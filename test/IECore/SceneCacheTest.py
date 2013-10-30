@@ -628,7 +628,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( set( B.readTags(IECore.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t3", "t4", "ObjectType:SpherePrimitive" ] ) )
 		self.assertEqual( set( B.readTags(IECore.SceneInterface.TagFilter.LocalTag) ), testSet(['t4']) )
 		self.assertEqual( set( b.readTags(IECore.SceneInterface.TagFilter.AncestorTag) ), testSet( ['t4'] ) )
-		self.assertEqual( set( b.readTags(IECore.SceneInterface.TagFilter.DescendentTag|IECore.SceneInterface.TagFilter.LocalTag) ), set() )
+		self.assertEqual( set( b.readTags(IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag) ), set() )
 		self.assertEqual( set( c.readTags(IECore.SceneInterface.TagFilter.AncestorTag) ), testSet( ['t4'] ) )
 		self.assertEqual( set( c.readTags(IECore.SceneInterface.TagFilter.EveryTag) ), testSet( [ "t4", "t3" ] ) )
 		self.assertEqual( set( d.readTags(IECore.SceneInterface.TagFilter.LocalTag) ), testSet( [ "ObjectType:SpherePrimitive" ] ) )

@@ -466,7 +466,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		# double expanding because the first level has all the same tags
 		childFn = fn.expandOnce()[0].expandOnce()[0]
 		scene = childFn.sceneInterface()
-		self.assertEqual( set([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendentTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), set([ "ObjectType:MeshPrimitive", "b", "c" ]) )
+		self.assertEqual( set([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), set([ "ObjectType:MeshPrimitive", "b", "c" ]) )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "b" ] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
@@ -474,7 +474,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		
 		childFn = childFn.expandOnce()[0]
 		scene = childFn.sceneInterface()
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendentTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )

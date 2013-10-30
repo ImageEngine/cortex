@@ -224,7 +224,7 @@ void bindSceneInterface()
 		;
 
 		enum_< SceneInterface::TagFilter > ("TagFilter")
-			.value("DescendentTag", SceneInterface::DescendentTag)
+			.value("DescendantTag", SceneInterface::DescendantTag)
 			.value("LocalTag", SceneInterface::LocalTag)
 			.value("AncestorTag", SceneInterface::AncestorTag)
 			.value("EveryTag", SceneInterface::EveryTag)

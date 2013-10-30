@@ -682,7 +682,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			tags.clear();
 
 			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
-			linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendentTag );
+			linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
 			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
 			
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );

@@ -1207,7 +1207,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
 		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendentTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
@@ -1227,7 +1227,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		hou.node( xform.path()+"/1" ).parm( "expand" ).pressButton()
 		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendentTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
@@ -1247,7 +1247,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
 		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendentTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
@@ -1274,7 +1274,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasTag( "notATag", IECore.SceneInterface.EveryTag ) )
 		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
-		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendentTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
+		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b", "green", "testing", "user:tags" ] )
 		for tag in scene.readTags(IECore.SceneInterface.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
@@ -1531,7 +1531,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( b.readTransformAsMatrix( time ), IECore.M44d() )
 		else :
 			self.assertEqual( set(a.readTags(IECore.SceneInterface.LocalTag)), set(b.readTags(IECore.SceneInterface.LocalTag)) )
-			self.assertEqual( set(a.readTags(IECore.SceneInterface.DescendentTag)), set(b.readTags(IECore.SceneInterface.DescendentTag)) )
+			self.assertEqual( set(a.readTags(IECore.SceneInterface.DescendantTag)), set(b.readTags(IECore.SceneInterface.DescendantTag)) )
 			self.assertEqual( set(a.readTags(IECore.SceneInterface.AncestorTag)), set(b.readTags(IECore.SceneInterface.AncestorTag)) )
 			self.assertEqual( set(a.readTags(IECore.SceneInterface.EveryTag)), set(b.readTags(IECore.SceneInterface.EveryTag)) )
 			self.assertTrue( a.readTransformAsMatrix( time ).equalWithAbsError( b.readTransformAsMatrix( time ), 1e-6 ) )
