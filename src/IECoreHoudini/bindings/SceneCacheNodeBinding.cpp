@@ -40,6 +40,8 @@
 
 #include "IECoreHoudini/SceneCacheNode.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
+#include "IECoreHoudini/NodeHandle.h"
+
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 
 using namespace boost::python;
@@ -47,11 +49,82 @@ using namespace IECoreHoudini;
 
 class SceneCacheNodeHelper
 {
+	public :
+
+		SceneCacheNodeHelper( OP_Node *node = 0 )
+		{
+			if ( !node )
+			{
+				return;
+			}
+
+			if ( getNode( node ) )
+			{
+				setNode( node );
+			}
+			else
+			{
+				UT_String path;
+				node->getFullPath( path );
+				std::cerr << path << " was not a valid SceneCacheNode!" << std::endl;
+			}
+		}
+		
+		~SceneCacheNodeHelper()
+		{
+		}
+		
+		bool hasNode() const
+		{
+			return m_handle.alive();
+		}
+		
+		void setNode( OP_Node *node )
+		{
+			m_handle = node;
+		}
+		
+		SceneCacheNode<OP_Node> *getNode( OP_Node *node ) const
+		{
+			// make sure its a SceneCacheNode
+			if ( !node || !node->hasParm( SceneCacheNode<OP_Node>::pFile.getToken() ) || !node->hasParm( SceneCacheNode<OP_Node>::pRoot.getToken() ) )
+			{
+				return 0;
+			}
+			
+			return reinterpret_cast<SceneCacheNode<OP_Node>* >( node );
+		}
+		
+		IECore::SceneInterfacePtr scene() const
+		{
+			if ( !hasNode() )
+			{
+				return 0;
+			}
+			
+			if ( SceneCacheNode<OP_Node> *node = getNode( m_handle.node() ) )
+			{
+				if ( IECore::ConstSceneInterfacePtr s = node->scene() )
+				{
+					return const_cast<IECore::SceneInterface*>( s.get() );
+				}
+			}
+			
+			return 0;
+		}
+	
+	private :
+		
+		NodeHandle m_handle;
+
 };
 
 void IECoreHoudini::bindSceneCacheNode()
 {
-	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" );
+	scope modeCacheNodeScope = class_<SceneCacheNodeHelper>( "SceneCacheNode" )
+		.def( init<OP_Node*>() )
+		.def( "scene", &SceneCacheNodeHelper::scene )
+	;
 	
 	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
 		.value( "World", SceneCacheNode<OP_Node>::World )
