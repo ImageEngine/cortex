@@ -2225,7 +2225,7 @@ bool SceneCache::hasTag( const Name &name, int filter ) const
 
 void SceneCache::readTags( NameList &tags, int filter ) const
 {
-	if ( filter != SceneInterface::LocalTag )
+	if ( filter && filter != SceneInterface::LocalTag )
 	{
 		/// non Local tags is only supported in read mode.
 		ReaderImplementation::reader( m_implementation.get() );		
