@@ -1,3 +1,24 @@
+# 8.0.0-a23
+
+#### IECore
+
+- Added new logos!
+
+#### IECoreGL
+
+- Added IECoreGL::glslVersion() function and python binding
+- Added IECoreGL::FrameBuffer::frameBuffer() method
+- OpenGL 2.1 compatibility fixes
+
+#### IECoreHoudini
+
+- Added bindings for SceneCacheNode which give access to the SceneInterface directly (or None if invalid)
+- HoudiniScene provides python access to registering custom attribute and tag readers
+- HoudiniScene now provides access to the world space transformation matrix of the held OBJ node
+- Fixing crashes in HoudiniScene when pointing to broken SOPs
+- Fixing crashes in SceneCacheWriter when given null attribute data
+- Replaced some (but not all) of the misc cow logos with the new Cortex mini-logo
+
 # 8.0.0-a22
 
 #### IECoreHoudini
