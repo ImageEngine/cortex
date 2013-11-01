@@ -519,6 +519,11 @@ bool HoudiniScene::hasObject() const
 	{
 		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = objNode->getRenderGeometry( context, false );
+		if ( !geo )
+		{
+			return false;
+		}
+		
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
@@ -641,6 +646,11 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	{
 		OP_Context context( adjustedDefaultTime() );
 		const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
+		if ( !geo )
+		{
+			return;
+		}
+		
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		if ( !nameAttrRef.isValid() )
 		{
@@ -809,33 +819,35 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
 			OP_Context context( adjustedDefaultTime() );
-			const GU_Detail *geo = contentNode->getRenderGeometry( context, false );
-			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			if ( nameAttrRef.isValid() )
+			if ( const GU_Detail *geo = contentNode->getRenderGeometry( context, false ) )
 			{
-				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-				GA_Size numShapes = tuple->getTableEntries( nameAttr );
-				for ( GA_Size i=0; i < numShapes; ++i )
+				GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+				if ( nameAttrRef.isValid() )
 				{
-					const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
-					const char *match = matchPath( currentName );
-					if ( match && *match != *emptyString )
+					const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+					const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+					GA_Size numShapes = tuple->getTableEntries( nameAttr );
+					for ( GA_Size i=0; i < numShapes; ++i )
 					{
-						std::pair<const char *, size_t> childMarker = nextWord( match );
-						std::string child( childMarker.first, childMarker.second );
-						if ( name == child )
+						const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+						const char *match = matchPath( currentName );
+						if ( match && *match != *emptyString )
 						{
-							size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
-							if ( contentSize )
+							std::pair<const char *, size_t> childMarker = nextWord( match );
+							std::string child( childMarker.first, childMarker.second );
+							if ( name == child )
 							{
-								contentPath.resize( contentSize );
-								std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+								size_t contentSize = ( m_contentIndex ) ? m_path.size() - m_contentIndex : 0;
+								if ( contentSize )
+								{
+									contentPath.resize( contentSize );
+									std::copy( m_path.begin() + m_contentIndex, m_path.end(), contentPath.begin() );
+								}
+
+								contentPath.push_back( name );
+
+								return contentNode;
 							}
-							
-							contentPath.push_back( name );
-							
-							return contentNode;
 						}
 					}
 				}
