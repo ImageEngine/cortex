@@ -2380,6 +2380,23 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertTrue( hou.node( xform.path()+"/1/2/3/geo" ).isTimeDependent() )
 		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo/3" ).isTimeDependent() )
 	
+	def testSceneMethod( self ) :
+		
+		def testNode( node ) :
+			
+			sceneNode = IECoreHoudini.SceneCacheNode( node )
+			shared = IECore.SharedSceneInterfaces.get( TestSceneCache.__testFile )
+			self.assertTrue( sceneNode.scene().isSame( shared ) )
+			node.parm( "root" ).set( "/1/fake" )
+			self.assertEqual( sceneNode.scene(), None )
+			node.parm( "root" ).set( "/1/2" )
+			self.compareScene( sceneNode.scene(), shared.scene( [ "1", "2" ] ) )
+		
+		self.writeSCC()
+		testNode( self.sop() )
+		testNode( self.xform() )
+		testNode( self.geometry() )
+	
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :
