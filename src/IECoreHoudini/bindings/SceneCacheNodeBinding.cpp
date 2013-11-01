@@ -60,9 +60,9 @@ class SceneCacheNodeHelper
 				return;
 			}
 
-			if ( getNode( node ) )
+			if ( sceneNode( node ) )
 			{
-				setNode( node );
+				m_handle = node;
 			}
 			else
 			{
@@ -81,12 +81,7 @@ class SceneCacheNodeHelper
 			return m_handle.alive();
 		}
 		
-		void setNode( OP_Node *node )
-		{
-			m_handle = node;
-		}
-		
-		SceneCacheNode<OP_Node> *getNode( OP_Node *node ) const
+		SceneCacheNode<OP_Node> *sceneNode( OP_Node *node ) const
 		{
 			// make sure its a SceneCacheNode
 			if ( !node || !node->hasParm( SceneCacheNode<OP_Node>::pFile.getToken() ) || !node->hasParm( SceneCacheNode<OP_Node>::pRoot.getToken() ) )
@@ -104,7 +99,7 @@ class SceneCacheNodeHelper
 				return 0;
 			}
 			
-			if ( SceneCacheNode<OP_Node> *node = getNode( m_handle.node() ) )
+			if ( SceneCacheNode<OP_Node> *node = sceneNode( m_handle.node() ) )
 			{
 				if ( IECore::ConstSceneInterfacePtr s = node->scene() )
 				{
