@@ -484,6 +484,28 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform.scale.z, 6, 6 )
 		self.failUnless( torus1.readTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
 	
+	def testReadWorldTransformMethods( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 10, 20, 30 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "t" ).set( [ 1, 2, 3 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "r" ).set( [ 10, 20, 30 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "s" ).set( [ 4, 5, 6 ] )
+		
+		torus1 = scene.child( "sub1" ).child( "torus1" )
+		transform = torus1.readWorldTransform( 0 ).value
+		
+		self.assertEqual( transform.translate.x, 11 )
+		self.assertEqual( transform.translate.y, 22 )
+		self.assertEqual( transform.translate.z, 33 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.x ), 10.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.y ), 20.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.z ), 30.0, 5 )
+		self.assertAlmostEqual( transform.scale.x, 4, 6 )
+		self.assertAlmostEqual( transform.scale.y, 5, 6 )
+		self.assertAlmostEqual( transform.scale.z, 6, 6 )
+		self.failUnless( torus1.readWorldTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
+	
 	def testAnimatedTransform( self ) :
 		
 		scene = self.buildScene()
