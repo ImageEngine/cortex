@@ -961,6 +961,27 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertRaises( RuntimeError, box1.child, "gap" )
 		self.assertEqual( box1.child( "gap", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 		self.assertRaises( hou.OperationFailed, box1.node().renderNode().cook )
+	
+	def testMultipleTransforms( self ) :
+		
+		obj = hou.node( "/obj" )
+		sub1 = obj.createNode( "subnet", "sub1" )
+		sub2 = sub1.createNode( "subnet", "sub2" )
+		sub2.setInput( 0, hou.node( "/obj/sub1" ).indirectInputs()[0] )
+		sub3 = sub1.createOutputNode( "subnet", "sub3" )
+		
+		sub1.parmTuple("t").set( (5.0,5.0,0.0) )
+		
+		sc = IECoreHoudini.HoudiniScene()
+		sub1Sc = sc.scene(["sub1"])
+		sub1Transform = sub1Sc.readTransform( 0 ).value
+		self.assertEqual( sub1Transform.translate, IECore.V3d( 5.0, 5.0, 0.0 ) )
+		sub2Sc = sub1Sc.child("sub2")
+		sub2Transform = sub2Sc.readTransform( 0 ).value
+		self.assertEqual( sub2Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
+		sub3Sc = sub1Sc.child("sub3")
+		sub3Transform = sub3Sc.readTransform( 0 ).value
+		self.assertEqual( sub3Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
 
 if __name__ == "__main__":
 	unittest.main()

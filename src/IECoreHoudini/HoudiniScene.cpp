@@ -291,7 +291,7 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	
 	UT_DMatrix4 matrix;
 	OP_Context context( adjustTime( time ) );
-	if ( !objNode->getLocalTransform( context, matrix ) )
+	if ( !objNode->getParmTransform( context, matrix ) )
 	{
 		return Imath::M44d();
 	}
