@@ -35,6 +35,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h> 
+
 #include "IECoreGL/GL.h"
 #include "IECoreGL/IECoreGL.h"
 #include "IECoreGL/FrameBuffer.h"
