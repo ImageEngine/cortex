@@ -1042,6 +1042,8 @@ env.Prepend(
 )
 
 if env["PLATFORM"]=="darwin" :
+	# necessary to fix errors from boost/numeric/interval.hpp
+	env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
 	# os x versions before snow leopard require the no-long-double flag
 	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
 	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :	
