@@ -33,6 +33,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// This must come before the Cortex includes, because on OSX headers included
+// by TBB define macros which conflict with the inline functions in ai_types.h.
+#include "ai.h"
+
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
