@@ -35,6 +35,7 @@
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
 #include "PRM/PRM_Include.h"
+#include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 
 #include "IECoreHoudini/Convert.h"
@@ -71,6 +72,9 @@ template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpanded( "expanded", "Expanded" );
 
 template<typename BaseType>
+PRM_Name OBJ_SceneCacheNode<BaseType>::pOverrideTransform( "overrideTransform", "Override Transform" );
+
+template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pOutTranslate( "outT", "Out Translate" );
 
 template<typename BaseType>
@@ -97,13 +101,15 @@ static PRM_Default outScaleDefault[] = {
 	PRM_Default( 0, "hou.pwd().parmTransform().extractScales()[2]", CH_PYTHON_EXPRESSION )
 };
 
-static void copyParm( PRM_Template &src, PRM_Template &dest )
+static void copyParm( PRM_Template &src, PRM_Template &dest, bool visible = true )
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
 	name->harden();
 	
+	PRM_Type type = ( visible ) ? src.getType() : (PRM_Type) (src.getType() | PRM_TYPE_INVISIBLE);
+	
 	dest.initialize(
-		src.getType(),
+		type,
 		src.getTypeExtended(),
 		src.exportLevel(),
 		src.getVectorSize(),
@@ -139,7 +145,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
 	unsigned numOutputParms = PRM_Template::countTemplates( outputTemplate );
 	
-	thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 2 ];
+	thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 3 ];
 	
 	// add the SceneCacheNode folders to the stdswitcher
 	unsigned switcherIndex = PRM_Template::getTemplateIndexByToken( objTemplate, "stdswitcher" );
@@ -149,21 +155,20 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	folders[0] = PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" );
 	folders[1] = PRM_Default( numOutputParms, "Output" );
 	
-	UT_BitArray folderVis;
-	folderVis.append( true );
-	folderVis.append( true );
-	
 	// add the normal folders
 	PRM_Default *defaults = stdswitcher.getFactoryDefaults();
 	for ( unsigned j = 0; j < numFolders; ++j )
 	{
-		folders[j+2] = defaults[j];
-		// hide the Transform folder, since those parms are not useable
-		folderVis.append( strcmp( defaults[j].getString(), "Transform" ) );
+		// add an extra parm to the transform folder
+		if ( !strcmp( defaults[j].getString(), "Transform" ) )
+		{
+			folders[j+2] = PRM_Default( defaults[j].getFloat() + 1, defaults[j].getString() );
+		}
+		else
+		{
+			folders[j+2] = defaults[j];
+		}
 	}
-	
-	static PRM_SpareData *spareData = new PRM_SpareData();
-	spareData->setVisibleTabs( folderVis );
 	
 	// re-init the stdswitcher so we get our new folders
 	thisTemplate[0] = stdswitcher;
@@ -177,7 +182,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		stdswitcher.getChoiceListPtr(),
 		stdswitcher.getRangePtr(),
 		stdswitcher.getCallback(),
-		spareData,
+		stdswitcher.getSparePtr(),
 		stdswitcher.getParmGroup(),
 		(const char *)stdswitcher.getHelpText(),
 		stdswitcher.getConditionalBasePtr()
@@ -208,7 +213,15 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		thisTemplate[totalParms] = outputTemplate[i];
 	}
 	
+	// add the override parm
+	thisTemplate[totalParms] = PRM_Template(
+		PRM_TOGGLE, 1, &pOverrideTransform, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
+		"Determines whether this OBJ reads from file or from the user parms."
+	);
+	totalParms++;
+	
 	// add the generic OBJ_Node parms
+	int transformIndex = thisTemplate[0].findSwitcherFolderWithLabel( "Transform" );
 	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
 	{
 		// this was added above
@@ -219,7 +232,20 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		}
 		
 		thisTemplate[totalParms] = objTemplate[i];
-		copyParm( objTemplate[i], thisTemplate[totalParms] );
+		
+		int switcher, folder;
+		bool visible = true;
+		bool inFolder = PRM_Template::getEnclosingSwitcherFolder( thisTemplate, totalParms, switcher, folder );
+		if ( inFolder && ( folder == transformIndex ) )
+		{
+			visible = (
+				!strcmp( thisTemplate[totalParms].getToken(), "t" ) ||
+				!strcmp( thisTemplate[totalParms].getToken(), "r" ) ||
+				!strcmp( thisTemplate[totalParms].getToken(), "s" )
+			);
+		}
+		
+		copyParm( objTemplate[i], thisTemplate[totalParms], visible );
 	}
 	
 	return thisTemplate;
@@ -372,6 +398,13 @@ void OBJ_SceneCacheNode<BaseType>::sceneChanged()
 template<typename BaseType>
 void OBJ_SceneCacheNode<BaseType>::updateState()
 {
+	// do not read from file if overriding
+	if ( this->evalInt( pOverrideTransform.getToken(), 0, 0 ) )
+	{
+		this->m_static = boost::indeterminate;
+		return;
+	}
+	
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
@@ -417,6 +450,13 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	{
 		BaseType::flags().setTimeDep( bool( !this->m_static ) );
 		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+	}
+	
+	// do not read from file if overriding
+	if ( this->evalInt( pOverrideTransform.getToken(), 0, 0 ) )
+	{
+		BaseType::getParmTransform( context, xform );
+		return true;
 	}
 	
 	if ( this->m_static == true && this->m_loaded && this->m_hash == hash )
@@ -475,6 +515,10 @@ template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::updateParmsFlags()
 {
 	this->enableParm( pExpanded.getToken(), !this->evalInt( pExpanded.getToken(), 0, 0 ) );
+	bool override = this->evalInt( pOverrideTransform.getToken(), 0, 0 );
+	this->enableParm( "t", override );
+	this->enableParm( "r", override );
+	this->enableParm( "s", override );
 	this->enableParm( pOutTranslate.getToken(), false );
 	this->enableParm( pOutRotate.getToken(), false );
 	this->enableParm( pOutScale.getToken(), false );
