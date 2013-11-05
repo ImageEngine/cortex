@@ -71,7 +71,6 @@ IE_CORE_FORWARDDECLARE( LensModel );
 /// * Call validate() to validate the parameters and set up any internal state as necessary.
 /// * Call distort(), undistort() or bounds() as desired to query distorted UV values.
 ///
-
 class LensModel : public Parameterised
 {
 	public:
