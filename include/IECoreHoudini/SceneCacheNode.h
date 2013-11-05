@@ -39,6 +39,7 @@
 
 #include "tbb/mutex.h"
 
+#include "OP/OP_Operator.h"
 #include "PRM/PRM_Name.h"
 
 #include "IECore/LRUCache.h"
@@ -56,8 +57,6 @@ class SceneCacheNode : public BaseType
 		
 		SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SceneCacheNode();
-		
-		static PRM_Template parameters[];
 		
 		static PRM_Name pFile;
 		static PRM_Name pRoot;
@@ -154,6 +153,9 @@ class SceneCacheNode : public BaseType
 		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
+		
+		static OP_TemplatePair *buildMainParameters();
+		static OP_TemplatePair *buildOptionParameters();
 		
 		bool m_loaded;
 		boost::tribool m_static;
