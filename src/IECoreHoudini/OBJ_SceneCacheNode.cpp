@@ -63,7 +63,7 @@ template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
 template<typename BaseType>
-PRM_Name OBJ_SceneCacheNode<BaseType>::pPush( "push", "Push Parms" );
+PRM_Name OBJ_SceneCacheNode<BaseType>::pPush( "push", "Push Options" );
 
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pCollapse( "collapse", "Collapse" );
@@ -135,25 +135,29 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	}
 	
 	PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
+	PRM_Template *mainTemplate = OBJ_SceneCacheNode<BaseType>::buildMainParameters()->myTemplate;
+	PRM_Template *optionTemplate = OBJ_SceneCacheNode<BaseType>::buildOptionParameters()->myTemplate;
 	PRM_Template *extraTemplate = ( extraParameters ) ? extraParameters->myTemplate : 0;
 	PRM_Template *expansionTemplate = buildExpansionParameters()->myTemplate;
 	PRM_Template *outputTemplate = buildOutputParameters()->myTemplate;
 	
 	unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
-	unsigned numSCCParms = PRM_Template::countTemplates( SceneCacheNode<BaseType>::parameters );
+	unsigned numMainParms = PRM_Template::countTemplates( mainTemplate );
+	unsigned numOptionParms = PRM_Template::countTemplates( optionTemplate );
 	unsigned numExtraParms = ( extraTemplate ) ? PRM_Template::countTemplates( extraTemplate ) : 0;
 	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
 	unsigned numOutputParms = PRM_Template::countTemplates( outputTemplate );
 	
-	thisTemplate = new PRM_Template[ numObjParms + numSCCParms + numExtraParms + numExpansionParms + numOutputParms + 3 ];
+	thisTemplate = new PRM_Template[ numObjParms + numMainParms + numOptionParms + numExtraParms + numExpansionParms + numOutputParms + 3 ];
 	
 	// add the SceneCacheNode folders to the stdswitcher
 	unsigned switcherIndex = PRM_Template::getTemplateIndexByToken( objTemplate, "stdswitcher" );
 	PRM_Template &stdswitcher = objTemplate[switcherIndex];
 	unsigned numFolders = stdswitcher.getVectorSize();
-	static PRM_Default *folders = new PRM_Default[ numFolders + 2 ];
-	folders[0] = PRM_Default( numSCCParms + numExtraParms + numExpansionParms, "Main" );
-	folders[1] = PRM_Default( numOutputParms, "Output" );
+	static PRM_Default *folders = new PRM_Default[ numFolders + 3 ];
+	folders[0] = PRM_Default( numMainParms + numExtraParms + numExpansionParms, "Main" );
+	folders[1] = PRM_Default( numOptionParms + 1, "Options" );
+	folders[2] = PRM_Default( numOutputParms, "Output" );
 	
 	// add the normal folders
 	PRM_Default *defaults = stdswitcher.getFactoryDefaults();
@@ -162,11 +166,11 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		// add an extra parm to the transform folder
 		if ( !strcmp( defaults[j].getString(), "Transform" ) )
 		{
-			folders[j+2] = PRM_Default( defaults[j].getFloat() + 1, defaults[j].getString() );
+			folders[j+3] = PRM_Default( defaults[j].getFloat() + 1, defaults[j].getString() );
 		}
 		else
 		{
-			folders[j+2] = defaults[j];
+			folders[j+3] = defaults[j];
 		}
 	}
 	
@@ -176,7 +180,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		stdswitcher.getType(),
 		stdswitcher.getTypeExtended(),
 		stdswitcher.exportLevel(),
-		numFolders + 2,
+		numFolders + 3,
 		stdswitcher.getNamePtr(),
 		folders,
 		stdswitcher.getChoiceListPtr(),
@@ -190,9 +194,9 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	
 	// add the generic SceneCacheNode parms
 	unsigned totalParms = 1;
-	for ( unsigned i = 0; i < numSCCParms; ++i, ++totalParms )
+	for ( unsigned i = 0; i < numMainParms; ++i, ++totalParms )
 	{
-		thisTemplate[totalParms] = SceneCacheNode<BaseType>::parameters[i];
+		thisTemplate[totalParms] = mainTemplate[i];
 	}
 	
 	// add the extra parms for this node
@@ -205,6 +209,19 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	for ( unsigned i = 0; i < numExpansionParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = expansionTemplate[i];
+	}
+	
+	// add the push options button
+	thisTemplate[totalParms] = PRM_Template(
+		PRM_CALLBACK, 1, &pPush, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::pushButtonCallback, 0, 0,
+		"Push the relevant parameter values to the hierarchy below.\n"
+	);
+	totalParms++;	
+	
+	// add the generic SceneCacheNode option parms
+	for ( unsigned i = 0; i < numOptionParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = optionTemplate[i];
 	}
 	
 	// add the OBJ_SceneCacheNode output parms
@@ -257,7 +274,7 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildExpansionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[5];
+		thisTemplate = new PRM_Template[4];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_CALLBACK, 1, &pExpand, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::expandButtonCallback, 0, 0,
@@ -266,16 +283,11 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildExpansionParameters()
 		);
 		
 		thisTemplate[1] = PRM_Template(
-			PRM_CALLBACK, 1, &pPush, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::pushButtonCallback, 0, 0,
-			"Push the relevant parameter values to the hierarchy below.\n"
-		);
-		
-		thisTemplate[2] = PRM_Template(
 			PRM_CALLBACK, 1, &pCollapse, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::collapseButtonCallback, 0, 0,
 			"Clean the hierarchy below the specified root path."
 		);
 		
-		thisTemplate[3] = PRM_Template(
+		thisTemplate[2] = PRM_Template(
 			PRM_TOGGLE, 1, &pExpanded, 0, 0, 0, 0, 0, 0,
 			"A toggle to indicate whether this level is expanded or not. This does not affect cooking, "
 			"and the value may be changed by automated scripts. Expansion will be blocked when this is on."

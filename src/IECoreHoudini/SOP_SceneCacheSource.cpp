@@ -60,24 +60,41 @@ PRM_Name SOP_SceneCacheSource::pObjectOnly( "objectOnly", "Object Only" );
 
 OP_TemplatePair *SOP_SceneCacheSource::buildParameters()
 {
-	static PRM_Template *thisTemplate = 0;
-	if ( !thisTemplate )
-	{
-		thisTemplate = new PRM_Template[2];
-		
-		thisTemplate[0] = PRM_Template(
-			PRM_TOGGLE, 1, &pObjectOnly, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
-			"Determines whether this SOP cooks the current object only, or traverses down through the hierarchy."
-		);
-	}
-	
 	static OP_TemplatePair *templatePair = 0;
-	if ( !templatePair )
+	if ( templatePair )
 	{
-		OP_TemplatePair *firstTemplatePair = new OP_TemplatePair( thisTemplate );
-		templatePair = new OP_TemplatePair( SceneCacheNode<SOP_Node>::parameters, firstTemplatePair );
+		return templatePair;
 	}
 	
+	PRM_Template *mainTemplate = SOP_SceneCacheSource::buildMainParameters()->myTemplate;
+	PRM_Template *optionTemplate = SOP_SceneCacheSource::buildOptionParameters()->myTemplate;
+	
+	unsigned numMainParms = PRM_Template::countTemplates( mainTemplate );
+	unsigned numOptionParms = PRM_Template::countTemplates( optionTemplate );
+	
+	static PRM_Template *thisTemplate = new PRM_Template[ numMainParms + numOptionParms + 2 ];
+	
+	// add the generic SceneCacheNode parms
+	unsigned totalParms = 0;
+	for ( unsigned i = 0; i < numMainParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = mainTemplate[i];
+	}
+	
+	// add the generic SceneCacheNode option parms
+	for ( unsigned i = 0; i < numOptionParms; ++i, ++totalParms )
+	{
+		thisTemplate[totalParms] = optionTemplate[i];
+	}
+	
+	// add the parms for this node
+	thisTemplate[totalParms] = PRM_Template(
+		PRM_TOGGLE, 1, &pObjectOnly, 0, 0, 0, &sceneParmChangedCallback, 0, 0,
+		"Determines whether this SOP cooks the current object only, or traverses down through the hierarchy."
+	);
+	totalParms++;
+	
+	templatePair = new OP_TemplatePair( thisTemplate );
 	return templatePair;
 }
 
