@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,6 +52,7 @@ class WarpOp : public ImagePrimitiveOp
 	public:
 
 		enum FilterType { None = 0, Bilinear, TypeCount };
+		enum BoundMode { Clamp = 0, SetToBlack = 1 };
 
 		WarpOp( const std::string &description );
 		virtual ~WarpOp();
@@ -86,7 +87,7 @@ class WarpOp : public ImagePrimitiveOp
 	private :
 
 		IntParameterPtr m_filterParameter;
-
+		IntParameterPtr m_boundModeParameter;
 		struct Warp;
 		friend class Warp;
 };

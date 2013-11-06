@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -62,6 +62,21 @@ WarpOp::WarpOp( const std::string &description )
 
 	parameters()->addParameter( m_filterParameter );
 
+	IntParameter::PresetsContainer boundModePresets;
+	boundModePresets.push_back( IntParameter::Preset( "Clamp", WarpOp::Clamp ) );
+	boundModePresets.push_back( IntParameter::Preset( "SetToBlack", WarpOp::SetToBlack ) );
+	m_boundModeParameter = new IntParameter(
+		"boundMode",
+		"Defines how the Op handles pixel requests for pixels outside of the input image.",
+		(int)WarpOp::Clamp,
+		(int)WarpOp::Clamp,
+		2,
+		boundModePresets,
+		true
+	);
+
+	parameters()->addParameter( m_boundModeParameter );
+
 }
 
 WarpOp::~WarpOp()
@@ -82,8 +97,8 @@ struct WarpOp::Warp
 {
 	typedef void ReturnType;
 
-	Warp( WarpOp * warp, WarpOp::FilterType filter, const Imath::Box2i &warpedDataWindow, const Imath::Box2i &originalDataWindow )
-		:	m_warpOp( warp ), m_filter( filter ), m_outputDataWindow( warpedDataWindow ), m_inputDataWindow( originalDataWindow )
+	Warp( WarpOp * warp, WarpOp::FilterType filter, WarpOp::BoundMode boundMode, const Imath::Box2i &warpedDataWindow, const Imath::Box2i &originalDataWindow )
+		:	m_warpOp( warp ), m_filter( filter ), m_boundMode( boundMode ), m_outputDataWindow( warpedDataWindow ), m_inputDataWindow( originalDataWindow )
 	{
 	}
 
@@ -123,6 +138,15 @@ struct WarpOp::Warp
 	template<typename V>
 	inline V clampXY( const std::vector<V> &buffer, int x, int y, int width, int height ) const
 	{
+		if( m_boundMode == WarpOp::SetToBlack )
+		{
+			if( x < 0 || x >= width || y < 0 || y >= height )
+			{
+				return 0;
+			}
+			return buffer[ x + y * width ];
+		}
+
 		x = ( x < 0 ? 0 : ( x >= width ? width - 1 : x ));
 		y = ( y < 0 ? 0 : ( y >= height ? height - 1 : y ));
 		return buffer[ x + y * width ];
@@ -185,6 +209,7 @@ struct WarpOp::Warp
 	private :
 		WarpOp * m_warpOp;
 		WarpOp::FilterType m_filter;
+		WarpOp::BoundMode m_boundMode;
 		Imath::Box2i m_outputDataWindow;
 		Imath::Box2i m_inputDataWindow;
 };
@@ -196,7 +221,7 @@ void WarpOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject 
 	begin( operands );
 	Imath::Box2i newDataWindow = warpedDataWindow( originalDataWindow );
 	std::string error;
-	Warp w( this, (FilterType)m_filterParameter->getNumericValue(), newDataWindow, originalDataWindow );
+	Warp w( this, (FilterType)m_filterParameter->getNumericValue(), (BoundMode)m_boundModeParameter->getNumericValue(), newDataWindow, originalDataWindow );
 	for( PrimitiveVariableMap::iterator it = image->variables.begin(); it != image->variables.end(); it++ )
 	{
 		if( it->second.interpolation!=PrimitiveVariable::Vertex &&
