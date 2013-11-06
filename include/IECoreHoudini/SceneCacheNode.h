@@ -64,6 +64,7 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pReload;
 		static PRM_Name pGeometryType;
 		static PRM_Name pAttributeFilter;
+		static PRM_Name pAttributeCopy;
 		static PRM_Name pTagFilter;
 		static PRM_Name pShapeFilter;
 		
@@ -75,6 +76,7 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
 		static PRM_ChoiceList geometryTypeList;
+		static PRM_ChoiceList attributeCopyMenu;
 		static PRM_ChoiceList tagFilterMenu;
 		static PRM_ChoiceList shapeFilterMenu;
 		
@@ -110,6 +112,8 @@ class SceneCacheNode : public BaseType
 		void getAttributeFilter( UT_String &filter ) const;
 		void getAttributeFilter( UT_StringMMPattern &filter ) const;
 		void setAttributeFilter( const UT_String &filter );
+		void getAttributeCopy( UT_String &value ) const;
+		void setAttributeCopy( const UT_String &value );
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );

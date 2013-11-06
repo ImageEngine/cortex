@@ -82,6 +82,9 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pAttributeFilter( "attributeFilter", "Attribute Filter" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pAttributeCopy( "attributeCopy", "Attribute Copy" );
+
+template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
 
 template<typename BaseType>
@@ -116,6 +119,11 @@ static PRM_Name geometryTypes[] = {
 	PRM_Name( 0 ) // sentinal
 };
 
+static PRM_Name attributeCopyOptions[] = {
+	PRM_Name( "P:Pref", "P:Pref" ),
+	PRM_Name( 0 ) // sentinal
+};
+
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &SceneCacheNode<BaseType>::buildRootMenu );
 
@@ -124,6 +132,9 @@ PRM_ChoiceList SceneCacheNode<BaseType>::spaceList( PRM_CHOICELIST_SINGLE, &spac
 
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE, &geometryTypes[0] );
+
+template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::attributeCopyMenu( PRM_CHOICELIST_TOGGLE, &attributeCopyOptions[0] );
 
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildTagFilterMenu );
@@ -178,7 +189,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[5];
+		thisTemplate = new PRM_Template[6];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
@@ -195,12 +206,19 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 		);
 		
 		thisTemplate[2] = PRM_Template(
+			PRM_STRING, 1, &pAttributeCopy, 0, &attributeCopyMenu, 0, 0, 0, 0,
+			"Attributes to copy before loading into Houdini. This uses a:b syntax to copy duplicate attributes. "
+			"Note that using this field will cause a duplication in memory before entering Houdini, which may "
+			"impact performance."
+		);
+		
+		thisTemplate[3] = PRM_Template(
 			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
 			"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
 			"is ignored. Uses Houdini matching syntax"
 		);
 		
-		thisTemplate[3] = PRM_Template(
+		thisTemplate[4] = PRM_Template(
 			PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
 			"A list of filters to decide which tags to expand. In SubNetwork mode, branches that do not "
 			"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
@@ -444,6 +462,18 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getAttributeCopy( UT_String &value ) const
+{
+	this->evalString( value, pAttributeCopy.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setAttributeCopy( const UT_String &value )
+{
+	this->setString( value, CH_STRING_LITERAL, pAttributeCopy.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
