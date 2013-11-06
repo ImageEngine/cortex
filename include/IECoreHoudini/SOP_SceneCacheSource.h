@@ -78,6 +78,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		{
 			GeometryType geometryType;
 			std::string attributeFilter;
+			std::string attributeCopy;
 			UT_StringMMPattern shapeFilter;
 			UT_StringMMPattern tagFilter;
 			
@@ -86,6 +87,8 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			std::vector<IECore::InternedString> animatedPrimVars;
 		};
 		
+		// Modify the object according the the paramters, copying if neccessary.
+		IECore::ConstObjectPtr modifyObject( const IECore::Object *object, Parameters &params );
 		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
 		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
