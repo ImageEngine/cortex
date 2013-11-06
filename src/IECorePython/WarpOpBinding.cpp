@@ -48,7 +48,10 @@ namespace IECorePython
 void bindWarpOp()
 {
 
-	RunTimeTypedClass<WarpOp>()
+	scope s = RunTimeTypedClass<WarpOp>();
+	enum_<WarpOp::FilterType>( "FilterType" )
+		.value( "Bilinear", WarpOp::Bilinear )
+		.value( "None", WarpOp::None )
 	;
 
 }
