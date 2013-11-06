@@ -138,6 +138,7 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	params.depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	params.hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
 	getAttributeFilter( params.attributeFilter );
+	getAttributeCopy( params.attributeCopy );
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilterStr );
 	getTagFilter( params.tagFilter );
@@ -212,6 +213,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
 	geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)params.geometryType );
 	geo->setAttributeFilter( params.attributeFilter );
+	geo->setAttributeCopy( params.attributeCopy );
 	geo->setShapeFilter( params.shapeFilter );
 	
 	bool visible = tagged( scene, params.tagFilter );
@@ -236,6 +238,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	xform->setSpace( Local );
 	xform->setGeometryType( (OBJ_SceneCacheTransform::GeometryType)params.geometryType );
 	xform->setAttributeFilter( params.attributeFilter );
+	xform->setAttributeCopy( params.attributeCopy );
 	xform->setShapeFilter( params.shapeFilter );
 	xform->setInt( pHierarchy.getToken(), 0, 0, params.hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, params.depth );
@@ -338,8 +341,9 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 
 void OBJ_SceneCacheTransform::pushToHierarchy()
 {
-	UT_String attribFilter, shapeFilter;
+	UT_String attribFilter, attribCopy, shapeFilter;
 	getAttributeFilter( attribFilter );
+	getAttributeCopy( attribCopy );
 	getShapeFilter( shapeFilter );
 	GeometryType geometryType = getGeometryType();
 	
@@ -354,6 +358,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	{
 		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children[i] );
 		xform->setAttributeFilter( attribFilter );
+		xform->setAttributeCopy( attribCopy );
 		xform->setShapeFilter( shapeFilter );
 		xform->setGeometryType( geometryType );
 		
@@ -379,6 +384,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	{
 		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children[i] );
 		geo->setAttributeFilter( attribFilter );
+		geo->setAttributeCopy( attribCopy );
 		geo->setShapeFilter( shapeFilter );
 		geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geometryType );
 		
@@ -409,6 +415,7 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 	hierarchy = other.hierarchy;
 	depth = other.depth;
 	attributeFilter = other.attributeFilter;
+	attributeCopy = other.attributeCopy;
 	shapeFilter = other.shapeFilter;
 	tagFilterStr = other.tagFilterStr;
 	tagFilter.compile( tagFilterStr );
