@@ -36,6 +36,7 @@
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
 #include "UT/UT_StringMMPattern.h"
+#include "UT/UT_WorkArgs.h"
 
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Group.h"
@@ -186,6 +187,9 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		attributeFilter += " P";
 	}
 	
+	UT_String attributeCopy;
+	getAttributeCopy( attributeCopy );
+	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
@@ -201,6 +205,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( tagFilterStr );
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
+	hash.append( attributeCopy );
 	hash.append( geometryType );
 	hash.append( getObjectOnly() );
 	
@@ -227,6 +232,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	UT_String attribFilter;
 	getAttributeFilter( attribFilter );
 	params.attributeFilter = attribFilter.toStdString();
+	params.attributeCopy = attributeCopy.toStdString();
 	params.geometryType = getGeometryType();
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
@@ -290,6 +296,9 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			currentTransform = transform;
 		}
 		
+		// modify the object if necessary
+		object = modifyObject( object, params );
+		
 		// transform the object unless its an identity
 		if ( currentTransform != Imath::M44d() )
 		{
@@ -322,6 +331,51 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize );
 		}
 	}
+}
+
+ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object, Parameters &params )
+{
+	ConstObjectPtr result = object;
+	
+	if ( params.attributeCopy != "" )
+	{
+		if ( const Primitive *primitive = IECore::runTimeCast<const Primitive>( object ) )
+		{
+			PrimitivePtr modified = 0;
+			const PrimitiveVariableMap &variables = primitive->variables;
+			
+			UT_WorkArgs pairs;
+			UT_String args( params.attributeCopy );
+			args.tokenize( pairs, " " );
+			for ( int i = 0; i < pairs.entries(); ++i )
+			{
+				UT_WorkArgs values;
+				UT_String( pairs[i] ).tokenize( values, ":" );
+				if ( values.entries() != 2 )
+				{
+					continue;
+				}
+				
+				PrimitiveVariableMap::const_iterator it = variables.find( values[0] );
+				if ( it != variables.end() )
+				{
+					if ( !modified )
+					{
+						modified = primitive->copy();
+					}
+					
+					modified->variables[values[1]] = modified->variables[values[0]];
+				}
+			}
+			
+			if ( modified )
+			{
+				result = modified;
+			}
+		}
+	}
+	
+	return result;
 }
 
 ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params )
