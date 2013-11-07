@@ -1447,7 +1447,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.xform() )
 		testNode( self.geometry() )
 	
-	def writeAnimSCC( self ) :
+	def writeAnimSCC( self, rotate = False ) :
 		
 		scene = self.writeSCC()
 		sc1 = scene.child( str( 1 ) )
@@ -1458,14 +1458,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 			
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
+			if rotate :
+				matrix.rotate( IECore.V3d( time, 0, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
 			
 			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
 			sc2.writeObject( mesh, time )
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			if rotate :
+				matrix.rotate( IECore.V3d( time, 0, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
 			
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
+			if rotate :
+				matrix.rotate( IECore.V3d( time, 0, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 		
 		return scene
@@ -2574,6 +2580,108 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
+	
+	def testGeometryTypes( self ) :
+		
+		self.writeAnimSCC()
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 3 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+			self.assertEqual( prims[0].vertices()[0].point().position(), hou.Vector3( 1.5, time + 0.5, 0.5 ) )
+			self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 3.5, time*2 + 0.5, 0.5 ) )
+			self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 6.5, time*3 + 0.5, 0.5 ) )
+		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, time, 0 ) )
+			self.assertEqual( prims[4].vertex( 0 ).point().position(), hou.Vector3( 2, time + 1, 1 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, time*2, 0 ) )
+			self.assertEqual( prims[10].vertex( 0 ).point().position(), hou.Vector3( 4, time*2 + 1, 1 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, time*3, 0 ) )
+			self.assertEqual( prims[16].vertex( 0 ).point().position(), hou.Vector3( 7, time*3 + 1, 1 ) )
+		
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.BoundingBox )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, time, 0 ) )
+			self.assertEqual( prims[4].vertex( 0 ).point().position(), hou.Vector3( 7, time*3 + 1, 1 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, time*2, 0 ) )
+			self.assertEqual( prims[10].vertex( 0 ).point().position(), hou.Vector3( 7, time*3 + 1, 1 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, time*3, 0 ) )
+			self.assertEqual( prims[16].vertex( 0 ).point().position(), hou.Vector3( 7, time*3 + 1, 1 ) )
+		
+		# re-write with rotation to prove point cloud basis vectors are accurate
+		self.writeAnimSCC( rotate = True )
+		
+		scene = IECore.SharedSceneInterfaces.get( TestSceneCache.__testFile )
+		a = scene.child( "1" )
+		b = a.child( "2" )
+		c = b.child( "3" )
+		
+		node.parm( "reload" ).pressButton()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.PointCloud )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 3 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 1 )
+			
+			aPoint = prims[0].vertices()[0].point()
+			bPoint = prims[1].vertices()[0].point()
+			cPoint = prims[2].vertices()[0].point()
+			
+			aWorld = scene.readTransformAsMatrix( time ) * a.readTransformAsMatrix( time )
+			bWorld = aWorld * b.readTransformAsMatrix( time )
+			cWorld = bWorld * c.readTransformAsMatrix( time )
+			
+			self.assertTrue( IECore.V3d( list(aPoint.position()) ).equalWithAbsError( aWorld.multVecMatrix( a.readBound( time ).center() ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(bPoint.position()) ).equalWithAbsError( bWorld.multVecMatrix( b.readBound( time ).center() ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(cPoint.position()) ).equalWithAbsError( cWorld.multVecMatrix( c.readBound( time ).center() ), 1e-6 ) )
+			
+			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( aWorld[(0,0)], aWorld[(0,1)], aWorld[(0,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( aWorld[(1,0)], aWorld[(1,1)], aWorld[(1,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(aPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( aWorld[(2,0)], aWorld[(2,1)], aWorld[(2,2)] ), 1e-6 ) )
+			
+			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( bWorld[(0,0)], bWorld[(0,1)], bWorld[(0,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( bWorld[(1,0)], bWorld[(1,1)], bWorld[(1,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(bPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( bWorld[(2,0)], bWorld[(2,1)], bWorld[(2,2)] ), 1e-6 ) )
+			
+			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis1" )) ).equalWithAbsError( IECore.V3d( cWorld[(0,0)], cWorld[(0,1)], cWorld[(0,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( cWorld[(1,0)], cWorld[(1,1)], cWorld[(1,2)] ), 1e-6 ) )
+			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( cWorld[(2,0)], cWorld[(2,1)], cWorld[(2,2)] ), 1e-6 ) )
 	
 	def tearDown( self ) :
 		
