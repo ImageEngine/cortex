@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,11 +97,18 @@ ImageDiffOp::ImageDiffOp()
 	        "If true then channels present in one image but missing in the other are ignored. If false, then missing channels mean the images are different.",
 	        false
 	);
+	
+	m_alignDisplayWindowsParameter = new BoolParameter(
+	        "alignDisplayWindows",
+	        "If true then display windows that are offset from the origin are moved to the origin before being compared.",
+	        false
+	);
 
 	parameters()->addParameter( m_imageAParameter );
 	parameters()->addParameter( m_imageBParameter );
 	parameters()->addParameter( m_maxErrorParameter );
 	parameters()->addParameter( m_skipMissingChannelsParameter );
+	parameters()->addParameter( m_alignDisplayWindowsParameter );
 }
 
 ImageDiffOp::~ImageDiffOp()
@@ -148,6 +155,16 @@ const BoolParameter * ImageDiffOp::skipMissingChannels() const
 	return m_skipMissingChannelsParameter;
 }
 
+BoolParameter * ImageDiffOp::alignDisplayWindows()
+{
+	return m_alignDisplayWindowsParameter;
+}
+
+const BoolParameter * ImageDiffOp::alignDisplayWindows() const
+{
+	return m_alignDisplayWindowsParameter;
+}
+
 /// A class to use a ScaledDataConversion to transform image data to floating point, to allow for simple measuring of
 /// error between two potentially different data types (e.g. UShort and Half)
 struct ImageDiffOp::FloatConverter
@@ -190,7 +207,33 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 		throw InvalidArgumentException( "ImageDiffOp: Image with invalid primitive variables specified as input parameter" );
 	}
 
-	if ( imageA->getDisplayWindow() != imageB->getDisplayWindow() )
+	const bool alignDisplayWindows = m_alignDisplayWindowsParameter->getTypedValue();
+	
+	if( alignDisplayWindows )
+	{
+		/// Fail if the display windows are of a different width or height.
+		if ( ( imageA->getDisplayWindow().size().x != imageB->getDisplayWindow().size().x ) || ( imageA->getDisplayWindow().size().y != imageB->getDisplayWindow().size().y ) )
+		{
+			return new BoolData( true );
+		}
+
+		// If the display windows are different to each other then we move them back to the origin.
+		if ( imageA->getDisplayWindow().min != imageB->getDisplayWindow().min || imageA->getDisplayWindow().min != Imath::V2i( 0 ) )
+		{
+			Imath::V2i offsetA = imageA->getDisplayWindow().min;
+			Imath::Box2i displayWindowA( imageA->getDisplayWindow().min-offsetA, imageA->getDisplayWindow().max-offsetA );
+			Imath::Box2i dataWindowA( imageA->getDataWindow().min-offsetA, imageA->getDataWindow().max-offsetA );
+			imageA->setDisplayWindow( displayWindowA );
+			imageA->setDataWindow( dataWindowA );
+
+			Imath::V2i offsetB = imageB->getDisplayWindow().min;
+			Imath::Box2i displayWindowB( imageB->getDisplayWindow().min-offsetB, imageB->getDisplayWindow().max-offsetB );
+			Imath::Box2i dataWindowB( imageB->getDataWindow().min-offsetB, imageB->getDataWindow().max-offsetB );
+			imageB->setDisplayWindow( displayWindowB );
+			imageB->setDataWindow( dataWindowB );
+		}
+	}
+	else if ( imageA->getDisplayWindow() != imageB->getDisplayWindow() )
 	{
 		return new BoolData( true );
 	}
