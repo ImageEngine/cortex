@@ -39,6 +39,7 @@
 
 #include "tbb/mutex.h"
 
+#include "OP/OP_Operator.h"
 #include "PRM/PRM_Name.h"
 
 #include "IECore/LRUCache.h"
@@ -57,14 +58,13 @@ class SceneCacheNode : public BaseType
 		SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SceneCacheNode();
 		
-		static PRM_Template parameters[];
-		
 		static PRM_Name pFile;
 		static PRM_Name pRoot;
 		static PRM_Name pSpace;
 		static PRM_Name pReload;
 		static PRM_Name pGeometryType;
 		static PRM_Name pAttributeFilter;
+		static PRM_Name pAttributeCopy;
 		static PRM_Name pTagFilter;
 		static PRM_Name pShapeFilter;
 		
@@ -76,6 +76,7 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
 		static PRM_ChoiceList geometryTypeList;
+		static PRM_ChoiceList attributeCopyMenu;
 		static PRM_ChoiceList tagFilterMenu;
 		static PRM_ChoiceList shapeFilterMenu;
 		
@@ -111,6 +112,8 @@ class SceneCacheNode : public BaseType
 		void getAttributeFilter( UT_String &filter ) const;
 		void getAttributeFilter( UT_StringMMPattern &filter ) const;
 		void setAttributeFilter( const UT_String &filter );
+		void getAttributeCopy( UT_String &value ) const;
+		void setAttributeCopy( const UT_String &value );
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );
@@ -154,6 +157,9 @@ class SceneCacheNode : public BaseType
 		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
+		
+		static OP_TemplatePair *buildMainParameters();
+		static OP_TemplatePair *buildOptionParameters();
 		
 		bool m_loaded;
 		boost::tribool m_static;

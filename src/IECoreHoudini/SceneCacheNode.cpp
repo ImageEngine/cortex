@@ -82,6 +82,9 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pAttributeFilter( "attributeFilter", "Attribute Filter" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pAttributeCopy( "attributeCopy", "Attribute Copy" );
+
+template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
 
 template<typename BaseType>
@@ -116,6 +119,11 @@ static PRM_Name geometryTypes[] = {
 	PRM_Name( 0 ) // sentinal
 };
 
+static PRM_Name attributeCopyOptions[] = {
+	PRM_Name( "P:Pref", "P:Pref" ),
+	PRM_Name( 0 ) // sentinal
+};
+
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::rootMenu( PRM_CHOICELIST_REPLACE, &SceneCacheNode<BaseType>::buildRootMenu );
 
@@ -126,58 +134,107 @@ template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::geometryTypeList( PRM_CHOICELIST_SINGLE, &geometryTypes[0] );
 
 template<typename BaseType>
+PRM_ChoiceList SceneCacheNode<BaseType>::attributeCopyMenu( PRM_CHOICELIST_TOGGLE, &attributeCopyOptions[0] );
+
+template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::tagFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildTagFilterMenu );
 
 template<typename BaseType>
 PRM_ChoiceList SceneCacheNode<BaseType>::shapeFilterMenu( PRM_CHOICELIST_TOGGLE, &SceneCacheNode<BaseType>::buildShapeFilterMenu );
 
 template<typename BaseType>
-PRM_Template SceneCacheNode<BaseType>::parameters[] = {
-	PRM_Template(
-		PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
-		"A static or animated SCC or LSCC file to load, starting at the Root path provided."
-	),
-	PRM_Template(
-		PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
-		"Removes the current SCC or LSCC file from the cache. This will force a recook on this node, and "
-		"cause all other nodes using this file to require a recook as well."
-	),
-	PRM_Template(
-		PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
-		"Root path inside the SCC or LSCC of the hierarchy to load"
-	),
-	PRM_Template(
-		PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
-		"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
-		"Path re-roots the transformation starting at the specified root path, Local uses the current level "
-		"transformations only, and Object is an identity transform"
-	),
-	PRM_Template(
-		PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
-		"The type of geometry to load. Cortex Primitives are faster, but only allow manipulation through "
-		"OpHolders or specificly designed nodes. Houdini Geometry will use the converters to create standard "
-		"geo that can be manipulated anywhere."
-	),
-	PRM_Template(
-		PRM_STRING, 1, &pAttributeFilter, &filterDefault, 0, 0, 0, 0, 0,
-		"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
-		"The filter expects Cortex names as exist in the cache, and performs automated conversion to "
-		"standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). P will always be loaded."
-	),
-	PRM_Template(
-		PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
-		"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
-		"is ignored. Uses Houdini matching syntax"
-	),
-	PRM_Template(
-		PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
-		"A list of filters to decide which tags to expand. In SubNetwork mode, branches that do not "
-		"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
-		"visibility. In FlatGeometry mode they essentially delete the non-tagged geometry. Uses Houdini "
-		"matching syntax, but matches *any* of the tags."
-	),
-	PRM_Template()
-};
+OP_TemplatePair *SceneCacheNode<BaseType>::buildMainParameters()
+{
+	static PRM_Template *thisTemplate = 0;
+	if ( !thisTemplate )
+	{
+		thisTemplate = new PRM_Template[5];
+		
+		thisTemplate[0] = PRM_Template(
+			PRM_FILE | PRM_TYPE_JOIN_NEXT, 1, &pFile, 0, 0, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
+			"A static or animated SCC or LSCC file to load, starting at the Root path provided."
+		);
+		
+		thisTemplate[1] = PRM_Template(
+			PRM_CALLBACK, 1, &pReload, 0, 0, 0, &SceneCacheNode<BaseType>::reloadButtonCallback, 0, 0,
+			"Removes the current SCC or LSCC file from the cache. This will force a recook on this node, and "
+			"cause all other nodes using this file to require a recook as well."
+		);
+		
+		thisTemplate[2] = PRM_Template(
+			PRM_STRING, 1, &pRoot, &rootDefault, &rootMenu, 0, &SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
+			"Root path inside the SCC or LSCC of the hierarchy to load"
+		);
+		
+		thisTemplate[3] = PRM_Template(
+			PRM_INT, 1, &pSpace, &spaceDefault, &spaceList, 0, 0, 0, 0,
+			"Re-orient the objects by choosing a space. World transforms from \"/\" on down the hierarchy, "
+			"Path re-roots the transformation starting at the specified root path, Local uses the current level "
+			"transformations only, and Object is an identity transform"
+		);
+	}
+	
+	static OP_TemplatePair *templatePair = 0;
+	if ( !templatePair )
+	{
+		templatePair = new OP_TemplatePair( thisTemplate );
+	}
+	
+	return templatePair;
+}
+
+template<typename BaseType>
+OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
+{
+	static PRM_Template *thisTemplate = 0;
+	if ( !thisTemplate )
+	{
+		thisTemplate = new PRM_Template[6];
+		
+		thisTemplate[0] = PRM_Template(
+			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
+			"The type of geometry to load. Cortex Primitives are faster, but only allow manipulation through "
+			"OpHolders or specificly designed nodes. Houdini Geometry will use the converters to create standard "
+			"geo that can be manipulated anywhere."
+		);
+		
+		thisTemplate[1] = PRM_Template(
+			PRM_STRING, 1, &pAttributeFilter, &filterDefault, 0, 0, 0, 0, 0,
+			"A list of attribute names to load, if they exist on each shape. Uses Houdini matching syntax. "
+			"The filter expects Cortex names as exist in the cache, and performs automated conversion to "
+			"standard Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv). P will always be loaded."
+		);
+		
+		thisTemplate[2] = PRM_Template(
+			PRM_STRING, 1, &pAttributeCopy, 0, &attributeCopyMenu, 0, 0, 0, 0,
+			"Attributes to copy before loading into Houdini. This uses a:b syntax to copy duplicate attributes. "
+			"Note that using this field will cause a duplication in memory before entering Houdini, which may "
+			"impact performance."
+		);
+		
+		thisTemplate[3] = PRM_Template(
+			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
+			"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
+			"is ignored. Uses Houdini matching syntax"
+		);
+		
+		thisTemplate[4] = PRM_Template(
+			PRM_STRING, 1, &pTagFilter, &filterDefault, &tagFilterMenu, 0, 0, 0, 0,
+			"A list of filters to decide which tags to expand. In SubNetwork mode, branches that do not "
+			"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
+			"visibility. In FlatGeometry mode they essentially delete the non-tagged geometry. Uses Houdini "
+			"matching syntax, but matches *any* of the tags."
+		);
+	}
+	
+	static OP_TemplatePair *templatePair = 0;
+	if ( !templatePair )
+	{
+		templatePair = new OP_TemplatePair( thisTemplate );
+	}
+	
+	return templatePair;
+}
 
 template<typename BaseType>
 void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * )
@@ -405,6 +462,18 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setAttributeFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pAttributeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getAttributeCopy( UT_String &value ) const
+{
+	this->evalString( value, pAttributeCopy.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setAttributeCopy( const UT_String &value )
+{
+	this->setString( value, CH_STRING_LITERAL, pAttributeCopy.getToken(), 0, 0 );
 }
 
 template<typename BaseType>

@@ -583,6 +583,72 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 	
+	def testSopAttributeCopy( self ) :
+		
+		self.writeSCC()
+		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		self.assertEqual( len(node.geometry().prims()), 18 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		
+		# copying as expected, including automatic translation to rest
+		node.parm( "attributeCopy" ).set( "P:Pref" )
+		self.assertEqual( len(node.geometry().prims()), 18 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw", "rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		for point in node.geometry().points() :
+			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+		
+		# copying multiple prim vars
+		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
+		self.assertEqual( len(node.geometry().prims()), 18 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw", "rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		for point in node.geometry().points() :
+			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+		for prim in node.geometry().prims() :
+			self.assertEqual( prim.attribValue( "Cd" ), prim.attribValue( "Cspecial" ) )
+		
+		# copied prim var makes it through even though filtered one doesn't
+		node.parm( "attributeFilter" ).set( "* ^Cs" )
+		node.parm( "attributeCopy" ).set( "Cs:Cspecial" )
+		self.assertEqual( len(node.geometry().prims()), 18 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cspecial", "ieMeshInterpolation", "name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		
+		# nonexistant prim vars are a no-op
+		node.parm( "attributeFilter" ).set( "*" )
+		node.parm( "attributeCopy" ).set( "fake:notThere" )
+		self.assertEqual( len(node.geometry().prims()), 18 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		
+		# still works for Cortex geo
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
+		node.parm( "attributeCopy" ).set( "P:Pref" )
+		self.assertEqual( len(node.geometry().prims()), 3 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
+		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
+		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		result = IECoreHoudini.FromHoudiniCompoundObjectConverter( node ).convert()
+		self.assertEqual( sorted( result.keys() ), [ "/1", "/1/2", "/1/2/3" ] )
+		for key in result.keys() :
+			self.assertTrue( isinstance( result[key], IECore.MeshPrimitive ) )
+			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "P", "Pref" ] )
+			self.assertEqual( result[key]["P"], result[key]["Pref"] )
+	
 	def testExpandGeo( self ) :
 		
 		self.writeSCC()
@@ -940,10 +1006,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testParmTrickleDown( self ) :
 		
-		def checkParms( node, geoType, tagFilter, attribFilter, shapeFilter ) :
+		def checkParms( node, geoType, tagFilter, attribFilter, shapeFilter, attribCopy ) :
 			
 			self.assertEqual( node.parm( "geometryType" ).eval(), geoType )
 			self.assertEqual( node.parm( "attributeFilter" ).eval(), attribFilter )
+			self.assertEqual( node.parm( "attributeCopy" ).eval(), attribCopy )
 			self.assertEqual( node.parm( "shapeFilter" ).eval(), shapeFilter )
 			if isinstance( node, hou.ObjNode ) :
 				self.assertEqual( node.parm( "expanded" ).eval(), True )
@@ -954,7 +1021,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 					self.assertEqual( node.parm( "tagFilter" ).eval(), "*" )
 			
 			for child in node.children() :
-				checkParms( child, geoType, tagFilter, attribFilter, shapeFilter )
+				checkParms( child, geoType, tagFilter, attribFilter, shapeFilter, attribCopy )
 		
 		self.writeDualTaggedSCC()
 		xform = self.xform()
@@ -962,29 +1029,32 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "attributeFilter" ).set( "*" )
 		xform.parm( "shapeFilter" ).set( "*" )
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "attributeCopy" ).set( "P:Pref" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "P:Pref" )
 		
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
+		xform.parm( "attributeCopy" ).set( "" )
 		xform.parm( "shapeFilter" ).set( "*" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "attributeCopy" ).set( "v:vIn" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "v:vIn" )
 		
 		# now check just pushing the parms
 		
@@ -993,9 +1063,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "expand" ).pressButton()
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
+		xform.parm( "attributeCopy" ).set( "P:Pref" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N", "2 ^3" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N", "2 ^3", "P:Pref" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
@@ -1008,10 +1079,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P N" )
+		xform.parm( "attributeCopy" ).set( "P:Pref v:vIn" )
 		xform.parm( "shapeFilter" ).set( "2 3" )
 		xform.parm( "tagFilter" ).set( "d" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "d", "P N", "2 3" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "d", "P N", "2 3", "P:Pref v:vIn" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )

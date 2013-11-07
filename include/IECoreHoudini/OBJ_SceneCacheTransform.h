@@ -101,6 +101,7 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 			Hierarchy hierarchy;
 			Depth depth;
 			UT_String attributeFilter;
+			UT_String attributeCopy;
 			UT_String shapeFilter;
 			UT_String tagFilterStr;
 			UT_StringMMPattern tagFilter;
