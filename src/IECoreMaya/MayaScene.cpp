@@ -273,7 +273,7 @@ void MayaScene::writeAttribute( const Name &name, const Object *attribute, doubl
 	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
 }
 
-bool MayaScene::hasTag( const Name &name, bool includeChildren ) const
+bool MayaScene::hasTag( const Name &name, int filter ) const
 {
 	if ( m_isRoot )
 	{
@@ -288,7 +288,7 @@ bool MayaScene::hasTag( const Name &name, bool includeChildren ) const
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
-		if ( it->m_has( m_dagPath, name ) )
+		if ( it->m_has( m_dagPath, name, filter ) )
 		{
 			return true;
 		}
@@ -297,7 +297,7 @@ bool MayaScene::hasTag( const Name &name, bool includeChildren ) const
 	return false;
 }
 
-void MayaScene::readTags( NameList &tags, bool includeChildren ) const
+void MayaScene::readTags( NameList &tags, int filter ) const
 {
 	tags.clear();
 
@@ -311,13 +311,16 @@ void MayaScene::readTags( NameList &tags, bool includeChildren ) const
 		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
 	}
 	
+	std::set<Name> uniqueTags;
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
 		NameList values;
-		it->m_read( m_dagPath, values, includeChildren );
-		tags.insert( tags.end(), values.begin(), values.end() );
+		it->m_read( m_dagPath, values, filter );
+		uniqueTags.insert( values.begin(), values.end() );
 	}
+
+	tags.insert( tags.end(), uniqueTags.begin(), uniqueTags.end() );
 }
 
 void MayaScene::writeTags( const NameList &tags )

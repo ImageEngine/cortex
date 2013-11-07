@@ -131,8 +131,8 @@ class LinkedScene : public  SampledSceneInterface
 		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
-		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
-		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
+		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;

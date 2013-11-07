@@ -116,9 +116,9 @@ class MayaScene : public IECore::SceneInterface
 		 */
 
 		/// Uses the custom registered tags to return whether a given tag is present in the scene location or not.
-		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
+		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
 		/// Uses the custom registered tags to list all the tags present in the scene location.
-		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
 		/// Not currently supported - will throw an exception.
 		virtual void writeTags( const NameList &tags );
 
@@ -170,11 +170,11 @@ class MayaScene : public IECore::SceneInterface
 		typedef boost::function<bool (const MDagPath &)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &, const Name &)> ReadAttrFn;
-		typedef boost::function<bool (const MDagPath &, const Name &)> HasTagFn;
-		typedef boost::function<void (const MDagPath &, NameList &, bool)> ReadTagsFn;
+		typedef boost::function<bool (const MDagPath &, const Name &, int )> HasTagFn;
+		typedef boost::function<void (const MDagPath &, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
 		
-		// Register callbacks for custom objects.		
+		// Register callbacks for custom objects.
 		// The has function will be called during hasObject and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomObject( HasFn hasFn, ReadFn readFn );

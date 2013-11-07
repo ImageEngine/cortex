@@ -240,7 +240,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		if drawTagsFilter:
 			parentTags = drawTagsFilter.split()
-			childTags = fnChild.sceneInterface().readTags()
+			childTags = fnChild.sceneInterface().readTags(IECore.SceneInterface.EveryTag)
 			commonTags = filter( lambda x: str(x) in childTags, parentTags )
 			if not commonTags:
 				# Hide that child since it doesn't match any filter
@@ -331,7 +331,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		result = (None, None)
 		if self.sceneInterface().hasObject():
-			tags = self.sceneInterface().readTags( includeChildren=False )
+			tags = self.sceneInterface().readTags( IECore.SceneInterface.LocalTag )
 			if "ObjectType:MeshPrimitive" in tags:
 				result = ( "mesh", "inMesh" )
 			elif "ObjectType:CurvesPrimitive" in tags:

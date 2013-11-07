@@ -233,7 +233,7 @@ void SceneCacheNode<BaseType>::buildTagFilterMenu( void *data, PRM_Name *menu, i
 	}
 	
 	SceneInterface::NameList tags;
-	scene->readTags( tags );
+	scene->readTags( tags, IECore::SceneInterface::EveryTag );
 	std::vector<std::string> tagStrings;
 	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 	{
@@ -524,7 +524,7 @@ template<typename BaseType>
 bool SceneCacheNode<BaseType>::tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter )
 {
 	SceneInterface::NameList tags;
-	scene->readTags( tags );
+	scene->readTags( tags, IECore::SceneInterface::EveryTag );
 	for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 	{
 		if ( UT_String( *it ).multiMatch( filter ) )

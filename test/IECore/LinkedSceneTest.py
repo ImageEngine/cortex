@@ -129,6 +129,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 	def testWriting( self ):
 
 		generateTestFiles = False	# change this to True to recreate the LinkedScene files for other tests.
+		testFilesSuffix = "_newTags"
 		if generateTestFiles :
 			outputPath = "test/IECore/data/sccFiles"
 		else :
@@ -137,7 +138,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 		A = m.child("A")
 
-		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres.lscc"), IECore.IndexedIO.OpenMode.Write )
+		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres%s.lscc"%testFilesSuffix), IECore.IndexedIO.OpenMode.Write )
 		i0 = l.createChild("instance0")
 		i0.writeLink( m )
 		i1 = l.createChild("instance1")
@@ -158,7 +159,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, b2.writeLink, A )
 		del i0, i1, i2, l, b1, b2, c2
 
-		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres.lscc"), IECore.IndexedIO.OpenMode.Read )
+		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres%s.lscc"%testFilesSuffix), IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( l.numBoundSamples(), 4 )
 		self.assertEqual( set(l.childNames()), set(['instance0','instance1','instance2','branch1','branch2']) )
@@ -191,16 +192,16 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.failUnless( LinkedSceneTest.compareBBox( i2.readBoundAtSample(1), IECore.Box3d(IECore.V3d( -1,-1,-1 ), IECore.V3d( 1,1,1 ) ) ) )
 		self.failUnless( LinkedSceneTest.compareBBox( i2.readBoundAtSample(2), IECore.Box3d(IECore.V3d( 0,-1,-1 ), IECore.V3d( 2,1,1 ) ) ) )
 		self.assertEqual( i2.readTransform( 0 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ) )
-		self.assertTrue( i2.hasTag( "canHaveTagsAtLinks" ) )
-		self.assertTrue( l.hasTag( "canHaveTagsAtLinks" ) )	# tags propagate up
-		self.assertTrue( i2.child("a").hasTag( "canHaveTagsAtLinks" ) )		# tags at link locations propagate down as well
+		self.assertTrue( i2.hasTag( "canHaveTagsAtLinks", IECore.SceneInterface.TagFilter.EveryTag ) )
+		self.assertTrue( l.hasTag( "canHaveTagsAtLinks", IECore.SceneInterface.TagFilter.EveryTag ) )	# tags propagate up
+		self.assertTrue( i2.child("a").hasTag( "canHaveTagsAtLinks", IECore.SceneInterface.TagFilter.EveryTag ) )		# tags at link locations propagate down as well
 
 		self.assertEqual( l.scene( [ 'instance0' ] ).path(), [ 'instance0' ] )
 		self.assertEqual( l.scene( [ 'instance0', 'A' ] ).path(), [ 'instance0', 'A' ] )
 		self.assertEqual( i0.path(), [ 'instance0' ] )
 
 		# test saving a two level LinkedScene
-		l2 = IECore.LinkedScene( os.path.join(outputPath,"environment.lscc"), IECore.IndexedIO.OpenMode.Write )
+		l2 = IECore.LinkedScene( os.path.join(outputPath,"environment%s.lscc"%testFilesSuffix), IECore.IndexedIO.OpenMode.Write )
 		base = l2.createChild("base")
 		t1 = base.createChild("test1")
 		t1.writeLink( l )
@@ -232,8 +233,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 			del i0, l, m
 		
-		if len( messageHandler.messages ):
-			self.fail( messageHandler.messages[0].message )
+		for messageInfo in messageHandler.messages:
+			if not messageInfo.message.startswith( "Detected ancestor tags" ) :
+				self.fail( messageInfo.message )
 	
 	def testTimeRemapping( self ):
 
@@ -407,12 +409,16 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( Aa.readTransformAsMatrix( 0.8 ), A.readTransformAsMatrix( 0.8 / 8 ) )
 		self.assertEqual( Aa.readTransformAsMatrix( 0.9 ), A.readTransformAsMatrix( 0.9 / 8 ) )
 	
-	def testReading( self ):
+	def readSavedScenes( self, fileVersion ):
 
 		def recurseCompare( basePath, virtualScene, realScene, atLink = True ) :
 			self.assertEqual( basePath, virtualScene.path() )
 
-			if not atLink :	# attributes and tranforms at link location are not loaded.
+			if atLink :	
+	
+				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.DescendantTag)) )
+
+			else: # attributes and tranforms at link location are not loaded.
 
 				self.assertEqual( set(virtualScene.attributeNames()), set(realScene.attributeNames()) )
 				for attr in realScene.attributeNames() :
@@ -424,6 +430,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 				self.assertEqual( virtualScene.numTransformSamples(), realScene.numTransformSamples() )
 				for s in xrange(0,virtualScene.numTransformSamples()) :
 					self.assertEqual( virtualScene.readTransformAtSample(s), realScene.readTransformAtSample(s) )
+
+				self.assertEqual( set(virtualScene.readTags()), set(realScene.readTags()) )
+				self.assertEqual( set(virtualScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)), set(realScene.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)) )
 
 			self.assertEqual( virtualScene.numBoundSamples(), realScene.numBoundSamples() )
 			for s in xrange(0,virtualScene.numBoundSamples()) :
@@ -440,8 +449,8 @@ class LinkedSceneTest( unittest.TestCase ) :
 				self.assertTrue( virtualScene.hasChild(c) )
 				recurseCompare( basePath + [ str(c) ], virtualScene.child(c), realScene.child(c), False )
 
-		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True
-		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres.lscc", IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True
+		env = IECore.LinkedScene( "test/IECore/data/sccFiles/environment%s.lscc" % fileVersion, IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
+		l = IECore.LinkedScene( "test/IECore/data/sccFiles/instancedSpheres%s.lscc" % fileVersion, IECore.IndexedIO.OpenMode.Read )	# created by testWriting() when generateTestFiles=True and testFilesSuffix is defined.
 		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 
 		base = env.child('base')
@@ -479,7 +488,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:link.fileName" ), True )
 		self.assertEqual( test1.child('instance2').hasAttribute( "sceneInterface:link.root" ), True )
 		
-		
 		self.assertEqual( test1.child('instance0').path(), [ "base", "test1", "instance0" ] )
 		recurseCompare( test1.child('instance0').path(), test1.child('instance0'), m )
 		recurseCompare( test2.path(), test2, m )
@@ -489,6 +497,11 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		recurseCompare( test1.path(), env.scene( [ 'base', 'test1' ] ), l )
 		recurseCompare( test1.path(), env.scene( [ 'base' ] ).child( 'test1' ), l )
+
+	def testReadingFormats( self ):
+
+		self.readSavedScenes( "" )		# tests first LinkedScene file format, with tags represented under the entry "tags"
+		self.readSavedScenes( "_newTags" ) # tests second LinkedScene file format, with tags represented in separated entries: "localTags", "descendentTags" and "ancestorTags".
 
 	def testTags( self ) :
 
@@ -509,20 +522,21 @@ class LinkedSceneTest( unittest.TestCase ) :
 		a = l.child('a')
 		b = l.child('b')
 
-		self.assertEqual( set(l.readTags()), testSet(["testA", "testB", "tags"]) )
-		self.assertEqual( set(l.readTags(includeChildren=False)), testSet(["tags"]) )
-		self.assertEqual( set(a.readTags()), testSet(["testA"]) )
-		self.assertEqual( set(a.readTags(includeChildren=False)), testSet(["testA"]) )
-		self.assertEqual( set(b.readTags()), testSet(["testB"]) )
-		self.assertEqual( set(b.readTags(includeChildren=False)), testSet(["testB"]) )
-		self.assertTrue( l.hasTag("testA") )
-		self.assertTrue( l.hasTag("testB") )
-		self.assertFalse( l.hasTag("testA", includeChildren=False) )
-		self.assertFalse( l.hasTag("testB", includeChildren=False) )
-		self.assertTrue( a.hasTag("testA") )
-		self.assertFalse( a.hasTag("testB") )
-		self.assertTrue( b.hasTag("testB") )
-		self.assertFalse( b.hasTag("testA") )
+		self.assertEqual( set(l.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA", "testB", "tags"]) )
+		self.assertEqual( set(l.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["tags"]) )
+		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet(["tags"]) )
+		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), set() )
+		self.assertEqual( set(a.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testA"]) )
+		self.assertEqual( set(b.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testB"]) )
+		self.assertEqual( set(b.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testB"]) )
+		self.assertTrue( l.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertTrue( l.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( l.hasTag("testA", IECore.SceneInterface.TagFilter.LocalTag) )
+		self.assertFalse( l.hasTag("testB", IECore.SceneInterface.TagFilter.LocalTag) )
+		self.assertTrue( a.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( a.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertTrue( b.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( b.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
 
 		l2 = IECore.LinkedScene( "/tmp/test2.lscc", IECore.IndexedIO.OpenMode.Write )
 
@@ -531,7 +545,18 @@ class LinkedSceneTest( unittest.TestCase ) :
 		A.writeTags( ['linkedA'] )	# creating tag after link
 
 		B = l2.createChild('B')
-		B.writeLink( a )
+
+		# creating a link to a branch of an external file.
+		messageHandler = IECore.CapturingMessageHandler()
+		with messageHandler :
+			# will have warnings as the branch inherits ancestor tags...
+			B.writeLink( a )
+		if not len( messageHandler.messages ):
+			self.fail( "Was expecting a warning message when linking to a location that had ancestor tags!" )
+		else :
+			for messageInfo in messageHandler.messages:
+				if not messageInfo.message.startswith( "Detected ancestor tags" ) :
+					self.fail( messageHandler.message )
 
 		C = l2.createChild('C')
 		c = C.createChild('c')
@@ -553,32 +578,38 @@ class LinkedSceneTest( unittest.TestCase ) :
 		ca = c.child("a")
 		D = l2.child("D")
 
-		self.assertTrue( l2.hasTag("testA") )
-		self.assertTrue( l2.hasTag("testB") )
-		self.assertFalse( l2.hasTag("t") )
-		self.assertEqual( set(l2.readTags()), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
-		self.assertEqual( set(l2.readTags(includeChildren=False)), testSet([]) )
-		self.assertEqual( set(A.readTags()), testSet(["testA","testB", "tags","linkedA"]) )
-		self.assertTrue( A.hasTag( "linkedA" ) )
-		self.assertTrue( A.hasTag( "tags" ) )
-		self.assertTrue( A.hasTag( "testA" ) )
-		self.assertTrue( A.hasTag( "testB" ) )
-		self.assertFalse( A.hasTag("C") )
-		self.assertEqual( set(A.readTags(includeChildren=False)), testSet(["tags","linkedA"]) )
-		self.assertEqual( set(Aa.readTags()), testSet(["testA", "linkedA"]) )
-		self.assertEqual( set(Aa.readTags(includeChildren=False)), testSet(["testA"]) )
-		self.assertTrue( Aa.hasTag("testA") )
-		self.assertFalse( Aa.hasTag("testB") )
-		self.assertEqual( set(B.readTags()), testSet(["testA"]) )
-		self.assertEqual( set(C.readTags()), testSet(["testA","testB","tags","C"]) )
-		self.assertEqual( set(C.readTags(includeChildren=False)), testSet(["C"]) )
-		self.assertEqual( set(c.readTags()), testSet(["testA", "testB","tags"]) )
-		self.assertEqual( set(c.readTags(includeChildren=False)), testSet(["tags"]) )
-		self.assertEqual( set(ca.readTags()), testSet(["testA"]) )
-		self.assertTrue( ca.hasTag("testA") )
-		self.assertFalse( ca.hasTag("testB") )
-		self.assertEqual( set(C.readTags(includeChildren=False)), testSet(["C"]) )
-		self.assertEqual( set(D.readTags()), testSet(["D", "testA"]) )
+		self.assertTrue( l2.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertTrue( l2.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( l2.hasTag("t", IECore.SceneInterface.TagFilter.EveryTag) )
+
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet([]) )
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.LocalTag|IECore.SceneInterface.TagFilter.DescendantTag)), testSet(["testA", "testB","tags", "C", "D","linkedA"]) )
+		self.assertEqual( set(l2.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet([]) )
+		self.assertEqual( set(A.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA","testB", "tags","linkedA"]) )
+		self.assertTrue( A.hasTag( "linkedA", IECore.SceneInterface.TagFilter.EveryTag ) )
+		self.assertTrue( A.hasTag( "tags", IECore.SceneInterface.TagFilter.EveryTag ) )
+		self.assertTrue( A.hasTag( "testA", IECore.SceneInterface.TagFilter.EveryTag ) )
+		self.assertTrue( A.hasTag( "testB", IECore.SceneInterface.TagFilter.EveryTag ) )
+		self.assertFalse( A.hasTag("C", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertEqual( set(A.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["tags","linkedA"]) )
+		self.assertEqual( set(Aa.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["tags","testA", "linkedA"]) )
+		self.assertEqual( set(Aa.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet(["tags", "linkedA"]) )
+		self.assertEqual( set(Aa.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testA"]) )
+		self.assertTrue( Aa.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( Aa.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertEqual( set(B.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA", "tags"]) )	# should not list "linkedA" as the link pointed to a child location.
+		self.assertEqual( set(C.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["testA","testB","tags","C"]) )
+		self.assertEqual( set(C.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["C"]) )
+		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["C", "testA", "testB","tags"]) )
+		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["tags"]) )
+		self.assertEqual( set(c.readTags(IECore.SceneInterface.TagFilter.DescendantTag)), testSet([ "testA", "testB" ]) )
+		self.assertEqual( set(ca.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["testA"]) )
+		self.assertEqual( set(ca.readTags(IECore.SceneInterface.TagFilter.AncestorTag)), testSet(["C", "tags"]) )
+		self.assertTrue( ca.hasTag("testA", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertFalse( ca.hasTag("testB", IECore.SceneInterface.TagFilter.EveryTag) )
+		self.assertEqual( set(C.readTags(IECore.SceneInterface.TagFilter.LocalTag)), testSet(["C"]) )
+		self.assertEqual( set(D.readTags(IECore.SceneInterface.TagFilter.EveryTag)), testSet(["tags", "D", "testA"]) )
 	
 	def testMissingLinkedScene( self ) :
 		
