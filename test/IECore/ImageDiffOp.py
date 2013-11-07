@@ -40,6 +40,43 @@ from IECore import *
 
 class TestImageDiffOp(unittest.TestCase):
 
+	def testOffsetDisplayWindows(self):
+		r = Reader.create( "test/IECore/data/exrFiles/carPark.exr" )
+		imageA = r.read()
+		imageB = r.read()
+
+		op = ImageDiffOp()
+		res = op(
+			imageA = imageA,
+			imageB = imageB,
+			alignDisplayWindows = False
+		)
+		self.assertFalse( res.value )
+	
+		# Offset the display and data windows.
+		offsetDisplayWindow = Box2i( imageA.displayWindow.min + V2i( -261, 172 ), imageA.displayWindow.max + V2i( -261, 172 ) ) 
+		offsetDataWindow = Box2i( imageA.dataWindow.min + V2i( -261, 172 ), imageA.dataWindow.max + V2i( -261, 172 ) ) 
+		imageA.displayWindow = offsetDisplayWindow
+		imageA.dataWindow = offsetDataWindow
+
+		# Compare the images again and they should fail as the display windows are different.
+		op = ImageDiffOp()
+		res = op(
+			imageA = imageA,
+			imageB = imageB,
+			alignDisplayWindows = False
+		)
+		self.assertTrue( res.value )
+		
+		# Compare the images again and they should not fail if "alignDisplayWindows" is turned on.
+		op = ImageDiffOp()
+		res = op(
+			imageA = imageA,
+			imageB = imageB,
+			alignDisplayWindows = True
+		)
+		self.assertFalse( res.value )
+
 	def testSimple(self):
 
 		op = ImageDiffOp()
