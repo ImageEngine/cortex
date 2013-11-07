@@ -51,7 +51,7 @@ class WarpOp : public ImagePrimitiveOp
 {
 	public:
 
-		enum FilterType { None = 0, Bilinear, TypeCount };
+		enum FilterType { None = 0, Bilinear = 1 };
 		enum BoundMode { Clamp = 0, SetToBlack = 1 };
 
 		WarpOp( const std::string &description );
