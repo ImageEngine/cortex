@@ -53,9 +53,9 @@ WarpOp::WarpOp( const std::string &description )
 	m_filterParameter = new IntParameter(
 		"filter",
 		"Defines the filter to be used on the warped coordinates.",
-		(int)WarpOp::Bilinear,
-		(int)WarpOp::None,
-		(int)WarpOp::TypeCount - 1,
+		WarpOp::Bilinear,
+		WarpOp::None,
+		WarpOp::Bilinear,
 		filterPresets,
 		true
 	);
@@ -68,9 +68,9 @@ WarpOp::WarpOp( const std::string &description )
 	m_boundModeParameter = new IntParameter(
 		"boundMode",
 		"Defines how the Op handles pixel requests for pixels outside of the input image.",
-		(int)WarpOp::Clamp,
-		(int)WarpOp::Clamp,
-		2,
+		WarpOp::Clamp,
+		WarpOp::Clamp,
+		WarpOp::SetToBlack,
 		boundModePresets,
 		true
 	);
