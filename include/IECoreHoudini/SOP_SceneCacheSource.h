@@ -87,7 +87,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			std::vector<IECore::InternedString> animatedPrimVars;
 		};
 		
-		// Modify the object according the the paramters, copying if neccessary.
+		// Modify the object according the parameters, copying if neccessary.
 		IECore::ConstObjectPtr modifyObject( const IECore::Object *object, Parameters &params );
 		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
