@@ -1,3 +1,14 @@
+# 8.0.0-b1
+
+#### IECore
+
+- SceneInterface tags now support upstream/local/downstream tags (using a bit mask filter to query)
+- Various fixes for OSX builds
+
+### IECoreHoudini
+
+- Fixed multiple transform bug in HoudiniScene
+
 # 8.0.0-a23
 
 #### IECore
