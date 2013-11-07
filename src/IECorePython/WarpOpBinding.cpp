@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,15 @@ namespace IECorePython
 void bindWarpOp()
 {
 
-	RunTimeTypedClass<WarpOp>()
+	scope s = RunTimeTypedClass<WarpOp>();
+	enum_<WarpOp::BoundMode>( "BoundMode" )
+		.value( "Clamp", WarpOp::Clamp )
+		.value( "SetToBlack", WarpOp::SetToBlack )
+	;
+	
+	enum_<WarpOp::FilterType>( "FilterType" )
+		.value( "Bilinear", WarpOp::Bilinear )
+		.value( "None", WarpOp::None )
 	;
 
 }
