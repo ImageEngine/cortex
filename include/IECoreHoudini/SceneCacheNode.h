@@ -98,6 +98,8 @@ class SceneCacheNode : public BaseType
 		{
 			Cortex,
 			Houdini,
+			BoundingBox,
+			PointCloud
 		};
 		
 		/// convenience methods for the common parameters;
