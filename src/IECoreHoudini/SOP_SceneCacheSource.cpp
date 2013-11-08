@@ -487,10 +487,31 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		return false;
 	}
 	
-	// attempt to optimize the conversion by re-using animated primitive variables
 	const Primitive *primitive = IECore::runTimeCast<const Primitive>( object );
+	
+	// attempt to optimize the conversion by re-using animated primitive variables
+	/// \todo: This offset loop is only used because GU_Detail::getRangeByValue is
+	/// terribly slow. Replace this if SideFx improves that function.
+	GA_OffsetList offsets;
 	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	GA_Range primRange = gdp->getRangeByValue( nameAttrRef, name.c_str() );
+	if ( nameAttrRef.isValid() )
+	{
+		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+		
+		GA_Range range = gdp->getPrimitiveRange();
+		for ( GA_Iterator it = range.begin(); !it.atEnd(); ++it )
+		{
+			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
+			if ( UT_String( currentName ).equal( name.c_str() ) )
+			{
+				offsets.append( it.getOffset() );
+			}
+		}
+	}
+	
+	GA_Range primRange( gdp->getPrimitiveMap(), offsets );
+	
 	if ( primitive && !params.hasAnimatedTopology && params.hasAnimatedPrimVars && nameAttrRef.isValid() && !primRange.isEmpty() )
 	{
 		// this means constant topology and primitive variables, even though multiple samples were written
