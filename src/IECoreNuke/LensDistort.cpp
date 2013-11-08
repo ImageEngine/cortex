@@ -351,6 +351,12 @@ void LensDistort::append( DD::Image::Hash &hash )
 		hash.append( m_assetPath );
 	}
 
+	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	{
+		hash.append( it->m_name );
+		hash.append( it->m_value );
+	}
+
 	hash.append( m_lensModel );
 	hash.append( m_mode );
 	hash.append( m_hasValidFileSequence );
