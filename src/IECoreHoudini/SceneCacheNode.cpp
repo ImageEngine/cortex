@@ -116,6 +116,8 @@ static PRM_Name spaceNames[] = {
 static PRM_Name geometryTypes[] = {
 	PRM_Name( "0", "Cortex Primitives" ),
 	PRM_Name( "1", "Houdini Geometry" ),
+	PRM_Name( "2", "Bounding Boxes" ),
+	PRM_Name( "3", "Point Cloud" ),
 	PRM_Name( 0 ) // sentinal
 };
 

@@ -133,6 +133,8 @@ void IECoreHoudini::bindSceneCacheNode()
 	enum_<SceneCacheNode<OP_Node>::GeometryType>( "GeometryType" )
 		.value( "Cortex", SceneCacheNode<OP_Node>::Cortex )
 		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
+		.value( "BoundingBox", SceneCacheNode<OP_Node>::BoundingBox )
+		.value( "PointCloud", SceneCacheNode<OP_Node>::PointCloud )
 	;
 	
 	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
