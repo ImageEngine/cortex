@@ -1,3 +1,20 @@
+# 8.0.0-b2
+
+#### IECore
+
+- WarpOp has a new BoundMode parameter, options are Clamp (previous behaviour) or SetToBlack.
+- ImageDiffOp has a new option to offset display windows of the same size to be aligned before comparison.
+- Added support to the LensDistortOp for images with offset display window.
+- Fixed LensDistortOp bug with non-symmetric distortions.
+
+#### IECoreHoudini
+
+- Added BoundingBox and PointCloud GeometryType options to SceneCache nodes
+- Added AttributeCopy parm to SceneCache SOP. This is used to duplicate attributes before loading to Houdini.
+- Exposed SceneCache OBJ parameters to override the transform values coming from disk (Transform tab)
+- Moved SceneCache OBJ Push button along with all geometry loading parms to the new Options tab
+- Improved performance of SceneCache SOP (Up to 5x faster on a 1500 shapes, 3 million polys asset)
+
 # 8.0.0-b1
 
 #### IECore
