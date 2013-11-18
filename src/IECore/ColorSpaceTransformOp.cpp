@@ -380,7 +380,10 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const 
 
 	bool first = true;
 	ConversionInfo previous;
-	std::vector< ConversionInfo >::const_iterator it = conversions.begin();
+
+        // BMS20131118: it is unused, thus throwing an error on compilation
+	//std::vector< ConversionInfo >::const_iterator it = conversions.begin();
+
 	ConversionInfo current;
 	for( std::vector< ConversionInfo >::const_iterator it = conversions.begin() ; it != conversions.end(); ++it )
 	{
