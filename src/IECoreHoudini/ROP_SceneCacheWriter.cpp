@@ -216,22 +216,25 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
+		bool reRoot = true;
 		OP_Context context( time );
-		const GU_Detail *geo = node->getRenderGeometry( context );
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		bool reRoot = !nameAttrRef.isValid();
-		if ( nameAttrRef.isValid() )
+		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
-			const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-			const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-			GA_Size numShapes = tuple->getTableEntries( nameAttr );
-			reRoot = ( numShapes == 0 );
-			if ( numShapes == 1 )
+			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+			reRoot = !nameAttrRef.isValid();
+			if ( nameAttrRef.isValid() )
 			{
-				const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
-				if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+				GA_Size numShapes = tuple->getTableEntries( nameAttr );
+				reRoot = ( numShapes == 0 );
+				if ( numShapes == 1 )
 				{
-					reRoot = true;
+					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
+					if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+					{
+						reRoot = true;
+					}
 				}
 			}
 		}

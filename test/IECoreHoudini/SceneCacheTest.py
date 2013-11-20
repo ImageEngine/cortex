@@ -1805,6 +1805,38 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
 	
+	def testRopFlattenedAndHidden( self ) :
+		
+		self.writeSCC()
+		subnet = hou.node( "/obj" ).createNode( "subnet" )
+		subnet.setDisplayFlag( False )
+		geo = self.geometry( parent = subnet )
+		geo.parm( "expand" ).pressButton()
+		attr = geo.children()[0].createOutputNode( "attribute" )
+		attr.parm( "primdel" ).set( "name" )
+		attr.setDisplayFlag( True )
+		attr.setRenderFlag( True )
+		rop = self.rop( geo )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( output.name(), "/" )
+		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertFalse( output.hasObject() )
+		self.assertEqual( output.childNames(), [ "ieSceneCacheGeometry1" ] )
+		root = output.child( "ieSceneCacheGeometry1" )
+		self.assertEqual( root.name(), "ieSceneCacheGeometry1" )
+		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertTrue( root.hasObject() )
+		obj = root.readObject( 0 )
+		self.assertTrue( obj.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertEqual( len(obj.children()), 3 )
+		for child in obj.children() :
+			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( root.childNames(), [] )
+	
 	def testRopLinked( self ) :
 		
 		self.writeTaggedSCC()
