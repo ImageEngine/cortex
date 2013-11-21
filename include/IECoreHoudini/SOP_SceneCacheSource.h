@@ -85,6 +85,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			bool hasAnimatedTopology;
 			bool hasAnimatedPrimVars;
 			std::vector<IECore::InternedString> animatedPrimVars;
+			std::map<std::string, GA_Range> namedRanges;
 		};
 		
 		// Modify the object according the parameters, copying if neccessary.
