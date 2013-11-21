@@ -43,6 +43,8 @@
 #include "DDImage/Filter.h"
 #include "IECore/LensModel.h"
 
+#define IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS 30
+
 namespace IECoreNuke
 {
 
@@ -51,7 +53,7 @@ namespace IECoreNuke
 /// The LensDistort node provides a nuke interface to the IECore::LensDistort libraries.
 /// It queries any registered lens models, displaying them within the pull-down menu of the "lens model"
 /// knob. When a lens model is selected the node will dynamically create the required knobs on the
-/// UI panel. An additional knob has been added to allow the input of a sequence of lens models
+/// UI panel. An additional knob has been added to allow the input of a file sequence of lens models
 /// which have been serialized into .cob files.
 ///
 /// Weta Digitals LensDistortion node was referenced when designing this node.
@@ -59,31 +61,24 @@ namespace IECoreNuke
 class LensDistort : public DD::Image::Iop
 {
 	/// PluginAttribute
-	/// A small struct for maintaining a list of the knobs on the UI and their values.
+	/// A small struct for maintaining a list of the attributes on the current lens model.
 	struct PluginAttribute
 	{
 		public:
 			
-			PluginAttribute( std::string name, double defaultValue = 0. ) :
+			PluginAttribute( std::string name ) :
 				m_name( name ),
-				m_knob( NULL ),
-				m_value( defaultValue ),
 				m_low( 0. ),
 				m_high( 1. )
 			{};
 			
 			PluginAttribute() :
 				m_name( "Unused" ),
-				m_knob( NULL ),
-				m_value( 0. ),
 				m_low( 0. ),
 				m_high( 1. )
 			{};
 			
 			std::string m_name;
-			DD::Image::Knob *m_knob;
-			std::string m_script;
-			double m_value;
 			double m_low;
 			double m_high;
 	};
@@ -99,10 +94,10 @@ class LensDistort : public DD::Image::Iop
 		};
 		
 		LensDistort( Node* node );
-		
-		inline int getLensModel() const { return (int)knob("model")->get_value(); };
-		inline PluginAttributeList &attributeList() { return m_pluginAttributes; };
-		
+
+		//! @name Nuke Virtual Methods
+		//////////////////////////////////////////////////////////////
+		//@{
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual int knob_changed( DD::Image::Knob* k );
 		virtual void append( DD::Image::Hash &hash );
@@ -111,80 +106,116 @@ class LensDistort : public DD::Image::Iop
 		virtual const char *node_help() const;
 		virtual void _validate( bool for_real );
 		virtual void engine( int y, int x, int r, DD::Image::ChannelMask channels, DD::Image::Row & outrow );
-		
-		static void buildDynamicKnobs( void*, DD::Image::Knob_Callback f );
-		static void addDynamicKnobs( void*, DD::Image::Knob_Callback f );
+		//@}
+
 		static const Iop::Description m_description;
 		static DD::Image::Op *build( Node *node );
 		
 	private:
 		
-		/// Returns an array of const char* which is populated with the available lens models.
-		static const char ** modelNames();
-		static int indexFromModelName( const char *name );
-	
-		/// Sets the lens model to use by calling the appropriate creators..
-		void setLensModel( IECore::ConstCompoundObjectPtr parameters );
-		void setLensModel( std::string modelName );
-
-		/// Updates the internal list of lens parameters (and their associated knobs) to those defined within the current lens models.
-		/// This method should only be called at the end of setLensModel.
-		/// @param updateKnobsFromParameters If this value is true then all knobs will be updated to the new lens model's parameters and any existing knob values.
-		/// will be discarded. If this value is false then the values of common parameters between the current and new lens model will be copied across.
-		void updateLensModel( bool updateKnobsFromParameters = false );
+		//////////////////////////////////////////////////////////////
+		// Private Methods
 		
-		/// Returns true if there is text in the file sequence knob. The contents of the knob are returned in the attribute 'path'.
-		bool getFileSequencePath( std::string& path );
-
-		/// Checks that the file sequence is valid and then loads the required file from it. File sequences of the format path.#.ext and path.%0Xd.ext will have their
+		/// Returns an array of const char* which is populated
+		/// with the available lens models. The names keep
+		/// the order that the lens models are held within the
+		/// IECore::LensModel::lensModels() list.
+		static const char ** modelNames();
+		/// Returns the index of a particular lens model within the
+		/// IECore::LensModel::lensModels() list. 
+		static int indexFromModelName( const char *name );
+		/// Returns the index of the current lens model within the
+		/// IECore::LensModel::lensModels() list.
+		int currentLensModelIndex() const;
+		/// Sets the current distortion to the lens model returned
+		/// by passing 'parameters' into the IECore::LensModel::create()
+		/// factory function.
+		void setLensModel( IECore::ConstCompoundObjectPtr parameters );
+		/// Sets the current distortion to the lens model with a name 'modelName'.
+		void setLensModel( std::string modelName );
+		/// Updates the internal list of lens parameters (and their associated knobs)
+		/// to those defined within the current lens models.
+		/// @param updateKnobsFromParameters If this value is true then all knobs will
+		///		   be updated to the new lens model's parameters and any existing knob values
+		///        will be discarded. If this value is false then the values of common
+		///        parameters between the current and new lens model will be retained.
+		void updateLensModel( bool updateKnobsFromParameters = false );
+		/// Returns true if there is text in the file sequence knob.
+		/// The contents of the knob are returned in the attribute 'path'.
+		bool fileSequencePath( std::string& path );
+		/// Checks that the file sequence is valid and then loads the required file from it.
+		/// File sequences of the format path.#.ext and path.%0Xd.ext will have their
 		/// wild card characters replaced and set to the current frame.
 		/// @param returnPath The path of the file that has been loaded.
 		/// @return Whether or not the file path was successful.
 		bool setLensFromFile( std::string &returnPath );
-
-		/// Iterates over all of the lens model's attributes and if they are associated with a knob, retrieves the information from the knob.
-		void updatePluginAttributesFromKnobs();
-
-		/// Updates the dynamic knobs. This method should be called whenever a knob is changed or an event happens that requires
-		/// the dynamic knobs to be recreated or their enabled state changed.
+		
+		
+		//! @name Lens Parameter Convenience Members 
+		//////////////////////////////////////////////////////////////
+		/// To make the knobs on the UI look like they have the name of the lens parameter
+		/// that they are representing on the LensModel, we set their label to display
+		/// the parameter name when a new lens model is selected or updateUI() is called.
+		/// In reality, each knob isactually named with the convention "lensParamX",
+		/// where 'X' is the index of the lens parameter on the lens model.
+		/// These methods are provided for convenience to allow the label of a knob
+		/// (which is the same as the lens model's parameter name) to be converted
+		/// to the knobs actual name and vice-versa.
+		//@{
+		/// Returns the name of a knob that represents a lens parameter at index 'i' on the lens model.
+		std::string parameterKnobName( unsigned int i ) const;
+		/// Returns the name of the associated parameter for a knob with a given name.	
+		std::string parameterNameFromKnobName( std::string knobName ) const;
+		/// Updates the knobs so that their labels correspond to their parameter's name, sets their visibility
+		/// and makes then read-only if the parameters for the lens model are being read from a file.
 		void updateUI();
+		//@}
+	
+		//////////////////////////////////////////////////////////////
+		// Private Members
 		
-		/// The maximum number of threads that we are going to use in parallel.
-		const int m_nThreads;
+		/// A flag to indicate where there is any text in the "lensFileSequence" knob.
+		bool m_useFileSequence;
 		
-		/// Plugin loaders. We need one of these per threads to make the lens lib thread safe.
-		std::vector< IECore::LensModelPtr > m_model;
-		
-		/// locks for each LensModel object
-		DD::Image::Lock* m_locks;
+		/// A flag that is set when a valid file sequence has been entered into the "lensFileSequence" knob.
+		bool m_hasValidFileSequence;
 		
 		/// A list of the attributes that the plugin uses.
 		PluginAttributeList m_pluginAttributes;
 		
-		/// Which lens model we are currently using.
-		int m_lensModel;
+		//! @name Multi-Threading members
+		/// As we can't assume that any derived classes of the IECore::LensModel
+		/// class are thread safe, we make multiple instances of some members
+		/// so that each thread has it's own.
+		/// For example, we create one instance of each lens model per thread and
+		/// store each of the instances in the m_lensModels member.
+		//////////////////////////////////////////////////////////////
+		//@{
+		/// The maximum number of threads that we are going to use in parallel.
+		const int m_nThreads;
+		/// Plugin loaders. We need one of these per thread in
+		/// case the LensModel is not thread safe.
+		std::vector< IECore::LensModelPtr > m_lensModels;
+		/// Locks for each LensModel object.
+		DD::Image::Lock* m_locks;
+		//@}
 		
-		/// Used to track the number of knobs created by the previous pass, so that the same number can be deleted next time.
-		int m_numNewKnobs;
-		
+		//! @name Knob Storage Members
+		/// These members hold the values of the various nuke knobs.
+		//////////////////////////////////////////////////////////////
+		//@{
+		/// Path that holds the file sequence string.
+		const char *m_assetPath;
 		/// The method of filtering. Defined by the 'filter' knob.
 		DD::Image::Filter m_filter;
-	
-		/// Pointer to the 'mode' knob.
-		DD::Image::Knob *m_kModel;
-
+		/// Which lens model we are currently using. This is an index into
+		/// the IECore::LensModel::lensModels() list.
+		int m_lensModel;
 		/// Distort or undistort.
 		int m_mode;
-		
-		/// All knobs below this one are dynamic.
-		DD::Image::Knob* m_lastStaticKnob;
-
-		/// Path that holds the file sequence information.
-		const char *m_assetPath;
-		
-		/// Set within the knob_changed method to indicate whether a valid file sequence has been entered.		
-		bool m_hasValidFileSequence;
-		bool m_useFileSequence;
+		/// Holds the values for the lens model's parameters.
+		double m_knobData[IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS];
+		//@}
 };
 
 };

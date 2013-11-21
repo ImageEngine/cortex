@@ -101,8 +101,6 @@ LensDistort::LensDistort( Node* node ) :
 	Iop(node),
 	m_nThreads( std::max( 16u, Thread::numCPUs + Thread::numThreads + 1 ) ),
 	m_lensModel( 0 ),
-	m_numNewKnobs( 0 ),
-	m_kModel( NULL ),
 	m_mode( Distort ),
 	m_assetPath( "" ),
 	m_hasValidFileSequence( false ),
@@ -111,16 +109,24 @@ LensDistort::LensDistort( Node* node ) :
 	// Work out the most threads we can have and create an instance of the lens model for each one.
 	// This is useful for any lens model implementation that uses the ldpk library is as it is not thread safe.
 	m_locks = new Lock[m_nThreads];
-	m_model.resize( m_nThreads, NULL );
-	for( int i = 0; i < m_nThreads; ++i ) m_model[i] = IECore::LensModel::create(modelNames()[0]);
+	m_lensModels.resize( m_nThreads, NULL );
+	for( int i = 0; i < m_nThreads; ++i )
+	{
+		m_lensModels[i] = IECore::LensModel::create( modelNames()[0] );
+	}
+	
+	memset( &m_knobData[0], 0, sizeof( double ) * IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS );
 }
 
 void LensDistort::updateLensModel( bool updateKnobsFromParameters ) 
 {
 	if ( updateKnobsFromParameters ) m_pluginAttributes.clear(); // Give us a fresh start by clearing our internal parameter list.
 
+	double tmpKnobData[IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS];
+	memset( &tmpKnobData[0], 0, sizeof( double ) * IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS );
+
 	// Get the parameters from our lens model.
-	std::vector<IECore::ParameterPtr> params( m_model[0]->parameters()->orderedParameters() );
+	std::vector<IECore::ParameterPtr> params( m_lensModels[0]->parameters()->orderedParameters() );
 
 	// For each parameter in the new lens model, check to see if we already have a similar knob on our UI. If we do then we copy the value
 	// of the old parameter to the new.
@@ -135,13 +141,14 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 		if (!d) continue;
 
 		bool parameterExists = false;
-		for (unsigned int i = attrIdx; i < m_pluginAttributes.size(); i++)
+		for(unsigned int i = 0; i < m_pluginAttributes.size(); ++i )
 		{
 			if ( (*j)->name() == m_pluginAttributes[i].m_name )
 			{
 				// Move the existing parameter to the correct location in our list of parameters.
 				parameterExists = true;
 				m_pluginAttributes.insert( m_pluginAttributes.begin()+attrIdx, m_pluginAttributes[i] );
+				tmpKnobData[attrIdx] = m_knobData[i];
 				m_pluginAttributes.erase( m_pluginAttributes.begin()+i+1 );
 				break;
 			}
@@ -152,12 +159,43 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 	
 		// Add the new attribute.
 		double value( d->readable() );
-		m_pluginAttributes.insert( m_pluginAttributes.begin()+attrIdx-1, PluginAttribute( (*j)->name().c_str(), value ) );
+		tmpKnobData[attrIdx-1] = value;
+		m_pluginAttributes.insert( m_pluginAttributes.begin()+attrIdx-1, PluginAttribute( (*j)->name().c_str() ) );
 	}
 	
 	// Erase all remaining parameters that are not in our current lens model.
 	m_pluginAttributes.erase( m_pluginAttributes.begin()+attrIdx, m_pluginAttributes.end() );
 
+	// Copy the temporary knob values.
+	memcpy( &m_knobData[0], &tmpKnobData[0], sizeof( double ) * IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS );
+
+	// Update the values of the knobs to match the internal data.
+	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	{
+		int index = int( it - m_pluginAttributes.begin() );
+		std::string knobName( parameterKnobName( index ) );
+		Knob *k = knob( knobName.c_str() );
+		if( k != NULL ) 
+		{
+			// Clear any animation on the knob and set it's value.
+			std::stringstream s;
+			s << m_knobData[index];
+			k->from_script( s.str().c_str() );
+		}
+	}
+
+	// Update the UI.
+	updateUI();
+}
+
+int LensDistort::currentLensModelIndex() const
+{
+	DD::Image::Knob *k = knob( "model" );
+	if( k != NULL )
+	{
+		return (int)knob("model")->get_value();
+	};
+	return 0;
 }
 
 void LensDistort::setLensModel( IECore::ConstCompoundObjectPtr parameters )
@@ -167,7 +205,7 @@ void LensDistort::setLensModel( IECore::ConstCompoundObjectPtr parameters )
 	{
 		for( unsigned int i = 0; i < nPlugins; ++i )
 		{
-			m_model[i] = IECore::LensModel::create( parameters );
+			m_lensModels[i] = IECore::LensModel::create( parameters );
 		}
 	}
 
@@ -179,13 +217,13 @@ void LensDistort::setLensModel( std::string modelName )
 	const unsigned int nPlugins( m_nThreads );
 	for( unsigned int i = 0; i < nPlugins; ++i )
 	{
-		m_model[i] = IECore::LensModel::create( modelName );
+		m_lensModels[i] = IECore::LensModel::create( modelName );
 	}
 
 	updateLensModel();
 }
 
-void LensDistort::_validate(bool for_real)
+void LensDistort::_validate( bool for_real )
 {
 	copy_info();
 	
@@ -198,15 +236,8 @@ void LensDistort::_validate(bool for_real)
 		m_hasValidFileSequence = setLensFromFile( filePath );
 	}
 
-	// Handle the knobs' status.
-	if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
-	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
-	{
-		if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
-	}
-
 	// Check that the path isn't null.
-	if ( (!m_hasValidFileSequence) && m_useFileSequence )
+	if ( ( !m_hasValidFileSequence ) && m_useFileSequence )
 	{
 		error( boost::str( boost::format( "Can not find lens file \"%s\"" ) % filePath ).c_str() );
 		set_out_channels( Mask_None );
@@ -218,15 +249,15 @@ void LensDistort::_validate(bool for_real)
 	{
 		for( PluginAttributeList::const_iterator j = m_pluginAttributes.begin(); j != m_pluginAttributes.end(); j++)
 		{
-			m_model[i]->parameters()->parameter<IECore::DoubleParameter>( j->m_name )->setNumericValue( j->m_value );
+			m_lensModels[i]->parameters()->parameter<IECore::DoubleParameter>( j->m_name )->setNumericValue( m_knobData[ j-m_pluginAttributes.begin() ] );
 		}
-		m_model[i]->validate();
+		m_lensModels[i]->validate();
 	}
 	
 	// Set the output bounding box according to the lens model.
 	bool black = input0().black_outside();
 	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r()-1, input0().info().t()-1 ) );
-	Imath::Box2i box( m_model[0]->bounds( m_mode, input, format().width(), format().height() ) );
+	Imath::Box2i box( m_lensModels[0]->bounds( m_mode, input, format().width(), format().height() ) );
 	info_.set( box.min.x-black, box.min.y-black, box.max.x+black, box.max.y+black );
 	
 	set_out_channels( Mask_All );
@@ -237,7 +268,7 @@ void LensDistort::_validate(bool for_real)
 void LensDistort::_request( int x, int y, int r, int t, ChannelMask channels, int count )
 {
 	Imath::Box2i requestArea( Imath::V2i( x, y ), Imath::V2i( r-1, t-1 ) );
-	Imath::Box2i box( m_model[0]->bounds( !m_mode, requestArea, format().width(), format().height() ) );
+	Imath::Box2i box( m_lensModels[0]->bounds( !m_mode, requestArea, format().width(), format().height() ) );
 	DD::Image::Box distortedRequestedBox( box.min.x, box.min.y, box.max.x+1, box.max.y+1 );
 	distortedRequestedBox.intersect( input0().info() );
 	input0().request( distortedRequestedBox, channels, count );
@@ -286,11 +317,11 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 			Imath::V2d p(u, v);
 			if( m_mode )
 			{
-				dp = m_model[lensIdx]->distort( p );
+				dp = m_lensModels[lensIdx]->distort( p );
 			}
 			else
 			{
-				dp = m_model[lensIdx]->undistort( p );
+				dp = m_lensModels[lensIdx]->undistort( p );
 			}
 			
 			dp.x *= w;
@@ -342,7 +373,7 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 void LensDistort::append( DD::Image::Hash &hash )
 {
 	std::string path;
-	if ( getFileSequencePath( path ) )
+	if ( fileSequencePath( path ) )
 	{
 		hash.append( path );
 	}
@@ -351,10 +382,9 @@ void LensDistort::append( DD::Image::Hash &hash )
 		hash.append( m_assetPath );
 	}
 
-	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	for( unsigned int i = 0; i < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++i )
 	{
-		hash.append( it->m_name );
-		hash.append( it->m_value );
+		hash.append( m_knobData[i] );
 	}
 
 	hash.append( m_lensModel );
@@ -364,7 +394,7 @@ void LensDistort::append( DD::Image::Hash &hash )
 	hash.append( outputContext().frame() );
 }
 
-bool LensDistort::getFileSequencePath( std::string& path )
+bool LensDistort::fileSequencePath( std::string& path )
 {
 	path = "";
 
@@ -393,7 +423,7 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 	returnPath.clear();
 	
 	// Check that the returnPath isn't null.
-	if ( !getFileSequencePath( returnPath ) ) return false;
+	if ( !fileSequencePath( returnPath ) ) return false;
 
 	// Get the returnPath required for the current context.
 	const float frame = outputContext().frame();
@@ -443,7 +473,7 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 		{
 			// Update the lensModel knob.
 			m_lensModel = indexFromModelName( p->member<IECore::StringData>( "lensModel", true )->readable().c_str() );
-			m_kModel->set_value( m_lensModel );
+			knob("model")->set_value( m_lensModel );
 			setLensModel( p );
 			return true;
 		}
@@ -454,6 +484,30 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 	}
 
 	return false;
+}
+
+std::string LensDistort::parameterNameFromKnobName( std::string knobName ) const
+{
+	// This check should never fail but it is better to be safe than sorry...
+	if( knobName.end() - knobName.begin() > 9 )
+	{
+		std::istringstream s( knobName.substr( 9, knobName.end() - knobName.begin() ) );
+
+		unsigned int index = 0;
+		s >> index;
+
+		if( index < m_pluginAttributes.size() && index >= 0 )
+		{
+			return m_pluginAttributes[index].m_name;
+		}
+	}
+
+	return "";
+}
+
+std::string LensDistort::parameterKnobName( unsigned int i ) const
+{
+	return std::string( boost::str( boost::format( "lensParam%d" ) % i ).c_str() );
 }
 
 void LensDistort::knobs( Knob_Callback f )
@@ -474,38 +528,41 @@ void LensDistort::knobs( Knob_Callback f )
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	
-	m_lastStaticKnob = m_kModel = Enumeration_knob( f, &m_lensModel, modelNames(), "model", "Model" );
+	Enumeration_knob( f, &m_lensModel, modelNames(), "model", "Model" );
 	Tooltip( f, "Choose the lens model to distort the input with. This list is populated with all lens models that have been registered to Cortex." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	SetFlags( f, Knob::NO_UNDO );
-	
-	updatePluginAttributesFromKnobs();
-
-	// Create the Dynamic knobs.
+		
 	if( f.makeKnobs() )
 	{
 		setLensModel( modelNames()[0] );
-		m_numNewKnobs = add_knobs( buildDynamicKnobs, this->firstOp(), f );
 	}
-	else 
+	
+	for( unsigned int i = 0; i < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++i )
 	{
-		LensDistort::addDynamicKnobs( this->firstOp(), f );
-	}
-}
-
-void LensDistort::updatePluginAttributesFromKnobs()
-{
-	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
-	{
-		Knob *k = it->m_knob;
-		if ( k )
+		if( i < m_pluginAttributes.size() )
 		{
-			std::stringstream s;
-			k->to_script( s, 0, false );
-			it->m_script = s.str();
-			it->m_value = k->get_value();
+			Double_knob( f, &m_knobData[i], parameterKnobName(i).c_str(), m_pluginAttributes[i].m_name.c_str() );
+			if( !m_useFileSequence )
+			{
+				ClearFlags( f, Knob::DISABLED );
+			}
+			else
+			{
+				SetFlags( f, Knob::DISABLED );
+			}
+			ClearFlags( f, Knob::HIDDEN );
 		}
+		else
+		{
+			Double_knob( f, &m_knobData[i], parameterKnobName(i).c_str() );
+			SetFlags( f, Knob::DISABLED );
+			SetFlags( f, Knob::HIDDEN );
+		}
+
+		SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
+		SetFlags( f, Knob::ALWAYS_SAVE );
 	}
 }
 
@@ -518,7 +575,7 @@ int LensDistort::knob_changed(Knob* k)
 
 		std::string path;
 		bool oldValue = m_useFileSequence;
-		m_useFileSequence = getFileSequencePath( path );
+		m_useFileSequence = fileSequencePath( path );
 		updateRequired |= oldValue != m_useFileSequence;
 
 		if ( m_useFileSequence )
@@ -540,23 +597,19 @@ int LensDistort::knob_changed(Knob* k)
 	// If the lens model was just changed then we need to set it internally and then update the UI.
 	if ( k->is( "model" ) )
 	{
-		setLensModel( modelNames()[getLensModel()] );
-		updateUI();
+		setLensModel( modelNames()[currentLensModelIndex()] );
 		return true;
 	}
 
 	// Update our internal reference of the knob value that just changed...
 	if ( !m_hasValidFileSequence )
 	{
-		std::stringstream s;
-		std::string name( k->name() );
+		std::string parameterName = parameterNameFromKnobName( k->name() );
 		for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
 		{
-			if( name == it->m_name )
+			if( parameterName == it->m_name )
 			{
-				k->to_script( s, 0, false );
-				it->m_script = s.str();
-				it->m_value = k->get_value();
+				m_knobData[ it - m_pluginAttributes.begin() ] = k->get_value();
 				return true;
 			}
 		}
@@ -574,44 +627,42 @@ int LensDistort::knob_changed(Knob* k)
 
 void LensDistort::updateUI()
 {
-	m_numNewKnobs = replace_knobs( m_lastStaticKnob, m_numNewKnobs, addDynamicKnobs, this->firstOp() );
-
-	// Handle the knobs state.
-	if ( knob("model" ) != NULL) knob("model")->enable( !m_useFileSequence );
-	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	// Set the names of knobs that are associated with our lens model attributes.
+	unsigned int index = 0;
+	for ( ; index < m_pluginAttributes.size(); ++index )
 	{
-		if ( it->m_knob != NULL) it->m_knob->enable( !m_useFileSequence );
-	}
-}
-
-void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
-{
-	PluginAttributeList& attributeList( ((LensDistort*)p)->attributeList() );
-	const unsigned int nAttributes( attributeList.size() );
-	for ( unsigned int i = 0; i < nAttributes; ++i )
-	{
-		attributeList[i].m_knob = Double_knob( f, &attributeList[i].m_value, attributeList[i].m_name.c_str(), attributeList[i].m_name.c_str() );
-		if( attributeList[i].m_script != "" )
+		std::string knobName( parameterKnobName( index ) );
+		Knob *k = knob( knobName.c_str() );
+		if( k != NULL ) 
 		{
-			attributeList[i].m_knob->from_script( attributeList[i].m_script.c_str() );
+			k->enable( !m_useFileSequence );
+			
+			std::string label( k->label() );
+			k->label( m_pluginAttributes[index].m_name.c_str() );
+			k->visible( true );
+			k->updateUI( outputContext() );
 		}
-		SetFlags( f, Knob::ALWAYS_SAVE );
 	}
-}
-
-void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
-{
-	PluginAttributeList& attributeList( ((LensDistort*)p)->attributeList() );
-	const unsigned int nAttributes( attributeList.size() );
-	for ( unsigned int i = 0; i < nAttributes; ++i )
+	
+	// Hide all other knobs from sight.
+	for ( ; index < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++index )
 	{
-		attributeList[i].m_knob = Double_knob( f, &attributeList[i].m_value, attributeList[i].m_name.c_str(), attributeList[i].m_name.c_str() );
-		if( attributeList[i].m_script != "" )
+		std::string knobName( parameterKnobName( index ) );
+		Knob *k = knob( knobName.c_str() );
+		if( k != NULL ) 
 		{
-			attributeList[i].m_knob->from_script( attributeList[i].m_script.c_str() );
+			k->enable( false );
+			
+			k->label( knobName.c_str() );
+			k->visible( false );
+			k->set_value( 0 );
+			k->updateUI( outputContext() );
 		}
-		SetFlags( f, Knob::ALWAYS_SAVE );
-		SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
+	}
+
+	if ( knob( "model" ) != NULL )
+	{
+		knob( "model" )->enable( !m_useFileSequence );
 	}
 }
 
