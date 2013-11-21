@@ -239,6 +239,37 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
 	
+	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+	if ( nameAttrRef.isValid() )
+	{
+		const GA_Attribute *attr = nameAttrRef.getAttribute();
+		const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
+		
+		std::map<std::string, GA_OffsetList> offsets;
+		GA_Range primRange = gdp->getPrimitiveRange();
+		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
+		{
+			std::string current = "";
+			if ( const char *value = tuple->getString( attr, it.getOffset() ) )
+			{
+				current = value;
+			}
+			
+			std::map<std::string, GA_OffsetList>::iterator oIt = offsets.find( current );
+			if ( oIt == offsets.end() )
+			{
+				oIt = offsets.insert( std::pair<std::string, GA_OffsetList>( current, GA_OffsetList() ) ).first;
+			}
+			
+			oIt->second.append( it.getOffset() );
+		}
+		
+		for ( std::map<std::string, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+		{
+			params.namedRanges[oIt->first] = GA_Range( gdp->getPrimitiveMap(), oIt->second );
+		}
+	}
+	
 	loadObjects( scene, transform, readTime, space, params, rootPath.size() );
 	
 	if ( progress->opInterrupt( 100 ) )
@@ -487,55 +518,36 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		return false;
 	}
 	
-	const Primitive *primitive = IECore::runTimeCast<const Primitive>( object );
-	
-	// attempt to optimize the conversion by re-using animated primitive variables
-	/// \todo: This offset loop is only used because GU_Detail::getRangeByValue is
-	/// terribly slow. Replace this if SideFx improves that function.
-	GA_OffsetList offsets;
-	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-	if ( nameAttrRef.isValid() )
+	std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( name );
+	if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
 	{
-		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		
-		GA_Range range = gdp->getPrimitiveRange();
-		for ( GA_Iterator it = range.begin(); !it.atEnd(); ++it )
+		GA_Range primRange = rIt->second;
+		const Primitive *primitive = IECore::runTimeCast<const Primitive>( object );
+		if ( primitive && !params.hasAnimatedTopology && params.hasAnimatedPrimVars )
 		{
-			const char *currentName = tuple->getString( nameAttr, it.getOffset(), 0 );
-			if ( UT_String( currentName ).equal( name.c_str() ) )
+			// this means constant topology and primitive variables, even though multiple samples were written
+			if ( params.animatedPrimVars.empty() )
 			{
-				offsets.append( it.getOffset() );
+				return true;
 			}
-		}
-	}
-	
-	GA_Range primRange( gdp->getPrimitiveMap(), offsets );
-	
-	if ( primitive && !params.hasAnimatedTopology && params.hasAnimatedPrimVars && nameAttrRef.isValid() && !primRange.isEmpty() )
-	{
-		// this means constant topology and primitive variables, even though multiple samples were written
-		if ( params.animatedPrimVars.empty() )
-		{
+			
+			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+			
+			std::string animatedPrimVarStr = "";
+			for ( std::vector<InternedString>::const_iterator it = params.animatedPrimVars.begin(); it != params.animatedPrimVars.end(); ++it )
+			{
+				animatedPrimVarStr += it->string() + " ";
+			}
+			
+			converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
+			converter->transferAttribs( gdp, pointRange, primRange );
+			
 			return true;
 		}
-		
-		GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
-		
-		std::string animatedPrimVarStr = "";
-		for ( std::vector<InternedString>::const_iterator it = params.animatedPrimVars.begin(); it != params.animatedPrimVars.end(); ++it )
+		else
 		{
-			animatedPrimVarStr += it->string() + " ";
+			gdp->destroyPrimitives( primRange, true );
 		}
-		
-		converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
-		converter->transferAttribs( gdp, pointRange, primRange );
-		
-		return true;
-	}
-	else
-	{
-		gdp->destroyPrimitives( primRange, true );
 	}
 	
 	// fallback to full conversion
