@@ -392,6 +392,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	
 	SceneInterface::NameList children;
 	scene->childNames( children );
+	std::sort( children.begin(), children.end(), InternedStringSort() );
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
@@ -635,4 +636,9 @@ std::string SOP_SceneCacheSource::relativePath( const IECore::SceneInterface *sc
 	SceneInterface::pathToString( relative, result );
 	
 	return result;
+}
+
+bool SOP_SceneCacheSource::InternedStringSort::operator() ( const SceneInterface::Name &i, const SceneInterface::Name &j )
+{
+	return ( i.string() < j.string() );
 }

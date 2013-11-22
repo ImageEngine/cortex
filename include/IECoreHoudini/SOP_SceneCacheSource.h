@@ -99,6 +99,11 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
+		
+		struct InternedStringSort
+		{
+			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
+		};
 
 };
 
