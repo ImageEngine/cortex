@@ -106,6 +106,7 @@ class LensDistort : public DD::Image::Iop
 		virtual const char *node_help() const;
 		virtual void _validate( bool for_real );
 		virtual void engine( int y, int x, int r, DD::Image::ChannelMask channels, DD::Image::Row & outrow );
+		virtual void _invalidate();
 		//@}
 
 		static const Iop::Description m_description;
@@ -149,6 +150,10 @@ class LensDistort : public DD::Image::Iop
 		/// @param returnPath The path of the file that has been loaded.
 		/// @return Whether or not the file path was successful.
 		bool setLensFromFile( std::string &returnPath );
+		/// Creates the BlackOutside node which is used to filter the input.
+		void createInternalNodes();
+		/// Connects up the BlackOutside node if m_enableBlackOutside is true.
+		void connectInternalNodes();
 		
 		
 		//! @name Lens Parameter Convenience Members 
@@ -182,7 +187,13 @@ class LensDistort : public DD::Image::Iop
 		
 		/// A list of the attributes that the plugin uses.
 		PluginAttributeList m_pluginAttributes;
-		
+	
+		/// Holds a pointer to a "BlackOutside" node which is used to process the input.
+		DD::Image::Iop *m_blackOutsideNode;
+
+		/// Holds a pointer to the input node.
+		DD::Image::Iop *m_inputNode;
+
 		//! @name Multi-Threading members
 		/// As we can't assume that any derived classes of the IECore::LensModel
 		/// class are thread safe, we make multiple instances of some members
@@ -208,6 +219,8 @@ class LensDistort : public DD::Image::Iop
 		const char *m_assetPath;
 		/// The method of filtering. Defined by the 'filter' knob.
 		DD::Image::Filter m_filter;
+		/// When true, the input will be padded with a black border.
+		bool m_enableBlackOutside;
 		/// Which lens model we are currently using. This is an index into
 		/// the IECore::LensModel::lensModels() list.
 		int m_lensModel;

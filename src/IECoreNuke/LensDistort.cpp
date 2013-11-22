@@ -99,12 +99,15 @@ int LensDistort::indexFromModelName( const char *name )
 
 LensDistort::LensDistort( Node* node ) :
 	Iop(node),
-	m_nThreads( std::max( 16u, Thread::numCPUs + Thread::numThreads + 1 ) ),
-	m_lensModel( 0 ),
-	m_mode( Distort ),
-	m_assetPath( "" ),
+	m_useFileSequence( false ),
 	m_hasValidFileSequence( false ),
-	m_useFileSequence( false )
+	m_blackOutsideNode( NULL ),
+	m_inputNode( NULL ),
+	m_nThreads( std::max( 16u, Thread::numCPUs + Thread::numThreads + 1 ) ),
+	m_assetPath( "" ),
+	m_enableBlackOutside( false ),
+	m_lensModel( 0 ),
+	m_mode( Distort )
 {
 	// Work out the most threads we can have and create an instance of the lens model for each one.
 	// This is useful for any lens model implementation that uses the ldpk library is as it is not thread safe.
@@ -170,7 +173,7 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 	memcpy( &m_knobData[0], &tmpKnobData[0], sizeof( double ) * IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS );
 
 	// Update the values of the knobs to match the internal data.
-	for ( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); it++ )
+	for( PluginAttributeList::iterator it = m_pluginAttributes.begin(); it != m_pluginAttributes.end(); ++it )
 	{
 		int index = int( it - m_pluginAttributes.begin() );
 		std::string knobName( parameterKnobName( index ) );
@@ -188,6 +191,40 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 	updateUI();
 }
 
+void LensDistort::createInternalNodes()
+{
+	if( m_blackOutsideNode == NULL )
+	{
+		m_blackOutsideNode = dynamic_cast<DD::Image::Iop*>( create( "BlackOutside" ) );
+	}
+}
+
+void LensDistort::connectInternalNodes()
+{
+	if( m_blackOutsideNode == NULL )
+	{
+		m_inputNode = input(0);
+	}
+	else if( m_enableBlackOutside == true )
+	{
+		m_inputNode = m_blackOutsideNode;
+		m_blackOutsideNode->set_input( 0, input(0) );
+	}
+	else
+	{
+		m_inputNode = input(0);
+	}
+}
+
+void LensDistort::_invalidate()
+{
+	if( m_blackOutsideNode != NULL )
+	{
+		 m_blackOutsideNode->invalidate();
+	}
+	Iop::_invalidate();
+}
+
 int LensDistort::currentLensModelIndex() const
 {
 	DD::Image::Knob *k = knob( "model" );
@@ -195,7 +232,7 @@ int LensDistort::currentLensModelIndex() const
 	{
 		return (int)knob("model")->get_value();
 	};
-	return 0;
+	return m_lensModel;
 }
 
 void LensDistort::setLensModel( IECore::ConstCompoundObjectPtr parameters )
@@ -229,17 +266,30 @@ void LensDistort::_validate( bool for_real )
 	
 	m_filter.initialize();
 
-	// Update the lens model if the frame or frame offset changed.
-	std::string filePath;
-	if ( m_useFileSequence )
+	// Process the internal nodes.
+	createInternalNodes();
+	connectInternalNodes();
+
+	// Validate the internal nodes.
+	input0().validate( for_real );
+	m_inputNode->validate( for_real );
+
+	// Try to load the lens from a file. 
+	std::string path;
+	m_useFileSequence = fileSequencePath( path );
+	if( m_useFileSequence )
 	{
-		m_hasValidFileSequence = setLensFromFile( filePath );
+		m_hasValidFileSequence = setLensFromFile( path );
+	}
+	else
+	{
+		setLensModel( modelNames()[currentLensModelIndex()] );
 	}
 
 	// Check that the path isn't null.
 	if ( ( !m_hasValidFileSequence ) && m_useFileSequence )
 	{
-		error( boost::str( boost::format( "Can not find lens file \"%s\"" ) % filePath ).c_str() );
+		error( boost::str( boost::format( "Can not find lens file \"%s\"" ) % path ).c_str() );
 		set_out_channels( Mask_None );
 		return;
 	}
@@ -255,9 +305,9 @@ void LensDistort::_validate( bool for_real )
 	}
 	
 	// Set the output bounding box according to the lens model.
-	bool black = input0().black_outside();
-	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r()-1, input0().info().t()-1 ) );
+	Imath::Box2i input( Imath::V2i( m_inputNode->info().x()-1, m_inputNode->info().y()-1 ), Imath::V2i( m_inputNode->info().r(), m_inputNode->info().t() ) );
 	Imath::Box2i box( m_lensModels[0]->bounds( m_mode, input, format().width(), format().height() ) );
+	bool black = m_inputNode->black_outside();
 	info_.set( box.min.x-black, box.min.y-black, box.max.x+black, box.max.y+black );
 	
 	set_out_channels( Mask_All );
@@ -267,24 +317,24 @@ void LensDistort::_validate( bool for_real )
 // We do this be using the output size and getting the bounds of the inverse distortion.
 void LensDistort::_request( int x, int y, int r, int t, ChannelMask channels, int count )
 {
-	Imath::Box2i requestArea( Imath::V2i( x, y ), Imath::V2i( r-1, t-1 ) );
+	Imath::Box2i requestArea( Imath::V2i( x, y ), Imath::V2i( r, t ) );
 	Imath::Box2i box( m_lensModels[0]->bounds( !m_mode, requestArea, format().width(), format().height() ) );
 	DD::Image::Box distortedRequestedBox( box.min.x, box.min.y, box.max.x+1, box.max.y+1 );
-	distortedRequestedBox.intersect( input0().info() );
-	input0().request( distortedRequestedBox, channels, count );
+	distortedRequestedBox.intersect( m_inputNode->info() );
+	m_inputNode->request( distortedRequestedBox, channels, count );
 }
 
 void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outrow )
 {
 	// Provide an early-out for any black rows.
 	bool blackOutside = info().black_outside();
-	if( blackOutside && ( y == info().t()-1 || y == info().y() ) )
+	if( blackOutside && ( y >= info().t()-1 || y <= info().y() ) )
 	{
 		outrow.erase( channels );
 		return;
 	}
-
-	const Info &info = input0().info();
+	
+	const Info &info = m_inputNode->info();
 	const double h( format().height() );
 	const double w( format().width() );
 	const double v( double(y)/h );
@@ -346,23 +396,34 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 	DD::Image::Pixel out(channels);
 	
 	// Lock the tile into the cache
-	DD::Image::Tile t( input0(), IECore::fastFloatFloor( x_min ), IECore::fastFloatFloor( y_min ), IECore::fastFloatCeil( x_max ), IECore::fastFloatCeil( y_max ), channels );
+	DD::Image::Tile t( *m_inputNode, IECore::fastFloatFloor( x_min ), IECore::fastFloatFloor( y_min ), IECore::fastFloatCeil( x_max ), IECore::fastFloatCeil( y_max ), channels );
 
 	// Write the black outside pixels.
 	if( blackOutside )
 	{
-		foreach ( z, channels )
+		if( x <= info_.x() )
 		{
-			outrow.writable(z)[x] = 0.f;
-			outrow.writable(z)[r-1] = 0.f;
+			foreach ( z, channels )
+			{
+				outrow.writable(z)[x] = 0.f;
+			}
+			x = std::max( x, info_.x() );
+		}
+		if( x >= info_.r()-1 )
+		{
+			foreach ( z, channels )
+			{
+				outrow.writable(z)[r-1] = 0.f;
+			}
+			x = std::min( x, info_.r()-1 );
 		}
 	}
 
 	// Loop over our array of precomputed points, and ask nuke to perform a filtered lookup for us.
-	for( int i = x+blackOutside; i < r-blackOutside; i++ )
+	for( int i = x; i < r; i++ )
 	{
 		if(aborted()) break;
-		input0().sample( distort[i-x].x+0.5, distort[i-x].y+0.5, 1.0, 1.0, &m_filter, out );
+		m_inputNode->sample( distort[i-x].x+0.5, distort[i-x].y+0.5, 1.0, 1.0, &m_filter, out );
 		foreach ( z, channels )
 		{
 			outrow.writable(z)[i] = out[z];
@@ -391,6 +452,8 @@ void LensDistort::append( DD::Image::Hash &hash )
 	hash.append( m_mode );
 	hash.append( m_hasValidFileSequence );
 	hash.append( m_useFileSequence );
+	hash.append( m_enableBlackOutside );
+	hash.append( m_blackOutsideNode == NULL );
 	hash.append( outputContext().frame() );
 }
 
@@ -461,7 +524,7 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 	// Check to see if the file returnPath is valid.
 	std::ifstream ifile;
 	ifile.open( returnPath.c_str(), std::ifstream::in );
-	if ( !ifile.is_open() ) return false;;
+	if ( !ifile.is_open() ) return false;
 	
 	// Try to open the lens file.
 	try
@@ -512,6 +575,10 @@ std::string LensDistort::parameterKnobName( unsigned int i ) const
 
 void LensDistort::knobs( Knob_Callback f )
 {
+	// Process the internal nodes.
+	createInternalNodes();
+	connectInternalNodes();
+	
 	File_knob( f, &m_assetPath, "lensFileSequence", "Lens File Sequence" );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
@@ -521,6 +588,8 @@ void LensDistort::knobs( Knob_Callback f )
 	Divider( f );
 
 	m_filter.knobs(f);
+	Bool_knob( f, &m_enableBlackOutside, "blackOutside", "black outside" );
+	Tooltip( f, "Fill the areas outside of the distorted image with black." );
 
 	static const char * const modes[] = { "Distort", "Undistort", 0 };
 	Enumeration_knob( f, &m_mode, modes, "mode", "Mode" );
@@ -536,7 +605,7 @@ void LensDistort::knobs( Knob_Callback f )
 		
 	if( f.makeKnobs() )
 	{
-		setLensModel( modelNames()[0] );
+		setLensModel( modelNames()[currentLensModelIndex()] );
 	}
 	
 	for( unsigned int i = 0; i < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++i )
@@ -568,29 +637,21 @@ void LensDistort::knobs( Knob_Callback f )
 
 int LensDistort::knob_changed(Knob* k)
 {
+	if( k->is( "blackOutside" ) )
+	{
+		m_enableBlackOutside = bool( k->get_value() );
+		return true;
+	}
+
 	// If the lensFileSequence knob just changed then we need to check if it is valid and load it.
 	if ( k->is( "lensFileSequence" ) )
 	{
-		bool updateRequired = false;
-
 		std::string path;
-		bool oldValue = m_useFileSequence;
 		m_useFileSequence = fileSequencePath( path );
-		updateRequired |= oldValue != m_useFileSequence;
-
-		if ( m_useFileSequence )
+		if( m_useFileSequence )
 		{
-			bool oldValue = m_hasValidFileSequence;
-			std::string path;
 			m_hasValidFileSequence = setLensFromFile( path );
-			updateRequired |= m_hasValidFileSequence != oldValue;
 		}
-		
-		if( updateRequired )
-		{
-			updateUI();
-		}
-		
 		return true;
 	}
 
@@ -618,6 +679,7 @@ int LensDistort::knob_changed(Knob* k)
 	// Do we need to update the UI?
 	if ( k == &Knob::showPanel )
 	{
+		validate( false );
 		updateUI();
 		return true;
 	}
