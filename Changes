@@ -1,3 +1,15 @@
+# 8.0.0-b3
+
+#### IECore
+
+- Fixed compile issue on Ubuntu
+
+#### IECoreHoudini
+
+- Improving performance of SceneCache SOP. This brings the animated performance back inline with 8.0.0-b1, while maintaining (if not improving) the on-load performance from 8.0.0-b2.
+- Guaranteed SceneCache SOP shape/point order by sorting children by name before loading.
+- Preventing crash in SceneCache ROP when cooking inside an invisible OBJ subnet.
+
 # 8.0.0-b2
 
 #### IECore
