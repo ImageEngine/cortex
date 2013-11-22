@@ -221,14 +221,17 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
 			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-			reRoot = !nameAttrRef.isValid();
 			if ( nameAttrRef.isValid() )
 			{
+				reRoot = false;
 				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 				GA_Size numShapes = tuple->getTableEntries( nameAttr );
-				reRoot = ( numShapes == 0 );
-				if ( numShapes == 1 )
+				if ( numShapes == 0 )
+				{
+					reRoot = true;
+				}
+				else if ( numShapes == 1 )
 				{
 					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
 					if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
