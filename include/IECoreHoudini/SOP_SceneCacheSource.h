@@ -85,6 +85,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			bool hasAnimatedTopology;
 			bool hasAnimatedPrimVars;
 			std::vector<IECore::InternedString> animatedPrimVars;
+			std::map<std::string, GA_Range> namedRanges;
 		};
 		
 		// Modify the object according the parameters, copying if neccessary.
@@ -98,6 +99,11 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
+		
+		struct InternedStringSort
+		{
+			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
+		};
 
 };
 

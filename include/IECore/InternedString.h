@@ -65,6 +65,9 @@ class InternedString
 		/// Note that this compares the addresses of the internal
 		/// unique strings, rather than performing an actual string
 		/// comparison.
+		/// \todo: Several use cases would benefit from sorting by string
+		/// value here. Investigate ways of making these comparisons by
+		/// string value, while maintaining constant-time complexity.
 		inline bool operator < ( const InternedString &other ) const;
 
 		inline operator const std::string & () const;
