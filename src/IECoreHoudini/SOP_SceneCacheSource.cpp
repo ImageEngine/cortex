@@ -239,6 +239,9 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
 	
+	// Building a map from shape name to primitive range, which will be used during
+	// convertObject() to do a lazy update of animated primvars where possible, and
+	// to destroy changing topology shapes when necessary.
 	GA_ROAttributeRef nameAttrRef = gdp->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 	if ( nameAttrRef.isValid() )
 	{
@@ -519,6 +522,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		return false;
 	}
 	
+	// check the primitve range map to see if this shape exists already
 	std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( name );
 	if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
 	{
@@ -534,6 +538,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			
 			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
 			
+			// update the animated primitive variables only
 			std::string animatedPrimVarStr = "";
 			for ( std::vector<InternedString>::const_iterator it = params.animatedPrimVars.begin(); it != params.animatedPrimVars.end(); ++it )
 			{
@@ -547,6 +552,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		}
 		else
 		{
+			// topology is changing, so destroy the exisiting primitives
 			gdp->destroyPrimitives( primRange, true );
 		}
 	}
