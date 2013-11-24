@@ -643,7 +643,7 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	AiNodeSetPnt( procedural, "min", bound.min.x, bound.min.y, bound.min.z );
 	AiNodeSetPnt( procedural, "max", bound.max.x, bound.max.y, bound.max.z );
 	
-	AiNodeSetPtr( procedural, "funcptr", (AtVoid *)procLoader );
+	AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
 	
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
