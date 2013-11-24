@@ -117,6 +117,10 @@ IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proc
 	/// \todo Initialise stacks properly!!
 	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
+	// the AttributeState constructor makes a surface shader node, and
+	// it's essential that we return that as one of the nodes created by
+	// the procedural - otherwise arnold hangs.
+	addNode( m_attributeStack.top().surfaceShader );
 }
 
 void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
