@@ -2977,6 +2977,13 @@ mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
 mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
 mtoaEnv["SHLIBPREFIX"] = ""
 
+mtoaVersionHeader = env.FindFile( "utils/Version.h", mtoaEnv["CXXFLAGS"] )
+if (mtoaVersionHeader !=None):	
+	mtoaEnv.Append( 
+	CXXFLAGS = [
+		"-DMTOA_VERSION_HEADER",
+	])
+
 if doConfigure and haveMaya and haveArnold :
 
 	c = Configure( mtoaEnv )
