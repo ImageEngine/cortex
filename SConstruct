@@ -3021,8 +3021,11 @@ alembicEnvAppends = {
 	"LIBS" : [ 
 		"AlembicAbcGeom$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbc$ALEMBIC_LIB_SUFFIX",
+		"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
+		"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+		"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 		"AlembicUtil$ALEMBIC_LIB_SUFFIX",
 		"hdf5$HDF5_LIB_SUFFIX",
 		"hdf5_hl$HDF5_LIB_SUFFIX",
