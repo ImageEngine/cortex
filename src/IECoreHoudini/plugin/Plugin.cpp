@@ -58,6 +58,7 @@
 #include "IECoreHoudini/SOP_CortexConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/SOP_SceneCacheTransform.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
@@ -117,17 +118,26 @@ void newSopOperator(OP_OperatorTable *table)
 	/// \todo: get a new icon
 	sceneCacheSource->setIconName( "SOP_ieCortexConverter" );
 	
+	OP_Operator *sceneCacheTransform = new OP_Operator(
+		SOP_SceneCacheTransform::typeName, "SceneCache Xform",
+		SOP_SceneCacheTransform::create, SOP_SceneCacheTransform::buildParameters(), 1, 1, NULL
+	);
+	/// \todo: get a new icon
+	sceneCacheTransform->setIconName( "SOP_xform" );
+	
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( cacheReader );
 	table->addOperator( sceneCacheSource );
+	table->addOperator( sceneCacheTransform );
 	
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
 	table->addOpHidden( cacheReader->getName() );
 	table->addOpHidden( sceneCacheSource->getName() );
+	table->addOpHidden( sceneCacheTransform->getName() );
 }
 
 void newObjectOperator( OP_OperatorTable *table )

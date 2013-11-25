@@ -69,6 +69,25 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geometry.parm( "file" ).set( TestSceneCache.__testFile )
 		return geometry
 	
+	def sopXform( self, parent=None ) :
+		if not parent :
+			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		box1 = parent.createNode( "box" )
+		box2 = parent.createNode( "box" )
+		box3 = parent.createNode( "box" )
+		name1 = box1.createOutputNode( "name" )
+		name1.parm( "name1" ).set( "/1" )
+		name2 = box2.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "/1/2" )
+		name3 = box3.createOutputNode( "name" )
+		name3.parm( "name1" ).set( "/1/2/3" )
+		merge = name1.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
+		merge.setInput( 2, name3 )
+		sop = merge.createOutputNode( "ieSceneCacheTransform" )
+		sop.parm( "file" ).set( TestSceneCache.__testFile )
+		return sop
+	
 	def rop( self, rootObject ) :
 		
 		rop = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
@@ -128,6 +147,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.xform() )
 		os.remove( TestSceneCache.__testFile )
 		testNode( self.geometry() )
+		os.remove( TestSceneCache.__testFile )
+		testNode( self.sopXform() )
 	
 	def testBadPath( self ) :
 		
@@ -154,6 +175,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.sop() )
 		testNode( self.xform() )
 		testNode( self.geometry() )
+		testNode( self.sopXform() )
 	
 	def testObjSubPaths( self ) :
 		
@@ -1446,6 +1468,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.sop() )
 		testNode( self.xform() )
 		testNode( self.geometry() )
+		testNode( self.sopXform() )
 	
 	def writeAnimSCC( self, rotate = False ) :
 		
@@ -1551,6 +1574,211 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( IECore.M44d( list(a.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(b.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
 			self.assertEqual( IECore.M44d( list(c.parmTransform().asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+	
+	def testSopXformNameMode( self ) :
+		
+		self.writeAnimSCC()
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		node = self.sopXform()
+		
+		# prims transform according to their name
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3.5, time*2 - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6.5, time*3 - 0.5, -0.5 ) )
+		
+		# names are relative to the root parm, and non-matching names are ignored
+		node.parm( "root" ).set( "/1/2" )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+		
+		# making the names relative again so the transformations take effect
+		node.inputConnections()[0].inputNode().inputConnections()[1].inputNode().parm( "name1" ).set( "/" )
+		node.inputConnections()[0].inputNode().inputConnections()[2].inputNode().parm( "name1" ).set( "/3" )
+		
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/', '/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			# still doesn't animate because /1 doesn't match any child of /1/2
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			# these ones are proper relative paths
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3.5, time*2 - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6.5, time*3 - 0.5, -0.5 ) )
+		
+		# testing invert toggle
+		node.parm( "invert" ).set( True )
+		node.parm( "root" ).set( "/" )
+		node.inputConnections()[0].inputNode().inputConnections()[1].inputNode().parm( "name1" ).set( "/1/2" )
+		node.inputConnections()[0].inputNode().inputConnections()[2].inputNode().parm( "name1" ).set( "/1/2/3" )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertTrue( prims[0].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -0.5, -time - 0.5, -0.5 ) ) )
+			self.assertTrue( prims[6].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -2.5, -time*2 - 0.5, -0.5 ) ) )
+			self.assertTrue( prims[12].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -5.5, -time*3 - 0.5, -0.5 ) ) )
+	
+	def testSopXformRootMode( self ) :
+		
+		self.writeAnimSCC()
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		node = self.sopXform()
+		node.parm( "mode" ).set( 1 )
+		
+		# in root mode all prims transform to match the root transform, regardless of name
+		node.parm( "root" ).set( "/1" )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+		
+		node.parm( "root" ).set( "/1/2" )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3.5, 2*time - 0.5, -0.5 ) )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3.5, 2*time - 0.5, -0.5 ) )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3.5, 2*time - 0.5, -0.5 ) )
+		
+		# testing invert toggle
+		node.parm( "invert" ).set( True )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertTrue( prims[0].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -2.5, -2*time - 0.5, -0.5 ) ) )
+			self.assertTrue( prims[6].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -2.5, -2*time - 0.5, -0.5 ) ) )
+			self.assertTrue( prims[12].vertex( 0 ).point().position().isAlmostEqual( hou.Vector3( -2.5, -2*time - 0.5, -0.5 ) ) )
+	
+	def testSopXformSpaces( self ) :
+		
+		self.writeAnimSCC()
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		node = self.sopXform()
+		node.parm( "root" ).set( "/1" )
+		node.inputConnections()[0].inputNode().inputConnections()[0].inputNode().parm( "name1" ).set( "/" )
+		node.inputConnections()[0].inputNode().inputConnections()[1].inputNode().parm( "name1" ).set( "/2" )
+		node.inputConnections()[0].inputNode().inputConnections()[2].inputNode().parm( "name1" ).set( "/2/3" )
+		
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3.5, time*2 - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6.5, time*3 - 0.5, -0.5 ) )
+		
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Path )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 5.5,time*2 - 0.5, -0.5 ) )
+		
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Local )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 2.5, time - 0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 3.5, time - 0.5, -0.5 ) )
+		
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.Object )
+		for time in times :
+			hou.setTime( time - spf )
+			prims = node.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			nameAttr = node.geometry().findPrimAttrib( "name" )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
 	
 	def testOBJOutputParms( self ) :
 		
@@ -2564,6 +2792,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testNode( self.sop() )
 		testNode( self.xform() )
 		testNode( self.geometry() )
+		testNode( self.sopXform() )
 	
 	def testTransformOverride( self ) :
 		
