@@ -92,5 +92,17 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 			self.assert_( normals[i].dot( p ) > 0.99 )
 			self.assert_( normals[i].dot( p ) < 1.01 )
 
+	def testUniformInterpolation( self ) :
+	
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ), V2i( 10 ) )
+		self.assertTrue( "N" not in m )
+		
+		m2 = MeshNormalsOp()( input = m, interpolation = PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( m2["N"].interpolation, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( len( m2["N"].data ), m2.variableSize( PrimitiveVariable.Interpolation.Uniform ) )
+	
+		for n in m2["N"].data :
+			self.assertEqual( n, V3f( 0, 0, 1 ) )
+			
 if __name__ == "__main__":
     unittest.main()
