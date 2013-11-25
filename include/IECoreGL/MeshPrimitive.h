@@ -51,6 +51,14 @@ class MeshPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		/// Copies of all data are taken.
+		/// \deprecated. This constructor was being used to allow the MeshPrimitive to support
+		/// Vertex and Varying primitive variables in addPrimitiveVariable(), but it lacks the
+		/// information necessary to support Uniform primitive variables. In the future this
+		/// constructor will be removed - for forwards compatibility, use a ToGLMeshConverter
+		/// to create MeshPrimitives.
+		/// \todo Replace this with a simple MeshPrimitive( numTriangles ) constructor, remove all
+		/// the conversions from addPrimitiveVariable, and just rely on the work the ToGLMeshConverter
+		/// already does.
 		MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds );
 		virtual ~MeshPrimitive();
 
