@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 24
+/svn/!svn/ver/5252/trunk
+END
+LICENSE
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/1279/trunk/LICENSE
+END
+SConstruct
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/!svn/ver/5239/trunk/SConstruct
+END
+Changes
+K 25
+svn:wc:ra_dav:version-url
+V 32
+/svn/!svn/ver/5248/trunk/Changes
+END
