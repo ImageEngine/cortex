@@ -1,0 +1,29 @@
+K 10
+svn:ignore
+V 119
+*.so
+*.dylib
+.sconsign.dblite
+config.log
+.sconf_temp
+plugins
+lib
+
+.cproject
+
+.project
+
+.pydevproject
+
+build
+
+.settings
+
+K 13
+svn:mergeinfo
+V 115
+/branches/6_maintenance:4484-4543
+/branches/coreGL2:4937-5074
+/branches/h12:4331-4548
+/branches/indexedIO:5009-5052
+END

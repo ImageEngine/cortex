@@ -1,13 +1,11 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
 #
 #  Copyright (c) 2012, John Haddon. All rights reserved.
-#
-#  Copyright 2012, Electric Theatre Collective Limited. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -50,10 +48,9 @@ import subprocess
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=8
-ieCoreMinorVersion=0
+ieCoreMajorVersion=7
+ieCoreMinorVersion=4
 ieCorePatchVersion=0
-ieCoreVersionSuffix="b3"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -82,13 +79,19 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
 	"TESTCXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
 	[ "-pipe", "-Wall", "-O0" ]
+)
+
+o.Add(
+	"PYTHONCXXFLAGS",
+	"The extra flags to pass to the C++ compiler during compilation of Python bindings.",
+	[ "-pipe", "-Wall", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 )
 
 o.Add(
@@ -199,13 +202,6 @@ o.Add(
 	"PNG_LIB_PATH",
 	"The path to the PNG lib directory.",
 	"/usr/local/lib",
-)
-
-o.Add(
-	"PNG_LIB_SUFFIX",
-	"The suffix appended to the names of libpng. You can modify this "
-	"to link against libraries installed with non-default names",
-	"",
 )
 
 # TIFF options
@@ -335,10 +331,15 @@ o.Add(
 )
 
 o.Add(
-	"GLEW_LIB_SUFFIX",
-	"The suffix appended to the names of the GLEW library. You can modify this "
-	"to link against libraries installed with non-defalt names.",
-	"",
+	"GLUT_INCLUDE_PATH",
+	"The path to the directory with glut.h in it.",
+	"$GLEW_INCLUDE_PATH",
+)
+
+o.Add(
+	"GLUT_LIB_PATH",
+	"The path to the directory with libGLUT in it.",
+	"$GLEW_LIB_PATH",
 )
 
 # Maya options
@@ -415,10 +416,6 @@ o.Add(
 	"HOUDINI_LINK_FLAGS",
 	"Flags to pass to the Houdini linker.",
 	"",
-)
-
-o.Add(
-	BoolVariable("WITH_MANTRA", "Set this to build the mantra procedural", False),
 )
 
 # Arnold options
@@ -560,14 +557,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MANTRALIB_NAME",
-	"The name under which to install the Mantra libraries. This "
-	"can be used to build and install the library for multiple "
-	"Mantra versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_RMANLIB_NAME",
 	"The name under which to install the RI libraries. This "
 	"can be used to build and install the library for multiple "
@@ -658,12 +647,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_HOUDINIMENU_DIR",
-	"The directory under which to install houdini menu files.",
-	"$INSTALL_PREFIX/houdini",
-)
-
-o.Add(
 	"INSTALL_MAYAICON_DIR",
 	"The directory under which to install maya icons.",
 	"$INSTALL_PREFIX/maya/icons",
@@ -679,12 +662,6 @@ o.Add(
 	"INSTALL_HOUDINIPLUGIN_NAME",
 	"The name under which to install houdini plugins.",
 	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_MANTRAPROCEDURAL_NAME",
-	"",
-	"$INSTALL_PREFIX/houdini/dso/mantra/$IECORE_NAME",
 )
 
 o.Add(
@@ -757,8 +734,6 @@ o.Add(
 		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
 		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
-		( "IECore.AlexaLogcToLinearOp", "common/colorSpace/alexaLogcToLinear" ),
-		( "IECore.LinearToAlexaLogcOp", "common/colorSpace/linearToAlexaLogc" ),
 		( "IECore.SRGBToLinearOp", "common/colorSpace/SRGBToLinear" ),
 		( "IECore.LinearToSRGBOp", "common/colorSpace/linearToSRGB" ),
 		( "IECore.Rec709ToLinearOp", "common/colorSpace/Rec709ToLinear" ),
@@ -837,14 +812,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_COREHOUDINI_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreHoudini library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
-o.Add(
 	"INSTALL_CORETRUELIGHT_POST_COMMAND",
 	"A command which is run following a successful installation of "
 	"the CoreTruelight library. This could be used to customise installation "
@@ -903,14 +870,6 @@ o.Add(
 )
 
 o.Add(
-	"TEST_MANTRA_SCRIPT",
-	"The python script to run for the houdini tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"contrib/IECoreMantra/test/IECoreMantra/All.py"
-)
-
-o.Add(
 	"TEST_NUKE_SCRIPT",
 	"The python script to run for the nuke tests. The default will run all the tests, "
 	"but it can be useful to override this to run just the test for the functionality "
@@ -924,14 +883,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"contrib/IECoreArnold/test/IECoreArnold/All.py"
-)
-
-o.Add(
-	"TEST_ALEMBIC_SCRIPT",
-	"The python script to run for the alembic tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"contrib/IECoreAlembic/test/IECoreAlembic/All.py"
 )
 
 o.Add(
@@ -960,7 +911,7 @@ o.Add(
 o.Add(
 	"DOXYGEN",
 	"The path to the doxygen binary.",
-	"/usr/local/bin/doxygen"
+	"/usr/bin/doxygen"
 )
 
 ###########################################################################################
@@ -990,40 +941,33 @@ if env["BUILD_CACHEDIR"] != "" :
 env["IECORE_MAJOR_VERSION"] = ieCoreMajorVersion
 env["IECORE_MINOR_VERSION"] = ieCoreMinorVersion
 env["IECORE_PATCH_VERSION"] = ieCorePatchVersion
-env["IECORE_VERSION_SUFFIX"] = ieCoreVersionSuffix
 env["IECORE_MAJORMINOR_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}"
 env["IECORE_MAJORMINORPATCH_VERSION"] = "${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}"
-if ieCoreVersionSuffix :
-	env["IECORE_MAJORMINORPATCH_VERSION"] += "-${IECORE_VERSION_SUFFIX}"
 
 env.Append(
 	CPPFLAGS = [
 		"-DIE_CORE_MAJORVERSION=$IECORE_MAJOR_VERSION",
 		"-DIE_CORE_MINORVERSION=$IECORE_MINOR_VERSION",
 		"-DIE_CORE_PATCHVERSION=$IECORE_PATCH_VERSION",
-		"-DBOOST_FILESYSTEM_VERSION=3",
+		"-DBOOST_FILESYSTEM_VERSION=2",
 	]
 )
 
 # update the include and lib paths
-dependencyIncludes = [
-	"-isystem", "$TBB_INCLUDE_PATH",
-	"-isystem", "$BOOST_INCLUDE_PATH",
-	"-isystem", "$OPENEXR_INCLUDE_PATH",
-	"-isystem", "$ILMBASE_INCLUDE_PATH",
-	# we use "OpenEXR/x.h" and they use "x.h"
-	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", "$PNG_INCLUDE_PATH",
-	"-isystem", "$JPEG_INCLUDE_PATH",
-	"-isystem", "$TIFF_INCLUDE_PATH",
-	"-isystem", "$FREETYPE_INCLUDE_PATH",		
-]
-
 env.Prepend(
-	CXXFLAGS = dependencyIncludes,
 	CPPPATH = [
 		"include",
+		"$TBB_INCLUDE_PATH",
+		"$OPENEXR_INCLUDE_PATH",
+		"$ILMBASE_INCLUDE_PATH",
+		# we use "OpenEXR/x.h" and they use "x.h"
+		os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
+		os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
+		"$BOOST_INCLUDE_PATH",
+        "$PNG_INCLUDE_PATH",
+		"$JPEG_INCLUDE_PATH",
+		"$TIFF_INCLUDE_PATH",
+		"$FREETYPE_INCLUDE_PATH",
 	],
 	LIBPATH = [
 		"./lib",
@@ -1031,7 +975,7 @@ env.Prepend(
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
-		"$PNG_LIB_PATH",
+        "$PNG_LIB_PATH",
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
@@ -1042,8 +986,6 @@ env.Prepend(
 )
 
 if env["PLATFORM"]=="darwin" :
-	# necessary to fix errors from boost/numeric/interval.hpp
-	env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
 	# os x versions before snow leopard require the no-long-double flag
 	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
 	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :	
@@ -1068,7 +1010,7 @@ if doConfigure :
 	# figure out the boost version in use so we can append it to the
 	# library names	if necessary
 	boostVersion = None
-	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CXXFLAGS"] )
+	boostVersionHeader = env.FindFile( "boost/version.hpp", env["CPPPATH"] )
 	if (boostVersionHeader ==None):
 		sys.stderr.write( "ERROR : unable to find the boost headers, check BOOST_INCLUDE_PATH.\n" )
 		Exit( 1 )
@@ -1142,6 +1084,7 @@ def getPythonConfig( env, flags ) :
 	return r
 
 pythonEnv = env.Clone()
+pythonEnv.Replace( CXXFLAGS = env.subst("$PYTHONCXXFLAGS") )
 
 # decide where python is
 if pythonEnv["PYTHON"]=="" :
@@ -1159,16 +1102,8 @@ except :
 if pythonEnv["PYTHON_INCLUDE_PATH"]=="" :
 	pythonEnv["PYTHON_INCLUDE_FLAGS"] = getPythonConfig( pythonEnv, "--includes" ).split()
 else :
-	pythonEnv["PYTHON_INCLUDE_FLAGS"] = [ "-isystem", "$PYTHON_INCLUDE_PATH" ]
-pythonEnv.Append( CXXFLAGS = "$PYTHON_INCLUDE_FLAGS" )
-
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	pythonEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
+	pythonEnv["PYTHON_INCLUDE_FLAGS"] = "-I$PYTHON_INCLUDE_PATH"
+pythonEnv.Append( CPPFLAGS="$PYTHON_INCLUDE_FLAGS" )
 
 # get the python link flags
 if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
@@ -1196,7 +1131,6 @@ if pythonModuleEnv["PLATFORM"]=="darwin" :
 
 testEnv = env.Clone()
 testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
-testEnv.Prepend( CXXFLAGS = " ".join( dependencyIncludes ) )
 
 testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
@@ -1287,10 +1221,6 @@ def makeSymLink( target, source ) :
 
 	if os.path.exists( target ) :
 		if os.path.islink( target ) :
-			# return if the existing link is exactly what we want already
-			if os.path.realpath( target ) == os.path.realpath( source ) :
-				return
-			
 			os.remove( target )
 		else :
 			# there's not a good reason for a non-link file to be here
@@ -1478,7 +1408,7 @@ if doConfigure :
 		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
 		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
 	
-	if c.CheckLibWithHeader( "png" + env["PNG_LIB_SUFFIX"], ["stdio.h", "png.h"], "CXX" ) :
+	if c.CheckLibWithHeader( "png", ["stdio.h", "png.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_PNG' )
 	else :
@@ -1533,7 +1463,6 @@ corePythonModuleEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LI
 corePythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 corePythonModule = corePythonModuleEnv.SharedLibrary( "python/IECore/_IECore", corePythonModuleSources )
 corePythonModuleEnv.Depends( corePythonModule, coreLibrary )
-corePythonModuleEnv.Depends( corePythonModule, corePythonLibrary )
 
 corePythonModuleInstall = corePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECore", corePythonScripts + corePythonModule )
 corePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECore", lambda target, source, env : makeSymLinks( corePythonEnv, corePythonEnv["INSTALL_PYTHON_DIR"] ) )
@@ -1593,16 +1522,16 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 ###########################################################################################
 
 riEnv = coreEnv.Clone( IECORE_NAME = "IECoreRI" )
-riEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+riEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreRI" )
-riPythonModuleEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+riPythonModuleEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 
 riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
 
-riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
+riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ie", SHLIBPREFIX="" )
 riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 
@@ -1636,7 +1565,7 @@ if doConfigure :
 		riPythonSources = sorted( glob.glob( "src/IECoreRI/bindings/*.cpp" ) )
 		riPythonScripts = glob.glob( "python/IECoreRI/*.py" )
 	
-		if c.CheckCXXHeader( "pointcloud.h" ) :
+		if c.CheckHeader( "pointcloud.h" ) :
 			
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PTC" )
@@ -1651,10 +1580,6 @@ if doConfigure :
 		if c.CheckFunc( "RiObjectBeginV" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
-			
-		if c.CheckFunc( "RiProceduralV" ) :
-			
-			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_PROCEDURALV" ] )
 		
 		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
 		
@@ -1809,26 +1734,31 @@ if env["WITH_GL"] and doConfigure :
 		"IECORE_NAME" : "IECoreGL",
 	}
 
+	glEnvPrepends = {
+		"CPPPATH" : [
+		],
+	}
 	glEnvAppends = {
 		
-		"CXXFLAGS" : [
-			"-isystem", "$GLEW_INCLUDE_PATH",
-			# These are to work around warnings in boost::wave
-			# while still using -Werror.
-			"-Wno-format",
-			"-Wno-strict-aliasing",
+		"CPPPATH" : [
+			"$GLEW_INCLUDE_PATH",
+			"$GLUT_INCLUDE_PATH",
 		],
 		"LIBPATH" : [
 			"$GLEW_LIB_PATH",
+			"$GLUT_LIB_PATH",
 		],
 	}
 	
 	glEnv = coreEnv.Clone( **glEnvSets )
+
 	glEnv.Append( **glEnvAppends )
+	glEnv.Prepend( **glEnvPrepends )
 	
 	c = Configure( glEnv )
 	
-	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "glew.h", "CXX" ) :
+	## \todo We need to check for GLUT here too
+	if not c.CheckLibWithHeader( "GLEW", "glew.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
 		c.Finish()
@@ -1844,6 +1774,7 @@ if env["WITH_GL"] and doConfigure :
 			glEnv.Append(
 				FRAMEWORKS = [
 					"OpenGL",
+					"GLUT",
 				]
 			)
 		else :
@@ -1851,6 +1782,7 @@ if env["WITH_GL"] and doConfigure :
 				LIBS = [
 					"GL",
 					"GLU",
+					"glut",
 				]
 			)
 
@@ -1891,6 +1823,7 @@ if env["WITH_GL"] and doConfigure :
 
 		glPythonModuleEnv = corePythonModuleEnv.Clone( **glEnvSets )
 		glPythonModuleEnv.Append( **glEnvAppends )
+		glPythonModuleEnv.Prepend( **glEnvPrepends )
 		glPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -1916,7 +1849,6 @@ if env["WITH_GL"] and doConfigure :
 
 		glTestEnv = testEnv.Clone()
 		glTestEnv["ENV"]["PYTHONPATH"] = glTestEnv["ENV"]["PYTHONPATH"] + ":python"
-		glTestEnv["ENV"]["IECOREGL_SHADER_INCLUDE_PATHS"] = "./glsl"
 		for e in ["DISPLAY", "XAUTHORITY"] :
 			if e in os.environ :
 				glTestEnv["ENV"][e] = os.environ[e]
@@ -1936,8 +1868,8 @@ mayaEnvSets = {
 }
 
 mayaEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
+	"CPPPATH" : [
+		"$GLEW_INCLUDE_PATH",
 	],
 	"LIBS" : [
 		"OpenMaya",
@@ -1956,13 +1888,13 @@ mayaEnvAppends = {
 if env["PLATFORM"]=="posix" :
 	mayaEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/lib"]
-	mayaEnvAppends["CXXFLAGS"] += [ "-isystem", "$MAYA_ROOT/include" ]
+	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/include"]
 	mayaEnvAppends["LIBS"]  += ["OpenMayalib"]
 
 elif env["PLATFORM"]=="darwin" :
 	mayaEnvAppends["CPPFLAGS"]  += ["-DOSMac_","-DOSMac_MachO_"]
 	mayaEnvAppends["LIBPATH"] = ["$MAYA_ROOT/MacOS"]
-	mayaEnvAppends["CPPPATH"] = ["$MAYA_ROOT/../../devkit/include"]
+	mayaEnvAppends["CPPPATH"] += ["$MAYA_ROOT/../../devkit/include"]
 	mayaEnvAppends["LIBS"] += ["Foundation", "OpenMayaRender"]
 	mayaEnvAppends["FRAMEWORKS"] = ["AGL", "OpenGL"]
 
@@ -1982,7 +1914,7 @@ if doConfigure :
 
 	c = Configure( mayaEnv )
 
-	if not c.CheckCXXHeader( "maya/MVectorArray.h" ) :
+	if not c.CheckHeader( "maya/MVectorArray.h" ) :
 
 		sys.stderr.write( "WARNING : no maya devkit found, not building IECoreMaya - check MAYA_ROOT.\n" )
 		c.Finish()
@@ -2006,7 +1938,7 @@ if doConfigure :
 			mayaEnv.Append( LIBS = riLibs )
 			mayaEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 			mayaEnv.Append( CPPFLAGS = "-DIECOREMAYA_WITH_RI" )
-			mayaEnv.Append( CXXFLAGS = [ "-isystem", "$RMAN_ROOT/include" ] )
+			mayaEnv.Append( CPPPATH = [ "$RMAN_ROOT/include" ] )
 			mayaEnv.Append( CPPFLAGS = [ "-DIECORERI_RMANPROCEDURAL_NAME=" + os.path.basename( riPythonProceduralEnv.subst( "$INSTALL_RMANPROCEDURAL_NAME" ) ) ] )
 			mayaEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 			
@@ -2124,10 +2056,6 @@ if doConfigure :
 		mayaTestEnv["ENV"]["PATH"] = mayaEnv.subst( "$MAYA_ROOT/bin:" ) + mayaEnv["ENV"]["PATH"]
 		mayaTestEnv["ENV"]["MAYA_PLUG_IN_PATH"] = "./plugins/maya:./test/IECoreMaya/plugins"
 		mayaTestEnv["ENV"]["MAYA_SCRIPT_PATH"] = "./mel"
-		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
-		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
-		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
 		
 		mayaPythonTestEnv = mayaTestEnv.Clone()
 		
@@ -2139,6 +2067,10 @@ if doConfigure :
 				"OpenMayalib" 
 			] 
 		)
+		mayaTestEnv["ENV"]["PYTHONHOME"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["MAYA_LOCATION"] = mayaTestEnv.subst( "$MAYA_ROOT" )
+		mayaTestEnv["ENV"]["LM_LICENSE_FILE"] = env["MAYA_LICENSE_FILE"]
+		mayaTestEnv["ENV"]["AUTODESK_ADLM_THINCLIENT_ENV"] = env["MAYA_ADLM_ENV_FILE"]
 						
 		mayaPythonTest = mayaPythonTestEnv.Command( "test/IECoreMaya/resultsPython.txt", mayaPythonModule, "mayapy $TEST_MAYA_SCRIPT" )
 		NoCache( mayaPythonTest )
@@ -2158,9 +2090,9 @@ if doConfigure :
 
 nukeEnvAppends = {
 
-	"CXXFLAGS" : [
-		"-isystem", "$NUKE_ROOT/include",
-		"-isystem", "$GLEW_INCLUDE_PATH",
+	"CPPPATH" : [
+		"$NUKE_ROOT/include",
+		"$GLEW_INCLUDE_PATH",
 	],
 	
 	"CPPFLAGS" : [
@@ -2172,7 +2104,7 @@ nukeEnvAppends = {
 	],
 
 	"LIBS" : [
-		"GLEW$GLEW_LIB_SUFFIX",
+		"GLEW",
 	]
 
 }
@@ -2211,7 +2143,7 @@ if doConfigure :
 		# figure out the nuke version from the headers
 		nukeMajorVersion = None
 		nukeMinorVersion = None
-		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CXXFLAGS"] )
+		nukeVersionHeader = env.FindFile( "DDImage/ddImageVersionNumbers.h", nukeEnv["CPPPATH"] )
 		if nukeVersionHeader :
 
 			for line in open( str( nukeVersionHeader ) ) :
@@ -2287,11 +2219,7 @@ if doConfigure :
 				else :
 					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )							
 					nukeNodeNames.remove( "ieDisplay" )
-				
-				if nukeMajorVersion < 7 :
-					nukeSources.remove( "src/IECoreNuke/SceneCacheReader.cpp" )
-					nukeHeaders.remove( "include/IECoreNuke/SceneCacheReader.h" )
-
+					
 				# nuke library
 
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
@@ -2375,16 +2303,15 @@ if doConfigure :
 
 houdiniEnvSets = {
 	"IECORE_NAME" : "IECoreHoudini",
-	"CXXFLAGS" : dependencyIncludes + [ "$HOUDINI_CXX_FLAGS", "-DMAKING_DSO" ]
+	"CXXFLAGS" : [
+		"$HOUDINI_CXX_FLAGS", "-DMAKING_DSO", "-DNEED_SPECIALIZATION_STORAGE"
+	],
 }
 
 houdiniEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$GLEW_INCLUDE_PATH",
-		"-isystem", "$HOUDINI_INCLUDE_PATH",
-	],
 	"CPPPATH" : [
-		"contrib/IECoreMantra/include",
+		"$GLEW_INCLUDE_PATH",
+		"$HOUDINI_INCLUDE_PATH",
 	],
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
@@ -2395,18 +2322,16 @@ houdiniEnvAppends = {
 	],
 	"LIBS" : [
 		"HoudiniUI",
-		"HoudiniOPZ",
-		"HoudiniOP3",
-		"HoudiniOP2",
-		"HoudiniOP1",
-		"HoudiniSIM",
-		"HoudiniGEO",
-		"HoudiniPRM",
-		"HoudiniUT",
-		"HoudiniRAY",
-		"HoudiniAPPS3",
+  		"HoudiniOPZ",
+  		"HoudiniOP3",
+  		"HoudiniOP2",
+  		"HoudiniOP1",
+  		"HoudiniSIM",
+  		"HoudiniGEO",
+  		"HoudiniPRM",
+  		"HoudiniUT",
 		"boost_python" + env["BOOST_LIB_SUFFIX"],
-		"GLEW$GLEW_LIB_SUFFIX"
+		"GLEW"
 	]
 }
 
@@ -2425,26 +2350,14 @@ houdiniEnv.Prepend( SHLINKFLAGS = "$HOUDINI_LINK_FLAGS" )
 
 houdiniPythonModuleEnv = pythonModuleEnv.Clone( **houdiniEnvSets )
 houdiniPythonModuleEnv.Append( **houdiniEnvAppends )
-if env["PLATFORM"] == "posix" :
-	## We really want to not have the -Wno-strict-aliasing flag, but it's necessary to stop boost
-	# python warnings that don't seem to be prevented by including boost via -isystem even. Better to
-	# be able to have -Werror but be missing one warning than to have no -Werror.
-	## \todo This is probably only necessary for specific gcc versions where -isystem doesn't
-	# fully work. Reenable when we encounter versions that work correctly.
-	houdiniPythonModuleEnv.Append( CXXFLAGS = [ "-Wno-strict-aliasing" ] )
 
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
-
-mantraEnv = houdiniEnv.Clone( IECORE_NAME="IECoreMantra")
-mantraPythonModuleEnv = houdiniPythonModuleEnv.Clone( IECORE_NAME="IECoreMantra" )
-mantraProceduralEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieProcedural" )
-mantraWorldEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieWorld" )
 
 if doConfigure :
 	
 	c = Configure( houdiniEnv )
 	
-	if not c.CheckCXXHeader( "SOP/SOP_API.h" ) :
+	if not c.CheckHeader( "SOP/SOP_API.h" ) :
 		
 		sys.stderr.write( "WARNING : no houdini devkit found, not building IECoreHoudini - check HOUDINI_ROOT.\n" )
 		c.Finish()
@@ -2462,25 +2375,12 @@ if doConfigure :
 		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
 		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
 		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
-		if env['WITH_MANTRA']:
-			mantraSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/*.cpp") )
-			mantraHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.inl" )
-			mantraBindingHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.inl" )
-			mantraPythonSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/bindings/*.cpp") )
-			mantraPythonScripts = glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" )
-			mantraProceduralSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/Procedural.cpp" ]
-			mantraWorldSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/World.cpp" ]
-
 		
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-		
-		mantraEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 		
 		#=====
 		# build library
@@ -2493,7 +2393,7 @@ if doConfigure :
 		houdiniEnv.Alias( "installHoudini", houdiniLibInstall )
 		houdiniEnv.Alias( "installLib", [ houdiniLibInstall ] )
 		
-		#=====
+ 		#=====
 		# install headers
 		#=====
 		houdiniHeaderInstall = houdiniEnv.Install( "$INSTALL_HEADER_DIR/IECoreHoudini", houdiniHeaders )
@@ -2547,132 +2447,11 @@ if doConfigure :
 		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
 		houdiniPluginEnv.Alias( "install", otlInstall )
 		houdiniPluginEnv.Alias( "installHoudini", otlInstall )
-
-		#=====
-		# build IECoreMantra
-		#=====
-		if env["WITH_MANTRA"] :
-			
-			# library
-			mantraLib = mantraEnv.SharedLibrary( "lib/" + os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraSources )
-			mantraLibInstall = mantraEnv.Install( os.path.dirname( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraLib )
-			mantraEnv.NoCache( mantraLibInstall )
-			mantraEnv.AddPostAction( mantraLibInstall, lambda target, source, env : makeLibSymLinks( mantraEnv, "INSTALL_MANTRALIB_NAME" ) )
-			mantraEnv.Alias( "install", mantraLibInstall )
-			mantraEnv.Alias( "installMantra", mantraLibInstall )
-			
-			# headers
-			mantraHeaderInstall = mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra", mantraHeaders )
-			mantraHeaderInstall += mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra/bindings", mantraBindingHeaders )		
-			mantraEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HEADER_DIR"] ) )
-			mantraEnv.Alias( "install", mantraHeaderInstall )
-			mantraEnv.Alias( "installMantra", mantraHeaderInstall )
-			
-			# VRAY_ieProcedural.dso
-			mantraProceduralEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraProceduralTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraProcedural = mantraProceduralEnv.SharedLibrary( mantraProceduralTarget, mantraProceduralSources, SHLIBPREFIX="" )
-			mantraProceduralInstall = mantraProceduralEnv.Install( os.path.dirname( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraProcedural )
-			mantraProceduralEnv.Depends( mantraProcedural, mantraLib )
-			mantraProceduralEnv.AddPostAction( mantraProceduralInstall, lambda target, source, env : makeSymLinks( mantraProceduralEnv, mantraProceduralEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraProceduralEnv.Alias( "install", mantraProceduralInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraProceduralInstall )
-			
-			# VRAY_ieWorld dso
-			mantraWorldEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraWorldTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraWorld = mantraWorldEnv.SharedLibrary( mantraWorldTarget, mantraWorldSources, SHLIBPREFIX="" )
-			mantraWorldInstall = mantraWorldEnv.Install( os.path.dirname( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraWorld )
-			mantraWorldEnv.Depends( mantraProcedural, mantraLib )
-			mantraWorldEnv.AddPostAction( mantraWorldInstall, lambda target, source, env : makeSymLinks( mantraWorldEnv, mantraWorldEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraWorldEnv.Alias( "install", mantraWorldInstall )
-			mantraWorldEnv.Alias( "installMantra", mantraWorldInstall )
-			
-			# VRAYprocedural menu
-			mantraVrayInclude = 'contrib/IECoreMantra/src/IECoreMantra/procedural/VRAYprocedural'
-			mantraVrayInstall = mantraProceduralEnv.Install( mantraProceduralEnv.subst( "$INSTALL_HOUDINIMENU_DIR" ), source=[ mantraVrayInclude ] )
-			mantraVrayForTest = mantraProceduralEnv.Command( "contrib/IECoreMantra/plugins/houdini/VRAYprocedural", mantraVrayInclude, Copy( "$TARGET", "$SOURCE" ) )
-			mantraProceduralEnv.Alias( "install", mantraVrayInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraVrayInstall )
-			
-			# python
-			mantraPythonModuleEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				]
-			)
-			mantraPythonModule = mantraPythonModuleEnv.SharedLibrary( "contrib/IECoreMantra/python/IECoreMantra/_IECoreMantra", mantraPythonSources )
-			mantraPythonModuleEnv.Depends( mantraPythonModule, mantraLib )
-			mantraPythonModuleInstall = mantraPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMantra", mantraPythonScripts + mantraPythonModule )
-			mantraPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraPythonModuleEnv, mantraPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-			mantraPythonModuleEnv.Alias( "install", mantraPythonModuleInstall )
-			mantraPythonModuleEnv.Alias( "installMantra", mantraPythonModuleInstall )
-			
-			# otls
-			otlPath = "contrib/IECoreMantra/otls/IECoreMantra/ieCoreMantra"
-			buildPath = "contrib/IECoreMantra/otls/IECoreMantra/build"
-			otlTarget = "contrib/IECoreMantra/plugins/houdini/otls/" + os.path.basename( mantraEnv.subst( "$IECORE_NAME" ) ) + ".otl"
-			mantraOtlCommand = mantraEnv.Command( otlTarget, otlPath, "cp -r %s %s; $HOUDINI_BIN_PATH/hotl -C %s $TARGET; rm -rf %s" % ( otlPath, buildPath, buildPath, buildPath ) )
-			mantraEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) + glob.glob( otlPath + "/*/*/*" ) + glob.glob( otlPath + "/*/*/*/*" ) )
-			otlInstall = mantraEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
-			mantraEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HOUDINIOTL_DIR"] ) )
-			mantraEnv.Alias( "install", otlInstall )
-			mantraEnv.Alias( "installMantra", otlInstall )
-			Default( [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-
-			# test
-			mantraTestEnv = testEnv.Clone()
-
-			mantraTestLibPaths = mantraEnv.subst( ":".join( mantraPythonModuleEnv["LIBPATH"] ) )
-			if haveRI :
-				mantraTestLibPaths += ":" + mantraEnv.subst( "$RMAN_ROOT/lib" )
-			mantraTestEnv["ENV"][mantraTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mantraTestLibPaths
-			mantraTestEnv["ENV"][libraryPathEnvVar] += ":" + mantraTestLibPaths
-			
-			mantraTestEnv["ENV"]["PATH"] = mantraEnv.subst( "$HOUDINI_ROOT/bin:" ) + mantraEnv["ENV"]["PATH"]
-			
-			mantraTestEnv.Append( **houdiniEnvAppends )
-			mantraTestEnv.Append( 
-				LIBS = [ 
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ), 
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				]
-			)
-			
-			mantraTestEnv["ENV"]["PYTHONPATH"] += ":./python:./contrib/IECoreMantra/python"
-			mantraTestEnv["ENV"]["HOUDINI_PATH"] = "./contrib/IECoreMantra/plugins/houdini:&" # pickup the VRAYprocedural include file
-			mantraTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/dso:&"
-			mantraTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/otls:&"
-			
-			mantraTestEnv["ENV"]["IECORE_OP_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/ops"
-			mantraTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/procedurals"
-			
-			mantraPythonExecutable = "hython"
-			
-			mantraPythonTest = mantraTestEnv.Command( "contrib/IECoreMantra/test/IECoreMantra/resultsPython.txt", mantraPythonModule, mantraPythonExecutable + " $TEST_MANTRA_SCRIPT" )
-			NoCache( mantraPythonTest )
-			mantraTestEnv.Depends( mantraPythonTest, [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/test/IECoreMantra/*.py" ) )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" ) )
-			if env["WITH_GL"] :
-				mantraTestEnv.Depends( mantraPythonTest, [ glLibrary, glPythonModule ] )
-			mantraTestEnv.Alias( "testMantra", mantraPythonTest )
-			mantraTestEnv.Alias( "testMantraPython", mantraPythonTest )
-
+		
 		#=====
 		# install icons
 		#=====
-		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
+		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" )
 		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
 		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )
@@ -2684,11 +2463,6 @@ if doConfigure :
 		houdiniToolbarInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINITOOLBAR_DIR", source=houdiniToolbars )
 		houdiniPluginEnv.Alias( "install", houdiniToolbarInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniToolbarInstall )
-		
-		if coreEnv["INSTALL_COREHOUDINI_POST_COMMAND"] != "" :
-			# this is the only way we could find to get a post action to run for an alias
-			houdiniPythonModuleEnv.Alias( "install", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
-			houdiniPythonModuleEnv.Alias( "installHoudini", houdiniPythonModuleInstall, "$INSTALL_COREHOUDINI_POST_COMMAND" )
 		
 		Default( [ houdiniLib, houdiniPlugin, houdiniPythonModule, otlCommand ] )
 
@@ -2745,7 +2519,7 @@ truelightEnv.Append( LIBS = [ "truelight" ] )
 oldTruelightLibs = list( truelightEnv["LIBS"] )
 truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if ( x.find( "boost_" ) == -1 and x.find( "Ilm" ) == -1 and x.find( "Iex" ) == -1 and x.find( "Half" )==-1 and x.find( "Imath" )==-1 ) ] 
 
-truelightEnv.Append( CXXFLAGS = [ "-isystem", "$TRUELIGHT_ROOT/include" ] )
+truelightEnv.Append( CPPPATH = [ "$TRUELIGHT_ROOT/include" ] )
 truelightEnv.Prepend( LIBPATH = [
 		"$TRUELIGHT_ROOT/lib"
 	]
@@ -2831,10 +2605,8 @@ if doConfigure :
 
 arnoldEnv = coreEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
-	],
 	CPPPATH = [
+		"$ARNOLD_ROOT/include",
 		"contrib/IECoreArnold/include",
 	]
 )
@@ -2842,10 +2614,8 @@ arnoldEnv.Append( LIBPATH = [ "$ARNOLD_ROOT/bin" ] )
 
 arnoldPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreArnold" )
 arnoldPythonModuleEnv.Append(
-	CXXFLAGS = [
-		"-isystem", "$ARNOLD_ROOT/include",
-	],
 	CPPPATH = [
+		"$ARNOLD_ROOT/include",
 		"contrib/IECoreArnold/include",
 		"contrib/IECoreArnold/include/bindings",
 	]
@@ -2971,18 +2741,10 @@ if doConfigure :
 
 mtoaEnv = mayaPluginEnv.Clone( IECORE_NAME = "ie" )
 ## \todo Remove MTOA_SOURCE_ROOT when it's no longer necessary
-mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$MTOA_ROOT/include", "-isystem", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
-mtoaEnv.Append( CXXFLAGS = [ "-isystem", "$ARNOLD_ROOT/include" ] )
+mtoaEnv.Append( CPPPATH = [ "$MTOA_ROOT/include", "$MTOA_SOURCE_ROOT/plugins/mtoa" ] )
+mtoaEnv.Append( CPPPATH = [ "$ARNOLD_ROOT/include" ] )
 mtoaEnv.Append( LIBPATH = [ "$MTOA_ROOT/bin" ] )
 mtoaEnv.Append( CXXFLAGS = [ "-D_LINUX" ] )
-
-mtoaVersionHeader = env.FindFile( "utils/Version.h", mtoaEnv["CXXFLAGS"] )
-if (mtoaVersionHeader !=None):	
-	mtoaEnv.Append( 
-	CXXFLAGS = [
-		"-DMTOA_VERSION_HEADER",
-	])
-
 mtoaEnv["SHLIBPREFIX"] = ""
 
 if doConfigure and haveMaya and haveArnold :
@@ -3015,12 +2777,10 @@ if doConfigure and haveMaya and haveArnold :
 
 alembicEnv = coreEnv.Clone( IECORE_NAME = "IECoreAlembic" )
 alembicEnvAppends = {
-	"CXXFLAGS" : [
-		"-isystem", "$ALEMBIC_INCLUDE_PATH",
-		"-isystem", "$HDF5_INCLUDE_PATH",
-	],
 	"CPPPATH" : [
+		"$ALEMBIC_INCLUDE_PATH",
 		"contrib/IECoreAlembic/include",
+		"$HDF5_INCLUDE_PATH",
 	],
 	"LIBPATH" : [
 		"$ALEMBIC_LIB_PATH",
@@ -3029,11 +2789,8 @@ alembicEnvAppends = {
 	"LIBS" : [ 
 		"AlembicAbcGeom$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbc$ALEMBIC_LIB_SUFFIX",
-		"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
 		"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
-		"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
-		"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 		"AlembicUtil$ALEMBIC_LIB_SUFFIX",
 		"hdf5$HDF5_LIB_SUFFIX",
 		"hdf5_hl$HDF5_LIB_SUFFIX",
@@ -3048,8 +2805,8 @@ if doConfigure :
 
 	c = Configure( alembicEnv )
 
-	if not c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
-
+	if not c.CheckLibWithHeader( "AlembicAbcGeom", "Alembic/AbcGeom/Foundation.h", "CXX" ) :
+	
 		sys.stderr.write( "WARNING : no AlembicAbcGeom library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
 		c.Finish()
 		
@@ -3085,7 +2842,7 @@ if doConfigure :
 		alembicPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( alembicEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
@@ -3099,15 +2856,6 @@ if doConfigure :
 
 		Default( [ alembicLibrary, alembicPythonModule ] )
 		
-		# tests
-		alembicTestEnv = testEnv.Clone()
-		alembicTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAlembic/python"
-		alembicTest = alembicTestEnv.Command( "contrib/IECoreAlembic/test/IECoreAlembic/results.txt", alembicPythonModule, pythonExecutable + " $TEST_ALEMBIC_SCRIPT" )
-		NoCache( alembicTest )
-		if haveArnold:
-			alembicTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreAlembic/test/IECoreAlembic/*.py" ) )
-		alembicTestEnv.Alias( "testAlembic", alembicTest )
-
 ###########################################################################################
 # Documentation
 ###########################################################################################

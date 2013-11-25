@@ -34,7 +34,9 @@
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
+#include "Alembic/AbcCoreFactory/IFactory.h"
 #include "Alembic/AbcCoreHDF5/ReadWrite.h"
+#include "Alembic/AbcCoreOgawa/ReadWrite.h"
 #include "Alembic/Abc/IArchive.h"
 #include "Alembic/Abc/IObject.h"
 #include "Alembic/AbcGeom/IGeomBase.h"
@@ -51,6 +53,7 @@
 using namespace Imath;
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
+using namespace Alembic::AbcCoreFactory;
 using namespace IECoreAlembic;
 using namespace IECore;
 
@@ -70,7 +73,11 @@ struct AlembicInput::DataMembers
 AlembicInput::AlembicInput( const std::string &fileName )
 {
 	m_data = boost::shared_ptr<DataMembers>( new DataMembers );
-	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), fileName ) );
+
+	IFactory factory;
+    factory.setPolicy(ErrorHandler::kQuietNoopPolicy);
+
+	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( factory.getArchive(fileName) ) );
 	m_data->object = m_data->archive->getTop();
 }
 

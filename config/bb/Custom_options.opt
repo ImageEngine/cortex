@@ -1,0 +1,65 @@
+import os
+ENV_VARS_TO_IMPORT = "SOFTWARE"
+
+# default versions
+os.environ['OPENEXR_VERSION'] = '2.0.1'
+os.environ['ILMBASE_VERSION'] = '2.0.1'
+os.environ['ALEMBIC_VERSION'] = '1.5.0'
+os.environ['MAYA_VERSION'] = '2014'
+os.environ['MTOA_VERSION'] = '0.23.0'
+os.environ['ARNOLD_VERSION'] = '4.0.16.2'
+os.environ['NUKE_VERSION'] = '7.0v8'
+
+# source  the environment after setting these versions
+
+CXX = 'g++'
+CXXFLAGS = ['-pipe', '-Wall', '-O2', '-DNDEBUG', '-DBOOST_DISABLE_ASSERTS']
+TESTCXXFLAGS = ['-pipe', '-Wall', '-O0']
+PYTHONCXXFLAGS = ['-pipe', '-Wall', '-O2', '-DNDEBUG', '-DBOOST_DISABLE_ASSERTS']
+
+BUILD_CACHEDIR = "Build_Cache"
+
+PYTHON='/development/software/wrappers/python'
+PYTHON_INCLUDE_PATH='/development/software/python/linux.centos6.x86_64/2.6.4/include/python2.6'
+PYTHON_LINK_FLAGS='-L/development/software/python/linux.centos6.x86_64/2.6.4/lib -lpython2.6'
+LINKFLAGS = []
+BOOST_INCLUDE_PATH = '/development/software/boost/linux.centos6.x86_64/1.47/include/'
+BOOST_LIB_PATH = '/development/software/boost/linux.centos6.x86_64/1.47/lib/'
+BOOST_LIB_SUFFIX = ''
+WITH_GL=True
+FREETYPE_INCLUDE_PATH='/usr/include/freetype2'
+GLEW_INCLUDE_PATH='/software/glew/linux.centos6.x86_64/1.6.0/include/GL'
+GLEW_LIB_PATH='/software/glew/linux.centos6.x86_64/1.6.0/lib64'
+TBB_LIB_PATH='/development/software/tbb/linux.centos6.x86_64/3.0.221/lib/'
+TBB_INCLUDE_PATH='/development/software/tbb/linux.centos6.x86_64/3.0.221/include'
+MAYA_ROOT='/software/maya/linux.centos6.x86_64/%s/' % os.environ['MAYA_VERSION']
+NUKE_ROOT='/software/nuke/linux.centos6.x86_64/%s/' % os.environ['NUKE_VERSION']
+# RMAN_ROOT=os.environ['DELIGHT']
+#HOUDINI_ROOT='/software/houdini/linux.centos6.x86_64/%s/' % (os.environ['HOUDINI_VERSION']) # not working ATM due to boost issues (different versions .. etc)
+HOUDINI_ROOT='NOTHERE'
+
+ARNOLD_ROOT='/software/arnold/linux.centos6.x86_64/%s/' % (os.environ['ARNOLD_VERSION'])
+print "ARNOLD_ROOT",ARNOLD_ROOT
+MTOA_ROOT='/software/mtoa/linux.centos6.x86_64/%s/%s/' % (os.environ['MTOA_VERSION'],os.environ['MAYA_VERSION'])
+# MTOA_SOURCE_ROOT='/disk1/playpen/dev/mtoa'
+#MTOA_ROOT='/software/mtoa/linux.centos6.x86_64/0.19.0.dev/2012'
+print "MTOA_ROOT",MTOA_ROOT
+
+OPENEXR_INCLUDE_PATH = '/software/openexr/linux.centos6.x86_64/%s/include/'%os.environ['OPENEXR_VERSION']
+OPENEXR_LIB_PATH = '/software/openexr/linux.centos6.x86_64/%s/lib/'%os.environ['OPENEXR_VERSION']
+ILMBASE_INCLUDE_PATH = '/software/ilmbase/linux.centos6.x86_64/%s/include/'%os.environ['ILMBASE_VERSION']
+ILMBASE_LIB_PATH = '/software/ilmbase/linux.centos6.x86_64/%s/lib/'%os.environ['ILMBASE_VERSION']
+
+ALEMBIC_INCLUDE_PATH = '/software/alembic/linux.centos6.x86_64/%s/include/'%os.environ['ALEMBIC_VERSION']
+ALEMBIC_LIB_PATH = '/software/alembic/linux.centos6.x86_64/%s/lib/'%os.environ['ALEMBIC_VERSION']
+HDF5_INCLUDE_PATH = '/software/hdf5/linux.centos6.x86_64/1.8.7/include/'
+HDF5_LIB_PATH = '/software/hdf5/linux.centos6.x86_64/1.8.7/lib/'
+
+INSTALL_PREFIX = '/development/software/cortex/linux.centos6.x86_64/${IECORE_MAJOR_VERSION}.${IECORE_MINOR_VERSION}.${IECORE_PATCH_VERSION}${IECORE_VERSION_SUFFIX}'
+INSTALL_PYTHON_DIR = '$INSTALL_PREFIX/python/2.6'
+INSTALL_NUKEPYTHON_DIR = '$INSTALL_PYTHON_DIR' 
+INSTALL_MEL_DIR = '$INSTALL_PREFIX/maya/%s/mel/$IECORE_NAME'  % os.environ['MAYA_VERSION']
+INSTALL_MAYAPLUGIN_NAME = '$INSTALL_PREFIX/maya/%s/plugins/$IECORE_NAME' % os.environ['MAYA_VERSION']
+INSTALL_MTOAEXTENSION_NAME = '$INSTALL_PREFIX/mtoaExtensions/%s/%s.%s/$IECORE_NAME' % (os.environ['MAYA_VERSION'],os.environ['MTOA_MAJOR_VERSION'],os.environ['MTOA_MINOR_VERSION'])
+INSTALL_NUKEPLUGIN_NAME = '$INSTALL_PREFIX/nuke/%s/plugins/$IECORE_NAME' % os.environ['NUKE_MAJ_MIN_VERSION']
+
