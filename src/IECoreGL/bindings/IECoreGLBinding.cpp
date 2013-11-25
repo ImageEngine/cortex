@@ -64,6 +64,7 @@
 #include "IECoreGL/bindings/ToGLTextureConverterBinding.h"
 #include "IECoreGL/bindings/PrimitiveBinding.h"
 #include "IECoreGL/bindings/PointsPrimitiveBinding.h"
+#include "IECoreGL/bindings/MeshPrimitiveBinding.h"
 #include "IECoreGL/bindings/SelectorBinding.h"
 #include "IECoreGL/bindings/FontBinding.h"
 #include "IECoreGL/bindings/FontLoaderBinding.h"
@@ -107,6 +108,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindToGLTextureConverter();
 	bindPrimitive();
 	bindPointsPrimitive();
+	bindMeshPrimitive();
 	bindSelector();
 	bindToGLMeshConverter();
 	bindToGLPointsConverter();

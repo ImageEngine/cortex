@@ -60,8 +60,12 @@ struct MeshPrimitive::MemberData : public IECore::RefCounted
 	IECore::ConstIntVectorDataPtr vertIds;
 	Imath::Box3f bound;
 
-	/// \todo This could be removed and the ToGLMeshConverter could use FaceVaryingPromotionOp
-	/// to convert everything to FaceVarying before being added.
+	/// \todo This could be removed now the ToGLMeshConverter uses FaceVaryingPromotionOp
+	/// to convert everything to FaceVarying before being added. The only reason we're even
+	/// doing this still is in case client code is creating MeshPrimitives directly rather
+	/// than using the converter. We should actually be able to remove the code here, and
+	/// instead of accept vertIds in the MeshPrimitive constructor, just accept the number
+	/// of triangles instead.
 	class ToFaceVaryingConverter
 	{
 		public:
@@ -118,23 +122,23 @@ IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
 
 void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
 {
-	if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	if( name == "P" )
 	{
-		if ( name == "P" )
+		// update the bounding box.
+		m_memberData->bound.makeEmpty();
+		IECore::ConstV3fVectorDataPtr points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data );
+		if( points )
 		{
-			// update the bounding box.
-			m_memberData->bound.makeEmpty();
-			IECore::ConstV3fVectorDataPtr points = IECore::runTimeCast< IECore::V3fVectorData >( primVar.data );
-			if ( points )
+			const std::vector<Imath::V3f> &p = points->readable();
+			for( unsigned int i=0; i<p.size(); i++ )
 			{
-				const std::vector<Imath::V3f> &p = points->readable();
-				for( unsigned int i=0; i<p.size(); i++ )
-				{
-					m_memberData->bound.extendBy( p[i] );
-				}
+				m_memberData->bound.extendBy( p[i] );
 			}
 		}
-
+	}
+	
+	if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	{
 		MemberData::ToFaceVaryingConverter primVarConverter( m_memberData->vertIds );
 		// convert to facevarying
 		IECore::DataPtr newData = IECore::despatchTypedData< MemberData::ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data, primVarConverter );
