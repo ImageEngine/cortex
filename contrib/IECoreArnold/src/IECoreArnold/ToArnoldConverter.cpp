@@ -268,6 +268,12 @@ void ToArnoldConverter::setParameterInternal( AtNode *node, const char *name, in
 					AiNodeSetInt( node, name, data->readable() );
 				}
 				break;
+			case AI_TYPE_BYTE :
+				if( const IntData *data = dataCast<IntData>( name, value ) )
+				{
+					AiNodeSetByte( node, name, data->readable() );
+				}
+				break;
 			case AI_TYPE_FLOAT :
 				if( const FloatData *data = dataCast<FloatData>( name, value ) )
 				{
