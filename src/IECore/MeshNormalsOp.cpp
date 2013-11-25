@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
+
 #include "IECore/MeshNormalsOp.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/CompoundParameter.h"
-
-#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace std;
@@ -59,8 +59,19 @@ MeshNormalsOp::MeshNormalsOp() : MeshPrimitiveOp( "Calculates vertex normals for
 		"N"
 	);
 
+	IntParameter::PresetsContainer interpolationPresets;
+	interpolationPresets.push_back( IntParameter::Preset( "Vertex", PrimitiveVariable::Vertex ) );
+	interpolationPresets.push_back( IntParameter::Preset( "Uniform", PrimitiveVariable::Uniform ) );
+	IntParameterPtr interpolationParameter = new IntParameter(
+		"interpolation",
+		"The primitive variable interpolation type for the calculated normals.",
+		PrimitiveVariable::Vertex,
+		interpolationPresets
+	);
+
 	parameters()->addParameter( pPrimVarNameParameter );
 	parameters()->addParameter( nPrimVarNameParameter );
+	parameters()->addParameter( interpolationParameter );
 }
 
 MeshNormalsOp::~MeshNormalsOp()
@@ -87,12 +98,22 @@ const StringParameter * MeshNormalsOp::nPrimVarNameParameter() const
 	return parameters()->parameter<StringParameter>( "nPrimVarName" );
 }
 
+IntParameter * MeshNormalsOp::interpolationParameter()
+{
+	return parameters()->parameter<IntParameter>( "interpolation" );
+}
+
+const IntParameter * MeshNormalsOp::interpolationParameter() const
+{
+	return parameters()->parameter<IntParameter>( "interpolation" );
+}
+
 struct MeshNormalsOp::CalculateNormals
 {
 	typedef DataPtr ReturnType;
 
-	CalculateNormals( const IntVectorData * vertsPerFace, const IntVectorData * vertIds )
-		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds )
+	CalculateNormals( const IntVectorData *vertsPerFace, const IntVectorData *vertIds, PrimitiveVariable::Interpolation interpolation )
+		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_interpolation( interpolation )
 	{
 	}
 
@@ -109,32 +130,55 @@ struct MeshNormalsOp::CalculateNormals
 		typename T::Ptr normalsData = new T;
 		normalsData->setInterpretation( GeometricData::Normal );
 		VecContainer &normals = normalsData->writable();
-		normals.resize( points.size(), Vec( 0 ) );
+		if( m_interpolation == PrimitiveVariable::Uniform )
+		{
+			normals.reserve( vertsPerFace.size() );
+		}
+		else
+		{
+			normals.resize( points.size(), Vec( 0 ) );
+		}
 
-		// for each face, calculate its normal, and accumulate that normal onto
-		// the normal for each of its vertices.
+		// loop over the faces
 		const int *vertId = &(vertIds[0]);
 		for( vector<int>::const_iterator it = vertsPerFace.begin(); it!=vertsPerFace.end(); it++ )
 		{
+			// calculate the face normal. note that this method is very naive, and doesn't
+			// cope with colinear vertices or concave faces - we could use polygonNormal() from
+			// PolygonAlgo.h to deal with that, but currently we'd prefer to avoid the overhead.
 			const Vec &p0 = points[*vertId];
 			const Vec &p1 = points[*(vertId+1)];
 			const Vec &p2 = points[*(vertId+2)];
 
 			Vec normal = (p2-p1).cross(p0-p1);
 			normal.normalize();
-			for( int i=0; i<*it; i++ )
+
+			if( m_interpolation == PrimitiveVariable::Uniform )
 			{
-				normals[*vertId] += normal;
-				vertId++;
+				normals.push_back( normal );
+				vertId += *it;
+			}
+			else
+			{
+				// accumulate the face normal onto each of the vertices
+				// for this face.
+				for( int i=0; i<*it; ++i )
+				{
+					normals[*vertId] += normal;
+					++vertId;
+				}
 			}
 		}
 
 		// normalize each of the vertex normals
-		for( typename VecContainer::iterator it=normals.begin(); it!=normals.end(); it++ )
+		if( m_interpolation == PrimitiveVariable::Vertex )
 		{
-			it->normalize();
+			for( typename VecContainer::iterator it=normals.begin(), eIt=normals.end(); it != eIt; ++it )
+			{
+				it->normalize();
+			}
 		}
-
+		
 		return normalsData;
 	}
 
@@ -142,6 +186,7 @@ struct MeshNormalsOp::CalculateNormals
 
 		ConstIntVectorDataPtr m_vertsPerFace;
 		ConstIntVectorDataPtr m_vertIds;
+		PrimitiveVariable::Interpolation m_interpolation;
 
 };
 
@@ -171,8 +216,10 @@ void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 		throw InvalidArgumentException( e );
 	}
 
-	CalculateNormals f( mesh->verticesPerFace(), mesh->vertexIds() );
+	const PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation>( operands->member<IntData>( "interpolation" )->readable() );
+	
+	CalculateNormals f( mesh->verticesPerFace(), mesh->vertexIds(), interpolation );
 	DataPtr n = despatchTypedData<CalculateNormals, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pvIt->second.data, f );
 
-	mesh->variables[ nPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( PrimitiveVariable::Vertex, n );
+	mesh->variables[ nPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( interpolation, n );
 }

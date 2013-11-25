@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHNORMALSOP_H
-#define IECORE_MESHNORMALSOP_H
+#ifndef IECOREGL_MESHPRIMITIVEBINDING_H
+#define IECOREGL_MESHPRIMITIVEBINDING_H
 
-#include "IECore/TypedPrimitiveOp.h"
-#include "IECore/NumericParameter.h"
-
-namespace IECore
+namespace IECoreGL
 {
 
-/// A MeshPrimitiveOp to calculate vertex normals.
-/// \ingroup geometryProcessingGroup
-class MeshNormalsOp : public MeshPrimitiveOp
-{
-	public:
+void bindMeshPrimitive();
 
-		MeshNormalsOp();
-		virtual ~MeshNormalsOp();
+}
 
-		IE_CORE_DECLARERUNTIMETYPED( MeshNormalsOp, MeshPrimitiveOp );
-
-		StringParameter * pPrimVarNameParameter();
-		const StringParameter * pPrimVarNameParameter() const;
-
-		StringParameter * nPrimVarNameParameter();
-		const StringParameter * nPrimVarNameParameter() const;
-
-		IntParameter *interpolationParameter();
-		const IntParameter *interpolationParameter() const;
-
-	protected:
-
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
-
-	private :
-
-		struct CalculateNormals;
-		struct HandleErrors;
-
-};
-
-IE_CORE_DECLAREPTR( MeshNormalsOp );
-
-
-} // namespace IECore
-
-#endif // IECORE_MESHNORMALSOP_H
-
+#endif // IECOREGL_MESHPRIMITIVEBINDING_H
