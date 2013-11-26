@@ -107,7 +107,8 @@ LensDistort::LensDistort( Node* node ) :
 	m_assetPath( "" ),
 	m_enableBlackOutside( false ),
 	m_lensModel( 0 ),
-	m_mode( Distort )
+	m_mode( Distort ),
+	m_onError( Error )
 {
 	// Work out the most threads we can have and create an instance of the lens model for each one.
 	// This is useful for any lens model implementation that uses the ldpk library is as it is not thread safe.
@@ -276,7 +277,7 @@ void LensDistort::_validate( bool for_real )
 
 	// Try to load the lens from a file. 
 	std::string path;
-	m_useFileSequence = fileSequencePath( path );
+	m_useFileSequence = fileSequencePath( path, outputContext() );
 	if( m_useFileSequence )
 	{
 		m_hasValidFileSequence = setLensFromFile( path );
@@ -434,7 +435,7 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 void LensDistort::append( DD::Image::Hash &hash )
 {
 	std::string path;
-	if ( fileSequencePath( path ) )
+	if ( fileSequencePath( path, outputContext() ) )
 	{
 		hash.append( path );
 	}
@@ -449,6 +450,7 @@ void LensDistort::append( DD::Image::Hash &hash )
 	}
 
 	hash.append( m_lensModel );
+	hash.append( m_onError );
 	hash.append( m_mode );
 	hash.append( m_hasValidFileSequence );
 	hash.append( m_useFileSequence );
@@ -457,7 +459,7 @@ void LensDistort::append( DD::Image::Hash &hash )
 	hash.append( outputContext().frame() );
 }
 
-bool LensDistort::fileSequencePath( std::string& path )
+bool LensDistort::fileSequencePath( std::string& path, const DD::Image::OutputContext &context )
 {
 	path = "";
 
@@ -467,11 +469,43 @@ bool LensDistort::fileSequencePath( std::string& path )
 		if ( knob("lensFileSequence") != NULL )
 		{
 			std::stringstream pathStream;
-			knob("lensFileSequence")->to_script( pathStream, &(outputContext()), false );
+			knob("lensFileSequence")->to_script( pathStream, &context, false );
 			path = pathStream.str();
-
-			// If the text field has no data ...
+			
+			// If the text field has no data then exit.
 			if ( path == "" ) return false;
+
+			// Otherwise, do wild card substitution on the file path.
+			if ( !strchr( path.c_str(), '#' ) )
+			{
+				boost::algorithm::replace_first( path, "%07d", "%07i" );
+				boost::algorithm::replace_first( path, "%06d", "%06i" );
+				boost::algorithm::replace_first( path, "%05d", "%05i" );
+				boost::algorithm::replace_first( path, "%04d", "%04i" );
+				boost::algorithm::replace_first( path, "%03d", "%03i" );
+				boost::algorithm::replace_first( path, "%02d", "%02i" );
+				boost::algorithm::replace_first( path, "%d", "%1i" );
+			}
+			else
+			{
+				boost::algorithm::replace_first( path, "#######", "%07i" );
+				boost::algorithm::replace_first( path, "######", "%06i" );
+				boost::algorithm::replace_first( path, "#####", "%05i" );
+				boost::algorithm::replace_first( path, "####", "%04i" );
+				boost::algorithm::replace_first( path, "###", "%03i" );
+				boost::algorithm::replace_first( path, "##", "%02i" );
+				boost::algorithm::replace_first( path, "#", "%1i" );
+			}
+
+			try
+			{
+				path = boost::str( boost::format( path ) % int( context.frame() ) );
+			}
+			catch( ... )
+			{
+				// it's ok if the above throws - it just means there wasn't a number specified in the
+				// filename, so we just use the filename as is
+			}
 		}
 		return true;
 	}
@@ -481,71 +515,110 @@ bool LensDistort::fileSequencePath( std::string& path )
 	return false;
 }
 
+bool LensDistort::loadFileAtFrame( std::string &path, int frame )
+{
+	std::string tempPath( path );
+
+	// Check to see if the file tempPath is valid.
+	std::ifstream ifile;
+	ifile.open( tempPath.c_str(), std::ifstream::in );
+	if ( ifile.is_open() )
+	{
+		// Try to open the lens file.
+		try
+		{
+			IECore::CachedReaderPtr reader( IECore::CachedReader::defaultCachedReader() );
+			IECore::ConstObjectPtr o = reader->read( tempPath );
+			IECore::ConstCompoundObjectPtr p = IECore::runTimeCast< const IECore::CompoundObject >( o );
+			if ( p )
+			{
+				// Update the lensModel knob.
+				m_lensModel = indexFromModelName( p->member<IECore::StringData>( "lensModel", true )->readable().c_str() );
+				knob("model")->set_value( m_lensModel );
+				setLensModel( p );
+				path = tempPath;
+				return true;
+			}
+		}
+		catch( const IECore::Exception &e )
+		{
+		}
+	}
+	return false;
+}
+
 bool LensDistort::setLensFromFile( std::string &returnPath )
 {
 	returnPath.clear();
-	
+
 	// Check that the returnPath isn't null.
-	if ( !fileSequencePath( returnPath ) ) return false;
+	if ( !fileSequencePath( returnPath, outputContext() ) ) return false;
 
 	// Get the returnPath required for the current context.
-	const float frame = outputContext().frame();
-	if ( !strchr( returnPath.c_str(), '#' ) )
-	{
-		boost::algorithm::replace_first( returnPath, "%07d", "%07i" );
-		boost::algorithm::replace_first( returnPath, "%06d", "%06i" );
-		boost::algorithm::replace_first( returnPath, "%05d", "%05i" );
-		boost::algorithm::replace_first( returnPath, "%04d", "%04i" );
-		boost::algorithm::replace_first( returnPath, "%03d", "%03i" );
-		boost::algorithm::replace_first( returnPath, "%02d", "%02i" );
-		boost::algorithm::replace_first( returnPath, "%d", "%1i" );
-	}
-	else
-	{
-		boost::algorithm::replace_first( returnPath, "#######", "%07i" );
-		boost::algorithm::replace_first( returnPath, "######", "%06i" );
-		boost::algorithm::replace_first( returnPath, "#####", "%05i" );
-		boost::algorithm::replace_first( returnPath, "####", "%04i" );
-		boost::algorithm::replace_first( returnPath, "###", "%03i" );
-		boost::algorithm::replace_first( returnPath, "##", "%02i" );
-		boost::algorithm::replace_first( returnPath, "#", "%1i" );
-	}
-
-	try
-	{
-		returnPath = boost::str( boost::format( returnPath ) % int(frame) );
-	}
-	catch( ... )
-	{
-		// it's ok if the above throws - it just means there wasn't a number specified in the
-		// filename, so we just use the filename as is
-	}
-
-	// Check to see if the file returnPath is valid.
-	std::ifstream ifile;
-	ifile.open( returnPath.c_str(), std::ifstream::in );
-	if ( !ifile.is_open() ) return false;
+	const int currentFrame = int( roundf( outputContext().frame() ) );
 	
-	// Try to open the lens file.
-	try
+	if( m_onError == Error )
 	{
-		IECore::CachedReaderPtr reader( IECore::CachedReader::defaultCachedReader() );
-		IECore::ConstObjectPtr o = reader->read( returnPath );
-		IECore::ConstCompoundObjectPtr p = IECore::runTimeCast< const IECore::CompoundObject >( o );
-		if ( p )
+		return loadFileAtFrame( returnPath, currentFrame );
+	}
+	else if( m_onError == NearestFrame )
+	{
+		DD::Image::OutputContext context( outputContext() );
+
+		const int startFrame = input0().first_frame();
+		const int endFrame = input0().last_frame();
+		if( currentFrame <= startFrame )
 		{
-			// Update the lensModel knob.
-			m_lensModel = indexFromModelName( p->member<IECore::StringData>( "lensModel", true )->readable().c_str() );
-			knob("model")->set_value( m_lensModel );
-			setLensModel( p );
-			return true;
+			for( int frame = startFrame; frame <= endFrame; ++frame ) 
+			{
+				context.setFrame( frame );
+				fileSequencePath( returnPath, context );
+				if( loadFileAtFrame( returnPath, frame ) )
+				{
+					return true;
+				}
+			}
+		}
+		else if( currentFrame >= endFrame )
+		{
+			for( int frame = endFrame; frame >= startFrame; --frame ) 
+			{
+				context.setFrame( frame );
+				fileSequencePath( returnPath, context );
+				if( loadFileAtFrame( returnPath, frame ) )
+				{
+					return true;
+				}
+			}
+		}
+		else
+		{
+			int downFrame = currentFrame;
+			int upFrame = currentFrame+1;
+			for( ; downFrame >= startFrame || upFrame <= endFrame; --downFrame, ++upFrame )
+			{
+				if( downFrame >= startFrame )
+				{
+					context.setFrame( downFrame );
+					fileSequencePath( returnPath, context );
+					if( loadFileAtFrame( returnPath, downFrame ) )
+					{
+						return true;
+					}
+				}
+				if( upFrame <= endFrame )
+				{
+					context.setFrame( upFrame );
+					fileSequencePath( returnPath, context );
+					if( loadFileAtFrame( returnPath, upFrame ) )
+					{
+						return true;
+					}
+				}
+			}
 		}
 	}
-	catch( const IECore::Exception &e )
-	{
-		return false;
-	}
-
+	
 	return false;
 }
 
@@ -578,12 +651,18 @@ void LensDistort::knobs( Knob_Callback f )
 	// Process the internal nodes.
 	createInternalNodes();
 	connectInternalNodes();
-	
+
 	File_knob( f, &m_assetPath, "lensFileSequence", "Lens File Sequence" );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	SetFlags( f, Knob::NO_UNDO );
 	Tooltip( f, "Directory name containing the lens files. Usually COB files..." );
+
+	static const char * const onError[] = { "Error", "Use Nearest Frame", 0 };
+	Enumeration_knob( f, &m_onError, onError, "onError", "Missing Frames" );
+	Tooltip( f, "How to handle missing cob files from the sequence of lens models." );
+	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
+	SetFlags( f, Knob::ALWAYS_SAVE );
 
 	Divider( f );
 
@@ -596,18 +675,18 @@ void LensDistort::knobs( Knob_Callback f )
 	Tooltip( f, "Whether to Distort or Undistort the input by the current lens model." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
-	
+
 	Enumeration_knob( f, &m_lensModel, modelNames(), "model", "Model" );
 	Tooltip( f, "Choose the lens model to distort the input with. This list is populated with all lens models that have been registered to Cortex." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	SetFlags( f, Knob::NO_UNDO );
-		
+
 	if( f.makeKnobs() )
 	{
 		setLensModel( modelNames()[currentLensModelIndex()] );
 	}
-	
+
 	for( unsigned int i = 0; i < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++i )
 	{
 		if( i < m_pluginAttributes.size() )
@@ -637,6 +716,12 @@ void LensDistort::knobs( Knob_Callback f )
 
 int LensDistort::knob_changed(Knob* k)
 {
+	if( k->is( "onError" ) )
+	{
+		m_onError = int( k->get_value() );
+		return true;
+	}
+
 	if( k->is( "blackOutside" ) )
 	{
 		m_enableBlackOutside = bool( k->get_value() );
@@ -647,7 +732,7 @@ int LensDistort::knob_changed(Knob* k)
 	if ( k->is( "lensFileSequence" ) )
 	{
 		std::string path;
-		m_useFileSequence = fileSequencePath( path );
+		m_useFileSequence = fileSequencePath( path, outputContext() );
 		if( m_useFileSequence )
 		{
 			m_hasValidFileSequence = setLensFromFile( path );
@@ -698,14 +783,14 @@ void LensDistort::updateUI()
 		if( k != NULL ) 
 		{
 			k->enable( !m_useFileSequence );
-			
+
 			std::string label( k->label() );
 			k->label( m_pluginAttributes[index].m_name.c_str() );
 			k->visible( true );
 			k->updateUI( outputContext() );
 		}
 	}
-	
+
 	// Hide all other knobs from sight.
 	for ( ; index < IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS; ++index )
 	{
@@ -714,7 +799,7 @@ void LensDistort::updateUI()
 		if( k != NULL ) 
 		{
 			k->enable( false );
-			
+
 			k->label( knobName.c_str() );
 			k->visible( false );
 			k->set_value( 0 );

@@ -89,6 +89,12 @@ class LensDistort : public DD::Image::Iop
 
 		enum
 		{
+			Error = 0,
+			NearestFrame = 1
+		};
+
+		enum
+		{
 			Distort,
 			Undistort
 		};
@@ -143,7 +149,7 @@ class LensDistort : public DD::Image::Iop
 		void updateLensModel( bool updateKnobsFromParameters = false );
 		/// Returns true if there is text in the file sequence knob.
 		/// The contents of the knob are returned in the attribute 'path'.
-		bool fileSequencePath( std::string& path );
+		bool fileSequencePath( std::string& path, const DD::Image::OutputContext &context );
 		/// Checks that the file sequence is valid and then loads the required file from it.
 		/// File sequences of the format path.#.ext and path.%0Xd.ext will have their
 		/// wild card characters replaced and set to the current frame.
@@ -154,6 +160,10 @@ class LensDistort : public DD::Image::Iop
 		void createInternalNodes();
 		/// Connects up the BlackOutside node if m_enableBlackOutside is true.
 		void connectInternalNodes();
+		/// Loads a particular frame from the given path.
+		/// The full path is saved into the "path" argument.
+		/// Returns whether the load was successful.
+		bool loadFileAtFrame( std::string &path, int frame );
 		
 		
 		//! @name Lens Parameter Convenience Members 
@@ -228,6 +238,8 @@ class LensDistort : public DD::Image::Iop
 		int m_mode;
 		/// Holds the values for the lens model's parameters.
 		double m_knobData[IECORENUKE_LENSDISTORT_NUMBER_OF_STATIC_KNOBS];
+		/// Holds an enum which defines how missing .cob files are handled.
+		int m_onError;
 		//@}
 };
 
