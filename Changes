@@ -1,3 +1,20 @@
+# 8.0.0-b4
+
+#### IECore
+
+- Optimised polygonNormal and polygonWinding in PolygonAlgo.h.
+- Added face normals mode to MeshNormalsOp.
+
+#### IECoreGL
+
+- Fixed shading of polygon meshes with no "N" primitive variable (#118).
+
+#### IECoreArnold
+
+- Added support for Arnold parameters of type AI_TYPE_BYTE.
+- Added compatibility with Arnold 4.1.
+- Fixed hangs in procedurals.
+
 # 8.0.0-b3
 
 #### IECore
