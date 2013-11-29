@@ -34,12 +34,17 @@
 
 #include <cassert>
 
+#include "tbb/mutex.h"
+
 #include "boost/format.hpp"
 
 #include "IECore/RunTimeTyped.h"
 #include "IECore/MessageHandler.h"
 
 using namespace IECore;
+
+RunTimeTyped::Mutex RunTimeTyped::g_baseTypeIdsMutex;
+RunTimeTyped::Mutex RunTimeTyped::g_derivedTypeIdsMutex;
 
 RunTimeTyped::RunTimeTyped()
 {
@@ -207,8 +212,10 @@ TypeId RunTimeTyped::baseTypeId( TypeId typeId )
 	}
 }
 
+
 const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 {
+	Mutex::scoped_lock lock( g_baseTypeIdsMutex, false ); // read-only lock
 	BaseTypesRegistryMap &baseTypes = completeBaseTypesRegistry();
 
 	BaseTypesRegistryMap::iterator it = baseTypes.find( typeId );
@@ -216,7 +223,9 @@ const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 	{
 		return it->second;
 	}
-
+	
+	lock.upgrade_to_writer();
+	
 	baseTypes.insert( BaseTypesRegistryMap::value_type( typeId, std::vector<TypeId>() ) );
 	it = baseTypes.find( typeId );
 	assert( it != baseTypes.end() );
@@ -233,11 +242,13 @@ const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 
 const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
 {
+	Mutex::scoped_lock lock( g_derivedTypeIdsMutex, false ); // read-only lock
 	DerivedTypesRegistryMap &derivedTypes = completeDerivedTypesRegistry();
 	DerivedTypesRegistryMap::iterator it = derivedTypes.find( typeId );
 
 	if ( it == derivedTypes.end() )
-	{
+	{	
+		lock.upgrade_to_writer();
 		derivedTypes.insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
 		it = derivedTypes.find( typeId );
 		assert( it != derivedTypes.end() );
