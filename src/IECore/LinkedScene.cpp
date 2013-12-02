@@ -940,7 +940,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 		}
 		catch ( IECore::Exception &e )
 		{
-			IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", e.what() );
+			IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", std::string( e.what() ) + " when expanding link from file " + m_mainScene->fileName() );
 			linkDepth = 0;
 			return 0;
 		}

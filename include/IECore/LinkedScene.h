@@ -156,7 +156,7 @@ class LinkedScene : public  SampledSceneInterface
 
 		LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped );
 
-		static ConstSceneInterfacePtr expandLink( const StringData *fileName, const InternedStringVectorData *root, int &linkDepth );
+		ConstSceneInterfacePtr expandLink( const StringData *fileName, const InternedStringVectorData *root, int &linkDepth );
 
 		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
 		double remappedLinkTime( double time ) const;
