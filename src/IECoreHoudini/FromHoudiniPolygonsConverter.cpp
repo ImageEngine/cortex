@@ -125,7 +125,8 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 	if ( attrHandle.isAttributeValid() )
 	{
 		modifiedOperands = operands->copy();
-		modifiedOperands->member<StringData>( "attributeFilter" )->writable() += " ^ieMeshInterpolation";
+		std::string &attributeFilter = modifiedOperands->member<StringData>( "attributeFilter" )->writable();
+		attributeFilter += " ^ieMeshInterpolation";
 		
 		GA_Range primRange = geo->getPrimitiveRange();
 		const GA_ROAttributeRef attrRef( attrHandle.getAttribute() );
@@ -137,6 +138,9 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 				if ( !strcmp( value, "subdiv" ) )
 				{
 					interpolation = "catmullClark";
+					// subdivision meshes should not have normals. we assume this occurred because the geo contained
+					// both subdiv and linear meshes, inadvertantly extending the normals attribute to both.
+					attributeFilter += " ^N";
 					break;
 				}
 				else if ( !strcmp( value, "poly" ) )

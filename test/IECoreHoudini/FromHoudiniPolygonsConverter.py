@@ -788,11 +788,14 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 	def testInterpolation( self ) :
 		
 		torus = self.createTorus()
-		result = IECoreHoudini.FromHoudiniPolygonsConverter( torus ).convert()
+		normals = torus.createOutputNode( "facet" )
+		normals.parm( "postnml" ).set( True )
+		result = IECoreHoudini.FromHoudiniPolygonsConverter( normals ).convert()
 		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
 		self.assertEqual( result.interpolation, "linear" )
+		self.assertTrue( "N" in result.keys() )
 		
-		attr = torus.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
+		attr = normals.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
 		attr.parm( "name" ).set( "ieMeshInterpolation" )
 		attr.parm( "class" ).set( 1 ) # prim
 		attr.parm( "type" ).set( 3 ) # string
@@ -800,11 +803,13 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
 		self.assertEqual( result.interpolation, "catmullClark" )
+		self.assertTrue( "N" not in result.keys() )
 		
 		attr.parm( "string") .set( "poly" )
 		result = IECoreHoudini.FromHoudiniPolygonsConverter( attr ).convert()
 		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
 		self.assertEqual( result.interpolation, "linear" )
+		self.assertTrue( "N" in result.keys() )
 
 if __name__ == "__main__":
     unittest.main()
