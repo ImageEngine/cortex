@@ -178,7 +178,7 @@ void newDriverOperator( OP_OperatorTable *table )
 }
 
 /// Declare our new Render Hooks for Houdini 12.0 and 12.1 only
-#if UT_MAJOR_VERSION_INT >= 12 && UT_MINOR_VERSION_INT <= 1
+#if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
 void newRenderHook( GR_RenderTable *table )
 {
 	GR_Cortex *hook = new GR_Cortex;
