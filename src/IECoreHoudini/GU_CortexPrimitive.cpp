@@ -34,6 +34,13 @@
 
 #include "GU/GU_ConvertParms.h"
 #include "GU/GU_RayIntersect.h"
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	#include "UT/UT_MemoryCounter.h"
+
+#endif
 
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Object.h"
@@ -56,10 +63,21 @@ GU_CortexPrimitive::~GU_CortexPrimitive()
 {
 }
 
+#if UT_MAJOR_VERSION_INT >= 13
+
+GA_Primitive *GU_CortexPrimitive::create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition )
+{
+	return new GU_CortexPrimitive( static_cast<GU_Detail *>( &detail ), offset );
+}
+
+#else
+
 GA_Primitive *GU_CortexPrimitive::create( GA_Detail &detail, GA_Offset offset )
 {
 	return new GU_CortexPrimitive( static_cast<GU_Detail *>( &detail ), offset );
 }
+
+#endif
 
 GU_CortexPrimitive *GU_CortexPrimitive::build( GU_Detail *geo, const IECore::Object *object )
 {
@@ -120,6 +138,39 @@ int64 GU_CortexPrimitive::getMemoryUsage() const
 	return total;
 }
 
+#if UT_MAJOR_VERSION_INT >= 13
+
+void GU_CortexPrimitive::countMemory( UT_MemoryCounter &counter ) const
+{
+	/// \todo: its unclear how we're supposed to count objects which are held by multiple
+	/// GU_CortexPrimitives, so we're just counting them every time for now.
+	counter.countUnshared( getMemoryUsage() );
+}
+
+void GU_CortexPrimitive::copyPrimitive( const GEO_Primitive *src )
+{
+	if ( src == this )
+	{
+		return;
+	}
+	
+	const GU_CortexPrimitive *orig = (const GU_CortexPrimitive *)src;
+	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
+	
+	/// \todo: should we make a shallow or a deep copy?
+	m_object = orig->m_object;
+	
+	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
+	
+	GA_Offset v = m_offset;
+	GA_Offset p = srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) );
+	
+	wireVertex( v, p );
+	vertexWrangler.copyAttributeValues( v, orig->m_offset );
+}
+
+#endif
+
 GEO_Primitive *GU_CortexPrimitive::convert( GU_ConvertParms &parms, GA_PointGroup *usedpts )
 {
 	GEO_Primitive *prim = doConvert( parms );
@@ -157,8 +208,18 @@ GEO_Primitive *GU_CortexPrimitive::doConvert( GU_ConvertParms &parms )
 		return 0;
 	}
 	
+#if UT_MAJOR_VERSION_INT >= 13
+
+	GA_PrimCompat::TypeMask type = parms.toType();
+
+#else
+
+	GA_PrimCompat::TypeMask type = parms.toType;
+
+#endif
+
 	/// \todo: should the GEO_PrimTypeCompat be registered with the converters?
-	if ( m_object->isInstanceOf( IECore::MeshPrimitiveTypeId ) && parms.toType == GEO_PrimTypeCompat::GEOPRIMPOLY )
+	if ( m_object->isInstanceOf( IECore::MeshPrimitiveTypeId ) && type == GEO_PrimTypeCompat::GEOPRIMPOLY )
 	{
 		GU_DetailHandle handle;
 		handle.allocateAndSet( (GU_Detail*)getParent(), false );
@@ -212,6 +273,8 @@ int GU_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, 
 	return result;
 }
 
+#if UT_MAJOR_VERSION_INT < 13
+
 GU_RayIntersect *GU_CortexPrimitive::createRayCache( int &persistent )
 {
 	GU_Detail *gdp = (GU_Detail *)getParent();
@@ -231,6 +294,8 @@ GU_RayIntersect *GU_CortexPrimitive::createRayCache( int &persistent )
 	
 	return intersect;
 }
+
+#endif
 
 void GU_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms )
 {
