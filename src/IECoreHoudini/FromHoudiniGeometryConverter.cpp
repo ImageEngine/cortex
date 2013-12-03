@@ -38,7 +38,6 @@
 #include "boost/lexical_cast.hpp"
 
 #include "CH/CH_Manager.h"
-#include "GEO/GEO_AttributeHandle.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_WorkArgs.h"
 

@@ -34,7 +34,6 @@
 
 #include "boost/filesystem/path.hpp"
 
-#include "GEO/GEO_AttributeHandle.h"
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
