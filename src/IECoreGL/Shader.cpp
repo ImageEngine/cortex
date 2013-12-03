@@ -880,7 +880,7 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	{
 		if( currentSelector->mode() == Selector::IDRender )
 		{
-			currentSelector->loadIDShader( m_setup.shader() );
+			currentSelector->pushIDShader( m_setup.shader() );
 		}	
 	}
 }
@@ -894,6 +894,13 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 	}
 	
 	glUseProgram( m_previousProgram );
+	if( Selector *currentSelector = Selector::currentSelector() )
+	{
+		if( currentSelector->mode() == Selector::IDRender )
+		{
+			currentSelector->popIDShader();
+		}	
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
