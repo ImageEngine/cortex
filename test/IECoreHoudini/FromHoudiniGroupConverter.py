@@ -525,9 +525,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		uvunwrap = merge.createOutputNode( "uvunwrap" )
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
+		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap']
+		if hou.applicationVersion()[0] == 13 :
+			expectedKeys.remove( "varmap" )
+		
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap'] )
+			self.assertEqual( sorted(child.keys()), expectedKeys )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		result = converter.convert()
@@ -592,9 +596,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge = self.buildScene()
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		result = converter.convert()
+		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap']
+		if hou.applicationVersion()[0] == 13 :
+			expectedKeys.remove( "varmap" )
+		
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap'] )
+			self.assertEqual( sorted(child.keys()), expectedKeys )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.Numeric )
