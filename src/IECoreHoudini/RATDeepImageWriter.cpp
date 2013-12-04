@@ -36,6 +36,7 @@
 
 #include "UT/UT_Matrix.h"
 #include "UT/UT_Options.h"
+#include "UT/UT_Version.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
@@ -73,7 +74,17 @@ RATDeepImageWriter::~RATDeepImageWriter()
 
 bool RATDeepImageWriter::canWrite( const std::string &fileName )
 {
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	return IMG_DeepShadow().create( fileName.c_str(), 2, 2 );
+
+#else
+
 	return IMG_DeepShadow().open( fileName.c_str(), 2, 2 );
+
+#endif
+
 }
 
 void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
@@ -186,12 +197,31 @@ void RATDeepImageWriter::open()
 	
 	const Imath::V2i &resolution = m_resolutionParameter->getTypedValue();
 	
-	if ( m_outputFile->open( fileName().c_str(), resolution.x, resolution.y ) )
+#if UT_MAJOR_VERSION_INT >= 13
+
+	bool success = m_outputFile->create( fileName().c_str(), resolution.x, resolution.y );
+	
+#else
+
+	bool success = m_outputFile->open( fileName().c_str(), resolution.x, resolution.y );
+
+#endif
+
+	if ( success )
 	{
 		m_outputFileName = fileName();
 		
-		// set the worldToCamera matrix
+#if UT_MAJOR_VERSION_INT >= 13
+
+		UT_SharedPtr<UT_Options> options = m_outputFile->getTextureOptions();
+
+#else
+
 		UT_Options *options = m_outputFile->getTBFOptions();
+
+#endif
+
+		// set the worldToCamera matrix
 		options->setOptionM4( "space:world", IECore::convert<UT_Matrix4>( worldToCameraParameter()->getTypedValue() ) );
 		
 		/// \todo: set the cameraToNDC parameters
