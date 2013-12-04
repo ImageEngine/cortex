@@ -110,6 +110,12 @@ class Selector : boost::noncopyable
 		/// Typically one is set up automatically in baseState(), but
 		/// if rendering must be performed with an alternative shader
 		/// then it may be passed via this function.
+		void pushIDShader( const IECoreGL::Shader *idShader );
+		
+		/// Revert to previous ID shader:
+		void popIDShader();
+		
+		/// Deprecated: calls pushIDShader
 		void loadIDShader( const IECoreGL::Shader *idShader );
 		
 		/// Returns the currently active Selector - this may be used
