@@ -630,7 +630,9 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		// open the linked scene
 		int linkDepth;
 		ConstDoubleDataPtr timeData = d->member< const DoubleData >( g_time );
-		ConstSceneInterfacePtr linkedScene = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
+		const StringData *fileName = d->member< const StringData >( g_fileName );
+		const InternedStringVectorData *sceneRoot = d->member< const InternedStringVectorData >( g_root );
+		ConstSceneInterfacePtr linkedScene = expandLink( fileName, sceneRoot, linkDepth );
 		if ( !linkedScene )
 		{
 			throw Exception( "Trying to store a broken link!" );
@@ -668,13 +670,23 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			// save the tags from the linked file to the current location so it gets propagated to the root.
 			NameList tags;
 
-			/// copy all tags as non local (so we can distinguish from tags added in the LinkedScene)
-			linkedScene->readTags(tags, true);
+			// Check if the position of the file we are trying to link to, has ancestor tags.
+			// This situation is undesirable, as it will make LinkedScene return inconsistent ancestor tags before and after the link location.
+			linkedScene->readTags(tags, SceneInterface::AncestorTag );
+			if ( tags.size() )
+			{
+				std::string pathStr;
+				SceneInterface::pathToString( sceneRoot->readable(), pathStr );
+				msg( Msg::Warning, "LinkedScene::writeAttribute", ( boost::format( "Detected ancestor tags while creating link to file %s at location %s." ) % fileName->readable() % pathStr ).str() );
+			}
+			tags.clear();
+
+			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
+			linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
 			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
 			
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
 			m_mainScene->writeAttribute( rootLinkAttribute, d->member< const InternedStringVectorData >( g_root ), time );
-		
 		}
 
 		/// we keep the information this level has a link, so we can prevent attempts to 
@@ -691,83 +703,58 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 	m_mainScene->writeAttribute(name,attribute,time);
 }
 
-bool LinkedScene::hasTag( const Name &name, bool includeChildren ) const
+bool LinkedScene::hasTag( const Name &name, int filter ) const
 {
-	if ( includeChildren )
+	if ( m_linkedScene )
 	{
-		if ( !m_linkedScene || (m_linkedScene && m_atLink) )
+		if ( m_linkedScene->hasTag( name, filter ) )
 		{
-			return m_mainScene->hasTag( name, true );
+			return true;
 		}
-		else
-		{
-			/// get only the tags that were saved in the LinkedScene at the link location (they will be applied to all the linked children)
-			if ( m_mainScene->hasTag( name, false ) )
-				return true;
 
-			return m_linkedScene->hasTag( name, true );
+		int mainFilter = filter & ( SceneInterface::AncestorTag | ( m_atLink ? SceneInterface::LocalTag : 0 ) );
+		if ( !m_atLink && (filter & SceneInterface::AncestorTag) )
+		{
+			/// child locations inside the link consider all the local tags at the link location as ancestor tags as well.
+			mainFilter |= SceneInterface::LocalTag;
 		}
+		return m_mainScene->hasTag(name, mainFilter);
 	}
 	else
 	{
-		if ( m_linkedScene && !m_atLink  )
-		{
-			return m_linkedScene->hasTag( name, false );
-		}
-		else
-		{
-			return m_mainScene->hasTag( name, false );
-		}
+		return m_mainScene->hasTag( name, filter );
 	}
 }
 
-void LinkedScene::readTags( NameList &tags, bool includeChildren ) const
+void LinkedScene::readTags( NameList &tags, int filter ) const
 {
-	if ( includeChildren && !m_readOnly )
+	if ( filter!=SceneInterface::LocalTag && !m_readOnly )
 	{
-		throw Exception( "readTags with includeChildren option is only supported when reading the scene file!" );
+		throw Exception( "readTags with filter != LocalTag is only supported when reading the scene file!" );
 	}
 
-	if ( includeChildren )
+	if ( m_linkedScene )
 	{
-		/// we want all tags (local or inherited from children or parent links)
+		m_linkedScene->readTags( tags, filter );
 
-		if ( !m_linkedScene || (m_linkedScene && m_atLink) )
+		/// Only queries ancestor tags and local tags (if at the link location) from the main scene.
+		int mainFilter = filter & ( SceneInterface::AncestorTag | ( m_atLink ? SceneInterface::LocalTag : 0 ) );
+		if ( !m_atLink && (filter & SceneInterface::AncestorTag) )
 		{
-			m_mainScene->readTags( tags, true );
+			/// child locations inside the link consider all the local tags at the link location as ancestor tags as well.
+			mainFilter |= SceneInterface::LocalTag;
 		}
-		else
+		if ( mainFilter )
 		{
-			/// get only the tags that were saved in the LinkedScene at the link location (they will be applied to all the linked children)
-			m_mainScene->readTags( tags, false );
-
-			/// add the tags coming from the linked scene
-			NameList linkTags;
-			m_linkedScene->readTags( linkTags, true );
-			tags.insert( tags.end(), linkTags.begin(), linkTags.end() );
+			NameList mainTags;
+			m_mainScene->readTags( mainTags, mainFilter );
+			tags.insert( tags.end(), mainTags.begin(), mainTags.end() );
 		}
 	}
 	else
 	{
-		// we are interested only on the tags written at the current location... 
-
-		if ( m_linkedScene )
-		{
-			m_linkedScene->readTags( tags, false );
-			if ( m_atLink )
-			{
-				// if we are at the link location, we should add the tags written in the main scene too.
-				NameList mainTags;
-				m_mainScene->readTags( mainTags, false );
-				tags.insert( tags.end(), mainTags.begin(), mainTags.end() );
-			}
-		}
-		else
-		{
-			m_mainScene->readTags( tags, false );
-		}
+		m_mainScene->readTags( tags, filter );
 	}
-
 }
 
 void LinkedScene::writeTags( const NameList &tags )
@@ -953,7 +940,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 		}
 		catch ( IECore::Exception &e )
 		{
-			IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", e.what() );
+			IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", std::string( e.what() ) + " when expanding link from file \"" + m_mainScene->fileName() + "\"" );
 			linkDepth = 0;
 			return 0;
 		}

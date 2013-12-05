@@ -36,14 +36,15 @@
 
 #include "boost/format.hpp"
 
-#include "IECoreGL/ToGLMeshConverter.h"
-#include "IECoreGL/MeshPrimitive.h"
-
 #include "IECore/MeshPrimitive.h"
 #include "IECore/TriangulateOp.h"
 #include "IECore/MeshNormalsOp.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/FaceVaryingPromotionOp.h"
+
+#include "IECoreGL/ToGLMeshConverter.h"
+#include "IECoreGL/MeshPrimitive.h"
 
 using namespace IECoreGL;
 
@@ -64,41 +65,36 @@ ToGLMeshConverter::~ToGLMeshConverter()
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
 	IECore::MeshPrimitivePtr mesh = IECore::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
-
-	if( mesh->interpolation() != "linear" )
-	{
-		// it's a subdivision mesh. in the absence of a nice subdivision algorithm to display things with,
-		// we can at least make things look a bit nicer by calculating some smooth shading normals.
-		// if interpolation is linear and no normals are provided then we assume the faceted look is intentional.
-		if( mesh->variables.find( "N" )==mesh->variables.end() )
-		{
-			IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
-			normalOp->inputParameter()->setValue( mesh );
-			normalOp->copyParameter()->setTypedValue( false );
-			normalOp->operate();
-		}
-	}
-		
-	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
-	op->inputParameter()->setValue( mesh );
-	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-
-	mesh = IECore::runTimeCast< IECore::MeshPrimitive > ( op->operate() );
-	assert( mesh );
-
-	IECore::ConstV3fVectorDataPtr p = 0;
-	IECore::PrimitiveVariableMap::const_iterator pIt = mesh->variables.find( "P" );
-	if( pIt!=mesh->variables.end() )
-	{
-		if( pIt->second.interpolation==IECore::PrimitiveVariable::Vertex )
-		{
-			p = IECore::runTimeCast<const IECore::V3fVectorData>( pIt->second.data );
-		}
-	}
-	if( !p )
+	
+	if( !mesh->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) )
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
+
+	if( mesh->variables.find( "N" )==mesh->variables.end() )
+	{
+		// the mesh has no normals - we need to explicitly add some. if it's a polygon
+		// mesh (interpolation==linear) then we add per-face normals for a faceted look
+		// and if it's a subdivision mesh we add smooth per-vertex normals.
+		IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
+		normalOp->inputParameter()->setValue( mesh );
+		normalOp->copyParameter()->setTypedValue( false );
+		normalOp->interpolationParameter()->setNumericValue(
+			mesh->interpolation() == "linear" ? IECore::PrimitiveVariable::Uniform : IECore::PrimitiveVariable::Vertex
+		);
+		normalOp->operate();
+	}
+	
+	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
+	op->inputParameter()->setValue( mesh );
+	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
+	op->copyParameter()->setTypedValue( false );
+	op->operate();
+
+	IECore::FaceVaryingPromotionOpPtr faceVaryingOp = new IECore::FaceVaryingPromotionOp;
+	faceVaryingOp->inputParameter()->setValue( mesh );
+	faceVaryingOp->copyParameter()->setTypedValue( false );
+	faceVaryingOp->operate();
 
 	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds() );
 

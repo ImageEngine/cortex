@@ -33,6 +33,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// This must come before the Cortex includes, because on OSX headers included
+// by TBB define macros which conflict with the inline functions in ai_types.h.
+#include "ai.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
@@ -262,6 +266,12 @@ void ToArnoldConverter::setParameterInternal( AtNode *node, const char *name, in
 				if( const IntData *data = dataCast<IntData>( name, value ) )
 				{
 					AiNodeSetInt( node, name, data->readable() );
+				}
+				break;
+			case AI_TYPE_BYTE :
+				if( const IntData *data = dataCast<IntData>( name, value ) )
+				{
+					AiNodeSetByte( node, name, data->readable() );
 				}
 				break;
 			case AI_TYPE_FLOAT :

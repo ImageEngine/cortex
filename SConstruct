@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=8
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="a21"	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="b4"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -1042,6 +1042,8 @@ env.Prepend(
 )
 
 if env["PLATFORM"]=="darwin" :
+	# necessary to fix errors from boost/numeric/interval.hpp
+	env.Append( CXXFLAGS = [ "-D__USE_ISOC99" ] )
 	# os x versions before snow leopard require the no-long-double flag
 	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
 	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :	
@@ -1171,6 +1173,7 @@ if env["PLATFORM"] == "posix" :
 # get the python link flags
 if pythonEnv["PYTHON_LINK_FLAGS"]=="" :
 	pythonEnv["PYTHON_LINK_FLAGS"] = getPythonConfig( pythonEnv, "--ldflags" )
+	pythonEnv["PYTHON_LINK_FLAGS"] = pythonEnv["PYTHON_LINK_FLAGS"].replace( "Python.framework/Versions/" + pythonEnv["PYTHON_VERSION"] + "/Python", "" )
 
 pythonEnv.Append( SHLINKFLAGS = pythonEnv["PYTHON_LINK_FLAGS"].split() )
 
@@ -2670,7 +2673,7 @@ if doConfigure :
 		#=====
 		# install icons
 		#=====
-		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" )
+		houdiniIcons = glob.glob( "icons/IECoreHoudini/*.svg" ) + glob.glob( "graphics/CortexLogo*.svg" )
 		houdiniIconInstall = houdiniPluginEnv.Install( "$INSTALL_HOUDINIICON_DIR", source=houdiniIcons )
 		houdiniPluginEnv.Alias( "install", houdiniIconInstall )
 		houdiniPluginEnv.Alias( "installHoudini", houdiniIconInstall )

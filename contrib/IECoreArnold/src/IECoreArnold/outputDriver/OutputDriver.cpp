@@ -36,6 +36,7 @@
 #include <stdio.h>
 
 #include "ai_drivers.h"
+#include "ai_version.h"
 
 #include "IECore/DisplayDriver.h"
 #include "IECore/BoxAlgo.h"
@@ -48,7 +49,11 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreArnold;
 
-static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
+#if ( ( AI_VERSION_ARCH_NUM * 100 ) + AI_VERSION_MAJOR_NUM ) >= 401
+#define ARNOLD_4_1
+#endif
+
+static void driverParameters( AtList *params, AtMetaDataStore *metaData )
 {
 	AiParameterSTR( "driverType", "" );
 
@@ -57,12 +62,12 @@ static AtVoid driverParameters( AtList *params, AtMetaDataStore *metaData )
 	AiMetaDataSetStr( metaData, 0, "maya.translator", "ie" );
 }
 
-static AtVoid driverInitialize( AtNode *node, AtParamValue *parameters )
+static void driverInitialize( AtNode *node, AtParamValue *parameters )
 {
 	AiDriverInitialize( node, true, new DisplayDriverPtr );
 }
 
-static AtVoid driverUpdate( AtNode *node, AtParamValue *parameters )
+static void driverUpdate( AtNode *node, AtParamValue *parameters )
 {
 }
 
@@ -86,7 +91,7 @@ static const char **driverExtension()
    return 0;
 }
 
-static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
+static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
 {	
 	std::vector<std::string> channelNames;
 	
@@ -151,11 +156,28 @@ static AtVoid driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBo
 	}
 }
 
-static AtVoid driverPrepareBucket( AtNode *node, AtInt x, AtInt y, AtInt sx, AtInt sy, AtInt tId )
+#ifdef ARNOLD_4_1
+
+static bool driverNeedsBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
+{
+	return true;
+}
+
+#endif // ARNOLD_4_1
+
+static void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
 {
 }
 
-static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, AtInt x, AtInt y, AtInt sx, AtInt sy ) 
+#ifdef ARNOLD_4_1
+
+static void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx, int sy, int tId )
+{
+}
+
+#endif // ARNOLD_4_1
+
+static void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx, int sy )
 {
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
 	if( !*driver )
@@ -169,7 +191,7 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 	interleavedData.resize( sx * sy * numOutputChannels );
 
 	int pixelType = 0;
-	const AtVoid *bucketData;
+	const void *bucketData;
 	int outChannelOffset = 0;
 	while( AiOutputIteratorGetNext( iterator, 0, &pixelType, &bucketData ) )
 	{
@@ -224,7 +246,7 @@ static AtVoid driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator
 	}
 }
 
-static AtVoid driverClose( AtNode *node, struct AtOutputIterator *iterator )
+static void driverClose( AtNode *node, struct AtOutputIterator *iterator )
 {
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
 	if( *driver )
@@ -242,14 +264,14 @@ static AtVoid driverClose( AtNode *node, struct AtOutputIterator *iterator )
 	}
 }
 
-static AtVoid driverFinish( AtNode *node )
+static void driverFinish( AtNode *node )
 {
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
 	delete driver;
 	AiDriverDestroy( node );
 }
 
-AI_EXPORT_LIB AtBoolean NodeLoader( int i, AtNodeLib *node )
+AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 {
 	if( i==0 )
 	{		
@@ -263,7 +285,13 @@ AI_EXPORT_LIB AtBoolean NodeLoader( int i, AtNodeLib *node )
 			driverSupportsPixelType,
 			driverExtension,
 			driverOpen,
+#ifdef ARNOLD_4_1
+			driverNeedsBucket,
+#endif
 			driverPrepareBucket,
+#ifdef ARNOLD_4_1
+			driverProcessBucket,
+#endif
 			driverWriteBucket,
 			driverClose
 		};

@@ -35,8 +35,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <stdio.h> 
+
 #include "IECoreGL/GL.h"
 #include "IECoreGL/IECoreGL.h"
+#include "IECoreGL/FrameBuffer.h"
+#include "IECoreGL/ColorTexture.h"
+#include "IECoreGL/DepthTexture.h"
 
 #if defined( __APPLE__ )
 
@@ -49,6 +54,8 @@
 #endif
 
 #include "IECore/MessageHandler.h"
+
+static int g_glslVersion = 0;
 
 void IECoreGL::init( bool glAlreadyInitialised )
 {
@@ -117,5 +124,30 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			IECore::msg( IECore::Msg::Error, "IECoreGL::init", boost::format( "GLEW initialisation failed (%s)." ) % glewGetErrorString( initStatus ) );
 		}
 		init = true;
+		
+		const char *s = (const char *)glGetString( GL_SHADING_LANGUAGE_VERSION );
+		int major = 0; int minor = 0;
+		sscanf( s, "%d.%d", &major, &minor );
+		g_glslVersion = major * 100 + minor;
+	
+#if defined( __APPLE__ )
+
+		if( !glAlreadyInitialised )
+		{
+			// we have to do this bit after GLEW initialisation.
+			static FrameBufferPtr g_frameBuffer = new FrameBuffer();
+			g_frameBuffer->setColor( new ColorTexture( 32, 23 ) );
+			g_frameBuffer->setDepth( new DepthTexture( 32, 32 ) );
+			g_frameBuffer->validate();
+			glBindFramebuffer( GL_FRAMEBUFFER, g_frameBuffer->frameBuffer() );
+		}
+
+#endif
+		
 	}
+}
+
+int IECoreGL::glslVersion()
+{
+	return g_glslVersion;
 }

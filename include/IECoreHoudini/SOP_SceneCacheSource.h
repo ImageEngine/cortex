@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_SOPSCENECACHESOURCE_H
 
 #include "SOP/SOP_Node.h"
+#include "UT/UT_StringMMPattern.h"
 
 #include "IECore/SceneCache.h"
 #include "IECore/MatrixTransform.h"
@@ -73,15 +74,36 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 	
 	private :
 		
+		struct Parameters
+		{
+			GeometryType geometryType;
+			std::string attributeFilter;
+			std::string attributeCopy;
+			UT_StringMMPattern shapeFilter;
+			UT_StringMMPattern tagFilter;
+			
+			bool hasAnimatedTopology;
+			bool hasAnimatedPrimVars;
+			std::vector<IECore::InternedString> animatedPrimVars;
+			std::map<std::string, GA_Range> namedRanges;
+		};
+		
+		// Modify the object according the parameters, copying if neccessary.
+		IECore::ConstObjectPtr modifyObject( const IECore::Object *object, Parameters &params );
 		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
-		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, bool &hasAnimatedTopology, bool &hasAnimatedPrimVars, std::vector<IECore::InternedString> &animatedPrimVars );
+		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( const IECore::Object *object, const std::string &name, const std::string &attributeFilter, GeometryType geometryType, bool animatedTopology, bool hasAnimatedPrimVars, const std::vector<IECore::InternedString> &animatedPrimVars );
+		bool convertObject( const IECore::Object *object, const std::string &name, Parameters &params );
 		
-		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, const UT_StringMMPattern &tagFilter, const UT_StringMMPattern &shapeFilter, const std::string &attributeFilter, GeometryType geometryType, size_t rootSize );
+		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
+		
+		struct InternedStringSort
+		{
+			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
+		};
 
 };
 

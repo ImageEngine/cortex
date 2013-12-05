@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -72,6 +72,9 @@ class ImageDiffOp : public Op
 		BoolParameter * skipMissingChannels();
 		const BoolParameter * skipMissingChannels() const;
 
+		BoolParameter * alignDisplayWindows();
+		const BoolParameter * alignDisplayWindows() const;
+
 	protected :
 
 		virtual ObjectPtr doOperation( const CompoundObject * operands );
@@ -82,6 +85,7 @@ class ImageDiffOp : public Op
 		ImagePrimitiveParameterPtr m_imageBParameter;
 		FloatParameterPtr m_maxErrorParameter;
 		BoolParameterPtr m_skipMissingChannelsParameter;
+		BoolParameterPtr m_alignDisplayWindowsParameter;
 
 		class FloatConverter;
 

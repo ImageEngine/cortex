@@ -83,6 +83,8 @@ class CurvesPrimitive : public Primitive
 
 	private :
 
+		void renderMode( const State *state, bool &linear, bool &ribbons ) const;
+
 		static const std::string &cubicLinesGeometrySource();
 		static const std::string &cubicRibbonsGeometrySource();
 		static const std::string &linearRibbonsGeometrySource();

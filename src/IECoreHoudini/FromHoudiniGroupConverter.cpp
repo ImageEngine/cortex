@@ -41,6 +41,7 @@
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
+#include "IECoreHoudini/GU_CortexPrimitive.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -118,6 +119,29 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 		}
 	}
 	
+	// are there multiple GU_CortexPrimitives holding VisibleRenderables?
+	unsigned numCortex = 0;
+	unsigned numVisibleRenderable = 0;
+	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	{
+		const GA_Primitive *prim = primitives.get( it.getOffset() );
+		if ( prim->getTypeId() != GU_CortexPrimitive::typeId() )
+		{
+			continue;
+		}
+		
+		numCortex++;
+		if ( IECore::runTimeCast<const VisibleRenderable>( ((GU_CortexPrimitive *)prim)->getObject() ) )
+		{
+			numVisibleRenderable++;
+		}
+	}
+	
+	if ( numVisibleRenderable > 1 && numCortex == numVisibleRenderable )
+	{
+		return Ideal;
+	}
+	
 	// are the primitives split into groups?
 	UT_PtrArray<const GA_ElementGroup*> primGroups;
 	geo->getElementGroupList( GA_ATTRIB_PRIMITIVE, primGroups );
@@ -160,13 +184,6 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		DetailSplitterPtr splitter = new DetailSplitter( handle() );
 		std::vector<std::string> children;
 		splitter->values( children );
-		
-		if ( children.empty() )
-		{
-			doUnnamedConversion( GU_DetailHandleAutoReadLock( handle() ).getGdp(), result, operands );
-			return result;
-		}
-		
 		for ( std::vector<std::string>::iterator it = children.begin(); it != children.end(); ++it )
 		{
 			const std::string &name = *it;
@@ -313,9 +330,33 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, PrimIdGroupMap &group
 
 void FromHoudiniGroupConverter::doUnnamedConversion( const GU_Detail *geo, Group *result, const CompoundObject *operands, const std::string &name ) const
 {
+	GA_OffsetList unusedOffsets;
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+	for ( GA_Iterator pIt=geo->getPrimitiveRange().begin(); !pIt.atEnd(); ++pIt )
+	{
+		if ( primitives.get( pIt.getOffset() )->getTypeId() == GU_CortexPrimitive::typeId() )
+		{
+			GA_OffsetList offsets;
+			offsets.append( pIt.getOffset() );
+			GU_Detail *newGeo = new GU_Detail();
+			GA_Range thisPrim( geo->getPrimitiveMap(), offsets );
+			newGeo->mergePrimitives( *geo, thisPrim );
+			ObjectPtr object = doDetailConversion( newGeo, operands );
+			if ( VisibleRenderablePtr renderable = IECore::runTimeCast<VisibleRenderable>( object ) )
+			{
+				result->addChild( renderable );
+			}
+		}
+		else
+		{
+			unusedOffsets.append( pIt.getOffset() );
+		}
+	}
+	
 	GU_Detail newGeo( (GU_Detail*)geo );
 	GA_PrimitiveGroup *newGroup = static_cast<GA_PrimitiveGroup*>( newGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__doUnnamedConversion" ) );
-	newGroup->toggleRange( newGeo.getPrimitiveRange() );
+	GA_Range unusedRange( newGeo.getPrimitiveMap(), unusedOffsets );
+	newGroup->toggleRange( unusedRange );
 	
 	VisibleRenderablePtr renderable = 0;
 	doGroupConversion( &newGeo, newGroup, renderable, operands );

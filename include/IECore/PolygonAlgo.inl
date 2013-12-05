@@ -58,21 +58,17 @@ typename std::iterator_traits<Iterator>::value_type polygonNormal( Iterator firs
 
 	Vec n( 0 );
 
-	CircularIt v0It( first, last, first );
-	CircularIt v1It( v0It ); v1It++;
+	CircularIt vIt( first, last, first );
 	do
 	{
-		const Vec &v0 = *v0It;
-		const Vec &v1 = *v1It;
+		const Vec &v0 = *vIt; ++vIt;
+		const Vec &v1 = *vIt;
 
 		n.x += (v0.y - v1.y) * (v0.z + v1.z);
 		n.y += (v0.z - v1.z) * (v0.x + v1.x);
 		n.z += (v0.x - v1.x) * (v0.y + v1.y);
-
-		v0It++;
-		v1It++;
 	}
-	while( v0It != first );
+	while( vIt != first );
 
 	return normalized ? n.normalized() : n;
 }
@@ -89,19 +85,15 @@ Winding polygonWinding( Iterator first, Iterator last )
 
 	Real z( 0 );
 
-	CircularIt v0It( first, last, first );
-	CircularIt v1It( v0It ); v1It++;
+	CircularIt vIt( first, last, first );
 	do
 	{
-		const Vec &v0 = *v0It;
-		const Vec &v1 = *v1It;
+		const Vec &v0 = *vIt; ++vIt;
+		const Vec &v1 = *vIt;
 
 		z += (v0.x - v1.x) * (v0.y + v1.y);
-
-		v0It++;
-		v1It++;
 	}
-	while( v0It != first );
+	while( vIt != first );
 
 	return z < Real( 0 ) ? ClockwiseWinding : CounterClockwiseWinding;
 }

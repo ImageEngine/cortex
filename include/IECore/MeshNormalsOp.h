@@ -36,6 +36,7 @@
 #define IECORE_MESHNORMALSOP_H
 
 #include "IECore/TypedPrimitiveOp.h"
+#include "IECore/NumericParameter.h"
 
 namespace IECore
 {
@@ -57,6 +58,8 @@ class MeshNormalsOp : public MeshPrimitiveOp
 		StringParameter * nPrimVarNameParameter();
 		const StringParameter * nPrimVarNameParameter() const;
 
+		IntParameter *interpolationParameter();
+		const IntParameter *interpolationParameter() const;
 
 	protected:
 

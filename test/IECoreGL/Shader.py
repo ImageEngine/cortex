@@ -282,6 +282,10 @@ class TestShader( unittest.TestCase ) :
 							
 	def testGeometryShader( self ) :
 	
+		if IECoreGL.glslVersion() < 150 :
+			# can't test geometry shaders if they don't exist
+			return
+			
 		geometrySource = """
 		#version 150
 		

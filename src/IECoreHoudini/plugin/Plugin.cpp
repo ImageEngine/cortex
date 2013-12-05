@@ -55,9 +55,10 @@
 #include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
-#include "IECoreHoudini/SOP_ToHoudiniConverter.h"
+#include "IECoreHoudini/SOP_CortexConverter.h"
 #include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
+#include "IECoreHoudini/SOP_SceneCacheTransform.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GR_Cortex.h"
@@ -87,21 +88,21 @@ void newSopOperator(OP_OperatorTable *table)
 		SOP_OpHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
 		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	opHolder->setIconName( "SOP_ieOpHolder" );
+	opHolder->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *proceduralHolder = new OP_Operator(
 		"ieProceduralHolder", "Cortex Procedural",
 		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
     		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
-	proceduralHolder->setIconName( "SOP_ieProceduralHolder" );
+	proceduralHolder->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *converter = new OP_Operator(
-		SOP_ToHoudiniConverter::typeName, "Cortex Convert",
-		SOP_ToHoudiniConverter::create, SOP_ToHoudiniConverter::parameters, 1,	1,
-		SOP_ToHoudiniConverter::variables, OP_FLAG_GENERATOR
+		SOP_CortexConverter::typeName, "Cortex Convert",
+		SOP_CortexConverter::create, SOP_CortexConverter::parameters, 1,	1,
+		SOP_CortexConverter::variables, OP_FLAG_GENERATOR
 	);
-	converter->setIconName( "SOP_ieToHoudiniConverter" );
+	converter->setIconName( "CortexLogoMini" );
 	
 	OP_Operator *cacheReader = new OP_Operator(
 		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
@@ -115,19 +116,28 @@ void newSopOperator(OP_OperatorTable *table)
 		NULL, OP_FLAG_GENERATOR
 	);
 	/// \todo: get a new icon
-	sceneCacheSource->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheSource->setIconName( "SOP_ieCortexConverter" );
+	
+	OP_Operator *sceneCacheTransform = new OP_Operator(
+		SOP_SceneCacheTransform::typeName, "SceneCache Xform",
+		SOP_SceneCacheTransform::create, SOP_SceneCacheTransform::buildParameters(), 1, 1, NULL
+	);
+	/// \todo: get a new icon
+	sceneCacheTransform->setIconName( "SOP_xform" );
 	
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( cacheReader );
 	table->addOperator( sceneCacheSource );
+	table->addOperator( sceneCacheTransform );
 	
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
 	table->addOpHidden( cacheReader->getName() );
 	table->addOpHidden( sceneCacheSource->getName() );
+	table->addOpHidden( sceneCacheTransform->getName() );
 }
 
 void newObjectOperator( OP_OperatorTable *table )
@@ -137,7 +147,7 @@ void newObjectOperator( OP_OperatorTable *table )
 		OBJ_SceneCacheTransform::create, OBJ_SceneCacheTransform::buildParameters(), 0, 1
 	);
 	/// \todo: get a new icon
-	sceneCacheTransform->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheTransform->setIconName( "SOP_ieCortexConverter" );
 	
 	OP_Operator *sceneCacheGeometry = new OP_Operator(
 		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
@@ -160,8 +170,7 @@ void newDriverOperator( OP_OperatorTable *table )
 		ROP_SceneCacheWriter::create, ROP_SceneCacheWriter::buildParameters(), 0, 999, 0,
 		OP_FLAG_GENERATOR
 	);
-	/// \todo: get a new icon
-	sceneCacheWriter->setIconName( "SOP_ieToHoudiniConverter" );
+	sceneCacheWriter->setIconName( "CortexLogoMini" );
 	
 	table->addOperator( sceneCacheWriter );
 	

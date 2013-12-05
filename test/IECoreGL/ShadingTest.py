@@ -56,8 +56,9 @@ class ShadingTest( unittest.TestCase ) :
 		s = IECore.Shader( "test", "gl:surface" )
 		
 		s.parameters["gl:fragmentSource"] = """
+			#include "IECoreGL/FragmentShader.h"
 			
-			in vec3 fragmentCs;
+			IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
 						
 			void main()
 			{
@@ -576,6 +577,10 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testGeometryShaderViaParameters( self ) :
 	
+		if IECoreGL.glslVersion() < 150 :
+			# no point testing unavailable functionality
+			return
+	
 		g = IECore.Group()
 		
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
@@ -602,6 +607,10 @@ class ShadingTest( unittest.TestCase ) :
 		
 	def testGeometryShaderViaFile( self ) :
 	
+		if IECoreGL.glslVersion() < 150 :
+			# no point testing unavailable functionality
+			return
+
 		g = IECore.Group()
 		
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )

@@ -43,6 +43,9 @@
 #include "SOP/SOP_Node.h"
 #include "HOM/HOM_Node.h"
 #include "HOM/HOM_Geometry.h"
+#include "RE/RE_Render.h"
+#include "RE/RE_Window.h"
+#include "RE/RE_Server.h"
 
 #include "IECore/Object.h"
 #include "IECore/Parameterised.h"
@@ -95,6 +98,23 @@ static void *extractNodeFromHOM( PyObject *o )
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
+// This little function makes the OpenGL context for Houdini's main window
+// current. This can be necessary when wanting to create your own OpenGL context
+// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
+// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
+static void makeMainGLContextCurrent()
+{
+	RE_Window *window = RE_OGLRender::getMainContext();
+	RE_Render *render = window->getRender();
+	RE_Server *server = render->getServer();
+
+	server->GLMakeCurrent(
+		window->getGraphicsDrawable(),
+		render->getContext(),
+		false
+	);
+}
+
 BOOST_PYTHON_MODULE(_IECoreHoudini)
 {
 	// setup our global python context
@@ -134,4 +154,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
 	
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
+		
+	def( "makeMainGLContextCurrent", &makeMainGLContextCurrent );
+	
 }

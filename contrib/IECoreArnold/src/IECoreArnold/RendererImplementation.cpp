@@ -33,6 +33,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// This must come before the Cortex includes, because on OSX headers included
+// by TBB define macros which conflict with the inline functions in ai_types.h.
+#include "ai.h"
+
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
@@ -113,6 +117,10 @@ IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proc
 	/// \todo Initialise stacks properly!!
 	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
+	// the AttributeState constructor makes a surface shader node, and
+	// it's essential that we return that as one of the nodes created by
+	// the procedural - otherwise arnold hangs.
+	addNode( m_attributeStack.top().surfaceShader );
 }
 
 void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
@@ -639,7 +647,7 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	AiNodeSetPnt( procedural, "min", bound.min.x, bound.min.y, bound.min.z );
 	AiNodeSetPnt( procedural, "max", bound.max.x, bound.max.y, bound.max.z );
 	
-	AiNodeSetPtr( procedural, "funcptr", (AtVoid *)procLoader );
+	AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
 	
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;

@@ -138,6 +138,7 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	params.depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	params.hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
 	getAttributeFilter( params.attributeFilter );
+	getAttributeCopy( params.attributeCopy );
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilterStr );
 	getTagFilter( params.tagFilter );
@@ -212,6 +213,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	geo->setSpace( (OBJ_SceneCacheGeometry::Space)space );
 	geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)params.geometryType );
 	geo->setAttributeFilter( params.attributeFilter );
+	geo->setAttributeCopy( params.attributeCopy );
 	geo->setShapeFilter( params.shapeFilter );
 	
 	bool visible = tagged( scene, params.tagFilter );
@@ -236,6 +238,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	xform->setSpace( Local );
 	xform->setGeometryType( (OBJ_SceneCacheTransform::GeometryType)params.geometryType );
 	xform->setAttributeFilter( params.attributeFilter );
+	xform->setAttributeCopy( params.attributeCopy );
 	xform->setShapeFilter( params.shapeFilter );
 	xform->setInt( pHierarchy.getToken(), 0, 0, params.hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, params.depth );
@@ -338,8 +341,9 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 
 void OBJ_SceneCacheTransform::pushToHierarchy()
 {
-	UT_String attribFilter, shapeFilter;
+	UT_String attribFilter, attribCopy, shapeFilter;
 	getAttributeFilter( attribFilter );
+	getAttributeCopy( attribCopy );
 	getShapeFilter( shapeFilter );
 	GeometryType geometryType = getGeometryType();
 	
@@ -354,6 +358,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	{
 		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children[i] );
 		xform->setAttributeFilter( attribFilter );
+		xform->setAttributeCopy( attribCopy );
 		xform->setShapeFilter( shapeFilter );
 		xform->setGeometryType( geometryType );
 		
@@ -379,6 +384,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	{
 		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children[i] );
 		geo->setAttributeFilter( attribFilter );
+		geo->setAttributeCopy( attribCopy );
 		geo->setShapeFilter( shapeFilter );
 		geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geometryType );
 		
@@ -409,6 +415,7 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 	hierarchy = other.hierarchy;
 	depth = other.depth;
 	attributeFilter = other.attributeFilter;
+	attributeCopy = other.attributeCopy;
 	shapeFilter = other.shapeFilter;
 	tagFilterStr = other.tagFilterStr;
 	tagFilter.compile( tagFilterStr );
@@ -422,28 +429,36 @@ OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSce
 
 OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
 {
-	HoudiniScene::registerCustomAttribute( LinkedScene::linkAttribute, OBJ_SceneCacheTransform::hasLink, OBJ_SceneCacheTransform::readLink );
+	HoudiniScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
 	HoudiniScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
 }
 
-bool OBJ_SceneCacheTransform::hasLink( const OP_Node *node )
+void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
 	{
-		return false;
+		return;
 	}
+	
+	const SceneCacheNode<OP_Node> *sceneNode = reinterpret_cast< const SceneCacheNode<OP_Node>* >( node );
+	/// \todo: do we need to ensure the file exists first?
+	ConstSceneInterfacePtr scene = OBJ_SceneCacheTransform::scene( sceneNode->getFile(), sceneNode->getPath() );
+	if ( !scene )
+	{
+		return;
+	}
+	
+	scene->attributeNames( attrs );
 	
 	const char *expanded = pExpanded.getToken();
 	if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 	{
-		return true;
+		attrs.push_back( LinkedScene::linkAttribute );
 	}
-	
-	return false;
 }
 
-IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, double time )
+IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *node, const SceneInterface::Name &name, double time )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -459,10 +474,21 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readLink( const OP_Node *node, d
 		return 0;
 	}
 	
-	return LinkedScene::linkAttributeData( scene, time );
+	if ( name == LinkedScene::linkAttribute )
+	{
+		const char *expanded = pExpanded.getToken();
+		if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
+		{
+			return LinkedScene::linkAttributeData( scene, time );
+		}
+		
+		return 0;
+	}
+	
+	return scene->readAttribute( name, time );
 }
 
-bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag )
+bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, int filter )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -478,10 +504,10 @@ bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface:
 		return false;
 	}
 	
-	return scene->hasTag( tag );
+	return scene->hasTag( tag, filter );
 }
 
-void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, bool includeChildren )
+void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::NameList &tags, int filter )
 {
 	// make sure its a SceneCacheNode
 	if ( !node->hasParm( pFile.getToken() ) || !node->hasParm( pRoot.getToken() ) )
@@ -497,7 +523,7 @@ void OBJ_SceneCacheTransform::readTags( const OP_Node *node, SceneInterface::Nam
 		return;
 	}
 	
-	scene->readTags( tags, includeChildren );
+	scene->readTags( tags, filter );
 }
 
 int *OBJ_SceneCacheTransform::getIndirect() const

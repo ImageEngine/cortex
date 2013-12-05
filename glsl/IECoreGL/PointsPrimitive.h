@@ -36,14 +36,14 @@
 #define IECOREGL_POINTSPRIMITIVE_H
 
 #include "IECoreGL/MatrixAlgo.h"
+#include "IECoreGL/VertexShader.h"
 
 #define IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS \
 	\
-	in vec3 vertexP;\
-	in float vertexwidth;\
-	in float vertexpatchaspectratio;\
-	in float vertexpatchrotation;\
-	\
+	IECOREGL_VERTEXSHADER_IN vec3 vertexP;\
+	IECOREGL_VERTEXSHADER_IN float vertexwidth;\
+	IECOREGL_VERTEXSHADER_IN float vertexpatchaspectratio;\
+	IECOREGL_VERTEXSHADER_IN float vertexpatchrotation;\
 	uniform bool useWidth;\
 	uniform bool useAspectRatio;\
 	uniform bool useRotation;\

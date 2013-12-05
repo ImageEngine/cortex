@@ -72,6 +72,9 @@ class HoudiniScene : public IECore::SceneInterface
 
 		virtual IECore::ConstDataPtr readTransform( double time ) const;
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
+		/// \todo: consider making these virtual methods of SceneInterface itself
+		IECore::ConstDataPtr readWorldTransform( double time ) const;
+		Imath::M44d readWorldTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const IECore::Data *transform, double time );
 
 		virtual bool hasAttribute( const Name &name ) const;
@@ -79,8 +82,8 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
 
-		virtual bool hasTag( const Name &name, bool includeChildren = true ) const;
-		virtual void readTags( NameList &tags, bool includeChildren = true ) const;
+		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
+		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
 		virtual void writeTags( const NameList &tags );
 
 		virtual bool hasObject() const;
@@ -117,13 +120,15 @@ class HoudiniScene : public IECore::SceneInterface
 		
 		typedef boost::function<bool (const OP_Node *)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, double &)> ReadFn;
-		typedef boost::function<bool (const OP_Node *, const Name &)> HasTagFn;
-		typedef boost::function<void (const OP_Node *, NameList &, bool)> ReadTagsFn;
+		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, const Name &, double &)> ReadAttrFn;
+		typedef boost::function<bool (const OP_Node *, const Name &, int)> HasTagFn;
+		typedef boost::function<void (const OP_Node *, NameList &, int)> ReadTagsFn;
+		typedef boost::function<void (const OP_Node *, NameList &)> ReadNamesFn;
 		
 		// Register callbacks for custom named attributes.
-		// The has function will be called during hasAttribute and it stops in the first one that returns true.
-		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
-		static void registerCustomAttribute( const Name &attrName, HasFn hasFn, ReadFn readFn );
+		// The names function will be called during attributeNames and hasAttribute.
+		// The read method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
+		static void registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn );
 		
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
@@ -152,10 +157,10 @@ class HoudiniScene : public IECore::SceneInterface
 		const char *contentPathValue() const;
 		
 		/// Struct for registering readers for custom Attributes.
-		struct CustomReader
+		struct CustomAttributeReader
 		{
-			HasFn m_has;
-			ReadFn m_read;
+			ReadNamesFn m_names;
+			ReadAttrFn m_read;
 		};
 		
 		/// Struct for registering readers for custom Tags.
@@ -165,7 +170,7 @@ class HoudiniScene : public IECore::SceneInterface
 			ReadTagsFn m_read;
 		};
 		
-		static std::map<Name, CustomReader> &customAttributeReaders();
+		static std::vector<CustomAttributeReader> &customAttributeReaders();
 		static std::vector<CustomTagReader> &customTagReaders();
 		
 		UT_String m_nodePath;

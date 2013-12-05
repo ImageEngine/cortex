@@ -45,6 +45,7 @@
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/IECoreGL.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -147,8 +148,8 @@ void CurvesPrimitive::addPrimitiveVariable( const std::string &name, const IECor
 
 const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *state ) const
 {
-	bool linear = m_memberData->basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value();
-	bool ribbons = !state->get<UseGLLines>()->value();
+	bool linear, ribbons;
+	renderMode( state, linear, ribbons );
 
 	if( linear && !ribbons  )
 	{
@@ -205,9 +206,9 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 
 void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) const
 {
-	bool linear = m_memberData->basis==IECore::CubicBasisf::linear() || currentState->get<IgnoreBasis>()->value();
-	bool ribbons = !currentState->get<UseGLLines>()->value();
-
+	bool linear, ribbons;
+	renderMode( currentState, linear, ribbons );
+	
 	if( !ribbons )
 	{
 		glLineWidth( currentState->get<GLLineWidth>()->value() );
@@ -237,6 +238,19 @@ void CurvesPrimitive::renderInstances( size_t numInstances ) const
 	ensureVertIds();
 	Buffer::ScopedBinding indexBinding( *(m_memberData->vertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
 	glDrawElementsInstancedARB( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, 0, numInstances );
+}
+
+void CurvesPrimitive::renderMode( const State *state, bool &linear, bool &ribbons ) const
+{
+	if( glslVersion() < 150 )
+	{
+		linear = true;
+		ribbons = false;
+		return;
+	}
+	
+	linear = m_memberData->basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value();
+	ribbons = !state->get<UseGLLines>()->value();
 }
 
 const std::string &CurvesPrimitive::cubicLinesGeometrySource()

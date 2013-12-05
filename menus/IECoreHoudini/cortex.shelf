@@ -40,6 +40,15 @@ soptoolutils.genericTool(kwargs, 'ieCortexConverter')]]></script>
     <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieSceneCacheSource')]]></script>
   </tool>
   
+  <!-- SceneCacheSource SOP -->
+  <tool name="cortexSceneCacheTransformSop" label="SceneCache Xform" icon="SOP_xform">
+    <toolMenuContext name="network">
+      <contextNetType>SOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Cortex</toolSubmenu>
+    <script scriptType="python"><![CDATA[import soptoolutils; soptoolutils.genericTool(kwargs, 'ieSceneCacheTransform')]]></script>
+  </tool>
+  
   <!-- SceneCacheTransform OBJ -->
   <tool name="cortexSceneCacheTransform" label="SceneCache Xform" icon="SOP_ieToHoudiniConverter">
     <toolMenuContext name="network">

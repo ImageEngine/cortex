@@ -52,6 +52,7 @@
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/TextureLoader.h"
+#include "IECoreGL/IECoreGL.h"
 
 using namespace IECoreGL;
 
@@ -99,6 +100,13 @@ class Selector::Implementation : public IECore::RefCounted
 			gluPickMatrix( regionCenter.x, regionCenter.y, regionSize.x, regionSize.y, viewport );
 			glMultMatrixd( projectionMatrix );
 			glMatrixMode( GL_MODELVIEW );
+
+			// fall back to GLSelect mode if we can't
+			// support IDRender mode.
+			if( m_mode == IDRender && glslVersion() < 330 )
+			{
+				m_mode = GLSelect;
+			}
 
 			switch( m_mode )
 			{
@@ -181,7 +189,29 @@ class Selector::Implementation : public IECore::RefCounted
 			return m_baseState;
 		}
 
-		void loadIDShader( const IECoreGL::Shader *shader )
+		void pushIDShader( const IECoreGL::Shader *shader )
+		{
+			bindIDShader( shader );
+			m_IDShaderStack.push( shader );
+		}
+		
+		void popIDShader()
+		{
+			m_IDShaderStack.pop();
+			if( m_IDShaderStack.size() )
+			{
+				bindIDShader( m_IDShaderStack.top() );
+			}
+		}
+
+		static Selector *currentSelector()
+		{
+			return g_currentSelector;
+		}
+
+	private :
+		
+		void bindIDShader( const IECoreGL::Shader *shader )
 		{
 			if( shader == m_currentIDShader )
 			{
@@ -206,7 +236,7 @@ class Selector::Implementation : public IECore::RefCounted
 			
 			m_currentIDShader = shader;
 			glUseProgram( m_currentIDShader->program() );
-					
+			
 			std::vector<GLenum> buffers;
 			buffers.resize( fragDataLocation + 1, GL_NONE );
 			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
@@ -214,14 +244,7 @@ class Selector::Implementation : public IECore::RefCounted
 			
 			loadNameIDRender( m_currentName );
 		}
-
-		static Selector *currentSelector()
-		{
-			return g_currentSelector;
-		}
-
-	private :
-
+		
 		Mode m_mode;
 		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
@@ -277,6 +300,7 @@ class Selector::Implementation : public IECore::RefCounted
 		boost::shared_ptr<FrameBuffer::ScopedBinding> m_frameBufferBinding;
 		GLint m_prevProgram;
 		ConstShaderPtr m_currentIDShader;
+		std::stack<ConstShaderPtr> m_IDShaderStack;
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
 		
@@ -338,7 +362,7 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
-			loadIDShader( m_baseState->get<ShaderStateComponent>()->shaderSetup()->shader() );	
+			pushIDShader( m_baseState->get<ShaderStateComponent>()->shaderSetup()->shader() );	
 		}
 
 		void loadNameIDRender( GLuint name )
@@ -413,11 +437,11 @@ class Selector::Implementation : public IECore::RefCounted
 		{
 			if( m_queries.size() )
 			{
-				glEndQuery( GL_ANY_SAMPLES_PASSED );
+				glEndQueryARB( GL_SAMPLES_PASSED_ARB );
 			}
 			m_queries.push_back( 0 );
-			glGenQueries( 1, &(m_queries[m_queries.size()-1]) );
-			glBeginQuery( GL_ANY_SAMPLES_PASSED, m_queries[m_queries.size()-1] );
+			glGenQueriesARB( 1, &(m_queries[m_queries.size()-1]) );
+			glBeginQueryARB( GL_SAMPLES_PASSED_ARB, m_queries[m_queries.size()-1] );
 			m_queryNames.push_back( name );
 		}
 
@@ -425,20 +449,20 @@ class Selector::Implementation : public IECore::RefCounted
 		{	
 			if( m_queries.size() )
 			{
-				glEndQuery( GL_ANY_SAMPLES_PASSED );
+				glEndQueryARB( GL_SAMPLES_PASSED_ARB );
 			}
-		
+
 			for( size_t i = 0, e = m_queries.size(); i < e; i++ )
 			{
 				GLuint samplesPassed = 0;
-				glGetQueryObjectuiv( m_queries[i], GL_QUERY_RESULT, &samplesPassed );
+				glGetQueryObjectuivARB( m_queries[i], GL_QUERY_RESULT_ARB, &samplesPassed );
 				if( samplesPassed )
 				{
 					m_hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
 				}
 			}
 		
-			glDeleteQueries( m_queries.size(), &(m_queries[0]) );
+			glDeleteQueriesARB( m_queries.size(), &(m_queries[0]) );
 			m_baseState->add( const_cast<DepthTestStateComponent *>( State::defaultState()->get<DepthTestStateComponent>() ), false /* no override */ );
 		}
 
@@ -476,7 +500,15 @@ State *Selector::baseState()
 
 void Selector::loadIDShader( const IECoreGL::Shader *idShader )
 {
-	m_implementation->loadIDShader( idShader );
+	m_implementation->pushIDShader( idShader );
+}
+void Selector::pushIDShader( const IECoreGL::Shader *idShader )
+{
+	m_implementation->pushIDShader( idShader );
+}
+void Selector::popIDShader()
+{
+	m_implementation->popIDShader();
 }
 
 Selector *Selector::currentSelector()

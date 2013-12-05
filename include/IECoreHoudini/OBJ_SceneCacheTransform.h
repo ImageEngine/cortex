@@ -101,6 +101,7 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 			Hierarchy hierarchy;
 			Depth depth;
 			UT_String attributeFilter;
+			UT_String attributeCopy;
 			UT_String shapeFilter;
 			UT_String tagFilterStr;
 			UT_StringMMPattern tagFilter;
@@ -132,10 +133,10 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 		};
 		static HoudiniSceneAddOn g_houdiniSceneAddOn;
 		
-		static bool hasLink( const OP_Node *node );
-		static IECore::ConstObjectPtr readLink( const OP_Node *node, double time );
-		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag );
-		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, bool includeChildren );
+		static void attributeNames( const OP_Node *node, IECore::SceneInterface::NameList &attrs );
+		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECore::SceneInterface::Name &name, double time );
+		static bool hasTag( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter );
+		static void readTags( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter );
 		
 		static int *g_indirection;
 

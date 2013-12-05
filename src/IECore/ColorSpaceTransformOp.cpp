@@ -380,7 +380,6 @@ void ColorSpaceTransformOp::modifyTypedPrimitive( ImagePrimitive * image, const 
 
 	bool first = true;
 	ConversionInfo previous;
-	std::vector< ConversionInfo >::const_iterator it = conversions.begin();
 	ConversionInfo current;
 	for( std::vector< ConversionInfo >::const_iterator it = conversions.begin() ; it != conversions.end(); ++it )
 	{

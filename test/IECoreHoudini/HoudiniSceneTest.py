@@ -233,14 +233,14 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		# no tags by default
 		scene = self.buildScene()
-		self.assertEqual( scene.readTags(), [] )
-		self.assertFalse( scene.hasTag( "any" ) )
+		self.assertEqual( scene.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( scene.hasTag( "any", IECore.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
-		self.assertEqual( sub1.readTags(), [] )
-		self.assertFalse( sub1.hasTag( "any" ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( sub1.hasTag( "any",IECore.SceneInterface.EveryTag ) )
 		torus1 = sub1.child( "torus1" )
-		self.assertEqual( torus1.readTags(), [] )
-		self.assertFalse( torus1.hasTag( "any" ) )
+		self.assertEqual( torus1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( torus1.hasTag( "any",IECore.SceneInterface.EveryTag ) )
 		
 		def addTags( node, tags ) :
 			
@@ -250,19 +250,19 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		# we can add tags to OBJ nodes, but they do not trickle up automatically
 		addTags( hou.node( "/obj/sub1/torus1" ), "yellow" )
 		addTags( hou.node( "/obj/box1" ), "sop top" )
-		self.assertEqual( scene.readTags(), [] )
-		self.assertFalse( scene.hasTag( "yellow" ) )
+		self.assertEqual( scene.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( scene.hasTag( "yellow", IECore.SceneInterface.EveryTag ) )
 		sub1 = scene.child( "sub1" )
-		self.assertEqual( sub1.readTags(), [] )
-		self.assertFalse( sub1.hasTag( "yellow" ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [] )
+		self.assertFalse( sub1.hasTag( "yellow", IECore.SceneInterface.EveryTag ) )
 		torus1 = sub1.child( "torus1" )
-		self.assertEqual( torus1.readTags(), [ "yellow" ] )
-		self.assertTrue( torus1.hasTag( "yellow" ) )
+		self.assertEqual( torus1.readTags(IECore.SceneInterface.LocalTag), [ "yellow" ] )
+		self.assertTrue( torus1.hasTag( "yellow",IECore.SceneInterface.LocalTag ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(), [ "sop", "top" ] )
-		self.assertTrue( box1.hasTag( "sop" ) )
-		self.assertTrue( box1.hasTag( "top" ) )
-		self.assertFalse( box1.hasTag( "yellow" ) )
+		self.assertEqual( box1.readTags(IECore.SceneInterface.LocalTag), [ "sop", "top" ] )
+		self.assertTrue( box1.hasTag( "sop",IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( box1.hasTag( "top",IECore.SceneInterface.LocalTag ) )
+		self.assertFalse( box1.hasTag( "yellow",IECore.SceneInterface.EveryTag ) )
 		
 		def addSopTags( node, tag, primRange ) :
 			
@@ -285,7 +285,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.readTags(), [] )
 		self.assertFalse( sub1.hasTag( "yellow" ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(), [ "sop", "top", "itsABox", "both:and" ] )
+		self.assertEqual( set(box1.readTags()), set( map( lambda s: IECore.InternedString(s), [ "sop", "top", "itsABox", "both:and" ] )) )
 		self.assertTrue( box1.hasTag( "sop" ) )
 		self.assertTrue( box1.hasTag( "top" ) )
 		self.assertTrue( box1.hasTag( "itsABox" ) )
@@ -297,7 +297,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertFalse( gap.hasTag( "top" ) )
 		self.assertFalse( gap.hasTag( "itsATorus" ) )
 		torus = gap.child( "torus" )
-		self.assertEqual( torus.readTags(), [ "itsATorus", "both:and" ] )
+		self.assertEqual( set(torus.readTags()), set( map( lambda s: IECore.InternedString(s),[ "itsATorus", "both:and" ])) )
 		self.assertTrue( torus.hasTag( "itsATorus" ) )
 		self.assertTrue( torus.hasTag( "both:and" ) )
 		self.assertFalse( torus.hasTag( "sop" ) )
@@ -483,6 +483,28 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertAlmostEqual( transform.scale.y, 5, 6 )
 		self.assertAlmostEqual( transform.scale.z, 6, 6 )
 		self.failUnless( torus1.readTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
+	
+	def testReadWorldTransformMethods( self ) :
+		
+		scene = self.buildScene()
+		hou.node( "/obj/sub1" ).parmTuple( "t" ).set( [ 10, 20, 30 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "t" ).set( [ 1, 2, 3 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "r" ).set( [ 10, 20, 30 ] )
+		hou.node( "/obj/sub1/torus1" ).parmTuple( "s" ).set( [ 4, 5, 6 ] )
+		
+		torus1 = scene.child( "sub1" ).child( "torus1" )
+		transform = torus1.readWorldTransform( 0 ).value
+		
+		self.assertEqual( transform.translate.x, 11 )
+		self.assertEqual( transform.translate.y, 22 )
+		self.assertEqual( transform.translate.z, 33 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.x ), 10.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.y ), 20.0, 5 )
+		self.assertAlmostEqual( IECore.radiansToDegrees( transform.rotate.z ), 30.0, 5 )
+		self.assertAlmostEqual( transform.scale.x, 4, 6 )
+		self.assertAlmostEqual( transform.scale.y, 5, 6 )
+		self.assertAlmostEqual( transform.scale.z, 6, 6 )
+		self.failUnless( torus1.readWorldTransformAsMatrix( 0 ).equalWithAbsError( transform.transform, 1e-6 ) )
 	
 	def testAnimatedTransform( self ) :
 		
@@ -726,6 +748,240 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		self.assertEqual( scene.child( "box2" ).embedded(), False )
 		self.assertEqual( scene.child( "sub2" ).embedded(), False )
+
+	def testSimilarNamesInFlatGeo( self ) :
+		
+		scene = self.buildScene()
+		name = hou.node( "/obj/box1" ).renderNode().createInputNode( 2, "name" )
+		name.parm( "name1" ).set( "/gap/torus2" )
+		name.createInputNode( 0, "torus" )
+		
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		self.assertEqual( box1.childNames(), [ "gap" ] )
+		
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.childNames(), [ "torus", "torus2" ] )
+		
+		torus = gap.child( "torus" )
+		self.assertEqual( torus.childNames(), [] )
+		self.assertTrue( torus.hasObject() )
+		self.assertTrue( torus.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( torus.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		torus2 = gap.child( "torus2" )
+		self.assertEqual( torus2.childNames(), [] )
+		self.assertTrue( torus2.hasObject() )
+		self.assertTrue( torus2.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertEqual( torus2.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+	
+	def testCustomAttributes( self ) : 
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertFalse( scene.hasAttribute( "custom" ) )
+		self.assertEqual( scene.readAttribute( "custom", 0 ), None )
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.attributeNames(), [] )
+		self.assertFalse( sub1.hasAttribute( "custom" ) )
+		self.assertEqual( sub1.readAttribute( "custom", 0 ), None )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.attributeNames(), [] )
+		self.assertFalse( torus1.hasAttribute( "custom" ) )
+		self.assertEqual( torus1.readAttribute( "custom", 0 ), None )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.attributeNames(), [] )
+		self.assertFalse( box1.hasAttribute( "custom" ) )
+		self.assertEqual( box1.readAttribute( "custom", 0 ), None )
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.attributeNames(), [] )
+		self.assertFalse( gap.hasAttribute( "custom" ) )
+		self.assertEqual( gap.readAttribute( "custom", 0 ), None )
+		
+		doTest = True
+		
+		def names( node ) :
+			
+			if not doTest :
+				return []
+			
+			if node.type().name() == "geo" :
+				return [ "custom" ]
+			
+			return []
+		
+		def readName( node, name, time ) :
+			
+			if not doTest :
+				return None
+			
+			if node.type().name() == "geo" and name == "custom" :
+				return IECore.StringData( node.path() )
+			
+			return None
+		
+		IECoreHoudini.HoudiniScene.registerCustomAttributes( names, readName )
+		
+		# subnets do not have the new attribute
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertFalse( scene.hasAttribute( "custom" ) )
+		self.assertEqual( scene.readAttribute( "custom", 0 ), None )
+		self.assertEqual( sub1.attributeNames(), [] )
+		self.assertFalse( sub1.hasAttribute( "custom" ) )
+		self.assertEqual( sub1.readAttribute( "custom", 0 ), None )
+		# geo nodes have the new attribute
+		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
+		self.assertTrue( torus1.hasAttribute( "custom" ) )
+		self.assertEqual( torus1.readAttribute( "custom", 0 ), IECore.StringData( torus1.node().path() ) )
+		self.assertEqual( box1.attributeNames(), [ "custom" ] )
+		self.assertTrue( box1.hasAttribute( "custom" ) )
+		self.assertEqual( box1.readAttribute( "custom", 0 ), IECore.StringData( box1.node().path() ) )
+		# embedded shapes do as well
+		self.assertEqual( gap.attributeNames(), [ "custom" ] )
+		self.assertTrue( gap.hasAttribute( "custom" ) )
+		self.assertEqual( gap.readAttribute( "custom", 0 ), IECore.StringData( gap.node().path() ) )
+		
+		# Disable custom attribute functions so they don't mess with other tests
+		doTest = False
+	
+	def testCustomTags( self ) : 
+		
+		scene = self.buildScene()
+		self.assertEqual( scene.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( scene.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		sub1 = scene.child( "sub1" )
+		self.assertEqual( sub1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( sub1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		torus1 = sub1.child( "torus1" )
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( torus1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		box1 = sub1.child( "box1" )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( box1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		gap = box1.child( "gap" )
+		self.assertEqual( gap.readTags( IECore.SceneInterface.EveryTag ), [] )
+		self.assertFalse( gap.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		
+		doTest = True
+		
+		def readTags( node, tagFilter ) :
+			
+			if not doTest :
+				return []
+			
+			if node.type().name() == "geo" :
+				return [ "custom" ]
+			
+			if tagFilter & IECore.SceneInterface.DescendantTag :
+				
+				def recurse( node ) :
+					if node.type().name() == "geo" :
+						return True
+					for child in node.children() :
+						if recurse( child ) :
+							return True
+					return False
+				
+				if recurse( node ) :
+					return [ "custom" ]
+			
+			return []
+		
+		def hasTag( node, name, tagFilter ) :
+			
+			if not doTest :
+				return False
+			
+			if name != "custom" :
+				return False
+			
+			if node.type().name() == "geo" :
+				return True
+			
+			if tagFilter & IECore.SceneInterface.DescendantTag :
+				
+				def recurse( node ) :
+					if node.type().name() == "geo" :
+						return True
+					for child in node.children() :
+						if recurse( child ) :
+							return True
+					return False
+				
+				return recurse( node )
+			
+			return False
+		
+		IECoreHoudini.HoudiniScene.registerCustomTags( hasTag, readTags )
+		
+		# subnets do not have the new tag directly
+		self.assertEqual( scene.readTags( IECore.SceneInterface.LocalTag ), [] )
+		self.assertFalse( scene.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertEqual( sub1.readTags( IECore.SceneInterface.LocalTag ), [] )
+		self.assertFalse( sub1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		# but they do have them on children
+		self.assertEqual( scene.readTags(IECore.SceneInterface.EveryTag), [ "custom" ] )
+		self.assertTrue( scene.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		self.assertEqual( sub1.readTags(IECore.SceneInterface.EveryTag), [ "custom" ] )
+		self.assertTrue( sub1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		# geo nodes have the new tag directly and on children
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( torus1.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( torus1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( torus1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( box1.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( box1.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( box1.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		# embedded shapes do as well
+		self.assertEqual( gap.readTags( IECore.SceneInterface.LocalTag ), [ "custom" ] )
+		self.assertEqual( gap.readTags( IECore.SceneInterface.EveryTag ), [ "custom" ] )
+		self.assertTrue( gap.hasTag( "custom", IECore.SceneInterface.LocalTag ) )
+		self.assertTrue( gap.hasTag( "custom", IECore.SceneInterface.EveryTag ) )
+		
+		# Disable custom tag functions so they don't mess with other tests
+		doTest = False
+	
+	def testBrokenSop( self ) :
+		
+		scene = self.buildScene()
+		boxNode = hou.node( "/obj/box1" )
+		box1 = scene.scene( [ "sub1", "box1" ] )
+		self.assertEqual( box1.hasObject(), True )
+		mesh = box1.readObject( 0 )
+		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
+		self.assertEqual( mesh["P"].data.size(), 8 )
+		self.assertEqual( box1.childNames(), [ "gap" ] )
+		self.assertTrue( isinstance( box1.child( "gap" ), IECoreHoudini.HoudiniScene ) )
+		
+		# forcing a cook error
+		hou.parm('/obj/box1/actualBox/sizex').setExpression( "fake" )
+		self.assertEqual( box1.hasObject(), False )
+		self.assertEqual( box1.readObject( 0 ), None )
+		self.assertEqual( box1.childNames(), [] )
+		self.assertRaises( RuntimeError, box1.child, "gap" )
+		self.assertEqual( box1.child( "gap", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertRaises( hou.OperationFailed, box1.node().renderNode().cook )
+	
+	def testMultipleTransforms( self ) :
+		
+		obj = hou.node( "/obj" )
+		sub1 = obj.createNode( "subnet", "sub1" )
+		sub2 = sub1.createNode( "subnet", "sub2" )
+		sub2.setInput( 0, hou.node( "/obj/sub1" ).indirectInputs()[0] )
+		sub3 = sub1.createOutputNode( "subnet", "sub3" )
+		
+		sub1.parmTuple("t").set( (5.0,5.0,0.0) )
+		
+		sc = IECoreHoudini.HoudiniScene()
+		sub1Sc = sc.scene(["sub1"])
+		sub1Transform = sub1Sc.readTransform( 0 ).value
+		self.assertEqual( sub1Transform.translate, IECore.V3d( 5.0, 5.0, 0.0 ) )
+		sub2Sc = sub1Sc.child("sub2")
+		sub2Transform = sub2Sc.readTransform( 0 ).value
+		self.assertEqual( sub2Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
+		sub3Sc = sub1Sc.child("sub3")
+		sub3Transform = sub3Sc.readTransform( 0 ).value
+		self.assertEqual( sub3Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
 
 if __name__ == "__main__":
 	unittest.main()

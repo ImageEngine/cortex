@@ -1,3 +1,105 @@
+# 8.0.0-b4
+
+#### IECore
+
+- Optimised polygonNormal and polygonWinding in PolygonAlgo.h.
+- Added face normals mode to MeshNormalsOp.
+
+#### IECoreGL
+
+- Fixed shading of polygon meshes with no "N" primitive variable (#118).
+
+#### IECoreArnold
+
+- Added support for Arnold parameters of type AI_TYPE_BYTE.
+- Added compatibility with Arnold 4.1.
+- Fixed hangs in procedurals.
+
+# 8.0.0-b3
+
+#### IECore
+
+- Fixed compile issue on Ubuntu
+
+#### IECoreHoudini
+
+- Improving performance of SceneCache SOP. This brings the animated performance back inline with 8.0.0-b1, while maintaining (if not improving) the on-load performance from 8.0.0-b2.
+- Guaranteed SceneCache SOP shape/point order by sorting children by name before loading.
+- Preventing crash in SceneCache ROP when cooking inside an invisible OBJ subnet.
+
+# 8.0.0-b2
+
+#### IECore
+
+- WarpOp has a new BoundMode parameter, options are Clamp (previous behaviour) or SetToBlack.
+- ImageDiffOp has a new option to offset display windows of the same size to be aligned before comparison.
+- Added support to the LensDistortOp for images with offset display window.
+- Fixed LensDistortOp bug with non-symmetric distortions.
+
+#### IECoreHoudini
+
+- Added BoundingBox and PointCloud GeometryType options to SceneCache nodes
+- Added AttributeCopy parm to SceneCache SOP. This is used to duplicate attributes before loading to Houdini.
+- Exposed SceneCache OBJ parameters to override the transform values coming from disk (Transform tab)
+- Moved SceneCache OBJ Push button along with all geometry loading parms to the new Options tab
+- Improved performance of SceneCache SOP (Up to 5x faster on a 1500 shapes, 3 million polys asset)
+
+# 8.0.0-b1
+
+#### IECore
+
+- SceneInterface tags now support upstream/local/downstream tags (using a bit mask filter to query)
+- Various fixes for OSX builds
+
+### IECoreHoudini
+
+- Fixed multiple transform bug in HoudiniScene
+
+# 8.0.0-a23
+
+#### IECore
+
+- Added new logos!
+
+#### IECoreGL
+
+- Added IECoreGL::glslVersion() function and python binding
+- Added IECoreGL::FrameBuffer::frameBuffer() method
+- OpenGL 2.1 compatibility fixes
+
+#### IECoreHoudini
+
+- Added bindings for SceneCacheNode which give access to the SceneInterface directly (or None if invalid)
+- HoudiniScene provides python access to registering custom attribute and tag readers
+- HoudiniScene now provides access to the world space transformation matrix of the held OBJ node
+- Fixing crashes in HoudiniScene when pointing to broken SOPs
+- Fixing crashes in SceneCacheWriter when given null attribute data
+- Replaced some (but not all) of the misc cow logos with the new Cortex mini-logo
+
+# 8.0.0-a22
+
+#### IECoreHoudini
+
+- ParameterisedHolder SOPs have a nameFilter parm (w/ disable toggle)
+ - These are used to pre-filter each input geometry (or not if toggled off)
+- ProceduralHolder outputs a single CortexObject holding its procedural
+- OpHolder operates several times per cook, once for each named input shape
+ - Shapes matching the filter are operated on, and returned as CortexObjects, maintaining their name
+ - Shapes not matching are passed through unchanged, whether they were normal geo or CortexObjects
+ - It can be forced to operate only once by disabling the nameFilter or by passing a single named shape
+- CortexConverter SOP now operates in both directions (converting between CortexObjects and native geo)
+ - It also has a nameFilter, with similar pass-through behaviour as the OpHolder
+- Changed interface for HoudiniScene custom attribute callbacks
+ - SceneCache OBJs pass attributes through to HoudiniScene (and therefor SceneCache ROP)
+- Added IECoreHoudini.makeMainGLContextCurrent() which is needed for sharing the GL Context with other applications (like Gaffer)
+- Fixed bug in HoudiniScene which was creating phony children when FlatGeometry names were similar, but not exact
+- Fixed bug in SceneCache SOP when loading Groups or CoordinateSystems without a transform
+- Preventing segmentation faults when reading a corrupt SceneCache file
+
+#### IECoreGL
+
+- Fixed GLSL shaders to work with GLSL version 120 (OpenGL 2.1)
+
 # 8.0.0-a21
 
 #### IECoreMaya

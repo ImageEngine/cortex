@@ -48,6 +48,7 @@
 #include "IECore/HexConversion.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/MemoryIndexedIO.h"
+#include "IECore/ParameterisedProcedural.h"
 #include "IECore/Primitive.h"
 #include "IECore/TransformOp.h"
 #include "IECore/VisibleRenderable.h"
@@ -300,8 +301,15 @@ const IECore::Object *GEO_CortexPrimitive::getObject() const
 
 void GEO_CortexPrimitive::setObject( const IECore::Object *object )
 {
-	/// \todo: should this be a deep copy?
-	m_object = object->copy();
+	if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
+	{
+		m_object = const_cast<IECore::Object *>( object );
+	}
+	else
+	{
+		/// \todo: should this be a deep copy?
+		m_object = object->copy();
+	}
 }
 
 class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON

@@ -216,22 +216,28 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	OBJ_Node *node = OPgetDirector()->findNode( nodePath )->castToOBJNode();
 	if ( node && node->getObjectType() == OBJ_GEOMETRY )
 	{
+		bool reRoot = true;
 		OP_Context context( time );
-		const GU_Detail *geo = node->getRenderGeometry( context );
-		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
-		bool reRoot = !nameAttrRef.isValid();
-		if ( nameAttrRef.isValid() )
+		if ( const GU_Detail *geo = node->getRenderGeometry( context, false ) )
 		{
-			const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
-			const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-			GA_Size numShapes = tuple->getTableEntries( nameAttr );
-			reRoot = ( numShapes == 0 );
-			if ( numShapes == 1 )
+			GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
+			if ( nameAttrRef.isValid() )
 			{
-				const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
-				if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+				reRoot = false;
+				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
+				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
+				GA_Size numShapes = tuple->getTableEntries( nameAttr );
+				if ( numShapes == 0 )
 				{
 					reRoot = true;
+				}
+				else if ( numShapes == 1 )
+				{
+					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
+					if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+					{
+						reRoot = true;
+					}
 				}
 			}
 		}
@@ -293,7 +299,10 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			mode = NaturalLink;
 		}
 		
-		outScene->writeAttribute( *it, liveScene->readAttribute( *it, time ), time );
+		if ( ConstObjectPtr data = liveScene->readAttribute( *it, time ) )
+		{
+			outScene->writeAttribute( *it, data, time );
+		}
 	}
 	
 	if ( mode == ForcedLink )
@@ -314,7 +323,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 	
 	SceneInterface::NameList tags;
-	liveScene->readTags( tags, false );
+	liveScene->readTags( tags );
 	outScene->writeTags( tags );
 	
 	if ( liveScene->hasObject() )

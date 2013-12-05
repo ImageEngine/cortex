@@ -69,6 +69,7 @@ class FromHoudiniCortexObjectConverter : public IECoreHoudini::FromHoudiniGeomet
 		IECore::ObjectPtr filterAttribs( const IECore::Object *object, const char *filter ) const;
 		
 		static FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> m_description;
+		static FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> m_universalDescription;
 };
 
 // register our converter

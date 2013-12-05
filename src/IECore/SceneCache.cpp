@@ -75,6 +75,9 @@ static InternedString attributesEntry("attributes");
 static InternedString childrenEntry("children");
 static InternedString sampleTimesEntry("sampleTimes");
 static InternedString tagsEntry("tags");
+static InternedString localTagsEntry("localTags");
+static InternedString ancestorTagsEntry("ancestorTags");
+static InternedString descendentTagsEntry("descendentTags");
 
 const SceneInterface::Name &SceneCache::animatedObjectTopologyAttribute = InternedString( "sceneInterface:animatedObjectTopology" );
 const SceneInterface::Name &SceneCache::animatedObjectPrimVarsAttribute = InternedString( "sceneInterface:animatedObjectPrimVars" );
@@ -124,44 +127,109 @@ class SceneCache::Implementation : public RefCounted
 			attributes->entryIds( attrsNames, IndexedIO::Directory );
 		}
 
-		bool hasTag( const Name &name, bool includeChildren ) const
+		bool hasTag( const Name &name, int filter ) const
 		{
-			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
-			if ( !tagsIO )
+			if ( !filter )
 			{
 				return false;
 			}
 
-			if ( tagsIO->hasEntry( name ) )
+			if ( filter & SceneInterface::LocalTag )
 			{
-				if ( includeChildren )
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO && tagsIO->hasEntry( name ) )
 				{
 					return true;
 				}
-				return ( tagsIO->entry( name ).entryType() == IndexedIO::File );
+			}
+
+			if ( filter & SceneInterface::DescendantTag )
+			{
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO && tagsIO->hasEntry( name ) )
+				{
+					return true;
+				}
+			}
+
+			if ( filter & SceneInterface::AncestorTag )
+			{
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( ancestorTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO && tagsIO->hasEntry( name ) )
+				{
+					return true;
+				}
+			}
+
+			/// provided for backward compatibility.
+			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
+			if ( tagsIO && tagsIO->hasEntry( name ) )
+			{
+				if ( filter == SceneInterface::LocalTag )
+				{
+					return ( tagsIO->entry(name).entryType() == IndexedIO::File );
+				}
+				return true;
 			}
 
 			return false;
 		}
 
-		void readTags( NameList &tags, bool includeChildren ) const
+		void readTags( NameList &tags, int filter ) const
 		{
-			ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
-			if ( tagsIO )
+			tags.clear();
+
+			if ( !filter )
 			{
-				if ( includeChildren )
+				return;
+			}
+
+			if ( (filter & SceneInterface::LocalTag) )
+			{
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO )
 				{
 					tagsIO->entryIds( tags );
 				}
-				else
-				{
-					// if we just want the local tags, then the list is filtered by Files
-					tagsIO->entryIds( tags, IndexedIO::File );
-				}
-			} 
-			else
+			}
+
+			NameList tmpTags;
+
+			if ( (filter & SceneInterface::AncestorTag) )
 			{
-				tags.clear();
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( ancestorTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO )
+				{
+					tagsIO->entryIds( tmpTags );
+					tags.insert( tags.end(), tmpTags.begin(), tmpTags.end() );
+				}
+			}
+
+			if ( (filter & SceneInterface::DescendantTag) )
+			{
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO )
+				{
+					tagsIO->entryIds( tmpTags );
+					tags.insert( tags.end(), tmpTags.begin(), tmpTags.end() );
+				}
+			}
+
+			if ( !tags.size() )
+			{
+				/// provided for backward compatibility...
+				ConstIndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
+				if ( tagsIO )
+				{
+					if ( filter == SceneInterface::LocalTag )
+					{
+						tagsIO->entryIds( tags, IndexedIO::File );
+					}
+					else
+					{
+						tagsIO->entryIds( tags );
+					}
+				}
 			}
 		}
 
@@ -1082,40 +1150,42 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			attribute->save( io, sampleEntry(sampleIndex) );
 		}
 
-		void writeTag( const char *tag )
+		void writeLocalTag( const char *tag )
 		{
 			writable();
-			IndexedIOPtr io = m_indexedIO->subdirectory( tagsEntry, IndexedIO::CreateIfMissing );
-			// we represent local tags as a IndexedIO::File of bool type
-			const char localTag = 1;
-			io->write( tag, localTag );
+			IndexedIOPtr io = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::CreateIfMissing );
+			// we just create a IndexedIO::Directory
+			io->subdirectory( tag, IndexedIO::CreateIfMissing );
 		}
 
-		void writeTags( const NameList &tags, bool fromChildren = false )
+		void writeTags( const NameList &tags, int tagLocation = SceneInterface::LocalTag )
 		{
 			if ( !tags.size() )
 			{
 				return;
 			}
 			writable();
-			IndexedIOPtr io = m_indexedIO->subdirectory( tagsEntry, IndexedIO::CreateIfMissing );
+			IndexedIOPtr io(0);
+			if ( tagLocation == SceneInterface::LocalTag )
+			{
+				io = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::CreateIfMissing );
+			}
+			else if ( tagLocation == SceneInterface::AncestorTag )
+			{
+				io = m_indexedIO->subdirectory( ancestorTagsEntry, IndexedIO::CreateIfMissing );
+			}
+			else if ( tagLocation == SceneInterface::DescendantTag )
+			{
+				io = m_indexedIO->subdirectory( descendentTagsEntry, IndexedIO::CreateIfMissing );
+			}
+			else
+			{
+				assert(false);
+			}
 			for ( NameList::const_iterator tIt = tags.begin(); tIt != tags.end(); tIt++ )
 			{
-				// we represent inherited tags as empty directories and local tags as a IndexedIO::File of bool type, so
-				// we can easily filter them when reading by entry type.
-				// Inherited tags do not override local tags.
-				if ( fromChildren )
-				{
-					if ( !io->hasEntry( *tIt ) )
-					{
-						io->subdirectory( *tIt, IndexedIO::CreateIfMissing );
-					}
-				}
-				else
-				{
-					const char localTag = 1;
-					io->write( *tIt, localTag );
-				}
+				// we just create a IndexedIO::Directory
+				io->subdirectory( *tIt, IndexedIO::CreateIfMissing );
 			}
 		}
 
@@ -1208,7 +1278,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				char objectTypeTag[128];
 				strcpy( objectTypeTag, "ObjectType:");
 				strcpy( &objectTypeTag[11], object->typeName() );
-				writeTag( objectTypeTag );
+				writeLocalTag( objectTypeTag );
 			}
 		}
 
@@ -1501,6 +1571,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 		//
 		void flush()
 		{
+			if ( m_parent )
+			{
+				NameList tags;
+				// get ancestor tags from parent
+				m_parent->readTags( tags, SceneInterface::LocalTag | SceneInterface::AncestorTag );
+				writeTags( tags, SceneInterface::AncestorTag );
+			}
 			/// first call flush recursively on children...
 			for ( std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator cit = m_children.begin(); cit != m_children.end(); cit++ )
 			{
@@ -1731,15 +1808,10 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 			if ( m_parent )
 			{
-				IndexedIOPtr tagsIO = m_indexedIO->subdirectory( tagsEntry, IndexedIO::NullIfMissing );
-
-				if ( tagsIO )
-				{
-					// propagate tags to parent
-					NameList tags;
-					readTags( tags, true );
-					m_parent->writeTags( tags, true );
-				}
+				NameList tags;
+				// propagate tags to parent
+				readTags( tags, SceneInterface::LocalTag | SceneInterface::DescendantTag );
+				m_parent->writeTags( tags, SceneInterface::DescendantTag );
 			}
 
 			// deallocate children since we now computed everything from them anyways...
@@ -2146,19 +2218,19 @@ void SceneCache::writeAttribute( const Name &name, const Object *attribute, doub
 	writer->writeAttribute( name, attribute, time );
 }
 
-bool SceneCache::hasTag( const Name &name, bool includeChildren ) const
+bool SceneCache::hasTag( const Name &name, int filter ) const
 {
-	return m_implementation->hasTag(name, includeChildren);
+	return m_implementation->hasTag(name, filter);
 }
 
-void SceneCache::readTags( NameList &tags, bool includeChildren ) const
+void SceneCache::readTags( NameList &tags, int filter ) const
 {
-	if ( includeChildren )
+	if ( filter && filter != SceneInterface::LocalTag )
 	{
-		/// include children is only supported in read mode.
+		/// non Local tags is only supported in read mode.
 		ReaderImplementation::reader( m_implementation.get() );		
 	}
-	return m_implementation->readTags(tags, includeChildren);
+	return m_implementation->readTags(tags, filter);
 }
 
 void SceneCache::writeTags( const NameList &tags )
@@ -2167,10 +2239,10 @@ void SceneCache::writeTags( const NameList &tags )
 	writer->writeTags( tags );
 }
 
-void SceneCache::writeTags( const NameList &tags, bool fromChildren )
+void SceneCache::writeTags( const NameList &tags, bool descendentTags )
 {
 	WriterImplementation *writer = WriterImplementation::writer( m_implementation.get() );
-	writer->writeTags( tags, fromChildren );
+	writer->writeTags( tags, descendentTags ? SceneInterface::DescendantTag : SceneInterface::LocalTag );
 }
 
 bool SceneCache::hasObject() const
