@@ -32,42 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_CAMELCASE_H
-#define IECORE_CAMELCASE_H
-
-#include <string>
-#include <vector>
+#include "IECore/CamelCase.h"
 
 namespace IECore
 {
 
-class CamelCase
+std::string CamelCase::toSpaced( const std::string &camelCase, Caps caps )
 {
-	
-	public :
-	
-		enum Caps
-		{
-			Unchanged,
-			First,
-			All,
-			AllExceptFirst
-		};
+	std::vector<std::string> words;
+	split( camelCase, std::back_insert_iterator<std::vector<std::string> >( words ) );
+	return join( words.begin(), words.end(), caps, " " );
+}
 
-		template<typename OutputIterator>
-		static void split( const std::string &camelCase, OutputIterator output );
-
-		template<typename Iterator>
-		static std::string join( Iterator begin, Iterator end, Caps caps = All, const std::string &separator="" );
-
-		static std::string toSpaced( const std::string &camelCase, Caps caps = All );
-
-		static std::string fromSpaced( const std::string &spaced, Caps caps = All );
-
-};
+std::string CamelCase::fromSpaced( const std::string &spaced, Caps caps )
+{
+	std::vector<std::string> words;
+	boost::algorithm::split( words, spaced, boost::is_any_of( " " ) );
+	return join( words.begin(), words.end(), caps );
+}
 
 } // namespace IECore
-
-#include "IECore/CamelCase.inl"
-
-#endif // IECORE_CAMELCASE_H
