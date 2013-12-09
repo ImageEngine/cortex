@@ -923,6 +923,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	HoudiniScenePtr rootScene = new HoudiniScene();
+	rootScene->setDefaultTime( m_defaultTime );
 	for ( Path::const_iterator it = rootPath.begin(); it != rootPath.end(); ++it )
 	{
 		rootScene = IECore::runTimeCast<HoudiniScene>( rootScene->child( *it ) );
