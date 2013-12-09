@@ -1,3 +1,24 @@
+# 8.0.0-b5
+
+#### IECore
+
+- Improved error reporting in LinkedScene - the main filename is now available in error messages.
+- Made RunTimeTyped baseTypeIds() and derivedTypeIds() methods thread safe.
+
+#### IECoreGL
+
+- Added IECoreGL::Selector::push/popIDShader() methods. These replace the now deprecated loadIDShader() method.
+- Fixed crashes when selecting curves.
+
+#### IECoreHoudini
+
+- Added SceneCache Transform SOP. This node applies transformations from a SceneCache file directly on the points and primitives at the SOP level.
+- FromHoudiniPolygon converter now automatically removes normal primvars when extracting a subdivision mesh.
+
+#### IECoreNuke
+
+- Added DeepImageReader - this allows any deep image type supported by Cortex to be read in Nuke.
+
 # 8.0.0-b4
 
 #### IECore
