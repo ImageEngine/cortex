@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "SYS/SYS_Types.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECoreHoudini/Convert.h"
