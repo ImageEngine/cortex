@@ -131,6 +131,9 @@ class SceneCache : public SampledSceneInterface
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
 		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 		
+		/// tells you if this scene cache is read only or writable:
+		bool readOnly() const;
+		
 		// The attribute names used to mark animated topology and primitive variables
 		// when SceneCache objects are Primitives.
 		static const Name &animatedObjectTopologyAttribute;

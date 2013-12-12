@@ -2371,3 +2371,8 @@ SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const
 {
 	return new SceneCache( impl );
 }
+
+bool SceneCache::readOnly() const
+{
+	return dynamic_cast< const ReaderImplementation* >( m_implementation.get() ) != NULL;
+}
