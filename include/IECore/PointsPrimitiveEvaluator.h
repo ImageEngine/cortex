@@ -130,7 +130,7 @@ class PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		/// \todo It would be much better if PrimitiveEvaluator::Description didn't require these create()
 		/// functions and instead just called the constructors that have to exist anyway.
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
-		friend class PrimitiveEvaluator::Description<PointsPrimitiveEvaluator>;
+		friend struct PrimitiveEvaluator::Description<PointsPrimitiveEvaluator>;
 		static PrimitiveEvaluator::Description<PointsPrimitiveEvaluator> g_evaluatorDescription;
 
 	private :

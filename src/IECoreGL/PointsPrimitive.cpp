@@ -72,44 +72,46 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( PointsPrimitive::GLPointW
 // MemberData
 //////////////////////////////////////////////////////////////////////////
 
-struct PointsPrimitive::MemberData : public IECore::RefCounted
+class PointsPrimitive::MemberData : public IECore::RefCounted
 {
 
-	IECore::V3fVectorDataPtr points;
-
-	Type type;
-	static const float g_defaultWidth;
-	IECore::ConstDataPtr constantWidth;
-	IECore::ConstDataPtr widths;
-	static const float g_defaultAspectRatio;
-	IECore::ConstDataPtr patchAspectRatio;
-	static const float g_defaultRotation;
-	IECore::ConstDataPtr rotations;
-
-	mutable Imath::Box3f bound;
-	mutable bool recomputeBound;
-
-	mutable bool renderSorted;
-	mutable std::vector<unsigned int> depthOrder;
-	mutable std::vector<float> depths;
-	mutable Imath::V3f depthCameraDirection;
+	public :
 	
-	struct InstancingSetup
-	{
-		InstancingSetup( ConstShaderPtr os, Type t, Shader::SetupPtr ss )
-			:	originalShader( os ), type( t ), shaderSetup( ss )
-		{
-		}
-		ConstShaderPtr originalShader;
-		Type type;
-		Shader::SetupPtr shaderSetup;
-	};
-	typedef std::vector<InstancingSetup> InstancingSetupVector;
-	mutable InstancingSetupVector instancingSetups;
+		IECore::V3fVectorDataPtr points;
 
-	SpherePrimitivePtr spherePrimitive;
-	DiskPrimitivePtr diskPrimitive;
-	QuadPrimitivePtr quadPrimitive;
+		Type type;
+		static const float g_defaultWidth;
+		IECore::ConstDataPtr constantWidth;
+		IECore::ConstDataPtr widths;
+		static const float g_defaultAspectRatio;
+		IECore::ConstDataPtr patchAspectRatio;
+		static const float g_defaultRotation;
+		IECore::ConstDataPtr rotations;
+
+		mutable Imath::Box3f bound;
+		mutable bool recomputeBound;
+
+		mutable bool renderSorted;
+		mutable std::vector<unsigned int> depthOrder;
+		mutable std::vector<float> depths;
+		mutable Imath::V3f depthCameraDirection;
+	
+		struct InstancingSetup
+		{
+			InstancingSetup( ConstShaderPtr os, Type t, Shader::SetupPtr ss )
+				:	originalShader( os ), type( t ), shaderSetup( ss )
+			{
+			}
+			ConstShaderPtr originalShader;
+			Type type;
+			Shader::SetupPtr shaderSetup;
+		};
+		typedef std::vector<InstancingSetup> InstancingSetupVector;
+		mutable InstancingSetupVector instancingSetups;
+
+		SpherePrimitivePtr spherePrimitive;
+		DiskPrimitivePtr diskPrimitive;
+		QuadPrimitivePtr quadPrimitive;
 
 };
 

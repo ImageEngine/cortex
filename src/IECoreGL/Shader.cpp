@@ -454,190 +454,192 @@ bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
 // Setup implementation
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Shader::Setup::MemberData : public IECore::RefCounted
+class Shader::Setup::MemberData : public IECore::RefCounted
 {
 	
-	MemberData( ConstShaderPtr &s )
-		:	shader( s ), hasCsValue( false )
-	{
-	}
+	public :
 	
-	// base class for objects which can bind a value of some sort
-	// to a shader, and later unbind it.
-	struct Value : public IECore::RefCounted
-	{
-		virtual void bind() = 0;
-		virtual void unbind() = 0;
-	};
-	IE_CORE_DECLAREPTR( Value );
-	
-	// value class for specifying vertex attributes
-	struct VertexValue : public Value
-	{
-	
-		VertexValue( GLuint attributeIndex, GLenum type, GLint size, ConstBufferPtr buffer, GLuint divisor )
-			:	m_attributeIndex( attributeIndex ), m_type( type ), m_size( size ), m_buffer( buffer ), m_divisor( divisor )
+		MemberData( ConstShaderPtr &s )
+			:	shader( s ), hasCsValue( false )
 		{
 		}
-		
-		virtual void bind()
-		{
-			Buffer::ScopedBinding binding( *m_buffer );
-			glEnableVertexAttribArrayARB( m_attributeIndex );
-			glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
-			glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
-		}
-		
-		virtual void unbind()
-		{
-			glVertexAttribDivisorARB( m_attributeIndex, 0 );
-			glDisableVertexAttribArrayARB( m_attributeIndex );
-		}
-		
-		private :
-		
-			GLuint m_attributeIndex;
-			GLenum m_type;
-			GLint m_size;
-			ConstBufferPtr m_buffer;
-			GLuint m_divisor;
-			
-	};
 	
-	// value class for specifying textures
-	struct TextureValue : public Value
-	{
+		// base class for objects which can bind a value of some sort
+		// to a shader, and later unbind it.
+		struct Value : public IECore::RefCounted
+		{
+			virtual void bind() = 0;
+			virtual void unbind() = 0;
+		};
+		IE_CORE_DECLAREPTR( Value );
 	
-		TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
-			:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
+		// value class for specifying vertex attributes
+		struct VertexValue : public Value
 		{
-		}
-		
-		virtual void bind()
-		{
-			glActiveTexture( textureUnits()[m_textureUnit] );
-			glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
-			if( m_texture )
+	
+			VertexValue( GLuint attributeIndex, GLenum type, GLint size, ConstBufferPtr buffer, GLuint divisor )
+				:	m_attributeIndex( attributeIndex ), m_type( type ), m_size( size ), m_buffer( buffer ), m_divisor( divisor )
 			{
-				m_texture->bind();
 			}
-			else
+		
+			virtual void bind()
 			{
-				glBindTexture( GL_TEXTURE_2D, 0 );
+				Buffer::ScopedBinding binding( *m_buffer );
+				glEnableVertexAttribArrayARB( m_attributeIndex );
+				glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
+				glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 			}
-			glUniform1i( m_uniformIndex, m_textureUnit );
-		}
 		
-		virtual void unbind()
-		{
-			glActiveTexture( textureUnits()[m_textureUnit] );
-			glBindTexture( GL_TEXTURE_2D, m_previousTexture );
-		}
+			virtual void unbind()
+			{
+				glVertexAttribDivisorARB( m_attributeIndex, 0 );
+				glDisableVertexAttribArrayARB( m_attributeIndex );
+			}
 		
-		private :
+			private :
 		
-			GLuint m_uniformIndex;
-			GLuint m_textureUnit;
-			ConstTexturePtr m_texture;
-			GLint m_previousTexture;
-	
-	};
-	
-	// value class for specifying uniform values
-	struct UniformFloatValue : public Value
-	{
-	
-		UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLfloat> &values )
-			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
-		{
-			m_previousValues.resize( m_values.size() );
-		}
-	
-		virtual void bind()
-		{
-			glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-			uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
-		}
-		
-		virtual void unbind()
-		{
-			uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
-		}
-	
-		private :
-		
-			GLuint m_program;
-			GLuint m_uniformIndex;
-			unsigned char m_dimensions;
-			std::vector<GLfloat> m_values;
-			std::vector<GLfloat> m_previousValues;
+				GLuint m_attributeIndex;
+				GLenum m_type;
+				GLint m_size;
+				ConstBufferPtr m_buffer;
+				GLuint m_divisor;
 			
-	};
+		};
 	
-	// value class for specifying uniform values
-	struct UniformIntegerValue : public Value
-	{
-	
-		UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLint> &values )
-			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+		// value class for specifying textures
+		struct TextureValue : public Value
 		{
-			m_previousValues.resize( m_values.size() );
-		}
 	
-		virtual void bind()
-		{
-			glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-			uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
-		}
+			TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
+				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
+			{
+			}
 		
-		virtual void unbind()
-		{
-			uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
-		}
-	
-		private :
+			virtual void bind()
+			{
+				glActiveTexture( textureUnits()[m_textureUnit] );
+				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
+				if( m_texture )
+				{
+					m_texture->bind();
+				}
+				else
+				{
+					glBindTexture( GL_TEXTURE_2D, 0 );
+				}
+				glUniform1i( m_uniformIndex, m_textureUnit );
+			}
 		
-			GLuint m_program;
-			GLuint m_uniformIndex;
-			unsigned char m_dimensions;
-			std::vector<GLint> m_values;
-			std::vector<GLint> m_previousValues;
+			virtual void unbind()
+			{
+				glActiveTexture( textureUnits()[m_textureUnit] );
+				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
+			}
+		
+			private :
+		
+				GLuint m_uniformIndex;
+				GLuint m_textureUnit;
+				ConstTexturePtr m_texture;
+				GLint m_previousTexture;
+	
+		};
+	
+		// value class for specifying uniform values
+		struct UniformFloatValue : public Value
+		{
+	
+			UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLfloat> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+			{
+				m_previousValues.resize( m_values.size() );
+			}
+	
+			virtual void bind()
+			{
+				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+			}
+		
+			virtual void unbind()
+			{
+				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+			}
+	
+			private :
+		
+				GLuint m_program;
+				GLuint m_uniformIndex;
+				unsigned char m_dimensions;
+				std::vector<GLfloat> m_values;
+				std::vector<GLfloat> m_previousValues;
 			
-	};
+		};
 	
-	struct UniformMatrixValue : public Value
-	{
-		UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, std::vector<GLfloat> &values )
-			:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions0( dimensions0 ), m_dimensions1( dimensions1 ), m_values( values )
+		// value class for specifying uniform values
+		struct UniformIntegerValue : public Value
 		{
-			m_previousValues.resize( m_values.size(), 0 );
-		}
+	
+			UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLint> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+			{
+				m_previousValues.resize( m_values.size() );
+			}
+	
+			virtual void bind()
+			{
+				glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+				uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+			}
 		
-		virtual void bind()
+			virtual void unbind()
+			{
+				uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+			}
+	
+			private :
+		
+				GLuint m_program;
+				GLuint m_uniformIndex;
+				unsigned char m_dimensions;
+				std::vector<GLint> m_values;
+				std::vector<GLint> m_previousValues;
+			
+		};
+	
+		struct UniformMatrixValue : public Value
 		{
-			glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-			uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_values[0]) );
-		}
+			UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, std::vector<GLfloat> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions0( dimensions0 ), m_dimensions1( dimensions1 ), m_values( values )
+			{
+				m_previousValues.resize( m_values.size(), 0 );
+			}
 		
-		virtual void unbind()
-		{
-			uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_previousValues[0]) );
-		}
+			virtual void bind()
+			{
+				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
+				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_values[0]) );
+			}
 		
-		private :
+			virtual void unbind()
+			{
+				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_previousValues[0]) );
+			}
 		
-			GLuint m_program;
-			GLuint m_uniformIndex;
-			unsigned char m_dimensions0;
-			unsigned char m_dimensions1;
-			std::vector<GLfloat> m_values;
-			std::vector<GLfloat> m_previousValues;
+			private :
+		
+				GLuint m_program;
+				GLuint m_uniformIndex;
+				unsigned char m_dimensions0;
+				unsigned char m_dimensions1;
+				std::vector<GLfloat> m_values;
+				std::vector<GLfloat> m_previousValues;
 				
-	};
+		};
 	
-	ConstShaderPtr shader;
-	vector<ValuePtr> values;
-	bool hasCsValue;
+		ConstShaderPtr shader;
+		vector<ValuePtr> values;
+		bool hasCsValue;
 	
 };
 
