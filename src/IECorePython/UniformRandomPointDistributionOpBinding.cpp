@@ -69,13 +69,13 @@ class UniformRandomPointDistributionOpWrap :
 		{
 		}
 
-		virtual float density( ConstMeshPrimitivePtr mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
+		virtual float density( const MeshPrimitive *mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
 		{
 			ScopedGILLock gilLock;
 			override o = this->get_override( "density" );
 			if( o )
 			{
-				return o( mesh, point, uv );
+				return o( MeshPrimitivePtr( const_cast<MeshPrimitive *>( mesh ) ), point, uv );
 			}
 			else
 			{
