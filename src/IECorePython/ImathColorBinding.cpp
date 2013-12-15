@@ -148,53 +148,55 @@ template<typename T>
 void bindColorCommon( class_<T> &c )
 {
 
-	c.def( self==self )
-	.def( self!=self )
+	c.def( self==self );
+	c.def( self!=self );
 
-	.def( self += self )
-	.def( self + self )
+	c.def( self += self );
+	c.def( self + self );
 
-	.def( self -= self )
-	.def( self - self )
+	c.def( self -= self );
+	c.def( self - self );
 
-	.def( -self )
-	.def( "negate", &T::negate, return_self<>() )
+	c.def( -self );
+	c.def( "negate", &T::negate, return_self<>() );
 
-	.def( self *= self )
-	.def( self *= typename T::BaseType() )
-	.def( self * self )
-	.def( self * typename T::BaseType() )
-	.def( typename T::BaseType() * self )
+	c.def( self *= self );
+	
+	c.def( self *= typename T::BaseType() );
+	
+	c.def( self * self );
+	c.def( self * typename T::BaseType() );
+	c.def( typename T::BaseType() * self );
 
-	.def( self /= self )
-	.def( self /= typename T::BaseType() )
-	.def( self / self )
-	.def( self / typename T::BaseType() )
+	c.def( self /= self );
+	c.def( self /= typename T::BaseType() );
+	c.def( self / self );
+	c.def( self / typename T::BaseType() );
 
-	.def( "dimensions", &T::dimensions ).staticmethod( "dimensions" )
+	c.def( "dimensions", &T::dimensions ).staticmethod( "dimensions" );
 
 	// [] operator support
-	.def("__getitem__", &ColorIndexer< T >::get)
-	.def("__setitem__", &ColorIndexer< T >::set)
+	c.def("__getitem__", &ColorIndexer< T >::get);
+	c.def("__setitem__", &ColorIndexer< T >::set);
 
-	.def( "baseTypeMin", &T::baseTypeMin ).staticmethod( "baseTypeMin" )
-	.def( "baseTypeMax", &T::baseTypeMax ).staticmethod( "baseTypeMax" )
-	.def( "baseTypeSmallest", &T::baseTypeSmallest ).staticmethod( "baseTypeSmallest" )
-	.def( "baseTypeEpsilon", &T::baseTypeEpsilon ).staticmethod( "baseTypeEpsilon" )
+	c.def( "baseTypeMin", &T::baseTypeMin ).staticmethod( "baseTypeMin" );
+	c.def( "baseTypeMax", &T::baseTypeMax ).staticmethod( "baseTypeMax" );
+	c.def( "baseTypeSmallest", &T::baseTypeSmallest ).staticmethod( "baseTypeSmallest" );
+	c.def( "baseTypeEpsilon", &T::baseTypeEpsilon ).staticmethod( "baseTypeEpsilon" );
 
-	.def( "luminance", &luminance<T, Vec3<typename T::BaseType> > )
-	.def( "luminance", (typename T::BaseType (*)( const T & ))&luminance<T> )
+	c.def( "luminance", &luminance<T, Vec3<typename T::BaseType> > );
+	c.def( "luminance", (typename T::BaseType (*)( const T & ))&luminance<T> );
 
-	.def( "adjustSaturation", &adjustSaturationInPlace<T>, "Adjusts the saturation of the color in place"  )
+	c.def( "adjustSaturation", &adjustSaturationInPlace<T>, "Adjusts the saturation of the color in place"  );
 
-	.def( "linearToSRGB", &linearToSRGB<T> )
-	.def( "sRGBToLinear", &sRGBToLinear<T> )
+	c.def( "linearToSRGB", &linearToSRGB<T> );
+	c.def( "sRGBToLinear", &sRGBToLinear<T> );
 
-	.def( "hsvToRGB", &hsvToRGB<T> )
-	.def( "rgbToHSV", &rgbToHSV<T> )
+	c.def( "hsvToRGB", &hsvToRGB<T> );
+	c.def( "rgbToHSV", &rgbToHSV<T> );
 
-	.def( "__str__", &str<T> )
-	.def( "__repr__", &repr<T> );
+	c.def( "__str__", &str<T> );
+	c.def( "__repr__", &repr<T> );
 }
 
 /// We need this and equalWithRelError so that we can call them passing colors instead of vectors.
