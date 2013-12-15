@@ -52,7 +52,7 @@ namespace IECorePython
 {
 
 template<class T>
-static std::string repr( T &x )
+std::string repr( T &x )
 {
 	std::stringstream s;
 

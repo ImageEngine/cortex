@@ -79,7 +79,7 @@ const char *typeName<LineSegment3d>()
 }
 
 template<class L>
-static std::string repr( L &x )
+std::string repr( L &x )
 {
 	std::stringstream s;
 
