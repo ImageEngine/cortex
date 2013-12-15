@@ -298,9 +298,9 @@ void OBJReader::parseOBJ() {
 	// http://local.wasp.uwa.edu.au/~pbourke/dataformats/obj/
 
 	// vertices
-	srule vertex         = ("v"  >> real_p >> real_p >> real_p) [bind(&OBJReader::parseVertex,            ref(this), _1, _2)];
-	srule vertex_texture = ("vt" >> real_p >> real_p)           [bind(&OBJReader::parseTextureCoordinate, ref(this), _1, _2)];
-	srule vertex_normal  = ("vn" >> real_p >> real_p >> real_p) [bind(&OBJReader::parseNormal,            ref(this), _1, _2)];
+	srule vertex         = ("v"  >> real_p >> real_p >> real_p) [bind(&OBJReader::parseVertex,            this, _1, _2)];
+	srule vertex_texture = ("vt" >> real_p >> real_p)           [bind(&OBJReader::parseTextureCoordinate, this, _1, _2)];
+	srule vertex_normal  = ("vn" >> real_p >> real_p >> real_p) [bind(&OBJReader::parseNormal,            this, _1, _2)];
 	//srule vertex_parameter_space  = "vp" >> real_p >> real_p >> real_p;
 
 	// srule cs_types = ("bmatrix" | "bezier" | "bspline" | "cardinal" | "taylor");
@@ -313,7 +313,7 @@ void OBJReader::parseOBJ() {
 	// elements
 	srule point = "p" >> real_p >> *(real_p);
 	srule  line = "l" >> int_p >> int_p >> *(int_p);
-	srule  face = (ch_p('f') >> *(anychar_p))[bind(&OBJReader::parseFace, ref(this), _1, _2)];
+	srule  face = (ch_p('f') >> *(anychar_p))[bind(&OBJReader::parseFace, this, _1, _2)];
 	// srule curve = "curv";
 	// srule curve_2d = "curv2";
 	// srule surface = "surf";
@@ -331,7 +331,7 @@ void OBJReader::parseOBJ() {
 	//srule connect = "con";
 
 	// grouping
-	srule group_name = ("g" >> *(anychar_p))[bind(&OBJReader::parseGroup, ref(this), _1, _2)];
+	srule group_name = ("g" >> *(anychar_p))[bind(&OBJReader::parseGroup, this, _1, _2)];
 	//	srule smoothing_group = "s";
 	//	srule merging_group = "mg";
 	srule object_name = "o" >> int_p;
