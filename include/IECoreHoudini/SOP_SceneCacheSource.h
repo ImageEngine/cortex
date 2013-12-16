@@ -104,6 +104,15 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		{
 			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
 		};
+		
+		/// Utility for detecting geometric primitive variables that need transforming
+		struct TransformGeometricData
+		{
+			typedef bool ReturnType;
+			
+			template<typename T>
+			ReturnType operator()( typename T::ConstPtr data ) const;
+		};
 
 };
 

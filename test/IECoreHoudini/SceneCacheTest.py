@@ -496,6 +496,47 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( prims[1].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
 		self.assertEqual( prims[2].vertices()[0].point().position(), hou.Vector3( 0.5, 0.5, 0.5 ) )
 	
+	def testSopTransformsPrimvars( self ) :
+		
+		def writeTestFile() :
+			
+			scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+			
+			sc = scene.createChild( str( 1 ) )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+			sc.writeTransform( IECore.M44dData( matrix ), 0 )
+			
+			sc = sc.createChild( str( 2 ) )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
+			sc.writeTransform( IECore.M44dData( matrix ), 0 )
+			
+			sc = sc.createChild( str( 3 ) )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
+			sc.writeTransform( IECore.M44dData( matrix ), 0 )
+			
+			mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+			mesh["Pref"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data.copy() )
+			mesh["otherP"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data.copy() )
+			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 8 ) )
+			sc.writeObject( mesh, 0 )
+		
+		writeTestFile()
+		
+		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 6 )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["Cd", "P", "Pw", "otherP", "rest"] )
+		
+		# P is transformed
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
+		# other Point data is as well
+		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 6, 0, 0 ) )
+		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "otherP" ), ( 6, 0, 0 ) )
+		# other data is not
+		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "Cd" ), ( 0, 0, 1 ) )
+	
 	def testSopShapeFilter( self ) :
 		
 		self.writeSCC()
