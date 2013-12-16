@@ -226,6 +226,7 @@ if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
+dlReg = None
 dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
@@ -360,7 +361,10 @@ DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"],
 ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION DL_VERSION DL_SHADERS_PATH DL_DISPLAYS_PATH"
 
 # make sure the tests can run
-TEST_LIBPATH = ":".join( [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib", dlReg["location"] + "/lib" ] )
+testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]
+if dlReg :
+	testLibs.append( dlReg["location"] + "/lib" )
+TEST_LIBPATH = ":".join( testLibs )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
 # install the op stubs and procedural stubs
