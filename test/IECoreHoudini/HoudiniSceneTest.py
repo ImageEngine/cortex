@@ -699,6 +699,12 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( deformer.cookCount(), 2 )
 		self.assertEqual( len(mesh0["P"].data), 8 )
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+		
+		scene.setDefaultTime( 0.5 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 3 )
+		gap = scene.scene( scene.path() + [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 3 )
 	
 	def testNode( self ) :
 		
