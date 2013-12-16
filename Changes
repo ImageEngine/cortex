@@ -1,3 +1,16 @@
+# 8.0.0-b6
+
+#### IECore
+
+- LinkedScene( SceneInterfacePtr ) supports writable scenes
+- Fixed SceneCache from IndexedIO bug
+- Fixed linking issues with IECore::CamelCase
+
+#### IECoreHoudini
+
+- SceneCache SOP transforms all Point, Normal, and Vector primitive variables (previously it only transformed P and N)
+- Preventing double cooking in HoudiniScene::scene( path )
+
 # 8.0.0-b5
 
 #### IECore
