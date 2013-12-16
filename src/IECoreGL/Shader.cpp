@@ -648,6 +648,10 @@ Shader::Setup::Setup( ConstShaderPtr shader )
 {
 }
 
+Shader::Setup::~Setup()
+{
+}
+
 const Shader *Shader::Setup::shader() const
 {
 	return m_memberData->shader.get();

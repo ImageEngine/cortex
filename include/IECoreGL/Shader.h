@@ -153,6 +153,7 @@ class Shader : public IECore::RunTimeTyped
 				IE_CORE_DECLAREMEMBERPTR( Setup )
 				
 				Setup( ConstShaderPtr shader );
+				virtual ~Setup();
 				
 				const Shader *shader() const;
 		
