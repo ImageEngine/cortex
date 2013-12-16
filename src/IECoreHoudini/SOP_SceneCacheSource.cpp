@@ -425,7 +425,8 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 			for ( int i = 0; i < pairs.entries(); ++i )
 			{
 				UT_WorkArgs values;
-				UT_String( pairs[i] ).tokenize( values, ":" );
+				UT_String pair( pairs[i] );
+				pair.tokenize( values, ":" );
 				if ( values.entries() != 2 )
 				{
 					continue;
