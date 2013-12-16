@@ -661,7 +661,41 @@ class SceneCacheTest( unittest.TestCase ) :
 		
 		m = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		self.assertTrue( m.boundSampleTime(0) < m.boundSampleTime(1) )
-
+	
+	def testMemoryIndexedIOReadWrite( self ) :
+		
+		# create inital file structure in memory:
+		mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+		
+		# write to the actual linkedscene:
+		scc = IECore.SceneCache( mio )
+		
+		c0 = scc.createChild("child0")
+		c1 = scc.createChild("child1")
+		
+		c0.writeAttribute( "testAttr", IECore.StringData("test0"), 0 )
+		c1.writeAttribute( "testAttr", IECore.StringData("test1"), 0 )
+		
+		# write the "file" to memory
+		del scc, c0, c1
+		
+		# can we read it back again?
+		mioData = mio.buffer()
+		mio = IECore.MemoryIndexedIO( mioData, IECore.IndexedIO.OpenMode.Read )
+		
+		scc = IECore.SceneCache( mio )
+		
+		self.assertEqual( set( scc.childNames() ), set( ["child0", "child1"] ) )
+		
+		# no write access!
+		self.assertRaises( RuntimeError, scc.createChild, "child2" )
+		
+		c0 = scc.child("child0")
+		c1 = scc.child("child1")
+		
+		self.assertEqual( c0.readAttribute( "testAttr", 0 ), IECore.StringData( "test0" ) )
+		self.assertEqual( c1.readAttribute( "testAttr", 0 ), IECore.StringData( "test1" ) )
+		
 
 if __name__ == "__main__":
 	unittest.main()

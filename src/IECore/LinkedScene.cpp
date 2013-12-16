@@ -76,6 +76,11 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 
 LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
 {
+	if( SceneCachePtr scc = runTimeCast<SceneCache>( m_mainScene ) )
+	{
+		m_readOnly = scc->readOnly();
+	}
+	
 	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != NULL);
 }
 
