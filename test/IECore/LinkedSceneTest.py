@@ -704,10 +704,6 @@ class LinkedSceneTest( unittest.TestCase ) :
 		
 		# create inital file structure in memory:
 		mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
-		header = IECore.HeaderGenerator.header()
-		header.save( mio, "header" )
-		mio.subdirectory( "sampleTimes", IECore.IndexedIO.CreateIfMissing )
-		mio.subdirectory( "root", IECore.IndexedIO.CreateIfMissing )
 		
 		# write to the actual linkedscene:
 		scc = IECore.SceneCache( mio )
@@ -720,7 +716,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		c1.writeAttribute( "testAttr", IECore.StringData("test1"), 0 )
 		
 		# write the "file" to memory
-		del l, scc
+		del l, scc, c0, c1
 		
 		# can we read it back again?
 		mioData = mio.buffer()

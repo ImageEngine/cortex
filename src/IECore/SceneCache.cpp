@@ -2027,6 +2027,7 @@ SceneCache::SceneCache( IECore::IndexedIOPtr indexedIO )
 	{
 		ObjectPtr header = HeaderGenerator::header();
 		header->save( indexedIO, headerEntry );
+		indexedIO->subdirectory( sampleTimesEntry, IndexedIO::CreateIfMissing );
 		indexedIO = indexedIO->subdirectory( rootEntry, IndexedIO::CreateIfMissing );
 		indexedIO->removeAll();
 		m_implementation = new WriterImplementation( indexedIO );
