@@ -126,7 +126,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result, transferred )
 	
 	def testTransferredMultiple( self ) :
-		""" Test TransferSmoothSkinningWeightsOp with one transferred influence"""
+		""" Test TransferSmoothSkinningWeightsOp with multiple transferred influences"""
 		
 		ssd = self.original()
 		transferred = self.transferredAC()

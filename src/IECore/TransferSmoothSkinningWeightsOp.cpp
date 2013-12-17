@@ -116,16 +116,15 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 	}
 
 	// decompress skinning data
-	DecompressSmoothSkinningDataOp decompressionOp;
-	decompressionOp.inputParameter()->setValidatedValue( skinningData );
-	decompressionOp.copyParameter()->setTypedValue( false );
-	decompressionOp.operate();
+	DecompressSmoothSkinningDataOpPtr decompressionOp = new DecompressSmoothSkinningDataOp;
+	decompressionOp->inputParameter()->setValidatedValue( skinningData );
+	decompressionOp->copyParameter()->setTypedValue( false );
+	decompressionOp->operate();
 	
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
-	const std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->readable();
-	std::vector<float> newWeights;
+	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
 	
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
@@ -143,24 +142,22 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 				targetWeight += weight;
 				targetCurrentIndex = current;
 			}
-			
-			const std::vector<int>::const_iterator found = find( sourceIndices.begin(), sourceIndices.end(), index );
-			if ( found != sourceIndices.end() )
+			else
 			{
-				targetWeight += weight;
-				weight = 0;
+				const std::vector<int>::const_iterator found = find( sourceIndices.begin(), sourceIndices.end(), index );
+				if ( found != sourceIndices.end() )
+				{
+					targetWeight += weight;
+					pointInfluenceWeights[ current ] = 0.0;
+				}
 			}
-			
-			newWeights.push_back( weight );
 		}
-		newWeights[ targetCurrentIndex ] = targetWeight;
+		pointInfluenceWeights[ targetCurrentIndex ] = targetWeight;
 	}
 	
-	skinningData->pointInfluenceWeights()->writable().swap( newWeights );
-	
 	// re-compress
-	CompressSmoothSkinningDataOp compressionOp;
-	compressionOp.inputParameter()->setValidatedValue( skinningData );
-	compressionOp.copyParameter()->setTypedValue( false );
-	compressionOp.operate();
+	CompressSmoothSkinningDataOpPtr compressionOp = new CompressSmoothSkinningDataOp;
+	compressionOp->inputParameter()->setValidatedValue( skinningData );
+	compressionOp->copyParameter()->setTypedValue( false );
+	compressionOp->operate();
 }
