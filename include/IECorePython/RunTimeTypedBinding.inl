@@ -35,8 +35,6 @@
 #ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 
-#include "boost/algorithm/string/find.hpp"
-
 #include "IECorePython/RefCountedBinding.h"
 #include "IECore/RunTimeTyped.h"
 
@@ -46,15 +44,7 @@ namespace IECorePython
 namespace Detail
 {
 
-static const char *nameWithoutNamespace( const char *name )
-{
-	boost::iterator_range<const char *> r = boost::find_last( name, ":" );
-	if( !r )
-	{
-		return name;
-	}
-	return r.end();
-}
+const char *nameWithoutNamespace( const char *name );
 
 template<class T>
 static IECore::TypeId typeId( T &t )

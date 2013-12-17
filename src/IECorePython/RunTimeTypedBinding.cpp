@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/algorithm/string/find.hpp"
 
 #include "IECore/RunTimeTyped.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -42,6 +43,21 @@ using namespace IECore;
 
 namespace IECorePython
 {
+
+namespace Detail
+{
+
+const char *nameWithoutNamespace( const char *name )
+{
+	boost::iterator_range<const char *> r = boost::find_last( name, ":" );
+	if( !r )
+	{
+		return name;
+	}
+	return r.end();
+}
+
+} // namespace Detail
 
 static list baseTypeIds( TypeId typeId )
 {
