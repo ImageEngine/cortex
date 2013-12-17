@@ -286,6 +286,7 @@
 #include "IECorePython/PointSmoothSkinningOpBinding.h"
 #include "IECorePython/AddSmoothSkinningInfluencesOpBinding.h"
 #include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
+#include "IECorePython/TransferSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/LookupBinding.h"
 #include "IECorePython/PointsPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointsMotionOpBinding.h"
@@ -604,6 +605,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointSmoothSkinningOp();
 	bindAddSmoothSkinningInfluencesOp();
 	bindRemoveSmoothSkinningInfluencesOp();
+	bindTransferSmoothSkinningWeightsOp();
 	bindLookup();
 	bindPointsPrimitiveEvaluator();
 	bindPointsMotionOp();
