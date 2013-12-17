@@ -778,6 +778,7 @@ o.Add(
 		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
 		( "IECore.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
 		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
+		( "IECore.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
 	]
 )
 
