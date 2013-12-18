@@ -846,6 +846,13 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertTrue( gap.hasAttribute( "custom" ) )
 		self.assertEqual( gap.readAttribute( "custom", 0 ), IECore.StringData( gap.node().path() ) )
 		
+		# two callbacks registering the same attribute should not double-register it
+		IECoreHoudini.HoudiniScene.registerCustomAttributes( names, readName )
+		self.assertEqual( sub1.attributeNames(), [] )
+		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
+		self.assertEqual( box1.attributeNames(), [ "custom" ] )
+		self.assertEqual( gap.attributeNames(), [ "custom" ] )
+		
 		# Disable custom attribute functions so they don't mess with other tests
 		doTest = False
 	
