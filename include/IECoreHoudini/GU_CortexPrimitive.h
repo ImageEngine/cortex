@@ -58,10 +58,27 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		
 		static const char *typeName;
 		
+#if UT_MAJOR_VERSION_INT >= 13
+
+		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );
+
+#else
+
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset );
+
+#endif
+
 		static GU_CortexPrimitive *build( GU_Detail *geo, const IECore::Object *object );
 		
 		virtual int64 getMemoryUsage() const;
+		
+#if UT_MAJOR_VERSION_INT >= 13
+
+		virtual void countMemory( UT_MemoryCounter &counter ) const;
+		virtual void copyPrimitive( const GEO_Primitive *src );
+
+#endif
+		
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
 		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
 		/// Maybe we should just give up registration in the plugin and do it all here.
@@ -74,7 +91,12 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		virtual const GEO_Primitive *castToGeo() const;
 		virtual void normal( NormalComp &output ) const;
 		virtual int intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax=1E17F, float tol=1E-12F, float *distance=0, UT_Vector3 *pos=0, UT_Vector3 *nml=0, int accurate=0, float *u=0, float *v=0, int ignoretrim=1 ) const;
+
+#if UT_MAJOR_VERSION_INT < 13
+
 		virtual GU_RayIntersect *createRayCache( int &persistent );
+
+#endif
 		
 		/// Convenience method to inspect a GU_Detail and return some information about
 		/// the GU_CortexPrimitives within, if there are any.

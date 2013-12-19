@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include "UT/UT_PtrArray.h"
+
 #include "IECore/CompoundParameter.h"
 #include "IECore/Group.h"
 #include "IECore/NumericParameter.h"
@@ -153,7 +155,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	bool externalGroups = false;
 	for ( unsigned i=0; i < primGroups.entries(); ++i )
 	{
-		const GA_ElementGroup *group = primGroups[i];
+		const GA_ElementGroup *group = primGroups( i );
 		if ( group->getInternal() )
 		{
 			continue;

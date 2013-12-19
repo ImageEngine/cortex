@@ -36,6 +36,7 @@
 
 #include "UT/UT_Matrix.h"
 #include "UT/UT_Options.h"
+#include "UT/UT_Version.h"
 
 #include "IECore/FileNameParameter.h"
 
@@ -76,9 +77,18 @@ RATDeepImageReader::~RATDeepImageReader()
 bool RATDeepImageReader::canRead( const std::string &fileName )
 {
 	IMG_DeepShadow file;
-	
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	if ( file.open( fileName.c_str() ) && file.getDepthInterp() == IMG_DI_DISCRETE )
+
+#else
+
 	if ( file.open( fileName.c_str() ) && file.depthInterp() == IMG_COMPRESS_DISCRETE )
+
+#endif
 	{
+		file.close();
 		return true;
 	}
 	
@@ -188,7 +198,16 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 	m_worldToNDC = Imath::M44f();
 	
 	bool success = true;
+	
+#if UT_MAJOR_VERSION_INT >= 13
+
+	if ( m_inputFile->open( fileName().c_str() ) && m_inputFile->getDepthInterp() == IMG_DI_DISCRETE )
+
+#else
+
 	if ( m_inputFile->open( fileName().c_str() ) && m_inputFile->depthInterp() == IMG_COMPRESS_DISCRETE )
+
+#endif
 	{
 		m_inputFileName = fileName();
 		m_ratPixel = new IMG_DeepPixelReader( *m_inputFile );
@@ -244,7 +263,17 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 		// applying a matrix that seems to fix the issues in several examples
 		Imath::M44f fix;
 		fix.makeIdentity();
+		
+#if UT_MAJOR_VERSION_INT >= 13
+
+		UT_SharedPtr<UT_Options> options = m_inputFile->getTextureOptions();
+
+#else
+
 		UT_Options *options = m_inputFile->getTBFOptions();
+
+#endif
+
 		if ( options->hasOption( "camera:clip" ) )
 		{
 			const UT_Vector2D clip = options->getOptionV2( "camera:clip" );

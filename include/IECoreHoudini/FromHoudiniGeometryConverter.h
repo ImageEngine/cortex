@@ -52,6 +52,8 @@
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniConverter.h"
 
+#include "IECoreHoudini/bindings/FromHoudiniGeometryConverterBinding.h" // to enable friend declaration for bindFromHoudiniGeometryConverter()
+
 namespace IECoreHoudini
 {
 
@@ -187,6 +189,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		void constructCommon();
 		
 		// This extra factory function is provided for the python bindings
+		friend void bindFromHoudiniGeometryConverter();
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
 		
 		// function to map standard Houdini names to IECore PrimitiveVariable names

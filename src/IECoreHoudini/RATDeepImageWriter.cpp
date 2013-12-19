@@ -36,6 +36,7 @@
 
 #include "UT/UT_Matrix.h"
 #include "UT/UT_Options.h"
+#include "UT/UT_Version.h"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
@@ -51,12 +52,29 @@ IE_CORE_DEFINERUNTIMETYPED( RATDeepImageWriter );
 const DeepImageWriter::DeepImageWriterDescription<RATDeepImageWriter> RATDeepImageWriter::g_writerDescription( "rat" );
 
 RATDeepImageWriter::RATDeepImageWriter()
+#if UT_MAJOR_VERSION_INT >= 13
+
+	: DeepImageWriter( "Writes Houdini RAT deep texture file format." ), m_outputFile( 0 ), m_ratPixel( 0 )
+
+#else
+
 	: DeepImageWriter( "Writes Houdini RAT deep texture file format." ), m_outputFile( 0 )
+
+#endif
 {
 }
 
 RATDeepImageWriter::RATDeepImageWriter( const std::string &fileName )
+#if UT_MAJOR_VERSION_INT >= 13
+
+	: DeepImageWriter( "Writes Houdini RAT deep texture file format." ), m_outputFile( 0 ), m_ratPixel( 0 )
+
+#else
+
 	: DeepImageWriter( "Writes Houdini RAT deep texture file format." ), m_outputFile( 0 )
+
+#endif
+
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }
@@ -67,13 +85,29 @@ RATDeepImageWriter::~RATDeepImageWriter()
 	{
 		m_outputFile->close();
 	}
-	
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	delete m_ratPixel;
+
+#endif
+
 	delete m_outputFile;
 }
 
 bool RATDeepImageWriter::canWrite( const std::string &fileName )
 {
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	return IMG_DeepShadow().create( fileName.c_str(), 2, 2 );
+
+#else
+
 	return IMG_DeepShadow().open( fileName.c_str(), 2, 2 );
+
+#endif
+
 }
 
 void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
@@ -94,7 +128,20 @@ void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	
 	y = m_resolutionParameter->getTypedValue().y - y - 1;
 	
+#if UT_MAJOR_VERSION_INT >= 13
+
+	if ( !m_ratPixel->open( x, y ) )
+	{
+		return;
+	}
+	
+	m_ratPixel->writeRawSamples( true );
+
+#else
+
 	m_outputFile->pixelStart( x, y );
+
+#endif
 	
 	unsigned numChannels = pixel->numChannels();
 	unsigned numSamples = pixel->numSamples();
@@ -119,10 +166,28 @@ void RATDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 			}
 		}
 		
+#if UT_MAJOR_VERSION_INT >= 13
+
+		m_ratPixel->writeOrdered( pixel->getDepth( i ), adjustedData, m_dataSize );
+
+#else
+
 		m_outputFile->pixelWriteOrdered( pixel->getDepth( i ), adjustedData, m_dataSize );
+
+#endif
+
 	}
 	
+#if UT_MAJOR_VERSION_INT >= 13
+
+	m_ratPixel->close();
+
+#else
+
 	m_outputFile->pixelClose();
+
+#endif
+
 }
 
 void RATDeepImageWriter::open()
@@ -132,6 +197,13 @@ void RATDeepImageWriter::open()
 		// we already opened the right file successfully
 		return;
 	}
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+	delete m_ratPixel;
+	m_ratPixel = 0;
+
+#endif
 
 	delete m_outputFile;
 	m_outputFile = new IMG_DeepShadow;
@@ -186,18 +258,47 @@ void RATDeepImageWriter::open()
 	
 	const Imath::V2i &resolution = m_resolutionParameter->getTypedValue();
 	
-	if ( m_outputFile->open( fileName().c_str(), resolution.x, resolution.y ) )
+#if UT_MAJOR_VERSION_INT >= 13
+
+	bool success = m_outputFile->create( fileName().c_str(), resolution.x, resolution.y );
+	
+#else
+
+	bool success = m_outputFile->open( fileName().c_str(), resolution.x, resolution.y );
+
+#endif
+
+	if ( success )
 	{
 		m_outputFileName = fileName();
 		
-		// set the worldToCamera matrix
+#if UT_MAJOR_VERSION_INT >= 13
+
+		m_ratPixel = new IMG_DeepPixelWriter( *m_outputFile );
+		
+		UT_SharedPtr<UT_Options> options = m_outputFile->getTextureOptions();
+
+#else
+
 		UT_Options *options = m_outputFile->getTBFOptions();
+
+#endif
+
+		// set the worldToCamera matrix
 		options->setOptionM4( "space:world", IECore::convert<UT_Matrix4>( worldToCameraParameter()->getTypedValue() ) );
 		
 		/// \todo: set the cameraToNDC parameters
 	}
 	else
 	{
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+		delete m_ratPixel;
+		m_ratPixel = 0;
+
+#endif
+		
 		delete m_outputFile;
 		m_outputFile = 0;
 		m_outputFileName = "";
