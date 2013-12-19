@@ -39,8 +39,6 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
-#include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost;
@@ -66,11 +64,13 @@ static boost::python::list channelNames( DisplayDriverPtr dd )
 
 static void displayDriverImageData( DisplayDriverPtr dd, const Imath::Box2i &box, FloatVectorDataPtr data )
 {
+	ScopedGILRelease gilRelease;
 	dd->imageData( box, &(data->readable()[0]), data->readable().size() );
 }
 
 static void displayDriverImageClose( DisplayDriverPtr dd )
 {
+	ScopedGILRelease gilRelease;
 	dd->imageClose();
 }
 
