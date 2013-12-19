@@ -486,7 +486,14 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *no
 		return 0;
 	}
 	
-	return scene->readAttribute( name, time );
+	try
+	{
+		return scene->readAttribute( name, time );
+	}
+	catch( ... )
+	{
+		return 0;
+	}
 }
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, int filter )

@@ -2985,6 +2985,17 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis2" )) ).equalWithAbsError( IECore.V3d( cWorld[(1,0)], cWorld[(1,1)], cWorld[(1,2)] ), 1e-6 ) )
 			self.assertTrue( IECore.V3d( list(cPoint.attribValue( "basis3" )) ).equalWithAbsError( IECore.V3d( cWorld[(2,0)], cWorld[(2,1)], cWorld[(2,2)] ), 1e-6 ) )
 	
+	def testNonExistantAttributes( self ) :
+		
+		self.writeSCC()
+		
+		node = self.xform()
+		node.parm( "expand" ).pressButton()
+		scene = IECoreHoudini.HoudiniScene( node.path(), rootPath = [ node.name() ] )
+		self.assertEqual( scene.attributeNames(), [] )
+		self.assertFalse( scene.hasAttribute( "test" ) )
+		self.assertEqual( scene.readAttribute( "test", 0 ), None )
+	
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :

@@ -366,7 +366,14 @@ void HoudiniScene::attributeNames( NameList &attrs ) const
 	{
 		NameList names;
 		it->m_names( node, names );
-		attrs.insert( attrs.end(), names.begin(), names.end() );
+		/// \todo: investigate using a set here if performance becomes an issue
+		for ( NameList::const_iterator nIt = names.begin(); nIt != names.end(); ++nIt )
+		{
+			if ( std::find( attrs.begin(), attrs.end(), *nIt ) == attrs.end() )
+			{
+				attrs.push_back( *nIt );
+			}
+		}
 	}
 }
 
