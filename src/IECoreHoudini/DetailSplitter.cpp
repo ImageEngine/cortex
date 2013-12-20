@@ -95,27 +95,22 @@ bool DetailSplitter::validate()
 	const GA_Attribute *attr = attrRef.getAttribute();
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
 	
-	/// \todo: this would be faster with a map of handles rather than strings
-	std::map<std::string, GA_OffsetList> offsets;
+	std::map<GA_StringIndexType, GA_OffsetList> offsets;
 	GA_Range primRange = geo->getPrimitiveRange();
 	for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
 	{
-		std::string current = "";
-		if ( const char *value = tuple->getString( attr, it.getOffset() ) )
-		{
-			current = value;
-		}
+		GA_StringIndexType currentHandle = tuple->getHandle( attr, it.getOffset() );
 		
-		std::map<std::string, GA_OffsetList>::iterator oIt = offsets.find( current );
+		std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.find( currentHandle );
 		if ( oIt == offsets.end() )
 		{
-			oIt = offsets.insert( std::pair<std::string, GA_OffsetList>( current, GA_OffsetList() ) ).first;
+			oIt = offsets.insert( std::pair<GA_StringIndexType, GA_OffsetList>( currentHandle, GA_OffsetList() ) ).first;
 		}
 		
 		oIt->second.append( it.getOffset() );
 	}
 	
-	for ( std::map<std::string, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
+	for ( std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
 	{
 		GU_Detail *newGeo = new GU_Detail();
 		GA_Range matchPrims( geo->getPrimitiveMap(), oIt->second );
@@ -124,7 +119,13 @@ bool DetailSplitter::validate()
 		GU_DetailHandle handle;
 		handle.allocateAndSet( newGeo, true );
 		
-		m_cache[oIt->first] = handle;
+		std::string current = "";
+		if ( const char *value = tuple->getTableString( attr, oIt->first ) )
+		{
+			current = value;
+		}
+		
+		m_cache[current] = handle;
 	}
 	
 	return !m_cache.empty();
