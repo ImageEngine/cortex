@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -288,6 +288,13 @@ void RATDeepImageWriter::open()
 		options->setOptionM4( "space:world", IECore::convert<UT_Matrix4>( worldToCameraParameter()->getTypedValue() ) );
 		
 		/// \todo: set the cameraToNDC parameters
+
+#if UT_MAJOR_VERSION_INT >= 13 && UT_BUILD_VERSION_INT >= 267
+
+		m_outputFile->setTextureOptions( *options );
+
+#endif
+
 	}
 	else
 	{
