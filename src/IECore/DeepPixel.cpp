@@ -114,7 +114,7 @@ float DeepPixel::getDepth( unsigned index ) const
 {
 	sort();
 	
-	if ( index < 0 || index >= numSamples() )
+	if( index >= numSamples() )
 	{
 		throw IECore::InvalidArgumentException( ( boost::format( "DeepPixel::getDepth: Depth index %d does not exist" ) % index ).str() );
 	}
@@ -143,7 +143,7 @@ class DeepPixel::DepthComparison
 
 void DeepPixel::setDepth( unsigned index, float depth )
 {
-	if ( index < 0 || index >= numSamples() )
+	if( index >= numSamples() )
 	{
 		throw IECore::InvalidArgumentException( ( boost::format( "DeepPixel::setDepth: Depth index %d does not exist" ) % index ).str() );
 	}
@@ -195,7 +195,7 @@ float *DeepPixel::channelData( unsigned index )
 {
 	sort();
 	
-	if ( index < 0 || index >= numSamples() )
+	if( index >= numSamples() )
 	{
 		throw IECore::InvalidArgumentException( ( boost::format( "DeepPixel::channelData: Depth index %d does not exist" ) % index ).str() );
 	}

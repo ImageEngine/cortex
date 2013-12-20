@@ -76,37 +76,41 @@ class DisplayDriverServer::Session : public RefCounted
 		CharVectorDataPtr m_buffer;
 };
 
-struct DisplayDriverServer::PrivateData : public RefCounted
+class DisplayDriverServer::PrivateData : public RefCounted
 {
-	bool m_success;
-	boost::asio::ip::tcp::endpoint m_endpoint;
-	boost::asio::io_service m_service;
-	boost::asio::ip::tcp::acceptor m_acceptor;
-	tbb::tbb_thread m_thread;
+	
+	public :
+	
+		bool m_success;
+		boost::asio::ip::tcp::endpoint m_endpoint;
+		boost::asio::io_service m_service;
+		boost::asio::ip::tcp::acceptor m_acceptor;
+		tbb::tbb_thread m_thread;
 
-	PrivateData( int portNumber ) :
-		m_success(false),
-		m_endpoint(tcp::v4(), portNumber),
-		m_service(),
-		m_acceptor( m_service ),
-		m_thread()
-	{
-		m_acceptor.open(  m_endpoint.protocol() );
-		m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
-		m_acceptor.bind( m_endpoint );
-		m_acceptor.listen();
-		m_success = true;
-	}
-
-	~PrivateData()
-	{
-		if ( m_success )
+		PrivateData( int portNumber ) :
+			m_success(false),
+			m_endpoint(tcp::v4(), portNumber),
+			m_service(),
+			m_acceptor( m_service ),
+			m_thread()
 		{
-			m_acceptor.cancel();
-			m_acceptor.close();
-			m_thread.join();
+			m_acceptor.open(  m_endpoint.protocol() );
+			m_acceptor.set_option( boost::asio::ip::tcp::acceptor::reuse_address(true));
+			m_acceptor.bind( m_endpoint );
+			m_acceptor.listen();
+			m_success = true;
 		}
-	}
+
+		~PrivateData()
+		{
+			if ( m_success )
+			{
+				m_acceptor.cancel();
+				m_acceptor.close();
+				m_thread.join();
+			}
+		}
+
 };
 
 /* Set the FD_CLOEXEC flag for the given socket descriptor, so that it will not exist on child processes.*/

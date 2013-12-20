@@ -89,7 +89,7 @@ class WarpOp : public ImagePrimitiveOp
 		IntParameterPtr m_filterParameter;
 		IntParameterPtr m_boundModeParameter;
 		struct Warp;
-		friend class Warp;
+		friend struct Warp;
 };
 
 IE_CORE_DECLAREPTR( WarpOp );

@@ -35,6 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECore/BINParticleWriter.h"
+#include "IECore/FileNameParameter.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

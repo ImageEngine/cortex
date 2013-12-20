@@ -96,7 +96,7 @@ class KDTree
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
 		
-		struct Neighbour;
+		class Neighbour;
 		/// Populates the passed vector with the N closest neighbours to p, sorted with the closest first. Returns the number found.
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNNeighbours( const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours ) const;

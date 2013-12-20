@@ -35,6 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECore/DeepImageWriter.h"
+#include "IECore/FileNameParameter.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;
