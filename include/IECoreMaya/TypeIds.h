@@ -120,6 +120,7 @@ enum TypeId
 	FromMayaProceduralHolderConverterTypeId = 109073,
 	FromMayaLocatorConverterTypeId = 109074,
 	ToMayaLocatorConverterTypeId = 109075,
+	ToMayaCurveConverterTypeId = 109076,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };
