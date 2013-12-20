@@ -1,3 +1,21 @@
+# 8.0.0-b7
+
+#### IECore
+
+- Added TransferSmoothSkinningWeightsOp
+- Added GIL release for DisplayDriver imageData and imageClose binding
+
+#### IECoreMaya
+
+- Added ToMayaCurveConverter
+
+#### IECoreHoudini
+
+- Houdini 13 Compatibility (requires H13.0.267 to pass tests)
+- Fixed HoudiniScene custom attribute bug when two callbacks define the same attribute
+- Fixed exception when reading HoudiniScene custom attributes that didn't exist in the underlying scene
+- Using handles instead of strings when validating the DetailSplitter
+
 # 8.0.0-b6
 
 #### IECore
