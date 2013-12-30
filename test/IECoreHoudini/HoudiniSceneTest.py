@@ -259,7 +259,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.readTags(IECore.SceneInterface.LocalTag), [ "yellow" ] )
 		self.assertTrue( torus1.hasTag( "yellow",IECore.SceneInterface.LocalTag ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(IECore.SceneInterface.LocalTag), [ "sop", "top" ] )
+		self.assertEqual( sorted( box1.readTags(IECore.SceneInterface.LocalTag) ), [ "sop", "top" ] )
 		self.assertTrue( box1.hasTag( "sop",IECore.SceneInterface.LocalTag ) )
 		self.assertTrue( box1.hasTag( "top",IECore.SceneInterface.LocalTag ) )
 		self.assertFalse( box1.hasTag( "yellow",IECore.SceneInterface.EveryTag ) )
