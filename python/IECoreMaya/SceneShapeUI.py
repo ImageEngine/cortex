@@ -184,15 +184,11 @@ def _dagMenu( menu, sceneShape ) :
 			for tag in tags :
 				tag = str(tag)
 				parts = tag.split(":")
-				if len(parts) == 1 :
-					if not tag in tagTree :
-						tagTree[tag] = None
+				leftOverTag = tag[len(parts[0])+1:]
+				if not parts[0] in tagTree :
+					tagTree[parts[0]] = [ leftOverTag ]
 				else :
-					leftOverTag = tag[len(parts[0])+1:]
-					if not parts[0] in tagTree or tagTree[parts[0]] is None :
-						tagTree[parts[0]] = [ leftOverTag ]
-					else :
-						tagTree[parts[0]].append( leftOverTag )
+					tagTree[parts[0]].append( leftOverTag )
 		if tagTree :
 
 			maya.cmds.menuItem(
@@ -210,22 +206,23 @@ def _dagMenu( menu, sceneShape ) :
 			tags.sort()
 
 			for tag in tags :
-
-				if tagTree[tag] is None :
-
+				
+				subtags = tagTree[tag]
+				subtags.sort()
+				
+				if "" in subtags:
 					maya.cmds.menuItem(
 						label = tag,
 						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag )
 					)
-
-				else :
-
+					subtags.remove("")
+				
+				if subtags:
 					maya.cmds.menuItem(
 						label = tag,
 						subMenu = True
 					)
-					subtags = tagTree[tag]
-					subtags.sort()
+
 					for tagSuffix in subtags :
 						maya.cmds.menuItem(
 							label = tagSuffix,
@@ -425,9 +422,9 @@ def __expandToSelected( sceneShape, *unused ) :
 	toSelect = []	
 
 	for selected in selectedNames:
-		transformName = "|".join( sceneShape.split("|")[:-1] )
+		transformName = parent
 		transformNames = [ transformName ]
-		for item in selected.split("/")[1:]:
+		for item in selected.split("/")[1:-1]:
 			transformName = transformName + "|" + item
 			if not transformName in transformNames:
 				transformNames.append( transformName )
