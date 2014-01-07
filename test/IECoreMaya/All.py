@@ -61,6 +61,7 @@ from FromMayaObjectConverterTest import *
 from FnParameterisedHolderTest import *
 from ToMayaPlugConverterTest import *
 from ToMayaMeshConverterTest import *
+from ToMayaCurveConverterTest import *
 from MayaTypeIdTest import *
 from FromMayaTransformConverterTest import *
 from CallbackIdTest import *

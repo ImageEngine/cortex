@@ -87,7 +87,7 @@ class ImageDiffOp : public Op
 		BoolParameterPtr m_skipMissingChannelsParameter;
 		BoolParameterPtr m_alignDisplayWindowsParameter;
 
-		class FloatConverter;
+		struct FloatConverter;
 
 };
 

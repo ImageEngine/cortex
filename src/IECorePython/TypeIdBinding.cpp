@@ -438,6 +438,7 @@ void bindTypeId()
 		.value( "LensModel", LensModelTypeId )
 		.value( "StandardRadialLensModel", StandardRadialLensModelTypeId )
 		.value( "LensDistortOp", LensDistortOpTypeId )
+		.value( "TransferSmoothSkinningWeightsOp", TransferSmoothSkinningWeightsOpTypeId )
 	;
 }
 

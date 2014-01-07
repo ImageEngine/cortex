@@ -53,7 +53,7 @@ class State : public Bindable
 
 		/// This class binds a State upon construction, and on destruction makes
 		/// sure that the previous state is reverted to.
-		struct ScopedBinding : private boost::noncopyable
+		class ScopedBinding : private boost::noncopyable
 		{
 		
 			public :

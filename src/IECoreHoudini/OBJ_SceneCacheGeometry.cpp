@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_PtrArray.h"
+
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 
@@ -106,7 +108,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
 	for ( int i=0; i < numSceneSops; ++i )
 	{
-		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children[i] );
+		SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( children( i ) );
 		sop->setAttributeFilter( attribFilter );
 		sop->setAttributeCopy( attribCopy );
 		sop->setTagFilter( tagFilter );

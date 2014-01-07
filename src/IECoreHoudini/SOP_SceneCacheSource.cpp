@@ -39,10 +39,12 @@
 #include "UT/UT_WorkArgs.h"
 
 #include "IECore/CoordinateSystem.h"
+#include "IECore/DespatchTypedData.h"
 #include "IECore/Group.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/TransformOp.h"
+#include "IECore/TypeTraits.h"
 #include "IECore/VisibleRenderable.h"
 
 #include "IECoreHoudini/GU_CortexPrimitive.h"
@@ -423,7 +425,8 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 			for ( int i = 0; i < pairs.entries(); ++i )
 			{
 				UT_WorkArgs values;
-				UT_String( pairs[i] ).tokenize( values, ":" );
+				UT_String pair( pairs[i] );
+				pair.tokenize( values, ":" );
 				if ( values.entries() != 2 )
 				{
 					continue;
@@ -451,6 +454,13 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 	return result;
 }
 
+template<typename T>
+SOP_SceneCacheSource::TransformGeometricData::ReturnType SOP_SceneCacheSource::TransformGeometricData::operator()( typename T::ConstPtr data ) const
+{
+	GeometricData::Interpretation interp = data->getInterpretation();
+	return ( interp == GeometricData::Point || interp == GeometricData::Normal || interp == GeometricData::Vector );
+}
+
 ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params )
 {
 	if ( const Primitive *primitive = IECore::runTimeCast<const Primitive>( object ) )
@@ -459,19 +469,27 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 		transformer->inputParameter()->setValue( const_cast<Primitive*>( primitive ) ); // safe because we set the copy parameter
 		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new M44dData( transform ) );
-		ObjectPtr result = transformer->operate();
 		
+		// add all Point and Normal prim vars to the transformation list
+		const PrimitiveVariableMap &variables = primitive->variables;
 		std::vector<std::string> &primVars = transformer->primVarsParameter()->getTypedValue();
-		for ( std::vector<std::string>::iterator it = primVars.begin(); it != primVars.end(); ++it )
+		primVars.clear();
+		for ( PrimitiveVariableMap::const_iterator it = variables.begin(); it != variables.end(); ++it )
 		{
-			if ( std::find( params.animatedPrimVars.begin(), params.animatedPrimVars.end(), *it ) == params.animatedPrimVars.end() )
+			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data ) )
 			{
-				params.animatedPrimVars.push_back( *it );
-				params.hasAnimatedPrimVars = true;
+				primVars.push_back( it->first );
+				
+				// add the transforming prim vars to the animated list
+				if ( std::find( params.animatedPrimVars.begin(), params.animatedPrimVars.end(), it->first ) == params.animatedPrimVars.end() )
+				{
+					params.animatedPrimVars.push_back( it->first );
+					params.hasAnimatedPrimVars = true;
+				}
 			}
 		}
 		
-		return result;
+		return transformer->operate();
 	}
 	else if ( const Group *group = IECore::runTimeCast<const Group>( object ) )
 	{

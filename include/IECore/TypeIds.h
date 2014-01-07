@@ -435,6 +435,7 @@ enum TypeId
 	LensModelTypeId = 387,
 	StandardRadialLensModelTypeId = 388,
 	LensDistortOpTypeId = 389,
+	TransferSmoothSkinningWeightsOpTypeId = 390,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

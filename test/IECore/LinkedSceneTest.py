@@ -699,7 +699,43 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( parent.readTransformAtSample( 0 ), transform )
 		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( 1, 0, 0 ), IECore.V3d( 3, 1, 1 ) ) ) )
 		self.failUnless( LinkedSceneTest.compareBBox( linked.readBoundAtSample( 0 ), linked.readBoundAtSample( 1 ) ) )
-
+	
+	def testMemoryIndexedIOReadWrite( self ) :
+		
+		# create inital file structure in memory:
+		mio = IECore.MemoryIndexedIO( IECore.CharVectorData(), IECore.IndexedIO.OpenMode.Write )
+		
+		# write to the actual linkedscene:
+		scc = IECore.SceneCache( mio )
+		l = IECore.LinkedScene( scc )
+		
+		c0 = l.createChild("child0")
+		c1 = l.createChild("child1")
+		
+		c0.writeAttribute( "testAttr", IECore.StringData("test0"), 0 )
+		c1.writeAttribute( "testAttr", IECore.StringData("test1"), 0 )
+		
+		# write the "file" to memory
+		del l, scc, c0, c1
+		
+		# can we read it back again?
+		mioData = mio.buffer()
+		mio = IECore.MemoryIndexedIO( mioData, IECore.IndexedIO.OpenMode.Read )
+		
+		scc = IECore.SceneCache( mio )
+		l = IECore.LinkedScene( scc )
+		
+		self.assertEqual( set( l.childNames() ), set( ["child0", "child1"] ) )
+		
+		# no write access!
+		self.assertRaises( RuntimeError, l.createChild, "child2" )
+		
+		c0 = l.child("child0")
+		c1 = l.child("child1")
+		
+		self.assertEqual( c0.readAttribute( "testAttr", 0 ), IECore.StringData( "test0" ) )
+		self.assertEqual( c1.readAttribute( "testAttr", 0 ), IECore.StringData( "test1" ) )
+		
 if __name__ == "__main__":
 	unittest.main()
 

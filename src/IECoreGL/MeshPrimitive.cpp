@@ -51,52 +51,55 @@ using namespace std;
 // MemberData
 //////////////////////////////////////////////////////////////////////////
 
-struct MeshPrimitive::MemberData : public IECore::RefCounted
+class MeshPrimitive::MemberData : public IECore::RefCounted
 {
-	MemberData( IECore::ConstIntVectorDataPtr verts ) : vertIds( verts )
-	{
-	}
-
-	IECore::ConstIntVectorDataPtr vertIds;
-	Imath::Box3f bound;
-
-	/// \todo This could be removed now the ToGLMeshConverter uses FaceVaryingPromotionOp
-	/// to convert everything to FaceVarying before being added. The only reason we're even
-	/// doing this still is in case client code is creating MeshPrimitives directly rather
-	/// than using the converter. We should actually be able to remove the code here, and
-	/// instead of accept vertIds in the MeshPrimitive constructor, just accept the number
-	/// of triangles instead.
-	class ToFaceVaryingConverter
-	{
-		public:
-
-		typedef IECore::DataPtr ReturnType;
-
-		ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
+	
+	public :
+	
+		MemberData( IECore::ConstIntVectorDataPtr verts ) : vertIds( verts )
 		{
-			assert( m_vertIds );
 		}
 
-		template<typename T>
-		IECore::DataPtr operator()( typename T::Ptr inData )
+		IECore::ConstIntVectorDataPtr vertIds;
+		Imath::Box3f bound;
+
+		/// \todo This could be removed now the ToGLMeshConverter uses FaceVaryingPromotionOp
+		/// to convert everything to FaceVarying before being added. The only reason we're even
+		/// doing this still is in case client code is creating MeshPrimitives directly rather
+		/// than using the converter. We should actually be able to remove the code here, and
+		/// instead of accept vertIds in the MeshPrimitive constructor, just accept the number
+		/// of triangles instead.
+		class ToFaceVaryingConverter
 		{
-			assert( inData );
+			public:
 
-			const typename T::Ptr outData = new T();
-			outData->writable().resize( m_vertIds->readable().size() );
+			typedef IECore::DataPtr ReturnType;
 
-			typename T::ValueType::iterator outIt = outData->writable().begin();
-
-			for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
+			ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
 			{
-				*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
+				assert( m_vertIds );
 			}
 
-			return outData;
-		}
+			template<typename T>
+			IECore::DataPtr operator()( typename T::Ptr inData )
+			{
+				assert( inData );
 
-		IECore::ConstIntVectorDataPtr m_vertIds;
-	};
+				const typename T::Ptr outData = new T();
+				outData->writable().resize( m_vertIds->readable().size() );
+
+				typename T::ValueType::iterator outIt = outData->writable().begin();
+
+				for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
+				{
+					*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
+				}
+
+				return outData;
+			}
+
+			IECore::ConstIntVectorDataPtr m_vertIds;
+		};
 
 };
 

@@ -47,25 +47,27 @@
 using namespace IECore;
 using namespace Imath;
 
-struct CameraController::MemberData : public IECore::RefCounted
+class CameraController::MemberData : public IECore::RefCounted
 {
 
-	// parts of the camera we manipulate
-	CameraPtr camera;
-	V2iDataPtr resolution;
-	Box2fDataPtr screenWindow;
-	MatrixTransformPtr transform;
-	ConstStringDataPtr projection;
-	ConstFloatDataPtr fov;
-	ConstV2fDataPtr clippingPlanes;
-	float centreOfInterest;
+	public :
 
-	// motion state
-	MotionType motionType;
-	Imath::V2f motionStart;
-	Imath::M44f motionMatrix;
-	float motionCentreOfInterest;
-	Imath::Box2f motionScreenWindow;
+		// parts of the camera we manipulate
+		CameraPtr camera;
+		V2iDataPtr resolution;
+		Box2fDataPtr screenWindow;
+		MatrixTransformPtr transform;
+		ConstStringDataPtr projection;
+		ConstFloatDataPtr fov;
+		ConstV2fDataPtr clippingPlanes;
+		float centreOfInterest;
+
+		// motion state
+		MotionType motionType;
+		Imath::V2f motionStart;
+		Imath::M44f motionMatrix;
+		float motionCentreOfInterest;
+		Imath::Box2f motionScreenWindow;
 		
 };
 		

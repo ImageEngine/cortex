@@ -101,7 +101,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 		{
 			if( throwExceptions )
 			{
-				throw Exception( boost::str( boost::format( "CompoundData child \"%s\" is not of type \"%s\"." ) % T::staticTypeName() ) );
+				throw Exception( boost::str( boost::format( "CompoundData child \"%s\" is not of type \"%s\"." ) % name.value() % T::staticTypeName() ) );
 			}
 			else
 			{

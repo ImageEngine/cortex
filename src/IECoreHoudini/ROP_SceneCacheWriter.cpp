@@ -34,7 +34,6 @@
 
 #include "boost/filesystem/path.hpp"
 
-#include "GEO/GEO_AttributeHandle.h"
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
@@ -43,6 +42,7 @@
 #include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+#include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECore/LinkedScene.h"
@@ -172,7 +172,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		size_t numNodes = nodes.entries();
 		for ( size_t i = 0; i < numNodes; ++i )
 		{
-			OP_Node *current = nodes[i]->getParent();
+			OP_Node *current = nodes( i )->getParent();
 			while ( current )
 			{
 				bundle->addOp( current );

@@ -431,100 +431,100 @@ void bindMatrix33()
 
 	const char *bindName = typeName<Matrix33<T> >();
 
-	class_< Matrix33<T> >( bindName )
-		//.def_readwrite("x", &Matrix33<T>::x)
-		.def(init<>())
-		.def(init<T>())
-		.def(init<T, T, T, T, T, T, T, T, T>())
-		.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<float> > ) )
-		.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<double> > ) )
-		.def("__init__", make_constructor( &constructFromList< Matrix33<T> > ) )
+	class_< Matrix33<T> > cls( bindName );
 
-		.def("dimensions", &MatrixDimensions<Matrix33<T> >::get)
+		cls.def(init<>());
+		cls.def(init<T>());
+		cls.def(init<T, T, T, T, T, T, T, T, T>());
+		cls.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<float> > ) );
+		cls.def("__init__", make_constructor( &constructFromMatrix33< Matrix33<T>, Matrix33<double> > ) );
+		cls.def("__init__", make_constructor( &constructFromList< Matrix33<T> > ) );
+
+		cls.def("dimensions", &MatrixDimensions<Matrix33<T> >::get);
 
 		// [] operator support
-		.def("__getitem__", &MatrixWrapper< Matrix33<T> >::get)
-		.def("__setitem__", &MatrixWrapper< Matrix33<T> >::set)
+		cls.def("__getitem__", &MatrixWrapper< Matrix33<T> >::get);
+		cls.def("__setitem__", &MatrixWrapper< Matrix33<T> >::set);
 
-		.def("makeIdentity", &Matrix33<T>::makeIdentity)
+		cls.def("makeIdentity", &Matrix33<T>::makeIdentity);
 
-		.def(self == self)
-		.def(self != self)
+		cls.def(self == self);
+		cls.def(self != self);
 
-		.def("equalWithAbsError", &Matrix33<T>::equalWithAbsError)
-		.def("equalWithRelError", &Matrix33<T>::equalWithRelError)
+		cls.def("equalWithAbsError", &Matrix33<T>::equalWithAbsError);
+		cls.def("equalWithRelError", &Matrix33<T>::equalWithRelError);
 
-		.def(self += self)
-		.def(self += T())
-		.def(self + self)
+		cls.def(self += self);
+		cls.def(self += T());
+		cls.def(self + self);
 
-		.def(self -= self)
-		.def(self -= T())
-		.def(self - self)
+		cls.def(self -= self);
+		cls.def(self -= T());
+		cls.def(self - self);
 
-		.def(- self)
-		.def("negate", &Matrix33<T>::negate, return_self<>())
+		cls.def(- self);
+		cls.def("negate", &Matrix33<T>::negate, return_self<>());
 
-		.def(self *= T())
-		.def(self * T())
+		cls.def(self *= T());
+		cls.def(self * T());
 
-		.def(self *= self)
-		.def(self * self)
+		cls.def(self *= self);
+		cls.def(self * self);
 
-		.def("multVecMatrix", multVecMatrix<Matrix33<T>, Vec2<T> > )
-		.def("multDirMatrix", multDirMatrix<Matrix33<T>, Vec2<T> > )
+		cls.def("multVecMatrix", multVecMatrix<Matrix33<T>, Vec2<T> > );
+		cls.def("multDirMatrix", multDirMatrix<Matrix33<T>, Vec2<T> > );
 
-		.def(self /= T())
-		.def(self / T())
+		cls.def(self /= T());
+		cls.def(self / T());
 
-		.def("transpose", &Matrix33<T>::transpose, return_self<>())
-		.def("transposed", &Matrix33<T>::transposed)
+		cls.def("transpose", &Matrix33<T>::transpose, return_self<>());
+		cls.def("transposed", &Matrix33<T>::transposed);
 
-		.def("invert", &Matrix33<T>::invert, return_self<>(), Matrix33InvertOverloads() )
-		.def("inverse", &Matrix33<T>::inverse, Matrix33InverseOverloads() )
-		.def("gjInvert", &Matrix33<T>::gjInvert, return_self<>(), Matrix33GJInvertOverloads() )
-		.def("gjInverse", &Matrix33<T>::gjInverse, Matrix33GJInverseOverloads() )
+		cls.def("invert", &Matrix33<T>::invert, return_self<>(), Matrix33InvertOverloads() );
+		cls.def("inverse", &Matrix33<T>::inverse, Matrix33InverseOverloads() );
+		cls.def("gjInvert", &Matrix33<T>::gjInvert, return_self<>(), Matrix33GJInvertOverloads() );
+		cls.def("gjInverse", &Matrix33<T>::gjInverse, Matrix33GJInverseOverloads() );
 
-		.def("setRotation", &Matrix33<T>::template setRotation<T>, return_self<>())
-		.def("rotate", &Matrix33<T>::template rotate<T>, return_self<>())
+		cls.def("setRotation", &Matrix33<T>::template setRotation<T>, return_self<>());
+		cls.def("rotate", &Matrix33<T>::template rotate<T>, return_self<>());
 
-		.def("setScale", setScale1, return_self<>())
-		.def("setScale", setScale2, return_self<>())
+		cls.def("setScale", setScale1, return_self<>());
+		cls.def("setScale", setScale2, return_self<>());
 
-		.def("scale", &Matrix33<T>::template scale<T>, return_self<>())
-		.def("setTranslation", &Matrix33<T>::template setTranslation<T>, return_self<>())
+		cls.def("scale", &Matrix33<T>::template scale<T>, return_self<>());
+		cls.def("setTranslation", &Matrix33<T>::template setTranslation<T>, return_self<>());
 
-		.def("translation", &Matrix33<T>::translation)
-		.def("translate", &Matrix33<T>::template translate<T>, return_self<>())
+		cls.def("translation", &Matrix33<T>::translation);
+		cls.def("translate", &Matrix33<T>::template translate<T>, return_self<>());
 
-		.def("setShear", setShear1, return_self<>())
-		.def("setShear", setShear2, return_self<>())
+		cls.def("setShear", setShear1, return_self<>());
+		cls.def("setShear", setShear2, return_self<>());
 
-		.def("shear", shear1, return_self<>())
-		.def("shear", shear2, return_self<>())
+		cls.def("shear", shear1, return_self<>());
+		cls.def("shear", shear2, return_self<>());
 
-		.def("baseTypeMin", &Matrix33<T>::baseTypeMin).staticmethod("baseTypeMin")
-		.def("baseTypeMax", &Matrix33<T>::baseTypeMax).staticmethod("baseTypeMax")
-		.def("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
-		.def("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon")
+		cls.def("baseTypeMin", &Matrix33<T>::baseTypeMin).staticmethod("baseTypeMin");
+		cls.def("baseTypeMax", &Matrix33<T>::baseTypeMax).staticmethod("baseTypeMax");
+		cls.def("baseTypeSmallest", &Matrix33<T>::baseTypeSmallest).staticmethod("baseTypeSmallest");
+		cls.def("baseTypeEpsilon", &Matrix33<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon");
 
-		.def("__str__", &IECorePython::str<Matrix33<T> > )
-		.def("__repr__", &IECorePython::repr<Matrix33<T> > )
+		cls.def("__str__", &IECorePython::str<Matrix33<T> > );
+		cls.def("__repr__", &IECorePython::repr<Matrix33<T> > );
 
-		.def("createScaled", &createScaled<Matrix33<T>, Vec2<T> > ).staticmethod( "createScaled" )
-		.def("createTranslated", &createTranslated<Matrix33<T>, Vec2<T> > ).staticmethod( "createTranslated" )
-		.def("createRotated", &createRotated<Matrix33<T>, T > ).staticmethod( "createRotated" )
+		cls.def("createScaled", &createScaled<Matrix33<T>, Vec2<T> > ).staticmethod( "createScaled" );
+		cls.def("createTranslated", &createTranslated<Matrix33<T>, Vec2<T> > ).staticmethod( "createTranslated" );
+		cls.def("createRotated", &createRotated<Matrix33<T>, T > ).staticmethod( "createRotated" );
 
-		.def("extractScaling", &extractScaling<Matrix33<T>, Vec2<T> > )
-		.def("sansScaling", (Matrix33<T>(*)( const Matrix33<T> &))&sansScaling2<Matrix33<T> > )
-		.def("removeScaling", &removeScaling<Matrix33<T> > )
-		.def("extractScalingAndShear", &extractScalingAndShear33<T> )
-		.def("sansScalingAndShear", &sansScalingAndShear<Matrix33<T> > )
-		.def("removeScalingAndShear", &removeScalingAndShear<Matrix33<T> > )
-		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T> )
-		.def("extractSHRT", &extractSHRT33<T> )
+		cls.def("extractScaling", &extractScaling<Matrix33<T>, Vec2<T> > );
+		cls.def("sansScaling", (Matrix33<T>(*)( const Matrix33<T> &))&sansScaling2<Matrix33<T> > );
+		cls.def("removeScaling", &removeScaling<Matrix33<T> > );
+		cls.def("extractScalingAndShear", &extractScalingAndShear33<T> );
+		cls.def("sansScalingAndShear", &sansScalingAndShear<Matrix33<T> > );
+		cls.def("removeScalingAndShear", &removeScalingAndShear<Matrix33<T> > );
+		cls.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear33<T> );
+		cls.def("extractSHRT", &extractSHRT33<T> );
 
-		.def("determinant", (float (*)( const Matrix33<T> & ))&IECore::determinant<T> )
+		cls.def("determinant", (float (*)( const Matrix33<T> & ))&IECore::determinant<T> );
 	;
 
 }
@@ -541,118 +541,112 @@ void bindMatrix44()
 	const Matrix44<T> &(Matrix44<T>::*setScale1)(const Vec3<T> &) = &Matrix44<T>::setScale;
 	const Matrix44<T> &(Matrix44<T>::*setScale2)(T) = &Matrix44<T>::setScale;
 
-	//const Matrix44<T> &(Matrix44<T>::*setShear1)(const Shear6<T> &) = &Matrix44<T>::template setShear<T>;
 	const Matrix44<T> &(Matrix44<T>::*setShear2)(const Vec3<T> &) = &Matrix44<T>::template setShear<T>;
 
-	//const Matrix44<T> &(Matrix44<T>::*shear1)(const Shear6<T> &) = &Matrix44<T>::template shear<T>;
 	const Matrix44<T> &(Matrix44<T>::*shear2)(const Vec3<T> &) = &Matrix44<T>::template shear<T>;
 
 	const char *bindName = typeName<Matrix44<T> >();
 
-	class_< Matrix44<T> >( bindName )
+	class_< Matrix44<T> > cls( bindName );
 
-		.def(init<>())
-		.def(init<T>())
-		.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>())
-		.def(init<Matrix33<T>, Vec3<T> >())
-		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<float> > ) )
-		.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<double> > ) )
-		.def("__init__", make_constructor( &constructFromList< Matrix44<T> > ) )
+		cls.def(init<>());
+		cls.def(init<T>());
+		cls.def(init<T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T>());
+		cls.def(init<Matrix33<T>, Vec3<T> >());
+		cls.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<float> > ) );
+		cls.def("__init__", make_constructor( &constructFromMatrix44< Matrix44<T>, Matrix44<double> > ) );
+		cls.def("__init__", make_constructor( &constructFromList< Matrix44<T> > ) );
 
-		//.def(self = T())
-
-		.def("dimensions", &MatrixDimensions<Matrix44<T> >::get)
+		cls.def("dimensions", &MatrixDimensions<Matrix44<T> >::get);
 
 		// [] operator support
-		.def("__getitem__", &MatrixWrapper< Matrix44<T> >::get)
-		.def("__setitem__", &MatrixWrapper< Matrix44<T> >::set)
+		cls.def("__getitem__", &MatrixWrapper< Matrix44<T> >::get);
+		cls.def("__setitem__", &MatrixWrapper< Matrix44<T> >::set);
 
-		.def("makeIdentity", &Matrix44<T>::makeIdentity)
+		cls.def("makeIdentity", &Matrix44<T>::makeIdentity);
 
-		.def(self == self)
-		.def(self != self)
+		cls.def(self == self);
+		cls.def(self != self);
 
-		.def("equalWithAbsError", &Matrix44<T>::equalWithAbsError)
-		.def("equalWithRelError", &Matrix44<T>::equalWithRelError)
+		cls.def("equalWithAbsError", &Matrix44<T>::equalWithAbsError);
+		cls.def("equalWithRelError", &Matrix44<T>::equalWithRelError);
 
-		.def(self += self)
-		.def(self += T())
-		.def(self + self)
+		cls.def(self += self);
+		cls.def(self += T());
+		cls.def(self + self);
 
-		.def(self -= self)
-		.def(self -= T())
-		.def(self - self)
+		cls.def(self -= self);
+		cls.def(self -= T());
+		cls.def(self - self);
 
-		.def(- self)
-		.def("negate", &Matrix44<T>::negate, return_self<>())
+		cls.def(- self);
+		cls.def("negate", &Matrix44<T>::negate, return_self<>());
 
-		.def(self *= T())
-		.def(self * T())
+		cls.def(self *= T());
+		cls.def(self * T());
 
-		.def(self *= self)
-		.def(self * self)
+		cls.def(self *= self);
+		cls.def(self * self);
 
-		.def("multVecMatrix", multVecMatrix<Matrix44<T>, Vec3<T> > )
-		.def("multDirMatrix", multDirMatrix<Matrix44<T>, Vec3<T> > )
+		cls.def("multVecMatrix", multVecMatrix<Matrix44<T>, Vec3<T> > );
+		cls.def("multDirMatrix", multDirMatrix<Matrix44<T>, Vec3<T> > );
 
-		.def(self /= T())
-		.def(self / T())
+		cls.def(self /= T());
+		cls.def(self / T());
 
-		.def("transpose", &Matrix44<T>::transpose, return_self<>())
-		.def("transposed", &Matrix44<T>::transposed)
+		cls.def("transpose", &Matrix44<T>::transpose, return_self<>());
+		cls.def("transposed", &Matrix44<T>::transposed);
 
-		.def("invert", &Matrix44<T>::invert, return_self<>(), Matrix44InvertOverloads() )
-		.def("inverse", &Matrix44<T>::inverse, Matrix44InverseOverloads() )
-		.def("gjInvert", &Matrix44<T>::gjInvert, return_self<>(), Matrix44GJInvertOverloads() )
-		.def("gjInverse", &Matrix44<T>::gjInverse, Matrix44GJInverseOverloads() )
+		cls.def("invert", &Matrix44<T>::invert, return_self<>(), Matrix44InvertOverloads() );
+		cls.def("inverse", &Matrix44<T>::inverse, Matrix44InverseOverloads() );
+		cls.def("gjInvert", &Matrix44<T>::gjInvert, return_self<>(), Matrix44GJInvertOverloads() );
+		cls.def("gjInverse", &Matrix44<T>::gjInverse, Matrix44GJInverseOverloads() );
 
-		.def("setEulerAngles", &Matrix44<T>::template setEulerAngles<T>, return_self<>())
-		.def("setAxisAngle", &Matrix44<T>::template setAxisAngle<T>, return_self<>())
-		.def("rotate", &Matrix44<T>::template rotate<T>, return_self<>())
+		cls.def("setEulerAngles", &Matrix44<T>::template setEulerAngles<T>, return_self<>());
+		cls.def("setAxisAngle", &Matrix44<T>::template setAxisAngle<T>, return_self<>());
+		cls.def("rotate", &Matrix44<T>::template rotate<T>, return_self<>());
 
-		.def("setScale", setScale1, return_self<>())
-		.def("setScale", setScale2, return_self<>())
+		cls.def("setScale", setScale1, return_self<>());
+		cls.def("setScale", setScale2, return_self<>());
 
-		.def("scale", &Matrix44<T>::template scale<T>, return_self<>())
-		.def("setTranslation", &Matrix44<T>::template setTranslation<T>, return_self<>())
+		cls.def("scale", &Matrix44<T>::template scale<T>, return_self<>());
+		cls.def("setTranslation", &Matrix44<T>::template setTranslation<T>, return_self<>());
 
-		.def("translation", &Matrix44<T>::translation)
-		.def("translate", &Matrix44<T>::template translate<T>, return_self<>())
+		cls.def("translation", &Matrix44<T>::translation);
+		cls.def("translate", &Matrix44<T>::template translate<T>, return_self<>());
 
-		//.def("setShear", setShear1, return_self<>())
-		.def("setShear", setShear2, return_self<>())
+		cls.def("setShear", setShear2, return_self<>());
 
-		//.def("shear", shear1, return_self<>())
-		.def("shear", shear2, return_self<>())
+		cls.def("shear", shear2, return_self<>());
 
-		.def("baseTypeMin", &Matrix44<T>::baseTypeMin).staticmethod("baseTypeMin")
-		.def("baseTypeMax", &Matrix44<T>::baseTypeMax).staticmethod("baseTypeMax")
-		.def("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest).staticmethod("baseTypeSmallest")
-		.def("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon")
+		cls.def("baseTypeMin", &Matrix44<T>::baseTypeMin).staticmethod("baseTypeMin");
+		cls.def("baseTypeMax", &Matrix44<T>::baseTypeMax).staticmethod("baseTypeMax");
+		cls.def("baseTypeSmallest", &Matrix44<T>::baseTypeSmallest).staticmethod("baseTypeSmallest");
+		cls.def("baseTypeEpsilon", &Matrix44<T>::baseTypeEpsilon).staticmethod("baseTypeEpsilon");
 
-		.def("__str__", &IECorePython::str<Matrix44<T> > )
-		.def("__repr__", &IECorePython::repr<Matrix44<T> > )
+		cls.def("__str__", &IECorePython::str<Matrix44<T> > );
+		cls.def("__repr__", &IECorePython::repr<Matrix44<T> > );
 
-		.def("createScaled", &createScaled<Matrix44<T>, Vec3<T> > ).staticmethod( "createScaled" )
-		.def("createTranslated", &createTranslated<Matrix44<T>, Vec3<T> > ).staticmethod( "createTranslated" )
-		.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" )
-		.def("createAimed", &Imath::rotationMatrix<T> )
-		.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" )
-		.def("createFromBasis", &matrixFromBasis<T> ).staticmethod( "createFromBasis" )
+		cls.def("createScaled", &createScaled<Matrix44<T>, Vec3<T> > ).staticmethod( "createScaled" );
+		cls.def("createTranslated", &createTranslated<Matrix44<T>, Vec3<T> > ).staticmethod( "createTranslated" );
+		cls.def("createRotated", &createRotated<Matrix44<T>, Vec3<T> > ).staticmethod( "createRotated" );
+		cls.def("createAimed", &Imath::rotationMatrix<T> );
+		cls.def("createAimed", &Imath::rotationMatrixWithUpDir<T> ).staticmethod( "createAimed" );
+		cls.def("createFromBasis", &matrixFromBasis<T> ).staticmethod( "createFromBasis" );
 
-		.def("extractScaling", &extractScaling<Matrix44<T>, Vec3<T> > )
-		.def("sansScaling", &sansScaling2<Matrix44<T> > )
-		.def("removeScaling", &removeScaling<Matrix44<T> > )
-		.def("extractScalingAndShear", &extractScalingAndShear44<T> )
-		.def("sansScalingAndShear", &sansScalingAndShear<Matrix44<T> > )
-		.def("removeScalingAndShear", &removeScalingAndShear<Matrix44<T> > )
-		.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T> )
-		.def("extractEulerXYZ", &extractEulerXYZ<Matrix44<T>, Vec3<T> > )
-		.def("extractEulerZYX", &extractEulerZYX<Matrix44<T>, Vec3<T> > )
-		.def("extractQuat", &extractQuat<T> )
-		.def("extractSHRT", &extractSHRT44<T> )
+		cls.def("extractScaling", &extractScaling<Matrix44<T>, Vec3<T> > );
+		cls.def("sansScaling", &sansScaling2<Matrix44<T> > );
+		cls.def("removeScaling", &removeScaling<Matrix44<T> > );
+		cls.def("extractScalingAndShear", &extractScalingAndShear44<T> );
+		cls.def("sansScalingAndShear", &sansScalingAndShear<Matrix44<T> > );
+		cls.def("removeScalingAndShear", &removeScalingAndShear<Matrix44<T> > );
+		cls.def("extractAndRemoveScalingAndShear", &extractAndRemoveScalingAndShear44<T> );
+		cls.def("extractEulerXYZ", &extractEulerXYZ<Matrix44<T>, Vec3<T> > );
+		cls.def("extractEulerZYX", &extractEulerZYX<Matrix44<T>, Vec3<T> > );
+		cls.def("extractQuat", &extractQuat<T> );
+		cls.def("extractSHRT", &extractSHRT44<T> );
 
-		.def("determinant", (float (*)( const Matrix44<T> & ))&IECore::determinant<T> )
+		cls.def("determinant", (float (*)( const Matrix44<T> & ))&IECore::determinant<T> );
 	;
 }
 

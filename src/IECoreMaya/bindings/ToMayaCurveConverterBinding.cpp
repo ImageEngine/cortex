@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,52 +34,18 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/DeepImageWriter.h"
-#include "IECore/FileNameParameter.h"
+#include "IECoreMaya/ToMayaCurveConverter.h"
+#include "IECoreMaya/bindings/ToMayaCurveConverterBinding.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
-using namespace boost::python;
 using namespace IECore;
+using namespace IECoreMaya;
+using namespace boost::python;
 
-namespace IECorePython
+void IECoreMaya::bindToMayaCurveConverter()
 {
-
-static list supportedExtensions()
-{
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
-}
-
-static list supportedExtensions( TypeId typeId )
-{
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( typeId, e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
-}
-
-void bindDeepImageWriter()
-{
-	RunTimeTypedClass<DeepImageWriter>()
-		.def( "writePixel", &DeepImageWriter::writePixel, ( arg_( "x" ), arg_( "y" ), arg_( "pixel" ) ) )
-		.def( "create", &DeepImageWriter::create ).staticmethod( "create" )
-		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
-		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
-		.staticmethod( "supportedExtensions" )
+	IECorePython::RunTimeTypedClass<ToMayaCurveConverter>()
+		.def( init<IECore::ConstObjectPtr>() )
 	;
 }
-
-} // namespace IECorePython

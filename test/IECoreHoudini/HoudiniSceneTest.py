@@ -259,7 +259,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( torus1.readTags(IECore.SceneInterface.LocalTag), [ "yellow" ] )
 		self.assertTrue( torus1.hasTag( "yellow",IECore.SceneInterface.LocalTag ) )
 		box1 = sub1.child( "box1" )
-		self.assertEqual( box1.readTags(IECore.SceneInterface.LocalTag), [ "sop", "top" ] )
+		self.assertEqual( sorted( box1.readTags(IECore.SceneInterface.LocalTag) ), [ "sop", "top" ] )
 		self.assertTrue( box1.hasTag( "sop",IECore.SceneInterface.LocalTag ) )
 		self.assertTrue( box1.hasTag( "top",IECore.SceneInterface.LocalTag ) )
 		self.assertFalse( box1.hasTag( "yellow",IECore.SceneInterface.EveryTag ) )
@@ -699,6 +699,12 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( deformer.cookCount(), 2 )
 		self.assertEqual( len(mesh0["P"].data), 8 )
 		self.assertEqual( mesh0["P"].data[0].x, -0.5 )
+		
+		scene.setDefaultTime( 0.5 )
+		self.assertTrue( scene.hasObject() )
+		self.assertEqual( deformer.cookCount(), 3 )
+		gap = scene.scene( scene.path() + [ "gap" ] )
+		self.assertEqual( deformer.cookCount(), 3 )
 	
 	def testNode( self ) :
 		
@@ -839,6 +845,13 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( gap.attributeNames(), [ "custom" ] )
 		self.assertTrue( gap.hasAttribute( "custom" ) )
 		self.assertEqual( gap.readAttribute( "custom", 0 ), IECore.StringData( gap.node().path() ) )
+		
+		# two callbacks registering the same attribute should not double-register it
+		IECoreHoudini.HoudiniScene.registerCustomAttributes( names, readName )
+		self.assertEqual( sub1.attributeNames(), [] )
+		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
+		self.assertEqual( box1.attributeNames(), [ "custom" ] )
+		self.assertEqual( gap.attributeNames(), [ "custom" ] )
 		
 		# Disable custom attribute functions so they don't mess with other tests
 		doTest = False

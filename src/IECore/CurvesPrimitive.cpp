@@ -237,7 +237,7 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 
 size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation, unsigned curveIndex ) const
 {
-	if( curveIndex < 0 || curveIndex >= m_vertsPerCurve->readable().size() )
+	if( curveIndex >= m_vertsPerCurve->readable().size() )
 	{
 		throw Exception( "Curve index out of range." );
 	}
@@ -267,7 +267,7 @@ size_t CurvesPrimitive::variableSize( PrimitiveVariable::Interpolation interpola
 
 unsigned CurvesPrimitive::numSegments( unsigned curveIndex ) const
 {
-	if( curveIndex < 0 || curveIndex >= m_vertsPerCurve->readable().size() )
+	if( curveIndex >= m_vertsPerCurve->readable().size() )
 	{
 		throw Exception( "Curve index out of range." );
 	}

@@ -35,6 +35,7 @@
 #include "OP/OP_Layout.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "UT/UT_Interrupt.h"
+#include "UT/UT_PtrArray.h"
 
 #include "IECoreHoudini/OBJ_SceneCacheGeometry.h"
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
@@ -356,7 +357,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	int numSceneNodes = getOpsByName( OBJ_SceneCacheTransform::typeName, children );
 	for ( int i=0; i < numSceneNodes; ++i )
 	{
-		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children[i] );
+		OBJ_SceneCacheTransform *xform = reinterpret_cast<OBJ_SceneCacheTransform*>( children( i ) );
 		xform->setAttributeFilter( attribFilter );
 		xform->setAttributeCopy( attribCopy );
 		xform->setShapeFilter( shapeFilter );
@@ -382,7 +383,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 	numSceneNodes = getOpsByName( OBJ_SceneCacheGeometry::typeName, children );
 	for ( int i=0; i < numSceneNodes; ++i )
 	{
-		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children[i] );
+		OBJ_SceneCacheGeometry *geo = reinterpret_cast<OBJ_SceneCacheGeometry*>( children( i ) );
 		geo->setAttributeFilter( attribFilter );
 		geo->setAttributeCopy( attribCopy );
 		geo->setShapeFilter( shapeFilter );
@@ -485,7 +486,14 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *no
 		return 0;
 	}
 	
-	return scene->readAttribute( name, time );
+	try
+	{
+		return scene->readAttribute( name, time );
+	}
+	catch( ... )
+	{
+		return 0;
+	}
 }
 
 bool OBJ_SceneCacheTransform::hasTag( const OP_Node *node, const SceneInterface::Name &tag, int filter )

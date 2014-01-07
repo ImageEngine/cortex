@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,37 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_TRANSFERSMOOTHSKINNINGWEIGHTSOP_H
+#define IECORE_TRANSFERSMOOTHSKINNINGWEIGHTSOP_H
 
-#include "IECore/DeepImageWriter.h"
-#include "IECore/FileNameParameter.h"
+#include "IECore/ModifyOp.h"
+#include "IECore/VectorTypedParameter.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECore
 {
 
-static list supportedExtensions()
+class TransferSmoothSkinningWeightsOp : public ModifyOp
 {
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
-}
+	public :
 
-static list supportedExtensions( TypeId typeId )
-{
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( typeId, e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
-}
+		IE_CORE_DECLARERUNTIMETYPED( TransferSmoothSkinningWeightsOp, ModifyOp );
 
-void bindDeepImageWriter()
-{
-	RunTimeTypedClass<DeepImageWriter>()
-		.def( "writePixel", &DeepImageWriter::writePixel, ( arg_( "x" ), arg_( "y" ), arg_( "pixel" ) ) )
-		.def( "create", &DeepImageWriter::create ).staticmethod( "create" )
-		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
-		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
-		.staticmethod( "supportedExtensions" )
-	;
-}
+		TransferSmoothSkinningWeightsOp();
+		virtual ~TransferSmoothSkinningWeightsOp();
 
-} // namespace IECorePython
+	protected :
+
+		virtual void modify( Object *object, const CompoundObject *operands );
+
+	private :
+
+		StringParameterPtr m_targetInfluenceNameParameter;
+		StringVectorParameterPtr m_sourceInfluenceNamesParameter;
+
+};
+
+IE_CORE_DECLAREPTR( TransferSmoothSkinningWeightsOp );
+
+} // namespace IECore
+
+#endif // IECORE_TRANSFERSMOOTHSKINNINGWEIGHTSOP_H

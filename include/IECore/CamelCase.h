@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,6 +34,9 @@
 
 #ifndef IECORE_CAMELCASE_H
 #define IECORE_CAMELCASE_H
+
+#include <string>
+#include <vector>
 
 namespace IECore
 {

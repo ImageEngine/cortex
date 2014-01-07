@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=8
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="b4"	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="b8"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -778,6 +778,7 @@ o.Add(
 		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
 		( "IECore.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
 		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
+		( "IECore.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
 	]
 )
 

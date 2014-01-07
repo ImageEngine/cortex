@@ -45,7 +45,7 @@ namespace IECore
 {
 
 /// Forward declaration
-template<typename, typename> class SRGBToLinearDataConversion;
+template<typename, typename> struct SRGBToLinearDataConversion;
 
 /// A class to perform data conversion from linear values to sRGB
 template<typename F, typename T>

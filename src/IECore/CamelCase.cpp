@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#include "IECore/CamelCase.h"
 
-#include "IECore/DeepImageWriter.h"
-#include "IECore/FileNameParameter.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECore
 {
 
-static list supportedExtensions()
+std::string CamelCase::toSpaced( const std::string &camelCase, Caps caps )
 {
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
+	std::vector<std::string> words;
+	split( camelCase, std::back_insert_iterator<std::vector<std::string> >( words ) );
+	return join( words.begin(), words.end(), caps, " " );
 }
 
-static list supportedExtensions( TypeId typeId )
+std::string CamelCase::fromSpaced( const std::string &spaced, Caps caps )
 {
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( typeId, e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
+	std::vector<std::string> words;
+	boost::algorithm::split( words, spaced, boost::is_any_of( " " ) );
+	return join( words.begin(), words.end(), caps );
 }
 
-void bindDeepImageWriter()
-{
-	RunTimeTypedClass<DeepImageWriter>()
-		.def( "writePixel", &DeepImageWriter::writePixel, ( arg_( "x" ), arg_( "y" ), arg_( "pixel" ) ) )
-		.def( "create", &DeepImageWriter::create ).staticmethod( "create" )
-		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
-		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
-		.staticmethod( "supportedExtensions" )
-	;
-}
-
-} // namespace IECorePython
+} // namespace IECore

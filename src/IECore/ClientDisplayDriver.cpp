@@ -47,7 +47,7 @@ using namespace Imath;
 using namespace IECore;
 using boost::asio::ip::tcp;
 
-struct ClientDisplayDriver::PrivateData : public RefCounted
+class ClientDisplayDriver::PrivateData : public RefCounted
 {
 	public :
 		PrivateData() :

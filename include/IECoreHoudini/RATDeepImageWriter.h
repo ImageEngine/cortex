@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_RATDEEPIMAGEWRITER_H
 
 #include "IMG/IMG_DeepShadow.h"
+#include "UT/UT_Version.h"
 
 #include "IECore/DeepImageWriter.h"
 
@@ -76,6 +77,13 @@ class RATDeepImageWriter : public IECore::DeepImageWriter
 		void open();
 		
 		IMG_DeepShadow *m_outputFile;
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+		IMG_DeepPixelWriter *m_ratPixel;
+
+#endif
+
 		std::string m_outputFileName;
 		int m_dataSize;
 		int m_alphaOffset;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -152,20 +152,6 @@ std::string CamelCase::join( Iterator begin, Iterator end, Caps caps, const std:
 	}
 	
 	return result;
-}
-
-std::string CamelCase::toSpaced( const std::string &camelCase, Caps caps )
-{
-	std::vector<std::string> words;
-	split( camelCase, std::back_insert_iterator<std::vector<std::string> >( words ) );
-	return join( words.begin(), words.end(), caps, " " );
-}
-
-std::string CamelCase::fromSpaced( const std::string &spaced, Caps caps )
-{
-	std::vector<std::string> words;
-	boost::algorithm::split( words, spaced, boost::is_any_of( " " ) );
-	return join( words.begin(), words.end(), caps );
 }
 
 } // namespace IECore

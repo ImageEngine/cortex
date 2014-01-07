@@ -68,44 +68,46 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( CurvesPrimitive::GLLineWi
 // MemberData
 //////////////////////////////////////////////////////////////////////////
 
-struct CurvesPrimitive::MemberData : public IECore::RefCounted
+class CurvesPrimitive::MemberData : public IECore::RefCounted
 {
 
-	MemberData( const IECore::CubicBasisf &b, bool p, IECore::ConstIntVectorDataPtr v, float w )
-		:	basis( b ), periodic( p ), vertsPerCurve( v->copy() ), width( w )
-	{
-	}
-
-	Imath::Box3f bound;
-	IECore::CubicBasisf basis;
-	bool periodic;
-	IECore::IntVectorDataPtr vertsPerCurve;
-	float width;
-	IECore::V3fVectorData::ConstPtr points;
-
-	mutable IECoreGL::ConstBufferPtr vertIdsBuffer;
-	mutable GLuint numVertIds;
-
-	mutable IECoreGL::ConstBufferPtr adjacencyVertIdsBuffer;
-	mutable GLuint numAdjacencyVertIds;
+	public :
 	
-	mutable IECoreGL::ConstBufferPtr linearAdjacencyVertIdsBuffer;
-	mutable GLuint numLinearAdjacencyVertIds;
-
-	struct GeometrySetup
-	{
-		GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss, bool l, bool r )
-			:	originalShader( os ), shaderSetup( ss ), linear( l ), ribbons( r )
+		MemberData( const IECore::CubicBasisf &b, bool p, IECore::ConstIntVectorDataPtr v, float w )
+			:	basis( b ), periodic( p ), vertsPerCurve( v->copy() ), width( w )
 		{
 		}
-		ConstShaderPtr originalShader;
-		Shader::SetupPtr shaderSetup;
-		bool linear;
-		bool ribbons;
-	};
 
-	typedef std::vector<GeometrySetup> GeometrySetupVector;
-	mutable GeometrySetupVector geometrySetups;
+		Imath::Box3f bound;
+		IECore::CubicBasisf basis;
+		bool periodic;
+		IECore::IntVectorDataPtr vertsPerCurve;
+		float width;
+		IECore::V3fVectorData::ConstPtr points;
+
+		mutable IECoreGL::ConstBufferPtr vertIdsBuffer;
+		mutable GLuint numVertIds;
+
+		mutable IECoreGL::ConstBufferPtr adjacencyVertIdsBuffer;
+		mutable GLuint numAdjacencyVertIds;
+	
+		mutable IECoreGL::ConstBufferPtr linearAdjacencyVertIdsBuffer;
+		mutable GLuint numLinearAdjacencyVertIds;
+
+		struct GeometrySetup
+		{
+			GeometrySetup( ConstShaderPtr os, Shader::SetupPtr ss, bool l, bool r )
+				:	originalShader( os ), shaderSetup( ss ), linear( l ), ribbons( r )
+			{
+			}
+			ConstShaderPtr originalShader;
+			Shader::SetupPtr shaderSetup;
+			bool linear;
+			bool ribbons;
+		};
+
+		typedef std::vector<GeometrySetup> GeometrySetupVector;
+		mutable GeometrySetupVector geometrySetups;
 
 };
 

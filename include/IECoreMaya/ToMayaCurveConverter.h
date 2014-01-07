@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IE_COREMAYA_TOMAYACURVECONVERTER_H
+#define IE_COREMAYA_TOMAYACURVECONVERTER_H
 
-#include "IECore/DeepImageWriter.h"
-#include "IECore/FileNameParameter.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/NumericParameter.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreMaya/ToMayaObjectConverter.h"
 
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECoreMaya
 {
 
-static list supportedExtensions()
+class ToMayaCurveConverter;
+IE_CORE_DECLAREPTR( ToMayaCurveConverter );
+
+/// This class converts IECore::CurvesPrimitives to maya curve objects.
+/// \ingroup conversionGroup
+class ToMayaCurveConverter : public ToMayaObjectConverter
 {
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
+	public:
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaCurveConverter, ToMayaCurveConverterTypeId, ToMayaObjectConverter );
+
+		ToMayaCurveConverter( IECore::ConstObjectPtr object );
+		
+		IECore::IntParameterPtr indexParameter();
+		IECore::ConstIntParameterPtr indexParameter() const;
+		
+	protected:
+		
+		/// Converts one of the curves in srcParameter() to a maya curve. The curve it converts
+		/// is specified by indexParameter() (named "index")
+		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
+
+		typedef ToMayaObjectConverterDescription<ToMayaCurveConverter> Description;
+		static Description g_curvesDataDescription;
+		static Description g_curvesDescription;
 	
-	return result;
+	private:
+		
+		IECore::IntParameterPtr m_indexParameter;
+};
+
 }
 
-static list supportedExtensions( TypeId typeId )
-{
-	list result;
-	std::vector<std::string> e;
-	DeepImageWriter::supportedExtensions( typeId, e );
-	for ( unsigned i=0; i < e.size(); i++ )
-	{
-		result.append( e[i] );
-	}
-	
-	return result;
-}
-
-void bindDeepImageWriter()
-{
-	RunTimeTypedClass<DeepImageWriter>()
-		.def( "writePixel", &DeepImageWriter::writePixel, ( arg_( "x" ), arg_( "y" ), arg_( "pixel" ) ) )
-		.def( "create", &DeepImageWriter::create ).staticmethod( "create" )
-		.def( "supportedExtensions", ( list(*)( ) )&supportedExtensions )
-		.def( "supportedExtensions", ( list(*)( TypeId ) )&supportedExtensions )
-		.staticmethod( "supportedExtensions" )
-	;
-}
-
-} // namespace IECorePython
+#endif // IE_COREMAYA_TOMAYACURVECONVERTER_H

@@ -1,3 +1,65 @@
+# 8.0.0-b8
+
+#### IECore
+
+- Clang compatibility
+
+#### IECoreGL
+
+- Clang compatibility
+
+# 8.0.0-b7
+
+#### IECore
+
+- Added TransferSmoothSkinningWeightsOp
+- Added GIL release for DisplayDriver imageData and imageClose binding
+
+#### IECoreMaya
+
+- Added ToMayaCurveConverter
+
+#### IECoreHoudini
+
+- Houdini 13 Compatibility (requires H13.0.267 to pass tests)
+- Fixed HoudiniScene custom attribute bug when two callbacks define the same attribute
+- Fixed exception when reading HoudiniScene custom attributes that didn't exist in the underlying scene
+- Using handles instead of strings when validating the DetailSplitter
+
+# 8.0.0-b6
+
+#### IECore
+
+- LinkedScene( SceneInterfacePtr ) supports writable scenes
+- Fixed SceneCache from IndexedIO bug
+- Fixed linking issues with IECore::CamelCase
+
+#### IECoreHoudini
+
+- SceneCache SOP transforms all Point, Normal, and Vector primitive variables (previously it only transformed P and N)
+- Preventing double cooking in HoudiniScene::scene( path )
+
+# 8.0.0-b5
+
+#### IECore
+
+- Improved error reporting in LinkedScene - the main filename is now available in error messages.
+- Made RunTimeTyped baseTypeIds() and derivedTypeIds() methods thread safe.
+
+#### IECoreGL
+
+- Added IECoreGL::Selector::push/popIDShader() methods. These replace the now deprecated loadIDShader() method.
+- Fixed crashes when selecting curves.
+
+#### IECoreHoudini
+
+- Added SceneCache Transform SOP. This node applies transformations from a SceneCache file directly on the points and primitives at the SOP level.
+- FromHoudiniPolygon converter now automatically removes normal primvars when extracting a subdivision mesh.
+
+#### IECoreNuke
+
+- Added DeepImageReader - this allows any deep image type supported by Cortex to be read in Nuke.
+
 # 8.0.0-b4
 
 #### IECore

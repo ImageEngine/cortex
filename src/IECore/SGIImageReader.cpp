@@ -71,12 +71,9 @@ struct SGIImageReader::Header
 			uint16_t  m_zSize;
 			uint32_t  m_pixMin;
 			uint32_t  m_pixMax;
-		private:
 			uint32_t  m_dummy1;
-		public:
 			char      m_imageName[80];
 			uint32_t  m_colorMap;
-		private:
 			char      m_dummy2[404];
 	};
 
