@@ -98,17 +98,26 @@ struct CompoundDataTest
 			BOOST_CHECK( !"Exception not thrown during invalid member retrieval." );		
 			BOOST_CHECK( !i );
 		}
-		catch ( std::exception &e ) 
+		catch ( IECore::Exception &e )
 		{
 		}
+		catch( ... )
+		{
+			BOOST_CHECK( !"Incorrect exception type thrown during invalid member retrieval." );
+		}
+		
 		try
 		{
 			StringData *s = c->member<StringData>( "iAmMissing", true, false );
 			BOOST_CHECK( !"Exception not thrown during missing member retrieval." );
 			BOOST_CHECK( !s );		
 		}
-		catch ( std::exception &e ) 
+		catch ( IECore::Exception &e )
 		{
+		}
+		catch( ... )
+		{
+			BOOST_CHECK( !"Incorrect exception type thrown during invalid member retrieval." );
 		}
 		
 		try
