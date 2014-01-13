@@ -90,8 +90,12 @@ class SplineParameterUI( ParameterUI ) :
 	def __openEditWindow( self, unused ) :
 
 		if not self.__editWindow :
-
-			self.__editWindow = maya.cmds.window( re.sub( "[\|\.]" , "_", self.plugName() ), title=self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
+			
+			editWindowName = re.sub( "[\|\.]" , "_", self.plugName() )
+			if maya.cmds.window( editWindowName, q=True, exists=True ):
+				maya.cmds.deleteUI( editWindowName )
+			
+			self.__editWindow = maya.cmds.window( editWindowName, title=self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
 
 			layout = maya.cmds.formLayout()
 
