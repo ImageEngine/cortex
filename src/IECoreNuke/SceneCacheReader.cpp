@@ -721,11 +721,17 @@ void SceneCacheReader::updateTagFilterKnob()
 	}
 }
 
+const IECore::InternedString &SceneCacheReader::geometryTag()
+{
+	static IECore::InternedString g_geometryTag( "ObjectType:MeshPrimitive" );
+	return g_geometryTag;
+}
+
 void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const IECore::ConstSceneInterfacePtr sceneInterface )
 {
 	if( sceneInterface )
 	{
-		if( sceneInterface->hasObject() )
+		if( sceneInterface->hasObject() && sceneInterface->hasTag( geometryTag() ) )
 		{
 			IECore::SceneInterface::NameList tagNames;
 			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );

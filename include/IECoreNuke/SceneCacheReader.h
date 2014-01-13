@@ -146,6 +146,9 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 	
+		/// Returns an InternedString with the name of the geometry tag.	
+		static const IECore::InternedString &geometryTag();
+
 		// Knob Members.	
 		const char *m_filePath; // Holds the raw SceneCache file path.
 		std::string m_evaluatedFilePath; // Holds the SceneCache file path after any TCL scripts have been evaluated..
