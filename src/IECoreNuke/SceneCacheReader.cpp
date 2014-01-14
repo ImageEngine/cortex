@@ -721,11 +721,20 @@ void SceneCacheReader::updateTagFilterKnob()
 	}
 }
 
+const IECore::InternedString &SceneCacheReader::geometryTag()
+{
+	static IECore::InternedString g_geometryTag( "ObjectType:MeshPrimitive" );
+	return g_geometryTag;
+}
+
 void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const IECore::ConstSceneInterfacePtr sceneInterface )
 {
 	if( sceneInterface )
 	{
-		if( sceneInterface->hasObject() )
+		//\todo: We currently only support mesh geomentry as there isn't an IECoreNuke curve or points primitive converter.
+		// As a result we check that the object which we have encountered has a MeshPrimitive tag.
+		// When IECoreNuke supports curves and points primitive converters, remove this assertion.
+		if( sceneInterface->hasObject() && sceneInterface->hasTag( geometryTag() ) )
 		{
 			IECore::SceneInterface::NameList tagNames;
 			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );
