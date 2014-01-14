@@ -320,7 +320,14 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 	MPlug timePlug = fnChildDag.findPlug( aTime );
 	MTime time;
 	timePlug.getValue( time );
-	return scene->readAttribute( attributeName, time.as( MTime::kSeconds ) );
+	try
+	{
+		return scene->readAttribute( attributeName, time.as( MTime::kSeconds ) );
+	}
+	catch( ... )
+	{
+		return 0;
+	}
 }
 
 bool SceneShape::hasSceneShapeObject( const MDagPath &p )
