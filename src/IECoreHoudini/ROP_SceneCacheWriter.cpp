@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
+	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
 {
 }
 
@@ -78,6 +78,8 @@ PRM_Name ROP_SceneCacheWriter::pForceObjects( "forceObjects", "Force Objects" );
 PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
 PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
+
+const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "visible" );
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
@@ -187,6 +189,11 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		m_forceFilter = new UT_StringMMPattern();
 		m_forceFilter->compile( forceObjects );
 	}
+	
+	// We need to adjust the time for writing, because Houdini treats time starting
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	m_startTime = s + CHgetManager()->getSecsPerSample();
+	m_endTime = e + CHgetManager()->getSecsPerSample();
 	
 	return true;
 }
@@ -344,11 +351,48 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	for ( SceneInterface::NameList::iterator it = children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
-		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
+		
+		SceneInterfacePtr outChild = 0;
+		if ( outScene->hasChild( *it ) )
+		{
+			outChild = outScene->child( *it );
+		}
+		else
+		{
+			outChild = outScene->createChild( *it );
+			
+			if ( time != m_startTime )
+			{
+				outChild->writeAttribute( visibleAttribute, new BoolData( false ), time - 1e-6 );
+			}
+		}
+		
+		if ( outChild->hasAttribute( visibleAttribute ) )
+		{
+			outChild->writeAttribute( visibleAttribute, new BoolData( true ), time );
+		}
+		
 		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
+		}
+	}
+	
+	// turn visibleAttribute off if the child disappears
+	SceneInterface::NameList outChildren;
+	outScene->childNames( outChildren );
+	for ( SceneInterface::NameList::iterator it = outChildren.begin(); it != outChildren.end(); ++it )
+	{
+		if ( !liveScene->hasChild( *it ) )
+		{
+			SceneInterfacePtr outChild = outScene->child( *it );
+			if ( !outChild->hasAttribute( visibleAttribute ) )
+			{
+				outChild->writeAttribute( visibleAttribute, new BoolData( true ), time - 1e-6 );
+			}
+			
+			outChild->writeAttribute( visibleAttribute, new BoolData( false ), time );
 		}
 	}
 	

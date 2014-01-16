@@ -2368,6 +2368,60 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "execute" ).pressButton()
 		self.assertEqual( sop.cookCount(), 1 )
 	
+	def testRopDynamicSopHierarchy( self ) :
+		
+		self.writeAnimSCC()
+		obj = self.geometry()
+		obj.parm( "expand" ).pressButton()
+		delete = obj.renderNode().createOutputNode( "delete" )
+		delete.parm( "groupop" ).set( 1 ) # by range
+		delete.parm( "rangestart" ).set( 2 )
+		delete.parm( "rangeend" ).set( 2 )
+		switch = obj.renderNode().createOutputNode( "switch" )
+		switch.setInput( 1, delete )
+		switch.parm( "input" ).setExpression( "if hou.frame() >= 5 :\n\treturn 0\nelse :\n\treturn 1", hou.exprLanguage.Python )
+		switch.setRenderFlag( True )
+		
+		rop = self.rop( obj )
+		rop.parm( "trange" ).set( 1 )
+		rop.parm( "f1" ).set( 1 )
+		rop.parm( "f2" ).set( 20 )
+		rop.parm( "execute" ).pressButton()
+		
+		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		a = output.child( "1" )
+		b = a.child( "2" )
+		c = b.child( "3" )
+		attr = "visible"
+		self.assertFalse( a.hasAttribute( attr ) )
+		self.assertFalse( b.hasAttribute( attr ) )
+		self.assertTrue( c.hasAttribute( attr ) )
+		self.assertEqual( c.readAttribute( attr, 0 ), IECore.BoolData( False ) )
+		self.assertEqual( c.readAttribute( attr, 0.2083 ), IECore.BoolData( False ) )
+		self.assertEqual( c.readAttribute( attr, 0.2084 ), IECore.BoolData( True ) )
+		self.assertEqual( c.readAttribute( attr, 1 ), IECore.BoolData( True ) )
+		
+		del output, a, b, c
+		IECore.SharedSceneInterfaces.clear()
+		
+		# make sure it can appear and disappear correctly
+		switch.parm( "input" ).setExpression( "if hou.frame() < 5 or hou.frame() >= 10 :\n\treturn 1\nelse :\n\treturn 0", hou.exprLanguage.Python )
+		rop.parm( "execute" ).pressButton()
+		hou.hipFile.save( "/tmp/bunk.hip" )
+		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		a = output.child( "1" )
+		b = a.child( "2" )
+		c = b.child( "3" )
+		self.assertFalse( a.hasAttribute( attr ) )
+		self.assertFalse( b.hasAttribute( attr ) )
+		self.assertTrue( c.hasAttribute( attr ) )
+		self.assertEqual( c.readAttribute( attr, 0 ), IECore.BoolData( False ) )
+		self.assertEqual( c.readAttribute( attr, 0.2083 ), IECore.BoolData( False ) )
+		self.assertEqual( c.readAttribute( attr, 0.2084 ), IECore.BoolData( True ) )
+		self.assertEqual( c.readAttribute( attr, 0.3 ), IECore.BoolData( True ) )
+		self.assertEqual( c.readAttribute( attr, 0.4167 ), IECore.BoolData( False ) )
+		self.assertEqual( c.readAttribute( attr, 1 ), IECore.BoolData( False ) )
+	
 	def testLiveScene( self ) :
 		
 		self.writeTaggedSCC()

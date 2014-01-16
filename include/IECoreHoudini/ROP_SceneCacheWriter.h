@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 		
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-		
+	
 	protected :
 		
 		virtual int startRender( int nframes, fpreal s, fpreal e );
@@ -79,6 +79,8 @@ class ROP_SceneCacheWriter : public ROP_Node
 	
 	private :
 		
+		static const IECore::SceneInterface::Name &visibleAttribute;
+
 		bool linked( const std::string &file ) const;
 		
 		enum Mode
@@ -93,6 +95,9 @@ class ROP_SceneCacheWriter : public ROP_Node
 		IECore::ConstSceneInterfacePtr m_liveScene;
 		IECore::SceneInterfacePtr m_outScene;
 		UT_StringMMPattern *m_forceFilter;
+		
+		double m_startTime;
+		double m_endTime;
 
 };
 
