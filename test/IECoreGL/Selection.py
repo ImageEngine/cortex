@@ -340,9 +340,10 @@ class TestSelection( unittest.TestCase ) :
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
-		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		names = [ x.name.value() for x in ss ]
-		self.assertEqual( names, [ "selectableObj" ] )
+		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
+			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			names = [ x.name.value() for x in ss ]
+			self.assertEqual( names, [ "selectableObj" ] )
 				
 if __name__ == "__main__":
     unittest.main()

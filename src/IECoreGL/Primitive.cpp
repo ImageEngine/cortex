@@ -50,6 +50,7 @@
 #include "IECoreGL/UniformFunctions.h"
 #include "IECoreGL/CachedConverter.h"
 #include "IECoreGL/Buffer.h"
+#include "IECoreGL/Selector.h"
 
 using namespace IECoreGL;
 using namespace std;
@@ -132,24 +133,24 @@ static ShaderPtr constant2()
 
 void Primitive::render( State *state ) const
 {
-
+	const Selector *currentSelector = Selector::currentSelector();
+	if( currentSelector && !state->get<Primitive::Selectable>()->value() )
+	{
+		// if we're not selectable then we don't need to do anything
+		return;
+	}
+	
 	/// \todo Really we want to remove use of this deprecated push/pop functionality.
 	PushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
 
 	// if we're in GL_SELECT render mode then just render solid
 	// with a simple shader and early out.
-	GLint renderMode = 0;
-	glGetIntegerv(GL_RENDER_MODE, &renderMode);
-	if( renderMode == GL_SELECT )
+	if( currentSelector && currentSelector->mode() == Selector::GLSelect )
 	{
-		// If we're not selectable, then do nothing in selection mode
-		if( state->get<Primitive::Selectable>()->value() )
-		{
-			const Shader *constantShader = constant2();
-			const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
-			Shader::Setup::ScopedBinding constantBinding( *constantSetup );
-			render( state, Primitive::DrawSolid::staticTypeId() );
-		}
+		const Shader *constantShader = constant2();
+		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
+		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
 	
