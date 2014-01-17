@@ -283,6 +283,109 @@ class TestSelection( unittest.TestCase ) :
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "pointsNeedSelectingToo" )
 	
+	def testCurvesPrimitiveSelect( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+
+			r.curves(
+				IECore.CubicBasisf.linear(),
+				False,
+				IECore.IntVectorData( [ 2 ] ),
+				{
+					"P" : IECore.PrimitiveVariable(
+						IECore.PrimitiveVariable.Interpolation.Vertex,
+						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+					)
+				}
+			)
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.PerspectiveCamera() )
+
+		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
+			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			names = [ x.name.value() for x in ss ]
+			self.assertEqual( len( names ), 1 )
+			self.assertEqual( names[0], "curvesNeedSelectingToo" )
+			
+	def testCurvesPrimitiveSelectUsingLines( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
+
+			r.curves(
+				IECore.CubicBasisf.linear(),
+				False,
+				IECore.IntVectorData( [ 2 ] ),
+				{
+					"P" : IECore.PrimitiveVariable(
+						IECore.PrimitiveVariable.Interpolation.Vertex,
+						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+					)
+				}
+			)
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.PerspectiveCamera() )
+
+		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
+			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			names = [ x.name.value() for x in ss ]
+			self.assertEqual( len( names ), 1 )
+			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
+
+	def testCurvesPrimitiveSelectUsingWireframeLines( self ) :
+	
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
+			r.setAttribute( "gl:primitive:wireframe", IECore.BoolData( True ) )
+			r.setAttribute( "gl:primitive:solid", IECore.BoolData( False ) )
+
+			r.curves(
+				IECore.CubicBasisf.linear(),
+				False,
+				IECore.IntVectorData( [ 2 ] ),
+				{
+					"P" : IECore.PrimitiveVariable(
+						IECore.PrimitiveVariable.Interpolation.Vertex,
+						IECore.V3fVectorData( [ IECore.V3f( -1, -1, 0, ), IECore.V3f( 1, 1, 0 ) ] )
+					)
+				}
+			)
+			
+		s = r.scene()
+		s.setCamera( IECoreGL.PerspectiveCamera() )
+
+		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
+			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+			names = [ x.name.value() for x in ss ]
+			self.assertEqual( len( names ), 1 )
+			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
+	
 	def testContextManager( self ) :
 	
 		r = IECoreGL.Renderer()

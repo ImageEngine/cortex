@@ -193,7 +193,15 @@ void Primitive::render( State *state ) const
 		return;
 	}
 	
+	// get a constant shader suitable for drawing wireframes, points etc.
 	const Shader *constantShader = Shader::constant();
+	if( currentSelector && currentSelector->mode() == Selector::IDRender )
+	{
+		// if we're in IDRender mode, then the constant shader is unsuitable,
+		// and we should instead use the ID shader we've been given.
+		constantShader = state->get<ShaderStateComponent>()->shaderSetup()->shader();
+	}
+	
 	const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
 	Shader::Setup::ScopedBinding constantBinding( *constantSetup );
 	GLint csIndex = -1;
@@ -252,8 +260,9 @@ void Primitive::render( State *state ) const
 	
 	// bound
 	
-	if( drawBound )
+	if( drawBound && ( !currentSelector || currentSelector->mode() != Selector::IDRender ) )
 	{
+		/// \todo Support IDRender selection mode.
 		Shader::Setup::ScopedBinding boundSetupBinding( *boundSetup() );
 		glLineWidth( 1 );
 		if( csIndex >= 0 )
