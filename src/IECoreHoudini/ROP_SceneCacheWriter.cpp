@@ -86,33 +86,54 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[4];
+		PRM_Template *baseTemplate = ROP_Node::getROPbaseTemplate();
+		PRM_Template *scriptTemplate = ROP_Node::getROPscriptTemplate();
 		
-		thisTemplate[0] = PRM_Template(
+		unsigned numBaseParms = PRM_Template::countTemplates( baseTemplate );
+		unsigned numScriptParms = PRM_Template::countTemplates( scriptTemplate );
+		
+		thisTemplate = new PRM_Template[ numBaseParms + numScriptParms + 4 ];
+		
+		// add the ROP base parms
+		unsigned totalParms = 0;
+		for ( unsigned i = 0; i < numBaseParms; ++i, ++totalParms )
+		{
+			thisTemplate[totalParms] = baseTemplate[i];
+		}
+		
+		// add the SceneCache parms
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
 			"An SCC file to write, based on the Houdini hierarchy defined by the Root Object provided."
 		);
+		totalParms++;
 		
-		thisTemplate[1] = PRM_Template(
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
 		);
+		totalParms++;
 		
 		forceObjectsSpareData.copyFrom( PRM_SpareData::objPath );
 		forceObjectsSpareData.setOpRelative( "/obj" );
-		
-		thisTemplate[2] = PRM_Template(
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH_LIST, 1, &pForceObjects, 0, 0, 0, 0,
 			&forceObjectsSpareData, 0, "Optional list of nodes to force as expanded objects. "
 			"If this list is used, then links will be stored for any node not listed."
 		);
+		totalParms++;
+		
+		// add the ROP script parms
+		for ( unsigned i = 0; i < numScriptParms; ++i, ++totalParms )
+		{
+			thisTemplate[totalParms] = scriptTemplate[i];
+		}
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		OP_TemplatePair *extraTemplatePair = new OP_TemplatePair( thisTemplate );
-		templatePair = new OP_TemplatePair( ROP_Node::getROPbaseTemplate(), extraTemplatePair );
+		templatePair = new OP_TemplatePair( thisTemplate );
 	}
 	
 	return templatePair;
@@ -212,6 +233,8 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		return ROP_ABORT_RENDER;
 	}
 	
+	executePreFrameScript( time );
+	
 	// update the default evaluation time to avoid double cooking
 	m_houdiniScene->setDefaultTime( writeTime );
 	
@@ -256,6 +279,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	}
 	
 	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
+	executePostFrameScript( time );
 	progress->opEnd();
 	return status;
 }
