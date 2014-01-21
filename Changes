@@ -1,3 +1,30 @@
+# 8.0.0-b9
+
+#### IECore
+
+- Fixed boost::format() exception in CompoundData::member()
+
+#### IECoreGL
+
+- Fixed "gl:primitive:selectable" attribute (#46)
+- Fixed ID selection in wireframe, outline, and points styles (gaffer/#53, gaffer/#160)
+
+#### IECoreMaya
+
+- Setting gl:curvesPrimitive:useGLLines for SceneShape drawing
+- Minor bug fixes to SceneShapeUI for tag menu and expandToSelected
+- Fixed crash when reading MayaScene attributes that don't exist on the SceneShape
+- Fixed stale window bug in SplineParameterUI
+
+#### IECoreHoudini
+
+- SceneCache ROP marks locations which appear and disappear over time
+- Added standard ROP script parms (pre/post render and frame)
+
+#### IECoreNuke
+
+- Changed SceneCacheReader to only display MeshPrimitives
+
 # 8.0.0-b8
 
 #### IECore
