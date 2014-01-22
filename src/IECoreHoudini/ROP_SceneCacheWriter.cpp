@@ -79,7 +79,7 @@ PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
 PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
-const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "visible" );
+const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "scene:visible" );
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {

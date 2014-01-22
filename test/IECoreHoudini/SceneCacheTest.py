@@ -2392,7 +2392,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		a = output.child( "1" )
 		b = a.child( "2" )
 		c = b.child( "3" )
-		attr = "visible"
+		attr = "scene:visible"
 		self.assertFalse( a.hasAttribute( attr ) )
 		self.assertFalse( b.hasAttribute( attr ) )
 		self.assertTrue( c.hasAttribute( attr ) )
