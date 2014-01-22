@@ -996,5 +996,17 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		sub3Transform = sub3Sc.readTransform( 0 ).value
 		self.assertEqual( sub3Transform.translate, IECore.V3d( 0.0, 0.0, 0.0 ) )
 
+	def testIgnoreNonOBJNodes( self ) :
+		
+		scene = self.buildScene()
+		rop = hou.node( "/obj" ).createNode( "ropnet" )
+		self.assertTrue( isinstance( rop, hou.RopNode ) )
+		# it is a child as far as Houdini is concerned
+		self.assertTrue( rop in scene.node().children() )
+		# but since its not an OBJ, we silently ignore it's existence
+		self.assertTrue( rop.name() not in scene.childNames() )
+		self.assertRaises( RuntimeError, scene.child, "ropnet" )
+		self.assertEqual( scene.child( "ropnet", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+
 if __name__ == "__main__":
 	unittest.main()

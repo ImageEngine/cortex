@@ -675,11 +675,11 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	{
 		for ( int i=0; i < node->getNchildren(); ++i )
 		{
-			OP_Node *child = node->getChild( i );
+			OBJ_Node *child = node->getChild( i )->castToOBJNode();
 			
 			// ignore children that have incoming connections, as those are actually grandchildren
 			// also ignore the contentNode, which is actually an extension of ourself
-			if ( child != contentNode && !hasInput( child ) )
+			if ( child && child != contentNode && !hasInput( child ) )
 			{
 				childNames.push_back( Name( child->getName() ) );
 			}
@@ -845,14 +845,14 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 	{
 		for ( int i=0; i < node->getNchildren(); ++i )
 		{
-			OP_Node *child = node->getChild( i );
+			OBJ_Node *child = node->getChild( i )->castToOBJNode();
 			// the contentNode is actually an extension of ourself
 			if ( child == contentNode )
 			{
 				continue;
 			}
 			
-			if ( child->getName().equal( name.c_str() ) && !hasInput( child ) )
+			if ( child && child->getName().equal( name.c_str() ) && !hasInput( child ) )
 			{
 				return child;
 			}
