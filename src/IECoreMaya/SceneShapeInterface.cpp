@@ -1115,7 +1115,18 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 			return;
 		}
 	}
-
+	
+	if ( subSceneInterface->hasAttribute( "scene:visible" ) )
+	{
+		if( ConstBoolDataPtr vis = runTimeCast<const BoolData>( subSceneInterface->readAttribute( "scene:visible", time ) ) )
+		{
+			if( !vis->readable() )
+			{
+				return;
+			}
+		}
+	}
+	
 	AttributeBlock a(renderer);
 	SceneInterface::Path pathName;
 	subSceneInterface->path( pathName );
