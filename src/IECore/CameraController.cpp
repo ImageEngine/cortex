@@ -131,16 +131,36 @@ float CameraController::getCentreOfInterest()
 
 void CameraController::setResolution( const Imath::V2i &resolution )
 {
-	V2i oldRes = m_data->resolution->readable();
-	float oldAspect = (float)oldRes.x/(float)oldRes.y;
-	float badAspect = (float)resolution.x/(float)resolution.y;
-	float yScale = oldAspect / badAspect;
+	setResolution( resolution, ScaleScreenWindow );
+}
 
-	m_data->resolution->writable() = V2i( resolution.x, resolution.y );
-	Box2f screenWindow = m_data->screenWindow->readable();
-	screenWindow.min.y *= yScale;
-	screenWindow.max.y *= yScale;
-	m_data->screenWindow->writable() = screenWindow;
+void CameraController::setResolution( const Imath::V2i &resolution, ScreenWindowAdjustment adjustment )
+{
+	const V2i oldResolution = m_data->resolution->readable();
+	const Box2f oldScreenWindow = m_data->screenWindow->readable();
+	
+	m_data->resolution->writable() = resolution;
+
+	Box2f newScreenWindow;
+	if( adjustment == ScaleScreenWindow )
+	{
+		const float oldAspect = (float)oldResolution.x/(float)oldResolution.y;
+		const float badAspect = (float)resolution.x/(float)resolution.y;
+		const float yScale = oldAspect / badAspect;
+
+		newScreenWindow = oldScreenWindow;
+		newScreenWindow.min.y *= yScale;
+		newScreenWindow.max.y *= yScale;
+	}
+	else
+	{
+		const V2f screenWindowCenter = oldScreenWindow.center();
+		const V2f scale = V2f( resolution ) / V2f( oldResolution );
+		newScreenWindow.min = (oldScreenWindow.min - screenWindowCenter) * scale;
+		newScreenWindow.max = (oldScreenWindow.max - screenWindowCenter) * scale;
+	}
+	
+	m_data->screenWindow->writable() = newScreenWindow;
 }
 
 const Imath::V2i &CameraController::getResolution() const
