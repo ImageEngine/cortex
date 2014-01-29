@@ -62,9 +62,9 @@ struct LinearInterpolator< Imath::Matrix44<T> >
 		}
 
 		Imath::Vec3<T> s0, s1, sx;
-	    Imath::Vec3<T> h0, h1, hx;
-	    Imath::Vec3<T> r0, r1, rx;
-	    Imath::Vec3<T> t0, t1, tx;
+		Imath::Vec3<T> h0, h1, hx;
+		Imath::Vec3<T> r0, r1, rx;
+		Imath::Vec3<T> t0, t1, tx;
 		
 		extractSHRT(y0, s0, h0, r0, t0);
 		extractSHRT(y1, s1, h1, r1, t1);
@@ -79,10 +79,12 @@ struct LinearInterpolator< Imath::Matrix44<T> >
 		LinearInterpolator< Imath::Vec3<T> >()( t0, t1, x, tx );
 
 		result.makeIdentity();
-		result.translate( tx );
 		result *= qx.toMatrix44();
 		result.shear( hx );
 		result.scale( sx );
+		result[3][0] = tx.x;
+		result[3][1] = tx.y;
+		result[3][2] = tx.z;
 	}
 };
 
@@ -112,9 +114,9 @@ struct CubicInterpolator< Imath::Matrix44< T > >
 		}
 
 		Imath::Vec3<T> s0, s1, s2, s3, sx;
-	    Imath::Vec3<T> h0, h1, h2, h3, hx;
-	    Imath::Vec3<T> r0, r1, r2, r3, rx;
-	    Imath::Vec3<T> t0, t1, t2, t3, tx;
+		Imath::Vec3<T> h0, h1, h2, h3, hx;
+		Imath::Vec3<T> r0, r1, r2, r3, rx;
+		Imath::Vec3<T> t0, t1, t2, t3, tx;
 		
 		extractSHRT(y0, s0, h0, r0, t0);
 		extractSHRT(y1, s1, h1, r1, t1);
@@ -133,10 +135,12 @@ struct CubicInterpolator< Imath::Matrix44< T > >
 		CubicInterpolator< Imath::Vec3<T> >()( t0, t1, t2, t3, x, tx );
 
 		result.makeIdentity();
-		result.translate( tx );
 		result *= qx.toMatrix44();
 		result.shear( hx );
 		result.scale( sx );
+		result[3][0] = tx.x;
+		result[3][1] = tx.y;
+		result[3][2] = tx.z;
 	}
 };
 

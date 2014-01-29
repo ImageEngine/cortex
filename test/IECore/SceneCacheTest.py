@@ -40,7 +40,7 @@ import unittest
 import IECore
 
 class SceneCacheTest( unittest.TestCase ) :
-
+	
 	def testSupportedExtension( self ) :
 		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions() )
 		self.assertTrue( "scc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Read ) )
@@ -695,6 +695,30 @@ class SceneCacheTest( unittest.TestCase ) :
 		
 		self.assertEqual( c0.readAttribute( "testAttr", 0 ), IECore.StringData( "test0" ) )
 		self.assertEqual( c1.readAttribute( "testAttr", 0 ), IECore.StringData( "test1" ) )
+	
+	def testTransformInterpolation( self ):
+		
+		s = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		
+		t = s.createChild( "t" )
+		
+		m = IECore.M44d()
+		m.setEulerAngles( IECore.V3d( 0, math.pi/2, 0 ) )
+		m[(3,0)] = 10
+		
+		t.writeTransform( IECore.M44dData( IECore.M44d.createTranslated(IECore.V3d( 5, 0, 0 ) ) ), 0.0 )
+		t.writeTransform( IECore.M44dData(m), 1.0 )
+		
+		del m, t, s
+		
+		s = IECore.SceneInterface.create( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		tchild = s.child("t")
+		
+		for i in range(0,11):
+			interpolatedTransform = tchild.readTransformAsMatrix(float(i)/10)
+			( s, h, r, t ) = interpolatedTransform.extractSHRT()
+			self.assertAlmostEqual( r[1], 0.1 * i * math.pi * 0.5, 9 )
+			self.assertAlmostEqual( t[0], 5 + 0.5 * i, 9 )
 		
 
 if __name__ == "__main__":
