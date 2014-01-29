@@ -1,3 +1,19 @@
+# 8.0.0
+
+#### IECore
+
+- Added screen window modes to CameraController::setResolution.
+- Fixed multiplication issue in MatrixInterpolator
+
+#### IECoreMaya
+
+- SceneShape GL Preview responds to the "scene:visible" attribute
+
+#### IECoreHoudini
+
+- SceneCache ROP marks visiblity using "scene:visible" rather than "visible"
+- Preventing crashes in HoudiniScene when OBJ networks contain non-OBJ nodes
+
 # 8.0.0-b9
 
 #### IECore
