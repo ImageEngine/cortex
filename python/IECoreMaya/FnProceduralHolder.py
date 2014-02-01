@@ -263,6 +263,10 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 
 				group.setTransform( IECore.MatrixTransform( parentLocalTransform * childLocalTransform ) )
 
+				childName = child.getAttribute("name")
+				if childName:
+					group.addState( IECore.AttributeState( { "name" : childName } ) )
+					
 				group.removeChild( child )
 
 				for c in child.children():
