@@ -273,8 +273,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 
 		sceneFile = maya.cmds.getAttr( node+".file" )
 		sceneRoot = maya.cmds.getAttr( node+".root" )
-
-		maya.cmds.setAttr( node+".querySpace", 1 )
+		
+		# Set querySpace to world (which is world space starting from the root)
+		maya.cmds.setAttr( node+".querySpace", 0 )
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 1 )
 		maya.cmds.setAttr( node+".objectOnly", l=True )
@@ -407,7 +408,32 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 				except:
 					IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Failed to set interpolation on %s." % shape )
 
+	def createLocatorAtTransform( self, path ) :
+		
+		node = self.fullPathName()
+		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + "Transform" )[0]
+		
+		index = self.__queryIndexForPath( path )
+		outTransform = node+".outTransform["+str(index)+"]"
+		maya.cmds.connectAttr( outTransform+".outTranslate", locator + ".translate" )
+		maya.cmds.connectAttr( outTransform+".outRotate", locator + ".rotate" )
+		maya.cmds.connectAttr( outTransform+".outScale", locator + ".scale" )
 
+		maya.cmds.select( maya.cmds.parent( locator, transform, relative=True ) )
+	
+	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
+		
+		node = self.fullPathName()
+		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		
+		for childPlugSuffix in childPlugSuffixes :
+			index = self.__queryIndexForPath( path )
+			outBound = node+".outBound["+str(index)+"]"
+			locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + childPlugSuffix )[0]
+			maya.cmds.connectAttr( outBound + ".outBound" + childPlugSuffix, locator + ".translate" )
+			maya.cmds.parent( locator, transform, relative=True )
+			
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):

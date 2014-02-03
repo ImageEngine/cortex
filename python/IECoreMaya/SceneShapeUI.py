@@ -112,6 +112,42 @@ def _dagMenu( menu, sceneShape ) :
 					command = IECore.curry( __expandToSelected, sceneShapes[0] )
 				)
 				maya.cmds.setParent( "..", menu=True )
+
+				maya.cmds.menuItem(
+					label = "Create Locator",
+					radialPosition = "SW",
+					subMenu = True,
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Min",
+					radialPosition = "N",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Max",
+					radialPosition = "NE",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Max" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Min And Max",
+					radialPosition = "E",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min", "Max" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Centre",
+					radialPosition = "SE",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Center" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Transform Origin",
+					radialPosition = "S",
+					command = IECore.curry( __createLocatorWithTransform, sceneShapes[0] ),
+				)
 	
 	# Object mode
 	elif maya.cmds.selectMode( q=True, object=True ):
@@ -496,4 +532,26 @@ def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 			allChildren = maya.cmds.listRelatives( transform[0], ad=False, fullPath=True, type = "ieSceneShape" ) or []
 			for node in allChildren:
 				maya.cmds.setAttr( node+".drawTagsFilter", tagName, type = "string" )
+
+def __createLocatorAtPoints( sceneShape, childPlugSuffixes, *unused ) :
+	
+	fnSc = IECoreMaya.FnSceneShape( sceneShape )
+	selectedNames = fnSc.selectedComponentNames()
+
+	locators = []
+	for name in selectedNames :
+		locators.extend( fnSc.createLocatorAtPoints( name, childPlugSuffixes ) )
+		
+	maya.cmds.select( locators, replace=True )
+
+def __createLocatorWithTransform( sceneShape, *unused ) :
+	
+	fnSc = IECoreMaya.FnSceneShape( sceneShape )
+	selectedNames = fnSc.selectedComponentNames()
+
+	locators = []
+	for name in selectedNames :
+		locators.append( fnSc.createLocatorAtTransform( name ) )
+
+	maya.cmds.select( locators, replace=True )
 
