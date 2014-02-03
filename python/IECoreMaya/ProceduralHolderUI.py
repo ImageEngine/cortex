@@ -190,16 +190,10 @@ def __createLocatorAtPoints( proceduralHolder, childPlugSuffixes, *unused ) :
 	
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	selectedNames = fnPH.selectedComponentNames()
-	
-	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
 
 	locators = []
 	for name in selectedNames :
-		for childPlugSuffix in childPlugSuffixes :
-			outputPlug = fnPH.componentBoundPlugPath( name )
-			locator = "|" + maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + childPlugSuffix )[0]
-			maya.cmds.connectAttr( outputPlug + ".componentBound" + childPlugSuffix, locator + ".translate" )
-			locators.extend( maya.cmds.parent( locator, proceduralParent, relative=True ) )
+		locators.extend( fnPH.createLocatorAtPoints( name, childPlugSuffixes ) )
 		
 	maya.cmds.select( locators, replace=True )
 
@@ -208,15 +202,8 @@ def __createLocatorWithTransform( proceduralHolder, *unused ) :
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	selectedNames = fnPH.selectedComponentNames()
 
-	proceduralParent = maya.cmds.listRelatives( fnPH.fullPathName(), parent=True, fullPath=True )[0]
-	
 	locators = []
 	for name in selectedNames :
-		outputPlug = fnPH.componentTransformPlugPath( name )
-		locator = "|" + maya.cmds.spaceLocator( name = name.replace( "/", "_" ) + "Transform" )[0]
-		maya.cmds.connectAttr( outputPlug + ".componentTranslate", locator + ".translate" )
-		maya.cmds.connectAttr( outputPlug + ".componentRotate", locator + ".rotate" )
-		maya.cmds.connectAttr( outputPlug + ".componentScale", locator + ".scale" )
-		locators.extend( maya.cmds.parent( locator, proceduralParent, relative=True ) )
+		locators.append( fnPH.createLocatorAtTransform( name ) )
 
 	maya.cmds.select( locators, replace=True )
