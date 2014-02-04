@@ -156,8 +156,8 @@ void CameraController::setResolution( const Imath::V2i &resolution, ScreenWindow
 	{
 		const V2f screenWindowCenter = oldScreenWindow.center();
 		const V2f scale = V2f( resolution ) / V2f( oldResolution );
-		newScreenWindow.min = (oldScreenWindow.min - screenWindowCenter) * scale;
-		newScreenWindow.max = (oldScreenWindow.max - screenWindowCenter) * scale;
+		newScreenWindow.min = screenWindowCenter + (oldScreenWindow.min - screenWindowCenter) * scale;
+		newScreenWindow.max = screenWindowCenter + (oldScreenWindow.max - screenWindowCenter) * scale;
 	}
 	
 	m_data->screenWindow->writable() = newScreenWindow;
