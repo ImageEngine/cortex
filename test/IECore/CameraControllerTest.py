@@ -170,8 +170,22 @@ class CameraControllerTest( unittest.TestCase ) :
 		controller.setResolution( IECore.V2i( 100, 100 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		
-		controller.setResolution( IECore.V2i( 100, 200 ), controller.ScreenWindowAdjustment.ScaleScreenWindow )
+		controller.setResolution( IECore.V2i( 100, 200 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1, -2 ), IECore.V2f( 1, 2 ) ) )
+
+	def testSetResolutionCroppingWithOffsetCenter( self ) :
+	
+		camera = IECore.Camera()
+		camera.parameters()["resolution"] = IECore.V2i( 200, 100 )
+		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 0, 0 ) )
+		
+		controller = IECore.CameraController( camera )
+		
+		controller.setResolution( IECore.V2i( 100, 100 ), controller.ScreenWindowAdjustment.CropScreenWindow )
+		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1.5, -1 ), IECore.V2f( -0.5, 0  ) ) )
+		
+		controller.setResolution( IECore.V2i( 100, 200 ), controller.ScreenWindowAdjustment.CropScreenWindow )
+		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1.5, -1.5 ), IECore.V2f( -0.5, 0.5 ) ) )
 		
 if __name__ == "__main__":
         unittest.main()
