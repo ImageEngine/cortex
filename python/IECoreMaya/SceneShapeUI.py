@@ -112,6 +112,42 @@ def _dagMenu( menu, sceneShape ) :
 					command = IECore.curry( __expandToSelected, sceneShapes[0] )
 				)
 				maya.cmds.setParent( "..", menu=True )
+
+				maya.cmds.menuItem(
+					label = "Create Locator",
+					radialPosition = "SW",
+					subMenu = True,
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Min",
+					radialPosition = "N",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Max",
+					radialPosition = "NE",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Max" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Min And Max",
+					radialPosition = "E",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min", "Max" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Bound Centre",
+					radialPosition = "SE",
+					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Center" ] ),
+				)
+				
+				maya.cmds.menuItem(
+					label = "At Transform Origin",
+					radialPosition = "S",
+					command = IECore.curry( __createLocatorWithTransform, sceneShapes[0] ),
+				)
 	
 	# Object mode
 	elif maya.cmds.selectMode( q=True, object=True ):
@@ -184,15 +220,11 @@ def _dagMenu( menu, sceneShape ) :
 			for tag in tags :
 				tag = str(tag)
 				parts = tag.split(":")
-				if len(parts) == 1 :
-					if not tag in tagTree :
-						tagTree[tag] = None
+				leftOverTag = tag[len(parts[0])+1:]
+				if not parts[0] in tagTree :
+					tagTree[parts[0]] = [ leftOverTag ]
 				else :
-					leftOverTag = tag[len(parts[0])+1:]
-					if not parts[0] in tagTree or tagTree[parts[0]] is None :
-						tagTree[parts[0]] = [ leftOverTag ]
-					else :
-						tagTree[parts[0]].append( leftOverTag )
+					tagTree[parts[0]].append( leftOverTag )
 		if tagTree :
 
 			maya.cmds.menuItem(
@@ -210,22 +242,23 @@ def _dagMenu( menu, sceneShape ) :
 			tags.sort()
 
 			for tag in tags :
-
-				if tagTree[tag] is None :
-
+				
+				subtags = tagTree[tag]
+				subtags.sort()
+				
+				if "" in subtags:
 					maya.cmds.menuItem(
 						label = tag,
 						command = IECore.curry( __setTagsFilterPreviewAttributes, sceneShapes, tag )
 					)
-
-				else :
-
+					subtags.remove("")
+				
+				if subtags:
 					maya.cmds.menuItem(
 						label = tag,
 						subMenu = True
 					)
-					subtags = tagTree[tag]
-					subtags.sort()
+
 					for tagSuffix in subtags :
 						maya.cmds.menuItem(
 							label = tagSuffix,
@@ -425,9 +458,9 @@ def __expandToSelected( sceneShape, *unused ) :
 	toSelect = []	
 
 	for selected in selectedNames:
-		transformName = "|".join( sceneShape.split("|")[:-1] )
+		transformName = parent
 		transformNames = [ transformName ]
-		for item in selected.split("/")[1:]:
+		for item in selected.split("/")[1:-1]:
 			transformName = transformName + "|" + item
 			if not transformName in transformNames:
 				transformNames.append( transformName )
@@ -499,4 +532,26 @@ def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 			allChildren = maya.cmds.listRelatives( transform[0], ad=False, fullPath=True, type = "ieSceneShape" ) or []
 			for node in allChildren:
 				maya.cmds.setAttr( node+".drawTagsFilter", tagName, type = "string" )
+
+def __createLocatorAtPoints( sceneShape, childPlugSuffixes, *unused ) :
+	
+	fnSc = IECoreMaya.FnSceneShape( sceneShape )
+	selectedNames = fnSc.selectedComponentNames()
+
+	locators = []
+	for name in selectedNames :
+		locators.extend( fnSc.createLocatorAtPoints( name, childPlugSuffixes ) )
+		
+	maya.cmds.select( locators, replace=True )
+
+def __createLocatorWithTransform( sceneShape, *unused ) :
+	
+	fnSc = IECoreMaya.FnSceneShape( sceneShape )
+	selectedNames = fnSc.selectedComponentNames()
+
+	locators = []
+	for name in selectedNames :
+		locators.append( fnSc.createLocatorAtTransform( name ) )
+
+	maya.cmds.select( locators, replace=True )
 

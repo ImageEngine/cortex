@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,7 +57,7 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 )
+	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
 {
 }
 
@@ -79,38 +79,61 @@ PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
 PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
+const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "scene:visible" );
+
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[4];
+		PRM_Template *baseTemplate = ROP_Node::getROPbaseTemplate();
+		PRM_Template *scriptTemplate = ROP_Node::getROPscriptTemplate();
 		
-		thisTemplate[0] = PRM_Template(
+		unsigned numBaseParms = PRM_Template::countTemplates( baseTemplate );
+		unsigned numScriptParms = PRM_Template::countTemplates( scriptTemplate );
+		
+		thisTemplate = new PRM_Template[ numBaseParms + numScriptParms + 4 ];
+		
+		// add the ROP base parms
+		unsigned totalParms = 0;
+		for ( unsigned i = 0; i < numBaseParms; ++i, ++totalParms )
+		{
+			thisTemplate[totalParms] = baseTemplate[i];
+		}
+		
+		// add the SceneCache parms
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
 			"An SCC file to write, based on the Houdini hierarchy defined by the Root Object provided."
 		);
+		totalParms++;
 		
-		thisTemplate[1] = PRM_Template(
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
 		);
+		totalParms++;
 		
 		forceObjectsSpareData.copyFrom( PRM_SpareData::objPath );
 		forceObjectsSpareData.setOpRelative( "/obj" );
-		
-		thisTemplate[2] = PRM_Template(
+		thisTemplate[totalParms] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH_LIST, 1, &pForceObjects, 0, 0, 0, 0,
 			&forceObjectsSpareData, 0, "Optional list of nodes to force as expanded objects. "
 			"If this list is used, then links will be stored for any node not listed."
 		);
+		totalParms++;
+		
+		// add the ROP script parms
+		for ( unsigned i = 0; i < numScriptParms; ++i, ++totalParms )
+		{
+			thisTemplate[totalParms] = scriptTemplate[i];
+		}
 	}
 	
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
-		OP_TemplatePair *extraTemplatePair = new OP_TemplatePair( thisTemplate );
-		templatePair = new OP_TemplatePair( ROP_Node::getROPbaseTemplate(), extraTemplatePair );
+		templatePair = new OP_TemplatePair( thisTemplate );
 	}
 	
 	return templatePair;
@@ -188,6 +211,11 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		m_forceFilter->compile( forceObjects );
 	}
 	
+	// We need to adjust the time for writing, because Houdini treats time starting
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	m_startTime = s + CHgetManager()->getSecsPerSample();
+	m_endTime = e + CHgetManager()->getSecsPerSample();
+	
 	return true;
 }
 
@@ -204,6 +232,8 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		addError( 0, "Cache aborted" );
 		return ROP_ABORT_RENDER;
 	}
+	
+	executePreFrameScript( time );
 	
 	// update the default evaluation time to avoid double cooking
 	m_houdiniScene->setDefaultTime( writeTime );
@@ -249,6 +279,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	}
 	
 	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
+	executePostFrameScript( time );
 	progress->opEnd();
 	return status;
 }
@@ -344,11 +375,48 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	for ( SceneInterface::NameList::iterator it = children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
-		SceneInterfacePtr outChild = outScene->child( *it, SceneInterface::CreateIfMissing );
+		
+		SceneInterfacePtr outChild = 0;
+		if ( outScene->hasChild( *it ) )
+		{
+			outChild = outScene->child( *it );
+		}
+		else
+		{
+			outChild = outScene->createChild( *it );
+			
+			if ( time != m_startTime )
+			{
+				outChild->writeAttribute( visibleAttribute, new BoolData( false ), time - 1e-6 );
+			}
+		}
+		
+		if ( outChild->hasAttribute( visibleAttribute ) )
+		{
+			outChild->writeAttribute( visibleAttribute, new BoolData( true ), time );
+		}
+		
 		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
+		}
+	}
+	
+	// turn visibleAttribute off if the child disappears
+	SceneInterface::NameList outChildren;
+	outScene->childNames( outChildren );
+	for ( SceneInterface::NameList::iterator it = outChildren.begin(); it != outChildren.end(); ++it )
+	{
+		if ( !liveScene->hasChild( *it ) )
+		{
+			SceneInterfacePtr outChild = outScene->child( *it );
+			if ( !outChild->hasAttribute( visibleAttribute ) )
+			{
+				outChild->writeAttribute( visibleAttribute, new BoolData( true ), time - 1e-6 );
+			}
+			
+			outChild->writeAttribute( visibleAttribute, new BoolData( false ), time );
 		}
 	}
 	

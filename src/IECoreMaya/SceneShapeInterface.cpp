@@ -1115,13 +1115,25 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 			return;
 		}
 	}
-
+	
+	if ( subSceneInterface->hasAttribute( "scene:visible" ) )
+	{
+		if( ConstBoolDataPtr vis = runTimeCast<const BoolData>( subSceneInterface->readAttribute( "scene:visible", time ) ) )
+		{
+			if( !vis->readable() )
+			{
+				return;
+			}
+		}
+	}
+	
 	AttributeBlock a(renderer);
 	SceneInterface::Path pathName;
 	subSceneInterface->path( pathName );
 	std::string pathStr = relativePathName( pathName );
 	renderer->setAttribute( "name", new StringData( pathStr ) );
-
+	renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
+	
 	if(pathStr != "/")
 	{
 		// Path space
@@ -1162,9 +1174,6 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 
 	if( drawBounds && pathStr != "/" )
 	{
-		AttributeBlock aBox(renderer);
-		renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
-
 		Box3d b = subSceneInterface->readBound( time );
 		Box3f bbox( b.min, b.max );
 		if( !bbox.isEmpty() )

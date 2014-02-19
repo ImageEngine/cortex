@@ -64,10 +64,22 @@ class CameraController : public boost::noncopyable
 		void setCentreOfInterest( float centreOfInterest );
 		float getCentreOfInterest();
 
-		/// Changes the camera resolution, modifying the screen window
-		/// to preserve the horizontal framing and changing the vertical
-		/// framing to maintain aspect ratio.
+		enum ScreenWindowAdjustment
+		{
+			/// Crop/extend the screen window to accommodate
+			/// the new resolution without scaling the content.
+			CropScreenWindow,
+			/// Preserve the horizontal framing and change the
+			/// vertical framing to maintain aspect ratio.
+			ScaleScreenWindow
+		};
+
+		/// \todo Remove this form, and add a default value for adjustment
+		/// in the form below.
 		void setResolution( const Imath::V2i &resolution );
+		/// Changes the camera resolution, modifying the screen window
+		/// in a manner determined by the adjustment argument.
+		void setResolution( const Imath::V2i &resolution, ScreenWindowAdjustment adjustment );
 		const Imath::V2i &getResolution() const;
 
 		/// Moves the camera to frame the specified box, keeping the

@@ -263,6 +263,10 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 
 				group.setTransform( IECore.MatrixTransform( parentLocalTransform * childLocalTransform ) )
 
+				childName = child.getAttribute("name")
+				if childName:
+					group.addState( IECore.AttributeState( { "name" : childName } ) )
+					
 				group.removeChild( child )
 
 				for c in child.children():
@@ -281,8 +285,34 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			for c in group.children():
 				if isinstance( c, IECore.Group ) :
 					self.__collapseGroups( c )
+	
+	def createLocatorAtTransform( self, path ):
 		
+		proceduralParent = maya.cmds.listRelatives( self.fullPathName(), parent=True, fullPath=True )[0]
+		outputPlug = self.componentTransformPlugPath( path )
+		locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + "Transform" )[0]
+		maya.cmds.connectAttr( outputPlug + ".componentTranslate", locator + ".translate" )
+		maya.cmds.connectAttr( outputPlug + ".componentRotate", locator + ".rotate" )
+		maya.cmds.connectAttr( outputPlug + ".componentScale", locator + ".scale" )
+		loc = proceduralParent + "|" + maya.cmds.parent( locator, proceduralParent, relative=True )[0]
+		
+		return loc
+		
+		
+		
+	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
+		
+		proceduralParent = maya.cmds.listRelatives( self.fullPathName(), parent=True, fullPath=True )[0]
+		
+		locators = []
+		for childPlugSuffix in childPlugSuffixes :
+			outputPlug = self.componentBoundPlugPath( path )
+			locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + childPlugSuffix )[0]
+			maya.cmds.connectAttr( outputPlug + ".componentBound" + childPlugSuffix, locator + ".translate" )
+			locators.append( proceduralParent + "|" + maya.cmds.parent( locator, proceduralParent, relative=True )[0] )
+		return locators
 
+	
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):

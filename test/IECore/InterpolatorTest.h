@@ -39,6 +39,8 @@
 #include "boost/test/floating_point_comparison.hpp"
 
 #include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
 
 #include "IECore/Interpolator.h"
 
@@ -65,6 +67,30 @@ class CubicInterpolatorTest
 		void testVector();
 };
 
+
+
+template<typename T>
+class MatrixLinearInterpolatorTest
+{
+	public:
+		void testSimple();
+		void testTyped();
+		void testVector();
+};
+
+template<typename T>
+class MatrixCubicInterpolatorTest
+{
+	public:
+
+		void testSimple();
+		void testTyped();
+		void testVector();
+};
+
+
+
+
 struct InterpolatorTestSuite : public boost::unit_test::test_suite
 {
 
@@ -74,11 +100,17 @@ struct InterpolatorTestSuite : public boost::unit_test::test_suite
 		addLinearTest<double>();
 		addLinearTest<Imath::V3f>();
 		addLinearTest<Imath::V3d>();
+		
+		addLinearMatrixTest<float>();
+		addLinearMatrixTest<double>();
 
 		addCubicTest<float>();
 		addCubicTest<double>();
 		addCubicTest<Imath::V3f>();
 		addCubicTest<Imath::V3d>();
+		
+		addCubicMatrixTest<float>();
+		addCubicMatrixTest<double>();
 	}
 
 	template<typename T>
@@ -99,6 +131,26 @@ struct InterpolatorTestSuite : public boost::unit_test::test_suite
 		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testSimple, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testTyped, instance ) );
 		add( BOOST_CLASS_TEST_CASE( &CubicInterpolatorTest<T>::testVector, instance ) );
+	}
+
+	template<typename T>
+	void addLinearMatrixTest()
+	{
+		static boost::shared_ptr<MatrixLinearInterpolatorTest<T> > instance(new MatrixLinearInterpolatorTest<T>());
+
+		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testSimple, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testTyped, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &MatrixLinearInterpolatorTest<T>::testVector, instance ) );
+	}
+
+	template<typename T>
+	void addCubicMatrixTest()
+	{
+		static boost::shared_ptr<MatrixCubicInterpolatorTest<T> > instance(new MatrixCubicInterpolatorTest<T>());
+
+		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testSimple, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testTyped, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &MatrixCubicInterpolatorTest<T>::testVector, instance ) );
 	}
 };
 }

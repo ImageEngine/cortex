@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=8
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="b8"	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options

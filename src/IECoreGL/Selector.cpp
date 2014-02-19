@@ -332,10 +332,6 @@ class Selector::Implementation : public IECore::RefCounted
 					"", "", idShaderFragmentSource(),
 					new IECore::CompoundObject()
 				) );
-				s.push_back( new Primitive::DrawBound( false ) );
-				s.push_back( new Primitive::DrawWireframe( false ) );
-				s.push_back( new Primitive::DrawOutline( false ) );
-				s.push_back( new Primitive::DrawPoints( false ) );
 			}
 			return s;
 		}
