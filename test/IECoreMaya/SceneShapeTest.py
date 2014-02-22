@@ -113,6 +113,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		sc3.writeAttribute( "intAttr", IECore.IntData( 12 ), 0.0 )
 		sc3.writeAttribute( "strAttr", IECore.StringData( "blah" ), 0.0 )
+		sc3.writeAttribute( "doubleAttr", IECore.DoubleData( 1.2 ), 0.0 )
 		
 		return scene
 	
@@ -427,24 +428,28 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+".queryAttributes[2]", "intAttr", type="string")
 		maya.cmds.setAttr( node+".queryAttributes[3]", "strAttr", type="string")
 		maya.cmds.setAttr( node+".queryAttributes[4]", "blablAttr", type="string")
+		maya.cmds.setAttr( node+".queryAttributes[5]", "doubleAttr", type="string")
 
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[0]" ), True )
 		self.assertEqual( round(maya.cmds.getAttr( node+".attributes[0].attributeValues[1]"), 6 ), 5.2 )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[2]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[3]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[4]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[5]" ), None )
 		
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[0]" ), False )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[1]" ), 2.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[2]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[3]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[4]" ), None )
+		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[5]" ), None )
 		
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[0]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[1]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[2]" ), 12 )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[3]" ), "blah" )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[4]" ), None )
+		self.assertEqual( round(maya.cmds.getAttr( node+".attributes[2].attributeValues[5]" ), 6), 1.2 )
 
 	def testTags( self ) :
 		
