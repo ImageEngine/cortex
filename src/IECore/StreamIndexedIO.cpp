@@ -300,12 +300,21 @@ class NodeBase
 			Directory
 		} NodeType;
 
+		NodeBase( IndexedIO::EntryID name ) : m_name(name)	{}
+
 		NodeBase( NodeType type ) : m_nodeType(type)	{}
 
 		// name of the node in the current directory
 		IndexedIO::EntryID m_name;
 
-		NodeType m_nodeType;
+		// using char instead of enum to compact members in one word
+		char m_nodeType;
+
+		static bool compareNames(const NodeBase* a, const NodeBase* b) 
+		{
+			return a->m_name < b->m_name;
+		}
+
 };
 
 /// Class that represents a Data node
@@ -325,6 +334,7 @@ class DataNode : public NodeBase
 
 		/// The size of this node's data chunk within the file
 		Imf::Int64 m_size;
+
 };
 
 /// A directory node within an index
@@ -340,9 +350,10 @@ class DirectoryNode : public NodeBase
 			LoadedSubIndex,
 		};
 
-		DirectoryNode() : NodeBase(NodeBase::Directory), m_subindex(NoSubIndex), m_offset(0), m_parent(0) {}
+		DirectoryNode() : NodeBase(NodeBase::Directory), m_subindex(NoSubIndex), m_sortedChildren(false), m_offset(0), m_parent(0) {}
 
-		SubIndexMode m_subindex;
+		char m_subindex;	// using char instead of enum to compact members in one word
+		bool m_sortedChildren; // same as above
 
 		/// The offset in the file to this node's subindex block if m_subindex is not NoSubIndex.
 		Imf::Int64 m_offset;
@@ -350,11 +361,33 @@ class DirectoryNode : public NodeBase
 		/// A pointer to the parent node in the tree - will be NULL for the root node
 		DirectoryNode* m_parent;
 
-		/// Pointers to this node's children (Node or DataNode)
-		typedef std::map< IndexedIO::EntryID, NodeBase*> ChildMap;
+		/// Sorted list of node's children (DirectoryNode or DataNode)
+		typedef std::vector< NodeBase* > ChildMap;
 		ChildMap m_children;
 
 	public:
+
+		inline void sortChildren()
+		{
+			if ( !m_sortedChildren )
+			{
+				std::sort( m_children.begin(), m_children.end(), NodeBase::compareNames );
+				m_sortedChildren = true;
+			}
+		}
+
+		template< typename T >
+		bool findChild( IndexedIO::EntryID name, T &it )
+		{
+			sortChildren();
+			NodeBase search(name);
+			it = std::lower_bound(m_children.begin(), m_children.end(), &search, NodeBase::compareNames );
+			if ( it == m_children.end() )
+			{
+				return false;
+			}
+			return ( (*it)->m_name == name );
+		}
 
 		/// registers a child node in this node
 		void registerChild( NodeBase* c );
@@ -541,7 +574,8 @@ void DirectoryNode::registerChild( NodeBase* c )
 		}
 		childNode->m_parent = this;
 	}
-	m_children.insert( ChildMap::value_type( c->m_name, c) );
+	m_children.push_back( c );
+	m_sortedChildren = false;
 }
 
 void DirectoryNode::path( IndexedIO::EntryIDList &result ) const
@@ -569,17 +603,18 @@ StreamIndexedIO::Node::~Node()
 
 bool StreamIndexedIO::Node::hasChild( const IndexedIO::EntryID &name ) const
 {
-	return m_node->m_children.find( name ) != m_node->m_children.end();
+	DirectoryNode::ChildMap::const_iterator cit;
+	return m_node->findChild( name, cit );
 }
 
 NodeBase* StreamIndexedIO::Node::child( const IndexedIO::EntryID &name ) const
 {
-	DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.find( name );
-	if (cit == m_node->m_children.end())
+	DirectoryNode::ChildMap::const_iterator cit;
+	if ( m_node->findChild( name, cit ) )
 	{
-		return 0;
+		return *cit;
 	}
-	return cit->second;
+	return 0;
 }
 
 DirectoryNode* StreamIndexedIO::Node::child( const IndexedIO::EntryID &name, bool loadChildren ) const
@@ -682,7 +717,7 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names ) const
 	names.reserve( m_node->m_children.size() );
 	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.begin(); cit != m_node->m_children.end(); cit++ )
 	{
-		names.push_back( cit->first );
+		names.push_back( (*cit)->m_name );
 	}
 }
 
@@ -695,19 +730,19 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO
 
 	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.begin(); cit != m_node->m_children.end(); cit++ )
 	{
-		NodeBase *cc = cit->second;
+		NodeBase *cc = *cit;
 		bool childIsDirectory = ( cc->m_nodeType == NodeBase::Directory );
 		if ( typeIsDirectory == childIsDirectory )
 		{
-			names.push_back( cit->first );
+			names.push_back( (*cit)->m_name );
 		}
 	}
 }
 
 void StreamIndexedIO::Node::removeChild( const IndexedIO::EntryID &childName, bool throwException )
 {
-	DirectoryNode::ChildMap::iterator it = m_node->m_children.find( childName );
-	if ( it == m_node->m_children.end() )
+	DirectoryNode::ChildMap::iterator it;
+	if ( !m_node->findChild( childName, it ) )
 	{
 		if (throwException)
 		{
@@ -716,7 +751,7 @@ void StreamIndexedIO::Node::removeChild( const IndexedIO::EntryID &childName, bo
 		return;
 	}
 
-	NodeBase *child = it->second;
+	NodeBase *child = *it;
 
 	m_idx->deallocateWalk(child);
 
@@ -775,7 +810,7 @@ void StreamIndexedIO::Index::recursiveNodeDealloc( NodeBase *n )
 				DirectoryNode *dn = static_cast< DirectoryNode *>(n);
 				for (DirectoryNode::ChildMap::const_iterator it = dn->m_children.begin(); it != dn->m_children.end(); ++it) 
 				{
-					recursiveNodeDealloc( it->second );
+					recursiveNodeDealloc( *it );
 				}
 				delete dn;
 				break;
@@ -1077,6 +1112,8 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 				NodeBase *child = readNode( f );
 				n->registerChild( child );
 			}
+			// force sorting all children so that read-only is multi-threaded
+			n->sortChildren();
 		}
 		return n;
 	}
@@ -1121,6 +1158,15 @@ void StreamIndexedIO::Index::read( F &f )
 		if ( m_root->m_nodeType != NodeBase::Directory)
 		{
 			throw Exception( "StreamIndexedIO::Index::read - Root node is not a directory!!" );
+		}
+
+		// force sorting all children so that read-only is multi-threaded
+		for (IndexToNodeMap::const_iterator it = m_indexToNodeMap.begin(); it != m_indexToNodeMap.end(); it++ )
+		{
+			if ( (*it)->m_nodeType == NodeBase::Directory )
+			{
+				static_cast< DirectoryNode * >(*it)->sortChildren();
+			}
 		}
 
 		if ( m_version == 4 )
@@ -1215,7 +1261,7 @@ void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 		writeLittleEndian(f, nodeCount);
 		for (DirectoryNode::ChildMap::const_iterator it = node->m_children.begin(); it != node->m_children.end(); ++it)
 		{
-			NodeBase *p = it->second;
+			NodeBase *p = *it;
 			if ( p->m_nodeType == NodeBase::Data )
 			{
 				DataNode *child = static_cast< DataNode * >(p);
@@ -1540,7 +1586,7 @@ void StreamIndexedIO::Index::deallocateWalk( NodeBase* n )
 
 		for (DirectoryNode::ChildMap::const_iterator it = nn->m_children.begin(); it != nn->m_children.end(); ++it)
 		{
-			deallocateWalk( it->second );
+			deallocateWalk( *it );
 		}
 
 		nn->m_children.clear();
@@ -1559,7 +1605,7 @@ void StreamIndexedIO::Index::recursiveSetSubIndex( DirectoryNode *n )
 
 	for (DirectoryNode::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
 	{
-		DirectoryNode *childNode = static_cast<DirectoryNode*>(it->second);
+		DirectoryNode *childNode = static_cast<DirectoryNode*>(*it);
 
 		if ( childNode->m_nodeType != NodeBase::Directory )
 			continue;
@@ -1592,7 +1638,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 
 		for (DirectoryNode::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
 		{
-			NodeBase *p = it->second;
+			NodeBase *p = *it;
 			if ( p->m_nodeType == NodeBase::Data )
 			{
 				DataNode *childNode = static_cast< DataNode *>(p);
