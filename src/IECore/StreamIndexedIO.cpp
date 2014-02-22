@@ -396,14 +396,12 @@ class DirectoryNode : public NodeBase
 };
 
 // holds the private member data for StreamIndexedIO instance and provides high level access to the directory nodes
-class StreamIndexedIO::Node : public RefCounted
+class StreamIndexedIO::Node
 {
 	public :
 
 		/// Construct a new Node in the given index with the given numeric id
 		Node(StreamIndexedIO::Index* index, DirectoryNode *dirNode);
-
-		virtual ~Node();
 
 		void childNames( IndexedIO::EntryIDList &names ) const;
 		void childNames( IndexedIO::EntryIDList &names, IndexedIO::EntryType ) const;
@@ -593,11 +591,7 @@ void DirectoryNode::path( IndexedIO::EntryIDList &result ) const
 //
 ///////////////////////////////////////////////
 
-StreamIndexedIO::Node::Node(Index* index, DirectoryNode *dirNode) : RefCounted(), m_idx(index), m_node(dirNode)
-{
-}
-
-StreamIndexedIO::Node::~Node()
+StreamIndexedIO::Node::Node(Index* index, DirectoryNode *dirNode) : m_idx(index), m_node(dirNode)
 {
 }
 
@@ -1876,6 +1870,10 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 
 StreamIndexedIO::~StreamIndexedIO()
 {
+	if ( m_node )
+	{
+		delete m_node;
+	}
 	// \todo Consider a mechanism for deallocating sub-indexes
 }
 

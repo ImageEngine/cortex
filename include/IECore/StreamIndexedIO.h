@@ -255,9 +255,10 @@ class StreamIndexedIO : public IndexedIO
 
 		StreamFile &streamFile() const;
 
-		NodePtr m_node;
-
 	private :
+
+		// \todo Consider exposing Node to avoid too much memory fragmentation and save one raw pointer.
+		Node *m_node;
 
 		void setRoot( const IndexedIO::EntryIDList &root );
 
