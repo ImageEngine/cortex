@@ -1,3 +1,16 @@
+# 8.1.0
+
+#### IECore
+
+- Fixed cropping bug in CameraController::setResolution
+- Fixed bug with SceneCache animated object topology.
+
+#### IECoreMaya
+
+- Added create locator functionality to SceneShapes
+- Moved create locator methods from ProceduralHolderUI to FnProceduralHolder
+- SceneShapes support queries to double attributes
+
 # 8.0.0
 
 #### IECore
