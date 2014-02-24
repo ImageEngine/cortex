@@ -886,6 +886,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MDataHandle currentElement = arrayHandle.outputValue();
 			
 			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
+			/// \todo Use a generic data converter that would be compatible with a generic attribute.
 			IECore::TypeId type = attrValue->typeId();
 			if( type == BoolDataTypeId )
 			{
