@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,6 +31,9 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 
 #include <algorithm>
 #include <list>
@@ -66,6 +69,7 @@ static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 /// Version 5: introduced subindex as zipped data blocks (to reduce size of the main index). 
 ///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever). 
 ///            Removed the linkCount field on the data nodes.
+/// \todo Store SubIndexSize and NodeCount as unsigned 64bit integers
 static const Imf::Int64 g_currentVersion = 5;
 
 /// FileFormat ::= Data Index IndexOffset Version MagicNumber
@@ -75,7 +79,7 @@ static const Imf::Int64 g_currentVersion = 5;
 /// DataEntry ::= Stores data from nodes: 
 ///                [Data nodes] binary data indexed by DataOffset/DataSize and 
 ///                [Subindex]   SubIndexSize zip(NodeCount NodeTree*) indexed by SubIndexOffset.
-/// SubIndexSize :: = unsigned int - number of bytes in the zipped subindex that follows
+/// SubIndexSize :: = uint32 - number of bytes in the zipped subindex that follows
 
 /// StringCache ::= NumStrings String*
 /// NumStrings ::= int64
@@ -94,7 +98,7 @@ static const Imf::Int64 g_currentVersion = 5;
 /// ParentNodeID ::= int64 ( Id for the parent node )
 /// DataOffset ::= int64 ( this is offset where the data is located )
 /// DataSize ::= int64 ( number of bytes stored in the data section )
-/// NodeCount ::= unsigned int ( number of child nodes in the directory - stored right after this node leading to recursive definition of a tree )
+/// NodeCount ::= uint32 ( number of child nodes in the directory - stored right after this node leading to recursive definition of a tree )
 /// SubIndexOffset :: = int64 ( offset in the Data block where there's a zipped index that contains all the child nodes from this node - and possibly other nodes )
 
 /// FreePages ::= NumFreePages FreePage*
@@ -426,7 +430,7 @@ class StreamIndexedIO::Index : public RefCounted
 
 		/// Returns the offset after saving the data to file or the offset for a previouly saved data (with matching hash)
 		/// \param prefixSize If true than it will prepend to the block, the size of it
-		Imf::Int64 writeUniqueData( const char *data, unsigned int size, bool prefixSize = false );
+		Imf::Int64 writeUniqueData( const char *data, size_t size, bool prefixSize = false );
 
 		/// flushes the children of the given directory node to a subindex in the file
 		void commitNodeToSubIndex( Node *n );
@@ -526,6 +530,12 @@ void StreamIndexedIO::Node::registerChild( BaseNode* c )
 	if ( !c )
 	{
 		throw Exception("Invalid pointer for child node!!");
+	}
+
+	if ( m_children.size() >= UINT32_MAX )
+	{
+		// we currently save childCount as a uint32... so we prevent new children by construction.
+		throw IOException("StreamIndexedIO: Too many children under the same node!");
 	}
 
 	if ( c->entryType() == IndexedIO::Directory )
@@ -906,7 +916,7 @@ BaseNode *StreamIndexedIO::Index::readNodeV4( F &f )
 			if ( m_version == 4 )
 			{
 				/// ignore link count data
-				typedef unsigned short LinkCount;
+				typedef uint16_t LinkCount;
 				LinkCount linkCount;
 				readLittleEndian(f,linkCount);
 			}
@@ -1014,10 +1024,10 @@ BaseNode *StreamIndexedIO::Index::readNode( F &f )
 		{
 			n->m_offset = 0;
 
-			unsigned int nodeCount = 0;
+			uint32_t nodeCount = 0;
 			readLittleEndian( f, nodeCount );
 
-			for ( unsigned int c = 0; c < nodeCount; c++ )
+			for ( uint32_t c = 0; c < nodeCount; c++ )
 			{
 				BaseNode *child = readNode( f );
 				n->registerChild( child );
@@ -1156,7 +1166,7 @@ void StreamIndexedIO::Index::writeNode( Node *node, F &f )
 	}
 	else
 	{
-		unsigned int nodeCount = node->m_children.size();
+		uint32_t nodeCount = node->m_children.size();
 		writeLittleEndian(f, nodeCount);
 		for (Node::ChildMap::const_iterator it = node->m_children.begin(); it != node->m_children.end(); ++it)
 		{
@@ -1423,7 +1433,7 @@ void StreamIndexedIO::Index::addFreePage(  Imf::Int64 offset, Imf::Int64 sz )
 	assert( m_freePagesOffset.size() == m_freePagesSize.size() );
 }
 
-Imf::Int64 StreamIndexedIO::Index::writeUniqueData( const char *data, unsigned int size, bool prefixSize )
+Imf::Int64 StreamIndexedIO::Index::writeUniqueData( const char *data, size_t size, bool prefixSize )
 {
 	m_hasChanged = true;
 
@@ -1434,11 +1444,16 @@ Imf::Int64 StreamIndexedIO::Index::writeUniqueData( const char *data, unsigned i
 	MurmurHash hash;
 	hash.append( data, size );
 
-	unsigned int totalSize = size;
+	if ( size >= UINT32_MAX )
+	{
+		throw IOException( "StreamIndexedIO: Data size too long!" );
+	}
+	uint32_t clampedSize = size;
+	size_t totalSize = size;
 
 	if ( prefixSize )
 	{
-		totalSize += sizeof( unsigned int );
+		totalSize += sizeof( clampedSize );
 	}
 
 	// see if it's already stored by another node..
@@ -1458,7 +1473,7 @@ Imf::Int64 StreamIndexedIO::Index::writeUniqueData( const char *data, unsigned i
 
 	if ( prefixSize )
 	{
-		writeLittleEndian( *m_stream, size );
+		writeLittleEndian( *m_stream, clampedSize );
 	}
 
 	/// Write data
@@ -1523,7 +1538,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( Node *n )
 		compressingStream.push( sink );
 		assert( compressingStream.is_complete() );
 
-		unsigned int nodeCount = n->m_children.size();
+		uint32_t nodeCount = n->m_children.size();
 
 		writeLittleEndian( compressingStream, nodeCount );
 
@@ -1549,7 +1564,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( Node *n )
 		char *data=0;
 		std::streamsize sz;
 		sink.get( data, sz );
-		unsigned int subindexSize = sz;
+		uint32_t subindexSize = sz;
 
 		n->m_offset = writeUniqueData( data, subindexSize, true );
 
@@ -1578,7 +1593,7 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( Node *n )
 	
 	m_stream->seekg( n->m_offset, std::ios::beg );
 
-	unsigned int subindexSize = 0;
+	uint32_t subindexSize = 0;
 	readLittleEndian( *m_stream, subindexSize );
 
 	char *data = m_stream->ioBuffer(subindexSize);
@@ -1590,11 +1605,11 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( Node *n )
 	decompressingStream.push( source );
 	assert( decompressingStream.is_complete() );
 
-	unsigned int nodeCount = 0;
+	uint32_t nodeCount = 0;
 
 	readLittleEndian( decompressingStream, nodeCount );
 	
-	for ( unsigned int i = 0; i < nodeCount; i++ )
+	for ( uint32_t i = 0; i < nodeCount; i++ )
 	{
 		BaseNode *child = readNode( decompressingStream );
 		n->registerChild( child );
