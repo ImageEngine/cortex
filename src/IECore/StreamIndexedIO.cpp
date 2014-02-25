@@ -69,6 +69,7 @@ static const Imf::Int64 g_versionedMagicNumber = 0xB00B1E50;
 /// Version 5: introduced subindex as zipped data blocks (to reduce size of the main index). 
 ///            Hard links are represented as regular data nodes, that points to same data on file (no removal of data ever). 
 ///            Removed the linkCount field on the data nodes.
+/// \todo Store SubIndexSize and NodeCount as unsigned 64bit integers
 static const Imf::Int64 g_currentVersion = 5;
 
 /// FileFormat ::= Data Index IndexOffset Version MagicNumber
@@ -533,7 +534,7 @@ void StreamIndexedIO::Node::registerChild( BaseNode* c )
 
 	if ( m_children.size() >= UINT32_MAX )
 	{
-		// we currently save childCount as a int32... so we prevent new children by construction.
+		// we currently save childCount as a uint32... so we prevent new children by construction.
 		throw IOException("StreamIndexedIO: Too many children under the same node!");
 	}
 
@@ -915,7 +916,7 @@ BaseNode *StreamIndexedIO::Index::readNodeV4( F &f )
 			if ( m_version == 4 )
 			{
 				/// ignore link count data
-				typedef int16_t LinkCount;
+				typedef uint16_t LinkCount;
 				LinkCount linkCount;
 				readLittleEndian(f,linkCount);
 			}
