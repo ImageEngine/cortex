@@ -257,7 +257,7 @@ class StreamIndexedIO : public IndexedIO
 
 	private :
 
-		// \todo Consider exposing Node to avoid too much memory fragmentation and save one raw pointer.
+		// \todo Either rename Node to MemberData or add it's member here and save one raw pointer.
 		Node *m_node;
 
 		void setRoot( const IndexedIO::EntryIDList &root );
