@@ -1157,9 +1157,14 @@ void StreamIndexedIO::Index::read( F &f )
 		// force sorting all children so that read-only is multi-threaded
 		for (IndexToNodeMap::const_iterator it = m_indexToNodeMap.begin(); it != m_indexToNodeMap.end(); it++ )
 		{
-			if ( (*it)->m_nodeType == NodeBase::Directory )
+			NodeBase *n = *it;
+			if ( !n )
 			{
-				static_cast< DirectoryNode * >(*it)->sortChildren();
+				continue;
+			}
+			if ( n->m_nodeType == NodeBase::Directory )
+			{
+				static_cast< DirectoryNode * >(n)->sortChildren();
 			}
 		}
 
