@@ -34,7 +34,6 @@
 
 #define __STDC_LIMIT_MACROS
 #include <stdint.h>
-
 #include <algorithm>
 #include <list>
 #include <iostream>
@@ -296,6 +295,7 @@ class NodeBase
 	public :
 		
 		typedef enum {
+			SmallData,
 			Data,
 			Directory
 		} NodeType;
@@ -317,24 +317,52 @@ class NodeBase
 
 };
 
-/// Class that represents a Data node
+/// Class that represents small data nodes
+class SmallDataNode : public NodeBase
+{
+	public :
+		typedef uint16_t Length;
+		typedef uint32_t Size;
+
+		static const size_t maxArrayLength = UINT16_MAX;
+		static const size_t maxSize = UINT32_MAX;
+		
+		SmallDataNode() : NodeBase(NodeBase::SmallData) {}
+
+		/// data fields from IndexedIO::Entry
+		// using char instead of enum to compact members in one word
+		char m_dataType;
+
+		/// data fields from IndexedIO::Entry
+		Length m_arrayLength;
+
+		/// The size of this node's data chunk within the file
+		Size m_size;
+
+		/// The offset in the file to this node's data
+		Imf::Int64 m_offset;
+};
+
+/// Class that represents Data nodes
 class DataNode : public NodeBase
 {
 	public :
+		static const size_t maxArrayLength = UINT64_MAX;
+		static const size_t maxSize = UINT64_MAX;
+		
 		DataNode() : NodeBase(NodeBase::Data) {}
 
 		/// data fields from IndexedIO::Entry
 		IndexedIO::DataType m_dataType;
 
 		/// data fields from IndexedIO::Entry
-		unsigned long m_arrayLength;
-
-		/// The offset in the file to this node's data
-		Imf::Int64 m_offset;
+		Imf::Int64 m_arrayLength;
 
 		/// The size of this node's data chunk within the file
 		Imf::Int64 m_size;
 
+		/// The offset in the file to this node's data
+		Imf::Int64 m_offset;
 };
 
 /// A directory node within an index
@@ -361,7 +389,7 @@ class DirectoryNode : public NodeBase
 		/// A pointer to the parent node in the tree - will be NULL for the root node
 		DirectoryNode* m_parent;
 
-		/// Sorted list of node's children (DirectoryNode or DataNode)
+		/// Sorted list of node's children (DirectoryNode or DataNode/SmallDataNode)
 		typedef std::vector< NodeBase* > ChildMap;
 		ChildMap m_children;
 
@@ -415,10 +443,11 @@ class StreamIndexedIO::Node
 		// Returns the named child node or NULL if not existent.
 		// If loadChildren is true, then it loads the subindex for the child nodes (if applicable).
 		DirectoryNode* child( const IndexedIO::EntryID &name, bool loadChildren ) const;
-		DataNode* dataChild( const IndexedIO::EntryID &name ) const;
+		/// returns information about the Data node
+		inline bool dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const;
 
 		DirectoryNode* addChild( const IndexedIO::EntryID & childName );
-		DataNode* addDataChild( const IndexedIO::EntryID & childName );
+		void addDataChild( const IndexedIO::EntryID & childName, IndexedIO::DataType dataType, size_t arrayLen, size_t offset, size_t size );
 
 		void removeChild( const IndexedIO::EntryID &childName, bool throwException = true );
 
@@ -446,8 +475,9 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Allocate a new chunk of data of the requested size, returning its offset within the file
 		Imf::Int64 allocate( Imf::Int64 sz );
 
-		/// Deallocate a node's data from the file.
-		void deallocate( DataNode* n );
+		/// Deallocate a Data node's data block from the file.
+		template< typename D >
+		void deallocate( D* n );
 
 		/// Queries the string cache
 		StringCache &stringCache();
@@ -523,19 +553,19 @@ class StreamIndexedIO::Index : public RefCounted
 		void writeNode( DirectoryNode *n, F &f );
 
 		/// Write the data node to a stream
-		template < typename F >
-		void writeDataNode( DataNode *n, F &f );
+		template < typename F, typename D >
+		void writeDataNode( D *n, F &f );
 
 		template < typename F >
 		void read( F &f );
 
 		/// Read method used on previous file format versions up to version 4
-		/// Returns a newly created Node or DataNode.
+		/// Returns a newly created Node.
 		template < typename F >
 		NodeBase *readNodeV4( F &f );
 
 		/// Replace the contents of this node with data read from a stream.
-		/// Returns a newly created Node or DataNode.
+		/// Returns a newly created Node.
 		template < typename F >
 		NodeBase *readNode( F &f );
 
@@ -630,18 +660,27 @@ DirectoryNode* StreamIndexedIO::Node::child( const IndexedIO::EntryID &name, boo
 	return n;
 }
 
-DataNode* StreamIndexedIO::Node::dataChild( const IndexedIO::EntryID &name ) const
+bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const
 {
-	DataNode *n = 0;
 	NodeBase *p = child(name);
 	if ( p )
 	{
 		if ( p->m_nodeType == NodeBase::Data )
 		{
-			n = static_cast< DataNode *>( p );
+			DataNode *n = static_cast< DataNode *>( p );
+			offset = n->m_offset;
+			size = n->m_size;
+			return true;
+		}
+		else if ( p->m_nodeType == NodeBase::SmallData )
+		{
+			SmallDataNode *n = static_cast< SmallDataNode *>( p );
+			offset = n->m_offset;
+			size = n->m_size;
+			return true;
 		}
 	}
-	return n;
+	return false;
 }
 
 DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childName )
@@ -671,7 +710,7 @@ DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childN
 	return child;
 }
 
-DataNode* StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName )
+void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, IndexedIO::DataType dataType, size_t arrayLen, size_t offset, size_t size )
 {
 	if ( m_node->m_subindex )
 	{
@@ -680,24 +719,40 @@ DataNode* StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childNa
 
 	if ( hasChild(childName) )
 	{
-		return 0;
+		throw IOException( "StreamIndexedIO: Could not insert node '" + childName.value() + "' into index" );
 	}
 
-	DataNode* child = new DataNode;
-	if ( !child )
-	{
-		throw Exception( "Failed to allocate node!" );
-	}
-	child->m_name = childName;
-	child->m_dataType = IndexedIO::Invalid;
-	child->m_arrayLength = 0;
 	m_idx->m_stringCache.add( childName );
 
-	m_node->registerChild( child );
-
+	if ( arrayLen <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+	{
+		SmallDataNode* child = new SmallDataNode;
+		if ( !child )
+		{
+			throw Exception( "Failed to allocate node!" );
+		}
+		child->m_name = childName;
+		child->m_dataType = dataType;
+		child->m_arrayLength = static_cast<SmallDataNode::Length>(arrayLen);
+		child->m_offset = offset;
+		child->m_size = static_cast<SmallDataNode::Size>(size);
+		m_node->registerChild( child );
+	}
+	else
+	{
+		DataNode* child = new DataNode;
+		if ( !child )
+		{
+			throw Exception( "Failed to allocate node!" );
+		}
+		child->m_name = childName;
+		child->m_dataType = dataType;
+		child->m_arrayLength = arrayLen;
+		child->m_offset = offset;
+		child->m_size = size;
+		m_node->registerChild( child );
+	}
 	m_idx->m_hasChanged = true;
-
-	return child;
 }
 
 const IndexedIO::EntryID &StreamIndexedIO::Node::name() const
@@ -812,6 +867,12 @@ void StreamIndexedIO::Index::recursiveNodeDealloc( NodeBase *n )
 		case NodeBase::Data :
 			{
 				DataNode *dn = static_cast< DataNode *>(n);
+				delete dn;
+				break;
+			}
+		case NodeBase::SmallData :
+			{
+				SmallDataNode *dn = static_cast< SmallDataNode *>(n);
 				delete dn;
 				break;
 			}
@@ -970,7 +1031,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 
 		n->m_name = *id;
 		n->m_dataType = dataType;
-		n->m_arrayLength = static_cast<unsigned long>( arrayLength );
+		n->m_arrayLength = arrayLength;
 
 		if ( isLink )		// Only version 4
 		{
@@ -1076,13 +1137,30 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 			readLittleEndian( f,arrayLength );
 		}
 
-		DataNode *n = new DataNode;
-		n->m_name = m_stringCache.findById( stringId );
-		n->m_dataType = dataType;
-		n->m_arrayLength = static_cast<unsigned long>( arrayLength );
-		readLittleEndian( f,n->m_offset );
-		readLittleEndian( f,n->m_size );
-		return n;
+		Imf::Int64 offset, size;
+		readLittleEndian( f, offset );
+		readLittleEndian( f, size );
+
+		if ( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
+		{
+			SmallDataNode *n = new SmallDataNode;
+			n->m_name = m_stringCache.findById( stringId );
+			n->m_dataType = dataType;
+			n->m_offset = offset;
+			n->m_arrayLength = static_cast<SmallDataNode::Length>( arrayLength );
+			n->m_size = static_cast<SmallDataNode::Size>( size );
+			return n;
+		}
+		else
+		{
+			DataNode *n = new DataNode;
+			n->m_name = m_stringCache.findById( stringId );
+			n->m_dataType = dataType;
+			n->m_offset = offset;
+			n->m_arrayLength = arrayLength;
+			n->m_size = size;
+			return n;
+		}
 	}
 	else if ( entryType == IndexedIO::Directory )
 	{
@@ -1220,8 +1298,8 @@ void StreamIndexedIO::Index::read( F &f )
 	}
 }
 
-template < typename F >
-void StreamIndexedIO::Index::writeDataNode( DataNode *node, F &f )
+template < typename F, typename D >
+void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 {
 	char t = IndexedIO::File;
 	f.write( &t, sizeof(char) );
@@ -1232,13 +1310,13 @@ void StreamIndexedIO::Index::writeDataNode( DataNode *node, F &f )
 	t = node->m_dataType;
 	f.write( &t, sizeof(char) );
 
-	if ( IndexedIO::Entry::isArray( node->m_dataType ) )
+	if ( IndexedIO::Entry::isArray( static_cast<IndexedIO::DataType>(node->m_dataType) ) )
 	{
 		writeLittleEndian<F,Imf::Int64>( f, node->m_arrayLength );
 	}
 
 	writeLittleEndian(f, node->m_offset);
-	writeLittleEndian(f, node->m_size);
+	writeLittleEndian<F,Imf::Int64>(f, node->m_size);
 }
 
 template < typename F >
@@ -1261,15 +1339,26 @@ void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 		for (DirectoryNode::ChildMap::const_iterator it = node->m_children.begin(); it != node->m_children.end(); ++it)
 		{
 			NodeBase *p = *it;
-			if ( p->m_nodeType == NodeBase::Data )
+			switch( p->m_nodeType )
 			{
-				DataNode *child = static_cast< DataNode * >(p);
-				writeDataNode( child, f );
-			}
-			else
-			{
-				DirectoryNode *child = static_cast< DirectoryNode * >(p);
-				writeNode( child, f );
+			case NodeBase::Data :
+				{
+					DataNode *child = static_cast< DataNode * >(p);
+					writeDataNode( child, f );
+					break;
+				}
+			case NodeBase::SmallData :
+				{
+					SmallDataNode *child = static_cast< SmallDataNode * >(p);
+					writeDataNode( child, f );
+					break;
+				}
+			case NodeBase::Directory :
+				{
+					DirectoryNode *child = static_cast< DirectoryNode * >(p);
+					writeNode( child, f );
+					break;
+				}
 			}
 		}
 	}
@@ -1395,10 +1484,11 @@ Imf::Int64 StreamIndexedIO::Index::allocate( Imf::Int64 sz )
 	return loc;
 }
 
-void StreamIndexedIO::Index::deallocate( DataNode* n )
+template< typename D >
+void StreamIndexedIO::Index::deallocate( D* n )
 {
 	assert(n);
-	assert(n->entryType() == IndexedIO::File);
+	assert(n->m_nodeType == NodeBase::Data || n->m_nodeType == NodeBase::SmallData );
 
 	addFreePage( n->m_offset, n->m_size );
 }
@@ -1638,16 +1728,26 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 		for (DirectoryNode::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
 		{
 			NodeBase *p = *it;
-			if ( p->m_nodeType == NodeBase::Data )
+			switch( p->m_nodeType )
 			{
-				DataNode *childNode = static_cast< DataNode *>(p);
-				writeDataNode( childNode, compressingStream );
-			}
-			else
-			{
-				DirectoryNode *childNode = static_cast< DirectoryNode *>(p);
-
-				writeNode( childNode, compressingStream );
+				case NodeBase::SmallData:
+					{
+						SmallDataNode *childNode = static_cast< SmallDataNode *>(p);
+						writeDataNode( childNode, compressingStream );
+						break;
+					}
+				case NodeBase::Data:
+					{
+						DataNode *childNode = static_cast< DataNode *>(p);
+						writeDataNode( childNode, compressingStream );
+						break;
+					}
+				case NodeBase::Directory:
+					{
+						DirectoryNode *childNode = static_cast< DirectoryNode *>(p);
+						writeNode( childNode, compressingStream );
+						break;
+					}
 			}
 		}
 
@@ -2082,13 +2182,26 @@ IndexedIO::Entry StreamIndexedIO::entry(const IndexedIO::EntryID &name) const
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
-	if ( node->m_nodeType == NodeBase::Data )
+	switch( node->m_nodeType )
 	{
-		DataNode *dn = static_cast< DataNode * >(node);
-		return IndexedIO::Entry( dn->m_name, IndexedIO::File, dn->m_dataType, dn->m_arrayLength );
-	}
+		case NodeBase::Data:
+			{
+				DataNode *dn = static_cast< DataNode * >(node);
+				return IndexedIO::Entry( dn->m_name, IndexedIO::File, static_cast<IndexedIO::DataType>(dn->m_dataType), dn->m_arrayLength );
+			}
 
-	return IndexedIO::Entry( node->m_name, IndexedIO::Directory, IndexedIO::Invalid, 0 );
+		case NodeBase::SmallData:
+			{
+				SmallDataNode *dn = static_cast< SmallDataNode * >(node);
+				return IndexedIO::Entry( dn->m_name, IndexedIO::File, static_cast<IndexedIO::DataType>(dn->m_dataType), dn->m_arrayLength );
+			}
+
+		case NodeBase::Directory:
+			return IndexedIO::Entry( node->m_name, IndexedIO::Directory, IndexedIO::Invalid, 0 );
+
+		default:
+			throw Exception("Invalid node type!");
+	}
 }
 
 IndexedIOPtr StreamIndexedIO::parentDirectory()
@@ -2165,12 +2278,6 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 	writable(name);
 	remove(name, false);
 
-	DataNode* node = m_node->addDataChild( name );
-	if (!node)
-	{
-		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
-	}
-
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
 	const Imf::Int64 *constIds = ids;
 	unsigned long size = IndexedIO::DataSizeTraits<Imf::Int64 *>::size(constIds, arrayLength);
@@ -2190,10 +2297,9 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 
 	IndexedIO::DataFlattenTraits<Imf::Int64*>::flatten(constIds, arrayLength, data);
 
-	node->m_dataType = dataType;
-	node->m_arrayLength = arrayLength;
-	node->m_offset = index->writeUniqueData( data, size );
-	node->m_size = size;
+	size_t offset = index->writeUniqueData( data, size );
+
+	m_node->addDataChild( name, dataType, arrayLength, offset, size );
 
 	delete [] ids;
 }
@@ -2203,27 +2309,27 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 	assert( m_node );
 	readable(name);
 
-	DataNode* node = m_node->dataChild( name );
+	Imf::Int64 dataOffset, dataSize;
 
-	if (!node)
+	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
-	Imf::Int64 size = node->m_size;
+
 	StreamIndexedIO::StreamFile &f = streamFile();
 	{
 		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( node->m_offset, std::ios::beg );
+		f.seekg( dataOffset, std::ios::beg );
 
 #ifdef IE_CORE_LITTLE_ENDIAN
 		// raw read
-		f.read( (char*)ids, size );
+		f.read( (char*)ids, dataSize );
 	}
 #else
-		char *data = f.ioBuffer(size);
-		f.read( data, size );
+		char *data = f.ioBuffer(dataSize);
+		f.read( data, dataSize );
 	}
 	IndexedIO::DataFlattenTraits<Imf::Int64*>::unflatten( data, ids, arrayLength );
 #endif
@@ -2247,26 +2353,16 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T *x, unsigned
 	writable(name);
 	remove(name, false);
 
-	DataNode* node = m_node->addDataChild( name );
-	if (node)
-	{
-		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
-		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
+	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
+	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
-		char *data = streamFile().ioBuffer(size);
-		assert(data);
-		IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength, data);
+	char *data = streamFile().ioBuffer(size);
+	assert(data);
+	IndexedIO::DataFlattenTraits<T*>::flatten(x, arrayLength, data);
 
-		node->m_dataType = dataType;
-		node->m_arrayLength = arrayLength;
-		node->m_offset = m_node->m_idx->writeUniqueData( data, size );
-		node->m_size = size;
-	}
+	Imf::Int64 offset = m_node->m_idx->writeUniqueData( data, size );
 
-	else
-	{
-		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
-	}
+	m_node->addDataChild( name, dataType, arrayLength, offset, size );
 }
 
 template<typename T>
@@ -2275,21 +2371,12 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T *x, unsig
 	writable(name);
 	remove(name, false);
 
-	DataNode* node = m_node->addDataChild( name );
-	if (node)
-	{
-		unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
-		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
+	unsigned long size = IndexedIO::DataSizeTraits<T*>::size(x, arrayLength);
+	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T*>::type();
 
-		node->m_dataType = dataType;
-		node->m_arrayLength = arrayLength;
-		node->m_offset = m_node->m_idx->writeUniqueData( (char*)x, size );
-		node->m_size = size;
-	}
-	else
-	{
-		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
-	}
+	Imf::Int64 offset =  m_node->m_idx->writeUniqueData( (char*)x, size );
+
+	m_node->addDataChild( name, dataType, arrayLength, offset, size );
 }
 
 template<typename T>
@@ -2298,25 +2385,16 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const T &x)
 	writable(name);
 	remove(name, false);
 
-	DataNode* node = m_node->addDataChild( name );
-	if (node)
-	{
-		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
-		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
+	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
+	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
-		char *data = streamFile().ioBuffer(size);
-		assert(data);
-		IndexedIO::DataFlattenTraits<T>::flatten(x, data);
+	char *data = streamFile().ioBuffer(size);
+	assert(data);
+	IndexedIO::DataFlattenTraits<T>::flatten(x, data);
 
-		node->m_dataType = dataType;
-		node->m_arrayLength = 0;
-		node->m_offset = m_node->m_idx->writeUniqueData( data, size );
-		node->m_size = size;
-	}
-	else
-	{
-		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
-	}
+	Imf::Int64 offset =  m_node->m_idx->writeUniqueData( data, size );
+
+	m_node->addDataChild( name, dataType, 0, offset, size );
 }
 
 template<typename T>
@@ -2325,21 +2403,12 @@ void StreamIndexedIO::rawWrite(const IndexedIO::EntryID &name, const T &x)
 	writable(name);
 	remove(name, false);
 
-	DataNode* node = m_node->addDataChild( name );
-	if (node)
-	{
-		unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
-		IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
+	unsigned long size = IndexedIO::DataSizeTraits<T>::size(x);
+	IndexedIO::DataType dataType = IndexedIO::DataTypeTraits<T>::type();
 
-		node->m_dataType = dataType;
-		node->m_arrayLength = 0;
-		node->m_offset = m_node->m_idx->writeUniqueData( (char*)&x, size );
-		node->m_size = size;
-	}
-	else
-	{
-		throw IOException( "StreamIndexedIO: Could not insert node '" + name.value() + "' into index" );
-	}
+	Imf::Int64 offset = m_node->m_idx->writeUniqueData( (char*)&x, size );
+
+	m_node->addDataChild( name, dataType, 0, offset, size );
 }
 
 template<typename T>
@@ -2348,20 +2417,19 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 	assert( m_node );
 	readable(name);
 
-	DataNode* node = m_node->dataChild( name );
+	Imf::Int64 dataOffset, dataSize;
 
-	if (!node)
+	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
 
 	StreamIndexedIO::StreamFile &f = streamFile();
-	Imf::Int64 size = node->m_size;
 	{
 		StreamFile::MutexLock lock( f.mutex() );
-		char *data = f.ioBuffer(size);
-		f.seekg( node->m_offset, std::ios::beg );
-		f.read( data, size );
+		char *data = f.ioBuffer(dataSize);
+		f.seekg( dataOffset, std::ios::beg );
+		f.read( data, dataSize );
 		IndexedIO::DataFlattenTraits<T*>::unflatten( data, x, arrayLength );
 	}
 }
@@ -2372,14 +2440,13 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 	assert( m_node );
 	readable(name);
 
-	DataNode* node = m_node->dataChild( name );
+	Imf::Int64 dataOffset, dataSize;
 
-	if (!node)
+	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
 	}
 
-	Imf::Int64 size = node->m_size;
 	if (!x)
 	{
 		x = new T[arrayLength];
@@ -2388,8 +2455,8 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 	StreamIndexedIO::StreamFile &f = streamFile();
 	{
 		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( node->m_offset, std::ios::beg );
-		f.read( (char*)x, size );
+		f.seekg( dataOffset, std::ios::beg );
+		f.read( (char*)x, dataSize );
 	}
 }
 
@@ -2399,20 +2466,19 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 	assert( m_node );
 	readable(name);
 
-	DataNode* node = m_node->dataChild( name );
+	Imf::Int64 dataOffset, dataSize;
 
-	if (!node)
+	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
 	}
 
-	Imf::Int64 size = node->m_size;
 	StreamIndexedIO::StreamFile &f = streamFile();
 	{
 		StreamFile::MutexLock lock( f.mutex() );
-		char *data = f.ioBuffer(size);
-		f.seekg( node->m_offset, std::ios::beg );
-		f.read( data, size );
+		char *data = f.ioBuffer(dataSize);
+		f.seekg( dataOffset, std::ios::beg );
+		f.read( data, dataSize );
 		IndexedIO::DataFlattenTraits<T>::unflatten( data, x );
 	}
 }
@@ -2423,19 +2489,18 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 	assert( m_node );
 	readable(name);
 
-	DataNode* node = m_node->dataChild( name );
+	Imf::Int64 dataOffset, dataSize;
 
-	if (!node)
+	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
 	}
 
-	Imf::Int64 size = node->m_size;
 	StreamIndexedIO::StreamFile &f = streamFile();
 	{
 		StreamFile::MutexLock lock( f.mutex() );
-		f.seekg( node->m_offset, std::ios::beg );
-		f.read( (char*)&x, size );
+		f.seekg( dataOffset, std::ios::beg );
+		f.read( (char*)&x, dataSize );
 	}
 }
 
