@@ -837,7 +837,7 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO
 	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.begin(); cit != m_node->m_children.end(); cit++ )
 	{
 		NodeBase *cc = *cit;
-		bool childIsDirectory = ( cc->m_nodeType == NodeBase::Directory );
+		bool childIsDirectory = ( cc->m_nodeType == NodeBase::Directory || cc->m_nodeType == NodeBase::SubIndex );
 		if ( typeIsDirectory == childIsDirectory )
 		{
 			names.push_back( (*cit)->m_name );
@@ -1805,7 +1805,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 			recursiveNodeDealloc( *it );
 		}
 
-		// remove all children from this node ( freeing some memory if there's no external references)
+		// remove all children from this node
 		n->m_children.clear();
 	}
 }
