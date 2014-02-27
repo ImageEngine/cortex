@@ -74,9 +74,6 @@ extern "C"
 	DLLEXPORT void HoudiniDSOInit( UT_DSOInfo &dsoinfo )
 	{
 		dsoinfo.loadGlobal = true;
-		
-		/// Create the default ObjectPool cache
-		UT_ObjectPoolCache::defaultObjectPoolCache();
 	}
 }
 
@@ -202,6 +199,9 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
 	GU_CortexPrimitive::setTypeDef( primDef );
 	
+	/// Create the default ObjectPool cache
+	UT_ObjectPoolCache::defaultObjectPoolCache();
+
 /// Declare our new Render Hook for Houdini 12.5 and later
 #if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
 
