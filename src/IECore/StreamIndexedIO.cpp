@@ -391,10 +391,11 @@ class DirectoryNode : public NodeBase
 			LoadedSubIndex,
 		};
 
-		DirectoryNode() : NodeBase(NodeBase::Directory), m_subindex(NoSubIndex), m_sortedChildren(false), m_offset(0), m_parent(0) {}
+		DirectoryNode() : NodeBase(NodeBase::Directory), m_subindex(NoSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(0), m_parent(0) {}
 
 		char m_subindex;	// using char instead of enum to compact members in one word
 		bool m_sortedChildren; // same as above
+		bool m_subindexChildren;	// true if one or more children are subindex. Helps avoiding the mutex...
 
 		/// The offset in the file to this node's subindex block if m_subindex is not NoSubIndex.
 		Imf::Int64 m_offset;
@@ -451,8 +452,6 @@ class StreamIndexedIO::Node
 
 		bool hasChild( const IndexedIO::EntryID &name ) const;
 
-		/// Returns a Node or DataNode or NULL if not existent.
-		NodeBase* child( const IndexedIO::EntryID &name ) const;
 		// Returns the named child directory node or NULL if not existent. Loads the subindex for the child nodes (if applicable).
 		DirectoryNode* directoryChild( const IndexedIO::EntryID &name ) const;
 		/// returns information about the Data node
@@ -624,6 +623,10 @@ void DirectoryNode::registerChild( NodeBase* c )
 		}
 		childNode->m_parent = this;
 	}
+	else if ( c->m_nodeType == NodeBase::SubIndex )
+	{
+		m_subindexChildren = true;
+	}
 	m_children.push_back( c );
 	m_sortedChildren = false;
 }
@@ -653,29 +656,28 @@ bool StreamIndexedIO::Node::hasChild( const IndexedIO::EntryID &name ) const
 	return m_node->findChild( name, cit );
 }
 
-NodeBase* StreamIndexedIO::Node::child( const IndexedIO::EntryID &name ) const
-{
-	DirectoryNode::ChildMap::const_iterator cit;
-	if ( m_node->findChild( name, cit ) )
-	{
-		return *cit;
-	}
-	return 0;
-}
-
 DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &name ) const
 {
-	Index::Mutex::scoped_lock lock( m_idx->m_mutex, false ); // read-only lock
-
 	DirectoryNode::ChildMap::iterator it;
 	if ( m_node->findChild( name, it ) )
 	{
+		Index::Mutex::scoped_lock lock;
+		if ( m_node->m_subindexChildren )
+		{
+			lock.acquire( m_idx->m_mutex, false ); // read-only lock
+		}
+
 		if ( (*it)->m_nodeType == NodeBase::Directory )
 		{
 			DirectoryNode *dir = static_cast< DirectoryNode *>( (*it) );
 
 			if ( dir->m_subindex == DirectoryNode::SavedSubIndex )
 			{
+				if ( m_node->m_subindexChildren )
+				{
+					lock.release();		/// we will not change the children dictionary, so we release the lock!
+				}
+
 				// this can occur when the user flushed a directory and right after tries to access it.
 				m_idx->readNodeFromSubIndex( dir );
 			}
@@ -689,22 +691,24 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 			newDir->m_name = subIndex->m_name;
 			newDir->m_offset = subIndex->m_offset;
 			newDir->m_parent = m_node;
+
+			lock.release();		/// we release the lock while loading data..
+
 			m_idx->readNodeFromSubIndex( newDir );
 
-			{
-				// now that we loaded the whole thing, lock our Index for writing and replace the Node pointer
-				lock.upgrade_to_writer();
+			// now that we loaded the whole thing, lock our Index for writing
+			lock.acquire( m_idx->m_mutex, true );
 
-				// there's a chance that someone else already replaced the pointer...
-				if ( (*it)->m_nodeType == NodeBase::Directory )
-				{
-					Index::recursiveNodeDealloc( newDir );
-					return static_cast< DirectoryNode *>(*it);
-				}
-				
-				// replace SubIndex by Directory node.
-				(*it) = newDir;
+			// there's a chance that someone else already replaced the pointer...
+			if ( (*it)->m_nodeType == NodeBase::Directory )
+			{
+				lock.release();		/// we release the lock because we won't change the children anyways..
+				Index::recursiveNodeDealloc( newDir );
+				return static_cast< DirectoryNode *>(*it);
 			}
+				
+			// replace SubIndex by Directory node.
+			(*it) = newDir;
 
 			// and now we are ok to delete the SubIndexNode..
 			delete subIndex;
@@ -717,11 +721,17 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 
 bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const
 {
-	Index::Mutex::scoped_lock lock( m_idx->m_mutex, false ); // read-only lock
-
-	NodeBase *p = child(name);
-	if ( p )
+	DirectoryNode::ChildMap::const_iterator cit;
+	if ( m_node->findChild( name, cit ) )
 	{
+		Index::Mutex::scoped_lock lock;
+		if ( m_node->m_subindexChildren )
+		{
+			lock.acquire( m_idx->m_mutex, false ); // read-only lock
+		}
+
+		NodeBase *p = *cit;
+
 		if ( p->m_nodeType == NodeBase::Data )
 		{
 			DataNode *n = static_cast< DataNode *>( p );
@@ -2211,14 +2221,19 @@ IndexedIO::Entry StreamIndexedIO::entry(const IndexedIO::EntryID &name) const
 	assert( m_node );
 	readable(name);
 
-	Index::Mutex::scoped_lock lock( m_node->m_idx->m_mutex, false ); // read-only lock
-
-	NodeBase* node = m_node->child( name );
-
-	if (!node)
+	DirectoryNode::ChildMap::iterator it;
+	if ( !m_node->m_node->findChild( name, it ) )
 	{
 		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
 	}
+
+	Index::Mutex::scoped_lock lock;
+	if ( m_node->m_node->m_subindexChildren )
+	{
+		lock.acquire( m_node->m_idx->m_mutex, false ); // read-only lock
+	}
+
+	NodeBase *node = *it;
 
 	switch( node->m_nodeType )
 	{
