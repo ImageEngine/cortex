@@ -83,6 +83,11 @@ DeepImageConverter::~DeepImageConverter()
 
 ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 {
+	if ( m_inputFileParameter->getTypedValue() == m_outputFileParameter->getTypedValue() )
+	{
+		throw InvalidArgumentException( "Different input and output files must be specified." );
+	}
+
 	DeepImageReaderPtr reader = IECore::runTimeCast<DeepImageReader>( Reader::create( m_inputFileParameter->getTypedValue() ) );
 	if ( !reader )
 	{
@@ -109,9 +114,9 @@ ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 		writer->worldToNDCParameter()->setValue( worldToNDC );
 	}
 	
-	for ( int y=dataWindow.min.y; y < dataWindow.max.y; ++y )
+	for ( int y=dataWindow.min.y; y <= dataWindow.max.y; ++y )
 	{
-		for ( int x=dataWindow.min.x; x < dataWindow.max.x; ++x )
+		for ( int x=dataWindow.min.x; x <= dataWindow.max.x; ++x )
 		{
 			writer->writePixel( x, y, reader->readPixel( x, y ) );
 		}
