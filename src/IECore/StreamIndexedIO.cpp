@@ -2021,10 +2021,7 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 
 StreamIndexedIO::~StreamIndexedIO()
 {
-	if ( m_node )
-	{
-		delete m_node;
-	}
+	delete m_node;
 	// \todo Consider a mechanism for deallocating sub-indexes
 }
 
