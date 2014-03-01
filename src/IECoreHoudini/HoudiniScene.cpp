@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -436,7 +436,7 @@ bool HoudiniScene::hasTag( const Name &name, int filter ) const
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
-			GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
+			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
 				GU_DetailHandleAutoReadLock readHandle( newHandle );
@@ -518,7 +518,7 @@ void HoudiniScene::readTags( NameList &tags, int filter ) const
 		OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
 		if ( contentNode && contentNode->getObjectType() == OBJ_GEOMETRY && m_splitter )
 		{
-			GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
+			GU_DetailHandle newHandle = contentHandle();
 			if ( !newHandle.isNull() )
 			{
 				GU_DetailHandleAutoReadLock readHandle( newHandle );
@@ -633,7 +633,7 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 			m_splitter = new DetailSplitter( handle );
 		}
 		
-		GU_DetailHandle newHandle = m_splitter->split( contentPathValue() );
+		GU_DetailHandle newHandle = contentHandle();
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
@@ -1081,6 +1081,20 @@ const char *HoudiniScene::contentPathValue() const
 	std::copy( m_path.begin() + m_contentIndex, m_path.end(), relative.begin() );
 	pathToString( relative, name );
 	return name.c_str();
+}
+
+GU_DetailHandle HoudiniScene::contentHandle() const
+{
+	const char *value = contentPathValue();
+	GU_DetailHandle handle = m_splitter->split( value );
+	
+	// we need to try again, in case the user didn't use a / prefix on the shape name
+	if ( handle.isNull() && m_contentIndex == 1 && strlen( value ) != 1 )
+	{
+		handle = m_splitter->split( &value[1] );
+	}
+	
+	return handle;
 }
 
 void HoudiniScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -779,6 +779,57 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertTrue( torus2.hasObject() )
 		self.assertTrue( torus2.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( torus2.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+	
+	def testNonSlashNames( self ) :
+		
+		obj = hou.node( "/obj" )
+		boxes = obj.createNode( "geo", "boxes", run_init_scripts=False )
+		box1 = boxes.createNode( "box" )
+		name1 = box1.createOutputNode( "name" )
+		name1.parm( "name1" ).set( "/box1" )
+		box2 = boxes.createNode( "box" )
+		box2.parmTuple( "t" ).set( ( 3,3,3 ) )
+		name2 = box2.createOutputNode( "name" )
+		name2.parm( "name1" ).set( "/box2" )
+		merge = name1.createOutputNode( "merge" )
+		merge.setInput( 1, name2 )
+		merge.setRenderFlag( True )
+		
+		def test() :
+			
+			scene = IECoreHoudini.HoudiniScene()
+			self.assertEqual( scene.childNames(), [ "boxes" ] )
+			boxesScene = scene.child( "boxes" )
+			self.assertEqual( boxesScene.childNames(), [ "box1", "box2" ] )
+			self.assertFalse( boxesScene.hasObject() )
+			
+			box1Scene = boxesScene.child( "box1" )
+			self.assertEqual( box1Scene.childNames(), [] )
+			self.assertTrue( box1Scene.hasObject() )
+			box1Obj = box1Scene.readObject( 0 )
+			self.assertTrue( isinstance( box1Obj, IECore.MeshPrimitive ) )
+			self.assertEqual( box1Obj.numFaces(), 6 )
+			self.assertTrue( box1Obj.arePrimitiveVariablesValid() )
+			
+			box2Scene = boxesScene.child( "box2" )
+			self.assertEqual( box2Scene.childNames(), [] )
+			self.assertTrue( box2Scene.hasObject() )
+			box2Obj = box2Scene.readObject( 0 )
+			self.assertTrue( isinstance( box2Obj, IECore.MeshPrimitive ) )
+			self.assertEqual( box2Obj.numFaces(), 6 )
+			self.assertTrue( box2Obj.arePrimitiveVariablesValid() )
+			
+			self.assertNotEqual( box1Obj, box2Obj )
+			box2Obj["P"] = box1Obj["P"]
+			self.assertEqual( box1Obj, box2Obj )
+		
+		test()
+		name1.parm( "name1" ).set( "box1" )
+		test()
+		name2.parm( "name1" ).set( "box2" )
+		test()
+		name1.parm( "name1" ).set( "/box1" )
+		test()
 	
 	def testCustomAttributes( self ) : 
 		
