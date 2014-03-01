@@ -419,20 +419,24 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.connectAttr( outTransform+".outTranslate", locator + ".translate" )
 		maya.cmds.connectAttr( outTransform+".outRotate", locator + ".rotate" )
 		maya.cmds.connectAttr( outTransform+".outScale", locator + ".scale" )
-
-		maya.cmds.select( maya.cmds.parent( locator, transform, relative=True ) )
+		locator = transform + "|" + maya.cmds.parent( locator, transform, relative=True )[0]
+		
+		return locator
 	
 	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
 		
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		
+		locators = []
 		for childPlugSuffix in childPlugSuffixes :
 			index = self.__queryIndexForPath( path )
 			outBound = node+".outBound["+str(index)+"]"
 			locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + childPlugSuffix )[0]
 			maya.cmds.connectAttr( outBound + ".outBound" + childPlugSuffix, locator + ".translate" )
-			maya.cmds.parent( locator, transform, relative=True )
+			locators.append( transform + "|" + maya.cmds.parent( locator, transform, relative=True )[0] )
+		
+		return locators
 			
 	## Returns the maya node type that this function set operates on
 	@classmethod
