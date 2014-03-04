@@ -60,8 +60,6 @@ struct RadixSortWrapper : public RadixSort
 
 void bindRadixSort()
 {
-	typedef class_< RadixSortWrapper, boost::noncopyable> MeshPrimitiveEvaluatorPyClass;
-
 	class_< RadixSortWrapper, boost::noncopyable>( "RadixSort", no_init )
 		.def( init<>() )
 		.def( "sort", &RadixSortWrapper::sort<int> )

@@ -157,7 +157,6 @@ struct WarpOp::Warp
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type V;
-		typedef typename Container::iterator It;
 		typename T::Ptr inData = data->copy();
 		const Container &inBuffer = inData->readable();
 		unsigned int outputWidth = m_outputDataWindow.size().x + 1;

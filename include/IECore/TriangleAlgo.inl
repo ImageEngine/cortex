@@ -330,8 +330,6 @@ Vec triangleClosestPoint( const Vec &v0, const Vec &v1, const Vec &v2, const Vec
 template<class Vec>
 int triangleBarycentricFeature( const Vec &barycentric, typename VectorTraits<Vec>::BaseType tolerance )
 {
-	typedef typename VectorTraits<Vec>::BaseType Real;
-
 	bool bx = VectorTraits<Vec>::get( barycentric, 0 ) > tolerance;
 	bool by = VectorTraits<Vec>::get( barycentric, 1 ) > tolerance;
 	bool bz = VectorTraits<Vec>::get( barycentric, 2 ) > tolerance;
