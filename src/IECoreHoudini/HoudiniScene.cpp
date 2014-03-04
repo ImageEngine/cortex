@@ -1068,30 +1068,32 @@ std::pair<const char *, size_t> HoudiniScene::nextWord( const char *value ) cons
 	return result;
 }
 
-const char *HoudiniScene::contentPathValue() const
+void HoudiniScene::relativeContentPath( SceneInterface::Path &path ) const
 {
+	path.clear();
+	
 	if ( !m_contentIndex )
 	{
-		return rootName.c_str();
+		return;
 	}
 	
-	Path relative;
-	std::string name;
-	relative.resize( m_path.size() - m_contentIndex );
-	std::copy( m_path.begin() + m_contentIndex, m_path.end(), relative.begin() );
-	pathToString( relative, name );
-	return name.c_str();
+	path.reserve( m_path.size() - m_contentIndex );
+	path.insert( path.begin(), m_path.begin() + m_contentIndex, m_path.end() );
 }
 
 GU_DetailHandle HoudiniScene::contentHandle() const
 {
-	const char *value = contentPathValue();
-	GU_DetailHandle handle = m_splitter->split( value );
+	std::string name;
+	SceneInterface::Path path;
+	relativeContentPath( path );
+	pathToString( path, name );
+	
+	GU_DetailHandle handle = m_splitter->split( name.c_str() );
 	
 	// we need to try again, in case the user didn't use a / prefix on the shape name
-	if ( handle.isNull() && m_contentIndex == 1 && strlen( value ) != 1 )
+	if ( handle.isNull() && m_contentIndex == 1 && !path.empty() && path[0] != "" )
 	{
-		handle = m_splitter->split( &value[1] );
+		handle = m_splitter->split( &name.c_str()[1] );
 	}
 	
 	return handle;

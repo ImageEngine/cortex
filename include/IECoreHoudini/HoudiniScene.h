@@ -154,7 +154,7 @@ class HoudiniScene : public IECore::SceneInterface
 		const char *matchPath( const char *value ) const;
 		bool matchPattern( const char *value, const char *pattern ) const;
 		std::pair<const char *, size_t> nextWord( const char *value ) const;
-		const char *contentPathValue() const;
+		void relativeContentPath( IECore::SceneInterface::Path &path ) const;
 		GU_DetailHandle contentHandle() const;
 		
 		/// Struct for registering readers for custom Attributes.
