@@ -72,7 +72,7 @@ struct ColorTransform : public std::unary_function<F, T>
 		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
 	}
 
-	virtual T transform( const F &f );
+	virtual T transform( const F &f ) = 0;
 
 };
 
