@@ -87,7 +87,6 @@ struct CurveTangentsOp::CalculateTangents
 	ReturnType operator()( T * data )
 	{
 		typedef typename T::ValueType VecContainer;
-		typedef typename VecContainer::value_type Vec;
 
 		const VecContainer &points = data->readable();
 		

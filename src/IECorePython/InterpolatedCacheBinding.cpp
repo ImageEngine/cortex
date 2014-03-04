@@ -158,8 +158,6 @@ struct InterpolatedCacheHelper
 
 void bindInterpolatedCache()
 {
-	typedef class_< InterpolatedCache, InterpolatedCachePtr > InterpolatedCachePyClass;
-
 	RefCountedClass<InterpolatedCache, RefCounted> interpolatedCacheClass( "InterpolatedCache" );
 	{
 		// define enum before functions.

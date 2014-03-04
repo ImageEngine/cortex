@@ -65,7 +65,6 @@ struct SummedAreaOp::SumArea
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type V;
-		typedef typename Container::iterator It;
 
 		Container &buffer = data->writable();
 

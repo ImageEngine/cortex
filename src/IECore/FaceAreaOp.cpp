@@ -127,7 +127,6 @@ void FaceAreaOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObjec
 		PolygonIterator faceEnd = mesh->faceEnd();
 		for( PolygonIterator pIt = mesh->faceBegin(); pIt!=faceEnd; pIt++ )
 		{
-			typedef vector<V3f> PointVector;
 			areas.push_back( polygonArea( pIt.vertexBegin( p.begin() ), pIt.vertexEnd( p.begin() ) ) );
 		}
 

@@ -243,6 +243,10 @@ void MeshPrimitiveImplicitSurfaceOp::modifyTypedPrimitive( MeshPrimitive * typed
 
 
 	V3i resolution;
+	resolution.x = 0;
+	resolution.y = 0;
+	resolution.z = 0;
+
 	int gridMethod = m_gridMethodParameter->getNumericValue();
 	if ( gridMethod == Resolution )
 	{
