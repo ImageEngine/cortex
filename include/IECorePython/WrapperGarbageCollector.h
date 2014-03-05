@@ -82,6 +82,43 @@ class WrapperGarbageCollector
 
 	protected :
 
+		/// Constructor for use by RefCountedWrapper derived class. The self argument is
+		/// the python object which holds the wrapped RefCounted argument, and wrappedType
+		/// is the Python type corresponding to the C++ wrapper. This constructor
+		/// initialises m_pyObject as follows :
+		///
+		/// If the python type of self is not wrappedType, this indicates that self
+		/// is an instance of a python subclass of the wrapped C++ class. In this case
+		/// we want to support access to virtual overrides via methodOverride(). Therefore
+		/// m_pyObject is initialised to point to self, and self's reference count is
+		/// incremented to keep it alive as long as the C++ object is alive. This reference
+		/// cycle will be broken by the collect() method. After this, isSubclassed() will
+		/// return true and methodOverride() may be used from virtual overrides to call into
+		/// python.
+		///
+		/// If the python type of self is the same as wrappedType, this indicates that self
+		/// is not subclassed in python. In this case we don't want to support virtual overrides
+		/// nor do we want to pay the overhead of garbage collection. Therefore m_pyObject
+		/// is initialised to NULL, isSubclassed() will return false, methodOverride() will always
+		/// fail, and we will have no further overhead.
+		WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType );
+
+		/// Returns true if this instance is of a Python subclass, and methodOverride() is therefore
+		/// useable. This method may be called without holding the GIL, so it should be tested first
+		/// and methodOverride() only called if it returns true - this avoids the huge overhead associated
+		/// with acquiring the GIL and entering Python only to discover that there is no override.
+		bool isSubclassed() const
+		{
+			return m_pyObject;
+		}
+		
+		/// Returns an overridden method for this instance if one exists. The GIL must
+		/// be held before calling this method. See isSubclassed() for an important means of
+		/// avoiding this overhead where it isn't necessary. Also see RefCountedWrapper::methodOverride()
+		/// which provides an overload which automatically supplies wrappedType.
+		boost::python::object methodOverride( const char *name, PyTypeObject *wrappedType ) const;
+
+		/// \todo Make private for the next major version.
 		PyObject *m_pyObject;
 		/// \todo This is unused. Remove it for
 		/// the next major version.

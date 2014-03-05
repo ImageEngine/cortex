@@ -36,6 +36,8 @@
 #ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_H
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_H
 
+#include "IECore/RunTimeTyped.h"
+
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 
@@ -43,6 +45,33 @@ namespace IECorePython
 {
 
 void bindRunTimeTyped();
+
+/// A class for wrapping RunTimeTyped objects to allow overriding
+/// in Python. It automatically forwards all RunTimeTypes virtual
+/// functions to Python overrides if they exist.
+template<typename T>
+class RunTimeTypedWrapper : public RefCountedWrapper<T>
+{
+
+	public :
+	
+		RunTimeTypedWrapper( PyObject *self );
+	
+		template<typename Arg1>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1 );
+	
+		template<typename Arg1, typename Arg2>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 );
+		
+		template<typename Arg1, typename Arg2, typename Arg3>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 );
+		
+		virtual IECore::TypeId typeId() const;
+		virtual const char *typeName() const;
+		virtual bool isInstanceOf( IECore::TypeId typeId ) const;
+		virtual bool isInstanceOf( const char *typeName ) const;
+
+};
 
 /// A class to simplify the binding of RunTimeTyped derived classes. This should be used
 /// in place of the usual boost::python::class_. It automatically makes sure the class is bound

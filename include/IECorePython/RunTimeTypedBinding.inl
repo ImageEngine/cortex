@@ -72,6 +72,111 @@ static bool isInstanceOf2( T &t, const char *n )
 
 } // namespace Detail
 
+//////////////////////////////////////////////////////////////////////////
+// RunTimeTypedWrapper
+//////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self )
+	:	RefCountedWrapper<T>( self )
+{
+}
+
+template<typename T>
+template<typename Arg1>
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1 )
+	:	RefCountedWrapper<T>( self, arg1 )
+{
+}
+
+template<typename T>
+template<typename Arg1, typename Arg2>
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
+	:	RefCountedWrapper<T>( self, arg1, arg2 )
+{
+}
+
+template<typename T>
+template<typename Arg1, typename Arg2, typename Arg3>
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
+	:	RefCountedWrapper<T>( self, arg1, arg2, arg3 )
+{
+}
+
+template<typename T>
+IECore::TypeId RunTimeTypedWrapper<T>::typeId() const
+{
+	if( this->isSubclassed() )
+	{		
+		IECorePython::ScopedGILLock gilLock;
+		if( boost::python::object f = this->methodOverride( "typeId" ) )
+		{
+			boost::python::object res = f();
+			return boost::python::extract<IECore::TypeId>( res );
+		}
+	}
+	return T::typeId();
+}
+
+template<typename T>
+const char *RunTimeTypedWrapper<T>::typeName() const
+{
+	if( this->isSubclassed() )
+	{
+		IECorePython::ScopedGILLock gilLock;
+		if( boost::python::object f = this->methodOverride( "typeName" ) )
+		{
+			boost::python::object res = f();
+			return boost::python::extract<const char *>( res );
+		}
+	}
+	return T::typeName();
+}
+
+template<typename T>
+bool RunTimeTypedWrapper<T>::isInstanceOf( IECore::TypeId typeId ) const
+{
+	if( T::isInstanceOf( typeId ) )
+	{
+		return true;
+	}
+	
+	if( this->isSubclassed() )
+	{
+		IECorePython::ScopedGILLock gilLock;
+		if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+		{
+			boost::python::object res = f( typeId );
+			return boost::python::extract<bool>( res );
+		}
+	}
+	return false;
+}
+
+template<typename T>
+bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
+{
+	if( T::isInstanceOf( typeName ) )
+	{
+		return true;
+	}
+	
+	if( this->isSubclassed() )
+	{
+		IECorePython::ScopedGILLock gilLock;
+		if( boost::python::object f = this->methodOverride( "isInstanceOf" ) )
+		{
+			boost::python::object res = f( typeName );
+			return boost::python::extract<bool>( res );
+		}
+	}
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// RunTimeTypedClass
+//////////////////////////////////////////////////////////////////////////
+
 template<typename T, typename Ptr>
 RunTimeTypedClass<T, Ptr>::RunTimeTypedClass( const char *docString )
 	:	BaseClass( Detail::nameWithoutNamespace( T::staticTypeName() ), docString )
