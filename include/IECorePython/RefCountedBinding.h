@@ -39,8 +39,11 @@
 
 namespace IECorePython
 {
+
 void bindRefCounted();
 
+/// \todo This class is now just an internal implementation detail of
+/// RefCountedClass - remove it from the public API for the next major version.
 template<typename T>
 struct IntrusivePtrToPython
 {
@@ -51,6 +54,8 @@ struct IntrusivePtrToPython
 
 };
 
+/// \todo This class is now just an internal implementation detail of
+/// RefCountedClass - remove it from the public API for the next major version.
 template<typename T>
 struct IntrusivePtrFromPython
 {
