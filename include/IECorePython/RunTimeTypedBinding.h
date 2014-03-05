@@ -89,6 +89,8 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
 
 };
 
+/// \deprecated
+/// \todo Remove for the next major version.
 #define IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
 	virtual IECore::TypeId typeId() const\
 	{\

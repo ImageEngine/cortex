@@ -48,10 +48,9 @@ namespace IECorePython
 /// for this alone because it has massive issues with memory management - ie it
 /// makes no attempt to do any, whereas our WrapperGarbageCollector base class
 /// handles that in ok fashion.
-/// \todo I suspect we can completely drop the inheritance
-/// of boost::python::wrapper as we only use it for the get_override method, and
-/// we could copy it out of the boost sources. Doing so would make the rather
-/// complicated class hierarchy here a lot simpler.
+/// \deprecated The RefCountedWrapper and RunTimeTypedWrapper classes provide
+/// a replacement for this class.
+/// \todo Remove for the next major version.
 template<typename T>
 class Wrapper : public boost::python::wrapper<T>, public WrapperGarbageCollector
 {
