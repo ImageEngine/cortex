@@ -83,6 +83,8 @@ class WrapperGarbageCollector
 	protected :
 
 		PyObject *m_pyObject;
+		/// \todo This is unused. Remove it for
+		/// the next major version.
 		IECore::RefCounted *m_object;
 
 	private :
