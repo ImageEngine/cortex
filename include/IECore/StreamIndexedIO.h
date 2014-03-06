@@ -255,9 +255,10 @@ class StreamIndexedIO : public IndexedIO
 
 		StreamFile &streamFile() const;
 
-		NodePtr m_node;
-
 	private :
+
+		// \todo Either rename Node to MemberData or add it's member here and save one raw pointer.
+		Node *m_node;
 
 		void setRoot( const IndexedIO::EntryIDList &root );
 
