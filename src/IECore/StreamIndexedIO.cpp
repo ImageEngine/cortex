@@ -119,7 +119,7 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( StreamIndexedIO )
 //// Templated functions for stream files //////
 
 template<typename F, typename T>
-void writeLittleEndian( F &f, T n )
+void writeLittleEndian( F &f, const T &n )
 {
 	const T nl = asLittleEndian<>(n);
 	f.write( (const char*) &nl, sizeof(T) );
@@ -291,31 +291,49 @@ class StreamIndexedIO::StringCache
 		mutable unsigned long m_ioBufferLen;
 };
 
+/// NodeBase is a base class for nodes representing the index
+// It's designed to keep the size of nodes to a minimum for dealing with large indexes
+// As a result we deliberately not deriving from RefCounted to save the size of the refcount and the vptr (due to the virtual methods)
+// Because it has no virtual destructor, we provide the destroy() function that carefully casts the Node pointer to the appropriate derived type before deleting it.
+// NodeType enumerates the derived types, and m_nodeType is defined at construction by the derived classes
 class NodeBase
 {
 	public :
 		
 		typedef enum {
+			Base,
 			SmallData,
 			Data,
 			Directory,
 			SubIndex
 		} NodeType;
 
-		NodeBase( IndexedIO::EntryID name ) : m_name(name)	{}
+		NodeBase( NodeType type, IndexedIO::EntryID name ) : m_name(name), m_nodeType(type) {}
 
-		NodeBase( NodeType type ) : m_nodeType(type)	{}
+		inline const IndexedIO::EntryID &name()
+		{
+			return m_name;
+		}
 
-		// name of the node in the current directory
-		IndexedIO::EntryID m_name;
-
-		// using char instead of enum to compact members in one word
-		char m_nodeType;
+		inline NodeType nodeType()
+		{
+			return static_cast<NodeType>(m_nodeType);
+		}
 
 		static bool compareNames(const NodeBase* a, const NodeBase* b) 
 		{
 			return a->m_name < b->m_name;
 		}
+
+		static void destroy( NodeBase *n );
+
+protected :
+
+		// name of the node in the current directory
+		const IndexedIO::EntryID m_name;
+
+		// using char instead of enum to compact members in one word
+		const char m_nodeType;
 
 };
 
@@ -329,20 +347,43 @@ class SmallDataNode : public NodeBase
 		static const size_t maxArrayLength = UINT16_MAX;
 		static const size_t maxSize = UINT32_MAX;
 		
-		SmallDataNode() : NodeBase(NodeBase::SmallData) {}
+		SmallDataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) : 
+			NodeBase(NodeBase::SmallData, name), m_dataType(dataType), m_arrayLength((Length)arrayLength), m_size((Size)size), m_offset(offset) {}
+
+		inline IndexedIO::DataType dataType() 
+		{
+			return static_cast<IndexedIO::DataType>(m_dataType);
+		}
+
+		inline Imf::Int64 arrayLength()
+		{
+			return m_arrayLength;
+		}
+
+		inline Imf::Int64 size()
+		{
+			return m_size;
+		}
+
+		inline Imf::Int64 offset()
+		{
+			return m_offset;
+		}
+
+	protected :
 
 		/// data fields from IndexedIO::Entry
 		// using char instead of enum to compact members in one word
-		char m_dataType;
+		const char m_dataType;
 
 		/// data fields from IndexedIO::Entry
-		Length m_arrayLength;
+		const Length m_arrayLength;
 
 		/// The size of this node's data chunk within the file
-		Size m_size;
+		const Size m_size;
 
 		/// The offset in the file to this node's data
-		Imf::Int64 m_offset;
+		const Imf::Int64 m_offset;
 };
 
 /// Class that represents Data nodes
@@ -352,7 +393,38 @@ class DataNode : public NodeBase
 		static const size_t maxArrayLength = UINT64_MAX;
 		static const size_t maxSize = UINT64_MAX;
 		
-		DataNode() : NodeBase(NodeBase::Data) {}
+		DataNode( IndexedIO::EntryID name, IndexedIO::DataType dataType, Imf::Int64 arrayLength, Imf::Int64 size, Imf::Int64 offset ) : 
+			NodeBase(NodeBase::Data, name), m_dataType(dataType), m_arrayLength(arrayLength), m_size(size), m_offset(offset) {}
+
+		inline IndexedIO::DataType dataType() 
+		{
+			return m_dataType;
+		}
+
+		inline Imf::Int64 arrayLength()
+		{
+			return m_arrayLength;
+		}
+
+		inline Imf::Int64 size()
+		{
+			return m_size;
+		}
+
+		inline Imf::Int64 offset()
+		{
+			return m_offset;
+		}
+
+		void copyFrom( DataNode *other )
+		{
+			m_dataType = other->m_dataType;
+			m_arrayLength = other->m_arrayLength;
+			m_offset = other->m_offset;
+			m_size = other->m_size;
+		}
+
+	protected :
 
 		/// data fields from IndexedIO::Entry
 		IndexedIO::DataType m_dataType;
@@ -365,16 +437,23 @@ class DataNode : public NodeBase
 
 		/// The offset in the file to this node's data
 		Imf::Int64 m_offset;
+
 };
 
 /// A compressed subindex node
 class SubIndexNode : public NodeBase 
 {
 	public :
-		SubIndexNode() : NodeBase(NodeBase::SubIndex) {}
+		SubIndexNode(IndexedIO::EntryID name, Imf::Int64 offset) : NodeBase(NodeBase::SubIndex, name), m_offset(offset) {}
 
+		inline Imf::Int64 offset()
+		{
+			return m_offset;
+		}
+
+	protected :
 		/// The offset in the file to this node's subindex block if m_subindex is not NoSubIndex.
-		Imf::Int64 m_offset;
+		const Imf::Int64 m_offset;
 
 };
 
@@ -391,7 +470,80 @@ class DirectoryNode : public NodeBase
 			LoadedSubIndex,
 		};
 
-		DirectoryNode() : NodeBase(NodeBase::Directory), m_subindex(NoSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(0), m_parent(0) {}
+		typedef std::vector< NodeBase* > ChildMap;
+
+		// regular constructor
+		DirectoryNode(IndexedIO::EntryID name) : NodeBase(NodeBase::Directory, name), m_subindex(NoSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(0), m_parent(0) {}
+
+		// constructor used when building a directory based on an existing SubIndexNode (because we want to load the contents soon).
+		DirectoryNode( SubIndexNode *subindex, DirectoryNode *parent ) : NodeBase(NodeBase::Directory, subindex->name()), m_subindex(SavedSubIndex), m_sortedChildren(false), m_subindexChildren(false), m_offset(subindex->offset()), m_parent(parent) {}
+
+		// returns what's the state of this directory, whether it's contents are in a subindex and whether they have been loaded or not.
+		inline SubIndexMode subindex()
+		{
+			return static_cast<SubIndexMode>(m_subindex);
+		}
+
+		inline bool subindexChildren()
+		{
+			return m_subindexChildren;
+		}
+
+		inline Imf::Int64 offset()
+		{
+			return m_offset;
+		}
+
+		inline DirectoryNode *parent()
+		{
+			return m_parent;
+		}
+
+		/// Returns the current list of child Nodes. 
+		// This function is not thread-safe because SubIndexNode children can be replaced by DirectoryNodes as the function directoryChild() is called.
+		// So in order to have safe access, the Index::Mutex m_mutex was created.
+		// \todo we may want to restrict more the access to the internal children and add the manipulation methods in the class instead.
+		inline ChildMap &children()
+		{
+			return m_children;
+		}
+
+		inline void sortChildren()
+		{
+			if ( !m_sortedChildren )
+			{
+				std::sort( m_children.begin(), m_children.end(), NodeBase::compareNames );
+				m_sortedChildren = true;
+			}
+		}
+
+		inline ChildMap::iterator findChild( IndexedIO::EntryID name )
+		{
+			sortChildren();
+			NodeBase search(NodeBase::Base, name);
+			ChildMap::iterator it = std::lower_bound(m_children.begin(), m_children.end(), &search, NodeBase::compareNames );
+			if ( it != m_children.end() )
+			{
+				if ( (*it)->name() != name )
+				{
+					return m_children.end();
+				}
+			}
+			return it;
+		}
+
+		/// registers a child node in this node
+		void registerChild( NodeBase* c );
+
+		void path( IndexedIO::EntryIDList &result ) const;
+
+		// Function that changes the SubIndex Mode to SavedSubIndex and saves memory by deallocating it's children.
+		void setSubIndexOffset( Imf::Int64 offset );
+
+		// Indicates to this Directory that it's contents have been retrieved from the subindex.
+		void recoveredSubIndex();
+
+	protected :
 
 		char m_subindex;	// using char instead of enum to compact members in one word
 		bool m_sortedChildren; // same as above
@@ -404,40 +556,11 @@ class DirectoryNode : public NodeBase
 		DirectoryNode* m_parent;
 
 		/// Sorted list of node's children (DirectoryNode or DataNode/SmallDataNode)
-		typedef std::vector< NodeBase* > ChildMap;
 		ChildMap m_children;
 
-	public:
-
-		inline void sortChildren()
-		{
-			if ( !m_sortedChildren )
-			{
-				std::sort( m_children.begin(), m_children.end(), NodeBase::compareNames );
-				m_sortedChildren = true;
-			}
-		}
-
-		template< typename T >
-		bool findChild( IndexedIO::EntryID name, T &it )
-		{
-			sortChildren();
-			NodeBase search(name);
-			it = std::lower_bound(m_children.begin(), m_children.end(), &search, NodeBase::compareNames );
-			if ( it == m_children.end() )
-			{
-				return false;
-			}
-			return ( (*it)->m_name == name );
-		}
-
-		/// registers a child node in this node
-		void registerChild( NodeBase* c );
-
-		void path( IndexedIO::EntryIDList &result ) const;
 };
 
-// holds the private member data for StreamIndexedIO instance and provides high level access to the directory nodes
+// holds the private member data for StreamIndexedIO instance and provides high level access to the directory nodes, including thread-safety
 class StreamIndexedIO::Node
 {
 	public :
@@ -591,13 +714,59 @@ class StreamIndexedIO::Index : public RefCounted
 		/// Returns a newly created Node.
 		template < typename F >
 		NodeBase *readNode( F &f );
-
-		static void recursiveNodeDealloc( NodeBase *n );
 };
 
 ///////////////////////////////////////////////
 //
-// DirectoryNode (begin)
+// NodeBase
+//
+///////////////////////////////////////////////
+
+void NodeBase::destroy( NodeBase *n )
+{
+	if ( !n )
+	{
+		return;
+	}
+	switch( n->nodeType() )
+	{
+		case NodeBase::Directory :
+			{
+				DirectoryNode *dn = static_cast< DirectoryNode *>(n);
+				for (DirectoryNode::ChildMap::const_iterator it = dn->children().begin(); it != dn->children().end(); ++it) 
+				{
+					destroy( *it );
+				}
+				delete dn;
+				break;
+			}
+		case NodeBase::Data :
+			{
+				DataNode *dn = static_cast< DataNode *>(n);
+				delete dn;
+				break;
+			}
+		case NodeBase::SmallData :
+			{
+				SmallDataNode *dn = static_cast< SmallDataNode *>(n);
+				delete dn;
+				break;
+			}
+		case NodeBase::SubIndex :
+			{
+				SubIndexNode *dn = static_cast< SubIndexNode *>(n);
+				delete dn;
+				break;
+			}
+		default:
+			throw Exception("Unknown node type!");
+	}
+}
+
+
+///////////////////////////////////////////////
+//
+// DirectoryNode
 //
 ///////////////////////////////////////////////
 
@@ -614,7 +783,7 @@ void DirectoryNode::registerChild( NodeBase* c )
 		throw IOException("StreamIndexedIO: Too many children under the same node!");
 	}
 
-	if ( c->m_nodeType == NodeBase::Directory )
+	if ( c->nodeType() == NodeBase::Directory )
 	{
 		DirectoryNode *childNode = static_cast< DirectoryNode *>(c);
 		if (childNode->m_parent)
@@ -623,7 +792,7 @@ void DirectoryNode::registerChild( NodeBase* c )
 		}
 		childNode->m_parent = this;
 	}
-	else if ( c->m_nodeType == NodeBase::SubIndex )
+	else if ( c->nodeType() == NodeBase::SubIndex )
 	{
 		m_subindexChildren = true;
 	}
@@ -640,6 +809,29 @@ void DirectoryNode::path( IndexedIO::EntryIDList &result ) const
 	}
 }
 
+void DirectoryNode::setSubIndexOffset( Imf::Int64 offset )
+{
+	m_offset = offset;
+
+	// mark this node as a saved in a subindex
+	m_subindex = DirectoryNode::SavedSubIndex;
+
+	// dealloc all the child nodes
+	for (DirectoryNode::ChildMap::const_iterator it = m_children.begin(); it != m_children.end(); ++it) 
+	{
+		NodeBase::destroy( *it );
+	}
+
+	// remove all children from this node
+	m_children.clear();
+}
+
+void DirectoryNode::recoveredSubIndex()
+{
+	m_subindex = DirectoryNode::LoadedSubIndex;
+}
+
+
 ///////////////////////////////////////////////
 //
 // StreamIndexedIO::Node (begin)
@@ -652,28 +844,28 @@ StreamIndexedIO::Node::Node(Index* index, DirectoryNode *dirNode) : m_idx(index)
 
 bool StreamIndexedIO::Node::hasChild( const IndexedIO::EntryID &name ) const
 {
-	DirectoryNode::ChildMap::const_iterator cit;
-	return m_node->findChild( name, cit );
+	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
+	return cit != m_node->children().end();
 }
 
 DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &name ) const
 {
-	DirectoryNode::ChildMap::iterator it;
-	if ( m_node->findChild( name, it ) )
+	DirectoryNode::ChildMap::iterator it = m_node->findChild( name );
+	if ( it != m_node->children().end() )
 	{
 		Index::Mutex::scoped_lock lock;
-		if ( m_node->m_subindexChildren )
+		if ( m_node->subindexChildren() )
 		{
 			lock.acquire( m_idx->m_mutex, false ); // read-only lock
 		}
 
-		if ( (*it)->m_nodeType == NodeBase::Directory )
+		if ( (*it)->nodeType() == NodeBase::Directory )
 		{
 			DirectoryNode *dir = static_cast< DirectoryNode *>( (*it) );
 
-			if ( dir->m_subindex == DirectoryNode::SavedSubIndex )
+			if ( dir->subindex() == DirectoryNode::SavedSubIndex )
 			{
-				if ( m_node->m_subindexChildren )
+				if ( m_node->subindexChildren() )
 				{
 					lock.release();		/// we will not change the children dictionary, so we release the lock!
 				}
@@ -683,14 +875,12 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 			}
 			return dir;
 		}
-		else if ( (*it)->m_nodeType == NodeBase::SubIndex )
+		else if ( (*it)->nodeType() == NodeBase::SubIndex )
 		{
 			SubIndexNode *subIndex = static_cast< SubIndexNode *>( (*it) );
 			
-			DirectoryNode *newDir = new DirectoryNode;
-			newDir->m_name = subIndex->m_name;
-			newDir->m_offset = subIndex->m_offset;
-			newDir->m_parent = m_node;
+			// build a Directory that knows it's flushed to a subindex.
+			DirectoryNode *newDir = new DirectoryNode( subIndex, m_node );
 
 			lock.release();		/// we release the lock while loading data..
 
@@ -700,10 +890,10 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 			lock.acquire( m_idx->m_mutex, true );
 
 			// there's a chance that someone else already replaced the pointer...
-			if ( (*it)->m_nodeType == NodeBase::Directory )
+			if ( (*it)->nodeType() == NodeBase::Directory )
 			{
 				lock.release();		/// we release the lock because we won't change the children anyways..
-				Index::recursiveNodeDealloc( newDir );
+				NodeBase::destroy( newDir );
 				return static_cast< DirectoryNode *>(*it);
 			}
 				
@@ -721,29 +911,29 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 
 bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const
 {
-	DirectoryNode::ChildMap::const_iterator cit;
-	if ( m_node->findChild( name, cit ) )
+	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
+	if ( cit != m_node->children().end() )
 	{
 		Index::Mutex::scoped_lock lock;
-		if ( m_node->m_subindexChildren )
+		if ( m_node->subindexChildren() )
 		{
 			lock.acquire( m_idx->m_mutex, false ); // read-only lock
 		}
 
 		NodeBase *p = *cit;
 
-		if ( p->m_nodeType == NodeBase::Data )
+		if ( p->nodeType() == NodeBase::Data )
 		{
 			DataNode *n = static_cast< DataNode *>( p );
-			offset = n->m_offset;
-			size = n->m_size;
+			offset = n->offset();
+			size = n->size();
 			return true;
 		}
-		else if ( p->m_nodeType == NodeBase::SmallData )
+		else if ( p->nodeType() == NodeBase::SmallData )
 		{
 			SmallDataNode *n = static_cast< SmallDataNode *>( p );
-			offset = n->m_offset;
-			size = n->m_size;
+			offset = n->offset();
+			size = n->size();
 			return true;
 		}
 	}
@@ -752,7 +942,7 @@ bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_
 
 DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childName )
 {
-	if ( m_node->m_subindex )
+	if ( m_node->subindex() )
 	{
 		throw Exception( "Cannot modify the file at current location! It was already committed to the file." );
 	}
@@ -762,12 +952,11 @@ DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childN
 		return 0;
 	}
 
-	DirectoryNode* child = new DirectoryNode();
+	DirectoryNode* child = new DirectoryNode(childName);
 	if ( !child )
 	{
 		throw Exception( "Failed to allocate node!" );
 	}
-	child->m_name = childName;
 	m_idx->m_stringCache.add( childName );
 
 	m_node->registerChild( child );
@@ -779,7 +968,7 @@ DirectoryNode* StreamIndexedIO::Node::addChild( const IndexedIO::EntryID &childN
 
 void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, IndexedIO::DataType dataType, size_t arrayLen, size_t offset, size_t size )
 {
-	if ( m_node->m_subindex )
+	if ( m_node->subindex() )
 	{
 		throw Exception( "Cannot modify the file at current location! It was already committed to the file." );
 	}
@@ -793,30 +982,20 @@ void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, I
 
 	if ( arrayLen <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
 	{
-		SmallDataNode* child = new SmallDataNode;
+		SmallDataNode* child = new SmallDataNode(childName, dataType, arrayLen, size, offset);
 		if ( !child )
 		{
 			throw Exception( "Failed to allocate node!" );
 		}
-		child->m_name = childName;
-		child->m_dataType = dataType;
-		child->m_arrayLength = static_cast<SmallDataNode::Length>(arrayLen);
-		child->m_offset = offset;
-		child->m_size = static_cast<SmallDataNode::Size>(size);
 		m_node->registerChild( child );
 	}
 	else
 	{
-		DataNode* child = new DataNode;
+		DataNode* child = new DataNode(childName, dataType, arrayLen, size, offset);
 		if ( !child )
 		{
 			throw Exception( "Failed to allocate node!" );
 		}
-		child->m_name = childName;
-		child->m_dataType = dataType;
-		child->m_arrayLength = arrayLen;
-		child->m_offset = offset;
-		child->m_size = size;
 		m_node->registerChild( child );
 	}
 	m_idx->m_hasChanged = true;
@@ -824,45 +1003,45 @@ void StreamIndexedIO::Node::addDataChild( const IndexedIO::EntryID &childName, I
 
 const IndexedIO::EntryID &StreamIndexedIO::Node::name() const
 {
-	return m_node->m_name;
+	return m_node->name();
 }
 
 void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names ) const
 {
 	names.clear();
-	names.reserve( m_node->m_children.size() );
-	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.begin(); cit != m_node->m_children.end(); cit++ )
+	names.reserve( m_node->children().size() );
+	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->children().begin(); cit != m_node->children().end(); cit++ )
 	{
-		names.push_back( (*cit)->m_name );
+		names.push_back( (*cit)->name() );
 	}
 }
 
 void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const
 {
 	names.clear();
-	names.reserve( m_node->m_children.size() );
+	names.reserve( m_node->children().size() );
 	
 	bool typeIsDirectory = ( type == IndexedIO::Directory );
 
-	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->m_children.begin(); cit != m_node->m_children.end(); cit++ )
+	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->children().begin(); cit != m_node->children().end(); cit++ )
 	{
 		NodeBase *cc = *cit;
-		bool childIsDirectory = ( cc->m_nodeType == NodeBase::Directory || cc->m_nodeType == NodeBase::SubIndex );
+		bool childIsDirectory = ( cc->nodeType() == NodeBase::Directory || cc->nodeType() == NodeBase::SubIndex );
 		if ( typeIsDirectory == childIsDirectory )
 		{
-			names.push_back( (*cit)->m_name );
+			names.push_back( (*cit)->name() );
 		}
 	}
 }
 
 void StreamIndexedIO::Node::removeChild( const IndexedIO::EntryID &childName, bool throwException )
 {
-	DirectoryNode::ChildMap::iterator it;
-	if ( !m_node->findChild( childName, it ) )
+	DirectoryNode::ChildMap::iterator it = m_node->findChild( childName );
+	if ( it == m_node->children().end() )
 	{
 		if (throwException)
 		{
-			throw IOException( "StreamIndexedIO:Node:removeChild: Entry not found '" + childName.value() + "'" );
+			throw IOException( "StreamIndexedIO::Node::removeChild: Entry not found '" + childName.value() + "'" );
 		}
 		return;
 	}
@@ -871,7 +1050,7 @@ void StreamIndexedIO::Node::removeChild( const IndexedIO::EntryID &childName, bo
 
 	m_idx->deallocateWalk(child);
 
-	m_node->m_children.erase( it );
+	m_node->children().erase( it );
 }
 
 ///////////////////////////////////////////////
@@ -904,53 +1083,12 @@ StreamIndexedIO::Index::~Index()
 	}
 
 	// dealloc all nodes, starting from root
-	recursiveNodeDealloc( m_root );
+	NodeBase::destroy( m_root );
 
 	// dealloc removed nodes
 	for ( std::vector< NodeBase * >::const_iterator it = m_removedNodes.begin(); it != m_removedNodes.end(); it++ )
 	{
-		recursiveNodeDealloc( *it );
-	}
-}
-
-void StreamIndexedIO::Index::recursiveNodeDealloc( NodeBase *n )
-{
-	if ( !n )
-	{
-		return;
-	}
-	switch( n->m_nodeType )
-	{
-		case NodeBase::Directory :
-			{
-				DirectoryNode *dn = static_cast< DirectoryNode *>(n);
-				for (DirectoryNode::ChildMap::const_iterator it = dn->m_children.begin(); it != dn->m_children.end(); ++it) 
-				{
-					recursiveNodeDealloc( *it );
-				}
-				delete dn;
-				break;
-			}
-		case NodeBase::Data :
-			{
-				DataNode *dn = static_cast< DataNode *>(n);
-				delete dn;
-				break;
-			}
-		case NodeBase::SmallData :
-			{
-				SmallDataNode *dn = static_cast< SmallDataNode *>(n);
-				delete dn;
-				break;
-			}
-		case NodeBase::SubIndex :
-			{
-				SubIndexNode *dn = static_cast< SubIndexNode *>(n);
-				delete dn;
-				break;
-			}
-		default:
-			throw Exception("Unknown node type!");
+		NodeBase::destroy( *it );
 	}
 }
 
@@ -1021,8 +1159,7 @@ void StreamIndexedIO::Index::openStream()
 	else
 	{
 		// creating a new empty Index
-		m_root = new DirectoryNode();
-		m_root->m_name = IndexedIO::rootName;
+		m_root = new DirectoryNode(IndexedIO::rootName);
 		m_hasChanged = true;
 	}
 }
@@ -1100,26 +1237,22 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 
 	if ( entryType == IndexedIO::File )
 	{
-		DataNode *n = new DataNode;
-
-		n->m_name = *id;
-		n->m_dataType = dataType;
-		n->m_arrayLength = arrayLength;
+		Imf::Int64 offset, size;
 
 		if ( isLink )		// Only version 4
 		{
 			Imf::Int64 targetNodeId;
 			// load Target Node ID in m_offset
 			readLittleEndian( f,targetNodeId );
-			n->m_offset = targetNodeId;
+			offset = targetNodeId;
 			// we cannot assure that the target node is already loaded, 
 			/// so we set size to zero for now and after we set it after the whole index is loaded.
-			n->m_size = 0;
+			size = 0;
 		}
 		else
 		{
-			readLittleEndian( f,n->m_offset );
-			readLittleEndian( f,n->m_size );
+			readLittleEndian( f,offset );
+			readLittleEndian( f,size );
 
 			if ( m_version == 4 )
 			{
@@ -1129,21 +1262,19 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 				readLittleEndian(f,linkCount);
 			}
 		}
+		DataNode *n = new DataNode( *id, dataType, arrayLength, size, offset );
 		result = n;
 	}
 	else // Directory
 	{
-		DirectoryNode *n = new DirectoryNode();
-		n->m_name = *id;
+		DirectoryNode *n = new DirectoryNode( *id );
 
 		if ( m_version < 2 )
 		{
-			Imf::Int64 size;
-			readLittleEndian( f, n->m_offset );
+			Imf::Int64 offset, size;
+			readLittleEndian( f, offset );
 			readLittleEndian( f, size );
 		}
-		n->m_offset = 0;
-
 		result = n;
 	}
 
@@ -1153,7 +1284,7 @@ NodeBase *StreamIndexedIO::Index::readNodeV4( F &f )
 		if ( parentId < m_indexToNodeMap.size() )
 		{
 			parent = static_cast< DirectoryNode * >( m_indexToNodeMap[parentId] );
-			if ( parent->m_nodeType != NodeBase::Directory )
+			if ( parent->nodeType() != NodeBase::Directory )
 			{
 				throw IOException("StreamIndexedIO: parent is not a directory!");
 			}
@@ -1209,30 +1340,18 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 
 		if ( arrayLength <= SmallDataNode::maxArrayLength && size <= SmallDataNode::maxSize )
 		{
-			SmallDataNode *n = new SmallDataNode;
-			n->m_name = m_stringCache.findById( stringId );
-			n->m_dataType = dataType;
-			n->m_offset = offset;
-			n->m_arrayLength = static_cast<SmallDataNode::Length>( arrayLength );
-			n->m_size = static_cast<SmallDataNode::Size>( size );
+			SmallDataNode *n = new SmallDataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
 			return n;
 		}
 		else
 		{
-			DataNode *n = new DataNode;
-			n->m_name = m_stringCache.findById( stringId );
-			n->m_dataType = dataType;
-			n->m_offset = offset;
-			n->m_arrayLength = arrayLength;
-			n->m_size = size;
+			DataNode *n = new DataNode( m_stringCache.findById( stringId ), dataType, arrayLength, size, offset );
 			return n;
 		}
 	}
 	else if ( entryType == IndexedIO::Directory )
 	{
-		DirectoryNode *n = new DirectoryNode();
-		n->m_name = m_stringCache.findById( stringId );
-		n->m_subindex = DirectoryNode::NoSubIndex;
+		DirectoryNode *n = new DirectoryNode( m_stringCache.findById( stringId ) );
 
 		uint32_t nodeCount = 0;
 		readLittleEndian( f, nodeCount );
@@ -1248,9 +1367,9 @@ NodeBase *StreamIndexedIO::Index::readNode( F &f )
 	}
 	else if ( entryType == SUBINDEX_DIR )
 	{
-		SubIndexNode *n = new SubIndexNode();
-		n->m_name = m_stringCache.findById( stringId );
-		readLittleEndian( f,n->m_offset );
+		Imf::Int64 offset;
+		readLittleEndian( f, offset );
+		SubIndexNode *n = new SubIndexNode( m_stringCache.findById( stringId ), offset );
 		return n;
 	}
 	else
@@ -1272,7 +1391,7 @@ void StreamIndexedIO::Index::read( F &f )
 		/// current file format reading
 		m_root = static_cast< DirectoryNode *>( readNode( f ) );
 
-		if ( m_root->m_nodeType != NodeBase::Directory)
+		if ( m_root->nodeType() != NodeBase::Directory)
 		{
 			throw Exception( "StreamIndexedIO::Index::read - Root node is not a directory!!" );
 		}
@@ -1291,7 +1410,7 @@ void StreamIndexedIO::Index::read( F &f )
 		}
 		m_root = static_cast< DirectoryNode *>( m_indexToNodeMap[0] );
 
-		if ( m_root->m_nodeType != NodeBase::Directory)
+		if ( m_root->nodeType() != NodeBase::Directory)
 		{
 			throw Exception( "StreamIndexedIO::Index::read - Root node is not a directory!!" );
 		}
@@ -1304,7 +1423,7 @@ void StreamIndexedIO::Index::read( F &f )
 			{
 				continue;
 			}
-			if ( n->m_nodeType == NodeBase::Directory )
+			if ( n->nodeType() == NodeBase::Directory )
 			{
 				static_cast< DirectoryNode * >(n)->sortChildren();
 			}
@@ -1316,27 +1435,24 @@ void StreamIndexedIO::Index::read( F &f )
 			for (IndexToNodeMap::const_iterator it = m_indexToNodeMap.begin(); it != m_indexToNodeMap.end(); it++ )
 			{
 				DataNode *n = static_cast< DataNode *>(*it);
-				if ( !n || n->m_nodeType != NodeBase::Data )
+				if ( !n || n->nodeType() != NodeBase::Data )
 				{
 					continue;
 				}
 	
-				if ( !n->m_size )
+				if ( !n->size() )
 				{
-					Imf::Int64 targetNodeId = n->m_offset;
+					Imf::Int64 targetNodeId = n->offset();
 					if ( targetNodeId >= m_indexToNodeMap.size() || !m_indexToNodeMap[targetNodeId] )
 					{
 						throw IOException("StreamIndexedIO: targetNodeId not found");
 					}
 					DataNode* targetNode = static_cast< DataNode *>(m_indexToNodeMap[targetNodeId]);
-					if ( targetNode->m_nodeType != NodeBase::Data )
+					if ( targetNode->nodeType() != NodeBase::Data )
 					{
 						throw IOException("StreamIndexedIO: targetNode if not of type File!" );
 					}
-					n->m_dataType = targetNode->m_dataType;
-					n->m_arrayLength = targetNode->m_arrayLength;;
-					n->m_offset = targetNode->m_offset;
-					n->m_size = targetNode->m_size;
+					n->copyFrom( targetNode );
 				}
 			}
 		}
@@ -1368,19 +1484,19 @@ void StreamIndexedIO::Index::writeDataNode( D *node, F &f )
 	char t = IndexedIO::File;
 	f.write( &t, sizeof(char) );
 
-	Imf::Int64 id = m_stringCache.find( node->m_name );
+	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
 
-	t = node->m_dataType;
+	t = node->dataType();
 	f.write( &t, sizeof(char) );
 
-	if ( IndexedIO::Entry::isArray( static_cast<IndexedIO::DataType>(node->m_dataType) ) )
+	if ( IndexedIO::Entry::isArray(node->dataType()) )
 	{
-		writeLittleEndian<F,Imf::Int64>( f, node->m_arrayLength );
+		writeLittleEndian<F,Imf::Int64>( f, node->arrayLength() );
 	}
 
-	writeLittleEndian(f, node->m_offset);
-	writeLittleEndian<F,Imf::Int64>(f, node->m_size);
+	writeLittleEndian(f, node->offset());
+	writeLittleEndian<F,Imf::Int64>(f, node->size());
 }
 
 template < typename F >
@@ -1389,22 +1505,22 @@ void StreamIndexedIO::Index::writeNode( SubIndexNode *node, F &f )
 	char t = SUBINDEX_DIR;
 	f.write( &t, sizeof(char) );
 
-	Imf::Int64 id = m_stringCache.find( node->m_name );
+	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
-	writeLittleEndian(f, node->m_offset);
+	writeLittleEndian(f, node->offset() );
 }
 
 template < typename F >
 void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 {
-	uint32_t nodeCount = n->m_children.size();
+	uint32_t nodeCount = n->children().size();
 
 	writeLittleEndian( f, nodeCount );
 
-	for (DirectoryNode::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it)
+	for (DirectoryNode::ChildMap::const_iterator it = n->children().begin(); it != n->children().end(); ++it)
 	{
 		NodeBase *p = *it;
-		switch( p->m_nodeType )
+		switch( p->nodeType() )
 		{
 			case NodeBase::Data :
 			{
@@ -1439,15 +1555,15 @@ void StreamIndexedIO::Index::writeNodeChildren( DirectoryNode *n, F &f )
 template < typename F >
 void StreamIndexedIO::Index::writeNode( DirectoryNode *node, F &f )
 {
-	char t = ( node->m_subindex ? SUBINDEX_DIR : IndexedIO::Directory );
+	char t = ( node->subindex() ? SUBINDEX_DIR : IndexedIO::Directory );
 	f.write( &t, sizeof(char) );
 
-	Imf::Int64 id = m_stringCache.find( node->m_name );
+	Imf::Int64 id = m_stringCache.find( node->name() );
 	writeLittleEndian( f, id );
 
-	if ( node->m_subindex )
+	if ( node->subindex() )
 	{
-		writeLittleEndian(f, node->m_offset);
+		writeLittleEndian(f, node->offset() );
 	}
 	else
 	{
@@ -1579,7 +1695,7 @@ template< typename D >
 void StreamIndexedIO::Index::deallocate( D* n )
 {
 	assert(n);
-	assert(n->m_nodeType == NodeBase::Data || n->m_nodeType == NodeBase::SmallData );
+	assert(n->nodeType() == NodeBase::Data || n->nodeType() == NodeBase::SmallData );
 
 	addFreePage( n->m_offset, n->m_size );
 }
@@ -1760,16 +1876,16 @@ void StreamIndexedIO::Index::deallocateWalk( NodeBase* n )
 	// store the pointer for future deallocation
 	m_removedNodes.push_back( n );
 
-	if ( n->m_nodeType == NodeBase::Directory )
+	if ( n->nodeType() == NodeBase::Directory )
 	{
 		DirectoryNode *nn = static_cast< DirectoryNode *>(n);
 
-		for (DirectoryNode::ChildMap::const_iterator it = nn->m_children.begin(); it != nn->m_children.end(); ++it)
+		for (DirectoryNode::ChildMap::const_iterator it = nn->children().begin(); it != nn->children().end(); ++it)
 		{
 			deallocateWalk( *it );
 		}
 
-		nn->m_children.clear();
+		nn->children().clear();
 	}
 	else
 	{
@@ -1786,7 +1902,7 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 		return;
 	}
 
-	if ( n->m_subindex == DirectoryNode::NoSubIndex )
+	if ( n->subindex() == DirectoryNode::NoSubIndex )
 	{
 		MemoryStreamSink sink;
 		io::filtering_ostream compressingStream;
@@ -1804,19 +1920,8 @@ void StreamIndexedIO::Index::commitNodeToSubIndex( DirectoryNode *n )
 		sink.get( data, sz );
 		uint32_t subindexSize = sz;
 
-		n->m_offset = writeUniqueData( data, subindexSize, true );
-
-		// mark this node as a saved in a subindex
-		n->m_subindex = DirectoryNode::SavedSubIndex;
-
-		// dealloc all the child nodes
-		for (DirectoryNode::ChildMap::const_iterator it = n->m_children.begin(); it != n->m_children.end(); ++it) 
-		{
-			recursiveNodeDealloc( *it );
-		}
-
-		// remove all children from this node
-		n->m_children.clear();
+		// tell the Directory node that it's contents have been written as a subindex		
+		n->setSubIndexOffset( writeUniqueData( data, subindexSize, true ) );
 	}
 }
 
@@ -1825,12 +1930,12 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 	/// guarantees thread safe access to the file and also to the m_subindex variable
 	StreamFile::MutexLock lock( m_stream->mutex() );
 
-	if ( n->m_subindex == DirectoryNode::LoadedSubIndex )
+	if ( n->subindex() == DirectoryNode::LoadedSubIndex )
 	{
 		return;
 	}
 
-	m_stream->seekg( n->m_offset, std::ios::beg );
+	m_stream->seekg( n->offset(), std::ios::beg );
 
 	uint32_t subindexSize = 0;
 	readLittleEndian( *m_stream, subindexSize );
@@ -1855,7 +1960,7 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 	}
 
 	/// mark the node as loaded from subindex
-	n->m_subindex = DirectoryNode::LoadedSubIndex;
+	n->recoveredSubIndex();
 }
 
 ///////////////////////////////////////////////
@@ -2187,7 +2292,7 @@ void StreamIndexedIO::removeAll( )
 {
 	assert( m_node );
 
-	if ( m_node->m_node->m_subindex )
+	if ( m_node->m_node->subindex() )
 	{
 		throw Exception( "Cannot modify the file at current location! It was already committed to the file." );
 	}
@@ -2205,7 +2310,7 @@ void StreamIndexedIO::remove( const IndexedIO::EntryID &name, bool throwIfNonExi
 	assert( m_node );
 	writable(name);
 
-	if ( m_node->m_node->m_subindex )
+	if ( m_node->m_node->subindex() )
 	{
 		throw Exception( "Cannot modify the file at current location! It was already committed to the file." );
 	}
@@ -2218,37 +2323,37 @@ IndexedIO::Entry StreamIndexedIO::entry(const IndexedIO::EntryID &name) const
 	assert( m_node );
 	readable(name);
 
-	DirectoryNode::ChildMap::iterator it;
-	if ( !m_node->m_node->findChild( name, it ) )
+	DirectoryNode::ChildMap::iterator it = m_node->m_node->findChild( name );
+	if ( it == m_node->m_node->children().end() )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::entry: Entry not found '" + name.value() + "'" );
 	}
 
 	Index::Mutex::scoped_lock lock;
-	if ( m_node->m_node->m_subindexChildren )
+	if ( m_node->m_node->subindexChildren() )
 	{
 		lock.acquire( m_node->m_idx->m_mutex, false ); // read-only lock
 	}
 
 	NodeBase *node = *it;
 
-	switch( node->m_nodeType )
+	switch( node->nodeType() )
 	{
 		case NodeBase::Data:
 			{
 				DataNode *dn = static_cast< DataNode * >(node);
-				return IndexedIO::Entry( dn->m_name, IndexedIO::File, static_cast<IndexedIO::DataType>(dn->m_dataType), dn->m_arrayLength );
+				return IndexedIO::Entry( dn->name(), IndexedIO::File, dn->dataType(), dn->arrayLength() );
 			}
 
 		case NodeBase::SmallData:
 			{
 				SmallDataNode *dn = static_cast< SmallDataNode * >(node);
-				return IndexedIO::Entry( dn->m_name, IndexedIO::File, static_cast<IndexedIO::DataType>(dn->m_dataType), dn->m_arrayLength );
+				return IndexedIO::Entry( dn->name(), IndexedIO::File, dn->dataType(), dn->arrayLength() );
 			}
 
 		case NodeBase::Directory:
 		case NodeBase::SubIndex:
-			return IndexedIO::Entry( node->m_name, IndexedIO::Directory, IndexedIO::Invalid, 0 );
+			return IndexedIO::Entry( node->name(), IndexedIO::Directory, IndexedIO::Invalid, 0 );
 
 		default:
 			throw Exception("Invalid node type!");
@@ -2258,7 +2363,7 @@ IndexedIO::Entry StreamIndexedIO::entry(const IndexedIO::EntryID &name) const
 IndexedIOPtr StreamIndexedIO::parentDirectory()
 {
 	assert( m_node );
-	DirectoryNode *parentNode = m_node->m_node->m_parent;
+	DirectoryNode *parentNode = m_node->m_node->parent();
 	if ( !parentNode )
 	{
 		return NULL;
@@ -2270,7 +2375,7 @@ IndexedIOPtr StreamIndexedIO::parentDirectory()
 ConstIndexedIOPtr StreamIndexedIO::parentDirectory() const
 {
 	assert( m_node );
-	DirectoryNode* parentNode = m_node->m_node->m_parent;
+	DirectoryNode* parentNode = m_node->m_node->parent();
 	if ( !parentNode )
 	{
 		return NULL;
@@ -2364,7 +2469,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, InternedString *&x, u
 
 	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::read : Data entry not found '" + name.value() + "'" );
 	}
 
 	Imf::Int64 *ids = new Imf::Int64[arrayLength];
@@ -2472,7 +2577,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T *&x, unsigned long 
 
 	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::read: Data entry not found '" + name.value() + "'" );
 	}
 
 	StreamIndexedIO::StreamFile &f = streamFile();
@@ -2495,7 +2600,7 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T *&x, unsigned lo
 
 	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::rawRead: Data entry not found '" + name.value() + "'" );
 	}
 
 	if (!x)
@@ -2521,7 +2626,7 @@ void StreamIndexedIO::read(const IndexedIO::EntryID &name, T &x) const
 
 	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::read Data entry not found '" + name.value() + "'" );
 	}
 
 	StreamIndexedIO::StreamFile &f = streamFile();
@@ -2544,7 +2649,7 @@ void StreamIndexedIO::rawRead(const IndexedIO::EntryID &name, T &x) const
 
 	if ( !m_node->dataChildInfo( name, dataOffset, dataSize ) )
 	{
-		throw IOException( "StreamIndexedIO: Data entry not found '" + name.value() + "'" );
+		throw IOException( "StreamIndexedIO::rawRead: Data entry not found '" + name.value() + "'" );
 	}
 
 	StreamIndexedIO::StreamFile &f = streamFile();
