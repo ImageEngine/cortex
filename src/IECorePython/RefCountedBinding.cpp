@@ -46,7 +46,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static bool is(RefCountedPtr self,RefCountedPtr other )
+static bool is( const RefCounted *self, const RefCounted *other )
 {
 	return self==other;
 }
