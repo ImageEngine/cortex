@@ -110,6 +110,46 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertEqual( hash( p1 ), hash( c["p1"] ) )
 		self.assertEqual( hash( p2 ), hash( c["p2"] ) )
 		self.assertNotEqual( hash( c["p1"] ), hash( c["p2"] ) )
+	
+	def testUseAsKey( self ) :
+	
+		p1 = IECore.ObjectParameter( "p1", "", IECore.IntData(), IECore.IntData.staticTypeId() )
+		p2 = IECore.ObjectParameter( "p2", "", IECore.IntData(), IECore.IntData.staticTypeId() )
+
+		c = IECore.CompoundParameter( "c" )
+		c.addParameter( p1 )
+		c.addParameter( p2 )
+		
+		d = {}
+		d[p1] = "p1"
+		
+		self.assertTrue( p1 in d )
+		self.assertFalse( p2 in d )
+		self.assertEqual( d[p1], "p1" )
+		
+		self.assertTrue( c["p1"] in d )
+		self.assertFalse( c["p2"] in d )
+		self.assertEqual( d[c["p1"]], "p1" )
+		
+		d[p2] = "p2"
+
+		self.assertTrue( p1 in d )
+		self.assertTrue( p2 in d )
+		self.assertTrue( c["p1"] in d )
+		self.assertTrue( c["p2"] in d )
+
+		self.assertEqual( d[p1], "p1" )
+		self.assertEqual( d[p2], "p2" )
+		self.assertEqual( d[c["p1"]], "p1" )
+		self.assertEqual( d[c["p2"]], "p2" )
+
+		del d[c["p1"]]
+		self.assertFalse( p1 in d )
+		self.assertFalse( c["p1"] in d )
+		self.assertTrue( p2 in d )
+		self.assertTrue( c["p2"] in d )
+		self.assertEqual( d[p2], "p2" )
+		self.assertEqual( d[c["p2"]], "p2" )
 
 if __name__ == "__main__":
     unittest.main()
