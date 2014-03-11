@@ -94,7 +94,7 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertNotEqual( p1, c["p2"] )
 		self.assertNotEqual( p1, c["p2"] )
 	
-	def testEqualityAfterRetrievalFromCPP( self ) :
+	def testHashAfterRetrievalFromCPP( self ) :
 
 		p1 = IECore.ObjectParameter( "p1", "", IECore.IntData(), IECore.IntData.staticTypeId() )
 		p2 = IECore.ObjectParameter( "p2", "", IECore.IntData(), IECore.IntData.staticTypeId() )

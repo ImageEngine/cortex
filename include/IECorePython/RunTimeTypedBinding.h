@@ -47,7 +47,7 @@ namespace IECorePython
 void bindRunTimeTyped();
 
 /// A class for wrapping RunTimeTyped objects to allow overriding
-/// in Python. It automatically forwards all RunTimeTypes virtual
+/// in Python. It automatically forwards all RunTimeTyped virtual
 /// functions to Python overrides if they exist.
 template<typename T>
 class RunTimeTypedWrapper : public RefCountedWrapper<T>

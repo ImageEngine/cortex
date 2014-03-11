@@ -56,6 +56,8 @@ class WrapperGarbageCollector
 
 	public :
 
+		/// \deprecated
+		/// \todo Remove for major version 9.
 		WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object );
 		virtual ~WrapperGarbageCollector();
 
