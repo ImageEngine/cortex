@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -46,14 +46,37 @@ using namespace IECore;
 namespace IECorePython
 {
 
-static bool is(RefCountedPtr self,RefCountedPtr other )
+static bool equal( const RefCounted *self, object other )
+{
+	extract<const RefCounted *> e( other );
+	if( !e.check() )
+	{
+		return false;
+	}
+	return self == e();
+}
+
+static bool notEqual( const RefCounted *self, object other )
+{
+	return !equal( self, other );
+}
+
+static bool is( const RefCounted *self, const RefCounted *other )
 {
 	return self==other;
+}
+
+static long hash( const RefCounted *self )
+{
+	return reinterpret_cast<long>( self ) / sizeof( RefCounted );
 }
 
 void bindRefCounted()
 {
 	class_<RefCounted, boost::noncopyable, RefCountedPtr>( "RefCounted", "A simple class to count references." )
+		.def( "__eq__", equal )
+		.def( "__ne__", notEqual )
+		.def( "__hash__", hash )
 		.def( "isSame", &is )
 		.def( "numWrappedInstances", &WrapperGarbageCollector::numWrappedInstances ).staticmethod( "numWrappedInstances" )
 		.add_static_property( "garbageCollectionThreshold", &WrapperGarbageCollector::getCollectThreshold, &WrapperGarbageCollector::setCollectThreshold )

@@ -55,6 +55,31 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::Re
 	g_refCountedToPyObject[object] = pyObject;
 }
 
+WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
+	:	m_pyObject( NULL ), m_object( NULL )
+{
+	assert( self );
+	assert( wrapped );
+	assert( wrappedType );
+	
+	if( self->ob_type != wrappedType )
+	{
+		// we're dealing with a python subclass.
+		
+		m_pyObject = self;
+
+		g_allocCount++;
+
+		if( g_allocCount >= g_allocThreshold )
+		{
+			collect();
+		}
+
+		g_refCountedToPyObject[wrapped] = m_pyObject;
+		Py_INCREF( m_pyObject );
+	}
+}
+
 WrapperGarbageCollector::~WrapperGarbageCollector()
 {
 }
@@ -135,4 +160,47 @@ void WrapperGarbageCollector::setCollectThreshold( size_t t )
 size_t WrapperGarbageCollector::getCollectThreshold()
 {
 	return g_allocThreshold;
+}
+
+boost::python::object WrapperGarbageCollector::methodOverride( const char *name, PyTypeObject *wrappedType ) const
+{
+	if( !m_pyObject )
+	{
+		return boost::python::object();
+	}
+	
+	// lookup the method on the python instance. this may
+	// or may not be an override. a new reference is returned
+	// so we must use a handle to manage it.
+	boost::python::handle<> methodFromInstance(
+		boost::python::allow_null(
+			PyObject_GetAttrString(
+				m_pyObject,
+				const_cast<char*>( name )
+			)
+		)
+	);
+		
+	if( !methodFromInstance || !PyMethod_Check( methodFromInstance.get() ) )
+	{
+		// if the attribute lookup failed, an error will be set, and we
+		// need to clear it before returning.
+		PyErr_Clear();
+		return boost::python::object();
+	}
+	
+	// lookup the method defined by our type. a borrowed reference
+	// is returned so we don't need to use a handle to manage the
+	// reference count.
+	PyObject *methodFromType = PyDict_GetItemString(
+		wrappedType->tp_dict, const_cast<char*>( name )
+	);
+	
+	// if they're not the same then we have an override
+	if( methodFromType != ((PyMethodObject *)methodFromInstance.get())->im_func )
+	{
+		return boost::python::object( methodFromInstance );
+	}
+
+	return boost::python::object();
 }

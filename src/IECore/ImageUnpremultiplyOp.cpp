@@ -96,7 +96,6 @@ struct ImageUnpremultiplyOp::UnpremultFn
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type ValueType;
-		typedef typename Container::iterator Iterator;
 
 		ScaledDataConversion< ValueType, float > toFloat;
 		ScaledDataConversion< float, ValueType > fromFloat;

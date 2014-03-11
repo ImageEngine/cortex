@@ -75,9 +75,7 @@ def _dagMenu( menu, sceneShape ) :
 		)
 		
 	# Component mode
-	elif maya.cmds.selectMode( q=True, component=True ):
-		
-		if len( sceneShapes ) == 1:
+	elif fnScS[0].selectedComponentNames():
 		
 			maya.cmds.menuItem(
 			label = "Object",
@@ -90,67 +88,65 @@ def _dagMenu( menu, sceneShape ) :
 				radialPosition = "NW",
 				command = IECore.curry( __printComponents, sceneShapes[0] )
 			)
-			
-			# Check if any component is selected
-			if fnScS[0].selectedComponentNames():
-	
-				maya.cmds.menuItem(
-					label = "Print Selected Component Names",
-					radialPosition = "NE",
-					command = IECore.curry( __printSelectedComponents, sceneShapes[0] )
-				)
-			
-				maya.cmds.menuItem(
-					label = "Expand...",
-					radialPosition = "SE",
-					subMenu = True
-				)
 
-				maya.cmds.menuItem(
-					label = "Expand to Selected Components",
-					radialPosition = "S",
-					command = IECore.curry( __expandToSelected, sceneShapes[0] )
-				)
-				maya.cmds.setParent( "..", menu=True )
+			maya.cmds.menuItem(
+				label = "Print Selected Component Names",
+				radialPosition = "NE",
+				command = IECore.curry( __printSelectedComponents, sceneShapes[0] )
+			)
+		
+			maya.cmds.menuItem(
+				label = "Expand...",
+				radialPosition = "SE",
+				subMenu = True
+			)
 
-				maya.cmds.menuItem(
-					label = "Create Locator",
-					radialPosition = "SW",
-					subMenu = True,
-				)
-				
-				maya.cmds.menuItem(
-					label = "At Bound Min",
-					radialPosition = "N",
-					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min" ] ),
-				)
-				
-				maya.cmds.menuItem(
-					label = "At Bound Max",
-					radialPosition = "NE",
-					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Max" ] ),
-				)
-				
-				maya.cmds.menuItem(
-					label = "At Bound Min And Max",
-					radialPosition = "E",
-					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min", "Max" ] ),
-				)
-				
-				maya.cmds.menuItem(
-					label = "At Bound Centre",
-					radialPosition = "SE",
-					command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Center" ] ),
-				)
-				
-				maya.cmds.menuItem(
-					label = "At Transform Origin",
-					radialPosition = "S",
-					command = IECore.curry( __createLocatorWithTransform, sceneShapes[0] ),
-				)
+			maya.cmds.menuItem(
+				label = "Expand to Selected Components",
+				radialPosition = "S",
+				command = IECore.curry( __expandToSelected, sceneShapes[0] )
+			)
+			maya.cmds.setParent( "..", menu=True )
+
+			maya.cmds.menuItem(
+				label = "Create Locator",
+				radialPosition = "SW",
+				subMenu = True,
+			)
+			
+			maya.cmds.menuItem(
+				label = "At Bound Min",
+				radialPosition = "N",
+				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min" ] ),
+			)
+			
+			maya.cmds.menuItem(
+				label = "At Bound Max",
+				radialPosition = "NE",
+				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Max" ] ),
+			)
+			
+			maya.cmds.menuItem(
+				label = "At Bound Min And Max",
+				radialPosition = "E",
+				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min", "Max" ] ),
+			)
+			
+			maya.cmds.menuItem(
+				label = "At Bound Centre",
+				radialPosition = "SE",
+				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Center" ] ),
+			)
+			
+			maya.cmds.menuItem(
+				label = "At Transform Origin",
+				radialPosition = "S",
+				command = IECore.curry( __createLocatorWithTransform, sceneShapes[0] ),
+			)
+			maya.cmds.setParent( "..", menu=True )
 	
 	# Object mode
-	elif maya.cmds.selectMode( q=True, object=True ):
+	else:
 		
 		if len( sceneShapes ) == 1:
 			if maya.cmds.getAttr( sceneShapes[0]+".drawGeometry" ) or maya.cmds.getAttr( sceneShapes[0]+".drawChildBounds" ):
@@ -368,7 +364,7 @@ def __selectedSceneShapes() :
 def __componentCallback( sceneShape, *unused ) :
 
 	parent = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
-	maya.cmds.selectMode( component=True )
+	maya.cmds.selectType( ocm=True, alc=False, facet=True )
 	maya.cmds.hilite( parent )
 	
 ## Switches to object mode

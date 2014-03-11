@@ -218,7 +218,6 @@ bool boxIntersects(
 	const char middle = 2;
 
 	typedef typename BoxTraits<T>::BaseType Vec;
-	typedef typename VectorTraits<Vec>::BaseType Real;
 
 	Vec minB = BoxTraits<T>::min( box );
 	Vec maxB = BoxTraits<T>::max( box );

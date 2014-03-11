@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -225,17 +225,33 @@ PYTHON_LINK_FLAGS = pythonReg["moduleLinkFlags"]
 if PYTHON_LINK_FLAGS=="" :
 	PYTHON_LINK_FLAGS = "-L" + pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib -lpython" + pythonVersion 
 
+# get the installation locations right
+INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
+installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_MAJORMINORPATCH_VERSION", platform )
+basePrefix = os.path.join( installPrefix, "base" )
+if targetApp :
+	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
+
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
 dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
+dlPrefix = basePrefix
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
-	if dlReg["compiler"]==compiler and dlReg["compilerVersion"]==compilerVersion :
+	if dlReg["compiler"]==compiler :
 		RMAN_ROOT = dlReg["location"]
 		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
 	
 		# Add ribdepends location to path
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
+		
+		# We don't want to build the renderman procedurals when the compiler version doesn't match,
+		# as otherwise they end up overwriting the proper installs. We do install IECoreRI in this
+		# case however, since the libs are installed to compiler (or app) specific paths.
+		##\todo: install procedurals on a compiler specific path if we ever want to use them from
+		# multiple compilers.
+		if dlReg["compilerVersion"] != compilerVersion :
+			dlPrefix = "/tmp/unwantedRMan"
 except :
 	pass
 	
@@ -250,13 +266,6 @@ except :
 
 # ask for opengl support
 WITH_GL=1
-
-# get the installation locations right
-INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
-installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_MAJORMINORPATCH_VERSION", platform )
-basePrefix = os.path.join( installPrefix, "base" )
-if targetApp :
-	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
 
 # find maya if we're building for maya
 if targetApp=="maya" :
@@ -391,10 +400,12 @@ else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_PYTHONLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION-python$PYTHON_VERSION" )
-	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion )
+	INSTALL_PYTHON_DIR = os.path.join( basePrefix, "python", pythonVersion, compiler, compilerVersion )
+	# We use basePrefix for IECoreRI, but dlPrefix for the renderman procedurals. See the note in
+	# the dlReg section for an explanation.
 	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "$IECORE_NAME" )
-	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", "$IECORE_NAME" )
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( dlPrefix, "3delight", dlVersion, "procedurals", "$IECORE_NAME" )
+	INSTALL_RMANDISPLAY_NAME = os.path.join( dlPrefix, "3delight", dlVersion, "displayDrivers", "$IECORE_NAME" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )

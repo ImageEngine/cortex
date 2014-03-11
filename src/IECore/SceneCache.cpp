@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -1228,13 +1228,14 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					MurmurHash topologyHash;
 					primitive->topologyHash( topologyHash );
 					topologyHash.append( primitive->typeId() );
-					if ( !m_objectSamples.empty() && topologyHash != m_animatedObjectTopology.first )
-					{
-						m_animatedObjectTopology.second = true;
-					}
-					else
+					if ( m_objectSamples.empty() )
 					{
 						m_animatedObjectTopology = AnimatedHashTest( topologyHash, false );
+					}
+					
+					if ( topologyHash != m_animatedObjectTopology.first )
+					{
+						m_animatedObjectTopology.second = true;
 					}
 					
 					for ( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(); it != primitive->variables.end(); ++it )

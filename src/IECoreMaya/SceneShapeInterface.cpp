@@ -454,6 +454,7 @@ MStatus SceneShapeInterface::initialize()
 	genAttr.addNumericDataAccept( MFnNumericData::kBoolean );
 	genAttr.addNumericDataAccept( MFnNumericData::kInt );
 	genAttr.addNumericDataAccept( MFnNumericData::kFloat );
+	genAttr.addNumericDataAccept( MFnNumericData::kDouble );
 	genAttr.addDataAccept( MFnData::kString );
 	genAttr.setReadable( true );
 	genAttr.setWritable( false );
@@ -885,6 +886,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			MDataHandle currentElement = arrayHandle.outputValue();
 			
 			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
+			/// \todo Use a generic data converter that would be compatible with a generic attribute.
 			IECore::TypeId type = attrValue->typeId();
 			if( type == BoolDataTypeId )
 			{
@@ -895,6 +897,11 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			{
 				float value = static_cast< const FloatData * >(attrValue.get())->readable();
 				currentElement.setGenericFloat( value, true);
+			}
+			else if( type == DoubleDataTypeId )
+			{
+				float value = static_cast< const DoubleData * >(attrValue.get())->readable();
+				currentElement.setGenericDouble( value, true);
 			}
 			else if( type == IntDataTypeId )
 			{
