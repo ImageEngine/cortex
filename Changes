@@ -1,3 +1,30 @@
+# 8.2.0
+
+#### IECore
+
+- Fixed potential platform independence problem when writing unsigned ints in StreamIndexedIO.
+- Optimised StreamIndexedIO memory usage. Reductions range between 20% and 70% for a selection of production assets.
+- Fixed an off-by-one error in DeepImageConverter.
+
+#### IECorePython
+
+- Introduced an improved wrapping mechanism with reduced overhead for non-subclassed instances. Deprecated existing wrapping mechanism.
+- Added RefCounted equality, inequality and __hash__ bindings based on the address of the underlying C++ object. Previously these methods were implemented with respect to the address of the python object, but several python objects could refer to the same C++ object.
+
+#### IECoreHoudini
+
+- Fixed problems initialising defaultObjectPoolCache during plugin load.
+- Fixed bug in HoudiniScene with flat geo but no / prefix.
+
+#### IECoreMaya
+
+- Switching to component mode on scene shapes now behaves the same as procedural holders.
+- The create locator functions in FnSceneShape now return the locators they created.
+
+#### Build
+
+- Fixed compilation errors on Linux Mint 16.
+
 # 8.1.0
 
 #### IECore

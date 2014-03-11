@@ -51,7 +51,7 @@ EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
 ieCoreMajorVersion=8
-ieCoreMinorVersion=1
+ieCoreMinorVersion=2
 ieCorePatchVersion=0
 ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
