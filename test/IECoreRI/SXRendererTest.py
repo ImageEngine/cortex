@@ -867,7 +867,25 @@ class SXRendererTest( unittest.TestCase ) :
 
 			for t in threads :
 				t.join()
-						
+		
+	def testUserOptions( self ):
+		
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxUserOptionTest.sdl test/IECoreRI/shaders/sxUserOptionTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) ) )	
+		
+		r = IECoreRI.SXRenderer()
+		r.shader( "surface", "test/IECoreRI/shaders/sxUserOptionTest.sdl", {} )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0,0,0 ) )
+		
+		r.setOption( "user:outputColor", IECore.FloatData( 1 ) )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 1,1,1 ) )
+		
+					
 	def tearDown( self ) :
 				
 		files = [
