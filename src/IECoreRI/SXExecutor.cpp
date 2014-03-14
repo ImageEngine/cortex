@@ -83,9 +83,11 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 
 			bool haveGrid = gridSize.x > 0 && gridSize.y > 0;
+			int numGrids = 0;
 			if( haveGrid )
 			{
-				if( numPoints != (size_t)(gridSize.x * gridSize.y) )
+				numGrids = numPoints / (size_t)(gridSize.x * gridSize.y);
+				if( numPoints != (size_t)( numGrids * gridSize.x * gridSize.y) )
 				{
 					throw Exception( boost::str( boost::format( "Wrong number of points (%d) for grid (%dx%d)." ) % numPoints % gridSize.x % gridSize.y ) );
 				}
@@ -94,13 +96,16 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			// create parameter list for the grid and set topology if we can.
 
 			boost::shared_ptr<void> vars( SxCreateParameterList( m_context, numPoints, "current" ), SxDestroyParameterList );
-
+			
+			std::vector<unsigned> nu;
+			std::vector<unsigned> nv;
 			if( haveGrid )
 			{
-				unsigned nu = gridSize.x; unsigned nv = gridSize.y;
-				SxSetParameterListGridTopology( vars.get(), 1, &nu, &nv );
+				nu.resize( numGrids, gridSize.x );
+				nv.resize( numGrids, gridSize.y );
+				SxSetParameterListGridTopology( vars.get(), numGrids, &nu.front(), &nv.front() );
 			}
-
+			
 			// fill the grid from our input data.
 
 			setVariables( vars.get(), points, numPoints );

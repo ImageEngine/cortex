@@ -406,6 +406,22 @@ class SXRendererTest( unittest.TestCase ) :
 			del s["N"] # test data on disk was created before we supported N as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
 
+	def testMultipleGrids( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxGridTest.sdl test/IECoreRI/shaders/sxGridTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 19, 9 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+				
+			r.shader( "surface", "test/IECoreRI/shaders/sxGridTest", {} )
+		
+			# there are 20 x 10 points in the input, so this call should shade four 10 x 5 grids:
+			r.shade( points, IECore.V2i( 10, 5 ) )
+
+
 	def testPlaneShade( self ) :
 		
 		r = IECoreRI.SXRenderer()
