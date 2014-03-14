@@ -63,7 +63,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 			for( ShaderVector::const_iterator it=coshaders.begin(); it!=coshaders.end(); ++it )
 			{
-				storeParameterInfo( *it );
+				storeParameterInfo( *it, false );
 			}
 			for( ShaderVector::const_iterator it=lights.begin(); it!=lights.end(); ++it )
 			{
@@ -157,7 +157,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			bool varying;
 		};
 		
-		void storeParameterInfo( SxShader shader )
+		void storeParameterInfo( SxShader shader, bool printWarnings = true )
 		{
 			unsigned numParameters = SxGetNumParameters( shader );
 			for( unsigned i=0; i<numParameters; i++ )
@@ -172,7 +172,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				TypeMap::const_iterator it = typeMap.find( name );
 				if( it != typeMap.end() )
 				{
-					if( it->second != info  )
+					if( it->second != info && printWarnings )
 					{
 						msg( Msg::Warning, "SXExecutor::storeParameterTypes", boost::format( "Shaders request conflicting types for parameter \"%s\"" ) % name );
 					}
