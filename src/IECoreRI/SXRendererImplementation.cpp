@@ -152,7 +152,23 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", "User options not yet supported" );
+		switch( value->typeId() )
+		{
+			case IntDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxInt, (void *)&(static_cast<const IntData *>( value.get() )->readable() ) );
+				break;
+			case FloatDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxFloat, (void *)&(static_cast<const FloatData *>( value.get() )->readable() ) );
+				break;
+			case StringDataTypeId :
+				{
+					const char *s = static_cast<const StringData *>( value.get() )->readable().c_str();
+					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &s );
+					break;	
+				}
+			default :
+				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
+		}
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
