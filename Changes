@@ -1,3 +1,15 @@
+# 8.3.0
+
+#### IECore
+
+- Refactored StandardRadialLensModel to match 3dequalizer
+
+#### IECoreRI
+
+- Added support for user options in SXRenderer
+- Added support for multiple repeated shading grids in SXRenderer
+- Removed conflicting parameter type warning for coshaders
+
 # 8.2.0
 
 #### IECore
