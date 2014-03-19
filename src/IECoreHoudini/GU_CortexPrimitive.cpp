@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -59,6 +59,11 @@ GU_CortexPrimitive::GU_CortexPrimitive( GU_Detail *gdp, GA_Offset offset )
 {
 }
 
+GU_CortexPrimitive::GU_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src )
+	: GEO_CortexPrimitive( map, detail, offset, src )
+{
+}
+
 GU_CortexPrimitive::~GU_CortexPrimitive()
 {
 }
@@ -78,6 +83,11 @@ GA_Primitive *GU_CortexPrimitive::create( GA_Detail &detail, GA_Offset offset )
 }
 
 #endif
+
+GA_Primitive *GU_CortexPrimitive::create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src )
+{
+	return new GU_CortexPrimitive( map, detail, offset, src );
+}
 
 GU_CortexPrimitive *GU_CortexPrimitive::build( GU_Detail *geo, const IECore::Object *object )
 {
