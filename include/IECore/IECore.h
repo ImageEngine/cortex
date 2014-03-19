@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ bool withJPEG();
 bool withFreeType();
 /// Returns true if IECore was built with PNG suppport
 bool withPNG();
+/// Returns true if IECore was built with Deep EXR support
+bool withDeepEXR();
 
 }
 

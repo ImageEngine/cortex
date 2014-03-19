@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,108 +32,31 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
+#include <boost/python.hpp>
+#include "boost/python/make_constructor.hpp"
 
-#include "boost/format.hpp"
+#include "IECore/EXRDeepImageReader.h"
+#include "IECorePython/EXRDeepImageReaderBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/Wrapper.h"
 
-namespace IECore
+using namespace boost;
+using namespace boost::python;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECore;
+
+namespace IECorePython
 {
 
-int majorVersion()
+void bindEXRDeepImageReader()
 {
-	return IE_CORE_MAJORVERSION;
+	RunTimeTypedClass<EXRDeepImageReader>()
+		.def( init<>() )
+		.def( init<const std::string &>() )
+		.def( "canRead", &EXRDeepImageReader::canRead ).staticmethod( "canRead" )
+	;
 }
 
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
+} // namespace IECorePython
 
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
-bool withASIO()
-{
-#ifdef IECORE_WITH_ASIO
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withSignals()
-{
-#ifdef IECORE_WITH_SIGNALS
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withBoostFactorial()
-{
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withFreeType()
-{
-#ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withPNG()
-{
-#ifdef IECORE_WITH_PNG
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withDeepEXR()
-{
-#ifdef IECORE_WITH_DEEPEXR
-	return true;
-#else
-	return false;
-#endif
-}
-
-}

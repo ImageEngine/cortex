@@ -260,7 +260,11 @@ const char *DeepImageReader::supportedExtensions()
 	// as we are inside a static initializer.
 	// We have also omitted the IECoreDL dtex reader here as nuke
 	// already supports it out of the box.
+#ifdef IECORE_WITH_DEEPEXR
+	return "shw\0dsm\0rat\0dexr\0";
+#else
 	return "shw\0dsm\0rat\0";
+#endif
 }
 
 const DD::Image::DeepReader::Description DeepImageReader::g_description( supportedExtensions(), "cortex", build, buildformat );

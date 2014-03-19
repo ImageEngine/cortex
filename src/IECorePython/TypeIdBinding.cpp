@@ -439,6 +439,8 @@ void bindTypeId()
 		.value( "StandardRadialLensModel", StandardRadialLensModelTypeId )
 		.value( "LensDistortOp", LensDistortOpTypeId )
 		.value( "TransferSmoothSkinningWeightsOp", TransferSmoothSkinningWeightsOpTypeId )
+		.value( "EXRDeepImageReader", EXRDeepImageReaderTypeId )
+		.value( "EXRDeepImageWriter", EXRDeepImageWriterTypeId )
 	;
 }
 

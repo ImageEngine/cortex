@@ -1459,6 +1459,13 @@ if doConfigure :
 		corePythonSources.remove( "src/IECorePython/EnvMapSHProjectorBinding.cpp" )
 		corePythonSources.remove( "src/IECorePython/ImageConvolveOpBinding.cpp" )
 	
+	if c.CheckHeader( "OpenEXR/ImfDeepFrameBuffer.h", "\"\"", "C++" ) :
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_DEEPEXR' )
+	else :
+		coreSources.remove( "src/IECore/EXRDeepImageReader.cpp" )
+		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
+	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )

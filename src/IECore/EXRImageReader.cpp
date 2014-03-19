@@ -57,6 +57,7 @@
 #include "OpenEXR/ImfMatrixAttribute.h"
 #include "OpenEXR/ImfStringAttribute.h"
 #include "OpenEXR/ImfTimeCodeAttribute.h"
+#include "OpenEXR/ImfPartType.h"
 
 #include <algorithm>
 #include <fstream>
@@ -95,13 +96,27 @@ bool EXRImageReader::canRead( const string &fileName )
 {
 	if( isOpenExrFile( fileName.c_str() ) )
 	{
+
 		Imf::InputFile *inputFile( NULL );
+		inputFile = new Imf::InputFile( fileName.c_str() );
+
 		try
 		{
-			inputFile = new Imf::InputFile( fileName.c_str() );
-
+			
 			// This will throw an exception if the image is deep and the EXR version is < 2.0.
 			Imf::Header header( inputFile->header() );
+
+#ifdef IECORE_WITH_DEEPEXR
+
+			if ( header.hasType() )
+			{
+				if ( header.type() != TILEDIMAGE && header.type() != "" )
+				{
+					throw IOException( "EXR is not a flat image." );
+				}
+			}
+
+#endif
 
 		}
 		catch( ... )
@@ -113,7 +128,6 @@ bool EXRImageReader::canRead( const string &fileName )
 
 		return true;
 	}
-
 	return false;
 }
 
@@ -155,7 +169,7 @@ std::string EXRImageReader::sourceColorSpace() const
 	return "linear";
 }
 
-template<class T>
+	template<class T>
 DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel )
 {
 	assert( channel );

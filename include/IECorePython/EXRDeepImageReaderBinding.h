@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2008, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,108 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/IECore.h"
+#ifndef IECOREPYTHON_EXRDEEPIMAGEREADER_BINDING
+#define IECOREPYTHON_EXRDEEPIMAGEREADER_BINDING
 
-#include "boost/format.hpp"
-
-namespace IECore
-{
-
-int majorVersion()
-{
-	return IE_CORE_MAJORVERSION;
-}
-
-int minorVersion()
-{
-	return IE_CORE_MINORVERSION;
-}
-
-int patchVersion()
-{
-	return IE_CORE_PATCHVERSION;
-}
-
-const std::string &versionString()
-{
-	static std::string v;
-	if( !v.size() )
-	{
-		v = boost::str( boost::format( "%d.%d.%d" ) % majorVersion() % minorVersion() % patchVersion() );
-	}
-	return v;
-}
-
-bool withASIO()
-{
-#ifdef IECORE_WITH_ASIO
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withSignals()
-{
-#ifdef IECORE_WITH_SIGNALS
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withBoostFactorial()
-{
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withFreeType()
-{
-#ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withPNG()
-{
-#ifdef IECORE_WITH_PNG
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withDeepEXR()
+namespace IECorePython
 {
 #ifdef IECORE_WITH_DEEPEXR
-	return true;
-#else
-	return false;
+	void bindEXRDeepImageReader();
 #endif
 }
 
-}
+#endif // IECOREPYTHON_EXRDEEPIMAGEREADER_BINDING
+

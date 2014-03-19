@@ -322,6 +322,7 @@
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
+#include "IECorePython/EXRDeepImageReaderBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -646,6 +647,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindStandardRadialLensModel();
 	bindLensDistortOp();
 	bindObjectPool();
+	
+#ifdef IECORE_WITH_DEEPEXR
+
+	bindEXRDeepImageReader();
+
+#endif
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
@@ -655,6 +662,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withSignals", &IECore::withSignals );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
+	def( "withDeepEXR", &IECore::withDeepEXR );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "withPNG", &IECore::withPNG );
 	def( "initThreads", &PyEval_InitThreads );
