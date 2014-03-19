@@ -136,7 +136,9 @@ bool DeepImageReader::doDeepEngine( DD::Image::Box box, const DD::Image::Channel
 			{	
 				continue;
 			}
-		
+
+			bool hasDeepBack = m_channels.contains( DD::Image::Chan_DeepBack );
+
 			DD::Image::DeepOutPixel dop;
 			float previousBack = pixel->getDepth( 0 );
 			for( unsigned int i = 0; i < nSamples; ++i )
@@ -148,12 +150,26 @@ bool DeepImageReader::doDeepEngine( DD::Image::Box box, const DD::Image::Channel
 				{
 					if( z == DD::Image::Chan_DeepFront )
 					{
-						dop.push_back( previousBack );
-						previousBack = depth;
+						if( !hasDeepBack )
+						{
+							dop.push_back( previousBack );
+							previousBack = depth;
+						}
+						else
+						{
+							dop.push_back( depth );
+						}
 					}
 					else if( z == DD::Image::Chan_DeepBack )
 					{
-						dop.push_back( depth );
+						if( !hasDeepBack )
+						{
+							dop.push_back( depth );
+						}
+						else
+						{
+							dop.push_back( data[ m_channelMap[DD::Image::Chan_DeepBack] ] );
+						}
 					}
 					else
 					{
@@ -218,6 +234,11 @@ bool DeepImageReader::loadFileFromPath( const std::string &filePath, std::string
 				{
 					m_channels += DD::Image::Chan_Blue;
 					m_channelMap[DD::Image::Chan_Blue] = idx; 
+				}
+				else if( *it == "ZBack" )
+				{
+					m_channels += DD::Image::Chan_DeepBack;
+					m_channelMap[DD::Image::Chan_DeepBack] = idx; 
 				}
 			}
 			
