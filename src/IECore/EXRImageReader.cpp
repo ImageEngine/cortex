@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -93,7 +93,28 @@ EXRImageReader::~EXRImageReader()
 
 bool EXRImageReader::canRead( const string &fileName )
 {
-	return isOpenExrFile( fileName.c_str() );
+	if( isOpenExrFile( fileName.c_str() ) )
+	{
+		Imf::InputFile *inputFile( NULL );
+		try
+		{
+			inputFile = new Imf::InputFile( fileName.c_str() );
+
+			// This will throw an exception if the image is deep and the EXR version is < 2.0.
+			Imf::Header header( inputFile->header() );
+
+		}
+		catch( ... )
+		{
+			delete inputFile;
+			return false;
+		}
+		delete inputFile;
+
+		return true;
+	}
+
+	return false;
 }
 
 void EXRImageReader::channelNames( vector<string> &names )
