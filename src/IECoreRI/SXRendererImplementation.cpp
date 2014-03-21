@@ -34,6 +34,7 @@
 
 #include "IECoreRI/private/SXRendererImplementation.h"
 #include "IECoreRI/SXExecutor.h"
+#include "IECoreRI/Convert.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Shader.h"
@@ -227,17 +228,30 @@ void IECoreRI::SXRendererImplementation::worldEnd()
 
 void IECoreRI::SXRendererImplementation::transformBegin()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::transformBegin", "Not implemented" );
+	Imath::M44f worldTransform = m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
+	
+	// New push state onto the stack: deep copy flag is false, so we don't create a new SxContext, which will swallow up any
+	// coordinate systems declared before transformEnd():
+	m_stateStack.push( State( m_stateStack.top(), false ) );
+	
+	m_stateStack.top().parentWorldTransform = worldTransform;
+	m_stateStack.top().localTransform.makeIdentity();
 }
 
 void IECoreRI::SXRendererImplementation::transformEnd()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::transformEnd", "Not implemented" );
+	unsigned minimumStack = m_inWorld ? 2 : 1;
+	if( m_stateStack.size() <= minimumStack )
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreRI::SXRenderer::transformEnd", "No matching transformBegin." );
+		return;
+	}
+	m_stateStack.pop();
 }
 
 void IECoreRI::SXRendererImplementation::setTransform( const Imath::M44f &m )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setTransform", "Not implemented" );
+	m_stateStack.top().localTransform = m;
 }
 
 void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordinateSystem )
@@ -247,7 +261,7 @@ void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordi
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform() const
 {
-	return getTransform( "object" );
+	return m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
 }
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string &coordinateSystem ) const
@@ -258,12 +272,15 @@ Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string 
 
 void IECoreRI::SXRendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::concatTransform", "Not implemented" );
+	m_stateStack.top().localTransform = m * m_stateStack.top().localTransform;
 }
 
 void IECoreRI::SXRendererImplementation::coordinateSystem( const std::string &name )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::coordinateSystem", "Not implemented" );
+	Imath::M44f worldTransform = m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
+	RtMatrix mm;
+	convert( worldTransform.transposed(), mm );
+	SxDefineSpace ( m_stateStack.top().context.get(), name.c_str(), (RtFloat*)&mm[0][0] );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
