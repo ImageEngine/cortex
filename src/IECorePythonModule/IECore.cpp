@@ -323,6 +323,7 @@
 #include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/EXRDeepImageReaderBinding.h"
+#include "IECorePython/EXRDeepImageWriterBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -651,6 +652,7 @@ BOOST_PYTHON_MODULE(_IECore)
 #ifdef IECORE_WITH_DEEPEXR
 
 	bindEXRDeepImageReader();
+	bindEXRDeepImageWriter();
 
 #endif
 

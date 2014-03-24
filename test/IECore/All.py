@@ -273,6 +273,7 @@ from RefCountedTest import RefCountedTest
 
 if IECore.withDeepEXR() :
 	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
+	from EXRDeepImageWriterTest import EXRDeepImageWriterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

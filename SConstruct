@@ -1465,6 +1465,8 @@ if doConfigure :
 	else :
 		coreSources.remove( "src/IECore/EXRDeepImageReader.cpp" )
 		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
+		coreSources.remove( "src/IECore/EXRDeepImageWriter.cpp" )
+		corePythonSources.remove( "src/IECorePython/EXRDeepImageWriterBinding.cpp" )
 	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
 		for e in allCoreEnvs :

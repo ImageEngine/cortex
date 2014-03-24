@@ -128,6 +128,7 @@ bool EXRImageReader::canRead( const string &fileName )
 
 		return true;
 	}
+
 	return false;
 }
 
@@ -169,7 +170,7 @@ std::string EXRImageReader::sourceColorSpace() const
 	return "linear";
 }
 
-	template<class T>
+template<class T>
 DataPtr EXRImageReader::readTypedChannel( const std::string &name, const Imath::Box2i &dataWindow, const Imf::Channel *channel )
 {
 	assert( channel );
