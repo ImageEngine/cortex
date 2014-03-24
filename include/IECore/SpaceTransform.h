@@ -60,11 +60,11 @@ struct SpaceTransform : public std::unary_function<F, T>
 		return transform( f );
 	}
 
-	InverseType inverse() const
-	{
-		/// Function is not invertible
-		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-	}
+//	InverseType inverse() const
+//	{
+//		/// Function is not invertible
+//		BOOST_STATIC_ASSERT( sizeof(T) == 0 );
+//	}
 
 	virtual T transform( const F &f ) = 0;
 
