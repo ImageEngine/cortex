@@ -40,6 +40,10 @@
 namespace IECorePython
 {
 
+//////////////////////////////////////////////////////////////////////////
+// IntrusivePtr To/From Python
+//////////////////////////////////////////////////////////////////////////
+
 template<typename T>
 IntrusivePtrToPython<T>::IntrusivePtrToPython()
 {
@@ -110,6 +114,62 @@ void IntrusivePtrFromPython<T>::construct( PyObject *source, boost::python::conv
 	}
 	data->convertible = storage;
 }
+
+//////////////////////////////////////////////////////////////////////////
+// RefCountedWrapper
+//////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *self )
+	:	T(), WrapperGarbageCollector( self, this, pyType() )
+{
+}
+
+template<typename T>
+template<typename Arg1>
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1 )
+	:	T( arg1 ), WrapperGarbageCollector( self, this, pyType() )
+{
+}
+
+template<typename T>
+template<typename Arg1, typename Arg2>
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
+	:	T( arg1, arg2 ), WrapperGarbageCollector( self, this, pyType() )
+{
+}
+
+template<typename T>
+template<typename Arg1, typename Arg2, typename Arg3>
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
+	:	T( arg1, arg2, arg3 ), WrapperGarbageCollector( self, this, pyType() )
+{
+}
+
+template<typename T>
+RefCountedWrapper<T>::~RefCountedWrapper()
+{
+}
+		
+/// You must hold the GIL before calling this method, and should
+/// first have used isSubclassed() to check that it is worth trying.
+template<typename T>
+boost::python::object RefCountedWrapper<T>::methodOverride( const char *name ) const
+{
+	return WrapperGarbageCollector::methodOverride( name, pyType() );
+}
+
+template<typename T>
+PyTypeObject *RefCountedWrapper<T>::pyType()
+{
+	boost::python::converter::registration const &r
+		= boost::python::converter::registered<T>::converters;
+	return r.get_class_object();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// RefCountedClass
+//////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename Base, typename Ptr>
 RefCountedClass<T, Base, Ptr>::RefCountedClass( const char *className, const char *docString )
