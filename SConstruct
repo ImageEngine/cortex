@@ -2169,6 +2169,10 @@ nukeEnvAppends = {
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 	
+	"LINKFLAGS" : [
+		"-Wl,-rpath-link=$NUKE_ROOT",
+	],
+
 	"LIBPATH" : [
 		"$NUKE_ROOT",
 	],
