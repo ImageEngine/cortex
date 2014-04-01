@@ -111,7 +111,8 @@ SceneCacheReader::SceneCacheReader( Node *node )
 		m_tagFilterKnob( NULL ),
 		m_sceneFilterKnob( NULL ),
 		m_rootKnob( NULL ),
-		m_scriptLoaded( false )
+		m_scriptFinishedLoading( false ),
+		m_isFirstRun( true )
 {
 	m_baseParentMatrix.makeIdentity();
 }
@@ -123,16 +124,25 @@ SceneCacheReader::~SceneCacheReader()
 void SceneCacheReader::_validate( bool forReal )
 {
 	m_evaluatedFilePath	= filePath();
-
-	if( !m_scriptLoaded )
+	
+	if( m_scriptFinishedLoading )
 	{
-		knob("loadAll")->set_value( true );
-		m_scriptLoaded = true;
-		loadAllFromKnobs();
-	}
+		if( m_isFirstRun )
+		{
+			Knob *k = knob("loadAll");
+			if( k != NULL )
+			{
+				k->set_value( true );
+			}
 
-	filterScene( m_filterText, m_filterTagText );
-	rebuildSelection();
+			m_isFirstRun = false;
+			m_scriptFinishedLoading = true;
+			loadAllFromKnobs();
+		}
+
+		filterScene( m_filterText, m_filterTagText );
+		rebuildSelection();
+	}
 
 	SourceGeo::_validate( forReal );
 }
@@ -154,7 +164,7 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	);
 	
 	int p = 0;
-	const char* tagNames[4] = { "None", 0 };
+	const char* tagNames[2] = { "None", 0 };
 	m_tagFilterKnob = Enumeration_knob( f, &p, tagNames, "filterByTag", "Filter Tag" );
 	SetFlags( f, DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
 	Tooltip( f,
@@ -322,12 +332,9 @@ int SceneCacheReader::knob_changed(Knob* k)
 		// structures.
 		else if( knob("loadAll") == k )
 		{
-			return 1;
-			if( !m_scriptLoaded )
+			if( !m_scriptFinishedLoading )
 			{
-				knob("loadAll")->set_value( true );
-				m_scriptLoaded = true;
-				loadAllFromKnobs();
+				m_scriptFinishedLoading = true;
 			}
 				
 			return 1;
@@ -339,7 +346,7 @@ int SceneCacheReader::knob_changed(Knob* k)
 
 void SceneCacheReader::loadAllFromKnobs()
 {
-	if( !m_scriptLoaded )
+	if( !m_scriptFinishedLoading )
 	{
 		throw IECore::Exception( "SceneCacheReader: Cannot load item as the script hasn't finished loading." );
 	}
@@ -350,7 +357,8 @@ void SceneCacheReader::loadAllFromKnobs()
 
 	std::vector<unsigned int> selectionIndices;
 	sceneView->getSelectedItems( selectionIndices );
-	
+
+
 	std::vector<unsigned int> filterIndices;
 	sceneView->getImportedItems( filterIndices );
 
@@ -396,7 +404,15 @@ void SceneCacheReader::loadAllFromKnobs()
 
 void SceneCacheReader::rebuildSelection()
 {
-	if( !m_scriptLoaded ) return;
+	if( !m_scriptFinishedLoading )
+	{
+		return;
+	}
+
+	if( m_isFirstRun )
+	{
+		validate( false );
+	}
 
 	// We require an up-to-date scene so rebuild it if necessary.
 	rebuildSceneView();
@@ -461,7 +477,15 @@ void SceneCacheReader::rebuildSceneView()
 {
 	m_evaluatedFilePath	= filePath();
 
-	if( !m_scriptLoaded ) return;
+	if( !m_scriptFinishedLoading )
+	{
+		return;
+	}
+
+	if( m_isFirstRun )
+	{
+		validate( false );
+	}
 	
 	Hash newSceneHash( sceneHash() );
 	
@@ -530,7 +554,15 @@ const std::string &SceneCacheReader::itemName( int index ) const
 // There LUTs are the m_itemToFiltered and m_filteredToItem maps.
 void SceneCacheReader::filterScene( const std::string &filterText, const std::string &filterTag )
 {
-	if( !m_scriptLoaded ) return;
+	if( !m_scriptFinishedLoading )
+	{
+		return;
+	}
+
+	if( m_isFirstRun )
+	{
+		validate( false );
+	}
 
 	Hash newFilterHash( sceneHash() );
 	newFilterHash.append( filterText );
