@@ -1,3 +1,23 @@
+# 8.4.0
+
+#### IECore
+
+- Fixed a bug where the EXRImageReader would interpret Deep EXRs as valid.
+- Added IECore::EXRDeepImageReader (only when building with OpenEXR 2)
+- Added IECore::EXRDeepImageWriter (only when building with OpenEXR 2)
+
+#### IECoreRI
+
+- Added support for coordinate systems and a world transform in SXRenderer
+
+#### IECoreHoudini
+
+- Fixed crash when merging CortexPrimitives in Houdini 13.
+
+#### IECoreNuke
+
+- Fixed linking of IECoreNuke for Nuke 8.
+
 # 8.3.0
 
 #### IECore
