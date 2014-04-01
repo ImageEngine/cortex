@@ -436,6 +436,8 @@ enum TypeId
 	StandardRadialLensModelTypeId = 388,
 	LensDistortOpTypeId = 389,
 	TransferSmoothSkinningWeightsOpTypeId = 390,
+	EXRDeepImageReaderTypeId = 391,
+	EXRDeepImageWriterTypeId = 392,
 	
 	// Remember to update TypeIdBinding.cpp !!!
 

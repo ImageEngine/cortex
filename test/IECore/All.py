@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -270,6 +270,10 @@ from StandardRadialLensModelTest import StandardRadialLensModelTest
 from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
+
+if IECore.withDeepEXR() :
+	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
+	from EXRDeepImageWriterTest import EXRDeepImageWriterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
