@@ -57,7 +57,12 @@
 #include "OpenEXR/ImfMatrixAttribute.h"
 #include "OpenEXR/ImfStringAttribute.h"
 #include "OpenEXR/ImfTimeCodeAttribute.h"
+
+#ifdef IECORE_WITH_DEEPEXR
+
 #include "OpenEXR/ImfPartType.h"
+
+#endif
 
 #include <algorithm>
 #include <fstream>
