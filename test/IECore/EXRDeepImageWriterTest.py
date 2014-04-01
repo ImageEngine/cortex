@@ -51,18 +51,6 @@ class EXRDeepImageWriterTest(unittest.TestCase):
 		self.failUnless( not EXRDeepImageWriter.canWrite( "" ) )
 		self.failUnless( EXRDeepImageWriter.canWrite( EXRDeepImageWriterTest.__output ) )
 	
-	def testDefaultWriter( self ) :
-		return
-		pass
-		writer = EXRDeepImageWriter()
-		self.assertEqual( writer.parameters()['fileName'].getTypedValue(), "" )
-		self.assertEqual( writer.parameters()['channelNames'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
-		self.assertEqual( writer.parameters()['halfPrecisionChannels'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
-		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), V2i( 2048, 1556 ) )
-		self.assertEqual( writer.parameters()['compression'].getTypedValue(), EXRDeepImageWriter.Compression.ZIPS )
-		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), M44f() )
-		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), M44f() )
-	
 	def testParameters( self ) :
 	
 		writer = EXRDeepImageWriter( EXRDeepImageWriterTest.__output )
