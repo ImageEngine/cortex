@@ -16,6 +16,7 @@
 
 #### IECoreNuke
 
+- Fixed a bug with IECoreNuke::SceneCacheReader that was causing hanging and crashing.
 - Fixed linking of IECoreNuke for Nuke 8.
 
 # 8.3.0
