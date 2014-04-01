@@ -43,6 +43,7 @@
 #include "OpenEXR/ImfChannelList.h"
 #include "OpenEXR/ImfTestFile.h"
 #include "OpenEXR/ImfDeepFrameBuffer.h"
+#include "OpenEXR/ImfPartType.h"
 
 #include "IECore/EXRDeepImageReader.h"
 #include "IECore/FileNameParameter.h"
@@ -92,7 +93,7 @@ bool EXRDeepImageReader::canRead( const std::string &fileName )
 
 		if ( inputFile->header().hasType() )
 		{
-			if ( inputFile->header().type() != "deepscanline" )
+			if ( inputFile->header().type() != Imf::DEEPSCANLINE )
 			{
 				throw IOException( "EXR is not a deep image." );
 			}

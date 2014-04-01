@@ -59,7 +59,7 @@ class EXRDeepImageWriterTest(unittest.TestCase):
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( writer.parameters()['halfPrecisionChannels'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), V2i( 2048, 1556 ) )
-		self.assertEqual( writer.parameters()['compression'].getTypedValue(), EXRDeepImageWriter.ZIPS )
+		self.assertEqual( writer.parameters()['compression'].getTypedValue(), EXRDeepImageWriter.Compression.ZIPS )
 		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), M44f() )
 		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), M44f() )
 	
@@ -70,7 +70,7 @@ class EXRDeepImageWriterTest(unittest.TestCase):
 		self.assertEqual( writer.parameters()['channelNames'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( writer.parameters()['halfPrecisionChannels'].getValue(), StringVectorData( [ "R", "G", "B", "A" ] ) )
 		self.assertEqual( writer.parameters()['resolution'].getTypedValue(), V2i( 2048, 1556 ) )
-		self.assertEqual( writer.parameters()['compression'].getTypedValue(), EXRDeepImageWriter.ZIPS )
+		self.assertEqual( writer.parameters()['compression'].getTypedValue(), EXRDeepImageWriter.Compression.ZIPS )
 		self.assertEqual( writer.parameters()['worldToCameraMatrix'].getTypedValue(), M44f() )
 		self.assertEqual( writer.parameters()['worldToNDCMatrix'].getTypedValue(), M44f() )
 	

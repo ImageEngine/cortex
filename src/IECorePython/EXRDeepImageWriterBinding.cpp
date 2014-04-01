@@ -47,13 +47,16 @@ namespace IECorePython
 
 void bindEXRDeepImageWriter()
 {
-	RunTimeTypedClass<EXRDeepImageWriter> bind;
-	bind.def( init<>() );
-	bind.def( init<const std::string &>() );
-	bind.def( "canWrite", &EXRDeepImageWriter::canWrite ).staticmethod( "canWrite" );
-	bind.attr( "NONE" ) = int( Imf::NO_COMPRESSION );
-	bind.attr( "RLE" ) = int( Imf::RLE_COMPRESSION );
-	bind.attr( "ZIPS" ) = int( Imf::ZIPS_COMPRESSION );
+	scope s = RunTimeTypedClass<EXRDeepImageWriter>()
+	.def( init<>() )
+	.def( init<const std::string &>() )
+	.def( "canWrite", &EXRDeepImageWriter::canWrite ).staticmethod( "canWrite" );
+
+	enum_<EXRDeepImageWriter::Compression>( "Compression" )
+		.value( "NONE", EXRDeepImageWriter::None )
+		.value( "RLE", EXRDeepImageWriter::RLE )
+		.value( "ZIPS", EXRDeepImageWriter::ZIPS )
+	;
 }
 
 } // namespace IECorePython

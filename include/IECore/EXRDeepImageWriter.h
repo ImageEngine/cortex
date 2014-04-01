@@ -61,6 +61,14 @@ class EXRDeepImageWriter : public DeepImageWriter
 		virtual ~EXRDeepImageWriter();
 
 		static bool canWrite( const std::string &filename );
+
+		/// The different modes of compression that are available.
+		enum Compression
+		{
+			None = Imf::NO_COMPRESSION,
+			RLE = Imf::RLE_COMPRESSION,
+			ZIPS = Imf::ZIPS_COMPRESSION
+		};
 	
 	protected :
 		
