@@ -103,12 +103,12 @@ bool EXRImageReader::canRead( const string &fileName )
 	{
 
 		Imf::InputFile *inputFile( NULL );
-		inputFile = new Imf::InputFile( fileName.c_str() );
-
+		
 		try
 		{
 			
 			// This will throw an exception if the image is deep and the EXR version is < 2.0.
+			inputFile = new Imf::InputFile( fileName.c_str() );
 			Imf::Header header( inputFile->header() );
 
 #ifdef IECORE_WITH_DEEPEXR
