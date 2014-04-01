@@ -130,7 +130,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		void rebuildSelection();
 		/// Clear any selected geometry from the SceneView_knob.
 		void clearSceneViewSelection();
-		/// Clears the current filters applied to the scene..
+		/// Clears the current filters applied to the scene.
 		void clearSceneViewFilter();
 		//@}
 
@@ -186,7 +186,10 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Knob *m_rootKnob;
 
 		 // A flag which is set when all of the knobs have been loaded from the script.
-		bool m_scriptLoaded;
+		bool m_scriptFinishedLoading;
+
+		// A flag which is used to initialize the internal data structures the first time the node is run.
+		bool m_isFirstRun;
 		
 		/// The SceneView_knob holds a list of all leaf items in the scene. When filtering the SceneView we specify indices into
 		/// this list. When setting or querying the selected items in the SceneView_knob we need to use indices into the list of 
