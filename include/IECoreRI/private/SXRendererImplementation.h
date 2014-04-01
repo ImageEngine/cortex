@@ -140,8 +140,7 @@ class SXRendererImplementation : public IECore::Renderer
 			SXExecutor::ShaderVector coshaders;
 			SXExecutor::ShaderVector lights;
 			
-			Imath::M44f localTransform;
-			Imath::M44f parentWorldTransform;
+			Imath::M44f transform;
 		};
 		typedef std::stack<State> StateStack;
 		

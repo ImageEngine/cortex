@@ -42,7 +42,6 @@
 #include "IECore/SplineData.h"
 #include "IECore/MatrixAlgo.h"
 #include "IECore/Transform.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
@@ -228,14 +227,9 @@ void IECoreRI::SXRendererImplementation::worldEnd()
 
 void IECoreRI::SXRendererImplementation::transformBegin()
 {
-	Imath::M44f worldTransform = m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
-	
 	// New push state onto the stack: deep copy flag is false, so we don't create a new SxContext, which will swallow up any
 	// coordinate systems declared before transformEnd():
 	m_stateStack.push( State( m_stateStack.top(), false ) );
-	
-	m_stateStack.top().parentWorldTransform = worldTransform;
-	m_stateStack.top().localTransform.makeIdentity();
 }
 
 void IECoreRI::SXRendererImplementation::transformEnd()
@@ -251,7 +245,7 @@ void IECoreRI::SXRendererImplementation::transformEnd()
 
 void IECoreRI::SXRendererImplementation::setTransform( const Imath::M44f &m )
 {
-	m_stateStack.top().localTransform = m;
+	m_stateStack.top().transform = m;
 }
 
 void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordinateSystem )
@@ -261,7 +255,7 @@ void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordi
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform() const
 {
-	return m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
+	return m_stateStack.top().transform;
 }
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string &coordinateSystem ) const
@@ -272,14 +266,14 @@ Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string 
 
 void IECoreRI::SXRendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	m_stateStack.top().localTransform = m * m_stateStack.top().localTransform;
+	m_stateStack.top().transform = m * m_stateStack.top().transform;
 }
 
 void IECoreRI::SXRendererImplementation::coordinateSystem( const std::string &name )
 {
-	Imath::M44f worldTransform = m_stateStack.top().localTransform * m_stateStack.top().parentWorldTransform;
+	M44f m = m_stateStack.top().transform.transposed();
 	RtMatrix mm;
-	convert( worldTransform.transposed(), mm );
+	convert( m, mm );
 	SxDefineSpace ( m_stateStack.top().context.get(), name.c_str(), (RtFloat*)&mm[0][0] );
 }
 
