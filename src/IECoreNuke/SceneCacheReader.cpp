@@ -336,8 +336,19 @@ int SceneCacheReader::knob_changed(Knob* k)
 			{
 				m_scriptFinishedLoading = true;
 			}
-				
+
 			return 1;
+		}
+		else if( std::string( k->name() ) == "hidePanel" || std::string( k->name() ) == "showPanel" )
+		{
+			if( !m_scriptFinishedLoading )
+			{
+				m_scriptFinishedLoading = true;
+				if( knob( "loadAll" ) != NULL )
+				{
+					validate( false );
+				}
+			}
 		}
 	}
 
