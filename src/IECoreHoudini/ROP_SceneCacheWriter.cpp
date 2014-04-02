@@ -264,7 +264,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 				else if ( numShapes == 1 )
 				{
 					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
-					if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+					if( ( name == 0 ) || ( !strcmp( name, "" ) || !strcmp( name, "/" ) ) )
 					{
 						reRoot = true;
 					}
