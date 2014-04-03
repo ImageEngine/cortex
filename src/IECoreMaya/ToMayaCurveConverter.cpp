@@ -110,6 +110,20 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 	
 	int numVertices = verticesPerCurve[curveIndex];
 	
+	int cvOffset = 0;
+	if( curves->basis() != IECore::CubicBasisf::linear() && !curves->periodic() )
+	{
+		// Maya implicitly duplicates end points, so they're explicitly duplicated in the CurvePrimitives.
+		// We need to remove those duplicates when converting back to Maya. Remove 2 cvs at start, 2 at end.
+		if( numVertices < 8 )
+		{
+			IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  "The Curve Primitive does not have enough CVs to be converted into a Maya Curve. Needs at least 8." );
+			return false;
+		}
+		
+		cvOffset = 2;
+	}
+	
 	const std::vector<Imath::V3f>& pts = p->readable();
 	
 	// triple up the start points for cubic periodic curves:
@@ -119,7 +133,7 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		vertexArray.append( vertexArray[0] );
 	}
 	
-	for( int i = 0; i < numVertices; ++i )
+	for( int i = cvOffset; i < numVertices-cvOffset; ++i )
 	{
 		vertexArray.append( IECore::convert<MPoint, Imath::V3f>( pts[i + curveBase] ) );
 	}
@@ -152,15 +166,27 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 	}
 	else
 	{
-		// first two cvs must have coincident knots if the curve's open, otherwise
-		// they must be spaced out
-		knotSequences.append( curves->periodic() ? -1 : 0 );
-		for( unsigned i=0; i < vertexArray.length(); ++i )
+		if( curves->periodic() )
 		{
-			knotSequences.append( i );
+			// Periodic curve, knots must be spaced out.
+			knotSequences.append( -1 );
+			for( unsigned i=0; i < vertexArray.length()+1; ++i )
+			{
+				knotSequences.append( i );
+			}
 		}
-		// same with the last two:
-		knotSequences.append( curves->periodic() ? vertexArray.length() : vertexArray.length() - 1 );
+		else
+		{
+			// For a cubic curve, the first three and last three knots must be duplicated for the curve start/end to start at the first/last CV.
+			knotSequences.append( 0 );
+			knotSequences.append( 0 );
+			for( unsigned i=0; i < vertexArray.length()-2; ++i )
+			{
+				knotSequences.append( i );
+			}
+			knotSequences.append( vertexArray.length()-3 );
+			knotSequences.append( vertexArray.length()-3 );
+		}
 	}
 	
 	MFnNurbsCurve fnCurve;
