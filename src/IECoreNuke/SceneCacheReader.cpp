@@ -124,25 +124,22 @@ SceneCacheReader::~SceneCacheReader()
 void SceneCacheReader::_validate( bool forReal )
 {
 	m_evaluatedFilePath	= filePath();
-	
-	if( m_scriptFinishedLoading )
-	{
-		if( m_isFirstRun )
-		{
-			Knob *k = knob("loadAll");
-			if( k != NULL )
-			{
-				k->set_value( true );
-			}
 
-			m_isFirstRun = false;
-			m_scriptFinishedLoading = true;
-			loadAllFromKnobs();
+	m_scriptFinishedLoading = true;
+	if( m_isFirstRun )
+	{
+		Knob *k = knob("loadAll");
+		if( k != NULL )
+		{
+			k->set_value( true );
 		}
 
-		filterScene( m_filterText, m_filterTagText );
-		rebuildSelection();
+		m_isFirstRun = false;
+		loadAllFromKnobs();
 	}
+
+	filterScene( m_filterText, m_filterTagText );
+	rebuildSelection();
 
 	SourceGeo::_validate( forReal );
 }
@@ -349,6 +346,8 @@ int SceneCacheReader::knob_changed(Knob* k)
 					validate( false );
 				}
 			}
+
+			return SourceGeo::knob_changed(k);
 		}
 	}
 
@@ -497,9 +496,9 @@ void SceneCacheReader::rebuildSceneView()
 	{
 		validate( false );
 	}
-	
+
 	Hash newSceneHash( sceneHash() );
-	
+
 	// Check to see if the scene has changed. If it has then we need to 
 	// rebuild our internal representation of it.
 	if( m_sceneHash != newSceneHash )
