@@ -156,10 +156,12 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		}
 	}
 	
+	unsigned vertexArrayLength = vertexArray.length();
+	
 	MDoubleArray knotSequences;
 	if( curves->basis() == IECore::CubicBasisf::linear() )
 	{
-		for( unsigned i=0; i < vertexArray.length(); ++i )
+		for( unsigned i=0; i < vertexArrayLength; ++i )
 		{
 			knotSequences.append( i );
 		}
@@ -170,7 +172,7 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		{
 			// Periodic curve, knots must be spaced out.
 			knotSequences.append( -1 );
-			for( unsigned i=0; i < vertexArray.length()+1; ++i )
+			for( unsigned i=0; i < vertexArrayLength+1; ++i )
 			{
 				knotSequences.append( i );
 			}
@@ -180,12 +182,12 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 			// For a cubic curve, the first three and last three knots must be duplicated for the curve start/end to start at the first/last CV.
 			knotSequences.append( 0 );
 			knotSequences.append( 0 );
-			for( unsigned i=0; i < vertexArray.length()-2; ++i )
+			for( unsigned i=0; i < vertexArrayLength-2; ++i )
 			{
 				knotSequences.append( i );
 			}
-			knotSequences.append( vertexArray.length()-3 );
-			knotSequences.append( vertexArray.length()-3 );
+			knotSequences.append( vertexArrayLength-3 );
+			knotSequences.append( vertexArrayLength-3 );
 		}
 	}
 	
