@@ -121,12 +121,17 @@ SceneCacheReader::~SceneCacheReader()
 {
 }
 
+SceneCacheReader *SceneCacheReader::firstReader()
+{
+	return dynamic_cast<SceneCacheReader*>(firstOp());
+}
+
 void SceneCacheReader::_validate( bool forReal )
 {
 	m_evaluatedFilePath	= filePath();
 
 	m_scriptFinishedLoading = true;
-	if( m_isFirstRun )
+	if( firstReader()->m_isFirstRun )
 	{
 		Knob *k = knob("loadAll");
 		if( k != NULL )
@@ -134,12 +139,12 @@ void SceneCacheReader::_validate( bool forReal )
 			k->set_value( true );
 		}
 
-		m_isFirstRun = false;
-		loadAllFromKnobs();
+		firstReader()->m_isFirstRun = false;
+		firstReader()->loadAllFromKnobs();
 	}
 
-	filterScene( m_filterText, m_filterTagText );
-	rebuildSelection();
+	firstReader()->filterScene( m_filterText, m_filterTagText );
+	firstReader()->rebuildSelection();
 
 	SourceGeo::_validate( forReal );
 }
@@ -225,6 +230,11 @@ std::string SceneCacheReader::filePath() const
 
 int SceneCacheReader::knob_changed(Knob* k)
 {
+	if ( firstReader() != this )
+	{
+		return SourceGeo::knob_changed(k);
+	}
+
 	if ( k != NULL ) 
 	{
 		if ( knob("selectable") == k ) 
