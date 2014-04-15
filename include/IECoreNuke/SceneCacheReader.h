@@ -104,6 +104,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		/// taken from the SceneCache, filter and select them. They are called
 		/// from the knob_changed() method to synchronize the SceneView_knob and
 		/// the internal lists of selected and filtered items.
+		/// These methods should only be called from the firstReader() returned instance.
 		//////////////////////////////////////////////////////////////
 		//@{
 		/// Loads the internal data structures from the knobs and set up the
@@ -130,8 +131,6 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		void rebuildSelection();
 		/// Clear any selected geometry from the SceneView_knob.
 		void clearSceneViewSelection();
-		/// Clears the current filters applied to the scene.
-		void clearSceneViewFilter();
 		//@}
 
 		/// Updates the Enumeration_knob of available tags from the internal list of tags
@@ -145,6 +144,9 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		std::string filePath() const;
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
+
+		// uses firstOp to return the Op that has the up-to-date private data
+		SceneCacheReader *firstReader();
 	
 		/// Returns an InternedString with the name of the geometry tag.	
 		static const IECore::InternedString &geometryTag();
