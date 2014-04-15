@@ -80,7 +80,9 @@ void PresetsOnlyParameterHandler::setParameterValue( IECore::Parameter *paramete
 	{
 		presetIndex = (int)m_knob->get_value();
 	}
-	parameter->setValue( parameter->getPresets()[m_storage].second );
+
+	parameter->setValue( parameter->getPresets()[presetIndex].second );
+
 }
 
 void PresetsOnlyParameterHandler::setKnobValue( const IECore::Parameter *parameter )
