@@ -136,22 +136,23 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr< SphericalHarmonicsTest< T > > instance(new SphericalHarmonicsTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testFunctionEvaluation), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testConstruction), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testDotProduct), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsTest< T >::testArithmeticOperations), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsTest<T>::testFunctionEvaluation, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsTest<T>::testConstruction, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsTest<T>::testDotProduct, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsTest<T>::testArithmeticOperations, instance ) );
 	}
 
 	template< typename T, int bands, int samples >
 	void addSphericalHarmonicsProjectorTest()
 	{
-		static boost::shared_ptr< SphericalHarmonicsProjectorTest< T,bands,samples > > instance(new SphericalHarmonicsProjectorTest<T,bands,samples>());
+		typedef SphericalHarmonicsProjectorTest<T,bands,samples> TestType;
+		static boost::shared_ptr<TestType> instance(new TestType());
 
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testProjection), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection1D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testPolarProjection3D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclideanProjection1D), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsProjectorTest< T,bands,samples >::testEuclideanProjection3D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &TestType::testProjection, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &TestType::testPolarProjection1D, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &TestType::testPolarProjection3D, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &TestType::testEuclideanProjection1D, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &TestType::testEuclideanProjection3D, instance ) );
 	}
 
 	template< typename T >
@@ -159,8 +160,8 @@ struct SphericalHarmonicsTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr< SphericalHarmonicsRotationMatrixTest< T > > instance(new SphericalHarmonicsRotationMatrixTest<T>());
 
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation), instance ) );
-		add( BOOST_CLASS_TEST_CASE( &(SphericalHarmonicsRotationMatrixTest< T >::testRotation3D), instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsRotationMatrixTest<T>::testRotation, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SphericalHarmonicsRotationMatrixTest<T>::testRotation3D, instance ) );
 	}
 
 	template< typename T >
