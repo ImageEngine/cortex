@@ -1,3 +1,23 @@
+# 8.4.1
+
+#### IECore
+
+- Compilation patches for Ubuntu 13 and Mint 16
+
+#### IECoreMaya
+
+- Fixed ToMayaCurveConverter for cubic non periodic curves (it was previously not possible to roundtrip such a curve using the To/From converters).
+
+#### IECoreHoudini
+
+- Fixed SceneCache ROP crash when a name attr existed, but the name was blank.
+
+#### IECoreNuke
+
+- Fixed a bug with SceneCacheReader where it wouldn't update correctly when wrapped by a python node.
+- Fixed a bug with SceneCacheReader that was causing flickering artifacts when using animated geo.
+- Fixed a bug with SceneCacheReader for infinite instantiation of Ops due to knob changes during the validate method.
+
 # 8.4.0
 
 #### IECore
