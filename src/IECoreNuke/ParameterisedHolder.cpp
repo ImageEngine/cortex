@@ -349,7 +349,7 @@ void ParameterisedHolder<BaseType>::replaceKnobs()
 		}
 	}
 
-	m_numParameterKnobs = replace_knobs( m_classDividerKnob, m_numParameterKnobs, parameterKnobs, this );
+	m_numParameterKnobs = this->replace_knobs( m_classDividerKnob, m_numParameterKnobs, parameterKnobs, this );
 
 	for( int i=0; (pKnob = BaseType::knob( i )); i++ )
 	{
