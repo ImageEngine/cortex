@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -145,40 +145,26 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 
-		// uses firstOp to return the Op that has the up-to-date private data
-		SceneCacheReader *firstReader();
-	
 		/// Returns an InternedString with the name of the geometry tag.	
 		static const IECore::InternedString &geometryTag();
 
+		// uses firstOp to return the Op that has the up-to-date private data
+		SceneCacheReader *firstReader();
+		const SceneCacheReader *firstReader() const;
+
+		class SharedData;
+
+		// this function should only be called from the firstReader() object.
+		SharedData *sharedData();
+		const SharedData *sharedData() const;
+
 		// Knob Members.	
 		const char *m_filePath; // Holds the raw SceneCache file path.
-		std::string m_evaluatedFilePath; // Holds the SceneCache file path after any TCL scripts have been evaluated..
 		std::string m_root; // Holds the root item in the SceneCache.
-		std::string m_filterText; // The text to filter the scene with.
-		std::string m_filterTagText; // The text to filter the tags with. This is set from the Enumeration_knob.
+		std::string m_filter; // The text to filter the scene with.
 		bool m_worldSpace; // Set to ignore local transforms..
 		DD::Image::Matrix4 m_baseParentMatrix; // The global matrix that is applied to the geo.
-		
-		// Hashes that are used to both provide an early-out to some methods
-		// and also contribute towards a hash for the geometry. 
-		DD::Image::Hash m_selectionHash;
-		DD::Image::Hash m_filterHash;
-		DD::Image::Hash m_sceneHash;
 
-		// When buildSceneView is called to parse the scene cache and generate a list of entries for the SceneView_knob,
-		// this map is also populated. It holds a mapping of tag names to the indices of items which have that tag. 
-		// It is used within the filterScene method to quickly filter items with a particular tag.
-		typedef	std::map< std::string, std::vector< unsigned int > > TagMap;
-		TagMap m_tagMap;
-		
-		// When specifying a root we store the path to it's parent item along with the length of it. We do this so that when
-		// we are building the list of items in the SceneView_knob we can strip this path quickly from the front of the
-		// name and easily restore it later to load it from the SceneCache. This ensures that the names of the items in the
-		// SceneView_knob are kept short. 
-		std::string m_pathPrefix;
-		unsigned int m_pathPrefixLength;
-	
 		// Pointers to various knobs.	
 		DD::Image::Knob *m_filePathKnob;
 		DD::Image::Knob *m_baseParentMatrixKnob;
@@ -187,19 +173,8 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Knob *m_sceneFilterKnob;
 		DD::Image::Knob *m_rootKnob;
 
-		 // A flag which is set when all of the knobs have been loaded from the script.
-		bool m_scriptFinishedLoading;
-
-		// A flag which is used to initialize the internal data structures the first time the node is run.
-		bool m_isFirstRun;
-		
-		/// The SceneView_knob holds a list of all leaf items in the scene. When filtering the SceneView we specify indices into
-		/// this list. When setting or querying the selected items in the SceneView_knob we need to use indices into the list of 
-		/// filtered (visible) items. This means that we have to keep a look-up table of mappings between indices in the filtered
-		/// list of items and the index within the complete list of items in the scene.
-		std::map<int, int> m_itemToFiltered; // Mapping of the index within the full scene list and the filtered scene list.
-		std::vector<unsigned int> m_filteredToItem; // Mapping from an index in the filtered scene list to the complete scene list. 
-		std::vector< bool > m_itemSelected; // An array of flags which indicate whether an item in the filtered list is selected or not.
+		// only the first reader allocates the shared data
+		SharedData *m_data;	
 };
 
 } // namespace IECoreNuke
