@@ -83,6 +83,8 @@ const char *SceneCacheReader::Class() const { return m_description.name; }
 
 const char *SceneCacheReader::node_help() const { return HELP; }
 
+typedef	std::map< std::string, std::vector< unsigned int > > TagMap;
+
 class SceneCacheReader::SharedData
 {
 	public :
@@ -112,7 +114,6 @@ class SceneCacheReader::SharedData
 		// When buildSceneView is called to parse the scene cache and generate a list of entries for the SceneView_knob,
 		// this map is also populated. It holds a mapping of tag names to the indices of items which have that tag. 
 		// It is used within the filterScene method to quickly filter items with a particular tag.
-		typedef	std::map< std::string, std::vector< unsigned int > > TagMap;
 		TagMap m_tagMap;
 		
 		// When specifying a root we store the path to it's parent item along with the length of it. We do this so that when
@@ -128,7 +129,7 @@ class SceneCacheReader::SharedData
 		/// list of items and the index within the complete list of items in the scene.
 		std::map<int, int> m_itemToFiltered; // Mapping of the index within the full scene list and the filtered scene list.
 		std::vector<unsigned int> m_filteredToItem; // Mapping from an index in the filtered scene list to the complete scene list. 
-		std::vector< bool > m_itemSelected; // An array of flags which indicate whether an item in the filtered list is selected or not.
+		std::vector<unsigned int> m_selectedItems; // An array of selected items
 
 		 // A flag which is set when all of the knobs have been loaded from the script.
 		bool m_scriptFinishedLoading;
@@ -148,6 +149,8 @@ bool bothSlashes( char a, char b )
 {
 	    return a == '/' && b == '/';
 }
+
+static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen );
 
 SceneCacheReader::SceneCacheReader( Node *node )
 	:	SourceGeo( node ),
@@ -204,8 +207,6 @@ void SceneCacheReader::_validate( bool forReal )
 		return;
 	}
 
-	m_data->m_evaluatedFilePath	= filePath();
-
 	m_data->m_scriptFinishedLoading = true;
 
 	if( m_data->m_isFirstRun )
@@ -219,9 +220,10 @@ void SceneCacheReader::_validate( bool forReal )
 		m_data->m_isFirstRun = false;
 		loadAllFromKnobs();
 	}
-
-	filterScene( m_data->m_filterText, m_data->m_filterTagText );
-	rebuildSelection();
+	else
+	{
+		filterScene( m_data->m_filterText, m_data->m_filterTagText );
+	}
 
 	SourceGeo::_validate( forReal );
 }
@@ -236,8 +238,8 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 		"File name for the scene cache."
 	);
 
-	m_rootKnob = String_knob( f, &m_root, "root", "Root" );
-	SetFlags( f, DD::Image::Knob::MODIFIES_GEOMETRY | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS );
+	m_rootKnob = String_knob( f, &m_root, "sceneRoot", "Root" );
+	SetFlags( f, DD::Image::Knob::MODIFIES_GEOMETRY | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS | DD::Image::Knob::NO_ANIMATION );
 	Tooltip( f,
 		"Root path for the scene cache."
 	);
@@ -259,7 +261,7 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	const char* e = { 0 };
 	m_sceneKnob = SceneView_knob( f, &p, &e, "sceneView", "Scene Hierarchy" );
 	SetFlags( f, DD::Image::Knob::RESIZABLE | DD::Image::Knob::MODIFIES_GEOMETRY | DD::Image::Knob::SAVE_MENU | DD::Image::Knob::ALWAYS_SAVE | DD::Image::Knob::KNOB_CHANGED_ALWAYS
-		| DD::Image::Knob::KNOB_CHANGED_RIGHTCONTEXT
+		| DD::Image::Knob::KNOB_CHANGED_RIGHTCONTEXT | DD::Image::Knob::NO_ANIMATION
 	);
 	
 	Bool_knob( f, &m_worldSpace, "worldSpace", "World Space" );
@@ -291,20 +293,6 @@ void SceneCacheReader::knobs( DD::Image::Knob_Callback f )
 	
 }
 
-std::string SceneCacheReader::filePath() const
-{
-	if( m_filePathKnob )
-	{
-		std::stringstream pathStream;
-		m_filePathKnob->to_script( pathStream, &(outputContext()), false );
-		return pathStream.str();
-	}
-	else
-	{
-		return "";
-	}
-}
-
 int SceneCacheReader::knob_changed(Knob* k)
 {
 	if ( firstReader() != this )
@@ -328,9 +316,18 @@ int SceneCacheReader::knob_changed(Knob* k)
 		}
 		else if( m_filePathKnob == k )
 		{
-			m_data->m_evaluatedFilePath	= filePath();
-			rebuildSceneView();
-			filterScene( m_data->m_filterText, m_data->m_filterTagText );
+			// during knob_changed we cannot query m_filePath because it returns the previous value.
+			if ( script_expand( m_filePathKnob->get_text() ) )
+			{
+				m_data->m_evaluatedFilePath = script_result();
+				script_unlock();
+			}
+
+			if ( m_data->m_scriptFinishedLoading )
+			{
+				// we want to keep current selection...
+				loadAllFromKnobs();
+			}
 			return 1;
 		}
 		else if( m_rootKnob == k )
@@ -354,33 +351,34 @@ int SceneCacheReader::knob_changed(Knob* k)
 				root = std::string("/") + root;
 			}
 
-			m_data->m_rootText = root;
-
 			// We would like the items in the SceneView_knob to be listed under the name of the root rather than it's full
 			// path. This means that we need to modify all of the item strings that we pass to it by removing the unwanted
 			// part of the path.
 			// To make recovery of the full path easier we store the unwanted of the path as a member.
 			IECore::SceneInterface::Path rootPath;
-			IECore::SceneInterface::stringToPath( m_data->m_rootText, rootPath );
+			IECore::SceneInterface::stringToPath( root, rootPath );
+			m_data->m_pathPrefix.clear();
 			if( rootPath.size() > 0 )
 			{
-				rootPath.erase( rootPath.end() );
+				rootPath.pop_back();
+				IECore::SceneInterface::pathToString( rootPath, m_data->m_pathPrefix );
 			}
-			IECore::SceneInterface::pathToString( rootPath, m_data->m_pathPrefix );
 
 			// We keep the length of the unwanted path string so that we can use it to easily truncate the names of the items
 			// that we use to populate the SceneView_knob.
 			m_data->m_pathPrefixLength = m_data->m_pathPrefix.size();
+			m_data->m_rootText = root;
+			m_rootKnob->set_text( root.c_str() );
 
 			// Finally, update the UI with the validated string and rebuild the SceneView_knob.
-			m_rootKnob->set_text( m_data->m_rootText.c_str() );
-
-			rebuildSceneView();
-			filterScene( m_data->m_filterText, m_data->m_filterTagText );
-
+			if ( m_data->m_scriptFinishedLoading )
+			{
+				// we want to keep current selection...
+				loadAllFromKnobs();
+			}
 			return 1;
 		}
-		else if ( m_tagFilterKnob == k || m_sceneFilterKnob == k )
+		else if ( m_sceneFilterKnob == k )
 		{
 			// As the filter expression or tag has changed, filter the scene again.
 			if( m_sceneFilterKnob )
@@ -395,7 +393,15 @@ int SceneCacheReader::knob_changed(Knob* k)
 					m_data->m_filterText = "";
 				}
 			}
-			
+
+			if ( m_data->m_scriptFinishedLoading )
+			{
+				filterScene( m_data->m_filterText, m_data->m_filterTagText );
+			}
+			return 1;
+		}
+		else if ( m_tagFilterKnob == k )			
+		{
 			// Get the tag's name.
 			m_data->m_filterTagText = std::string("");
 			if( m_tagFilterKnob )
@@ -403,13 +409,15 @@ int SceneCacheReader::knob_changed(Knob* k)
 				tagSelection( m_data->m_filterTagText );
 			}
 
-			filterScene( m_data->m_filterText, m_data->m_filterTagText );
-			
+			if ( m_data->m_scriptFinishedLoading )
+			{
+				filterScene( m_data->m_filterText, m_data->m_filterTagText );
+			}
 			return 1;
 		}
 		else if( m_sceneKnob == k )
 		{
-			rebuildSelection();
+			m_data->m_selectionHash = Hash();
 			return 1;
 		}
 		// This knob is only loaded when a script is pasted or loaded from a file.
@@ -421,6 +429,7 @@ int SceneCacheReader::knob_changed(Knob* k)
 			if( !m_data->m_scriptFinishedLoading )
 			{
 				m_data->m_scriptFinishedLoading = true;
+				validate( false );
 			}
 
 			return 1;
@@ -449,30 +458,28 @@ void SceneCacheReader::loadAllFromKnobs()
 
 	if( !m_data->m_scriptFinishedLoading )
 	{
-		throw IECore::Exception( "SceneCacheReader: Cannot load item as the script hasn't finished loading." );
+		return;
 	}
-
-	m_data->m_evaluatedFilePath	= filePath();
 
 	SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 
 	std::vector<unsigned int> selectionIndices;
 	sceneView->getSelectedItems( selectionIndices );
 
-
 	std::vector<unsigned int> filterIndices;
 	sceneView->getImportedItems( filterIndices );
 
 	std::vector<std::string> oldItems = sceneView->menu();
 
-	// Load the scene cache file without any selection or filter.
-	clearSceneViewSelection();
 	rebuildSceneView();
-	filterScene( "", "" );
-	
-	const std::vector<std::string> &items = sceneView->menu();
-	
-	// Remove any selected items which do not exist any longer. For all that do, get their index into the new SceneView_knob.
+
+	// filter of the scene without worrying about selection
+	m_data->m_filterHash = Hash();
+	filterScene( m_data->m_filterText, m_data->m_filterTagText, false );
+
+	const std::vector< std::string > &items = sceneView->menu();
+
+	// Try to remap the previous selection to the current items available.
 	std::vector<unsigned int> newSelectionIndices;
 	for( std::vector<unsigned int>::const_iterator it( selectionIndices.begin() ); it != selectionIndices.end(); ++it )
 	{
@@ -485,69 +492,18 @@ void SceneCacheReader::loadAllFromKnobs()
 			warning( ( std::string( "WARNING: Could not load selected geometry \"" ) + itemName + std::string( "\" as it no longer exists in the scene cache." ) ).c_str() );
 			continue;
 		}
-		
-		newSelectionIndices.push_back( selectedIt - items.begin() ); 
+
+		unsigned int index = (selectedIt - items.begin());
+
+		if ( index < m_data->m_itemToFiltered.size() )
+		{
+			index = m_data->m_itemToFiltered[index];
+		}
+		newSelectionIndices.push_back( index );
 	}
 
-	// Select the new selection list.
-	for( std::vector<unsigned int>::iterator it( newSelectionIndices.begin() ); it != newSelectionIndices.end(); ++it )
-	{
-		*it = m_data->m_itemToFiltered[*it];
-	}
-	
 	sceneView->setSelectedItems( newSelectionIndices );
-	rebuildSelection();
-
-	// Finally force the filter of the scene again.
-	m_data->m_filterHash = Hash();
-	filterScene( m_data->m_filterText, m_data->m_filterTagText );
-}
-
-void SceneCacheReader::rebuildSelection()
-{
-	assert ( firstReader() == this );
-
-	if( !m_data->m_scriptFinishedLoading )
-	{
-		return;
-	}
-
-	if( m_data->m_isFirstRun )
-	{
-		validate( false );
-	}
-
-	// We require an up-to-date scene so rebuild it if necessary.
-	rebuildSceneView();
-
-	// Only update the selection if the SceneView_knob exists.
-	if( m_sceneKnob != NULL )
-	{
-		// Generate a hash from the SceneView_knob's selected entries.
-		std::vector<unsigned int> selectionIndices;
-		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
-		sceneView->getSelectedItems( selectionIndices );
-
-		Hash newSelectionHash( sceneHash() );
-
-		for( std::vector<unsigned int>::const_iterator it( selectionIndices.begin() ); it != selectionIndices.end(); ++it )
-		{
-			newSelectionHash.append( m_data->m_filteredToItem[*it] );
-		}
-
-		// See if our selection has changed and if it has then update
-		// our list of selected geometry. 
-		if( m_data->m_selectionHash != newSelectionHash )
-		{
-			m_data->m_itemSelected.assign( m_data->m_itemSelected.size(), 0 );
-			for( std::vector<unsigned int>::const_iterator it( selectionIndices.begin() ); it != selectionIndices.end(); ++it )
-			{
-				m_data->m_itemSelected[*it] = true;
-			}
-			
-			m_data->m_selectionHash = newSelectionHash;
-		}
-	}
+	m_data->m_selectionHash = Hash();
 }
 
 void SceneCacheReader::clearSceneViewSelection()
@@ -559,8 +515,7 @@ void SceneCacheReader::clearSceneViewSelection()
 		std::vector<unsigned int> emptySelection;
 		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 		sceneView->setSelectedItems( emptySelection );
-		m_data->m_itemSelected.assign( m_data->m_itemSelected.size(), 0 );
-		m_data->m_selectionHash = sceneHash();
+		m_data->m_selectionHash = Hash();
 	}
 }
 
@@ -573,16 +528,48 @@ Hash SceneCacheReader::sceneHash() const
 
 	Hash newHash;
 	newHash.append( m_data->m_evaluatedFilePath );
-	newHash.append( m_filePath );
 	newHash.append( m_data->m_rootText );
 	return newHash;
+}
+
+Hash SceneCacheReader::selectionHash( bool force ) const
+{
+	if ( firstReader() != this )
+	{
+		return firstReader()->selectionHash(false);
+	}
+	
+	if ( force || m_data->m_selectionHash == Hash() )
+	{
+		Hash newHash;
+
+		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
+
+		std::vector<unsigned int> indices;
+		sceneView->getImportedItems( indices );
+
+		newHash.append( (unsigned int)indices.size() );
+		for( std::vector<unsigned int>::const_iterator cit( indices.begin() ); cit != indices.end(); ++cit )
+		{
+			newHash.append( *cit );
+		}
+
+		m_data->m_selectedItems.clear();
+		sceneView->getSelectedItems( m_data->m_selectedItems );
+		newHash.append( (unsigned int)m_data->m_selectedItems.size() );
+		for( std::vector<unsigned int>::const_iterator cit( m_data->m_selectedItems.begin() ); cit != m_data->m_selectedItems.end(); ++cit )
+		{
+			newHash.append( *cit );
+		}
+		
+		m_data->m_selectionHash = newHash;
+	}
+	return m_data->m_selectionHash;
 }
 
 void SceneCacheReader::rebuildSceneView()
 {
 	assert ( firstReader() == this );
-
-	m_data->m_evaluatedFilePath	= filePath();
 
 	if( !m_data->m_scriptFinishedLoading )
 	{
@@ -600,12 +587,15 @@ void SceneCacheReader::rebuildSceneView()
 	// rebuild our internal representation of it.
 	if( m_data->m_sceneHash != newSceneHash )
 	{
+		// Set the new hash.
+		m_data->m_sceneHash = newSceneHash;
+
 		IECore::ConstSceneInterfacePtr sceneInterface = getSceneInterface();
 		SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 
 		// If we have a selection, clear it!
-		if( m_data->m_itemSelected.size() != 0 )
-		{			
+		if( m_data->m_selectedItems.size() != 0 )
+		{
 			clearSceneViewSelection();
 		}
 
@@ -616,26 +606,21 @@ void SceneCacheReader::rebuildSceneView()
 		std::vector<std::string> sceneItems;
 		sceneView->menu( sceneItems );
 		
-		// Validate our scene.
-		if( !sceneInterface || !sceneView )
+		if( sceneInterface && sceneView )
 		{
-			return;
+			// Rebuild our list of items which we will use to populate the SceneView_knob.
+			buildSceneView( sceneItems, m_data->m_tagMap, sceneInterface, m_data->m_pathPrefixLength );
 		}
 
-		// Rebuild our list of items which we will use to populate the SceneView_knob.	
-		buildSceneView( sceneItems, sceneInterface );
-		
-		// Reset the list of selected entries and populate the SceneView_knob.
-		m_data->m_itemSelected.clear();
+		updateTagFilterKnob();
+
+		m_data->m_selectionHash = Hash();
+
 		if( !sceneItems.empty() )
 		{
-			m_data->m_itemSelected.resize( sceneItems.size(), 0 );
+			// Reset the list of selected entries and populate the SceneView_knob.
 			sceneView->addItems( sceneItems );
-			updateTagFilterKnob();
 		}
-
-		// Set the new hash.
-		m_data->m_sceneHash = newSceneHash;
 	}
 }
 
@@ -660,8 +645,8 @@ const std::string &SceneCacheReader::itemName( int index ) const
 // list of items in the scene. We do this because when we query the SceneView_knob for the selected
 // items, we are returned a list of indices within the filtered items. Therefore, to get the
 // names of these items we need to use a LUT of filtered indices to indices within the list of names.
-// There LUTs are the m_itemToFiltered and m_filteredToItem maps.
-void SceneCacheReader::filterScene( const std::string &filterText, const std::string &filterTag )
+// These LUTs are the m_itemToFiltered and m_filteredToItem maps.
+void SceneCacheReader::filterScene( const std::string &filterText, const std::string &filterTag, bool keepSelection )
 {
 	assert ( firstReader() == this );
 
@@ -676,6 +661,8 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	}
 
 	Hash newFilterHash( sceneHash() );
+	newFilterHash.append( m_data->m_evaluatedFilePath );
+	newFilterHash.append( m_data->m_rootText );
 	newFilterHash.append( filterText );
 	newFilterHash.append( filterTag );
 
@@ -690,11 +677,18 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	// Get the item indices of the currently selected items so that
 	// we can add them to the newly filtered scene.
 	std::vector<unsigned int> newSelection;
-	sceneView->getSelectedItems( newSelection ); // Set the vector to the indices of the filtered items.
-	for( std::vector<unsigned int>::iterator it( newSelection.begin() ); it != newSelection.end(); ++it )
+
+	if ( keepSelection )
 	{
-		*it = m_data->m_filteredToItem[*it]; // Convert the filter index to a item index.
-	}	
+		sceneView->getSelectedItems( newSelection ); // Set the vector to the indices of the filtered items.
+		for( std::vector<unsigned int>::iterator it( newSelection.begin() ); it != newSelection.end(); ++it )
+		{
+			if ( *it < m_data->m_filteredToItem.size() )
+			{
+				*it = m_data->m_filteredToItem[*it]; // Convert the filter index to a item index.
+			}
+		}
+	}
 
 	// Reset our LUTs as we are going to rebuild them.
 	m_data->m_itemToFiltered.clear();	
@@ -712,6 +706,8 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	expr.erase( std::unique( expr.begin(), expr.end(), bothSlashes ), expr.end());
 	
 	std::vector<unsigned int> filteredIndices;
+
+	const std::vector<std::string> &sceneItems = sceneView->menu();
 	
 	if( expr != "/" && expr != "*" && expr != "" )
 	{
@@ -720,7 +716,6 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 		{
 			// Loop over all of the items in the scene and create a unique list of all entries whose name matches our regular expression.
 			boost::regex expression( expr );
-			const std::vector<std::string> &sceneItems = sceneView->menu();
 			
 			if( filterByTag ) // Filter by tag and expression
 			{
@@ -756,7 +751,6 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	}
 	else
 	{
-		const std::vector<std::string> &sceneItems = sceneView->menu();
 		filteredIndices.clear();
 		if( !sceneItems.empty() )
 		{
@@ -791,7 +785,10 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	{
 		for( std::vector<unsigned int>::const_iterator it( newSelection.begin() ); it != newSelection.end(); ++it )
 		{
-			filteredIndices.push_back( *it );
+			if ( *it <= sceneItems.size() )
+			{
+				filteredIndices.push_back( *it );
+			}
 		}
 
 		// Make sure all indices in our selection are unique and sorted.
@@ -804,27 +801,19 @@ void SceneCacheReader::filterScene( const std::string &filterText, const std::st
 	m_data->m_filteredToItem = filteredIndices;
 
 	// Restore the old selection.
-	m_data->m_itemSelected.clear();
-	if( !filteredIndices.empty() )
+	m_data->m_itemToFiltered.clear();
+
+	// Set the filtered items.
+	sceneView->setImportedItems( filteredIndices );
+
+	// Create a mapping of item indices to filtered indices.
+	for( std::vector<unsigned int>::const_iterator it( filteredIndices.begin() ); it != filteredIndices.end(); ++it )
 	{
-		// Set the filtered items.
-		sceneView->setImportedItems( filteredIndices );
-
-		// Create a mapping of item indices to filtered indices.
-		for( std::vector<unsigned int>::const_iterator it( filteredIndices.begin() ); it != filteredIndices.end(); ++it )
-		{
-			m_data->m_itemToFiltered[ *it ] = it - filteredIndices.begin();
-		}
-
-		m_data->m_itemSelected.resize( filteredIndices.size(), false );
-		if( !newSelection.empty() )
-		{
-			for( std::vector<unsigned int>::const_iterator it( newSelection.begin() ); it != newSelection.end(); ++it )
-			{
-				m_data->m_itemSelected[ m_data->m_itemToFiltered[ *it ] ] = true;
-			}
-		}
+		m_data->m_itemToFiltered[ *it ] = it - filteredIndices.begin();
 	}
+
+	// we invalidate the selection hash to force recomputation since importted items changed.
+	m_data->m_selectionHash = Hash();
 }
 
 void SceneCacheReader::tagSelection( std::string &selection ) const
@@ -851,7 +840,7 @@ void SceneCacheReader::updateTagFilterKnob()
 		std::vector<std::string> tagNames;
 		tagNames.push_back( "None" );
 
-		for( SceneCacheReader::SharedData::TagMap::const_iterator it = m_data->m_tagMap.begin(); it != m_data->m_tagMap.end(); ++it )
+		for( TagMap::const_iterator it = m_data->m_tagMap.begin(); it != m_data->m_tagMap.end(); ++it )
 		{
 			tagNames.push_back( it->first );
 		}
@@ -868,14 +857,11 @@ void SceneCacheReader::updateTagFilterKnob()
 	}
 }
 
-const IECore::InternedString &SceneCacheReader::geometryTag()
+/// This recursive method traverses the sceneInterface to build a list of item names and a mapping of the tags to the indices in the items.
+static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen )
 {
 	static IECore::InternedString g_geometryTag( "ObjectType:MeshPrimitive" );
-	return g_geometryTag;
-}
 
-void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const IECore::ConstSceneInterfacePtr sceneInterface )
-{
 	assert ( firstReader() == this );
 
 	if( sceneInterface )
@@ -883,13 +869,13 @@ void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const I
 		//\todo: We currently only support mesh geomentry as there isn't an IECoreNuke curve or points primitive converter.
 		// As a result we check that the object which we have encountered has a MeshPrimitive tag.
 		// When IECoreNuke supports curves and points primitive converters, remove this assertion.
-		if( sceneInterface->hasObject() && sceneInterface->hasTag( geometryTag() ) )
+		if( sceneInterface->hasObject() && sceneInterface->hasTag( g_geometryTag ) )
 		{
 			IECore::SceneInterface::NameList tagNames;
 			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );
 			for ( IECore::SceneInterface::NameList::const_iterator it = tagNames.begin(); it != tagNames.end(); ++it )
 			{
-				m_data->m_tagMap[*it].push_back( list.size() );
+				tagMap[*it].push_back( list.size() );
 			}
 
 			IECore::SceneInterface::Path path;
@@ -901,13 +887,13 @@ void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const I
 			// This is an issue as the SceneCache can have multiple entries at root level.
 			// To resolve this issue we append "/root" to the item name when viewing the
 			// tree at root level.
-			if( m_data->m_rootText == "/" )
+			if( rootPrefixLen == 0 ) // This means m_data->m_rootText == "/"
 			{
 				pathStr = std::string("/root") + pathStr;
 			}
 			else
 			{
-				pathStr = pathStr.substr( m_data->m_pathPrefixLength );
+				pathStr = pathStr.substr( rootPrefixLen );
 			}
 			list.push_back( pathStr );
 		}
@@ -920,7 +906,7 @@ void SceneCacheReader::buildSceneView( std::vector< std::string > &list, const I
 		{
 			IECore::SceneInterface::Name name = *it;
 			const IECore::ConstSceneInterfacePtr childScene = sceneInterface->child( name );
-			buildSceneView( list, childScene );
+			buildSceneView( list, tagMap, childScene, rootPrefixLen );
 		}
 	}
 }
@@ -929,27 +915,17 @@ void SceneCacheReader::append( DD::Image::Hash &hash )
 {
 	SourceGeo::append( hash );
 
-	SharedData *data = sharedData();
-
-	hash.append( data->m_sceneHash );
-	hash.append( data->m_selectionHash );
-	hash.append( data->m_evaluatedFilePath );
-	hash.append( m_filePath );
-	hash.append( data->m_rootText );
+	hash.append( sceneHash() );
+	hash.append( selectionHash(true) );
 	hash.append( m_worldSpace );
 	hash.append( outputContext().frame() );
 }
 
 void SceneCacheReader::get_geometry_hash()
 {
-	SharedData *data = sharedData();
-
 	SourceGeo::get_geometry_hash();
-
-	geo_hash[Group_Primitives].append( data->m_sceneHash );
-	geo_hash[Group_Primitives].append( data->m_selectionHash );
-	geo_hash[Group_Primitives].append( data->m_evaluatedFilePath );
-	geo_hash[Group_Primitives].append( data->m_rootText );
+	geo_hash[Group_Primitives].append( sceneHash() );
+	geo_hash[Group_Primitives].append( selectionHash() );
 	geo_hash[Group_Primitives].append( m_worldSpace );
 
 	IECore::ConstSceneCachePtr sceneInterface = IECore::runTimeCast< const IECore::SceneCache >(getSceneInterface());
@@ -963,10 +939,8 @@ void SceneCacheReader::get_geometry_hash()
 	static const int groups[] = { Group_Points, Group_Attributes, Group_Matrix, Group_None };
 	for( const int *g = groups; *g!=Group_None; g++ )
 	{
-		geo_hash[*g].append( data->m_sceneHash );
-		geo_hash[*g].append( data->m_selectionHash );
-		geo_hash[*g].append( data->m_evaluatedFilePath );
-		geo_hash[*g].append( data->m_rootText );
+		geo_hash[*g].append( sceneHash() );
+		geo_hash[*g].append( selectionHash() );
 		geo_hash[*g].append( m_worldSpace );
 		if( isAnimated )
 		{
@@ -1033,15 +1007,16 @@ void SceneCacheReader::create_geometry( DD::Image::Scene &scene, DD::Image::Geom
 		if( rebuild( Mask_Primitives ) )
 		{
 			out.delete_objects();
-			
+
 			// Loop over the selected items in the SceneView_knob and add them to the geometry list.
 			SceneView_KnobI *sceneView( m_sceneKnob->sceneViewKnob() );
 			const std::vector<std::string> &items = sceneView->menu();
-			for( std::vector<bool>::const_iterator it( data->m_itemSelected.begin() ); it != data->m_itemSelected.end(); ++it )
+
+			for( std::vector<unsigned int>::const_iterator it( data->m_selectedItems.begin() ); it != data->m_selectedItems.end(); ++it )
 			{
-				if( *it )
+				unsigned int index = *it;
+				if ( index < data->m_filteredToItem.size() )
 				{
-					int index = it - data->m_itemSelected.begin();
 					loadPrimitive( out, items[ data->m_filteredToItem[index] ] );
 				}
 			}
@@ -1074,7 +1049,7 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 	IECore::ConstSceneInterfacePtr sceneInterface( getSceneInterface( itemPath ) );
 	if( sceneInterface )
 	{
-		double time = outputContext().frame() / 24.0;
+		double time = outputContext().frame() / DD::Image::root_real_fps();
 		IECore::ConstObjectPtr object = sceneInterface->readObject( time );
 		IECore::SceneInterface::Path rootPath;
 		if( m_worldSpace )
@@ -1123,36 +1098,37 @@ Imath::M44d SceneCacheReader::worldTransform( IECore::ConstSceneInterfacePtr sce
 	return result;
 }
 
-IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string &path ) const
+IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface( const string &path )
 {
+	const SharedData *data = sharedData();
+	IECore::ConstSceneInterfacePtr scene(0);
 	try
 	{
-		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( sharedData()->m_evaluatedFilePath );
+		scene = IECore::SharedSceneInterfaces::get( data->m_evaluatedFilePath );
+	}
+	catch( const std::exception &e )
+	{
+		error( (std::string("Could not open file ") + data->m_evaluatedFilePath ).c_str() );
+		return 0;
+	}
+
+	try
+	{
 		IECore::SceneInterface::Path itemPath;
 		IECore::SceneInterface::stringToPath( path, itemPath );
 		scene = scene->scene( itemPath );
-		return scene;
 	}
 	catch( const std::exception &e )
 	{
+		error( (std::string("Could not find root \"" + path + "\" in ") + data->m_evaluatedFilePath ).c_str() );
 		return 0;
 	}
+
+	return scene;
 }
 
-IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface() const
+IECore::ConstSceneInterfacePtr SceneCacheReader::getSceneInterface()
 {
-	try
-	{
-		const SharedData *data = sharedData();
-		IECore::ConstSceneInterfacePtr scene = IECore::SharedSceneInterfaces::get( data->m_evaluatedFilePath );
-		IECore::SceneInterface::Path rootPath;
-		IECore::SceneInterface::stringToPath( data->m_rootText, rootPath );
-		scene = scene->scene( rootPath );
-		return scene;
-	}
-	catch( const std::exception &e )
-	{
-		return 0;
-	}
+	return getSceneInterface( sharedData()->m_rootText );
 }
 

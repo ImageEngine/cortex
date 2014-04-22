@@ -94,9 +94,9 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		// Returns the name of the item at index itemIndex in the SceneView_knob.
 		const std::string &itemName( int itemIndex ) const;
 		// Returns a SceneInterface for the root item.
-		IECore::ConstSceneInterfacePtr getSceneInterface() const;
+		IECore::ConstSceneInterfacePtr getSceneInterface();
 		// Returns a SceneInterface for the item at path.
-		IECore::ConstSceneInterfacePtr getSceneInterface( const std::string &path ) const;
+		IECore::ConstSceneInterfacePtr getSceneInterface( const std::string &path );
 		//@}
 
 		//! @name Methods which control the SceneView_knob
@@ -116,19 +116,12 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		/// is rebuilt then the selection will be lost. The filterScene() method must
 		/// be called immediately afterwards.
 		void rebuildSceneView();
-		/// This recursive method is called from rebuildSceneView() and traverses the
-		/// sceneInterface to build a list of item names and a mapping of the tags to 
-		/// the indices in the items.
-		void buildSceneView( std::vector< std::string > &list, const IECore::ConstSceneInterfacePtr sceneInterface );
 		/// Rebuilds the sceneView to show only items which are already selected or have
-		/// a names that matches filterText and a tag which matches tagText.
+		/// names that matches filterText and a tag which matches tagText.
 		/// Passing an empty string to either filterText or tagText will disable the
 		/// filtering of the names and tags respectively. This should be called
 		/// immediately after any call to rebuildSceneView().
-		void filterScene( const std::string &filterText, const std::string &tagText );
-		/// Rebuilds the current geometry selection from the entries that are selected
-		/// in the SceneView_knob.
-		void rebuildSelection();
+		void filterScene( const std::string &filterText, const std::string &tagText, bool keepSelection = true );
 		/// Clear any selected geometry from the SceneView_knob.
 		void clearSceneViewSelection();
 		//@}
@@ -140,13 +133,10 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		void loadPrimitive( DD::Image::GeometryList &out, const std::string &path );
 		/// Get the hash of the file path and root knob.
 		DD::Image::Hash sceneHash() const;
-		/// Evaluates the file path for the current context and returns the result.
-		std::string filePath() const;
+		/// Get the hash of the SceneView knob (the default hash implementation of that knob returns a constant hash...)
+		DD::Image::Hash selectionHash( bool force = false ) const;
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
-
-		/// Returns an InternedString with the name of the geometry tag.	
-		static const IECore::InternedString &geometryTag();
 
 		// uses firstOp to return the Op that has the up-to-date private data
 		SceneCacheReader *firstReader();
