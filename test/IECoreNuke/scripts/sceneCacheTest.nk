@@ -1,0 +1,184 @@
+#! /software/apps/nuke/7.0v8/cent6.x86_64/Nuke7.0 -nx
+version 7.0 v8
+define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
+<layout version="1.0">
+    <window x="66" y="29" w="1688" h="1052" screen="0">
+        <splitter orientation="1">
+            <split size="1062"/>
+            <splitter orientation="1">
+                <split size="40"/>
+                <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                    <page id="Toolbar.1"/>
+                </dock>
+                <split size="1018"/>
+                <splitter orientation="2">
+                    <split size="585"/>
+                    <dock id="" activePageId="Viewer.1">
+                        <page id="Viewer.1"/>
+                    </dock>
+                    <split size="411"/>
+                    <dock id="" activePageId="DAG.1">
+                        <page id="DAG.1"/>
+                        <page id="Curve Editor.1"/>
+                        <page id="DopeSheet.1"/>
+                    </dock>
+                </splitter>
+            </splitter>
+            <split size="614"/>
+            <dock id="" activePageId="Properties.1">
+                <page id="Properties.1"/>
+                <page id="Script Editor.1"/>
+            </dock>
+        </splitter>
+    </window>
+</layout>
+}
+Root {
+ inputs 0
+ name /home/lucio/dev/cortex/test/IECoreNuke/scripts/sceneCacheTest.nk
+ last_frame 80
+ lock_range true
+ format "640 480 0 0 640 480 1 PC_Video"
+ proxy_type scale
+ proxy_format "1024 778 0 0 1024 778 1 1K_Super_35(full-ap)"
+ luts {linear {}
+   sRGB {}
+   rec709 {}
+   Cineon {}
+   CineonBlackpoint0 {(pow(10,(1023*x-685)/300)-.0052)/(1-.0052)}
+   Panalog {"-0.042784 + 0.042784 * exp(4.971170*(x*1.06674-0.066736))"}
+   ieAlexaV3LogC {"(x > 0.1496582 ? pow(10.0, (x - 0.385537) / 0.2471896) : x / 0.9661776 - 0.04378604) * 0.18 - 0.00937677"}}
+ defaultViewerLUT "OCIO LUTs"
+ addUserKnob {20 IE}
+ addUserKnob {1 IEENV_WORKING_PATH +DISABLED}
+ IEENV_WORKING_PATH /data/jobs/FSQ/sequences/rnd/shots/pipe
+}
+Read {
+ inputs 0
+ file "\[file dirname \[value root.name] ]/data/sceneCacheExpectedResults.####.exr"
+ format "640 480 0 0 640 480 1 PC_Video"
+ last 100
+ origlast 100
+ origset true
+ name Read1
+ xpos 158
+ ypos 291
+}
+set N35b4cc10 [stack 0]
+push $N35b4cc10
+Camera2 {
+ inputs 0
+ translate {0 0 50}
+ name Camera1
+ xpos -146
+ ypos 194
+}
+CheckerBoard2 {
+ inputs 0
+ name CheckerBoard1
+ xpos -10
+ ypos -29
+}
+set N2ea03360 [stack 0]
+ieSceneCacheReader {
+ file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
+ sceneRoot /
+ filterByTag None
+ filterByName ""
+ sceneView {{0} imported: 0 1 selected: 0 items: /root/A/a /root/B/b}
+ translate {8 0 0}
+ loadAll true
+ name ieSceneCacheReader3
+ xpos 287
+ ypos 79
+}
+FrameHold {
+ first_frame 70
+ name FrameHold1
+ xpos 322
+ ypos 158
+}
+push $N2ea03360
+ieSceneCacheReader {
+ file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
+ sceneRoot /
+ filterByTag None
+ filterByName ""
+ sceneView {{0} imported: 0 1 selected: 0 items: /root/A/a /root/B/b}
+ translate {5 0 0}
+ loadAll true
+ name ieSceneCacheReader4
+ xpos 139
+ ypos 78
+}
+set N38de6c70 [stack 0]
+TimeOffset {
+ time_offset 30
+ name TimeOffset2
+ xpos 186
+ ypos 151
+}
+push $N38de6c70
+push $N2ea03360
+ieSceneCacheReader {
+ file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
+ sceneRoot /
+ filterByTag None
+ filterByName ""
+ sceneView {{0} imported: 0 1 selected: 0 1 items: /root/A/a /root/B/b}
+ loadAll true
+ name ieSceneCacheReader2
+ xpos -10
+ ypos 87
+}
+TimeOffset {
+ time_offset 10
+ name TimeOffset1
+ xpos -10
+ ypos 130
+}
+push $N2ea03360
+ieSceneCacheReader {
+ file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
+ sceneRoot /
+ filterByTag None
+ filterByName ""
+ sceneView {{0} imported: 0 1 selected: 0 1 items: /root/A/a /root/B/b}
+ translate {-5 0 0}
+ loadAll true
+ name ieSceneCacheReader1
+ xpos -164
+ ypos 90
+}
+Scene {
+ inputs 5
+ name Scene1
+ xpos 0
+ ypos 188
+}
+push 0
+ScanlineRender {
+ inputs 3
+ shutteroffset centred
+ shuttercustomoffset 0.25
+ motion_vectors_type distance
+ name ScanlineRender1
+ xpos -10
+ ypos 293
+}
+Write {
+ file "\[file dirname \[value root.name] ]/data/sceneCacheTestResults.####.exr"
+ file_type exr
+ version 3
+ name Write1
+ selected true
+ xpos -10
+ ypos 334
+}
+Viewer {
+ inputs 3
+ input_process false
+ name Viewer1
+ xpos 54
+ ypos 413
+}

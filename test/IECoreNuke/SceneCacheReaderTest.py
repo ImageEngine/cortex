@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,33 +33,48 @@
 ##########################################################################
 
 import unittest
+import IECoreNuke
 import IECore
-import sys
+import os
+import nuke
+from glob import glob
 
-sys.path.append( "test/IECoreNuke" )
+class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 
-from KnobAccessorsTest import *
-from FnAxisTest import *
-from DeepImageReaderTest import *
-from LensDistortTest import *
-from StringUtilTest import *
-from KnobConvertersTest import *
-from ParameterisedHolderTest import ParameterisedHolderTest
-from ObjectKnobTest import ObjectKnobTest
-from OpHolderTest import OpHolderTest
-from SceneCacheReaderTest import SceneCacheReaderTest
+	def setUp( self ) :
+		nuke.scriptClear()
 
-if IECore.withPNG() :
-	from PNGReaderTest import PNGReaderTest
+	def tearDown( self ) :
+		nuke.scriptClear()
+		for f in glob( "test/IECoreNuke/scripts/data/sceneCacheTestResults*.exr" ) :
+			try:
+				os.remove(f)
+			except:
+				pass
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreNuke/resultsPython.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testLoadedScriptWithRetime( self ) :
+
+		nuke.scriptOpen("test/IECoreNuke/scripts/sceneCacheTest.nk" )
+		w = nuke.toNode("Write1")
+		frames = [ 1, 10, 20, 30, 40, 50, 60, 70, 80 ]
+		nuke.executeMultiple( [ w ], map( lambda f: (f,f,1), frames ) )
+		for f in frames :
+			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResults.%04d.exr" % f )()
+			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.%04d.exr" % f )()
+			self.assertEqual( IECore.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
+		
+		n = nuke.toNode("ieSceneCacheReader4")
+		v = n.knob('sceneView')
+		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a']) )
+
+		# now force loading A+B and test in frame 20
+		v.setSelectedItems(['/root/A/a', '/root/B/b'])
+		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a', '/root/B/b']) )
+		nuke.executeMultiple( [ w ], [(20,20,1)] )
+		imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResultsB.0020.exr" )()
+		imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.0020.exr" )()
+		self.assertEqual( IECore.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
+
+if __name__ == "__main__":
+    unittest.main()
+
