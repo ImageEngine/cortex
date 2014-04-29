@@ -37,6 +37,8 @@
 import math
 import unittest
 import random
+
+import IECore
 from IECore import *
 
 class ImathV2f(unittest.TestCase):
@@ -493,6 +495,12 @@ class ImathV3f(unittest.TestCase):
 
 		v1.normalize()
 		self.assertEqual( v1, V3f(1.0, 0.0, 0.0) )
+		
+	def testRepr( self ) :
+	
+		v1 = IECore.V3f( 0.091242323423 )
+		v2 = eval( repr( v1 ) )
+		self.assertEqual( v1, v2 )
 
 class ImathBox3f(unittest.TestCase):
 	def testConstructors(self):
@@ -1106,6 +1114,12 @@ class ImathColor3Test( unittest.TestCase ) :
 		crgb = chsv.hsvToRGB()
 		self.failUnless( chsv.equalWithAbsError( Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
 		self.failUnless( crgb.equalWithAbsError( c, 0.001 ) )
+
+	def testRepr( self ) :
+	
+		c1 = IECore.Color3f( 0.091242323423 )
+		c2 = eval( repr( c1 ) )
+		self.assertEqual( c1, c2 )
 
 class ImathColor4Test( unittest.TestCase ) :
 

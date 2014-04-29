@@ -94,7 +94,7 @@ std::string repr<COL>( COL &x )							\
 	s << "IECore." << #COL << "( ";						\
 	for( unsigned i=0; i<COL::dimensions(); i++ )		\
 	{													\
-		s << x[i];										\
+		s << boost::lexical_cast<std::string>( x[i] );	\
 		if( i!=COL::dimensions()-1 )					\
 		{												\
 			s << ", ";									\
@@ -110,7 +110,7 @@ std::string str<COL>( COL &x )							\
 	std::stringstream s;								\
 	for( unsigned i=0; i<COL::dimensions(); i++ )		\
 	{													\
-		s << x[i];										\
+		s << boost::lexical_cast<std::string>( x[i] );	\
 		if( i!=COL::dimensions()-1 )					\
 		{												\
 			s << " ";									\
