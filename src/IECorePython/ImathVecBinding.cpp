@@ -159,7 +159,7 @@ std::string repr<VEC>( VEC &x )\
 	s << "IECore." << typeName<VEC>() << "( ";\
 	for( unsigned i=0; i<VEC::dimensions(); i++ )\
 	{\
-		s << x[i];\
+		s << boost::lexical_cast<string>( x[i] );\
 		if( i!=VEC::dimensions()-1 )\
 		{\
 			s << ", ";\
@@ -175,7 +175,7 @@ std::string str<VEC>( VEC &x )\
 	std::stringstream s;\
 	for( unsigned i=0; i<VEC::dimensions(); i++ )\
 	{\
-		s << x[i];\
+		s << boost::lexical_cast<string>( x[i] );\
 		if( i!=VEC::dimensions()-1 )\
 		{\
 			s << " ";\
