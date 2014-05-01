@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -140,7 +140,6 @@ bool DeepImageReader::doDeepEngine( DD::Image::Box box, const DD::Image::Channel
 			bool hasDeepBack = m_channels.contains( DD::Image::Chan_DeepBack );
 
 			DD::Image::DeepOutPixel dop;
-			float previousBack = pixel->getDepth( 0 );
 			for( unsigned int i = 0; i < nSamples; ++i )
 			{
 				float *data( pixel->channelData( i ) );
@@ -150,21 +149,19 @@ bool DeepImageReader::doDeepEngine( DD::Image::Box box, const DD::Image::Channel
 				{
 					if( z == DD::Image::Chan_DeepFront )
 					{
-						if( !hasDeepBack )
-						{
-							dop.push_back( previousBack );
-							previousBack = depth;
-						}
-						else
-						{
-							dop.push_back( depth );
-						}
+						dop.push_back( depth );
 					}
 					else if( z == DD::Image::Chan_DeepBack )
 					{
 						if( !hasDeepBack )
 						{
-							dop.push_back( depth );
+							float nextFront = depth;
+							if( i < nSamples - 1 )
+							{
+								nextFront = pixel->getDepth( i + 1 );
+							}
+
+							dop.push_back( nextFront );
 						}
 						else
 						{
@@ -210,7 +207,7 @@ bool DeepImageReader::loadFileFromPath( const std::string &filePath, std::string
 
 			m_reader->channelNames( channelNames );
 
-			m_channels = DD::Image::ChannelSet( DD::Image::Mask_DeepFront | DD::Image::Mask_DeepBack );
+			m_channels = DD::Image::ChannelSet( DD::Image::Mask_DeepFront );
 			m_channelMap.clear();
 			for( std::vector< std::string >::const_iterator it( channelNames.begin() ); it != channelNames.end(); ++it )
 			{
