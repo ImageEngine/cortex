@@ -519,7 +519,15 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		inline const SampleTimes &attributeSampleTimes( const SceneCache::Name &name ) const
 		{
-			// \todo consider tbb::concurrent_hash_map instead
+			AttributeMapMutex::scoped_lock lock( m_attributeMutex, false );
+			AttributeSamplesMap::const_iterator cit = m_attributeSampleTimes.find( name );
+			if ( cit != m_attributeSampleTimes.end() )
+			{
+				return *(cit->second);
+			}
+
+			lock.upgrade_to_writer();
+
 			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< IndexedIO::EntryID, SampleTimes* >( name, NULL ) );
 			if ( it.second )
 			{
@@ -725,6 +733,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		// \todo Consider using concurrent_vector for constant access time.
 		typedef tbb::concurrent_hash_map< uint64_t, SampleTimes > SampleTimesMap;
 		typedef std::map< IndexedIO::EntryID, const SampleTimes* > AttributeSamplesMap;
+		typedef tbb::spin_rw_mutex AttributeMapMutex;
 
 		typedef std::pair< const ReaderImplementation *, size_t > SimpleCacheKey;
 		typedef tuple< const ReaderImplementation *, const SceneCache::Name &, size_t > AttributeCacheKey;
@@ -843,6 +852,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		mutable const SampleTimes *m_boundSampleTimes;
 		mutable const SampleTimes *m_transformSampleTimes;
 		mutable AttributeSamplesMap m_attributeSampleTimes;
+		mutable AttributeMapMutex m_attributeMutex;
 		mutable const SampleTimes *m_objectSampleTimes;
 
 		IndexedIOPtr globalSampleTimes() const
