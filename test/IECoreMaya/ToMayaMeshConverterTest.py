@@ -304,8 +304,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 			origNormal = maya.cmds.polyNormalPerVertex( sphere+'.vtx['+str(i)+']', query=True, xyz=True )
 			normal3f = maya.cmds.polyNormalPerVertex( newSphere+'.vtx['+str(i)+']', query=True, xyz=True )
 			normal3d = maya.cmds.polyNormalPerVertex( newSphere2+'.vtx['+str(i)+']', query=True, xyz=True )
-			self.assertEqual( origNormal, normal3f )
-			self.assertEqual( origNormal, normal3d )
+			for j in range( 0, len(origNormal) ) :
+				self.assertAlmostEqual( origNormal[j], normal3f[j], 6 )
+				self.assertAlmostEqual( origNormal[j], normal3d[j], 6 )
 
 	def testSetMeshInterpolation( self ) :
 
