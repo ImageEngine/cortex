@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -316,6 +316,44 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( "map2_t" in m )
 		self.assert_( "map2Indices" in m )
 
+	def testManyUVConversionsFromPlug( self ) :
+		
+		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		
+		self.assertTrue( "s" in coreMesh )
+		self.assertTrue( "t" in coreMesh )
+		
+		for i in range( 0, 7 ) :
+			coreMesh[ "testUVSet%d_s" % i ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
+			coreMesh[ "testUVSet%d_t" % i ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		
+		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
+		
+		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
+		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
+		
+		op = fn.getOp()
+		with fn.parameterModificationContext() :
+			op["input"].setValue( coreMesh )
+		
+		maya.cmds.file( rename="/tmp/test.ma" )
+		maya.cmds.file( save=True )
+		maya.cmds.file( new=True, f=True )
+		maya.cmds.file( "/tmp/test.ma", open=True )
+		
+		result = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
+		
+		self.assertTrue( result.arePrimitiveVariablesValid() )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 760 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 2280 )
+		
+		self.assertEqual( coreMesh["s"], result["s"] )
+		self.assertEqual( coreMesh["t"], result["t"] )
+		
+		for i in range( 0, 7 ) :
+			self.assertEqual( coreMesh[ "testUVSet%d_s" % i ], result[ "testUVSet%d_s" %  i ] )
+			self.assertEqual( coreMesh[ "testUVSet%d_t" %  i ], result[ "testUVSet%d_t" %  i ] )
+	
 	def testColors( self ):
 
 		# test alpha to rgb conversion
@@ -363,4 +401,4 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( converter.colors("cRGBA"), m['cRGBA_Cs'].data )
 		
 if __name__ == "__main__":
-	IECoreMaya.TestProgram()
+	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

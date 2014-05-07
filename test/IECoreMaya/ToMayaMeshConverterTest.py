@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -168,6 +168,62 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
 		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
 	
+	def testManyUVConversionsFromPlug( self ) :
+		
+		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		
+		self.assertTrue( "s" in coreMesh )
+		self.assertTrue( "t" in coreMesh )
+		
+		for i in range( 0, 7 ) :
+			coreMesh[ "testUVSet%d_s" % i ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
+			coreMesh[ "testUVSet%d_t" % i ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		
+		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
+		
+		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
+		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
+		
+		op = fn.getOp()
+		with fn.parameterModificationContext() :
+			op["input"].setValue( coreMesh )
+		
+		maya.cmds.file( rename="/tmp/test.ma" )
+		maya.cmds.file( save=True )
+		maya.cmds.file( new=True, f=True )
+		maya.cmds.file( "/tmp/test.ma", open=True )
+		
+		fnMesh = OpenMaya.MFnMesh( IECoreMaya.dagPathFromString( mayaMesh ) )
+		self.assertEqual( fnMesh.numPolygons(), 760 )
+		# When calling fnMesh.numFaceVertices() (and other MFnMesh API calls), given a mesh with 6
+		# or more UV sets, which has never been evaluated before, the first call throws kFailure.
+		# From within the ToMayaMeshConverter itself, the output plug appears fine, and the API calls
+		# evaluate as expected. Despite this, the resulting mesh cannot be evaluated on the first try.
+		# Making the mesh visible, or making any attempt to evaluate it, will trigger some unknown
+		# internal updating, and subsequent attempts to evaluate it will succeed. Meshes with 5 or less
+		# UV sets do not suffer from this problem. Leaving this test failing in case it is fixed in a
+		# future Maya, and to mark the issue so users of ToMayaMeshConverter have breadcrumbs to follow.
+		self.assertEqual( fnMesh.numFaceVertices(), 2280 ) # Known failure. See note above for an explanation.
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
+		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
+		
+		u = OpenMaya.MFloatArray()
+		v = OpenMaya.MFloatArray()
+		
+		fnMesh.getUVs( u, v )
+		self.assertEqual( u.length(), 2280 )
+		self.assertEqual( v.length(), 2280 )
+		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
+		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		
+		for i in range( 0, 7 ) :
+			
+			fnMesh.getUVs( u, v, "testUVSet%d" % i )
+			self.assertEqual( u.length(), 2280 )
+			self.assertEqual( v.length(), 2280 )
+			self.assertEqual( u[12], coreMesh[ "testUVSet%d_s" % i ].data[12] )
+			self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet%d_t" % i ].data[12] )
+	
 	def testUVConversionFromMayaMesh( self ) :
 		
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
@@ -248,8 +304,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 			origNormal = maya.cmds.polyNormalPerVertex( sphere+'.vtx['+str(i)+']', query=True, xyz=True )
 			normal3f = maya.cmds.polyNormalPerVertex( newSphere+'.vtx['+str(i)+']', query=True, xyz=True )
 			normal3d = maya.cmds.polyNormalPerVertex( newSphere2+'.vtx['+str(i)+']', query=True, xyz=True )
-			self.assertEqual( origNormal, normal3f )
-			self.assertEqual( origNormal, normal3d )
+			for j in range( 0, len(origNormal) ) :
+				self.assertAlmostEqual( origNormal[j], normal3f[j], 6 )
+				self.assertAlmostEqual( origNormal[j], normal3d[j], 6 )
 
 	def testSetMeshInterpolation( self ) :
 
