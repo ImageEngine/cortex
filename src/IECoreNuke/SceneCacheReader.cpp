@@ -529,6 +529,7 @@ Hash SceneCacheReader::sceneHash() const
 	Hash newHash;
 	newHash.append( m_data->m_evaluatedFilePath );
 	newHash.append( m_data->m_rootText );
+	newHash.append( outputContext().frame() );
 	return newHash;
 }
 
