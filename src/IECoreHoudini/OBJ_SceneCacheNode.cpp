@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -284,7 +284,8 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildExpansionParameters()
 		
 		thisTemplate[1] = PRM_Template(
 			PRM_CALLBACK, 1, &pCollapse, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::collapseButtonCallback, 0, 0,
-			"Clean the hierarchy below the specified root path."
+			"Clean the hierarchy below the specified root path. Note that this is a destructive operation. "
+			"All nodes contained within will be deleted."
 		);
 		
 		thisTemplate[2] = PRM_Template(
@@ -526,7 +527,10 @@ OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 template<typename BaseType>
 bool OBJ_SceneCacheNode<BaseType>::updateParmsFlags()
 {
-	this->enableParm( pExpanded.getToken(), !this->evalInt( pExpanded.getToken(), 0, 0 ) );
+	bool expanded = this->evalInt( pExpanded.getToken(), 0, 0 );
+	this->enableParm( pExpand.getToken(), !expanded );
+	this->enableParm( pExpanded.getToken(), !expanded );
+	this->enableParm( pCollapse.getToken(), expanded );
 	bool override = this->evalInt( pOverrideTransform.getToken(), 0, 0 );
 	this->enableParm( "t", override );
 	this->enableParm( "r", override );
