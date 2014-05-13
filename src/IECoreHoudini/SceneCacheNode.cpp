@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -651,6 +651,10 @@ ConstSceneInterfacePtr SceneCacheNode<BaseType>::scene( const std::string &fileN
 	catch ( std::exception &e )
 	{
 		std::cerr << "Error loading \"" << fileName << "\" at location \"" << path << "\": " << e.what() << std::endl;
+	}
+	catch ( ... )
+	{
+		std::cerr << "Unknown error loading \"" << fileName << "\" at location \"" << path << "\": " << std::endl;
 	}
 	
 	return result;
