@@ -37,8 +37,10 @@
 import os
 import math
 import unittest
-from IECore import *
 import random
+
+from IECore import *
+import IECore
 
 class SimpleTypedDataTest(unittest.TestCase):
 
@@ -323,7 +325,17 @@ class SimpleTypedDataTest(unittest.TestCase):
 		
 		self.assertEqual( s2.value.value(), "i" )
 		self.assertEqual( s, s2 )
-		
+
+	def testStringDataRepr( self ) :
+	
+		for s in [
+			"a\nb",
+			"a'",
+			'"',
+		] :
+			d = IECore.StringData( s )
+			self.assertEqual( eval( repr( d ) ), d )
+
 class BoolDataTest( unittest.TestCase ) :
 
 	def test( self ) :
