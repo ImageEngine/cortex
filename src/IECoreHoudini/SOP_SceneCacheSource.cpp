@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -386,7 +386,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			SceneInterface::Path path;
 			scene->path( path );
 			SceneInterface::pathToString( path, fullName );
-			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
+			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to Houdini" ).c_str() );
 		}
 	}
 	
@@ -564,9 +564,22 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			}
 			
 			converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
-			converter->transferAttribs( gdp, pointRange, primRange );
 			
-			return true;
+			try
+			{
+				converter->transferAttribs( gdp, pointRange, primRange );
+				return true;
+			}
+			catch ( std::exception &e )
+			{
+				addWarning( SOP_MESSAGE, e.what() );
+				return false;
+			}
+			catch ( ... )
+			{
+				addWarning( SOP_MESSAGE, "Attribute transfer failed for unknown reasons" );
+				return false;
+			}
 		}
 		else
 		{
@@ -578,7 +591,21 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	// fallback to full conversion
 	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( params.attributeFilter );
-	return converter->convert( myGdpHandle );
+	
+	try
+	{
+		return converter->convert( myGdpHandle );
+	}
+	catch ( std::exception &e )
+	{
+		addWarning( SOP_MESSAGE, e.what() );
+		return false;
+	}
+	catch ( ... )
+	{
+		addWarning( SOP_MESSAGE, "Conversion failed for unknown reasons" );
+		return false;
+	}
 }
 
 void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
