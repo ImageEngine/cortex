@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -317,7 +317,14 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		if ( interpolation == detailInterpolation )
  		{
 			// add detail attribs
-			converter->convert( name, geo );
+			try
+			{
+				converter->convert( name, geo );
+			}
+			catch ( std::exception &e )
+			{
+				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Detail Attrib: " + e.what() );
+			}
 	 	}
 		else if ( interpolation == pointInterpolation )
 		{
@@ -329,18 +336,39 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			}
 			else
 			{
- 				converter->convert( name, geo, points );
+ 				try
+				{
+					converter->convert( name, geo, points );
+				}
+				catch ( std::exception &e )
+				{
+					throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Point Attrib: " + e.what() );
+				}
 			}
 		}
 		else if ( interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
-			converter->convert( name, geo, prims );
+			try
+			{
+				converter->convert( name, geo, prims );
+			}
+			catch ( std::exception &e )
+			{
+				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Primitive Attrib: " + e.what() );
+			}
 		}
 		else if ( interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
-			converter->convert( name, geo, vertRange );
+			try
+			{
+				converter->convert( name, geo, vertRange );
+			}
+			catch ( std::exception &e )
+			{
+				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Vertex Attrib: " + e.what() );
+			}
 		}
 	}
 	
