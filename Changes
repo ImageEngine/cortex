@@ -1,3 +1,26 @@
+# 8.4.3
+
+#### IECore
+
+- Improved precision of Imath Vec and Color repr() and str().
+- Using mutex on all access to the internal directory nodes in StreamIndexedIO.
+- SceneCache attribute read is now thread-safe.
+
+#### IECoreMaya
+
+- Working around a bug in Maya for meshes with 6 or more UV sets.
+- Fixed precision issue in failing test case.
+
+#### IECoreHoudini
+
+- Improved Exception handling in Houdini SceneCache nodes.
+- Improved UI for Expand/Collapse buttons.
+- Fixed bug in CortexConverter SOP todo with multiple CortexObject primitives with the same name.
+
+#### IECoreNuke
+
+- Fixed a bug in the SceneCacheReader that was preventing animated scene caches from displaying properly.
+
 # 8.4.2
 
 #### IECoreNuke
