@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -467,7 +467,49 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			for vert in verts :
 				self.assertAlmostEqual( sData[i], vert.attribValue( outS ) )
 				self.assertAlmostEqual( tData[i], vert.attribValue( outT ) )
-				i += 1		
+				i += 1
+	
+	def testSameName( self ) :
+		
+		node = self.scene()
+		
+		# it all converts to Cortex prims
+		node.parm( "resultType" ).set( 0 )
+		geo = node.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 3 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Custom ] * 3 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'boxB', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		rename = node.createOutputNode( "name" )
+		rename.parm( "group1" ).set( "@name=boxB" )
+		rename.parm( "name1" ).set( "boxA" )
+		
+		# still have 3 CortexObjects
+		geo = rename.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 3 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Custom ] * 3 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 2 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
+		
+		# turns into 2 named Houdini objects since 2 of the names were the same
+		toHoudini = rename.createOutputNode( "ieCortexConverter" )
+		toHoudini.parm( "resultType" ).set( 1 )
+		geo = toHoudini.geometry()
+		prims = geo.prims()
+		self.assertEqual( len(prims), 112 )
+		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
+		nameAttr = geo.findPrimAttrib( "name" )
+		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'torus' ] ) )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 12 )
+		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
 
 if __name__ == "__main__":
 	unittest.main()
