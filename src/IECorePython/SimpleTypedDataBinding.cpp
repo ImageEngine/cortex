@@ -170,7 +170,14 @@ string str( std::string &x )
 template<>
 string repr( std::string &x )
 {
-	return "\"" + x + "\"";
+	// we must use the python repr() implementation in order to
+	// get proper escaping and quoting of special characters.
+	// come to think of it, i don't know why we don't just use
+	// this implementation for everything, and not need all these
+	// specialisations - perhaps for performance reasons?
+	IECorePython::ScopedGILLock gilLock;
+	object o( x );
+	return extract<std::string>( o.attr( "__repr__" )() );
 }
 
 template<>
