@@ -595,7 +595,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		doTest = True
 		
 		def hasMyTags( node, tag, tagFilter ) :
-			"""'archivable' should be on all transforms and 'renderable' only at shape transforms."""			
+			#'archivable' should be on all transforms and 'renderable' only at shape transforms.
 
 			if not doTest:
 				return False
@@ -621,7 +621,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 			return dagPath.fullPathName().endswith("Shape")
 
 		def readMyTags( node, tagFilter ) :
-			"""'archivable' should be on all transforms and 'renderable' only at shape transforms."""			
+			#'archivable' should be on all transforms and 'renderable' only at shape transforms.
 			
 			if not doTest:
 				return []
@@ -712,17 +712,62 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		sphereScene = scene.child('pSphere')
 		self.assertEqual( scene.attributeNames(), [] )
 		self.assertEqual( scene.readAttribute("anyAttr", 0.0), None )
-		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("transformAttribute") ] )
+		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
 		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
 		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), None )
 		self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
-		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString('shapeAttribute') ] )
+		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString('shapeAttribute') ] )
 		self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
 		
 		# Disable custom attribute functions so they don't mess with other tests
 		doTest = False
+	
+	def testSceneVisible( self ) :
 		
+		maya.cmds.createNode( "transform", name = "t1" )
+		maya.cmds.createNode( "transform", name = "t2" )
 		
+		scene = IECoreMaya.MayaScene()
+		t1 = scene.child( "t1" )
+		t2 = scene.child( "t2" )
+		
+		self.assertEqual( t1.attributeNames(), ["scene:visible"] )
+		self.assertEqual( t2.attributeNames(), ["scene:visible"] )
+		
+		self.assertEqual( t1.hasAttribute( "scene:visible" ), True )
+		self.assertEqual( t2.hasAttribute( "scene:visible" ), True )
+		
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		
+		# test visibility on transform:
+		maya.cmds.setAttr( "t1.visibility", False )
+		
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		
+		maya.cmds.setAttr( "t1.visibility", True )
+		
+		# test visibility on shape. Add a mesh to the two transforms, along with an image plane to confuse it:
+		maya.cmds.createNode( "mesh", name = "m1", parent="t1" )
+		maya.cmds.createNode( "imagePlane", name = "i1", parent="t1" )
+		
+		maya.cmds.createNode( "imagePlane", name = "i2", parent="t2" )
+		maya.cmds.createNode( "mesh", name = "m2", parent="t2" )
+		
+		maya.cmds.setAttr( "i1.visibility", False )
+		maya.cmds.setAttr( "i2.visibility", False )
+		
+		# these should both be visible, as cortex ignores image planes and the meshes are visible:
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+	
+		maya.cmds.setAttr( "m1.visibility", False )
+		maya.cmds.setAttr( "m2.visibility", False )
+		
+		# should both be invisible now, as we've hidden the meshes:
+		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 		
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
