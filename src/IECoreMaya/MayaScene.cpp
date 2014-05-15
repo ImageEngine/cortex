@@ -10,6 +10,7 @@
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
 #include "IECoreMaya/FromMayaCameraConverter.h"
 #include "IECoreMaya/Convert.h"
+#include "IECoreMaya/SceneShape.h"
 
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
@@ -282,7 +283,7 @@ ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 		{
 			MDagPath childDag;
 			
-			// find an object with a cortex converter and check its visibility:
+			// find an object that's either a SceneShape, or has a cortex converter and check its visibility:
 			unsigned int childCount = 0;
 			m_dagPath.numberOfShapesDirectlyBelow(childCount);
 			
@@ -292,6 +293,12 @@ ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 				if( d.extendToShapeDirectlyBelow( c ) )
 				{
 					MFnDagNode fnChildDag(d);
+					if( fnChildDag.typeId() == SceneShape::id )
+					{
+						childDag = d;
+						break;
+					}
+					
 					if ( fnChildDag.isIntermediateObject() )
 					{
 						continue;

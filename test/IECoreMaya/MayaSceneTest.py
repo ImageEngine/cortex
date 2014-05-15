@@ -769,5 +769,29 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( t1.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 		self.assertEqual( t2.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 		
+	def testSceneShapeVisible( self ) :
+		
+		# make sure we are at time 0
+		maya.cmds.currentTime( "0sec" )
+		scene = IECoreMaya.MayaScene()
+
+		envShape = str( IECoreMaya.FnSceneShape.create( "ieScene1" ).fullPathName() )
+		envNode = 'ieScene1'
+
+		envScene = scene.child( envNode )
+		self.failUnless( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
+		
+		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
+		self.failUnless( IECore.InternedString( "scene:visible" ) in envScene.attributeNames() )
+		
+		maya.cmds.setAttr( "ieScene1.visibility", False )
+		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+		
+		maya.cmds.setAttr( "ieScene1.visibility", True )
+		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( True ) )
+		
+		maya.cmds.setAttr( envShape + ".visibility", False )
+		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+	
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
