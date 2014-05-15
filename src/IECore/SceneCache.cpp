@@ -747,9 +747,9 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			public :
 
 				SharedData() : 
-					objectCache( new SimpleCache( doReadObjectAtSample, simpleHash,  10000 )  ), 
+					objectCache( new SimpleCache( doReadObjectAtSample, objectHash,  10000 )  ), 
 					attributeCache( new AttributeCache( doReadAttributeAtSample, attributeHash, 1000) ), 
-					transformCache( new SimpleCache(  doReadTransformAtSample, simpleHash, 1000) )
+					transformCache( new SimpleCache(  doReadTransformAtSample, transformHash, 1000) )
 				{
 				}
 
@@ -926,10 +926,17 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return &(it->second);
 		}
 
-		static MurmurHash simpleHash( const SimpleCacheKey &key )
+		static MurmurHash transformHash( const SimpleCacheKey &key )
 		{
 			const ReaderImplementation *reader = key.first;
 			size_t sample = key.second;
+
+			// \todo Implement entryHash in the base class IndexedIO and remove these casts here and the alternative hash method based on path.
+			StreamIndexedIOPtr io = runTimeCast< StreamIndexedIO >( reader->m_indexedIO->subdirectory( transformEntry, IndexedIO::NullIfMissing ) );
+			if ( io )
+			{
+				return io->entryHash( sampleEntry(sample) );
+			}
 
 			SceneInterface::Path p;
 			reader->path(p);
@@ -962,6 +969,32 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return Object::load( io, sampleEntry(key.second) );
 		}
 
+		static MurmurHash objectHash( const SimpleCacheKey &key )
+		{
+			const ReaderImplementation *reader = key.first;
+			size_t sample = key.second;
+
+			// \todo Implement entryHash in the base class IndexedIO and remove these casts here and the alternative hash method based on path.
+			StreamIndexedIOPtr io = runTimeCast< StreamIndexedIO >( reader->m_indexedIO->subdirectory( objectEntry, IndexedIO::NullIfMissing ) );
+			if ( io )
+			{
+				return io->entryHash( sampleEntry(sample) );
+			}
+
+			SceneInterface::Path p;
+			reader->path(p);
+
+			MurmurHash h;
+			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
+			{
+				h.append( it->value() );
+				h.append( '/' );
+			}
+			h.append( (uint64_t)sample );
+
+			return h;
+		}
+
 		// static function used by the cache mechanism to actually load the object data from file.
 		static ObjectPtr doReadObjectAtSample( const SimpleCacheKey &key )
 		{
@@ -974,6 +1007,13 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			const SceneInterface::Name &name = get<1>( key );
 			size_t sample = get<2>( key );
 
+			// \todo Implement entryHash in the base class IndexedIO and remove these casts here and the alternative hash method based on path.
+			StreamIndexedIOPtr io = runTimeCast< StreamIndexedIO >( reader->m_indexedIO->subdirectory(attributesEntry)->subdirectory(name, IndexedIO::NullIfMissing ) );
+			if ( io )
+			{
+				return io->entryHash( sampleEntry(sample) );
+			}
+
 			SceneInterface::Path p;
 			reader->path(p);
 
@@ -985,6 +1025,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 			h.append(name.value());
 			h.append( (uint64_t)sample );
+
 			return h;
 		}
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@
 #include "boost/optional.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 
+#include "MurmurHash.h"
 #include "IndexedIO.h"
 #include "Exception.h"
 #include "VectorTypedData.h"
@@ -91,6 +92,8 @@ class StreamIndexedIO : public IndexedIO
 		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
 
 		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
+
+		MurmurHash entryHash( const IndexedIO::EntryID &name ) const;
 
 		void commit();
 
