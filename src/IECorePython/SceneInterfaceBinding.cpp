@@ -267,6 +267,8 @@ void bindSceneInterface()
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
 		.def( "create", SceneInterface::create ).staticmethod( "create" )
 		.def( "supportedExtensions", supportedExtensions, ( arg("modes") = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append ) ).staticmethod( "supportedExtensions" )
+		
+		.add_static_property( "visibilityName", make_getter(&SceneInterface::visibilityName, return_value_policy<reference_existing_object>() ) )
 	;
 }
 
