@@ -1384,11 +1384,15 @@ int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 
 IECore::InternedString SceneShapeInterface::selectionName( int index )
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
 	return m_indexToNameMap[index];
 }
 
 const std::vector< InternedString > & SceneShapeInterface::componentNames() const
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
 	return m_indexToNameMap;
 }
 
