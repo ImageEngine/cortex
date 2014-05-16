@@ -10,9 +10,12 @@
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
 #include "IECoreMaya/FromMayaCameraConverter.h"
 #include "IECoreMaya/Convert.h"
+#include "IECoreMaya/SceneShape.h"
 
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
+#include "maya/MPxTransform.h"
+#include "maya/MPxSurfaceShape.h"
 #include "maya/MFnCamera.h"
 #include "maya/MFnMatrixData.h"
 #include "maya/MFnNumericData.h"
@@ -212,6 +215,12 @@ bool MayaScene::hasAttribute( const Name &name ) const
 	{
 		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
 	}
+	
+	if( name == SceneInterface::visibilityName )
+	{
+		return true;
+	}
+	
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -238,6 +247,7 @@ void MayaScene::attributeNames( NameList &attrs ) const
 	}
 
 	attrs.clear();
+	attrs.push_back( SceneInterface::visibilityName );
 	for ( std::vector< CustomAttributeReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
 	{
 		it->m_names( m_dagPath, attrs );
@@ -250,11 +260,81 @@ ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 	{
 		return 0;
 	}
-
+	
 	if( m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
 	}
+	
+	tbb::mutex::scoped_lock l( s_mutex );
+	if( name == SceneInterface::visibilityName )
+	{
+		bool visible = true;
+		
+		MStatus st;
+		MFnDagNode dagFn( m_dagPath );
+		MPlug visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+		if( st )
+		{
+			visible = visibilityPlug.asBool();
+		}
+		
+		if( visible )
+		{
+			MDagPath childDag;
+			
+			// find an object that's either a SceneShape, or has a cortex converter and check its visibility:
+			unsigned int childCount = 0;
+			m_dagPath.numberOfShapesDirectlyBelow(childCount);
+			
+			for ( unsigned int c = 0; c < childCount; c++ )
+			{
+				MDagPath d = m_dagPath;
+				if( d.extendToShapeDirectlyBelow( c ) )
+				{
+					MFnDagNode fnChildDag(d);
+					if( fnChildDag.typeId() == SceneShape::id )
+					{
+						childDag = d;
+						break;
+					}
+					
+					if ( fnChildDag.isIntermediateObject() )
+					{
+						continue;
+					}
+					
+					FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( d );
+					if( shapeConverter )
+					{
+						childDag = d;
+						break;
+					}
+
+					FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( d );
+					if( dagConverter )
+					{
+						childDag = d;
+						break;
+					}
+				}
+			}
+			
+			if( childDag.isValid() )
+			{
+				MFnDagNode dagFn( childDag );
+				MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
+				if( st )
+				{
+					visible = visibilityPlug.asBool();
+				}
+			}
+			
+		}
+		
+		return new BoolData( visible );
+	}
+	
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{

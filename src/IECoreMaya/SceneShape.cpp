@@ -279,18 +279,21 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 		return;
 	}
 	
+	SceneInterface::NameList sceneAttrNames;
 	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
 	if ( !scene )
 	{
 		return;
 	}
-	scene->attributeNames( attributeNames );
+	scene->attributeNames( sceneAttrNames );
+	attributeNames.insert( attributeNames.end(), sceneAttrNames.begin(), sceneAttrNames.end() );
 	
 	MFnDagNode fnChildDag( dagPath );
 	if( !fnChildDag.isIntermediateObject() && hasSceneShapeLink( p ) )
 	{
 		attributeNames.push_back( LinkedScene::linkAttribute );
 	}
+	
 }
 
 ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInterface::Name attributeName )
