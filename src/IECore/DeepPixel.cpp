@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -41,7 +41,8 @@
 using namespace IECore;
 
 DeepPixel::DeepPixel( const std::string channelNames, unsigned numSamples )
-	: m_channels( channelNames.size() )
+	: m_sorted( false ),
+	m_channels( channelNames.size() )
 {
 	m_depthIndices.reserve( numSamples );
 	m_samples.reserve( numSamples * ( 1 + channelNames.size() ) );
@@ -54,6 +55,7 @@ DeepPixel::DeepPixel( const std::string channelNames, unsigned numSamples )
 }
 
 DeepPixel::DeepPixel( const std::vector<std::string> &channelNames, unsigned numSamples )
+	: m_sorted( false ) 
 {
 	m_depthIndices.reserve( numSamples );
 	m_samples.reserve( numSamples * ( 1 + channelNames.size() ) );

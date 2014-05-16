@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,7 @@ const DeepImageWriter::DeepImageWriterDescription<SHWDeepImageWriter> SHWDeepIma
 
 SHWDeepImageWriter::SHWDeepImageWriter()
 	:	DeepImageWriter( "Writes 3delight SHW deep shadow file format." ),
-		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 )
+		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 ), m_alphaOffset( 0 )
 {
 	std::vector<std::string> channels( 1, "A" );
 	m_channelsParameter->setValue( new StringVectorData( channels ) );
@@ -60,7 +60,7 @@ SHWDeepImageWriter::SHWDeepImageWriter()
 
 SHWDeepImageWriter::SHWDeepImageWriter( const std::string &fileName )
 	:	DeepImageWriter( "Writes 3delight SHW deep shadow file format." ),
-		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 )
+		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 ), m_alphaOffset( 0 )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 	
@@ -164,7 +164,7 @@ void SHWDeepImageWriter::open()
 		throw InvalidArgumentException( std::string( "Tile size must be equal to or less than resolution." ) );
 	}
 	
-	if ( ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) || ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) )
+	if ( ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) || ( ( tileSize.y & ( tileSize.y - 1 ) ) != 0 ) )
 	{
 		throw InvalidArgumentException( std::string( "Tile width and height must be a power of two." ) );
 	}
