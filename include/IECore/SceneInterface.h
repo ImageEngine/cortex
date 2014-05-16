@@ -92,6 +92,8 @@ class SceneInterface : public RunTimeTyped
 		static const Name &rootName;
 		/// Utility variable that can be used anytime you want to refer to the root path in the Scene.
 		static const Path &rootPath;
+		/// Name of the visibility attribute
+		static const Name visibilityName;
 
 		/// Create an instance of a subclass which is able to open the file found at "path".
 		/// Files can be opened for Read, Write, or Append depending on the derived classes.

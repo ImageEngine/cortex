@@ -105,7 +105,10 @@ class SceneInterfaceTest( unittest.TestCase ) :
 		instance4 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertFalse( instance4.isSame( instance1 ) )
 		self.assertTrue( instance4.isSame( instance3 ) )
-
+	
+	def testVisibilityName( self ) :
+		self.assertEqual( IECore.SceneInterface.visibilityName, "scene:visible" )
+	
 if __name__ == "__main__":
 	unittest.main()
 

@@ -42,6 +42,7 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneInterface )
 
 const SceneInterface::Name &SceneInterface::rootName = IndexedIO::rootName;
 const SceneInterface::Path &SceneInterface::rootPath = IndexedIO::rootPath;
+const SceneInterface::Name SceneInterface::visibilityName( "scene:visible" );
 
 class SceneInterface::CreatorMap : public std::map< std::pair< std::string, IndexedIO::OpenModeFlags >, CreatorFn>
 {
