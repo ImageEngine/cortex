@@ -2284,6 +2284,9 @@ if doConfigure :
 					]
 				)
 				
+				if "-DIECORE_WITH_DEEPEXR" in coreEnv["CPPFLAGS"] :
+					nukeEnv.Append( CPPFLAGS = [ "-DIECORE_WITH_DEEPEXR" ] )
+				
 				nukePythonModuleEnv.Append( LIBS = [
 					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
 					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
