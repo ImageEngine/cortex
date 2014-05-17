@@ -34,8 +34,11 @@
 
 #include <vector>
 #include <iostream>
+
 #include "tbb/tbb.h"
+
 #include "IECore/SharedSceneInterfaces.h"
+
 #include "SceneCacheThreadingTest.h"
 
 using namespace boost;
@@ -52,30 +55,44 @@ struct SceneCacheThreadingTest
 	{
 		public :
 			
-			TestSceneCache() : m_errors( 0 )
+			TestSceneCache( const char *attribute ) : m_errors( 0 ), m_attribute( attribute )
 			{
 			}
-
-			void operator() ( int instance ) const
+			
+			TestSceneCache( TestSceneCache &that, tbb::split ) : m_errors( 0 ), m_attribute( that.m_attribute )
 			{
-				for ( size_t i = 0; i < 1000; i++ )
+			}
+			
+			void operator()( const blocked_range<size_t> &r ) const
+			{
+				for ( size_t i = r.begin(); i != r.end(); ++i )
 				{
-					if ( (instance + i) % 7 == 0 )
+					for ( size_t j = 0; j < 1000; j++ )
 					{
-						SharedSceneInterfaces::clear();
-					}
-					ConstSceneInterfacePtr scene = SharedSceneInterfaces::get("test/IECore/data/sccFiles/attributeAtRoot.scc");
-					try 
-					{
-						scene->readAttribute("w", 0);
-					}
-					catch( Exception e )
-					{
-						m_errors++;
+						if ( ( i + j ) % 7 == 0 )
+						{
+							SharedSceneInterfaces::clear();
+						}
+
+						ConstSceneInterfacePtr scene = SharedSceneInterfaces::get("test/IECore/data/sccFiles/attributeAtRoot.scc");
+
+						try 
+						{
+							scene->readAttribute( m_attribute, 0 );
+						}
+						catch( Exception &e )
+						{
+							m_errors++;
+						}
 					}
 				}
 			}
-
+			
+			void join( const TestSceneCache &that )
+			{
+				m_errors += that.m_errors;
+			}
+			
 			size_t errors() const
 			{
 				return m_errors;
@@ -83,30 +100,17 @@ struct SceneCacheThreadingTest
 		
 		private :
 			mutable size_t m_errors;
-			SceneInterface::Path m_attributePath;
+			SceneInterface::Name m_attribute;
 	};
 
 	void testAttributeRead()
 	{
-		const int numThreads = 100;
-
-		TestSceneCache task;
-		std::vector< tbb::tbb_thread *> threads;
-
-		for ( int i = 0; i < numThreads; i++ )
-		{
-			threads.push_back( new tbb::tbb_thread( task, i ) );
-		}
-		for ( int i = 0; i < numThreads; i++ )
-		{
-			threads[i]->join();
-		}
-		for ( int i = 0; i < numThreads; i++ )
-		{
-			delete threads[i];
-		}
-		BOOST_CHECK( task.errors() == 0 );
-
+		task_scheduler_init scheduler( 100 );
+		
+		TestSceneCache task( "w" );
+		
+		parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
+ 		BOOST_CHECK( task.errors() == 0 );
 	}
 
 };
