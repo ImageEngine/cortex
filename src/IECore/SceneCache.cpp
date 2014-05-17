@@ -535,6 +535,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 			if ( !it.first->second )
 			{
+				m_attributeSampleTimes.erase( it.first );
 				throw Exception( ( boost::format( "No samples for attribute %s available" ) % name.value() ).str() );
 			}
 			return *(it.first->second);

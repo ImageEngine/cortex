@@ -112,6 +112,16 @@ struct SceneCacheThreadingTest
 		parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
  		BOOST_CHECK( task.errors() == 0 );
 	}
+	
+	void testFakeAttributeRead()
+	{
+		task_scheduler_init scheduler( 100 );
+		
+		TestSceneCache task( "fake" );
+		
+		parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
+ 		BOOST_CHECK( task.errors() == 100000 );
+	}
 
 };
 
@@ -123,6 +133,7 @@ struct SceneCacheThreadingTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<SceneCacheThreadingTest> instance( new SceneCacheThreadingTest() );
 
 		add( BOOST_CLASS_TEST_CASE( &SceneCacheThreadingTest::testAttributeRead, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &SceneCacheThreadingTest::testFakeAttributeRead, instance ) );
 	}
 };
 
