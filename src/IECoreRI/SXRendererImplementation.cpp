@@ -166,6 +166,17 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &s );
 					break;	
 				}
+			case StringVectorDataTypeId :
+				{
+					const std::vector<std::string>& strings = static_cast<const StringVectorData *>( value.get() )->readable();
+					std::vector< const char* > s;
+					for( size_t i=0; i < strings.size(); ++i )
+					{
+						s.push_back( strings[i].c_str() );
+					}
+					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &(s[0]), s.size() );
+					break;	
+				}
 			default :
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
 		}
