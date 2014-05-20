@@ -1,3 +1,23 @@
+# 8.4.5
+
+#### IECore
+
+- Fixing seg fault when attempting to read a non-existant attribute several times.
+- Minor fixes for issues highlighted by Coverity.
+
+#### IECoreRI
+
+- Added support for string array options in SXRenderer.
+
+#### IECoreMaya
+
+- MayaScene now outputs the "scene:visible" attribute based on Maya visibility.
+- SceneShapeInterface::componentNames() and selectionName() now work even if the Maya viewport hasn't refreshed.
+
+#### IECoreNuke
+
+- Added support in DeepImageReader for ZBack channels.
+
 # 8.4.4
 
 #### IECore
