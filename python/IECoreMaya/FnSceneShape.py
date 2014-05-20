@@ -132,7 +132,8 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			componentNames = set( componentNames )
 
 		fullPathName = self.fullPathName()
-		allnames = self.componentNames()
+		allNames = self.componentNames()
+		toSelect = []
 		for i, name in enumerate( allNames ):
 			if name in componentNames:
 				toSelect.append( fullPathName + ".f[" + str( i ) + "]" )
@@ -140,8 +141,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		maya.cmds.select( clear=True )
 		maya.cmds.selectMode( component=True )
 		maya.cmds.hilite( fullPathName )
-		for s in toSelect :
-			maya.cmds.select( s, add=True )
+		if toSelect:
+			maya.cmds.select( toSelect, r=True )
+			
 	
 	## Returns the full path name to this node.
 	def fullPathName( self ) :
@@ -157,7 +159,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	def sceneInterface( self ) :
 
 		return _IECoreMaya._sceneShapeSceneInterface( self )
-		
+	
 	def componentNames( self ) :
 
 		return _IECoreMaya._sceneShapeComponentNames( self )
