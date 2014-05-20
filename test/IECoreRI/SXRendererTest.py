@@ -900,6 +900,23 @@ class SXRendererTest( unittest.TestCase ) :
 		
 		s = r.shade( points )
 		self.assertEqual( s["Ci"][0], IECore.Color3f( 1,1,1 ) )
+	
+	def testStringArrayOptions( self ):
+		
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxStringArrayOptionTest.sdl test/IECoreRI/shaders/sxStringArrayOptionTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) ) )	
+		
+		r = IECoreRI.SXRenderer()
+		r.shader( "surface", "test/IECoreRI/shaders/sxStringArrayOptionTest.sdl", {} )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0,0,0 ) )
+		
+		r.setOption( "user:stringArray", IECore.StringVectorData( ["this","should","work"] ) )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 1,1,1 ) )
 		
 	
 	def testCoordinateSystems( self ):
