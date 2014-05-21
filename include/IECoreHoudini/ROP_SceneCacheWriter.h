@@ -80,6 +80,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 	private :
 		
 		static const IECore::SceneInterface::Name &visibleAttribute;
+		static const IECore::SceneInterface::Name &changingHierarchyAttribute;
 
 		bool linked( const std::string &file ) const;
 		

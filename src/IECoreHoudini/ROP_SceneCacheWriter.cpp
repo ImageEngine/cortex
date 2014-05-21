@@ -80,6 +80,7 @@ PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
 PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
 const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "scene:visible" );
+const SceneInterface::Name &ROP_SceneCacheWriter::changingHierarchyAttribute( "sceneInterface:changingHierarchy" );
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
@@ -387,11 +388,12 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			
 			if ( time != m_startTime )
 			{
+				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
 				outChild->writeAttribute( visibleAttribute, new BoolData( false ), time - 1e-6 );
 			}
 		}
 		
-		if ( outChild->hasAttribute( visibleAttribute ) )
+		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
 			outChild->writeAttribute( visibleAttribute, new BoolData( true ), time );
 		}
@@ -416,6 +418,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 				outChild->writeAttribute( visibleAttribute, new BoolData( true ), time - 1e-6 );
 			}
 			
+			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
 			outChild->writeAttribute( visibleAttribute, new BoolData( false ), time );
 		}
 	}
