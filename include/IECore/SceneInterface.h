@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -93,7 +93,7 @@ class SceneInterface : public RunTimeTyped
 		/// Utility variable that can be used anytime you want to refer to the root path in the Scene.
 		static const Path &rootPath;
 		/// Name of the visibility attribute
-		static const Name visibilityName;
+		static const Name &visibilityName;
 
 		/// Create an instance of a subclass which is able to open the file found at "path".
 		/// Files can be opened for Read, Write, or Append depending on the derived classes.
