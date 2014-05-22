@@ -1,3 +1,13 @@
+# 8.4.6
+
+#### IECore
+
+- Removed unnecessary overhead from Object::copy().
+
+#### IECoreHoudini
+
+- Fixing crash in SceneCache ROP todo with "scene:visible" attribute.
+
 # 8.4.5
 
 #### IECore
