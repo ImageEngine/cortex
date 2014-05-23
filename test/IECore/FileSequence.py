@@ -434,6 +434,30 @@ class testLs( unittest.TestCase ) :
 		l = ls( "test/sequences/lsTest" )
 		self.assertEqual( len( l ), 0 )
 
+	def testAmbiguousPaddingNonContiguous( self ):
+
+		self.tearDown()
+		os.system( "mkdir -p test/sequences/lsTest" )
+
+		s1 = FileSequence( "test/sequences/lsTest/a.#.tif 98,100,103" )
+		s2 = FileSequence( "test/sequences/lsTest/a.##.tif 98,100,103" )
+
+		for f in s1.fileNames() :
+			os.system( "touch '" + f + "'" )
+
+		l = ls( "test/sequences/lsTest/a.#.tif" )
+		self.assertTrue( l )
+		self.assertEqual( s1.fileName, l.fileName )
+		self.assertEqual( s1.frameList.asList(), l.frameList.asList() )
+
+		l = ls( "test/sequences/lsTest/a.##.tif" )
+		self.assertTrue( l )
+		self.assertEqual( s2.fileName, l.fileName )
+		self.assertEqual( s2.frameList.asList(), l.frameList.asList() )
+
+		l = ls( "test/sequences/lsTest/a.###.tif" )
+		self.assertFalse( l )
+
 	def tearDown( self ) :
 
 		if os.path.exists( "test/sequences" ) :
