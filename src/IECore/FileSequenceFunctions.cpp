@@ -51,6 +51,7 @@
 #include "IECore/CompoundFrameList.h"
 #include "IECore/EmptyFrameList.h"
 #include "IECore/FrameRange.h"
+#include "IECore/ReversedFrameList.h"
 
 #if BOOST_VERSION < 103400
 
@@ -311,7 +312,14 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 			}
 			else
 			{
-				frameLists.push_back( new FrameRange( frames[ rangeStart ], frames[ rangeEnd -1 ], rangeStep ) );
+				if ( rangeStep > 0)
+				{
+					frameLists.push_back( new FrameRange( frames[ rangeStart ], frames[ rangeEnd -1 ], rangeStep ) );
+				}
+				else
+				{
+					frameLists.push_back( new ReversedFrameList( new FrameRange(frames[ rangeEnd -1 ], frames[ rangeStart ], -rangeStep ) ));
+				}
 			}
 
 			rangeStart = rangeEnd;
