@@ -1,3 +1,10 @@
+# 8.4.7
+
+#### IECore
+
+- IECore.ls supports ambiguous padding when the sequence is not a regular frame range.
+- IECore::frameListFromList correctly handles reverse order lists.
+
 # 8.4.6
 
 #### IECore
