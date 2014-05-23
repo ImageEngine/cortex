@@ -977,6 +977,7 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxUniformPrimitiveVariableTest.sdl",
 			"test/IECoreRI/shaders/sxUserOptionTest.sdl",
 			"test/IECoreRI/shaders/sxCoordSystemTest.sdl",
+			"test/IECoreRI/shaders/sxStringArrayOptionTest.sdl",
 		]
 		
 		for f in files :
