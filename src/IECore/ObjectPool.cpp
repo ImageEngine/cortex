@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -141,7 +141,7 @@ ObjectPoolPtr ObjectPool::defaultObjectPool()
 	if( !c )
 	{
 		const char *m = getenv( "IECORE_OBJECTPOOL_MEMORY" );
-		int mi = m ? boost::lexical_cast<int>( m ) : 500;
+		size_t mi = m ? boost::lexical_cast<size_t>( m ) : 500;
 		c = new ObjectPool(1024 * 1024 * mi);
 	}
 	return c;
