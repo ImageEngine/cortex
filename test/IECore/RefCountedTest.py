@@ -151,5 +151,18 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertEqual( d[p2], "p2" )
 		self.assertEqual( d[c["p2"]], "p2" )
 
+	def testRefCount( self ) :
+	
+		c = IECore.CompoundData()
+		i = IECore.IntData( 10 )
+		
+		r = i.refCount()
+		
+		c["i"] = i
+		self.assertEqual( i.refCount(), r + 1 )
+		
+		del c["i"]
+		self.assertEqual( i.refCount(), r )
+
 if __name__ == "__main__":
     unittest.main()
