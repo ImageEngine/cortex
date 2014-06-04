@@ -304,7 +304,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	}
 	
 	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
-	executePostFrameScript( time );
+	if ( status != ROP_ABORT_RENDER )
+	{
+		executePostFrameScript( time );
+	}
+	
 	progress->opEnd();
 	return status;
 }
