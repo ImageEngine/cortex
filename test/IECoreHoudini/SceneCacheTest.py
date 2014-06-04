@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -2105,6 +2105,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for child in obj.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
+	
+	def testRopFlattenedWithErrors( self ) :
+		
+		self.writeSCC()
+		geo = self.geometry()
+		geo.parm( "expand" ).pressButton()
+		rop = self.rop( geo )
+		rop.parm( "rootObject" ).set( geo.path() )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
+		geo.renderNode().parm( "file" ).set( "fake.scc" )
+		rop.parm( "execute" ).pressButton()
+		self.assertNotEqual( rop.errors(), "" )
+		self.assertTrue( geo.renderNode().path() in rop.errors() )
+		self.assertTrue( geo.renderNode().errors() in rop.errors() )
 	
 	def testRopLinked( self ) :
 		
