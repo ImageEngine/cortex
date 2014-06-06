@@ -42,6 +42,7 @@
 #include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+#include "SOP/SOP_Node.h"
 #include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
 
@@ -271,6 +272,30 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 				}
 			}
 		}
+		else
+		{
+			UT_String msg;
+			std::string messages = "Re-rooting flat geo failed.";
+			node->getErrorMessages( msg );
+			if ( msg != UT_String::getEmptyString() )
+			{
+				messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
+			}
+			
+			if ( SOP_Node *sop = node->getRenderSopPtr() )
+			{
+				sop->getErrorMessages( msg );
+				if ( msg != UT_String::getEmptyString() )
+				{
+					sop->getFullPath( nodePath );
+					messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
+				}
+			}
+			
+			addError( 0, messages.c_str() );
+			progress->opEnd();
+			return ROP_ABORT_RENDER;
+		}
 
 		if ( reRoot )
 		{
@@ -279,7 +304,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	}
 	
 	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
-	executePostFrameScript( time );
+	if ( status != ROP_ABORT_RENDER )
+	{
+		executePostFrameScript( time );
+	}
+	
 	progress->opEnd();
 	return status;
 }
