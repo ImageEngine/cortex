@@ -50,8 +50,8 @@ import subprocess
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=8
-ieCoreMinorVersion=5
+ieCoreMajorVersion=9
+ieCoreMinorVersion=0
 ieCorePatchVersion=0
 ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
