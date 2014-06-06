@@ -1,3 +1,19 @@
+# 8.5.0
+
+#### IECore
+
+- Added python binding for RefCounted::refCount()
+- Fixed default ObjectPool for larger sizes
+
+#### IECoreRI
+
+- Changed SHWDeepImageReader to convert depth to standard Z (distance from eye plane), instead of spherical distance from the near clip.
+- Changed SHWDeepImageWriter to convert back to spherical distance from the near clip, assuming the incoming DeepPixels represent distance from eye plane.
+
+#### IECoreHoudini
+
+- Fixed bug in SceneCache ROP when re-rooting flattened geo with errors
+
 # 8.4.7
 
 #### IECore
