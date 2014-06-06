@@ -108,6 +108,17 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	
 	float previous = 0.0;
 	unsigned numSamples = pixel->numSamples();
+
+	const Imath::V2i &resolution = m_resolutionParameter->getTypedValue();
+	float nearClip = m_NDCToCamera[3][2] / m_NDCToCamera[3][3];
+	float correction = 1;
+	if( m_NDCToCamera[3][2] != 0 && m_NDCToCamera[2][3] != 0 )
+	{
+		// Compute a correction factor that converts from perpendicular distance to spherical distance,
+		// by comparing the closest distance to the near clip with the distance to the near clip at the current pixel position
+		correction = ( Imath::V3f(((x+0.5f)/resolution.x * 2 - 1), -((y+0.5)/resolution.y * 2 - 1),0) * m_NDCToCamera ).length() / nearClip;
+	}
+
 	for ( unsigned i=0; i < numSamples; ++i )
 	{
 		// SHW files require composited values, accumulated over depth, but we have uncomposited values
@@ -124,8 +135,13 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 		{
 			adjustedData[c] = value;
 		}
-		
-		DtexAppendPixel( m_dtexPixel, pixel->getDepth( i ), numChannels, adjustedData, 0 );
+	
+		float depth = pixel->getDepth( i );	
+
+		// Convert from Z ( distance from eye plane ) to "3delight distance" ( spherical distance from near clip )
+		depth = ( depth - nearClip ) * correction;
+
+		DtexAppendPixel( m_dtexPixel, depth, numChannels, adjustedData, 0 );
 	}
 	
 	DtexFinishPixel( m_dtexPixel );
@@ -183,6 +199,8 @@ void SHWDeepImageWriter::open()
 	
 	float *NL = worldToCameraParameter()->getTypedValue().getValue();
 	float *NP = worldToNDCParameter()->getTypedValue().getValue();
+
+	m_NDCToCamera = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
 	
 	/// \todo: does image name mean anything for this format?
 	int status = DtexAddImage(
@@ -190,6 +208,7 @@ void SHWDeepImageWriter::open()
 		resolution.x, resolution.y, tileSize.x, tileSize.y,
 		NP, NL, DTEX_COMPRESSION_NONE, DTEX_TYPE_FLOAT, &m_dtexImage
 	);
+
 	
 	if ( status != DTEX_NOERR )
 	{
@@ -198,7 +217,7 @@ void SHWDeepImageWriter::open()
 		clean();
 		throw IOException( std::string( "Failed to create the main sub-image in \"" ) + fileName() + "\" for writing." );
 	}
-	
+
 	m_dtexPixel = DtexMakePixel( numChannels );
 }
 
