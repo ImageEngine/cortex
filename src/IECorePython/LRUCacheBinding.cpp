@@ -43,6 +43,19 @@
 using namespace boost::python;
 using namespace IECore;
 
+namespace boost
+{
+namespace python
+{
+
+inline size_t tbb_hasher( const boost::python::object &o )
+{
+	return PyObject_Hash( o.ptr() );
+}
+
+} // namespace boost
+} // namespace python
+
 namespace IECorePython
 {
 

@@ -45,45 +45,52 @@
 
 using namespace IECoreGL;
 
+namespace
+{
+
+// Conceptually the key for the cache is just the hash of
+// the object, but we also need the key to carry the object,
+// so that the getter can use it for the source of the conversion.
+// We therefore pass the object as well as the hash in the key,
+// but never access the object outside of the getter() - as there is
+// no guarantee that the object is alive outside of the
+// call to convert().
+struct CacheKey
+{
+
+	CacheKey()
+		:	object( NULL )
+	{
+	}
+
+	CacheKey( const IECore::Object *o )
+		: object( o ), hash( o->hash() )
+	{
+	}
+	
+	bool operator == ( const CacheKey &other ) const
+	{
+		return hash == other.hash;
+	}
+	
+	mutable const IECore::Object *object;
+	IECore::MurmurHash hash;
+	
+};
+
+inline size_t tbb_hasher( const CacheKey &cacheKey )
+{
+	return tbb_hasher( cacheKey.hash );
+}
+
+} // namespace
+
 struct CachedConverter::MemberData
 {
 	MemberData( size_t maxMemory )
 		:	cache( getter, boost::bind( &MemberData::removalCallback, this, ::_1, ::_2 ), maxMemory )
 	{
 	}
-	
-	// Conceptually the key for the cache is just the hash of
-	// the object, but we also need the key to carry the object,
-	// so that the getter can use it for the source of the conversion.
-	// We therefore pass the object as well as the hash in the key,
-	// but never access the object outside of the getter() - as there is
-	// no guarantee that the object is alive outside of the
-	// call to convert().
-	struct CacheKey
-	{
-		CacheKey( const IECore::Object *o )
-			: object( o ), hash( o->hash() )
-		{
-		}
-		
-		bool operator == ( const CacheKey &other ) const
-		{
-			return hash == other.hash;
-		}
-		
-		bool operator != ( const CacheKey &other ) const
-		{
-			return hash != other.hash;
-		}
-
-		bool operator < ( const CacheKey &other ) const
-		{
-			return hash < other.hash;
-		}
-		
-		mutable const IECore::Object *object;
-		IECore::MurmurHash hash;
-	};
 	
 	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
 	{
@@ -130,7 +137,7 @@ CachedConverter::~CachedConverter()
 
 IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object )
 {
-	return m_data->cache.get( MemberData::CacheKey( object ) );
+	return m_data->cache.get( CacheKey( object ) );
 }
 
 size_t CachedConverter::getMaxMemory() const
