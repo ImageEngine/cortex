@@ -43,6 +43,16 @@
 using namespace IECore;
 using namespace IECoreRI;
 
+#include "IECore/ClassData.h"
+
+static IECore::ClassData< SHWDeepImageReader, Imath::M44f > g_ndcClassData;
+
+Imath::M44f &SHWDeepImageReader::m_NDCToCamera()
+{
+	return g_ndcClassData[ this ];
+}
+
+
 IE_CORE_DEFINERUNTIMETYPED( SHWDeepImageReader );
 
 const Reader::ReaderDescription<SHWDeepImageReader> SHWDeepImageReader::g_readerDescription( "shw" );
@@ -52,6 +62,7 @@ SHWDeepImageReader::SHWDeepImageReader()
 		m_inputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 ),
 		m_dataWindow( Imath::V2i( 0 ), Imath::V2i( 0 ) )
 {
+	g_ndcClassData.create( this, Imath::M44f() );
 }
 
 SHWDeepImageReader::SHWDeepImageReader( const std::string &fileName )
@@ -60,11 +71,13 @@ SHWDeepImageReader::SHWDeepImageReader( const std::string &fileName )
 		m_dataWindow( Imath::V2i( 0 ), Imath::V2i( 0 ) )
 {
 	m_fileNameParameter->setTypedValue( fileName );
+	g_ndcClassData.create( this, Imath::M44f() );
 }
 
 SHWDeepImageReader::~SHWDeepImageReader()
 {
 	clean();
+	g_ndcClassData.erase( this );
 }
 
 bool SHWDeepImageReader::canRead( const std::string &fileName )
@@ -154,13 +167,13 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 		previous[j] = 0.0;
 	}
 
-	float nearClip = m_NDCToCamera[3][2] / m_NDCToCamera[3][3];
+	float nearClip = m_NDCToCamera()[3][2] / m_NDCToCamera()[3][3];
 	float correction = 1;
-	if( m_NDCToCamera[3][2] != 0 && m_NDCToCamera[2][3] != 0 )
+	if( m_NDCToCamera()[3][2] != 0 && m_NDCToCamera()[2][3] != 0 )
 	{
 		// Compute a correction factor that converts from spherical distance to perpendicular distance,
 		// by comparing the closest distance to the near clip with the distance to the near clip at the current pixel position
-		correction = nearClip / ( Imath::V3f(((x+0.5f)/(m_dataWindow.max.x+1) * 2 - 1), -((y+0.5)/(m_dataWindow.max.y+1) * 2 - 1),0) * m_NDCToCamera ).length();
+		correction = nearClip / ( Imath::V3f(((x+0.5f)/(m_dataWindow.max.x+1) * 2 - 1), -((y+0.5)/(m_dataWindow.max.y+1) * 2 - 1),0) * m_NDCToCamera() ).length();
 	}
 
 	for ( int i=0; i < numSamples; ++i )
@@ -202,7 +215,7 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 	m_dataWindow.max.y = 0;
 	m_worldToCamera = Imath::M44f();
 	m_worldToNDC = Imath::M44f();
-	m_NDCToCamera = Imath::M44f();
+	m_NDCToCamera() = Imath::M44f();
 	
 	clean();
 	
@@ -227,7 +240,7 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		DtexNl( m_dtexImage, m_worldToCamera.getValue() );
 		DtexNP( m_dtexImage, m_worldToNDC.getValue() );
-		m_NDCToCamera = m_worldToNDC.inverse() * m_worldToCamera;
+		m_NDCToCamera() = m_worldToNDC.inverse() * m_worldToCamera;
 	}
 	else
 	{
