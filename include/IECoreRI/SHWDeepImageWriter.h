@@ -80,7 +80,7 @@ class SHWDeepImageWriter : public IECore::DeepImageWriter
 		DtexImage *m_dtexImage;
 		DtexPixel *m_dtexPixel;
 
-		Imath::M44f &m_NDCToCamera();
+		Imath::M44f m_NDCToCamera;
 		std::string m_outputFileName;
 		int m_alphaOffset;
 

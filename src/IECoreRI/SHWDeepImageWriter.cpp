@@ -43,16 +43,6 @@
 using namespace IECore;
 using namespace IECoreRI;
 
-#include "IECore/ClassData.h"
-
-static IECore::ClassData< SHWDeepImageWriter, Imath::M44f > g_ndcClassData;
-
-Imath::M44f &SHWDeepImageWriter::m_NDCToCamera()
-{
-	return g_ndcClassData[ this ];
-}
-
-
 IE_CORE_DEFINERUNTIMETYPED( SHWDeepImageWriter );
 
 const DeepImageWriter::DeepImageWriterDescription<SHWDeepImageWriter> SHWDeepImageWriter::g_writerDescription( "shw" );
@@ -66,9 +56,6 @@ SHWDeepImageWriter::SHWDeepImageWriter()
 	
 	m_tileSizeParameter = new V2iParameter( "tileSize", "The tile size for the image cache. Must be equal or less than resolution.", new V2iData( Imath::V2i( 32, 32 ) ) );
 	parameters()->addParameter( m_tileSizeParameter );
-
-	g_ndcClassData.create( this, Imath::M44f() );
-
 }
 
 SHWDeepImageWriter::SHWDeepImageWriter( const std::string &fileName )
@@ -82,15 +69,11 @@ SHWDeepImageWriter::SHWDeepImageWriter( const std::string &fileName )
 	
 	m_tileSizeParameter = new V2iParameter( "tileSize", "The tile size for the image cache. Must be equal or less than resolution.", new V2iData( Imath::V2i( 32, 32 ) ) );
 	parameters()->addParameter( m_tileSizeParameter );
-
-	g_ndcClassData.create( this, Imath::M44f() );
 }
 
 SHWDeepImageWriter::~SHWDeepImageWriter()
 {
 	clean();
-	g_ndcClassData.erase( this );
-
 }
 
 bool SHWDeepImageWriter::canWrite( const std::string &fileName )
@@ -127,13 +110,13 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	unsigned numSamples = pixel->numSamples();
 
 	const Imath::V2i &resolution = m_resolutionParameter->getTypedValue();
-	float nearClip = m_NDCToCamera()[3][2] / m_NDCToCamera()[3][3];
+	float nearClip = m_NDCToCamera[3][2] / m_NDCToCamera[3][3];
 	float correction = 1;
-	if( m_NDCToCamera()[3][2] != 0 && m_NDCToCamera()[2][3] != 0 )
+	if( m_NDCToCamera[3][2] != 0 && m_NDCToCamera[2][3] != 0 )
 	{
 		// Compute a correction factor that converts from perpendicular distance to spherical distance,
 		// by comparing the closest distance to the near clip with the distance to the near clip at the current pixel position
-		correction = ( Imath::V3f(((x+0.5f)/resolution.x * 2 - 1), -((y+0.5)/resolution.y * 2 - 1),0) * m_NDCToCamera() ).length() / nearClip;
+		correction = ( Imath::V3f(((x+0.5f)/resolution.x * 2 - 1), -((y+0.5)/resolution.y * 2 - 1),0) * m_NDCToCamera ).length() / nearClip;
 	}
 
 	for ( unsigned i=0; i < numSamples; ++i )
@@ -217,7 +200,7 @@ void SHWDeepImageWriter::open()
 	float *NL = worldToCameraParameter()->getTypedValue().getValue();
 	float *NP = worldToNDCParameter()->getTypedValue().getValue();
 
-	m_NDCToCamera() = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
+	m_NDCToCamera = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
 	
 	/// \todo: does image name mean anything for this format?
 	int status = DtexAddImage(

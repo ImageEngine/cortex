@@ -89,7 +89,7 @@ class SHWDeepImageReader : public IECore::DeepImageReader
 		Imath::Box2i m_dataWindow;
 		Imath::M44f m_worldToCamera;
 		Imath::M44f m_worldToNDC;
-		Imath::M44f &m_NDCToCamera();
+		Imath::M44f m_NDCToCamera;
 		std::string m_inputFileName;
 		std::string m_channelNames;
 
