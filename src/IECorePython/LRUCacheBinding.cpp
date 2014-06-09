@@ -39,6 +39,7 @@
 #include "IECore/LRUCache.h"
 
 #include "IECorePython/ScopedGILRelease.h"
+#include "IECorePython/LRUCacheBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -56,7 +57,7 @@ inline size_t tbb_hasher( const boost::python::object &o )
 } // namespace boost
 } // namespace python
 
-namespace IECorePython
+namespace
 {
 
 struct LRUCacheGetter
@@ -120,7 +121,7 @@ class PythonLRUCache : public LRUCache<object, object>
 			
 			Mutex::scoped_lock lock;
 			{
-				ScopedGILRelease gilRelease;
+				IECorePython::ScopedGILRelease gilRelease;
 				lock.acquire( m_getMutex );
 			}
 			return LRUCache<object, object>::get( key );
@@ -132,7 +133,9 @@ class PythonLRUCache : public LRUCache<object, object>
 
 };
 
-void bindLRUCache()
+} // namespace
+
+void IECorePython::bindLRUCache()
 {
 	
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
@@ -148,5 +151,3 @@ void bindLRUCache()
 		.def( "cached", &PythonLRUCache::cached )
 	;
 }
-
-} // namespace IECorePython
