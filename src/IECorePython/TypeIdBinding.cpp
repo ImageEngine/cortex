@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -44,6 +44,39 @@
 
 using namespace boost::python;
 using namespace IECore;
+
+namespace
+{
+
+// A converter from python RunTimeTyped classes to their TypeIds. This
+// allows a class to be passed where a TypeId is expected, which is more
+// Pythonic.
+struct TypeIdFromPython
+{
+	static void *convertible( PyObject *obj )
+	{
+		if( PyType_Check( obj ) && PyObject_HasAttrString( obj, "staticTypeId" ) )
+		{
+			return obj;
+		}
+		return NULL;
+	}
+
+	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )
+	{
+		void *storage = ((converter::rvalue_from_python_storage<IECore::TypeId>*)data)->storage.bytes;
+
+		object o( handle<>( borrowed( obj ) ) );
+
+		object t = o.attr( "staticTypeId" )();
+		IECore::TypeId typeId = extract<IECore::TypeId>( t );
+
+		new (storage) IECore::TypeId( typeId );
+		data->convertible = storage;
+	}
+};
+
+} // namespace
 
 namespace IECorePython
 {
@@ -442,6 +475,13 @@ void bindTypeId()
 		.value( "EXRDeepImageReader", EXRDeepImageReaderTypeId )
 		.value( "EXRDeepImageWriter", EXRDeepImageWriterTypeId )
 	;
+	
+	converter::registry::push_back(
+		&TypeIdFromPython::convertible,
+		&TypeIdFromPython::construct,
+		type_id<IECore::TypeId>()
+	);
+	
 }
 
 }
