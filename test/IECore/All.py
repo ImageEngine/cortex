@@ -110,16 +110,8 @@ from DataCastOp import *
 from DataPromoteOp import *
 from MatrixMultiplyOp import *
 from PointBoundsOp import *
-from ImplicitSurfaceFunction import *
-from CachedImplicitSurfaceFunction import *
-from MarchingCubes import *
-from PointMeshOp import *
-from CSGImplicitSurfaceFunction import *
-from ParticleMeshOp import *
 from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
-from PrimitiveImplicitSurfaceFunction import *
-from MeshPrimitiveImplicitSurfaceOp import *
 from InternedStringTest import InternedStringTest
 from Writer import *
 from TriangulateOp import *

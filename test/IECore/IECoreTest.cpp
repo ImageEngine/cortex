@@ -49,7 +49,6 @@
 #include "InterpolatorTest.h"
 #include "IndexedIOTest.h"
 #include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
 #include "DataConversionTest.h"
 #include "DataConvertTest.h"
 #include "DespatchTypedDataTest.h"
@@ -96,7 +95,6 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addTypedDataTest(test);
 		addInterpolatorTest(test);
 		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
 		addDataConversionTest(test);
 		addDataConvertTest(test);
 		addDespatchTypedDataTest(test);

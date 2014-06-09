@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -143,23 +143,10 @@
 #include "IECorePython/PointBoundsOpBinding.h"
 #include "IECorePython/ImathRandomBinding.h"
 #include "IECorePython/RandomRotationOpBinding.h"
-#include "IECorePython/ImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/CachedImplicitSurfaceFunctionBinding.h"
 #include "IECorePython/MeshPrimitiveBuilderBinding.h"
-#include "IECorePython/MarchingCubesBinding.h"
-#include "IECorePython/PointMeshOpBinding.h"
-#include "IECorePython/CSGImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/SphereImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/PlaneImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/BlobbyImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/ZhuBridsonImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/ParticleMeshOpBinding.h"
 #include "IECorePython/TypedPrimitiveOpBinding.h"
 #include "IECorePython/PrimitiveEvaluatorBinding.h"
 #include "IECorePython/MeshPrimitiveEvaluatorBinding.h"
-#include "IECorePython/PrimitiveImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECorePython/TriangulateOpBinding.h"
 #include "IECorePython/InternedStringBinding.h"
 #include "IECorePython/SpherePrimitiveBinding.h"
@@ -444,23 +431,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointBoundsOp();
 	bindImathRandom();
 	bindRandomRotationOp();
-	bindImplicitSurfaceFunction();
-	bindCachedImplicitSurfaceFunction();
 	bindMeshPrimitiveBuilder();
-	bindMarchingCubes();
-	bindPointMeshOp();
-	bindCSGImplicitSurfaceFunction();
-	bindSphereImplicitSurfaceFunction();
-	bindPlaneImplicitSurfaceFunction();
-	bindBlobbyImplicitSurfaceFunction();
-	bindZhuBridsonImplicitSurfaceFunction();
-	bindParticleMeshOp();
 	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
 	bindMeshPrimitiveEvaluator();
-	bindPrimitiveImplicitSurfaceFunction();
-	bindMeshPrimitiveImplicitSurfaceFunction();
-	bindMeshPrimitiveImplicitSurfaceOp();
 	bindTriangulateOp();
 	bindInternedString();
 	bindSpherePrimitive();
