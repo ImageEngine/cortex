@@ -240,9 +240,6 @@
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
 #include "IECorePython/ColorSpaceTransformOpBinding.h"
-#include "IECorePython/BINParticleWriterBinding.h"
-#include "IECorePython/BINMeshReaderBinding.h"
-#include "IECorePython/BGEOParticleReaderBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
 #include "IECorePython/IFFHairReaderBinding.h"
 #include "IECorePython/FaceAreaOpBinding.h"
@@ -541,9 +538,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
-	bindBINParticleWriter();
-	bindBINMeshReader();
-	bindBGEOParticleReader();
 	bindNParticleReader();
 	bindIFFHairReader();
 	bindFaceAreaOp();

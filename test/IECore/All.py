@@ -191,9 +191,6 @@ from DataTraitsTest import *
 from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
-from BINParticleWriterTest import *
-from BINMeshReaderTest import *
-from BGEOParticleReader import *
 from NParticleReader import *
 from IFFHairReader import *
 from FaceAreaOpTest import FaceAreaOpTest
