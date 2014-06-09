@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -75,14 +75,10 @@ class ThreadingTest( unittest.TestCase ) :
 		kwArgs = []
 		for i in range( 0, 4 ) :
 		
-			ops.append( IECore.ParticleMeshOp() )
+			ops.append( IECore.PointDistributionOp() )
 			kwArgs.append( {
-				"filename" : "test/IECore/data/pdcFiles/particleMesh.pdc",
-				"useRadiusAttribute" : False,
-				"radius" : 0.25,
-				"threshold" : 1,
-				"bound" : IECore.Box3f( IECore.V3f( -5, -7, -2 ), IECore.V3f( 3, 3, 3 ) ),
-				"resolution" : IECore.V3i( 80, 80, 80 ),
+				"mesh" : IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
+				"density" : 10000,
 			} )
 
 		tStart = time.time()
@@ -130,14 +126,10 @@ class ThreadingTest( unittest.TestCase ) :
 		kwArgs = []
 		for i in range( 0, 4 ) :
 		
-			ops.append( IECore.ParticleMeshOp() )
+			ops.append( IECore.PointDistributionOp() )
 			kwArgs.append( {
-				"filename" : "test/IECore/data/pdcFiles/particleMesh.pdc",
-				"useRadiusAttribute" : False,
-				"radius" : 0.25,
-				"threshold" : 1,
-				"bound" : IECore.Box3f( IECore.V3f( -5, -7, -2 ), IECore.V3f( 3, 3, 3 ) ),
-				"resolution" : IECore.V3i( 80, 80, 80 ),
+				"mesh" : IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
+				"density" : 10000,
 			} )
 			
 			ops.append( IECore.ClassLsOp() )

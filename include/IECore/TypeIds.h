@@ -231,13 +231,13 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
-	PointMeshOpTypeId = 186,
-	ParticleMeshOpTypeId = 187,
+	PointMeshOpTypeId = 186, // obsolete - available for reuse
+	ParticleMeshOpTypeId = 187, // obsolete - available for reuse
 	HalfDataTypeId = 188,
 	MeshPrimitiveOpTypeId = 189,
 	PrimitiveEvaluatorTypeId = 190,
 	MeshPrimitiveEvaluatorTypeId = 191,
-	MeshPrimitiveImplicitSurfaceOpTypeId = 192,
+	MeshPrimitiveImplicitSurfaceOpTypeId = 192, // obsolete - available for reuse
 	TriangulateOpTypeId = 193,
 	SpherePrimitiveEvaluatorTypeId = 194,
 	SpherePrimitiveTypeId = 195,
