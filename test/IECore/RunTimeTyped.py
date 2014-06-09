@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,7 +32,9 @@
 #
 ##########################################################################
 
+import sys
 import unittest
+
 import IECore
 
 class TestRunTimeTyped( unittest.TestCase ) :
@@ -198,6 +200,21 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assertTrue( p.isInstanceOf( IECore.VisibleRenderable.staticTypeId() ) )
 		self.assertTrue( p.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
 		self.assertTrue( p.isInstanceOf( IECore.RunTimeTyped.staticTypeId() ) )
+
+	def testClassInPlaceOfTypeId( self ) :
+	
+		# check that we can pass the python class itself
+		# where C++ would like a TypeId.
+		self.assertTrue( IECore.Data.inheritsFrom( IECore.RunTimeTyped ) )
+		self.assertTrue( IECore.Data.inheritsFrom( IECore.Object ) )
+		self.assertFalse( IECore.Data.inheritsFrom( IECore.Parameter ) )
+		self.assertRaises( Exception, IECore.Data.inheritsFrom, dict )
+
+		# check that the converter mechanism doesn't both the
+		# reference count for the class objects
+		r = sys.getrefcount( IECore.Data )
+		IECore.IntData.inheritsFrom( IECore.Data )
+		self.assertEqual( r, sys.getrefcount( IECore.Data ) )
 
 if __name__ == "__main__":
     unittest.main()
