@@ -241,7 +241,6 @@
 #include "IECorePython/LevenbergMarquardtBinding.h"
 #include "IECorePython/ColorSpaceTransformOpBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
-#include "IECorePython/IFFHairReaderBinding.h"
 #include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
@@ -539,7 +538,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
 	bindNParticleReader();
-	bindIFFHairReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
