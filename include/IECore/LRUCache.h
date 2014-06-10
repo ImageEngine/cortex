@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,8 @@
 #ifndef IECORE_LRUCACHE_H
 #define IECORE_LRUCACHE_H
 
-#include <map>
-#include <list>
-
-#include "tbb/recursive_mutex.h"
+#include "tbb/spin_mutex.h"
+#include "tbb/concurrent_unordered_map.h"
 
 #include "boost/noncopyable.hpp"
 #include "boost/function.hpp"
@@ -46,104 +44,181 @@
 namespace IECore
 {
 
-/// A templated cache with a Least-Recently-Used disposal mechanism. Each item to be retrieved is "calculated"
-/// by a function which can also state the "cost" of that piece of data. The cache has a maximum cost, and
-/// attempts to add any data which would exceed this results in the LRU items being discarded.
-/// Template parameters are the key by which the data is accessed and a smart pointer type which can be used
-/// to point to the data.
-/// \threading It should be safe to call the methods of LRUCache from concurrent threads.
+/// A mapping from keys to values, where values are computed from keys using a user
+/// supplied function. Recently computed values are stored in the cache to accelerate
+/// subsequent lookups. Each value has a cost associated with it, and the cache has
+/// a maximum total cost above which it will remove the least recently accessed items. 
+///
+/// The Key type must have a tbb_hasher implementation.
+///
+/// The Value type must be default constructible, copy constructible and assignable.
+/// Note that Values are returned by value, and erased by assigning a default constructed
+/// value. In practice this means that a smart pointer is the best choice of Value.
+///
+/// \threading It is safe to call the methods of LRUCache from concurrent threads.
 /// \ingroup utilityGroup
-template<typename Key, typename Ptr>
+template<typename Key, typename Value>
 class LRUCache : private boost::noncopyable
 {
 	public:
 	
-		typedef Key KeyType;
-		typedef Ptr PtrType;
 		typedef size_t Cost;
 		
 		/// The GetterFunction is responsible for computing the value and cost for a cache entry
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
 		/// any reason.
-		typedef boost::function<Ptr ( const Key &key, Cost &cost )> GetterFunction;
+		typedef boost::function<Value ( const Key &key, Cost &cost )> GetterFunction;
 		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
-		typedef boost::function<void ( const Key &key, const Ptr &data )> RemovalCallback;
+		typedef boost::function<void ( const Key &key, const Value &data )> RemovalCallback;
 
 		LRUCache( GetterFunction getter );
 		LRUCache( GetterFunction getter, Cost maxCost );
 		LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost );
 		virtual ~LRUCache();
 
-		void clear();
+		/// Retrieves an item from the cache, computing it if necessary.
+		/// The item is returned by value, as it may be removed from the
+		/// cache at any time by operations on another thread, or may not
+		/// even be stored in the cache if it exceeds the maximum cost.
+		/// Throws if the item can not be computed.
+		Value get( const Key &key );
 
-		// Erases the given key if it is contained in the cache. Returns whether any item was removed.
-		bool erase( const Key &key );
+		/// Adds an item to the cache directly, bypassing the GetterFunction.
+		/// Returns true for success and false on failure - failure can occur
+		/// if the cost exceeds the maximum cost for the cache. Note that even
+		/// when true is returned, the item may be removed from the cache by a
+		/// subsequent (or concurrent) operation.
+		bool set( const Key &key, const Value &value, Cost cost );
 
-		/// Set the maximum cost of the items held in the cache, discarding any items if necessary.
-		void setMaxCost( Cost maxCost );
-
-		/// Get the maximum possible cost of cacheable items
-		Cost getMaxCost() const;
-
-		/// Returns the current cost of items held in the cache
-		Cost currentCost() const;
-
-		/// Retrieves the item from the cache, computing it if necessary. Throws if the item can not be
-		/// computed.
-		Ptr get( const Key &key );
-
-		/// Registers an object in the cache directly. Returns true for success and false on failure -
-		/// failure can occur if the cost exceeds the maximum cost for the cache.
-		bool set( const Key &key, const Ptr &data, Cost cost );
-
-		/// Returns true if the object is in the cache.
+		/// Returns true if the object is in the cache. Note that the
+		/// return value may be invalidated immediately by operations performed
+		/// by another thread.
 		bool cached( const Key &key ) const;
 
-	protected:
+		/// Erases the item if it was cached. Returns true if it was cached
+		/// and false if it wasn't cached and therefore wasn't removed.
+		bool erase( const Key &key );
+
+		/// Erases all cached items. Note that when this returns, the cache
+		/// may have been repopulated with items if other threads have called
+		/// set() or get() concurrently.
+		void clear();
+
+		/// Sets the maximum cost of the items held in the cache, discarding any
+		/// items if necessary to meet the new limit.
+		void setMaxCost( Cost maxCost );
+
+		/// Returns the maximum cost.
+		Cost getMaxCost() const;
+
+		/// Returns the current cost of all cached items.
+		Cost currentCost() const;
+
+	private :
 		
-		typedef std::list<Key> List;
-		typedef typename std::list<Key>::iterator ListIterator;
-				
-		typedef tbb::recursive_mutex Mutex;
-		
+		// Data
+		//////////////////////////////////////////////////////////////////////////
+
+		// A function for computing values, and one for notifying of removals.
+		GetterFunction m_getter;
+		RemovalCallback m_removalCallback;
+
+		// Status of each item in the cache.
 		enum Status
 		{
 			New, // brand new unpopulated entry
-			Caching, // unpopulated entry which is waiting for m_getter to return
 			Cached, // entry complete with value
-			Erased, // entry once had value but removed by limitCost
+			Erased, // entry once had value but it was removed to meet cost limits
 			TooCostly, // entry cost exceeds m_maxCost and therefore isn't stored
 			Failed // m_getter failed when computing entry
 		};
 		
+		// The type used to store a single cached item.
+		struct CacheEntry;
+
+		// Map from keys to items - this forms the basis of
+		// our cache. The concurrent_unordered_map has the
+		// following pertinent properties :
+		//
+		// - find(), insert() and traversal may be invoked concurrently
+		// - erase() may _not_ be invoked concurrently (hence we don't use it)
+		// - value access is not locked in any way (we are responsible for
+		// our own locking when accessing the CacheEntry).
+		typedef tbb::concurrent_unordered_map<Key, CacheEntry> Map;
+		typedef typename Map::iterator MapIterator;
+		typedef typename Map::const_iterator ConstMapIterator;
+		typedef typename Map::value_type MapValue;
+		Map m_map;
+
+		// CacheEntry implementation - a single item of the cache.
 		struct CacheEntry
 		{
-			CacheEntry();
+			CacheEntry(); // status == New, previous == next == NULL
 			
-			Cost cost;
-			ListIterator listIterator;
-			Status status;
-			Ptr data;
+			Value value; // value for this item
+			Cost cost; // the cost for this item
+			
+			// Pointers to previous and and next items
+			// in the LRU list. We use the CacheEntries
+			// themselves to store the list because it is
+			// quicker than using an external structure
+			// like a std::list.
+			MapValue *previous;
+			MapValue *next;
+			
+			char status; // status of this item
+			tbb::spin_mutex mutex; // mutex. must be held before access.			
 		};
 
-		typedef std::map<Key, CacheEntry> Cache;
-		typedef typename std::map<Key, CacheEntry>::const_iterator ConstCacheIterator;
-
-		/// Clear out any data with a least-recently-used strategy until the current cost does not exceed the specified cost.
-		void limitCost( Cost cost );
-
-		static void nullRemovalCallback( const Key &key, const Ptr &data );
-
-		GetterFunction m_getter;
-		RemovalCallback m_removalCallback;
-
-		mutable Mutex m_mutex;
-
-		Cost m_maxCost;
-		Cost m_currentCost;
+		// Dummy MapValues to represent the start and end of our LRU list.
+		// Items are moved to the end when they are accessed, and removed
+		// from the start when we need to reduce costs.
+		MapValue m_listStart;
+		MapValue m_listEnd;
+	
+		// The list is inherently a serial data structure, so we must
+		// protect all accesses with this mutex. The mutex _must_ be held
+		// before the list fields of _any_ MapValue may be accessed.
+		typedef tbb::spin_mutex ListMutex;
+		ListMutex m_listMutex;
 		
-		List m_list;
-		Cache m_cache;
+		// Total cost. We store the current cost atomically so it can be updated
+		// concurrently by multiple threads.
+		typedef tbb::atomic<Cost> AtomicCost;
+		AtomicCost m_currentCost;
+		Cost m_maxCost;
+
+		// Methods. Note that great care must be taken to properly handle the
+		// CacheEntry and list mutexes to avoid deadlock. If both m_listMutex
+		// and a CacheEntry::mutex must be held, the list mutex must be acquired
+		// _first_, and the CacheEntry::mutex _second_. Pay attention to the
+		// documentation for each method, to ensure that the right locks are held
+		// at the right times.
+		//////////////////////////////////////////////////////////////////////////
+
+		// Updates the cache entry with the new value and updates m_currentCost
+		// appropriately. Returns true if the value was stored and false if it
+		// exceeded the maximum cost. The mutex for the CacheEntry must be held by
+		// the caller.
+		bool setInternal( MapValue *mapValue, const Value &value, Cost cost );
+		
+		// Sets the status for the cache entry to Erased, removes any
+		// previously Cached value, updates m_currentCost and removes
+		// the entry from the LRU list. The caller must hold m_listMutex, and
+		// must _not_ hold the mutex for the cache entry.
+		bool eraseInternal( MapValue *mapValue );
+
+		// Caller must not hold any locks.
+		void limitCost();
+
+		// Caller must hold mapValue mutex.
+		void updateListPosition( MapValue *mapValue );
+
+		void listErase( MapValue *mapValue );
+		void listInsertAtEnd( MapValue *mapValue );
+
+		static void nullRemovalCallback( const Key &key, const Value &value );
+
 };
 
 } // namespace IECore
