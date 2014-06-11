@@ -241,6 +241,23 @@ class LRUCacheTest( unittest.TestCase ) :
 		keys = [ x[0] for x in removed ]
 		for i in range( 1, 8 ) :
 			self.failUnless( i in keys )
+	
+	def testSet( self ) :
+	
+		def getter( key ) :
+			return ( None, 1 )
 			
+		c = IECore.LRUCache( getter, 1000 )
+		
+		c.set( 5, 10, 1 )
+		self.assertEqual( c.currentCost(), 1 )
+		self.assertEqual( c.get( 5 ), 10 )
+		self.assertEqual( c.currentCost(), 1 )
+		
+		c.set( 5, 20, 100000 )
+		self.assertEqual( c.currentCost(), 0 )
+		self.assertEqual( c.get( 5 ), None )
+		self.assertEqual( c.currentCost(), 1 )
+		
 if __name__ == "__main__":
     unittest.main()
