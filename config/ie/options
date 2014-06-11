@@ -63,7 +63,7 @@ targetApp = getOption( "APP", None )
 
 # get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
 # fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["8"].get( platform, IEEnv.registry["libraries"]["cortex"]["8"] )
+cortexReg = IEEnv.registry["libraries"]["cortex"]["9"].get( platform, IEEnv.registry["libraries"]["cortex"]["9"] )
 
 tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
