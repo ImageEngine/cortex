@@ -50,8 +50,8 @@ import random
 ## or an error in the IECoreNuke::DeepImageReader code. Further investigation is required.
 class DeepImageReaderTest( IECoreNuke.TestCase ) :
 	
-	__smokeWithoutZBack = "test/IECoreRI/data/exr/smokeWithoutZBack.dexr"
-	__output = "test/IECoreRI/data/exr/smokeWithZBack.exr"
+	__smokeWithoutZBack = "test/IECoreRI/data/exr/deepSmokeWithoutZBack.exr"
+	__output = "test/IECoreRI/data/exr/deepSmokeWithZBack.exr"
 
 	def __inputPaths( self ) :	
 		return { "exr" : "test/IECoreRI/data/exr/primitives.exr", "shw" : "test/IECoreRI/data/shw/primitives.shw" }
@@ -60,7 +60,13 @@ class DeepImageReaderTest( IECoreNuke.TestCase ) :
 
 		if not IECore.withDeepEXR :
 			return
-				
+		
+		## This test is disabled because Nuke is seg faulting when executing
+		## a DeepWrite from command line mode. The same test in an interactive
+		## Nuke session works as expected. Last tested in Nuke8.0v3.
+		## \todo: Re-enable this test when the Nuke bug is fixed.
+		return
+		
 		# Create a DeepReader to read the deep EXR.
 		reader = nuke.createNode( "DeepRead" )
 		reader["file"].setText( DeepImageReaderTest.__smokeWithoutZBack )
