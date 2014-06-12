@@ -310,8 +310,6 @@ if targetApp=="nuke" :
 		# version than we have installed centrally.
 		PNG_INCLUDE_PATH = "/usr/local/include/"
 	
-	# Nuke 6 uses an OpenEXR version that we can't install centrally
-	OPENEXR_LIB_SUFFIX = ""
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -325,10 +323,7 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-	# Houdini currently uses an OpenEXR version that we can't install centrally
-	OPENEXR_INCLUDE_PATH = os.path.join( houdiniReg['location'], houdiniReg['includes'][0] )
-	OPENEXR_LIB_SUFFIX = ""
-	PNG_INCLUDE_PATH = OPENEXR_INCLUDE_PATH
+	PNG_INCLUDE_PATH = os.path.join( houdiniReg['location'], houdiniReg['includes'][0] )
 	
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
