@@ -115,7 +115,8 @@ bool EXRImageReader::canRead( const string &fileName )
 
 			if ( header.hasType() )
 			{
-				if ( header.type() != TILEDIMAGE && header.type() != "" )
+				/// \todo: determine why we are checking for the empty string
+				if ( header.type() != TILEDIMAGE && header.type() != SCANLINEIMAGE && header.type() != "" )
 				{
 					throw IOException( "EXR is not a flat image." );
 				}
