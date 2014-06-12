@@ -176,8 +176,11 @@ if compilerVersionInt < 350 :
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
 
+# find tbb
+TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
+TBB_LIB_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib" )
+
 # set the include paths
-TBB_INCLUDE_PATH = "/software/tools/include/" + platform + "/tbb/" + tbbVersion
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
 GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
@@ -192,7 +195,7 @@ else :
 	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
 	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
 	CXXFLAGS += [ "-isystem", "/software/tools/include/freetype/2.3.5" ]
-	
+
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
 if IEEnv.platformOS().startswith( "osx" ) :
