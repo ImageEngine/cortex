@@ -215,7 +215,7 @@ struct ValidateArraySize
 	}
 
 	template<typename T>
-	bool operator() ( typename T::ConstPtr data )
+	bool operator() ( const T *data )
 	{
 		assert( data );
 
@@ -234,7 +234,7 @@ struct ReturnFalseErrorHandler
 	typedef bool ReturnType;
 
 	template<typename T, typename F>
-	bool operator() ( typename T::ConstPtr data, const F &f )
+	bool operator() ( const T *data, const F &f )
 	{
 		return false;
 	}
@@ -259,7 +259,7 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 	// cases all require arrays so that's what we require.
 	size_t sz = variableSize( pv.interpolation );
 	ValidateArraySize func( sz );
-	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data, func );
+	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data.get(), func );
 }
 
 bool Primitive::arePrimitiveVariablesValid() const

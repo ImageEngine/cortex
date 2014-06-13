@@ -159,7 +159,7 @@ struct PointsMotionOp::PrimVarBuilder
 	}
 
 	template<typename T>
-	ReturnType operator() ( typename T::Ptr data )
+	ReturnType operator() ( T *data )
 	{
 		typename T::Ptr newData = new T();
 		const typename T::ValueType &dataVec = data->readable();
@@ -329,7 +329,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 				bool masked = ( maskedPrimvarsSet.find( pIt->first ) != maskedPrimvarsSet.end() );
 				PrimVarBuilder primVarBuilder( pIt->first, masked, snapshot, ids, idMap, objectVector );
 				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation, 
-						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data, primVarBuilder ) 
+						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data.get(), primVarBuilder ) 
 				);
 			}
 		}

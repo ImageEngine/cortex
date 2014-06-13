@@ -79,6 +79,6 @@ void LinearToAlexaLogcOp::modifyChannels( const Imath::Box2i &displayWindow, con
 	LinearToAlexaLogcOp::Converter converter;
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<LinearToAlexaLogcOp::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<LinearToAlexaLogcOp::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

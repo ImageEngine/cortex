@@ -115,7 +115,7 @@ struct MeshMergeOp::AppendPrimVars
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T *data )
 	{
 		if ( m_visitedData.find( data ) != m_visitedData.end() )
 		{
@@ -164,7 +164,7 @@ struct MeshMergeOp::PrependPrimVars
 	}
 	
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr data )
+	ReturnType operator()( const T *data )
 	{
 		PrimitiveVariableMap::iterator it = m_mesh->variables.find( m_name );
 		if ( it == m_mesh->variables.end() && !m_remove )
@@ -247,7 +247,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 		if ( pvIt2->second.interpolation != PrimitiveVariable::Constant )
 		{
 			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
-			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data, f );
+			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data.get(), f );
 		}
 	}
 }

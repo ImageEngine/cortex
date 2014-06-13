@@ -371,10 +371,10 @@ void TriangulateOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 		TriangulateFn fn( mesh, tolerance, throwExceptions );
 
 		despatchTypedData<
-                        TriangulateFn,
-                        TypeTraits::IsFloatVec3VectorTypedData,
-                        TriangulateFn::ErrorHandler
-                >( verticesData, fn );
+			TriangulateFn,
+			TypeTraits::IsFloatVec3VectorTypedData,
+			TriangulateFn::ErrorHandler
+		>( verticesData.get(), fn );
 	}
 	else
 	{

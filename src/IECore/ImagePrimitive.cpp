@@ -382,7 +382,7 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 		return false;
 	}
 
-	size_t size = despatchTypedData<TypedDataSize>( pv.data );
+	size_t size = despatchTypedData<TypedDataSize>( pv.data.get() );
 	size_t numPixels = variableSize( PrimitiveVariable::Vertex );
 	if( size!=numPixels )
 	{

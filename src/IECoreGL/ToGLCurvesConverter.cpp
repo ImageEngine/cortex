@@ -72,7 +72,7 @@ class ToGLCurvesConverter::ToVertexConverter
 		}
 		
 		template<typename T>
-		IECore::DataPtr operator()( typename T::Ptr inData )
+		IECore::DataPtr operator()( const T *inData )
 		{
 			const typename T::Ptr outData = new T();
 			typename T::ValueType &out = outData->writable();
@@ -140,7 +140,7 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 		else if( pIt->second.interpolation == IECore::PrimitiveVariable::Uniform )
 		{
 			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECore::PrimitiveVariable::Vertex ), 1 );	
-			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( pIt->second.data, converter );
+			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( pIt->second.data.get(), converter );
 			if( newData )
 			{
 				result->addPrimitiveVariable( pIt->first, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, newData ) );

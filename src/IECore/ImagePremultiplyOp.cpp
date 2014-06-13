@@ -74,7 +74,7 @@ struct ImagePremultiplyOp::ToFloatVectorData
 	typedef FloatVectorDataPtr ReturnType;
 
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr dataPtr )
+	ReturnType operator()( const T *dataPtr )
 	{
 		return DataConvert< T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float > >()( dataPtr );
 	}
@@ -92,7 +92,7 @@ struct ImagePremultiplyOp::PremultFn
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataPtr )
+	ReturnType operator()( T *dataPtr )
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type ValueType;
@@ -133,7 +133,7 @@ void ImagePremultiplyOp::modifyChannels( const Imath::Box2i &displayWindow, cons
 		throw InvalidArgumentException( "ImagePremultiplyOp: Cannot find specified alpha channel" );
 	}
 
-	FloatVectorDataPtr alphaData = despatchTypedData< ToFloatVectorData, TypeTraits::IsNumericVectorTypedData >( it->second.data );
+	FloatVectorDataPtr alphaData = despatchTypedData< ToFloatVectorData, TypeTraits::IsNumericVectorTypedData >( it->second.data.get() );
 
 	ImagePremultiplyOp::PremultFn fn( alphaData );
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )

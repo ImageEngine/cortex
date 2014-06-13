@@ -403,5 +403,5 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 	}
 
 	ShrinkWrapFn fn( mesh, target, directionVerticesData, direction, method, this->triangulationToleranceParameter()->getNumericValue() );
-	despatchTypedData< ShrinkWrapFn, TypeTraits::IsFloatVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData, fn );
+	despatchTypedData< ShrinkWrapFn, TypeTraits::IsFloatVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData.get(), fn );
 }
