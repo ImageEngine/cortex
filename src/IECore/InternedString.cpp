@@ -38,7 +38,7 @@
 #include "tbb/concurrent_hash_map.h"
 
 #include "boost/multi_index_container.hpp"
-#include "boost/format.hpp"
+#include "boost/lexical_cast.hpp"
 
 #include "IECore/HashTable.h"
 #include "IECore/InternedString.h"
@@ -134,7 +134,7 @@ const InternedString &InternedString::numberString( int64_t number )
 	NumbersMap::accessor it;
 	if ( g_numbers->insert( it, number ) )
 	{
-		it->second = InternedString( ( boost::format("%d") % number ).str() );
+		it->second = InternedString( boost::lexical_cast<std::string>( number ) );
 	}
 	return it->second;
 }
