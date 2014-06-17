@@ -36,6 +36,8 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "tbb/tbb.h"
+
 #include "IECore/LRUCache.h"
 
 #include "IECorePython/ScopedGILRelease.h"
@@ -43,6 +45,7 @@
 
 using namespace boost::python;
 using namespace IECore;
+using namespace tbb;
 
 namespace boost
 {
@@ -129,11 +132,55 @@ class PythonLRUCache : public LRUCache<object, object>
 
 	private :
 	
+		typedef tbb::mutex Mutex;
 		Mutex m_getMutex;
 
 };
 
 } // namespace
+
+typedef LRUCache<int, int> TestCache;
+
+static int get( int key, size_t &cost )
+{
+	cost = 1;
+	return key;
+}
+
+struct GetFromTestCache
+{
+	public :
+	
+		GetFromTestCache( TestCache &cache, size_t numValues )
+			:	m_cache( cache ), m_numValues( numValues )
+		{
+		}
+		
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				const int k = i % m_numValues;
+				const int v = m_cache.get( k );
+				if( k != v )
+				{
+					throw Exception( "Incorrect LRUCache value found" );
+				}
+			}
+		}
+		
+	private :
+	
+		TestCache &m_cache;
+		size_t m_numValues;
+		
+};
+	
+void testLRUCacheThreading( int numIterations, int numValues, int maxCost )
+{
+	TestCache cache( get, maxCost );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues ) );
+}
 
 void IECorePython::bindLRUCache()
 {
@@ -150,4 +197,8 @@ void IECorePython::bindLRUCache()
 		.def( "set", &PythonLRUCache::set )
 		.def( "cached", &PythonLRUCache::cached )
 	;
+	
+	/// \todo If we create an IECoreTest module, move this into it.
+	def( "testLRUCacheThreading", testLRUCacheThreading );
+	
 }
