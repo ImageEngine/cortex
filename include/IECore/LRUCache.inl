@@ -157,6 +157,11 @@ Value LRUCache<Key, Value>::get( const Key& key )
 		assert( cacheEntry.status == Cached || cacheEntry.status == TooCostly );
 	
 		lock.release();
+		
+		/// \todo We might want to consider ways of avoiding having to manipulate the
+		/// list for cache hits, because we want this to be our fastest code path.
+		/// Adopting an approximate LRU heuristic like Second Chance would be one way
+		/// of doing this.
 		updateListPosition( &*it );
 		limitCost();
 	
