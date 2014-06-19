@@ -150,7 +150,6 @@ Value LRUCache<Key, Value>::get( const Key& key )
 		
 		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
 		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
-		assert( cacheEntry.status != TooCostly );
 		
 		setInternal( &*it, value, cost );
 		
