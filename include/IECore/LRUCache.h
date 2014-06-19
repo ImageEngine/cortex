@@ -66,9 +66,10 @@ class LRUCache : private boost::noncopyable
 		
 		/// The GetterFunction is responsible for computing the value and cost for a cache entry
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
-		/// any reason.
+		/// any reason. It is unsafe to access the LRUCache itself from the GetterFunction.
 		typedef boost::function<Value ( const Key &key, Cost &cost )> GetterFunction;
 		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
+		///  It is unsafe to access the LRUCache itself from the RemovalCallback.
 		typedef boost::function<void ( const Key &key, const Value &data )> RemovalCallback;
 
 		LRUCache( GetterFunction getter );
@@ -188,7 +189,9 @@ class LRUCache : private boost::noncopyable
 		AtomicCost m_currentCost;
 		Cost m_maxCost;
 
-		// Methods. Note that great care must be taken to properly handle the
+		// Methods
+		//
+		// Note that great care must be taken to properly handle the
 		// CacheEntry and list mutexes to avoid deadlock. If both m_listMutex
 		// and a CacheEntry::mutex must be held, the list mutex must be acquired
 		// _first_, and the CacheEntry::mutex _second_. Pay attention to the
