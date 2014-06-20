@@ -44,11 +44,6 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
 
-		# we can't use concatTransform to position the camera until
-		# we get support for RxTransformPoints working in rib generation
-		# mode from 3delight - instead we're using the nasty transform
-		# parameter in the list below.
-		#r.concatTransform( s )
 		r.camera( "main", {
 			"resolution" : IECore.V2iData( IECore.V2i( 1024, 200 ) ),
 			"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
