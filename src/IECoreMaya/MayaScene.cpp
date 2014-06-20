@@ -206,12 +206,7 @@ void MayaScene::writeTransform( const Data *transform, double time )
 
 bool MayaScene::hasAttribute( const Name &name ) const
 {
-	if ( m_isRoot )
-	{
-		return false;
-	}
-	
-	if( m_dagPath.length() == 0 )
+	if ( !m_isRoot && m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
 	}
@@ -236,16 +231,12 @@ bool MayaScene::hasAttribute( const Name &name ) const
 
 void MayaScene::attributeNames( NameList &attrs ) const
 {
-	if ( m_isRoot )
-	{
-		return;
-	}
-	
-	if( m_dagPath.length() == 0 )
+	if( !m_isRoot && m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
 	}
-
+	
+	tbb::mutex::scoped_lock l( s_mutex );
 	attrs.clear();
 	attrs.push_back( SceneInterface::visibilityName );
 	for ( std::vector< CustomAttributeReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
@@ -256,83 +247,87 @@ void MayaScene::attributeNames( NameList &attrs ) const
 
 ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 {
-	if ( m_isRoot )
-	{
-		return 0;
-	}
-	
-	if( m_dagPath.length() == 0 )
+	if ( !m_isRoot && m_dagPath.length() == 0 )
 	{
 		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
 	}
 	
 	tbb::mutex::scoped_lock l( s_mutex );
-	if( name == SceneInterface::visibilityName )
+	if ( !m_isRoot )
 	{
-		bool visible = true;
-		
-		MStatus st;
-		MFnDagNode dagFn( m_dagPath );
-		MPlug visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
-		if( st )
-		{
-			visible = visibilityPlug.asBool();
-		}
-		
-		if( visible )
-		{
-			MDagPath childDag;
-			
-			// find an object that's either a SceneShape, or has a cortex converter and check its visibility:
-			unsigned int childCount = 0;
-			m_dagPath.numberOfShapesDirectlyBelow(childCount);
-			
-			for ( unsigned int c = 0; c < childCount; c++ )
-			{
-				MDagPath d = m_dagPath;
-				if( d.extendToShapeDirectlyBelow( c ) )
-				{
-					MFnDagNode fnChildDag(d);
-					if( fnChildDag.typeId() == SceneShape::id )
-					{
-						childDag = d;
-						break;
-					}
-					
-					if ( fnChildDag.isIntermediateObject() )
-					{
-						continue;
-					}
-					
-					FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( d );
-					if( shapeConverter )
-					{
-						childDag = d;
-						break;
-					}
 
-					FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( d );
-					if( dagConverter )
+		if( name == SceneInterface::visibilityName )
+		{
+			bool visible = true;
+
+			MStatus st;
+			MFnDagNode dagFn( m_dagPath );
+			MPlug visibilityPlug = dagFn.findPlug( MPxTransform::visibility, &st );
+			if( st )
+			{
+				visible = visibilityPlug.asBool();
+			}
+
+			if( visible )
+			{
+				MDagPath childDag;
+
+				// find an object that's either a SceneShape, or has a cortex converter and check its visibility:
+				unsigned int childCount = 0;
+				m_dagPath.numberOfShapesDirectlyBelow(childCount);
+
+				for ( unsigned int c = 0; c < childCount; c++ )
+				{
+					MDagPath d = m_dagPath;
+					if( d.extendToShapeDirectlyBelow( c ) )
 					{
-						childDag = d;
-						break;
+						MFnDagNode fnChildDag(d);
+						if( fnChildDag.typeId() == SceneShape::id )
+						{
+							childDag = d;
+							break;
+						}
+
+						if ( fnChildDag.isIntermediateObject() )
+						{
+							continue;
+						}
+
+						FromMayaShapeConverterPtr shapeConverter = FromMayaShapeConverter::create( d );
+						if( shapeConverter )
+						{
+							childDag = d;
+							break;
+						}
+
+						FromMayaDagNodeConverterPtr dagConverter = FromMayaDagNodeConverter::create( d );
+						if( dagConverter )
+						{
+							childDag = d;
+							break;
+						}
 					}
 				}
-			}
-			
-			if( childDag.isValid() )
-			{
-				MFnDagNode dagFn( childDag );
-				MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
-				if( st )
+
+				if( childDag.isValid() )
 				{
-					visible = visibilityPlug.asBool();
+					MFnDagNode dagFn( childDag );
+					MPlug visibilityPlug = dagFn.findPlug( MPxSurfaceShape::visibility, &st );
+					if( st )
+					{
+						visible = visibilityPlug.asBool();
+					}
 				}
+
 			}
-			
+
+			return new BoolData( visible );
 		}
-		
-		return new BoolData( visible );
+
+	}
+	else if( name == SceneInterface::visibilityName )
+	{
+		return new BoolData( true );
 	}
 	
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
