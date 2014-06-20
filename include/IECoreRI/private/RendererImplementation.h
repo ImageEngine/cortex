@@ -189,6 +189,7 @@ class RendererImplementation : public IECore::Renderer
 		IECore::CompoundDataPtr m_options;
 		IECore::CameraPtr m_camera;
 		size_t m_numDisplays;
+		bool m_inWorld;
 		void outputCamera( IECore::CameraPtr camera );
 
 		struct AttributeState

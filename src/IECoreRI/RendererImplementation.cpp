@@ -86,7 +86,7 @@ std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 // This constructor launches a render within the current application. It creates a SharedData instance,
 // which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
-	:	m_sharedData( new SharedData )
+	:	m_sharedData( new SharedData ), m_inWorld( false )
 {
 	m_options = new CompoundData();
 	constructCommon();
@@ -117,7 +117,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
 // that launched the procedural
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true )
 {
 	constructCommon();
 	
@@ -141,7 +141,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
 IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 ), m_options( 0 )
+	:	m_context( 0 ), m_options( 0 ), m_inWorld( true )
 {
 	constructCommon();
 	
@@ -546,6 +546,12 @@ void IECoreRI::RendererImplementation::display( const std::string &name, const s
 
 void IECoreRI::RendererImplementation::worldBegin()
 {
+	if( m_inWorld )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Already in a world block." );
+		return;
+	}
+
 	ScopedContext scopedContext( m_context );
 	
 	// we implement the "editable" option by specifying the raytrace hider with
@@ -644,10 +650,17 @@ void IECoreRI::RendererImplementation::worldBegin()
 	// get the world fired up
 	
 	RiWorldBegin();
+	m_inWorld = true;
 }
 
 void IECoreRI::RendererImplementation::worldEnd()
 {	
+	if( !m_inWorld )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::worldEnd", "Not in a world block." );
+		return;
+	}
+	
 	// we can't simply use ScopedContext here to manage our context
 	// as we do in the other methods, because 3delight versions >= 11.0.0
 	// actually change context in RiWorldEnd when rerendering. the old
@@ -668,6 +681,7 @@ void IECoreRI::RendererImplementation::worldEnd()
 	
 	RiContext( m_context );
 	RiWorldEnd();
+	m_inWorld = false;
 	
 	// get our new context which we can emit edits on. we can no longer make
 	// calls to our original context, and we must call RiEnd() with the new one
@@ -2054,10 +2068,14 @@ void RendererImplementation::editBegin( const std::string &name, const IECore::C
 	
 	ParameterList p( parameters );
 	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
+	
+	m_inWorld = name != "option";
 }
 
 void RendererImplementation::editEnd()
 {
 	ScopedContext scopedContext( m_context );
 	RiEditEnd();
+	
+	m_inWorld = false;
 }
