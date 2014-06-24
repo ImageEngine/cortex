@@ -1,3 +1,19 @@
+# 9.0.0-a1
+
+#### IECore
+
+- Added from-python conversion of RunTimeTypedClass to IECore::TypeId
+- Removed implicit surface functionality
+- Removed BGEO and BIN readers/writers. 
+- Removed IFFHairReader.
+- Fixed EXRImageReader canRead to accept scanline images.
+- Improved speed of InternedString( int64_t ).
+- Tidied up LRUCache
+
+#### IECoreMaya
+
+- Fixed MayaScene for reading scene:visible and custom attributes at the root
+
 # 8.5.0
 
 #### IECore
