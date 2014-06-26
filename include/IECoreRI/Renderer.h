@@ -118,11 +118,6 @@ class Renderer : public IECore::Renderer
 		///	\li <b>"projection:*"</b><br>
 		/// All parameters matching this naming convention are passed to the RiProjection call.
 		///
-		/// \li <b>"ri:hider" StringData()</b><br>
-		///
-		/// \li <b>"ri:hider:*"</b><br>
-		/// All parameters matching this naming convention are passed to an RiHider call.
-		///
 		/// \li <b>"ri:outputNow" BoolData false</b><br>
 		/// The renderman interface and the IECore::Renderer interface differ in their interpretation
 		/// of transforms before worldBegin, and the IECore::Renderer spec says that the last camera specified

@@ -470,22 +470,6 @@ void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
 	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
 	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
 
-	// then hider
-	it = camera->parameters().find( "ri:hider" );
-	if( it!=camera->parameters().end() )
-	{
-		ConstStringDataPtr d = runTimeCast<const StringData>( it->second );
-		if( d )
-		{
-			ParameterList p( camera->parameters(), "ri:hider:" );
-			RiHiderV( (char *)d->readable().c_str(), p.n(), p.tokens(), p.values() );
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Camera \"ri:hider\" parameter should be of type StringData." );
-		}
-	}
-
 	// then resolution
 	it = camera->parameters().find( "resolution" );
 	ConstV2iDataPtr d = runTimeCast<const V2iData>( it->second );

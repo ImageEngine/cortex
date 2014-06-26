@@ -51,8 +51,6 @@ class CameraTest( IECoreRI.TestCase ) :
 			"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
 			"projection" : IECore.StringData( "perspective" ),
 			"projection:fov" : IECore.FloatData( 45 ),
-			"ri:hider" : IECore.StringData( "hidden" ),
-			"ri:hider:jitter" : IECore.IntData( 1 ),
 			"shutter" : IECore.V2fData( IECore.V2f( 0, 0.1 ) ),
 		} )
 
@@ -67,7 +65,6 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assert_( "CropWindow 0.1 0.9 0.1 0.9" in l )
 		self.assert_( ("Clipping 1 1000" in l) or ("Clipping 1 1e3" in l) )
 		self.assert_( "Projection \"perspective\" \"float fov\" [ 45 ]" in l )
-		self.assert_( "Hider \"hidden\" \"int jitter\" [ 1 ] " in l )
 		self.assert_( "Shutter 0 0.1" in l )
 
 	def testPositioning( self ) :
