@@ -222,7 +222,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 
-	m_inMotion = false;
+	m_motionType = None;
 	m_numDisplays = 0;
 }
 
@@ -450,12 +450,31 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
 	// then transform
-	M44f m = m_preWorldTransform.get();
-	m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-	m.invert();
-	RtMatrix mm;
-	convert( m, mm );
-	RiTransform( mm );
+	const size_t numSamples = m_preWorldTransform.numSamples();
+	if( numSamples > 1 )
+	{
+		vector<float> sampleTimes;
+		for( size_t i = 0; i < numSamples; ++i )
+		{
+			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
+		}
+		RiMotionBegin( sampleTimes.size(), &sampleTimes.front() );
+	}
+	
+	for( size_t i = 0; i < numSamples; ++i )
+	{
+		M44f m = m_preWorldTransform.sample( i );
+		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+		m.invert();
+		RtMatrix mm;
+		convert( m, mm );
+		RiTransform( mm );
+	}
+	
+	if( numSamples > 1 )
+	{
+		RiMotionEnd();
+	}
 	
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
@@ -670,10 +689,11 @@ void IECoreRI::RendererImplementation::transformEnd()
 
 void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 {
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin( Transform );
+
 	if( m_inWorld )
 	{
-		ScopedContext scopedContext( m_context );
-		delayedMotionBegin();
 		RtMatrix mm;
 		convert( m, mm );
 		RiTransform( mm );
@@ -686,10 +706,11 @@ void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 
 void IECoreRI::RendererImplementation::setTransform( const std::string &coordinateSystem )
 {
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin( Transform );
+
 	if( m_inWorld )
 	{
-		ScopedContext scopedContext( m_context );
-		delayedMotionBegin();
 		RiCoordSysTransform( (char *)coordinateSystem.c_str() );
 	}
 }
@@ -719,10 +740,11 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 
 void IECoreRI::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
+	ScopedContext scopedContext( m_context );
+	delayedMotionBegin( Transform );
+
 	if( m_inWorld )
 	{
-		ScopedContext scopedContext( m_context );
-		delayedMotionBegin();
 		RtMatrix mm;
 		convert( m, mm );
 		RiConcatTransform( mm );
@@ -1359,64 +1381,90 @@ void IECoreRI::RendererImplementation::motionBegin( const std::set<float> &times
 	{
 		m_delayedMotionTimes[i++] = *it;
 	}
+	m_motionType = Pending;
 }
 
-void IECoreRI::RendererImplementation::delayedMotionBegin()
+void IECoreRI::RendererImplementation::delayedMotionBegin( MotionType type )
 {
-	if( m_delayedMotionTimes.size() )
+	assert( type == Transform || type == Primitive );
+	
+	if( m_motionType == Pending )
 	{
-		RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+		if( m_inWorld )
+		{
+			RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+		}
+		else
+		{
+			m_preWorldTransform.motionBegin( m_delayedMotionTimes );
+		}
+		m_motionType = type;
 		m_delayedMotionTimes.clear();
-		m_inMotion = true;
 	}
 }
 
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
-	if( !automaticInstancingEnabled() || m_inMotion )
+	
+	if( m_motionType == Transform )
 	{
-		// no auto instancing, or perhaps we're in a transform motion block
-		RiMotionEnd();
-	}
-	else
-	{
-		MurmurHash h;
-		for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
+		if( m_inWorld )
 		{
-			h.append( *it );
-		}
-		for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
-		{
-			(*it)->hash( h );
-		}
-		
-		std::string instanceName = "cortexAutomaticInstance" + h.toString();
-			
-		SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
-
-		SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );		
-		if( it != m_sharedData->objectHandles.end() )
-		{
-			instance( instanceName );
+			RiMotionEnd();
 		}
 		else
 		{
-			instanceBegin( instanceName, CompoundDataMap() );
-				emitPrimitiveAttributes( m_motionPrimitives[0] );
-				RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
-					for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
-					{
-						emitPrimitive( *it );
-					}
-				RiMotionEnd();	
-			instanceEnd();
-			instance( instanceName );
-			m_delayedMotionTimes.clear();
-			m_motionPrimitives.clear();
+			m_preWorldTransform.motionEnd();
 		}
 	}
-	m_inMotion = false;
+	else
+	{
+		// motionType == Primitive
+		if( !automaticInstancingEnabled() )
+		{
+			RiMotionEnd();
+		}
+		else
+		{
+		
+			MurmurHash h;
+			for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
+			{
+				h.append( *it );
+			}
+			for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
+			{
+				(*it)->hash( h );
+			}
+		
+			std::string instanceName = "cortexAutomaticInstance" + h.toString();
+			
+			SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
+
+			SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );
+			if( it != m_sharedData->objectHandles.end() )
+			{
+				instance( instanceName );
+			}
+			else
+			{
+				instanceBegin( instanceName, CompoundDataMap() );
+					emitPrimitiveAttributes( m_motionPrimitives[0] );
+					RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
+						{
+							emitPrimitive( *it );
+						}
+					RiMotionEnd();
+				instanceEnd();
+				instance( instanceName );
+				m_delayedMotionTimes.clear();
+				m_motionPrimitives.clear();
+			}
+		}
+	}
+	m_motionType = None;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1566,11 +1614,11 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 	
 	if( !automaticInstancingEnabled() )
 	{
-		if( !m_inMotion )
+		if( m_motionType == None || m_motionType == Pending )
 		{
 			emitPrimitiveAttributes( primitive );		
 		}
-		delayedMotionBegin();		
+		delayedMotionBegin( Primitive );
 		emitPrimitive( primitive );
 	}
 	else

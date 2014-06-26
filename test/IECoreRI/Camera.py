@@ -198,6 +198,29 @@ class CameraTest( IECoreRI.TestCase ) :
 		a = e.A()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( a ), 1 )
+	
+	def testMotionBlurCameraRender( self ) :
+	
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+		
+		with IECore.TransformBlock( r ) :
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
+			
+			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
+		
+		with IECore.WorldBlock( r ) :
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+
+		# check that something appears in the output image
+		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertTrue( result.floatPrimVar( e.A() ) > 0 ) # something should be there
+		self.assertTrue( result.floatPrimVar( e.A() ) < 1 ) # but it should be blurry
 		
 if __name__ == "__main__":
     unittest.main()
