@@ -443,22 +443,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	else
 	{
 		// add transform and store for output at worldBegin().
-		CompoundDataMap::const_iterator transformIt=parameters.find( "transform" );
-		if( transformIt!=parameters.end() )
-		{
-			if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )
-			{
-				camera->setTransform( new MatrixTransform( m->readable() ) );
-			}
-			else
-			{
-				msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"transform\" parameter should be of type M44fData." );
-			}
-		}
-		else
-		{
-			camera->setTransform( new MatrixTransform( getTransform() ) );
-		}
+		camera->setTransform( new MatrixTransform( getTransform() ) );
 		m_camera = camera;
 	}
 }
