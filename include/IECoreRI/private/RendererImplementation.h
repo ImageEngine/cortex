@@ -56,6 +56,7 @@
 #include "IECore/PatchMeshPrimitive.h"
 
 #include "IECoreRI/Renderer.h"
+#include "IECoreRI/private/TransformStack.h"
 
 namespace IECoreRI
 {
@@ -187,10 +188,13 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getRxOption( const char *name ) const;
 
 		IECore::CompoundDataPtr m_options;
-		IECore::CameraPtr m_camera;
+		// Before RiWorldBegin we have to track the transform
+		// ourselves (because we must invert cortex camera
+		// transforms to get renderman camera transforms).
+		TransformStack m_preWorldTransform;
 		size_t m_numDisplays;
+		std::string m_lastCamera;
 		bool m_inWorld;
-		void outputCamera( IECore::CameraPtr camera );
 
 		struct AttributeState
 		{

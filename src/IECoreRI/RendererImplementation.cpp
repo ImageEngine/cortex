@@ -172,10 +172,6 @@ IECoreRI::RendererImplementation::RendererImplementation()
 
 void IECoreRI::RendererImplementation::constructCommon()
 {
-	m_camera = new Camera;
-	m_camera->addStandardParameters();
-	m_camera->setTransform( new MatrixTransform() );
-
 	m_attributeStack.push( AttributeState() );
 
 	const char *fontPath = getenv( "IECORE_FONT_PATHS" );
@@ -419,38 +415,9 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	CompoundDataPtr parameterData = (new CompoundData( parameters ))->copy();
 
 	CameraPtr camera = new Camera( name, 0, parameterData );
-	camera->addStandardParameters(); // it simplifies outputCamera() to know that the camera is complete
+	camera->addStandardParameters(); // it simplifies things to know that the camera is complete
 
-	bool outputNow = false;
-	CompoundDataMap::const_iterator outputNowIt=parameters.find( "ri:outputNow" );
-	if( outputNowIt!=parameters.end() )
-	{
-		if( ConstBoolDataPtr b = runTimeCast<BoolData>( outputNowIt->second ) )
-		{
-			outputNow = b->readable();
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"ri:outputNow\" parameter should be of type BoolData." );
-		}
-	}
-
-	if( outputNow )
-	{
-		outputCamera( camera );
-		m_camera = 0;
-	}
-	else
-	{
-		// add transform and store for output at worldBegin().
-		camera->setTransform( new MatrixTransform( getTransform() ) );
-		m_camera = camera;
-	}
-}
-
-void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
-{
-	// then shutter
+	// output shutter
 	CompoundDataMap::const_iterator it = camera->parameters().find( "shutter" );
 	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
 	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
@@ -476,19 +443,25 @@ void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
 	RiClipping( clippingD->readable()[0], clippingD->readable()[1] );
 
 	// then projection
+	RiIdentity();
 	it = camera->parameters().find( "projection" );
 	ConstStringDataPtr projectionD = runTimeCast<const StringData>( it->second );
 	ParameterList p( camera->parameters(), "projection:" );
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
-	// transform last
-	if( camera->getTransform() )
-	{
-		M44f m = camera->getTransform()->transform();
-		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-		m.invert();
-		setTransform( m );
-	}
+	// then transform
+	M44f m = m_preWorldTransform.get();
+	m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+	m.invert();
+	RtMatrix mm;
+	convert( m, mm );
+	RiTransform( mm );
+	
+	// then camera itself
+	RiCamera( name.c_str(), RI_NULL );
+	
+	// remember which camera we output last
+	m_lastCamera = name;
 }
 
 /// \todo This should be outputting several calls to display as a series of secondary displays, and also trying to find the best display
@@ -519,6 +492,14 @@ void IECoreRI::RendererImplementation::worldBegin()
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Already in a world block." );
 		return;
+	}
+
+	if( m_lastCamera == "" )
+	{
+		// no camera was output explicitly. output one ourselves
+		// so that we end up with the cortex default camera rather
+		// than the renderman one.
+		camera( "main", CompoundDataMap() );
 	}
 
 	ScopedContext scopedContext( m_context );
@@ -609,13 +590,6 @@ void IECoreRI::RendererImplementation::worldBegin()
 		}
 	}
 	
-	// output any stored camera we might have
-	
-	if( m_camera )
-	{
-		outputCamera( m_camera );
-	}
-	
 	// get the world fired up
 	
 	RiWorldBegin();
@@ -670,30 +644,54 @@ void IECoreRI::RendererImplementation::worldEnd()
 
 void IECoreRI::RendererImplementation::transformBegin()
 {
-	ScopedContext scopedContext( m_context );
-	RiTransformBegin();
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		RiTransformBegin();
+	}
+	else
+	{
+		m_preWorldTransform.push();
+	}
 }
 
 void IECoreRI::RendererImplementation::transformEnd()
 {
-	ScopedContext scopedContext( m_context );
-	RiTransformEnd();
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		RiTransformEnd();
+	}
+	else
+	{
+		m_preWorldTransform.pop();
+	}
 }
 
 void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RtMatrix mm;
-	convert( m, mm );
-	RiTransform( mm );
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		delayedMotionBegin();
+		RtMatrix mm;
+		convert( m, mm );
+		RiTransform( mm );
+	}
+	else
+	{
+		m_preWorldTransform.set( m );
+	}
 }
 
 void IECoreRI::RendererImplementation::setTransform( const std::string &coordinateSystem )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RiCoordSysTransform( (char *)coordinateSystem.c_str() );
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		delayedMotionBegin();
+		RiCoordSysTransform( (char *)coordinateSystem.c_str() );
+	}
 }
 
 Imath::M44f IECoreRI::RendererImplementation::getTransform() const
@@ -721,11 +719,18 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 
 void IECoreRI::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RtMatrix mm;
-	convert( m, mm );
-	RiConcatTransform( mm );
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		delayedMotionBegin();
+		RtMatrix mm;
+		convert( m, mm );
+		RiConcatTransform( mm );
+	}
+	else
+	{
+		m_preWorldTransform.concatenate( m );
+	}
 }
 
 void IECoreRI::RendererImplementation::coordinateSystem( const std::string &name )

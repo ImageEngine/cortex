@@ -143,5 +143,61 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assertEqual( result.floatPrimVar( g ), 1 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
 
+	def testMultipleCameraRIB( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
+
+		with IECore.TransformBlock( r ) :
+
+			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		
+			r.camera( "first", {
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
+			} )
+
+		with IECore.TransformBlock( r ) :
+
+			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 3, 4, 5 ) ) )
+		
+			r.camera( "second", {
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 50 ),
+			} )
+
+		with IECore.WorldBlock( r ) :
+			pass
+			
+		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
+		l = " ".join( l.split() )
+
+		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 45 ]" in l )
+		self.assertTrue( "Camera \"first\"" in l )
+		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 50 ]" in l )
+		self.assertTrue( "Camera \"second\"" in l )
+
+	def testMultipleCameraRender( self ) :
+
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+
+		with IECore.TransformBlock( r ) :
+			r.camera( "iCantSeeAnything", {} )
+		
+		with IECore.TransformBlock( r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
+			r.camera( "iCanSeeSomething", {} )
+		
+		with IECore.WorldBlock( r ) :
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+
+		# check that something appears in the output image
+		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		a = e.A()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+		
 if __name__ == "__main__":
     unittest.main()
