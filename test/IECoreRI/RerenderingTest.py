@@ -46,7 +46,6 @@ import IECoreRI
 				
 class RerenderingTest( unittest.TestCase ) :
 	
-	
 	def testEditLight( self ) :
 		
 		# start an editable render with one light colour
@@ -249,6 +248,80 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# and check we've actually killed it:
 		self.failUnless( procref() is None )
+
+	def testEditCamera( self ) :
+		
+		# start an editable render with the camera in one spot
+		
+		r = IECoreRI.Renderer( "" )
+		
+		r.setOption( "editable", True )
+		
+		r.display( "test", "ie", "rgba",
+			{
+				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
+				"handle" : IECore.StringData( "myLovelySphere" ),
+				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
+			}
+		)
+		
+		camera = IECore.Camera(
+			"main",
+			None,
+			{
+				"projection" : "orthographic",
+				"resolution" : IECore.V2i( 512 ),
+				"screenWindow" : IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ),
+			}
+		)
+		
+		with IECore.TransformBlock( r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 5 ) ) )
+			camera.render( r )
+			
+		with IECore.WorldBlock( r ) :
+			r.sphere( 0.08, -1, 1, 360, {} )
+		
+		# give it a bit of time to finish
+		
+		time.sleep( 2 )
+		
+		# check we get the sphere where we expected
+
+		def checkResults( results ) :
+		
+			i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
+			
+			e = IECore.ImagePrimitiveEvaluator( i )
+			er = e.createResult()
+			
+			for position, value in results :
+				e.pointAtUV( position, er )
+				self.assertEqual( er.floatPrimVar( i["A"] ), value )
+		
+		checkResults( [
+			( IECore.V2f( 0.5, 0.5 ), 1 ),
+			( IECore.V2f( 0.6, 0.5 ), 0 ),
+			( IECore.V2f( 0.4, 0.5 ), 0 ),
+		] )
+		
+		# move the camera and check the sphere has moved
+		
+		r.editBegin( "option", {} )
+		
+		with IECore.TransformBlock( r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0, 5 ) ) )
+			camera.render( r )
+		
+		r.editEnd()
+		
+		time.sleep( 2 )
+		
+		checkResults( [
+			( IECore.V2f( 0.4, 0.5 ), 1 ),
+			( IECore.V2f( 0.5, 0.5 ), 0 ),
+			( IECore.V2f( 0.3, 0.5 ), 0 ),
+		] )
 		
 if __name__ == "__main__":
     unittest.main()

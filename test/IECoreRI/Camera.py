@@ -175,7 +175,8 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assertTrue( "Camera \"first\"" in l )
 		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 50 ]" in l )
 		self.assertTrue( "Camera \"second\"" in l )
-
+		self.assertEqual( l.count( "Camera" ), 2 )
+		
 	def testMultipleCameraRender( self ) :
 
 		r = IECoreRI.Renderer( "" )

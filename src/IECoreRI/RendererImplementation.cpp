@@ -479,8 +479,17 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
 	
-	// remember which camera we output last
-	m_lastCamera = name;
+	if( name == m_lastCamera )
+	{
+		// we're in an edit, and need to update
+		// the world camera as well.
+		RiCamera( RI_WORLD, RI_NULL );
+	}
+	else
+	{
+		// remember which camera we output last
+		m_lastCamera = name;
+	}
 }
 
 /// \todo This should be outputting several calls to display as a series of secondary displays, and also trying to find the best display
