@@ -273,13 +273,17 @@ bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
 
 template<typename Key, typename Value>
 void LRUCache<Key, Value>::limitCost()
-{	
+{
 	ListMutex::scoped_lock lock( m_listMutex );
 
-	while( m_currentCost > m_maxCost )
+	// While we're above the cost limit, and there are still things
+	// in the list, erase the first item in the list. Note that it _is_
+	// possible for the list to become empty before we meet the cost limit,
+	// because another thread may have cached an item and incremented
+	// m_currentCost, but still be waiting to add the item to the list,
+	// because we hold m_listMutex.
+	while( m_currentCost > m_maxCost && m_listStart.second.next != &m_listEnd )
 	{
-		// if this isn't true, then we've messed up our cost counting somewhere
-		assert( m_listStart.second.next && m_listStart.second.next != &m_listEnd );
 		eraseInternal( m_listStart.second.next );
 	}
 }
