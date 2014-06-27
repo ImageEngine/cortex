@@ -174,6 +174,9 @@ class LRUCacheTest( unittest.TestCase ) :
 		t1.join()
 		t2.join()
 		t3.join()
+		
+		c.clear()
+		self.assertEqual( c.currentCost(), 0 )
 
 	def testYieldGILInGetter( self ) :
 	
@@ -258,6 +261,20 @@ class LRUCacheTest( unittest.TestCase ) :
 		self.assertEqual( c.currentCost(), 0 )
 		self.assertEqual( c.get( 5 ), None )
 		self.assertEqual( c.currentCost(), 1 )
+	
+	def testCPPThreading( self ) :
+		
+		# arguments are :
+		# iterations, number of unique values, maximum cost
+		
+		# cache exactly the right size
+		IECore.testLRUCacheThreading( 100000, 100, 100 )
+		
+		# cache not quite big enough
+		IECore.testLRUCacheThreading( 100000, 100, 90 )
+		
+		# cache thrashing like crazy
+		IECore.testLRUCacheThreading( 100000, 1000, 2 )
 		
 if __name__ == "__main__":
     unittest.main()
