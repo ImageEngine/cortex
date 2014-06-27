@@ -43,31 +43,6 @@ namespace IECorePython
 
 void bindRefCounted();
 
-/// \todo This class is now just an internal implementation detail of
-/// RefCountedClass - remove it from the public API for the next major version.
-template<typename T>
-struct IntrusivePtrToPython
-{
-	/// Constructor registers the conversion with boost::python.
-	IntrusivePtrToPython();
-
-	static PyObject *convert( typename T::Ptr const &x );
-
-};
-
-/// \todo This class is now just an internal implementation detail of
-/// RefCountedClass - remove it from the public API for the next major version.
-template<typename T>
-struct IntrusivePtrFromPython
-{
-	/// Constructor registers the conversion with boost::python.
-	IntrusivePtrFromPython();
-
-	static void *convertible( PyObject *p );
-	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data );
-
-};
-
 /// A class similar to boost::python::wrapper, but with specialisations
 /// making it more suitable for use wrapping RefCounted types. See
 /// RunTimeTypedWrapper for a good example of its use.

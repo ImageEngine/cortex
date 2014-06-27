@@ -44,76 +44,89 @@ namespace IECorePython
 // IntrusivePtr To/From Python
 //////////////////////////////////////////////////////////////////////////
 
-template<typename T>
-IntrusivePtrToPython<T>::IntrusivePtrToPython()
+namespace Detail
 {
-	boost::python::to_python_converter<typename T::Ptr, IntrusivePtrToPython<T> >();
-}
 
 template<typename T>
-PyObject *IntrusivePtrToPython<T>::convert( typename T::Ptr const &x )
+struct IntrusivePtrToPython
 {
-	if (!x)
+	// Constructor registers the conversion with boost::python.
+	IntrusivePtrToPython()
 	{
-		Py_INCREF( Py_None );
-		return Py_None;
+		boost::python::to_python_converter<typename T::Ptr, IntrusivePtrToPython<T> >();
 	}
 
-	PyObject* converted = WrapperGarbageCollector::pyObject( x.get() );
-	if( converted )
+	static PyObject *convert( typename T::Ptr const &x )
 	{
-		Py_INCREF( converted );
+		if (!x)
+		{
+			Py_INCREF( Py_None );
+			return Py_None;
+		}
+
+		PyObject* converted = WrapperGarbageCollector::pyObject( x.get() );
+		if( converted )
+		{
+			Py_INCREF( converted );
+		}
+		else
+		{
+			using namespace boost::python::objects;
+
+			converted = class_value_wrapper<
+				typename T::Ptr, make_ptr_instance<
+					T,
+					pointer_holder<typename T::Ptr, T>
+					>
+				>::convert(x);
+		}
+
+		assert(converted);
+
+		return converted;
 	}
-	else
-	{
-		using namespace boost::python::objects;
 
-		converted = class_value_wrapper<
-			typename T::Ptr, make_ptr_instance<
-				T,
-				pointer_holder<typename T::Ptr, T>
-				>
-			>::convert(x);
-	}
-
-	assert(converted);
-
-	return converted;
-}
+};
 
 template<typename T>
-IntrusivePtrFromPython<T>::IntrusivePtrFromPython()
+struct IntrusivePtrFromPython
 {
-	boost::python::converter::registry::push_back( &convertible, &construct, boost::python::type_id<typename T::Ptr>() );
-}
 
-template<typename T>
-void *IntrusivePtrFromPython<T>::convertible( PyObject *p )
-{
-	if( p == Py_None )
+	// Constructor registers the conversion with boost::python.
+	IntrusivePtrFromPython()
 	{
-		return p;
+		boost::python::converter::registry::push_back( &convertible, &construct, boost::python::type_id<typename T::Ptr>() );
 	}
 
-	return boost::python::converter::get_lvalue_from_python( p, boost::python::converter::registered<T>::converters );
-}
-
-template<typename T>
-void IntrusivePtrFromPython<T>::construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
-{
-	void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
-
-	if( data->convertible == source )
+	static void *convertible( PyObject *p )
 	{
-		// Py_None case
-		new (storage) typename T::Ptr();
+		if( p == Py_None )
+		{
+			return p;
+		}
+
+		return boost::python::converter::get_lvalue_from_python( p, boost::python::converter::registered<T>::converters );
 	}
-	else
+	
+	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data )
 	{
-		new (storage) typename T::Ptr( static_cast<T*>( data->convertible ) );
+		void *storage = ((boost::python::converter::rvalue_from_python_storage<typename T::Ptr>*)data)->storage.bytes;
+
+		if( data->convertible == source )
+		{
+			// Py_None case
+			new (storage) typename T::Ptr();
+		}
+		else
+		{
+			new (storage) typename T::Ptr( static_cast<T*>( data->convertible ) );
+		}
+		data->convertible = storage;
 	}
-	data->convertible = storage;
-}
+
+};
+
+} // namespace Detail
 
 //////////////////////////////////////////////////////////////////////////
 // RefCountedWrapper
@@ -177,9 +190,9 @@ RefCountedClass<T, Base, Ptr>::RefCountedClass( const char *className, const cha
 {
 
 	// register smart pointer conversion to python
-	IntrusivePtrToPython<T>();
+	Detail::IntrusivePtrToPython<T>();
 	// register smart pointer conversion from python
-	IntrusivePtrFromPython<T>();
+	Detail::IntrusivePtrFromPython<T>();
 
 	// register casts between T and Base
 	boost::python::objects::register_dynamic_id<T>();
