@@ -130,13 +130,10 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 		}
 	}
 };
-IE_CORE_DECLAREPTR( ImageViewportPostProcessWrapper );
 
 void bindImageViewportPostProcess()
 {
-	typedef class_< ImageViewportPostProcess, ImageViewportPostProcessWrapperPtr, bases< ViewportPostProcess >, boost::noncopyable > ImageViewportPostProcessPyClass;
-
-	RefCountedClass<ImageViewportPostProcess, ViewportPostProcess, ImageViewportPostProcessWrapperPtr>( "ImageViewportPostProcess" )
+	RefCountedClass<ImageViewportPostProcess, ViewportPostProcess, ImageViewportPostProcessWrapper>( "ImageViewportPostProcess" )
 		.def( init<>() )
 		.def( "needsDepth", &ImageViewportPostProcessWrapper::needsDepth )
 		.def( "preRender", &ImageViewportPostProcessWrapper::preRender )

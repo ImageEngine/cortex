@@ -184,8 +184,8 @@ PyTypeObject *RefCountedWrapper<T>::pyType()
 // RefCountedClass
 //////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename Base, typename Ptr>
-RefCountedClass<T, Base, Ptr>::RefCountedClass( const char *className, const char *docString )
+template<typename T, typename Base, typename TWrapper>
+RefCountedClass<T, Base, TWrapper>::RefCountedClass( const char *className, const char *docString )
 	:	BaseClass( className, docString, boost::python::no_init )
 {
 

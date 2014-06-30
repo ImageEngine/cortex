@@ -133,13 +133,11 @@ class ParameterWrap : public Parameter, public Wrapper<Parameter>
 
 };
 
-IE_CORE_DECLAREPTR( ParameterWrap );
-
 void bindParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Parameter, ParameterWrapPtr>()
+	RunTimeTypedClass<Parameter, ParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
 			(

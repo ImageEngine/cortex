@@ -65,11 +65,10 @@ class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
 		};
 
 };
-IE_CORE_DECLAREPTR( ModifyOpWrap );
 
 void bindModifyOp()
 {
-	RunTimeTypedClass<ModifyOp, ModifyOpWrapPtr>()
+	RunTimeTypedClass<ModifyOp, ModifyOpWrap>()
 		.def( init< const std::string &, ParameterPtr, ParameterPtr >() )
 	;
 }

@@ -87,7 +87,7 @@ class UniformRandomPointDistributionOpWrap :
 
 void bindUniformRandomPointDistributionOp()
 {
-	RunTimeTypedClass<UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap::Ptr>()
+	RunTimeTypedClass<UniformRandomPointDistributionOp, UniformRandomPointDistributionOpWrap>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "density", &UniformRandomPointDistributionOpWrap::density )

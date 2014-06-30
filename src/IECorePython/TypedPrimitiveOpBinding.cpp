@@ -71,7 +71,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 template<typename T>
 static void bindTypedPrimitiveOp()
 {
-	RunTimeTypedClass<TypedPrimitiveOp<T>, typename TypedPrimitiveOpWrap<T>::Ptr>()
+	RunTimeTypedClass<TypedPrimitiveOp<T>, TypedPrimitiveOpWrap<T> >()
 		.def( init<const std::string &>() )
 	;
 }

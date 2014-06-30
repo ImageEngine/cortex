@@ -63,11 +63,10 @@ class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
 		}
 
 };
-IE_CORE_DECLAREPTR( PrimitiveOpWrap );
 
 void bindPrimitiveOp()
 {
-	RunTimeTypedClass<PrimitiveOp, PrimitiveOpWrapPtr>()
+	RunTimeTypedClass<PrimitiveOp, PrimitiveOpWrap>()
 		.def( init<const std::string &>() )
 	;
 }

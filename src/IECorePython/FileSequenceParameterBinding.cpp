@@ -165,7 +165,7 @@ void bindFileSequenceParameter()
 	FileSequencePtr (FileSequenceParameter::*getFileSequenceValueInternalData)() const = &FileSequenceParameter::getFileSequenceValue;
 	FileSequencePtr (FileSequenceParameter::*getFileSequenceValueStringData)( const StringData *value ) const = &FileSequenceParameter::getFileSequenceValue;
 	
-	RunTimeTypedClass<FileSequenceParameter, FileSequenceParameterWrap::Ptr>()
+	RunTimeTypedClass<FileSequenceParameter, FileSequenceParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object, int > >
 			(

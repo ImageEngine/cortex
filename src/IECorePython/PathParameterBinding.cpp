@@ -59,13 +59,12 @@ class PathParameterWrap : public PathParameter, public Wrapper<PathParameter>
 		IECOREPYTHON_PARAMETERWRAPPERFNS( PathParameter );
 
 };
-IE_CORE_DECLAREPTR( PathParameterWrap );
 
 void bindPathParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<PathParameter, PathParameterWrapPtr> pathParamClass;
+	RunTimeTypedClass<PathParameter, PathParameterWrap> pathParamClass;
 	{
 		// define enum before functions.
 		scope varScope = pathParamClass;

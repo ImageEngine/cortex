@@ -90,13 +90,12 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 		}
 
 };
-IE_CORE_DECLAREPTR( ColorTransformOpWrap );
 
 void bindColorTransformOp()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrapPtr>( "ColorTransformOp" )
+	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrap>( "ColorTransformOp" )
 		.def( init<const std::string &>( ( arg( "description" ) ) ) )
 	;
 

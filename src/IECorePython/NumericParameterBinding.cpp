@@ -66,7 +66,7 @@ static void bindNumericParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<NumericParameter<T>, typename NumericParameterWrap<T>::Ptr>()
+	RunTimeTypedClass<NumericParameter<T>, NumericParameterWrap<T> >()
 		.def(
 			init<const std::string &, const std::string &, boost::python::optional< T, T, T, const object &, bool, CompoundObjectPtr> >
 			(
