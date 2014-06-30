@@ -122,9 +122,6 @@ class WrapperGarbageCollector
 
 		/// \todo Make private for the next major version.
 		PyObject *m_pyObject;
-		/// \todo This is unused. Remove it for
-		/// the next major version.
-		IECore::RefCounted *m_object;
 
 	private :
 
