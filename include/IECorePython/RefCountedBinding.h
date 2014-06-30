@@ -78,6 +78,14 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 
 };
 
+namespace Detail
+{
+
+template<typename T>
+class GILReleasePtr;
+
+};
+
 /// A class to simplify the binding of RefCounted derived classes - this should be used in place of the usual
 /// boost::python::class_. It deals with many issues relating to intrusive pointers and object identity.
 ///
@@ -86,12 +94,12 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 /// - TWrapper : optional Wrapper class derived from RefCountedWrapper<T>.
 ///   This can be used to allow Python subclasses to override C++ virtual functions.
 template<typename T, typename Base, typename TWrapper=T>
-class RefCountedClass : public boost::python::class_<T, IECore::IntrusivePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> >
+class RefCountedClass : public boost::python::class_<T, Detail::GILReleasePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> >
 {
 
 	public :
 
-		typedef boost::python::class_<T, IECore::IntrusivePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> > BaseClass;
+		typedef boost::python::class_<T, Detail::GILReleasePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> > BaseClass;
 
 		RefCountedClass( const char *className, const char *docString = 0 );
 

@@ -36,6 +36,7 @@
 #define IECOREBINDINGS_REFCOUNTEDBINDING_INL
 
 #include "IECorePython/WrapperGarbageCollector.h"
+#include "IECorePython/ScopedGILRelease.h"
 
 namespace IECorePython
 {
@@ -46,6 +47,44 @@ namespace IECorePython
 
 namespace Detail
 {
+
+// An intrusive pointer that releases the GIL in its
+// destructor, so that other threads may acquire it
+// while the C++ destructor is running.
+template<typename T>
+class GILReleasePtr : public IECore::IntrusivePtr<T>
+{
+	
+	public :
+	
+		typedef IECore::IntrusivePtr<T> Base;
+
+		typedef T element_type;
+	
+		GILReleasePtr( T *p )
+			: 	Base( p )
+		{
+		}
+	
+		~GILReleasePtr()
+		{
+			IECorePython::ScopedGILRelease gilRelease;
+			Base::reset( NULL );
+		}
+		
+	private :
+
+		// we don't expect boost::python to need any other
+		// constructors or assignment operators, so we make
+		// them private and unimplemented so we're alerted
+		// should our assumptions ever become incorrect.
+		template<typename U>
+		GILReleasePtr( const U &rhs );
+
+		template<typename U>
+		GILReleasePtr &operator=( const U &rhs );
+
+};
 
 template<typename T>
 struct IntrusivePtrToPython
@@ -74,11 +113,12 @@ struct IntrusivePtrToPython
 			using namespace boost::python::objects;
 
 			converted = class_value_wrapper<
-				typename T::Ptr, make_ptr_instance<
+				GILReleasePtr<T>,
+				make_ptr_instance<
 					T,
-					pointer_holder<typename T::Ptr, T>
-					>
-				>::convert(x);
+					pointer_holder<GILReleasePtr<T>, T>
+				>
+			>::convert( GILReleasePtr<T>( x.get() ) );
 		}
 
 		assert(converted);
