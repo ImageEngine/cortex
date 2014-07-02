@@ -3062,6 +3062,16 @@ if doConfigure :
 		
 	else :
 	
+		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
+			alembicEnv.Append(
+				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
+				LIBS = [
+					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
+					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
+				]
+			)
+			
 		c.Finish()	
 		
 		alembicSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/*.cpp" ) )
