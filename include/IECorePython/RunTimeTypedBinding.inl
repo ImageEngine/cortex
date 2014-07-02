@@ -177,8 +177,8 @@ bool RunTimeTypedWrapper<T>::isInstanceOf( const char *typeName ) const
 // RunTimeTypedClass
 //////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename Ptr>
-RunTimeTypedClass<T, Ptr>::RunTimeTypedClass( const char *docString )
+template<typename T, typename TWrapper>
+RunTimeTypedClass<T, TWrapper>::RunTimeTypedClass( const char *docString )
 	:	BaseClass( Detail::nameWithoutNamespace( T::staticTypeName() ), docString )
 {
 

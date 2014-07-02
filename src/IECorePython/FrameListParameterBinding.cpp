@@ -105,7 +105,7 @@ void bindFrameListParameter()
 	FrameListPtr (FrameListParameter::*getFrameListValueInternalData)() const = &FrameListParameter::getFrameListValue;
 	FrameListPtr (FrameListParameter::*getFrameListValueStringData)( const StringData *value ) const = &FrameListParameter::getFrameListValue;
 	
-	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap::Ptr>()
+	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, const dict &, bool, CompoundObjectPtr > >
 			(

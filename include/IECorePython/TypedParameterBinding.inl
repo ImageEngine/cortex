@@ -82,7 +82,7 @@ void bindTypedParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<IECore::TypedParameter<T>, typename TypedParameterWrap<T>::Ptr>()
+	RunTimeTypedClass<IECore::TypedParameter<T>, TypedParameterWrap<T> >()
 		.def(
 			boost::python::init< const std::string &, const std::string &, boost::python::object, boost::python::optional<const boost::python::object &, bool, IECore::CompoundObjectPtr > >
 			(

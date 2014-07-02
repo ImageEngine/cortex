@@ -158,8 +158,6 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 
 };
 
-IE_CORE_DECLAREPTR( ParameterisedProceduralWrap );
-
 static void render( ParameterisedProcedural &o, Renderer *renderer )
 {
 	ScopedGILRelease gilRelease;
@@ -185,7 +183,7 @@ static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, 
 void bindParameterisedProcedural()
 {
 
-	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrapPtr>()
+	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrap>()
 		.def( init<>() )
 		.def( init< const std::string >( arg( "description") ) )
 		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )

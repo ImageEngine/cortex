@@ -180,7 +180,7 @@ void bindReader()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Reader, ReaderWrapPtr>()
+	RunTimeTypedClass<Reader, ReaderWrap>()
 		.def( init<const std::string &>( ( arg( "description" ) ) ) )
 		.def( init<const std::string &, ParameterPtr>( ( arg( "description" ), arg( "resultParameter" ) ) ) )
 		.def( "readHeader", &Reader::readHeader )

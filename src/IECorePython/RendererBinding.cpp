@@ -150,7 +150,6 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 		}
 
 };
-IE_CORE_DECLAREPTR( ProceduralWrap );
 
 static void fillCompoundDataMap( CompoundDataMap &m, const dict &d )
 {
@@ -391,7 +390,7 @@ void bindRenderer()
 		.def("editEnd", &Renderer::editEnd)
 	;
 
-	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapPtr>( "Procedural" )
+	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrap>( "Procedural" )
 		.def( init<>() )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )

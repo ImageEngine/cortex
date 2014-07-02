@@ -317,7 +317,7 @@ static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
 }
 
 template<class T>
-static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > &c )
+static void bindNumericMethods( RunTimeTypedClass<T> &c )
 {
 	c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
 	c.add_static_property( "maxValue", &std::numeric_limits<typename T::ValueType>::max, "Maximum representable value." );

@@ -64,8 +64,6 @@ class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
 		}
 
 };
-IE_CORE_DECLAREPTR( MessageHandlerWrap );
-
 
 static void addHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
 {
@@ -97,7 +95,7 @@ void bindMessageHandler()
 
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
 
-	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrapPtr>( "MessageHandler" )
+	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrap>( "MessageHandler" )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
 		.def( "setDefaultHandler", &MessageHandler::setDefaultHandler )

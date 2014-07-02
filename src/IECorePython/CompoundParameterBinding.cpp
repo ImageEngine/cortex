@@ -164,7 +164,7 @@ void bindCompoundParameter()
 {
 	using boost::python::arg ;
 
-	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap::Ptr>()
+	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr, bool > >
 			(

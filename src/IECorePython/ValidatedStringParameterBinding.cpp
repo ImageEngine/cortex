@@ -62,13 +62,12 @@ class ValidatedStringParameterWrap : public ValidatedStringParameter, public Wra
 		IECOREPYTHON_PARAMETERWRAPPERFNS( ValidatedStringParameter );
 
 };
-IE_CORE_DECLAREPTR( ValidatedStringParameterWrap );
 
 void bindValidatedStringParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<ValidatedStringParameter, ValidatedStringParameterWrapPtr>()
+	RunTimeTypedClass<ValidatedStringParameter, ValidatedStringParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, bool, object &, bool, CompoundObjectPtr >
 			(

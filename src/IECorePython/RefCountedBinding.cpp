@@ -84,8 +84,8 @@ void bindRefCounted()
 		.def( "collectGarbage", &WrapperGarbageCollector::collect ).staticmethod( "collectGarbage" )
 	;
 
-	IntrusivePtrToPython<RefCounted>();
-	IntrusivePtrFromPython<RefCounted>();
+	Detail::IntrusivePtrToPython<RefCounted>();
+	Detail::IntrusivePtrFromPython<RefCounted>();
 
 	implicitly_convertible<RefCountedPtr, ConstRefCountedPtr>();
 }

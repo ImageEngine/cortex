@@ -174,7 +174,7 @@ void bindLevenbergMarquardt( const char *name )
 			.value( "Success", LevenbergMarquardtWrapper<T>::Success )
 		;
 
-		RefCountedClass<LevenbergMarquardtErrorFn<T>, RefCounted, typename LevenbergMarquardtErrorFnWrapper<T>::Ptr>( "ErrorFn" )
+		RefCountedClass<LevenbergMarquardtErrorFn<T>, RefCounted, LevenbergMarquardtErrorFnWrapper<T> >( "ErrorFn" )
 			.def( init<>() )
 			.def( "numErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::numErrors ) )
 			.def( "computeErrors", pure_virtual( &LevenbergMarquardtErrorFnWrapper<T>::computeErrors ) )
