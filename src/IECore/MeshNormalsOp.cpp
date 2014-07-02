@@ -219,7 +219,7 @@ void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 	const PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation>( operands->member<IntData>( "interpolation" )->readable() );
 	
 	CalculateNormals f( mesh->verticesPerFace(), mesh->vertexIds(), interpolation );
-	DataPtr n = despatchTypedData<CalculateNormals, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pvIt->second.data, f );
+	DataPtr n = despatchTypedData<CalculateNormals, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pvIt->second.data.get(), f );
 
 	mesh->variables[ nPrimVarNameParameter()->getTypedValue() ] = PrimitiveVariable( interpolation, n );
 }

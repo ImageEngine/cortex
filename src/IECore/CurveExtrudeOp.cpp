@@ -146,7 +146,7 @@ struct CurveExtrudeOp::VaryingFn
 	}
 
 	template<typename T>
-	DataPtr operator() ( typename T::Ptr data ) const
+	DataPtr operator() ( T *data ) const
 	{
 		assert( data );
 		typedef typename T::ValueType::value_type Value;
@@ -194,12 +194,12 @@ struct CurveExtrudeOp::VaryingFn
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );
-                }
-        };
+		}
+	};
 };
 
 struct CurveExtrudeOp::VertexFn
@@ -277,8 +277,8 @@ struct CurveExtrudeOp::VertexFn
 		{
 			assert( data );
 			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for vertex primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );
-                }
-        };
+		}
+	};
 };
 
 
@@ -295,7 +295,7 @@ struct CurveExtrudeOp::UniformFn
 	}
 
 	template<typename T>
-	DataPtr operator() ( typename T::Ptr data ) const
+	DataPtr operator() ( T *data ) const
 	{
 		assert( data );
 		return new TypedData< typename T::ValueType::value_type >( data->readable()[ m_curveIndex ] );
@@ -304,7 +304,7 @@ struct CurveExtrudeOp::UniformFn
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 			throw InvalidArgumentException( ( boost::format( "CurveExtrudeOp: Invalid data type \"%s\" for uniform primitive variable \"%s\"." ) % Object::typeNameFromTypeId( data->typeId() ) % functor.m_primVarName ).str() );
@@ -394,7 +394,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 
 			patchMesh->variables[ it->first ] = PrimitiveVariable(
 				it->second.interpolation,
-				despatchTypedData<VaryingFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data, varyingFn )
+				despatchTypedData<VaryingFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data.get(), varyingFn )
 			);
 
 		}
@@ -405,7 +405,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 
 			patchMesh->variables[ it->first ] = PrimitiveVariable(
 				it->second.interpolation,
-				despatchTypedData<VertexFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data, vertexFn )
+				despatchTypedData<VertexFn, TypeTraits::IsStrictlyInterpolableVectorTypedData>( it->second.data.get(), vertexFn )
 			);
 
 		}
@@ -418,7 +418,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 			UniformFn uniformFn( it->first, curves, curveIndex );
 			patchMesh->variables[ it->first ] = PrimitiveVariable(
 				PrimitiveVariable::Constant,
-				despatchTypedData<UniformFn, TypeTraits::IsVectorTypedData>( it->second.data, uniformFn )
+				despatchTypedData<UniformFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), uniformFn )
 			);
 		}
 	}

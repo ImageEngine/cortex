@@ -85,7 +85,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 	{
 		if ( testTypedData<TypeTraits::IsVectorTypedData>( it->second.data ) )
 		{
-			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data.get() );
 			if( s==numParticles )
 			{
 				allNames.push_back( it->first );
@@ -100,7 +100,7 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 			// it's not data of a vector type but it could be of a simple type
 			// in which case it's suitable for saving as a constant particle attribute
 
-			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
+			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data.get() );
 			allNames.push_back( it->first );
 		}
 	}
