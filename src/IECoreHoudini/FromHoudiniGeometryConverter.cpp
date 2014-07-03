@@ -665,7 +665,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	size_t numHandles = handles.entries();
 	for ( size_t i=0; i < numHandles; i++ )
 	{
-		adjustedHandles[ handles[i] ] = i;
+		adjustedHandles[ handles(i) ] = i;
 	}
 	
 	size_t i = 0;

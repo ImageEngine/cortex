@@ -455,7 +455,7 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 }
 
 template<typename T>
-SOP_SceneCacheSource::TransformGeometricData::ReturnType SOP_SceneCacheSource::TransformGeometricData::operator()( typename T::ConstPtr data ) const
+SOP_SceneCacheSource::TransformGeometricData::ReturnType SOP_SceneCacheSource::TransformGeometricData::operator()( const T *data ) const
 {
 	GeometricData::Interpretation interp = data->getInterpretation();
 	return ( interp == GeometricData::Point || interp == GeometricData::Normal || interp == GeometricData::Vector );
@@ -476,7 +476,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 		primVars.clear();
 		for ( PrimitiveVariableMap::const_iterator it = variables.begin(); it != variables.end(); ++it )
 		{
-			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data ) )
+			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data.get() ) )
 			{
 				primVars.push_back( it->first );
 				
