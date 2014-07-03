@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -197,7 +197,7 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 		// only duplicate point and vertex attrib end points
 		if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
 		{
-			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data, func );
+			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data.get(), func );
 		}
 	}
 	
@@ -211,7 +211,7 @@ FromHoudiniCurvesConverter::DuplicateEnds::DuplicateEnds( const std::vector<int>
 }
 
 template <typename T>
-FromHoudiniCurvesConverter::DuplicateEnds::ReturnType FromHoudiniCurvesConverter::DuplicateEnds::operator()( typename T::Ptr data ) const
+FromHoudiniCurvesConverter::DuplicateEnds::ReturnType FromHoudiniCurvesConverter::DuplicateEnds::operator()( T *data ) const
 {
 	assert( data );
 
@@ -219,6 +219,7 @@ FromHoudiniCurvesConverter::DuplicateEnds::ReturnType FromHoudiniCurvesConverter
 
 	std::vector<ValueType> newValues;
 	const std::vector<ValueType> &origValues = data->readable();
+	newValues.reserve( origValues.size() + m_vertsPerCurve.size()*4 );
 	
 	size_t index = 0;
 	for ( size_t i=0; i < m_vertsPerCurve.size(); i++ )
