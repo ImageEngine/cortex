@@ -93,6 +93,7 @@ from CompoundVectorParameter import CompoundVectorParameter
 from AttributeBlock import AttributeBlock
 from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
+from EditBlock import EditBlock
 from SequenceMergeOp import SequenceMergeOp
 from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *

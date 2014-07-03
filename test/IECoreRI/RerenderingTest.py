@@ -93,17 +93,15 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# make an edit to the light color and check the colour has changed
 		
-		r.editBegin( "light", {} )
+		with IECore.EditBlock( r, "light", {} ) :
 		
-		r.light(
+			r.light(
 				"pointlight",
 				"myLovelyLight",
 				{
 					"lightcolor" : IECore.Color3f( 0.25, 0.5, 1 ),
 				}
 			)
-		
-		r.editEnd()
 		
 		time.sleep( 1 )
 		
@@ -158,9 +156,9 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# make an edit to the shader and wait for it to take hold
 		
-		r.editBegin( "attribute", { "scopename" : "/sphere" } )
-		r.shader( "surface", "matte", { "Kd" : 0.5 } )
-		r.editEnd()
+		with IECore.EditBlock( r, "attribute", { "scopename" : "/sphere" } ) :
+			r.shader( "surface", "matte", { "Kd" : 0.5 } )
+		
 		time.sleep( 1 )
 		
 		# check the ratio of the two colours is as expected.
@@ -307,14 +305,11 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# move the camera and check the sphere has moved
 		
-		r.editBegin( "option", {} )
-		
-		with IECore.TransformBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0, 5 ) ) )
-			camera.render( r )
-		
-		r.editEnd()
-		
+		with IECore.EditBlock( r, "option", {} ) :
+			with IECore.TransformBlock( r ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.1, 0, 5 ) ) )
+				camera.render( r )
+				
 		time.sleep( 2 )
 		
 		checkResults( [
