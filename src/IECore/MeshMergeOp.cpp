@@ -121,6 +121,7 @@ struct MeshMergeOp::AppendPrimVars
 		{
 			return;
 		}
+		m_visitedData.insert( data );
 
 		const T *data2 = m_mesh2->variableData<T>( m_name, m_interpolation );
 		if ( data2 )
@@ -139,8 +140,6 @@ struct MeshMergeOp::AppendPrimVars
 			
  			data->writable().insert( data->writable().end(), size, defaultValue );
 		}
-		
-		m_visitedData.insert( data );
 	}
 
 	private :
