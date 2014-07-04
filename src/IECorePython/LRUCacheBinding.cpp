@@ -151,8 +151,8 @@ struct GetFromTestCache
 {
 	public :
 	
-		GetFromTestCache( TestCache &cache, size_t numValues )
-			:	m_cache( cache ), m_numValues( numValues )
+		GetFromTestCache( TestCache &cache, size_t numValues, size_t clearFrequency )
+			:	m_cache( cache ), m_numValues( numValues ), m_clearFrequency( clearFrequency )
 		{
 		}
 		
@@ -166,6 +166,11 @@ struct GetFromTestCache
 				{
 					throw Exception( "Incorrect LRUCache value found" );
 				}
+				
+				if( m_clearFrequency && (i % m_clearFrequency == 0) )
+				{
+					m_cache.clear();
+				}
 			}
 		}
 		
@@ -173,17 +178,18 @@ struct GetFromTestCache
 	
 		TestCache &m_cache;
 		size_t m_numValues;
+		size_t m_clearFrequency;
 		
 };
 	
-void testLRUCacheThreading( int numIterations, int numValues, int maxCost )
+void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int clearFrequency = 0 )
 {
 	// do lots of parallel cache accesses. then clear the cache in the main
 	// thread and check that it has emptied successfully, to ensure that the
 	// cost counting has been accurate.
 
 	TestCache cache( get, maxCost );
-	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues ) );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues, clearFrequency ) );
 	
 	if( cache.currentCost() > cache.getMaxCost() )
 	{
@@ -199,7 +205,7 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost )
 	// as above, but using setMaxCost( 0 ) to clear the cache.
 
 	TestCache cache2( get, maxCost );
-	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache2, numValues ) );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache2, numValues, clearFrequency ) );
 
 	if( cache2.currentCost() > cache2.getMaxCost() )
 	{
@@ -230,6 +236,15 @@ void IECorePython::bindLRUCache()
 	;
 	
 	/// \todo If we create an IECoreTest module, move this into it.
-	def( "testLRUCacheThreading", testLRUCacheThreading );
+	def(
+		"testLRUCacheThreading",
+		testLRUCacheThreading,
+		(
+			boost::python::arg( "numIterations" ),
+			boost::python::arg( "numValues" ),
+			boost::python::arg( "maxCost" ),
+			boost::python::arg( "clearFrequency" ) = 0
+		)
+	);
 	
 }
