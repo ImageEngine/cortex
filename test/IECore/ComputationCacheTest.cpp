@@ -184,12 +184,6 @@ struct ComputationCacheTest
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
 				{
-
-					if ( i % 17 == 0 )
-					{
-						m_cache.clear();
-					}
-
 					int value = int(i) % 500;
 					ConstObjectPtr r = m_cache.get( ComputationParams(value) );
 					ConstIntDataPtr k = runTimeCast< const IntData >(r);
