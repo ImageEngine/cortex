@@ -256,6 +256,8 @@ bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
 		
 	const Status originalStatus = (Status)cacheEntry.status;
+
+	listErase( mapValue );
 	cacheEntry.status = Erased;
 	
 	if( originalStatus != Cached ) 
@@ -267,7 +269,6 @@ bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
 	m_currentCost -= cacheEntry.cost;
 	cacheEntry.value = Value();
 	
-	listErase( mapValue );	
 	return true;
 }
 
@@ -295,10 +296,7 @@ void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
 	
 	tbb::spin_mutex::scoped_lock( mapValue->second.mutex );
 	
-	if( mapValue->second.previous )
-	{
-		listErase( mapValue );
-	}
+	listErase( mapValue );
 	
 	if( mapValue->second.status == Cached )
 	{
@@ -310,7 +308,10 @@ template<typename Key, typename Value>
 void LRUCache<Key, Value>::listErase( MapValue *mapValue )
 {	
 	MapValue *previous = mapValue->second.previous;	
-	assert( previous );
+	if( !previous )
+	{
+		return;
+	}
 
 	previous->second.next = mapValue->second.next;
 	mapValue->second.next->second.previous = previous;

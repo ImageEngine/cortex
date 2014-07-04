@@ -159,16 +159,26 @@ class LRUCache : private boost::noncopyable
 			Value value; // value for this item
 			Cost cost; // the cost for this item
 			
-			// Pointers to previous and and next items
+			// Pointers to previous and next items
 			// in the LRU list. We use the CacheEntries
 			// themselves to store the list because it is
 			// quicker than using an external structure
-			// like a std::list.
+			// like a std::list. Note that although the
+			// purpose of the list is to track items where
+			// status==Cached, the two are not updated
+			// atomically, so it may _not_ be assumed
+			// that status==Cached implies previous!=NULL
+			// or status!=Cached implies previous==NULL
+			// at any given moment.
 			MapValue *previous;
 			MapValue *next;
 			
 			char status; // status of this item
-			tbb::spin_mutex mutex; // mutex. must be held before access.			
+			// Mutex - must be held before accessing any
+			// fields other than the list fields (previous
+			// and next). To access the list fields, m_listMutex
+			// must be held instead.
+			tbb::spin_mutex mutex;
 		};
 
 		// Dummy MapValues to represent the start and end of our LRU list.
@@ -214,10 +224,17 @@ class LRUCache : private boost::noncopyable
 		// Caller must not hold any locks.
 		void limitCost();
 
-		// Caller must hold mapValue mutex.
+		// Either erases the item from the list, or moves it to
+		// the end, depending on whether or not it is cached.
+		// Caller must not hold any locks.
 		void updateListPosition( MapValue *mapValue );
 
+		// If the item is in the list, erases it, otherwise
+		// does nothing. Caller must hold m_listMutex.
 		void listErase( MapValue *mapValue );
+		// Inserts the item at the end of the list - the
+		// item must _not_ already be in the list.
+		// Caller must hold m_listMutex.
 		void listInsertAtEnd( MapValue *mapValue );
 
 		static void nullRemovalCallback( const Key &key, const Value &value );
