@@ -294,10 +294,9 @@ void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
 {
 	ListMutex::scoped_lock lock( m_listMutex );
 	
-	tbb::spin_mutex::scoped_lock( mapValue->second.mutex );
-	
 	listErase( mapValue );
 	
+	tbb::spin_mutex::scoped_lock mapValueMutex( mapValue->second.mutex );
 	if( mapValue->second.status == Cached )
 	{
 		listInsertAtEnd( mapValue );
