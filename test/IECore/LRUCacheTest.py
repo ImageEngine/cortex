@@ -265,7 +265,7 @@ class LRUCacheTest( unittest.TestCase ) :
 	def testCPPThreading( self ) :
 		
 		# arguments are :
-		# iterations, number of unique values, maximum cost
+		# iterations, number of unique values, maximum cost, clear frequency
 		
 		# cache exactly the right size
 		IECore.testLRUCacheThreading( 100000, 100, 100 )
@@ -275,6 +275,9 @@ class LRUCacheTest( unittest.TestCase ) :
 		
 		# cache thrashing like crazy
 		IECore.testLRUCacheThreading( 100000, 1000, 2 )
+		
+		# clearing all the time while doing concurrent lookups
+		IECore.testLRUCacheThreading( 100000, 1000, 90, 20 )
 		
 if __name__ == "__main__":
     unittest.main()
