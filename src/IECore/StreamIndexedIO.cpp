@@ -576,6 +576,8 @@ class StreamIndexedIO::Node
 
 		bool hasChild( const IndexedIO::EntryID &name ) const;
 
+		MurmurHash childHash( const IndexedIO::EntryID &name ) const;
+
 		// Returns the named child directory node or NULL if not existent. Loads the subindex for the child nodes (if applicable).
 		DirectoryNode* directoryChild( const IndexedIO::EntryID &name ) const;
 		/// returns information about the Data node
@@ -855,6 +857,43 @@ bool StreamIndexedIO::Node::hasChild( const IndexedIO::EntryID &name ) const
 	m_idx->lockDirectory( lock, m_node );
 	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
 	return cit != m_node->children().end();
+}
+
+MurmurHash StreamIndexedIO::Node::childHash( const IndexedIO::EntryID &name ) const
+{
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
+	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
+	if ( cit != m_node->children().end() )
+	{
+		if ( (*cit)->nodeType() == NodeBase::Directory )
+		{
+			DirectoryNode *dir = static_cast< DirectoryNode *>( (*cit) );
+
+			if ( dir->subindex() != DirectoryNode::NoSubIndex )
+			{
+				// If the directory came from a SubIndex we have it's offset in the file
+				MurmurHash h;
+				h.append( dir->offset() );
+				return h;
+			}
+		}
+		else if ( (*cit)->nodeType() == NodeBase::SubIndex )
+		{
+			SubIndexNode *subIndex = static_cast< SubIndexNode *>( (*cit) );
+
+			MurmurHash h;
+			h.append( subIndex->offset() );
+			return h;
+		}
+	}
+
+	// In all other situations we want a unique hash from the current node and the child name.
+	// Note that even non-existing child nodes will have unique hashes (so it can be used with LRUCache).
+	MurmurHash h;
+	h.append( (size_t)m_node );
+	h.append( name );
+	return h;
 }
 
 DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &name ) const
@@ -2441,6 +2480,11 @@ IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, Ind
 ConstIndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour ) const
 {
 	return const_cast< StreamIndexedIO * >(this)->directory( path, missingBehaviour == IndexedIO::CreateIfMissing ? IndexedIO::ThrowIfMissing : missingBehaviour );
+}
+
+MurmurHash StreamIndexedIO::entryHash( const IndexedIO::EntryID &name ) const
+{
+	return m_node->childHash( name );
 }
 
 void StreamIndexedIO::commit()
