@@ -719,6 +719,14 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return location;
 		}
 
+		void hash( HashType hashType, double time, MurmurHash &h ) const
+		{
+			// \todo We could do better in this hash by checking the samples to see if it's animated or check if the object exists, for example.
+			sceneHash( this, h );
+			h.append( (unsigned char)hashType );
+			h.append( time );
+		}
+
 		static ReaderImplementation *reader( Implementation *impl, bool throwException = true )
 		{
 			ReaderImplementation *reader = dynamic_cast< ReaderImplementation* >( impl );
@@ -927,20 +935,25 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return &(it->second);
 		}
 
+		static void sceneHash( const ReaderImplementation *scene, MurmurHash &h )
+		{
+			// We currently use the pointer of the shared data plus the current path as a way to uniquely identify the scene location
+			h.append( (size_t)scene->m_sharedData );
+			const ReaderImplementation *currScene = scene;
+			while( currScene->m_parent )
+			{
+				h.append( currScene->name() );
+				currScene = currScene->m_parent.get();
+			}
+			h.append( currScene->name() );
+		}
+
 		static MurmurHash simpleHash( const SimpleCacheKey &key )
 		{
 			const ReaderImplementation *reader = key.first;
 			size_t sample = key.second;
-
-			SceneInterface::Path p;
-			reader->path(p);
-
 			MurmurHash h;
-			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
-			{
-				h.append( it->value() );
-				h.append( '/' );
-			}
+			sceneHash( reader, h );
 			h.append( (uint64_t)sample );
 			return h;
 		}
@@ -975,15 +988,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			const SceneInterface::Name &name = get<1>( key );
 			size_t sample = get<2>( key );
 
-			SceneInterface::Path p;
-			reader->path(p);
-
 			MurmurHash h;
-			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
-			{
-				h.append( it->value() );
-				h.append( '/' );
-			}
+			sceneHash( reader, h );
 			h.append(name.value());
 			h.append( (uint64_t)sample );
 			return h;
@@ -2378,6 +2384,12 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
 	}
 	
 	return duplicate( impl );
+}
+
+void SceneCache::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	reader->hash( hashType, time, h );
 }
 
 SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const

@@ -721,6 +721,40 @@ class SceneCacheTest( unittest.TestCase ) :
 			self.assertAlmostEqual( r[1], 0.1 * i * math.pi * 0.5, 9 )
 			self.assertAlmostEqual( t[0], 5 + 0.5 * i, 9 )
 		
+	def testHashes( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			hashResults.add( scene.hash( hashType, time ) )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+
+		allHashes = set()
+
+		def hashesForTime( scene, currTime ):
+			counter = 0
+			hashSet = set()
+			for hashType in hashTypes :
+				counter += collectHashes( scene, hashType, currTime, hashSet )
+			allHashes.update( hashSet )
+			return (counter, hashSet)
+
+		(time0counter, time0hashes) = hashesForTime( m, 0 )
+		self.assertEqual( time0counter, len(time0hashes) )
+		self.assertEqual( time0counter, len(allHashes) )
+		(time0counter, time0hashes) = hashesForTime( m, 0 )
+		self.assertEqual( time0counter, len(allHashes) )
+
+		(time1counter, time1hashes) = hashesForTime( m, 1 )
+
+		self.assertEqual( time1counter, len(time1hashes) )
+		self.assertEqual( (time0counter+time1counter), len(allHashes) )
+
 
 if __name__ == "__main__":
 	unittest.main()

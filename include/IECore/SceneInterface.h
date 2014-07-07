@@ -88,6 +88,16 @@ class SceneInterface : public RunTimeTyped
 			EveryTag = DescendantTag | LocalTag | AncestorTag
 		};
 
+		/// Defines the type of hash to be computed.
+		enum HashType {
+			TransformHash,
+			AttributesHash,
+			BoundHash,
+			ObjectHash,
+			ChildNamesHash,
+			HierarchyHash,
+		};
+
 		/// Constant name assigned to the root location "/".
 		static const Name &rootName;
 		/// Utility variable that can be used anytime you want to refer to the root path in the Scene.
@@ -230,6 +240,15 @@ class SceneInterface : public RunTimeTyped
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 		/// Returns a const interface for querying the scene at the given path (full path). 
 		virtual ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
+
+		/*
+		 * Hash
+		 */
+
+		/// Computes the requested type of hash for the current location on the scene at the given time.
+		/// The hash returned can be used for memory caches and is not currently garanteed to be the same for different processes.
+		/// Some implementations may throw if it's not supported or if the scene is opened with write access.
+		virtual void hash( HashType hashType, double time, MurmurHash &h ) const = 0;
 
 		/*
 		 * Utility functions

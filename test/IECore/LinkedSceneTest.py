@@ -736,6 +736,114 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( c0.readAttribute( "testAttr", 0 ), IECore.StringData( "test0" ) )
 		self.assertEqual( c1.readAttribute( "testAttr", 0 ), IECore.StringData( "test1" ) )
 		
+	def testHashes( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		i0 = l.createChild("instance0")
+		i0.writeLink( m )
+		i1 = l.createChild("instance1")
+		i1.writeLink( m )
+		del i0, i1, l, m
+
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			hashResults.add( scene.hash( hashType, time ) )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+
+		allHashes = set()
+
+		def hashesForTime( scene, currTime ):
+			counter = 0
+			hashSet = set()
+			for hashType in hashTypes :
+				counter += collectHashes( scene, hashType, currTime, hashSet )
+			allHashes.update( hashSet )
+			return (counter, hashSet)
+
+		(cc, hh) = hashesForTime( l.child("instance0"), 0 )
+		self.assertEqual( cc, len(hh) )
+		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
+		self.assertEqual( cc2, len(hh2) )
+		self.assertEqual( cc2, cc )
+		self.assertEqual( cc + 1, len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
+
+		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
+		self.assertEqual( cc3, len(hh3) )
+		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
+		self.assertEqual( cc4, len(hh4) )
+		self.assertEqual( cc4, cc3 )
+		self.assertEqual( cc3 + 1, len(hh3.union(hh4)) )	# only the instance location should have different hash, so we sum 1.
+
+		self.assertEqual( cc + cc3 + 2, len( allHashes ) )
+
+	def testHashesWithRetimedLinks( self ) :
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		# save animated spheres with double the speed and with offset, using less samples (time remapping)
+		i0 = l.createChild("instance0")
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 1.0 )
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 2.0 ), 2.0 )
+		# save animated spheres with same speed and with offset, same samples (time remapping is identity)
+		i1 = l.createChild("instance1")
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 1.0 )
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 2.0 )
+		del i0, i1, l, m
+
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+		allHashes = set()
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			hashResults.add( scene.hash( hashType, time ) )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		def hashesForTime( scene, currTime ):
+			counter = 0
+			hashSet = set()
+			for hashType in hashTypes :
+				counter += collectHashes( scene, hashType, currTime, hashSet )
+			allHashes.update( hashSet )
+			return (counter, hashSet)
+
+		# time 0 on both branches map to time 0 in the instance
+		(cc, hh) = hashesForTime( l.child("instance0"), 0 )
+		self.assertEqual( cc, len(hh) )
+		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
+		self.assertEqual( cc2, len(hh2) )
+		self.assertEqual( cc2, cc )
+		self.assertEqual( cc + 1, len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
+		
+		# time 1 maps to times 1 and 0 in the instance
+		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
+		self.assertEqual( cc3, len(hh3) )
+		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
+		self.assertEqual( cc4, len(hh4) )
+		self.assertEqual( cc3+cc4, len(hh3.union(hh4)) )	# they should mismatch entirelly
+		self.assertEqual( cc4, len(hh4.union(hh)) )	# they should match entirelly (both map to time 0)
+
+		# time 2 maps to times 2 and 1 in the instance
+		(cc5, hh5) = hashesForTime( l.child("instance0"), 2 )
+		self.assertEqual( cc5, len(hh5) )
+		(cc6, hh6) = hashesForTime( l.child("instance1"), 2 )
+		self.assertEqual( cc4, len(hh4) )
+		self.assertEqual( cc5+cc6, len(hh5.union(hh6)) )	# they should mismatch entirelly
+		self.assertEqual( cc6, len(hh6.union(hh3)) )	# they should match entirelly (both map to time 0)
+
 if __name__ == "__main__":
 	unittest.main()
 

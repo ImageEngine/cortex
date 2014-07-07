@@ -205,6 +205,13 @@ ObjectPtr readObject( SceneInterface &m, double time )
 	return 0;
 }
 
+static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashType, double time )
+{
+	MurmurHash h;
+	//m.hash( hashType, time, h );
+	return h;
+}
+
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
@@ -228,6 +235,16 @@ void bindSceneInterface()
 			.value("LocalTag", SceneInterface::LocalTag)
 			.value("AncestorTag", SceneInterface::AncestorTag)
 			.value("EveryTag", SceneInterface::EveryTag)
+			.export_values()
+		;
+
+		enum_< SceneInterface::HashType > ("HashType")
+			.value("TransformHash", SceneInterface::TransformHash)
+			.value("AttributesHash", SceneInterface::AttributesHash)
+			.value("BoundHash", SceneInterface::BoundHash)
+			.value("ObjectHash", SceneInterface::ObjectHash)
+			.value("ChildNamesHash", SceneInterface::ChildNamesHash)
+			.value("HierarchyHash", SceneInterface::HierarchyHash)
 			.export_values()
 		;
 
@@ -262,6 +279,7 @@ void bindSceneInterface()
 		.def( "child", nonConstChild, ( arg( "name" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
 		.def( "createChild", &SceneInterface::createChild )
 		.def( "scene", &nonConstScene, ( arg( "path" ), arg( "missingBehaviour" ) = SceneInterface::ThrowIfMissing ) )
+		.def( "hash", &sceneHash )
 
 		.def( "pathToString", pathToString ).staticmethod("pathToString")
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -166,6 +166,8 @@ class MayaScene : public IECore::SceneInterface
 		
 		/// Returns an object for querying the scene at the given path (full path). 
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
+
+		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
 
 		typedef boost::function<bool (const MDagPath &)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const MDagPath &)> ReadFn;

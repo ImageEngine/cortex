@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -1171,3 +1171,31 @@ ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::Missin
 	SceneInterfacePtr (LinkedScene::*nonConstSceneFn)(const Path &, MissingBehaviour) = &LinkedScene::scene;
 	return (const_cast<LinkedScene*>(this)->*nonConstSceneFn)( path, missingBehaviour );
 }
+
+void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	if ( !m_readOnly )
+	{
+		throw Exception( "Hashes not available on write-only LinkedScene!" );
+	}
+
+	if ( m_linkedScene )
+	{
+		if ( m_atLink )
+		{
+			/// special case: we are exactly at the entry point for the linked scene,
+			/// in that case, we need to add the hash of that just in case there's transforms or attributes there as well.
+			m_mainScene->hash( HierarchyHash, time, h );
+		}
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
+		m_linkedScene->hash(hashType, time, h);
+	}
+	else
+	{
+		m_mainScene->hash(hashType, time, h);
+	}
+}
+
