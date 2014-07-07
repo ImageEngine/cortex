@@ -230,7 +230,7 @@ class Object : public RunTimeTyped
 			public :
 				/// Returns a copy of the specified object.
 				template<class T>
-				IntrusivePtr<T> copy( const T *toCopy );
+				typename T::Ptr copy( const T *toCopy );
 			private :
 				std::map<const Object *, Object *> m_copies;
 		};

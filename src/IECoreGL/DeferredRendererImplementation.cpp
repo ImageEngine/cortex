@@ -228,7 +228,7 @@ StateComponent *DeferredRendererImplementation::getState( IECore::TypeId type )
 		StateComponentPtr c = (*it)->get( type );
 		if( c )
 		{
-			return c;
+			return c.get();
 		}
 	}
 	return const_cast<StateComponent *>( State::defaultState()->get( type ) );
@@ -251,7 +251,7 @@ IECore::Data *DeferredRendererImplementation::getUserAttribute( const IECore::In
 		IECore::CompoundDataMap::iterator attrIt = attrs.find( name );
 		if( attrIt != attrs.end() )
 		{
-			return attrIt->second;
+			return attrIt->second.get();
 		}
 	}
 	return 0;
@@ -484,7 +484,7 @@ const DeferredRendererImplementation::RenderContext *DeferredRendererImplementat
 	if ( m_threadContextPool.size() == 0 )
 	{
 		// If no thread context created so far than there's no procedural being rendered. Returns the default context.
-		return m_defaultContext;
+		return m_defaultContext.get();
 	}
 
 	ThreadRenderContext::reference myThreadContext = m_threadContextPool.local();
@@ -495,7 +495,7 @@ const DeferredRendererImplementation::RenderContext *DeferredRendererImplementat
 		throw IECore::Exception( "Invalid thread used on deferred render! Procedurals should not instantiate threads!" );
 	}
 
-	return myThreadContext.top();
+	return myThreadContext.top().get();
 }
 
 DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::currentContext()

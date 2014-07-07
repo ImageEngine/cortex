@@ -86,7 +86,7 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 	}
 	
 	ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
-	ObjectPtr result = filterAttribs( object, operands->member<StringData>( "attributeFilter" )->readable().c_str() );
+	ObjectPtr result = filterAttribs( object.get(), operands->member<StringData>( "attributeFilter" )->readable().c_str() );
 	
 	if ( result )
 	{

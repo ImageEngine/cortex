@@ -151,7 +151,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 					
 		typeString += AiParamGetTypeName( type );
 		AiNodeDeclare( shape, name, typeString.c_str() );
-		AtArray *array = dataToArray( primitiveVariable.data );
+		AtArray *array = dataToArray( primitiveVariable.data.get() );
 		if( array )
 		{
 			AiNodeSetArray( shape, name, array );

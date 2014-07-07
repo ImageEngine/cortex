@@ -123,92 +123,92 @@ Grade::~Grade()
 
 Color3fParameter * Grade::blackPointParameter()
 {
-	return m_blackPointParameter;
+	return m_blackPointParameter.get();
 }
 
 const Color3fParameter * Grade::blackPointParameter() const
 {
-	return m_blackPointParameter;
+	return m_blackPointParameter.get();
 }
 
 Color3fParameter * Grade::whitePointParameter()
 {
-	return m_whitePointParameter;
+	return m_whitePointParameter.get();
 }
 
 const Color3fParameter * Grade::whitePointParameter() const
 {
-	return m_whitePointParameter;
+	return m_whitePointParameter.get();
 }
 
 Color3fParameter * Grade::liftParameter()
 {
-	return m_liftParameter;
+	return m_liftParameter.get();
 }
 
 const Color3fParameter * Grade::liftParameter() const
 {
-	return m_liftParameter;
+	return m_liftParameter.get();
 }
 
 Color3fParameter * Grade::gainParameter()
 {
-	return m_gainParameter;
+	return m_gainParameter.get();
 }
 
 const Color3fParameter * Grade::gainParameter() const
 {
-	return m_gainParameter;
+	return m_gainParameter.get();
 }
 
 Color3fParameter * Grade::multiplyParameter()
 {
-	return m_multiplyParameter;
+	return m_multiplyParameter.get();
 }
 
 const Color3fParameter * Grade::multiplyParameter() const
 {
-	return m_gainParameter;
+	return m_gainParameter.get();
 }
 
 Color3fParameter * Grade::offsetParameter()
 {
-	return m_offsetParameter;
+	return m_offsetParameter.get();
 }
 
 const Color3fParameter * Grade::offsetParameter() const
 {
-	return m_offsetParameter;
+	return m_offsetParameter.get();
 }
 
 Color3fParameter * Grade::gammaParameter()
 {
-	return m_gammaParameter;
+	return m_gammaParameter.get();
 }
 
 const Color3fParameter * Grade::gammaParameter() const
 {
-	return m_gammaParameter;
+	return m_gammaParameter.get();
 }
 
 BoolParameter * Grade::blackClampParameter()
 {
-	return m_blackClampParameter;
+	return m_blackClampParameter.get();
 }
 
 const BoolParameter * Grade::blackClampParameter() const
 {
-	return m_blackClampParameter;
+	return m_blackClampParameter.get();
 }
 
 BoolParameter * Grade::whiteClampParameter()
 {
-	return m_whiteClampParameter;
+	return m_whiteClampParameter.get();
 }
 
 const BoolParameter * Grade::whiteClampParameter() const
 {
-	return m_whiteClampParameter;
+	return m_whiteClampParameter.get();
 }
 
 void Grade::begin( const CompoundObject * operands )

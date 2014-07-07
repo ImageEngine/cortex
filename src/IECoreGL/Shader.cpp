@@ -722,7 +722,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		else
 		{
 			UniformDataConverter<vector<GLint> > converter( integers );
-			IECore::despatchTypedData< UniformDataConverter<vector<GLint> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );
+			IECore::despatchTypedData< UniformDataConverter<vector<GLint> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );
 		}
 		if( !integers.size() )
 		{
@@ -752,7 +752,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
-		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
 		if( !floats.size() )
 		{
 			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
@@ -801,7 +801,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
-		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( IECore::constPointerCast<IECore::Data>( value ), converter );	
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
 		if( floats.size() != dimensions0 * dimensions1 )
 		{
 			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Matrix parameter \"%s\" requires %d values but value of type \%s\" provided %d" ) % name % (dimensions0 * dimensions1) % value->typeName() % floats.size() );
@@ -829,7 +829,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Array attribute \"%s\" is currently unsupported." ) % name );
 	}
 
-	GLenum dataGLType = glType( value );
+	GLenum dataGLType = glType( value.get() );
 	if( !dataGLType )
 	{
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addVertexAttribute", format( "Vertex attribute \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
@@ -859,7 +859,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 	}
 
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
-	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value  ) );
+	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value.get() ) );
 	
 	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
 }

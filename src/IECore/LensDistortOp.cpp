@@ -88,12 +88,12 @@ LensDistortOp::~LensDistortOp()
 
 ObjectParameter * LensDistortOp::lensParameter()
 {
-	return m_lensParameter;
+	return m_lensParameter.get();
 }
 
 const ObjectParameter * LensDistortOp::lensParameter() const
 {
-	return m_lensParameter;
+	return m_lensParameter.get();
 }
 
 void LensDistortOp::begin( const CompoundObject * operands )

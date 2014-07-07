@@ -130,7 +130,7 @@ void VectorTypedDataTest<T>::testWrite()
 template<typename T>
 void VectorTypedDataTest<T>::testAssign()
 {
-	IntrusivePtr<TypedData<T> > assign = new TypedData<T>();
+	typename TypedData<T>::Ptr assign = new TypedData<T>();
 	*assign = *m_data;
 
 	BOOST_CHECK_EQUAL( assign->readable().size(), m_data->readable().size() );
@@ -177,7 +177,7 @@ void SimpleTypedDataTest<T>::testWrite()
 template<typename T>
 void SimpleTypedDataTest<T>::testAssign()
 {
-	IntrusivePtr<TypedData<T> > other = new TypedData<T>();
+	typename TypedData<T>::Ptr other = new TypedData<T>();
 	*other = *m_data;
 
 	BOOST_CHECK_EQUAL( other->readable(), static_cast<T>(3.0) );
@@ -192,10 +192,10 @@ void SimpleTypedDataTest<T>::testMemoryUsage()
 template<typename T>
 void SimpleTypedDataTest<T>::testIsEqualTo()
 {
-	IntrusivePtr<TypedData<T> > other = new TypedData<T>();
+	typename TypedData<T>::Ptr other = new TypedData<T>();
 	other->writable() = static_cast<T>(3.0);
 
-	BOOST_CHECK( m_data->isEqualTo(other) );
+	BOOST_CHECK( m_data->isEqualTo( other.get() ) );
 }
 
 }

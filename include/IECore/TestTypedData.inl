@@ -48,7 +48,7 @@ struct TypedDataTest
 	typedef bool ReturnType;
 
 	template< typename T >
-	ReturnType operator()( typename T::ConstPtr d ) const
+	ReturnType operator()( const T *d ) const
 	{
 		return true;
 	}
@@ -57,10 +57,10 @@ struct TypedDataTest
 } // namespace Detail
 
 template<template<typename> class Predicate>
-bool testTypedData( DataPtr data )
+bool testTypedData( const Data *data )
 {
 	/// The error handler will return bool(), which is false, for us when we need to.
-	return despatchTypedData< Detail::TypedDataTest, Predicate, DespatchTypedDataIgnoreError >( data );
+	return despatchTypedData< Detail::TypedDataTest, Predicate, DespatchTypedDataIgnoreError >( const_cast<Data *>( data ) );
 }
 
 }

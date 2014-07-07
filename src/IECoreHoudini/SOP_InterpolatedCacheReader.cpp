@@ -276,7 +276,7 @@ OP_ERROR SOP_InterpolatedCacheReader::cookMySop( OP_Context &context )
 		// transfer the InterpolatedCache::Attributes onto the GA_ElementGroup
 		for ( CompoundObject::ObjectMap::const_iterator aIt=attributeMap.begin(); aIt != attributeMap.end(); aIt++ )
 		{
-			Data *data = IECore::runTimeCast<Data>( aIt->second );
+			Data *data = IECore::runTimeCast<Data>( aIt->second.get() );
 			if ( !data )
 			{
 				continue;

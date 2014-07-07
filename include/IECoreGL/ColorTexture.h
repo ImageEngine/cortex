@@ -71,16 +71,16 @@ class ColorTexture : public Texture
 
 	private :
 
-		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a );
+		void construct( unsigned int width, unsigned int height, const IECore::Data *r,
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a );
 
 		template<typename T>
-		void castConstruct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a );
+		void castConstruct( unsigned int width, unsigned int height, const IECore::Data *r,
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a );
 
 		template<typename T>
-		void templateConstruct( unsigned int width, unsigned int height, IECore::IntrusivePtr<const T> r,
-			IECore::IntrusivePtr<const T> g,  IECore::IntrusivePtr<const T> b, IECore::IntrusivePtr<const T> a );
+		void templateConstruct( unsigned int width, unsigned int height, const T *r,
+			const T *g, const T *b, const T *a );
 
 };
 

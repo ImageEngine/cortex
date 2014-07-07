@@ -92,7 +92,7 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 				{
 					PrimitiveEvaluator::ResultPtr result = m_evaluator.createResult();
 					unsigned curveIndex = i % g_numCurves;
-					m_evaluator.pointAtV( curveIndex, 0.5, result );
+					m_evaluator.pointAtV( curveIndex, 0.5, result.get() );
 				}
 			}
 			
@@ -125,7 +125,7 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 				for( size_t i=r.begin(); i!=r.end(); ++i )
 				{
 					unsigned curveIndex = i % g_numCurves;
-					bool ok = m_evaluator.pointAtV( curveIndex, 0.5, result );
+					bool ok = m_evaluator.pointAtV( curveIndex, 0.5, result.get() );
 					// it would be preferable to call BOOST_CHECK in here instead
 					// of throwing exceptions on errors, but as far as i can tell
 					// BOOST_CHECK isn't threadsafe.
@@ -134,7 +134,7 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 						throw Exception( "Not OK." );
 					}
 					V3f p = result->point();
-					ok = m_evaluator.closestPoint( p, result );
+					ok = m_evaluator.closestPoint( p, result.get() );
 					if( !ok )
 					{
 						throw Exception( "Not OK." );

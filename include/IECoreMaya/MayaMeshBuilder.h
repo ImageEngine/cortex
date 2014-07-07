@@ -57,8 +57,7 @@ class MayaMeshBuilder : public IECore::RefCounted
 
 		typedef T BaseType;
 
-		typedef IECore::IntrusivePtr <MayaMeshBuilder<T> > Ptr;
-		typedef IECore::IntrusivePtr< const MayaMeshBuilder<T> > ConstPtr;
+		IE_CORE_DECLAREMEMBERPTR( MayaMeshBuilder<T> )
 
 		MayaMeshBuilder( MObject parentOrOwner );
 		virtual ~MayaMeshBuilder();

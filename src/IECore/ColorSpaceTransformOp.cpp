@@ -110,52 +110,52 @@ ColorSpaceTransformOp::~ColorSpaceTransformOp()
 
 StringParameter *ColorSpaceTransformOp::inputColorSpaceParameter()
 {
-	return m_inputColorSpaceParameter;
+	return m_inputColorSpaceParameter.get();
 }
 
 const StringParameter *ColorSpaceTransformOp::inputColorSpaceParameter() const
 {
-	return m_inputColorSpaceParameter;
+	return m_inputColorSpaceParameter.get();
 }
 
 StringParameter *ColorSpaceTransformOp::outputColorSpaceParameter()
 {
-	return m_outputColorSpaceParameter;
+	return m_outputColorSpaceParameter.get();
 }
 
 const StringParameter *ColorSpaceTransformOp::outputColorSpaceParameter() const
 {
-	return m_outputColorSpaceParameter;
+	return m_outputColorSpaceParameter.get();
 }
 
 StringVectorParameter *ColorSpaceTransformOp::channelsParameter()
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 const StringVectorParameter *ColorSpaceTransformOp::channelsParameter() const
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 StringParameter *ColorSpaceTransformOp::alphaPrimVarParameter()
 {
-	return m_alphaPrimVarParameter;
+	return m_alphaPrimVarParameter.get();
 }
 
 const StringParameter *ColorSpaceTransformOp::alphaPrimVarParameter() const
 {
-	return m_alphaPrimVarParameter;
+	return m_alphaPrimVarParameter.get();
 }
 
 BoolParameter *ColorSpaceTransformOp::premultipliedParameter()
 {
-	return m_premultipliedParameter;
+	return m_premultipliedParameter.get();
 }
 
 const BoolParameter *ColorSpaceTransformOp::premultipliedParameter() const
 {
-	return m_premultipliedParameter;
+	return m_premultipliedParameter.get();
 }
 
 void ColorSpaceTransformOp::registerConversion( const InputColorSpace &inputColorSpace, const OutputColorSpace &outputColorSpace, const CreatorFn &creator )

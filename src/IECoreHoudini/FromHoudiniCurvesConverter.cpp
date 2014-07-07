@@ -183,7 +183,7 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 	
 	result->setTopology( new IntVectorData( origVertsPerCurve ), basis, periodic );
 	
-	transferAttribs( geo, result, operands, PrimitiveVariable::Vertex );
+	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
 	
 	if ( !duplicateEnds )
 	{

@@ -127,42 +127,42 @@ UniformRandomPointDistributionOp::~UniformRandomPointDistributionOp()
 
 MeshPrimitiveParameter * UniformRandomPointDistributionOp::meshParameter()
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 const MeshPrimitiveParameter * UniformRandomPointDistributionOp::meshParameter() const
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 IntParameter * UniformRandomPointDistributionOp::numPointsParameter()
 {
-	return m_numPointsParameter;
+	return m_numPointsParameter.get();
 }
 
 const IntParameter * UniformRandomPointDistributionOp::numPointsParameter() const
 {
-	return m_numPointsParameter;
+	return m_numPointsParameter.get();
 }
 
 IntParameter * UniformRandomPointDistributionOp::seedParameter()
 {
-	return m_seedParameter;
+	return m_seedParameter.get();
 }
 
 const IntParameter * UniformRandomPointDistributionOp::seedParameter() const
 {
-	return m_seedParameter;
+	return m_seedParameter.get();
 }
 
 BoolParameter * UniformRandomPointDistributionOp::addSTParameter()
 {
-	return m_addSTParameter;
+	return m_addSTParameter.get();
 }
 
 const BoolParameter * UniformRandomPointDistributionOp::addSTParameter() const
 {
-	return m_addSTParameter;
+	return m_addSTParameter.get();
 }
 
 float UniformRandomPointDistributionOp::density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
@@ -385,6 +385,6 @@ ObjectPtr UniformRandomPointDistributionOp::doOperation( const CompoundObject * 
 		throw InvalidArgumentException( "blah" );
 	}
 
-	DistributeFn fn( this, mesh, m_numPointsParameter->getNumericValue(), m_seedParameter->getNumericValue(), sData, tData, addST );
-	return despatchTypedData< DistributeFn, TypeTraits::IsFloatVec3VectorTypedData, DistributeFn::ErrorHandler >( mesh->variables["P"].data, fn );
+	DistributeFn fn( this, mesh.get(), m_numPointsParameter->getNumericValue(), m_seedParameter->getNumericValue(), sData.get(), tData.get(), addST );
+	return despatchTypedData< DistributeFn, TypeTraits::IsFloatVec3VectorTypedData, DistributeFn::ErrorHandler >( mesh->variables["P"].data.get(), fn );
 }

@@ -79,14 +79,14 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doAlembicConversion( const Alemb
 	IN3fGeomParam normals = iPolyMeshSchema.getNormalsParam();
 	if( normals.valid() )
 	{
-		convertGeomParam( normals, sampleSelector, result );
+		convertGeomParam( normals, sampleSelector, result.get() );
 	}
 	
 	Alembic::AbcGeom::IV2fGeomParam uvs = iPolyMeshSchema.getUVsParam();
-	convertUVs( uvs, sampleSelector, result );
+	convertUVs( uvs, sampleSelector, result.get() );
 	
 	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
-	convertArbGeomParams( arbGeomParams, sampleSelector, result );
+	convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
 	
 	return result;
 }

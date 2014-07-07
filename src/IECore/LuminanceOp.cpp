@@ -113,73 +113,73 @@ LuminanceOp::~LuminanceOp()
 
 StringParameter * LuminanceOp::colorPrimVarParameter()
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::colorPrimVarParameter() const
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::redPrimVarParameter()
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::redPrimVarParameter() const
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::greenPrimVarParameter()
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::greenPrimVarParameter() const
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::bluePrimVarParameter()
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::bluePrimVarParameter() const
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 Color3fParameter * LuminanceOp::weightsParameter()
 {
-	return m_weightsParameter;
+	return m_weightsParameter.get();
 }
 
 const Color3fParameter * LuminanceOp::weightsParameter() const
 {
-	return m_weightsParameter;
+	return m_weightsParameter.get();
 }
 
 
 StringParameter * LuminanceOp::luminancePrimVarParameter()
 {
-	return m_luminancePrimVarParameter;
+	return m_luminancePrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::luminancePrimVarParameter() const
 {
-	return m_luminancePrimVarParameter;
+	return m_luminancePrimVarParameter.get();
 }
 
 BoolParameter * LuminanceOp::removeColorPrimVarsParameter()
 {
-	return m_removeColorPrimVarsParameter;
+	return m_removeColorPrimVarsParameter.get();
 }
 
 const BoolParameter * LuminanceOp::removeColorPrimVarsParameter() const
 {
-	return m_removeColorPrimVarsParameter;
+	return m_removeColorPrimVarsParameter.get();
 }
 
 template<typename T>
@@ -247,9 +247,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 		{
 			throw Exception( "PrimitiveVariable types do not match." );
 		}
-		size_t rSize = despatchTypedData<TypedDataSize>( rIt->second.data );
-		size_t gSize = despatchTypedData<TypedDataSize>( gIt->second.data );
-		size_t bSize = despatchTypedData<TypedDataSize>( bIt->second.data );
+		size_t rSize = despatchTypedData<TypedDataSize>( rIt->second.data.get() );
+		size_t gSize = despatchTypedData<TypedDataSize>( gIt->second.data.get() );
+		size_t bSize = despatchTypedData<TypedDataSize>( bIt->second.data.get() );
 		if( rSize!=gSize || rSize!=bSize )
 		{
 			throw Exception( "PrimitiveVariable sizes do not match." );

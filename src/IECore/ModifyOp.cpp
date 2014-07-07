@@ -68,32 +68,32 @@ ModifyOp::~ModifyOp()
 
 Parameter *ModifyOp::inputParameter()
 {
-	return m_inputParameter;
+	return m_inputParameter.get();
 }
 
 const Parameter *ModifyOp::inputParameter() const
 {
-	return m_inputParameter;
+	return m_inputParameter.get();
 }
 
 BoolParameter *ModifyOp::copyParameter()
 {
-	return m_copyParameter;
+	return m_copyParameter.get();
 }
 
 const BoolParameter *ModifyOp::copyParameter() const
 {
-	return m_copyParameter;
+	return m_copyParameter.get();
 }
 
 BoolParameter *ModifyOp::enableParameter()
 {
-	return m_enableParameter;
+	return m_enableParameter.get();
 }
 
 const BoolParameter *ModifyOp::enableParameter() const
 {
-	return m_enableParameter;
+	return m_enableParameter.get();
 }
 
 ObjectPtr ModifyOp::doOperation( const CompoundObject *operands )
@@ -105,7 +105,7 @@ ObjectPtr ModifyOp::doOperation( const CompoundObject *operands )
 	}
 	if( m_enableParameter->getTypedValue() )
 	{
-		modify( object, operands );
+		modify( object.get(), operands );
 	}
 	return object;
 }

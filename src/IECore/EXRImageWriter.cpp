@@ -141,7 +141,7 @@ static void blindDataToHeader( const CompoundData *blindData, Imf::Header &heade
 		{
 			case CompoundDataTypeId:
 
-				blindDataToHeader( staticPointerCast< const CompoundData >( it->second ), header, thisName );
+				blindDataToHeader( static_cast<const CompoundData *>( it->second.get() ), header, thisName );
 				break;
 			
 			case IntDataTypeId:
@@ -247,7 +247,7 @@ void EXRImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 				throw IOException( ( boost::format("EXRImageWriter: Could not find image channel \"%s\"") % name ).str() );
 			}
 
-			const Data *channelData = pit->second.data;
+			const Data *channelData = pit->second.data.get();
 			if (!channelData)
 			{
 				throw IOException( ( boost::format("EXRImageWriter: Channel \"%s\" has no data") % name ).str() );

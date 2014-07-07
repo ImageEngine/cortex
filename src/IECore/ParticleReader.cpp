@@ -106,52 +106,52 @@ ParticleReader::ParticleReader( const std::string &description )
 
 FloatParameter * ParticleReader::percentageParameter()
 {
-	return m_percentageParameter;
+	return m_percentageParameter.get();
 }
 
 const FloatParameter * ParticleReader::percentageParameter() const
 {
-	return m_percentageParameter;
+	return m_percentageParameter.get();
 }
 
 IntParameter * ParticleReader::percentageSeedParameter()
 {
-	return m_percentageSeedParameter;
+	return m_percentageSeedParameter.get();
 }
 
 const IntParameter * ParticleReader::percentageSeedParameter() const
 {
-	return m_percentageSeedParameter;
+	return m_percentageSeedParameter.get();
 }
 
 StringVectorParameter * ParticleReader::attributesParameter()
 {
-	return m_attributesParameter;
+	return m_attributesParameter.get();
 }
 
 const StringVectorParameter * ParticleReader::attributesParameter() const
 {
-	return m_attributesParameter;
+	return m_attributesParameter.get();
 }
 
 IntParameter * ParticleReader::realTypeParameter()
 {
-	return m_realTypeParameter;
+	return m_realTypeParameter.get();
 }
 
 const IntParameter * ParticleReader::realTypeParameter() const
 {
-	return m_realTypeParameter;
+	return m_realTypeParameter.get();
 }
 
 BoolParameter * ParticleReader::convertPrimVarNamesParameter()
 {
-	return m_convertPrimVarNamesParameter;
+	return m_convertPrimVarNamesParameter.get();
 }
 
 const BoolParameter * ParticleReader::convertPrimVarNamesParameter() const
 {
-	return m_convertPrimVarNamesParameter;
+	return m_convertPrimVarNamesParameter.get();
 }
 
 ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
@@ -167,9 +167,9 @@ ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 	{
 		DataPtr d = readAttribute( *it );
 
-		if ( testTypedData<TypeTraits::IsVectorTypedData>( d ) )
+		if ( testTypedData<TypeTraits::IsVectorTypedData>( d.get() ) )
 		{
-			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( d.get() );
 			if( !haveNumPoints )
 			{
 				result->setNumPoints( s );
@@ -190,7 +190,7 @@ ObjectPtr ParticleReader::doOperation( const CompoundObject * operands )
 				msg( Msg::Warning, "ParticleReader::doOperation", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % *it % result->getNumPoints() % s );
 			}
 		}
-		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d ) )
+		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( d.get() ) )
 		{
 			result->variables.insert( PrimitiveVariableMap::value_type( *it, PrimitiveVariable( PrimitiveVariable::Constant, d ) ) );
 		}

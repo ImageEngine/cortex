@@ -114,7 +114,7 @@ bool CoordinateSystem::isEqualTo( const Object *other ) const
 	}
 	if( m_transform )
 	{
-		return m_transform->isEqualTo( c->m_transform );
+		return m_transform->isEqualTo( c->m_transform.get() );
 	}
 	return true;
 }
@@ -125,7 +125,7 @@ void CoordinateSystem::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_name.capacity() + sizeof( m_name ) );
 	if( m_transform )
 	{
-		a.accumulate( m_transform );
+		a.accumulate( m_transform.get() );
 	}
 }
 
@@ -136,7 +136,7 @@ void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 	m_name = c->m_name;
 	if( c->m_transform )
 	{
-		m_transform = context->copy<Transform>( c->m_transform );
+		m_transform = context->copy<Transform>( c->m_transform.get() );
 	}
 	else
 	{
@@ -151,7 +151,7 @@ void CoordinateSystem::save( SaveContext *context ) const
 	container->write( g_nameEntry, m_name );
 	if( m_transform )
 	{
-		context->save( m_transform, container, g_transformEntry );
+		context->save( m_transform.get(), container.get(), g_transformEntry );
 	}
 }
 
@@ -164,7 +164,7 @@ void CoordinateSystem::load( LoadContextPtr context )
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, g_transformEntry );
+		m_transform = context->load<Transform>( container.get(), g_transformEntry );
 	}
 	catch( ... )
 	{

@@ -102,42 +102,42 @@ PointVelocityDisplaceOp::~PointVelocityDisplaceOp()
 
 StringParameter * PointVelocityDisplaceOp::positionVarParameter()
 {
-	return m_positionVarParameter;
+	return m_positionVarParameter.get();
 }
 
 const StringParameter * PointVelocityDisplaceOp::positionVarParameter() const
 {
-	return m_positionVarParameter;
+	return m_positionVarParameter.get();
 }
 
 StringParameter * PointVelocityDisplaceOp::velocityVarParameter()
 {
-	return m_velocityVarParameter;
+	return m_velocityVarParameter.get();
 }
 
 const StringParameter * PointVelocityDisplaceOp::velocityVarParameter() const
 {
-	return m_velocityVarParameter;
+	return m_velocityVarParameter.get();
 }
 
 FloatParameter * PointVelocityDisplaceOp::sampleLengthParameter()
 {
-	return m_sampleLengthParameter;
+	return m_sampleLengthParameter.get();
 }
 
 const FloatParameter * PointVelocityDisplaceOp::sampleLengthParameter() const
 {
-	return m_sampleLengthParameter;
+	return m_sampleLengthParameter.get();
 }
 
 StringParameter * PointVelocityDisplaceOp::sampleLengthVarParameter()
 {
-	return m_sampleLengthVarParameter;
+	return m_sampleLengthVarParameter.get();
 }
 
 const StringParameter * PointVelocityDisplaceOp::sampleLengthVarParameter() const
 {
-	return m_sampleLengthVarParameter;
+	return m_sampleLengthVarParameter.get();
 }
 
 void PointVelocityDisplaceOp::modify( Object *input, const CompoundObject *operands )

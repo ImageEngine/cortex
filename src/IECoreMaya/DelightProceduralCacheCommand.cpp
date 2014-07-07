@@ -167,7 +167,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			}
 			cachedProcedural.values = values->copy();
 			
-			findMotionParameters( cachedProcedural.procedural->parameters(), cachedProcedural.motionValues );
+			findMotionParameters( cachedProcedural.procedural->parameters().get(), cachedProcedural.motionValues );
 			addMotionSample( cachedProcedural.motionValues );
 			
 			g_procedurals[objectNames[0].asChar()] = cachedProcedural;

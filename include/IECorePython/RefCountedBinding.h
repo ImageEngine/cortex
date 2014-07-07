@@ -35,7 +35,6 @@
 #ifndef IECOREPYTHON_REFCOUNTEDBINDING_H
 #define IECOREPYTHON_REFCOUNTEDBINDING_H
 
-#include "IECore/IntrusivePtr.h"
 #include "IECorePython/WrapperGarbageCollector.h"
 
 namespace IECorePython

@@ -108,12 +108,12 @@ MatrixMultiplyOp::~MatrixMultiplyOp()
 
 ObjectParameter * MatrixMultiplyOp::matrixParameter()
 {
-	return m_matrixParameter;
+	return m_matrixParameter.get();
 }
 
 const ObjectParameter * MatrixMultiplyOp::matrixParameter() const
 {
-	return m_matrixParameter;
+	return m_matrixParameter.get();
 }
 
 struct MultiplyFunctor

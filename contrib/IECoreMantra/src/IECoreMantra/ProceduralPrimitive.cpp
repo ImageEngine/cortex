@@ -93,7 +93,7 @@ void IECoreMantra::ProceduralPrimitive::addChild( ProceduralPrimitive *proc )
 
 void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderablePtr renderable )
 {
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable.get() );
 	if( !converter ) 
 	{
 		msg( Msg::Warning, "ProceduralPrimitive::addVisibleRenderable", "converter could not be found" );

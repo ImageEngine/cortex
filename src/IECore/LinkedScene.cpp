@@ -108,7 +108,8 @@ LinkedScene::~LinkedScene()
 
 void LinkedScene::writeLink( const SceneInterface *scene )
 {
-	writeAttribute( linkAttribute, linkAttributeData(scene), 0 );
+	CompoundDataPtr d = linkAttributeData( scene );
+	writeAttribute( linkAttribute, d.get(), 0 );
 }
 
 IECore::CompoundDataPtr LinkedScene::linkAttributeData( const SceneInterface *scene )
@@ -700,7 +701,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		
 		if( timeData )
 		{
-			m_mainScene->writeAttribute( timeLinkAttribute, timeData, time );
+			m_mainScene->writeAttribute( timeLinkAttribute, timeData.get(), time );
 		}
 		return;
 	}
@@ -1004,7 +1005,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		{
 			return 0;
 		}
-		return new LinkedScene( m_mainScene, c, m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
+		return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
 	}
 	else
 	{
@@ -1023,10 +1024,10 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 				/// we found the link attribute...
 				int linkDepth;
 				bool timeRemapped = c->hasAttribute( timeLinkAttribute );
-				ConstSceneInterfacePtr l = expandLink( fileName, root, linkDepth );
+				ConstSceneInterfacePtr l = expandLink( fileName.get(), root.get(), linkDepth );
 				if ( l )
 				{
-					return new LinkedScene( c, l, linkDepth, m_readOnly, true, timeRemapped );
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
 				}
 			}
 			else if( c->hasAttribute( linkAttribute ) )
@@ -1040,12 +1041,12 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 				ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 				if ( l )
 				{
-					return new LinkedScene( c, l, linkDepth, m_readOnly, true, timeRemapped );
+					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
 				}
 			}
 		}
 		
-		return new LinkedScene( c, 0, 0, m_readOnly, false, false );
+		return new LinkedScene( c.get(), 0, 0, m_readOnly, false, false );
 	}
 }
 
@@ -1154,7 +1155,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 		}
 		atLink = false;
 	}
-	return new LinkedScene( s, l, linkDepth, m_readOnly, atLink, timeRemapped );
+	return new LinkedScene( s.get(), l.get(), linkDepth, m_readOnly, atLink, timeRemapped );
 }
 
 ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::MissingBehaviour missingBehaviour ) const

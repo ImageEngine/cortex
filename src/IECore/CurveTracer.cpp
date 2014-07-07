@@ -276,7 +276,7 @@ ObjectPtr CurveTracer::doOperation( const CompoundObject * operands )
 	// add color if requested
 	if( operands->member<BoolData>( "color" )->readable() )
 	{
-		colorCurves( result );
+		colorCurves( result.get() );
 	}
 	
 	return result;

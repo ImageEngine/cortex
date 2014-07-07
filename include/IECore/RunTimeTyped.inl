@@ -41,7 +41,7 @@ namespace IECore
 {
 
 template<typename T, typename S>
-IntrusivePtr<T> runTimeCast( const IntrusivePtr<S> &src )
+boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
 {
 	if( !src )
 	{
@@ -69,7 +69,7 @@ T *runTimeCast( S *src )
 }
 
 template<typename T, typename S>
-IntrusivePtr<T> assertedStaticCast( const IntrusivePtr<S> &src )
+boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src )
 {
 	assert( runTimeCast<T>( src ) );
 	return staticPointerCast<T>( src );

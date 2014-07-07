@@ -123,52 +123,52 @@ ImageCompositeOp::~ImageCompositeOp()
 
 StringVectorParameter * ImageCompositeOp::channelNamesParameter()
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 const StringVectorParameter * ImageCompositeOp::channelNamesParameter() const
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 StringParameter * ImageCompositeOp::alphaChannelNameParameter()
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 const StringParameter * ImageCompositeOp::alphaChannelNameParameter() const
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 ImagePrimitiveParameter * ImageCompositeOp::imageAParameter()
 {
-	return m_imageAParameter;
+	return m_imageAParameter.get();
 }
 
 const ImagePrimitiveParameter * ImageCompositeOp::imageAParameter() const
 {
-	return m_imageAParameter;
+	return m_imageAParameter.get();
 }
 
 IntParameter * ImageCompositeOp::operationParameter()
 {
-	return m_operationParameter;
+	return m_operationParameter.get();
 }
 
 const IntParameter * ImageCompositeOp::operationParameter() const
 {
-	return m_operationParameter;
+	return m_operationParameter.get();
 }
 
 IntParameter * ImageCompositeOp::inputModeParameter()
 {
-	return m_inputModeParameter;
+	return m_inputModeParameter.get();
 }
 
 const IntParameter * ImageCompositeOp::inputModeParameter() const
 {
-	return m_inputModeParameter;
+	return m_inputModeParameter.get();
 }
 
 struct ImageCompositeOp::ChannelConverter
@@ -239,7 +239,7 @@ FloatVectorDataPtr ImageCompositeOp::getChannelData( ImagePrimitive * image, con
 			ChannelConverter,
 			TypeTraits::IsNumericVectorTypedData,
 			ChannelConverter::ErrorHandler
-		>( it->second.data, converter );
+		>( it->second.data.get(), converter );
 }
 
 float ImageCompositeOp::readChannelData( const ImagePrimitive * image, const FloatVectorData * data, const V2i &pixel )
@@ -354,7 +354,7 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	/// \todo Use the "reformat" parameter of the ImageCropOp to do this, when it's implemented
 	imageB->setDisplayWindow( displayWindow );
 
-	FloatVectorDataPtr aAlphaData = getChannelData( imageA, alphaChannel, false );
+	FloatVectorDataPtr aAlphaData = getChannelData( imageA.get(), alphaChannel, false );
 	FloatVectorDataPtr bAlphaData = getChannelData( imageB, alphaChannel, false );
 
 	const int newWidth = newDataWindow.size().x + 1;
@@ -367,7 +367,7 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 	{
 		const StringVectorParameter::ValueType::value_type &channelName = channelNames[i];
 
-		FloatVectorDataPtr aData = getChannelData( imageA, channelName );
+		FloatVectorDataPtr aData = getChannelData( imageA.get(), channelName );
 		assert( aData->readable().size() == imageA->variableSize( PrimitiveVariable::Vertex ) );
 		FloatVectorDataPtr bData = getChannelData( imageB, channelName );
 		assert( bData->readable().size() == imageB->variableSize( PrimitiveVariable::Vertex ) );
@@ -381,11 +381,11 @@ void ImageCompositeOp::composite( CompositeFn fn, DataWindowResult dwr, ImagePri
 			int offset = (y - newDataWindow.min.y ) * newWidth;
 			for ( int x = newDataWindow.min.x; x <= newDataWindow.max.x; x++, offset++ )
 			{
-				float aVal = readChannelData( imageA, aData, V2i( x, y ) );
-				float bVal = readChannelData( imageB, bData, V2i( x, y ) );
+				float aVal = readChannelData( imageA.get(), aData.get(), V2i( x, y ) );
+				float bVal = readChannelData( imageB, bData.get(), V2i( x, y ) );
 
-				float aAlpha = aAlphaData ? readChannelData( imageA, aAlphaData, V2i( x, y ) ) : 1.0f;
-				float bAlpha = bAlphaData ? readChannelData( imageB, bAlphaData, V2i( x, y ) ) : 1.0f;
+				float aAlpha = aAlphaData ? readChannelData( imageA.get(), aAlphaData.get(), V2i( x, y ) ) : 1.0f;
+				float bAlpha = bAlphaData ? readChannelData( imageB, bAlphaData.get(), V2i( x, y ) ) : 1.0f;
 
 				assert( offset >= 0 );
 				assert( offset < (int)newBData->readable().size() );

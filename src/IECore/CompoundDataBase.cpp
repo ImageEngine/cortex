@@ -60,7 +60,7 @@ void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	{
 		if ( iter->second )
 		{
-			accumulator.accumulate( iter->second );
+			accumulator.accumulate( iter->second.get() );
 		}
 		iter++;
 	}	
@@ -80,7 +80,7 @@ void CompoundDataBase::copyFrom( const Object *other, CopyContext *context )
 		{
 			throw Exception( "Cannot copy CompoundData will NULL data pointers!" );
 		}
-		data[it->first] = context->copy<Data>( it->second );
+		data[it->first] = context->copy<Data>( it->second.get() );
 	}
 }
 
@@ -113,7 +113,7 @@ bool CompoundDataBase::isEqualTo( const Object *other ) const
 				/// either one of the pointers is NULL
 				return false;
 			}
-			if( ! it1->second->isEqualTo( it2->second ) )
+			if( ! it1->second->isEqualTo( it2->second.get() ) )
 			{
 				return false;
 			}
@@ -134,7 +134,7 @@ void CompoundDataBase::save( SaveContext *context ) const
 	CompoundDataMap::const_iterator it;
 	for( it=m.begin(); it!=m.end(); it++ )
 	{
-		context->save( it->second, container, it->first );
+		context->save( it->second.get(), container.get(), it->first );
 	}
 }
 
@@ -165,7 +165,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 	IndexedIO::EntryIDList::const_iterator it;
 	for( it=memberNames.begin(); it!=memberNames.end(); it++ )
 	{
-		m[*it] = context->load<Data>( container, *it );
+		m[*it] = context->load<Data>( container.get(), *it );
 	}
 }
 

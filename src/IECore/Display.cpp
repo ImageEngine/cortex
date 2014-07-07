@@ -64,7 +64,7 @@ void Display::copyFrom( const Object *other, CopyContext *context )
 	m_name = tOther->m_name;
 	m_type = tOther->m_type;
 	m_data = tOther->m_data;
-	m_parameters = context->copy<CompoundData>( tOther->m_parameters );
+	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
 void Display::save( SaveContext *context ) const
@@ -74,7 +74,7 @@ void Display::save( SaveContext *context ) const
 	container->write( g_nameEntry, m_name );
 	container->write( g_typeEntry, m_type );
 	container->write( g_dataEntry, m_data );
-	context->save( m_parameters, container, g_parametersEntry );
+	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Display::load( LoadContextPtr context )
@@ -85,7 +85,7 @@ void Display::load( LoadContextPtr context )
 	container->read( g_nameEntry, m_name );
 	container->read( g_typeEntry, m_type );
 	container->read( g_dataEntry, m_data );
-	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
+	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
 bool Display::isEqualTo( const Object *other ) const
@@ -116,7 +116,7 @@ bool Display::isEqualTo( const Object *other ) const
 	}
 
 	// check parameters
-	if( !m_parameters->isEqualTo( tOther->m_parameters ) )
+	if( !m_parameters->isEqualTo( tOther->m_parameters.get() ) )
 	{
 		return false;
 	}
@@ -130,7 +130,7 @@ void Display::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_name.capacity() );
 	a.accumulate( m_type.capacity() );
 	a.accumulate( m_data.capacity() );
-	a.accumulate( m_parameters );
+	a.accumulate( m_parameters.get() );
 }
 
 void Display::hash( MurmurHash &h ) const

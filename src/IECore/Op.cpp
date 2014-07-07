@@ -68,6 +68,6 @@ ObjectPtr Op::operate( const CompoundObject *operands )
 
 const Parameter * Op::resultParameter() const
 {
-	return m_resultParameter;
+	return m_resultParameter.get();
 }
 

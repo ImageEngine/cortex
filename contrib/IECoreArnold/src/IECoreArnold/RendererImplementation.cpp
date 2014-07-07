@@ -163,14 +163,14 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), name.c_str() + 3 );
 		if( parameter )
 		{
-			ToArnoldConverter::setParameter( options, name.c_str() + 3, value );
+			ToArnoldConverter::setParameter( options, name.c_str() + 3, value.get() );
 			return;
 		}
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		ToArnoldConverter::setParameter( options, name.c_str(), value );
+		ToArnoldConverter::setParameter( options, name.c_str(), value.get() );
 		return;
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -441,7 +441,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 						continue;
 					}
 				}
-				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second );
+				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second.get() );
 			}
 			addNode( s );
 		}
@@ -487,7 +487,7 @@ void IECoreArnold::RendererImplementation::light( const std::string &name, const
 	}
 	for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
 	{
-		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second );
+		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second.get() );
 	}
 	applyTransformToNode( l );
 	addNode( l );
@@ -708,7 +708,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		{
 			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
 			{
-				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second );
+				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second.get() );
 			}
 		}
 	}

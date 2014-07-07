@@ -586,7 +586,7 @@ class Font::Implementation : public IECore::RefCounted
 			// see if we have it cached
 			if( m_images[c] )
 			{
-				return m_images[c];
+				return m_images[c].get();
 			}
 
 			// not in cache, so load it
@@ -624,7 +624,7 @@ class Font::Implementation : public IECore::RefCounted
 			m_images[c] = image;
 
 			// return it
-			return image;
+			return image.get();
 		}
 		
 		Imath::Box2i boundingWindow() const

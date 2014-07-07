@@ -108,42 +108,42 @@ ImageCropOp::~ImageCropOp()
 
 Box2iParameter * ImageCropOp::cropBoxParameter()
 {
-	return m_cropBoxParameter;
+	return m_cropBoxParameter.get();
 }
 
 const Box2iParameter * ImageCropOp::cropBoxParameter() const
 {
-	return m_cropBoxParameter;
+	return m_cropBoxParameter.get();
 }
 
 BoolParameter * ImageCropOp::matchDataWindowParameter()
 {
-	return m_matchDataWindowParameter;
+	return m_matchDataWindowParameter.get();
 }
 
 const BoolParameter * ImageCropOp::matchDataWindowParameter() const
 {
-	return m_matchDataWindowParameter;
+	return m_matchDataWindowParameter.get();
 }
 
 BoolParameter * ImageCropOp::resetOriginParameter()
 {
-	return m_resetOriginParameter;
+	return m_resetOriginParameter.get();
 }
 
 const BoolParameter * ImageCropOp::resetOriginParameter() const
 {
-	return m_resetOriginParameter;
+	return m_resetOriginParameter.get();
 }
 
 BoolParameter * ImageCropOp::intersectParameter()
 {
-	return m_intersectParameter;
+	return m_intersectParameter.get();
 }
 
 const BoolParameter * ImageCropOp::intersectParameter() const
 {
-	return m_intersectParameter;
+	return m_intersectParameter.get();
 }
 
 struct ImageCropOp::ImageCropFn
@@ -276,7 +276,7 @@ void ImageCropOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundOb
 					assert( data );
 					ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
 
-					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data, fn );
+					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data.get(), fn );
 					assert( channel.data );
 				}
 				break;

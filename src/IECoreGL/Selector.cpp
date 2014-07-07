@@ -186,7 +186,7 @@ class Selector::Implementation : public IECore::RefCounted
 		
 		State *baseState()
 		{
-			return m_baseState;
+			return m_baseState.get();
 		}
 
 		void pushIDShader( const IECoreGL::Shader *shader )
@@ -200,7 +200,7 @@ class Selector::Implementation : public IECore::RefCounted
 			m_IDShaderStack.pop();
 			if( m_IDShaderStack.size() )
 			{
-				bindIDShader( m_IDShaderStack.top() );
+				bindIDShader( m_IDShaderStack.top().get() );
 			}
 		}
 

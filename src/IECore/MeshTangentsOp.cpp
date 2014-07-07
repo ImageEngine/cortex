@@ -133,22 +133,22 @@ const BoolParameter * MeshTangentsOp::orthogonalizeTangentsParameter() const
 
 StringParameter * MeshTangentsOp::uPrimVarNameParameter()
 {
-	return m_uPrimVarNameParameter;
+	return m_uPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshTangentsOp::uPrimVarNameParameter() const
 {
-	return m_uPrimVarNameParameter;
+	return m_uPrimVarNameParameter.get();
 }
 
 StringParameter * MeshTangentsOp::vPrimVarNameParameter()
 {
-	return m_vPrimVarNameParameter;
+	return m_vPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshTangentsOp::vPrimVarNameParameter() const
 {
-	return m_vPrimVarNameParameter;
+	return m_vPrimVarNameParameter.get();
 }
 
 StringParameter * MeshTangentsOp::uvIndicesPrimVarNameParameter()
@@ -163,22 +163,22 @@ const StringParameter * MeshTangentsOp::uvIndicesPrimVarNameParameter() const
 		
 StringParameter * MeshTangentsOp::uTangentPrimVarNameParameter()
 {
-	return m_uTangentPrimVarNameParameter;
+	return m_uTangentPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshTangentsOp::uTangentPrimVarNameParameter() const
 {
-	return m_uTangentPrimVarNameParameter;
+	return m_uTangentPrimVarNameParameter.get();
 }
 
 StringParameter * MeshTangentsOp::vTangentPrimVarNameParameter()
 {
-	return m_vTangentPrimVarNameParameter;
+	return m_vTangentPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshTangentsOp::vTangentPrimVarNameParameter() const
 {
-	return m_vTangentPrimVarNameParameter;
+	return m_vTangentPrimVarNameParameter.get();
 }
 
 struct MeshTangentsOp::CalculateTangents

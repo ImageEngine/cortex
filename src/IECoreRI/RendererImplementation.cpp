@@ -809,7 +809,7 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 		size_t i = name.find_first_of( ":", 3 );
 		if( i==string::npos )
 		{
-			const CompoundData *compoundValue = runTimeCast<const CompoundData>( value );
+			const CompoundData *compoundValue = runTimeCast<const CompoundData>( value.get() );
 			if( !compoundValue )
 			{
 				msg( Msg::Warning, "IECoreRI::RendererImplementation::setAttribute", format( "Expected CompoundData for name matching \"ri:*\" but got \"%s\"." ) % value->typeName() );
@@ -824,14 +824,14 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 		{
 			string s1( name, 3, i-3 );
 			string s2( name, i+1 );
-			ParameterList pl( s2, value );
+			ParameterList pl( s2, value.get() );
 			RiAttributeV( (char *)s1.c_str(), pl.n(), pl.tokens(), pl.values() );
 		}
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
 		string s( name, 5 );
-		ParameterList pl( s, value );
+		ParameterList pl( s, value.get() );
 		RiAttributeV( "user", pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -956,7 +956,7 @@ void IECoreRI::RendererImplementation::setNameAttribute( const std::string &name
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expects a StringData value." ) % name );
 		return;
 	}
-	ParameterList pl( "name", f );
+	ParameterList pl( "name", f.get() );
 	RiAttributeV( "identifier", pl.n(), pl.tokens(), pl.values() );
 }
 
@@ -1328,7 +1328,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
-			handleData = runTimeCast<const StringData>( it->second );
+			handleData = runTimeCast<const StringData>( it->second.get() );
 		}
 		if( !handleData )
 		{
@@ -1352,7 +1352,7 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 	CompoundDataMap::iterator it = parametersCopy.find( "ri:areaLight" );
 	if( it != parametersCopy.end() )
 	{
-		BoolData *b = runTimeCast<BoolData>( it->second );
+		BoolData *b = runTimeCast<BoolData>( it->second.get() );
 		if( b && b->readable() )
 		{
 			areaLight = true;
@@ -1459,11 +1459,11 @@ void IECoreRI::RendererImplementation::motionEnd()
 			else
 			{
 				instanceBegin( instanceName, CompoundDataMap() );
-					emitPrimitiveAttributes( m_motionPrimitives[0] );
+					emitPrimitiveAttributes( m_motionPrimitives[0].get() );
 					RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
 						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
 						{
-							emitPrimitive( *it );
+							emitPrimitive( it->get() );
 						}
 					RiMotionEnd();
 				instanceEnd();
@@ -1625,10 +1625,10 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 	{
 		if( m_motionType == None || m_motionType == Pending )
 		{
-			emitPrimitiveAttributes( primitive );		
+			emitPrimitiveAttributes( primitive.get() );		
 		}
 		delayedMotionBegin( Primitive );
-		emitPrimitive( primitive );
+		emitPrimitive( primitive.get() );
 	}
 	else
 	{
@@ -1649,8 +1649,8 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 			else
 			{
 				instanceBegin( instanceName, CompoundDataMap() );
-					emitPrimitiveAttributes( primitive );
-					emitPrimitive( primitive );
+					emitPrimitiveAttributes( primitive.get() );
+					emitPrimitive( primitive.get() );
 				instanceEnd();
 				instance( instanceName );
 			}

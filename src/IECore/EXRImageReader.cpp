@@ -443,7 +443,7 @@ static void addHeaderAttribute( const std::string &name, Data *data, CompoundDat
 			blindData->writable()[ thisName ] = newBlindData;
 		}
 		// call recursivelly
-		addHeaderAttribute( newName, data, newBlindData );
+		addHeaderAttribute( newName, data, newBlindData.get() );
 		return;
 	}
 	// add blind data key
@@ -458,7 +458,7 @@ static void headerToCompoundData( const Imf::Header &header, CompoundData *blind
 		DataPtr data = attributeToData( attrIt.attribute() );
 		if ( data )
 		{
-			addHeaderAttribute( name, data, blindData );
+			addHeaderAttribute( name, data.get(), blindData );
 		}
 	}
 }
@@ -472,7 +472,7 @@ static void compoundDataToCompoundObject( const CompoundData *data, CompoundObje
 		{
 			CompoundObjectPtr newObject = new CompoundObject();
 			object->members()[ it->first ] = newObject;
-			compoundDataToCompoundObject( staticPointerCast< CompoundData >( it->second ), newObject );
+			compoundDataToCompoundObject( static_cast<const CompoundData *>( it->second.get() ), newObject.get() );
 		}
 		else
 		{
@@ -485,8 +485,8 @@ CompoundObjectPtr EXRImageReader::readHeader()
 {
 	CompoundObjectPtr header = ImageReader::readHeader();
 	CompoundDataPtr tmp = new CompoundData();
-	headerToCompoundData( m_inputFile->header(), tmp );
-	compoundDataToCompoundObject( tmp, header );
+	headerToCompoundData( m_inputFile->header(), tmp.get() );
+	compoundDataToCompoundObject( tmp.get(), header.get() );
 	return header;
 }
 

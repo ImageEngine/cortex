@@ -2135,7 +2135,7 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 {
 	IndexPtr newIndex = new Index( file );
 	newIndex->openStream();
-	m_node = new StreamIndexedIO::Node( newIndex, newIndex->root() );
+	m_node = new StreamIndexedIO::Node( newIndex.get(), newIndex->root() );
 	setRoot( root );
 	assert( m_node );
 	assert( m_node->dirNode() );
@@ -2262,7 +2262,7 @@ IndexedIOPtr StreamIndexedIO::subdirectory( const IndexedIO::EntryID &name, Inde
 			throw IOException( "StreamIndexedIO: Could not find child '" + name.value() + "'" );
 		}
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2283,7 +2283,7 @@ ConstIndexedIOPtr StreamIndexedIO::subdirectory( const IndexedIO::EntryID &name,
 		}
 		throw IOException( "StreamIndexedIO: Could not find child '" + name.value() + "'" );
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2300,7 +2300,7 @@ IndexedIOPtr StreamIndexedIO::createSubdirectory( const IndexedIO::EntryID &name
 	{
 		throw IOException( "StreamIndexedIO: Could not insert child '" + name.value() + "'" );
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2387,7 +2387,7 @@ IndexedIOPtr StreamIndexedIO::parentDirectory()
 	{
 		return NULL;
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, parentNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), parentNode );
 	return duplicate(*newNode);
 }
 
@@ -2399,14 +2399,14 @@ ConstIndexedIOPtr StreamIndexedIO::parentDirectory() const
 	{
 		return NULL;
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, parentNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), parentNode );
 	return duplicate(*newNode);
 }
 
 IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour )
 {
 	// from the root go to the path
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, m_node->m_idx->root() );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), m_node->m_idx->root() );
 
 	for ( IndexedIO::EntryIDList::const_iterator pIt = path.begin(); pIt != path.end(); pIt++ )
 	{
@@ -2461,7 +2461,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 	char *data = streamFile().ioBuffer(size);
 	assert(data);
 
-	Index *index = m_node->m_idx;
+	Index *index = m_node->m_idx.get();
 
 	StringCache &stringCache = index->stringCache();
 

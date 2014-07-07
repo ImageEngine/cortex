@@ -148,7 +148,7 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, IECor
 	c.width = width;
 	c.height = height;
 	c.mipMap = mipMap;
-	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( y ), c );
+	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( y.get() ), c );
 }
 
 ImagePrimitivePtr LuminanceTexture::imagePrimitive() const

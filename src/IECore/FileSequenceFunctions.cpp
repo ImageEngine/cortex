@@ -263,10 +263,9 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 		{
 			FrameList::Frame startFrame, endFrame;
 			
-			if ( (*it)->getFrameList()->typeId() == FrameRangeTypeId )
+			if( FrameRange *fr = runTimeCast<FrameRange>( (*it)->getFrameList().get() ) )
 			{
 				// Can do a quick validation if the range is a FrameRange, by looking at the start and end only
-				FrameRange *fr = staticPointerCast< FrameRange >( (*it)->getFrameList() );
 				startFrame = fr->getStart();
 				endFrame = fr->getEnd();
 			}

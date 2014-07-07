@@ -88,32 +88,32 @@ ImageWriter::ImageWriter( const std::string &description ) :
 
 StringVectorParameter * ImageWriter::channelNamesParameter()
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 const StringVectorParameter * ImageWriter::channelNamesParameter() const
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 StringParameter * ImageWriter::colorspaceParameter()
 {
-	return m_colorspaceParameter;
+	return m_colorspaceParameter.get();
 }
 
 const StringParameter * ImageWriter::colorspaceParameter() const
 {
-	return m_colorspaceParameter;
+	return m_colorspaceParameter.get();
 }
 
 BoolParameter * ImageWriter::rawChannelsParameter()
 {
-	return m_rawChannelsParameter;
+	return m_rawChannelsParameter.get();
 }
 
 const BoolParameter * ImageWriter::rawChannelsParameter() const
 {
-	return m_rawChannelsParameter;
+	return m_rawChannelsParameter.get();
 }
 
 bool ImageWriter::canWrite( ConstObjectPtr image, const string &fileName )
@@ -204,5 +204,5 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		transformOp->operate();
  	}
 
-	writeImage( channels, image, dataWindow );
+	writeImage( channels, image.get(), dataWindow );
 }

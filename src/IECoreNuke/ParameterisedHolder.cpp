@@ -86,7 +86,7 @@ int ParameterisedHolder<BaseType>::minimum_inputs() const
 	const ParameterisedInterface *parameterisedInterface = dynamic_cast<const ParameterisedInterface *>( m_parameterised.get() );
 	if( parameterisedInterface )
 	{
-		return m_parameterHandler->minimumInputs( parameterisedInterface->parameters() );
+		return m_parameterHandler->minimumInputs( parameterisedInterface->parameters().get() );
 	}
 	return 0;
 }
@@ -97,7 +97,7 @@ int ParameterisedHolder<BaseType>::maximum_inputs() const
 	const ParameterisedInterface *parameterisedInterface = dynamic_cast<const ParameterisedInterface *>( m_parameterised.get() );
 	if( parameterisedInterface )
 	{
-		return m_parameterHandler->maximumInputs( parameterisedInterface->parameters() );
+		return m_parameterHandler->maximumInputs( parameterisedInterface->parameters().get() );
 	}
 	return 0;
 }
@@ -108,7 +108,7 @@ bool ParameterisedHolder<BaseType>::test_input( int input, DD::Image::Op *op ) c
 	const ParameterisedInterface *parameterisedInterface = dynamic_cast<const ParameterisedInterface *>( m_parameterised.get() );
 	if( parameterisedInterface )
 	{
-		return m_parameterHandler->testInput( parameterisedInterface->parameters(), input, op );
+		return m_parameterHandler->testInput( parameterisedInterface->parameters().get(), input, op );
 	}
 	return false;
 }
@@ -188,10 +188,10 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 			ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
 			if( handlerState )
 			{
-				m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+				m_parameterHandler->setState( parameterisedInterface->parameters().get(), handlerState.get() );
 			}
 			// get values directly from knobs as they haven't been stored at this point
-			m_parameterHandler->setParameterValue( parameterisedInterface->parameters(), ParameterHandler::Knob );
+			m_parameterHandler->setParameterValue( parameterisedInterface->parameters().get(), ParameterHandler::Knob );
 		}
 	
 		return 1;
@@ -205,7 +205,7 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 		////////////////////////////////////////////////////////////////////////////////////
 				
 		ParameterisedInterface *inputParameterisedInterface = dynamic_cast<ParameterisedInterface *>( g_modifiedParametersInput.get() );
-		ObjectPtr handlerState = m_parameterHandler->getState( inputParameterisedInterface->parameters() );
+		ObjectPtr handlerState = m_parameterHandler->getState( inputParameterisedInterface->parameters().get() );
 		CompoundObjectPtr classSpecifier = runTimeCast<CompoundObject>( m_classSpecifierKnob->getValue()->copy() );
 		if( handlerState )
 		{
@@ -225,7 +225,7 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
 		if( handlerState )
 		{
-			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+			m_parameterHandler->setState( parameterisedInterface->parameters().get(), handlerState.get() );
 		}
 		parameterisedInterface->parameters()->setValue( inputParameterisedInterface->parameters()->getValue() );
 		
@@ -300,7 +300,7 @@ void ParameterisedHolder<BaseType>::setKnobValues()
 	if( m_parameterHandler )
 	{
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-		m_parameterHandler->setKnobValue( parameterisedInterface->parameters() );
+		m_parameterHandler->setKnobValue( parameterisedInterface->parameters().get() );
 	}
 }
 
@@ -373,7 +373,7 @@ void ParameterisedHolder<BaseType>::parameterKnobs( void *that, DD::Image::Knob_
 	if( parameterisedHolder->m_parameterHandler )
 	{
 		const ParameterisedInterface *parameterisedInterface = dynamic_cast<const ParameterisedInterface *>( parameterisedHolder->m_parameterised.get() );
-		parameterisedHolder->m_parameterHandler->knobs( parameterisedInterface->parameters(), "parm", f );
+		parameterisedHolder->m_parameterHandler->knobs( parameterisedInterface->parameters().get(), "parm", f );
 	}
 }
 
@@ -517,7 +517,7 @@ void ParameterisedHolder<BaseType>::updateParameterised( bool reload )
 	ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
 	if( parameterisedInterface )
 	{
-		m_parameterHandler = ParameterHandler::create( parameterisedInterface->parameters() );
+		m_parameterHandler = ParameterHandler::create( parameterisedInterface->parameters().get() );
 
 		// apply the previously stored handler state
 
@@ -525,7 +525,7 @@ void ParameterisedHolder<BaseType>::updateParameterised( bool reload )
 		ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
 		if( handlerState )
 		{
-			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+			m_parameterHandler->setState( parameterisedInterface->parameters().get(), handlerState.get() );
 		}
 	}
 	

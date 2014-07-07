@@ -75,7 +75,7 @@ void CompoundParameterHandler::inputs( const IECore::Parameter *parameter, int &
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
-		ParameterHandlerPtr h = handler( *cIt, true );
+		ParameterHandlerPtr h = handler( cIt->get(), true );
 		if( h )
 		{
 			int min = h->minimumInputs( cIt->get() );
@@ -105,7 +105,7 @@ bool CompoundParameterHandler::testInput(  const IECore::Parameter *parameter, i
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
-		ParameterHandlerPtr h = handler( *cIt, true );
+		ParameterHandlerPtr h = handler( cIt->get(), true );
 		if( h )
 		{
 			int inputs = h->maximumInputs( cIt->get() );
@@ -126,7 +126,7 @@ void CompoundParameterHandler::setParameterValue( IECore::Parameter *parameter, 
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
-		ParameterHandlerPtr h = handler( *cIt, true );
+		ParameterHandlerPtr h = handler( cIt->get(), true );
 		if( h )
 		{
 			int maxInputs = h->maximumInputs( cIt->get() );
@@ -192,7 +192,7 @@ void CompoundParameterHandler::setState( IECore::Parameter *parameter, const IEC
 			ParameterHandlerPtr h = handler( child, true );
 			if( h )
 			{
-				h->setState( child, it->second );
+				h->setState( child, it->second.get() );
 			}
 		}
 	}
@@ -206,10 +206,10 @@ IECore::ObjectPtr CompoundParameterHandler::getState( const IECore::Parameter *p
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
-		ParameterHandlerPtr h = handler( *cIt, true );
+		ParameterHandlerPtr h = handler( cIt->get(), true );
 		if( h )
 		{
-			ObjectPtr childState = h->getState( *cIt );
+			ObjectPtr childState = h->getState( cIt->get() );
 			if( childState )
 			{
 				result->members()[(*cIt)->name()] = childState;
@@ -281,11 +281,11 @@ void CompoundParameterHandler::childKnobs( const IECore::Parameter *parameter, c
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
-		ParameterHandlerPtr h = handler( *cIt, true );
+		ParameterHandlerPtr h = handler( cIt->get(), true );
 		if( h )
 		{
 			bool wantTabGroup = false;
-			const CompoundParameter *childCompound = runTimeCast<CompoundParameter>( *cIt );
+			const CompoundParameter *childCompound = runTimeCast<CompoundParameter>( cIt->get() );
 			if( childCompound )
 			{
 				wantTabGroup = containerType( childCompound ) == Tab;

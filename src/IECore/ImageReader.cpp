@@ -235,52 +235,52 @@ Imath::Box2i ImageReader::dataWindowToRead()
 
 Box2iParameter * ImageReader::dataWindowParameter()
 {
-	return m_dataWindowParameter;
+	return m_dataWindowParameter.get();
 }
 
 const Box2iParameter * ImageReader::dataWindowParameter() const
 {
-	return m_dataWindowParameter;
+	return m_dataWindowParameter.get();
 }
 
 Box2iParameter * ImageReader::displayWindowParameter()
 {
-	return m_displayWindowParameter;
+	return m_displayWindowParameter.get();
 }
 
 const Box2iParameter * ImageReader::displayWindowParameter() const
 {
-	return m_displayWindowParameter;
+	return m_displayWindowParameter.get();
 }
 
 StringVectorParameter * ImageReader::channelNamesParameter()
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 const StringVectorParameter * ImageReader::channelNamesParameter() const
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 StringParameter * ImageReader::colorspaceParameter()
 {
-	return m_colorspaceParameter;
+	return m_colorspaceParameter.get();
 }
 
 const StringParameter * ImageReader::colorspaceParameter() const
 {
-	return m_colorspaceParameter;
+	return m_colorspaceParameter.get();
 }
 
 BoolParameter * ImageReader::rawChannelsParameter()
 {
-	return m_rawChannelsParameter;
+	return m_rawChannelsParameter.get();
 }
 
 const BoolParameter * ImageReader::rawChannelsParameter() const
 {
-	return m_rawChannelsParameter;
+	return m_rawChannelsParameter.get();
 }
 
 CompoundObjectPtr ImageReader::readHeader()

@@ -203,7 +203,7 @@ struct IECoreGL::Renderer::MemberData
 		{
 			addCurrentInstanceChild( glPrimitive );
 		}
-		else if( checkCulling<IECoreGL::Primitive>( glPrimitive ) )
+		else if( checkCulling<IECoreGL::Primitive>( glPrimitive.get() ) )
 		{
 			implementation->addPrimitive( glPrimitive );
 		}
@@ -1682,7 +1682,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
 
-	if ( !m_data->checkCulling<IECore::Primitive>( image ) )
+	if ( !m_data->checkCulling<IECore::Primitive>( image.get() ) )
 	{
 		return;
 	}
@@ -1779,7 +1779,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 		IECore::msg( IECore::Msg::Warning, "Renderer::procedural", "Procedurals currently not supported inside instances." );
 		return;
 	}
-	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc ) )
+	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc.get() ) )
 	{
 		m_data->implementation->addProcedural( proc, this );
 	}
@@ -1865,7 +1865,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		{
 			{
 				IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-				parent->removeChild( child );
+				parent->removeChild( child.get() );
 			}
 			{
 				tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
@@ -1903,7 +1903,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		// group after removal became empty, remove it too.
 		{
 			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-			parent->removeChild( child );
+			parent->removeChild( child.get() );
 		}
 		{
 			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
@@ -2033,10 +2033,10 @@ void IECoreGL::Renderer::editEnd()
 
 IECoreGL::ShaderLoader *IECoreGL::Renderer::shaderLoader()
 {
-	return m_data->shaderLoader;
+	return m_data->shaderLoader.get();
 }
 
 IECoreGL::TextureLoader *IECoreGL::Renderer::textureLoader()
 {
-	return m_data->textureLoader;
+	return m_data->textureLoader.get();
 }

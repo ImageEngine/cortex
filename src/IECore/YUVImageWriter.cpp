@@ -138,32 +138,32 @@ std::string YUVImageWriter::destinationColorSpace() const
 
 IntParameter * YUVImageWriter::formatParameter()
 {
-	return m_formatParameter;
+	return m_formatParameter.get();
 }
 
 const IntParameter * YUVImageWriter::formatParameter() const
 {
-	return m_formatParameter;
+	return m_formatParameter.get();
 }
 
 V2fParameter * YUVImageWriter::kBkRParameter()
 {
-	return m_kBkRParameter;
+	return m_kBkRParameter.get();
 }
 
 const V2fParameter * YUVImageWriter::kBkRParameter() const
 {
-	return m_kBkRParameter;
+	return m_kBkRParameter.get();
 }
 
 Box3fParameter * YUVImageWriter::rangeParameter()
 {
-	return m_rangeParameter;
+	return m_rangeParameter.get();
 }
 
 const Box3fParameter * YUVImageWriter::rangeParameter() const
 {
-	return m_rangeParameter;
+	return m_rangeParameter.get();
 }
 
 struct YUVImageWriter::ChannelConverter
@@ -288,13 +288,13 @@ void YUVImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 			DataPtr dataContainer = image->variables.find( name )->second.data;
 			assert( dataContainer );
 
-			ChannelConverter converter( *it, image, dataWindow, channelOffset, rgbData );
+			ChannelConverter converter( *it, image, dataWindow, channelOffset, rgbData.get() );
 
 			despatchTypedData<
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( dataContainer, converter );
+			>( dataContainer.get(), converter );
 
 		}
 

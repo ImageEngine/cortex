@@ -756,7 +756,7 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new HoudiniScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter );
+	return new HoudiniScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter.get() );
 }
 
 ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -949,7 +949,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter );
+	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter.get() );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );

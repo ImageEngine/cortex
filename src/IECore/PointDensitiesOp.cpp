@@ -90,32 +90,32 @@ PointDensitiesOp::~PointDensitiesOp()
 
 ObjectParameter * PointDensitiesOp::pointParameter()
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 const ObjectParameter * PointDensitiesOp::pointParameter() const
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 IntParameter * PointDensitiesOp::numNeighboursParameter()
 {
-	return m_numNeighboursParameter;
+	return m_numNeighboursParameter.get();
 }
 
 const IntParameter * PointDensitiesOp::numNeighboursParameter() const
 {
-	return m_numNeighboursParameter;
+	return m_numNeighboursParameter.get();
 }
 
 DoubleParameter * PointDensitiesOp::multiplierParameter()
 {
-	return m_multiplierParameter;
+	return m_multiplierParameter.get();
 }
 
 const DoubleParameter * PointDensitiesOp::multiplierParameter() const
 {
-	return m_multiplierParameter;
+	return m_multiplierParameter.get();
 }
 
 /// This works by finding the nearest n neighbours, and returning n divided by the volume of the sphere containing them.

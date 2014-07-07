@@ -61,7 +61,7 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 	ConstObjectPtr result = filterAttribs( object );
 	
 	size_t numPrims = geo->getNumPrimitives();
-	GU_CortexPrimitive::build( geo, result );
+	GU_CortexPrimitive::build( geo, result.get() );
 	
 	GA_OffsetList offsets;
 	offsets.append( geo->primitiveOffset( numPrims ) );

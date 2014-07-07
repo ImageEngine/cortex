@@ -70,22 +70,22 @@ TriangulateOp::~TriangulateOp()
 
 FloatParameter * TriangulateOp::toleranceParameter()
 {
-	return m_toleranceParameter;
+	return m_toleranceParameter.get();
 }
 
 const FloatParameter * TriangulateOp::toleranceParameter() const
 {
-	return m_toleranceParameter;
+	return m_toleranceParameter.get();
 }
 
 BoolParameter * TriangulateOp::throwExceptionsParameter()
 {
-	return m_throwExceptionsParameter;
+	return m_throwExceptionsParameter.get();
 }
 
 const BoolParameter * TriangulateOp::throwExceptionsParameter() const
 {
-	return m_throwExceptionsParameter;
+	return m_throwExceptionsParameter.get();
 }
 
 /// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
@@ -305,10 +305,10 @@ struct TriangulateOp::TriangulateFn
 			if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
 			{
  				assert( it->second.data );
-				varyingRemap.m_other = it->second.data;
+				varyingRemap.m_other = it->second.data.get();
 				DataPtr data = it->second.data->copy();
 
-				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, varyingRemap );
+				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data.get(), varyingRemap );
 				assert( primVarSize == faceVaryingIndices.size() );
 				(void)primVarSize;
 
@@ -317,10 +317,10 @@ struct TriangulateOp::TriangulateFn
 			else if ( it->second.interpolation == PrimitiveVariable::Uniform )
 			{
  				assert( it->second.data );
-				uniformRemap.m_other = it->second.data;
+				uniformRemap.m_other = it->second.data.get();
 				DataPtr data = it->second.data->copy();
 
-				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data, uniformRemap );
+				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data.get(), uniformRemap );
 				assert( primVarSize == uniformIndices.size() );
 				(void)primVarSize;
 

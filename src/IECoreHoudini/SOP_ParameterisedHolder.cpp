@@ -65,7 +65,7 @@ SOP_ParameterisedHolder::SOP_ParameterisedHolder( OP_Network *net, const char *n
 	IECoreHoudini::MessageHandler::HandlerFn warningFn = boost::bind( &SOP_ParameterisedHolder::addWarning, this, SOP_MESSAGE, _1 );
 	IECoreHoudini::MessageHandler::HandlerFn infoFn = boost::bind( &SOP_ParameterisedHolder::addMessage, this, SOP_MESSAGE, _1 );
 	IECore::MessageHandlerPtr h = new IECoreHoudini::MessageHandler( errorFn, warningFn, infoFn, infoFn );
-	setMessageHandler( h );
+	setMessageHandler( h.get() );
 }
 
 SOP_ParameterisedHolder::~SOP_ParameterisedHolder()
@@ -110,7 +110,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 		}
 		else
 		{
-			const ObjectParameter *objectParam = IECore::runTimeCast<ObjectParameter>( *it );
+			const ObjectParameter *objectParam = IECore::runTimeCast<ObjectParameter>( it->get() );
 			if ( !objectParam )
 			{
 				continue;
@@ -149,7 +149,7 @@ void SOP_ParameterisedHolder::setInputParameterValues( float now )
 	{
 		useInputSource( i, m_dirty, false );
 		
-		setInputParameterValue( m_inputParameters[i], GU_DetailHandle(), i );
+		setInputParameterValue( m_inputParameters[i].get(), GU_DetailHandle(), i );
 	}
 }
 
@@ -184,7 +184,7 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 			return;
 		}
 		
-		if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result ) )
+		if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result.get() ) )
 		{
 			IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
 			// We are acquiring and releasing the GIL here to ensure that it is released when we render. This has
@@ -196,7 +196,7 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 				IECorePython::ScopedGILRelease gilRelease;
 				{
 					IECore::WorldBlock worldBlock( renderer );
-					procedural->render( renderer );
+					procedural->render( renderer.get() );
 				}
 			}
 			

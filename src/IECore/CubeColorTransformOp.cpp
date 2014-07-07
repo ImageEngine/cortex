@@ -67,12 +67,12 @@ CubeColorTransformOp::~CubeColorTransformOp()
 
 CubeColorLookupfParameter * CubeColorTransformOp::cubeParameter()
 {
-	return m_cubeParameter;
+	return m_cubeParameter.get();
 }
 
 const CubeColorLookupfParameter * CubeColorTransformOp::cubeParameter() const
 {
-	return m_cubeParameter;
+	return m_cubeParameter.get();
 }
 
 void CubeColorTransformOp::begin( const CompoundObject * operands )

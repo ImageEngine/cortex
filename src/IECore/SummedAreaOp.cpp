@@ -101,7 +101,7 @@ void SummedAreaOp::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 	SumArea summer( dataWindow );
 	for( unsigned i=0; i<channels.size(); i++ )
 	{
-		despatchTypedData<SumArea, TypeTraits::IsNumericVectorTypedData>( channels[i], summer );
+		despatchTypedData<SumArea, TypeTraits::IsNumericVectorTypedData>( channels[i].get(), summer );
 	}
 }
 

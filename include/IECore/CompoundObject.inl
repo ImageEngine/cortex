@@ -48,7 +48,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions )
 	ObjectMap::const_iterator it = members().find( name );
 	if( it!=members().end() )
 	{
-		T *result = runTimeCast<T>( it->second );
+		T *result = runTimeCast<T>( it->second.get() );
 		if( result )
 		{
 			return result;
@@ -85,7 +85,7 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 	ObjectMap::const_iterator it = members().find( name );
 	if( it!=members().end() )
 	{
-		const T *result = runTimeCast<const T>( it->second );
+		const T *result = runTimeCast<const T>( it->second.get() );
 		if( result )
 		{
 			return result;
@@ -145,7 +145,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 		{
 			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
 			members()[name] = member;
-			return member;
+			return member.get();
 		}
 		else if( throwExceptions )
 		{

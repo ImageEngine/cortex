@@ -81,22 +81,22 @@ PointNormalsOp::~PointNormalsOp()
 
 ObjectParameter * PointNormalsOp::pointParameter()
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 const ObjectParameter * PointNormalsOp::pointParameter() const
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 IntParameter * PointNormalsOp::numNeighboursParameter()
 {
-	return m_numNeighboursParameter;
+	return m_numNeighboursParameter.get();
 }
 
 const IntParameter * PointNormalsOp::numNeighboursParameter() const
 {
-	return m_numNeighboursParameter;
+	return m_numNeighboursParameter.get();
 }
 
 /// Calculates density at a point by finding the volume of a sphere holding numNeighbours. Doesn't bother

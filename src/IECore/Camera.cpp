@@ -65,13 +65,13 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 	m_name = tOther->m_name;
 	if( tOther->m_transform )
 	{
-		m_transform = context->copy<Transform>( tOther->m_transform );
+		m_transform = context->copy<Transform>( tOther->m_transform.get() );
 	}
 	else
 	{
 		m_transform = 0;
 	}
-	m_parameters = context->copy<CompoundData>( tOther->m_parameters );
+	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
 void Camera::save( SaveContext *context ) const
@@ -81,9 +81,9 @@ void Camera::save( SaveContext *context ) const
 	container->write( g_nameEntry, m_name );
 	if( m_transform )
 	{
-		context->save( m_transform, container, g_transformEntry );
+		context->save( m_transform.get(), container.get(), g_transformEntry );
 	}
-	context->save( m_parameters, container, g_parametersEntry );
+	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Camera::load( LoadContextPtr context )
@@ -96,12 +96,12 @@ void Camera::load( LoadContextPtr context )
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, g_transformEntry );
+		m_transform = context->load<Transform>( container.get(), g_transformEntry );
 	}
 	catch( ... )
 	{
 	}
-	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
+	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
 bool Camera::isEqualTo( const Object *other ) const
@@ -125,13 +125,13 @@ bool Camera::isEqualTo( const Object *other ) const
 		return false;
 	}
 
-	if( m_transform && !tOther->m_transform->isEqualTo( m_transform ) )
+	if( m_transform && !tOther->m_transform->isEqualTo( m_transform.get() ) )
 	{
 		return false;
 	}
 
 	// check parameters
-	if( !m_parameters->isEqualTo( tOther->m_parameters ) )
+	if( !m_parameters->isEqualTo( tOther->m_parameters.get() ) )
 	{
 		return false;
 	}
@@ -145,9 +145,9 @@ void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_name.capacity() );
 	if( m_transform )
 	{
-		a.accumulate( m_transform );
+		a.accumulate( m_transform.get() );
 	}
-	a.accumulate( m_parameters );
+	a.accumulate( m_parameters.get() );
 }
 
 void Camera::hash( MurmurHash &h ) const

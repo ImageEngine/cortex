@@ -168,7 +168,7 @@ void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & pat
 	{
 		return;
 	}
-	TransformationMatrixfParameter *parameter = runTimeCast<TransformationMatrixfParameter>( holder->plugParameter( m_plug ) );
+	TransformationMatrixfParameter *parameter = runTimeCast<TransformationMatrixfParameter>( holder->plugParameter( m_plug ).get() );
 	if( !parameter )
 	{
 		return;

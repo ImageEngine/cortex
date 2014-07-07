@@ -58,7 +58,7 @@ Font::~Font()
 
 IECore::Font *Font::coreFont()
 {
-	return m_font;
+	return m_font.get();
 }
 
 const MeshPrimitive *Font::mesh( char c ) const
@@ -72,14 +72,14 @@ const MeshPrimitive *Font::mesh( char c ) const
 	ConstMeshPrimitivePtr mesh = IECore::staticPointerCast<const MeshPrimitive>( converter.convert() );
 	m_meshes[c] = mesh;
 
-	return mesh;
+	return mesh.get();
 }
 
 const AlphaTexture *Font::texture() const
 {
 	if( m_texture )
 	{
-		return m_texture;
+		return m_texture.get();
 	}
 
 	IECore::ConstImagePrimitivePtr image = m_font->image();
@@ -87,7 +87,7 @@ const AlphaTexture *Font::texture() const
 	IECore::ConstFloatVectorDataPtr y = image->getChannel<float>( "Y" );
 	Imath::V2i s = image->getDataWindow().size() + Imath::V2i( 1 );
 	m_texture = new AlphaTexture( s.x, s.y, y );
-	return m_texture;
+	return m_texture.get();
 }
 
 void Font::renderSprites( const std::string &text ) const

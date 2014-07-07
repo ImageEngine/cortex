@@ -115,7 +115,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 		{
 			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
 			writable()[name] = member;
-			return member;
+			return member.get();
 		}
 		else if( throwExceptions )
 		{

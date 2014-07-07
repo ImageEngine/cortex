@@ -70,12 +70,12 @@ MeshMergeOp::~MeshMergeOp()
 
 MeshPrimitiveParameter * MeshMergeOp::meshParameter()
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 const MeshPrimitiveParameter * MeshMergeOp::meshParameter() const
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 template<class T>
@@ -235,7 +235,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
 			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData );
-			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data, f );
+			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
 		}
 	}
 	

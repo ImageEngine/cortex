@@ -133,7 +133,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	}
 	double aspectRatio = (double)resolution.x / (double)resolution.y;
 	
-	const MatrixTransform *transform = IECore::runTimeCast<const MatrixTransform>( camera->getTransform() );
+	const MatrixTransform *transform = IECore::runTimeCast<const MatrixTransform>( camera->getTransform().get() );
 	if ( transform )
 	{
 		Imath::M44f mat = transform->transform();

@@ -175,7 +175,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 1; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					IntVectorDataPtr d = staticPointerCast<IntVectorData>( attr );
-					writeAttr<IntVectorData, int, 1>( oStream, d );
+					writeAttr<IntVectorData, int, 1>( oStream, d.get() );
 				}
 				break;
 			// casting FloatVectorData to DoubleVectorData since PDCs don't handle floats
@@ -190,7 +190,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 3; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					DoubleVectorDataPtr d = staticPointerCast<DoubleVectorData>( attr );
-					writeAttr<DoubleVectorData, double, 1>( oStream, d );
+					writeAttr<DoubleVectorData, double, 1>( oStream, d.get() );
 				}
 				break;
 			// casting V3fVectorData and Color3fVectorData to V3dVectorData since PDCs don't handle floats
@@ -206,7 +206,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 5; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					V3dVectorDataPtr d = staticPointerCast<V3dVectorData>( attr );
-					writeAttr<V3dVectorData, double, 3>( oStream, d );
+					writeAttr<V3dVectorData, double, 3>( oStream, d.get() );
 				}
 				break;
 			case IntDataTypeId :
@@ -214,7 +214,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 0; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					IntDataPtr d = staticPointerCast<IntData>( attr );
-					writeSimpleAttr<IntData, int, 1>( oStream, d );
+					writeSimpleAttr<IntData, int, 1>( oStream, d.get() );
 				}
 				break;
 			// casting FloatData to DoubleData since PDCs don't handle floats
@@ -229,7 +229,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 2; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					DoubleDataPtr d = staticPointerCast<DoubleData>( attr );
-					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
+					writeSimpleAttr<DoubleData, double, 1>( oStream, d.get() );
 				}
 				break;
 			// casting V3fData and Color3fData to V3dData since PDCs don't handle floats
@@ -245,7 +245,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 					int type = 4; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
 					V3dDataPtr d = staticPointerCast<V3dData>( attr );
-					writeSimpleAttr<V3dData, double, 3>( oStream, d );
+					writeSimpleAttr<V3dData, double, 3>( oStream, d.get() );
 				}
 				break;
 

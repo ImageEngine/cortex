@@ -117,52 +117,52 @@ ImageDiffOp::~ImageDiffOp()
 
 ImagePrimitiveParameter * ImageDiffOp::imageAParameter()
 {
-	return m_imageAParameter;
+	return m_imageAParameter.get();
 }
 
 const ImagePrimitiveParameter * ImageDiffOp::imageAParameter() const
 {
-	return m_imageAParameter;
+	return m_imageAParameter.get();
 }
 
 ImagePrimitiveParameter * ImageDiffOp::imageBParameter()
 {
-	return m_imageBParameter;
+	return m_imageBParameter.get();
 }
 
 const ImagePrimitiveParameter * ImageDiffOp::imageBParameter() const
 {
-	return m_imageBParameter;
+	return m_imageBParameter.get();
 }
 
 FloatParameter * ImageDiffOp::maxErrorParameter()
 {
-	return m_maxErrorParameter;
+	return m_maxErrorParameter.get();
 }
 
 const FloatParameter * ImageDiffOp::maxErrorParameter() const
 {
-	return m_maxErrorParameter;
+	return m_maxErrorParameter.get();
 }
 
 BoolParameter * ImageDiffOp::skipMissingChannels()
 {
-	return m_skipMissingChannelsParameter;
+	return m_skipMissingChannelsParameter.get();
 }
 
 const BoolParameter * ImageDiffOp::skipMissingChannels() const
 {
-	return m_skipMissingChannelsParameter;
+	return m_skipMissingChannelsParameter.get();
 }
 
 BoolParameter * ImageDiffOp::alignDisplayWindows()
 {
-	return m_alignDisplayWindowsParameter;
+	return m_alignDisplayWindowsParameter.get();
 }
 
 const BoolParameter * ImageDiffOp::alignDisplayWindows() const
 {
-	return m_alignDisplayWindowsParameter;
+	return m_alignDisplayWindowsParameter.get();
 }
 
 /// A class to use a ScaledDataConversion to transform image data to floating point, to allow for simple measuring of
@@ -318,8 +318,8 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 
 		try
 		{
-			aFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( aData );
-			bFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( bData );
+			aFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( aData.get() );
+			bFloatData = despatchTypedData< FloatConverter, TypeTraits::IsNumericVectorTypedData > ( bData.get() );
 		}
 		catch ( Exception &e )
 		{

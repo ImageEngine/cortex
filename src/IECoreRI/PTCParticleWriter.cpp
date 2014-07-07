@@ -68,7 +68,7 @@ PTCParticleWriter::PTCParticleWriter( ObjectPtr object, const std::string &fileN
 }
 
 template<class T>
-static void write16DAttr( float *target, IntrusivePtr<T> attr, int index )
+static void write16DAttr( float *target, const T *attr, int index )
 {
 	const typename T::ValueType &v = attr->readable();
 	const typename T::ValueType::value_type &item = v[index];
@@ -79,7 +79,7 @@ static void write16DAttr( float *target, IntrusivePtr<T> attr, int index )
 }
 
 template<class T>
-static void write3DAttr( float *target, IntrusivePtr<T> attr, int index )
+static void write3DAttr( float *target, const T *attr, int index )
 {
 	const typename T::ValueType &v = attr->readable();
 	const typename T::ValueType::value_type &item = v[index];
@@ -89,7 +89,7 @@ static void write3DAttr( float *target, IntrusivePtr<T> attr, int index )
 }
 
 template<class T>
-static void write1DAttr( float *target, IntrusivePtr<T> attr, int index )
+static void write1DAttr( float *target, const T *attr, int index )
 {
 	const typename T::ValueType &v = attr->readable();
 	*target = v[index];
@@ -102,52 +102,52 @@ static void writeAttribute( float *target, DataPtr attr, int index )
 		case DoubleVectorDataTypeId :
 			{
 				DoubleVectorDataPtr d = staticPointerCast<DoubleVectorData>( attr );
-				write1DAttr<DoubleVectorData>( target, d, index );
+				write1DAttr<DoubleVectorData>( target, d.get(), index );
 			}
 			break;
 		case FloatVectorDataTypeId :
 			{
 				FloatVectorDataPtr f = staticPointerCast<FloatVectorData>( attr );
-				write1DAttr<FloatVectorData>( target, f, index );
+				write1DAttr<FloatVectorData>( target, f.get(), index );
 			}
 			break;
 
 		case V3dVectorDataTypeId :
 			{
 				V3dVectorDataPtr d = staticPointerCast<V3dVectorData>( attr );
-				write3DAttr<V3dVectorData>( target, d, index );
+				write3DAttr<V3dVectorData>( target, d.get(), index );
 			}
 			break;
 		case V3fVectorDataTypeId :
 			{
 				V3fVectorDataPtr f = staticPointerCast<V3fVectorData>( attr );
-				write3DAttr<V3fVectorData>( target, f, index );
+				write3DAttr<V3fVectorData>( target, f.get(), index );
 			}
 			break;
 			
 		case Color3dVectorDataTypeId :
 			{
 				Color3dVectorDataPtr d = staticPointerCast<Color3dVectorData>( attr );
-				write3DAttr<Color3dVectorData>( target, d, index );
+				write3DAttr<Color3dVectorData>( target, d.get(), index );
 			}
 			break;
 		case Color3fVectorDataTypeId :
 			{
 				Color3fVectorDataPtr f = staticPointerCast<Color3fVectorData>( attr );
-				write3DAttr<Color3fVectorData>( target, f, index );
+				write3DAttr<Color3fVectorData>( target, f.get(), index );
 			}
 			break;
 
 		case M44fVectorDataTypeId :
 			{
 				M44fVectorDataPtr f = staticPointerCast<M44fVectorData>( attr );
-				write16DAttr<M44fVectorData>( target, f, index );
+				write16DAttr<M44fVectorData>( target, f.get(), index );
 			}
 			break;
 		case M44dVectorDataTypeId :
 			{
 				M44dVectorDataPtr d = staticPointerCast<M44dVectorData>( attr );
-				write16DAttr<M44dVectorData>( target, d, index );
+				write16DAttr<M44dVectorData>( target, d.get(), index );
 			}
 			break;
 		default :

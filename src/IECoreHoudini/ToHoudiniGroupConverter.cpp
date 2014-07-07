@@ -64,12 +64,12 @@ ToHoudiniGroupConverter::~ToHoudiniGroupConverter()
 
 M44fParameter *ToHoudiniGroupConverter::transformParameter()
 {
-	return m_transformParameter;
+	return m_transformParameter.get();
 }
 
 const M44fParameter *ToHoudiniGroupConverter::transformParameter() const
 {
-	return m_transformParameter;
+	return m_transformParameter.get();
 }
 
 bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Detail *geo ) const
@@ -81,7 +81,7 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 	}
 	
 	Imath::M44f transform = ( runTimeCast<const M44fData>( m_transformParameter->getValue() ) )->readable();
-	const Transform *groupTransform = group->getTransform();
+	const Transform *groupTransform = group->getTransform().get();
 	if ( groupTransform )
 	{
 		transform = transform * groupTransform->transform();
@@ -117,7 +117,7 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 			child = staticPointerCast<VisibleRenderable>( transformOp->operate() );
 		}
 		
-		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child );
+		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child.get() );
 		if ( !converter )
 		{
 			continue;
@@ -142,7 +142,7 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 		converter->attributeFilterParameter()->setTypedValue( attribFilter );
 		converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );
 		
-		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter );
+		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter.get() );
 		if ( groupConverter )
 		{
 			groupConverter->transformParameter()->setValue( transformData );

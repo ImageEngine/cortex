@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -332,19 +332,19 @@ IE_CORE_DECLAREPTR( RunTimeTyped );
 /// system implemented in RunTimeTyped. This should be used in preference to
 /// both dynamic_cast and dynamicPointerCast wherever possible.
 template<typename T, typename S>
-IntrusivePtr<T> runTimeCast( const IntrusivePtr<S> &src );
+boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
 /// Equivalent to dynamic_cast but using the type identification system
 /// implemented in RunTimeTyped. This should be used in preference to
 /// dynamic_cast wherever possible.
 template<typename T, typename S>
 T *runTimeCast( S *src );
 
-/// Equivalent to staticPointerCast, but using the type identifaction
+/// Equivalent to staticPointerCast, but using the type identification
 /// system implemented in RunTimeTyped to fire an assert if the equivalent runTimeCast
 /// would not succeed. In a non-asserted build this will compile directly down to
 /// a single staticPointerCast.
 template<typename T, typename S>
-inline IntrusivePtr<T> assertedStaticCast( const IntrusivePtr<S> &src );
+inline boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<T> &src );
 
 /// Equivalent to static_cast, but using the type identifaction system implemented in
 /// RunTimeTyped to fire an assert if the equivalent runTimeCast would not succeed.

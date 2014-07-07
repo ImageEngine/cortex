@@ -327,10 +327,10 @@ class CapturingRenderer::Implementation
 				return;
 			}
 			
-			const BoolData *reentrant = IECore::runTimeCast<const BoolData>( getAttribute( "cp:procedural:reentrant" ) );
+			ConstBoolDataPtr reentrant = IECore::runTimeCast<const BoolData>( getAttribute( "cp:procedural:reentrant" ) );
 			if ( reentrant ? reentrant->readable() : true )
 			{
-				ContextPtr proceduralContext = new Context( context );
+				ContextPtr proceduralContext = new Context( context.get() );
 				addChild( context->stack.back(), proceduralContext->stack.back().group );
 				
 				if( context == m_mainContext )
@@ -563,11 +563,11 @@ class CapturingRenderer::Implementation
 		bool testFilter()
 		{
 		
-			const StringData *name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
+			ConstStringDataPtr name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
 			
 			if( name )
 			{
-				const StringVectorData *objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
+				ConstStringVectorDataPtr objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
 				
 				if( objectFilter )
 				{

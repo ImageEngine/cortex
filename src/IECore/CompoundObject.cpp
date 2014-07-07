@@ -75,7 +75,7 @@ void CompoundObject::copyFrom( const Object *other, CopyContext *context )
 		{
 			throw Exception( "Cannot copy CompoundObject will NULL data pointers!" );
 		}
-		m_members[it->first] = context->copy<Object>( it->second );
+		m_members[it->first] = context->copy<Object>( it->second.get() );
 	}
 }
 
@@ -87,7 +87,7 @@ void CompoundObject::save( SaveContext *context ) const
 	ObjectMap::const_iterator it;
 	for( it=m_members.begin(); it!=m_members.end(); it++ )
 	{
-		context->save( it->second, container, it->first );
+		context->save( it->second.get(), container.get(), it->first );
 	}
 }
 
@@ -106,7 +106,7 @@ void CompoundObject::load( LoadContextPtr context )
 
 	for( it=memberNames.begin(); it!=memberNames.end(); it++ )
 	{
-		m_members[*it] = context->load<Object>( container, *it );
+		m_members[*it] = context->load<Object>( container.get(), *it );
 	}
 }
 
@@ -136,7 +136,7 @@ bool CompoundObject::isEqualTo( const Object *other ) const
 				/// either one of the pointers is NULL
 				return false;
 			}
-			if( ! it1->second->isEqualTo( it2->second ) )
+			if( ! it1->second->isEqualTo( it2->second.get() ) )
 			{
 				return false;
 			}
@@ -155,7 +155,7 @@ void CompoundObject::memoryUsage( Object::MemoryAccumulator &a ) const
 	{
 		if ( it->second )
 		{
-			a.accumulate( it->second );
+			a.accumulate( it->second.get() );
 		}
 	}
 }

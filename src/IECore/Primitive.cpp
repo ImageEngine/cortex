@@ -89,7 +89,7 @@ void Primitive::copyFrom( const Object *other, IECore::Object::CopyContext *cont
 	variables.clear();
 	for( PrimitiveVariableMap::const_iterator it=tOther->variables.begin(); it!=tOther->variables.end(); it++ )
 	{
-		variables.insert( PrimitiveVariableMap::value_type( it->first, PrimitiveVariable( it->second.interpolation, context->copy<Data>( it->second.data ) ) ) );
+		variables.insert( PrimitiveVariableMap::value_type( it->first, PrimitiveVariable( it->second.interpolation, context->copy<Data>( it->second.data.get() ) ) ) );
 	}
 }
 
@@ -103,7 +103,7 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 		IndexedIOPtr ioPrimVar = ioVariables->subdirectory( it->first, IndexedIO::CreateIfMissing );
 		const int i = it->second.interpolation;
 		ioPrimVar->write( g_interpolationEntry, i );
-		context->save( it->second.data, ioPrimVar, g_dataEntry );
+		context->save( it->second.data.get(), ioPrimVar.get(), g_dataEntry );
 	}
 }
 
@@ -134,7 +134,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		int i; 
 		ioPrimVar->read( g_interpolationEntry, i );
 		variables.insert( 
-			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, g_dataEntry ) ) ) 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) ) 
 		);
 	}
 }
@@ -163,7 +163,7 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 		int i; 
 		ioPrimVar->read( g_interpolationEntry, i );
 		variables.insert( 
-			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar, g_dataEntry ) ) ) 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) ) 
 		);
 	}
 
@@ -189,7 +189,7 @@ void Primitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	VisibleRenderable::memoryUsage( a );
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
-		a.accumulate( it->second.data );
+		a.accumulate( it->second.data.get() );
 	}
 }
 

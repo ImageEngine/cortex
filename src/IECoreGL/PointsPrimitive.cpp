@@ -152,9 +152,9 @@ void PointsPrimitive::updateBounds() const
 	}
 
 	unsigned int cwStep = 0, wStep = 0, aStep = 0;
-	const float *cw = dataAndStride( m_memberData->constantWidth, &MemberData::g_defaultWidth, cwStep );
-	const float *w = dataAndStride( m_memberData->widths, &MemberData::g_defaultWidth, wStep );
-	const float *a = dataAndStride( m_memberData->patchAspectRatio, &MemberData::g_defaultAspectRatio, aStep );
+	const float *cw = dataAndStride( m_memberData->constantWidth.get(), &MemberData::g_defaultWidth, cwStep );
+	const float *w = dataAndStride( m_memberData->widths.get(), &MemberData::g_defaultWidth, wStep );
+	const float *a = dataAndStride( m_memberData->patchAspectRatio.get(), &MemberData::g_defaultAspectRatio, aStep );
 	
 	m_memberData->bound.makeEmpty();
 	const vector<V3f> &pd = m_memberData->points->readable();
@@ -231,8 +231,8 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 		}
 		
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
-		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup );
-		addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "vertex", 1 );
+		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup.get() );
+		addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "vertex", 1 );
 		
 		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
 		if( !m_memberData->constantWidth )
@@ -249,21 +249,21 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 				{
 					m_memberData->diskPrimitive = new DiskPrimitive( 0.5f );
 				}
-				m_memberData->diskPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				m_memberData->diskPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "instance" );
 				break;
 			case Sphere :
 				if( !m_memberData->spherePrimitive )
 				{
 					m_memberData->spherePrimitive = new SpherePrimitive();
 				}
-				m_memberData->spherePrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				m_memberData->spherePrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "instance" );
 				break;
 			case Quad :
 				if( !m_memberData->quadPrimitive )
 				{
 					m_memberData->quadPrimitive = new QuadPrimitive();
 				}
-				m_memberData->quadPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup, "instance" );
+				m_memberData->quadPrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "instance" );
 				break;
 			default :
 				break;

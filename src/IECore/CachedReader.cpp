@@ -193,7 +193,7 @@ ConstObjectPtr CachedReader::read( const std::string &file )
 void CachedReader::insert( const std::string &file, ConstObjectPtr obj )
 {
 	m_data->m_fileErrors.erase( file );
-	m_data->m_cache.set( PARAM(file), obj, ObjectPool::StoreReference );
+	m_data->m_cache.set( PARAM(file), obj.get(), ObjectPool::StoreReference );
 }
 
 bool CachedReader::cached( const std::string &file ) const

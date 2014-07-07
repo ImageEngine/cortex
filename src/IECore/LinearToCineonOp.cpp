@@ -63,32 +63,32 @@ LinearToCineonOp::~LinearToCineonOp()
 
 FloatParameter * LinearToCineonOp::filmGammaParameter()
 {
-	return m_filmGamma;
+	return m_filmGamma.get();
 }
 
 const FloatParameter * LinearToCineonOp::filmGammaParameter() const
 {
-	return m_filmGamma;
+	return m_filmGamma.get();
 }
 
 IntParameter * LinearToCineonOp::refWhiteValParameter()
 {
-	return m_refWhiteVal;
+	return m_refWhiteVal.get();
 }
 
 const IntParameter * LinearToCineonOp::refWhiteValParameter() const
 {
-	return m_refWhiteVal;
+	return m_refWhiteVal.get();
 }
 
 IntParameter * LinearToCineonOp::refBlackValParameter()
 {
-	return m_refBlackVal;
+	return m_refBlackVal.get();
 }
 
 const IntParameter * LinearToCineonOp::refBlackValParameter() const
 {
-	return m_refBlackVal;
+	return m_refBlackVal.get();
 }
 
 struct LinearToCineonOp::Converter
@@ -129,6 +129,6 @@ void LinearToCineonOp::modifyChannels( const Imath::Box2i &displayWindow, const 
 											refBlackValParameter()->getNumericValue() );
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<LinearToCineonOp::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<LinearToCineonOp::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

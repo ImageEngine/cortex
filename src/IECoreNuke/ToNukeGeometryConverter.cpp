@@ -65,7 +65,7 @@ void ToNukeGeometryConverter::convert( GeometryList &geoList ) const
 	geoList.add_object(objIndex);
 
 	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands );
+	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands.get() );
 }
 
 /////////////////////////////////////////////////////////////////////////////////

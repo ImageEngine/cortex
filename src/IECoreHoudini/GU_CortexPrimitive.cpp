@@ -105,7 +105,7 @@ GU_CortexPrimitive *GU_CortexPrimitive::build( GU_Detail *geo, const IECore::Obj
 	
 	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
 	{
-		if ( const IECore::Transform *transform = coord->getTransform() )
+		if ( const IECore::Transform *transform = coord->getTransform().get() )
 		{
 			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
 		}
@@ -233,7 +233,7 @@ GEO_Primitive *GU_CortexPrimitive::doConvert( GU_ConvertParms &parms )
 	{
 		GU_DetailHandle handle;
 		handle.allocateAndSet( (GU_Detail*)getParent(), false );
-		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object ) );
+		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object.get() ) );
 		if ( !converter->convert( handle ) )
 		{
 			return 0;

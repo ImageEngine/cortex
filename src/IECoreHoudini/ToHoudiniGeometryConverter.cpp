@@ -83,32 +83,32 @@ ToHoudiniGeometryConverter::~ToHoudiniGeometryConverter()
 
 BoolParameter *ToHoudiniGeometryConverter::convertStandardAttributesParameter()
 {
-	return m_convertStandardAttributesParameter;
+	return m_convertStandardAttributesParameter.get();
 }
 
 const BoolParameter *ToHoudiniGeometryConverter::convertStandardAttributesParameter() const
 {
-	return m_convertStandardAttributesParameter;
+	return m_convertStandardAttributesParameter.get();
 }
 
 StringParameter *ToHoudiniGeometryConverter::nameParameter()
 {
-	return m_nameParameter;
+	return m_nameParameter.get();
 }
 
 const StringParameter *ToHoudiniGeometryConverter::nameParameter() const
 {
-	return m_nameParameter;
+	return m_nameParameter.get();
 }
 
 StringParameter *ToHoudiniGeometryConverter::attributeFilterParameter()
 {
-	return m_attributeFilterParameter;
+	return m_attributeFilterParameter.get();
 }
 
 const StringParameter *ToHoudiniGeometryConverter::attributeFilterParameter() const
 {
-	return m_attributeFilterParameter;
+	return m_attributeFilterParameter.get();
 }
 
 bool ToHoudiniGeometryConverter::convert( GU_DetailHandle handle ) const
@@ -223,7 +223,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			continue;
 		}
 
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data );
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data.get() );
 		if ( !converter )
 		{
 			continue;
@@ -251,8 +251,8 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		{
 			if ( sPrimVar->second.interpolation == tPrimVar->second.interpolation )
 			{
-				const FloatVectorData *sData = runTimeCast<const FloatVectorData>( sPrimVar->second.data );
-				const FloatVectorData *tData = runTimeCast<const FloatVectorData>( tPrimVar->second.data );
+				const FloatVectorData *sData = runTimeCast<const FloatVectorData>( sPrimVar->second.data.get() );
+				const FloatVectorData *tData = runTimeCast<const FloatVectorData>( tPrimVar->second.data.get() );
 				if ( sData && tData )
 				{
 					const std::vector<float> &s = sData->readable();
@@ -292,7 +292,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		}
 		
 		PrimitiveVariable primVar = processPrimitiveVariable( primitive, it->second );
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data );
+		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data.get() );
 		if ( !converter )
 		{
 			continue;
@@ -305,7 +305,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			PrimitiveVariableMap::const_iterator indices = stringsToIndices.find( it->first );
 			if ( indices != stringsToIndices.end() )
 			{
-				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter );
+				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() );
 				PrimitiveVariable indicesPrimVar = processPrimitiveVariable( primitive, indices->second );
 				stringVectorConverter->indicesParameter()->setValidatedValue( indicesPrimVar.data );
 				interpolation = indices->second.interpolation;
@@ -332,7 +332,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			if ( name == "P" )
 			{
 				// special case for P
-				transferP( runTimeCast<const V3fVectorData>( primVar.data ), geo, points );
+				transferP( runTimeCast<const V3fVectorData>( primVar.data.get() ), geo, points );
 			}
 			else
 			{

@@ -110,7 +110,7 @@ static boost::python::list items( MotionPrimitive &p )
 	MotionPrimitive::SnapshotMap::const_iterator it;
 	for( it = s.begin(); it!=s.end(); it++ )
 	{
-		result.append( make_tuple( it->first, it->second ) );
+		result.append( boost::python::make_tuple( it->first, it->second ) );
 	}
 	return result;
 }

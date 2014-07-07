@@ -105,7 +105,7 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	{
 		if( m_createMissingRGBChannels )
 		{
-			image = createMissingChannels( image );
+			image = createMissingChannels( image.get() );
 			t = new ColorTexture( image );
 		}
 		else

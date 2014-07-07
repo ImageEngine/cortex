@@ -71,7 +71,7 @@ void ParameterisedProcedural::save( SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_parameters->getValue(), container, g_parametersEntry );
+	context->save( m_parameters->getValue(), container.get(), g_parametersEntry );
 }
 
 void ParameterisedProcedural::load( LoadContextPtr context )
@@ -79,7 +79,7 @@ void ParameterisedProcedural::load( LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-	m_parameters->setValue( context->load<Object>( container, g_parametersEntry ) );
+	m_parameters->setValue( context->load<Object>( container.get(), g_parametersEntry ) );
 }
 
 bool ParameterisedProcedural::isEqualTo( const Object *other ) const

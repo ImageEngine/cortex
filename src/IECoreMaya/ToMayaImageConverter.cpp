@@ -305,7 +305,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					ChannelConverter<float>,
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<float>::ErrorHandler
-				>( dataContainer, converter );
+				>( dataContainer.get(), converter );
 
 				writeChannel<float>( image, channelData, channelOffset, numChannels );
 			}
@@ -318,7 +318,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					ChannelConverter<unsigned char>,
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<unsigned char>::ErrorHandler
-				>( dataContainer, converter );
+				>( dataContainer.get(), converter );
 
 				writeChannel<unsigned char>( image, channelData, channelOffset, numChannels );
 			}
@@ -361,7 +361,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 				ChannelConverter<float>,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter<float>::ErrorHandler
-			>( dataContainer, converter );
+			>( dataContainer.get(), converter );
 
 			writeDepth( image, channelData );
 	}

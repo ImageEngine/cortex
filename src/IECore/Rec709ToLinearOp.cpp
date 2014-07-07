@@ -78,6 +78,6 @@ void Rec709ToLinearOp::modifyChannels( const Imath::Box2i &displayWindow, const 
 	Rec709ToLinearOp::Converter converter;
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<Rec709ToLinearOp::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<Rec709ToLinearOp::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

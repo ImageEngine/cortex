@@ -72,22 +72,22 @@ const std::string &DeepImageWriter::fileName() const
 
 StringVectorParameter *DeepImageWriter::channelNamesParameter()
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 const StringVectorParameter *DeepImageWriter::channelNamesParameter() const
 {
-	return m_channelsParameter;
+	return m_channelsParameter.get();
 }
 
 V2iParameter *DeepImageWriter::resolutionParameter()
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 const V2iParameter *DeepImageWriter::resolutionParameter() const
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 M44fParameter *DeepImageWriter::worldToCameraParameter()

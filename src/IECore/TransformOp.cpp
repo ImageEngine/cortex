@@ -73,12 +73,12 @@ const ObjectParameter * TransformOp::matrixParameter() const
 
 StringVectorParameter * TransformOp::primVarsParameter()
 {
-	return m_primVarsParameter;
+	return m_primVarsParameter.get();
 }
 
 const StringVectorParameter * TransformOp::primVarsParameter() const
 {
-	return m_primVarsParameter;
+	return m_primVarsParameter.get();
 }
 
 void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
@@ -92,7 +92,7 @@ void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 			continue;
 		}
 		
-		Data *data = pIt->second.data;
+		Data *data = pIt->second.data.get();
 		
 		// fix for old files that don't store Interpretation properly
 		V3fVectorData *v3fData = runTimeCast<V3fVectorData>( data );

@@ -75,22 +75,22 @@ SplineToImage::~SplineToImage()
 
 ObjectParameter * SplineToImage::splineParameter()
 {
-	return m_splineParameter;
+	return m_splineParameter.get();
 }
 
 const ObjectParameter * SplineToImage::splineParameter() const
 {
-	return m_splineParameter;
+	return m_splineParameter.get();
 }
 
 V2iParameter * SplineToImage::resolutionParameter()
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 const V2iParameter * SplineToImage::resolutionParameter() const
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 struct SplineToImage::CreateImage

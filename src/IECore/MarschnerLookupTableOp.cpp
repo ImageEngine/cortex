@@ -100,22 +100,22 @@ MarschnerLookupTableOp::~MarschnerLookupTableOp()
 
 MarschnerParameter *MarschnerLookupTableOp::modelParameter()
 {
-	return m_modelParameter;
+	return m_modelParameter.get();
 }
 
 const MarschnerParameter *MarschnerLookupTableOp::modelParameter() const
 {
-	return m_modelParameter;
+	return m_modelParameter.get();
 }
 
 IntParameter *MarschnerLookupTableOp::resolutionParameter()
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 const IntParameter *MarschnerLookupTableOp::resolutionParameter() const
 {
-	return m_resolutionParameter;
+	return m_resolutionParameter.get();
 }
 
 ObjectPtr MarschnerLookupTableOp::doOperation( const CompoundObject *operands )

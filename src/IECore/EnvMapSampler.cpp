@@ -84,22 +84,22 @@ EnvMapSampler::~EnvMapSampler()
 
 ImagePrimitiveParameter * EnvMapSampler::imageParameter()
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 const ImagePrimitiveParameter * EnvMapSampler::imageParameter() const
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 IntParameter * EnvMapSampler::subdivisionDepthParameter()
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 const IntParameter * EnvMapSampler::subdivisionDepthParameter() const
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 ObjectPtr EnvMapSampler::doOperation( const CompoundObject * operands )

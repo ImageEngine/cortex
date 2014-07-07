@@ -103,7 +103,7 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-static ShaderPtr constant2()
+static Shader *constant2()
 {
 
 	static const char *vertexSource =
@@ -128,7 +128,7 @@ static ShaderPtr constant2()
 		"}";
 
 	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
-	return s;
+	return s.get();
 }
 
 void Primitive::render( State *state ) const
@@ -194,7 +194,7 @@ void Primitive::render( State *state ) const
 	}
 	
 	// get a constant shader suitable for drawing wireframes, points etc.
-	const Shader *constantShader = Shader::constant();
+	const Shader *constantShader = Shader::constant().get();
 	if( currentSelector && currentSelector->mode() == Selector::IDRender )
 	{
 		// if we're in IDRender mode, then the constant shader is unsuitable,

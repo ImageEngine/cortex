@@ -278,7 +278,7 @@ ObjectPtr PTCParticleReader::doOperation( const CompoundObject * operands )
 
 		DataPtr d = itData->second;
 
-		PrimitiveVariable::Interpolation interp = despatchTypedData< TypedDataInterpolation, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( constPointerCast<Data>( d ) );
+		PrimitiveVariable::Interpolation interp = despatchTypedData< TypedDataInterpolation, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d.get() ) );
 
 		if ( interp == PrimitiveVariable::Invalid )
 		{
@@ -518,10 +518,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<Color3fVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<Color3fVectorData, Color3fVectorData>( static_cast<Color3fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<Color3dVectorData, Color3fVectorData>( staticPointerCast<Color3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<Color3dVectorData, Color3fVectorData>( static_cast<Color3fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -532,10 +532,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<V3fVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<V3fVectorData, V3fVectorData>( static_cast<V3fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<V3dVectorData, V3fVectorData>( staticPointerCast<V3fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<V3dVectorData, V3fVectorData>( static_cast<V3fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -544,10 +544,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<FloatVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<FloatVectorData, FloatVectorData>( static_cast<FloatVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<DoubleVectorData, FloatVectorData>( staticPointerCast<FloatVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<DoubleVectorData, FloatVectorData>( static_cast<FloatVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 			}
 			break;
@@ -556,10 +556,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 				case ParticleReader::Native :
 				case ParticleReader::Float :
-					filteredData = filterAttr<M44fVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<M44fVectorData, M44fVectorData>( static_cast<M44fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 				case ParticleReader::Double :
-					filteredData = filterAttr<M44dVectorData, M44fVectorData>( staticPointerCast<M44fVectorData>(attrIt->second.targetData), particlePercentage(), ids );
+					filteredData = filterAttr<M44dVectorData, M44fVectorData>( static_cast<M44fVectorData *>( attrIt->second.targetData.get() ), particlePercentage(), ids );
 					break;
 			}
 			break;

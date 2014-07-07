@@ -111,42 +111,42 @@ HdrMergeOp::~HdrMergeOp()
 
 ObjectParameter * HdrMergeOp::inputGroupParameter()
 {
-	return m_inputGroupParameter;
+	return m_inputGroupParameter.get();
 }
 
 const ObjectParameter * HdrMergeOp::inputGroupParameter() const
 {
-	return m_inputGroupParameter;
+	return m_inputGroupParameter.get();
 }
 
 FloatParameter * HdrMergeOp::exposureStepParameter()
 {
-	return m_exposureStepParameter;
+	return m_exposureStepParameter.get();
 }
 
 const FloatParameter * HdrMergeOp::exposureStepParameter() const
 {
-	return m_exposureStepParameter;
+	return m_exposureStepParameter.get();
 }
 
 FloatParameter * HdrMergeOp::exposureAdjustmentParameter()
 {
-	return m_exposureAdjustmentParameter;
+	return m_exposureAdjustmentParameter.get();
 }
 
 const FloatParameter * HdrMergeOp::exposureAdjustmentParameter() const
 {
-	return m_exposureAdjustmentParameter;
+	return m_exposureAdjustmentParameter.get();
 }
 
 Box2fParameter * HdrMergeOp::windowingParameter()
 {
-	return m_windowingParameter;
+	return m_windowingParameter.get();
 }
 
 const Box2fParameter * HdrMergeOp::windowingParameter() const
 {
-	return m_windowingParameter;
+	return m_windowingParameter.get();
 }
 
 template< typename T >
@@ -260,15 +260,15 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 	bool firstImage = true;
 	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++, firstImage = false )
 	{
-		const ImagePrimitive *img = staticPointerCast< ImagePrimitive >(*it);
+		const ImagePrimitive *img = static_cast<const ImagePrimitive *>( it->get() );
 		float intensityMultiplier = pow( 2.0f, exposure );
 		if ( img->getChannel< float >( "R" ) )
 		{
-			merge< float >( firstImage, pixelCount, img, outImg, windowing, intensityMultiplier, outR, outG, outB, outA );
+			merge< float >( firstImage, pixelCount, img, outImg.get(), windowing, intensityMultiplier, outR.get(), outG.get(), outB.get(), outA.get() );
 		}
 		else
 		{
-			merge< half >( firstImage, pixelCount, img, outImg, windowing, intensityMultiplier, outR, outG, outB, outA );
+			merge< half >( firstImage, pixelCount, img, outImg.get(), windowing, intensityMultiplier, outR.get(), outG.get(), outB.get(), outA.get() );
 		}
 		exposure -= exposureStep;
 	}

@@ -155,7 +155,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 	
 	if ( geo->getNumVertices() )
 	{
-		transferAttribs( geo, result, modifiedOperands ? modifiedOperands : operands );
+		transferAttribs( geo, result.get(), modifiedOperands ? modifiedOperands.get() : operands );
 	}
 	
 	return result;

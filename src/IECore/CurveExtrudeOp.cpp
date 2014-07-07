@@ -91,12 +91,12 @@ CurveExtrudeOp::~CurveExtrudeOp()
 
 CurvesPrimitiveParameter * CurveExtrudeOp::curvesParameter()
 {
-	return m_curvesParameter;
+	return m_curvesParameter.get();
 }
 
 const CurvesPrimitiveParameter * CurveExtrudeOp::curvesParameter() const
 {
-	return m_curvesParameter;
+	return m_curvesParameter.get();
 }
 
 void CurveExtrudeOp::buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< M44f > &frames ) const

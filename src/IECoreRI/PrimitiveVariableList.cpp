@@ -221,5 +221,5 @@ const void *PrimitiveVariableList::value( IECore::DataPtr d )
 		return (&*(m_charPtrs.rbegin())) - ( sd.readable().size() - 1 );
 	}
 
-	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( constPointerCast<Data>( d ) );
+	return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d.get() ) );
 }

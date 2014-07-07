@@ -95,42 +95,42 @@ RandomRotationOp::~RandomRotationOp()
 
 ObjectParameter * RandomRotationOp::seedParameter()
 {
-	return m_seedParameter;
+	return m_seedParameter.get();
 }
 
 const ObjectParameter * RandomRotationOp::seedParameter() const
 {
-	return m_seedParameter;
+	return m_seedParameter.get();
 }
 
 FloatParameter * RandomRotationOp::timeParameter()
 {
-	return m_timeParameter;
+	return m_timeParameter.get();
 }
 
 const FloatParameter * RandomRotationOp::timeParameter() const
 {
-	return m_timeParameter;
+	return m_timeParameter.get();
 }
 
 FloatParameter * RandomRotationOp::speedMinParameter()
 {
-	return m_speedMinParameter;
+	return m_speedMinParameter.get();
 }
 
 const FloatParameter * RandomRotationOp::speedMinParameter() const
 {
-	return m_speedMinParameter;
+	return m_speedMinParameter.get();
 }
 
 FloatParameter * RandomRotationOp::speedMaxParameter()
 {
-	return m_speedMaxParameter;
+	return m_speedMaxParameter.get();
 }
 
 const FloatParameter * RandomRotationOp::speedMaxParameter() const
 {
-	return m_speedMaxParameter;
+	return m_speedMaxParameter.get();
 }
 
 template<typename T>

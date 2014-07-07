@@ -251,7 +251,7 @@ void Group::copyFrom( const Object *other, CopyContext *context )
 	const Group *tOther = static_cast<const Group *>( other );
 	if( tOther->m_transform )
 	{
-		m_transform = context->copy<Transform>( tOther->m_transform );
+		m_transform = context->copy<Transform>( tOther->m_transform.get() );
 	}
 	else
 	{
@@ -260,12 +260,12 @@ void Group::copyFrom( const Object *other, CopyContext *context )
 	clearState();
 	for( StateContainer::const_iterator it=tOther->state().begin(); it!=tOther->state().end(); it++ )
 	{
-		addState( context->copy<StateRenderable>( *it ) );
+		addState( context->copy<StateRenderable>( it->get() ) );
 	}
 	clearChildren();
 	for( ChildContainer::const_iterator it=tOther->children().begin(); it!=tOther->children().end(); it++ )
 	{
-		addChild( context->copy<VisibleRenderable>( *it ) );
+		addChild( context->copy<VisibleRenderable>( it->get() ) );
 	}
 }
 
@@ -275,14 +275,14 @@ void Group::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	if( m_transform )
 	{
-		context->save( m_transform, container, g_transformEntry );
+		context->save( m_transform.get(), container.get(), g_transformEntry );
 	}
 	IndexedIOPtr stateContainer = container->subdirectory( g_stateEntry, IndexedIO::CreateIfMissing );
 	int i = 0;
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
 		string name = str( boost::format( "%d" ) % i );
-		context->save( *it, stateContainer, name );
+		context->save( it->get(), stateContainer.get(), name );
 		i++;
 	}
 	IndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry, IndexedIO::CreateIfMissing );
@@ -290,7 +290,7 @@ void Group::save( SaveContext *context ) const
 	for( ChildContainer::const_iterator it = children().begin(); it!=children().end(); it++ )
 	{
 		string name = str( boost::format( "%d" ) % i );
-		context->save( *it, childrenContainer, name );
+		context->save( it->get(), childrenContainer.get(), name );
 		i++;
 	}
 }
@@ -327,7 +327,7 @@ void Group::load( LoadContextPtr context )
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, g_transformEntry );
+		m_transform = context->load<Transform>( container.get(), g_transformEntry );
 	}
 	catch( ... )
 	{
@@ -340,7 +340,7 @@ void Group::load( LoadContextPtr context )
 	sort( l.begin(), l.end(), entryListCompare );
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
 	{
-		addState( context->load<StateRenderable>( stateContainer, *it ) );
+		addState( context->load<StateRenderable>( stateContainer.get(), *it ) );
 	}
 	clearChildren();
 	ConstIndexedIOPtr childrenContainer = container->subdirectory( g_childrenEntry );
@@ -348,7 +348,7 @@ void Group::load( LoadContextPtr context )
 	sort( l.begin(), l.end(), entryListCompare );
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
 	{
-		addChild( context->load<VisibleRenderable>( childrenContainer, *it ) );
+		addChild( context->load<VisibleRenderable>( childrenContainer.get(), *it ) );
 	}
 }
 
@@ -367,7 +367,7 @@ bool Group::isEqualTo( const Object *other ) const
 		return false;
 	}
 
-	if( m_transform && !tOther->m_transform->isEqualTo( m_transform ) )
+	if( m_transform && !tOther->m_transform->isEqualTo( m_transform.get() ) )
 	{
 		return false;
 	}
@@ -379,7 +379,7 @@ bool Group::isEqualTo( const Object *other ) const
 	}
 	for( size_t i=0; i<m_state.size(); i++ )
 	{
-		if( !m_state[i]->isEqualTo( tOther->m_state[i] ) )
+		if( !m_state[i]->isEqualTo( tOther->m_state[i].get() ) )
 		{
 			return false;
 		}
@@ -392,7 +392,7 @@ bool Group::isEqualTo( const Object *other ) const
 	}
 	for( size_t i=0; i<m_children.size(); i++ )
 	{
-		if( !m_children[i]->isEqualTo( tOther->m_children[i] ) )
+		if( !m_children[i]->isEqualTo( tOther->m_children[i].get() ) )
 		{
 			return false;
 		}
@@ -406,15 +406,15 @@ void Group::memoryUsage( Object::MemoryAccumulator &a ) const
 	VisibleRenderable::memoryUsage( a );
 	if( m_transform )
 	{
-		a.accumulate( m_transform );
+		a.accumulate( m_transform.get() );
 	}
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
-		a.accumulate( *it );
+		a.accumulate( it->get() );
 	}
 	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
-		a.accumulate( *it );
+		a.accumulate( it->get() );
 	}
 }
 

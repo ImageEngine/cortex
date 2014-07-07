@@ -61,12 +61,12 @@ ImageUnpremultiplyOp::~ImageUnpremultiplyOp()
 
 StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter()
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 const StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter() const
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 struct ImageUnpremultiplyOp::ToFloatVectorData
@@ -138,7 +138,7 @@ void ImageUnpremultiplyOp::modifyChannels( const Imath::Box2i &displayWindow, co
 
 	FloatVectorDataPtr alphaData = despatchTypedData< ToFloatVectorData, TypeTraits::IsNumericVectorTypedData >( it->second.data.get() );
 
-	ImageUnpremultiplyOp::UnpremultFn fn( alphaData );
+	ImageUnpremultiplyOp::UnpremultFn fn( alphaData.get() );
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
 		despatchTypedData<ImageUnpremultiplyOp::UnpremultFn, TypeTraits::IsNumericVectorTypedData>( it->get(), fn );
