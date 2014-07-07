@@ -215,6 +215,28 @@ class MurmurHashTest( unittest.TestCase ) :
 		h2.append( IECore.StringVectorData( [ "", "" ] ) )
 		
 		self.assertNotEqual( h1, h2 )
+
+	def testHashInSets( self ) :
+
+		h1 = IECore.MurmurHash()		
+		h2 = IECore.MurmurHash()
+		h3 = IECore.MurmurHash()
+		h3.append( 1 )
+		h4 = IECore.MurmurHash()
+		h4.append( "lala" )
+
+		uniqueHashes = set()
+		uniqueHashes.add( h1 )
+		self.assertEqual( len(uniqueHashes), 1 )
+		uniqueHashes.add( h1 )
+		self.assertEqual( len(uniqueHashes), 1 )
+		uniqueHashes.add( h2 )
+		self.assertEqual( len(uniqueHashes), 1 )
+		uniqueHashes.add( h3 )
+		self.assertEqual( len(uniqueHashes), 2 )
+		uniqueHashes.add( h4 )
+		self.assertEqual( len(uniqueHashes), 3 )
+		self.assertEqual( uniqueHashes, set( [ h4, h3, h2, h1 ] ) )
 		
 if __name__ == "__main__":
 	unittest.main()

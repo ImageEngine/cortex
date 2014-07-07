@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -68,6 +68,11 @@ static void appendInt( MurmurHash &hash, int64_t v )
 	{
 		hash.append( v );
 	}
+}
+
+static size_t hash( MurmurHash &hash )
+{
+	return tbb_hasher( hash );
 }
 
 void bindMurmurHash()
@@ -146,6 +151,7 @@ void bindMurmurHash()
 		.def( "copyFrom", &MurmurHash::operator=, return_self<>() )
 		.def( "__repr__", &repr )
 		.def( "__str__", &MurmurHash::toString )
+		.def( "__hash__", &hash )
 		.def( "toString", &MurmurHash::toString )
 	;
 
