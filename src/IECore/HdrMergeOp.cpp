@@ -219,7 +219,7 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 		{
 			throw Exception( "Input group should contain images only!" );
 		}
-		ImagePrimitivePtr img = staticPointerCast< ImagePrimitive >(*it);
+		ImagePrimitivePtr img = boost::static_pointer_cast< ImagePrimitive >(*it);
 		if ( !((img->getChannel< float >( "R" ) &&
 				img->getChannel< float >( "G" ) &&
 				img->getChannel< float >( "B" )) ||

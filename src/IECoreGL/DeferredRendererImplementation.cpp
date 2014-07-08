@@ -275,7 +275,7 @@ void DeferredRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
 	/// to decent speed and memory usage is going to be automatically instanced primitives,
 	/// each referencing potentially shared vertex buffer objects. Modifying one of those
 	/// could have bad consequences for the others.
-	g->addChild( IECore::constPointerCast<Primitive>( primitive ) );
+	g->addChild( boost::const_pointer_cast<Primitive>( primitive ) );
 
 	{
 		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );

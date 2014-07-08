@@ -1287,7 +1287,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 			{
 				if( it->second->typeId()==StringData::staticTypeId() )
 				{
-					state.primVarTypeHints.insert( std::pair<string, string>( it->first, staticPointerCast<const StringData>( it->second )->readable() ) );
+					state.primVarTypeHints.insert( std::pair<string, string>( it->first, static_pointer_cast<const StringData>( it->second )->readable() ) );
 				}
 			}
 		}

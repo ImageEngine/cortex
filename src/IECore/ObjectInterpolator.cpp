@@ -159,7 +159,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 					ObjectPtr resultData = linearObjectInterpolation( it0->second.data.get(), it1->second.data.get(), x );
 					if( resultData )
 					{
-						itRes->second.data = staticPointerCast<Data>( resultData );
+						itRes->second.data = boost::static_pointer_cast<Data>( resultData );
 					}
 				}
 			}

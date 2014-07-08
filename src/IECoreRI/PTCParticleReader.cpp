@@ -471,7 +471,7 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			{
 			case Color3fVectorDataTypeId :
 				{
-					Color3f &c = staticPointerCast<Color3fVectorData>(it->second.targetData)->writable()[ i ];
+					Color3f &c = static_pointer_cast<Color3fVectorData>(it->second.targetData)->writable()[ i ];
 					c[0] = attributePtr[0];
 					c[1] = attributePtr[1];
 					c[2] = attributePtr[2];
@@ -479,18 +479,18 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 				}
 			case V3fVectorDataTypeId:
 				{
-					V3f &p = staticPointerCast<V3fVectorData>(it->second.targetData)->writable()[ i ];
+					V3f &p = static_pointer_cast<V3fVectorData>(it->second.targetData)->writable()[ i ];
 					p[0] = attributePtr[0];
 					p[1] = attributePtr[1];
 					p[2] = attributePtr[2];
 					break;
 				}
 			case FloatVectorDataTypeId:
-				staticPointerCast<FloatVectorData>(it->second.targetData)->writable()[ i ] = attributePtr[0];
+				static_pointer_cast<FloatVectorData>(it->second.targetData)->writable()[ i ] = attributePtr[0];
 				break;
 			case M44fVectorDataTypeId:
 				{
-					M44f &m = staticPointerCast<M44fVectorData>(it->second.targetData)->writable()[ i ];
+					M44f &m = static_pointer_cast<M44fVectorData>(it->second.targetData)->writable()[ i ];
 					m = M44f(	attributePtr[0], attributePtr[1], attributePtr[2], attributePtr[3],
 								attributePtr[4], attributePtr[5], attributePtr[6], attributePtr[7],
 								attributePtr[8], attributePtr[9], attributePtr[9], attributePtr[10],

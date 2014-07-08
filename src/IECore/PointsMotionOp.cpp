@@ -179,7 +179,7 @@ struct PointsMotionOp::PrimVarBuilder
 			std::vector< const typename T::ValueType * > snapshots;
 			for ( std::vector<ObjectPtr>::const_iterator it = m_objectVector.begin(); it != m_objectVector.end(); it++ )
 			{
-				ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+				ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 				typename T::ConstPtr primVarData = points->variableData< T >( m_primVarName );
 				assert( primVarData );
 				snapshots.push_back( &primVarData->readable() );
@@ -211,7 +211,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 {
 	const std::string &idPrimVarName = idPrimVarNameParameter()->getTypedValue();
 	const std::vector<float> &snapshotTimes = m_snapshotTimesParameter->getTypedValue();
-	const std::vector<ObjectPtr> &objectVector = staticPointerCast< ObjectVector, Object >( m_pointsPrimitiveVectorParameter->getValue() )->members();
+	const std::vector<ObjectPtr> &objectVector = boost::static_pointer_cast< ObjectVector, Object >( m_pointsPrimitiveVectorParameter->getValue() )->members();
 	const std::vector<std::string> &maskedPrimvars = m_maskedPrimVarsParameter->getTypedValue();
 	std::set< std::string > maskedPrimvarsSet;
 
@@ -244,7 +244,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Invalid object passed on pointsPrimitives parameter!" );
 		}
-		ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+		ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 
 		if ( !points->arePrimitiveVariablesValid() )
 		{
@@ -309,7 +309,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 	snapshot = 0;
 	for ( std::vector<ObjectPtr>::const_iterator it = objectVector.begin(); it != objectVector.end(); it++, snapshot++ )
 	{
-		ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+		ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 		PointsPrimitivePtr primitive = new PointsPrimitive( totalPoints );
 
 		// Set the 'id' primVar value with the complete list of ids from the map.

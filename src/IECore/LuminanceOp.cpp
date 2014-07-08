@@ -210,7 +210,7 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 			case Color3fDataTypeId :
 				{
 					FloatDataPtr l = new FloatData;
-					const float *d = staticPointerCast<Color3fData>( colorIt->second.data )->baseReadable();
+					const float *d = boost::static_pointer_cast<Color3fData>( colorIt->second.data )->baseReadable();
 					calculate( d, d + 1, d + 2, steps, 1, l->baseWritable() );
 					luminanceData = l;
 				}
@@ -218,7 +218,7 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 			case Color3fVectorDataTypeId :
 				{
 					FloatVectorDataPtr l = new FloatVectorData;
-					Color3fVectorDataPtr d = staticPointerCast<Color3fVectorData>( colorIt->second.data );
+					Color3fVectorDataPtr d = boost::static_pointer_cast<Color3fVectorData>( colorIt->second.data );
 					l->writable().resize( d->readable().size() );
 					const float *dd = d->baseReadable();
 					steps[0] = steps[1] = steps[2] = 3;
@@ -260,9 +260,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 				{
 					HalfDataPtr l = new HalfData;
 					calculate(
-						staticPointerCast<HalfData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<HalfData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<HalfData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -275,9 +275,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 					HalfVectorDataPtr l = new HalfVectorData;
 					l->writable().resize( rSize );
 					calculate(
-						staticPointerCast<HalfVectorData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<HalfVectorData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<HalfVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -289,9 +289,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 				{
 					FloatDataPtr l = new FloatData;
 					calculate(
-						staticPointerCast<FloatData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<FloatData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<FloatData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -304,9 +304,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 					FloatVectorDataPtr l = new FloatVectorData;
 					l->writable().resize( rSize );
 					calculate(
-						staticPointerCast<FloatVectorData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<FloatVectorData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<FloatVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()

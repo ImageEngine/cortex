@@ -146,67 +146,67 @@ static void blindDataToHeader( const CompoundData *blindData, Imf::Header &heade
 			
 			case IntDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::IntAttribute( staticPointerCast< const IntData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::IntAttribute( boost::static_pointer_cast< const IntData >( it->second )->readable() ) );
 				break;
 
 			case FloatDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::FloatAttribute( staticPointerCast< FloatData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::FloatAttribute( boost::static_pointer_cast< FloatData >( it->second )->readable() ) );
 				break;
 
 			case DoubleDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::DoubleAttribute( staticPointerCast< DoubleData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::DoubleAttribute( boost::static_pointer_cast< DoubleData >( it->second )->readable() ) );
 				break;
 
 			case V2iDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::V2iAttribute( staticPointerCast< V2iData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::V2iAttribute( boost::static_pointer_cast< V2iData >( it->second )->readable() ) );
 				break;
 
 			case V2fDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::V2fAttribute( staticPointerCast< V2fData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::V2fAttribute( boost::static_pointer_cast< V2fData >( it->second )->readable() ) );
 				break;
 
 			case V3iDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::V3iAttribute( staticPointerCast< V3iData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::V3iAttribute( boost::static_pointer_cast< V3iData >( it->second )->readable() ) );
 				break;
 
 			case V3fDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::V3fAttribute( staticPointerCast< V3fData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::V3fAttribute( boost::static_pointer_cast< V3fData >( it->second )->readable() ) );
 				break;
 
 			case Box2iDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::Box2iAttribute( staticPointerCast< Box2iData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::Box2iAttribute( boost::static_pointer_cast< Box2iData >( it->second )->readable() ) );
 				break;
 
 			case Box2fDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::Box2fAttribute( staticPointerCast< Box2fData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::Box2fAttribute( boost::static_pointer_cast< Box2fData >( it->second )->readable() ) );
 				break;
 
 			case M33fDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::M33fAttribute( staticPointerCast< M33fData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::M33fAttribute( boost::static_pointer_cast< M33fData >( it->second )->readable() ) );
 				break;
 
 			case M44fDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::M44fAttribute( staticPointerCast< M44fData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::M44fAttribute( boost::static_pointer_cast< M44fData >( it->second )->readable() ) );
 				break;
 
 			case StringDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::StringAttribute( staticPointerCast< StringData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::StringAttribute( boost::static_pointer_cast< StringData >( it->second )->readable() ) );
 				break;
 
 			case TimeCodeDataTypeId:
 
-				header.insert( thisName.c_str(), Imf::TimeCodeAttribute( staticPointerCast< TimeCodeData >( it->second )->readable() ) );
+				header.insert( thisName.c_str(), Imf::TimeCodeAttribute( boost::static_pointer_cast< TimeCodeData >( it->second )->readable() ) );
 				break;
 
 			default:

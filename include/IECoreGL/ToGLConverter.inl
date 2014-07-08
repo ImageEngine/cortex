@@ -59,7 +59,7 @@ ToGLConverter::ConverterDescription<T>::ConverterDescription( IECore::TypeId inp
 template<class T>
 ToGLConverterPtr ToGLConverter::ConverterDescription<T>::creator( IECore::ConstObjectPtr object )
 {
-	return new T( IECore::staticPointerCast<const typename T::InputType>( object ) );
+	return new T( boost::static_pointer_cast<const typename T::InputType>( object ) );
 }
 
 } // namespace IECoreGL

@@ -123,7 +123,7 @@ struct DataConvertOp::ConvertFnStage1
 		
 		ConvertFnStage2<FromBaseType> fn( data->baseReadable(), data->baseSize() );
 		
-		DataPtr result = staticPointerCast<Data>( Object::create( m_resultType ) );
+		DataPtr result = boost::static_pointer_cast<Data>( Object::create( m_resultType ) );
 	
 		return despatchTypedData<ConvertFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result.get(), fn );
 	}

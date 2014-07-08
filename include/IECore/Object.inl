@@ -51,7 +51,7 @@ typename T::Ptr Object::CopyContext::copy( const T *toCopy )
 	ObjectPtr copy = create( toCopy->typeId() );
 	copy->copyFrom( toCopy, this );
 	m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
-	return staticPointerCast<T>( copy );
+	return boost::static_pointer_cast<T>( copy );
 }
 
 template<class T>

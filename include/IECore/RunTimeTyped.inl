@@ -49,7 +49,7 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
 	}
 	if( src->isInstanceOf( T::staticTypeId() ) )
 	{
-		return staticPointerCast<T>( src );
+		return boost::static_pointer_cast<T>( src );
 	}
 	return 0;
 }
@@ -72,7 +72,7 @@ template<typename T, typename S>
 boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<S> &src )
 {
 	assert( runTimeCast<T>( src ) );
-	return staticPointerCast<T>( src );
+	return boost::static_pointer_cast<T>( src );
 }
 
 template<typename T, typename S>

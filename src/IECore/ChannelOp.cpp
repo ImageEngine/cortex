@@ -123,7 +123,7 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObje
 			throw Exception( str( format( "Primitive variable \"%s\" has wrong size (%d but should be %d)." ) % channelNames[i] % size % numPixels ) );
 		}
 
-		channels.push_back( staticPointerCast< FloatVectorData >( it->second.data ) );
+		channels.push_back( boost::static_pointer_cast< FloatVectorData >( it->second.data ) );
 	}
 
 	modifyChannels( image->getDisplayWindow(), image->getDataWindow(), channels );

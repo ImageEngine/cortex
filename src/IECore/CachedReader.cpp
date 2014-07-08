@@ -151,7 +151,7 @@ struct CachedReader::MemberData
 					/// that all Ops only use their operands to access arguments and not go getting them
 					/// from the Parameters directly.
 					tbb::mutex::scoped_lock l( data->m_postProcessorMutex );
-					ModifyOpPtr postProcessor = constPointerCast<ModifyOp>( data->m_postProcessor );
+					ModifyOpPtr postProcessor = boost::const_pointer_cast<ModifyOp>( data->m_postProcessor );
 					postProcessor->inputParameter()->setValue( result );
 					postProcessor->copyParameter()->setTypedValue( false );
 					postProcessor->operate();

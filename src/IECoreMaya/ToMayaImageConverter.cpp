@@ -60,7 +60,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToMayaImageConverter );
 ToMayaImageConverter::ToMayaImageConverter( ConstImagePrimitivePtr image )
 	:	ToMayaConverter( "Converts image types.", IECore::ImagePrimitiveTypeId )
 {
-	srcParameter()->setValue( constPointerCast<ImagePrimitive>( image ) );
+	srcParameter()->setValue( boost::const_pointer_cast<ImagePrimitive>( image ) );
 
 	IntParameter::PresetsContainer typePresets;
 	typePresets.push_back( IntParameter::Preset( "Float", Float ) );
@@ -102,7 +102,7 @@ struct ToMayaImageConverter::ChannelConverter
 
 		return DataConvert < T, TypedData< std::vector<C> >, ScaledDataConversion< typename T::ValueType::value_type, C> >()
 		(
-			staticPointerCast<const T>( data )
+			boost::static_pointer_cast<const T>( data )
 		);
 	};
 

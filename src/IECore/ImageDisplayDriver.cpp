@@ -116,7 +116,7 @@ void ImageDisplayDriver::imageData( const Box2i &box, const float *data, size_t 
 
 	for ( vector<string>::const_iterator it = channelNames().begin(); it != channelNames().end(); it++, channel++ )
 	{
-		vector< float > &target = staticPointerCast< FloatVectorData >(m_image->variables[ *it ].data)->writable();
+		vector< float > &target = boost::static_pointer_cast< FloatVectorData >(m_image->variables[ *it ].data)->writable();
 		vector< float >::iterator targetIt;
 		const float *sourceIt = data+channel;
 		targetIt = target.begin()+targetWidth*targetY+targetX;

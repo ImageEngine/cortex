@@ -113,7 +113,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 	{
 		if( createIfMissing )
 		{
-			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
+			typename T::Ptr member = boost::static_pointer_cast<T>( Object::create( T::staticTypeId() ) );
 			writable()[name] = member;
 			return member.get();
 		}

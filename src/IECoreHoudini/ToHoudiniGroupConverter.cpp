@@ -113,8 +113,8 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 		ConstPrimitivePtr primitive = runTimeCast<const Primitive>( child );
 		if ( primitive )
 		{
-			transformOp->inputParameter()->setValue( constPointerCast<Primitive>( primitive ) );
-			child = staticPointerCast<VisibleRenderable>( transformOp->operate() );
+			transformOp->inputParameter()->setValue( boost::const_pointer_cast<Primitive>( primitive ) );
+			child = boost::static_pointer_cast<VisibleRenderable>( transformOp->operate() );
 		}
 		
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child.get() );

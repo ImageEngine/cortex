@@ -126,7 +126,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 				}
 				else if( it->second->isInstanceOf( IECore::DataTypeId ) )
 				{
-					shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
+					shaderSetup->addUniformParameter( it->first.value(), boost::static_pointer_cast<const IECore::Data>( it->second ) );
 				}
 			}
 		

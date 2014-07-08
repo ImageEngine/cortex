@@ -143,7 +143,7 @@ T *CompoundObject::member( const InternedString &name, bool throwExceptions, boo
 	{
 		if( createIfMissing )
 		{
-			typename T::Ptr member = staticPointerCast<T>( Object::create( T::staticTypeId() ) );
+			typename T::Ptr member = boost::static_pointer_cast<T>( Object::create( T::staticTypeId() ) );
 			members()[name] = member;
 			return member.get();
 		}

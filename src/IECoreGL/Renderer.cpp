@@ -214,7 +214,7 @@ struct IECoreGL::Renderer::MemberData
 		IECoreGL::GroupPtr childGroup = new IECoreGL::Group();
 		childGroup->setTransform( transformStack.top() );
 		/// \todo See todo in DeferredRendererImplementation::addPrimitive().
-		childGroup->addChild( constPointerCast<Renderable>( child ) );
+		childGroup->addChild( boost::const_pointer_cast<Renderable>( child ) );
 		currentInstance->addChild( childGroup );
 	}
 	

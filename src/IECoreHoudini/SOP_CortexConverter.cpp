@@ -205,7 +205,7 @@ void SOP_CortexConverter::doConvert( const GU_DetailHandle &handle, const std::s
 			}
 		}
 		
-		result = IECore::constPointerCast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
+		result = boost::const_pointer_cast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 	}
 	
 	ToHoudiniGeometryConverterPtr converter = ( type == Cortex ) ? new ToHoudiniCortexObjectConverter( result.get() ) : ToHoudiniGeometryConverter::create( result.get() );

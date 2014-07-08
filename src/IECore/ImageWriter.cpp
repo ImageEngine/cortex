@@ -198,7 +198,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
 		transformOp->inputColorSpaceParameter()->setTypedValue( "linear" );
 		transformOp->outputColorSpaceParameter()->setTypedValue( colorspace );
-		transformOp->inputParameter()->setValue( constPointerCast< ImagePrimitive >(image) );
+		transformOp->inputParameter()->setValue( boost::const_pointer_cast< ImagePrimitive >(image) );
 		transformOp->copyParameter()->setTypedValue( false );
 		transformOp->channelsParameter()->setTypedValue( channelNames );
 		transformOp->operate();

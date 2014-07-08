@@ -280,7 +280,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< UIntVectorData, FloatVectorData, ScaledDataConversion< unsigned int, float > > converter;
-					ConstUIntVectorDataPtr vec = staticPointerCast< UIntVectorData >(res);
+					ConstUIntVectorDataPtr vec = boost::static_pointer_cast< UIntVectorData >(res);
 					return converter( vec );
 				}
 
@@ -293,7 +293,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< HalfVectorData, FloatVectorData, ScaledDataConversion< half, float > > converter;
-					ConstHalfVectorDataPtr vec = staticPointerCast< HalfVectorData >(res);
+					ConstHalfVectorDataPtr vec = boost::static_pointer_cast< HalfVectorData >(res);
 					return converter( vec );
 				}
 
@@ -432,7 +432,7 @@ static void addHeaderAttribute( const std::string &name, Data *data, CompoundDat
 		{
 			if ( cIt->second->typeId() == CompoundDataTypeId )
 			{
-				newBlindData = staticPointerCast< CompoundData >( cIt->second );
+				newBlindData = boost::static_pointer_cast< CompoundData >( cIt->second );
 			}
 		}
 		if ( !newBlindData )
@@ -476,7 +476,7 @@ static void compoundDataToCompoundObject( const CompoundData *data, CompoundObje
 		}
 		else
 		{
-			object->members()[ it->first ] = staticPointerCast< Data >( it->second );
+			object->members()[ it->first ] = boost::static_pointer_cast< Data >( it->second );
 		}
 	}
 }
@@ -492,7 +492,7 @@ CompoundObjectPtr EXRImageReader::readHeader()
 
 ObjectPtr EXRImageReader::doOperation( const CompoundObject *operands )
 {
-	ImagePrimitivePtr image = staticPointerCast< ImagePrimitive >( ImageReader::doOperation( operands ) );
+	ImagePrimitivePtr image = boost::static_pointer_cast< ImagePrimitive >( ImageReader::doOperation( operands ) );
 	if ( image )
 	{
 		headerToCompoundData( m_inputFile->header(), image->blindData() );

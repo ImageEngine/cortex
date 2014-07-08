@@ -73,7 +73,7 @@ void ImagePrimitiveParameterHandler::setParameterValue( IECore::Parameter *param
 		DD::Image::Tile tile( *iOp, iOp->requested_channels(), true );
 		
 		FromNukeTileConverterPtr converter = new FromNukeTileConverter( &tile );
-		IECore::ImagePrimitivePtr image = IECore::staticPointerCast<IECore::ImagePrimitive>( converter->convert() );
+		IECore::ImagePrimitivePtr image = boost::static_pointer_cast<IECore::ImagePrimitive>( converter->convert() );
 		
 		/// \todo Sort out data window vs display window and suchlike.
 		

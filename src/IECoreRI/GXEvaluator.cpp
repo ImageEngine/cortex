@@ -186,7 +186,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 		
 	buildSTEvaluator();
 	
-	MeshPrimitiveEvaluator::ResultPtr evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_stEvaluator->createResult() );
+	MeshPrimitiveEvaluator::ResultPtr evaluatorResult = boost::static_pointer_cast<MeshPrimitiveEvaluator::Result>( m_stEvaluator->createResult() );
 	IntVectorDataPtr fData = new IntVectorData;
 	FloatVectorDataPtr uData = new FloatVectorData;
 	FloatVectorDataPtr vData = new FloatVectorData;

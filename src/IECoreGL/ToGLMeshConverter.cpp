@@ -55,7 +55,7 @@ ToGLConverter::ConverterDescription<ToGLMeshConverter> ToGLMeshConverter::g_desc
 ToGLMeshConverter::ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::MeshPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::MeshPrimitive>( toConvert ) );
 }
 
 ToGLMeshConverter::~ToGLMeshConverter()
@@ -64,7 +64,7 @@ ToGLMeshConverter::~ToGLMeshConverter()
 
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::MeshPrimitivePtr mesh = IECore::staticPointerCast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
+	IECore::MeshPrimitivePtr mesh = boost::static_pointer_cast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
 	
 	if( !mesh->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) )
 	{

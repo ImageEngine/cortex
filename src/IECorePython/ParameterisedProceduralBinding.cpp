@@ -71,7 +71,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				override o = this->get_override( "doRenderState" );
 				if( o )
 				{
-					o( renderer, constPointerCast<CompoundObject>( args ) );
+					o( renderer, boost::const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
 				{
@@ -101,7 +101,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				override o = this->get_override( "doBound" );
 				if( o )
 				{
-					return o( constPointerCast<CompoundObject>( args ) );
+					return o( boost::const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
 				{
@@ -133,7 +133,7 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 				override o = this->get_override( "doRender" );
 				if( o )
 				{
-					o( r, constPointerCast<CompoundObject>( args ) );
+					o( r, boost::const_pointer_cast<CompoundObject>( args ) );
 				}
 				else
 				{

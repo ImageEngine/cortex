@@ -69,7 +69,7 @@ const MeshPrimitive *Font::mesh( char c ) const
 	}
 
 	ToGLMeshConverter converter( m_font->mesh( c ) );
-	ConstMeshPrimitivePtr mesh = IECore::staticPointerCast<const MeshPrimitive>( converter.convert() );
+	ConstMeshPrimitivePtr mesh = boost::static_pointer_cast<const MeshPrimitive>( converter.convert() );
 	m_meshes[c] = mesh;
 
 	return mesh.get();

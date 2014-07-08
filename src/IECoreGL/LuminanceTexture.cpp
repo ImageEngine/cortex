@@ -83,7 +83,7 @@ struct LuminanceTexture::Constructor
 		typedef typename T::ValueType::value_type ElementType;
 
 		const std::vector<ElementType> &ry = y->readable();
-		const std::vector<ElementType> *ra = alpha ? &(staticPointerCast<const T>( alpha )->readable()) : 0;
+		const std::vector<ElementType> *ra = alpha ? &(boost::static_pointer_cast<const T>( alpha )->readable()) : 0;
 
 		unsigned int n = width * height;
 		if( ry.size()!=n || (ra && ra->size()!=n) )

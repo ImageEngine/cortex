@@ -169,24 +169,6 @@ inline void intrusive_ptr_release( const IECore::RefCounted *r )
 	r->removeRef();
 }
 
-template<class T, class U>
-boost::intrusive_ptr<T> staticPointerCast( boost::intrusive_ptr<U> const &p )
-{
-	return boost::static_pointer_cast<T, U>( p );
-}
-
-template<class T, class U>
-boost::intrusive_ptr<T> constPointerCast( boost::intrusive_ptr<U> const &p )
-{
-	return boost::const_pointer_cast<T, U>( p );
-}
-
-template<class T, class U>
-boost::intrusive_ptr<T> dynamicPointerCast( boost::intrusive_ptr<U> const &p )
-{
-	return boost::dynamic_pointer_cast<T, U>( p );
-}
-
 } // namespace IECore
 
 

@@ -62,7 +62,7 @@ static TextureLoaderPtr textureLoader( Renderer &r )
 
 static void worldBegin( Renderer &r )
 {
-	if ( IECore::staticPointerCast<const IECore::StringData>(r.getOption( "gl:mode" ))->readable() == "deferred" )
+	if ( boost::static_pointer_cast<const IECore::StringData>(r.getOption( "gl:mode" ))->readable() == "deferred" )
 	{
 		// The deferred render uses multiple threads when rendering procedurals. So we enable threads for python here.
 		// \todo Consider moving this to IECore::Renderer::worldBegin binding (assuming all decent renderers are multithreaded).

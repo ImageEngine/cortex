@@ -97,7 +97,7 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 	{
 		if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
 		{
-			return IECore::constPointerCast<IECore::Object>( object );
+			return boost::const_pointer_cast<IECore::Object>( object );
 		}
 		
 		return object->copy();

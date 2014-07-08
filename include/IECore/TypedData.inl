@@ -94,7 +94,7 @@ TypedData<T>::~TypedData()
 template <class T>
 typename TypedData<T>::Ptr TypedData<T>::copy() const
 {
-	return staticPointerCast<TypedData<T> >( Data::copy() );
+	return boost::static_pointer_cast<TypedData<T> >( Data::copy() );
 }
 
 template <class T>

@@ -200,7 +200,7 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 				}
 			}
 			
-			result = IECore::constPointerCast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
+			result = boost::const_pointer_cast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 		}
 		
 		parameter->setValidatedValue( result );

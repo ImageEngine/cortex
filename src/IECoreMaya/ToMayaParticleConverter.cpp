@@ -107,12 +107,12 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	MPointArray mp( primitive->variableSize( PrimitiveVariable::Vertex ) );
 	if( p->isInstanceOf( V3fVectorDataTypeId ) )
 	{
-		const vector<V3f> &pReadable = staticPointerCast<const V3fVectorData>( p )->readable();
+		const vector<V3f> &pReadable = boost::static_pointer_cast<const V3fVectorData>( p )->readable();
 		std::transform( pReadable.begin(), pReadable.end(), MArrayIter<MPointArray>::begin( mp ), IECore::convert<MPoint, V3f> );
 	}
 	else
 	{
-		const vector<V3d> &pReadable = staticPointerCast<const V3dVectorData>( p )->readable();
+		const vector<V3d> &pReadable = boost::static_pointer_cast<const V3dVectorData>( p )->readable();
 		std::transform( pReadable.begin(), pReadable.end(), MArrayIter<MPointArray>::begin( mp ), IECore::convert<MPoint, V3d> );
 	}
 

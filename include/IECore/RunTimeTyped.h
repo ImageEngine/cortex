@@ -328,9 +328,9 @@ class RunTimeTyped : public RefCounted
 
 IE_CORE_DECLAREPTR( RunTimeTyped );
 
-/// Equivalent to boost::dynamicPointerCast but using the type identification
+/// Equivalent to boost::dynamic_pointer_cast but using the type identification
 /// system implemented in RunTimeTyped. This should be used in preference to
-/// both dynamic_cast and dynamicPointerCast wherever possible.
+/// boost::dynamic_pointer_cast wherever possible.
 template<typename T, typename S>
 boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
 /// Equivalent to dynamic_cast but using the type identification system
@@ -339,10 +339,10 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src );
 template<typename T, typename S>
 T *runTimeCast( S *src );
 
-/// Equivalent to staticPointerCast, but using the type identification
+/// Equivalent to boost::static_pointer_cast, but using the type identification
 /// system implemented in RunTimeTyped to fire an assert if the equivalent runTimeCast
 /// would not succeed. In a non-asserted build this will compile directly down to
-/// a single staticPointerCast.
+/// a single boost::static_pointer_cast.
 template<typename T, typename S>
 inline boost::intrusive_ptr<T> assertedStaticCast( const boost::intrusive_ptr<T> &src );
 

@@ -61,7 +61,7 @@ ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert, bo
 	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId ),
 	m_createMissingRGBChannels( createMissingRGBChannels )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::Object>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::Object>( toConvert ) );
 }
 
 ToGLTextureConverter::~ToGLTextureConverter()

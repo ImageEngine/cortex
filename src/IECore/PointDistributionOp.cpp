@@ -194,7 +194,7 @@ struct PointDistributionOp::Emitter
 		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, std::vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
 			: m_meshEvaluator( evaluator ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 )
 		{
-			m_evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
+			m_evaluatorResult = boost::static_pointer_cast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
 		}
 
 		void operator() ( const Imath::V2f pos, float densityThreshold )

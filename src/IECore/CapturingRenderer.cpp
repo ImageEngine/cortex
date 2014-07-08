@@ -680,7 +680,7 @@ class CapturingRenderer::Implementation
 			
 			for( Group::ChildContainer::const_iterator it = subGroups.begin(); it!=subGroups.end(); it++ )
 			{
-				Group::ChildContainer subGroupChildren = staticPointerCast<Group>( *it )->children();
+				Group::ChildContainer subGroupChildren = boost::static_pointer_cast<Group>( *it )->children();
 				for( Group::ChildContainer::const_iterator it2 = subGroupChildren.begin(); it2!=subGroupChildren.end(); it2++ )
 				{
 					state.group->addChild( *it2 );

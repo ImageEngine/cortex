@@ -682,7 +682,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				{
 					continue;
 				}
-				it1->second.data = staticPointerCast< Data >( linearObjectInterpolation( it1->second.data.get(), it2->second.data.get(), x ) );
+				it1->second.data = boost::static_pointer_cast< Data >( linearObjectInterpolation( it1->second.data.get(), it2->second.data.get(), x ) );
 			}
 			return map1;
 		}

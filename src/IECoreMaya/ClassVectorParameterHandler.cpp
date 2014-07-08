@@ -90,7 +90,7 @@ MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr param
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
-		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
+		boost::python::object pythonParameter( boost::const_pointer_cast<IECore::Parameter>( parameter ) );
 		boost::python::list classesInfo = extract<list>( pythonParameter.attr( "getClasses" )( true ) );
 		
 		int l = boost::python::len( classesInfo );
@@ -309,7 +309,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
-		boost::python::object pythonParameter( IECore::constPointerCast<IECore::Parameter>( parameter ) );
+		boost::python::object pythonParameter( boost::const_pointer_cast<IECore::Parameter>( parameter ) );
 		boost::python::object classes = pythonParameter.attr( "getClasses" )( true );
 	
 		MStringArray storedParameterNames;
