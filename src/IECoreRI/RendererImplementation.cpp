@@ -458,7 +458,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 		{
 			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
 		}
-		RiMotionBegin( sampleTimes.size(), &sampleTimes.front() );
+		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
 	}
 	
 	for( size_t i = 0; i < numSamples; ++i )
