@@ -781,8 +781,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( cc4, len(hh4) )
 		self.assertEqual( cc4, cc3 )
 		self.assertEqual( cc3 + 1*len(hashTypes), len(hh3.union(hh4)) )	# only the instance location should have different hash, so we sum 1.
-
-		self.assertEqual( cc + cc3 + 2*len(hashTypes), len( allHashes ) )
+		sceneLocations = cc3 / len(hashTypes)
+		sameChildNameHashes = sceneLocations-1
+		self.assertEqual( cc + cc3 + 2*(len(hashTypes)) - sameChildNameHashes, len( allHashes ) )
 
 	def testHashesWithRetimedLinks( self ) :
 
@@ -833,7 +834,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( cc3, len(hh3) )
 		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
 		self.assertEqual( cc4, len(hh4) )
-		self.assertEqual( cc3+cc4, len(hh3.union(hh4)) )	# they should mismatch entirelly
+		sceneLocations = cc3 / len(hashTypes)
+		sameChildNameHashes = sceneLocations-1
+		self.assertEqual( cc3+cc4-sameChildNameHashes, len(hh3.union(hh4)) )	# they should mismatch entirelly except for the child names hash
 		self.assertEqual( cc4+1*len(hashTypes), len(hh4.union(hh)) )	# they should mismatch only at the link (both map to time 0)
 
 		# time 2 maps to times 2 and 1 in the instance
@@ -841,7 +844,9 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( cc5, len(hh5) )
 		(cc6, hh6) = hashesForTime( l.child("instance1"), 2 )
 		self.assertEqual( cc4, len(hh4) )
-		self.assertEqual( cc5+cc6, len(hh5.union(hh6)) )	# they should mismatch entirelly
+		sceneLocations = cc5 / len(hashTypes)
+		sameChildNameHashes = sceneLocations-1
+		self.assertEqual( cc5+cc6-sameChildNameHashes, len(hh5.union(hh6)) )	# they should mismatch entirelly
 		self.assertEqual( cc6+1*len(hashTypes), len(hh6.union(hh3)) )	# they should mismatch only at the link (both map to time 0)
 
 if __name__ == "__main__":

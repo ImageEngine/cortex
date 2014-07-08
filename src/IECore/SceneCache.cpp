@@ -724,7 +724,11 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			// \todo We could do better in this hash by checking the samples to see if it's animated or check if the object exists, for example.
 			sceneHash( this, h );
 			h.append( (unsigned char)hashType );
-			h.append( time );
+			// all kinds of hashes, except the child names depend on time.
+			if ( hashType != ChildNamesHash )
+			{
+				h.append( time );
+			}
 		}
 
 		static ReaderImplementation *reader( Implementation *impl, bool throwException = true )

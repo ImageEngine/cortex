@@ -753,7 +753,8 @@ class SceneCacheTest( unittest.TestCase ) :
 		(time1counter, time1hashes) = hashesForTime( m, 1 )
 
 		self.assertEqual( time1counter, len(time1hashes) )
-		self.assertEqual( (time0counter+time1counter), len(allHashes) )
+		sceneLocations = time0counter / len(hashTypes)
+		self.assertEqual( (time0counter+time1counter-1*sceneLocations), len(allHashes) )	# there's match only on 1 hash for all scene locations: child names hash
 
 
 if __name__ == "__main__":
