@@ -208,7 +208,7 @@ ObjectPtr readObject( SceneInterface &m, double time )
 static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashType, double time )
 {
 	MurmurHash h;
-	//m.hash( hashType, time, h );
+	m.hash( hashType, time, h );
 	return h;
 }
 

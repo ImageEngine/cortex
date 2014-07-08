@@ -727,7 +727,7 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		def collectHashes( scene, hashType, time, hashResults ) :
 			counter = 1
-			hashResults.add( scene.hash( hashType, time ) )
+			hashResults.add( scene.hash( hashType, time ).toString() )
 			for n in scene.childNames() :
 				counter += collectHashes( scene.child(n), hashType, time, hashResults )
 			return counter

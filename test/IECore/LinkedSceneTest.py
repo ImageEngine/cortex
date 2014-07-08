@@ -751,7 +751,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		def collectHashes( scene, hashType, time, hashResults ) :
 			counter = 1
-			hashResults.add( scene.hash( hashType, time ) )
+			hashResults.add( scene.hash( hashType, time ).toString() )
 			for n in scene.childNames() :
 				counter += collectHashes( scene.child(n), hashType, time, hashResults )
 			return counter
@@ -773,16 +773,16 @@ class LinkedSceneTest( unittest.TestCase ) :
 		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
 		self.assertEqual( cc2, len(hh2) )
 		self.assertEqual( cc2, cc )
-		self.assertEqual( cc + 1, len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
+		self.assertEqual( cc + 1*len(hashTypes), len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
 
 		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
 		self.assertEqual( cc3, len(hh3) )
 		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
 		self.assertEqual( cc4, len(hh4) )
 		self.assertEqual( cc4, cc3 )
-		self.assertEqual( cc3 + 1, len(hh3.union(hh4)) )	# only the instance location should have different hash, so we sum 1.
+		self.assertEqual( cc3 + 1*len(hashTypes), len(hh3.union(hh4)) )	# only the instance location should have different hash, so we sum 1.
 
-		self.assertEqual( cc + cc3 + 2, len( allHashes ) )
+		self.assertEqual( cc + cc3 + 2*len(hashTypes), len( allHashes ) )
 
 	def testHashesWithRetimedLinks( self ) :
 
@@ -807,7 +807,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		def collectHashes( scene, hashType, time, hashResults ) :
 			counter = 1
-			hashResults.add( scene.hash( hashType, time ) )
+			hashResults.add( scene.hash( hashType, time ).toString() )
 			for n in scene.childNames() :
 				counter += collectHashes( scene.child(n), hashType, time, hashResults )
 			return counter
@@ -826,7 +826,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
 		self.assertEqual( cc2, len(hh2) )
 		self.assertEqual( cc2, cc )
-		self.assertEqual( cc + 1, len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
+		self.assertEqual( cc + 1*len(hashTypes), len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
 		
 		# time 1 maps to times 1 and 0 in the instance
 		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
@@ -834,7 +834,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
 		self.assertEqual( cc4, len(hh4) )
 		self.assertEqual( cc3+cc4, len(hh3.union(hh4)) )	# they should mismatch entirelly
-		self.assertEqual( cc4, len(hh4.union(hh)) )	# they should match entirelly (both map to time 0)
+		self.assertEqual( cc4+1*len(hashTypes), len(hh4.union(hh)) )	# they should mismatch only at the link (both map to time 0)
 
 		# time 2 maps to times 2 and 1 in the instance
 		(cc5, hh5) = hashesForTime( l.child("instance0"), 2 )
@@ -842,7 +842,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		(cc6, hh6) = hashesForTime( l.child("instance1"), 2 )
 		self.assertEqual( cc4, len(hh4) )
 		self.assertEqual( cc5+cc6, len(hh5.union(hh6)) )	# they should mismatch entirelly
-		self.assertEqual( cc6, len(hh6.union(hh3)) )	# they should match entirelly (both map to time 0)
+		self.assertEqual( cc6+1*len(hashTypes), len(hh6.union(hh3)) )	# they should mismatch only at the link (both map to time 0)
 
 if __name__ == "__main__":
 	unittest.main()
