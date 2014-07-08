@@ -39,7 +39,7 @@ import os.path
 import os
 
 class CameraTest( IECoreRI.TestCase ) :
-
+	
 	def testParameters( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
@@ -222,6 +222,24 @@ class CameraTest( IECoreRI.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertTrue( result.floatPrimVar( e.A() ) > 0 ) # something should be there
 		self.assertTrue( result.floatPrimVar( e.A() ) < 1 ) # but it should be blurry
+	
+	def testMotionBlurCameraRib( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
+		
+		with IECore.TransformBlock( r ) :
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
+			
+			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
+		
+		r.worldBegin()
+		r.worldEnd()
+		
+		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
+		
+		self.assert_( "MotionBegin [ 0 1 ]" in l )
 		
 if __name__ == "__main__":
     unittest.main()
