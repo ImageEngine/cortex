@@ -54,8 +54,8 @@ class ParameterisedInterface
 		virtual ~ParameterisedInterface();
 
 		/// Returns the parameters for query/modification
-		virtual CompoundParameterPtr parameters() = 0;
-		virtual ConstCompoundParameterPtr parameters() const = 0;
+		virtual CompoundParameter *parameters() = 0;
+		virtual const CompoundParameter *parameters() const = 0;
 
 };
 

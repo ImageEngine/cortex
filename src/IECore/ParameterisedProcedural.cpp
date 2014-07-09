@@ -175,14 +175,14 @@ Imath::Box3f ParameterisedProcedural::bound() const
 	return doBound( args );
 }
 
-CompoundParameterPtr ParameterisedProcedural::parameters()
+CompoundParameter *ParameterisedProcedural::parameters()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-ConstCompoundParameterPtr ParameterisedProcedural::parameters() const
+const CompoundParameter *ParameterisedProcedural::parameters() const
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
 void ParameterisedProcedural::doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const

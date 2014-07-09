@@ -183,11 +183,13 @@ static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, 
 void bindParameterisedProcedural()
 {
 
+	CompoundParameter *(ParameterisedProcedural::*parameters)() = &ParameterisedProcedural::parameters;
+
 	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrap>()
 		.def( init<>() )
 		.def( init< const std::string >( arg( "description") ) )
 		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )
-		.def( "parameters", (CompoundParameterPtr (ParameterisedProcedural::*)())&ParameterisedProcedural::parameters )
+		.def( "parameters", parameters, return_value_policy<CastToIntrusivePtr>() )
 		.def( "render", &render )
 		.def( "render", &render2, ( arg( "renderer" ), arg( "inAttributeBlock" ) = true, arg( "withState" ) = true, arg( "withGeometry" ) = true, arg( "immediateGeometry" ) = false ) )
 		.def( "__getitem__", &parameterisedProceduralGetItem )

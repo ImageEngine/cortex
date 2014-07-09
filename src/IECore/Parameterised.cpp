@@ -59,22 +59,22 @@ const std::string &Parameterised::description() const
 	return m_description;
 }
 
-CompoundParameterPtr Parameterised::parameters()
+CompoundParameter *Parameterised::parameters()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-ConstCompoundParameterPtr Parameterised::parameters() const
+const CompoundParameter *Parameterised::parameters() const
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-CompoundObjectPtr Parameterised::userData()
+CompoundObject *Parameterised::userData()
 {
-	return m_userData;
+	return m_userData.get();
 }
 
-ConstCompoundObjectPtr Parameterised::userData() const
+const CompoundObject *Parameterised::userData() const
 {
-	return m_userData;
+	return m_userData.get();
 }

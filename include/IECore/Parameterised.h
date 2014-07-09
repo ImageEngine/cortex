@@ -66,14 +66,14 @@ class Parameterised : public RunTimeTyped, public ParameterisedInterface
 
 		/// Returns the parameters for editing. Subclasses should
 		/// typically add parameters to this from their constructors.
-		virtual CompoundParameterPtr parameters();
+		virtual CompoundParameter *parameters();
 		/// Returns the parameters for query.
-		virtual ConstCompoundParameterPtr parameters() const;
+		virtual const CompoundParameter *parameters() const;
 
 		/// Returns an object that anyone can use for storing anything.
-		CompoundObjectPtr userData();
+		CompoundObject *userData();
 		/// Read only version of the above.
-		ConstCompoundObjectPtr userData() const;
+		const CompoundObject *userData() const;
 
 	private :
 
