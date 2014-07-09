@@ -176,14 +176,14 @@ void Camera::setTransform( TransformPtr transform )
 	m_transform = transform;
 }
 
-TransformPtr Camera::getTransform()
+Transform *Camera::getTransform()
 {
-	return m_transform;
+	return m_transform.get();
 }
 
-ConstTransformPtr Camera::getTransform() const
+const Transform *Camera::getTransform() const
 {
-	return m_transform;
+	return m_transform.get();
 }
 
 CompoundDataMap &Camera::parameters()
@@ -196,14 +196,14 @@ const CompoundDataMap &Camera::parameters() const
 	return m_parameters->readable();
 }
 
-CompoundDataPtr Camera::parametersData()
+CompoundData *Camera::parametersData()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-ConstCompoundDataPtr Camera::parametersData() const
+const CompoundData *Camera::parametersData() const
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
 void Camera::addStandardParameters()

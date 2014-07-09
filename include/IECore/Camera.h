@@ -57,16 +57,16 @@ class Camera : public PreWorldRenderable
 
 		void setTransform( TransformPtr transform );
 		/// May return 0 if no transform has been applied.
-		TransformPtr getTransform();
-		ConstTransformPtr getTransform() const;
+		Transform *getTransform();
+		const Transform *getTransform() const;
 
 		CompoundDataMap &parameters();
 		const CompoundDataMap &parameters() const;
 		/// This is mostly of use for the binding - the parameters()
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
-		CompoundDataPtr parametersData();
-		ConstCompoundDataPtr parametersData() const;
+		CompoundData *parametersData();
+		const CompoundData *parametersData() const;
 		/// Adds the standard parameters documented as part of Renderer::camera(),
 		/// giving them the appropriate default values as documented there. Note that
 		/// this function will only modify existing parameters if they are of the incorrect
