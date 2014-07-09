@@ -182,9 +182,9 @@ const CompoundDataMap &Display::parameters() const
 	return m_parameters->readable();
 }
 
-CompoundDataPtr Display::parametersData()
+CompoundData *Display::parametersData()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
 void Display::render( Renderer *renderer ) const
