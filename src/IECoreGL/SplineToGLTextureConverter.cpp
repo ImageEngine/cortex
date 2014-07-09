@@ -84,11 +84,11 @@ IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstO
 
 	if ( !y && r && g && b )
 	{
-			t = new ColorTexture( image );
+			t = new ColorTexture( image.get() );
 	}
 	else if ( y && !r && !g && !b ) 
 	{
-			t = new LuminanceTexture( image );
+			t = new LuminanceTexture( image.get() );
 	}
 	else
 	{

@@ -49,14 +49,14 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( AlphaTexture );
 
-AlphaTexture::AlphaTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap )
+AlphaTexture::AlphaTexture( unsigned int width, unsigned int height, const IECore::Data *a, bool mipMap )
 {
 	construct( width, height, a, mipMap );
 }
 
-AlphaTexture::AlphaTexture( IECore::ConstImagePrimitivePtr image, bool mipMap )
+AlphaTexture::AlphaTexture( const IECore::ImagePrimitive *image, bool mipMap )
 {
-	IECore::ConstDataPtr a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data : 0;
+	const IECore::Data *a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data.get() : NULL;
 
 	if( !a )
 	{
@@ -124,7 +124,7 @@ struct AlphaTexture::Constructor
 	bool mipMap;
 };
 
-void AlphaTexture::construct( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap )
+void AlphaTexture::construct( unsigned int width, unsigned int height, const IECore::Data *a, bool mipMap )
 {
 	glGenTextures( 1, &m_texture );
 	ScopedBinding binding( *this );
@@ -133,7 +133,7 @@ void AlphaTexture::construct( unsigned int width, unsigned int height, IECore::C
 	c.width = width;
 	c.height = height;
 	c.mipMap = mipMap;
-	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( a.get() ), c );
+	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( a ), c );
 }
 
 

@@ -68,14 +68,14 @@ const Imath::M44f &Group::getTransform() const
 	return m_transform;
 }
 
-StatePtr Group::getState()
+State *Group::getState()
 {
-	return m_state;
+	return m_state.get();
 }
 
-ConstStatePtr Group::getState() const
+const State *Group::getState() const
 {
-	return m_state;
+	return m_state.get();
 }
 
 void Group::setState( StatePtr state )

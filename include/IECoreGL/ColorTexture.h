@@ -54,15 +54,15 @@ class ColorTexture : public Texture
 		ColorTexture( unsigned int width, unsigned int height );
 		/// Constructs a new ColorTexture. All channels must be of the same type, and must
 		/// be some form of numeric VectorData.
-		ColorTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-			IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a = 0 );
+		ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a = 0 );
 
 		/// Creates a ColorTexture from the specified image. Accepts channels with names
 		/// "r", "R", "red", "g", "G", "green", "b", "B", "blue", "a", "A" and "alpha".
 		/// Currently ignores the display window and uses only the data window.
 		/// Image must have at least RGB channels and all channels
 		/// must be of the same type.
-		ColorTexture( IECore::ConstImagePrimitivePtr image );
+		ColorTexture( const IECore::ImagePrimitive *image );
 
 		virtual ~ColorTexture();
 

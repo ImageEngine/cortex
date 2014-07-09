@@ -61,10 +61,10 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 		GL_FLOAT, 0 );
 }
 
-ColorTexture::ColorTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-	IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a )
+ColorTexture::ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
 {
-	construct( width, height, r.get(), g.get(), b.get(), a.get() );
+	construct( width, height, r, g, b, a );
 }
 
 static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, const char **names )
@@ -87,7 +87,7 @@ static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, c
 	return 0;
 }
 
-ColorTexture::ColorTexture( IECore::ConstImagePrimitivePtr image )
+ColorTexture::ColorTexture( const IECore::ImagePrimitive *image )
 {
 	static const char *redNames[] = { "r", "R", "red", 0 };
 	static const char *greenNames[] = { "g", "G", "green", 0 };

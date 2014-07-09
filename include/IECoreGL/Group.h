@@ -69,8 +69,8 @@ class Group : public Renderable
 		void setTransform( const Imath::M44f &matrix );
 		const Imath::M44f &getTransform() const;
 
-		StatePtr getState();
-		ConstStatePtr getState() const;
+		State *getState();
+		const State *getState() const;
 		void setState( StatePtr state );
 
 		// render method ( assumes there's no threads modifying the group ).
