@@ -184,7 +184,7 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 	
 	if( m_originalClasses->readable().size() )
 	{
-		restoreClassParameterStates( m_originalClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters().get(), "" );
+		restoreClassParameterStates( m_originalClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->updateParameterised();
 	}
 	
@@ -225,7 +225,7 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 	}
 	else
 	{
-		restoreClassParameterStates( m_newClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters().get(), "" );
+		restoreClassParameterStates( m_newClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_newValues->copy() );
 		m_parameterisedHolder->updateParameterised();
 		setNodeValuesForParametersWithNewValues();
@@ -449,7 +449,7 @@ IECore::Parameter *ParameterisedHolderModificationCmd::parameterFromPath( Parame
 	std::vector<std::string> names;
 	boost::split( names, path, boost::is_any_of( "." ) );
 	
-	CompoundParameter *parent = parameterised->parameters().get();
+	CompoundParameter *parent = parameterised->parameters();
 	for( int i=0; i<(int)names.size(); i++ )
 	{
 		if( i==((int)names.size()-1) )
