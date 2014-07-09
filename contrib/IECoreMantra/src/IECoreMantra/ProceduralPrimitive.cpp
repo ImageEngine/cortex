@@ -81,7 +81,7 @@ void IECoreMantra::ProceduralPrimitive::getBoundingBox(UT_BoundingBox &box)
 
 void IECoreMantra::ProceduralPrimitive::render()
 {
-	m_procedural->render( m_renderer );
+	m_procedural->render( m_renderer.get() );
 }
 
 void IECoreMantra::ProceduralPrimitive::addChild( ProceduralPrimitive *proc )
