@@ -403,7 +403,7 @@ ObjectPtr FromHoudiniGroupConverter::doDetailConversion( const GU_Detail *geo, c
 	}
 	
 	// transfer the common parameter values
-	CompoundParameter *parameters = converter->parameters().get();
+	CompoundParameter *parameters = converter->parameters();
 	const CompoundParameter::ParameterMap &parameterMap = parameters->parameters();
 	const CompoundObject::ObjectMap &values = operands->members();
 	for ( CompoundObject::ObjectMap::const_iterator it = values.begin(); it != values.end(); ++it )

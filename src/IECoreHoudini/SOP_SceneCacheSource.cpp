@@ -495,7 +495,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	{
 		GroupPtr result = group->copy();
 		MatrixTransformPtr matTransform = matrixTransform( transform );
-		if ( const Transform *transform = group->getTransform().get() )
+		if ( const Transform *transform = group->getTransform() )
 		{
 			matTransform->matrix *= transform->transform();
 		}
@@ -506,7 +506,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	{
 		CoordinateSystemPtr result = coord->copy();
 		MatrixTransformPtr matTransform = matrixTransform( transform );
-		if ( const Transform *transform = coord->getTransform().get() )
+		if ( const Transform *transform = coord->getTransform() )
 		{
 			matTransform->matrix *= transform->transform();
 		}

@@ -202,14 +202,14 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 	}
 	else if ( Group *group = IECore::runTimeCast<Group>( m_object.get() ) )
 	{
-		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( group->getTransform().get() ) )
+		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( group->getTransform() ) )
 		{
 			matTransform->matrix = transform * matTransform->matrix;
 		}
 	}
 	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object.get() ) )
 	{
-		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( coord->getTransform().get() ) )
+		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( coord->getTransform() ) )
 		{
 			matTransform->matrix = transform * matTransform->matrix;
 		}

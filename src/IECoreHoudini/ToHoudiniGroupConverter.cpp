@@ -81,7 +81,7 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 	}
 	
 	Imath::M44f transform = ( runTimeCast<const M44fData>( m_transformParameter->getValue() ) )->readable();
-	const Transform *groupTransform = group->getTransform().get();
+	const Transform *groupTransform = group->getTransform();
 	if ( groupTransform )
 	{
 		transform = transform * groupTransform->transform();

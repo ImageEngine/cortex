@@ -105,7 +105,7 @@ GU_CortexPrimitive *GU_CortexPrimitive::build( GU_Detail *geo, const IECore::Obj
 	
 	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
 	{
-		if ( const IECore::Transform *transform = coord->getTransform().get() )
+		if ( const IECore::Transform *transform = coord->getTransform() )
 		{
 			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
 		}
