@@ -62,8 +62,8 @@ class CoordinateSystem : public StateRenderable
 		/// This is the local transform relative to the parent of
 		/// the coordinate system (usually a Group). May return 0
 		/// if no transform has been applied.
-		TransformPtr getTransform();
-		ConstTransformPtr getTransform() const;
+		Transform *getTransform();
+		const Transform *getTransform() const;
 		/// Sets the Transform applied to the coordinate system.
 		void setTransform( TransformPtr transform );
 

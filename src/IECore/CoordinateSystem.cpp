@@ -70,14 +70,14 @@ void CoordinateSystem::setName( const std::string &name )
 	m_name = name;
 }
 
-TransformPtr CoordinateSystem::getTransform()
+Transform *CoordinateSystem::getTransform()
 {
-	return m_transform;
+	return m_transform.get();
 }
 
-ConstTransformPtr CoordinateSystem::getTransform() const
+const Transform *CoordinateSystem::getTransform() const
 {
-	return m_transform;
+	return m_transform.get();
 }
 
 void CoordinateSystem::setTransform( TransformPtr transform )
