@@ -1941,7 +1941,7 @@ void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
 	// we do however share SharedData with the parent renderer, so that we can share instances among procedurals.
 	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->sharedData, proceduralData->options ) );
-	proceduralData->procedural->render( renderer );
+	proceduralData->procedural->render( renderer.get() );
 }
 
 void IECoreRI::RendererImplementation::procFree( void *data )

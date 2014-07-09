@@ -87,7 +87,8 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			}
 			return Imath::Box3f(); // empty
 		}
-		virtual void render( RendererPtr r ) const
+		
+		virtual void render( Renderer *r ) const
 		{
 			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.
@@ -97,7 +98,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 				override o = this->get_override( "render" );
 				if( o )
 				{
-					o( r );
+					o( RendererPtr( r ) );
 				}
 				else
 				{
@@ -117,6 +118,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 				msg( Msg::Error, "ProceduralWrap::render", "Caught unknown exception" );
 			}
 		}
+		
 		virtual MurmurHash hash() const
 		{
 			ScopedGILLock gilLock;

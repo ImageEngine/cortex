@@ -210,7 +210,7 @@ void ImmediateRendererImplementation::addProcedural( IECore::Renderer::Procedura
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )
 	{
-		proc->render( renderer );
+		proc->render( renderer.get() );
 	}
 }
 

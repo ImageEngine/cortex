@@ -386,7 +386,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 
 			// activates the render context on the task's thread.
 			ScopedRenderContext scopedProceduralContext( m_proceduralContext, m_renderer, "DeferredRendererImplementation::ProceduralTask::execute" );
-			m_procedural->render( m_param );
+			m_procedural->render( m_param.get() );
 			set_ref_count( m_numSubtasks + 1 );
 			spawn_and_wait_for_all(taskList);
 			taskList.clear();
@@ -470,7 +470,7 @@ void DeferredRendererImplementation::addProcedural( IECore::Renderer::Procedural
 	else
 	{
 		// threading not wanted - just execute immediately
-		proc->render( renderer );
+		proc->render( renderer.get() );
 	}
 }
 

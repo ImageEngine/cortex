@@ -351,7 +351,7 @@ class CapturingRenderer::Implementation
 			{
 				// enclose this in an attribute block to prevent leaking:
 				attributeBegin();
-				procedural->render( renderer );
+				procedural->render( renderer.get() );
 				attributeEnd();
 			}
 		}
@@ -427,7 +427,7 @@ class CapturingRenderer::Implementation
 					
 					try
 					{
-						m_procedural->render( m_renderer );
+						m_procedural->render( m_renderer.get() );
 						wait_for_all();
 						m_renderer->m_implementation->collapseGroups( m_context->stack.back() );
 					}

@@ -605,7 +605,7 @@ int IECoreArnold::RendererImplementation::procLoader( AtProcVtable *vTable )
 int IECoreArnold::RendererImplementation::procInit( AtNode *node, void **userPtr )
 {
 	ProceduralData *data = (ProceduralData *)( AiNodeGetPtr( node, "userptr" ) );
-	data->procedural->render( data->renderer );
+	data->procedural->render( data->renderer.get() );
 	data->procedural = 0;
 	*userPtr = data;
 	return 1;

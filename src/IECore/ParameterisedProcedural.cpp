@@ -119,7 +119,7 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 			return parameterisedProcedural->doBound( validatedArgs );
 		}
 
-		virtual void render( RendererPtr renderer ) const
+		virtual void render( Renderer *renderer ) const
 		{
 			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
