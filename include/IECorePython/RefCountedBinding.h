@@ -104,6 +104,20 @@ class RefCountedClass : public boost::python::class_<T, Detail::GILReleasePtr<TW
 
 };
 
+/// A class to simplify the binding of functions returning raw pointers to
+/// RefCounted objects, where we must cast to intrusive_ptr to allow python
+/// to share ownership with C++. Use as follows :
+///
+/// def( "f", &functionReturningRawPointer, return_value_policy<CastToIntrusivePtr>() )
+struct CastToIntrusivePtr
+{
+	template <class T>
+	struct apply
+	{
+		typedef boost::python::to_python_value<boost::intrusive_ptr<typename boost::remove_pointer<T>::type> > type;
+	};
+};
+
 } // namespace IECorePython
 
 #include "IECorePython/RefCountedBinding.inl"
