@@ -65,14 +65,14 @@ Group::~Group()
 	clearChildren();
 }
 
-TransformPtr Group::getTransform()
+Transform *Group::getTransform()
 {
-	return m_transform;
+	return m_transform.get();
 }
 
-ConstTransformPtr Group::getTransform() const
+const Transform *Group::getTransform() const
 {
-	return m_transform;
+	return m_transform.get();
 }
 
 void Group::setTransform( TransformPtr transform )
@@ -132,8 +132,7 @@ const Group::StateContainer &Group::state() const
 	return m_state;
 }
 
-
-IECore::ConstDataPtr Group::getAttribute( const std::string &name ) const
+const Data *Group::getAttribute( const std::string &name ) const
 {
 	StateContainer::const_reverse_iterator it = m_state.rbegin();
 	for( ; it != m_state.rend(); ++it )
@@ -143,7 +142,7 @@ IECore::ConstDataPtr Group::getAttribute( const std::string &name ) const
 			CompoundDataMap::const_iterator attrIt = attr->attributes().find( name );
 			if( attrIt != attr->attributes().end() )
 			{
-				return attrIt->second;
+				return attrIt->second.get();
 			}
 		}
 	}
@@ -235,12 +234,12 @@ const Group::ChildContainer &Group::children() const
 	return m_children;
 }
 
-GroupPtr Group::parent()
+Group *Group::parent()
 {
 	return m_parent;
 }
 
-ConstGroupPtr Group::parent() const
+const Group *Group::parent() const
 {
 	return m_parent;
 }
