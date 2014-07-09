@@ -73,7 +73,7 @@ static long hash( const RefCounted *self )
 
 void bindRefCounted()
 {
-	class_<RefCounted, boost::noncopyable, RefCountedPtr>( "RefCounted", "A simple class to count references." )
+	class_<RefCounted, boost::noncopyable, Detail::GILReleasePtr<RefCounted> >( "RefCounted", "A simple class to count references." )
 		.def( "__eq__", equal )
 		.def( "__ne__", notEqual )
 		.def( "__hash__", hash )
