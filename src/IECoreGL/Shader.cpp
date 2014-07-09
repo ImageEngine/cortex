@@ -1055,13 +1055,13 @@ const std::string &Shader::lambertFragmentSource()
 // definitions for useful simple shaders
 ///////////////////////////////////////////////////////////////////////////////
 
-ShaderPtr Shader::constant()
+Shader *Shader::constant()
 {
 	static ShaderPtr s = new Shader( "", constantFragmentSource() );
-	return s;
+	return s.get();
 }
 
-ShaderPtr Shader::facingRatio()
+Shader *Shader::facingRatio()
 {
 	// the empty strings will be replaced with defaultVertexSource() and
 	// defaultFragmentSource() in the constructor. it's important that we
@@ -1069,5 +1069,5 @@ ShaderPtr Shader::facingRatio()
 	// the empty string too, signifying to the funkier primitives (PointsPrimitive
 	// being a good example) that it's ok to replace the vertex shader.
 	static ShaderPtr s = new Shader( "", "" );
-	return s;
+	return s.get();
 }

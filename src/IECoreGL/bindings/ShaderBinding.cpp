@@ -119,8 +119,8 @@ void bindShader()
 		.def( "csParameter", &csParameter )
 		.def( "defaultVertexSource", &Shader::defaultVertexSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultVertexSource" )
 		.def( "defaultFragmentSource", &Shader::defaultFragmentSource, return_value_policy<copy_const_reference>() ).staticmethod( "defaultFragmentSource" )
-		.def( "constant", &Shader::constant ).staticmethod( "constant" )
-		.def( "facingRatio", &Shader::facingRatio ).staticmethod( "facingRatio" )
+		.def( "constant", &Shader::constant, return_value_policy<IECorePython::CastToIntrusivePtr>() ).staticmethod( "constant" )
+		.def( "facingRatio", &Shader::facingRatio, return_value_policy<IECorePython::CastToIntrusivePtr>() ).staticmethod( "facingRatio" )
 	;
 	
 	IECorePython::RefCountedClass<Shader::Setup, IECore::RefCounted>( "Setup" )

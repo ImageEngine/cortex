@@ -194,7 +194,7 @@ void Primitive::render( State *state ) const
 	}
 	
 	// get a constant shader suitable for drawing wireframes, points etc.
-	const Shader *constantShader = Shader::constant().get();
+	const Shader *constantShader = Shader::constant();
 	if( currentSelector && currentSelector->mode() == Selector::IDRender )
 	{
 		// if we're in IDRender mode, then the constant shader is unsuitable,
