@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+
 #include "boost/format.hpp"
 
 #include "IECorePython/IECoreBinding.h"
@@ -59,7 +60,7 @@ std::string repr( FileSequence &x )
 
 	s <<"', ";
 
-	object item( x.getFrameList() );
+	object item( FrameListPtr( x.getFrameList() ) );
 
 	s << call_method< std::string >( item.ptr(), "__repr__" );
 
@@ -116,7 +117,7 @@ struct FileSequenceHelper
 		return result;
 	}
 
-	static object mapTo( const FileSequence &x, ConstFileSequencePtr other, bool asList )
+	static object mapTo( const FileSequence &x, const FileSequence *other, bool asList )
 	{
 		if ( asList )
 		{
@@ -148,22 +149,21 @@ struct FileSequenceHelper
 		}
 	}
 
-	static object mapTo( const FileSequence &x, ConstFileSequencePtr other )
+	static object mapTo( const FileSequence &x, const FileSequence *other )
 	{
 		return mapTo( x, other, false );
 	}
 };
 
-
 void bindFileSequence()
 {
-	object (*mapTo1)( const FileSequence &, ConstFileSequencePtr, bool ) = &FileSequenceHelper::mapTo;
-	object (*mapTo2)( const FileSequence &, ConstFileSequencePtr ) = &FileSequenceHelper::mapTo;
+	object (*mapTo1)( const FileSequence &, const FileSequence *, bool ) = &FileSequenceHelper::mapTo;
+	object (*mapTo2)( const FileSequence &, const FileSequence * ) = &FileSequenceHelper::mapTo;
 
 	RunTimeTypedClass<FileSequence>()
 		.def( init< const std::string &, FrameListPtr >() )
 		.def( init< const std::string & >() )
-		.add_property( "frameList", &FileSequence::getFrameList, &FileSequence::setFrameList )
+		.add_property( "frameList", make_function( &FileSequence::getFrameList, return_value_policy<CastToIntrusivePtr>() ), &FileSequence::setFrameList )
 		.add_property( "fileName", make_function( &FileSequence::getFileName, return_value_policy<copy_const_reference>() ), &FileSequence::setFileName )
 		.def( "getPadding", &FileSequence::getPadding )
 		.def( "setPadding", &FileSequence::setPadding )

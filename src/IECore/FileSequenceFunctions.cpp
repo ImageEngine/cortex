@@ -263,7 +263,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 		{
 			FrameList::Frame startFrame, endFrame;
 			
-			if( FrameRange *fr = runTimeCast<FrameRange>( (*it)->getFrameList().get() ) )
+			if( FrameRange *fr = runTimeCast<FrameRange>( (*it)->getFrameList() ) )
 			{
 				// Can do a quick validation if the range is a FrameRange, by looking at the start and end only
 				startFrame = fr->getStart();
