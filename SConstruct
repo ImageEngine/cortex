@@ -3063,11 +3063,11 @@ if doConfigure :
 	else :
 	
 		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
-			alembicEnv.Append(
+			alembicEnv.Prepend(
 				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
 				LIBS = [
-					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
 					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
 					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 				]
 			)
