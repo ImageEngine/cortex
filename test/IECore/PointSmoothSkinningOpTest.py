@@ -68,7 +68,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		pts = PointsPrimitive( self.myP() )
 		vertex = PrimitiveVariable.Interpolation.Vertex
 		pts["N"] = PrimitiveVariable( vertex, self.myN() )
-		pts.arePrimitiveVariablesValid()
+		self.assertTrue( pts.arePrimitiveVariablesValid() )
 		return pts
 	
 	def myMN (self):
@@ -87,7 +87,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, self.myP() )
 		m["N"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, self.myMN() )
-		m.arePrimitiveVariablesValid()
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 		return m
 
 	def myDP (self):
