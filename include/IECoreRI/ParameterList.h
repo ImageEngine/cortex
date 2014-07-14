@@ -87,13 +87,14 @@ class ParameterList
 		// Call one of these to reserve enough space in the arrays below to represent all the parameters.
 		void reserve( const IECore::CompoundDataMap &parameters );
 		void reserve( const IECore::Data *parameter );
-		void accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats );
+		void accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats, size_t &numMatrices );
 		// Then call this n times to populate the member data
 		void appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
 		std::vector<std::string> m_strings;
 		std::vector<int> m_ints;
 		std::vector<float> m_floats;
+		std::vector<Imath::M44f> m_matrices;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
 

@@ -35,6 +35,7 @@
 
 #include "IECoreRI/ParameterList.h"
 
+#include "IECore/MatrixAlgo.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
 
@@ -135,6 +136,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 		case StringDataTypeId :
 			return "string";
 		case M44fDataTypeId :
+		case M44dDataTypeId :
 			return "matrix";
 		default :
 			msg( Msg::Warning, "ParameterList::type", format( "Variable \"%s\" has unsupported datatype." ) % name );
@@ -177,7 +179,10 @@ const void *ParameterList::value( const IECore::Data *d )
 		
 			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 			return &*(m_ints.rbegin());
-
+		case M44dDataTypeId :
+		
+			m_matrices.push_back( convert<Imath::M44f>( static_cast<const M44dData *>( d )->readable() ) );
+			return &*(m_matrices.rbegin());
 		default :
 		
 			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
@@ -192,14 +197,16 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	size_t numCharPtrs = 0;
 	size_t numInts = 0;
 	size_t numFloats = 0;
+	size_t numMatrices = 0;
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats );
+		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats, numMatrices );
 	}
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
+	m_matrices.reserve( numMatrices );
 }
 
 void ParameterList::reserve( const IECore::Data *parameter )
@@ -208,14 +215,16 @@ void ParameterList::reserve( const IECore::Data *parameter )
 	size_t numCharPtrs = 0;
 	size_t numInts = 0;
 	size_t numFloats = 0;
-	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats );
+	size_t numMatrices = 0;
+	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats, numMatrices );
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
+	m_matrices.reserve( numMatrices );
 }
 
-void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
+void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats, size_t &numMatrices )
 {
 	if( !d )
 	{
@@ -233,6 +242,9 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 			numCharPtrs += static_cast<const StringVectorData *>( d )->readable().size();
 		case BoolDataTypeId :
 			numInts++;
+			break;
+		case M44dDataTypeId :
+			numMatrices++;
 			break;
 		case SplineffDataTypeId :
 			{
