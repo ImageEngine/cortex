@@ -180,9 +180,27 @@ const void *ParameterList::value( const IECore::Data *d )
 			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 			return &*(m_ints.rbegin());
 		case M44dDataTypeId :
-		
-			m_matrices.push_back( convert<Imath::M44f>( static_cast<const M44dData *>( d )->readable() ) );
-			return &*(m_matrices.rbegin());
+			{
+				const Imath::M44d& t = static_cast<const M44dData *>( d )->readable();
+				m_floats.push_back( (float)t[0][0] );
+				m_floats.push_back( (float)t[0][1] );
+				m_floats.push_back( (float)t[0][2] );
+				m_floats.push_back( (float)t[0][3] );
+				m_floats.push_back( (float)t[1][0] );
+				m_floats.push_back( (float)t[1][1] );
+				m_floats.push_back( (float)t[1][2] );
+				m_floats.push_back( (float)t[1][3] );
+				m_floats.push_back( (float)t[2][0] );
+				m_floats.push_back( (float)t[2][1] );
+				m_floats.push_back( (float)t[2][2] );
+				m_floats.push_back( (float)t[2][3] );
+				m_floats.push_back( (float)t[3][0] );
+				m_floats.push_back( (float)t[3][1] );
+				m_floats.push_back( (float)t[3][2] );
+				m_floats.push_back( (float)t[3][3] );
+
+				return &*(m_floats.rbegin() + 15);
+			}
 		default :
 		
 			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
@@ -197,16 +215,14 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	size_t numCharPtrs = 0;
 	size_t numInts = 0;
 	size_t numFloats = 0;
-	size_t numMatrices = 0;
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats, numMatrices );
+		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats );
 	}
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
-	m_matrices.reserve( numMatrices );
 }
 
 void ParameterList::reserve( const IECore::Data *parameter )
@@ -215,16 +231,14 @@ void ParameterList::reserve( const IECore::Data *parameter )
 	size_t numCharPtrs = 0;
 	size_t numInts = 0;
 	size_t numFloats = 0;
-	size_t numMatrices = 0;
-	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats, numMatrices );
+	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats );
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
-	m_matrices.reserve( numMatrices );
 }
 
-void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats, size_t &numMatrices )
+void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numStrings, size_t &numCharPtrs, size_t &numInts, size_t &numFloats )
 {
 	if( !d )
 	{
@@ -244,7 +258,7 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 			numInts++;
 			break;
 		case M44dDataTypeId :
-			numMatrices++;
+			numFloats += 16;
 			break;
 		case SplineffDataTypeId :
 			{

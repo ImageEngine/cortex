@@ -159,12 +159,12 @@ class RendererTest( IECoreRI.TestCase ) :
 		
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testM44dAttribute.rib" )
 		with WorldBlock( r ) :
-			r.setAttribute( "user:Mref", M44dData( M44d() ) )
-			self.assertEqual( r.getAttribute( "user:Mref" ), M44fData( M44f() ) )
+			r.setAttribute( "user:Mref", M44dData( M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
+			self.assertEqual( r.getAttribute( "user:Mref" ), M44fData( M44f( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
 
 		l = "".join( file( "test/IECoreRI/output/testM44dAttribute.rib" ).readlines() )
 		l = " ".join( l.split() )
-		self.assert_( "Attribute \"user\" \"matrix Mref\" [ 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 ]" in l )
+		self.assert_( "Attribute \"user\" \"matrix Mref\" [ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ]" in l )
 	
 	def testCompoundDataAttributes( self ) :
 	
