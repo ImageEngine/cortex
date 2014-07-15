@@ -105,7 +105,7 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &
 		return false;
 	}
 	
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( object );
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( object.get() );
 	if ( !converter )
 	{
 		return false;

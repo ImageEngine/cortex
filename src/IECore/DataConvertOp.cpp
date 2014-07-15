@@ -123,9 +123,9 @@ struct DataConvertOp::ConvertFnStage1
 		
 		ConvertFnStage2<FromBaseType> fn( data->baseReadable(), data->baseSize() );
 		
-		DataPtr result = staticPointerCast<Data>( Object::create( m_resultType ) );
+		DataPtr result = boost::static_pointer_cast<Data>( Object::create( m_resultType ) );
 	
-		return despatchTypedData<ConvertFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result, fn );
+		return despatchTypedData<ConvertFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result.get(), fn );
 	}
 	
 	TypeId m_resultType;
@@ -187,7 +187,7 @@ ObjectPtr DataConvertOp::doOperation( const CompoundObject *operands )
 	
 	ConvertFnStage1 fn( targetType );
 	
-	DataPtr result = despatchTypedData<ConvertFnStage1, TypeTraits::IsNumericBasedVectorTypedData>( constPointerCast<Data>( data ), fn );
+	DataPtr result = despatchTypedData<ConvertFnStage1, TypeTraits::IsNumericBasedVectorTypedData>( const_cast<Data *>( data.get() ), fn );
 
 	return result;
 }

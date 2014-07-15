@@ -165,7 +165,7 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 		for( int i=0; i<numVertices; i++ )
 		{
 			float v = std::min( vStep * i, 1.0f );
-			evaluator->pointAtV( curveIndex, v, evaluatorResult );
+			evaluator->pointAtV( curveIndex, v, evaluatorResult.get() );
 			for( size_t j=0; j<primitiveVariables.size(); j++ )
 			{
 				switch( primitiveVariableTypes[j] )

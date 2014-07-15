@@ -53,7 +53,7 @@ void bindCoordinateSystem()
 		.def( init<const std::string &, TransformPtr>() )
 		.def( "getName", &CoordinateSystem::getName, return_value_policy<copy_const_reference>() )
 		.def( "setName", &CoordinateSystem::setName )
-		.def( "getTransform", (TransformPtr (CoordinateSystem::*)())&CoordinateSystem::getTransform )
+		.def( "getTransform", (Transform *(CoordinateSystem::*)())&CoordinateSystem::getTransform, return_value_policy<CastToIntrusivePtr>() )
 		.def( "setTransform", &CoordinateSystem::setTransform )
 	;
 }

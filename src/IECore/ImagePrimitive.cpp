@@ -373,7 +373,7 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 		return false;
 	}
 
-	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( pv.data ) )
+	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( pv.data.get() ) )
 	{
 		if( reason )
 		{

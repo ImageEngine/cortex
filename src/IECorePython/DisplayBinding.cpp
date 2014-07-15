@@ -70,7 +70,7 @@ void bindDisplay()
 		.def( "getType", &Display::getType, return_value_policy<copy_const_reference>() )
 		.def( "setData", &Display::setData )
 		.def( "getData", &Display::getData, return_value_policy<copy_const_reference>() )
-		.def( "parameters", &Display::parametersData )
+		.def( "parameters", &Display::parametersData, return_value_policy<CastToIntrusivePtr>() )
 	;
 
 }

@@ -125,64 +125,63 @@ PointSmoothSkinningOp::~PointSmoothSkinningOp()
 
 StringParameter * PointSmoothSkinningOp::positionVarParameter()
 {
-        return m_positionVarParameter;
+        return m_positionVarParameter.get();
 }
 
 const StringParameter * PointSmoothSkinningOp::positionVarParameter() const
 {
-        return m_positionVarParameter;
+        return m_positionVarParameter.get();
 }
 
 StringParameter * PointSmoothSkinningOp::normalVarParameter()
 {
-        return m_normalVarParameter;
+        return m_normalVarParameter.get();
 }
 
 const StringParameter * PointSmoothSkinningOp::normalVarParameter() const
 {
-        return m_normalVarParameter;
+        return m_normalVarParameter.get();
 }
 
 M44fVectorParameter * PointSmoothSkinningOp::deformationPoseParameter()
 {
-	return m_deformationPoseParameter;
+	return m_deformationPoseParameter.get();
 }
 
 const M44fVectorParameter * PointSmoothSkinningOp::deformationPoseParameter() const
 {
-	return m_deformationPoseParameter;
+	return m_deformationPoseParameter.get();
 }
 
 SmoothSkinningDataParameter * PointSmoothSkinningOp::smoothSkinningDataParameter()
 {
-	return m_smoothSkinningDataParameter;
+	return m_smoothSkinningDataParameter.get();
 }
 
 const SmoothSkinningDataParameter * PointSmoothSkinningOp::smoothSkinningDataParameter() const
 {
-	return m_smoothSkinningDataParameter;
+	return m_smoothSkinningDataParameter.get();
 }
 
 BoolParameter * PointSmoothSkinningOp::deformNormalsParameter()
 {
-	return m_deformNormalsParameter;
+	return m_deformNormalsParameter.get();
 }
 
 const BoolParameter * PointSmoothSkinningOp::deformNormalsParameter() const
 {
-	return m_deformNormalsParameter;
+	return m_deformNormalsParameter.get();
 }
 
 IntParameter * PointSmoothSkinningOp::blendParameter()
 {
-	return m_blendParameter;
+	return m_blendParameter.get();
 }
 
 const IntParameter * PointSmoothSkinningOp::blendParameter() const
 {
-	return m_blendParameter;
+	return m_blendParameter.get();
 }
-
 
 void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operands )
 {

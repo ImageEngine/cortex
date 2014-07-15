@@ -327,10 +327,10 @@ class CapturingRenderer::Implementation
 				return;
 			}
 			
-			const BoolData *reentrant = IECore::runTimeCast<const BoolData>( getAttribute( "cp:procedural:reentrant" ) );
+			ConstBoolDataPtr reentrant = IECore::runTimeCast<const BoolData>( getAttribute( "cp:procedural:reentrant" ) );
 			if ( reentrant ? reentrant->readable() : true )
 			{
-				ContextPtr proceduralContext = new Context( context );
+				ContextPtr proceduralContext = new Context( context.get() );
 				addChild( context->stack.back(), proceduralContext->stack.back().group );
 				
 				if( context == m_mainContext )
@@ -351,7 +351,7 @@ class CapturingRenderer::Implementation
 			{
 				// enclose this in an attribute block to prevent leaking:
 				attributeBegin();
-				procedural->render( renderer );
+				procedural->render( renderer.get() );
 				attributeEnd();
 			}
 		}
@@ -427,7 +427,7 @@ class CapturingRenderer::Implementation
 					
 					try
 					{
-						m_procedural->render( m_renderer );
+						m_procedural->render( m_renderer.get() );
 						wait_for_all();
 						m_renderer->m_implementation->collapseGroups( m_context->stack.back() );
 					}
@@ -563,11 +563,11 @@ class CapturingRenderer::Implementation
 		bool testFilter()
 		{
 		
-			const StringData *name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
+			ConstStringDataPtr name = IECore::runTimeCast<const StringData>( getAttribute( "name" ) );
 			
 			if( name )
 			{
-				const StringVectorData *objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
+				ConstStringVectorDataPtr objectFilter = IECore::runTimeCast<const StringVectorData>( getOption( "cp:objectFilter" ) );
 				
 				if( objectFilter )
 				{
@@ -680,7 +680,7 @@ class CapturingRenderer::Implementation
 			
 			for( Group::ChildContainer::const_iterator it = subGroups.begin(); it!=subGroups.end(); it++ )
 			{
-				Group::ChildContainer subGroupChildren = staticPointerCast<Group>( *it )->children();
+				Group::ChildContainer subGroupChildren = boost::static_pointer_cast<Group>( *it )->children();
 				for( Group::ChildContainer::const_iterator it2 = subGroupChildren.begin(); it2!=subGroupChildren.end(); it2++ )
 				{
 					state.group->addChild( *it2 );

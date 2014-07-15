@@ -60,7 +60,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToMayaImageConverter );
 ToMayaImageConverter::ToMayaImageConverter( ConstImagePrimitivePtr image )
 	:	ToMayaConverter( "Converts image types.", IECore::ImagePrimitiveTypeId )
 {
-	srcParameter()->setValue( constPointerCast<ImagePrimitive>( image ) );
+	srcParameter()->setValue( boost::const_pointer_cast<ImagePrimitive>( image ) );
 
 	IntParameter::PresetsContainer typePresets;
 	typePresets.push_back( IntParameter::Preset( "Float", Float ) );
@@ -102,7 +102,7 @@ struct ToMayaImageConverter::ChannelConverter
 
 		return DataConvert < T, TypedData< std::vector<C> >, ScaledDataConversion< typename T::ValueType::value_type, C> >()
 		(
-			staticPointerCast<const T>( data )
+			boost::static_pointer_cast<const T>( data )
 		);
 	};
 
@@ -305,7 +305,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					ChannelConverter<float>,
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<float>::ErrorHandler
-				>( dataContainer, converter );
+				>( dataContainer.get(), converter );
 
 				writeChannel<float>( image, channelData, channelOffset, numChannels );
 			}
@@ -318,7 +318,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 					ChannelConverter<unsigned char>,
 					TypeTraits::IsNumericVectorTypedData,
 					ChannelConverter<unsigned char>::ErrorHandler
-				>( dataContainer, converter );
+				>( dataContainer.get(), converter );
 
 				writeChannel<unsigned char>( image, channelData, channelOffset, numChannels );
 			}
@@ -361,7 +361,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 				ChannelConverter<float>,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter<float>::ErrorHandler
-			>( dataContainer, converter );
+			>( dataContainer.get(), converter );
 
 			writeDepth( image, channelData );
 	}

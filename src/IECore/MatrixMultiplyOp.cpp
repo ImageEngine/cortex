@@ -108,12 +108,12 @@ MatrixMultiplyOp::~MatrixMultiplyOp()
 
 ObjectParameter * MatrixMultiplyOp::matrixParameter()
 {
-	return m_matrixParameter;
+	return m_matrixParameter.get();
 }
 
 const ObjectParameter * MatrixMultiplyOp::matrixParameter() const
 {
-	return m_matrixParameter;
+	return m_matrixParameter.get();
 }
 
 struct MultiplyFunctor
@@ -190,22 +190,22 @@ struct MultiplyFunctor
 		switch ( matrix->typeId() )
 		{
 		case M33fDataTypeId:
-			multiply33<M33f, U>( data, staticPointerCast< const M33fData >( matrix )->readable() );
+			multiply33<M33f, U>( data, boost::static_pointer_cast< const M33fData >( matrix )->readable() );
 			break;
 		case M33dDataTypeId:
-			multiply33<M33d, U>( data, staticPointerCast< const M33dData >( matrix )->readable() );
+			multiply33<M33d, U>( data, boost::static_pointer_cast< const M33dData >( matrix )->readable() );
 			break;
 		case M44fDataTypeId:
-			multiply<M44f, U>( data, staticPointerCast< const M44fData >( matrix )->readable() );
+			multiply<M44f, U>( data, boost::static_pointer_cast< const M44fData >( matrix )->readable() );
 			break;
 		case M44dDataTypeId:
-			multiply<M44d, U>( data, staticPointerCast< const M44dData >( matrix )->readable() );
+			multiply<M44d, U>( data, boost::static_pointer_cast< const M44dData >( matrix )->readable() );
 			break;
 		case TransformationMatrixfDataTypeId:
-			multiply<M44f, U>( data, staticPointerCast< const TransformationMatrixfData >( matrix )->readable().transform() );
+			multiply<M44f, U>( data, boost::static_pointer_cast< const TransformationMatrixfData >( matrix )->readable().transform() );
 			break;
 		case TransformationMatrixdDataTypeId:
-			multiply<M44d, U>( data, staticPointerCast< const TransformationMatrixdData >( matrix )->readable().transform() );
+			multiply<M44d, U>( data, boost::static_pointer_cast< const TransformationMatrixdData >( matrix )->readable().transform() );
 			break;
 		default:
 			throw InvalidArgumentException( "Data supplied is not a known matrix type." );

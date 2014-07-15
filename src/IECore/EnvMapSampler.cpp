@@ -84,22 +84,22 @@ EnvMapSampler::~EnvMapSampler()
 
 ImagePrimitiveParameter * EnvMapSampler::imageParameter()
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 const ImagePrimitiveParameter * EnvMapSampler::imageParameter() const
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 IntParameter * EnvMapSampler::subdivisionDepthParameter()
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 const IntParameter * EnvMapSampler::subdivisionDepthParameter() const
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 ObjectPtr EnvMapSampler::doOperation( const CompoundObject * operands )
@@ -130,9 +130,9 @@ ObjectPtr EnvMapSampler::doOperation( const CompoundObject * operands )
 	MedianCutSamplerPtr sampler = new MedianCutSampler;
 	sampler->imageParameter()->setValue( image );
 	sampler->subdivisionDepthParameter()->setNumericValue( subdivisionDepthParameter()->getNumericValue() );
-	ConstCompoundObjectPtr samples = staticPointerCast<CompoundObject>( sampler->operate() );
-	const vector<V2f> &centroids = staticPointerCast<V2fVectorData>( samples->members().find( "centroids" )->second )->readable();
-	const vector<Box2i> &areas = staticPointerCast<Box2iVectorData>( samples->members().find( "areas" )->second )->readable();
+	ConstCompoundObjectPtr samples = boost::static_pointer_cast<CompoundObject>( sampler->operate() );
+	const vector<V2f> &centroids = boost::static_pointer_cast<V2fVectorData>( samples->members().find( "centroids" )->second )->readable();
+	const vector<Box2i> &areas = boost::static_pointer_cast<Box2iVectorData>( samples->members().find( "areas" )->second )->readable();
 
 	// get light directions and colors from the samples
 	V3fVectorDataPtr directionsData = new V3fVectorData;

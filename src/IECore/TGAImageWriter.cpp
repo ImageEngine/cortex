@@ -244,7 +244,7 @@ void TGAImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 			ChannelConverter,
 			TypeTraits::IsNumericVectorTypedData,
 			ChannelConverter::ErrorHandler
-			>( dataContainer, converter );
+			>( dataContainer.get(), converter );
 
 			++offset;
 		}

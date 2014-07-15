@@ -146,63 +146,62 @@ PointRepulsionOp::~PointRepulsionOp()
 
 MeshPrimitiveParameter * PointRepulsionOp::meshParameter()
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 const MeshPrimitiveParameter * PointRepulsionOp::meshParameter() const
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
-
 
 ImagePrimitiveParameter * PointRepulsionOp::imageParameter()
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 const ImagePrimitiveParameter * PointRepulsionOp::imageParameter() const
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 StringParameter * PointRepulsionOp::channelNameParameter()
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 const StringParameter * PointRepulsionOp::channelNameParameter() const
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 IntParameter * PointRepulsionOp::numIterationsParameter()
 {
-	return m_numIterationsParameter;
+	return m_numIterationsParameter.get();
 }
 
 const IntParameter * PointRepulsionOp::numIterationsParameter() const
 {
-	return m_numIterationsParameter;
+	return m_numIterationsParameter.get();
 }
 
 FloatParameter * PointRepulsionOp::magnitudeParameter()
 {
-	return m_magnitudeParameter;
+	return m_magnitudeParameter.get();
 }
 
 const FloatParameter * PointRepulsionOp::magnitudeParameter() const
 {
-	return m_magnitudeParameter;
+	return m_magnitudeParameter.get();
 }
 
 StringParameter * PointRepulsionOp::weightsNameParameter()
 {
-	return m_weightsNameParameter;
+	return m_weightsNameParameter.get();
 }
 
 const StringParameter * PointRepulsionOp::weightsNameParameter() const
 {
-	return m_weightsNameParameter;
+	return m_weightsNameParameter.get();
 }
 
 void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluator * imageEvaluator, const PrimitiveVariable &densityPrimVar, MeshPrimitiveEvaluator * meshEvaluator, const PrimitiveVariable &sPrimVar, const PrimitiveVariable &tPrimVar, std::vector<Imath::V3f> &points, std::vector<float> &densities )
@@ -214,7 +213,7 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluator * i
 
 	for ( std::vector<Imath::V3f>::size_type p = 0; p < points.size(); p++ )
 	{
-		bool found = meshEvaluator->closestPoint( points[p], meshResult );
+		bool found = meshEvaluator->closestPoint( points[p], meshResult.get() );
 		if ( !found )
 		{
 			throw InvalidArgumentException( "PointRepulsionOp: Invaid mesh - closest point is undefined" );
@@ -250,7 +249,7 @@ void PointRepulsionOp::getNearestPointsAndDensities( ImagePrimitiveEvaluator * i
 			placedUv.y = fmodf( placedUv.y, 1.0f );
 		}
 
-		imageEvaluator->pointAtUV( placedUv, imageResult );
+		imageEvaluator->pointAtUV( placedUv, imageResult.get() );
 
 		densities[p] = imageResult->floatPrimVar( densityPrimVar );
 	}
@@ -308,7 +307,7 @@ void PointRepulsionOp::calculateForces( std::vector<V3f> &points, std::vector<fl
 
 void PointRepulsionOp::modify( Object * object, const CompoundObject * operands )
 {
-	MeshPrimitive * mesh = m_meshParameter->getTypedValue<MeshPrimitive>();
+	MeshPrimitivePtr mesh = m_meshParameter->getTypedValue<MeshPrimitive>();
 	assert( mesh );
 
 	TriangulateOpPtr op = new TriangulateOp();
@@ -451,7 +450,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 		for ( int x = 0; x < width; x++ )
 		{
 			//// Get point at center of pixel
-			bool found = imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
+			bool found = imageEvaluator->pointAtPixel( V2i( x, y ), imageResult.get() );
 			if ( found )
 			{
 				V2f topLeft =     imageResult->uv() + V2f( -du / 2.0f, -dv / 2.0f );
@@ -469,7 +468,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 
 				for ( unsigned c = 0; c < 4; c++ )
 				{
-					found = meshEvaluator->pointAtUV( pixelCornersUV[c], meshResult );
+					found = meshEvaluator->pointAtUV( pixelCornersUV[c], meshResult.get() );
 
 					if ( found )
 					{
@@ -480,7 +479,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 				if ( pixelCornersWorld.size() == 4 )
 				{
 					/// \todo optimise
-					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
+					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult.get() );
 					float density = imageResult->floatPrimVar( densityPrimVar );
 
 					textureArea += density * triangleArea( pixelCornersWorld[0], pixelCornersWorld[1], pixelCornersWorld[2] ) ;
@@ -489,7 +488,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 				else if ( pixelCornersWorld.size() == 3 )
 				{
 					/// \todo optimise
-					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult );
+					imageEvaluator->pointAtPixel( V2i( x, y ), imageResult.get() );
 					float density = imageResult->floatPrimVar( densityPrimVar );
 
 					textureArea += density * triangleArea( pixelCornersWorld[0], pixelCornersWorld[1], pixelCornersWorld[2] );
@@ -529,7 +528,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 		assert( points.size() == bounds.size() );
 
 		// Snap points to mesh, and calculate new densities
-		getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
+		getNearestPointsAndDensities( imageEvaluator.get(), densityPrimVar, meshEvaluator.get(), sIt->second, tIt->second, points, currentDensities );
 
 		if ( i == 0 )
 		{
@@ -575,7 +574,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 		}
 
 		// Snap points back to mesh, and calculate new densities
-		getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
+		getNearestPointsAndDensities( imageEvaluator.get(), densityPrimVar, meshEvaluator.get(), sIt->second, tIt->second, points, currentDensities );
 
 		totalEnergy = 0.0f;
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
@@ -621,7 +620,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 		lastEnergy = totalEnergy;
 	}
 
-	getNearestPointsAndDensities( imageEvaluator, densityPrimVar, meshEvaluator, sIt->second, tIt->second, points, currentDensities );
+	getNearestPointsAndDensities( imageEvaluator.get(), densityPrimVar, meshEvaluator.get(), sIt->second, tIt->second, points, currentDensities );
 
 	if ( pointsPrimitive->variables.find( "width" ) == pointsPrimitive->variables.end() )
 	{
@@ -655,7 +654,7 @@ void PointRepulsionOp::modify( Object * object, const CompoundObject * operands 
 
 		for ( PointArray::size_type p = 0; p < numPoints; p++ )
 		{
-			bool found = meshEvaluator->closestPoint( points[p], meshResult );
+			bool found = meshEvaluator->closestPoint( points[p], meshResult.get() );
 			assert( found );
 			( void ) found;
 

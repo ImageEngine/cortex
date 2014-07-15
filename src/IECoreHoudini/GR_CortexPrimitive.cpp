@@ -122,12 +122,12 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 		const IECore::VisibleRenderable *visible = IECore::runTimeCast<const IECore::VisibleRenderable>( m_renderable );
 		if ( visible )
 		{
-			IECore::MeshPrimitive::createBox( visible->bound() )->render( renderer );
+			IECore::MeshPrimitive::createBox( visible->bound() )->render( renderer.get() );
 		}
 	}
 	else
 	{
-		m_renderable->render( renderer );
+		m_renderable->render( renderer.get() );
 	}
 	
 	renderer->worldEnd();
@@ -275,52 +275,52 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		{
 			if ( isObjectSelection() )
 			{
-				return g_selected;
+				return g_selected.get();
 			}
 
 			if ( flags & GR_RENDER_FLAG_WIRE_OVER )
 			{
 				if ( flags & GR_RENDER_FLAG_UNLIT )
 				{
-					return g_wireShaded;
+					return g_wireShaded.get();
 				}
 				
-				return g_wireLit;
+				return g_wireLit.get();
 			}
 			
 			if ( flags & GR_RENDER_FLAG_UNLIT )
 			{
-				return g_shaded;
+				return g_shaded.get();
 			}
 			
-			return g_lit;
+			return g_lit.get();
 		}
 		case GR_RENDER_WIREFRAME :
 		{
 			if ( isObjectSelection() )
 			{
-				return g_wireSelected;
+				return g_wireSelected.get();
 			}
 
-			return g_wire;
+			return g_wire.get();
 		}
 		case GR_RENDER_HIDDEN_LINE :
 		{
 			if ( isObjectSelection() )
 			{
-				return g_wireConstBGSelected;
+				return g_wireConstBGSelected.get();
 			}
 
-			return g_wireConstBG;
+			return g_wireConstBG.get();
 		}
 		case GR_RENDER_GHOST_LINE :
 		{
 			if ( isObjectSelection() )
 			{
-				return g_wireConstGhostSelected;
+				return g_wireConstGhostSelected.get();
 			}
 
-			return g_wireConstGhost;
+			return g_wireConstGhost.get();
 		}
 		// hovering on GU_CortexPrimitives during GR_RENDER_OBJECT_PICK mode flips the mode
 		// to GR_RENDER_MATTE. Since we're not supporting that on its own, we'll consider it
@@ -328,7 +328,7 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		case GR_RENDER_MATTE :
 		case GR_RENDER_OBJECT_PICK :
 		{
-			return g_pick;
+			return g_pick.get();
 		}
 		default :
 		{
@@ -336,7 +336,7 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		}
 	}
 	
-	return g_shaded;
+	return g_shaded.get();
 }
 
 const std::string &GR_CortexPrimitive::pickFragmentSource()

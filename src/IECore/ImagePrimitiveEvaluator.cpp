@@ -434,7 +434,7 @@ bool ImagePrimitiveEvaluator::intersectionPoint( const V3f &origin, const V3f &d
 		assert( numIntersections == 1 );
 		assert( results.size() == 1 );
 
-		ResultPtr intersectionResult = dynamicPointerCast< Result >( results[0] );
+		ResultPtr intersectionResult = boost::dynamic_pointer_cast< Result >( results[0] );
 		assert( intersectionResult );
 		r->m_p = intersectionResult->m_p;
 
@@ -455,7 +455,7 @@ int ImagePrimitiveEvaluator::intersectionPoints( const V3f &origin, const V3f &d
 	{
 		if ( ( origin - hitPoint ).length2() < maxDistance * maxDistance )
 		{
-			ResultPtr result = staticPointerCast< Result >( createResult() );
+			ResultPtr result = boost::static_pointer_cast< Result >( createResult() );
 			result->m_p = hitPoint;
 
 			results.push_back( result );

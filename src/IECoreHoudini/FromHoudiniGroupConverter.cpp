@@ -197,11 +197,11 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			
 			GU_DetailHandleAutoReadLock readHandle( childHandle );
 			const GU_Detail *childGeo = readHandle.getGdp();
-			ObjectPtr child = doDetailConversion( childGeo, operands );
+			ObjectPtr child = doDetailConversion( childGeo, operands.get() );
 			if ( !child )
 			{
 				// this happens when mismatched primitives share the same name
-				doUnnamedConversion( childGeo, result, operands, name );
+				doUnnamedConversion( childGeo, result.get(), operands.get(), name );
 			}
 			else if ( VisibleRenderablePtr renderable = IECore::runTimeCast<VisibleRenderable>( child ) )
 			{
@@ -235,7 +235,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 			}
 
 			VisibleRenderablePtr renderable = 0;
-			numResultPrims += doGroupConversion( geo, group, renderable, operands );
+			numResultPrims += doGroupConversion( geo, group, renderable, operands.get() );
 			if( !renderable )
 			{
 				continue;
@@ -264,7 +264,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		}
 
 		VisibleRenderablePtr renderable = 0;
-		doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands );
+		doGroupConversion( &ungroupedGeo, ungrouped, renderable, operands.get() );
 		if ( renderable )
 		{
 			result->addChild( renderable );
@@ -365,7 +365,7 @@ void FromHoudiniGroupConverter::doUnnamedConversion( const GU_Detail *geo, Group
 	doGroupConversion( &newGeo, newGroup, renderable, operands );
 	if ( renderable )
 	{
-		if ( Group *group = IECore::runTimeCast<Group>( renderable ) )
+		if ( Group *group = IECore::runTimeCast<Group>( renderable.get() ) )
 		{
 			const Group::ChildContainer &children = group->children();
 			for ( Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )

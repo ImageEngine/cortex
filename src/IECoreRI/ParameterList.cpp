@@ -52,7 +52,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		appendParameter( it->first, it->second, typeHints );
+		appendParameter( it->first, it->second.get(), typeHints );
 	}
 }
 
@@ -65,7 +65,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	{
 		if( 0==it->first.value().compare( 0, prefix.size(), prefix ) )
 		{
-			appendParameter( string( it->first, prefix.size() ), it->second, typeHints );
+			appendParameter( string( it->first, prefix.size() ), it->second.get(), typeHints );
 		}
 	}
 }
@@ -217,7 +217,7 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	size_t numFloats = 0;
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats );
+		accumulateReservations( it->second.get(), numStrings, numCharPtrs, numInts, numFloats );
 	}
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );

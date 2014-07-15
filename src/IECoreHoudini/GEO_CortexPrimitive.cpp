@@ -192,7 +192,7 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 	
 	Imath::M44f transform = IECore::convert<Imath::M44f>( xform );
 	
-	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object ) )
+	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object.get() ) )
 	{
 		TransformOpPtr transformer = new TransformOp();
 		transformer->inputParameter()->setValue( primitive );
@@ -200,14 +200,14 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 		transformer->matrixParameter()->setValue( new M44fData( transform ) );
 		transformer->operate();
 	}
-	else if ( Group *group = IECore::runTimeCast<Group>( m_object ) )
+	else if ( Group *group = IECore::runTimeCast<Group>( m_object.get() ) )
 	{
 		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( group->getTransform() ) )
 		{
 			matTransform->matrix = transform * matTransform->matrix;
 		}
 	}
-	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object ) )
+	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object.get() ) )
 	{
 		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( coord->getTransform() ) )
 		{
@@ -227,7 +227,7 @@ int GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
 		return 0;
 	}
 	
-	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object );
+	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object.get() );
 	if ( !renderable )
 	{
 		return 0;
@@ -321,12 +321,12 @@ bool GEO_CortexPrimitive::evaluatePointRefMap( GA_Offset result_vtx, GA_Attribut
 
 IECore::Object *GEO_CortexPrimitive::getObject()
 {
-	return m_object;
+	return m_object.get();
 }
 
 const IECore::Object *GEO_CortexPrimitive::getObject() const
 {
-	return m_object;
+	return m_object.get();
 }
 
 void GEO_CortexPrimitive::setObject( const IECore::Object *object )
@@ -528,7 +528,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 						}
 						
 						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buf, IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
-						object( pr )->setObject( IECore::Object::load( io, "object" ) );
+						object( pr )->setObject( IECore::Object::load( io, "object" ).get() );
 					}
 					catch ( std::exception &e )
 					{

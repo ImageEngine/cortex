@@ -107,12 +107,12 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	MPointArray mp( primitive->variableSize( PrimitiveVariable::Vertex ) );
 	if( p->isInstanceOf( V3fVectorDataTypeId ) )
 	{
-		const vector<V3f> &pReadable = staticPointerCast<const V3fVectorData>( p )->readable();
+		const vector<V3f> &pReadable = boost::static_pointer_cast<const V3fVectorData>( p )->readable();
 		std::transform( pReadable.begin(), pReadable.end(), MArrayIter<MPointArray>::begin( mp ), IECore::convert<MPoint, V3f> );
 	}
 	else
 	{
-		const vector<V3d> &pReadable = staticPointerCast<const V3dVectorData>( p )->readable();
+		const vector<V3d> &pReadable = boost::static_pointer_cast<const V3dVectorData>( p )->readable();
 		std::transform( pReadable.begin(), pReadable.end(), MArrayIter<MPointArray>::begin( mp ), IECore::convert<MPoint, V3d> );
 	}
 
@@ -133,11 +133,11 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 		
 		if( it->first=="Cs" )
 		{
-			addAttribute( it->second.data, fnPS, "rgbPP" );
+			addAttribute( it->second.data.get(), fnPS, "rgbPP" );
 		}
 		else
 		{
-			addAttribute( it->second.data, fnPS, it->first.c_str() );
+			addAttribute( it->second.data.get(), fnPS, it->first.c_str() );
 		}
 	}
 	

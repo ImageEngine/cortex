@@ -476,7 +476,7 @@ void HitMissTransform::modifyChannels( const Imath::Box2i &displayWindow, const 
 	{
 		// threshold the image into a temporary pixels structure
 		Thresholder thresholder( thresholdParameter()->getNumericValue(), borderValue, size, pixels );
-		despatchTypedData<Thresholder, TypeTraits::IsNumericVectorTypedData>( channels[i], thresholder );
+		despatchTypedData<Thresholder, TypeTraits::IsNumericVectorTypedData>( channels[i].get(), thresholder );
 		pixels2.clear(); pixels2.resize( pixels.size(), borderValue );
 		
 		// do the work
@@ -553,7 +553,7 @@ void HitMissTransform::modifyChannels( const Imath::Box2i &displayWindow, const 
 		
 		// and copy back into the original structure
 		Copyer copyer( size, pixels );
-		despatchTypedData<Copyer, TypeTraits::IsNumericVectorTypedData>( channels[i], copyer );
+		despatchTypedData<Copyer, TypeTraits::IsNumericVectorTypedData>( channels[i].get(), copyer );
 	}
 }
 

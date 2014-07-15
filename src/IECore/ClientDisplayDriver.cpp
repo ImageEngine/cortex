@@ -202,8 +202,8 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 	FloatVectorDataPtr dataData = new FloatVectorData( std::vector<float>( data, data+dataSize ) );
 
 	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
-	staticPointerCast<Object>(boxData)->save( io, "box" );
-	staticPointerCast<Object>(dataData)->save( io, "data" );
+	boost::static_pointer_cast<Object>(boxData)->save( io, "box" );
+	boost::static_pointer_cast<Object>(dataData)->save( io, "data" );
 	buf = io->buffer();
 	size_t blockSize = buf->readable().size();
 

@@ -41,7 +41,7 @@ namespace IECore
 {
 
 template<class T>
-IntrusivePtr<T> Object::CopyContext::copy( const T *toCopy )
+typename T::Ptr Object::CopyContext::copy( const T *toCopy )
 {
 	std::map<const Object *, Object *>::const_iterator it = m_copies.find( toCopy );
 	if( it!=m_copies.end() )
@@ -50,8 +50,8 @@ IntrusivePtr<T> Object::CopyContext::copy( const T *toCopy )
 	}
 	ObjectPtr copy = create( toCopy->typeId() );
 	copy->copyFrom( toCopy, this );
-	m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy ) );
-	return staticPointerCast<T>( copy );
+	m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
+	return boost::static_pointer_cast<T>( copy );
 }
 
 template<class T>

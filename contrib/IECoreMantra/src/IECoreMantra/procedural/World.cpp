@@ -156,6 +156,6 @@ VRAY_ieWorld::render()
 		msg( Msg::Warning, "VRAY_ieWorld", format("Failed to read ieworld cache file: %s") % m_worldFileName.buffer() );
 	}
 	IECoreMantra::RendererPtr renderer = new IECoreMantra::Renderer( this );
-	renderable->render( renderer );
+	renderable->render( renderer.get() );
 }
 

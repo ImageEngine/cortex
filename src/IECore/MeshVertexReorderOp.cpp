@@ -60,12 +60,12 @@ MeshVertexReorderOp::~MeshVertexReorderOp()
 
 V3iParameter * MeshVertexReorderOp::startingVerticesParameter()
 {
-	return m_startingVerticesParameter;
+	return m_startingVerticesParameter.get();
 }
 
 const V3iParameter * MeshVertexReorderOp::startingVerticesParameter() const
 {
-	return m_startingVerticesParameter;
+	return m_startingVerticesParameter.get();
 }
 
 struct MeshVertexReorderOp::ReorderFn
@@ -447,21 +447,21 @@ void MeshVertexReorderOp::modifyTypedPrimitive( MeshPrimitive * mesh, const Comp
 			assert( it->second.data );
 
 			faceVaryingFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data, faceVaryingFn );
+			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), faceVaryingFn );
 		}
 		else if ( it->second.interpolation == PrimitiveVariable::Vertex || it->second.interpolation == PrimitiveVariable::Varying )
 		{
 			assert( it->second.data );
 
 			vertexFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data, vertexFn );
+			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), vertexFn );
 		}
 		else if ( it->second.interpolation == PrimitiveVariable::Uniform )
 		{
 			assert( it->second.data );
 
 			uniformFn.m_name = it->first;
-			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data, uniformFn );
+			it->second.data = despatchTypedData<ReorderFn, TypeTraits::IsVectorTypedData>( it->second.data.get(), uniformFn );
 		}
 	}
 

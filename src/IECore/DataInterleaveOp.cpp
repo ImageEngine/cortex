@@ -148,9 +148,9 @@ struct DataInterleaveOp::InterleaveFnStage1
 		
 		InterleaveFnStage2<FromBaseType> fn( rawDataArrays, arrayLength );
 		
-		DataPtr result = staticPointerCast<Data>( Object::create( m_resultType ) );
+		DataPtr result = boost::static_pointer_cast<Data>( Object::create( m_resultType ) );
 	
-		return despatchTypedData<InterleaveFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result, fn );
+		return despatchTypedData<InterleaveFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result.get(), fn );
 	}
 	
 	const std::vector<ObjectPtr> &m_dataArrays;
@@ -232,7 +232,7 @@ ObjectPtr DataInterleaveOp::doOperation( const CompoundObject *operands )
 	
 	InterleaveFnStage1 fn( inputData->members(), targetType );
 	
-	DataPtr result = despatchTypedData<InterleaveFnStage1, TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( firstData ), fn );
+	DataPtr result = despatchTypedData<InterleaveFnStage1, TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( firstData.get() ), fn );
 
 	return result;
 }

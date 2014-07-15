@@ -91,7 +91,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 			{
 				ObjectPtr resultObj = Object::create( it0->second->typeId() );
 
-				LinearInterpolator< Object >()( it0->second, it1->second, x, resultObj );
+				LinearInterpolator< Object >()( it0->second.get(), it1->second.get(), x, resultObj );
 
 				if ( resultObj )
 				{
@@ -115,7 +115,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 			if ( it1 != x1->members().end() && it0->second->typeId() == it1->second->typeId() )
 			{
 				ObjectPtr resultObj = Object::create( it0->second->typeId() );
-				LinearInterpolator< Object >()( it0->second, it1->second, x, resultObj );
+				LinearInterpolator< Object >()( it0->second.get(), it1->second.get(), x, resultObj );
 
 				if ( resultObj )
 				{
@@ -156,10 +156,10 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 				)
 				{
 					PrimitiveVariableMap::iterator itRes = xRes->variables.find( it0->first );
-					ObjectPtr resultData = linearObjectInterpolation( it0->second.data, it1->second.data, x );
+					ObjectPtr resultData = linearObjectInterpolation( it0->second.data.get(), it1->second.data.get(), x );
 					if( resultData )
 					{
-						itRes->second.data = staticPointerCast<Data>( resultData );
+						itRes->second.data = boost::static_pointer_cast<Data>( resultData );
 					}
 				}
 			}
@@ -179,7 +179,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 		         Adaptor,
 		         TypeTraits::IsStrictlyInterpolable,
 		         DespatchTypedDataIgnoreError
-		         >( data, adaptor );
+		         >( data.get(), adaptor );
 	}
 	else
 	{
@@ -246,7 +246,7 @@ void CubicInterpolator<Object>::operator()( const Object *y0, const Object *y1, 
 					if ( it3 != x3->readable().end() && it0->second->typeId() == it3->second->typeId() )
 					{
 						ObjectPtr resultObj = Object::create( it1->second->typeId() );
-						CubicInterpolator< Object >()( it0->second, it1->second, it2->second, it3->second, x, resultObj );
+						CubicInterpolator< Object >()( it0->second.get(), it1->second.get(), it2->second.get(), it3->second.get(), x, resultObj );
 						if ( resultObj )
 						{
 							xRes->writable()[ it1->first ] = assertedStaticCast<Data>( resultObj );
@@ -291,7 +291,7 @@ void CubicInterpolator<Object>::operator()( const Object *y0, const Object *y1, 
 					if ( it3 != x3->members().end() && it0->second->typeId() == it3->second->typeId() )
 					{
 						ObjectPtr resultObj = Object::create( it1->second->typeId() );
-						CubicInterpolator< Object >()( it0->second, it1->second, it2->second, it3->second, x, resultObj );
+						CubicInterpolator< Object >()( it0->second.get(), it1->second.get(), it2->second.get(), it3->second.get(), x, resultObj );
 
 						if ( resultObj )
 						{
@@ -327,7 +327,7 @@ void CubicInterpolator<Object>::operator()( const Object *y0, const Object *y1, 
 		         Adaptor,
 		         TypeTraits::IsStrictlyInterpolable,
 		         DespatchTypedDataIgnoreError
-		         >( data, converter );
+		         >( data.get(), converter );
 	}
 	else
 	{

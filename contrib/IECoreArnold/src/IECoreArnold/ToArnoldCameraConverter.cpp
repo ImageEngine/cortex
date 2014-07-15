@@ -61,7 +61,7 @@ ToArnoldCameraConverter::~ToArnoldCameraConverter()
 
 AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
 {
-	CameraPtr camera = staticPointerCast<const Camera>( from )->copy();
+	CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
 	camera->addStandardParameters();
 
 	// use projection to decide what sort of camera node to create

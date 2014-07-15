@@ -396,7 +396,7 @@ IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId result
 		ObjectPtr object0 = c->convert();
 		c->sampleIndexParameter()->setNumericValue( index1 );
 		ObjectPtr object1 = c->convert();
-		return linearObjectInterpolation( object0, object1, lerpFactor );
+		return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
 	}
 }
 		

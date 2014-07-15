@@ -98,7 +98,7 @@ MStatus ParameterHandler::setValue( const MPlug &plug, IECore::ParameterPtr para
 	assert( parameter );
 	assert( ! plug.isNull() );
 
-	ConstParameterHandlerPtr h = ParameterHandler::create( IECore::staticPointerCast< const IECore::Parameter > (parameter) );
+	ConstParameterHandlerPtr h = ParameterHandler::create( boost::static_pointer_cast< const IECore::Parameter > (parameter) );
 	if( !h )
 	{
 		return MS::kFailure;
@@ -111,7 +111,7 @@ MStatus ParameterHandler::restore( const MPlug &plug, IECore::ParameterPtr param
 	assert( parameter );
 	assert( ! plug.isNull() );
 
-	ConstParameterHandlerPtr h = ParameterHandler::create( IECore::staticPointerCast<const IECore::Parameter> (parameter) );
+	ConstParameterHandlerPtr h = ParameterHandler::create( boost::static_pointer_cast<const IECore::Parameter> (parameter) );
 	if( !h )
 	{
 		return MS::kFailure;

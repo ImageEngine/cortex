@@ -228,7 +228,7 @@ StateComponent *DeferredRendererImplementation::getState( IECore::TypeId type )
 		StateComponentPtr c = (*it)->get( type );
 		if( c )
 		{
-			return c;
+			return c.get();
 		}
 	}
 	return const_cast<StateComponent *>( State::defaultState()->get( type ) );
@@ -251,7 +251,7 @@ IECore::Data *DeferredRendererImplementation::getUserAttribute( const IECore::In
 		IECore::CompoundDataMap::iterator attrIt = attrs.find( name );
 		if( attrIt != attrs.end() )
 		{
-			return attrIt->second;
+			return attrIt->second.get();
 		}
 	}
 	return 0;
@@ -275,7 +275,7 @@ void DeferredRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
 	/// to decent speed and memory usage is going to be automatically instanced primitives,
 	/// each referencing potentially shared vertex buffer objects. Modifying one of those
 	/// could have bad consequences for the others.
-	g->addChild( IECore::constPointerCast<Primitive>( primitive ) );
+	g->addChild( boost::const_pointer_cast<Primitive>( primitive ) );
 
 	{
 		IECoreGL::Group::Mutex::scoped_lock lock( curContext->groupStack.top()->mutex() );
@@ -386,7 +386,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 
 			// activates the render context on the task's thread.
 			ScopedRenderContext scopedProceduralContext( m_proceduralContext, m_renderer, "DeferredRendererImplementation::ProceduralTask::execute" );
-			m_procedural->render( m_param );
+			m_procedural->render( m_param.get() );
 			set_ref_count( m_numSubtasks + 1 );
 			spawn_and_wait_for_all(taskList);
 			taskList.clear();
@@ -470,7 +470,7 @@ void DeferredRendererImplementation::addProcedural( IECore::Renderer::Procedural
 	else
 	{
 		// threading not wanted - just execute immediately
-		proc->render( renderer );
+		proc->render( renderer.get() );
 	}
 }
 
@@ -484,7 +484,7 @@ const DeferredRendererImplementation::RenderContext *DeferredRendererImplementat
 	if ( m_threadContextPool.size() == 0 )
 	{
 		// If no thread context created so far than there's no procedural being rendered. Returns the default context.
-		return m_defaultContext;
+		return m_defaultContext.get();
 	}
 
 	ThreadRenderContext::reference myThreadContext = m_threadContextPool.local();
@@ -495,7 +495,7 @@ const DeferredRendererImplementation::RenderContext *DeferredRendererImplementat
 		throw IECore::Exception( "Invalid thread used on deferred render! Procedurals should not instantiate threads!" );
 	}
 
-	return myThreadContext.top();
+	return myThreadContext.top().get();
 }
 
 DeferredRendererImplementation::RenderContext *DeferredRendererImplementation::currentContext()

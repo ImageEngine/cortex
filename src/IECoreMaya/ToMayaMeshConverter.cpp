@@ -504,7 +504,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 
 		for ( it = presets.begin(); it != presets.end(); it++, index++ )
 		{
-			if ( interpolation == it->first || interpolation == IECore::staticPointerCast< IECore::StringData >(it->second)->readable() )
+			if ( interpolation == it->first || interpolation == boost::static_pointer_cast< IECore::StringData >(it->second)->readable() )
 			{
 				interpolationValue = index;
 				break;

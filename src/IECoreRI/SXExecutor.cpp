@@ -263,14 +263,14 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				ParameterInfo info = predefinedParameterInfo( it->first.value().c_str() );
 				if( info.type != SxInvalid )
 				{
-					setVariable( parameterList, it->first.value().c_str(), info, true, it->second, numPoints );
+					setVariable( parameterList, it->first.value().c_str(), info, true, it->second.get(), numPoints );
 				}
 				else
 				{
 					TypeMap::const_iterator tIt = m_inputParameterTypes.find( it->first );
 					if( tIt != m_inputParameterTypes.end() )
 					{
-						setVariable( parameterList, it->first.value().c_str(), tIt->second, false, it->second, numPoints );
+						setVariable( parameterList, it->first.value().c_str(), tIt->second, false, it->second.get(), numPoints );
 					}
 					else
 					{
@@ -279,7 +279,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 						ParameterInfo info = assumedParameterInfo( it->second->typeId() );
 						if( info.type != SxInvalid )
 						{
-							setVariable( parameterList, it->first.value().c_str(), info, false, it->second, numPoints );
+							setVariable( parameterList, it->first.value().c_str(), info, false, it->second.get(), numPoints );
 						}
 						else
 						{
@@ -430,29 +430,29 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				switch( it->second.type )
 				{
 					case SxFloat :
-						getVariable<SxFloat>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxFloat>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxColor :
-						getVariable<SxColor>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxColor>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxPoint :
-						getVariable<SxPoint>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxPoint>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxVector :
-						getVariable<SxVector>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxVector>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxNormal :
-						getVariable<SxNormal>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxNormal>( parameterList, it->first.value().c_str(), result.get() );
 						break;				
 					default :
 						throw Exception( boost::str( boost::format( "Output parameter \"%s\" has unsupported type." ) % it->first.value() ) );
 				}
 			}
 
-			getVariable<SxColor>( parameterList, "Ci", result );
-			getVariable<SxColor>( parameterList, "Oi", result );
-			getVariable<SxPoint>( parameterList, "P", result );
-			getVariable<SxNormal>( parameterList, "N", result );
+			getVariable<SxColor>( parameterList, "Ci", result.get() );
+			getVariable<SxColor>( parameterList, "Oi", result.get() );
+			getVariable<SxPoint>( parameterList, "P", result.get() );
+			getVariable<SxNormal>( parameterList, "N", result.get() );
 
 			return result;						
 		}

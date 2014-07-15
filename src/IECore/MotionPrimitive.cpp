@@ -159,7 +159,7 @@ void MotionPrimitive::copyFrom( const Object *other, Object::CopyContext *contex
 	m_snapshots.clear();
 	for( SnapshotMap::const_iterator it=tOther->m_snapshots.begin(); it!=tOther->m_snapshots.end(); it++ )
 	{
-		m_snapshots[it->first] = context->copy<Primitive>( it->second );
+		m_snapshots[it->first] = context->copy<Primitive>( it->second.get() );
 	}
 }
 
@@ -175,7 +175,7 @@ void MotionPrimitive::save( IECore::Object::SaveContext *context ) const
 		string is = str( boost::format( "%d" ) % i );
 		IndexedIOPtr snapshot = snapshots->subdirectory( is, IndexedIO::CreateIfMissing );
 		snapshot->write( g_timeEntry, it->first );
-		context->save( it->second, snapshot, g_primitiveEntry );
+		context->save( it->second.get(), snapshot.get(), g_primitiveEntry );
 		i++;
 	}
 }
@@ -195,7 +195,7 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 		ConstIndexedIOPtr snapshot = snapshots->subdirectory( *it );
 		float t; 
 		snapshot->read( g_timeEntry, t );
-		m_snapshots[t] = context->load<Primitive>( snapshot, g_primitiveEntry );
+		m_snapshots[t] = context->load<Primitive>( snapshot.get(), g_primitiveEntry );
 	}
 }
 
@@ -218,7 +218,7 @@ bool MotionPrimitive::isEqualTo( const Object *other ) const
 		{
 			return false;
 		}
-		if( !tIt->second->isEqualTo( oIt->second ) )
+		if( !tIt->second->isEqualTo( oIt->second.get() ) )
 		{
 			return false;
 		}
@@ -233,7 +233,7 @@ void MotionPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	VisibleRenderable::memoryUsage( a );
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
-		a.accumulate( it->second );
+		a.accumulate( it->second.get() );
 	}
 }
 

@@ -61,7 +61,7 @@ ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert, bo
 	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId ),
 	m_createMissingRGBChannels( createMissingRGBChannels )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::Object>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::Object>( toConvert ) );
 }
 
 ToGLTextureConverter::~ToGLTextureConverter()
@@ -95,18 +95,18 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 
 	if ( !y && r && g && b )
 	{
-		t = new ColorTexture( image );
+		t = new ColorTexture( image.get() );
 	}
 	else if ( y && !r && !g && !b ) 
 	{
-		t = new LuminanceTexture( image );
+		t = new LuminanceTexture( image.get() );
 	}
 	else
 	{
 		if( m_createMissingRGBChannels )
 		{
-			image = createMissingChannels( image );
-			t = new ColorTexture( image );
+			image = createMissingChannels( image.get() );
+			t = new ColorTexture( image.get() );
 		}
 		else
 		{

@@ -105,14 +105,13 @@ std::string JPEGImageWriter::destinationColorSpace() const
 
 IntParameter * JPEGImageWriter::qualityParameter()
 {
-	return m_qualityParameter;
+	return m_qualityParameter.get();
 }
 
 const IntParameter * JPEGImageWriter::qualityParameter() const
 {
-	return m_qualityParameter;
+	return m_qualityParameter.get();
 }
-
 
 struct JPEGWriterErrorHandler : public jpeg_error_mgr
 {
@@ -321,7 +320,7 @@ void JPEGImageWriter::writeImage( const vector<string> &names, const ImagePrimit
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( dataContainer, converter );
+			>( dataContainer.get(), converter );
 
 		}
 

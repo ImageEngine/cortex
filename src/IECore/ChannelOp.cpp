@@ -69,12 +69,12 @@ ChannelOp::~ChannelOp()
 
 StringVectorParameter * ChannelOp::channelNamesParameter()
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 const StringVectorParameter * ChannelOp::channelNamesParameter() const
 {
-	return m_channelNamesParameter;
+	return m_channelNamesParameter.get();
 }
 
 void ChannelOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject * operands )
@@ -117,13 +117,13 @@ void ChannelOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObje
 			throw Exception( str( format( "Primitive variable \"%s\" is not a float vector." ) % channelNames[i] ) );
 		}
 
-		size_t size = despatchTypedData<TypedDataSize>( it->second.data );
+		size_t size = despatchTypedData<TypedDataSize>( it->second.data.get() );
 		if( size!=numPixels )
 		{
 			throw Exception( str( format( "Primitive variable \"%s\" has wrong size (%d but should be %d)." ) % channelNames[i] % size % numPixels ) );
 		}
 
-		channels.push_back( staticPointerCast< FloatVectorData >( it->second.data ) );
+		channels.push_back( boost::static_pointer_cast< FloatVectorData >( it->second.data ) );
 	}
 
 	modifyChannels( image->getDisplayWindow(), image->getDataWindow(), channels );

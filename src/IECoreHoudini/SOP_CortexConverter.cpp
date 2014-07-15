@@ -189,7 +189,7 @@ void SOP_CortexConverter::doConvert( const GU_DetailHandle &handle, const std::s
 		return;
 	}
 	
-	if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result ) )
+	if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result.get() ) )
 	{
 		IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
 		// We are acquiring and releasing the GIL here to ensure that it is released when we render. This has
@@ -201,14 +201,14 @@ void SOP_CortexConverter::doConvert( const GU_DetailHandle &handle, const std::s
 			IECorePython::ScopedGILRelease gilRelease;
 			{
 				IECore::WorldBlock worldBlock( renderer );
-				procedural->render( renderer );
+				procedural->render( renderer.get() );
 			}
 		}
 		
-		result = IECore::constPointerCast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
+		result = boost::const_pointer_cast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 	}
 	
-	ToHoudiniGeometryConverterPtr converter = ( type == Cortex ) ? new ToHoudiniCortexObjectConverter( result ) : ToHoudiniGeometryConverter::create( result );
+	ToHoudiniGeometryConverterPtr converter = ( type == Cortex ) ? new ToHoudiniCortexObjectConverter( result.get() ) : ToHoudiniGeometryConverter::create( result.get() );
 	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( attributeFilter );
 	converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );

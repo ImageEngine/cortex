@@ -208,7 +208,7 @@ void TIFFImageWriter::encodeChannels( const ImagePrimitive * image, const vector
 			ChannelConverter<ChannelData>,
 			TypeTraits::IsNumericVectorTypedData,
 			typename ChannelConverter<ChannelData>::ErrorHandler
-		>( dataContainer, converter );
+		>( dataContainer.get(), converter );
 
 		typedef boost::multi_array_ref< const T, 2 > SourceArray2D;
 		typedef boost::multi_array_ref< T, 3 > TargetArray3D;

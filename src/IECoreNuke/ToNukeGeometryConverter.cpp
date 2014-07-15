@@ -48,7 +48,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToNukeGeometryConverter );
 ToNukeGeometryConverter::ToNukeGeometryConverter( const std::string &description, IECore::TypeId fromType, ConstObjectPtr object )
 	:	ToNukeConverter( description, fromType )
 {
-	srcParameter()->setValue( constPointerCast<Object>( object ) );
+	srcParameter()->setValue( boost::const_pointer_cast<Object>( object ) );
 
 	m_objIndexParameter = new IntParameter( "objIndex", "Index for the first object inserted on the GeometryList. Use -1 to simply add on the next index available", -1 );
 	parameters()->addParameter( m_objIndexParameter );
@@ -65,7 +65,7 @@ void ToNukeGeometryConverter::convert( GeometryList &geoList ) const
 	geoList.add_object(objIndex);
 
 	ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<CompoundObject>();
-	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands );
+	doConversion( srcParameter()->getValidatedValue(), geoList, objIndex, operands.get() );
 }
 
 /////////////////////////////////////////////////////////////////////////////////

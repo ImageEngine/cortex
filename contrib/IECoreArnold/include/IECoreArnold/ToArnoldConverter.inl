@@ -47,7 +47,7 @@ ToArnoldConverter::ConverterDescription<T>::ConverterDescription()
 template<class T>
 ToArnoldConverterPtr ToArnoldConverter::ConverterDescription<T>::creator( IECore::ObjectPtr object )
 {
-	return new T( IECore::staticPointerCast<typename T::InputType>( object ) );
+	return new T( boost::static_pointer_cast<typename T::InputType>( object ) );
 }
 
 } // namespace IECoreArnold

@@ -65,12 +65,12 @@ CurveTangentsOp::~CurveTangentsOp()
 
 StringParameter * CurveTangentsOp::vTangentPrimVarNameParameter()
 {
-	return m_vTangentPrimVarNameParameter;
+	return m_vTangentPrimVarNameParameter.get();
 }
 
 const StringParameter * CurveTangentsOp::vTangentPrimVarNameParameter() const
 {
-	return m_vTangentPrimVarNameParameter;
+	return m_vTangentPrimVarNameParameter.get();
 }
 
 struct CurveTangentsOp::CalculateTangents
@@ -109,7 +109,7 @@ struct CurveTangentsOp::CalculateTangents
 			for( int i = 0; i < m_vertsPerCurve[curveIndex]; i++ ) 
 			{
 				v = min( 1.0f, i * vStep );			
-				m_evaluator->pointAtV( curveIndex, v, result );
+				m_evaluator->pointAtV( curveIndex, v, result.get() );
 				vTangents[ pIndex + i ] = result->vTangent().normalized();
 			}
 			pIndex += m_vertsPerCurve[curveIndex];

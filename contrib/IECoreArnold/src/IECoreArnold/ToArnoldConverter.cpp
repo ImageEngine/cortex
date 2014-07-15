@@ -114,7 +114,7 @@ void ToArnoldConverter::setParameters( AtNode *node, const IECore::CompoundDataM
 {
 	for( CompoundDataMap::const_iterator it=values.begin(); it!=values.end(); it++ )
 	{
-		setParameter( node, it->first.value().c_str(), it->second );
+		setParameter( node, it->first.value().c_str(), it->second.get() );
 	}
 }
 
@@ -224,8 +224,8 @@ AtArray *ToArnoldConverter::dataToArray( const IECore::Data *data )
 		return 0;
 	}
 	
-	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( DataPtr( const_cast<Data *>( data ) ) );
-	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( DataPtr( const_cast<Data *>( data ) ) );
+	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
+	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
 	return AiArrayConvert( dataSize, 1, type, dataAddress );
 }
 

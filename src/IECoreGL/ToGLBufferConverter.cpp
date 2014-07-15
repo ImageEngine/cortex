@@ -70,7 +70,7 @@ struct TypedDataBytes
 ToGLBufferConverter::ToGLBufferConverter( IECore::ConstDataPtr toConvert )
 	:	ToGLConverter( "Converts IECore::Data objects to IECoreGL::Buffer objects.", IECore::DataTypeId )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::Data>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::Data>( toConvert ) );
 }
 
 ToGLBufferConverter::~ToGLBufferConverter()
@@ -79,10 +79,10 @@ ToGLBufferConverter::~ToGLBufferConverter()
 
 IECore::RunTimeTypedPtr ToGLBufferConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::ConstDataPtr data = IECore::staticPointerCast<const IECore::Data>( src ); // safe because the parameter validated it for us
+	IECore::ConstDataPtr data = boost::static_pointer_cast<const IECore::Data>( src ); // safe because the parameter validated it for us
 		
-	const void *address = despatchTypedData<TypedDataAddress, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( constPointerCast<Data>( data ) );
-	size_t size = despatchTypedData<Detail::TypedDataBytes, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( constPointerCast<Data>( data ) );
+	const void *address = despatchTypedData<TypedDataAddress, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
+	size_t size = despatchTypedData<Detail::TypedDataBytes, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
 
 	return new Buffer( address, size );
 }

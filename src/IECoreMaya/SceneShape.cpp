@@ -261,13 +261,13 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		if ( array[i].name() == "time1.outTime" )
 		{
 			/// connected to time, so no time remapping between maya scene and loaded scene.
-			return LinkedScene::linkAttributeData( scene );
+			return LinkedScene::linkAttributeData( scene.get() );
 		}
 	}
 	/// couldn't find connection to maya time, so this node is mapping the time some other way.
 	MTime time;
 	timePlug.getValue( time );
-	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
+	return LinkedScene::linkAttributeData( scene.get(), time.as( MTime::kSeconds ) );
 }
 
 void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
@@ -382,7 +382,10 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 		return false;
 	}
 	
-	const SceneInterface *scene = sceneShape->getSceneInterface();
+	/// \todo Perhaps getSceneInterface() should return a raw pointer?
+	/// Also perhaps it shouldn't be prefixed with "get" since there is no
+	/// corresponding set.
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return false;
@@ -399,7 +402,7 @@ void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, in
 		return;
 	}
 	
-	const SceneInterface *scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return;

@@ -42,7 +42,7 @@ namespace IECorePython
 {
 
 //////////////////////////////////////////////////////////////////////////
-// IntrusivePtr To/From Python
+// Smart pointer conversion to/from Python
 //////////////////////////////////////////////////////////////////////////
 
 namespace Detail
@@ -52,12 +52,12 @@ namespace Detail
 // destructor, so that other threads may acquire it
 // while the C++ destructor is running.
 template<typename T>
-class GILReleasePtr : public IECore::IntrusivePtr<T>
+class GILReleasePtr : public boost::intrusive_ptr<T>
 {
 	
 	public :
 	
-		typedef IECore::IntrusivePtr<T> Base;
+		typedef boost::intrusive_ptr<T> Base;
 
 		typedef T element_type;
 	
@@ -239,8 +239,8 @@ RefCountedClass<T, Base, TWrapper>::RefCountedClass( const char *className, cons
 	boost::mpl::for_each( boost::python::objects::register_base_of<T>(), (typename BaseClass::metadata::bases*)0, (boost::add_pointer<boost::mpl::_>*) 0 );
 
 	// implicit conversions
-	boost::python::implicitly_convertible<IECore::IntrusivePtr<T> , IECore::IntrusivePtr<Base> >();
-	boost::python::implicitly_convertible<IECore::IntrusivePtr<T> , IECore::IntrusivePtr<const T> >();
+	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<Base> >();
+	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<const T> >();
 
 }
 

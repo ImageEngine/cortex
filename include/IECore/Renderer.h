@@ -345,7 +345,7 @@ class Renderer : public RunTimeTyped
 				/// geometry. Any relevant methods of renderer may be called, but
 				/// the geometry generated must be contained within the
 				/// box returned by bound().
-				virtual void render( RendererPtr renderer ) const = 0;
+				virtual void render( Renderer *renderer ) const = 0;
 				/// Implement this to return a hash for procedural level instancing.
 				/// Procedurals with the same hash will be reused by renderers that
 				/// support this feature. If computing a sensible hash is difficult

@@ -81,7 +81,7 @@ void IECoreMantra::ProceduralPrimitive::getBoundingBox(UT_BoundingBox &box)
 
 void IECoreMantra::ProceduralPrimitive::render()
 {
-	m_procedural->render( m_renderer );
+	m_procedural->render( m_renderer.get() );
 }
 
 void IECoreMantra::ProceduralPrimitive::addChild( ProceduralPrimitive *proc )
@@ -93,7 +93,7 @@ void IECoreMantra::ProceduralPrimitive::addChild( ProceduralPrimitive *proc )
 
 void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderablePtr renderable )
 {
-	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable );
+	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable.get() );
 	if( !converter ) 
 	{
 		msg( Msg::Warning, "ProceduralPrimitive::addVisibleRenderable", "converter could not be found" );

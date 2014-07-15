@@ -229,9 +229,9 @@ class Shader : public IECore::RunTimeTyped
 		///////////////////////////////////////////////////////////
 		//@{
 		/// Returns a shader which shades as a constant flat color.
-		static ShaderPtr constant();
+		static Shader *constant();
 		/// Returns a shader which shades as a facing ratio.
-		static ShaderPtr facingRatio();
+		static Shader *facingRatio();
 		//@}
 
 	private :

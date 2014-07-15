@@ -49,7 +49,7 @@ ToGLConverter::ConverterDescription<ToGLPointsConverter> ToGLPointsConverter::g_
 ToGLPointsConverter::ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert )
 	:	ToGLConverter( "Converts IECore::PointsPrimitive objects to IECoreGL::PointsPrimitive objects.", IECore::PointsPrimitiveTypeId )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::PointsPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::PointsPrimitive>( toConvert ) );
 }
 
 ToGLPointsConverter::~ToGLPointsConverter()
@@ -58,7 +58,7 @@ ToGLPointsConverter::~ToGLPointsConverter()
 
 IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::PointsPrimitive::ConstPtr pointsPrim = IECore::staticPointerCast<const IECore::PointsPrimitive>( src ); // safe because the parameter validated it for us
+	IECore::PointsPrimitive::ConstPtr pointsPrim = boost::static_pointer_cast<const IECore::PointsPrimitive>( src ); // safe because the parameter validated it for us
 
 	IECore::V3fVectorData::ConstPtr points = pointsPrim->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex );
 	if( !points )

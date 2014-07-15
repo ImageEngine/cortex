@@ -260,11 +260,11 @@ void NURBSPrimitive::copyFrom( const Object *other, IECore::Object::CopyContext 
 	Primitive::copyFrom( other, context );
 	const NURBSPrimitive *tOther = static_cast<const NURBSPrimitive *>( other );
 	m_uOrder = tOther->m_uOrder;
-	m_uKnot = context->copy<FloatVectorData>( tOther->m_uKnot );
+	m_uKnot = context->copy<FloatVectorData>( tOther->m_uKnot.get() );
 	m_uMin = tOther->m_uMin;
 	m_uMax = tOther->m_uMax;
 	m_vOrder = tOther->m_vOrder;
-	m_vKnot = context->copy<FloatVectorData>( tOther->m_vKnot );
+	m_vKnot = context->copy<FloatVectorData>( tOther->m_vKnot.get() );
 	m_vMin = tOther->m_vMin;
 	m_vMax = tOther->m_vMax;
 }
@@ -275,12 +275,12 @@ void NURBSPrimitive::save( IECore::Object::SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 
 	container->write( g_uOrderEntry, m_uOrder );
-	context->save( m_uKnot, container, g_uKnotEntry );
+	context->save( m_uKnot.get(), container.get(), g_uKnotEntry );
 	container->write( g_uMinEntry, m_uMin );
 	container->write( g_uMaxEntry, m_uMax );
 
 	container->write( g_vOrderEntry, m_vOrder );
-	context->save( m_vKnot, container, g_vKnotEntry );
+	context->save( m_vKnot.get(), container.get(), g_vKnotEntry );
 	container->write( g_vMinEntry, m_vMin );
 	container->write( g_vMaxEntry, m_vMax );
 }
@@ -293,12 +293,12 @@ void NURBSPrimitive::load( IECore::Object::LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( g_uOrderEntry, m_uOrder );
-	m_uKnot = context->load<FloatVectorData>( container, g_uKnotEntry );
+	m_uKnot = context->load<FloatVectorData>( container.get(), g_uKnotEntry );
 	container->read( g_uMinEntry, m_uMin );
 	container->read( g_uMaxEntry, m_uMax );
 
 	container->read( g_vOrderEntry, m_vOrder );
-	m_vKnot = context->load<FloatVectorData>( container, g_vKnotEntry );
+	m_vKnot = context->load<FloatVectorData>( container.get(), g_vKnotEntry );
 	container->read( g_vMinEntry, m_vMin );
 	container->read( g_vMaxEntry, m_vMax );
 }
@@ -339,11 +339,11 @@ bool NURBSPrimitive::isEqualTo( const Object *other ) const
 		return false;
 	}
 
-	if( !m_uKnot->isEqualTo( tOther->m_uKnot ) )
+	if( !m_uKnot->isEqualTo( tOther->m_uKnot.get() ) )
 	{
 		return false;
 	}
-	if( !m_vKnot->isEqualTo( tOther->m_vKnot ) )
+	if( !m_vKnot->isEqualTo( tOther->m_vKnot.get() ) )
 	{
 		return false;
 	}
@@ -356,8 +356,8 @@ void NURBSPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 	Primitive::memoryUsage( a );
 	a.accumulate( sizeof( m_uOrder ) * 2 );
 	a.accumulate( sizeof( m_uMin ) * 4 );
-	a.accumulate( m_uKnot );
-	a.accumulate( m_vKnot );
+	a.accumulate( m_uKnot.get() );
+	a.accumulate( m_vKnot.get() );
 }
 
 void NURBSPrimitive::hash( MurmurHash &h ) const

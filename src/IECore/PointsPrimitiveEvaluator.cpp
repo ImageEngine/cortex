@@ -159,7 +159,7 @@ PointsPrimitiveEvaluator::PointsPrimitiveEvaluator( ConstPointsPrimitivePtr poin
 	{
 		throw InvalidArgumentException( "PrimitiveVariable P is not of type V3fVectorData." );
 	}
-	m_pVector = &( staticPointerCast<const V3fVectorData>( m_p.data )->readable() );
+	m_pVector = &( boost::static_pointer_cast<const V3fVectorData>( m_p.data )->readable() );
 }
 
 PointsPrimitiveEvaluator::~PointsPrimitiveEvaluator()

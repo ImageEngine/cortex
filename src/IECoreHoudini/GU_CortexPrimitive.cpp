@@ -233,7 +233,7 @@ GEO_Primitive *GU_CortexPrimitive::doConvert( GU_ConvertParms &parms )
 	{
 		GU_DetailHandle handle;
 		handle.allocateAndSet( (GU_Detail*)getParent(), false );
-		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object ) );
+		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object.get() ) );
 		if ( !converter->convert( handle ) )
 		{
 			return 0;

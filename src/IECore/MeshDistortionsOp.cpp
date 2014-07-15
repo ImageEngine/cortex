@@ -117,74 +117,73 @@ MeshDistortionsOp::~MeshDistortionsOp()
 
 StringParameter * MeshDistortionsOp::pPrimVarNameParameter()
 {
-	return m_pPrimVarNameParameter;
+	return m_pPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::pPrimVarNameParameter() const
 {
-	return m_pPrimVarNameParameter;
+	return m_pPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::pRefPrimVarNameParameter()
 {
-	return m_pRefPrimVarNameParameter;
+	return m_pRefPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::pRefPrimVarNameParameter() const
 {
-	return m_pRefPrimVarNameParameter;
+	return m_pRefPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::uPrimVarNameParameter()
 {
-	return m_uPrimVarNameParameter;
+	return m_uPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::uPrimVarNameParameter() const
 {
-	return m_uPrimVarNameParameter;
+	return m_uPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::vPrimVarNameParameter()
 {
-	return m_vPrimVarNameParameter;
+	return m_vPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::vPrimVarNameParameter() const
 {
-	return m_vPrimVarNameParameter;
+	return m_vPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::distortionPrimVarNameParameter()
 {
-	return m_distortionPrimVarNameParameter;
+	return m_distortionPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::distortionPrimVarNameParameter() const
 {
-	return m_distortionPrimVarNameParameter;
+	return m_distortionPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::uDistortionPrimVarNameParameter()
 {
-	return m_uDistortionPrimVarNameParameter;
+	return m_uDistortionPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::uDistortionPrimVarNameParameter() const
 {
-	return m_uDistortionPrimVarNameParameter;
+	return m_uDistortionPrimVarNameParameter.get();
 }
 
 StringParameter * MeshDistortionsOp::vDistortionPrimVarNameParameter()
 {
-	return m_vDistortionPrimVarNameParameter;
+	return m_vDistortionPrimVarNameParameter.get();
 }
 
 const StringParameter * MeshDistortionsOp::vDistortionPrimVarNameParameter() const
 {
-	return m_vDistortionPrimVarNameParameter;
+	return m_vDistortionPrimVarNameParameter.get();
 }
-
 
 struct MeshDistortionsOp::CalculateDistortions
 {

@@ -50,14 +50,14 @@ class LuminanceTexture : public Texture
 
 		/// Constructs a new LuminanceTexture. Both channels must be of the same type, and must
 		/// be some form of numeric VectorData. The alpha channel may be omitted.
-		LuminanceTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr y,
-			IECore::ConstDataPtr a = 0, bool mipMap=true );
+		LuminanceTexture( unsigned int width, unsigned int height, const IECore::Data *y,
+			const IECore::Data *a = 0, bool mipMap=true );
 
 		/// Creates a LuminanceTexture from the specified image. Accepts channels with names
 		/// "Y" and "A". Currently ignores the display window and uses only
 		/// the data window. Image must have at least the "Y" channel and if specified the
 		/// "A" channel must be of the same type.
-		LuminanceTexture( IECore::ConstImagePrimitivePtr image, bool mipMap=true );
+		LuminanceTexture( const IECore::ImagePrimitive *image, bool mipMap=true );
 
 		virtual ~LuminanceTexture();
 
@@ -67,8 +67,8 @@ class LuminanceTexture : public Texture
 
 		struct Constructor;
 
-		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr y,
-			IECore::ConstDataPtr a, bool mipMap );
+		void construct( unsigned int width, unsigned int height, const IECore::Data *y,
+			const IECore::Data *a, bool mipMap );
 
 };
 

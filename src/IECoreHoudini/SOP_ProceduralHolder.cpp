@@ -84,7 +84,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 			renderer->worldBegin();
-			procedural->render( renderer );
+			procedural->render( renderer.get() );
 			renderer->worldEnd();
 			m_scene = renderer->scene();
 			m_scene->setCamera( 0 ); // houdini will be providing the camera when we draw the scene
@@ -138,7 +138,7 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 	
 	setParameterisedValues( now );
 	
-	ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( procedural );
+	ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( procedural.get() );
 	if ( !converter->convert( myGdpHandle ) )
 	{
 		addError( SOP_MESSAGE, "Unable to store procedural on gdp" );

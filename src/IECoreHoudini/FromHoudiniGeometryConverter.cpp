@@ -111,7 +111,7 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 		return 0;
 	}
 	
-	return doDetailConversion( geo, operands );
+	return doDetailConversion( geo, operands.get() );
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.

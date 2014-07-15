@@ -138,15 +138,15 @@ struct ComputationCacheTest
 		BOOST_CHECK_EQUAL( size_t(0), cache.cachedComputations() );
 
 		// set some values on the cache
-		cache.set( ComputationParams(1), v, ObjectPool::StoreReference );
+		cache.set( ComputationParams(1), v.get(), ObjectPool::StoreReference );
 		BOOST_CHECK_EQUAL( size_t(1), cache.cachedComputations() );
 		BOOST_CHECK_EQUAL( v, cache.get( ComputationParams(1), Cache::NullIfMissing ) );
-		cache.set( ComputationParams(1), v, ObjectPool::StoreCopy );
+		cache.set( ComputationParams(1), v.get(), ObjectPool::StoreCopy );
 		BOOST_CHECK_EQUAL( size_t(1), cache.cachedComputations() );
 		BOOST_CHECK_EQUAL( v, cache.get( ComputationParams(1), Cache::NullIfMissing ) );
 		cache.clear();
 		v = new IntData(41);
-		cache.set( ComputationParams(1), v, ObjectPool::StoreCopy );
+		cache.set( ComputationParams(1), v.get(), ObjectPool::StoreCopy );
 		BOOST_CHECK_EQUAL( size_t(1), cache.cachedComputations() );
 		BOOST_CHECK( *v == *cache.get( ComputationParams(1), Cache::NullIfMissing ) );
 		v->writable() = 42;
@@ -155,7 +155,7 @@ struct ComputationCacheTest
 		// test when the computation function does not match the already registered computation hash....
 		IntDataPtr weirdValue = new IntData(666);
 		cache.clear();
-		cache.set( ComputationParams(1), weirdValue, ObjectPool::StoreReference );
+		cache.set( ComputationParams(1), weirdValue.get(), ObjectPool::StoreReference );
 		ConstObjectPtr v0 = cache.get( ComputationParams(1) );
 		BOOST_CHECK( *weirdValue == *cache.get( ComputationParams(1), Cache::NullIfMissing ) );
 		pool->clear();

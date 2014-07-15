@@ -109,7 +109,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	if( result )
 	{
 		IECore::ObjectPtr d = new IECore::TypedData<T>( v );
-		if( !parameter->valueValid( d ) )
+		if( !parameter->valueValid( d.get() ) )
 		{
 			return MS::kFailure;
 		}
