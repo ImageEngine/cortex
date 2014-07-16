@@ -1,3 +1,14 @@
+# 8.5.1
+
+#### IECore
+
+- PointSmoothSkinningOp handles faceVarying normals and added refIndics parameter
+- FromMayaMeshConverter checks if we need to convert st and extraST before doing it.
+
+#### IECoreRI
+
+- IECoreRI::Renderer supports M44d attributes
+
 # 8.5.0
 
 #### IECore
