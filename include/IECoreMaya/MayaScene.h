@@ -167,6 +167,7 @@ class MayaScene : public IECore::SceneInterface
 		/// Returns an object for querying the scene at the given path (full path). 
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
+		/// Currently raises an exception
 		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
 
 		typedef boost::function<bool (const MDagPath &)> HasFn;

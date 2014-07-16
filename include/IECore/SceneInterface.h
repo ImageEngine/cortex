@@ -246,8 +246,9 @@ class SceneInterface : public RunTimeTyped
 		 */
 
 		/// Computes the requested type of hash for the current location on the scene at the given time.
-		/// The hash returned can be used for memory caches and is not currently garanteed to be the same for different processes.
-		/// Some implementations may throw if it's not supported or if the scene is opened with write access.
+		/// The hash returned is not content-based, but it uniquely identifies the queried information so that 
+		/// it can be used for memory caches, for example, used by ComputationCache objects.
+		/// This function is only available when reading scenes and it raises an exception otherwise.
 		virtual void hash( HashType hashType, double time, MurmurHash &h ) const = 0;
 
 		/*
