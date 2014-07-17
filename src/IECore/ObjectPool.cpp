@@ -135,7 +135,7 @@ size_t ObjectPool::memoryUsage() const
 	return m_data->cache.currentCost();
 }
 
-ObjectPoolPtr ObjectPool::defaultObjectPool()
+ObjectPool *ObjectPool::defaultObjectPool()
 {
 	static ObjectPoolPtr c = 0;
 	if( !c )
@@ -144,7 +144,7 @@ ObjectPoolPtr ObjectPool::defaultObjectPool()
 		size_t mi = m ? boost::lexical_cast<size_t>( m ) : 500;
 		c = new ObjectPool(1024 * 1024 * mi);
 	}
-	return c;
+	return c.get();
 }
 
 /// make sure the default pool is created at load time and avoid 

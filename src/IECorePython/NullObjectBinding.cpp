@@ -60,7 +60,8 @@ void bindNullObject()
 	RunTimeTypedClass<NullObject>()
 		.def( init<>() )
 		.def( "__repr__", &repr )
-		.def( "defaultNullObject", NullObject::defaultNullObject ).staticmethod( "defaultNullObject" )
+		.def( "defaultNullObject", NullObject::defaultNullObject, return_value_policy<CastToIntrusivePtr>() )
+		.staticmethod( "defaultNullObject" )
 	;
 }
 

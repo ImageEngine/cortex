@@ -78,7 +78,7 @@ class CachedConverter : public IECore::RefCounted
 		/// this wherever possible to conserve memory. This initially
 		/// has a memory limit specified in megabytes by the
 		/// IECOREGL_CACHEDCONVERTER_MEMORY environment variable.
-		static CachedConverterPtr defaultCachedConverter();
+		static CachedConverter *defaultCachedConverter();
 
 	private :
 

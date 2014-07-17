@@ -67,7 +67,7 @@ class TextureLoader : public IECore::RefCounted
 		/// Returns a static TextureLoader instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECOREGL_TEXTURE_PATHS environment variable.
-		static TextureLoaderPtr defaultTextureLoader();
+		static TextureLoader *defaultTextureLoader();
 
 	private :
 

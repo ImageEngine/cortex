@@ -55,7 +55,7 @@ class NullObject : public Object
 
 		IE_CORE_DECLAREOBJECT( NullObject, Object );
 
-		static NullObjectPtr defaultNullObject();
+		static NullObject *defaultNullObject();
 
 	private :
 

@@ -72,8 +72,8 @@ class OStreamMessageHandler : public MessageHandler
 		/// everyone.
 		////////////////////////////////////////////////////////
 		//@{
-		static OStreamMessageHandlerPtr cErrHandler();
-		static OStreamMessageHandlerPtr cOutHandler();
+		static OStreamMessageHandler *cErrHandler();
+		static OStreamMessageHandler *cOutHandler();
 		//@}
 
 		virtual void handle( Level level, const std::string &context, const std::string &message );

@@ -241,7 +241,7 @@ ObjectPool *CachedReader::objectPool() const
 	return m_data->m_cache.objectPool();
 }
 
-CachedReaderPtr CachedReader::defaultCachedReader()
+CachedReader *CachedReader::defaultCachedReader()
 {
 	static CachedReaderPtr c = 0;
 	if( !c )
@@ -249,6 +249,6 @@ CachedReaderPtr CachedReader::defaultCachedReader()
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );
 		c = new CachedReader( SearchPath( sp ? sp : "", ":" ) );
 	}
-	return c;
+	return c.get();
 }
 

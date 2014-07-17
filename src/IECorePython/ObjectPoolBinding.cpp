@@ -94,7 +94,8 @@ void bindObjectPool()
 		.def( "memoryUsage", &ObjectPool::memoryUsage )
 		.def( "getMaxMemoryUsage", &ObjectPool::getMaxMemoryUsage)
 		.def( "setMaxMemoryUsage", &ObjectPool::setMaxMemoryUsage )
-		.def( "defaultObjectPool", &ObjectPool::defaultObjectPool ).staticmethod( "defaultObjectPool" )
+		.def( "defaultObjectPool", &ObjectPool::defaultObjectPool, return_value_policy<CastToIntrusivePtr>() )
+		.staticmethod( "defaultObjectPool" )
 	;
 }
 

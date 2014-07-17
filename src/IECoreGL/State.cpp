@@ -274,10 +274,10 @@ bool State::isComplete() const
 	return m_implementation->isComplete();
 }
 
-ConstStatePtr State::defaultState()
+const State *State::defaultState()
 {
 	static StatePtr s = new State( true );
-	return s;
+	return s.get();
 }
 
 void State::registerComponent( IECore::TypeId type, CreatorFn creator )
