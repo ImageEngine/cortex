@@ -50,7 +50,7 @@ namespace IECorePython
 template<>
 std::string repr( BinaryFrameList &x )
 {
-	object item( x.getFrameList() );
+	object item( FrameListPtr( x.getFrameList() ) );
 	std::stringstream s;
 
 	s << "IECore.BinaryFrameList( ";

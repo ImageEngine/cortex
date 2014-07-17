@@ -50,7 +50,7 @@ namespace IECorePython
 template<>
 std::string repr( ReversedFrameList &x )
 {
-	object item( x.getFrameList() );
+	object item( FrameListPtr( x.getFrameList() ) );
 	std::stringstream s;
 
 	s << "IECore.ReversedFrameList( ";

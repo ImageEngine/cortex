@@ -50,7 +50,8 @@ void bindTextureLoader()
 		.def( init<const IECore::SearchPath &>() )
 		.def( "load", &TextureLoader::load )
 		.def( "clear", &TextureLoader::clear )
-		.def( "defaultTextureLoader", &TextureLoader::defaultTextureLoader ).staticmethod( "defaultTextureLoader" )
+		.def( "defaultTextureLoader", &TextureLoader::defaultTextureLoader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.staticmethod( "defaultTextureLoader" )
 	;
 }
 

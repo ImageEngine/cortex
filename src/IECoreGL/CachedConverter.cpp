@@ -156,7 +156,7 @@ void CachedConverter::clearUnused()
 	m_data->deferredRemovals.clear();
 }
 
-CachedConverterPtr CachedConverter::defaultCachedConverter()
+CachedConverter *CachedConverter::defaultCachedConverter()
 {
 	static CachedConverterPtr c = 0;
 	if( !c )
@@ -165,5 +165,5 @@ CachedConverterPtr CachedConverter::defaultCachedConverter()
 		int mi = m ? boost::lexical_cast<int>( m ) : 500;
 		c = new CachedConverter( 1024 * 1024 * mi );
 	}
-	return c;
+	return c.get();
 }

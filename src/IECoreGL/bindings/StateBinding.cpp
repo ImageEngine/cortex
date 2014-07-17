@@ -53,7 +53,7 @@ static IECore::CompoundDataPtr userAttributes( State &s )
 
 static StatePtr defaultState()
 {
-	return boost::const_pointer_cast< State >( State::defaultState() );
+	return const_cast<State *>( State::defaultState() );
 }
 
 static StateComponentPtr get( State &s, IECore::TypeId typeId )

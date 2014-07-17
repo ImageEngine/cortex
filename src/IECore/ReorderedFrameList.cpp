@@ -51,9 +51,9 @@ ReorderedFrameList::~ReorderedFrameList()
 {
 }
 
-FrameListPtr ReorderedFrameList::getFrameList()
+FrameList *ReorderedFrameList::getFrameList()
 {
-	return m_frameList;
+	return m_frameList.get();
 }
 
 void ReorderedFrameList::setFrameList( FrameListPtr frameList )

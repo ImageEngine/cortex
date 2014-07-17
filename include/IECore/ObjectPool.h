@@ -107,7 +107,7 @@ class ObjectPool : public RefCounted
 		/// environment variable. If it needs changing it's recommended to do 
 		/// that from a config file loaded by the ConfigLoader, to avoid multiple 
 		/// clients fighting over the same set of settings.
-		static ObjectPoolPtr defaultObjectPool();
+		static ObjectPool *defaultObjectPool();
 
 	private:
 
