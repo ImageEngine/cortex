@@ -719,15 +719,93 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return location;
 		}
 
-		void hash( HashType hashType, double time, MurmurHash &h ) const
+		void hash( HashType hashType, double time, MurmurHash &h, bool ignoreSceneHash = false ) const
 		{
-			// \todo We could do better in this hash by checking the samples to see if it's animated or check if the object exists, for example.
-			sceneHash( this, h );
+			size_t s0, s1;
+			double x;
+
+			h.append( SceneCacheTypeId );	// create a unique base hash that should not collide with other Cortex data types.
 			h.append( (unsigned char)hashType );
+
 			// all kinds of hashes, except the child names depend on time.
-			if ( hashType != ChildNamesHash )
+			switch( hashType )
 			{
-				h.append( time );
+				case TransformHash:
+
+					if ( m_indexedIO->hasEntry( transformEntry ) )
+					{
+						x = transformSampleInterval( time, s0, s1 );
+						h.append( lerp( (double)s0, (double)s1, x ) );
+					}
+					else
+					{
+						// return a simple hash for the identity transform (which does not include the scene location).
+						return;
+					}
+					break;
+
+				case AttributesHash:
+					{
+						NameList attrs;
+						attributeNames( attrs );
+						if ( !attrs.size() )
+						{
+							// return a simple hash for no attributes (which does not include the scene location).
+							return;
+						}
+						for ( NameList::const_iterator aIt = attrs.begin(); aIt != attrs.end(); aIt++ )
+						{
+							x = attributeSampleInterval( *aIt, time, s0, s1 );
+							h.append( lerp( (double)s0, (double)s1, x ) );
+						}
+					}
+					break;
+
+				case BoundHash:
+
+					x = boundSampleInterval( time, s0, s1 );
+					h.append( lerp( (double)s0, (double)s1, x ) );
+					break;
+
+				case ObjectHash:
+
+					if ( m_indexedIO->hasEntry( objectEntry ) )
+					{
+						x = objectSampleInterval( time, s0, s1 );
+						h.append( lerp( (double)s0, (double)s1, x ) );
+					}
+					else
+					{
+						// return a simple hash for no object (which does not include the scene location).
+						return;
+					}
+					break;
+
+				case ChildNamesHash:
+
+					// child names do not depend on time.
+					break;
+
+				case HierarchyHash:
+
+					if ( m_indexedIO->hasEntry( childrenEntry ) )
+					{
+						// we currently have no way to know if child locations are animated, we have to assume so...
+						// \todo Consider writing animatedHierarchy tag at locations where there's animation and use it here.
+						h.append( time );
+					}
+					else
+					{
+						// For leaf locations we just need the attribute,bounds and object hashes (the transform is not part of it)
+						hash( AttributesHash, time, h, true );
+						hash( BoundHash, time, h, true );
+						hash( ObjectHash, time, h, true );
+					}
+					break;
+			}
+			if ( !ignoreSceneHash )
+			{
+				sceneHash( this, h );
 			}
 		}
 
