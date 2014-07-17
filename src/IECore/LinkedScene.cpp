@@ -1183,9 +1183,27 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 	{
 		if ( m_atLink )
 		{
-			/// special case: we are exactly at the entry point for the linked scene,
-			/// in that case, we need to add the hash of that just in case there's transforms or attributes there as well.
-			m_mainScene->hash( HierarchyHash, time, h );
+			/// special cases: we are exactly at the entry point for the linked scene.
+			switch( hashType )
+			{
+				case TransformHash:
+					m_mainScene->hash( hashType, time, h );
+					return;	// Link locations override the transform so we return without adding the hash from the linked scene.
+				case AttributesHash:
+					m_mainScene->hash( hashType, time, h );
+					break;
+				case BoundHash:
+					break;	 // Let the bounds come from the linked location
+				case ObjectHash:
+					// Defined by the linked scene
+					break;
+				case ChildNamesHash:
+					// Defined by the linked scene
+					break;
+				case HierarchyHash:
+					m_mainScene->hash( hashType, time, h );
+					break;
+			};
 		}
 		if ( m_timeRemapped )
 		{

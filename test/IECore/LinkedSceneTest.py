@@ -751,39 +751,56 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		def collectHashes( scene, hashType, time, hashResults ) :
 			counter = 1
-			hashResults.add( scene.hash( hashType, time ).toString() )
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
 			for n in scene.childNames() :
 				counter += collectHashes( scene.child(n), hashType, time, hashResults )
 			return counter
 
 		hashTypes = IECore.SceneInterface.HashType.values.values()
 
-		allHashes = set()
+		def checkHash( hashType, scene, currTime, duplicates = 0 ) :
+			hh = set()
+			cc = collectHashes( scene.child("instance0"), hashType, currTime, hh )
+			self.assertEqual( cc - duplicates, len(hh) )
+			hh2 = set()
+			cc2 = collectHashes( scene.child("instance1"), hashType, currTime, hh2 )
+			self.assertEqual( cc2 - duplicates, len(hh2) )
+			self.assertEqual( cc2, cc )
+			if hashType in [ IECore.SceneInterface.HashType.AttributesHash, IECore.SceneInterface.HashType.HierarchyHash ] :
+				# only the instance location should have different hashes, so we sum 1.
+				self.assertEqual( cc - duplicates + 1, len(hh.union(hh2)) )
+			else :
+				# for all the other locations both instances should match
+				self.assertEqual( cc - duplicates, len(hh.union(hh2)) )	
 
-		def hashesForTime( scene, currTime ):
-			counter = 0
-			hashSet = set()
-			for hashType in hashTypes :
-				counter += collectHashes( scene, hashType, currTime, hashSet )
-			allHashes.update( hashSet )
-			return (counter, hashSet)
+			return ( cc, hh, cc2, hh2 )
 
-		(cc, hh) = hashesForTime( l.child("instance0"), 0 )
-		self.assertEqual( cc, len(hh) )
-		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
-		self.assertEqual( cc2, len(hh2) )
-		self.assertEqual( cc2, cc )
-		self.assertEqual( cc + 1*len(hashTypes), len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
+		t0 = checkHash( IECore.SceneInterface.HashType.TransformHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.TransformHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )	# all transforms differ except the root
 
-		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
-		self.assertEqual( cc3, len(hh3) )
-		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
-		self.assertEqual( cc4, len(hh4) )
-		self.assertEqual( cc4, cc3 )
-		self.assertEqual( cc3 + 1*len(hashTypes), len(hh3.union(hh4)) )	# only the instance location should have different hash, so we sum 1.
-		sceneLocations = cc3 / len(hashTypes)
-		sameChildNameHashes = sceneLocations-1
-		self.assertEqual( cc + cc3 + 2*(len(hashTypes)) - sameChildNameHashes, len( allHashes ) )
+		duplicates = 1
+		t0 = checkHash( IECore.SceneInterface.HashType.AttributesHash, l, 0, duplicates )
+		t1 = checkHash( IECore.SceneInterface.HashType.AttributesHash, l, 1, duplicates )
+		self.assertEqual( t0[0] - duplicates, len(t0[1].union(t1[1])) )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.BoundHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.BoundHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )		# all except /A/a have animated bounds
+
+		duplicates = 2
+		t0 = checkHash( IECore.SceneInterface.HashType.ObjectHash, l, 0, duplicates )
+		t1 = checkHash( IECore.SceneInterface.HashType.ObjectHash, l, 1, duplicates )
+		self.assertEqual( t0[0] - duplicates + 1, len(t0[1].union(t1[1])) )	# only /B/b has animated object, the rest should match
+
+		t0 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l, 1 )
+		self.assertEqual( t0[0], len(t0[1].union(t1[1])) )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )	# all locations have time dependent hash except for the leaf /A/a where there's no animation
 
 	def testHashesWithRetimedLinks( self ) :
 
@@ -804,50 +821,34 @@ class LinkedSceneTest( unittest.TestCase ) :
 		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
 
 		hashTypes = IECore.SceneInterface.HashType.values.values()
-		allHashes = set()
 
 		def collectHashes( scene, hashType, time, hashResults ) :
 			counter = 1
-			hashResults.add( scene.hash( hashType, time ).toString() )
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
 			for n in scene.childNames() :
 				counter += collectHashes( scene.child(n), hashType, time, hashResults )
 			return counter
 
-		def hashesForTime( scene, currTime ):
-			counter = 0
-			hashSet = set()
-			for hashType in hashTypes :
-				counter += collectHashes( scene, hashType, currTime, hashSet )
-			allHashes.update( hashSet )
-			return (counter, hashSet)
+		def checkHash( hashType, scene, duplicates=0 ) :
+			hh = set()
+			cc = collectHashes( scene.child("instance0"), hashType, 0.5, hh )
+			self.assertEqual( cc - duplicates, len(hh) )
+			hh2 = set()
+			cc2 = collectHashes( scene.child("instance1"), hashType, 1.5, hh2 )
+			self.assertEqual( cc2- duplicates, len(hh2) )
+			self.assertEqual( cc2, cc )
+			if hashType in [IECore.SceneInterface.HashType.AttributesHash, IECore.SceneInterface.HashType.HierarchyHash] :
+				self.assertEqual( cc-duplicates+1, len(hh.union(hh2)) )
+			else :
+				self.assertEqual( cc-duplicates, len(hh.union(hh2)) )
 
-		# time 0 on both branches map to time 0 in the instance
-		(cc, hh) = hashesForTime( l.child("instance0"), 0 )
-		self.assertEqual( cc, len(hh) )
-		(cc2, hh2) = hashesForTime( l.child("instance1"), 0 )
-		self.assertEqual( cc2, len(hh2) )
-		self.assertEqual( cc2, cc )
-		self.assertEqual( cc + 1*len(hashTypes), len(hh.union(hh2)) )	# only the instance location should have different hash, so we sum 1.
-		
-		# time 1 maps to times 1 and 0 in the instance
-		(cc3, hh3) = hashesForTime( l.child("instance0"), 1 )
-		self.assertEqual( cc3, len(hh3) )
-		(cc4, hh4) = hashesForTime( l.child("instance1"), 1 )
-		self.assertEqual( cc4, len(hh4) )
-		sceneLocations = cc3 / len(hashTypes)
-		sameChildNameHashes = sceneLocations-1
-		self.assertEqual( cc3+cc4-sameChildNameHashes, len(hh3.union(hh4)) )	# they should mismatch entirelly except for the child names hash
-		self.assertEqual( cc4+1*len(hashTypes), len(hh4.union(hh)) )	# they should mismatch only at the link (both map to time 0)
-
-		# time 2 maps to times 2 and 1 in the instance
-		(cc5, hh5) = hashesForTime( l.child("instance0"), 2 )
-		self.assertEqual( cc5, len(hh5) )
-		(cc6, hh6) = hashesForTime( l.child("instance1"), 2 )
-		self.assertEqual( cc4, len(hh4) )
-		sceneLocations = cc5 / len(hashTypes)
-		sameChildNameHashes = sceneLocations-1
-		self.assertEqual( cc5+cc6-sameChildNameHashes, len(hh5.union(hh6)) )	# they should mismatch entirelly
-		self.assertEqual( cc6+1*len(hashTypes), len(hh6.union(hh3)) )	# they should mismatch only at the link (both map to time 0)
+		checkHash( IECore.SceneInterface.HashType.TransformHash, l,  )
+		checkHash( IECore.SceneInterface.HashType.AttributesHash, l, duplicates = 1 )
+		checkHash( IECore.SceneInterface.HashType.BoundHash, l )
+		checkHash( IECore.SceneInterface.HashType.ObjectHash, l, duplicates = 2 )
+		checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l )
+		checkHash( IECore.SceneInterface.HashType.HierarchyHash, l )
 
 if __name__ == "__main__":
 	unittest.main()
