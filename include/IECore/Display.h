@@ -65,7 +65,7 @@ class Display : public PreWorldRenderable
 		/// This is mostly of use for the binding - the parameters()
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
-		CompoundDataPtr parametersData();
+		CompoundData *parametersData();
 
 		virtual void render( Renderer *renderer ) const;
 

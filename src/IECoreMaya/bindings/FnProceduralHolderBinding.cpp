@@ -54,7 +54,7 @@ static IECoreGL::ScenePtr scene( MFnDependencyNode *fnDN )
 	ProceduralHolder *ph = dynamic_cast<ProceduralHolder *>( userNode );
 	assert( ph );
 	IECoreGL::ConstScenePtr scene = ph->scene();
-	return IECore::constPointerCast<IECoreGL::Scene>( scene );
+	return boost::const_pointer_cast<IECoreGL::Scene>( scene );
 }
 
 void IECoreMaya::bindFnProceduralHolder()

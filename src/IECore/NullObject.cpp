@@ -78,8 +78,8 @@ void NullObject::hash( MurmurHash &h ) const
 	Object::hash( h );
 }
 
-NullObjectPtr NullObject::defaultNullObject()
+NullObject *NullObject::defaultNullObject()
 {
 	static NullObjectPtr o = new NullObject();
-	return o;
+	return o.get();
 }

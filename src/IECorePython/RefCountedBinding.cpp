@@ -73,7 +73,7 @@ static long hash( const RefCounted *self )
 
 void bindRefCounted()
 {
-	class_<RefCounted, boost::noncopyable, RefCountedPtr>( "RefCounted", "A simple class to count references." )
+	class_<RefCounted, boost::noncopyable, Detail::GILReleasePtr<RefCounted> >( "RefCounted", "A simple class to count references." )
 		.def( "__eq__", equal )
 		.def( "__ne__", notEqual )
 		.def( "__hash__", hash )
@@ -84,8 +84,8 @@ void bindRefCounted()
 		.def( "collectGarbage", &WrapperGarbageCollector::collect ).staticmethod( "collectGarbage" )
 	;
 
-	IntrusivePtrToPython<RefCounted>();
-	IntrusivePtrFromPython<RefCounted>();
+	Detail::IntrusivePtrToPython<RefCounted>();
+	Detail::IntrusivePtrFromPython<RefCounted>();
 
 	implicitly_convertible<RefCountedPtr, ConstRefCountedPtr>();
 }

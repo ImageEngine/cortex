@@ -196,8 +196,8 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 	}
 
 	Shader::SetupPtr geometryShaderSetup = new Shader::Setup( geometryShader );
-	shaderStateComponent->addParametersToShaderSetup( geometryShaderSetup );
-	addPrimitiveVariablesToShaderSetup( geometryShaderSetup );
+	shaderStateComponent->addParametersToShaderSetup( geometryShaderSetup.get() );
+	addPrimitiveVariablesToShaderSetup( geometryShaderSetup.get() );
 	geometryShaderSetup->addUniformParameter( "basis", new IECore::M44fData( m_memberData->basis.matrix ) );
 	geometryShaderSetup->addUniformParameter( "width", new IECore::M44fData( m_memberData->width ) );
 
@@ -396,7 +396,7 @@ void CurvesPrimitive::ensureVertIds() const
 	m_memberData->numVertIds = vertIds.size();
 	
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
-	m_memberData->vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+	m_memberData->vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }
 
 void CurvesPrimitive::ensureAdjacencyVertIds() const
@@ -432,7 +432,7 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	m_memberData->numAdjacencyVertIds = vertIds.size();
 	
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
-	m_memberData->adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+	m_memberData->adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }
 
 void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
@@ -478,5 +478,5 @@ void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
 	m_memberData->numLinearAdjacencyVertIds = vertIds.size();
 	
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
-	m_memberData->linearAdjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData ) );
+	m_memberData->linearAdjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }

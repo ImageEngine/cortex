@@ -59,13 +59,12 @@ class DirNameParameterWrap : public DirNameParameter, public Wrapper<DirNamePara
 		IECOREPYTHON_PARAMETERWRAPPERFNS( DirNameParameter );
 
 };
-IE_CORE_DECLAREPTR( DirNameParameterWrap );
 
 void bindDirNameParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<DirNameParameter, DirNameParameterWrapPtr>()
+	RunTimeTypedClass<DirNameParameter, DirNameParameterWrap>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(

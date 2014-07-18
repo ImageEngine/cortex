@@ -112,9 +112,9 @@ void FileSequence::setFileName( const std::string &fileName )
 	m_fileName = fileName;
 }
 
-FrameListPtr FileSequence::getFrameList()
+FrameList *FileSequence::getFrameList()
 {
-	return m_frameList;
+	return m_frameList.get();
 }
 
 void FileSequence::setFrameList( FrameListPtr frameList )
@@ -264,7 +264,7 @@ FileSequencePtr FileSequence::copy() const
 	return new FileSequence( m_fileName, m_frameList->copy() );
 }
 
-void FileSequence::mapTo( ConstFileSequencePtr other, std::vector< std::pair< std::string, std::string > > &result ) const
+void FileSequence::mapTo( const FileSequence *other, std::vector< std::pair< std::string, std::string > > &result ) const
 {
 	assert( other );
 	result.clear();
@@ -288,7 +288,7 @@ void FileSequence::mapTo( ConstFileSequencePtr other, std::vector< std::pair< st
 	}
 }
 
-void FileSequence::mapTo( ConstFileSequencePtr other, std::map< std::string, std::string > &result ) const
+void FileSequence::mapTo( const FileSequence *other, std::map< std::string, std::string > &result ) const
 {
 	assert( other );
 	result.clear();

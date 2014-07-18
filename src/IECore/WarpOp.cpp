@@ -85,12 +85,12 @@ WarpOp::~WarpOp()
 
 IntParameter * WarpOp::filterParameter()
 {
-	return m_filterParameter;
+	return m_filterParameter.get();
 }
 
 const IntParameter * WarpOp::filterParameter() const
 {
-	return m_filterParameter;
+	return m_filterParameter.get();
 }
 
 struct WarpOp::Warp
@@ -234,7 +234,7 @@ void WarpOp::modifyTypedPrimitive( ImagePrimitive * image, const CompoundObject 
 		{
 			throw Exception( error );
 		}
-		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( it->second.data, w );
+		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( it->second.data.get(), w );
 	}
 	end();
 	image->setDataWindow( newDataWindow );

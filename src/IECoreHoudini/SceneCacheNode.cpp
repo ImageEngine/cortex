@@ -259,7 +259,7 @@ void SceneCacheNode<BaseType>::buildRootMenu( void *data, PRM_Name *menu, int ma
 	}
 	
 	std::vector<std::string> descendants;
-	node->descendantNames( node->scene( file, SceneInterface::rootName ), descendants );
+	node->descendantNames( node->scene( file, SceneInterface::rootName ).get(), descendants );
 	node->createMenu( menu, descendants );
 }
 
@@ -331,7 +331,7 @@ void SceneCacheNode<BaseType>::buildShapeFilterMenu( void *data, PRM_Name *menu,
 	}
 	
 	std::vector<std::string> objects;
-	node->objectNames( scene, objects );
+	node->objectNames( scene.get(), objects );
 	node->createMenu( menu, objects );
 }
 
@@ -551,7 +551,7 @@ void SceneCacheNode<BaseType>::descendantNames( const IECore::SceneInterface *sc
 	
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		descendantNames( scene->child( *it ), descendants );
+		descendantNames( scene->child( *it ).get(), descendants );
 	}
 };
 
@@ -572,7 +572,7 @@ void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene,
 	scene->childNames( children );
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
-		objectNames( scene->child( *it ), objects );
+		objectNames( scene->child( *it ).get(), objects );
 	}
 };
 

@@ -82,8 +82,8 @@ class ParameterisedProcedural : public VisibleRenderable, public ParameterisedIn
 		/// Forwards to doBound().
 		virtual Imath::Box3f bound() const;
 
-		virtual CompoundParameterPtr parameters();
-		virtual ConstCompoundParameterPtr parameters() const;
+		virtual CompoundParameter *parameters();
+		virtual const CompoundParameter *parameters() const;
 
 	protected :
 

@@ -43,7 +43,7 @@ size_t WrapperGarbageCollector::g_allocThreshold = 50;
 WrapperGarbageCollector::InstanceMap WrapperGarbageCollector::g_refCountedToPyObject;
 
 WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object )
-			:	m_pyObject( pyObject ), m_object( object )
+			:	m_pyObject( pyObject )
 {
 	g_allocCount++;
 
@@ -56,7 +56,7 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::Re
 }
 
 WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
-	:	m_pyObject( NULL ), m_object( NULL )
+	:	m_pyObject( NULL )
 {
 	assert( self );
 	assert( wrapped );

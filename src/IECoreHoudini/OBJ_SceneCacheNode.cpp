@@ -353,7 +353,7 @@ int OBJ_SceneCacheNode<BaseType>::expandButtonCallback( void *data, int index, f
 	}
 	
 	node->setDisplay( false );
-	node->expandHierarchy( node->scene( file, node->getPath() ) );
+	node->expandHierarchy( node->scene( file, node->getPath() ).get() );
 	node->setDisplay( true );
 	
 	return 1;
@@ -428,7 +428,7 @@ void OBJ_SceneCacheNode<BaseType>::updateState()
 	std::string path = this->getPath();
 	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
-	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene );
+	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene.get() );
 	
 	this->m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
 	

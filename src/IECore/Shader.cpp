@@ -115,7 +115,7 @@ bool Shader::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	return m_parameters->isEqualTo( s->m_parameters );
+	return m_parameters->isEqualTo( s->m_parameters.get() );
 }
 
 void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
@@ -123,7 +123,7 @@ void Shader::memoryUsage( Object::MemoryAccumulator &a ) const
 	StateRenderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
 	a.accumulate( m_type.capacity() );
-	a.accumulate( m_parameters );
+	a.accumulate( m_parameters.get() );
 }
 
 void Shader::copyFrom( const Object *other, CopyContext *context )
@@ -132,7 +132,7 @@ void Shader::copyFrom( const Object *other, CopyContext *context )
 	const Shader *s = static_cast<const Shader *>( other );
 	m_name = s->m_name;
 	m_type = s->m_type;
-	m_parameters = context->copy<CompoundData>( s->m_parameters );
+	m_parameters = context->copy<CompoundData>( s->m_parameters.get() );
 }
 
 void Shader::save( SaveContext *context ) const
@@ -141,7 +141,7 @@ void Shader::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
 	container->write( g_typeEntry, m_type );
-	context->save( m_parameters, container, g_parametersEntry );
+	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Shader::load( LoadContextPtr context )
@@ -151,7 +151,7 @@ void Shader::load( LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
 	container->read( g_typeEntry, m_type );
-	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
+	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
 void Shader::hash( MurmurHash &h ) const

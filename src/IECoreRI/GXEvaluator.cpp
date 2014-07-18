@@ -52,7 +52,7 @@ GXEvaluator::GXEvaluator( const IECore::Primitive *primitive )
 	RendererPtr renderer = new IECoreRI::Renderer();
 	RtObjectHandle objectHandle = RiObjectBegin();
 	
-		primitive->render( renderer );
+		primitive->render( renderer.get() );
 	
 	RiObjectEnd();
 	
@@ -186,7 +186,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 		
 	buildSTEvaluator();
 	
-	MeshPrimitiveEvaluator::ResultPtr evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_stEvaluator->createResult() );
+	MeshPrimitiveEvaluator::ResultPtr evaluatorResult = boost::static_pointer_cast<MeshPrimitiveEvaluator::Result>( m_stEvaluator->createResult() );
 	IntVectorDataPtr fData = new IntVectorData;
 	FloatVectorDataPtr uData = new FloatVectorData;
 	FloatVectorDataPtr vData = new FloatVectorData;
@@ -203,7 +203,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 	const PrimitiveVariable &vPrimVar = m_stEvaluator->primitive()->variables.find( "v" )->second;
 	for( size_t i=0; i<numPoints; i++ )
 	{
-		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], tReadable[i] ), evaluatorResult );
+		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], tReadable[i] ), evaluatorResult.get() );
 		// dividing by 2 maps from the triangle index to the original face index of the mesh before it
 		// was triangulated - we can guarantee this because the original mesh was all quads.
 		fWritable[i] = success ? evaluatorResult->triangleIndex() / 2 : 0;
@@ -212,7 +212,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 		statusWritable[i] = success;
 	}
 
-	CompoundDataPtr result = evaluate( fData, uData, vData, primVarNames );
+	CompoundDataPtr result = evaluate( fData.get(), uData.get(), vData.get(), primVarNames );
 	result->writable()["gxStatus"] = statusData;
 	
 	return result;
@@ -279,7 +279,7 @@ void GXEvaluator::buildSTEvaluator() const
 	primVarNames.push_back( "P" );
 	primVarNames.push_back( "s" );
 	primVarNames.push_back( "t" );
-	CompoundDataPtr vertexData = evaluate( faceIndicesData, uData, vData, primVarNames );
+	CompoundDataPtr vertexData = evaluate( faceIndicesData.get(), uData.get(), vData.get(), primVarNames );
 	
 	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
 	IntVectorDataPtr vertexIdsData = new IntVectorData;

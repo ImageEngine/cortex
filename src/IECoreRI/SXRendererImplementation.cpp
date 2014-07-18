@@ -345,7 +345,7 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
-			handleData = runTimeCast<const StringData>( it->second );
+			handleData = runTimeCast<const StringData>( it->second.get() );
 		}
 		if( !handleData )
 		{
@@ -733,7 +733,7 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2
 	points->writable()[ "s" ] = sData;
 	points->writable()[ "t" ] = tData;
 	
-	return shade( points, resolution );
+	return shade( points.get(), resolution );
 }
 
 IECore::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const

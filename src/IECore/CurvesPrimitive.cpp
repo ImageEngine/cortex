@@ -92,7 +92,7 @@ bool CurvesPrimitive::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	if( !m_vertsPerCurve->isEqualTo( tOther->m_vertsPerCurve ) )
+	if( !m_vertsPerCurve->isEqualTo( tOther->m_vertsPerCurve.get() ) )
 	{
 		return false;
 	}
@@ -121,7 +121,7 @@ void CurvesPrimitive::save( IECore::Object::SaveContext *context ) const
 	container->write( g_basisStepEntry, m_basis.step );
 	int p = m_periodic;
 	container->write( g_periodicEntry, p );
-	context->save( m_vertsPerCurve, container, g_verticesPerCurveEntry );
+	context->save( m_vertsPerCurve.get(), container.get(), g_verticesPerCurveEntry );
 	// we could recompute these on loading, but it'd take a while and the overhead
 	// of storing them isn't great.
 	container->write( g_numVertsEntry, m_numVerts );
@@ -141,7 +141,7 @@ void CurvesPrimitive::load( IECore::Object::LoadContextPtr context )
 	int p = 0;
 	container->read( g_periodicEntry, p );
 	m_periodic = p;
-	m_vertsPerCurve = context->load<IntVectorData>( container, g_verticesPerCurveEntry );
+	m_vertsPerCurve = context->load<IntVectorData>( container.get(), g_verticesPerCurveEntry );
 	container->read( g_numVertsEntry, m_numVerts );
 	container->read( g_numFaceVaryingEntry, m_numFaceVarying );
 }
@@ -150,7 +150,7 @@ void CurvesPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Primitive::memoryUsage( a );
 	a.accumulate( sizeof( CubicBasisf ) + sizeof( bool ) * 2 + sizeof( unsigned ) * 2 );
-	a.accumulate( m_vertsPerCurve );
+	a.accumulate( m_vertsPerCurve.get() );
 }
 
 void CurvesPrimitive::hash( MurmurHash &h ) const

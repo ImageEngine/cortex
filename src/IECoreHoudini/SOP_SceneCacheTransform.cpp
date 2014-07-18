@@ -175,12 +175,12 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 	
 	if ( mode == Root )
 	{
-		UT_Matrix4 transform = getTransform( scene, scene, readTime, space, invert );
+		UT_Matrix4 transform = getTransform( scene.get(), scene.get(), readTime, space, invert );
 		gdp->transform( transform );
 	}
 	else if ( mode == Name )
 	{
-		transformByName( scene, readTime, space, invert );
+		transformByName( scene.get(), readTime, space, invert );
 	}
 	else
 	{
@@ -258,7 +258,7 @@ void SOP_SceneCacheTransform::transformByName( const SceneInterface *scene, doub
 		
 		if ( ConstSceneInterfacePtr leaf = scene->scene( fullPath, SceneInterface::NullIfMissing ) )
 		{
-			UT_Matrix4 transform = getTransform( scene, leaf, time, space, invert );
+			UT_Matrix4 transform = getTransform( scene, leaf.get(), time, space, invert );
 			gdp->transform( transform, it->second, false );
 		}
 	}
@@ -269,7 +269,7 @@ UT_Matrix4 SOP_SceneCacheTransform::getTransform( const SceneInterface *rootScen
 	Imath::M44d transform;
 	if ( space == World )
 	{
-		transform = relativeTransform( scene->scene( SceneInterface::rootPath ), scene, time );
+		transform = relativeTransform( scene->scene( SceneInterface::rootPath ).get(), scene, time );
 	}
 	else if ( space == Local )
 	{
@@ -328,7 +328,7 @@ Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECore::SceneInter
 			break;
 		}
 		
-		if ( const SampledSceneInterface *sampledCurrent = IECore::runTimeCast<const SampledSceneInterface>( current ) )
+		if ( const SampledSceneInterface *sampledCurrent = IECore::runTimeCast<const SampledSceneInterface>( current.get() ) )
 		{
 			if ( sampledCurrent->numTransformSamples() > 1 )
 			{

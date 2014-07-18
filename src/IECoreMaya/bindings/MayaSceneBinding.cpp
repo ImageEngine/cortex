@@ -58,14 +58,31 @@ class CustomTagReader
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			return m_has( p.asChar(), tag, filter );
+			try
+			{
+				return m_has( p.asChar(), tag, filter );
+			}
+			catch ( error_already_set )
+			{
+				PyErr_Print();
+				throw IECore::Exception( std::string( "Python exception while checking MayaScene tag " + tag.string() ) );
+			}
 		}
 		
 		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_read( p.asChar(), filter );
+			object o;
+			try
+			{
+				o = m_read( p.asChar(), filter );
+			}
+			catch ( error_already_set )
+			{
+				PyErr_Print();
+				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene tags" ) );
+			}
 			extract<list> l( o );
 			if ( !l.check() )
 			{
@@ -96,15 +113,32 @@ class CustomAttributeReader
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			IECore::ConstObjectPtr result = extract<IECore::ConstObjectPtr>(m_read( p.asChar(), attr ));
-			return result;
+			try
+			{
+				return extract<IECore::ConstObjectPtr>(m_read( p.asChar(), attr ));
+			}
+			catch ( error_already_set )
+			{
+				PyErr_Print();
+				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene attribute " + attr.string() ) );
+			}
 		}
 		
 		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
-			object o = m_names( p.asChar() );
+			object o;
+			try
+			{
+				o = m_names( p.asChar() );
+			}
+			catch ( error_already_set )
+			{
+				PyErr_Print();
+				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for MayaScene." ) );
+			}
+			
 			extract<list> l( o );
 			if ( !l.check() )
 			{

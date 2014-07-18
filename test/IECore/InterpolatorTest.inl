@@ -70,34 +70,34 @@ void LinearInterpolatorTest<T>::testTyped()
 {
 	LinearInterpolator<TypedData<T> > interp;
 
-	IntrusivePtr<TypedData<T> > p0, p1;
+	typename TypedData<T>::Ptr p0, p1;
 
-	IntrusivePtr<TypedData<T> > result = new TypedData<T>();
+	typename TypedData<T>::Ptr result = new TypedData<T>();
 
 	p0 = new TypedData<T>(T(0.0));
 	p1 = new TypedData<T>(T(1.0));
-	interp( p0, p1, 0.5, result);
+	interp( p0.get(), p1.get(), 0.5, result);
 	BOOST_CHECK_EQUAL(T(0.5), result->readable());
 
-	interp( p0, p1, 0.0, result);
+	interp( p0.get(), p1.get(), 0.0, result);
 	BOOST_CHECK_EQUAL(T(0.0), result->readable());
 
-	interp( p0, p1, 1.0, result);
+	interp( p0.get(), p1.get(), 1.0, result);
 	BOOST_CHECK_EQUAL(T(1.0), result->readable());
 
 	p0 = new TypedData<T>(T(50.0));
 	p1 = new TypedData<T>(T(80.0));
-	interp( p0, p1, 0.5, result);
+	interp( p0.get(), p1.get(), 0.5, result);
 	BOOST_CHECK_EQUAL(T(65.0), result->readable());
 
 	p0 = new TypedData<T>(T(10.0));
 	p1 = new TypedData<T>(T(20.0));
-	interp(p0, p1, 0.6, result);
+	interp(p0.get(), p1.get(), 0.6, result);
 	BOOST_CHECK_EQUAL(T(16.0), result->readable());
 
 	p0 = new TypedData<T>(T(-10.0));
 	p1 = new TypedData<T>(T(5.0));
-	interp( p0, p1, 0.5, result);
+	interp( p0.get(), p1.get(), 0.5, result);
 	BOOST_CHECK_EQUAL(T(-2.5), result->readable());
 
 }
@@ -107,7 +107,7 @@ void LinearInterpolatorTest<T>::testVector()
 {
 	LinearInterpolator<TypedData<std::vector<T> > > interp;
 
-	IntrusivePtr<TypedData<std::vector<T> > > p0, p1, result;
+	typename TypedData<std::vector<T> >::Ptr p0, p1, result;
 
 	p0 = new TypedData<std::vector<T> >();
 	p1 = new TypedData<std::vector<T> >();
@@ -125,7 +125,7 @@ void LinearInterpolatorTest<T>::testVector()
 	p0->writable().push_back( T(15.0) );
 	p1->writable().push_back( T(4.0) );
 
-	interp( p0, p1, 0.5, result );
+	interp( p0.get(), p1.get(), 0.5, result );
 
 	BOOST_CHECK_EQUAL( result->readable().size(), 4u );
 
@@ -165,36 +165,36 @@ void CubicInterpolatorTest<T>::testTyped()
 {
 	CubicInterpolator<TypedData<T > > interp;
 
-	IntrusivePtr<TypedData<T > > result = new TypedData<T>();
+	typename TypedData<T>::Ptr result = new TypedData<T>();
 
-	IntrusivePtr<TypedData<T> > p0, p1, p2, p3;
+	typename TypedData<T>::Ptr p0, p1, p2, p3;
 
 	p0 = new TypedData<T>( T(0.0));
 	p1 = new TypedData<T>( T(0.0));
 	p2 = new TypedData<T>( T(1.0));
 	p3 = new TypedData<T>( T(1.0));
 
-	interp( p0, p1, p2, p3, 0.5, result);
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 0.5, result);
 	BOOST_CHECK_EQUAL(T(0.5), result->readable());
 
-	interp( p0, p1, p2, p3, 0.0, result);
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 0.0, result);
 	BOOST_CHECK_EQUAL(T(0.0), result->readable());
 
-	interp( p0, p1, p2, p3, 1.0, result);
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 1.0, result);
 	BOOST_CHECK_EQUAL(T(1.0), result->readable());
 
 	p0 = new TypedData<T>( T(-1.0));
 	p1 = new TypedData<T>( T(0.0));
 	p2 = new TypedData<T>( T(1.0));
 	p3 = new TypedData<T>( T(2.0));
-	interp( p0, p1, p2, p3, 1.0, result);
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 1.0, result);
 	BOOST_CHECK_EQUAL(T(1.0), result->readable());
 
 	p0 = new TypedData<T>( T(-15.0));
 	p1 = new TypedData<T>( T(0.0));
 	p2 = new TypedData<T>( T(-1.0));
 	p3 = new TypedData<T>( T(4.0));
-	interp( p0, p1, p2, p3, 0.5, result);
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 0.5, result);
 	BOOST_CHECK_EQUAL(T(0.75), result->readable());
 
 }
@@ -204,7 +204,7 @@ void CubicInterpolatorTest<T>::testVector()
 {
 	CubicInterpolator<TypedData<std::vector<T> > > interp;
 
-	IntrusivePtr<TypedData<std::vector<T> > > p0, p1, p2, p3, result;
+	typename TypedData<std::vector<T> >::Ptr p0, p1, p2, p3, result;
 
 	p0 = new TypedData<std::vector<T> >();
 	p1 = new TypedData<std::vector<T> >();
@@ -218,7 +218,7 @@ void CubicInterpolatorTest<T>::testVector()
 	p2->writable().push_back( T(32.0) );
 	p3->writable().push_back( T(128.0) );
 
-	interp( p0, p1, p2, p3, 0.75, result );
+	interp( p0.get(), p1.get(), p2.get(), p3.get(), 0.75, result );
 
 	BOOST_CHECK_EQUAL( result->readable().size(), 1u );
 
@@ -283,7 +283,7 @@ void MatrixLinearInterpolatorTest<T>::testTyped()
 	typedef typename Imath::Vec3< T > Vector;
 	
 	typedef TypedData< Matrix > MatrixData;
-	typedef IntrusivePtr< MatrixData > MatrixDataPtr;
+	typedef typename MatrixData::Ptr MatrixDataPtr;
 	
 	LinearInterpolator< MatrixData > interp;
 	LinearInterpolator< Vector > vectorInterp;
@@ -302,7 +302,7 @@ void MatrixLinearInterpolatorTest<T>::testTyped()
 	for( int i = 0; i < 11; ++i )
 	{
 		MatrixDataPtr result = new MatrixData;
-		interp( m0, m1, T(i)/10, result );
+		interp( m0.get(), m1.get(), T(i)/10, result );
 		Vector s, h, r, t;
 		extractSHRT( result->readable(), s, h, r, t );
 		
@@ -333,10 +333,10 @@ void MatrixLinearInterpolatorTest<T>::testVector()
 	typedef std::vector< Vector > VectorVector;
 	
 	typedef TypedData< MatrixVector > MatrixVectorData;
-	typedef IntrusivePtr< MatrixVectorData > MatrixVectorDataPtr;
+	typedef typename MatrixVectorData::Ptr MatrixVectorDataPtr;
 	
 	typedef TypedData< VectorVector > VectorVectorData;
-	typedef IntrusivePtr< VectorVectorData > VectorVectorDataPtr;
+	typedef typename VectorVectorData::Ptr VectorVectorDataPtr;
 	
 	
 	LinearInterpolator< MatrixVectorData > interp;
@@ -385,17 +385,17 @@ void MatrixLinearInterpolatorTest<T>::testVector()
 	{
 		MatrixVectorDataPtr result = new MatrixVectorData;
 		
-		interp( m0, m1, T(i)/10, result );
+		interp( m0.get(), m1.get(), T(i)/10, result );
 		
 		VectorVectorDataPtr sTrue = new VectorVectorData;
 		VectorVectorDataPtr hTrue = new VectorVectorData;
 		VectorVectorDataPtr rTrue = new VectorVectorData;
 		VectorVectorDataPtr tTrue = new VectorVectorData;
 		
-		vectorInterp( s0, s1, T(i)/10, sTrue );
-		vectorInterp( h0, h1, T(i)/10, hTrue );
-		vectorInterp( r0, r1, T(i)/10, rTrue );
-		vectorInterp( t0, t1, T(i)/10, tTrue );
+		vectorInterp( s0.get(), s1.get(), T(i)/10, sTrue );
+		vectorInterp( h0.get(), h1.get(), T(i)/10, hTrue );
+		vectorInterp( r0.get(), r1.get(), T(i)/10, rTrue );
+		vectorInterp( t0.get(), t1.get(), T(i)/10, tTrue );
 		
 		
 		for( int j=0; j < 4; ++j )
@@ -487,7 +487,7 @@ void MatrixCubicInterpolatorTest<T>::testTyped()
 	typedef typename Imath::Vec3< T > Vector;
 	
 	typedef TypedData< Matrix > MatrixData;
-	typedef IntrusivePtr< MatrixData > MatrixDataPtr;
+	typedef typename MatrixData::Ptr MatrixDataPtr;
 	
 	CubicInterpolator< MatrixData > interp;
 	CubicInterpolator< Vector > vectorInterp;
@@ -521,7 +521,7 @@ void MatrixCubicInterpolatorTest<T>::testTyped()
 	for( int i = 0; i < 11; ++i )
 	{
 		MatrixDataPtr result = new MatrixData;
-		interp( m0, m1, m2, m3, T(i)/10, result );
+		interp( m0.get(), m1.get(), m2.get(), m3.get(), T(i)/10, result );
 		Vec3<T> s, h, r, t;
 		extractSHRT( result->readable(), s, h, r, t );
 		
@@ -555,11 +555,10 @@ void MatrixCubicInterpolatorTest<T>::testVector()
 	typedef std::vector< Vector > VectorVector;
 	
 	typedef TypedData< MatrixVector > MatrixVectorData;
-	typedef IntrusivePtr< MatrixVectorData > MatrixVectorDataPtr;
+	typedef typename MatrixVectorData::Ptr MatrixVectorDataPtr;
 	
 	typedef TypedData< VectorVector > VectorVectorData;
-	typedef IntrusivePtr< VectorVectorData > VectorVectorDataPtr;
-	
+	typedef typename VectorVectorData::Ptr VectorVectorDataPtr;
 	
 	CubicInterpolator< MatrixVectorData > interp;
 	CubicInterpolator< VectorVectorData > vectorInterp;
@@ -601,15 +600,15 @@ void MatrixCubicInterpolatorTest<T>::testVector()
 	{
 		MatrixVectorDataPtr result = new MatrixVectorData;
 		
-		interp( mSamples[0], mSamples[1], mSamples[2], mSamples[3], T(i)/10, result );
+		interp( mSamples[0].get(), mSamples[1].get(), mSamples[2].get(), mSamples[3].get(), T(i)/10, result );
 		
 		VectorVectorDataPtr sTrue = new VectorVectorData;
 		VectorVectorDataPtr hTrue = new VectorVectorData;
 		VectorVectorDataPtr tTrue = new VectorVectorData;
 		
-		vectorInterp( sSamples[0], sSamples[1], sSamples[2], sSamples[3], T(i)/10, sTrue );
-		vectorInterp( hSamples[0], hSamples[1], hSamples[2], hSamples[3], T(i)/10, hTrue );
-		vectorInterp( tSamples[0], tSamples[1], tSamples[2], tSamples[3], T(i)/10, tTrue );
+		vectorInterp( sSamples[0].get(), sSamples[1].get(), sSamples[2].get(), sSamples[3].get(), T(i)/10, sTrue );
+		vectorInterp( hSamples[0].get(), hSamples[1].get(), hSamples[2].get(), hSamples[3].get(), T(i)/10, hTrue );
+		vectorInterp( tSamples[0].get(), tSamples[1].get(), tSamples[2].get(), tSamples[3].get(), T(i)/10, tTrue );
 		
 		// \todo: quaternion cubic interpolation doesn't currently
 		// give the cubic interpolated angle in this case, so we're not checking r.

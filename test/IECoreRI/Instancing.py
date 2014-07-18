@@ -228,8 +228,8 @@ class InstancingTest( IECoreRI.TestCase ) :
 				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
 				"projection" : StringData( "perspective" ),
 				"projection:fov" : FloatData( 45 ),
-				"ri:hider" : StringData( "raytrace" ),
 			} )
+			r.setOption( "ri:hider", StringData( "raytrace" ) )
 			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
 			
 			# chuck a couple of procedurals at it:
@@ -308,8 +308,8 @@ class InstancingTest( IECoreRI.TestCase ) :
 				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
 				"projection" : StringData( "perspective" ),
 				"projection:fov" : FloatData( 45 ),
-				"ri:hider" : StringData( "raytrace" ),
 			} )
+			r.setOption( "ri:hider", StringData( "raytrace" ) )
 			r.setOption( "ri:trace:shareinstances", IntData( 1 ) )
 			
 			# chuck a couple of procedurals at it:

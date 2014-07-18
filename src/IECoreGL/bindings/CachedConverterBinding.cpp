@@ -47,7 +47,7 @@ using namespace IECoreGL;
 static IECore::RunTimeTypedPtr convert( CachedConverter &c, IECore::ObjectPtr o )
 {
 	IECorePython::ScopedGILRelease gilRelease;
-	return IECore::constPointerCast<IECore::RunTimeTyped>( c.convert( o.get() ) );
+	return boost::const_pointer_cast<IECore::RunTimeTyped>( c.convert( o.get() ) );
 }
 
 void IECoreGL::bindCachedConverter()
@@ -58,6 +58,7 @@ void IECoreGL::bindCachedConverter()
 		.def( "getMaxMemory", &CachedConverter::getMaxMemory )
 		.def( "setMaxMemory", &CachedConverter::setMaxMemory )
 		.def( "clearUnused", &CachedConverter::clearUnused )
-		.def( "defaultCachedConverter", &CachedConverter::defaultCachedConverter ).staticmethod( "defaultCachedConverter" )
+		.def( "defaultCachedConverter", &CachedConverter::defaultCachedConverter, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.staticmethod( "defaultCachedConverter" )
 	;
 }

@@ -54,7 +54,7 @@ std::string repr( ExclusionFrameList &x )
 
 	s << "IECore.ExclusionFrameList( ";
 
-	object item( x.getFrameList() );
+	object item( FrameListPtr( x.getFrameList() ) );
 
 	s << call_method< std::string >( item.ptr(), "__repr__" );
 

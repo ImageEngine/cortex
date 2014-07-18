@@ -248,7 +248,7 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 void bindFileSequenceVectorParameter()
 {
 
-	RunTimeTypedClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrap::Ptr>()
+	RunTimeTypedClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrap>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
 			(

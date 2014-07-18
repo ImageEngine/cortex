@@ -91,42 +91,42 @@ PointsMotionOp::~PointsMotionOp()
 
 FloatVectorParameter * PointsMotionOp::snapshotTimesParameter()
 {
-	return m_snapshotTimesParameter;
+	return m_snapshotTimesParameter.get();
 }
 
 const FloatVectorParameter * PointsMotionOp::snapshotTimesParameter() const
 {
-	return m_snapshotTimesParameter;
+	return m_snapshotTimesParameter.get();
 }
 
 ObjectVectorParameter * PointsMotionOp::pointsPrimitiveVectorParameter()
 {
-	return m_pointsPrimitiveVectorParameter;
+	return m_pointsPrimitiveVectorParameter.get();
 }
 
 const ObjectVectorParameter * PointsMotionOp::pointsPrimitiveVectorParameter() const
 {
-	return m_pointsPrimitiveVectorParameter;
+	return m_pointsPrimitiveVectorParameter.get();
 }
 
 StringParameter * PointsMotionOp::idPrimVarNameParameter()
 {
-	return m_idPrimVarNameParameter;
+	return m_idPrimVarNameParameter.get();
 }
 
 const StringParameter * PointsMotionOp::idPrimVarNameParameter() const
 {
-	return m_idPrimVarNameParameter;
+	return m_idPrimVarNameParameter.get();
 }
 
 StringVectorParameter * PointsMotionOp::maskedPrimVarsParameter()
 {
-	return m_maskedPrimVarsParameter;
+	return m_maskedPrimVarsParameter.get();
 }
 
 const StringVectorParameter * PointsMotionOp::maskedPrimVarsParameter() const
 {
-	return m_maskedPrimVarsParameter;
+	return m_maskedPrimVarsParameter.get();
 }
 
 struct PointsMotionOp::IdInfo
@@ -159,7 +159,7 @@ struct PointsMotionOp::PrimVarBuilder
 	}
 
 	template<typename T>
-	ReturnType operator() ( typename T::Ptr data )
+	ReturnType operator() ( T *data )
 	{
 		typename T::Ptr newData = new T();
 		const typename T::ValueType &dataVec = data->readable();
@@ -179,7 +179,7 @@ struct PointsMotionOp::PrimVarBuilder
 			std::vector< const typename T::ValueType * > snapshots;
 			for ( std::vector<ObjectPtr>::const_iterator it = m_objectVector.begin(); it != m_objectVector.end(); it++ )
 			{
-				ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+				ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 				typename T::ConstPtr primVarData = points->variableData< T >( m_primVarName );
 				assert( primVarData );
 				snapshots.push_back( &primVarData->readable() );
@@ -211,7 +211,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 {
 	const std::string &idPrimVarName = idPrimVarNameParameter()->getTypedValue();
 	const std::vector<float> &snapshotTimes = m_snapshotTimesParameter->getTypedValue();
-	const std::vector<ObjectPtr> &objectVector = staticPointerCast< ObjectVector, Object >( m_pointsPrimitiveVectorParameter->getValue() )->members();
+	const std::vector<ObjectPtr> &objectVector = boost::static_pointer_cast< ObjectVector, Object >( m_pointsPrimitiveVectorParameter->getValue() )->members();
 	const std::vector<std::string> &maskedPrimvars = m_maskedPrimVarsParameter->getTypedValue();
 	std::set< std::string > maskedPrimvarsSet;
 
@@ -244,7 +244,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Invalid object passed on pointsPrimitives parameter!" );
 		}
-		ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+		ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 
 		if ( !points->arePrimitiveVariablesValid() )
 		{
@@ -309,7 +309,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 	snapshot = 0;
 	for ( std::vector<ObjectPtr>::const_iterator it = objectVector.begin(); it != objectVector.end(); it++, snapshot++ )
 	{
-		ConstPointsPrimitivePtr points = staticPointerCast< const PointsPrimitive >( *it );
+		ConstPointsPrimitivePtr points = boost::static_pointer_cast< const PointsPrimitive >( *it );
 		PointsPrimitivePtr primitive = new PointsPrimitive( totalPoints );
 
 		// Set the 'id' primVar value with the complete list of ids from the map.
@@ -329,7 +329,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 				bool masked = ( maskedPrimvarsSet.find( pIt->first ) != maskedPrimvarsSet.end() );
 				PrimVarBuilder primVarBuilder( pIt->first, masked, snapshot, ids, idMap, objectVector );
 				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation, 
-						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data, primVarBuilder ) 
+						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data.get(), primVarBuilder ) 
 				);
 			}
 		}

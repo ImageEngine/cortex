@@ -63,12 +63,12 @@ CurvesMergeOp::~CurvesMergeOp()
 
 CurvesPrimitiveParameter * CurvesMergeOp::curvesParameter()
 {
-	return m_curvesParameter;
+	return m_curvesParameter.get();
 }
 
 const CurvesPrimitiveParameter * CurvesMergeOp::curvesParameter() const
 {
-	return m_curvesParameter;
+	return m_curvesParameter.get();
 }
 
 struct CurvesMergeOp::AppendPrimVars
@@ -87,7 +87,7 @@ struct CurvesMergeOp::AppendPrimVars
 		PrimitiveVariableMap::const_iterator it = m_curves2->variables.find( m_name );
 		if( it!=m_curves2->variables.end() )
 		{
-			const T *data2 = runTimeCast<const T>( it->second.data );
+			const T *data2 = runTimeCast<const T>( it->second.data.get() );
 			if( data2 )
 			{
 				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
@@ -124,7 +124,7 @@ void CurvesMergeOp::modifyTypedPrimitive( CurvesPrimitive * curves, const Compou
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
 			AppendPrimVars f( curves2, pvIt->first );
-			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data, f );
+			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
 		}
 	}
 }

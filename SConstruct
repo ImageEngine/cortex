@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=9
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a1"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -3062,6 +3062,16 @@ if doConfigure :
 		
 	else :
 	
+		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
+			alembicEnv.Prepend(
+				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
+				LIBS = [
+					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
+					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
+				]
+			)
+			
 		c.Finish()	
 		
 		alembicSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/*.cpp" ) )

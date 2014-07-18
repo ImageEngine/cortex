@@ -76,7 +76,7 @@ void Scene::render( State *state ) const
 void Scene::render() const
 {
 	/// \todo Can we avoid this cast?
-	render( const_cast<State *>( State::defaultState().get() ) );
+	render( const_cast<State *>( State::defaultState() ) );
 }
 
 Imath::Box3f Scene::bound() const
@@ -88,7 +88,7 @@ size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vect
 {
 	if( m_camera )
 	{
-		m_camera->render( const_cast<State *>( State::defaultState().get() ) );
+		m_camera->render( const_cast<State *>( State::defaultState() ) );
 	}
 
 	Selector selector( region, mode, hits );

@@ -115,14 +115,12 @@ bool withDeepEXR();
 /// \section mainPageMemoryManagementSection Memory Management
 ///
 /// IECore uses reference counting for any reasonably complex class. The \link IECore::RefCounted RefCounted \endlink
-/// base class provides an internal reference count for the object, and IECore::IntrusivePtr
-/// is used most places where raw pointers would otherwise be used. This means that
-/// generally you don't need to worry about memory management - objects die appropriately
-/// when the last IntrusivePtr pointing to them goes out of scope.
+/// base class provides an internal reference count for the object, and boost::intrusive_ptr
+/// is used to share ownsership amongst interested parties.
 ///
 /// For convenience, all classes define typedefs of the form ClassPtr, ConstClassPtr,
 /// Class::Ptr and Class::ConstPtr - these should be used in preference to the
-/// clunkier IntrusivePtr<Class> syntax.
+/// clunkier boost::intrusive_ptr<Class> syntax.
 ///
 /// \code
 ///	{

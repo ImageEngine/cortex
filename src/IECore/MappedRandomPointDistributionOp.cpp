@@ -90,22 +90,22 @@ MappedRandomPointDistributionOp::~MappedRandomPointDistributionOp()
 
 ImagePrimitiveParameter * MappedRandomPointDistributionOp::imageParameter()
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 const ImagePrimitiveParameter * MappedRandomPointDistributionOp::imageParameter() const
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 StringParameter * MappedRandomPointDistributionOp::channelNameParameter()
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 const StringParameter * MappedRandomPointDistributionOp::channelNameParameter() const
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 float MappedRandomPointDistributionOp::density( const MeshPrimitive * mesh, const Imath::V3f &point, const Imath::V2f &uv ) const
@@ -138,7 +138,7 @@ float MappedRandomPointDistributionOp::density( const MeshPrimitive * mesh, cons
 		placedUv.y = fmod( (double)placedUv.y, 1.0 );
 	}
 
-	bool found = m_imageEvaluator->pointAtUV( placedUv, constPointerCast<PrimitiveEvaluator::Result>( m_result ) );
+	bool found = m_imageEvaluator->pointAtUV( placedUv, m_result.get() );
 
 	if ( found )
 	{

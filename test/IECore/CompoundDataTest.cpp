@@ -195,19 +195,19 @@ struct CompoundDataTest
 			CompoundDataPtr c2 = new CompoundData();
 			c2->writable()["nullElement"] = 0;
 
-			bool i = c->isEqualTo( c );
+			bool i = c->isEqualTo( c.get() );
 			BOOST_CHECK( i );
 
-			i = c->isEqualTo( c2 );
+			i = c->isEqualTo( c2.get() );
 			BOOST_CHECK( i );
 
-			i = c2->isEqualTo( c );
+			i = c2->isEqualTo( c.get() );
 			BOOST_CHECK( i );
 
-			i = c->isEqualTo( d );
+			i = c->isEqualTo( d.get() );
 			BOOST_CHECK( !i );
 
-			i = d->isEqualTo( c );
+			i = d->isEqualTo( c.get() );
 			BOOST_CHECK( !i );
 
 		}

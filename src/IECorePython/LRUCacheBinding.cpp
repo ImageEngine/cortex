@@ -36,14 +36,31 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "tbb/tbb.h"
+
 #include "IECore/LRUCache.h"
 
 #include "IECorePython/ScopedGILRelease.h"
+#include "IECorePython/LRUCacheBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace tbb;
 
-namespace IECorePython
+namespace boost
+{
+namespace python
+{
+
+inline size_t tbb_hasher( const boost::python::object &o )
+{
+	return PyObject_Hash( o.ptr() );
+}
+
+} // namespace boost
+} // namespace python
+
+namespace
 {
 
 struct LRUCacheGetter
@@ -107,7 +124,7 @@ class PythonLRUCache : public LRUCache<object, object>
 			
 			Mutex::scoped_lock lock;
 			{
-				ScopedGILRelease gilRelease;
+				IECorePython::ScopedGILRelease gilRelease;
 				lock.acquire( m_getMutex );
 			}
 			return LRUCache<object, object>::get( key );
@@ -115,11 +132,94 @@ class PythonLRUCache : public LRUCache<object, object>
 
 	private :
 	
+		typedef tbb::mutex Mutex;
 		Mutex m_getMutex;
 
 };
 
-void bindLRUCache()
+} // namespace
+
+typedef LRUCache<int, int> TestCache;
+
+static int get( int key, size_t &cost )
+{
+	cost = 1;
+	return key;
+}
+
+struct GetFromTestCache
+{
+	public :
+	
+		GetFromTestCache( TestCache &cache, size_t numValues, size_t clearFrequency )
+			:	m_cache( cache ), m_numValues( numValues ), m_clearFrequency( clearFrequency )
+		{
+		}
+		
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				const int k = i % m_numValues;
+				const int v = m_cache.get( k );
+				if( k != v )
+				{
+					throw Exception( "Incorrect LRUCache value found" );
+				}
+				
+				if( m_clearFrequency && (i % m_clearFrequency == 0) )
+				{
+					m_cache.clear();
+				}
+			}
+		}
+		
+	private :
+	
+		TestCache &m_cache;
+		size_t m_numValues;
+		size_t m_clearFrequency;
+		
+};
+	
+void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int clearFrequency = 0 )
+{
+	// do lots of parallel cache accesses. then clear the cache in the main
+	// thread and check that it has emptied successfully, to ensure that the
+	// cost counting has been accurate.
+
+	TestCache cache( get, maxCost );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues, clearFrequency ) );
+	
+	if( cache.currentCost() > cache.getMaxCost() )
+	{
+		throw Exception( "LRUCache exceeds maximum cost" );
+	}
+	
+	cache.clear();
+	if( cache.currentCost() != 0 )
+	{
+		throw Exception( "Cost not 0 after LRUCache::clear()" );
+	}
+	
+	// as above, but using setMaxCost( 0 ) to clear the cache.
+
+	TestCache cache2( get, maxCost );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache2, numValues, clearFrequency ) );
+
+	if( cache2.currentCost() > cache2.getMaxCost() )
+	{
+		throw Exception( "LRUCache exceeds maximum cost" );
+	}
+	
+	cache2.setMaxCost( 0 );
+	if( cache2.currentCost() != 0 )
+	{
+		throw Exception( "Cost not 0 after LRUCache::setMaxCost( 0 )" );
+	}
+}
+
+void IECorePython::bindLRUCache()
 {
 	
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
@@ -134,6 +234,17 @@ void bindLRUCache()
 		.def( "set", &PythonLRUCache::set )
 		.def( "cached", &PythonLRUCache::cached )
 	;
+	
+	/// \todo If we create an IECoreTest module, move this into it.
+	def(
+		"testLRUCacheThreading",
+		testLRUCacheThreading,
+		(
+			boost::python::arg( "numIterations" ),
+			boost::python::arg( "numValues" ),
+			boost::python::arg( "maxCost" ),
+			boost::python::arg( "clearFrequency" ) = 0
+		)
+	);
+	
 }
-
-} // namespace IECorePython

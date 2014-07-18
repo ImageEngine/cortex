@@ -74,7 +74,7 @@ static void bindTypedObjectParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<TypedObjectParameter<T>, typename TypedObjectParameterWrap<T>::Ptr >()
+	RunTimeTypedClass<TypedObjectParameter<T>, TypedObjectParameterWrap<T> >()
 		.def(
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
 			(

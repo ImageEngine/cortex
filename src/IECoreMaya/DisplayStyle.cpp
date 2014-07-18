@@ -101,15 +101,15 @@ IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, M3dView::
 				Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
 				m_data->boundsState->add( new IECoreGL::BoundColorStateComponent( wc ) );
 			}
-			return m_data->boundsState;
+			return m_data->boundsState.get();
 
 		case M3dView::kFlatShaded :
 		case M3dView::kGouraudShaded :
 			if ( lightingMode != M3dView::kLightDefault )
 			{
-				return m_data->litState;
+				return m_data->litState.get();
 			}
-			return m_data->shadedState;
+			return m_data->shadedState.get();
 
 		case M3dView::kWireFrame :
 			if( transferCurrentColor )
@@ -117,7 +117,7 @@ IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, M3dView::
 				Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
 				m_data->wireframeState->add( new IECoreGL::WireframeColorStateComponent( wc ) );
 			}
-			return m_data->wireframeState;
+			return m_data->wireframeState.get();
 
 		case M3dView::kPoints :
 			if( transferCurrentColor )
@@ -125,10 +125,10 @@ IECoreGL::State *DisplayStyle::baseState( M3dView::DisplayStyle style, M3dView::
 				Imath::Color4f wc; glGetFloatv( GL_CURRENT_COLOR, wc.getValue() );
 				m_data->pointsState->add( new IECoreGL::PointColorStateComponent( wc ) );
 			}
-			return m_data->pointsState;
+			return m_data->pointsState.get();
 
 		default :
-			return m_data->shadedState;
+			return m_data->shadedState.get();
 
 	}
 }

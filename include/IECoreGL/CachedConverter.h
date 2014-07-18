@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,10 +35,7 @@
 #ifndef IECOREGL_CACHEDCONVERTER_H
 #define IECOREGL_CACHEDCONVERTER_H
 
-#include "boost/function.hpp"
-
 #include "IECore/Object.h"
-#include "IECore/MurmurHash.h"
 
 namespace IECoreGL
 {
@@ -59,11 +56,6 @@ class CachedConverter : public IECore::RefCounted
 		/// Returns the object converted to an appropriate IECoreGL type, reusing
 		/// a previous conversion where possible.
 		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object );
-
-		typedef boost::function<IECore::RunTimeTypedPtr (const IECore::Object *)> ConverterFn;
-
-		/// Uses a custom converter for the given object. The converter is a callable object of the type ConverterFn but it also must implement a hash( object ) method.
-		template< typename T >	IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object, T converter );
 		
 		/// Returns the maximum amount of memory (in bytes) the cache will use.
 		size_t getMaxMemory() const;
@@ -86,11 +78,9 @@ class CachedConverter : public IECore::RefCounted
 		/// this wherever possible to conserve memory. This initially
 		/// has a memory limit specified in megabytes by the
 		/// IECOREGL_CACHEDCONVERTER_MEMORY environment variable.
-		static CachedConverterPtr defaultCachedConverter();
+		static CachedConverter *defaultCachedConverter();
 
 	private :
-
-		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object, ConverterFn converter, const IECore::MurmurHash &converterHash );
 
 		struct MemberData;
 		MemberData *m_data;
@@ -98,7 +88,5 @@ class CachedConverter : public IECore::RefCounted
 };
 
 } // namespace IECoreGL
-
-#include "IECoreGL/CachedConverter.inl"
 
 #endif // IECOREGL_CACHEDCONVERTER_H

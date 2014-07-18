@@ -161,7 +161,7 @@ static int procInit( AtNode *node, void **userPtr )
 	if( parameterisedProcedural )
 	{
 		IECoreArnold::RendererPtr renderer = new IECoreArnold::Renderer( node );
-		parameterisedProcedural->render( renderer );
+		parameterisedProcedural->render( renderer.get() );
 			
 		renderer->addRef();
 		*userPtr = renderer.get();

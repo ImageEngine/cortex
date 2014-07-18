@@ -188,7 +188,7 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 			ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
 			if( handlerState )
 			{
-				m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+				m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState.get() );
 			}
 			// get values directly from knobs as they haven't been stored at this point
 			m_parameterHandler->setParameterValue( parameterisedInterface->parameters(), ParameterHandler::Knob );
@@ -225,7 +225,7 @@ int ParameterisedHolder<BaseType>::knob_changed( DD::Image::Knob *knob )
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
 		if( handlerState )
 		{
-			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState.get() );
 		}
 		parameterisedInterface->parameters()->setValue( inputParameterisedInterface->parameters()->getValue() );
 		
@@ -280,7 +280,7 @@ void ParameterisedHolder<BaseType>::setParameterValuesFromInputs()
 	if( m_parameterHandler )
 	{
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-		m_parameterHandler->setParameterValue( parameterisedInterface->parameters().get(), BaseType::getInputs().begin(), BaseType::getInputs().end() );
+		m_parameterHandler->setParameterValue( parameterisedInterface->parameters(), BaseType::getInputs().begin(), BaseType::getInputs().end() );
 	}
 }
 
@@ -290,7 +290,7 @@ void ParameterisedHolder<BaseType>::setParameterValues()
 	if( m_parameterHandler )
 	{
 		ParameterisedInterface *parameterisedInterface = dynamic_cast<ParameterisedInterface *>( m_parameterised.get() );
-		m_parameterHandler->setParameterValue( parameterisedInterface->parameters().get() );
+		m_parameterHandler->setParameterValue( parameterisedInterface->parameters() );
 	}
 }
 
@@ -525,7 +525,7 @@ void ParameterisedHolder<BaseType>::updateParameterised( bool reload )
 		ConstObjectPtr handlerState = classSpecifier->member<Object>( "handlerState" );
 		if( handlerState )
 		{
-			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState );
+			m_parameterHandler->setState( parameterisedInterface->parameters(), handlerState.get() );
 		}
 	}
 	

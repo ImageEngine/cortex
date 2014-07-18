@@ -78,6 +78,6 @@ void LinearToPanalogOp::modifyChannels( const Imath::Box2i &displayWindow, const
 	LinearToPanalogOp::Converter converter;
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<LinearToPanalogOp::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<LinearToPanalogOp::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

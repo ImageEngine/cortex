@@ -118,7 +118,8 @@ ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 	{
 		for ( int x=dataWindow.min.x; x <= dataWindow.max.x; ++x )
 		{
-			writer->writePixel( x, y, reader->readPixel( x, y ) );
+			DeepPixelPtr pixel = reader->readPixel( x, y );
+			writer->writePixel( x, y, pixel.get() );
 		}
 	}
 	

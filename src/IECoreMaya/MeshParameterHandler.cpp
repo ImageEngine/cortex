@@ -134,7 +134,7 @@ MStatus MeshParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPt
 	if( result )
 	{
 		/// \todo Pull in userData from parameter to set up conversion parameters
-		FromMayaMeshConverterPtr converter = IECore::dynamicPointerCast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECore::MeshPrimitive::staticTypeId() ) );
+		FromMayaMeshConverterPtr converter = boost::dynamic_pointer_cast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECore::MeshPrimitive::staticTypeId() ) );
 		assert(converter);
 
 		converter->spaceParameter()->setNumericValue( (int)FromMayaMeshConverter::World );

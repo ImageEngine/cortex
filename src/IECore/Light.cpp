@@ -117,7 +117,7 @@ bool Light::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	return m_parameters->isEqualTo( s->m_parameters );
+	return m_parameters->isEqualTo( s->m_parameters.get() );
 }
 
 void Light::memoryUsage( Object::MemoryAccumulator &a ) const
@@ -125,7 +125,7 @@ void Light::memoryUsage( Object::MemoryAccumulator &a ) const
 	StateRenderable::memoryUsage( a );
 	a.accumulate( m_name.capacity() );
 	a.accumulate( m_handle.capacity() );
-	a.accumulate( m_parameters );
+	a.accumulate( m_parameters.get() );
 }
 
 void Light::copyFrom( const Object *other, CopyContext *context )
@@ -134,7 +134,7 @@ void Light::copyFrom( const Object *other, CopyContext *context )
 	const Light *s = static_cast<const Light *>( other );
 	m_name = s->m_name;
 	m_handle = s->m_handle;
-	m_parameters = context->copy<CompoundData>( s->m_parameters );
+	m_parameters = context->copy<CompoundData>( s->m_parameters.get() );
 }
 
 void Light::save( SaveContext *context ) const
@@ -143,7 +143,7 @@ void Light::save( SaveContext *context ) const
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
 	container->write( g_nameEntry, m_name );
 	container->write( g_handleEntry, m_handle );
-	context->save( m_parameters, container, g_parametersEntry );
+	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Light::load( LoadContextPtr context )
@@ -153,7 +153,7 @@ void Light::load( LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
 	container->read( g_handleEntry, m_handle );
-	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
+	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
 void Light::hash( MurmurHash &h ) const

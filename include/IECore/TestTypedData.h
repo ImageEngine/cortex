@@ -45,7 +45,7 @@ namespace IECore
 /// For example testTypedData< TypeTraits::IsVectorTypedData >( new DoubleVectorData() ) would return true,
 /// while testTypedData< TypeTraits::IsSimpleTypedData >( new DoubleVectorData() ) would return false.
 template<template<typename> class Predicate>
-bool testTypedData( DataPtr data );
+bool testTypedData( const Data *data );
 
 } // namespace IECore
 

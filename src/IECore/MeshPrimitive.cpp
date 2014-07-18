@@ -233,8 +233,8 @@ void MeshPrimitive::save( IECore::Object::SaveContext *context ) const
 {
 	Primitive::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_verticesPerFace, container, g_verticesPerFaceEntry );
-	context->save( m_vertexIds, container, g_vertexIdsEntry );
+	context->save( m_verticesPerFace.get(), container.get(), g_verticesPerFaceEntry );
+	context->save( m_vertexIds.get(), container.get(), g_vertexIdsEntry );
 
 	/// \todo: mac has problems with the size_t type, resulting in the write() call being
 	/// ambiguous to the compiler
@@ -251,8 +251,8 @@ void MeshPrimitive::load( IECore::Object::LoadContextPtr context )
 
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	m_verticesPerFace = context->load<IntVectorData>( container, g_verticesPerFaceEntry );
-	m_vertexIds = context->load<IntVectorData>( container, g_vertexIdsEntry );
+	m_verticesPerFace = context->load<IntVectorData>( container.get(), g_verticesPerFaceEntry );
+	m_vertexIds = context->load<IntVectorData>( container.get(), g_vertexIdsEntry );
 
 	unsigned int numVertices;
 	container->read( g_numVerticesEntry, numVertices );
@@ -278,11 +278,11 @@ bool MeshPrimitive::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	if( !m_verticesPerFace->isEqualTo( tOther->m_verticesPerFace ) )
+	if( !m_verticesPerFace->isEqualTo( tOther->m_verticesPerFace.get() ) )
 	{
 		return false;
 	}
-	if( !m_vertexIds->isEqualTo( tOther->m_vertexIds ) )
+	if( !m_vertexIds->isEqualTo( tOther->m_vertexIds.get() ) )
 	{
 		return false;
 	}
@@ -293,8 +293,8 @@ bool MeshPrimitive::isEqualTo( const Object *other ) const
 void MeshPrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Primitive::memoryUsage( a );
-	a.accumulate( m_verticesPerFace );
-	a.accumulate( m_vertexIds );
+	a.accumulate( m_verticesPerFace.get() );
+	a.accumulate( m_vertexIds.get() );
 }
 
 void MeshPrimitive::hash( MurmurHash &h ) const

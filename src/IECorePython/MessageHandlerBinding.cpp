@@ -64,8 +64,6 @@ class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
 		}
 
 };
-IE_CORE_DECLAREPTR( MessageHandlerWrap );
-
 
 static void addHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
 {
@@ -82,29 +80,19 @@ static LevelFilteredMessageHandlerPtr levelFilteredMessageHandlerConstructor(Mes
 	return new LevelFilteredMessageHandler( handle, level );
 }
 
-static MessageHandlerPtr currentHandler()
-{
-	return MessageHandler::currentHandler();
-}
-
-static MessageHandlerPtr getDefaultHandler()
-{
-	return MessageHandler::getDefaultHandler();
-}
-
 void bindMessageHandler()
 {
 
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
 
-	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrapPtr>( "MessageHandler" )
+	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrap>( "MessageHandler" )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
 		.def( "setDefaultHandler", &MessageHandler::setDefaultHandler )
 		.staticmethod( "setDefaultHandler" )
-		.def( "getDefaultHandler", &getDefaultHandler )
+		.def( "getDefaultHandler", &MessageHandler::getDefaultHandler, return_value_policy<CastToIntrusivePtr>() )
 		.staticmethod( "getDefaultHandler" )
-		.def( "currentHandler", &currentHandler )
+		.def( "currentHandler", &MessageHandler::currentHandler, return_value_policy<CastToIntrusivePtr>() )
 		.staticmethod( "currentHandler" )
 		.def( "output", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&MessageHandler::output )
 		.staticmethod( "output" )
@@ -119,9 +107,9 @@ void bindMessageHandler()
 	;
 
 	RefCountedClass<OStreamMessageHandler, MessageHandler>( "OStreamMessageHandler" )
-		.def( "cErrHandler", &OStreamMessageHandler::cErrHandler )
+		.def( "cErrHandler", &OStreamMessageHandler::cErrHandler, return_value_policy<CastToIntrusivePtr>() )
 		.staticmethod( "cErrHandler" )
-		.def( "cOutHandler", &OStreamMessageHandler::cOutHandler )
+		.def( "cOutHandler", &OStreamMessageHandler::cOutHandler, return_value_policy<CastToIntrusivePtr>() )
 		.staticmethod( "cOutHandler" )
 	;
 

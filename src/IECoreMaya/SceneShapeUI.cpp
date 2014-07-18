@@ -367,7 +367,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 
 	// early out if we have no scene to draw
 	SceneShape *sceneShape = static_cast<SceneShape *>( surfaceShape() );
-	const IECore::SceneInterface *sceneInterface = sceneShape->getSceneInterface();
+	const IECore::SceneInterface *sceneInterface = sceneShape->getSceneInterface().get();
 	if( !sceneInterface )
 	{
 		return false;
@@ -488,7 +488,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	MPoint worldIntersectionPoint;
 	selectionRayToWorldSpacePoint( camera, snapInfo, depthMin, worldIntersectionPoint );
 	Imath::V3f pt( worldIntersectionPoint[0], worldIntersectionPoint[1], worldIntersectionPoint[2] );
-	Imath::M44f objToWorld( worldTransform( childInterface, time ) );
+	Imath::M44f objToWorld( worldTransform( childInterface.get(), time ) );
 	pt = pt * objToWorld.inverse();
 
 	// Get the list of vertices in the mesh.

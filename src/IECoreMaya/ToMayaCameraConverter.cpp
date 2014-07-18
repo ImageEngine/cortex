@@ -129,7 +129,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	CompoundDataMap::const_iterator resIt = camera->parameters().find( "resolution" );
 	if ( resIt != camera->parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
 	{
-		resolution = staticPointerCast<V2iData>( resIt->second )->readable();
+		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
 	}
 	double aspectRatio = (double)resolution.x / (double)resolution.y;
 	
@@ -163,7 +163,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	CompoundDataMap::const_iterator clippingIt = camera->parameters().find( "clippingPlanes" );
 	if ( clippingIt != camera->parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
-		Imath::V2f clippingPlanes = staticPointerCast<V2fData>( clippingIt->second )->readable();
+		Imath::V2f clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
 		fnCamera.setNearClippingPlane( clippingPlanes[0] );
 		fnCamera.setFarClippingPlane( clippingPlanes[1] );
 	}
@@ -172,7 +172,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	CompoundDataMap::const_iterator projectionIt = camera->parameters().find( "projection" );
 	if ( projectionIt != camera->parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
 	{
-		projection = staticPointerCast<StringData>( projectionIt->second )->readable();
+		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
 	}
 	if ( projection == "perspective" )
 	{
@@ -186,7 +186,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		CompoundDataMap::const_iterator screenWindowIt = camera->parameters().find( "screenWindow" );
 		if ( screenWindowIt != camera->parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 		{
-			screenWindow = staticPointerCast<Box2fData>( screenWindowIt->second )->readable();
+			screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
 		}
 		
 		if ( !screenWindow.isEmpty() )
@@ -198,7 +198,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	CompoundDataMap::const_iterator fovIt = camera->parameters().find( "projection:fov" );
 	if ( fovIt != camera->parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
 	{
-		fov = degreesToRadians( staticPointerCast<FloatData>( fovIt->second )->readable() );
+		fov = degreesToRadians( boost::static_pointer_cast<FloatData>( fovIt->second )->readable() );
 	}
 	
 	// setting field of view last as some of the other commands alter it

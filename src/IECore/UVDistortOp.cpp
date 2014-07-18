@@ -69,12 +69,12 @@ UVDistortOp::~UVDistortOp()
 
 ObjectParameter * UVDistortOp::uvMapParameter()
 {
-	return m_uvMapParameter;
+	return m_uvMapParameter.get();
 }
 
 const ObjectParameter * UVDistortOp::uvMapParameter() const
 {
-	return m_uvMapParameter;
+	return m_uvMapParameter.get();
 }
 
 void UVDistortOp::begin( const CompoundObject * operands )
@@ -154,8 +154,8 @@ Imath::V2f UVDistortOp::warp( const Imath::V2f &p ) const
 	UVDistortOp::Lookup lookup( pos );
 
 	return Imath::V2f(
-		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( constPointerCast<Data>(m_u), lookup ),
-		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( constPointerCast<Data>(m_v), lookup )
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_cast<Data *>( m_u.get() ), lookup ),
+		despatchTypedData< UVDistortOp::Lookup, TypeTraits::IsFloatVectorTypedData>( const_cast<Data *>( m_v.get() ), lookup )
 	) * m_imageSize + m_imageOrigin;
 }
 

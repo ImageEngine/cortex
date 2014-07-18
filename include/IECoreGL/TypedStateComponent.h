@@ -51,8 +51,8 @@ class TypedStateComponent : public StateComponent
 
 		typedef T ValueType;
 
-		typedef IECore::IntrusivePtr<TypedStateComponent> Ptr;
-		typedef IECore::IntrusivePtr<const TypedStateComponent> ConstPtr;
+		typedef boost::intrusive_ptr<TypedStateComponent> Ptr;
+		typedef boost::intrusive_ptr<const TypedStateComponent> ConstPtr;
 
 		TypedStateComponent();
 		TypedStateComponent( const T &value );

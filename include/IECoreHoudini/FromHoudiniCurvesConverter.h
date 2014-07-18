@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -75,7 +75,7 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 			DuplicateEnds( const std::vector<int> &vertsPerCurve );
 			
 			template<typename T>
-			ReturnType operator()( typename T::Ptr data ) const;
+			ReturnType operator()( T *data ) const;
 			
 			const std::vector<int> &m_vertsPerCurve;
 		};

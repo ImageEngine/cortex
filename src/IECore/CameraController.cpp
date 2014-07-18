@@ -85,13 +85,13 @@ void CameraController::setCamera( CameraPtr camera )
 {
 	m_data->camera = camera;
 	m_data->camera->addStandardParameters(); // subsequent casts are safe because of this
-	m_data->resolution = staticPointerCast<V2iData>( m_data->camera->parameters()["resolution"] );
-	m_data->screenWindow = staticPointerCast<Box2fData>( m_data->camera->parameters()["screenWindow"] );
-	m_data->clippingPlanes = staticPointerCast<V2fData>( m_data->camera->parameters()["clippingPlanes"] );
-	m_data->projection = staticPointerCast<StringData>( m_data->camera->parameters()["projection"] );
+	m_data->resolution = boost::static_pointer_cast<V2iData>( m_data->camera->parameters()["resolution"] );
+	m_data->screenWindow = boost::static_pointer_cast<Box2fData>( m_data->camera->parameters()["screenWindow"] );
+	m_data->clippingPlanes = boost::static_pointer_cast<V2fData>( m_data->camera->parameters()["clippingPlanes"] );
+	m_data->projection = boost::static_pointer_cast<StringData>( m_data->camera->parameters()["projection"] );
 	if( m_data->projection->readable()=="perspective" )
 	{
-		m_data->fov = staticPointerCast<FloatData>( m_data->camera->parameters()["projection:fov"] );
+		m_data->fov = boost::static_pointer_cast<FloatData>( m_data->camera->parameters()["projection:fov"] );
 	}
 	else
 	{

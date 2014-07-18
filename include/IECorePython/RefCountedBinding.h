@@ -35,38 +35,12 @@
 #ifndef IECOREPYTHON_REFCOUNTEDBINDING_H
 #define IECOREPYTHON_REFCOUNTEDBINDING_H
 
-#include "IECore/IntrusivePtr.h"
 #include "IECorePython/WrapperGarbageCollector.h"
 
 namespace IECorePython
 {
 
 void bindRefCounted();
-
-/// \todo This class is now just an internal implementation detail of
-/// RefCountedClass - remove it from the public API for the next major version.
-template<typename T>
-struct IntrusivePtrToPython
-{
-	/// Constructor registers the conversion with boost::python.
-	IntrusivePtrToPython();
-
-	static PyObject *convert( typename T::Ptr const &x );
-
-};
-
-/// \todo This class is now just an internal implementation detail of
-/// RefCountedClass - remove it from the public API for the next major version.
-template<typename T>
-struct IntrusivePtrFromPython
-{
-	/// Constructor registers the conversion with boost::python.
-	IntrusivePtrFromPython();
-
-	static void *convertible( PyObject *p );
-	static void construct( PyObject *source, boost::python::converter::rvalue_from_python_stage1_data *data );
-
-};
 
 /// A class similar to boost::python::wrapper, but with specialisations
 /// making it more suitable for use wrapping RefCounted types. See
@@ -103,18 +77,45 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 
 };
 
+namespace Detail
+{
+
+template<typename T>
+class GILReleasePtr;
+
+};
+
 /// A class to simplify the binding of RefCounted derived classes - this should be used in place of the usual
 /// boost::python::class_. It deals with many issues relating to intrusive pointers and object identity.
-template<typename T, typename Base, typename Ptr=IECore::IntrusivePtr<T> >
-class RefCountedClass : public boost::python::class_<T, Ptr, boost::noncopyable, boost::python::bases<Base> >
+///
+/// - T : the type being bound
+/// - Base : the base class of the type being bound
+/// - TWrapper : optional Wrapper class derived from RefCountedWrapper<T>.
+///   This can be used to allow Python subclasses to override C++ virtual functions.
+template<typename T, typename Base, typename TWrapper=T>
+class RefCountedClass : public boost::python::class_<T, Detail::GILReleasePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> >
 {
 
 	public :
 
-		typedef boost::python::class_<T, Ptr, boost::noncopyable, boost::python::bases<Base> > BaseClass;
+		typedef boost::python::class_<T, Detail::GILReleasePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> > BaseClass;
 
 		RefCountedClass( const char *className, const char *docString = 0 );
 
+};
+
+/// A class to simplify the binding of functions returning raw pointers to
+/// RefCounted objects, where we must cast to intrusive_ptr to allow python
+/// to share ownership with C++. Use as follows :
+///
+/// def( "f", &functionReturningRawPointer, return_value_policy<CastToIntrusivePtr>() )
+struct CastToIntrusivePtr
+{
+	template <class T>
+	struct apply
+	{
+		typedef boost::python::to_python_value<boost::intrusive_ptr<typename boost::remove_pointer<T>::type> > type;
+	};
 };
 
 } // namespace IECorePython

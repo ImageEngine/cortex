@@ -98,7 +98,7 @@ void TextureLoader::clear()
 	m_loadedTextures.clear();
 }
 
-TextureLoaderPtr TextureLoader::defaultTextureLoader()
+TextureLoader *TextureLoader::defaultTextureLoader()
 {
 	static TextureLoaderPtr t = 0;
 	if( !t )
@@ -106,5 +106,5 @@ TextureLoaderPtr TextureLoader::defaultTextureLoader()
 		const char *e = getenv( "IECOREGL_TEXTURE_PATHS" );
 		t = new TextureLoader( IECore::SearchPath( e ? e : "", ":" ) );
 	}
-	return t;
+	return t.get();
 }

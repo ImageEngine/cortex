@@ -486,7 +486,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const
 		{
-			return dataToMatrix( readTransformAtSample( sampleIndex ) );
+			return dataToMatrix( readTransformAtSample( sampleIndex ).get() );
 		}
 
 		ConstDataPtr readTransform( double time ) const
@@ -503,7 +503,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 			ConstDataPtr transformData1 = readTransformAtSample( sample1 );
 			ConstDataPtr transformData2 = readTransformAtSample( sample2 );
-			DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1, transformData2, x ) );
+			DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1.get(), transformData2.get(), x ) );
 			if ( !transformData )
 			{
 				// failed to interpolate, return the closest one
@@ -514,7 +514,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		Imath::M44d readTransformAsMatrix( double time ) const
 		{
-			return dataToMatrix( readTransform( time ) );
+			return dataToMatrix( readTransform( time ).get() );
 		}
 
 		inline const SampleTimes &attributeSampleTimes( const SceneCache::Name &name ) const
@@ -583,7 +583,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 			ConstObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
 			ConstObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
-			ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1, attributeObj2, x );
+			ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1.get(), attributeObj2.get(), x );
 			if ( !attributeObj )
 			{
 				// failed to interpolate, return the closest one
@@ -643,7 +643,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 			ConstObjectPtr object1 = readObjectAtSample( sample1 );
 			ConstObjectPtr object2 = readObjectAtSample( sample2 );
-			ObjectPtr object = linearObjectInterpolation( object1, object2, x );
+			ObjectPtr object = linearObjectInterpolation( object1.get(), object2.get(), x );
 			if ( !object )
 			{
 				// failed to interpolate, return the closest one
@@ -654,7 +654,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		static PrimitiveVariableMap readObjectPrimitiveVariablesAtSample( const IndexedIOPtr &io, const std::vector<InternedString> &primVarNames, size_t sample )
 		{
-			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ), sampleEntry(sample), primVarNames );
+			return Primitive::loadPrimitiveVariables( io->subdirectory( objectEntry ).get(), sampleEntry(sample), primVarNames );
 		}
 
 		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
@@ -672,8 +672,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 
 			IndexedIOPtr objectIO = m_indexedIO->subdirectory( objectEntry );
-			PrimitiveVariableMap map1 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample1), primVarNames );
-			PrimitiveVariableMap map2 = Primitive::loadPrimitiveVariables( objectIO, sampleEntry(sample2), primVarNames );
+			PrimitiveVariableMap map1 = Primitive::loadPrimitiveVariables( objectIO.get(), sampleEntry(sample1), primVarNames );
+			PrimitiveVariableMap map2 = Primitive::loadPrimitiveVariables( objectIO.get(), sampleEntry(sample2), primVarNames );
 
 			for ( PrimitiveVariableMap::iterator it1 = map1.begin(); it1 != map1.end(); it1++ )
 			{
@@ -682,7 +682,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				{
 					continue;
 				}
-				it1->second.data = staticPointerCast< Data >( linearObjectInterpolation( it1->second.data, it2->second.data, x ) );
+				it1->second.data = boost::static_pointer_cast< Data >( linearObjectInterpolation( it1->second.data.get(), it2->second.data.get(), x ) );
 			}
 			return map1;
 		}
@@ -787,7 +787,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 									{
 										// we managed to load the object from a different time sample from the cache, just have to load the changing prim vars...
 										mergeMaps( prim->variables, readObjectPrimitiveVariablesAtSample( reader->m_indexedIO, varNames->readable(), sample ) );
-										objectCache->set( currentKey, prim, ObjectPool::StoreReference );
+										objectCache->set( currentKey, prim.get(), ObjectPool::StoreReference );
 										return prim;
 									}
 								}
@@ -796,7 +796,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 							obj = objectCache->get( currentKey );
 						}
 						/// register the object as the default, so next frames could reuse them
-						objectCache->set( defaultKey, obj, ObjectPool::StoreReference );
+						objectCache->set( defaultKey, obj.get(), ObjectPool::StoreReference );
 						return obj;
 					}
 					/// The object has animated topology... so we load the entire object
@@ -1623,7 +1623,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 						}
 					}
 					
-					writeAttribute( animatedObjectPrimVarsAttribute, primVarData, 0 );
+					writeAttribute( animatedObjectPrimVarsAttribute, primVarData.get(), 0 );
 				}
 			}
 			
@@ -1868,7 +1868,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			Imath::Box3d previousBox = *bsIt;
 			TransformSample previousTransform = *tsIt;
 			double previousTransformTime = *ttIt;
-			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform );
+			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform.get() );
 			Imath::Box3d previousTransformedBox;
 			TransformSample nextTransform = 0;
 			ttIt++;
@@ -1894,7 +1894,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				{
 					// interpolate transform to the next box sample
 					double x = (boxTime-previousTransformTime)/(transformTime-previousTransformTime);
-					nextTransform = runTimeCast< Data >( linearObjectInterpolation( previousTransform, *tsIt, x ) );
+					nextTransform = runTimeCast< Data >( linearObjectInterpolation( previousTransform.get(), tsIt->get(), x ) );
 					if ( !nextTransform )
 					{
 						throw Exception( "Failed to interpolate transforms while computing bounding boxes! Different types?" );
@@ -1912,7 +1912,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				}
 
 				Imath::Box3d nextBox = *bsIt;
-				Imath::Box3d nextTransformedBox = transform(nextBox, dataToMatrix( nextTransform ));
+				Imath::Box3d nextTransformedBox = transform( nextBox, dataToMatrix( nextTransform.get() ) );
 				// we don't know how to handle empty bboxes...
 				if ( !nextBox.isEmpty() && !previousTransformedBox.isEmpty() )
 				{
@@ -1927,13 +1927,13 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					{
 						// compute the transformed interpolation of bounding boxes
 						boxInterpolator( previousBox, nextBox, x, transfomedInterpBox );
-						ObjectPtr obj = linearObjectInterpolation( previousTransform, nextTransform, x );
+						ObjectPtr obj = linearObjectInterpolation( previousTransform.get(), nextTransform.get(), x );
 						if ( !obj )
 						{
 							throw Exception( "Failed to interpolate transforms while computing bounding boxes! Different types?" );
 						}
 						TransformSample interpTransform = runTimeCast< Data >( obj );
-						transfomedInterpBox = transform( transfomedInterpBox, dataToMatrix( interpTransform ) );
+						transfomedInterpBox = transform( transfomedInterpBox, dataToMatrix( interpTransform.get() ) );
 						// compute the interpolation of the transformed bounding boxes
 						boxInterpolator( previousTransformedBox, nextTransformedBox, x, interpTransformedBoxes );
 						// compute how much the transformed boxes (on both samples) have to expand to fully include transfomedInterpBox 
@@ -1960,7 +1960,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 
 			/// now transform all the following bound samples using the last transform available...
-			previousTransformMatrix = dataToMatrix( previousTransform );
+			previousTransformMatrix = dataToMatrix( previousTransform.get() );
 			while( btIt != boxTimes.end() )
 			{
 				*bsIt = transform( *bsIt, previousTransformMatrix );

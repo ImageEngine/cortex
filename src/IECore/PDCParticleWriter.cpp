@@ -174,8 +174,8 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					int type = 1; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					IntVectorDataPtr d = staticPointerCast<IntVectorData>( attr );
-					writeAttr<IntVectorData, int, 1>( oStream, d );
+					IntVectorDataPtr d = boost::static_pointer_cast<IntVectorData>( attr );
+					writeAttr<IntVectorData, int, 1>( oStream, d.get() );
 				}
 				break;
 			// casting FloatVectorData to DoubleVectorData since PDCs don't handle floats
@@ -183,14 +183,14 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( DoubleVectorDataTypeId );
-					attr = staticPointerCast<DoubleVectorData>( castOp.operate() );
+					attr = boost::static_pointer_cast<DoubleVectorData>( castOp.operate() );
 				} // intentionally falling through
 			case DoubleVectorDataTypeId :
 				{
 					int type = 3; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					DoubleVectorDataPtr d = staticPointerCast<DoubleVectorData>( attr );
-					writeAttr<DoubleVectorData, double, 1>( oStream, d );
+					DoubleVectorDataPtr d = boost::static_pointer_cast<DoubleVectorData>( attr );
+					writeAttr<DoubleVectorData, double, 1>( oStream, d.get() );
 				}
 				break;
 			// casting V3fVectorData and Color3fVectorData to V3dVectorData since PDCs don't handle floats
@@ -199,22 +199,22 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dVectorDataTypeId );
-					attr = staticPointerCast<V3dVectorData>( castOp.operate() );
+					attr = boost::static_pointer_cast<V3dVectorData>( castOp.operate() );
 				} // intentionally falling through
 			case V3dVectorDataTypeId :
 				{
 					int type = 5; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					V3dVectorDataPtr d = staticPointerCast<V3dVectorData>( attr );
-					writeAttr<V3dVectorData, double, 3>( oStream, d );
+					V3dVectorDataPtr d = boost::static_pointer_cast<V3dVectorData>( attr );
+					writeAttr<V3dVectorData, double, 3>( oStream, d.get() );
 				}
 				break;
 			case IntDataTypeId :
 				{
 					int type = 0; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					IntDataPtr d = staticPointerCast<IntData>( attr );
-					writeSimpleAttr<IntData, int, 1>( oStream, d );
+					IntDataPtr d = boost::static_pointer_cast<IntData>( attr );
+					writeSimpleAttr<IntData, int, 1>( oStream, d.get() );
 				}
 				break;
 			// casting FloatData to DoubleData since PDCs don't handle floats
@@ -222,14 +222,14 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( DoubleDataTypeId );
-					attr = staticPointerCast<DoubleData>( castOp.operate() );
+					attr = boost::static_pointer_cast<DoubleData>( castOp.operate() );
 				} // intentionally falling through
 			case DoubleDataTypeId :
 				{
 					int type = 2; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					DoubleDataPtr d = staticPointerCast<DoubleData>( attr );
-					writeSimpleAttr<DoubleData, double, 1>( oStream, d );
+					DoubleDataPtr d = boost::static_pointer_cast<DoubleData>( attr );
+					writeSimpleAttr<DoubleData, double, 1>( oStream, d.get() );
 				}
 				break;
 			// casting V3fData and Color3fData to V3dData since PDCs don't handle floats
@@ -238,14 +238,14 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 				{
 					castOp.objectParameter()->setValue( attr );
 					castOp.targetTypeParameter()->setNumericValue( V3dDataTypeId );
-					attr = staticPointerCast<V3dData>( castOp.operate() );
+					attr = boost::static_pointer_cast<V3dData>( castOp.operate() );
 				} // intentionally falling through
 			case V3dDataTypeId :
 				{
 					int type = 4; type = asBigEndian( type );
 					oStream.write( (const char *)&type, sizeof( type ) );
-					V3dDataPtr d = staticPointerCast<V3dData>( attr );
-					writeSimpleAttr<V3dData, double, 3>( oStream, d );
+					V3dDataPtr d = boost::static_pointer_cast<V3dData>( attr );
+					writeSimpleAttr<V3dData, double, 3>( oStream, d.get() );
 				}
 				break;
 

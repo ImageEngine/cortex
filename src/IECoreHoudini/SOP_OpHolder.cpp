@@ -99,7 +99,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	
 	// main input is reserved for splitting by name when the filter is enabled
 	UT_StringMMPattern nameFilter;
-	if ( !m_inputParameters.empty() && getNameFilter( m_inputParameters[0], nameFilter ) ) 
+	if ( !m_inputParameters.empty() && getNameFilter( m_inputParameters[0].get(), nameFilter ) ) 
 	{
 		DetailSplitterPtr splitter = new DetailSplitter( inputGeoHandle( 0 ) );
 		std::vector<std::string> names;
@@ -110,7 +110,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 			// we want match all to also match no-name
 			if ( UT_String( name ).multiMatch( nameFilter ) || ( name == "" && UT_String( "*" ).multiMatch( nameFilter ) ) )
 			{
-				doOperation( op, splitter->split( name ), name );
+				doOperation( op.get(), splitter->split( name ), name );
 			}
 			else
 			{
@@ -120,7 +120,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	}
 	else
 	{
-		doOperation( op, GU_DetailHandle(), "" );
+		doOperation( op.get(), GU_DetailHandle(), "" );
 	}
 	
 	boss->opEnd();
@@ -132,10 +132,10 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 {
 	if ( !m_inputParameters.empty() )
 	{
-		SOP_ParameterisedHolder::setInputParameterValue( m_inputParameters[0], handle, 0 );
+		SOP_ParameterisedHolder::setInputParameterValue( m_inputParameters[0].get(), handle, 0 );
 	}
 	
-	const IECore::Object *result = 0;
+	IECore::ConstObjectPtr result = 0;
 	
 	try
 	{
@@ -162,7 +162,7 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 	
 	if ( result )
 	{
-		ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( result );
+		ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( result.get() );
 		converter->nameParameter()->setTypedValue( name );
 		if ( !converter->convert( myGdpHandle ) )
 		{

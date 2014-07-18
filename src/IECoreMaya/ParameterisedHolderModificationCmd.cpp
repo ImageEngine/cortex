@@ -151,12 +151,12 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 			return s;
 		}
 		m_newValues = m_parameterisedHolder->getParameterisedInterface()->parameters()->getValue()->copy();
-		storeParametersWithNewValues( m_originalValues, m_newValues, "" );
+		storeParametersWithNewValues( m_originalValues.get(), m_newValues.get(), "" );
 		despatchSetParameterisedCallbacks();
 	}
 	else
 	{
-		storeParametersWithNewValues( m_originalValues, m_newValues, "" );	
+		storeParametersWithNewValues( m_originalValues.get(), m_newValues.get(), "" );	
 		m_parameterisedHolder->updateParameterised();
 		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
@@ -184,7 +184,7 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 	
 	if( m_originalClasses->readable().size() )
 	{
-		restoreClassParameterStates( m_originalClasses, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
+		restoreClassParameterStates( m_originalClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->updateParameterised();
 	}
 	
@@ -225,7 +225,7 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 	}
 	else
 	{
-		restoreClassParameterStates( m_newClasses, m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
+		restoreClassParameterStates( m_newClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_newValues->copy() );
 		m_parameterisedHolder->updateParameterised();
 		setNodeValuesForParametersWithNewValues();
@@ -285,7 +285,7 @@ void ParameterisedHolderModificationCmd::restoreClassParameterStates( const IECo
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
 		{
-			restoreClassParameterStates( classes, constPointerCast<Parameter>( *it ), parameterPath );
+			restoreClassParameterStates( classes, it->get(), parameterPath );
 		}
 	}
 }
@@ -323,7 +323,7 @@ void ParameterisedHolderModificationCmd::storeParametersWithNewValues( const IEC
 			{
 				childParameterPath = it->first;
 			}
-			storeParametersWithNewValues( it->second, newCompound->member<Object>( it->first ), childParameterPath );
+			storeParametersWithNewValues( it->second.get(), newCompound->member<Object>( it->first ), childParameterPath );
 		}
 		
 		const CompoundObject::ObjectMap &newChildren = static_cast<const CompoundObject *>( newValue )->members();
@@ -341,7 +341,7 @@ void ParameterisedHolderModificationCmd::storeParametersWithNewValues( const IEC
 				{
 					childParameterPath = it->first;
 				}
-				storeParametersWithNewValues( 0, it->second, childParameterPath );
+				storeParametersWithNewValues( 0, it->second.get(), childParameterPath );
 			}
 		}
 	}
@@ -379,8 +379,7 @@ void ParameterisedHolderModificationCmd::setNodeValue( IECore::Parameter *parame
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator it = childParameters.begin(); it!=childParameters.end(); it++ )
 		{
-			ParameterPtr childParameter = *it;
-			setNodeValue( childParameter );
+			setNodeValue( it->get() );
 		}
 	}
 }
@@ -428,7 +427,7 @@ void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 			IECore::CompoundDataMap::const_iterator it1 = m_originalClasses->readable().find( *it );
 			IECore::CompoundDataMap::const_iterator it2 = m_newClasses->readable().find( *it );			
 
-			if( it1==m_originalClasses->readable().end() || it2==m_newClasses->readable().end() || !(it1->second->isEqualTo( it2->second ) ) )
+			if( it1==m_originalClasses->readable().end() || it2==m_newClasses->readable().end() || !(it1->second->isEqualTo( it2->second.get() ) ) )
 			{
 				MPlug parameterPlug = m_parameterisedHolder->parameterPlug( parameter );
 				MString plugName = nodeName + "." + parameterPlug.partialName();

@@ -79,7 +79,7 @@ void ObjectWriter::doWrite( const CompoundObject *operands )
 	/// returns a CompoundObject
 
 	// write the header
-	CompoundDataPtr header = staticPointerCast<CompoundData>( m_headerParameter->getValue()->copy() );
+	CompoundDataPtr header = boost::static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
 
 	header->writable()["typeName"] = new StringData( object()->typeName() );
 
@@ -89,7 +89,7 @@ void ObjectWriter::doWrite( const CompoundObject *operands )
 		assert( it->second );
 		if ( it->second->isInstanceOf( Data::staticTypeId() ) )
 		{
-			header->writable()[ it->first ] = staticPointerCast< Data >( it->second );
+			header->writable()[ it->first ] = boost::static_pointer_cast< Data >( it->second );
 		}
 	}
 

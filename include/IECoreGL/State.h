@@ -113,7 +113,7 @@ class State : public Bindable
 
 		/// Returns a complete State object with default settings. The
 		/// same object is returned each time this is called.
-		static ConstStatePtr defaultState();
+		static const State *defaultState();
 
 		/// Even a complete State object doesn't specify the whole of the
 		/// GL state - and in fact the State object and components assume

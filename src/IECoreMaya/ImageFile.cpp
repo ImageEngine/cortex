@@ -162,7 +162,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( rData, converter );
+			>( rData.get(), converter );
 
 		DataPtr gData = image->variables["G"].data;
 		if (! gData )
@@ -175,7 +175,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( gData, converter );
+			>( gData.get(), converter );
 
 		DataPtr bData = image->variables["B"].data;
 		if (! bData )
@@ -188,7 +188,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( bData, converter );
+			>( bData.get(), converter );
 
 		if ( m_numChannels == 4 )
 		{
@@ -203,7 +203,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter,
 				TypeTraits::IsNumericVectorTypedData,
 				ChannelConverter::ErrorHandler
-			>( aData, converter );
+			>( aData.get(), converter );
 		}
 
 	}

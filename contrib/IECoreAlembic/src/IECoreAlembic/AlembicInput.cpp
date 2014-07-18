@@ -42,6 +42,10 @@
 #include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/ICamera.h"
 
+#ifdef IECOREALEMBIC_WITH_OGAWA
+#include "Alembic/AbcCoreFactory/IFactory.h"
+#endif
+
 #include "IECoreAlembic/AlembicInput.h"
 #include "IECoreAlembic/FromAlembicConverter.h"
 
@@ -70,7 +74,20 @@ struct AlembicInput::DataMembers
 AlembicInput::AlembicInput( const std::string &fileName )
 {
 	m_data = boost::shared_ptr<DataMembers>( new DataMembers );
+	
+#ifdef IECOREALEMBIC_WITH_OGAWA
+	Alembic::AbcCoreFactory::IFactory factory;
+	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( factory.getArchive( fileName ) ) );
+	if( !m_data->archive->valid() )
+	{
+		// even though the default policy for IFactory is kThrowPolicy, this appears not to
+		// be applied when it fails to load an archive - instead it returns an invalid archive.
+		throw IECore::Exception( boost::str( boost::format( "Unable to open file \"%s\"" ) % fileName ) );
+	}
+#else
 	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), fileName ) );
+#endif
+	
 	m_data->object = m_data->archive->getTop();
 }
 
@@ -379,7 +396,7 @@ IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId result
 		ObjectPtr object0 = c->convert();
 		c->sampleIndexParameter()->setNumericValue( index1 );
 		ObjectPtr object1 = c->convert();
-		return linearObjectInterpolation( object0, object1, lerpFactor );
+		return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
 	}
 }
 		

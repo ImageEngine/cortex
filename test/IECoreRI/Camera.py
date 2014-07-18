@@ -39,16 +39,11 @@ import os.path
 import os
 
 class CameraTest( IECoreRI.TestCase ) :
-
+	
 	def testParameters( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
 
-		# we can't use concatTransform to position the camera until
-		# we get support for RxTransformPoints working in rib generation
-		# mode from 3delight - instead we're using the nasty transform
-		# parameter in the list below.
-		#r.concatTransform( s )
 		r.camera( "main", {
 			"resolution" : IECore.V2iData( IECore.V2i( 1024, 200 ) ),
 			"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
@@ -56,8 +51,6 @@ class CameraTest( IECoreRI.TestCase ) :
 			"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
 			"projection" : IECore.StringData( "perspective" ),
 			"projection:fov" : IECore.FloatData( 45 ),
-			"ri:hider" : IECore.StringData( "hidden" ),
-			"ri:hider:jitter" : IECore.IntData( 1 ),
 			"shutter" : IECore.V2fData( IECore.V2f( 0, 0.1 ) ),
 		} )
 
@@ -72,7 +65,6 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assert_( "CropWindow 0.1 0.9 0.1 0.9" in l )
 		self.assert_( ("Clipping 1 1000" in l) or ("Clipping 1 1e3" in l) )
 		self.assert_( "Projection \"perspective\" \"float fov\" [ 45 ]" in l )
-		self.assert_( "Hider \"hidden\" \"int jitter\" [ 1 ] " in l )
 		self.assert_( "Shutter 0 0.1" in l )
 
 	def testPositioning( self ) :
@@ -151,5 +143,103 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assertEqual( result.floatPrimVar( g ), 1 )
 		self.assertEqual( result.floatPrimVar( b ), 0 )
 
+	def testMultipleCameraRIB( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
+
+		with IECore.TransformBlock( r ) :
+
+			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		
+			r.camera( "first", {
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
+			} )
+
+		with IECore.TransformBlock( r ) :
+
+			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 3, 4, 5 ) ) )
+		
+			r.camera( "second", {
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 50 ),
+			} )
+
+		with IECore.WorldBlock( r ) :
+			pass
+			
+		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
+		l = " ".join( l.split() )
+
+		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 45 ]" in l )
+		self.assertTrue( "Camera \"first\"" in l )
+		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 50 ]" in l )
+		self.assertTrue( "Camera \"second\"" in l )
+		self.assertEqual( l.count( "Camera" ), 2 )
+		
+	def testMultipleCameraRender( self ) :
+
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+
+		with IECore.TransformBlock( r ) :
+			r.camera( "iCantSeeAnything", {} )
+		
+		with IECore.TransformBlock( r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
+			r.camera( "iCanSeeSomething", {} )
+		
+		with IECore.WorldBlock( r ) :
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+
+		# check that something appears in the output image
+		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		a = e.A()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( a ), 1 )
+	
+	def testMotionBlurCameraRender( self ) :
+	
+		r = IECoreRI.Renderer( "" )
+		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
+		
+		with IECore.TransformBlock( r ) :
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
+			
+			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
+		
+		with IECore.WorldBlock( r ) :
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+
+		# check that something appears in the output image
+		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
+		e = IECore.PrimitiveEvaluator.create( i )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertTrue( result.floatPrimVar( e.A() ) > 0 ) # something should be there
+		self.assertTrue( result.floatPrimVar( e.A() ) < 1 ) # but it should be blurry
+	
+	def testMotionBlurCameraRib( self ) :
+	
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
+		
+		with IECore.TransformBlock( r ) :
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
+			
+			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
+		
+		r.worldBegin()
+		r.worldEnd()
+		
+		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
+		
+		self.assert_( "MotionBegin [ 0 1 ]" in l )
+		
 if __name__ == "__main__":
     unittest.main()

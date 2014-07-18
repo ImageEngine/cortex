@@ -69,8 +69,8 @@ class Group : public VisibleRenderable
 		/// and takes no account of any transforms in the parents
 		/// of the Group. May return 0 if no transform has been
 		/// applied.
-		TransformPtr getTransform();
-		ConstTransformPtr getTransform() const;
+		Transform *getTransform();
+		const Transform *getTransform() const;
 		/// Sets the local transform applied to the children
 		/// of this Group.
 		void setTransform( TransformPtr transform );
@@ -97,7 +97,7 @@ class Group : public VisibleRenderable
 		/// Query an attribute from the group's scope. Tries to
 		/// find the attribute in the group's state, then traverses
 		/// the group's parents
-		IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		const Data *getAttribute( const std::string &name ) const;
 		/// Set an attribute on this group.
 		void setAttribute( const std::string &name, ConstDataPtr value );
 
@@ -118,8 +118,8 @@ class Group : public VisibleRenderable
 
 		/// Returns the parent for this Group, returning 0 if no
 		/// parent exists.
-		GroupPtr parent();
-		ConstGroupPtr parent() const;
+		Group *parent();
+		const Group *parent() const;
 		
 		/// Renders all the children in an attribute block along
 		/// with the transform and state.

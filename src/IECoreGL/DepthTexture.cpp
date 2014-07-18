@@ -45,7 +45,7 @@ using namespace IECoreGL;
 
 IE_CORE_DEFINERUNTIMETYPED( DepthTexture );
 
-DepthTexture::DepthTexture( unsigned int width, unsigned height, IECore::ConstDataPtr z )
+DepthTexture::DepthTexture( unsigned int width, unsigned height, const IECore::Data *z )
 {
 	glGenTextures( 1, &m_texture );
 	ScopedBinding binding( *this );

@@ -56,7 +56,11 @@ std::string repr( ReorderedFrameList &x )
 void bindReorderedFrameList()
 {
 	RunTimeTypedClass<ReorderedFrameList>()
-		.add_property( "frameList", &ReorderedFrameList::getFrameList, &ReorderedFrameList::setFrameList )
+		.add_property(
+			"frameList",
+			make_function( &ReorderedFrameList::getFrameList, return_value_policy<CastToIntrusivePtr>() ),
+			&ReorderedFrameList::setFrameList
+		)
 	;
 }
 

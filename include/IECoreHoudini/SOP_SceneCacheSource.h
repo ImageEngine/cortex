@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -111,7 +111,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			typedef bool ReturnType;
 			
 			template<typename T>
-			ReturnType operator()( typename T::ConstPtr data ) const;
+			ReturnType operator()( const T *data ) const;
 		};
 
 };

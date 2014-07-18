@@ -659,6 +659,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False
 	
+	
 	def testCustomAttributes( self ) :
 	
 		t = maya.cmds.createNode( "transform" )
@@ -672,6 +673,8 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 
 			if not doTest:
 				return []
+			if not node:
+				return ["root"]
 			
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
 			try:
@@ -687,6 +690,11 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		def readMyAttribute( node, attr ) :
 			
 			if not doTest:
+				return None
+			
+			if not node :
+				if attr == "root":
+					return IECore.BoolData( True )
 				return None
 			
 			dagPath = IECoreMaya.StringUtil.dagPathFromString(node)
@@ -710,8 +718,11 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		scene = IECoreMaya.MayaScene()
 		transformScene = scene.child(str(t))
 		sphereScene = scene.child('pSphere')
-		self.assertEqual( scene.attributeNames(), [] )
+		self.assertEqual( scene.attributeNames(), [ "scene:visible", "root" ] )
 		self.assertEqual( scene.readAttribute("anyAttr", 0.0), None )
+		self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
+		self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
+		
 		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
 		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
 		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), None )
@@ -792,6 +803,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		maya.cmds.setAttr( envShape + ".visibility", False )
 		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
+	
 	
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

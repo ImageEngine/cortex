@@ -74,7 +74,7 @@ bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
 	}
 	if( data && other.data )
 	{
-		return data->isEqualTo( other.data );
+		return data->isEqualTo( other.data.get() );
 	}
 	return !data && !other.data;
 }

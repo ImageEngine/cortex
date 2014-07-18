@@ -174,6 +174,9 @@ class LRUCacheTest( unittest.TestCase ) :
 		t1.join()
 		t2.join()
 		t3.join()
+		
+		c.clear()
+		self.assertEqual( c.currentCost(), 0 )
 
 	def testYieldGILInGetter( self ) :
 	
@@ -241,6 +244,40 @@ class LRUCacheTest( unittest.TestCase ) :
 		keys = [ x[0] for x in removed ]
 		for i in range( 1, 8 ) :
 			self.failUnless( i in keys )
+	
+	def testSet( self ) :
+	
+		def getter( key ) :
+			return ( None, 1 )
 			
+		c = IECore.LRUCache( getter, 1000 )
+		
+		c.set( 5, 10, 1 )
+		self.assertEqual( c.currentCost(), 1 )
+		self.assertEqual( c.get( 5 ), 10 )
+		self.assertEqual( c.currentCost(), 1 )
+		
+		c.set( 5, 20, 100000 )
+		self.assertEqual( c.currentCost(), 0 )
+		self.assertEqual( c.get( 5 ), None )
+		self.assertEqual( c.currentCost(), 1 )
+	
+	def testCPPThreading( self ) :
+		
+		# arguments are :
+		# iterations, number of unique values, maximum cost, clear frequency
+		
+		# cache exactly the right size
+		IECore.testLRUCacheThreading( 100000, 100, 100 )
+		
+		# cache not quite big enough
+		IECore.testLRUCacheThreading( 100000, 100, 90 )
+		
+		# cache thrashing like crazy
+		IECore.testLRUCacheThreading( 100000, 1000, 2 )
+		
+		# clearing all the time while doing concurrent lookups
+		IECore.testLRUCacheThreading( 100000, 1000, 90, 20 )
+		
 if __name__ == "__main__":
     unittest.main()

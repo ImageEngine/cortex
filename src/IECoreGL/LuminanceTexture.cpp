@@ -49,15 +49,15 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( LuminanceTexture );
 
-LuminanceTexture::LuminanceTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr y, IECore::ConstDataPtr a, bool mipMap )
+LuminanceTexture::LuminanceTexture( unsigned int width, unsigned int height, const IECore::Data *y, const IECore::Data *a, bool mipMap )
 {
 	construct( width, height, y, a, mipMap );
 }
 
-LuminanceTexture::LuminanceTexture( IECore::ConstImagePrimitivePtr image, bool mipMap )
+LuminanceTexture::LuminanceTexture( const IECore::ImagePrimitive *image, bool mipMap )
 {
-	IECore::ConstDataPtr y = image->channelValid( "Y" ) ? image->variables.find( "Y" )->second.data : 0;
-	IECore::ConstDataPtr a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data : 0;
+	const IECore::Data *y = image->channelValid( "Y" ) ? image->variables.find( "Y" )->second.data.get() : NULL;
+	const IECore::Data *a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data.get() : NULL;
 
 	if( !y )
 	{
@@ -83,7 +83,7 @@ struct LuminanceTexture::Constructor
 		typedef typename T::ValueType::value_type ElementType;
 
 		const std::vector<ElementType> &ry = y->readable();
-		const std::vector<ElementType> *ra = alpha ? &(staticPointerCast<const T>( alpha )->readable()) : 0;
+		const std::vector<ElementType> *ra = alpha ? &(boost::static_pointer_cast<const T>( alpha )->readable()) : 0;
 
 		unsigned int n = width * height;
 		if( ry.size()!=n || (ra && ra->size()!=n) )
@@ -133,7 +133,7 @@ struct LuminanceTexture::Constructor
 	ConstDataPtr alpha;
 };
 
-void LuminanceTexture::construct( unsigned int width, unsigned int height, IECore::ConstDataPtr y, IECore::ConstDataPtr a, bool mipMap )
+void LuminanceTexture::construct( unsigned int width, unsigned int height, const IECore::Data *y, const IECore::Data *a, bool mipMap )
 {
 	if( a && (y->typeId() != a->typeId()) )
 	{
@@ -148,7 +148,7 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, IECor
 	c.width = width;
 	c.height = height;
 	c.mipMap = mipMap;
-	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( constPointerCast<Data>( y ), c );
+	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( y ), c );
 }
 
 ImagePrimitivePtr LuminanceTexture::imagePrimitive() const

@@ -387,7 +387,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p0 = origin + t0 * dir;
 			if ( (origin - p0).length() < maxDistance )
 			{
-				ResultPtr r = staticPointerCast< Result > ( createResult() );
+				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
 				r->m_p = p0;
 
 				results.push_back( r );
@@ -400,7 +400,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p1 = origin + t1 * dir;
 			if ( (origin - p1).length() < maxDistance )
 			{
-				ResultPtr r = staticPointerCast< Result > ( createResult() );
+				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
 				r->m_p = p1;
 
 				results.push_back( r );
@@ -416,7 +416,7 @@ int SpherePrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, cons
 			Imath::V3f p = origin + t * dir;
 			if ( (origin - p).length() < maxDistance )
 			{
-				ResultPtr r = staticPointerCast< Result > ( createResult() );
+				ResultPtr r = boost::static_pointer_cast< Result > ( createResult() );
 				r->m_p = p;
 
 				results.push_back( r );

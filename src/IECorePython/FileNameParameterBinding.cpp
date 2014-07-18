@@ -59,7 +59,6 @@ class FileNameParameterWrap : public FileNameParameter, public Wrapper<FileNameP
 		IECOREPYTHON_PARAMETERWRAPPERFNS( FileNameParameter );
 
 };
-IE_CORE_DECLAREPTR( FileNameParameterWrap );
 
 static boost::python::list fileNameParameterExtensions( const FileNameParameter &that )
 {
@@ -76,7 +75,7 @@ void bindFileNameParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<FileNameParameter, FileNameParameterWrapPtr>()
+	RunTimeTypedClass<FileNameParameter, FileNameParameterWrap>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(

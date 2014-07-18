@@ -60,7 +60,8 @@ void bindShaderLoader()
 		.def( "loadSource", &loadSource )
 		.def( "create", &ShaderLoader::create )
 		.def( "load", &ShaderLoader::load )
-		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader ).staticmethod( "defaultShaderLoader" )
+		.def( "defaultShaderLoader", &ShaderLoader::defaultShaderLoader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.staticmethod( "defaultShaderLoader" )
 		.def( "clear", &ShaderLoader::clear)
 	;
 }

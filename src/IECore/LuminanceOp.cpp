@@ -113,73 +113,73 @@ LuminanceOp::~LuminanceOp()
 
 StringParameter * LuminanceOp::colorPrimVarParameter()
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::colorPrimVarParameter() const
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::redPrimVarParameter()
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::redPrimVarParameter() const
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::greenPrimVarParameter()
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::greenPrimVarParameter() const
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 StringParameter * LuminanceOp::bluePrimVarParameter()
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::bluePrimVarParameter() const
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 Color3fParameter * LuminanceOp::weightsParameter()
 {
-	return m_weightsParameter;
+	return m_weightsParameter.get();
 }
 
 const Color3fParameter * LuminanceOp::weightsParameter() const
 {
-	return m_weightsParameter;
+	return m_weightsParameter.get();
 }
 
 
 StringParameter * LuminanceOp::luminancePrimVarParameter()
 {
-	return m_luminancePrimVarParameter;
+	return m_luminancePrimVarParameter.get();
 }
 
 const StringParameter * LuminanceOp::luminancePrimVarParameter() const
 {
-	return m_luminancePrimVarParameter;
+	return m_luminancePrimVarParameter.get();
 }
 
 BoolParameter * LuminanceOp::removeColorPrimVarsParameter()
 {
-	return m_removeColorPrimVarsParameter;
+	return m_removeColorPrimVarsParameter.get();
 }
 
 const BoolParameter * LuminanceOp::removeColorPrimVarsParameter() const
 {
-	return m_removeColorPrimVarsParameter;
+	return m_removeColorPrimVarsParameter.get();
 }
 
 template<typename T>
@@ -210,7 +210,7 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 			case Color3fDataTypeId :
 				{
 					FloatDataPtr l = new FloatData;
-					const float *d = staticPointerCast<Color3fData>( colorIt->second.data )->baseReadable();
+					const float *d = boost::static_pointer_cast<Color3fData>( colorIt->second.data )->baseReadable();
 					calculate( d, d + 1, d + 2, steps, 1, l->baseWritable() );
 					luminanceData = l;
 				}
@@ -218,7 +218,7 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 			case Color3fVectorDataTypeId :
 				{
 					FloatVectorDataPtr l = new FloatVectorData;
-					Color3fVectorDataPtr d = staticPointerCast<Color3fVectorData>( colorIt->second.data );
+					Color3fVectorDataPtr d = boost::static_pointer_cast<Color3fVectorData>( colorIt->second.data );
 					l->writable().resize( d->readable().size() );
 					const float *dd = d->baseReadable();
 					steps[0] = steps[1] = steps[2] = 3;
@@ -247,9 +247,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 		{
 			throw Exception( "PrimitiveVariable types do not match." );
 		}
-		size_t rSize = despatchTypedData<TypedDataSize>( rIt->second.data );
-		size_t gSize = despatchTypedData<TypedDataSize>( gIt->second.data );
-		size_t bSize = despatchTypedData<TypedDataSize>( bIt->second.data );
+		size_t rSize = despatchTypedData<TypedDataSize>( rIt->second.data.get() );
+		size_t gSize = despatchTypedData<TypedDataSize>( gIt->second.data.get() );
+		size_t bSize = despatchTypedData<TypedDataSize>( bIt->second.data.get() );
 		if( rSize!=gSize || rSize!=bSize )
 		{
 			throw Exception( "PrimitiveVariable sizes do not match." );
@@ -260,9 +260,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 				{
 					HalfDataPtr l = new HalfData;
 					calculate(
-						staticPointerCast<HalfData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<HalfData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<HalfData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -275,9 +275,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 					HalfVectorDataPtr l = new HalfVectorData;
 					l->writable().resize( rSize );
 					calculate(
-						staticPointerCast<HalfVectorData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<HalfVectorData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<HalfVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -289,9 +289,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 				{
 					FloatDataPtr l = new FloatData;
 					calculate(
-						staticPointerCast<FloatData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<FloatData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<FloatData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()
@@ -304,9 +304,9 @@ void LuminanceOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 					FloatVectorDataPtr l = new FloatVectorData;
 					l->writable().resize( rSize );
 					calculate(
-						staticPointerCast<FloatVectorData>( rIt->second.data )->baseReadable(),
-						staticPointerCast<FloatVectorData>( gIt->second.data )->baseReadable(),
-						staticPointerCast<FloatVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( rIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( gIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( bIt->second.data )->baseReadable(),
 						steps,
 						rSize,
 						l->baseWritable()

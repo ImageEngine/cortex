@@ -153,7 +153,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		{
 			if ( do_update )
 			{
-				IECore::IntrusivePtr<U> data = IECore::runTimeCast<U>( parm->getValue() );
+				typename U::Ptr data = IECore::runTimeCast<U>( parm->getValue() );
 				if ( val != data->readable() )
 				{
 					m_dirty = true;

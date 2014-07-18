@@ -609,7 +609,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 				if ( interpolationIndex < m_interpolation->getPresets().size() - 1 )
 				{
 					// convert interpolation index to the preset value
-					interpolation = staticPointerCast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
+					interpolation = boost::static_pointer_cast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
 				}
 				else
 				{

@@ -66,7 +66,7 @@ class FontLoader : public IECore::RefCounted
 		/// Returns a static FontLoader instance that everyone
 		/// can use. This has searchpaths set using the
 		/// IECORE_FONT_PATHS environment variable.
-		static FontLoaderPtr defaultFontLoader();
+		static FontLoader *defaultFontLoader();
 
 	private :
 

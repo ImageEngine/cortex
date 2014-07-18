@@ -151,7 +151,21 @@ class RendererTest( IECoreRI.TestCase ) :
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )
 			l = " ".join( l.split() )
 			self.assert_( t[2] in l )
+	
+	def testM44dAttribute( self ) :
+		
+		# separate test case for M44d attributes, as they get converted to M44f before being 
+		# written into the rib:
+		
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testM44dAttribute.rib" )
+		with WorldBlock( r ) :
+			r.setAttribute( "user:Mref", M44dData( M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
+			self.assertEqual( r.getAttribute( "user:Mref" ), M44fData( M44f( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
 
+		l = "".join( file( "test/IECoreRI/output/testM44dAttribute.rib" ).readlines() )
+		l = " ".join( l.split() )
+		self.assert_( "Attribute \"user\" \"matrix Mref\" [ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ]" in l )
+	
 	def testCompoundDataAttributes( self ) :
 	
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )

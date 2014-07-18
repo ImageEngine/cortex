@@ -69,7 +69,7 @@ class VectorTypedDataTest
 		unsigned int randomElementPos();
 
 		unsigned int m_size;
-		IntrusivePtr<TypedData<T> > m_data;
+		typename TypedData<T>::Ptr m_data;
 
 		Imath::Rand32 m_randGen;
 
@@ -88,7 +88,7 @@ class SimpleTypedDataTest
 		void testMemoryUsage();
 		void testIsEqualTo();
 
-		IntrusivePtr< TypedData<T> > m_data;
+		typename TypedData<T>::Ptr m_data;
 
 };
 

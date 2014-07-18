@@ -54,7 +54,7 @@ ToGLConverter::ConverterDescription<ToGLCameraConverter> ToGLCameraConverter::g_
 ToGLCameraConverter::ToGLCameraConverter( IECore::ConstCameraPtr toConvert )
 	:	ToGLConverter( "Converts IECore::Camera objects to IECoreGL::Camera objects.", IECore::CameraTypeId )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::Camera>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::Camera>( toConvert ) );
 }
 
 ToGLCameraConverter::~ToGLCameraConverter()
@@ -63,11 +63,11 @@ ToGLCameraConverter::~ToGLCameraConverter()
 
 IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::CameraPtr camera = IECore::staticPointerCast<const IECore::Camera>( src )->copy(); // safe because the parameter validated it for us
+	IECore::CameraPtr camera = boost::static_pointer_cast<const IECore::Camera>( src )->copy(); // safe because the parameter validated it for us
 	camera->addStandardParameters(); // now all parameters should be there and have appropriate types - so we can avoid performing checks below
 
 	CameraPtr result = 0;
-	const std::string &projection = IECore::staticPointerCast<const IECore::StringData>( camera->parameters()["projection"] )->readable();
+	const std::string &projection = boost::static_pointer_cast<const IECore::StringData>( camera->parameters()["projection"] )->readable();
 	if( projection=="orthographic" )
 	{
 		result = new OrthographicCamera;
@@ -75,7 +75,7 @@ IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPt
 	else if( projection=="perspective" )
 	{
 		PerspectiveCameraPtr p = new PerspectiveCamera;
-		float fov = IECore::staticPointerCast<const IECore::FloatData>( camera->parameters()["projection:fov"] )->readable();
+		float fov = boost::static_pointer_cast<const IECore::FloatData>( camera->parameters()["projection:fov"] )->readable();
 		p->setFOV( fov );
 		result = p;
 	}
@@ -84,9 +84,9 @@ IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPt
 		throw IECore::Exception( ( boost::format( "Unsupported projection type \"%s\"" ) % projection ).str() );
 	}
 
-	result->setResolution( IECore::staticPointerCast<const IECore::V2iData>( camera->parameters()["resolution"] )->readable() );
-	result->setScreenWindow( IECore::staticPointerCast<const IECore::Box2fData>( camera->parameters()["screenWindow"] )->readable() );
-	result->setClippingPlanes( IECore::staticPointerCast<const IECore::V2fData>( camera->parameters()["clippingPlanes"] )->readable() );
+	result->setResolution( boost::static_pointer_cast<const IECore::V2iData>( camera->parameters()["resolution"] )->readable() );
+	result->setScreenWindow( boost::static_pointer_cast<const IECore::Box2fData>( camera->parameters()["screenWindow"] )->readable() );
+	result->setClippingPlanes( boost::static_pointer_cast<const IECore::V2fData>( camera->parameters()["clippingPlanes"] )->readable() );
 
 	IECore::TransformPtr t = camera->getTransform();
 	if( t )

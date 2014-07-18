@@ -112,13 +112,13 @@ struct Vectoriser
 		switch( seeds->typeId() )
 		{
 			case FloatVectorDataTypeId :
-				return vectoriseSeededT<FloatVectorData>( r, staticPointerCast<const FloatVectorData>( seeds ) );
+				return vectoriseSeededT<FloatVectorData>( r, boost::static_pointer_cast<const FloatVectorData>( seeds ) );
 			case DoubleVectorDataTypeId :
-				return vectoriseSeededT<DoubleVectorData>( r, staticPointerCast<const DoubleVectorData>( seeds ) );
+				return vectoriseSeededT<DoubleVectorData>( r, boost::static_pointer_cast<const DoubleVectorData>( seeds ) );
 			case IntVectorDataTypeId :
-				return vectoriseSeededT<IntVectorData>( r, staticPointerCast<const IntVectorData>( seeds ) );
+				return vectoriseSeededT<IntVectorData>( r, boost::static_pointer_cast<const IntVectorData>( seeds ) );
 			case UIntVectorDataTypeId :
-				return vectoriseSeededT<UIntVectorData>( r, staticPointerCast<const UIntVectorData>( seeds ) );
+				return vectoriseSeededT<UIntVectorData>( r, boost::static_pointer_cast<const UIntVectorData>( seeds ) );
 			default :
 				throw Exception( "Unsupported type for seeds parameter." );
 		}

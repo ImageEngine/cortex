@@ -57,7 +57,7 @@ AttributeCache::AttributeCache( const std::string &filename, IndexedIO::OpenMode
 		CompoundObjectPtr header = HeaderGenerator::header();
 		for ( CompoundObject::ObjectMap::const_iterator it = header->members().begin(); it != header->members().end(); it++ )
 		{
-			writeHeader( it->first, it->second );
+			writeHeader( it->first, it->second.get() );
 		}
 	}
 	if ( mode == IndexedIO::Read )

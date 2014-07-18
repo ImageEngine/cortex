@@ -35,6 +35,7 @@
 
 #include "IECoreRI/ParameterList.h"
 
+#include "IECore/MatrixAlgo.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/DespatchTypedData.h"
 
@@ -51,7 +52,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		appendParameter( it->first, it->second, typeHints );
+		appendParameter( it->first, it->second.get(), typeHints );
 	}
 }
 
@@ -64,7 +65,7 @@ ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const s
 	{
 		if( 0==it->first.value().compare( 0, prefix.size(), prefix ) )
 		{
-			appendParameter( string( it->first, prefix.size() ), it->second, typeHints );
+			appendParameter( string( it->first, prefix.size() ), it->second.get(), typeHints );
 		}
 	}
 }
@@ -135,6 +136,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 		case StringDataTypeId :
 			return "string";
 		case M44fDataTypeId :
+		case M44dDataTypeId :
 			return "matrix";
 		default :
 			msg( Msg::Warning, "ParameterList::type", format( "Variable \"%s\" has unsupported datatype." ) % name );
@@ -177,7 +179,28 @@ const void *ParameterList::value( const IECore::Data *d )
 		
 			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 			return &*(m_ints.rbegin());
+		case M44dDataTypeId :
+			{
+				const Imath::M44d& t = static_cast<const M44dData *>( d )->readable();
+				m_floats.push_back( (float)t[0][0] );
+				m_floats.push_back( (float)t[0][1] );
+				m_floats.push_back( (float)t[0][2] );
+				m_floats.push_back( (float)t[0][3] );
+				m_floats.push_back( (float)t[1][0] );
+				m_floats.push_back( (float)t[1][1] );
+				m_floats.push_back( (float)t[1][2] );
+				m_floats.push_back( (float)t[1][3] );
+				m_floats.push_back( (float)t[2][0] );
+				m_floats.push_back( (float)t[2][1] );
+				m_floats.push_back( (float)t[2][2] );
+				m_floats.push_back( (float)t[2][3] );
+				m_floats.push_back( (float)t[3][0] );
+				m_floats.push_back( (float)t[3][1] );
+				m_floats.push_back( (float)t[3][2] );
+				m_floats.push_back( (float)t[3][3] );
 
+				return &*(m_floats.rbegin() + 15);
+			}
 		default :
 		
 			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
@@ -194,7 +217,7 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	size_t numFloats = 0;
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
-		accumulateReservations( it->second, numStrings, numCharPtrs, numInts, numFloats );
+		accumulateReservations( it->second.get(), numStrings, numCharPtrs, numInts, numFloats );
 	}
 	m_strings.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
@@ -233,6 +256,9 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 			numCharPtrs += static_cast<const StringVectorData *>( d )->readable().size();
 		case BoolDataTypeId :
 			numInts++;
+			break;
+		case M44dDataTypeId :
+			numFloats += 16;
 			break;
 		case SplineffDataTypeId :
 			{

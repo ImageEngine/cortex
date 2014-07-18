@@ -116,22 +116,22 @@ PointDistributionOp::~PointDistributionOp()
 
 MeshPrimitiveParameter * PointDistributionOp::meshParameter()
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 const MeshPrimitiveParameter * PointDistributionOp::meshParameter() const
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 FloatParameter *PointDistributionOp::densityParameter()
 {
-	return m_densityParameter;
+	return m_densityParameter.get();
 }
 
 const FloatParameter *PointDistributionOp::densityParameter() const
 {
-	return m_densityParameter;
+	return m_densityParameter.get();
 }
 
 void PointDistributionOp::processMesh( const IECore::MeshPrimitive *mesh )
@@ -194,7 +194,7 @@ struct PointDistributionOp::Emitter
 		Emitter( MeshPrimitiveEvaluator *evaluator, const PrimitiveVariable &densityVar, std::vector<Imath::V3f> &positions, size_t triangleIndex, const Imath::V2f &v0, const Imath::V2f &v1, const Imath::V2f &v2 )
 			: m_meshEvaluator( evaluator ), m_densityVar( densityVar ), m_p( positions ), m_triangleIndex( triangleIndex ), m_v0( v0 ), m_v1( v1 ), m_v2( v2 )
 		{
-			m_evaluatorResult = staticPointerCast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
+			m_evaluatorResult = boost::static_pointer_cast<MeshPrimitiveEvaluator::Result>( m_meshEvaluator->createResult() );
 		}
 
 		void operator() ( const Imath::V2f pos, float densityThreshold )
@@ -202,7 +202,7 @@ struct PointDistributionOp::Emitter
 			Imath::V3f bary;
 			if( triangleContainsPoint( m_v0, m_v1, m_v2, pos, bary ) )
 			{
-				m_meshEvaluator->barycentricPosition( m_triangleIndex, bary, m_evaluatorResult );
+				m_meshEvaluator->barycentricPosition( m_triangleIndex, bary, m_evaluatorResult.get() );
 				if ( m_evaluatorResult->floatPrimVar( m_densityVar ) >= densityThreshold )
 				{
 					m_p.push_back( m_evaluatorResult->point() );
@@ -309,7 +309,7 @@ ObjectPtr PointDistributionOp::doOperation( const CompoundObject * operands )
 	const std::vector<float> &textureArea = m_mesh->variableData<FloatVectorData>( "textureArea", PrimitiveVariable::Uniform )->readable();
 	
 	size_t numFaces = m_mesh->verticesPerFace()->readable().size();	
-	Generator gen( m_meshEvaluator, s, t, faceArea, textureArea, density, densityVar, offset );
+	Generator gen( m_meshEvaluator.get(), s, t, faceArea, textureArea, density, densityVar, offset );
 	tbb::parallel_reduce( tbb::blocked_range<size_t>( 0, numFaces ), gen );
 	
 	V3fVectorDataPtr pData = new V3fVectorData();

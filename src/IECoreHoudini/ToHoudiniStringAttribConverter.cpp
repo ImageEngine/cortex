@@ -124,7 +124,7 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::convertString( std::stri
 	valueData->writable().push_back( value );
 	std::vector<int> indexValues( range.getEntries(), 0 );
 	IntVectorDataPtr indexData = new IntVectorData( indexValues );
-	ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( valueData );
+	ToHoudiniStringVectorAttribConverterPtr converter = new ToHoudiniStringVectorAttribConverter( valueData.get() );
 	converter->indicesParameter()->setValidatedValue( indexData );
 	return converter->convert( name, geo, range );
 }

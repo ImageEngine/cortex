@@ -62,7 +62,7 @@ class MurmurHash;
 
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
-		TYPENAME::Ptr copy() const { return IECore::staticPointerCast<TYPENAME>( IECore::Object::copy() ); }			\
+		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( IECore::Object::copy() ); }			\
 		virtual bool isEqualTo( const IECore::Object *other ) const;													\
 		virtual void hash( IECore::MurmurHash &h ) const;																		\
 	protected :																											\
@@ -135,7 +135,7 @@ class Object : public RunTimeTyped
 		/// your base class isEqualTo() and returning false straight away
 		/// if that returns false. The Object level implementation checks that
 		/// the types are identical, so you can safely perform a
-		/// staticPointerCast<YourClass>( other ) if your base class isEqualTo()
+		/// boost::static_pointer_cast<YourClass>( other ) if your base class isEqualTo()
 		/// doesn't return false.
 		virtual bool isEqualTo( const Object *other ) const = 0;
 		/// Returns true if this object is not equal to the other. A default
@@ -230,7 +230,7 @@ class Object : public RunTimeTyped
 			public :
 				/// Returns a copy of the specified object.
 				template<class T>
-				IntrusivePtr<T> copy( const T *toCopy );
+				typename T::Ptr copy( const T *toCopy );
 			private :
 				std::map<const Object *, Object *> m_copies;
 		};

@@ -111,7 +111,7 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			FromMayaCurveConverterPtr converter = new FromMayaCurveConverter( curve );
 			// we want worldspace points if a worldShape is connected, and local otherwise
 			converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
-			IECore::CurvesPrimitivePtr cortexCurve = IECore::staticPointerCast<IECore::CurvesPrimitive>( converter->convert() );
+			IECore::CurvesPrimitivePtr cortexCurve = boost::static_pointer_cast<IECore::CurvesPrimitive>( converter->convert() );
 			
 			if( !combinedCurves )
 			{

@@ -88,7 +88,7 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		/// Returns just the face-varying colors for the mesh.
 		template< class T >	typename IECore::TypedData< T >::Ptr colors( const MString &colorSet="" ) const
 		{
-			return IECore::dynamicPointerCast< T >( colors( colorSet, false  ) );
+			return boost::dynamic_pointer_cast< T >( colors( colorSet, false  ) );
 		}
 
 		//! @name Parameter accessors

@@ -252,7 +252,7 @@ void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const Co
 		}
 		
 		promoter.setInterpolation( it->second.interpolation );
-		it->second.data = despatchTypedData<Promoter, TypeTraits::IsVectorTypedData>( it->second.data, promoter );
+		it->second.data = despatchTypedData<Promoter, TypeTraits::IsVectorTypedData>( it->second.data.get(), promoter );
 		it->second.interpolation = PrimitiveVariable::FaceVarying;
 		
 		assert( mesh->isPrimitiveVariableValid( it->second ) );

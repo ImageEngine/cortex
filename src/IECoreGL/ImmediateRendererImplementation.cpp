@@ -94,7 +94,7 @@ void ImmediateRendererImplementation::worldBegin()
 
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
 	
-	m_camera->render( m_stateStack.top() );
+	m_camera->render( m_stateStack.top().get() );
 
 	glViewport( 0, 0, width, height );
 	glClearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -186,12 +186,12 @@ void ImmediateRendererImplementation::addUserAttribute( const IECore::InternedSt
 
 IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::InternedString &name )
 {
-	State *curState = m_stateStack.top();
+	State *curState = m_stateStack.top().get();
 	IECore::CompoundDataMap &attrs = curState->userAttributes()->writable();
 	IECore::CompoundDataMap::iterator attrIt = attrs.find( name );
 	if( attrIt != attrs.end() )
 	{
-		return attrIt->second;
+		return attrIt->second.get();
 	}
 	return 0;
 }
@@ -201,7 +201,7 @@ void ImmediateRendererImplementation::addPrimitive( ConstPrimitivePtr primitive 
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )
 	{
-		primitive->render( m_stateStack.top() );
+		primitive->render( m_stateStack.top().get() );
 	}
 }
 
@@ -210,7 +210,7 @@ void ImmediateRendererImplementation::addProcedural( IECore::Renderer::Procedura
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )
 	{
-		proc->render( renderer );
+		proc->render( renderer.get() );
 	}
 }
 
@@ -219,6 +219,6 @@ void ImmediateRendererImplementation::addInstance( GroupPtr grp )
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )
 	{
-		grp->render( m_stateStack.top() );
+		grp->render( m_stateStack.top().get() );
 	}
 }

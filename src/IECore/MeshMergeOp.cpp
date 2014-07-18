@@ -70,12 +70,12 @@ MeshMergeOp::~MeshMergeOp()
 
 MeshPrimitiveParameter * MeshMergeOp::meshParameter()
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 const MeshPrimitiveParameter * MeshMergeOp::meshParameter() const
 {
-	return m_meshParameter;
+	return m_meshParameter.get();
 }
 
 template<class T>
@@ -115,12 +115,13 @@ struct MeshMergeOp::AppendPrimVars
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr data )
+	ReturnType operator()( T *data )
 	{
 		if ( m_visitedData.find( data ) != m_visitedData.end() )
 		{
 			return;
 		}
+		m_visitedData.insert( data );
 
 		const T *data2 = m_mesh2->variableData<T>( m_name, m_interpolation );
 		if ( data2 )
@@ -139,8 +140,6 @@ struct MeshMergeOp::AppendPrimVars
 			
  			data->writable().insert( data->writable().end(), size, defaultValue );
 		}
-		
-		m_visitedData.insert( data );
 	}
 
 	private :
@@ -164,7 +163,7 @@ struct MeshMergeOp::PrependPrimVars
 	}
 	
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr data )
+	ReturnType operator()( const T *data )
 	{
 		PrimitiveVariableMap::iterator it = m_mesh->variables.find( m_name );
 		if ( it == m_mesh->variables.end() && !m_remove )
@@ -236,7 +235,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
 			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData );
-			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data, f );
+			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
 		}
 	}
 	
@@ -247,7 +246,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 		if ( pvIt2->second.interpolation != PrimitiveVariable::Constant )
 		{
 			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
-			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data, f );
+			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data.get(), f );
 		}
 	}
 }

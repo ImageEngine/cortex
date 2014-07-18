@@ -65,7 +65,7 @@ IECore::ObjectPtr OpHolder::engine()
 	}
 
 	/// \todo operate() should be const, then we wouldn't need this cast.
-	IECore::OpPtr op = IECore::constPointerCast<IECore::Op>( constOp );
+	IECore::OpPtr op = boost::const_pointer_cast<IECore::Op>( constOp );
 
 	setParameterValues(); /// \todo is this really needed?? didn't we do that in validate()?
 	setParameterValuesFromInputs(); /// \todo Should this be done by an engine() call on the base class?

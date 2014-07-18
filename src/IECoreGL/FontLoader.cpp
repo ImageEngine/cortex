@@ -84,7 +84,7 @@ void FontLoader::clear()
 	m_fonts.clear();
 }
 
-FontLoaderPtr FontLoader::defaultFontLoader()
+FontLoader *FontLoader::defaultFontLoader()
 {
 	static FontLoaderPtr l = 0;
 	if( !l )
@@ -92,5 +92,5 @@ FontLoaderPtr FontLoader::defaultFontLoader()
 		const char *e = getenv( "IECORE_FONT_PATHS" );
 		l = new FontLoader( IECore::SearchPath( e ? e : "", ":" ) );
 	}
-	return l;
+	return l.get();
 }

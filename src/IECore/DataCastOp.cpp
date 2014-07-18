@@ -87,22 +87,22 @@ DataCastOp::~DataCastOp()
 
 ObjectParameter * DataCastOp::objectParameter()
 {
-	return m_objectParameter;
+	return m_objectParameter.get();
 }
 
 const ObjectParameter * DataCastOp::objectParameter() const
 {
-	return m_objectParameter;
+	return m_objectParameter.get();
 }
 
 IntParameter * DataCastOp::targetTypeParameter()
 {
-	return m_targetTypeParameter;
+	return m_targetTypeParameter.get();
 }
 
 const IntParameter * DataCastOp::targetTypeParameter() const
 {
-	return m_targetTypeParameter;
+	return m_targetTypeParameter.get();
 }
 
 /// A functor suitable for use with stl algorithms such as transform(), allowing

@@ -303,7 +303,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		}
 	}
 	
-	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
+	ROP_RENDER_CODE status = doWrite( m_liveScene.get(), outScene.get(), writeTime, progress );
 	if ( status != ROP_ABORT_RENDER )
 	{
 		executePostFrameScript( time );
@@ -333,7 +333,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	
 	if ( liveScene != m_liveScene )
 	{
-		outScene->writeTransform( liveScene->readTransform( time ), time );
+		outScene->writeTransform( liveScene->readTransform( time ).get(), time );
 	}
 	
 	Mode mode = NaturalExpand;
@@ -361,7 +361,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		
 		if ( ConstObjectPtr data = liveScene->readAttribute( *it, time ) )
 		{
-			outScene->writeAttribute( *it, data, time );
+			outScene->writeAttribute( *it, data.get(), time );
 		}
 	}
 	
@@ -371,7 +371,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		{
 			if ( ConstSceneInterfacePtr scene = sceneNode->scene() )
 			{
-				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene, time ), time );
+				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene.get(), time ).get(), time );
 				return ROP_CONTINUE_RENDER;
 			}
 		}
@@ -390,7 +390,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	{
 		try
 		{
-			outScene->writeObject( liveScene->readObject( time ), time );
+			outScene->writeObject( liveScene->readObject( time ).get(), time );
 		}
 		catch ( IECore::Exception &e )
 		{
@@ -426,7 +426,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time );
 		}
 		
-		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
+		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;

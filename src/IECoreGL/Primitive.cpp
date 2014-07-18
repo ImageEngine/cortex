@@ -103,7 +103,7 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-static ShaderPtr constant2()
+static Shader *constant2()
 {
 
 	static const char *vertexSource =
@@ -128,7 +128,7 @@ static ShaderPtr constant2()
 		"}";
 
 	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
-	return s;
+	return s.get();
 }
 
 void Primitive::render( State *state ) const
