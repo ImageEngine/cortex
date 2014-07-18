@@ -1020,7 +1020,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 		static void sceneHash( const ReaderImplementation *scene, MurmurHash &h )
 		{
 			// We currently use the pointer of the shared data plus the current path as a way to uniquely identify the scene location
-			h.append( (size_t)scene->m_sharedData );
+			h.append( (uint64_t)scene->m_sharedData );
 			const ReaderImplementation *currScene = scene;
 			while( currScene->m_parent )
 			{
