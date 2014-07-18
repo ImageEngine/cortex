@@ -193,12 +193,12 @@ const IntParameter * PointSmoothSkinningOp::blendParameter() const
 
 IntVectorParameter * PointSmoothSkinningOp::refIndicesParameter()
 {
-	return m_refIndicesParameter;
+	return m_refIndicesParameter.get();
 }
 
 const IntVectorParameter * PointSmoothSkinningOp::refIndicesParameter() const
 {
-	return m_refIndicesParameter;
+	return m_refIndicesParameter.get();
 }
 
 void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operands )
