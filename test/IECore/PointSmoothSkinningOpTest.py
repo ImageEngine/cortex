@@ -65,27 +65,29 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def myPP (self):
 		# return a point primitive for testing
-		pts = PointsPrimitive(0)
+		pts = PointsPrimitive( self.myP() )
 		vertex = PrimitiveVariable.Interpolation.Vertex
-		pts["P"] = PrimitiveVariable( vertex, self.myP() )
 		pts["N"] = PrimitiveVariable( vertex, self.myN() )
+		self.assertTrue( pts.arePrimitiveVariablesValid() )
 		return pts
-
-	def myMP (self):
-		# return a mesh primitive for testing, with fv n
+	
+	def myMN (self):
+		# face varying n
 		n = V3fVectorData( [ V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ),
 							V3f( 0, 1, 0 ), V3f( 0, 1, 0 ), V3f( 0, 1, 0 ), V3f( 0, 1, 0 ),
 							V3f( 0, 0, -1 ), V3f( 0, 0, -1 ), V3f( 0, 0, -1 ), V3f( 0, 0, -1 ),
 							V3f( 0, -1, 0 ), V3f( 0, -1, 0 ), V3f( 0, -1, 0 ), V3f( 0, -1, 0 ),
 							V3f( 1, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 0, 0 ),
 							V3f( -1, 0, 0 ), V3f( -1, 0, 0 ), V3f( -1, 0, 0 ), V3f( -1, 0, 0 ) ] )
+		return n
 
+	def myMP (self):
 		vertsPerFace = IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
 		vertexIds = IntVectorData( [ 0, 1, 3, 2, 2, 3, 5, 4, 4, 5, 7, 6, 6, 7, 1, 0, 1, 7, 5, 3, 6, 0, 2, 4 ] )
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, self.myP() )
-		m["N"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, n )
-		m.arePrimitiveVariablesValid()
+		m["N"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, self.myMN() )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
 		return m
 
 	def myDP (self):
@@ -196,14 +198,15 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		# check that it works with other primitives, meshPrim
 		mp = self.myMP()
 		o = PointSmoothSkinningOp()
-		# facevarying normals are not supported, yet - so raise an error
-		self.assertRaises( RuntimeError, o, input=mp, copyInput=True,
-						deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )
-
 		# test it works
 		o( input=mp, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = False )
-
 		self.assertNotEqual(mp["P"].data , self.myP())
+		self.assertEqual(mp["N"].data , self.myMN())
+		
+		o( input=mp, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )
+		self.assertNotEqual(mp["P"].data , self.myP())
+		self.assertNotEqual(mp["N"].data , self.myMN())
+		
 
 	def testDifferentVarNames( self ) :
 		# check using different var names
