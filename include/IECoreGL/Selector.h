@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
 
 #include "IECore/RefCounted.h"
 
@@ -94,6 +95,13 @@ class Selector : boost::noncopyable
 		
 		/// Returns the mode this Selector is operating in.
 		Mode mode() const;
+		
+		/// The post-projection matrix being used to perform
+		/// the selection. This is applied automatically by
+		/// the constructor, but if the projection matrix is
+		/// changed after construction, then this matrix must
+		/// be multiplied with it.
+		const Imath::M44d &postProjectionMatrix();
 		
 		/// Call this to set the name attached to subsequently rendered objects.
 		/// If rendering a Scene, this will be called automatically
