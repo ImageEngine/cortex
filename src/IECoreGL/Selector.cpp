@@ -494,14 +494,11 @@ State *Selector::baseState()
 	return m_implementation->baseState();
 }
 
-void Selector::loadIDShader( const IECoreGL::Shader *idShader )
-{
-	m_implementation->pushIDShader( idShader );
-}
 void Selector::pushIDShader( const IECoreGL::Shader *idShader )
 {
 	m_implementation->pushIDShader( idShader );
 }
+
 void Selector::popIDShader()
 {
 	m_implementation->popIDShader();

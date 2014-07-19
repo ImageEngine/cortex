@@ -115,9 +115,6 @@ class Selector : boost::noncopyable
 		/// Revert to previous ID shader:
 		void popIDShader();
 		
-		/// Deprecated: calls pushIDShader
-		void loadIDShader( const IECoreGL::Shader *idShader );
-		
 		/// Returns the currently active Selector - this may be used
 		/// in drawing code to retrieve a selector to call loadName()
 		/// on. The NameStateComponent is an example of a class which
