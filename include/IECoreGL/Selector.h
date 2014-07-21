@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "OpenEXR/ImathBox.h"
+#include "OpenEXR/ImathMatrix.h"
 
 #include "IECore/RefCounted.h"
 
@@ -95,6 +96,13 @@ class Selector : boost::noncopyable
 		/// Returns the mode this Selector is operating in.
 		Mode mode() const;
 		
+		/// The post-projection matrix being used to perform
+		/// the selection. This is applied automatically by
+		/// the constructor, but if the projection matrix is
+		/// changed after construction, then this matrix must
+		/// be multiplied with it.
+		const Imath::M44d &postProjectionMatrix();
+		
 		/// Call this to set the name attached to subsequently rendered objects.
 		/// If rendering a Scene, this will be called automatically
 		/// by the NameStateComponents within the Scene.
@@ -114,9 +122,6 @@ class Selector : boost::noncopyable
 		
 		/// Revert to previous ID shader:
 		void popIDShader();
-		
-		/// Deprecated: calls pushIDShader
-		void loadIDShader( const IECoreGL::Shader *idShader );
 		
 		/// Returns the currently active Selector - this may be used
 		/// in drawing code to retrieve a selector to call loadName()
