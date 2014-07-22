@@ -1019,7 +1019,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		static void sceneHash( const ReaderImplementation *scene, MurmurHash &h )
 		{
-			// We currently use the pointer of the shared data plus the current path as a way to uniquely identify the scene location
+			// \todo Currently there's a chance of hash collision if the file is closed and others opened, if the shared data object happens to be allocated in the same address. Replace it by a more reliable mechanism for uniquely identifying the file. 
 			h.append( (uint64_t)scene->m_sharedData );
 			const ReaderImplementation *currScene = scene;
 			while( currScene->m_parent )
