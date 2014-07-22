@@ -1,3 +1,46 @@
+# 9.0.0-a2
+
+#### IECore
+
+- Made RefCounted bindings release the GIL during C++ destruction.
+- Changed RefCounted base class binding to use GILReleasePtr too.
+- Replaced IECore::IntrusivePtr with boost::intrusive_ptr.
+- Removed staticPointerCast, constPointerCast and dynamicPointerCast.
+- Fixed crash in MeshMergeOp.
+- Fixed mutex acquisition in LRUCache::updateListPosition().
+- PointSmoothSkinningOp handles faceVarying normals and added refIndices parameter
+- Changed DespatchedTypedData DataPtr & argument to Data *
+- Fixed LRUCache hangs.
+- Simplified RefCounted bindings.
+- Fixed LRUCache crashes where clear() was called concurrently with get().
+    
+#### IECorePython
+
+- Added IECorePython::CastToIntrusivePtr.
+
+#### IECoreMaya
+
+- MayaScene bindings now catch boost python exceptions
+
+#### IECoreGL
+
+- Removed deprecated IECoreGL::Selector::loadIDShader() method.
+- Added IECoreGL::Selector::postProjectionMatrix() method.
+
+#### IECoreRI
+
+- Added support for camera edits to IECoreRI::Renderer.
+- Added support for motion blurred cameras to IECoreRI::Renderer.
+- Added support for multiple cameras to IECoreRI::Renderer.
+- Removed "transform" parameter from IECoreRI::Renderer::camera().
+- Removed support for hider parameters in IECoreRI::Renderer::camera(). …
+- IECoreRI now built for all python versions 
+- added M44dData attribute support to IECoreRI::Renderer
+
+#### IECoreAlembic
+
+- Added support for the Ogawa backend into IECoreAlembic.
+
 # 9.0.0-a1
 
 #### IECore
