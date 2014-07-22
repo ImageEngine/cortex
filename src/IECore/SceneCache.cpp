@@ -724,7 +724,6 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			size_t s0, s1;
 			double x;
 
-			h.append( SceneCacheTypeId );	// create a unique base hash that should not collide with other Cortex data types.
 			h.append( (unsigned char)hashType );
 
 			// all kinds of hashes, except the child names depend on time.
@@ -2472,6 +2471,8 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
 
 void SceneCache::hash( HashType hashType, double time, MurmurHash &h ) const
 {
+	SceneInterface::hash( hashType, time, h );
+
 	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
 	reader->hash( hashType, time, h );
 }

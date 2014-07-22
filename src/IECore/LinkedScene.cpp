@@ -1172,6 +1172,13 @@ ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::Missin
 	return (const_cast<LinkedScene*>(this)->*nonConstSceneFn)( path, missingBehaviour );
 }
 
+void LinkedScene::mainSceneHash( HashType hashType, double time, MurmurHash &h ) const
+{
+	// We add the base class hash so that it does not collide with hashes returned as if the main scene was opened directly as a SceneCache.
+	SceneInterface::hash( hashType, time, h );
+	m_mainScene->hash(hashType, time, h);
+}
+
 void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 {
 	if ( !m_readOnly )
@@ -1187,21 +1194,18 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 			switch( hashType )
 			{
 				case TransformHash:
-					m_mainScene->hash( hashType, time, h );
-					return;	// Link locations override the transform so we return without adding the hash from the linked scene.
+					mainSceneHash( hashType, time, h );
+					// Link locations override the transform so we return without adding the hash from the linked scene.
+					return;
 				case AttributesHash:
-					m_mainScene->hash( hashType, time, h );
+				case HierarchyHash:
+					// Attributes and Hierarchy are affected by both the main scene and the linked scene
+					mainSceneHash( hashType, time, h );
 					break;
 				case BoundHash:
-					break;	 // Let the bounds come from the linked location
 				case ObjectHash:
-					// Defined by the linked scene
-					break;
 				case ChildNamesHash:
-					// Defined by the linked scene
-					break;
-				case HierarchyHash:
-					m_mainScene->hash( hashType, time, h );
+					// Let the bounds, object and child names come from the linked location
 					break;
 			};
 		}
@@ -1213,7 +1217,7 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 	}
 	else
 	{
-		m_mainScene->hash(hashType, time, h);
+		mainSceneHash(hashType, time, h);
 	}
 }
 

@@ -250,7 +250,10 @@ class SceneInterface : public RunTimeTyped
 		/// The hash returned is not content-based, but it uniquely identifies the queried information so that 
 		/// it can be used for memory caches, for example, used by ComputationCache objects.
 		/// This function is only available when reading scenes and it raises an exception otherwise.
-		virtual void hash( HashType hashType, double time, MurmurHash &h ) const = 0;
+		/// The base class implementation only adds the class typeId information to garantee that the hash won't 
+		/// collide with other Cortex objects and derived classes are responsible to call the base class implementation
+		/// as well as add the time dependency as applicable.
+		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;
 
 		/*
 		 * Utility functions

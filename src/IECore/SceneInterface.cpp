@@ -119,6 +119,11 @@ SceneInterface::~SceneInterface()
 {
 }
 
+void SceneInterface::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	h.append( typeId() );
+}
+
 void SceneInterface::pathToString( const SceneInterface::Path &p, std::string &path )
 {
 	if ( !p.size() )

@@ -160,6 +160,8 @@ class LinkedScene : public  SampledSceneInterface
 
 		ConstSceneInterfacePtr expandLink( const StringData *fileName, const InternedStringVectorData *root, int &linkDepth );
 
+		void mainSceneHash( HashType hashType, double time, MurmurHash &h ) const;
+
 		// uses the mainScene to ask what is the time the link is remapped to. Should only be called when the linkAttribute is available.
 		double remappedLinkTime( double time ) const;
 		double remappedLinkTimeAtSample( size_t sampleIndex ) const;
