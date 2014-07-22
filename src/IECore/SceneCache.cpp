@@ -796,15 +796,17 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 					}
 					else
 					{
-						// For leaf locations we just need the attribute,bounds and object hashes (the transform is not part of it)
+						// For leaf locations, we can find out if they are time dependent by adding the individual hashes for the location here.
 						hash( AttributesHash, time, h, true );
 						hash( BoundHash, time, h, true );
 						hash( ObjectHash, time, h, true );
+						hash( TransformHash, time, h, true );
 					}
 					break;
 			}
 			if ( !ignoreSceneHash )
 			{
+				// Because the hash computed so far is not based on the contents of the file, we have to add to the hash something that identifies the file and the location in the hierarchy.
 				sceneHash( this, h );
 			}
 		}

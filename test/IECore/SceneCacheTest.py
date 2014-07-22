@@ -771,8 +771,7 @@ class SceneCacheTest( unittest.TestCase ) :
 
 		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 0 )
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
-		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )		# only the leaf location /A/a has a non animated object and matches the hiearchy hash
-
+		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
 
 if __name__ == "__main__":
 	unittest.main()

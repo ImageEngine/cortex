@@ -800,7 +800,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 
 		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 0 )
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 1 )
-		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )	# all locations have time dependent hash except for the leaf /A/a where there's no animation
+		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )	# all locations differ
 
 	def testHashesWithRetimedLinks( self ) :
 

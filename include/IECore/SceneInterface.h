@@ -89,6 +89,7 @@ class SceneInterface : public RunTimeTyped
 		};
 
 		/// Defines the type of hash to be computed.
+		/// The hierarchy hash includes all the other types of hash for the queried location and all it's children locations.
 		enum HashType {
 			TransformHash,
 			AttributesHash,
