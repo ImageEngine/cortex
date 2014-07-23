@@ -736,6 +736,120 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( c0.readAttribute( "testAttr", 0 ), IECore.StringData( "test0" ) )
 		self.assertEqual( c1.readAttribute( "testAttr", 0 ), IECore.StringData( "test1" ) )
 		
+	def testHashes( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		i0 = l.createChild("instance0")
+		i0.writeLink( m )
+		i1 = l.createChild("instance1")
+		i1.writeLink( m )
+		del i0, i1, l, m
+
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+
+		def checkHash( hashType, scene, currTime, duplicates = 0 ) :
+			hh = set()
+			cc = collectHashes( scene.child("instance0"), hashType, currTime, hh )
+			self.assertEqual( cc - duplicates, len(hh) )
+			hh2 = set()
+			cc2 = collectHashes( scene.child("instance1"), hashType, currTime, hh2 )
+			self.assertEqual( cc2 - duplicates, len(hh2) )
+			self.assertEqual( cc2, cc )
+			if hashType in [ IECore.SceneInterface.HashType.AttributesHash, IECore.SceneInterface.HashType.HierarchyHash ] :
+				# only the instance location should have different hashes, so we sum 1.
+				self.assertEqual( cc - duplicates + 1, len(hh.union(hh2)) )
+			else :
+				# for all the other locations both instances should match
+				self.assertEqual( cc - duplicates, len(hh.union(hh2)) )	
+
+			return ( cc, hh, cc2, hh2 )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.TransformHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.TransformHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )	# all transforms differ except the root
+
+		duplicates = 1
+		t0 = checkHash( IECore.SceneInterface.HashType.AttributesHash, l, 0, duplicates )
+		t1 = checkHash( IECore.SceneInterface.HashType.AttributesHash, l, 1, duplicates )
+		self.assertEqual( t0[0] - duplicates, len(t0[1].union(t1[1])) )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.BoundHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.BoundHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0] - 1, len(t0[1].union(t1[1])) )		# all except /A/a have animated bounds
+
+		duplicates = 2
+		t0 = checkHash( IECore.SceneInterface.HashType.ObjectHash, l, 0, duplicates )
+		t1 = checkHash( IECore.SceneInterface.HashType.ObjectHash, l, 1, duplicates )
+		self.assertEqual( t0[0] - duplicates + 1, len(t0[1].union(t1[1])) )	# only /B/b has animated object, the rest should match
+
+		t0 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l, 1 )
+		self.assertEqual( t0[0], len(t0[1].union(t1[1])) )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, l, 1 )
+		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )	# all locations differ
+
+	def testHashesWithRetimedLinks( self ) :
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		# save animated spheres with double the speed and with offset, using less samples (time remapping)
+		i0 = l.createChild("instance0")
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 1.0 )
+		i0.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 2.0 ), 2.0 )
+		# save animated spheres with same speed and with offset, same samples (time remapping is identity)
+		i1 = l.createChild("instance1")
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 1.0 )
+		i1.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 1.0 ), 2.0 )
+		del i0, i1, l, m
+
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		def checkHash( hashType, scene, duplicates=0 ) :
+			hh = set()
+			cc = collectHashes( scene.child("instance0"), hashType, 0.5, hh )
+			self.assertEqual( cc - duplicates, len(hh) )
+			hh2 = set()
+			cc2 = collectHashes( scene.child("instance1"), hashType, 1.5, hh2 )
+			self.assertEqual( cc2- duplicates, len(hh2) )
+			self.assertEqual( cc2, cc )
+			if hashType in [IECore.SceneInterface.HashType.AttributesHash, IECore.SceneInterface.HashType.HierarchyHash] :
+				self.assertEqual( cc-duplicates+1, len(hh.union(hh2)) )
+			else :
+				self.assertEqual( cc-duplicates, len(hh.union(hh2)) )
+
+		checkHash( IECore.SceneInterface.HashType.TransformHash, l,  )
+		checkHash( IECore.SceneInterface.HashType.AttributesHash, l, duplicates = 1 )
+		checkHash( IECore.SceneInterface.HashType.BoundHash, l )
+		checkHash( IECore.SceneInterface.HashType.ObjectHash, l, duplicates = 2 )
+		checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l )
+		checkHash( IECore.SceneInterface.HashType.HierarchyHash, l )
+
 if __name__ == "__main__":
 	unittest.main()
 

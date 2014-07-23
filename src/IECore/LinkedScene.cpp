@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -1172,3 +1172,53 @@ ConstSceneInterfacePtr LinkedScene::scene( const Path &path, LinkedScene::Missin
 	SceneInterfacePtr (LinkedScene::*nonConstSceneFn)(const Path &, MissingBehaviour) = &LinkedScene::scene;
 	return (const_cast<LinkedScene*>(this)->*nonConstSceneFn)( path, missingBehaviour );
 }
+
+void LinkedScene::mainSceneHash( HashType hashType, double time, MurmurHash &h ) const
+{
+	// We add the base class hash so that it does not collide with hashes returned as if the main scene was opened directly as a SceneCache.
+	SceneInterface::hash( hashType, time, h );
+	m_mainScene->hash(hashType, time, h);
+}
+
+void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	if ( !m_readOnly )
+	{
+		throw Exception( "Hashes not available on write-only LinkedScene!" );
+	}
+
+	if ( m_linkedScene )
+	{
+		if ( m_atLink )
+		{
+			/// special cases: we are exactly at the entry point for the linked scene.
+			switch( hashType )
+			{
+				case TransformHash:
+					mainSceneHash( hashType, time, h );
+					// Link locations override the transform so we return without adding the hash from the linked scene.
+					return;
+				case AttributesHash:
+				case HierarchyHash:
+					// Attributes and Hierarchy are affected by both the main scene and the linked scene
+					mainSceneHash( hashType, time, h );
+					break;
+				case BoundHash:
+				case ObjectHash:
+				case ChildNamesHash:
+					// Let the bounds, object and child names come from the linked location
+					break;
+			};
+		}
+		if ( m_timeRemapped )
+		{
+			time = remappedLinkTime( time );
+		}
+		m_linkedScene->hash(hashType, time, h);
+	}
+	else
+	{
+		mainSceneHash(hashType, time, h);
+	}
+}
+

@@ -721,6 +721,57 @@ class SceneCacheTest( unittest.TestCase ) :
 			self.assertAlmostEqual( r[1], 0.1 * i * math.pi * 0.5, 9 )
 			self.assertAlmostEqual( t[0], 5 + 0.5 * i, 9 )
 		
+	def testHashes( self ):
+
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+
+		hashTypes = IECore.SceneInterface.HashType.values.values()
+
+		def checkHash( hashType, scene, currTime, duplicates = 0 ):
+			hh = set()
+			cc = collectHashes( scene, hashType, currTime, hh )
+			self.assertEqual( cc - duplicates, len(hh) )
+			return ( cc, hh )
+
+		t0 = checkHash( IECore.SceneInterface.HashType.TransformHash, m, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.TransformHash, m, 1 )
+		self.assertEqual( t0[0]+t1[0]-1, len(t0[1].union(t1[1])) )	# all transforms should be animated except the root
+
+		t05 = checkHash( IECore.SceneInterface.HashType.TransformHash, m, 0.5 )
+		self.assertEqual( t0[0]+t05[0]+t1[0]-2, len(t0[1].union(t05[1].union(t1[1]))) )	# all transforms should be animated except the root
+
+		tn1 = checkHash( IECore.SceneInterface.HashType.TransformHash, m, -1 )
+		self.assertEqual( t0[0], len(t0[1].union(tn1[1])) )	# time 0 should match time -1's hashes
+
+		duplicatedAttributes = 2
+		t0 = checkHash( IECore.SceneInterface.HashType.AttributesHash, m, 0, duplicatedAttributes )
+		t1 = checkHash( IECore.SceneInterface.HashType.AttributesHash, m, 1, duplicatedAttributes )
+		self.assertEqual( t0[0] - duplicatedAttributes, len(t0[1].union(t1[1])) )		# attributes are not animated in the example scene
+
+		t0 = checkHash( IECore.SceneInterface.HashType.BoundHash, m, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.BoundHash, m, 1 )
+		self.assertEqual( t0[0]+t1[0]-1, len(t0[1].union(t1[1])) )		# only object at /A/a is constant in time and not vary it's bounds everything else differs
+
+		noObjects = 2
+		t0 = checkHash( IECore.SceneInterface.HashType.ObjectHash, m, 0, noObjects )
+		t1 = checkHash( IECore.SceneInterface.HashType.ObjectHash, m, 1, noObjects )
+		self.assertEqual( t0[0] - noObjects + 1, len(t0[1].union(t1[1])) )	# only object at /B/b vary in time everything else should match
+
+		t0 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, m, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.ChildNamesHash, m, 1 )
+		self.assertEqual( t0[0], len(t0[1].union(t1[1])) )	# child names does not change over time
+
+		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 0 )
+		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
+		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
 
 if __name__ == "__main__":
 	unittest.main()

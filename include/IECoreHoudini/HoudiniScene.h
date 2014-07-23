@@ -100,6 +100,9 @@ class HoudiniScene : public IECore::SceneInterface
 		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		
+		/// Currently raises an exception
+		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
+
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
 		

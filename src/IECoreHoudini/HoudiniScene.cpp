@@ -779,6 +779,11 @@ SceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missin
 	return retrieveScene( path, missingBehaviour );
 }
 
+void HoudiniScene::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	throw Exception( "Hashes currently not supported in HoudiniScene objects." );
+}
+
 OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = OPgetDirector()->findNode( m_nodePath );

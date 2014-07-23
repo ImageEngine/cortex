@@ -719,6 +719,97 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return location;
 		}
 
+		void hash( HashType hashType, double time, MurmurHash &h, bool ignoreSceneHash = false ) const
+		{
+			size_t s0, s1;
+			double x;
+
+			h.append( (unsigned char)hashType );
+
+			// all kinds of hashes, except the child names depend on time.
+			switch( hashType )
+			{
+				case TransformHash:
+
+					if ( m_indexedIO->hasEntry( transformEntry ) )
+					{
+						x = transformSampleInterval( time, s0, s1 );
+						h.append( lerp( (double)s0, (double)s1, x ) );
+					}
+					else
+					{
+						// return a simple hash for the identity transform (which does not include the scene location).
+						return;
+					}
+					break;
+
+				case AttributesHash:
+					{
+						NameList attrs;
+						attributeNames( attrs );
+						if ( !attrs.size() )
+						{
+							// return a simple hash for no attributes (which does not include the scene location).
+							return;
+						}
+						for ( NameList::const_iterator aIt = attrs.begin(); aIt != attrs.end(); aIt++ )
+						{
+							x = attributeSampleInterval( *aIt, time, s0, s1 );
+							h.append( lerp( (double)s0, (double)s1, x ) );
+						}
+					}
+					break;
+
+				case BoundHash:
+
+					x = boundSampleInterval( time, s0, s1 );
+					h.append( lerp( (double)s0, (double)s1, x ) );
+					break;
+
+				case ObjectHash:
+
+					if ( m_indexedIO->hasEntry( objectEntry ) )
+					{
+						x = objectSampleInterval( time, s0, s1 );
+						h.append( lerp( (double)s0, (double)s1, x ) );
+					}
+					else
+					{
+						// return a simple hash for no object (which does not include the scene location).
+						return;
+					}
+					break;
+
+				case ChildNamesHash:
+
+					// child names do not depend on time.
+					break;
+
+				case HierarchyHash:
+
+					if ( m_indexedIO->hasEntry( childrenEntry ) )
+					{
+						// we currently have no way to know if child locations are animated, we have to assume so...
+						// \todo Consider writing animatedHierarchy tag at locations where there's animation and use it here.
+						h.append( time );
+					}
+					else
+					{
+						// For leaf locations, we can find out if they are time dependent by adding the individual hashes for the location here.
+						hash( AttributesHash, time, h, true );
+						hash( BoundHash, time, h, true );
+						hash( ObjectHash, time, h, true );
+						hash( TransformHash, time, h, true );
+					}
+					break;
+			}
+			if ( !ignoreSceneHash )
+			{
+				// Because the hash computed so far is not based on the contents of the file, we have to add to the hash something that identifies the file and the location in the hierarchy.
+				sceneHash( this, h );
+			}
+		}
+
 		static ReaderImplementation *reader( Implementation *impl, bool throwException = true )
 		{
 			ReaderImplementation *reader = dynamic_cast< ReaderImplementation* >( impl );
@@ -927,20 +1018,25 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return &(it->second);
 		}
 
+		static void sceneHash( const ReaderImplementation *scene, MurmurHash &h )
+		{
+			// \todo Currently there's a chance of hash collision if the file is closed and others opened, if the shared data object happens to be allocated in the same address. Replace it by a more reliable mechanism for uniquely identifying the file. 
+			h.append( (uint64_t)scene->m_sharedData );
+			const ReaderImplementation *currScene = scene;
+			while( currScene->m_parent )
+			{
+				h.append( currScene->name() );
+				currScene = currScene->m_parent.get();
+			}
+			h.append( currScene->name() );
+		}
+
 		static MurmurHash simpleHash( const SimpleCacheKey &key )
 		{
 			const ReaderImplementation *reader = key.first;
 			size_t sample = key.second;
-
-			SceneInterface::Path p;
-			reader->path(p);
-
 			MurmurHash h;
-			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
-			{
-				h.append( it->value() );
-				h.append( '/' );
-			}
+			sceneHash( reader, h );
 			h.append( (uint64_t)sample );
 			return h;
 		}
@@ -975,15 +1071,8 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			const SceneInterface::Name &name = get<1>( key );
 			size_t sample = get<2>( key );
 
-			SceneInterface::Path p;
-			reader->path(p);
-
 			MurmurHash h;
-			for ( SceneInterface::Path::const_iterator it = p.begin(); it != p.end(); it++ )
-			{
-				h.append( it->value() );
-				h.append( '/' );
-			}
+			sceneHash( reader, h );
 			h.append(name.value());
 			h.append( (uint64_t)sample );
 			return h;
@@ -2378,6 +2467,14 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
 	}
 	
 	return duplicate( impl );
+}
+
+void SceneCache::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	SceneInterface::hash( hashType, time, h );
+
+	ReaderImplementation *reader = ReaderImplementation::reader( m_implementation.get() );
+	reader->hash( hashType, time, h );
 }
 
 SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const
