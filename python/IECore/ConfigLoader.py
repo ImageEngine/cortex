@@ -46,6 +46,9 @@ import IECore
 # \ingroup python
 def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory = "" ) :
 
+	if isinstance( searchPaths, basestring ) :
+		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ), ":" )
+
 	paths = searchPaths.paths
 	paths.reverse()
 	for path in paths :
@@ -62,4 +65,4 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory 
 						stacktrace = traceback.format_exc()
 						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
 
-loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
+loadConfig( "IECORE_CONFIG_PATHS", { "IECore" : IECore } )

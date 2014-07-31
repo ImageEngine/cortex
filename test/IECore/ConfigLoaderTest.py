@@ -168,6 +168,38 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		
 		self.assertTrue( "lastRun" in contextDict )
 		self.assertFalse( "a" in contextDict )
+	
+	def testSearchPathAsEnvVar( self ) :
+	
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
+			os.path.dirname( __file__ ) + "/config/orderOne",
+			os.path.dirname( __file__ ) + "/config/orderTwo"
+		)
+		
+		contextDict = {}
+		IECore.loadConfig(
+		
+			"IECORE_CONFIGLOADERTEST_PATHS",
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["a"], 1 )
+		
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
+			os.path.dirname( __file__ ) + "/config/orderTwo",
+			os.path.dirname( __file__ ) + "/config/orderOne"
+		)
+		
+		contextDict = {}
+		IECore.loadConfig(
+		
+			"IECORE_CONFIGLOADERTEST_PATHS",
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["a"], 2 )
 		
 if __name__ == "__main__":
 	unittest.main()
