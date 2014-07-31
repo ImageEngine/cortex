@@ -44,13 +44,13 @@ import IECore
 # a series of searchpaths. It is expected that these files will then make appropriate
 # calls to objects passed in via the specified contextDict.
 # \ingroup python
-def loadConfig( searchPaths, contextDict, raiseExceptions = False ) :
+def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory = "" ) :
 
 	paths = searchPaths.paths
 	paths.reverse()
 	for path in paths :
 		pyExtTest = re.compile( "^[^~].*\.py$" )
-		for dirPath, dirNames, fileNames in os.walk( path ) :
+		for dirPath, dirNames, fileNames in os.walk( os.path.join( path, subdirectory ) ) :
 			for fileName in filter( pyExtTest.search, sorted( fileNames ) ) :
 				fullFileName = os.path.join( dirPath, fileName )
 				if raiseExceptions:

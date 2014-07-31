@@ -154,6 +154,20 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		)
 		
 		self.assertEqual( contextDict["lastRun"], "b" )
+	
+	def testSubdirectory( self ) :
+	
+		contextDict = {}
+		IECore.loadConfig(
+		
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config", ":" ),
+			contextDict,
+			subdirectory = "orderDir",
+			
+		)
+		
+		self.assertTrue( "lastRun" in contextDict )
+		self.assertFalse( "a" in contextDict )
 		
 if __name__ == "__main__":
 	unittest.main()
