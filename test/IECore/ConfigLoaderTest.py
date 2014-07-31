@@ -140,6 +140,20 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		self.failIf( "notDotPyRan" in contextDict )
 
 		self.assertEqual( contextDict["a"], 1000 )
+	
+	def testOrderWithinDirectory( self ) :
+	
+		os.utime( os.path.dirname( __file__ ) + "/config/orderDir/a.py", None )
+	
+		contextDict = {}
+		IECore.loadConfig(
+		
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir", ":" ),
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["lastRun"], "b" )
 		
 if __name__ == "__main__":
 	unittest.main()
