@@ -1,3 +1,13 @@
+# 9.0.0-a3
+
+#### IECore
+
+- Added SceneInterface::hash() method.
+- Improved ConfigLoader.
+	- Now executes files within the same directory in alphabetical order.
+	- Added subdirectory argument.
+	- Env var accepted in place of search path.
+
 # 9.0.0-a2
 
 #### IECore
