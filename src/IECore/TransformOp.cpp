@@ -84,15 +84,17 @@ const StringVectorParameter * TransformOp::primVarsParameter() const
 void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	const std::vector<std::string> &pv = m_primVarsParameter->getTypedValue();
+	std::set< Data* > visitedData;
 	for ( std::vector<std::string>::const_iterator it = pv.begin(); it != pv.end(); ++it )
 	{
 		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if ( pIt == primitive->variables.end() || !pIt->second.data )
+		if ( pIt == primitive->variables.end() || !pIt->second.data || visitedData.find( pIt->second.data ) != visitedData.end() )
 		{
 			continue;
 		}
 		
 		Data *data = pIt->second.data;
+		visitedData.insert( data );
 		
 		// fix for old files that don't store Interpretation properly
 		V3fVectorData *v3fData = runTimeCast<V3fVectorData>( data );
