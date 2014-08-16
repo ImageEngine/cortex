@@ -84,7 +84,7 @@ const StringVectorParameter * TransformOp::primVarsParameter() const
 void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	const std::vector<std::string> &pv = m_primVarsParameter->getTypedValue();
-	std::set< DataPtr > visitedData;
+	std::set< Data* > visitedData;
 	for ( std::vector<std::string>::const_iterator it = pv.begin(); it != pv.end(); ++it )
 	{
 		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
