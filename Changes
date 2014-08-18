@@ -1,3 +1,9 @@
+# 8.5.2
+
+#### IECore
+
+- Prevented TransformOp from double transforming data (when 2 PrimitiveVariables point to the same data).
+
 # 8.5.1
 
 #### IECore
