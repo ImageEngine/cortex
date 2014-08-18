@@ -94,6 +94,18 @@ class TestTransformOp( unittest.TestCase ) :
 		self.assertEqual( ms["N"].data, m["N"].data )
 		self.assertEqual( ms["N"].data, m["N"].data )
 		self.assertEqual( ms["notVel"].data, m["notVel"].data )
+	
+	def testSamePrimVars( self ) :
+		
+		m = MeshPrimitive.createBox( Box3f( V3f( -1 ), V3f( 1 ) ) )
+		MeshNormalsOp()( input = m, copyInput = False )
+		m["vel"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f( 0.5 ) ] * 8, GeometricData.Interpretation.Vector ) )
+		m["sameVel"] = m["vel"]
+		
+		ms = TransformOp()( input=m, primVarsToModify = StringVectorData( [ "vel", "sameVel" ] ), matrix = M44fData( M44f.createScaled( V3f( 1, 2, 3 ) ) ) )
+		
+		self.assertEqual( ms["vel"].data, V3fVectorData( [ x * V3f( 1, 2, 3 ) for x in m["vel"].data ], GeometricData.Interpretation.Vector ) )
+		self.assertEqual( ms["vel"].data, ms["sameVel"].data )
 		
 
 if __name__ == "__main__":
