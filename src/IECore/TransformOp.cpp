@@ -88,7 +88,7 @@ void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 	for ( std::vector<std::string>::const_iterator it = pv.begin(); it != pv.end(); ++it )
 	{
 		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if ( pIt == primitive->variables.end() || !pIt->second.data || visitedData.find( pIt->second.data ) != visitedData.end() )
+		if ( pIt == primitive->variables.end() || !pIt->second.data || visitedData.find( pIt->second.data.get() ) != visitedData.end() )
 		{
 			continue;
 		}
