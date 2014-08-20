@@ -1969,6 +1969,9 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 		n->registerChild( child );
 	}
 
+	/// make sure the children is sorted to avoid non-thread safe sorting happening later...
+	n->sortChildren();
+
 	/// mark the node as loaded from subindex
 	n->recoveredSubIndex();
 }
