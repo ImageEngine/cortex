@@ -1,3 +1,8 @@
+#### IECore
+
+- Bug fix in StreamIndexedIO that was causing sporadic crashes when loading SceneCaches during procedural expansion.
+
+
 # 9.0.0-a3
 
 #### IECore
