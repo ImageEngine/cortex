@@ -250,26 +250,32 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, m.scene, [ "a", "d" ] )
 		self.assertEqual( None, m.scene( [ "a", "d" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ) )
 	
-	def testExplicitBoundOverridesImplicitBound( self ) :
+	def testExplicitBoundDilatesImplicitBound( self ) :
 			
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		a = m.createChild( "a" )
-		a.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 10 ) ), 0.0 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -200 ), IECore.V3d( 10 ) ), 0.0 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -300 ), IECore.V3d( 10 ) ), 1.0 )
 		a.writeObject( IECore.SpherePrimitive( 0.1 ), 0.0 )
 		
 		b = a.createChild( "b" )
 		b.writeObject( IECore.SpherePrimitive( 100 ), 0.0 )
+		b.writeObject( IECore.SpherePrimitive( 50 ), 0.5 )
 		
 		del m, a, b
 		
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
 		
 		a = m.child( "a" )
-		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 10 ) ) )
+		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -200 ), IECore.V3d( 100 ) ) )
+		#self.assertEqual( a.readBound(0.5), IECore.Box3d( IECore.V3d( -250 ), IECore.V3d( 100 ) ) )
+		self.assertEqual( a.readBound(1.0), IECore.Box3d( IECore.V3d( -300 ), IECore.V3d( 50 ) ) )
 		
 		b = a.child( "b" )
 		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
-	
+		self.assertEqual( b.readBound(0.5), IECore.Box3d( IECore.V3d( -50 ), IECore.V3d( 50 ) ) )
+		
+		
 	def testExplicitBoundPropagatesToImplicitBound( self ) :
 			
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
@@ -278,7 +284,7 @@ class SceneCacheTest( unittest.TestCase ) :
 				
 		b = a.createChild( "b" )
 		b.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
-		b.writeObject( IECore.SpherePrimitive( 100 ), 0.0 )
+		b.writeObject( IECore.SpherePrimitive( 0.1 ), 0.0 )
 		
 		# destroys reference to the write SceneCache handles to close the file
 		del m, a, b
@@ -772,7 +778,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 0 )
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
 		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
-
+	
 if __name__ == "__main__":
 	unittest.main()
 

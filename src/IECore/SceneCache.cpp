@@ -1183,11 +1183,8 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					throw Exception( "Times must be incremental amongst calls to writeBound!" );
 				}
 			}
-			size_t sampleIndex = m_boundSampleTimes.size();
 			m_boundSampleTimes.push_back( time );
 			m_boundSamples.push_back( bound );
-			IndexedIOPtr io = m_indexedIO->subdirectory( boundEntry, IndexedIO::CreateIfMissing );
-			io->write( sampleEntry(sampleIndex), bound.min.getValue(), 6 );
 		}
 
 		void writeTransform( const Data *transform, double time )
@@ -1731,179 +1728,174 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				io = m_indexedIO->subdirectory( objectEntry, IndexedIO::CreateIfMissing );
 				storeSampleTimes( m_objectSampleTimes, io );				
 			}
-			// We have to compute the bounding box over time for the object and each child if there's no bound overrides writen.
-			bool computedBounds = false;
-			if ( m_boundSampleTimes.size() == 0 )
+			
+			// We have to compute the bounding box over time for the object and each child.
+			for ( std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator cit = m_children.begin(); cit != m_children.end(); cit++ )
 			{
-				computedBounds = true;
-				for ( std::map< SceneCache::Name, WriterImplementationPtr >::const_iterator cit = m_children.begin(); cit != m_children.end(); cit++ )
+				const SampleTimes &childBoundTimes = cit->second->m_boundSampleTimes;
+				const BoxSamples &childBoxSamples = cit->second->m_boundSamples;
+				const SampleTimes &childTransformTimes = cit->second->m_transformSampleTimes;
+				const TransformSamples &childTransformSamples = cit->second->m_transformSamples; 
+
+				if ( childBoundTimes.size() == 0 )
 				{
-					const SampleTimes &childBoundTimes = cit->second->m_boundSampleTimes;
-					const BoxSamples &childBoxSamples = cit->second->m_boundSamples;
-					const SampleTimes &childTransformTimes = cit->second->m_transformSampleTimes;
-					const TransformSamples &childTransformSamples = cit->second->m_transformSamples; 
+					continue;
+				}
 
-					if ( childBoundTimes.size() == 0 )
+				if ( childTransformTimes.size() == 0 )
+				{
+					// no transform or animation applied to this child... we just accumulate it.
+					accumulateBoxSamples( childBoundTimes, childBoxSamples );
+				}
+				else if ( childTransformTimes.size() == 1 )
+				{
+					M44d m = dataToMatrix( childTransformSamples[0].get() );
+					// there's just one constant transform applied to the children, very simple case 
+					// (we can ignore it's time and just use the child box one)
+					BoxSamples transformedChildBoxes;
+					transformedChildBoxes.reserve( childBoundTimes.size() );
+					for ( BoxSamples::const_iterator cbit = childBoxSamples.begin(); cbit != childBoxSamples.end(); cbit++ )
 					{
-						continue;
+						transformedChildBoxes.push_back( transform( *cbit, m ) );
 					}
+					// accumulate the resulting transformed bounding boxes
+					accumulateBoxSamples( childBoundTimes, transformedChildBoxes );
+				}
+				else // childTransformTimes.size() > 1
+				{
+					BoxSamples transformedChildBoxes;
 
-					if ( childTransformTimes.size() == 0 )
+					if ( childBoundTimes.size() > 1 )
 					{
-						// no transform or animation applied to this child... we just accumulate it.
-						accumulateBoxSamples( childBoundTimes, childBoxSamples );
-					}
-					else if ( childTransformTimes.size() == 1 )
-					{
-						M44d m = dataToMatrix( childTransformSamples[0].get() );
-						// there's just one constant transform applied to the children, very simple case 
-						// (we can ignore it's time and just use the child box one)
-						BoxSamples transformedChildBoxes;
-						transformedChildBoxes.reserve( childBoundTimes.size() );
-						for ( BoxSamples::const_iterator cbit = childBoxSamples.begin(); cbit != childBoxSamples.end(); cbit++ )
+						// complex case: animated transforms. 
+
+						// Step 1: Apply bbox interpolation for each transform sample that doesn't have a corresponding bbox sample.
+						SampleTimes transformedChildSampleTimes;
+
+						transformedChildSampleTimes.reserve( childBoundTimes.size() + childTransformTimes.size() );
+						transformedChildBoxes.reserve( childBoundTimes.size() + childTransformTimes.size() );
+
+						SampleTimes::const_iterator transformTimeIt, childTimeIt;
+						BoxSamples::const_iterator childBoxIt;
+						transformTimeIt = childTransformTimes.begin();
+						childTimeIt = childBoundTimes.begin();
+						TransformSamples::const_iterator transformIt = childTransformSamples.begin();
+						childBoxIt = childBoxSamples.begin();
+						Imath::Box3d tmpBox;
+						LinearInterpolator<Box3d> boxInterpolator;
+
+						while( childTimeIt != childBoundTimes.end() && transformTimeIt != childTransformTimes.end() )
 						{
-							transformedChildBoxes.push_back( transform( *cbit, m ) );
-						}
-						// accumulate the resulting transformed bounding boxes
-						accumulateBoxSamples( childBoundTimes, transformedChildBoxes );
-					}
-					else // childTransformTimes.size() > 1
-					{
-						BoxSamples transformedChildBoxes;
-
-						if ( childBoundTimes.size() > 1 )
-						{
-							// complex case: animated transforms. 
-
-							// Step 1: Apply bbox interpolation for each transform sample that doesn't have a corresponding bbox sample.
-							SampleTimes transformedChildSampleTimes;
-
-							transformedChildSampleTimes.reserve( childBoundTimes.size() + childTransformTimes.size() );
-							transformedChildBoxes.reserve( childBoundTimes.size() + childTransformTimes.size() );
-
-							SampleTimes::const_iterator transformTimeIt, childTimeIt;
-							BoxSamples::const_iterator childBoxIt;
-							transformTimeIt = childTransformTimes.begin();
-							childTimeIt = childBoundTimes.begin();
-							TransformSamples::const_iterator transformIt = childTransformSamples.begin();
-							childBoxIt = childBoxSamples.begin();
-							Imath::Box3d tmpBox;
-							LinearInterpolator<Box3d> boxInterpolator;
-
-							while( childTimeIt != childBoundTimes.end() && transformTimeIt != childTransformTimes.end() )
+							if ( *childTimeIt < *transformTimeIt )
 							{
-								if ( *childTimeIt < *transformTimeIt )
-								{
-									// Situation: child sample comes before the transform sample: interpolate transform.
-									transformedChildSampleTimes.push_back( *childTimeIt );
-									transformedChildBoxes.push_back( *childBoxIt );
-									childTimeIt++;
-									childBoxIt++;
-								}
-								else if ( *transformTimeIt < *childTimeIt )
-								{
-									// Situation: transform sample comes before the child sample: interpolate child bbox.
-									if ( childBoxIt == childBoxSamples.begin() )
-									{
-										// this is the first known sample so nothing to interpolate...
-										tmpBox = *childBoxIt;
-									}
-									else
-									{
-										// interpolate known samples.
-										double prevChildTime = *(childTimeIt-1);
-										double x = (*transformTimeIt -prevChildTime) /((*childTimeIt)-prevChildTime);
-										boxInterpolator( *(childBoxIt-1), *childBoxIt, x, tmpBox );
-									}
-									transformedChildSampleTimes.push_back( *transformTimeIt );
-									transformedChildBoxes.push_back( tmpBox );
-									transformTimeIt++;
-									transformIt++;
-								}
-								else
-								{
-									// Situation: child sample matches the time of the transform sample: transform child bbox.
-									transformedChildSampleTimes.push_back( *childTimeIt );
-									transformedChildBoxes.push_back( *childBoxIt );
-									childTimeIt++;
-									childBoxIt++;
-									transformTimeIt++;
-									transformIt++;
-								}
-							}
-
-							while( childTimeIt != childBoundTimes.end() )
-							{
-								// Situation: child samples exist after all the transform samples.
+								// Situation: child sample comes before the transform sample: interpolate transform.
 								transformedChildSampleTimes.push_back( *childTimeIt );
 								transformedChildBoxes.push_back( *childBoxIt );
 								childTimeIt++;
 								childBoxIt++;
 							}
-
-							tmpBox = *(childBoxSamples.rbegin());
-							while( transformTimeIt != childTransformTimes.end() )
+							else if ( *transformTimeIt < *childTimeIt )
 							{
-								// Situation: transform samples exist after all the child samples
+								// Situation: transform sample comes before the child sample: interpolate child bbox.
+								if ( childBoxIt == childBoxSamples.begin() )
+								{
+									// this is the first known sample so nothing to interpolate...
+									tmpBox = *childBoxIt;
+								}
+								else
+								{
+									// interpolate known samples.
+									double prevChildTime = *(childTimeIt-1);
+									double x = (*transformTimeIt -prevChildTime) /((*childTimeIt)-prevChildTime);
+									boxInterpolator( *(childBoxIt-1), *childBoxIt, x, tmpBox );
+								}
 								transformedChildSampleTimes.push_back( *transformTimeIt );
 								transformedChildBoxes.push_back( tmpBox );
 								transformTimeIt++;
 								transformIt++;
 							}
-
-							// We also want to add some border in the sampled bounding boxes to 
-							// guarantee that the interpolated rotations that trace curves in space
-							// would still be included in the linear interpolated bounding boxes.
-							// then we transform the child bboxes...
-							transformAndExpandBounds( childTransformTimes, childTransformSamples, transformedChildSampleTimes, transformedChildBoxes );
-
-							// accumulate the resulting transformed bounding boxes
-							accumulateBoxSamples( transformedChildSampleTimes, transformedChildBoxes );
-						}
-						else
-						{
-							// the child object does not vary in time, so we just have to transform at each transform 
-							// sample (and we can ignore the sample time for the box - if existent)
-
-							Imath::Box3d tmpBox;
-							if ( childBoxSamples.size() )
+							else
 							{
-								tmpBox = childBoxSamples[0];
+								// Situation: child sample matches the time of the transform sample: transform child bbox.
+								transformedChildSampleTimes.push_back( *childTimeIt );
+								transformedChildBoxes.push_back( *childBoxIt );
+								childTimeIt++;
+								childBoxIt++;
+								transformTimeIt++;
+								transformIt++;
 							}
-
-							transformedChildBoxes.resize( childTransformTimes.size(), tmpBox );
-
-							// We also want to add some border in the sampled bounding boxes to 
-							// guarantee that the interpolated rotations that trace curves in space
-							// would still be included in the linear interpolated bounding boxes.
-							// then we transform the child bboxes...
-							transformAndExpandBounds( childTransformTimes, childTransformSamples, childTransformTimes, transformedChildBoxes );
-							// accumulate the resulting transformed bounding boxes
-							accumulateBoxSamples( childTransformTimes, transformedChildBoxes );							
 						}
+
+						while( childTimeIt != childBoundTimes.end() )
+						{
+							// Situation: child samples exist after all the transform samples.
+							transformedChildSampleTimes.push_back( *childTimeIt );
+							transformedChildBoxes.push_back( *childBoxIt );
+							childTimeIt++;
+							childBoxIt++;
+						}
+
+						tmpBox = *(childBoxSamples.rbegin());
+						while( transformTimeIt != childTransformTimes.end() )
+						{
+							// Situation: transform samples exist after all the child samples
+							transformedChildSampleTimes.push_back( *transformTimeIt );
+							transformedChildBoxes.push_back( tmpBox );
+							transformTimeIt++;
+							transformIt++;
+						}
+
+						// We also want to add some border in the sampled bounding boxes to 
+						// guarantee that the interpolated rotations that trace curves in space
+						// would still be included in the linear interpolated bounding boxes.
+						// then we transform the child bboxes...
+						transformAndExpandBounds( childTransformTimes, childTransformSamples, transformedChildSampleTimes, transformedChildBoxes );
+
+						// accumulate the resulting transformed bounding boxes
+						accumulateBoxSamples( transformedChildSampleTimes, transformedChildBoxes );
+					}
+					else
+					{
+						// the child object does not vary in time, so we just have to transform at each transform 
+						// sample (and we can ignore the sample time for the box - if existent)
+
+						Imath::Box3d tmpBox;
+						if ( childBoxSamples.size() )
+						{
+							tmpBox = childBoxSamples[0];
+						}
+
+						transformedChildBoxes.resize( childTransformTimes.size(), tmpBox );
+
+						// We also want to add some border in the sampled bounding boxes to 
+						// guarantee that the interpolated rotations that trace curves in space
+						// would still be included in the linear interpolated bounding boxes.
+						// then we transform the child bboxes...
+						transformAndExpandBounds( childTransformTimes, childTransformSamples, childTransformTimes, transformedChildBoxes );
+						// accumulate the resulting transformed bounding boxes
+						accumulateBoxSamples( childTransformTimes, transformedChildBoxes );							
 					}
 				}
-
-				if ( m_objectSampleTimes.size() && m_objectSamples.size() )
-				{
-					// union all the bounding box samples from the child and also from the optional object stored in this location
-					accumulateBoxSamples( m_objectSampleTimes, m_objectSamples );
-				}
 			}
+
+			if ( m_objectSampleTimes.size() && m_objectSamples.size() )
+			{
+				// union all the bounding box samples from the child and also from the optional object stored in this location
+				accumulateBoxSamples( m_objectSampleTimes, m_objectSamples );
+			}
+			
 
 			if ( m_boundSampleTimes.size() )
 			{
 				// save the bound sample times
 				io = m_indexedIO->subdirectory( boundEntry, IndexedIO::CreateIfMissing );
 				storeSampleTimes( m_boundSampleTimes, io );
-				if ( computedBounds )
+
+				// store computed bounds in file
+				uint64_t sampleIndex = 0;
+				for ( BoxSamples::const_iterator bit = m_boundSamples.begin(); bit != m_boundSamples.end(); bit++, sampleIndex++ )
 				{
-					// store computed bounds in file
-					uint64_t sampleIndex = 0;
-					for ( BoxSamples::const_iterator bit = m_boundSamples.begin(); bit != m_boundSamples.end(); bit++, sampleIndex++ )
-					{
-						io->write( sampleEntry(sampleIndex), bit->min.getValue(), 6 );
-					}
+					io->write( sampleEntry(sampleIndex), bit->min.getValue(), 6 );
 				}
 			}
 
