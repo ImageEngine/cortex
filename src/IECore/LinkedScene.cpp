@@ -38,6 +38,9 @@
 #include "IECore/SharedSceneInterfaces.h"
 #include "IECore/MessageHandler.h"
 
+#include <set>
+
+#include "boost/foreach.hpp"
 using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( LinkedScene )
@@ -258,9 +261,10 @@ Imath::Box3d LinkedScene::readBoundAtSample( size_t sampleIndex ) const
 	}
 }
 
+
 Imath::Box3d LinkedScene::readBound( double time ) const
 {
-	if ( m_linkedScene )
+	if ( m_linkedScene && !m_atLink )
 	{
 		if ( m_timeRemapped )
 		{
@@ -616,14 +620,6 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			{
 				throw Exception( "Links to external scenes cannot be created on locations where there's already an object saved!" );
 			}
-
-			NameList names;
-			m_mainScene->childNames( names );
-			if ( names.size() )
-			{
-				throw Exception( "Links to external scenes cannot be created on locations where there are already child locations!" );
-			}
-
 		}
 
 		// we are creating a link!
@@ -638,14 +634,36 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		ConstDoubleDataPtr timeData = d->member< const DoubleData >( g_time );
 		const StringData *fileName = d->member< const StringData >( g_fileName );
 		const InternedStringVectorData *sceneRoot = d->member< const InternedStringVectorData >( g_root );
-		ConstSceneInterfacePtr linkedScene = expandLink( fileName, sceneRoot, linkDepth );
-		if ( !linkedScene )
+		m_linkedScene = expandLink( fileName, sceneRoot, linkDepth );
+		if ( !m_linkedScene )
 		{
 			throw Exception( "Trying to store a broken link!" );
 		}
-
+		
+		// check for child name clashes:
+		NameList mainSceneChildren;
+		NameList linkedSceneChildren;
+		
+		m_mainScene->childNames( mainSceneChildren );
+		m_linkedScene->childNames( linkedSceneChildren );
+		std::sort( mainSceneChildren.begin(), mainSceneChildren.end() );
+		std::sort( linkedSceneChildren.begin(), linkedSceneChildren.end() );
+		
+		std::set<Name> intersection;
+		std::set_intersection(mainSceneChildren.begin(),mainSceneChildren.end(),linkedSceneChildren.begin(),linkedSceneChildren.end(), std::inserter(intersection,intersection.begin()) );
+		
+		if( intersection.size() )
+		{
+			std::string intersectionString;
+			for( std::set<Name>::iterator it = intersection.begin(); it != intersection.end(); ++it )
+			{
+				intersectionString += " " + it->string();
+			}
+			throw Exception( "Attempting to write link will cause the following child name clashes: " + intersectionString );
+		}
+		
 		// get the bounds of the linked scene
-		const SampledSceneInterface *sampledScene = runTimeCast< const SampledSceneInterface >(linkedScene.get());
+		const SampledSceneInterface *sampledScene = runTimeCast< const SampledSceneInterface >(m_linkedScene.get());
 		if ( sampledScene && !timeData )
 		{
 			// When there's no time remapping we get all the bounding box samples from the linked scene, using the same time.
@@ -663,11 +681,11 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			/// we store just the current bounding box
 			if ( timeData )
 			{
-				m_mainScene->writeBound( linkedScene->readBound(timeData->readable()), time );
+				m_mainScene->writeBound( m_linkedScene->readBound(timeData->readable()), time );
 			}
 			else
 			{
-				m_mainScene->writeBound( linkedScene->readBound(time), time );
+				m_mainScene->writeBound( m_linkedScene->readBound(time), time );
 			}
 		}
 
@@ -678,7 +696,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 
 			// Check if the position of the file we are trying to link to, has ancestor tags.
 			// This situation is undesirable, as it will make LinkedScene return inconsistent ancestor tags before and after the link location.
-			linkedScene->readTags(tags, SceneInterface::AncestorTag );
+			m_linkedScene->readTags(tags, SceneInterface::AncestorTag );
 			if ( tags.size() )
 			{
 				std::string pathStr;
@@ -688,7 +706,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			tags.clear();
 
 			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
-			linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
+			m_linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
 			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
 			
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
@@ -925,6 +943,16 @@ void LinkedScene::writeObject( const Object *object, double time )
 
 void LinkedScene::childNames( NameList &childNames ) const
 {
+	if( m_atLink )
+	{
+		// concatenate link child names with main scene child names:
+		m_linkedScene->childNames(childNames);
+		NameList mainSceneChildNames;
+		m_mainScene->childNames(mainSceneChildNames);
+		childNames.insert( childNames.end(), mainSceneChildNames.begin(), mainSceneChildNames.end() );
+		return;
+	}
+
 	if ( m_linkedScene )
 	{
 		return m_linkedScene->childNames(childNames);
@@ -992,62 +1020,83 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		{
 			throw Exception( "No write access to scene file!" );
 		}
-		if ( m_atLink )
-		{
-			throw Exception( "Locations with links to external scene cannot have child locations themselves!" );
-		}
 	}
 
 	if ( m_linkedScene )
 	{
-		ConstSceneInterfacePtr c = m_linkedScene->child( name, missingBehaviour );
-		if ( !c )
+		ConstSceneInterfacePtr c = m_linkedScene->child( name, SceneInterface::NullIfMissing );
+		if ( c )
 		{
-			return 0;
+			return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
 		}
-		return new LinkedScene( m_mainScene.get(), c.get(), m_rootLinkDepth, m_readOnly, false, m_timeRemapped );
+		if( !m_atLink )
+		{
+			if( missingBehaviour == SceneInterface::ThrowIfMissing )
+			{
+				throw Exception( "IECore::LinkedScene::child(): Couldn't find child named " + name.string() );
+			}
+			else if( missingBehaviour == SceneInterface::NullIfMissing )
+			{
+				return 0;
+			}
+		}
 	}
-	else
+	
+	if( missingBehaviour == SceneInterface::CreateIfMissing && m_atLink )
 	{
-		SceneInterfacePtr c = m_mainScene->child( name, missingBehaviour );
-		if ( !c )
+		if( !m_mainScene->hasChild( name ) )
 		{
-			return 0;
-		}
-		if ( m_readOnly )
-		{
-			if( c->hasAttribute( fileNameLinkAttribute ) && c->hasAttribute( rootLinkAttribute ) )
-			{
-				ConstStringDataPtr fileName = runTimeCast< const StringData >( c->readAttribute( fileNameLinkAttribute, 0 ) );
-				ConstInternedStringVectorDataPtr root = runTimeCast< const InternedStringVectorData >( c->readAttribute( rootLinkAttribute, 0 ) );
+			// check for name clashes with the link:
+			NameList linkChildNames;
+			m_linkedScene->childNames( linkChildNames );
 
-				/// we found the link attribute...
-				int linkDepth;
-				bool timeRemapped = c->hasAttribute( timeLinkAttribute );
-				ConstSceneInterfacePtr l = expandLink( fileName.get(), root.get(), linkDepth );
-				if ( l )
-				{
-					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
-				}
-			}
-			else if( c->hasAttribute( linkAttribute ) )
+			if( std::find( linkChildNames.begin(), linkChildNames.end(), name ) != linkChildNames.end() )
 			{
-				// read from old school link attribute.
-				// \todo: remove this when it doesn't break everyone's stuff!
-				ConstCompoundDataPtr d = runTimeCast< const CompoundData >( c->readAttribute( linkAttribute, 0 ) );
-				/// we found the link attribute...
-				int linkDepth;
-				bool timeRemapped = false;
-				ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
-				if ( l )
-				{
-					return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
-				}
+				throw Exception( "IECore::LinkedScene::child(): Child name " + name.string() + " clashes with a child in the link" );
 			}
 		}
-		
-		return new LinkedScene( c.get(), 0, 0, m_readOnly, false, false );
 	}
+	
+	
+	SceneInterfacePtr c = m_mainScene->child( name, missingBehaviour );
+	if ( !c )
+	{
+		return 0;
+	}
+	if ( m_readOnly )
+	{
+		if( c->hasAttribute( fileNameLinkAttribute ) && c->hasAttribute( rootLinkAttribute ) )
+		{
+			ConstStringDataPtr fileName = runTimeCast< const StringData >( c->readAttribute( fileNameLinkAttribute, 0 ) );
+			ConstInternedStringVectorDataPtr root = runTimeCast< const InternedStringVectorData >( c->readAttribute( rootLinkAttribute, 0 ) );
+
+			/// we found the link attribute...
+			int linkDepth;
+			bool timeRemapped = c->hasAttribute( timeLinkAttribute );
+			ConstSceneInterfacePtr l = expandLink( fileName.get(), root.get(), linkDepth );
+			if ( l )
+			{
+				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+			}
+		}
+		else if( c->hasAttribute( linkAttribute ) )
+		{
+			// read from old school link attribute.
+			// \todo: remove this when it doesn't break everyone's stuff!
+			ConstCompoundDataPtr d = runTimeCast< const CompoundData >( c->readAttribute( linkAttribute, 0 ) );
+			/// we found the link attribute...
+			int linkDepth;
+			bool timeRemapped = false;
+			ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
+			if ( l )
+			{
+				return new LinkedScene( c.get(), l.get(), linkDepth, m_readOnly, true, timeRemapped );
+			}
+		}
+	}
+
+	return new LinkedScene( c.get(), 0, 0, m_readOnly, false, false );
+	
 }
 
 ConstSceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missingBehaviour ) const

@@ -41,7 +41,7 @@ import unittest
 import IECore
 
 class LinkedSceneTest( unittest.TestCase ) :
-
+	
 	@staticmethod
 	def compareBBox( box1, box2 ):
 		errorTolerance = IECore.V3d(1e-5, 1e-5, 1e-5)
@@ -148,7 +148,7 @@ class LinkedSceneTest( unittest.TestCase ) :
 		i2 = l.createChild("instance2")
 		i2.writeLink( A )
 		i2.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) ), 0.0 )
-		self.assertRaises( RuntimeError, i2.createChild, "cannotHaveChildrenAtLinks" )
+		l.createChild("canHaveChildrenAtLinks")
 		i2.writeTags( ["canHaveTagsAtLinks"] )
 		self.assertRaises( RuntimeError, i2.writeObject, IECore.SpherePrimitive( 1 ), 0.0 )  # cannot save objects at link locations.
 		b1 = l.createChild("branch1")
@@ -156,13 +156,13 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, b1.writeLink, A )
 		b2 = l.createChild("branch2")
 		c2 = b2.createChild("child2")
-		self.assertRaises( RuntimeError, b2.writeLink, A )
+		b2.writeLink( A )
 		del i0, i1, i2, l, b1, b2, c2
 
 		l = IECore.LinkedScene( os.path.join(outputPath,"instancedSpheres%s.lscc"%testFilesSuffix), IECore.IndexedIO.OpenMode.Read )
 
 		self.assertEqual( l.numBoundSamples(), 4 )
-		self.assertEqual( set(l.childNames()), set(['instance0','instance1','instance2','branch1','branch2']) )
+		self.assertEqual( set(l.childNames()), set(["canHaveChildrenAtLinks",'instance0','instance1','instance2','branch1','branch2']) )
 		i0 = l.child("instance0")
 		self.assertEqual( i0.numBoundSamples(), 4 )
 		self.failUnless( LinkedSceneTest.compareBBox( i0.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
@@ -849,7 +849,104 @@ class LinkedSceneTest( unittest.TestCase ) :
 		checkHash( IECore.SceneInterface.HashType.ObjectHash, l, duplicates = 2 )
 		checkHash( IECore.SceneInterface.HashType.ChildNamesHash, l )
 		checkHash( IECore.SceneInterface.HashType.HierarchyHash, l )
+	
+	
+	def testReadExtraChildrenAtLink( self ) :
+		
+		# create a base scene
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.SceneCache( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		# save animated spheres with double the speed and with offset, using less samples (time remapping)
+		link = l.createChild("link")
+		link.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
+		link.createChild("a")
+		b = link.createChild("b")
+		b.writeAttribute( IECore.LinkedScene.linkAttribute, IECore.LinkedScene.linkAttributeData( m, 0.0 ), 0.0 )
+		
+		del l, link, b
+		
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( set( l.child("link").childNames() ), set( ['A', 'B', 'a', 'b'] ) )
+		self.failUnless( isinstance( l.child("link").child("a"), IECore.LinkedScene ) )
+		self.assertEqual( l.child("link").child("a").path(), ['link','a'] )
+		self.assertEqual( l.child("link").child("a").childNames(), [] )
+		
+		self.assertEqual( l.scene( ['link', 'a'] ).path(), ['link','a'] )
+		self.assertEqual( l.scene( ['link', 'b', 'A'] ).path(), ['link','b', 'A'] )
+		self.assertEqual( l.child('link').child('b').child('A').path(), ['link','b', 'A'] )
+	
+	def testWriteExtraChildrenAtLink( self ) :
+		
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		
+		# write a link:
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		link = l.createChild("link")
+		link.writeLink( m )
+		
+		# give it an extra child:
+		C = link.createChild( "C" )
+		C.writeTags( ["stuff"] )
+		C.writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d( 10, 0, 0 ) ) ), 0.0 )
+		C.writeObject( IECore.SpherePrimitive( 1 ), 0.0 )
+		del C, l, link
+		
+		# read file:
+		l = IECore.SharedSceneInterfaces.get( sceneFile )
+		link = l.child("link")
+		C = link.child("C")
+		
+		# check the bounding box has been dilated at the link:
+		expectedBox = IECore.Box3f( IECore.V3f( -1.0000002384185791, -1, -1.0000004768371582 ), IECore.V3f( 2, 2, 1.0000001192092896 ) )
+		expectedBox.extendBy( IECore.Box3f( IECore.V3f(9,-1,-1), IECore.V3f(11,-1,-1) ) )
+		
+		bbox = link.readBound( 0 )
+		self.assertAlmostEqual( bbox.min.x, expectedBox.min.x, 5 )
+		self.assertAlmostEqual( bbox.min.y, expectedBox.min.y, 5 )
+		self.assertAlmostEqual( bbox.min.z, expectedBox.min.z, 5 )
+		
+		self.assertAlmostEqual( bbox.max.x, expectedBox.max.x, 5 )
+		self.assertAlmostEqual( bbox.max.y, expectedBox.max.y, 5 )
+		self.assertAlmostEqual( bbox.max.z, expectedBox.max.z, 5 )
+		
+		# bounding box should have propagated up:
+		self.assertEqual( l.readBound( 0 ), bbox )
+		
+		# check the tags have made it through:
+		self.assertEqual( set( [ str(t) for t in l.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ] ), {"ObjectType:MeshPrimitive","ObjectType:SpherePrimitive","stuff"} )
+		
+		# check "C" has been added to the child names:
+		self.assertEqual( set( link.childNames() ), set( ["A","B","C"] ) )
+	
+	def testChildNameClashes( self ) :
+		
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		
+		# write a link:
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		link = l.createChild("link")
+		link.writeLink( m )
+		
+		# try and give it an extra child, with a name wot clashes:
+		self.assertRaises( RuntimeError, link.createChild, "A" )
 
+		del l, link
+		
+		sceneFile = "/tmp/test.lscc"
+		l = IECore.LinkedScene( sceneFile, IECore.IndexedIO.OpenMode.Write )
+		link = l.createChild("link")
+		
+		# now do it the other way round: create a child which will clash with the link:
+		link.createChild( "A" )
+		
+		self.assertRaises( RuntimeError, link.writeLink, m )
+		
+		del l,link
+		
+	
 if __name__ == "__main__":
 	unittest.main()
 
