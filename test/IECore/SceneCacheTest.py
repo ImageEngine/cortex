@@ -268,35 +268,131 @@ class SceneCacheTest( unittest.TestCase ) :
 		
 		a = m.child( "a" )
 		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -200 ), IECore.V3d( 100 ) ) )
-		#self.assertEqual( a.readBound(0.5), IECore.Box3d( IECore.V3d( -250 ), IECore.V3d( 100 ) ) )
+		
+		# this one should be the union of ( -250, -250, -250 ) ( 10, 10, 10 ) and (-50 -50 -50) (50 50 50)
+		self.assertEqual( a.readBound(0.5), IECore.Box3d( IECore.V3d( -250 ), IECore.V3d( 50 ) ) )
+		
 		self.assertEqual( a.readBound(1.0), IECore.Box3d( IECore.V3d( -300 ), IECore.V3d( 50 ) ) )
 		
 		b = a.child( "b" )
 		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
 		self.assertEqual( b.readBound(0.5), IECore.Box3d( IECore.V3d( -50 ), IECore.V3d( 50 ) ) )
+	
+	
+	def testAnimatedBoundPropagation( self ) :
+		
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
+		
+		# write some interleaved animated samples:
+		p1 = m.createChild( "p1" )
+		
+		a = p1.createChild( "a" )
+		a.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), -0.5 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 0 ) ), 0.5 )
+				
+		b = a.createChild( "b" )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), -1.0 )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 0.0 )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 1.0 )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) ), 2.0 )
+		
+		p2 = m.createChild( "p2" )
+		
+		a = p2.createChild( "a" )
+		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), -1.0 )
+		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 0.0 )
+		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 1.0 )
+		a.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) ), 2.0 )
+				
+		b = a.createChild( "b" )
+		b.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
+		b.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
+		b.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), -0.5 )
+		b.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 0 ) ), 0.5 )
 		
 		
+		# non interleaved with a coincident sample:
+		p3 = m.createChild( "p3" )
+		a = p3.createChild( "a" )
+		a.writeBound( IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 0 ) ), -2.5 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 0 ) ), -1.5 )
+		a.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 0 ) ), 0 )
+		
+		b = p3.createChild( "b" )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 1 ) ), 0 )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 2 ) ), 1.5 )
+		b.writeBound( IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 3 ) ), 2.5 )
+		
+		del m, a, b, p1, p2, p3
+		
+		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
+		p1 = m.child( "p1" )
+		p2 = m.child( "p2" )
+		p3 = m.child( "p3" )
+		
+		for t in [-2.5, -1.5, -1, -0.5, 0, 0.5, 1, 2]:
+			self.assertEqual( p1.readBound( t ), p2.readBound( t ) )
+		
+		self.assertEqual( p1.readBound( -2.5 ), IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -1.5 ), IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -1.0 ), IECore.Box3d( IECore.V3d( -2.5 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p1.readBound( -0.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 1.5 ) ) )
+		self.assertEqual( p1.readBound(  0.0 ), IECore.Box3d( IECore.V3d( -1.5 ), IECore.V3d( 2 ) ) )
+		self.assertEqual( p1.readBound(  0.5 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 2.5 ) ) )
+		self.assertEqual( p1.readBound(  1.0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 3 ) ) )
+		self.assertEqual( p1.readBound(  2.0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 4 ) ) )
+		
+		
+		self.assertEqual( p3.readBound( -2.5 ), IECore.Box3d( IECore.V3d( -4 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound( -1.5 ), IECore.Box3d( IECore.V3d( -3 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound(    0 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( p3.readBound(  1.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
+		self.assertEqual( p3.readBound(  2.5 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 3 ) ) )
+		
+	
 	def testExplicitBoundPropagatesToImplicitBound( self ) :
 			
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Write )
 		
+		# This hierarchy has a leaf with a small primitive and a large explicit bound.
+		# The explicit bound should win as it's bigger:
 		a = m.createChild( "a" )
 				
 		b = a.createChild( "b" )
 		b.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
 		b.writeObject( IECore.SpherePrimitive( 0.1 ), 0.0 )
 		
+		
+		# This hierarchy has a leaf with a large primitive and a smaller explicit bound.
+		# The primitive's bound should win in this case :
+		c = m.createChild( "c" )
+		c.writeBound( IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ), 0.0 )
+				
+		d = c.createChild( "d" )
+		d.writeBound( IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ), 0.0 )
+		d.writeObject( IECore.SpherePrimitive( 100 ), 0.0 )
+		
 		# destroys reference to the write SceneCache handles to close the file
-		del m, a, b
+		del m, a, b, c, d
 		
 		m = IECore.SceneCache( "/tmp/test.scc", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		self.assertEqual( m.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
 		
 		a = m.child( "a" )
 		self.assertEqual( a.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 		
 		b = a.child( "b" )
 		self.assertEqual( b.readBound(0.0), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
+		
+		c = m.child( "c" )
+		self.assertEqual( c.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
+		
+		d = c.child( "d" )
+		self.assertEqual( d.readBound(0.0), IECore.Box3d( IECore.V3d( -100 ), IECore.V3d( 100 ) ) )
+		
+		
 	
 	def testWriteMultiObjects( self ) :
 		
@@ -778,6 +874,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 0 )
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
 		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
+	
 	
 if __name__ == "__main__":
 	unittest.main()
