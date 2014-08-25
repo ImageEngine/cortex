@@ -42,7 +42,7 @@
 import sys
 
 import VersionControl 
-VersionControl.setVersion('IEBuild', '6.6.1') 
+VersionControl.setVersion('IEBuild', '6.15.0') 
 import IEBuild  
 
 cortexMajorVersion=ARGUMENTS['MAJOR']
