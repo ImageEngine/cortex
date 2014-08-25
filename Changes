@@ -1,7 +1,12 @@
+# 9.0.0-a4
+
 #### IECore
 
 - Bug fix in StreamIndexedIO that was causing sporadic crashes when loading SceneCaches during procedural expansion.
-
+- Fixed some minor bounding box bugs in IECore.SceneCache
+- Child bounds can now dilate bounds explicitly specified using IECore.SceneCache.writeBound()
+- IECore.LinkedScene now supports extra children at link locations
+- Fixed TransformOp double transform bug
 
 # 9.0.0-a3
 
