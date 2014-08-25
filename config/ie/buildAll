@@ -66,7 +66,8 @@ if IEEnv.platform() == "cent6.x86_64" :
 		build( [ "APP=maya", "APP_VERSION="+mayaVersion, "DL_VERSION=10.0.142", "ARNOLD_VERSION=4.0.9.1" ] )
 	
 	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+		if nukeVersion.startswith( "8" ) :
+			build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
 	
 	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
 		if houdiniVersion.endswith( "-python2.7" ) :
