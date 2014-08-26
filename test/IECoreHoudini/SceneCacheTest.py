@@ -1334,13 +1334,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags(IECore.SceneInterface.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1353,14 +1353,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
 		hou.node( xform.path()+"/1" ).parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1374,13 +1374,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1397,7 +1397,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		group2 = group.createOutputNode( "group" )
 		group2.parm( "crname" ).set( "notATag" )
 		group2.setRenderFlag( True )
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		# they don't currently affect parents, just the immediate node
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
@@ -1407,7 +1407,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasTag( "user:tags", IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "green", IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "notATag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b", "green", "testing", "user:tags" ] )
@@ -1441,7 +1441,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		
 		# its a link before it is expanded
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( scene.attributeNames(), [ IECore.LinkedScene.linkAttribute ] )
 		self.assertTrue( scene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertEqual(
@@ -2178,7 +2178,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live )
 		
 		# make sure it doesn't crash if the linked scene doesn't exist anymore
@@ -2210,7 +2210,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
 			linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 			if bakedObjects :
-				live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+				live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 				self.compareScene( linked, live, bakedObjects = bakedObjects )
 			else :
 				orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -2451,7 +2451,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		b.parm( "expand" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )
 	
 	def testTopologyChanges( self ) :
@@ -3060,7 +3060,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		node = self.xform()
 		node.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( node.path(), rootPath = [ node.name() ] )
+		scene = IECoreHoudini.LiveScene( node.path(), rootPath = [ node.name() ] )
 		self.assertEqual( scene.attributeNames(), [] )
 		self.assertFalse( scene.hasAttribute( "test" ) )
 		self.assertEqual( scene.readAttribute( "test", 0 ), None )

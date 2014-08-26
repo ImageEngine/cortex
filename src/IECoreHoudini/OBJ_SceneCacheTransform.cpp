@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -423,15 +423,15 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Registration for HoudiniScene extra attributes
+// Registration for LiveScene extra attributes
 //////////////////////////////////////////////////////////////////////////////////////////
 
-OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSceneAddOn;
+OBJ_SceneCacheTransform::LiveSceneAddOn OBJ_SceneCacheTransform::g_liveSceneAddOn;
 
-OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
+OBJ_SceneCacheTransform::LiveSceneAddOn::LiveSceneAddOn()
 {
-	HoudiniScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
-	HoudiniScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
+	LiveScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
+	LiveScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
 }
 
 void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )

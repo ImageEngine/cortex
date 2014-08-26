@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,8 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECoreHoudini/CoreHoudini.h"
-#include "IECoreHoudini/HoudiniScene.h"
-#include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
+#include "IECoreHoudini/LiveScene.h"
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -59,18 +59,18 @@ static void listToPath( const list &l, IECore::SceneInterface::Path &p )
 	}
 }
 
-static HoudiniScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
+static LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
 {
 	UT_String nodePath( n );
 	IECore::SceneInterface::Path contentPath, rootPath;
 	listToPath( c, contentPath );
 	listToPath( r, rootPath );
 	
-	return new HoudiniScene( nodePath, contentPath, rootPath, defaultTime );
+	return new LiveScene( nodePath, contentPath, rootPath, defaultTime );
 }
 
 /// \todo: return a PyObject* directly if SideFx provides a swig-free method for creating one from a HOM_Node*
-static std::string getNodePath( HoudiniScene *scene )
+static std::string getNodePath( LiveScene *scene )
 {
 	const OP_Node *node = scene->node();
 	if ( !node )
@@ -84,7 +84,7 @@ static std::string getNodePath( HoudiniScene *scene )
 	return path.toStdString();
 }
 
-IECore::DataPtr readWorldTransform( HoudiniScene &scene, double time )
+IECore::DataPtr readWorldTransform( LiveScene &scene, double time )
 {
 	if ( IECore::ConstDataPtr t = scene.readWorldTransform( time ) )
 	{
@@ -131,7 +131,7 @@ class CustomTagReader
 void registerCustomTags( object hasFn, object readFn )
 {
 	CustomTagReader reader( hasFn, readFn );
-	HoudiniScene::registerCustomTags( reader, reader );
+	LiveScene::registerCustomTags( reader, reader );
 }
 
 class CustomAttributeReader
@@ -171,20 +171,20 @@ class CustomAttributeReader
 void registerCustomAttributes( object namesFn, object readFn )
 {
 	CustomAttributeReader reader( namesFn, readFn );
-	HoudiniScene::registerCustomAttributes( reader, reader );
+	LiveScene::registerCustomAttributes( reader, reader );
 }
 
-void IECoreHoudini::bindHoudiniScene()
+void IECoreHoudini::bindLiveScene()
 {
-	IECorePython::RunTimeTypedClass<HoudiniScene>()
+	IECorePython::RunTimeTypedClass<LiveScene>()
 		.def( init<>() )
 		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( arg( "nodePath" ), arg( "contentPath" ) = list(), arg( "rootPath" ) = list(), arg( "defaultTime" ) = std::numeric_limits<double>::infinity() ) ) )
-		.def( "getDefaultTime", &HoudiniScene::getDefaultTime )
-		.def( "setDefaultTime", &HoudiniScene::setDefaultTime )
-		.def( "embedded", &HoudiniScene::embedded )
+		.def( "getDefaultTime", &LiveScene::getDefaultTime )
+		.def( "setDefaultTime", &LiveScene::setDefaultTime )
+		.def( "embedded", &LiveScene::embedded )
 		.def( "_getNodePath", &getNodePath )
 		.def( "readWorldTransform", &readWorldTransform )
-		.def( "readWorldTransformAsMatrix", &HoudiniScene::readWorldTransformAsMatrix )
+		.def( "readWorldTransformAsMatrix", &LiveScene::readWorldTransformAsMatrix )
 		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
 	;

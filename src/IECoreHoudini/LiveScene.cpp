@@ -47,7 +47,7 @@
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
-#include "IECoreHoudini/HoudiniScene.h"
+#include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 
 using namespace IECore;
@@ -55,10 +55,10 @@ using namespace IECoreHoudini;
 
 static InternedString contentName( "geo" );
 
-PRM_Name HoudiniScene::pTags( "ieTags", "ieTags" );
+PRM_Name LiveScene::pTags( "ieTags", "ieTags" );
 static const UT_String tagGroupPrefix( "ieTag_" );
 
-HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
+LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( std::numeric_limits<double>::infinity() )
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
@@ -67,19 +67,19 @@ HoudiniScene::HoudiniScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultT
 	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
+LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime )
 	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( defaultTime )
 {
 	constructCommon( nodePath, contentPath, rootPath, 0 );
 }
 
-HoudiniScene::HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter )
+LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter )
 	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter ), m_defaultTime( defaultTime )
 {
 	constructCommon( nodePath, contentPath, rootPath, splitter );
 }
 
-void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
+void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
@@ -97,21 +97,21 @@ void HoudiniScene::constructCommon( const UT_String &nodePath, const Path &conte
 	calculatePath( contentPath, rootPath );
 }
 
-HoudiniScene::~HoudiniScene()
+LiveScene::~LiveScene()
 {
 }
 
-const OP_Node *HoudiniScene::node() const
+const OP_Node *LiveScene::node() const
 {
 	return retrieveNode( false, NullIfMissing );
 }
 
-bool HoudiniScene::embedded() const
+bool LiveScene::embedded() const
 {
 	return m_contentIndex;
 }
 
-double HoudiniScene::adjustedDefaultTime() const
+double LiveScene::adjustedDefaultTime() const
 {
 	if ( m_defaultTime == std::numeric_limits<double>::infinity() )
 	{
@@ -121,22 +121,22 @@ double HoudiniScene::adjustedDefaultTime() const
 	return adjustTime( m_defaultTime );
 }
 
-double HoudiniScene::getDefaultTime() const
+double LiveScene::getDefaultTime() const
 {
 	return m_defaultTime;
 }
 
-void HoudiniScene::setDefaultTime( double time )
+void LiveScene::setDefaultTime( double time )
 {
 	m_defaultTime = time;
 }
 
-std::string HoudiniScene::fileName() const
+std::string LiveScene::fileName() const
 {
-	throw Exception( "HoudiniScene does not support fileName()." );
+	throw Exception( "IECoreHoudini::LiveScene does not support fileName()." );
 }
 
-SceneInterface::Name HoudiniScene::name() const
+SceneInterface::Name LiveScene::name() const
 {
 	if ( m_path.empty() || m_rootIndex == m_path.size() )
 	{
@@ -146,13 +146,13 @@ SceneInterface::Name HoudiniScene::name() const
 	return *m_path.rbegin();
 }
 
-void HoudiniScene::path( Path &p ) const
+void LiveScene::path( Path &p ) const
 {
 	p.resize( m_path.size() - m_rootIndex );
 	std::copy( m_path.begin() + m_rootIndex, m_path.end(), p.begin() );
 }
 
-void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath )
+void LiveScene::calculatePath( const Path &contentPath, const Path &rootPath )
 {
 	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
@@ -203,7 +203,7 @@ void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath 
 		std::string pStr, rStr;
 		pathToString( m_path, pStr );
 		pathToString( rootPath, rStr );
-		throw Exception( "IECoreHoudini::HoudiniScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
+		throw Exception( "IECoreHoudini::LiveScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
 	}
 	
 	for ( size_t i = 0; i < rootPath.size(); ++i )
@@ -213,14 +213,14 @@ void HoudiniScene::calculatePath( const Path &contentPath, const Path &rootPath 
 			std::string pStr, rStr;
 			pathToString( m_path, pStr );
 			pathToString( rootPath, rStr );
-			throw Exception( "IECoreHoudini::HoudiniScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
+			throw Exception( "IECoreHoudini::LiveScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
 		}
 	}
 	
 	m_rootIndex = rootPath.size();
 }
 
-Imath::Box3d HoudiniScene::readBound( double time ) const
+Imath::Box3d LiveScene::readBound( double time ) const
 {
 	OP_Node *node = retrieveNode( true );
 	
@@ -255,12 +255,12 @@ Imath::Box3d HoudiniScene::readBound( double time ) const
 	return bounds;
 }
 
-void HoudiniScene::writeBound( const Imath::Box3d &bound, double time )
+void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 {
-	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
+	throw Exception( "IECoreHoudini::LiveScene is read-only" );
 }
 
-ConstDataPtr HoudiniScene::readTransform( double time ) const
+ConstDataPtr LiveScene::readTransform( double time ) const
 {
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readTransformAsMatrix( time );
@@ -269,7 +269,7 @@ ConstDataPtr HoudiniScene::readTransform( double time ) const
 	return new TransformationMatrixdData( TransformationMatrixd( s, r, t ) );
 }
 
-Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
+Imath::M44d LiveScene::readTransformAsMatrix( double time ) const
 {
 	OP_Node *node = retrieveNode();	
 	if ( node->isManager() )
@@ -299,7 +299,7 @@ Imath::M44d HoudiniScene::readTransformAsMatrix( double time ) const
 	return IECore::convert<Imath::M44d>( matrix );
 }
 
-ConstDataPtr HoudiniScene::readWorldTransform( double time ) const
+ConstDataPtr LiveScene::readWorldTransform( double time ) const
 {
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readWorldTransformAsMatrix( time );
@@ -308,7 +308,7 @@ ConstDataPtr HoudiniScene::readWorldTransform( double time ) const
 	return new TransformationMatrixdData( TransformationMatrixd( s, r, t ) );
 }
 
-Imath::M44d HoudiniScene::readWorldTransformAsMatrix( double time ) const
+Imath::M44d LiveScene::readWorldTransformAsMatrix( double time ) const
 {
 	OP_Node *node = retrieveNode();	
 	if ( node->isManager() )
@@ -332,12 +332,12 @@ Imath::M44d HoudiniScene::readWorldTransformAsMatrix( double time ) const
 	return IECore::convert<Imath::M44d>( matrix );
 }
 
-void HoudiniScene::writeTransform( const Data *transform, double time )
+void LiveScene::writeTransform( const Data *transform, double time )
 {
-	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
+	throw Exception( "IECoreHoudini::LiveScene is read-only" );
 }
 
-bool HoudiniScene::hasAttribute( const Name &name ) const
+bool LiveScene::hasAttribute( const Name &name ) const
 {
 	OP_Node *node = retrieveNode();
 	
@@ -355,7 +355,7 @@ bool HoudiniScene::hasAttribute( const Name &name ) const
 	return false;
 }
 
-void HoudiniScene::attributeNames( NameList &attrs ) const
+void LiveScene::attributeNames( NameList &attrs ) const
 {
 	attrs.clear();
 	
@@ -377,7 +377,7 @@ void HoudiniScene::attributeNames( NameList &attrs ) const
 	}
 }
 
-ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
 	OP_Node *node = retrieveNode();
 	
@@ -393,12 +393,12 @@ ConstObjectPtr HoudiniScene::readAttribute( const Name &name, double time ) cons
 	return 0;
 }
 
-void HoudiniScene::writeAttribute( const Name &name, const Object *attribute, double time )
+void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
 {
-	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
+	throw Exception( "IECoreHoudini::LiveScene is read-only" );
 }
 
-bool HoudiniScene::hasTag( const Name &name, int filter ) const
+bool LiveScene::hasTag( const Name &name, int filter ) const
 {
 	const OP_Node *node = retrieveNode();
 	if ( !node )
@@ -471,7 +471,7 @@ bool HoudiniScene::hasTag( const Name &name, int filter ) const
 	return false;
 }
 
-void HoudiniScene::readTags( NameList &tags, int filter ) const
+void LiveScene::readTags( NameList &tags, int filter ) const
 {
 	tags.clear();
 	
@@ -549,14 +549,14 @@ void HoudiniScene::readTags( NameList &tags, int filter ) const
 	tags.insert( tags.end(), uniqueTags.begin(), uniqueTags.end() );
 }
 
-void HoudiniScene::writeTags( const NameList &tags )
+void LiveScene::writeTags( const NameList &tags )
 {
-	throw Exception( "HoudiniScene::writeTags not supported" );
+	throw Exception( "IECoreHoudini::LiveScene::writeTags not supported" );
 }
 
 static const char *emptyString = "";
 
-bool HoudiniScene::hasObject() const
+bool LiveScene::hasObject() const
 {
 	OP_Node *node = retrieveNode( true );
 	if ( node->isManager() )
@@ -615,7 +615,7 @@ bool HoudiniScene::hasObject() const
 	return false;
 }
 
-ConstObjectPtr HoudiniScene::readObject( double time ) const
+ConstObjectPtr LiveScene::readObject( double time ) const
 {
 	OBJ_Node *objNode = retrieveNode( true )->castToOBJNode();
 	if ( !objNode )
@@ -648,7 +648,7 @@ ConstObjectPtr HoudiniScene::readObject( double time ) const
 	return 0;
 }
 
-PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	// \todo Optimize this function, adding special cases such as for Meshes.
 	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
@@ -659,12 +659,12 @@ PrimitiveVariableMap HoudiniScene::readObjectPrimitiveVariables( const std::vect
 	return prim->variables;
 }
 
-void HoudiniScene::writeObject( const Object *object, double time )
+void LiveScene::writeObject( const Object *object, double time )
 {
-	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
+	throw Exception( "IECoreHoudini::LiveScene is read-only" );
 }
 
-void HoudiniScene::childNames( NameList &childNames ) const
+void LiveScene::childNames( NameList &childNames ) const
 {
 	OP_Node *node = retrieveNode();
 	OBJ_Node *objNode = node->castToOBJNode();
@@ -733,13 +733,13 @@ void HoudiniScene::childNames( NameList &childNames ) const
 	}
 }
 
-bool HoudiniScene::hasChild( const Name &name ) const
+bool LiveScene::hasChild( const Name &name ) const
 {
 	Path contentPath;
 	return (bool)retrieveChild( name, contentPath, NullIfMissing );
 }
 
-SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour )
+SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour )
 {
 	Path contentPath;
 	OP_Node *child = retrieveChild( name, contentPath, missingBehaviour );
@@ -756,35 +756,35 @@ SceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missin
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new HoudiniScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter.get() );
+	return new LiveScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter.get() );
 }
 
-ConstSceneInterfacePtr HoudiniScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
+ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
 {
-	return const_cast<HoudiniScene *>( this )->child( name, missingBehaviour );
+	return const_cast<LiveScene *>( this )->child( name, missingBehaviour );
 }
 
-SceneInterfacePtr HoudiniScene::createChild( const Name &name )
+SceneInterfacePtr LiveScene::createChild( const Name &name )
 {
-	throw Exception( "IECoreHoudini::HoudiniScene is read-only" );
+	throw Exception( "IECoreHoudini::LiveScene is read-only" );
 }
 
-ConstSceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
-{
-	return retrieveScene( path, missingBehaviour );
-}
-
-SceneInterfacePtr HoudiniScene::scene( const Path &path, MissingBehaviour missingBehaviour )
+ConstSceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	return retrieveScene( path, missingBehaviour );
 }
 
-void HoudiniScene::hash( HashType hashType, double time, MurmurHash &h ) const
+SceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour )
 {
-	throw Exception( "Hashes currently not supported in HoudiniScene objects." );
+	return retrieveScene( path, missingBehaviour );
 }
 
-OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehaviour ) const
+void LiveScene::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	throw Exception( "Hashes currently not supported in IECoreHoudini::LiveScene objects." );
+}
+
+OP_Node *LiveScene::retrieveNode( bool content, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = OPgetDirector()->findNode( m_nodePath );
 	if ( node && content )
@@ -799,19 +799,19 @@ OP_Node *HoudiniScene::retrieveNode( bool content, MissingBehaviour missingBehav
 	{
 		if ( !node )
 		{
-			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
+			throw Exception( "IECoreHoudini::LiveScene: Node \"" + m_nodePath.toStdString() + "\" no longer exists." );
 		}
 
 		if ( !node->isManager() && !node->castToOBJNode() )
 		{
-			throw Exception( "IECoreHoudini::HoudiniScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
+			throw Exception( "IECoreHoudini::LiveScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
 		}
 	}
 	
 	return node;
 }
 
-OP_Node *HoudiniScene::locateContent( OP_Node *node ) const
+OP_Node *LiveScene::locateContent( OP_Node *node ) const
 {
 	OBJ_Node *objNode = node->castToOBJNode();
 	if ( node->isManager() || ( objNode && objNode->getObjectType() == OBJ_SUBNET ) )
@@ -833,7 +833,7 @@ OP_Node *HoudiniScene::locateContent( OP_Node *node ) const
 	return 0;
 }
 
-OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour ) const
+OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour ) const
 {
 	OP_Node *node = retrieveNode( false, missingBehaviour );
 	OP_Node *contentBaseNode = retrieveNode( true, missingBehaviour );
@@ -922,23 +922,23 @@ OP_Node *HoudiniScene::retrieveChild( const Name &name, Path &contentPath, Missi
 		path( p );
 		std::string pStr;
 		pathToString( p, pStr );
-		throw Exception( "IECoreHoudini::HoudiniScene::retrieveChild: Path \"" + pStr + "\" has no child named " + name.string() + "." );
+		throw Exception( "IECoreHoudini::LiveScene::retrieveChild: Path \"" + pStr + "\" has no child named " + name.string() + "." );
 	}
 	
 	return 0;
 }
 
-SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
+SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	Path rootPath, emptyPath;
 	rootPath.resize( m_rootIndex );
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
-	HoudiniScenePtr rootScene = new HoudiniScene();
+	LiveScenePtr rootScene = new LiveScene();
 	rootScene->setDefaultTime( m_defaultTime );
 	for ( Path::const_iterator it = rootPath.begin(); it != rootPath.end(); ++it )
 	{
-		rootScene = IECore::runTimeCast<HoudiniScene>( rootScene->child( *it ) );
+		rootScene = IECore::runTimeCast<LiveScene>( rootScene->child( *it ) );
 		if ( !rootScene )
 		{
 			return 0;
@@ -954,7 +954,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new HoudiniScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter.get() );
+	SceneInterfacePtr scene = new LiveScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter.get() );
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );
@@ -967,7 +967,7 @@ SceneInterfacePtr HoudiniScene::retrieveScene( const Path &path, MissingBehaviou
 	return scene;
 }
 
-bool HoudiniScene::hasInput( const OP_Node *node ) const
+bool LiveScene::hasInput( const OP_Node *node ) const
 {
 	int numInputs = node->nInputs();
 	for ( int j=0; j < numInputs; ++j )
@@ -982,12 +982,12 @@ bool HoudiniScene::hasInput( const OP_Node *node ) const
 	return false;
 }
 
-double HoudiniScene::adjustTime( double time ) const
+double LiveScene::adjustTime( double time ) const
 {
 	return time - CHgetManager()->getSecsPerSample();
 }
 
-bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const
+bool LiveScene::matchPattern( const char *value, const char *pattern ) const
 {
 	size_t size = strlen( pattern );
 	
@@ -1009,7 +1009,7 @@ bool HoudiniScene::matchPattern( const char *value, const char *pattern ) const
 	return true;
 }
 
-const char *HoudiniScene::matchPath( const char *value ) const
+const char *LiveScene::matchPath( const char *value ) const
 {
 	// looking for empty path
 	if ( !m_contentIndex )
@@ -1050,7 +1050,7 @@ const char *HoudiniScene::matchPath( const char *value ) const
 	return &value[i];
 }
 
-std::pair<const char *, size_t> HoudiniScene::nextWord( const char *value ) const
+std::pair<const char *, size_t> LiveScene::nextWord( const char *value ) const
 {
 	std::pair<const char *, size_t> result( value, 0 );
 	
@@ -1073,7 +1073,7 @@ std::pair<const char *, size_t> HoudiniScene::nextWord( const char *value ) cons
 	return result;
 }
 
-void HoudiniScene::relativeContentPath( SceneInterface::Path &path ) const
+void LiveScene::relativeContentPath( SceneInterface::Path &path ) const
 {
 	path.clear();
 	
@@ -1086,7 +1086,7 @@ void HoudiniScene::relativeContentPath( SceneInterface::Path &path ) const
 	path.insert( path.begin(), m_path.begin() + m_contentIndex, m_path.end() );
 }
 
-GU_DetailHandle HoudiniScene::contentHandle() const
+GU_DetailHandle LiveScene::contentHandle() const
 {
 	std::string name;
 	SceneInterface::Path path;
@@ -1104,7 +1104,7 @@ GU_DetailHandle HoudiniScene::contentHandle() const
 	return handle;
 }
 
-void HoudiniScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )
+void LiveScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn )
 {
 	CustomAttributeReader r;
 	r.m_names = namesFn;
@@ -1112,13 +1112,13 @@ void HoudiniScene::registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn rea
 	customAttributeReaders().push_back( r );
 }
 
-std::vector<HoudiniScene::CustomAttributeReader> &HoudiniScene::customAttributeReaders()
+std::vector<LiveScene::CustomAttributeReader> &LiveScene::customAttributeReaders()
 {
-	static std::vector<HoudiniScene::CustomAttributeReader> readers;
+	static std::vector<LiveScene::CustomAttributeReader> readers;
 	return readers;
 }
 
-void HoudiniScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
+void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 {
 	CustomTagReader r;
 	r.m_has = hasFn;
@@ -1126,8 +1126,8 @@ void HoudiniScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 	customTagReaders().push_back( r );
 }
 
-std::vector<HoudiniScene::CustomTagReader> &HoudiniScene::customTagReaders()
+std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
-	static std::vector<HoudiniScene::CustomTagReader> readers;
+	static std::vector<LiveScene::CustomTagReader> readers;
 	return readers;
 }

@@ -49,7 +49,7 @@
 #include "IECore/LinkedScene.h"
 
 #include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/HoudiniScene.h"
+#include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 
 using namespace IECore;
@@ -58,7 +58,7 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
+	: ROP_Node( net, name, op ), m_liveHoudiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
 {
 }
 
@@ -152,15 +152,15 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
+		m_liveHoudiniScene = new IECoreHoudini::LiveScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( linked( file ) )
 		{
-			m_liveScene = m_houdiniScene;
+			m_liveScene = m_liveHoudiniScene;
 		}
 		else
 		{
-			m_liveScene = new LinkedScene( m_houdiniScene );
+			m_liveScene = new LinkedScene( m_liveHoudiniScene );
 		}
 	}
 	catch ( IECore::Exception &e )
@@ -237,7 +237,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	executePreFrameScript( time );
 	
 	// update the default evaluation time to avoid double cooking
-	m_houdiniScene->setDefaultTime( writeTime );
+	m_liveHoudiniScene->setDefaultTime( writeTime );
 	
 	SceneInterfacePtr outScene = m_outScene;
 	
@@ -315,7 +315,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 {
-	m_houdiniScene = 0;
+	m_liveHoudiniScene = 0;
 	m_liveScene = 0;
 	m_outScene = 0;
 	
@@ -337,7 +337,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	}
 	
 	Mode mode = NaturalExpand;
-	const HoudiniScene *hScene = IECore::runTimeCast<const HoudiniScene>( liveScene );
+	const LiveScene *hScene = IECore::runTimeCast<const LiveScene>( liveScene );
 	if ( hScene && m_forceFilter )
 	{
 		UT_String nodePath;
