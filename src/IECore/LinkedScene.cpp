@@ -1265,7 +1265,6 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 					m_mainScene->childNames( childNames );
 					if( childNames.size() )
 					{
-						// Link locations override the transform and bound, so we return without adding the hash from the linked scene.
 						mainSceneHash( hashType, time, h );
 						return;
 					}
