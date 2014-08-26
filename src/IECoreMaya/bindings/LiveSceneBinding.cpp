@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,8 +36,8 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreMaya/MayaScene.h"
-#include "IECoreMaya/bindings/MayaSceneBinding.h"
+#include "IECoreMaya/LiveScene.h"
+#include "IECoreMaya/bindings/LiveSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -65,7 +65,7 @@ class CustomTagReader
 			catch ( error_already_set )
 			{
 				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while checking MayaScene tag " + tag.string() ) );
+				throw IECore::Exception( std::string( "Python exception while checking IECoreMaya::LiveScene tag " + tag.string() ) );
 			}
 		}
 		
@@ -81,7 +81,7 @@ class CustomTagReader
 			catch ( error_already_set )
 			{
 				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene tags" ) );
+				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene tags" ) );
 			}
 			extract<list> l( o );
 			if ( !l.check() )
@@ -99,7 +99,7 @@ class CustomTagReader
 void registerCustomTags( object hasFn, object readFn )
 {
 	CustomTagReader reader( hasFn, readFn );
-	MayaScene::registerCustomTags( reader, reader );
+	LiveScene::registerCustomTags( reader, reader );
 }
 
 class CustomAttributeReader
@@ -120,7 +120,7 @@ class CustomAttributeReader
 			catch ( error_already_set )
 			{
 				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene attribute " + attr.string() ) );
+				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene attribute " + attr.string() ) );
 			}
 		}
 		
@@ -136,7 +136,7 @@ class CustomAttributeReader
 			catch ( error_already_set )
 			{
 				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for MayaScene." ) );
+				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for IECoreMaya::LiveScene." ) );
 			}
 			
 			extract<list> l( o );
@@ -155,12 +155,12 @@ class CustomAttributeReader
 void registerCustomAttributes( object namesFn, object readFn )
 {
 	CustomAttributeReader reader( namesFn, readFn );
-	MayaScene::registerCustomAttributes( reader, reader );
+	LiveScene::registerCustomAttributes( reader, reader );
 }
 
-void IECoreMaya::bindMayaScene()
+void IECoreMaya::bindLiveScene()
 {
-	IECorePython::RunTimeTypedClass<MayaScene>()
+	IECorePython::RunTimeTypedClass<LiveScene>()
 		.def( init<>() )
 		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )

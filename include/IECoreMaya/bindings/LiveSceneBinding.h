@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYASCENEBINDING_H
-#define IECOREMAYA_MAYASCENEBINDING_H
+#ifndef IECOREMAYA_LIVESCENEBINDING_H
+#define IECOREMAYA_LIVESCENEBINDING_H
 
 namespace IECoreMaya
 {
 
-void bindMayaScene();
+void bindLiveScene();
 
 }
 
-#endif // IECOREMAYA_MAYASCENEBINDING_H
+#endif // IECOREMAYA_LIVESCENEBINDING_H

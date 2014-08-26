@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
@@ -78,7 +78,7 @@ from ToMayaParticleConverterTest import ToMayaParticleConverterTest
 from ImageConverterTest import ImageConverterTest
 from ObjectDataTest import ObjectDataTest
 from ToMayaCameraConverterTest import ToMayaCameraConverterTest
-from MayaSceneTest import *
+from LiveSceneTest import *
 from SceneShapeTest import SceneShapeTest
 from FnSceneShapeTest import FnSceneShapeTest
 from FromMayaLocatorConverterTest import FromMayaLocatorConverterTest

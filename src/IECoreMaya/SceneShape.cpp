@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 #include "IECore/LinkedScene.h"
 
 #include "IECoreMaya/SceneShape.h"
-#include "IECoreMaya/MayaScene.h"
+#include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "maya/MFnTypedAttribute.h"
@@ -52,14 +52,14 @@ MTypeId SceneShape::id = SceneShapeId;
 MObject SceneShape::aSceneFilePlug;
 MObject SceneShape::aSceneRootPlug;
 
-// registers this class in MayaScene
-SceneShape::MayaSceneAddOn SceneShape::g_mayaSceneAddon;
+// registers this class in LiveScene
+SceneShape::LiveSceneAddOn SceneShape::g_liveSceneAddon;
 
-SceneShape::MayaSceneAddOn::MayaSceneAddOn()
+SceneShape::LiveSceneAddOn::LiveSceneAddOn()
 {
-	MayaScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
-	MayaScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
-	MayaScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
+	LiveScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
+	LiveScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
+	LiveScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
 }
 
 SceneShape::SceneShape()

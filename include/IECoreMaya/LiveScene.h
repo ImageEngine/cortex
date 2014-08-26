@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREMAYA_MAYASCENE_H
-#define IECOREMAYA_MAYASCENE_H
+#ifndef IECOREMAYA_LIVESCENE_H
+#define IECOREMAYA_LIVESCENE_H
 
 #include "boost/function.hpp"
 #include "tbb/mutex.h"
@@ -46,28 +46,28 @@
 namespace IECoreMaya
 {
 
-IE_CORE_FORWARDDECLARE( MayaScene );
+IE_CORE_FORWARDDECLARE( LiveScene );
 
 /// A class for navigating a maya scene.
-/// Each MayaScene instance maps to a specific transform in a scene, uniquely identified by it's dag path.
+/// Each LiveScene instance maps to a specific transform in a scene, uniquely identified by it's dag path.
 /// Shapes are interpreted as objects living on their parent - eg a scene with the objects |pSphere1 and
-/// |pSphere1|pSphereShape1 in it will map to a MayaScene at "/", with a child called "pSphere1", with a
+/// |pSphere1|pSphereShape1 in it will map to a LiveScene at "/", with a child called "pSphere1", with a
 /// MeshPrimitive as its object, and no children.
 /// This interface currently only supports read operations, which can only be called with the current maya
 /// time in seconds. For example, if you're currently on frame 1 in your maya session, your scene's frame rate
-/// is 24 fps, and you want to read an object from your MayaScene instance, you must call
-/// mayaSceneInstance.readObject( 1.0 / 24 ), or it will throw an exception.
+/// is 24 fps, and you want to read an object from your LiveScene instance, you must call
+/// LiveSceneInstance.readObject( 1.0 / 24 ), or it will throw an exception.
 
-class MayaScene : public IECore::SceneInterface
+class LiveScene : public IECore::SceneInterface
 {
 	public :
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MayaScene, MayaSceneTypeId, IECore::SceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
 		
 		// default constructor
-		MayaScene();
+		LiveScene();
 		
-		virtual ~MayaScene();
+		virtual ~LiveScene();
 		
 		virtual std::string fileName() const;
 
@@ -228,22 +228,22 @@ class MayaScene : public IECore::SceneInterface
 	protected:
 		
 		// constructor for a specific dag path:
-		MayaScene( const MDagPath& p, bool isRoot = false );
+		LiveScene( const MDagPath& p, bool isRoot = false );
 		
 		MDagPath m_dagPath;
 		bool m_isRoot;
 		
 		/// calls the constructor for a specific dag path. Derived classes can override this so their child() and scene() methods can 
 		/// return instances of the derived class
-		virtual MayaScenePtr duplicate( const MDagPath& p, bool isRoot = false ) const;
+		virtual LiveScenePtr duplicate( const MDagPath& p, bool isRoot = false ) const;
 	
 		typedef tbb::mutex Mutex;
 		static Mutex s_mutex;
 		
 };
 
-IE_CORE_DECLAREPTR( MayaScene )
+IE_CORE_DECLAREPTR( LiveScene )
 
 } // namespace IECoreMaya
 
-#endif // IECOREMAYA_MAYASCENE_H
+#endif // IECOREMAYA_LIVESCENE_H

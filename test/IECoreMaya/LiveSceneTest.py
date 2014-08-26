@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -38,7 +38,7 @@ import maya.OpenMaya as OpenMaya
 import IECore
 import IECoreMaya
 
-class MayaSceneTest( IECoreMaya.TestCase ) :
+class LiveSceneTest( IECoreMaya.TestCase ) :
 	
 	def setUp( self ) :
 
@@ -46,7 +46,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 	
 	def testFileName( self ) :
 
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		self.assertRaises( RuntimeError, scene.fileName )
 
 	def testChildNames( self ) :
@@ -59,7 +59,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( "pSphere2", "pSphere1" )
 		maya.cmds.parent( "pSphere3", "pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( set( child.childNames() ), set( [ "pSphere2", "pSphere3" ] ) )
@@ -76,7 +76,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( "pSphere2", "pSphere1" )
 		maya.cmds.parent( "pSphere3", "pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasChild("pSphere1"), True )
@@ -100,7 +100,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( "pSphere2", "pSphere1" )
 		maya.cmds.parent( "pSphere3", "pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		
 		sphere1 = scene.child( "pSphere1" )
 		
@@ -125,7 +125,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( "pSphere2", "pSphere1" )
 		maya.cmds.parent( "pSphere3", "pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		
 		sphere1 = scene.child( "pSphere1" )
 		
@@ -150,7 +150,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.parent( "pSphere2", "pSphere1" )
 		maya.cmds.parent( "pSphere3", "pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		
 		self.assertEqual( str( scene.scene( ["pSphere1"] ).name() ), "pSphere1" )
 		
@@ -167,7 +167,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		child = scene.child( "pSphere1" )
 		
 		self.assertEqual( scene.hasObject(), False )
@@ -204,7 +204,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "pSphere1.sy", 5 )
 		maya.cmds.setAttr( "pSphere1.sz", 6 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformChild = scene.child( "transform1" ).child( "pSphere1" )
 		
 		# test it returns the correct transform in local space
@@ -239,7 +239,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( "pSphere1", attribute="ty", t="1sec", v=5 )
 		maya.cmds.setKeyframe( "pSphere1", attribute="tz", t="1sec", v=6 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformChild = scene.child( "pSphere1" )
 		
 		# move to frame -1:
@@ -263,7 +263,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( "pSphere1", attribute="ty", t="1sec", v=5 )
 		maya.cmds.setKeyframe( "pSphere1", attribute="tz", t="1sec", v=6 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformChild = scene.child( "pSphere1" )
 		
 		# test it returns the correct transform in local space
@@ -287,7 +287,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		child = scene.child( "pSphere1" )
 		
 		maya.cmds.delete( "pSphere1" )
@@ -323,7 +323,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "pCube1.ry", 20 )
 		maya.cmds.setAttr( "pCube1.rz", 30 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		cube = scene.child( "pCube1" )
 		
 		# read mesh at time 0:
@@ -360,7 +360,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="0sec" )
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="1sec", v=-1 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		cube = scene.child( "pCube1" )
 		
 		# read mesh at different times:
@@ -399,7 +399,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( "pCube3.ty", -1 )
 		maya.cmds.setAttr( "pCube3.tz", -1 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		cube4Transform = scene.child( "pCube4" )
 		cube1Transform = scene.child( "pCube1" )
 
@@ -439,7 +439,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="0sec" )
 		maya.cmds.setKeyframe( cluster, attribute="tx", t="1sec", v=-1 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformChild = scene.child( "pCube2" )
 
 		maya.cmds.currentTime( "0.0sec" )		
@@ -462,7 +462,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setKeyframe( "pCube1", attribute="tx", t="0sec", v=0 )
 		maya.cmds.setKeyframe( "pCube1", attribute="tx", t="1sec", v=-1 )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformChild = scene.child( "pCube1Parent" )
 
 		maya.cmds.currentTime( "0.0sec" )
@@ -477,7 +477,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		# camera must be output with an identity transform, because of the hierarchical
 		# nature of this class...
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		cameraTransform = scene.child( "persp" )
 		maya.cmds.currentTime( "0.0sec" )
 		camera = cameraTransform.readObject( 0 )
@@ -492,7 +492,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		sphere = maya.cmds.polySphere( name="pSphere1" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		sphere = scene.child( "pSphere1" )
 		
 		maya.cmds.currentTime( "0.0sec" )
@@ -511,7 +511,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 	
 	def testWriteExceptions( self ) :
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, IECore.Box3d(), 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( IECore.M44d() ), 0.0 ) )
@@ -522,7 +522,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		# make sure we are at time 0
 		maya.cmds.currentTime( "0sec" )
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 
 		envShape = str( IECoreMaya.FnSceneShape.create( "ieScene1" ).fullPathName() )
 		envNode = 'ieScene1'
@@ -581,7 +581,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 		# make sure we are at time 0
 		maya.cmds.currentTime( "0sec" )
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		
 		# tests a bug where calling attributeNames at the root raised an exception
 		scene.attributeNames()
@@ -639,9 +639,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 
 			return result
 		
-		IECoreMaya.MayaScene.registerCustomTags( hasMyTags, readMyTags )
+		IECoreMaya.LiveScene.registerCustomTags( hasMyTags, readMyTags )
 
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
 		sphereScene = scene.child('pSphere')
 		self.assertFalse( scene.hasTag( 'renderable' ) )
@@ -713,9 +713,9 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 	
 			return IECore.StringData("mesh")
 		
-		IECoreMaya.MayaScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
 	
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		transformScene = scene.child(str(t))
 		sphereScene = scene.child('pSphere')
 		self.assertEqual( scene.attributeNames(), [ "scene:visible", "root" ] )
@@ -738,7 +738,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.createNode( "transform", name = "t1" )
 		maya.cmds.createNode( "transform", name = "t2" )
 		
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 		t1 = scene.child( "t1" )
 		t2 = scene.child( "t2" )
 		
@@ -784,7 +784,7 @@ class MayaSceneTest( IECoreMaya.TestCase ) :
 		
 		# make sure we are at time 0
 		maya.cmds.currentTime( "0sec" )
-		scene = IECoreMaya.MayaScene()
+		scene = IECoreMaya.LiveScene()
 
 		envShape = str( IECoreMaya.FnSceneShape.create( "ieScene1" ).fullPathName() )
 		envNode = 'ieScene1'

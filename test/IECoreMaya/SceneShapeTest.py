@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -461,7 +461,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
 		
-		scene = IECoreMaya.MayaScene().child( transform )
+		scene = IECoreMaya.LiveScene().child( transform )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), [] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
