@@ -1245,17 +1245,30 @@ void LinkedScene::hash( HashType hashType, double time, MurmurHash &h ) const
 			{
 				case TransformHash:
 					mainSceneHash( hashType, time, h );
-					// Link locations override the transform so we return without adding the hash from the linked scene.
+					// Link locations override the transform and bound, so we return without adding the hash from the linked scene.
 					return;
 				case AttributesHash:
 				case HierarchyHash:
-					// Attributes and Hierarchy are affected by both the main scene and the linked scene
+				case ChildNamesHash:
+					// Attributes, ChildNames and Hierarchy are affected by both the main scene and the linked scene
 					mainSceneHash( hashType, time, h );
 					break;
-				case BoundHash:
 				case ObjectHash:
-				case ChildNamesHash:
-					// Let the bounds, object and child names come from the linked location
+					// Let the object come from the linked location:
+					break;
+				case BoundHash:
+					// if there are extra children at the link, we have to read the bound directly from the main scene,
+					// so we hash from there and return (which isn't particularly smart at the moment, so it's going to look
+					// like all bounds are different when maybe they aren't). Otherwise we get the bound hash from m_linkedScene
+					// so we can recognize repetition.
+					NameList childNames;
+					m_mainScene->childNames( childNames );
+					if( childNames.size() )
+					{
+						// Link locations override the transform and bound, so we return without adding the hash from the linked scene.
+						mainSceneHash( hashType, time, h );
+						return;
+					}
 					break;
 			};
 		}
