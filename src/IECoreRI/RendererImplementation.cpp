@@ -612,10 +612,21 @@ void IECoreRI::RendererImplementation::worldBegin()
 			processed = true;
 		}
 		
-		if( !processed && ( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) )
+		if(
+			!processed &&
+			( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) &&
+			name != "ri:frame"
+		)
 		{
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
 		}
+	}
+	
+	// output a frame block if ri:frame has been specified
+	
+	if( const IntData *frame = m_options->member<IntData>( "ri:frame" ) )
+	{
+		RiFrameBegin( frame->readable() );
 	}
 	
 	// get the world fired up
@@ -653,6 +664,11 @@ void IECoreRI::RendererImplementation::worldEnd()
 	RiContext( m_context );
 	RiWorldEnd();
 	m_inWorld = false;
+	
+	if( m_options->member<IntData>( "ri:frame" ) )
+	{
+		RiFrameEnd();
+	}
 	
 	// get our new context which we can emit edits on. we can no longer make
 	// calls to our original context, and we must call RiEnd() with the new one

@@ -84,6 +84,10 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:hider:*" StringData()</b></br>
 		/// Passed to an RiHider call.
 		///
+		/// \li <b>"ri:frame" IntData()</b></br>
+		/// Specifies the frame number for RiFrameBegin. If not specified,
+		/// then no frame block will be output.
+		///
 		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiOption call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
