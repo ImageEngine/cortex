@@ -39,7 +39,7 @@
 #include "PRM/PRM_SpareData.h"
 
 #include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/HoudiniScene.h"
+#include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 using namespace IECore;
@@ -328,7 +328,7 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
 		);
 		
 		thisTemplate[3] = PRM_Template(
-			PRM_STRING | PRM_TYPE_NOCOOK, 1, &HoudiniScene::pTags, 0, 0, 0, 0, 0, 0,
+			PRM_STRING | PRM_TYPE_NOCOOK, 1, &LiveScene::pTags, 0, 0, 0, 0, 0, 0,
 			"A space separated list of tags to add when caching with the SceneCache ROP."
 		);
 	}

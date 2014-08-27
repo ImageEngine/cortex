@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREHOUDINI_HOUDINISCENE_H
-#define IECOREHOUDINI_HOUDINISCENE_H
+#ifndef IECOREHOUDINI_LIVESCENE_H
+#define IECOREHOUDINI_LIVESCENE_H
 
 #include "OP/OP_Node.h" 
 #include "UT/UT_String.h"
@@ -46,21 +46,21 @@
 namespace IECoreHoudini
 {
 
-IE_CORE_FORWARDDECLARE( HoudiniScene );
+IE_CORE_FORWARDDECLARE( LiveScene );
 
 /// A read-only class for representing a live Houdini scene as an IECore::SceneInterface
 /// Note that this class treats time by SceneInterface standards, starting at Frame 0,
 /// as opposed to Houdini standards, which start at Frame 1.
-class HoudiniScene : public IECore::SceneInterface
+class LiveScene : public IECore::SceneInterface
 {
 	public :
 		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HoudiniScene, HoudiniSceneTypeId, IECore::SceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
 		
-		HoudiniScene();
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
+		LiveScene();
+		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
 		
-		virtual ~HoudiniScene();
+		virtual ~LiveScene();
 		
 		virtual std::string fileName() const;
 
@@ -110,7 +110,7 @@ class HoudiniScene : public IECore::SceneInterface
 		bool embedded() const;
 		
 		/// These methods provide a default cooking time for methods that do not accept time
-		/// as an argument (e.g. hasObject or childNames). In a HoudiniScene which points at
+		/// as an argument (e.g. hasObject or childNames). In a LiveScene which points at
 		/// a SOP, it is necessary to use time in these methods. The default time will pass
 		/// through to children automatically. If left unset, CHgetEvalTime() will be used
 		/// for these queries. See ROP_SceneCacheWriter for a use case.
@@ -140,7 +140,7 @@ class HoudiniScene : public IECore::SceneInterface
 		
 	private :
 		
-		HoudiniScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter );
+		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter );
 		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
@@ -192,4 +192,4 @@ class HoudiniScene : public IECore::SceneInterface
 
 } // namespace IECoreHoudini
 
-#endif // IECOREHOUDINI_HOUDINISCENE_H
+#endif // IECOREHOUDINI_LIVESCENE_H

@@ -73,7 +73,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 		
 		virtual bool updateParmsFlags();
 		
-		/// Called recursively to traverse the IECoreHoudini::HoudiniScene, starting with the Root Object,
+		/// Called recursively to traverse the IECoreHoudini::LiveScene, starting with the Root Object,
 		/// and write the hierarchy to the output file.
 		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time, UT_Interrupt *progress );
 	
@@ -91,7 +91,7 @@ class ROP_SceneCacheWriter : public ROP_Node
 			ForcedExpand
 		};
 		
-		IECoreHoudini::HoudiniScenePtr m_houdiniScene;
+		IECoreHoudini::LiveScenePtr m_liveHoudiniScene;
 		IECore::ConstSceneInterfacePtr m_liveScene;
 		IECore::SceneInterfacePtr m_outScene;
 		UT_StringMMPattern *m_forceFilter;

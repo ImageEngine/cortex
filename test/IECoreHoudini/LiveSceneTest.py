@@ -39,7 +39,7 @@ import hou
 import IECore
 import IECoreHoudini
 
-class HoudiniSceneTest( IECoreHoudini.TestCase ) :
+class LiveSceneTest( IECoreHoudini.TestCase ) :
 	
 	def buildScene( self ) :
 		
@@ -64,7 +64,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		torus2 = torus1.createOutputNode( "geo", "torus2", run_init_scripts=False )
 		torus2.createNode( "torus", "actualTorus" )
 		
-		return IECoreHoudini.HoudiniScene()
+		return IECoreHoudini.LiveScene()
 	
 	def testChildNames( self ) :
 	
@@ -571,7 +571,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 	def testRerooting( self ) :	
 		
 		self.buildScene()
-		scene = IECoreHoudini.HoudiniScene( "/obj/sub1", rootPath = [ "sub1" ] )
+		scene = IECoreHoudini.LiveScene( "/obj/sub1", rootPath = [ "sub1" ] )
 		self.assertEqual( scene.path(), [] )
 		self.assertEqual( scene.pathAsString(), "/" )
 		self.assertEqual( scene.name(), "/" )
@@ -676,7 +676,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		self.assertNotEqual( hou.time(), 0.5 )
 		self.assertEqual( deformer.cookCount(), 0 )
-		scene = IECoreHoudini.HoudiniScene( box.path(), defaultTime = 0.5 )
+		scene = IECoreHoudini.LiveScene( box.path(), defaultTime = 0.5 )
 		self.assertEqual( scene.getDefaultTime(), 0.5 )
 		self.assertEqual( deformer.cookCount(), 1 )
 		self.assertTrue( scene.hasObject() )
@@ -797,7 +797,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		def test() :
 			
-			scene = IECoreHoudini.HoudiniScene()
+			scene = IECoreHoudini.LiveScene()
 			self.assertEqual( scene.childNames(), [ "boxes" ] )
 			boxesScene = scene.child( "boxes" )
 			self.assertEqual( boxesScene.childNames(), [ "box1", "box2" ] )
@@ -876,7 +876,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			
 			return None
 		
-		IECoreHoudini.HoudiniScene.registerCustomAttributes( names, readName )
+		IECoreHoudini.LiveScene.registerCustomAttributes( names, readName )
 		
 		# subnets do not have the new attribute
 		self.assertEqual( scene.attributeNames(), [] )
@@ -898,7 +898,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( gap.readAttribute( "custom", 0 ), IECore.StringData( gap.node().path() ) )
 		
 		# two callbacks registering the same attribute should not double-register it
-		IECoreHoudini.HoudiniScene.registerCustomAttributes( names, readName )
+		IECoreHoudini.LiveScene.registerCustomAttributes( names, readName )
 		self.assertEqual( sub1.attributeNames(), [] )
 		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
 		self.assertEqual( box1.attributeNames(), [ "custom" ] )
@@ -975,7 +975,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 			
 			return False
 		
-		IECoreHoudini.HoudiniScene.registerCustomTags( hasTag, readTags )
+		IECoreHoudini.LiveScene.registerCustomTags( hasTag, readTags )
 		
 		# subnets do not have the new tag directly
 		self.assertEqual( scene.readTags( IECore.SceneInterface.LocalTag ), [] )
@@ -1015,7 +1015,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 		self.assertEqual( mesh["P"].data.size(), 8 )
 		self.assertEqual( box1.childNames(), [ "gap" ] )
-		self.assertTrue( isinstance( box1.child( "gap" ), IECoreHoudini.HoudiniScene ) )
+		self.assertTrue( isinstance( box1.child( "gap" ), IECoreHoudini.LiveScene ) )
 		
 		# forcing a cook error
 		hou.parm('/obj/box1/actualBox/sizex').setExpression( "fake" )
@@ -1036,7 +1036,7 @@ class HoudiniSceneTest( IECoreHoudini.TestCase ) :
 		
 		sub1.parmTuple("t").set( (5.0,5.0,0.0) )
 		
-		sc = IECoreHoudini.HoudiniScene()
+		sc = IECoreHoudini.LiveScene()
 		sub1Sc = sc.scene(["sub1"])
 		sub1Transform = sub1Sc.readTransform( 0 ).value
 		self.assertEqual( sub1Transform.translate, IECore.V3d( 5.0, 5.0, 0.0 ) )

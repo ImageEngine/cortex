@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,7 +64,7 @@ from RATDeepImageWriterTest import *
 from DeepImageConverter import *
 from UpdateMode import *
 from SceneCacheTest import *
-from HoudiniSceneTest import *
+from LiveSceneTest import *
 from ToHoudiniCortexObjectConverter import *
 from ToHoudiniCompoundObjectConverter import *
 

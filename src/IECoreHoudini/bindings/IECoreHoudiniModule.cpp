@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -69,7 +69,7 @@
 #include "IECoreHoudini/bindings/RATDeepImageReaderBinding.h"
 #include "IECoreHoudini/bindings/RATDeepImageWriterBinding.h"
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
-#include "IECoreHoudini/bindings/HoudiniSceneBinding.h"
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
 #include "IECoreHoudini/bindings/ToHoudiniCortexObjectConverterBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCompoundObjectConverterBinding.h"
@@ -143,7 +143,7 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindRATDeepImageReader();
 	bindRATDeepImageWriter();
 	bindSceneCacheNode();
-	bindHoudiniScene();
+	bindLiveScene();
 	bindFromHoudiniCortexObjectConverter();
 	bindToHoudiniCortexObjectConverter();
 	bindFromHoudiniCompoundObjectConverter();

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -361,7 +361,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 				fn.convertObjectToGeometry()
 
-			# turn the scene node an intermediateObject so it can't be seen by MayaScene
+			# turn the scene node an intermediateObject so it can't be seen by LiveScene
 			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )
 	
 	## Converts the object (if any) in the scene interface into maya geometry.

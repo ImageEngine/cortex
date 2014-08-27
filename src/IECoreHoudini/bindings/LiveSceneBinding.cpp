@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,67 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "maya/MString.h"
-
 #include "boost/python.hpp"
 
-#include "IECoreMaya/MayaScene.h"
-#include "IECoreMaya/bindings/MayaSceneBinding.h"
+#include "IECoreHoudini/CoreHoudini.h"
+#include "IECoreHoudini/LiveScene.h"
+#include "IECoreHoudini/bindings/LiveSceneBinding.h"
 
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 
-using namespace IECoreMaya;
+using namespace IECoreHoudini;
 using namespace boost::python;
+
+static void listToPath( const list &l, IECore::SceneInterface::Path &p )
+{
+	int listLen = IECorePython::len( l );
+	for (int i = 0; i < listLen; i++ )
+	{
+		extract< std::string > ex( l[i] );
+		if ( !ex.check() )
+		{
+			throw IECore::InvalidArgumentException( std::string( "Invalid path! Should be a list of strings!" ) );
+		}
+		p.push_back( ex() );	
+	}
+}
+
+static LiveScenePtr constructor( const std::string n, const list &c, const list &r, double defaultTime )
+{
+	UT_String nodePath( n );
+	IECore::SceneInterface::Path contentPath, rootPath;
+	listToPath( c, contentPath );
+	listToPath( r, rootPath );
+	
+	return new LiveScene( nodePath, contentPath, rootPath, defaultTime );
+}
+
+/// \todo: return a PyObject* directly if SideFx provides a swig-free method for creating one from a HOM_Node*
+static std::string getNodePath( LiveScene *scene )
+{
+	const OP_Node *node = scene->node();
+	if ( !node )
+	{
+		return 0;
+	}
+	
+	UT_String path;
+	node->getFullPath( path );
+	
+	return path.toStdString();
+}
+
+IECore::DataPtr readWorldTransform( LiveScene &scene, double time )
+{
+	if ( IECore::ConstDataPtr t = scene.readWorldTransform( time ) )
+	{
+		return t->copy();
+	}
+	
+	return 0;
+}
 
 class CustomTagReader
 {
@@ -54,35 +101,20 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag, int filter )
+		bool operator() ( const OP_Node *node, const IECore::SceneInterface::Name &tag, int filter )
 		{
-			MString p = dagPath.fullPathName();
+			UT_String path;
+			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				return m_has( p.asChar(), tag, filter );
-			}
-			catch ( error_already_set )
-			{
-				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while checking MayaScene tag " + tag.string() ) );
-			}
+			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, filter );
 		}
 		
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
+		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter )
 		{
-			MString p = dagPath.fullPathName();
+			UT_String path;
+			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			object o;
-			try
-			{
-				o = m_read( p.asChar(), filter );
-			}
-			catch ( error_already_set )
-			{
-				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene tags" ) );
-			}
+			object o = m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), filter );
 			extract<list> l( o );
 			if ( !l.check() )
 			{
@@ -91,7 +123,7 @@ class CustomTagReader
 			
 			IECorePython::listToSceneInterfaceNameList( l(), tags );
 		}
-
+		
 		object m_has;
 		object m_read;
 };
@@ -99,7 +131,7 @@ class CustomTagReader
 void registerCustomTags( object hasFn, object readFn )
 {
 	CustomTagReader reader( hasFn, readFn );
-	MayaScene::registerCustomTags( reader, reader );
+	LiveScene::registerCustomTags( reader, reader );
 }
 
 class CustomAttributeReader
@@ -109,36 +141,20 @@ class CustomAttributeReader
 		{
 		}
 
-		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		IECore::ConstObjectPtr operator() ( const OP_Node *node, const IECore::SceneInterface::Name &attr, double time )
 		{
-			MString p = dagPath.fullPathName();
+			UT_String path;
+			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			try
-			{
-				return extract<IECore::ConstObjectPtr>(m_read( p.asChar(), attr ));
-			}
-			catch ( error_already_set )
-			{
-				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating MayaScene attribute " + attr.string() ) );
-			}
+			return extract<IECore::ConstObjectPtr>( m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), attr, time ) );
 		}
 		
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
+		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &attributes )
 		{
-			MString p = dagPath.fullPathName();
+			UT_String path;
+			node->getFullPath( path );
 			IECorePython::ScopedGILLock gilLock;
-			object o;
-			try
-			{
-				o = m_names( p.asChar() );
-			}
-			catch ( error_already_set )
-			{
-				PyErr_Print();
-				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for MayaScene." ) );
-			}
-			
+			object o = m_names( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ) );
 			extract<list> l( o );
 			if ( !l.check() )
 			{
@@ -155,13 +171,20 @@ class CustomAttributeReader
 void registerCustomAttributes( object namesFn, object readFn )
 {
 	CustomAttributeReader reader( namesFn, readFn );
-	MayaScene::registerCustomAttributes( reader, reader );
+	LiveScene::registerCustomAttributes( reader, reader );
 }
 
-void IECoreMaya::bindMayaScene()
+void IECoreHoudini::bindLiveScene()
 {
-	IECorePython::RunTimeTypedClass<MayaScene>()
+	IECorePython::RunTimeTypedClass<LiveScene>()
 		.def( init<>() )
+		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( arg( "nodePath" ), arg( "contentPath" ) = list(), arg( "rootPath" ) = list(), arg( "defaultTime" ) = std::numeric_limits<double>::infinity() ) ) )
+		.def( "getDefaultTime", &LiveScene::getDefaultTime )
+		.def( "setDefaultTime", &LiveScene::setDefaultTime )
+		.def( "embedded", &LiveScene::embedded )
+		.def( "_getNodePath", &getNodePath )
+		.def( "readWorldTransform", &readWorldTransform )
+		.def( "readWorldTransformAsMatrix", &LiveScene::readWorldTransformAsMatrix )
 		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
 		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
 	;

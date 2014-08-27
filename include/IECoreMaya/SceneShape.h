@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -48,7 +48,7 @@ namespace IECoreMaya
 
 /// A shape derived from a SceneShapeInterface which implements
 /// a shape which can read an IECore::SceneInterface using a file (.scc) and a root path
-/// It also registers itself in the MayaScene class so that the node is seen as a link to 
+/// It also registers itself in the LiveScene class so that the node is seen as a link to 
 /// an external file through the LinkedScene mechanism.
 class SceneShape : public SceneShapeInterface
 {
@@ -85,12 +85,12 @@ class SceneShape : public SceneShapeInterface
 
 		static SceneShape *findScene( const MDagPath &p, bool noIntermediate, MDagPath *dagPath = 0 );
 
-		/// functions registered in MayaScene as custom object and custom attributes
-		struct MayaSceneAddOn
+		/// functions registered in LiveScene as custom object and custom attributes
+		struct LiveSceneAddOn
 		{
-			MayaSceneAddOn();
+			LiveSceneAddOn();
 		};
-		static MayaSceneAddOn g_mayaSceneAddon;
+		static LiveSceneAddOn g_liveSceneAddon;
 
 		static bool hasSceneShapeLink( const MDagPath &p );
 		static IECore::ConstObjectPtr readSceneShapeLink( const MDagPath &p );

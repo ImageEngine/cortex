@@ -38,7 +38,7 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/Primitive.h"
 
-#include "IECoreMaya/MayaScene.h"
+#include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
 #include "IECoreMaya/FromMayaShapeConverter.h"
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
@@ -70,12 +70,12 @@
 using namespace IECore;
 using namespace IECoreMaya;
 
-IE_CORE_DEFINERUNTIMETYPED( MayaScene );
+IE_CORE_DEFINERUNTIMETYPED( LiveScene );
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
-MayaScene::Mutex MayaScene::s_mutex;
+LiveScene::Mutex LiveScene::s_mutex;
 
-MayaScene::MayaScene() : m_isRoot( true )
+LiveScene::LiveScene() : m_isRoot( true )
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -84,33 +84,33 @@ MayaScene::MayaScene() : m_isRoot( true )
 	it.getPath( m_dagPath );
 }
 
-MayaScene::MayaScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
+LiveScene::LiveScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 {
 	// this constructor is expected to be called when s_mutex is locked!
 	m_dagPath = p;
 }
 
-MayaScene::~MayaScene()
+LiveScene::~LiveScene()
 {
 }
 
-std::string MayaScene::fileName() const
+std::string LiveScene::fileName() const
 {
-	throw Exception( "MayaScene does not support fileName()." );
+	throw Exception( "IECoreMaya::LiveScene does not support fileName()." );
 }
 
-MayaScenePtr MayaScene::duplicate( const MDagPath& p, bool isRoot ) const
+LiveScenePtr LiveScene::duplicate( const MDagPath& p, bool isRoot ) const
 {
-	return new MayaScene( p, isRoot );
+	return new LiveScene( p, isRoot );
 }
 
-SceneInterface::Name MayaScene::name() const
+SceneInterface::Name LiveScene::name() const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::name: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::name: Dag path no longer exists!" );
 	}
 	
 	std::string nameStr = m_dagPath.fullPathName().asChar();
@@ -131,13 +131,13 @@ SceneInterface::Name MayaScene::name() const
 	}
 }
 
-void MayaScene::path( Path &p ) const
+void LiveScene::path( Path &p ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::path: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::path: Dag path no longer exists!" );
 	}
 	
 	std::string pathStr( m_dagPath.fullPathName().asChar() );
@@ -156,13 +156,13 @@ void MayaScene::path( Path &p ) const
 	
 }
 
-Imath::Box3d MayaScene::readBound( double time ) const
+Imath::Box3d LiveScene::readBound( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
-		throw Exception( "MayaScene::readBound: time must be the same as on the maya timeline!" );
+		throw Exception( "IECoreMaya::LiveScene::readBound: time must be the same as on the maya timeline!" );
 	}
 	
 	if( m_isRoot )
@@ -187,7 +187,7 @@ Imath::Box3d MayaScene::readBound( double time ) const
 	}
 	else if( m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::readBound: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::readBound: Dag path no longer exists!" );
 	}
 	else
 	{
@@ -198,23 +198,23 @@ Imath::Box3d MayaScene::readBound( double time ) const
 	}
 }
 
-void MayaScene::writeBound( const Imath::Box3d &bound, double time )
+void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 {
-	throw Exception( "MayaScene::writeBound: write operations not supported!" );
+	throw Exception( "IECoreMaya::LiveScene::writeBound: write operations not supported!" );
 }
 
-ConstDataPtr MayaScene::readTransform( double time ) const
+ConstDataPtr LiveScene::readTransform( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::readTransform: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::readTransform: Dag path no longer exists!" );
 	}
 	
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
-		throw Exception( "MayaScene::readTransform: time must be the same as on the maya timeline!" );
+		throw Exception( "IECoreMaya::LiveScene::readTransform: time must be the same as on the maya timeline!" );
 	}
 	
 	if( m_dagPath.hasFn( MFn::kTransform ) )
@@ -228,21 +228,21 @@ ConstDataPtr MayaScene::readTransform( double time ) const
 	}
 }
 
-Imath::M44d MayaScene::readTransformAsMatrix( double time ) const
+Imath::M44d LiveScene::readTransformAsMatrix( double time ) const
 {
 	return runTimeCast< const TransformationMatrixdData >( readTransform( time ) )->readable().transform();
 }
 
-void MayaScene::writeTransform( const Data *transform, double time )
+void LiveScene::writeTransform( const Data *transform, double time )
 {
-	throw Exception( "MayaScene::writeTransform: write operations not supported!" );
+	throw Exception( "IECoreMaya::LiveScene::writeTransform: write operations not supported!" );
 }
 
-bool MayaScene::hasAttribute( const Name &name ) const
+bool LiveScene::hasAttribute( const Name &name ) const
 {
 	if ( !m_isRoot && m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::hasAttribute: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::hasAttribute: Dag path no longer exists!" );
 	}
 	
 	if( name == SceneInterface::visibilityName )
@@ -263,11 +263,11 @@ bool MayaScene::hasAttribute( const Name &name ) const
 	return false;
 }
 
-void MayaScene::attributeNames( NameList &attrs ) const
+void LiveScene::attributeNames( NameList &attrs ) const
 {
 	if( !m_isRoot && m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::attributeNames: Dag path no longer exists!" );
 	}
 	
 	tbb::mutex::scoped_lock l( s_mutex );
@@ -279,11 +279,11 @@ void MayaScene::attributeNames( NameList &attrs ) const
 	}
 }
 
-ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
+ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
 	if ( !m_isRoot && m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::readAttribute: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::readAttribute: Dag path no longer exists!" );
 	}
 	
 	tbb::mutex::scoped_lock l( s_mutex );
@@ -377,12 +377,12 @@ ConstObjectPtr MayaScene::readAttribute( const Name &name, double time ) const
 	return 0;
 }
 
-void MayaScene::writeAttribute( const Name &name, const Object *attribute, double time )
+void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
 {
-	throw Exception( "MayaScene::writeAttribute: write operations not supported!" );
+	throw Exception( "IECoreMaya::LiveScene::writeAttribute: write operations not supported!" );
 }
 
-bool MayaScene::hasTag( const Name &name, int filter ) const
+bool LiveScene::hasTag( const Name &name, int filter ) const
 {
 	if ( m_isRoot )
 	{
@@ -391,7 +391,7 @@ bool MayaScene::hasTag( const Name &name, int filter ) const
 
 	if( m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::hasTag: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::hasTag: Dag path no longer exists!" );
 	}
 	
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
@@ -406,7 +406,7 @@ bool MayaScene::hasTag( const Name &name, int filter ) const
 	return false;
 }
 
-void MayaScene::readTags( NameList &tags, int filter ) const
+void LiveScene::readTags( NameList &tags, int filter ) const
 {
 	tags.clear();
 
@@ -417,7 +417,7 @@ void MayaScene::readTags( NameList &tags, int filter ) const
 
 	if( m_dagPath.length() == 0 )
 	{
-		throw Exception( "MayaScene::attributeNames: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::attributeNames: Dag path no longer exists!" );
 	}
 	
 	std::set<Name> uniqueTags;
@@ -432,12 +432,12 @@ void MayaScene::readTags( NameList &tags, int filter ) const
 	tags.insert( tags.end(), uniqueTags.begin(), uniqueTags.end() );
 }
 
-void MayaScene::writeTags( const NameList &tags )
+void LiveScene::writeTags( const NameList &tags )
 {
-	throw Exception( "MayaScene::writeTags not supported" );
+	throw Exception( "IECoreMaya::LiveScene::writeTags not supported" );
 }
 
-bool MayaScene::hasObject() const
+bool LiveScene::hasObject() const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -447,7 +447,7 @@ bool MayaScene::hasObject() const
 	}
 	else if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::hasObject: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::hasObject: Dag path no longer exists!" );
 	}
 
 	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
@@ -490,18 +490,18 @@ bool MayaScene::hasObject() const
 	return false;
 }
 
-ConstObjectPtr MayaScene::readObject( double time ) const
+ConstObjectPtr LiveScene::readObject( double time ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::readObject: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::readObject: Dag path no longer exists!" );
 	}
 	
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
-		throw Exception( "MayaScene::readObject: time must be the same as on the maya timeline!" );
+		throw Exception( "IECoreMaya::LiveScene::readObject: time must be the same as on the maya timeline!" );
 	}
 
 	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
@@ -551,7 +551,7 @@ ConstObjectPtr MayaScene::readObject( double time ) const
 	return 0;
 }
 
-PrimitiveVariableMap MayaScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
+PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
 {
 	// \todo Optimize this function, adding special cases such as for Meshes.
 	ConstPrimitivePtr prim = runTimeCast< const Primitive >( readObject( time ) );
@@ -562,12 +562,12 @@ PrimitiveVariableMap MayaScene::readObjectPrimitiveVariables( const std::vector<
 	return prim->variables;
 }
 
-void MayaScene::writeObject( const Object *object, double time )
+void LiveScene::writeObject( const Object *object, double time )
 {
-	throw Exception( "MayaScene::writeObject: write operations not supported!" );
+	throw Exception( "IECoreMaya::LiveScene::writeObject: write operations not supported!" );
 }
 
-void MayaScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
+void LiveScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const
 {
 	for( unsigned i=0; i < dagPath.childCount(); ++i )
 	{
@@ -594,13 +594,13 @@ void MayaScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) co
 	}
 }
 
-void MayaScene::childNames( NameList &childNames ) const
+void LiveScene::childNames( NameList &childNames ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::childNames: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::childNames: Dag path no longer exists!" );
 	}
 	
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
@@ -617,13 +617,13 @@ void MayaScene::childNames( NameList &childNames ) const
 	}
 }
 
-bool MayaScene::hasChild( const Name &name ) const
+bool LiveScene::hasChild( const Name &name ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::childNames: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::childNames: Dag path no longer exists!" );
 	}
 	
 	unsigned currentPathLength = m_dagPath.fullPathName().length();
@@ -644,13 +644,13 @@ bool MayaScene::hasChild( const Name &name ) const
 	return false;
 }
 
-IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
+IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
-		throw Exception( "MayaScene::retrieveChild: Dag path no longer exists!" );
+		throw Exception( "IECoreMaya::LiveScene::retrieveChild: Dag path no longer exists!" );
 	}
 	
 	MSelectionList sel;
@@ -663,7 +663,7 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 	{
 		if( missingBehaviour == SceneInterface::ThrowIfMissing )
 		{
-			throw Exception( "MayaScene::retrieveChild: Couldn't find transform at specified path " + std::string( path.fullPathName().asChar() ) );
+			throw Exception( "IECoreMaya::LiveScene::retrieveChild: Couldn't find transform at specified path " + std::string( path.fullPathName().asChar() ) );
 		}
 		return 0;
 	}
@@ -671,22 +671,22 @@ IECore::SceneInterfacePtr MayaScene::retrieveChild( const Name &name, MissingBeh
 	return duplicate( path );
 }
 
-SceneInterfacePtr MayaScene::child( const Name &name, MissingBehaviour missingBehaviour )
+SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour )
 {
 	return retrieveChild( name, missingBehaviour );
 }
 
-ConstSceneInterfacePtr MayaScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
+ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
 {
 	return retrieveChild( name, missingBehaviour );
 }
 
-SceneInterfacePtr MayaScene::createChild( const Name &name )
+SceneInterfacePtr LiveScene::createChild( const Name &name )
 {
 	return 0;
 }
 
-SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
+SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
 	
@@ -718,7 +718,7 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 				pathName += std::string( path[i] ) + "/";
 			}
 			
-			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
+			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
@@ -740,29 +740,29 @@ SceneInterfacePtr MayaScene::retrieveScene( const Path &path, MissingBehaviour m
 				pathName += std::string( path[i] ) + "/";
 			}
 			
-			throw Exception( "MayaScene::retrieveScene: Couldn't find transform at specified path " + pathName );
+			throw Exception( "IECoreMaya::LiveScene::retrieveScene: Couldn't find transform at specified path " + pathName );
 		}
 		return 0;
 	}
 	
 }
 
-ConstSceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
+ConstSceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
 	return retrieveScene( path, missingBehaviour );
 }
 
-SceneInterfacePtr MayaScene::scene( const Path &path, MissingBehaviour missingBehaviour )
+SceneInterfacePtr LiveScene::scene( const Path &path, MissingBehaviour missingBehaviour )
 {
 	return retrieveScene( path, missingBehaviour );
 }
 
-void MayaScene::hash( HashType hashType, double time, MurmurHash &h ) const
+void LiveScene::hash( HashType hashType, double time, MurmurHash &h ) const
 {
-	throw Exception( "Hashes currently not supported in MayaScene objects." );
+	throw Exception( "Hashes currently not supported in IECoreMaya::LiveScene objects." );
 }
 
-void MayaScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
+void LiveScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
 {
 	CustomReader r;
 	r.m_has = hasFn;
@@ -770,7 +770,7 @@ void MayaScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
 	customObjectReaders().push_back(r);
 }
 
-void MayaScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn )
+void LiveScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn )
 {
 	CustomAttributeReader r;
 	r.m_names = namesFn;
@@ -778,7 +778,7 @@ void MayaScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn )
 	customAttributeReaders().push_back(r);
 }
 
-void MayaScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
+void LiveScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 {
 	CustomTagReader r;
 	r.m_has = hasFn;
@@ -786,20 +786,20 @@ void MayaScene::registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn )
 	customTagReaders().push_back( r );
 }
 
-std::vector< MayaScene::CustomReader > &MayaScene::customObjectReaders()
+std::vector<LiveScene::CustomReader> &LiveScene::customObjectReaders()
 {
-	static std::vector< MayaScene::CustomReader > readers;
+	static std::vector<LiveScene::CustomReader> readers;
 	return readers;
 }
 
-std::vector<MayaScene::CustomAttributeReader> &MayaScene::customAttributeReaders()
+std::vector<LiveScene::CustomAttributeReader> &LiveScene::customAttributeReaders()
 {
-	static std::vector< MayaScene::CustomAttributeReader > readers;
+	static std::vector<LiveScene::CustomAttributeReader> readers;
 	return readers;
 }
 
-std::vector<MayaScene::CustomTagReader> &MayaScene::customTagReaders()
+std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
-	static std::vector<MayaScene::CustomTagReader> readers;
+	static std::vector<LiveScene::CustomTagReader> readers;
 	return readers;
 }
