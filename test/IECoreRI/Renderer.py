@@ -597,6 +597,25 @@ class RendererTest( IECoreRI.TestCase ) :
 				
 		self.assertTrue( "+z.exr" in rib )
 	
+	def testFrameBlock( self ) :
+	
+		with CapturingMessageHandler() as mh :
+		
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		
+			r.setOption( "ri:frame", 10 )
+		
+			with WorldBlock( r ) :
+				pass
+
+			del r
+
+		self.assertEqual( len( mh.messages ), 0 )
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		self.assertTrue( "FrameBegin 10" in rib )
+		self.assertTrue( "FrameEnd" in rib )
+	
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )
