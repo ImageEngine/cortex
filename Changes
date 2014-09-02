@@ -1,3 +1,21 @@
+# 9.0.0-a5
+
+#### IECore
+
+- LinkedScene::hash now takes extra children at links into account
+
+#### IECoreRI
+
+- Added support for RiFrame blocks in IECoreRI::Renderer.
+
+#### IECoreMaya
+
+- Renamed IECoreMaya::MayaScene to IECoreMaya::LiveScene
+
+#### IECoreHoudini
+
+- Renamed IECoreHoudini::HoudiniScene to IECoreHoudini::LiveScene
+
 # 9.0.0-a4
 
 #### IECore
