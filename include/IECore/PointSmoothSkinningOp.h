@@ -121,7 +121,10 @@ class PointSmoothSkinningOp : public ModifyOp
 		M44fVectorParameterPtr m_deformationPoseParameter;
 		IntVectorParameterPtr m_refIndicesParameter;
 
-		SmoothSkinningDataPtr m_prevSmoothSkinningData;
+		ConstSmoothSkinningDataPtr m_prevSmoothSkinningData;
+		
+		struct DeformPositions;
+		struct DeformNormals;
 };
 
 IE_CORE_DECLAREPTR( PointSmoothSkinningOp );
