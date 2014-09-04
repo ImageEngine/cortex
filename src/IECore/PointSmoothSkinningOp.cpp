@@ -37,6 +37,8 @@
 
 #include "boost/format.hpp"
 
+#include "tbb/tbb.h"
+
 #include "IECore/PointsPrimitive.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/ObjectParameter.h"
@@ -201,6 +203,117 @@ const IntVectorParameter * PointSmoothSkinningOp::refIndicesParameter() const
 	return m_refIndicesParameter.get();
 }
 
+struct PointSmoothSkinningOp::DeformPositions
+{
+	public :
+		
+		DeformPositions( std::vector<V3f> &p_data, const std::vector<int> &pointIndexOffsets, const std::vector<int> &pointInfluenceCounts, const std::vector<int> &pointInfluenceIndices, const std::vector<float> &pointInfluenceWeights, const std::vector<M44f> &skin_data, const std::vector<int> &refId_data )
+			:	m_pData( p_data ), m_pointIndexOffsets( pointIndexOffsets ), m_pointInfluenceCounts( pointInfluenceCounts ), m_pointInfluenceIndices( pointInfluenceIndices ), m_pointInfluenceWeights( pointInfluenceWeights ), m_skinData(skin_data), m_refIdData(refId_data)
+		{
+		}
+
+		void operator()( const tbb::blocked_range<size_t> &r ) const
+		{
+			for( size_t p_it=r.begin(); p_it!=r.end(); ++p_it )
+			{
+				V3f p_new(0,0,0);
+				
+				V3f &p_value = m_pData[p_it];
+				int p_id;
+				if( m_refIdData.size() )
+				{
+					// get the actual index to look up in the smooth skinning data
+					p_id = m_refIdData[p_it];
+				}
+				else
+				{
+					p_id = p_it;
+				}
+
+				int p_influence_count = m_pointInfluenceCounts[p_id];
+				int p_index_offset = m_pointIndexOffsets[p_id];
+	
+				for (int p_influence_id = p_index_offset; p_influence_id < (p_index_offset+p_influence_count);
+						p_influence_id++)
+				{
+					int influence_id = m_pointInfluenceIndices[p_influence_id];
+					float weight = m_pointInfluenceWeights[p_influence_id];
+					p_new += p_value * m_skinData[influence_id] * weight;
+				}
+				p_value = p_new;
+			}
+		}
+	
+	private :
+		
+		std::vector<V3f> &m_pData;
+		const std::vector<int> &m_pointIndexOffsets;
+		const std::vector<int> &m_pointInfluenceCounts;
+		const std::vector<int> &m_pointInfluenceIndices;
+		const std::vector<float> &m_pointInfluenceWeights;
+		const std::vector<M44f> &m_skinData;
+		const std::vector<int> &m_refIdData;
+		
+};
+
+struct PointSmoothSkinningOp::DeformNormals
+{
+	public :
+		
+		DeformNormals( std::vector<V3f> &n_data, const std::vector<int> &pointIndexOffsets, const std::vector<int> &pointInfluenceCounts, const std::vector<int> &pointInfluenceIndices, const std::vector<float> &pointInfluenceWeights, const std::vector<M44f> &skin_data, const std::vector<int> &refId_data, std::vector<int> &vertexIndicesData )
+			:	m_nData( n_data ), m_pointIndexOffsets( pointIndexOffsets ), m_pointInfluenceCounts( pointInfluenceCounts ), m_pointInfluenceIndices( pointInfluenceIndices ), m_pointInfluenceWeights( pointInfluenceWeights ), m_skinData(skin_data), m_refIdData(refId_data), m_vertexIndicesData( vertexIndicesData )
+		{
+		}
+
+		void operator()( const tbb::blocked_range<size_t> &r ) const
+		{
+			for( size_t n_it=r.begin(); n_it!=r.end(); ++n_it )
+			{
+				V3f n_new(0,0,0);
+				
+				V3f &n_value = m_nData[n_it];
+				V3f n_unw;
+				
+				int n_id = n_it;
+
+				if( m_vertexIndicesData.size() )
+				{
+					n_id = m_vertexIndicesData[n_id];
+				}
+				if( m_refIdData.size() )
+				{
+					n_id = m_refIdData[n_id];
+				}
+				
+				int n_influence_count = m_pointInfluenceCounts[n_id];
+				int n_index_offset = m_pointIndexOffsets[n_id];
+	
+				for (int n_influence_id = n_index_offset; n_influence_id < (n_index_offset+n_influence_count);
+						n_influence_id++)
+				{
+					int influence_id = m_pointInfluenceIndices[n_influence_id];
+					float weight = m_pointInfluenceWeights[n_influence_id];
+	
+					m_skinData[influence_id].multDirMatrix(n_value,n_unw);
+					n_new += n_unw * weight;
+				}	
+				n_value = n_new;
+			}
+		}
+	
+	private :
+		
+		std::vector<V3f> &m_nData;
+		const std::vector<int> &m_pointIndexOffsets;
+		const std::vector<int> &m_pointInfluenceCounts;
+		const std::vector<int> &m_pointInfluenceIndices;
+		const std::vector<float> &m_pointInfluenceWeights;
+		const std::vector<M44f> &m_skinData;
+		const std::vector<int> &m_refIdData;
+		const std::vector<int> &m_vertexIndicesData;
+		
+};
+
 void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operands )
 {
 	// get the input parameters
@@ -266,7 +379,7 @@ void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operand
 	if ( ssd != m_prevSmoothSkinningData )
 	{
 		ssd->validate();
-		m_prevSmoothSkinningData = ssd->copy();
+		m_prevSmoothSkinningData = ssd;
 	}
 
 	// test n data
@@ -320,94 +433,41 @@ void PointSmoothSkinningOp::modify( Object *input, const CompoundObject *operand
 	// iterate through all the points in the source primitive and deform using the weighted skinning matrices
 	if ( blend == Linear )
 	{
-        std::vector<V3f>::iterator p_it = p_data.begin();
-
-	const std::vector<int> &pointIndexOffsets = ssd->pointIndexOffsets()->readable();
-	const std::vector<int> &pointInfluenceCounts = ssd->pointInfluenceCounts()->readable();
-	const std::vector<int> &pointInfluenceIndices = ssd->pointInfluenceIndices()->readable();
-	const std::vector<float> &pointInfluenceWeights = ssd->pointInfluenceWeights()->readable();
+		const std::vector<int> &pointIndexOffsets = ssd->pointIndexOffsets()->readable();
+		const std::vector<int> &pointInfluenceCounts = ssd->pointInfluenceCounts()->readable();
+		const std::vector<int> &pointInfluenceIndices = ssd->pointInfluenceIndices()->readable();
+		const std::vector<float> &pointInfluenceWeights = ssd->pointInfluenceWeights()->readable();
+		
+		// deform our P
+		tbb::parallel_for(
+			tbb::blocked_range<size_t>( 0, p_size ),
+			DeformPositions( p_data, pointIndexOffsets, pointInfluenceCounts, pointInfluenceIndices, pointInfluenceWeights, skin_data, refId_data )
+		);
 	
-		// todo, thread this
-        // deform our P
-        for ( p_it=p_data.begin(); p_it!=p_data.end(); ++p_it )
-        {
-			V3f p_new(0,0,0);
-
-			int p_id = p_it - p_data.begin();
-			
-			if( refId_size )
-			{
-				// get the actual index to look up in the smooth skinning data
-				p_id = refId_data[p_id];
-			}
-			
-			int p_influence_count = pointInfluenceCounts[p_id];
-			int p_index_offset = pointIndexOffsets[p_id];
-
-			for (int p_influence_id = p_index_offset; p_influence_id < (p_index_offset+p_influence_count);
-					p_influence_id++)
-			{
-				int influence_id = pointInfluenceIndices[p_influence_id];
-				float weight = pointInfluenceWeights[p_influence_id];
-				p_new += (*p_it) * skin_data[influence_id] * weight;
-			}
-
-			(*p_it) = p_new;
-
-        }
-
-        // deform our N
-        if ( deform_n )
-        {
-		PrimitiveVariableMap::const_iterator it = pt->variables.find(normal_var);
-		if ( it != pt->variables.end() )
+		// deform our N
+		if ( deform_n )
 		{
-			V3fVectorData *n = pt->variableData<V3fVectorData>(normal_var);
-			std::vector<V3f> &n_data =  n->writable();
-	
-			std::vector<V3f>::iterator n_it = n_data.begin();
-			V3f n_unw;
-			
-			std::vector<int> vertexIndicesData;
-			if (it->second.interpolation == PrimitiveVariable::FaceVarying )
+			PrimitiveVariableMap::const_iterator it = pt->variables.find(normal_var);
+			if ( it != pt->variables.end() )
 			{
-				MeshPrimitive *mesh = dynamic_cast<MeshPrimitive *>( pt );
-				if( mesh )
+				V3fVectorData *n = pt->variableData<V3fVectorData>(normal_var);
+				std::vector<V3f> &n_data =  n->writable();
+				
+				std::vector<int> vertexIndicesData;
+				if (it->second.interpolation == PrimitiveVariable::FaceVarying )
 				{
-					vertexIndicesData = mesh->vertexIds()->readable();
-				}
-			}
-			
-			for ( n_it=n_data.begin(); n_it!=n_data.end(); ++n_it )
-			{
-				V3f n_new(0,0,0);
-	
-				int n_id = n_it - n_data.begin();
-
-				if( vertexIndicesData.size() )
-				{
-					n_id = vertexIndicesData[n_id];
-				}
-				if( refId_size )
-				{
-					n_id = refId_data[n_id];
+					MeshPrimitive *mesh = dynamic_cast<MeshPrimitive *>( pt );
+					if( mesh )
+					{
+						vertexIndicesData = mesh->vertexIds()->readable();
+					}
 				}
 				
-				int n_influence_count = pointInfluenceCounts[n_id];
-				int n_index_offset = pointIndexOffsets[n_id];
-	
-				for (int n_influence_id = n_index_offset; n_influence_id < (n_index_offset+n_influence_count);
-						n_influence_id++)
-				{
-					int influence_id = pointInfluenceIndices[n_influence_id];
-					float weight = pointInfluenceWeights[n_influence_id];
-	
-					skin_data[influence_id].multDirMatrix((*n_it),n_unw);
-					n_new += n_unw * weight;
-				}	
-				(*n_it) = n_new;
+				tbb::parallel_for(
+					tbb::blocked_range<size_t>( 0, n_data.size() ),
+					DeformNormals( n_data, pointIndexOffsets, pointInfluenceCounts, pointInfluenceIndices, pointInfluenceWeights, skin_data, refId_data, vertexIndicesData )
+				);
 			}
-		}
         }
 	}
 	else
