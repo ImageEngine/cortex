@@ -506,6 +506,13 @@ inline size_t tbb_hasher( const MurmurHash &h )
 	return h.m_h1 ^ h.m_h2;
 }
 
+/// Implementation of hash_value for MurmurHash, allowing it to be used with boost::hash,
+/// and therefore as a key in boost::unordered_map.
+inline size_t hash_value( const MurmurHash &h )
+{
+	return h.m_h1 ^ h.m_h2;
+}
+
 } // namespace IECore
 
 #endif // IECORE_MURMURHASH_INL

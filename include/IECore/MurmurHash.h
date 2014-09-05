@@ -159,6 +159,7 @@ class MurmurHash
 		uint64_t m_h2;
 		
 		friend size_t tbb_hasher( const MurmurHash &h );
+		friend size_t hash_value( const MurmurHash &h );
 
 };
 
