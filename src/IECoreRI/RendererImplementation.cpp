@@ -46,8 +46,11 @@
 #include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 #include "boost/format.hpp"
 
 #include <iostream>
@@ -1898,21 +1901,29 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::Pat
 
 void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
-	ScopedContext scopedContext( m_context );
-
 	Imath::Box3f bound = proc->bound();
 	if( bound.isEmpty() )
 	{
 		return;
 	}
 
+	ScopedContext scopedContext( m_context );
+
+	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+	{
+		externalProcedural( externalProc );
+	}
+	else
+	{
+		standardProcedural( proc.get() );
+	}
+}
+
+void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
+{
+
 	RtBound riBound;
-	riBound[0] = bound.min.x;
-	riBound[1] = bound.max.x;
-	riBound[2] = bound.min.y;
-	riBound[3] = bound.max.y;
-	riBound[4] = bound.min.z;
-	riBound[5] = bound.max.z;
+	convert( proc->bound(), riBound );
 
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
@@ -1946,6 +1957,88 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 	
 #endif
 
+}
+
+namespace
+{
+
+struct Serialiser
+{
+
+	typedef void ReturnType;
+
+	Serialiser( std::ostringstream &stringStream )
+		:	m_stringStream( stringStream )
+	{
+	}
+
+	template<typename T>
+	void operator() ( const T *data )
+	{
+		const typename T::BaseType *b = data->baseReadable();
+		for( size_t i = 0, e = data->baseSize(); i < e; ++i )
+		{
+			m_stringStream << b[i];
+			if( i != e - 1 )
+			{
+				m_stringStream << " ";
+			}
+		}
+	}
+
+	private :
+
+		std::ostringstream &m_stringStream;
+
+};
+
+} // namespace
+
+void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *proc )
+{
+	RtBound riBound;
+	convert( proc->bound(), riBound );
+
+	if( boost::algorithm::ends_with( proc->fileName(), ".rib" ) )
+	{
+		// RiProcDelayedReadArchive
+		const char **data = (const char **)malloc( sizeof( char * ) );
+		data[0] = proc->fileName().c_str();
+		RiProcedural( data, riBound, RiProcDelayedReadArchive, RiProcFree );
+	}
+	else
+	{
+		// RiProcDynamicLoad
+		const CompoundDataMap &parms = proc->parameters();
+
+		ostringstream dataStringStream;
+		CompoundDataMap::const_iterator it = parms.find( "ri:data" );
+		if( it != parms.end() )
+		{
+			if( const StringData *s = IECore::runTimeCast<const StringData>( it->second.get() ) )
+			{
+				dataStringStream << s->readable();
+			}
+		}
+
+		Serialiser serialiser( dataStringStream );
+		for( CompoundDataMap::const_iterator it = parms.begin(), eIt = parms.end(); it != eIt; ++it )
+		{
+			if( it->first == "ri:data" )
+			{
+				continue;
+			}
+			dataStringStream << " --" << it->first << " ";
+			IECore::despatchTypedData<Serialiser, TypeTraits::HasBaseType, DespatchTypedDataIgnoreError>( it->second.get(), serialiser );
+		}
+
+		const std::string dataString = dataStringStream.str();
+
+		const char **data = (const char **)malloc( sizeof( char * ) * 2 );
+		data[0] = proc->fileName().c_str();
+		data[1] = dataString.c_str();
+		RiProcedural( data, riBound, RiProcDynamicLoad, RiProcFree );
+	}
 }
 
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )

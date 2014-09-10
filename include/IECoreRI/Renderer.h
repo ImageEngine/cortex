@@ -256,6 +256,16 @@ class Renderer : public IECore::Renderer
 
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 
+		/// ExternalProcedurals are treated as DelayedReadArchives if their filename ends with ".rib"
+		/// and as DynamicLoad procedurals otherwise. Because RenderMan has very poor support for passing
+		/// parameters to DynamicLoad procedurals (you can only pass a single string), the arbitrary parameters
+		/// of the ExternalProcedural are treated as follows :
+		///
+		/// - If an "ri:data" StringData parameter exists, it is passed verbatim to the procedural. This
+		/// allows procedurals which require data in a specific format to be supported.
+		/// - All other parameters are serialised in a command line "--name value" style and concatenated.
+		/// This allows the convenience of arbitrary typed parameters provided that the procedural itself
+		/// uses a command line style parser.
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 
 		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );

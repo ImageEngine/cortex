@@ -255,6 +255,9 @@ class RendererImplementation : public IECore::Renderer
 		// This constructor is used to create a child renderer in procSubdivide()
 		RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options );
 		
+		void standardProcedural( Procedural *proc );
+		void externalProcedural( ExternalProcedural *proc );
+
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 
