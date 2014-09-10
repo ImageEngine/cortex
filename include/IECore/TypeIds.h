@@ -438,7 +438,8 @@ enum TypeId
 	TransferSmoothSkinningWeightsOpTypeId = 390,
 	EXRDeepImageReaderTypeId = 391,
 	EXRDeepImageWriterTypeId = 392,
-	
+	ExternalProceduralTypeId = 393,
+
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

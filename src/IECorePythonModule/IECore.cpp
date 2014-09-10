@@ -307,6 +307,7 @@
 #include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/EXRDeepImageReaderBinding.h"
 #include "IECorePython/EXRDeepImageWriterBinding.h"
+#include "IECorePython/ExternalProceduralBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -614,7 +615,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindStandardRadialLensModel();
 	bindLensDistortOp();
 	bindObjectPool();
-	
+	bindExternalProcedural();
+
 #ifdef IECORE_WITH_DEEPEXR
 
 	bindEXRDeepImageReader();
