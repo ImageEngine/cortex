@@ -55,3 +55,43 @@ Renderer::Procedural::Procedural()
 Renderer::Procedural::~Procedural()
 {
 }
+
+Renderer::ExternalProcedural::ExternalProcedural( const std::string &fileName, const Imath::Box3f &bound, const CompoundDataMap &parameters )
+	:	m_fileName( fileName ), m_bound( bound ), m_parameters( parameters )
+{
+}
+
+Renderer::ExternalProcedural::~ExternalProcedural()
+{
+}
+
+const std::string &Renderer::ExternalProcedural::fileName() const
+{
+	return m_fileName;
+}
+
+const CompoundDataMap &Renderer::ExternalProcedural::parameters() const
+{
+	return m_parameters;
+}
+
+Imath::Box3f Renderer::ExternalProcedural::bound() const
+{
+	return m_bound;
+}
+
+void Renderer::ExternalProcedural::render( Renderer *renderer ) const
+{
+}
+
+MurmurHash Renderer::ExternalProcedural::hash() const
+{
+	MurmurHash h;
+	h.append( m_fileName );
+	for( CompoundDataMap::const_iterator it = m_parameters.begin(), eIt = m_parameters.end(); it != eIt; ++it )
+	{
+		h.append( it->first );
+		it->second->hash( h );
+	}
+	return h;
+}

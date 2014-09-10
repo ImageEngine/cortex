@@ -336,6 +336,13 @@ static void editBegin( Renderer &r, const std::string &name, const dict &paramet
 	r.editBegin( name, p );
 }
 
+static Renderer::ExternalProceduralPtr externalProceduralConstructor( const char *fileName, const Imath::Box3f &bound, const dict &parameters )
+{
+	CompoundDataMap p;
+	fillCompoundDataMap( p, parameters );
+	return new Renderer::ExternalProcedural( fileName, bound, p );
+}
+
 void bindRenderer()
 {
 	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
@@ -397,6 +404,10 @@ void bindRenderer()
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
 		.def( "hash", &Renderer::Procedural::hash )
+	;
+
+	RefCountedClass<Renderer::ExternalProcedural, Renderer::Procedural>( "ExternalProcedural" )
+		.def( "__init__", make_constructor( externalProceduralConstructor ) )
 	;
 
 }
