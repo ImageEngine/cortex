@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Renderer.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
+#ifndef IECORE_EXTERNALPROCEDURAL_H
+#define IECORE_EXTERNALPROCEDURAL_H
 
-using namespace IECore;
+#include "IECore/VisibleRenderable.h"
 
-IE_CORE_DEFINERUNTIMETYPED( Renderer );
-
-Renderer::Renderer()
+namespace IECore
 {
-}
 
-Renderer::~Renderer()
+/// \ingroup renderingGroup
+/// \ingroup coreGroup
+class ExternalProcedural : public VisibleRenderable
 {
-}
 
-Renderer::Procedural::Procedural()
-{
-}
+	public :
 
-Renderer::Procedural::~Procedural()
-{
-}
+		ExternalProcedural( const std::string &fileName = "", const Imath::Box3f &bound = Imath::Box3f(), const CompoundData *parameters = NULL );
+		virtual ~ExternalProcedural();
 
-Renderer::ExternalProcedural::ExternalProcedural( const std::string &fileName, const Imath::Box3f &bound, const CompoundDataMap &parameters )
-	:	m_fileName( fileName ), m_bound( bound ), m_parameters( parameters )
-{
-}
+		IE_CORE_DECLAREOBJECT( ExternalProcedural, VisibleRenderable );
 
-Renderer::ExternalProcedural::~ExternalProcedural()
-{
-}
+		void setFileName( const std::string &fileName );
+		const std::string &getFileName() const;
 
-const std::string &Renderer::ExternalProcedural::fileName() const
-{
-	return m_fileName;
-}
+		void setBound( const Imath::Box3f &bound );
+		const Imath::Box3f &getBound() const;
 
-const CompoundDataMap &Renderer::ExternalProcedural::parameters() const
-{
-	return m_parameters;
-}
+		CompoundData *parameters();
+		const CompoundData *parameters() const;
 
-Imath::Box3f Renderer::ExternalProcedural::bound() const
-{
-	return m_bound;
-}
+		virtual void render( Renderer *renderer ) const;
+		virtual Imath::Box3f bound() const;
 
-void Renderer::ExternalProcedural::render( Renderer *renderer ) const
-{
-}
+	private :
 
-MurmurHash Renderer::ExternalProcedural::hash() const
-{
-	MurmurHash h;
-	h.append( m_fileName );
-	for( CompoundDataMap::const_iterator it = m_parameters.begin(), eIt = m_parameters.end(); it != eIt; ++it )
-	{
-		h.append( it->first );
-		it->second->hash( h );
-	}
-	return h;
-}
+		std::string m_fileName;
+		Imath::Box3f m_bound;
+		CompoundDataPtr m_parameters;
+
+};
+
+IE_CORE_DECLAREPTR( ExternalProcedural );
+
+} // namespace IECore
+
+#endif // IECORE_EXTERNALPROCEDURAL_H

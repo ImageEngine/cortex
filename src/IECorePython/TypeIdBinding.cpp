@@ -469,6 +469,7 @@ void bindTypeId()
 		.value( "TransferSmoothSkinningWeightsOp", TransferSmoothSkinningWeightsOpTypeId )
 		.value( "EXRDeepImageReader", EXRDeepImageReaderTypeId )
 		.value( "EXRDeepImageWriter", EXRDeepImageWriterTypeId )
+		.value( "ExternalProcedural", ExternalProceduralTypeId )
 	;
 	
 	converter::registry::push_back(

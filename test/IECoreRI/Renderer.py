@@ -616,6 +616,58 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertTrue( "FrameBegin 10" in rib )
 		self.assertTrue( "FrameEnd" in rib )
 	
+	def testDynamicLoadProcedural( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		with WorldBlock( r ) :
+
+			r.procedural(
+				r.ExternalProcedural(
+					"test.so",
+					Box3f(
+						V3f( 1, 2, 3 ),
+						V3f( 4, 5, 6 )
+					),
+					{
+						"ri:data" : "blah blah blah",
+						"colorParm" : Color3f( 1, 2, 3 ),
+						"stringParm" : "test",
+						"floatParm" : 1.5,
+						"intParm" : 2,
+					}
+				)
+			)
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		self.assertTrue( "Procedural \"DynamicLoad\"" in rib )
+		self.assertTrue( "test.so" in rib )
+		self.assertTrue( "\"blah blah blah" in rib )
+		self.assertTrue( "--colorParm 1 2 3" in rib )
+		self.assertTrue( "--stringParm test" in rib )
+		self.assertTrue( "--floatParm 1.5" in rib )
+		self.assertTrue( "--intParm 2" in rib )
+		self.assertTrue( "[ 1 4 2 5 3 6 ]" in rib )
+
+	def testDelayedReadArchive( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		with WorldBlock( r ) :
+
+			r.procedural(
+				r.ExternalProcedural(
+					"testArchive.rib",
+					Box3f(
+						V3f( 1, 2, 3 ),
+						V3f( 4, 5, 6 )
+					),
+					{}
+				)
+			)
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		self.assertTrue( "Procedural \"DelayedReadArchive\" [ \"testArchive.rib\" ]" in rib )
+		self.assertTrue( "[ 1 4 2 5 3 6 ]" in rib )
+
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )

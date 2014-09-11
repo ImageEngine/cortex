@@ -259,6 +259,7 @@ from StandardRadialLensModelTest import StandardRadialLensModelTest
 from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
+from ExternalProceduralTest import ExternalProceduralTest
 
 if IECore.withDeepEXR() :
 	from EXRDeepImageReaderTest import EXRDeepImageReaderTest

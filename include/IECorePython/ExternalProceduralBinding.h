@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Renderer.h"
-#include "IECore/CompoundObject.h"
-#include "IECore/CompoundParameter.h"
+#ifndef IECOREPYTHON_EXTERNALPROCEDURALBINDING_H
+#define IECOREPYTHON_EXTERNALPROCEDURALBINDING_H
 
-using namespace IECore;
-
-IE_CORE_DEFINERUNTIMETYPED( Renderer );
-
-Renderer::Renderer()
+namespace IECorePython
 {
-}
 
-Renderer::~Renderer()
-{
-}
+void bindExternalProcedural();
 
-Renderer::Procedural::Procedural()
-{
-}
+} // namespace IECorePython
 
-Renderer::Procedural::~Procedural()
-{
-}
-
-Renderer::ExternalProcedural::ExternalProcedural( const std::string &fileName, const Imath::Box3f &bound, const CompoundDataMap &parameters )
-	:	m_fileName( fileName ), m_bound( bound ), m_parameters( parameters )
-{
-}
-
-Renderer::ExternalProcedural::~ExternalProcedural()
-{
-}
-
-const std::string &Renderer::ExternalProcedural::fileName() const
-{
-	return m_fileName;
-}
-
-const CompoundDataMap &Renderer::ExternalProcedural::parameters() const
-{
-	return m_parameters;
-}
-
-Imath::Box3f Renderer::ExternalProcedural::bound() const
-{
-	return m_bound;
-}
-
-void Renderer::ExternalProcedural::render( Renderer *renderer ) const
-{
-}
-
-MurmurHash Renderer::ExternalProcedural::hash() const
-{
-	MurmurHash h;
-	h.append( m_fileName );
-	for( CompoundDataMap::const_iterator it = m_parameters.begin(), eIt = m_parameters.end(); it != eIt; ++it )
-	{
-		h.append( it->first );
-		it->second->hash( h );
-	}
-	return h;
-}
+#endif // IECOREPYTHON_EXTERNALPROCEDURALBINDING_H

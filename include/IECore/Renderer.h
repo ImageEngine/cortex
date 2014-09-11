@@ -356,6 +356,33 @@ class Renderer : public RunTimeTyped
 		};
 		IE_CORE_DECLAREPTR( Procedural );
 
+		/// A placeholder for specifying a procedural which the Renderer
+		/// must load from a file on disk.
+		class ExternalProcedural : public Procedural
+		{
+			public :
+
+				IE_CORE_DECLAREMEMBERPTR( ExternalProcedural )
+
+				ExternalProcedural( const std::string &fileName, const Imath::Box3f &bound, const CompoundDataMap &parameters );
+				virtual ~ExternalProcedural();
+
+				const std::string &fileName() const;
+				const CompoundDataMap &parameters() const;
+
+				virtual Imath::Box3f bound() const;
+				virtual void render( Renderer *renderer ) const;
+				virtual MurmurHash hash() const;
+
+			private :
+
+				std::string m_fileName;
+				Imath::Box3f m_bound;
+				CompoundDataMap m_parameters;
+
+		};
+		IE_CORE_DECLAREPTR( ExternalProcedural );
+
 		/// Renders a piece of procedural geometry.
 		virtual void procedural( ProceduralPtr proc ) = 0;
 
