@@ -1781,7 +1781,19 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 	}
 	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc.get() ) )
 	{
-		m_data->implementation->addProcedural( proc, this );
+		if( ExternalProcedural *externalProcedural = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+		{
+			attributeBegin();
+				setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
+				setAttribute( "gl:primitive:solid", new BoolData( false ) );
+				setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
+				IECore::CurvesPrimitive::createBox( externalProcedural->bound() )->render( this );
+			attributeEnd();
+		}
+		else
+		{
+			m_data->implementation->addProcedural( proc, this );
+		}
 	}
 }
 
