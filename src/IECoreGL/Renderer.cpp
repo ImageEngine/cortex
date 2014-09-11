@@ -33,6 +33,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <stack>
+
+#include "tbb/mutex.h"
+
+#include "OpenEXR/ImathBoxAlgo.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/BoxOps.h"
+#include "IECore/Camera.h"
+#include "IECore/Transform.h"
+#include "IECore/MatrixAlgo.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/MeshNormalsOp.h"
+#include "IECore/SplineData.h"
+#include "IECore/SplineToImage.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/PointsPrimitive.h"
+
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/PointsPrimitive.h"
@@ -63,25 +82,6 @@
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/CachedConverter.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/BoxOps.h"
-#include "IECore/Camera.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixAlgo.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/MeshNormalsOp.h"
-#include "IECore/SplineData.h"
-#include "IECore/SplineToImage.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-
-#include "OpenEXR/ImathBoxAlgo.h"
-
-#include "tbb/mutex.h"
-
-#include <stack>
 
 using namespace IECore;
 using namespace IECoreGL;
