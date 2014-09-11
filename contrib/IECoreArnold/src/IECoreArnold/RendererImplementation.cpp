@@ -638,22 +638,33 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		return;
 	}
 	
-	// we have to transform the bound, as we're not applying the current transform to the
-	// procedural node, but instead applying absolute transforms to the shapes the procedural
-	// generates.
-	bound = transform( bound, m_transformStack.top() );
-
 	AtNode *procedural = AiNode( "procedural" );
+
+	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+	{
+		AiNodeSetStr( procedural, "dso", externalProc->fileName().c_str() );
+		ToArnoldConverter::setParameters( procedural, externalProc->parameters() );
+		applyTransformToNode( procedural );
+	}
+	else
+	{
+
+		// we have to transform the bound, as we're not applying the current transform to the
+		// procedural node, but instead applying absolute transforms to the shapes the procedural
+		// generates.
+		bound = transform( bound, m_transformStack.top() );
+	
+		AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
+	
+		ProceduralData *data = new ProceduralData;
+		data->procedural = proc;
+		data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
+		
+		AiNodeSetPtr( procedural, "userptr", data );
+	}
+
 	AiNodeSetPnt( procedural, "min", bound.min.x, bound.min.y, bound.min.z );
 	AiNodeSetPnt( procedural, "max", bound.max.x, bound.max.y, bound.max.z );
-	
-	AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
-	
-	ProceduralData *data = new ProceduralData;
-	data->procedural = proc;
-	data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
-		
-	AiNodeSetPtr( procedural, "userptr", data );
 	
 	// we call addNode() rather than addShape() as we don't want to apply transforms and
 	// shaders and attributes to procedurals. if we do, they override the things we set
