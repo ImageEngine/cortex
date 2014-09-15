@@ -1,3 +1,20 @@
+# 9.0.0-a6
+
+#### IECore
+
+- Multithreaded PointSmoothSkinningOp
+- Added ExternalProcedural object type
+- Added HasBaseType type trait
+- Added boost::hash compatibility for MurmurHash
+
+#### IECoreRI
+
+- Added support for DynamicLoad and DelayedReadArchive procedurals
+
+#### IECoreArnold
+
+- Added support for delayed load DSO and .ass procedurals
+
 # 9.0.0-a5
 
 #### IECore
