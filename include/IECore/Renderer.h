@@ -139,6 +139,9 @@ class Renderer : public RunTimeTyped
 		///	\li <b>"resolution"	V2iData</b><br>
 		/// The resolution of any output images. Should default to 640x480 if not specified.
 		///
+		/// \li <b>"pixelAspectRatio" FloatData</b><br>
+		/// The xSize/ySize aspect ratio for a pixel.
+		///
 		/// \li <b>"screenWindow" Box2fData</b><br>
 		/// The region in screen space which is mapped to the output resolution. If unspecified
 		/// then this should default to -1,1 in the smallest image dimension and the other
