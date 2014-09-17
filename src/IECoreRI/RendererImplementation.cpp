@@ -425,10 +425,14 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
 	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
 
-	// then resolution
+	// then format
 	it = camera->parameters().find( "resolution" );
 	ConstV2iDataPtr d = runTimeCast<const V2iData>( it->second );
-	RiFormat( d->readable().x, d->readable().y, 1 );
+	RiFormat(
+		d->readable().x,
+		d->readable().y,
+		camera->parametersData()->member<FloatData>( "pixelAspectRatio" )->readable()
+	);
 
 	// then screen window
 	it = camera->parameters().find( "screenWindow" );

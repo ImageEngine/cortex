@@ -240,6 +240,24 @@ class CameraTest( IECoreRI.TestCase ) :
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
 		
 		self.assert_( "MotionBegin [ 0 1 ]" in l )
-		
+	
+	def testPixelAspectRatio( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
+
+		r.camera( "main", {
+			"resolution" : IECore.V2i( 100, 200 ),
+			"pixelAspectRatio" : 2.0,
+		} )
+
+		with IECore.WorldBlock( r ) :
+			pass
+
+		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
+		l = " ".join( l.split() )
+
+		self.assertTrue( "Format 100 200 2" in l )
+		self.assertTrue( "ScreenWindow -1 1 -1 1" in l )
+	
 if __name__ == "__main__":
     unittest.main()
