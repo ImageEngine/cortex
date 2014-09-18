@@ -705,9 +705,7 @@ class RendererTest( unittest.TestCase ) :
 				)
 			)
 
-
 		ass = "".join( file( self.__assFileName ).readlines() )
-		print ass
 
 		self.assertTrue( "procedural" in ass )
 		self.assertTrue( "min 1 2 3" in ass )
@@ -721,6 +719,18 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( "floatParm 1.5" in ass )
 		self.assertTrue( "intParm 2" in ass )
 		self.assertTrue( "colorParm 1 2 3" in ass )
+
+	def testPixelAspectRatio( self ) :
+
+		r = IECoreArnold.Renderer( self.__assFileName )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "pixelAspectRatio" : 2.0 } )
+
+		with IECore.WorldBlock( r ) :
+			pass
+
+		ass = "".join( file( self.__assFileName ).readlines() )
+		self.assertTrue( "aspect_ratio 0.5" in ass )
 
 	def tearDown( self ) :
 			

@@ -221,6 +221,18 @@ void Camera::addStandardParameters()
 		parameters()["resolution"] = new V2iData( resolution );
 	}
 
+	// pixel aspect ratio
+	float pixelAspectRatio = 0.0f;
+	if( FloatData *pixelAspectRatioData = parametersData()->member<FloatData>( "pixelAspectRatio" ) )
+	{
+		pixelAspectRatio = pixelAspectRatioData->readable();
+	}
+	if( pixelAspectRatio == 0.0f )
+	{
+		pixelAspectRatio = 1.0f;
+		parameters()["pixelAspectRatio"] = new FloatData( pixelAspectRatio );
+	}
+
 	// screen window
 	Box2f screenWindow;
 	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
@@ -230,7 +242,7 @@ void Camera::addStandardParameters()
 	}
 	if( screenWindow.isEmpty() )
 	{
-		float aspectRatio = (float)resolution.x/(float)resolution.y;
+		float aspectRatio = ((float)resolution.x * pixelAspectRatio)/(float)resolution.y;
 		if( aspectRatio < 1.0f )
 		{
 			screenWindow.min.x = -1;
