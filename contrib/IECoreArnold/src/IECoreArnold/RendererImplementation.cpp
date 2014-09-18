@@ -208,6 +208,8 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std:
 void IECoreArnold::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
+	cortexCamera->addStandardParameters();
+
 	ToArnoldCameraConverterPtr converter = new ToArnoldCameraConverter( cortexCamera );
 	AtNode *arnoldCamera = converter->convert();
 	AtNode *options = AiUniverseGetOptions();
@@ -215,9 +217,12 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	
 	applyTransformToNode( arnoldCamera );
 	
-	ConstV2iDataPtr resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
-	AiNodeSetInt( options, "xres", resolution ? resolution->readable().x : 640 );
-	AiNodeSetInt( options, "yres", resolution ? resolution->readable().y : 480 );
+	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
+	AiNodeSetInt( options, "xres", resolution->readable().x );
+	AiNodeSetInt( options, "yres", resolution->readable().y );
+
+	const FloatData *pixelAspectRatio = cortexCamera->parametersData()->member<FloatData>( "pixelAspectRatio" );
+	AiNodeSetFlt( options, "aspect_ratio", 1.0f / pixelAspectRatio->readable() ); // arnold is y/x, we're x/y
 }
 
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )

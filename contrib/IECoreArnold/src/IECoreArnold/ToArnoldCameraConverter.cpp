@@ -94,7 +94,8 @@ AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	// set screen window
 	const Imath::Box2f &screenWindow = camera->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
 	const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
-	float aspect = (float)resolution.x / (float)resolution.y;
+	const float pixelAspectRatio = camera->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
+	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
 	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
 	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
 	
