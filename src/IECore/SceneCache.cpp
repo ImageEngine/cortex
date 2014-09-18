@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include"boost/tuple/tuple.hpp"
+#include "boost/tuple/tuple.hpp"
 #include "tbb/concurrent_hash_map.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -710,7 +710,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			if ( !ignoreSceneHash )
 			{
 				// Because the hash computed so far is not based on the contents of the file, we have to add to the hash something that identifies the file and the location in the hierarchy.
-				sceneHash( this, h );
+				sceneHash( h );
 			}
 		}
 
@@ -922,11 +922,24 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return &(it->second);
 		}
 
-		static void sceneHash( const ReaderImplementation *scene, MurmurHash &h )
+		void sceneHash( MurmurHash &h ) const
 		{
-			// \todo Currently there's a chance of hash collision if the file is closed and others opened, if the shared data object happens to be allocated in the same address. Replace it by a more reliable mechanism for uniquely identifying the file. 
-			h.append( (uint64_t)scene->m_sharedData );
-			const ReaderImplementation *currScene = scene;
+			if( FileIndexedIO *fileIndexedIO = runTimeCast<FileIndexedIO>( m_indexedIO.get() ) )
+			{
+				h.append( fileIndexedIO->fileName() );
+			}
+			else
+			{
+				/// \todo This isn't ideal as it isn't stable across different processes
+				/// and might even produce non-unique hashes if this SceneCache is deleted
+				/// and a new one is allocated with m_sharedData at the same memory address.
+				/// If MemoryIndexedIO provided access to a cheap hash of its contents we
+				/// could use that here. Alternatively we could compute the hashes of the data
+				/// when writing it, and just load them here.
+				h.append( (uint64_t)m_sharedData );
+			}
+
+			const ReaderImplementation *currScene = this;
 			while( currScene->m_parent )
 			{
 				h.append( currScene->name() );
@@ -940,7 +953,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			const ReaderImplementation *reader = key.first;
 			size_t sample = key.second;
 			MurmurHash h;
-			sceneHash( reader, h );
+			reader->sceneHash( h );
 			h.append( (uint64_t)sample );
 			return h;
 		}
@@ -976,7 +989,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			size_t sample = get<2>( key );
 
 			MurmurHash h;
-			sceneHash( reader, h );
+			reader->sceneHash( h );
 			h.append(name.value());
 			h.append( (uint64_t)sample );
 			return h;
