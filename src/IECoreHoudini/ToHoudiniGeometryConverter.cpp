@@ -338,7 +338,13 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 			{
  				try
 				{
-					converter->convert( name, geo, points );
+					GA_RWAttributeRef attrRef = converter->convert( name, geo, points );
+					
+					// mark rest as non-transforming so it doesn't get manipulated once inside Houdini
+					if ( name == "rest" || name == "Pref" )
+					{
+						attrRef.getAttribute()->setNonTransforming( true );
+					}
 				}
 				catch ( std::exception &e )
 				{
