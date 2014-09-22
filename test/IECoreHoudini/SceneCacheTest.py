@@ -532,8 +532,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# P is transformed
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		# other Point data is as well
-		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 6, 0, 0 ) )
 		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "otherP" ), ( 6, 0, 0 ) )
+		# rest is not transformed
+		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
 		# other data is not
 		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "Cd" ), ( 0, 0, 1 ) )
 	
@@ -664,8 +665,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		# ensure the rest does not transform along with P by making sure it matches the static P
+		original = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		for point in node.geometry().points() :
-			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+			rest = point.attribValue( "rest" )
+			self.assertNotEqual( point.attribValue( "P" ), rest )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
 		
 		# copying multiple prim vars
 		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
@@ -674,8 +679,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		# ensure the rest does not transform along with P by making sure it matches the static P
 		for point in node.geometry().points() :
-			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+			rest = point.attribValue( "rest" )
+			self.assertNotEqual( point.attribValue( "P" ), rest )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
 		for prim in node.geometry().prims() :
 			self.assertEqual( prim.attribValue( "Cd" ), prim.attribValue( "Cspecial" ) )
 		
@@ -710,7 +718,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for key in result.keys() :
 			self.assertTrue( isinstance( result[key], IECore.MeshPrimitive ) )
 			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "P", "Pref" ] )
-			self.assertEqual( result[key]["P"], result[key]["Pref"] )
+			self.assertNotEqual( result[key]["P"], result[key]["Pref"] )
+			self.assertEqual( original["P"], result[key]["Pref"] )
 	
 	def testExpandGeo( self ) :
 		
@@ -1820,6 +1829,39 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
 			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
 			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
+	
+	def testSopXformRestDoesNotTransform( self ) :
+		
+		self.writeAnimSCC()
+		
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		source = self.sop()
+		source.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		source.parm( "attributeCopy" ).set( "P:Pref" )
+		xform = source.createOutputNode( "ieSceneCacheTransform" )
+		xform.parm( "file" ).set( TestSceneCache.__testFile )
+		
+		for time in times :
+			hou.setTime( time - spf )
+			prims = xform.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			# positions are double transformed (once by the source sop and once by the xform)
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 2, 2*time, 0 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 4*time, 0 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 12, 6*time, 0 ) )
+			# rest doesn't transform from either source or xform
+			self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
 	
 	def testOBJOutputParms( self ) :
 		
