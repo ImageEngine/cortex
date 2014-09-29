@@ -1996,6 +1996,14 @@ struct Serialiser
 
 };
 
+void dynamicLoadFree( void *voidData )
+{
+	char **data = (char **)voidData;
+	free( data[0] );
+	free( data[1] );
+	free( data );
+};
+
 } // namespace
 
 void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *proc )
@@ -2039,9 +2047,9 @@ void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *p
 		const std::string dataString = dataStringStream.str();
 
 		const char **data = (const char **)malloc( sizeof( char * ) * 2 );
-		data[0] = proc->fileName().c_str();
-		data[1] = dataString.c_str();
-		RiProcedural( data, riBound, RiProcDynamicLoad, RiProcFree );
+		data[0] = strdup( proc->fileName().c_str() );
+		data[1] = strdup( dataString.c_str() );
+		RiProcedural( data, riBound, RiProcDynamicLoad, dynamicLoadFree );
 	}
 }
 
