@@ -440,7 +440,9 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 						modified = primitive->copy();
 					}
 					
-					modified->variables[values[1]] = modified->variables[values[0]];
+					// we need to copy the data in case either copy will be modified later on
+					const PrimitiveVariable &orig = modified->variables[values[0]];
+					modified->variables[values[1]] = PrimitiveVariable( orig.interpolation, orig.data->copy() );
 				}
 			}
 			
@@ -470,7 +472,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new M44dData( transform ) );
 		
-		// add all Point and Normal prim vars to the transformation list
+		// add all Point and Normal prim vars to the transformation list, except for rest/Pref
 		const PrimitiveVariableMap &variables = primitive->variables;
 		std::vector<std::string> &primVars = transformer->primVarsParameter()->getTypedValue();
 		primVars.clear();
@@ -478,6 +480,12 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 		{
 			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data ) )
 			{
+				// we don't want to alter rest/Pref because Houdini excepts these to be non-transforming prim vars
+				if ( it->first == "rest" || it->first == "Pref" )
+				{
+					continue;
+				}
+				
 				primVars.push_back( it->first );
 				
 				// add the transforming prim vars to the animated list
