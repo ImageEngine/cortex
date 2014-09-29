@@ -1,6 +1,13 @@
+# 8.5.3
+
 #### IECore
 
 - Bug fix in StreamIndexedIO that was causing sporadic crashes when loading SceneCaches during procedural expansion.
+
+#### IECoreHoudini
+
+- ToHoudiniGeometryConverter marks Pref/rest as non-transforming
+- Preventing SceneCache Source from transforming Pref/rest
 
 # 8.5.2
 
