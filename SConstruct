@@ -748,7 +748,6 @@ o.Add(
 		( "IECore.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
 		( "IECore.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
 		( "IECore.MeshMergeOp", "common/primitive/mesh/merge" ),
-		( "IECore.MeshPrimitiveImplicitSurfaceOp", "common/primitive/mesh/implicitSurface" ),
 		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
 		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
