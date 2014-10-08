@@ -43,15 +43,7 @@ namespace IECore
 template<class T>
 typename T::Ptr Object::CopyContext::copy( const T *toCopy )
 {
-	std::map<const Object *, Object *>::const_iterator it = m_copies.find( toCopy );
-	if( it!=m_copies.end() )
-	{
-		return static_cast<T *>( it->second );
-	}
-	ObjectPtr copy = create( toCopy->typeId() );
-	copy->copyFrom( toCopy, this );
-	m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
-	return boost::static_pointer_cast<T>( copy );
+	return boost::static_pointer_cast<T>( copyInternal( toCopy ) );	
 }
 
 template<class T>
