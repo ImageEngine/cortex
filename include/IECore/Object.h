@@ -229,10 +229,12 @@ class IECORE_API Object : public RunTimeTyped
 		class IECORE_API CopyContext
 		{
 			public :
+				CopyContext();
 				/// Returns a copy of the specified object.
 				template<class T>
 				typename T::Ptr copy( const T *toCopy );
 			private :
+				ObjectPtr copyInternal( const Object *toCopy );
 				std::map<const Object *, Object *> m_copies;
 		};
 
