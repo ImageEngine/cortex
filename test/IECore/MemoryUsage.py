@@ -53,6 +53,19 @@ class TestMemoryUsage( unittest.TestCase ) :
 		c["b"] = d
 		self.assert_( c.memoryUsage() < m + dm )
 
+	def testMultipleReferencesToStringData( self ) :
+
+		c = CompoundObject()
+		d = StringData( " " * 10000 )
+
+		c["a"] = d
+
+		m = c.memoryUsage()
+		dm = d.memoryUsage()
+
+		c["b"] = d
+		self.assert_( c.memoryUsage() < m + dm )
+
 	def testCopiedDataReferences( self ) :
 
 		"""Copied data shouldn't use additional memory unless the copies have
