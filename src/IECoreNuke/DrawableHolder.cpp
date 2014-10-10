@@ -165,7 +165,7 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 				IECore::WorldBlock worldBlock( renderer );
 				{
 					IECorePython::ScopedGILLock gilLock;
-					boost::python::object pythonDrawable( IECore::constPointerCast<IECore::RunTimeTyped>( drawable ) );
+					boost::python::object pythonDrawable( boost::const_pointer_cast<IECore::RunTimeTyped>( drawable ) );
 					pythonDrawable.attr( "draw" )( IECore::RendererPtr( renderer ) );
 				}
 			}

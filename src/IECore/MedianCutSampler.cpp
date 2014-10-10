@@ -109,42 +109,42 @@ MedianCutSampler::~MedianCutSampler()
 
 ImagePrimitiveParameter * MedianCutSampler::imageParameter()
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 const ImagePrimitiveParameter * MedianCutSampler::imageParameter() const
 {
-	return m_imageParameter;
+	return m_imageParameter.get();
 }
 
 StringParameter * MedianCutSampler::channelNameParameter()
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 const StringParameter * MedianCutSampler::channelNameParameter() const
 {
-	return m_channelNameParameter;
+	return m_channelNameParameter.get();
 }
 
 IntParameter * MedianCutSampler::subdivisionDepthParameter()
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 const IntParameter * MedianCutSampler::subdivisionDepthParameter() const
 {
-	return m_subdivisionDepthParameter;
+	return m_subdivisionDepthParameter.get();
 }
 
 IntParameter * MedianCutSampler::projectionParameter()
 {
-	return m_projectionParameter;
+	return m_projectionParameter.get();
 }
 
 const IntParameter * MedianCutSampler::projectionParameter() const
 {
-	return m_projectionParameter;
+	return m_projectionParameter.get();
 }
 
 /// \todo This functionality and the code in SummedAreaOp should be

@@ -121,7 +121,7 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	
 	// set the geometric interpretation if it exists
 	SetInterpretation func = { attr->getTypeInfo() };
-	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data, func );
+	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data.get(), func );
 	
 	return data;
 }
@@ -140,7 +140,7 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 
 	// set the geometric interpretation if it exists
 	SetInterpretation func = { attr->getTypeInfo() };
-	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data, func );
+	IECore::despatchTypedData< SetInterpretation, IECore::TypeTraits::IsGeometricTypedData, IECore::DespatchTypedDataIgnoreError >( data.get(), func );
 	
 	return data;
 }

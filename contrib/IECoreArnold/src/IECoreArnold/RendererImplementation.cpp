@@ -163,14 +163,14 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), name.c_str() + 3 );
 		if( parameter )
 		{
-			ToArnoldConverter::setParameter( options, name.c_str() + 3, value );
+			ToArnoldConverter::setParameter( options, name.c_str() + 3, value.get() );
 			return;
 		}
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		ToArnoldConverter::setParameter( options, name.c_str(), value );
+		ToArnoldConverter::setParameter( options, name.c_str(), value.get() );
 		return;
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -208,6 +208,8 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std:
 void IECoreArnold::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
+	cortexCamera->addStandardParameters();
+
 	ToArnoldCameraConverterPtr converter = new ToArnoldCameraConverter( cortexCamera );
 	AtNode *arnoldCamera = converter->convert();
 	AtNode *options = AiUniverseGetOptions();
@@ -215,9 +217,12 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	
 	applyTransformToNode( arnoldCamera );
 	
-	ConstV2iDataPtr resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
-	AiNodeSetInt( options, "xres", resolution ? resolution->readable().x : 640 );
-	AiNodeSetInt( options, "yres", resolution ? resolution->readable().y : 480 );
+	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
+	AiNodeSetInt( options, "xres", resolution->readable().x );
+	AiNodeSetInt( options, "yres", resolution->readable().y );
+
+	const FloatData *pixelAspectRatio = cortexCamera->parametersData()->member<FloatData>( "pixelAspectRatio" );
+	AiNodeSetFlt( options, "aspect_ratio", 1.0f / pixelAspectRatio->readable() ); // arnold is y/x, we're x/y
 }
 
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
@@ -441,7 +446,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 						continue;
 					}
 				}
-				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second );
+				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second.get() );
 			}
 			addNode( s );
 		}
@@ -487,7 +492,7 @@ void IECoreArnold::RendererImplementation::light( const std::string &name, const
 	}
 	for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
 	{
-		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second );
+		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second.get() );
 	}
 	applyTransformToNode( l );
 	addNode( l );
@@ -605,7 +610,7 @@ int IECoreArnold::RendererImplementation::procLoader( AtProcVtable *vTable )
 int IECoreArnold::RendererImplementation::procInit( AtNode *node, void **userPtr )
 {
 	ProceduralData *data = (ProceduralData *)( AiNodeGetPtr( node, "userptr" ) );
-	data->procedural->render( data->renderer );
+	data->procedural->render( data->renderer.get() );
 	data->procedural = 0;
 	*userPtr = data;
 	return 1;
@@ -638,22 +643,33 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		return;
 	}
 	
-	// we have to transform the bound, as we're not applying the current transform to the
-	// procedural node, but instead applying absolute transforms to the shapes the procedural
-	// generates.
-	bound = transform( bound, m_transformStack.top() );
-
 	AtNode *procedural = AiNode( "procedural" );
+
+	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+	{
+		AiNodeSetStr( procedural, "dso", externalProc->fileName().c_str() );
+		ToArnoldConverter::setParameters( procedural, externalProc->parameters() );
+		applyTransformToNode( procedural );
+	}
+	else
+	{
+
+		// we have to transform the bound, as we're not applying the current transform to the
+		// procedural node, but instead applying absolute transforms to the shapes the procedural
+		// generates.
+		bound = transform( bound, m_transformStack.top() );
+	
+		AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
+	
+		ProceduralData *data = new ProceduralData;
+		data->procedural = proc;
+		data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
+		
+		AiNodeSetPtr( procedural, "userptr", data );
+	}
+
 	AiNodeSetPnt( procedural, "min", bound.min.x, bound.min.y, bound.min.z );
 	AiNodeSetPnt( procedural, "max", bound.max.x, bound.max.y, bound.max.z );
-	
-	AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
-	
-	ProceduralData *data = new ProceduralData;
-	data->procedural = proc;
-	data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
-		
-	AiNodeSetPtr( procedural, "userptr", data );
 	
 	// we call addNode() rather than addShape() as we don't want to apply transforms and
 	// shaders and attributes to procedurals. if we do, they override the things we set
@@ -708,7 +724,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		{
 			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
 			{
-				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second );
+				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second.get() );
 			}
 		}
 	}

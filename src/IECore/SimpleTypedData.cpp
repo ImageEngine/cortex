@@ -145,7 +145,7 @@ template<>
 void StringData::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
-	accumulator.accumulate( &readable(), readable().capacity() );
+	accumulator.accumulate( readable().capacity() );
 }
 
 template<>

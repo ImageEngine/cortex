@@ -143,11 +143,11 @@ class InterpolatedCache::Implementation : public IECore::RefCounted
 				{
 					case Linear :
 						assert( numCaches==2 );
-						result = linearObjectInterpolation( r[0], r[1], x );
+						result = linearObjectInterpolation( r[0].get(), r[1].get(), x );
 						break;
 					case Cubic :
 						assert( numCaches==4 );
-						result = cubicObjectInterpolation( r[0], r[1], r[2], r[3], x );
+						result = cubicObjectInterpolation( r[0].get(), r[1].get(), r[2].get(), r[3].get(), x );
 						break;
 					default :
 						assert( false );
@@ -202,11 +202,11 @@ class InterpolatedCache::Implementation : public IECore::RefCounted
 				{
 					case Linear :
 						assert( numCaches==2 );
-						result = linearObjectInterpolation( r[0], r[1], x );
+						result = linearObjectInterpolation( r[0].get(), r[1].get(), x );
 						break;
 					case Cubic :
 						assert( numCaches==4 );
-						result = cubicObjectInterpolation( r[0], r[1], r[2], r[3], x );
+						result = cubicObjectInterpolation( r[0].get(), r[1].get(), r[2].get(), r[3].get(), x );
 						break;
 					default :
 						assert( false );

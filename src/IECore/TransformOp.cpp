@@ -73,26 +73,28 @@ const ObjectParameter * TransformOp::matrixParameter() const
 
 StringVectorParameter * TransformOp::primVarsParameter()
 {
-	return m_primVarsParameter;
+	return m_primVarsParameter.get();
 }
 
 const StringVectorParameter * TransformOp::primVarsParameter() const
 {
-	return m_primVarsParameter;
+	return m_primVarsParameter.get();
 }
 
 void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject * operands )
 {
 	const std::vector<std::string> &pv = m_primVarsParameter->getTypedValue();
+	std::set< Data* > visitedData;
 	for ( std::vector<std::string>::const_iterator it = pv.begin(); it != pv.end(); ++it )
 	{
 		PrimitiveVariableMap::iterator pIt = primitive->variables.find( *it );
-		if ( pIt == primitive->variables.end() || !pIt->second.data )
+		if ( pIt == primitive->variables.end() || !pIt->second.data || visitedData.find( pIt->second.data.get() ) != visitedData.end() )
 		{
 			continue;
 		}
 		
-		Data *data = pIt->second.data;
+		Data *data = pIt->second.data.get();
+		visitedData.insert( data );
 		
 		// fix for old files that don't store Interpretation properly
 		V3fVectorData *v3fData = runTimeCast<V3fVectorData>( data );

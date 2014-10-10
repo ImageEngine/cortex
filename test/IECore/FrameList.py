@@ -53,7 +53,7 @@ class TestFrameList( unittest.TestCase ) :
 		
 		f = FrameList.parse( "1-5r" )
 		self.assertEqual( f.asList(), [ 5, 4, 3, 2, 1 ] )
-		self.assertEqual( frameListFromList( [ 5, 4, 3, 2, 1 ] ), f ) # Known error with IECore::frameListFromList
+		self.assertEqual( frameListFromList( [ 5, 4, 3, 2, 1 ] ), f )
 	
 	## \todo: there should probably be a lot more tests in here...
 	

@@ -915,6 +915,61 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertAlmostEqual( vert.attribValue( t ), tData[i] )
 				i += 1
 	
+	def testCannotTransformRest( self ) :
+		
+		sop = self.emptySop()
+		mergeGeo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
+		mergeGeo.parm( "tx" ).set( 10 )
+		merge = mergeGeo.createNode( "object_merge" )
+		merge.parm( "xformtype" ).set( 1 )
+		merge.parm( "objpath1" ).set( sop.path() )
+		
+		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		IECore.TriangulateOp()( input=mesh, copyInput=False )
+		IECore.MeshNormalsOp()( input=mesh, copyInput=False )
+		mesh["Pref"] = mesh["P"]
+		prefData = mesh["Pref"].data
+		self.assertTrue( mesh.arePrimitiveVariablesValid() )
+		
+		converter = IECoreHoudini.ToHoudiniPolygonsConverter( mesh )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		geo2 = merge.geometry()
+		
+		i = 0
+		for point in geo.points() :
+			restValue = point.attribValue( "rest" )
+			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertTrue( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
+			i += 1
+		
+		i = 0
+		for point in geo2.points() :
+			restValue = point.attribValue( "rest" )
+			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertFalse( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
+			i += 1
+		
+		# Pref shouldn't transform either
+		converter["convertStandardAttributes"].setTypedValue( False )
+		self.assertTrue( converter.convert( sop ) )
+		geo = sop.geometry()
+		geo2 = merge.geometry()
+		
+		i = 0
+		for point in geo.points() :
+			restValue = point.attribValue( "Pref" )
+			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertTrue( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
+			i += 1
+		
+		i = 0
+		for point in geo2.points() :
+			restValue = point.attribValue( "Pref" )
+			self.assertAlmostEqual( IECore.V3f( restValue[0], restValue[1], restValue[2] ), prefData[i] )
+			self.assertFalse( point.position().isAlmostEqual( hou.Vector3(restValue) ) )
+			i += 1
+	
 	def testInterpolation( self ) :
 		
 		mesh = self.mesh()

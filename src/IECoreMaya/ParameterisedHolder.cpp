@@ -473,7 +473,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 	bool childParametersWereSet = false;
 	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
 	{
-		CompoundParameterPtr compoundParameter = staticPointerCast<CompoundParameter>( parameter );
+		CompoundParameterPtr compoundParameter = boost::static_pointer_cast<CompoundParameter>( parameter );
 		const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 		for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 		{
@@ -591,7 +591,7 @@ MPlug ParameterisedHolder<B>::parameterPlug( IECore::ConstParameterPtr parameter
 	// to update the parameter->name map if necessary
 	getParameterised();
 
-	ParameterToAttributeNameMap::const_iterator it = m_parametersToAttributeNames.find( constPointerCast<IECore::Parameter>( parameter ) );
+	ParameterToAttributeNameMap::const_iterator it = m_parametersToAttributeNames.find( boost::const_pointer_cast<IECore::Parameter>( parameter ) );
 	if( it==m_parametersToAttributeNames.end() )
 	{
 		return MPlug();

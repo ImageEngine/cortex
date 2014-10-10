@@ -139,6 +139,8 @@ class SXRendererImplementation : public IECore::Renderer
 			SxShader imagerShader;
 			SXExecutor::ShaderVector coshaders;
 			SXExecutor::ShaderVector lights;
+			
+			Imath::M44f transform;
 		};
 		typedef std::stack<State> StateStack;
 		

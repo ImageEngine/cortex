@@ -44,16 +44,17 @@ import IECore
 # a series of searchpaths. It is expected that these files will then make appropriate
 # calls to objects passed in via the specified contextDict.
 # \ingroup python
-def loadConfig( searchPaths, contextDict, raiseExceptions = False ) :
+def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory = "" ) :
+
+	if isinstance( searchPaths, basestring ) :
+		searchPaths = IECore.SearchPath( os.environ.get( searchPaths, "" ), ":" )
 
 	paths = searchPaths.paths
 	paths.reverse()
 	for path in paths :
-		# \todo Perhaps filter out filenames that begin with "~", also? This would
-		# exclude certain types of auto-generated backup files.
 		pyExtTest = re.compile( "^[^~].*\.py$" )
-		for dirPath, dirNames, fileNames in os.walk( path ) :
-			for fileName in filter( pyExtTest.search, fileNames ) :
+		for dirPath, dirNames, fileNames in os.walk( os.path.join( path, subdirectory ) ) :
+			for fileName in filter( pyExtTest.search, sorted( fileNames ) ) :
 				fullFileName = os.path.join( dirPath, fileName )
 				if raiseExceptions:
 					execfile( fullFileName, contextDict, contextDict )
@@ -64,4 +65,4 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False ) :
 						stacktrace = traceback.format_exc()
 						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
 
-loadConfig( IECore.SearchPath( os.environ.get( "IECORE_CONFIG_PATHS", "" ), ":" ), { "IECore" : IECore } )
+loadConfig( "IECORE_CONFIG_PATHS", { "IECore" : IECore } )

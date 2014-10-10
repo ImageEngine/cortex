@@ -71,7 +71,7 @@ void ParameterisedProcedural::save( SaveContext *context ) const
 {
 	VisibleRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_parameters->getValue(), container, g_parametersEntry );
+	context->save( m_parameters->getValue(), container.get(), g_parametersEntry );
 }
 
 void ParameterisedProcedural::load( LoadContextPtr context )
@@ -79,7 +79,7 @@ void ParameterisedProcedural::load( LoadContextPtr context )
 	VisibleRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-	m_parameters->setValue( context->load<Object>( container, g_parametersEntry ) );
+	m_parameters->setValue( context->load<Object>( container.get(), g_parametersEntry ) );
 }
 
 bool ParameterisedProcedural::isEqualTo( const Object *other ) const
@@ -119,7 +119,7 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 			return parameterisedProcedural->doBound( validatedArgs );
 		}
 
-		virtual void render( RendererPtr renderer ) const
+		virtual void render( Renderer *renderer ) const
 		{
 			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
@@ -175,14 +175,14 @@ Imath::Box3f ParameterisedProcedural::bound() const
 	return doBound( args );
 }
 
-CompoundParameterPtr ParameterisedProcedural::parameters()
+CompoundParameter *ParameterisedProcedural::parameters()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-ConstCompoundParameterPtr ParameterisedProcedural::parameters() const
+const CompoundParameter *ParameterisedProcedural::parameters() const
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
 void ParameterisedProcedural::doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const

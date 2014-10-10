@@ -61,13 +61,13 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 		GL_FLOAT, 0 );
 }
 
-ColorTexture::ColorTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-	IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a )
+ColorTexture::ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
 {
 	construct( width, height, r, g, b, a );
 }
 
-static IECore::ConstDataPtr findChannel( const IECore::PrimitiveVariableMap &variables, const char **names )
+static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, const char **names )
 {
 	while( *names!=0 )
 	{
@@ -79,7 +79,7 @@ static IECore::ConstDataPtr findChannel( const IECore::PrimitiveVariableMap &var
 				interpolation==PrimitiveVariable::Varying ||
 				interpolation==PrimitiveVariable::FaceVarying )
 			{
-				return it->second.data;
+				return it->second.data.get();
 			}
 		}
 		names++;
@@ -87,17 +87,17 @@ static IECore::ConstDataPtr findChannel( const IECore::PrimitiveVariableMap &var
 	return 0;
 }
 
-ColorTexture::ColorTexture( IECore::ConstImagePrimitivePtr image )
+ColorTexture::ColorTexture( const IECore::ImagePrimitive *image )
 {
 	static const char *redNames[] = { "r", "R", "red", 0 };
 	static const char *greenNames[] = { "g", "G", "green", 0 };
 	static const char *blueNames[] = { "b", "B", "blue", 0 };
 	static const char *alphaNames[] = { "a", "A", "alpha", 0 };
 
-	IECore::ConstDataPtr r = findChannel( image->variables, redNames );
-	IECore::ConstDataPtr g = findChannel( image->variables, greenNames );
-	IECore::ConstDataPtr b = findChannel( image->variables, blueNames );
-	IECore::ConstDataPtr a = findChannel( image->variables, alphaNames );
+	const IECore::Data *r = findChannel( image->variables, redNames );
+	const IECore::Data *g = findChannel( image->variables, greenNames );
+	const IECore::Data *b = findChannel( image->variables, blueNames );
+	const IECore::Data *a = findChannel( image->variables, alphaNames );
 
 	if( !(r && g && b) )
 	{
@@ -113,8 +113,8 @@ ColorTexture::~ColorTexture()
 {
 }
 
-void ColorTexture::construct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-	IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a )
+void ColorTexture::construct( unsigned int width, unsigned int height, const IECore::Data *r,
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
 {
 	if( r->typeId() != g->typeId() ||
 		r->typeId() != b->typeId() ||
@@ -157,19 +157,19 @@ void ColorTexture::construct( unsigned int width, unsigned int height, IECore::C
 }
 
 template<class T>
-void ColorTexture::castConstruct( unsigned int width, unsigned int height, IECore::ConstDataPtr r,
-	IECore::ConstDataPtr g, IECore::ConstDataPtr b, IECore::ConstDataPtr a )
+void ColorTexture::castConstruct( unsigned int width, unsigned int height, const IECore::Data *r,
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
 {
 	templateConstruct( width, height,
-		staticPointerCast<const T>( r ),
-		staticPointerCast<const T>( g ),
-		staticPointerCast<const T>( b ),
-		staticPointerCast<const T>( a )	);
+		static_cast<const T *>( r ),
+		static_cast<const T *>( g ),
+		static_cast<const T *>( b ),
+		static_cast<const T *>( a )	);
 }
 
 template<typename T>
-void ColorTexture::templateConstruct( unsigned int width, unsigned int height, IECore::IntrusivePtr<const T> r,
-	IECore::IntrusivePtr<const T> g,  IECore::IntrusivePtr<const T> b, IECore::IntrusivePtr<const T> a )
+void ColorTexture::templateConstruct( unsigned int width, unsigned int height, const T *r,
+	const T *g, const T *b, const T *a )
 {
 	typedef typename T::ValueType::value_type ElementType;
 

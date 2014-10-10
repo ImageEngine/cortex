@@ -49,7 +49,7 @@ void bindDepthTexture()
 {
 	IECorePython::RunTimeTypedClass<DepthTexture>()
 		.def( init<unsigned int, unsigned int>() )
-		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr>() )
+		.def( init<unsigned int, unsigned int, const IECore::Data *>() )
 	;
 }
 

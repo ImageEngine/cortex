@@ -87,27 +87,27 @@ bool Options::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const Options *s = static_cast<const Options *>( other );
-	return m_options->isEqualTo( s->m_options );
+	return m_options->isEqualTo( s->m_options.get() );
 }
 
 void Options::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	PreWorldRenderable::memoryUsage( a );
-	a.accumulate( m_options );
+	a.accumulate( m_options.get() );
 }
 
 void Options::copyFrom( const Object *other, CopyContext *context )
 {
 	PreWorldRenderable::copyFrom( other, context );
 	const Options *s = static_cast<const Options *>( other );
-	m_options = context->copy<CompoundData>( s->m_options );
+	m_options = context->copy<CompoundData>( s->m_options.get() );
 }
 
 void Options::save( SaveContext *context ) const
 {
 	PreWorldRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_options, container, g_optionsEntry );
+	context->save( m_options.get(), container.get(), g_optionsEntry );
 }
 
 void Options::load( LoadContextPtr context )
@@ -115,7 +115,7 @@ void Options::load( LoadContextPtr context )
 	PreWorldRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-	m_options = context->load<CompoundData>( container, g_optionsEntry );
+	m_options = context->load<CompoundData>( container.get(), g_optionsEntry );
 }
 
 void Options::hash( MurmurHash &h ) const

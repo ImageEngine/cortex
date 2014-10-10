@@ -1,3 +1,258 @@
+# 9.0.0-a6
+
+#### IECore
+
+- Multithreaded PointSmoothSkinningOp
+- Added ExternalProcedural object type
+- Added HasBaseType type trait
+- Added boost::hash compatibility for MurmurHash
+
+#### IECoreRI
+
+- Added support for DynamicLoad and DelayedReadArchive procedurals
+
+#### IECoreArnold
+
+- Added support for delayed load DSO and .ass procedurals
+
+# 9.0.0-a5
+
+#### IECore
+
+- LinkedScene::hash now takes extra children at links into account
+
+#### IECoreRI
+
+- Added support for RiFrame blocks in IECoreRI::Renderer.
+
+#### IECoreMaya
+
+- Renamed IECoreMaya::MayaScene to IECoreMaya::LiveScene
+
+#### IECoreHoudini
+
+- Renamed IECoreHoudini::HoudiniScene to IECoreHoudini::LiveScene
+
+# 9.0.0-a4
+
+#### IECore
+
+- Bug fix in StreamIndexedIO that was causing sporadic crashes when loading SceneCaches during procedural expansion.
+- Fixed some minor bounding box bugs in IECore.SceneCache
+- Child bounds can now dilate bounds explicitly specified using IECore.SceneCache.writeBound()
+- IECore.LinkedScene now supports extra children at link locations
+- Fixed TransformOp double transform bug
+
+# 9.0.0-a3
+
+#### IECore
+
+- Added SceneInterface::hash() method.
+- Improved ConfigLoader.
+	- Now executes files within the same directory in alphabetical order.
+	- Added subdirectory argument.
+	- Env var accepted in place of search path.
+
+# 9.0.0-a2
+
+#### IECore
+
+- Made RefCounted bindings release the GIL during C++ destruction.
+- Changed RefCounted base class binding to use GILReleasePtr too.
+- Replaced IECore::IntrusivePtr with boost::intrusive_ptr.
+- Removed staticPointerCast, constPointerCast and dynamicPointerCast.
+- Fixed crash in MeshMergeOp.
+- Fixed mutex acquisition in LRUCache::updateListPosition().
+- PointSmoothSkinningOp handles faceVarying normals and added refIndices parameter
+- Changed DespatchedTypedData DataPtr & argument to Data *
+- Fixed LRUCache hangs.
+- Simplified RefCounted bindings.
+- Fixed LRUCache crashes where clear() was called concurrently with get().
+    
+#### IECorePython
+
+- Added IECorePython::CastToIntrusivePtr.
+
+#### IECoreMaya
+
+- MayaScene bindings now catch boost python exceptions
+
+#### IECoreGL
+
+- Removed deprecated IECoreGL::Selector::loadIDShader() method.
+- Added IECoreGL::Selector::postProjectionMatrix() method.
+
+#### IECoreRI
+
+- Added support for camera edits to IECoreRI::Renderer.
+- Added support for motion blurred cameras to IECoreRI::Renderer.
+- Added support for multiple cameras to IECoreRI::Renderer.
+- Removed "transform" parameter from IECoreRI::Renderer::camera().
+- Removed support for hider parameters in IECoreRI::Renderer::camera(). …
+- IECoreRI now built for all python versions 
+- added M44dData attribute support to IECoreRI::Renderer
+
+#### IECoreAlembic
+
+- Added support for the Ogawa backend into IECoreAlembic.
+
+# 9.0.0-a1
+
+#### IECore
+
+- Added from-python conversion of RunTimeTypedClass to IECore::TypeId
+- Removed implicit surface functionality
+- Removed BGEO and BIN readers/writers. 
+- Removed IFFHairReader.
+- Fixed EXRImageReader canRead to accept scanline images.
+- Improved speed of InternedString( int64_t ).
+- Tidied up LRUCache
+
+#### IECoreMaya
+
+- Fixed MayaScene for reading scene:visible and custom attributes at the root
+
+# 8.5.0
+
+#### IECore
+
+- Added python binding for RefCounted::refCount()
+- Fixed default ObjectPool for larger sizes
+
+#### IECoreRI
+
+- Changed SHWDeepImageReader to convert depth to standard Z (distance from eye plane), instead of spherical distance from the near clip.
+- Changed SHWDeepImageWriter to convert back to spherical distance from the near clip, assuming the incoming DeepPixels represent distance from eye plane.
+
+#### IECoreHoudini
+
+- Fixed bug in SceneCache ROP when re-rooting flattened geo with errors
+
+# 8.4.7
+
+#### IECore
+
+- IECore.ls supports ambiguous padding when the sequence is not a regular frame range.
+- IECore::frameListFromList correctly handles reverse order lists.
+
+# 8.4.6
+
+#### IECore
+
+- Removed unnecessary overhead from Object::copy().
+
+#### IECoreHoudini
+
+- Fixing crash in SceneCache ROP todo with "scene:visible" attribute.
+
+# 8.4.5
+
+#### IECore
+
+- Fixing seg fault when attempting to read a non-existant attribute several times.
+- Minor fixes for issues highlighted by Coverity.
+
+#### IECoreRI
+
+- Added support for string array options in SXRenderer.
+
+#### IECoreMaya
+
+- MayaScene now outputs the "scene:visible" attribute based on Maya visibility.
+- SceneShapeInterface::componentNames() and selectionName() now work even if the Maya viewport hasn't refreshed.
+
+#### IECoreNuke
+
+- Added support in DeepImageReader for ZBack channels.
+
+# 8.4.4
+
+#### IECore
+
+- Fixed StringData repr() to support newlines and quotes.
+
+# 8.4.3
+
+#### IECore
+
+- Improved precision of Imath Vec and Color repr() and str().
+- Using mutex on all access to the internal directory nodes in StreamIndexedIO.
+- SceneCache attribute read is now thread-safe.
+
+#### IECoreMaya
+
+- Working around a bug in Maya for meshes with 6 or more UV sets.
+- Fixed precision issue in failing test case.
+
+#### IECoreHoudini
+
+- Improved Exception handling in Houdini SceneCache nodes.
+- Improved UI for Expand/Collapse buttons.
+- Fixed bug in CortexConverter SOP todo with multiple CortexObject primitives with the same name.
+
+#### IECoreNuke
+
+- Fixed a bug in the SceneCacheReader that was preventing animated scene caches from displaying properly.
+
+# 8.4.2
+
+#### IECoreNuke
+
+- Redesigning SceneCacheReader and fixing it for several known bugs (bug in 8.4.1, flickering, selection reset after file change, no TCL expressions)
+
+# 8.4.1
+
+#### IECore
+
+- Compilation patches for Ubuntu 13 and Mint 16
+
+#### IECoreMaya
+
+- Fixed ToMayaCurveConverter for cubic non periodic curves (it was previously not possible to roundtrip such a curve using the To/From converters).
+
+#### IECoreHoudini
+
+- Fixed SceneCache ROP crash when a name attr existed, but the name was blank.
+
+#### IECoreNuke
+
+- Fixed a bug with SceneCacheReader where it wouldn't update correctly when wrapped by a python node.
+- Fixed a bug with SceneCacheReader that was causing flickering artifacts when using animated geo.
+- Fixed a bug with SceneCacheReader for infinite instantiation of Ops due to knob changes during the validate method.
+
+# 8.4.0
+
+#### IECore
+
+- Fixed a bug where the EXRImageReader would interpret Deep EXRs as valid.
+- Added IECore::EXRDeepImageReader (only when building with OpenEXR 2)
+- Added IECore::EXRDeepImageWriter (only when building with OpenEXR 2)
+
+#### IECoreRI
+
+- Added support for coordinate systems and a world transform in SXRenderer
+
+#### IECoreHoudini
+
+- Fixed crash when merging CortexPrimitives in Houdini 13.
+
+#### IECoreNuke
+
+- Fixed a bug with IECoreNuke::SceneCacheReader that was causing hanging and crashing.
+- Fixed linking of IECoreNuke for Nuke 8.
+
+# 8.3.0
+
+#### IECore
+
+- Refactored StandardRadialLensModel to match 3dequalizer
+
+#### IECoreRI
+
+- Added support for user options in SXRenderer
+- Added support for multiple repeated shading grids in SXRenderer
+- Removed conflicting parameter type warning for coshaders
+
 # 8.2.0
 
 #### IECore

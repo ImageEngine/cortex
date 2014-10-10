@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -292,12 +292,12 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		OBJ_Node *childNode = 0;
 		if ( params.hierarchy == SubNetworks )
 		{
-			childNode = doExpandChild( child, parent, params );
-			if ( params.depth == AllDescendants && child->hasObject() && tagged( child, params.tagFilter ) )
+			childNode = doExpandChild( child.get(), parent, params );
+			if ( params.depth == AllDescendants && child->hasObject() && tagged( child.get(), params.tagFilter ) )
 			{
 				Parameters childParams( params );
 				childParams.depth = Children;
-				doExpandObject( child, childNode, childParams );
+				doExpandObject( child.get(), childNode, childParams );
 			}
 		}
 		else if ( params.hierarchy == Parenting )
@@ -306,11 +306,11 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 			{
 				Parameters childParams( params );
 				childParams.depth = Children;
-				childNode = doExpandObject( child, parent, childParams );
+				childNode = doExpandObject( child.get(), parent, childParams );
 			}
 			else
 			{
-				childNode = doExpandChild( child, parent, params );
+				childNode = doExpandChild( child.get(), parent, params );
 			}
 			
 			childNode->setInput( 0, inputNode );
@@ -318,7 +318,7 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 		
 		if ( params.depth == AllDescendants )
 		{
-			if ( params.hierarchy == SubNetworks && !tagged( child, params.tagFilter ) )
+			if ( params.hierarchy == SubNetworks && !tagged( child.get(), params.tagFilter ) )
 			{
 				// we don't expand non-tagged children for SubNetwork mode, but we
 				// do for Parenting mode, because otherwise the hierarchy would be
@@ -326,7 +326,7 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 				continue;
 			}
 			
-			doExpandChildren( child, childNode, params );
+			doExpandChildren( child.get(), childNode, params );
 			childNode->setInt( pExpanded.getToken(), 0, 0, 1 );
 		}
 	}
@@ -367,7 +367,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 		bool visible = false;
 		if ( IECore::ConstSceneInterfacePtr scene = xform->scene() )
 		{
-			if ( tagged( scene, tagFilter ) )
+			if ( tagged( scene.get(), tagFilter ) )
 			{
 				visible = true;
 				xform->setTagFilter( tagFilterStr );
@@ -393,7 +393,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 		bool visible = false;
 		if ( IECore::ConstSceneInterfacePtr scene = geo->scene() )
 		{
-			visible = tagged( scene, tagFilter );
+			visible = tagged( scene.get(), tagFilter );
 			if ( visible )
 			{
 				geo->setTagFilter( tagFilterStr );
@@ -423,15 +423,15 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Registration for HoudiniScene extra attributes
+// Registration for LiveScene extra attributes
 //////////////////////////////////////////////////////////////////////////////////////////
 
-OBJ_SceneCacheTransform::HoudiniSceneAddOn OBJ_SceneCacheTransform::g_houdiniSceneAddOn;
+OBJ_SceneCacheTransform::LiveSceneAddOn OBJ_SceneCacheTransform::g_liveSceneAddOn;
 
-OBJ_SceneCacheTransform::HoudiniSceneAddOn::HoudiniSceneAddOn()
+OBJ_SceneCacheTransform::LiveSceneAddOn::LiveSceneAddOn()
 {
-	HoudiniScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
-	HoudiniScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
+	LiveScene::registerCustomAttributes( OBJ_SceneCacheTransform::attributeNames, OBJ_SceneCacheTransform::readAttribute );
+	LiveScene::registerCustomTags( OBJ_SceneCacheTransform::hasTag, OBJ_SceneCacheTransform::readTags );
 }
 
 void OBJ_SceneCacheTransform::attributeNames( const OP_Node *node, SceneInterface::NameList &attrs )
@@ -480,7 +480,7 @@ IECore::ConstObjectPtr OBJ_SceneCacheTransform::readAttribute( const OP_Node *no
 		const char *expanded = pExpanded.getToken();
 		if ( node->hasParm( expanded ) && !node->evalInt( expanded, 0, 0 ) )
 		{
-			return LinkedScene::linkAttributeData( scene, time );
+			return LinkedScene::linkAttributeData( scene.get(), time );
 		}
 		
 		return 0;

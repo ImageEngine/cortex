@@ -111,7 +111,7 @@ ObjectPtr FromHoudiniGeometryConverter::doConversion( ConstCompoundObjectPtr ope
 		return 0;
 	}
 	
-	return doDetailConversion( geo, operands );
+	return doDetailConversion( geo, operands.get() );
 }
 
 /// Create a remapping matrix of names, types and interpolation classes for all attributes specified in the 'rixlate' detail attribute.
@@ -665,7 +665,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 	size_t numHandles = handles.entries();
 	for ( size_t i=0; i < numHandles; i++ )
 	{
-		adjustedHandles[ handles[i] ] = i;
+		adjustedHandles[ handles(i) ] = i;
 	}
 	
 	size_t i = 0;

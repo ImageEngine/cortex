@@ -79,6 +79,22 @@ struct InternedStringTest
 		size_t numIterations = 10000000;
 		parallel_for( blocked_range<size_t>( 0, numIterations ), Constructor() );
 	}
+
+	void testRangeConstruction()
+	{
+
+		const char *aa = "aa";
+		const char *aabb = "aabb";
+		const char *aabbaa = "aabbaa";
+
+		BOOST_CHECK_EQUAL( InternedString( aa ), InternedString( aa, 2 ) );
+		BOOST_CHECK_EQUAL( InternedString( aa, 2 ), InternedString( aa, 2 ) );
+		BOOST_CHECK_EQUAL( InternedString( aa, 1 ), InternedString( aa, 1 ) );
+		BOOST_CHECK_EQUAL( InternedString( aa, 2 ), InternedString( aabb, 2 ) );
+		BOOST_CHECK_EQUAL( InternedString( aabb ), InternedString( aabbaa, 4 ) );
+
+	};
+
 };
 
 
@@ -90,6 +106,7 @@ struct InternedStringTestSuite : public boost::unit_test::test_suite
 		boost::shared_ptr<InternedStringTest> instance( new InternedStringTest() );
 
 		add( BOOST_CLASS_TEST_CASE( &InternedStringTest::testConcurrentConstruction, instance ) );
+		add( BOOST_CLASS_TEST_CASE( &InternedStringTest::testRangeConstruction, instance ) );
 
 	}
 };

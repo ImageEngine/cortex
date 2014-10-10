@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -94,9 +94,9 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		// Returns the name of the item at index itemIndex in the SceneView_knob.
 		const std::string &itemName( int itemIndex ) const;
 		// Returns a SceneInterface for the root item.
-		IECore::ConstSceneInterfacePtr getSceneInterface() const;
+		IECore::ConstSceneInterfacePtr getSceneInterface();
 		// Returns a SceneInterface for the item at path.
-		IECore::ConstSceneInterfacePtr getSceneInterface( const std::string &path ) const;
+		IECore::ConstSceneInterfacePtr getSceneInterface( const std::string &path );
 		//@}
 
 		//! @name Methods which control the SceneView_knob
@@ -104,6 +104,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		/// taken from the SceneCache, filter and select them. They are called
 		/// from the knob_changed() method to synchronize the SceneView_knob and
 		/// the internal lists of selected and filtered items.
+		/// These methods should only be called from the firstReader() returned instance.
 		//////////////////////////////////////////////////////////////
 		//@{
 		/// Loads the internal data structures from the knobs and set up the
@@ -115,23 +116,14 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		/// is rebuilt then the selection will be lost. The filterScene() method must
 		/// be called immediately afterwards.
 		void rebuildSceneView();
-		/// This recursive method is called from rebuildSceneView() and traverses the
-		/// sceneInterface to build a list of item names and a mapping of the tags to 
-		/// the indices in the items.
-		void buildSceneView( std::vector< std::string > &list, const IECore::ConstSceneInterfacePtr sceneInterface );
 		/// Rebuilds the sceneView to show only items which are already selected or have
-		/// a names that matches filterText and a tag which matches tagText.
+		/// names that matches filterText and a tag which matches tagText.
 		/// Passing an empty string to either filterText or tagText will disable the
 		/// filtering of the names and tags respectively. This should be called
 		/// immediately after any call to rebuildSceneView().
-		void filterScene( const std::string &filterText, const std::string &tagText );
-		/// Rebuilds the current geometry selection from the entries that are selected
-		/// in the SceneView_knob.
-		void rebuildSelection();
+		void filterScene( const std::string &filterText, const std::string &tagText, bool keepSelection = true );
 		/// Clear any selected geometry from the SceneView_knob.
 		void clearSceneViewSelection();
-		/// Clears the current filters applied to the scene..
-		void clearSceneViewFilter();
 		//@}
 
 		/// Updates the Enumeration_knob of available tags from the internal list of tags
@@ -141,42 +133,28 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		void loadPrimitive( DD::Image::GeometryList &out, const std::string &path );
 		/// Get the hash of the file path and root knob.
 		DD::Image::Hash sceneHash() const;
-		/// Evaluates the file path for the current context and returns the result.
-		std::string filePath() const;
+		/// Get the hash of the SceneView knob (the default hash implementation of that knob returns a constant hash...)
+		DD::Image::Hash selectionHash( bool force = false ) const;
 		
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
-	
-		/// Returns an InternedString with the name of the geometry tag.	
-		static const IECore::InternedString &geometryTag();
+
+		// uses firstOp to return the Op that has the up-to-date private data
+		SceneCacheReader *firstReader();
+		const SceneCacheReader *firstReader() const;
+
+		class SharedData;
+
+		// this function should only be called from the firstReader() object.
+		SharedData *sharedData();
+		const SharedData *sharedData() const;
 
 		// Knob Members.	
 		const char *m_filePath; // Holds the raw SceneCache file path.
-		std::string m_evaluatedFilePath; // Holds the SceneCache file path after any TCL scripts have been evaluated..
 		std::string m_root; // Holds the root item in the SceneCache.
-		std::string m_filterText; // The text to filter the scene with.
-		std::string m_filterTagText; // The text to filter the tags with. This is set from the Enumeration_knob.
+		std::string m_filter; // The text to filter the scene with.
 		bool m_worldSpace; // Set to ignore local transforms..
 		DD::Image::Matrix4 m_baseParentMatrix; // The global matrix that is applied to the geo.
-		
-		// Hashes that are used to both provide an early-out to some methods
-		// and also contribute towards a hash for the geometry. 
-		DD::Image::Hash m_selectionHash;
-		DD::Image::Hash m_filterHash;
-		DD::Image::Hash m_sceneHash;
 
-		// When buildSceneView is called to parse the scene cache and generate a list of entries for the SceneView_knob,
-		// this map is also populated. It holds a mapping of tag names to the indices of items which have that tag. 
-		// It is used within the filterScene method to quickly filter items with a particular tag.
-		typedef	std::map< std::string, std::vector< unsigned int > > TagMap;
-		TagMap m_tagMap;
-		
-		// When specifying a root we store the path to it's parent item along with the length of it. We do this so that when
-		// we are building the list of items in the SceneView_knob we can strip this path quickly from the front of the
-		// name and easily restore it later to load it from the SceneCache. This ensures that the names of the items in the
-		// SceneView_knob are kept short. 
-		std::string m_pathPrefix;
-		unsigned int m_pathPrefixLength;
-	
 		// Pointers to various knobs.	
 		DD::Image::Knob *m_filePathKnob;
 		DD::Image::Knob *m_baseParentMatrixKnob;
@@ -185,16 +163,8 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Knob *m_sceneFilterKnob;
 		DD::Image::Knob *m_rootKnob;
 
-		 // A flag which is set when all of the knobs have been loaded from the script.
-		bool m_scriptLoaded;
-		
-		/// The SceneView_knob holds a list of all leaf items in the scene. When filtering the SceneView we specify indices into
-		/// this list. When setting or querying the selected items in the SceneView_knob we need to use indices into the list of 
-		/// filtered (visible) items. This means that we have to keep a look-up table of mappings between indices in the filtered
-		/// list of items and the index within the complete list of items in the scene.
-		std::map<int, int> m_itemToFiltered; // Mapping of the index within the full scene list and the filtered scene list.
-		std::vector<unsigned int> m_filteredToItem; // Mapping from an index in the filtered scene list to the complete scene list. 
-		std::vector< bool > m_itemSelected; // An array of flags which indicate whether an item in the filtered list is selected or not.
+		// only the first reader allocates the shared data
+		SharedData *m_data;	
 };
 
 } // namespace IECoreNuke

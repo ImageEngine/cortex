@@ -92,62 +92,62 @@ SmoothSkinningData::~SmoothSkinningData()
 
 const StringVectorData  *SmoothSkinningData::influenceNames() const
 {
-	return m_influenceNames;
+	return m_influenceNames.get();
 }
 
 StringVectorData *SmoothSkinningData::influenceNames()
 {
-	return m_influenceNames;
+	return m_influenceNames.get();
 }
 
 const M44fVectorData *SmoothSkinningData::influencePose() const
 {
-	return m_influencePose;
+	return m_influencePose.get();
 }
 
 M44fVectorData *SmoothSkinningData::influencePose()
 {
-	return m_influencePose;
+	return m_influencePose.get();
 }
 
 const IntVectorData *SmoothSkinningData::pointIndexOffsets() const
 {
-	return m_pointIndexOffsets;
+	return m_pointIndexOffsets.get();
 }
 
 IntVectorData *SmoothSkinningData::pointIndexOffsets()
 {
-	return m_pointIndexOffsets;
+	return m_pointIndexOffsets.get();
 }
 
 const IntVectorData *SmoothSkinningData::pointInfluenceCounts() const
 {
-	return m_pointInfluenceCounts;
+	return m_pointInfluenceCounts.get();
 }
 
 IntVectorData *SmoothSkinningData::pointInfluenceCounts()
 {
-	return m_pointInfluenceCounts;
+	return m_pointInfluenceCounts.get();
 }
 
 const IntVectorData *SmoothSkinningData::pointInfluenceIndices() const
 {
-	return m_pointInfluenceIndices;
+	return m_pointInfluenceIndices.get();
 }
 
 IntVectorData *SmoothSkinningData::pointInfluenceIndices()
 {
-	return m_pointInfluenceIndices;
+	return m_pointInfluenceIndices.get();
 }
 
 const FloatVectorData *SmoothSkinningData::pointInfluenceWeights() const
 {
-	return m_pointInfluenceWeights;
+	return m_pointInfluenceWeights.get();
 }
 
 FloatVectorData *SmoothSkinningData::pointInfluenceWeights()
 {
-	return m_pointInfluenceWeights;
+	return m_pointInfluenceWeights.get();
 }
 
 void SmoothSkinningData::validateSizes() const
@@ -277,12 +277,12 @@ void SmoothSkinningData::save( IECore::Object::SaveContext *context ) const
 {
 	Data::save(context);
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_influenceNames, container, g_influenceNamesEntry );
-	context->save( m_influencePose, container, g_influencePoseEntry );
-	context->save( m_pointIndexOffsets, container, g_pointIndexOffsetsEntry );
-	context->save( m_pointInfluenceCounts, container, g_pointInfluenceCountsEntry );
-	context->save( m_pointInfluenceIndices, container, g_pointInfluenceIndicesEntry );
-	context->save( m_pointInfluenceWeights, container, g_pointInfluenceWeightsEntry );
+	context->save( m_influenceNames.get(), container.get(), g_influenceNamesEntry );
+	context->save( m_influencePose.get(), container.get(), g_influencePoseEntry );
+	context->save( m_pointIndexOffsets.get(), container.get(), g_pointIndexOffsetsEntry );
+	context->save( m_pointInfluenceCounts.get(), container.get(), g_pointInfluenceCountsEntry );
+	context->save( m_pointInfluenceIndices.get(), container.get(), g_pointInfluenceIndicesEntry );
+	context->save( m_pointInfluenceWeights.get(), container.get(), g_pointInfluenceWeightsEntry );
 }
 
 void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
@@ -292,12 +292,12 @@ void SmoothSkinningData::load( IECore::Object::LoadContextPtr context )
 
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
-	m_influenceNames = context->load<StringVectorData>( container, g_influenceNamesEntry );
-	m_influencePose = context->load<M44fVectorData>( container, g_influencePoseEntry );
-	m_pointIndexOffsets = context->load<IntVectorData>( container, g_pointIndexOffsetsEntry );
-	m_pointInfluenceCounts = context->load<IntVectorData>( container, g_pointInfluenceCountsEntry );
-	m_pointInfluenceIndices = context->load<IntVectorData>( container, g_pointInfluenceIndicesEntry );
-	m_pointInfluenceWeights = context->load<FloatVectorData>( container, g_pointInfluenceWeightsEntry );
+	m_influenceNames = context->load<StringVectorData>( container.get(), g_influenceNamesEntry );
+	m_influencePose = context->load<M44fVectorData>( container.get(), g_influencePoseEntry );
+	m_pointIndexOffsets = context->load<IntVectorData>( container.get(), g_pointIndexOffsetsEntry );
+	m_pointInfluenceCounts = context->load<IntVectorData>( container.get(), g_pointInfluenceCountsEntry );
+	m_pointInfluenceIndices = context->load<IntVectorData>( container.get(), g_pointInfluenceIndicesEntry );
+	m_pointInfluenceWeights = context->load<FloatVectorData>( container.get(), g_pointInfluenceWeightsEntry );
 
 }
 
@@ -311,32 +311,32 @@ bool SmoothSkinningData::isEqualTo(  const IECore::Object *other ) const
 
 	const SmoothSkinningData *tOther = static_cast<const SmoothSkinningData *>( other );
 
-	if(	!m_influenceNames->isEqualTo( tOther->m_influenceNames ) )
+	if(	!m_influenceNames->isEqualTo( tOther->m_influenceNames.get() ) )
 	{
 		return false;
 	}
 
-	if(	!m_influencePose->isEqualTo( tOther->m_influencePose ) )
+	if(	!m_influencePose->isEqualTo( tOther->m_influencePose.get() ) )
 	{
 		return false;
 	}
 
-	if(	!m_influencePose->isEqualTo( tOther->m_influencePose ) )
+	if(	!m_influencePose->isEqualTo( tOther->m_influencePose.get() ) )
 	{
 		return false;
 	}
 
-	if(	!m_pointInfluenceCounts->isEqualTo( tOther->m_pointInfluenceCounts ) )
+	if(	!m_pointInfluenceCounts->isEqualTo( tOther->m_pointInfluenceCounts.get() ) )
 	{
 		return false;
 	}
 
-	if(	!m_pointInfluenceIndices->isEqualTo( tOther->m_pointInfluenceIndices ) )
+	if(	!m_pointInfluenceIndices->isEqualTo( tOther->m_pointInfluenceIndices.get() ) )
 	{
 		return false;
 	}
 
-	if(	!m_pointInfluenceWeights->isEqualTo( tOther->m_pointInfluenceWeights ) )
+	if(	!m_pointInfluenceWeights->isEqualTo( tOther->m_pointInfluenceWeights.get() ) )
 	{
 		return false;
 	}
@@ -347,12 +347,12 @@ bool SmoothSkinningData::isEqualTo(  const IECore::Object *other ) const
 void SmoothSkinningData::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Data::memoryUsage( a );
-	a.accumulate( m_influenceNames );
-	a.accumulate( m_influencePose );
-	a.accumulate( m_pointIndexOffsets );
-	a.accumulate( m_pointInfluenceCounts );
-	a.accumulate( m_pointInfluenceIndices );
-	a.accumulate( m_pointInfluenceWeights );
+	a.accumulate( m_influenceNames.get() );
+	a.accumulate( m_influencePose.get() );
+	a.accumulate( m_pointIndexOffsets.get() );
+	a.accumulate( m_pointInfluenceCounts.get() );
+	a.accumulate( m_pointInfluenceIndices.get() );
+	a.accumulate( m_pointInfluenceWeights.get() );
 }
 
 void SmoothSkinningData::hash( MurmurHash &h ) const

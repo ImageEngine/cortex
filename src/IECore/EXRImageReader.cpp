@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -58,6 +58,12 @@
 #include "OpenEXR/ImfStringAttribute.h"
 #include "OpenEXR/ImfTimeCodeAttribute.h"
 
+#ifdef IECORE_WITH_DEEPEXR
+
+#include "OpenEXR/ImfPartType.h"
+
+#endif
+
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -93,7 +99,43 @@ EXRImageReader::~EXRImageReader()
 
 bool EXRImageReader::canRead( const string &fileName )
 {
-	return isOpenExrFile( fileName.c_str() );
+	if( isOpenExrFile( fileName.c_str() ) )
+	{
+
+		Imf::InputFile *inputFile( NULL );
+		
+		try
+		{
+			
+			// This will throw an exception if the image is deep and the EXR version is < 2.0.
+			inputFile = new Imf::InputFile( fileName.c_str() );
+			Imf::Header header( inputFile->header() );
+
+#ifdef IECORE_WITH_DEEPEXR
+
+			if ( header.hasType() )
+			{
+				/// \todo: determine why we are checking for the empty string
+				if ( header.type() != TILEDIMAGE && header.type() != SCANLINEIMAGE && header.type() != "" )
+				{
+					throw IOException( "EXR is not a flat image." );
+				}
+			}
+
+#endif
+
+		}
+		catch( ... )
+		{
+			delete inputFile;
+			return false;
+		}
+		delete inputFile;
+
+		return true;
+	}
+
+	return false;
 }
 
 void EXRImageReader::channelNames( vector<string> &names )
@@ -238,7 +280,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< UIntVectorData, FloatVectorData, ScaledDataConversion< unsigned int, float > > converter;
-					ConstUIntVectorDataPtr vec = staticPointerCast< UIntVectorData >(res);
+					ConstUIntVectorDataPtr vec = boost::static_pointer_cast< UIntVectorData >(res);
 					return converter( vec );
 				}
 
@@ -251,7 +293,7 @@ DataPtr EXRImageReader::readChannel( const string &name, const Imath::Box2i &dat
 				else
 				{
 					DataConvert< HalfVectorData, FloatVectorData, ScaledDataConversion< half, float > > converter;
-					ConstHalfVectorDataPtr vec = staticPointerCast< HalfVectorData >(res);
+					ConstHalfVectorDataPtr vec = boost::static_pointer_cast< HalfVectorData >(res);
 					return converter( vec );
 				}
 
@@ -390,7 +432,7 @@ static void addHeaderAttribute( const std::string &name, Data *data, CompoundDat
 		{
 			if ( cIt->second->typeId() == CompoundDataTypeId )
 			{
-				newBlindData = staticPointerCast< CompoundData >( cIt->second );
+				newBlindData = boost::static_pointer_cast< CompoundData >( cIt->second );
 			}
 		}
 		if ( !newBlindData )
@@ -401,7 +443,7 @@ static void addHeaderAttribute( const std::string &name, Data *data, CompoundDat
 			blindData->writable()[ thisName ] = newBlindData;
 		}
 		// call recursivelly
-		addHeaderAttribute( newName, data, newBlindData );
+		addHeaderAttribute( newName, data, newBlindData.get() );
 		return;
 	}
 	// add blind data key
@@ -416,7 +458,7 @@ static void headerToCompoundData( const Imf::Header &header, CompoundData *blind
 		DataPtr data = attributeToData( attrIt.attribute() );
 		if ( data )
 		{
-			addHeaderAttribute( name, data, blindData );
+			addHeaderAttribute( name, data.get(), blindData );
 		}
 	}
 }
@@ -430,11 +472,11 @@ static void compoundDataToCompoundObject( const CompoundData *data, CompoundObje
 		{
 			CompoundObjectPtr newObject = new CompoundObject();
 			object->members()[ it->first ] = newObject;
-			compoundDataToCompoundObject( staticPointerCast< CompoundData >( it->second ), newObject );
+			compoundDataToCompoundObject( static_cast<const CompoundData *>( it->second.get() ), newObject.get() );
 		}
 		else
 		{
-			object->members()[ it->first ] = staticPointerCast< Data >( it->second );
+			object->members()[ it->first ] = boost::static_pointer_cast< Data >( it->second );
 		}
 	}
 }
@@ -443,14 +485,14 @@ CompoundObjectPtr EXRImageReader::readHeader()
 {
 	CompoundObjectPtr header = ImageReader::readHeader();
 	CompoundDataPtr tmp = new CompoundData();
-	headerToCompoundData( m_inputFile->header(), tmp );
-	compoundDataToCompoundObject( tmp, header );
+	headerToCompoundData( m_inputFile->header(), tmp.get() );
+	compoundDataToCompoundObject( tmp.get(), header.get() );
 	return header;
 }
 
 ObjectPtr EXRImageReader::doOperation( const CompoundObject *operands )
 {
-	ImagePrimitivePtr image = staticPointerCast< ImagePrimitive >( ImageReader::doOperation( operands ) );
+	ImagePrimitivePtr image = boost::static_pointer_cast< ImagePrimitive >( ImageReader::doOperation( operands ) );
 	if ( image )
 	{
 		headerToCompoundData( m_inputFile->header(), image->blindData() );

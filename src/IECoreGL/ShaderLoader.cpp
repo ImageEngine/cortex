@@ -333,7 +333,7 @@ ShaderPtr ShaderLoader::load( const std::string &name )
 	return m_implementation->load( name );
 }
 
-ShaderLoaderPtr ShaderLoader::defaultShaderLoader()
+ShaderLoader *ShaderLoader::defaultShaderLoader()
 {
 	static ShaderLoaderPtr t = 0;
 	if( !t )
@@ -343,5 +343,5 @@ ShaderLoaderPtr ShaderLoader::defaultShaderLoader()
 		IECore::SearchPath pp( p ? p : "", ":" );
 		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
 	}
-	return t;
+	return t.get();
 }

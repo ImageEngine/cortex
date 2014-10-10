@@ -108,25 +108,27 @@ static typename T::ValueType getValue( T &that )
 }
 
 template<class T>
-static int cmp( T &x, T &y )
+static bool lessThan( const T *x, const T *y )
 {
-	const typename T::ValueType &xData = x.readable();
-	const typename T::ValueType &yData = y.readable();
-	if( xData < yData )
-	{
-		return -1;
-	}
-	if( xData > yData )
-	{
-		return 1;
-	}
-	return 0;
+	return x->readable() < y->readable();
 }
 
-template<>
-int cmp( StringData &x, StringData &y )
+template<class T>
+static bool lessThanOrEqualTo( const T *x, const T *y )
 {
-	return x.readable().compare( y.readable() );
+	return x->readable() <= y->readable();
+}
+
+template<class T>
+static bool greaterThan( const T *x, const T *y )
+{
+	return x->readable() > y->readable();
+}
+
+template<class T>
+static bool greaterThanOrEqualTo( const T *x, const T *y )
+{
+	return x->readable() >= y->readable();
 }
 
 template<>
@@ -170,7 +172,14 @@ string str( std::string &x )
 template<>
 string repr( std::string &x )
 {
-	return "\"" + x + "\"";
+	// we must use the python repr() implementation in order to
+	// get proper escaping and quoting of special characters.
+	// come to think of it, i don't know why we don't just use
+	// this implementation for everything, and not need all these
+	// specialisations - perhaps for performance reasons?
+	IECorePython::ScopedGILLock gilLock;
+	object o( x );
+	return extract<std::string>( o.attr( "__repr__" )() );
 }
 
 template<>
@@ -310,11 +319,14 @@ static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
 }
 
 template<class T>
-static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, bases<Data> > &c )
+static void bindNumericMethods( RunTimeTypedClass<T> &c )
 {
 	c.add_static_property( "minValue", &std::numeric_limits<typename T::ValueType>::min, "Minimum representable value." );
 	c.add_static_property( "maxValue", &std::numeric_limits<typename T::ValueType>::max, "Maximum representable value." );
-	c.def( "__cmp__", &cmp<T>, "Comparison operators ( <, >, >=, <= )" );
+	c.def( "__lt__", &lessThan<T> );
+	c.def( "__le__", &lessThanOrEqualTo<T> );
+	c.def( "__gt__", &greaterThan<T> );
+	c.def( "__ge__", &greaterThanOrEqualTo<T> );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +336,10 @@ static void bindNumericMethods( class_<T, typename T::Ptr, boost::noncopyable, b
 void bindAllSimpleTypedData()
 {
 	RunTimeTypedClass<StringData> sdc = bindSimpleData<StringData>();
-	sdc.def("__cmp__", &cmp<StringData> );
+	sdc.def( "__lt__", &lessThan<StringData> );
+	sdc.def( "__le__", &lessThanOrEqualTo<StringData> );
+	sdc.def( "__gt__", &greaterThan<StringData> );
+	sdc.def( "__ge__", &greaterThanOrEqualTo<StringData> );
 	
 	bindSimpleData<InternedStringData>();
 

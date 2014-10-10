@@ -108,63 +108,63 @@ ColorTransformOp::~ColorTransformOp()
 
 StringParameter * ColorTransformOp::colorPrimVarParameter()
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 const StringParameter * ColorTransformOp::colorPrimVarParameter() const
 {
-	return m_colorPrimVarParameter;
+	return m_colorPrimVarParameter.get();
 }
 
 StringParameter * ColorTransformOp::redPrimVarParameter()
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 const StringParameter * ColorTransformOp::redPrimVarParameter() const
 {
-	return m_redPrimVarParameter;
+	return m_redPrimVarParameter.get();
 }
 
 StringParameter * ColorTransformOp::greenPrimVarParameter()
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 const StringParameter * ColorTransformOp::greenPrimVarParameter() const
 {
-	return m_greenPrimVarParameter;
+	return m_greenPrimVarParameter.get();
 }
 
 StringParameter * ColorTransformOp::bluePrimVarParameter()
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 const StringParameter * ColorTransformOp::bluePrimVarParameter() const
 {
-	return m_bluePrimVarParameter;
+	return m_bluePrimVarParameter.get();
 }
 
 StringParameter * ColorTransformOp::alphaPrimVarParameter()
 {
-	return m_alphaPrimVarParameter;
+	return m_alphaPrimVarParameter.get();
 }
 
 const StringParameter * ColorTransformOp::alphaPrimVarParameter() const
 {
-	return m_alphaPrimVarParameter;
+	return m_alphaPrimVarParameter.get();
 }
 
 
 BoolParameter * ColorTransformOp::premultipliedParameter()
 {
-	return m_premultipliedParameter;
+	return m_premultipliedParameter.get();
 }
 
 const BoolParameter * ColorTransformOp::premultipliedParameter() const
 {
-	return m_premultipliedParameter;
+	return m_premultipliedParameter.get();
 }
 
 template<typename T>
@@ -288,16 +288,16 @@ void ColorTransformOp::modifyPrimitive( Primitive * primitive, const CompoundObj
 		switch( colorIt->second.data->typeId() )
 		{
 			case Color3fDataTypeId :
-				transformInterleaved<Color3fData>( primitive, operands, staticPointerCast<Color3fData>( colorIt->second.data ) );
+				transformInterleaved<Color3fData>( primitive, operands, static_cast<Color3fData *>( colorIt->second.data.get() ) );
 				break;
 			case Color3fVectorDataTypeId :
-				transformInterleaved<Color3fVectorData>( primitive, operands, staticPointerCast<Color3fVectorData>( colorIt->second.data ) );
+				transformInterleaved<Color3fVectorData>( primitive, operands, static_cast<Color3fVectorData *>( colorIt->second.data.get() ) );
 				break;
 			case Color3dDataTypeId :
-				transformInterleaved<Color3dData>( primitive, operands, staticPointerCast<Color3dData>( colorIt->second.data ) );
+				transformInterleaved<Color3dData>( primitive, operands, static_cast<Color3dData *>( colorIt->second.data.get() ) );
 				break;
 			case Color3dVectorDataTypeId :
-				transformInterleaved<Color3dVectorData>( primitive, operands, staticPointerCast<Color3dVectorData>( colorIt->second.data ) );
+				transformInterleaved<Color3dVectorData>( primitive, operands, static_cast<Color3dVectorData *>( colorIt->second.data.get() ) );
 				break;
 			default :
 				throw Exception( "PrimitiveVariable has unsupported type." );
@@ -325,36 +325,36 @@ void ColorTransformOp::modifyPrimitive( Primitive * primitive, const CompoundObj
 				transformSeparate<HalfData>(
 					primitive,
 					operands,
-					staticPointerCast<HalfData>( rIt->second.data ),
-					staticPointerCast<HalfData>( gIt->second.data ),
-					staticPointerCast<HalfData>( bIt->second.data )
+					static_cast<HalfData *>( rIt->second.data.get() ),
+					static_cast<HalfData *>( gIt->second.data.get() ),
+					static_cast<HalfData *>( bIt->second.data.get() )
 				);
 				break;
 			case HalfVectorDataTypeId :
 				transformSeparate<HalfVectorData>(
 					primitive,
 					operands,
-					staticPointerCast<HalfVectorData>( rIt->second.data ),
-					staticPointerCast<HalfVectorData>( gIt->second.data ),
-					staticPointerCast<HalfVectorData>( bIt->second.data )
+					static_cast<HalfVectorData *>( rIt->second.data.get() ),
+					static_cast<HalfVectorData *>( gIt->second.data.get() ),
+					static_cast<HalfVectorData *>( bIt->second.data.get() )
 				);
 				break;
 			case FloatDataTypeId :
 				transformSeparate<FloatData>(
 					primitive,
 					operands,
-					staticPointerCast<FloatData>( rIt->second.data ),
-					staticPointerCast<FloatData>( gIt->second.data ),
-					staticPointerCast<FloatData>( bIt->second.data )
+					static_cast<FloatData *>( rIt->second.data.get() ),
+					static_cast<FloatData *>( gIt->second.data.get() ),
+					static_cast<FloatData *>( bIt->second.data.get() )
 				);
 				break;
 			case FloatVectorDataTypeId :
 				transformSeparate<FloatVectorData>(
 					primitive,
 					operands,
-					staticPointerCast<FloatVectorData>( rIt->second.data ),
-					staticPointerCast<FloatVectorData>( gIt->second.data ),
-					staticPointerCast<FloatVectorData>( bIt->second.data )
+					static_cast<FloatVectorData *>( rIt->second.data.get() ),
+					static_cast<FloatVectorData *>( gIt->second.data.get() ),
+					static_cast<FloatVectorData *>( bIt->second.data.get() )
 				);
 				break;
 			default :

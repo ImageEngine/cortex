@@ -231,13 +231,13 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
-	PointMeshOpTypeId = 186,
-	ParticleMeshOpTypeId = 187,
+	PointMeshOpTypeId = 186, // obsolete - available for reuse
+	ParticleMeshOpTypeId = 187, // obsolete - available for reuse
 	HalfDataTypeId = 188,
 	MeshPrimitiveOpTypeId = 189,
 	PrimitiveEvaluatorTypeId = 190,
 	MeshPrimitiveEvaluatorTypeId = 191,
-	MeshPrimitiveImplicitSurfaceOpTypeId = 192,
+	MeshPrimitiveImplicitSurfaceOpTypeId = 192, // obsolete - available for reuse
 	TriangulateOpTypeId = 193,
 	SpherePrimitiveEvaluatorTypeId = 194,
 	SpherePrimitiveTypeId = 195,
@@ -340,13 +340,13 @@ enum TypeId
 	ColorSpaceTransformOpTypeId = 292,
 	TGAImageReaderTypeId = 293,
 	TGAImageWriterTypeId = 294,
-	BINParticleReaderTypeId = 295,
-	BINParticleWriterTypeId = 296,
-	BINMeshReaderTypeId = 297,
-	BGEOParticleReaderTypeId = 298,
+	BINParticleReaderTypeId = 295, // obsolete - available for reuse
+	BINParticleWriterTypeId = 296, // obsolete - available for reuse
+	BINMeshReaderTypeId = 297, // obsolete - available for reuse
+	BGEOParticleReaderTypeId = 298, // obsolete - available for reuse
 	NParticleReaderTypeId = 299,
 	IFFImageReaderTypeId = 300,
-	IFFHairReaderTypeId = 301,
+	IFFHairReaderTypeId = 301, // obsolete - available for reuse
 	FaceAreaOpTypeId = 302,
 	CurvesMergeOpTypeId = 303,
 	CurvesPrimitiveOpTypeId = 304,
@@ -436,7 +436,10 @@ enum TypeId
 	StandardRadialLensModelTypeId = 388,
 	LensDistortOpTypeId = 389,
 	TransferSmoothSkinningWeightsOpTypeId = 390,
-	
+	EXRDeepImageReaderTypeId = 391,
+	EXRDeepImageWriterTypeId = 392,
+	ExternalProceduralTypeId = 393,
+
 	// Remember to update TypeIdBinding.cpp !!!
 
 	// If we ever get this far then the core library is too big.

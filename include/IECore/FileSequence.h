@@ -73,7 +73,7 @@ class FileSequence : public RunTimeTyped
 		const std::string &getFileName() const;
 		void setFileName( const std::string &fileName );
 
-		FrameListPtr getFrameList();
+		FrameList *getFrameList();
 		void setFrameList( FrameListPtr frameList );
 
 		std::string asString() const;
@@ -116,9 +116,9 @@ class FileSequence : public RunTimeTyped
 		/// Returns a deep copy of this object.
 		FileSequencePtr copy() const;
 
-		void mapTo( ConstFileSequencePtr other, std::vector< std::pair< std::string, std::string > > &result ) const;
+		void mapTo( const FileSequence *other, std::vector< std::pair< std::string, std::string > > &result ) const;
 
-		void mapTo( ConstFileSequencePtr other, std::map< std::string, std::string > &result ) const;
+		void mapTo( const FileSequence *other, std::map< std::string, std::string > &result ) const;
 
 		/// Returns a regular expression that matches only valid filenames. Matches 1, 2, and 3 of any
 		/// resulting matches are the prefix, padding and suffix of the matched filename.

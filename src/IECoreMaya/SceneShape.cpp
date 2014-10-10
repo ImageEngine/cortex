@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,7 +36,7 @@
 #include "IECore/LinkedScene.h"
 
 #include "IECoreMaya/SceneShape.h"
-#include "IECoreMaya/MayaScene.h"
+#include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/MayaTypeIds.h"
 
 #include "maya/MFnTypedAttribute.h"
@@ -52,14 +52,14 @@ MTypeId SceneShape::id = SceneShapeId;
 MObject SceneShape::aSceneFilePlug;
 MObject SceneShape::aSceneRootPlug;
 
-// registers this class in MayaScene
-SceneShape::MayaSceneAddOn SceneShape::g_mayaSceneAddon;
+// registers this class in LiveScene
+SceneShape::LiveSceneAddOn SceneShape::g_liveSceneAddon;
 
-SceneShape::MayaSceneAddOn::MayaSceneAddOn()
+SceneShape::LiveSceneAddOn::LiveSceneAddOn()
 {
-	MayaScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
-	MayaScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
-	MayaScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
+	LiveScene::registerCustomObject( SceneShape::hasSceneShapeObject, SceneShape::readSceneShapeObject );
+	LiveScene::registerCustomAttributes( SceneShape::sceneShapeAttributeNames, SceneShape::readSceneShapeAttribute );
+	LiveScene::registerCustomTags( SceneShape::hasTag, SceneShape::readTags );
 }
 
 SceneShape::SceneShape()
@@ -261,13 +261,13 @@ ConstObjectPtr SceneShape::readSceneShapeLink( const MDagPath &p )
 		if ( array[i].name() == "time1.outTime" )
 		{
 			/// connected to time, so no time remapping between maya scene and loaded scene.
-			return LinkedScene::linkAttributeData( scene );
+			return LinkedScene::linkAttributeData( scene.get() );
 		}
 	}
 	/// couldn't find connection to maya time, so this node is mapping the time some other way.
 	MTime time;
 	timePlug.getValue( time );
-	return LinkedScene::linkAttributeData( scene, time.as( MTime::kSeconds ) );
+	return LinkedScene::linkAttributeData( scene.get(), time.as( MTime::kSeconds ) );
 }
 
 void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::NameList &attributeNames )
@@ -279,18 +279,21 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 		return;
 	}
 	
+	SceneInterface::NameList sceneAttrNames;
 	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
 	if ( !scene )
 	{
 		return;
 	}
-	scene->attributeNames( attributeNames );
+	scene->attributeNames( sceneAttrNames );
+	attributeNames.insert( attributeNames.end(), sceneAttrNames.begin(), sceneAttrNames.end() );
 	
 	MFnDagNode fnChildDag( dagPath );
 	if( !fnChildDag.isIntermediateObject() && hasSceneShapeLink( p ) )
 	{
 		attributeNames.push_back( LinkedScene::linkAttribute );
 	}
+	
 }
 
 ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInterface::Name attributeName )
@@ -379,7 +382,10 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 		return false;
 	}
 	
-	const SceneInterface *scene = sceneShape->getSceneInterface();
+	/// \todo Perhaps getSceneInterface() should return a raw pointer?
+	/// Also perhaps it shouldn't be prefixed with "get" since there is no
+	/// corresponding set.
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return false;
@@ -396,7 +402,7 @@ void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, in
 		return;
 	}
 	
-	const SceneInterface *scene = sceneShape->getSceneInterface();
+	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return;

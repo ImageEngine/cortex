@@ -75,6 +75,9 @@ template<typename T> struct HasVectorValueType< TypedData< std::vector< T > > > 
 template<typename T> struct HasVectorValueType< GeometricTypedData<std::vector<T> > > : public boost::true_type {};
 template<typename T> struct HasVectorValueType< const T > : public HasVectorValueType<T> {};
 
+/// HasBaseType
+template<typename T> struct HasBaseType : public boost::mpl::not_< boost::is_void<typename T::BaseType> > {};
+
 namespace Detail
 {
 

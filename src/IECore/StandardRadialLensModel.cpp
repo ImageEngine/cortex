@@ -107,16 +107,23 @@ StandardRadialLensModel::~StandardRadialLensModel(){}
 
 void StandardRadialLensModel::validate()
 {
+	double filmBackWidth( parameters()->parameter<IECore::DoubleParameter>("filmbackWidthCm")->getNumericValue() );
+	double filmBackHeight( parameters()->parameter<IECore::DoubleParameter>("filmbackHeightCm")->getNumericValue() );
+	double filmBackOffsetX( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetXCm")->getNumericValue() );
+	double filmBackOffsetY( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetYCm")->getNumericValue() );
+
+	// Calculate the diagonal length of the filmback.
+	m_filmbackDiagonal = sqrt( filmBackWidth * filmBackWidth * .25 + filmBackHeight * filmBackHeight * .25 );
+
+	// Normalize the filmback and the offset by the diagonal radius of the filmback.
+	m_dnFilmback = Imath::V2d( filmBackWidth / m_filmbackDiagonal, filmBackHeight / m_filmbackDiagonal );
+	m_dnOffset = Imath::V2d( filmBackOffsetX / m_filmbackDiagonal, filmBackOffsetY / m_filmbackDiagonal );
+
 	const double distortion( parameters()->parameter<IECore::DoubleParameter>("distortion")->getNumericValue() );
 	const double anamorphicSqueeze( parameters()->parameter<IECore::DoubleParameter>("anamorphicSqueeze")->getNumericValue() );
 	const double quarticDistortion( parameters()->parameter<IECore::DoubleParameter>("quarticDistortion")->getNumericValue() );
 	const double curvatureX( parameters()->parameter<IECore::DoubleParameter>("curvatureX")->getNumericValue() );
 	const double curvatureY( parameters()->parameter<IECore::DoubleParameter>("curvatureY")->getNumericValue() );
-	
-	// Calculate the diagonal length of the filmback.
-	const double fbWidth( parameters()->parameter<IECore::DoubleParameter>("filmbackWidthCm")->getNumericValue() );
-	const double fbHeight( parameters()->parameter<IECore::DoubleParameter>("filmbackHeightCm")->getNumericValue() );
-	m_filmbackDiagonal = sqrt( fbWidth * fbWidth + fbHeight * fbHeight) / 2.0;
 	
 	// Use the parameters to calculate the coefficients that are needed by the distortion algorithm.
 	m_cxx = distortion / anamorphicSqueeze;
@@ -164,7 +171,6 @@ Imath::V2d StandardRadialLensModel::distort( Imath::V2d p )
 		fd[0][1] = 2.0*m_cyx*dn.x*dn.y + 2.*m_cyyx*dny2*dn.y*dn.x + 4.*m_cyxx*dnx2*dn.x*dn.y;
 		fd[1][1] = 1.0 + 3.0*m_cyy*dny2 + m_cyx*dnx2 + 5.*m_cyyy*dny4 + 3.*m_cyyx*dnx2*dny2 + m_cyxx*dnx4;
 		
-		// Convert the diagonally normalised coordinates to polar coordinates
 		Imath::V2d fDist;
 		fDist.x = dn.x * (1. + m_cxx*dnx2 + m_cxy*dny2 + m_cxxx*dnx4 + m_cxxy*dnx2*dny2 + m_cxyy*dny4);
 		fDist.y = dn.y * (1. + m_cyx*dnx2 + m_cyy*dny2 + m_cyxx*dnx4 + m_cyyx*dnx2*dny2 + m_cyyy*dny4);
@@ -175,37 +181,30 @@ Imath::V2d StandardRadialLensModel::distort( Imath::V2d p )
 	return DNtoUV( dn );
 }
 
-// A simple method which transforms UV coordinates of the range 0-1 to
-// diagonally normalized coordinates which are used by the distortion algorithm.
+// Transforms UV coordinates in the range 0-1 to the dimesionless
+// coordinates which are used by the distortion algorithm.
 Imath::V2d StandardRadialLensModel::UVtoDN( const Imath::V2d& uv )
 {
-	const double fbWidth( parameters()->parameter<IECore::DoubleParameter>("filmbackWidthCm")->getNumericValue() );
-	const double fbHeight( parameters()->parameter<IECore::DoubleParameter>("filmbackHeightCm")->getNumericValue() );
-	const double lensOffsetX( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetXCm")->getNumericValue() );
-	const double lensOffsetY( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetYCm")->getNumericValue() );
-	
-	Imath::V2d dn( uv );
-	dn.x = (uv.x - 1.0/2.0) * fbWidth - lensOffsetX;
-	dn.y = (uv.y - 1.0/2.0) * fbHeight - lensOffsetY;
-	dn /= m_filmbackDiagonal;
+	// Convert the UV coordinates to FOV coordinates.
+	// FOV coordinates range from -1 to 1 in both axis.
+	Imath::V2d fov( uv * Imath::V2d( 2. ) - Imath::V2d( 1. ) );
+	// Normalize the FOV coordinates so that the length from the
+	// center of the filmback to the corner is 1. This is referred
+	// to as the dimesionless coordiante system.
+	Imath::V2d dn( m_dnFilmback * fov * Imath::V2d( .5 ) - m_dnOffset );
 	return dn;
 }
 
-// A simple method which transforms the diagonally normalized coordinates
-// used by the distortion algorithm to UV coordinates of
-// the range 0-1.
-Imath::V2d StandardRadialLensModel::DNtoUV( const Imath::V2d& uv )
+// Transforms the dimesionless coordinates that are used by the
+// distortion algorithm to UV coordinates in the range of 0-1.
+Imath::V2d StandardRadialLensModel::DNtoUV( const Imath::V2d& dn )
 {
-	const double fbWidth( parameters()->parameter<IECore::DoubleParameter>("filmbackWidthCm")->getNumericValue() );
-	const double fbHeight( parameters()->parameter<IECore::DoubleParameter>("filmbackHeightCm")->getNumericValue() );
-	const double lensOffsetX( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetXCm")->getNumericValue() );
-	const double lensOffsetY( parameters()->parameter<IECore::DoubleParameter>("lensCenterOffsetYCm")->getNumericValue() );
-	
-	Imath::V2d dn( uv );
-	dn *= m_filmbackDiagonal;
-	dn += Imath::V2d(fbWidth/2. + lensOffsetX, fbHeight/2. + lensOffsetY);
-	dn /= Imath::V2d(fbWidth, fbHeight);
-	return dn;
+	// Convert the dimesionless coordinates to FOV coordinates.
+	// FOV coordinates range from -1 to 1 in both axis.
+	Imath::V2d fov( ( ( dn + m_dnOffset ) * Imath::V2d( 2. ) ) / m_dnFilmback );
+	// Convert from FOV coordinates to UV coordinates.
+	Imath::V2d uv( ( fov + Imath::V2d( 1. ) ) * Imath::V2d( .5 ) );
+	return uv;
 }
 
 } // namespace IECore

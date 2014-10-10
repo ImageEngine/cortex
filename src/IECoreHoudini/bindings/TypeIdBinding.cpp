@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -76,7 +76,7 @@ void bindTypeId()
 		.value( "ToHoudiniStringVectorAttribConverter", ToHoudiniStringVectorAttribConverterTypeId )
 		.value( "RATDeepImageReader", RATDeepImageReaderTypeId )
 		.value( "RATDeepImageWriter", RATDeepImageWriterTypeId )
-		.value( "HoudiniScene", HoudiniSceneTypeId )
+		.value( "LiveScene", LiveSceneTypeId )
 		.value( "FromHoudiniCortexObjectConverter", FromHoudiniCortexObjectConverterTypeId )
 		.value( "ToHoudiniCortexObjectConverter", ToHoudiniCortexObjectConverterTypeId )
 		.value( "FromHoudiniCompoundObjectConverter", FromHoudiniCompoundObjectConverterTypeId )

@@ -103,32 +103,32 @@ PointBoundsOp::~PointBoundsOp()
 
 ObjectParameter * PointBoundsOp::pointParameter()
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 const ObjectParameter * PointBoundsOp::pointParameter() const
 {
-	return m_pointParameter;
+	return m_pointParameter.get();
 }
 
 ObjectParameter * PointBoundsOp::radiusParameter()
 {
-	return m_radiusParameter;
+	return m_radiusParameter.get();
 }
 
 const ObjectParameter * PointBoundsOp::radiusParameter() const
 {
-	return m_radiusParameter;
+	return m_radiusParameter.get();
 }
 
 ObjectParameter * PointBoundsOp::velocityParameter()
 {
-	return m_velocityParameter;
+	return m_velocityParameter.get();
 }
 
 const ObjectParameter * PointBoundsOp::velocityParameter() const
 {
-	return m_velocityParameter;
+	return m_velocityParameter.get();
 }
 
 template<typename P, typename R, typename V>

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -55,7 +55,8 @@ LensDistortOp::LensDistortOp()
 	:	WarpOp(
 			"Distorts an ImagePrimitive using a parametric lens model which is supplied as a .cob file. "
 			"The resulting image will have the same display window as the original with a different data window."
-		)
+		),
+		m_mode( kUndistort )
 {
 
 	IntParameter::PresetsContainer modePresets;
@@ -87,12 +88,12 @@ LensDistortOp::~LensDistortOp()
 
 ObjectParameter * LensDistortOp::lensParameter()
 {
-	return m_lensParameter;
+	return m_lensParameter.get();
 }
 
 const ObjectParameter * LensDistortOp::lensParameter() const
 {
-	return m_lensParameter;
+	return m_lensParameter.get();
 }
 
 void LensDistortOp::begin( const CompoundObject * operands )

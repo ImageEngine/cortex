@@ -255,7 +255,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 		{
 			IECore::WorldBlock worldBlock( renderer );
-			proc->render( renderer, false, true, true, true );
+			proc->render( renderer.get(), false, true, true, true );
 		}
 
 		m_scene = renderer->scene();

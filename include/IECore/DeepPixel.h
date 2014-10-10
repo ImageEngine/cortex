@@ -46,6 +46,7 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( DeepPixel )
 
 /// A DeepPixel represents arbitrary channel data stored at varying depths in space.
+/// By convention, depth is measured as distance from the eye plane
 /// \ingroup deepCompositingGroup
 class DeepPixel : public RefCounted
 {

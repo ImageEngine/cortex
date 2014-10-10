@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -45,6 +45,11 @@ class TestEXRReader(unittest.TestCase):
 
 		r = Reader.create( "test/IECore/data/exrFiles/AllHalfValues.exr" )
 		self.assertEqual( type( r ), EXRImageReader )
+
+	def testCanReadDeepImage( self ) :
+
+		# Check that we reject a deep image.
+		self.assertFalse( EXRImageReader.canRead( "test/IECoreRI/data/exr/primitives.exr" ) )
 
 	def testCanReadAndIsComplete( self ) :
 

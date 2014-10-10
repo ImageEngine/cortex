@@ -82,7 +82,7 @@ ObjectPtr FromHoudiniPointsConverter::doDetailConversion( const GU_Detail *geo, 
 {
 	PointsPrimitivePtr result = new PointsPrimitive( geo->getNumPoints() );
 	
-	transferAttribs( geo, result, operands, PrimitiveVariable::Vertex );
+	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
 	
 	return result;
 }

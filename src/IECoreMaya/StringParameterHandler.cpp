@@ -111,7 +111,7 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 			if( getPlugValue( plug, p, v ) )
 			{
 				IECore::ObjectPtr d = new IECore::StringData( v.asChar() );
-				if( !parameter->valueValid( d ) )
+				if( !parameter->valueValid( d.get() ) )
 				{
 					return MS::kFailure;
 				}

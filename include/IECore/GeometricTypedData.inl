@@ -83,7 +83,7 @@ void GeometricTypedData<T>::setInterpretation( GeometricData::Interpretation int
 template <class T>
 typename GeometricTypedData<T>::Ptr GeometricTypedData<T>::copy() const
 {
-	return staticPointerCast<GeometricTypedData<T> >( TypedData<T>::copy() );
+	return boost::static_pointer_cast<GeometricTypedData<T> >( TypedData<T>::copy() );
 }
 
 template <class T>

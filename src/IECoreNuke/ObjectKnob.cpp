@@ -77,7 +77,7 @@ ObjectKnob::~ObjectKnob()
 
 bool ObjectKnob::setValue( IECore::ConstObjectPtr value )
 {
-	if( !valuesEqual( m_value, value ) )
+	if( !valuesEqual( m_value.get(), value.get() ) )
 	{
 		new_undo();
 		m_value = value ? value->copy() : 0;
@@ -152,7 +152,7 @@ bool ObjectKnob::from_script( const char *value )
 
 bool ObjectKnob::not_default() const
 {
-	return !valuesEqual( m_value, m_defaultValue );
+	return !valuesEqual( m_value.get(), m_defaultValue.get() );
 }
 
 void ObjectKnob::store( DD::Image::StoreType storeType, void *storage, DD::Image::Hash &hash, const DD::Image::OutputContext &context )

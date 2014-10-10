@@ -104,7 +104,7 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 		if ( obj )
 		{
 			m_cache.set( computationHash, obj->hash(), 1 );
-			obj = m_objectPool->store( obj, ObjectPool::StoreReference );
+			obj = m_objectPool->store( obj.get(), ObjectPool::StoreReference );
 		}
 	}
 	else
@@ -124,7 +124,7 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 			obj = m_computeFn(args);
 			if ( obj )
 			{
-				obj = m_objectPool->store( obj, ObjectPool::StoreReference );
+				obj = m_objectPool->store( obj.get(), ObjectPool::StoreReference );
 				MurmurHash h = obj->hash();
 				if ( h != objectHash )
 				{

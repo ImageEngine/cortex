@@ -658,7 +658,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 
 	ResultPtr result = new Result();
 
-	bool found = closestPoint( p, result );
+	bool found = closestPoint( p, result.get() );
 
 	if (found)
 	{

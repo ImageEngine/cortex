@@ -83,9 +83,9 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 	ConstPointsPrimitivePtr cd = particleObject();
 	for( PrimitiveVariableMap::const_iterator it=cd->variables.begin(); it!=cd->variables.end(); it++ )
 	{
-		if ( testTypedData<TypeTraits::IsVectorTypedData>( it->second.data ) )
+		if ( testTypedData<TypeTraits::IsVectorTypedData>( it->second.data.get() ) )
 		{
-			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data );
+			size_t s = despatchTypedData< TypedDataSize, TypeTraits::IsVectorTypedData >( it->second.data.get() );
 			if( s==numParticles )
 			{
 				allNames.push_back( it->first );
@@ -95,12 +95,12 @@ void ParticleWriter::particleAttributes( std::vector<std::string> &names )
 				msg( Msg::Warning, "ParticleWriter::particleAttributes", format( "Ignoring attribute \"%s\" due to insufficient elements (expected %d but found %d)." ) % it->first % numParticles % s );
 			}
 		}
-		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( it->second.data ) )
+		else if ( testTypedData<TypeTraits::IsSimpleTypedData>( it->second.data.get() ) )
 		{
 			// it's not data of a vector type but it could be of a simple type
 			// in which case it's suitable for saving as a constant particle attribute
 
-			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data );
+			despatchTypedData< TypedDataAddress, TypeTraits::IsSimpleTypedData >( it->second.data.get() );
 			allNames.push_back( it->first );
 		}
 	}

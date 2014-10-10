@@ -1182,7 +1182,7 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 		l = [ "one", "two", "three" ]
 		d = StringVectorData( l )
 		self.assertEqual( " ".join( l ), str( d ) )
-		self.assertEqual( "IECore.StringVectorData( [ " + ", ".join( ["\""+x+"\"" for x in l] ) + " ] )", repr( d ) )
+		self.assertEqual( "IECore.StringVectorData( [ " + ", ".join( ["'"+x+"'" for x in l] ) + " ] )", repr( d ) )
 
 		l = [ 1, 2, 3 ]
 		d = IntVectorData( l )

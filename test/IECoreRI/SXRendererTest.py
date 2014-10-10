@@ -127,7 +127,7 @@ class SXRendererTest( unittest.TestCase ) :
 		else : 
 			for i in range( 0, len( data1 ) ) :
 				self.assertAlmostEqual( data1[i], data2[i], 6 )
-		
+	
 	def test( self ) :
 
 		r = IECoreRI.SXRenderer()
@@ -405,6 +405,22 @@ class SXRendererTest( unittest.TestCase ) :
 			del s["P"] # test data on disk was created before we supported P as an output
 			del s["N"] # test data on disk was created before we supported N as an output
 			self.assertEqual( s, IECore.ObjectReader( "test/IECoreRI/data/sxOutput/grid.cob" ).read() )
+
+	def testMultipleGrids( self ) :
+	
+		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/sxGridTest.sdl test/IECoreRI/shaders/sxGridTest.sl" ), 0 )
+		
+		r = IECoreRI.SXRenderer()
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 19, 9 ) )
+		points = self.__rectanglePoints( b )
+		
+		with IECore.WorldBlock( r ) :
+				
+			r.shader( "surface", "test/IECoreRI/shaders/sxGridTest", {} )
+		
+			# there are 20 x 10 points in the input, so this call should shade four 10 x 5 grids:
+			r.shade( points, IECore.V2i( 10, 5 ) )
+
 
 	def testPlaneShade( self ) :
 		
@@ -867,7 +883,77 @@ class SXRendererTest( unittest.TestCase ) :
 
 			for t in threads :
 				t.join()
-						
+		
+	def testUserOptions( self ):
+		
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxUserOptionTest.sdl test/IECoreRI/shaders/sxUserOptionTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) ) )	
+		
+		r = IECoreRI.SXRenderer()
+		r.shader( "surface", "test/IECoreRI/shaders/sxUserOptionTest.sdl", {} )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0,0,0 ) )
+		
+		r.setOption( "user:outputColor", IECore.FloatData( 1 ) )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 1,1,1 ) )
+	
+	def testStringArrayOptions( self ):
+		
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxStringArrayOptionTest.sdl test/IECoreRI/shaders/sxStringArrayOptionTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) ) )	
+		
+		r = IECoreRI.SXRenderer()
+		r.shader( "surface", "test/IECoreRI/shaders/sxStringArrayOptionTest.sdl", {} )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 0,0,0 ) )
+		
+		r.setOption( "user:stringArray", IECore.StringVectorData( ["this","should","work"] ) )
+		
+		s = r.shade( points )
+		self.assertEqual( s["Ci"][0], IECore.Color3f( 1,1,1 ) )
+		
+	
+	def testCoordinateSystems( self ):
+		
+		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/sxCoordSystemTest.sdl test/IECoreRI/shaders/sxCoordSystemTest.sl" ), 0 )
+		
+		points = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) ) )
+		
+		r = IECoreRI.SXRenderer()
+		
+		r.shader( "surface", "test/IECoreRI/shaders/sxCoordSystemTest.sdl", { "coordSysName" : IECore.StringData( "test1" ) } )
+		
+		r.transformBegin()
+		r.setTransform( IECore.M44f.createTranslated( IECore.V3f(0,0,2) ) )
+		r.coordinateSystem( "test1" )
+		r.transformEnd()
+		
+		r.transformBegin()
+		r.setTransform( IECore.M44f.createRotated( IECore.V3f(1,0,0) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f(0,0,2) ) )
+		r.coordinateSystem( "test2" )
+		r.transformEnd()
+		
+		s1 = r.shade( points )
+		for i in range( len( s1["Ci"] ) ):
+			self.assertEqual( points["P"][i] + IECore.V3f(0,0,2), IECore.V3f( s1["Ci"][i][0], s1["Ci"][i][1], s1["Ci"][i][2] ) )
+		
+		r.shader( "surface", "test/IECoreRI/shaders/sxCoordSystemTest.sdl", { "coordSysName" : IECore.StringData( "test2" ) } )
+		s2 = r.shade( points )
+		for i in range( len( s2["Ci"] ) ):
+			shaderP = IECore.V3f( s2["Ci"][i][0], s2["Ci"][i][1], s2["Ci"][i][2] )
+			transP = points["P"][i] * IECore.M44f.createTranslated( IECore.V3f(0,0,2) ) * IECore.M44f.createRotated( IECore.V3f(1,0,0) )
+			
+			self.failUnless( ( shaderP - transP ).length() < 1.e-5 )
+			
+		
+	
 	def tearDown( self ) :
 				
 		files = [
@@ -889,6 +975,9 @@ class SXRendererTest( unittest.TestCase ) :
 			"test/IECoreRI/shaders/sxTextureTest.sdl",
 			"test/IECoreRI/shaders/sxUniformPrimitiveVariableShaderParameterTest.sdl",
 			"test/IECoreRI/shaders/sxUniformPrimitiveVariableTest.sdl",
+			"test/IECoreRI/shaders/sxUserOptionTest.sdl",
+			"test/IECoreRI/shaders/sxCoordSystemTest.sdl",
+			"test/IECoreRI/shaders/sxStringArrayOptionTest.sdl",
 		]
 		
 		for f in files :

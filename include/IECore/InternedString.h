@@ -37,6 +37,11 @@
 
 #include <string>
 
+/// May be used to detect the existence of the
+/// InternedString( const char *, size_t length )
+/// constructor.
+#define IECORE_INTERNEDSTRING_RANGECONSTRUCTOR
+
 namespace IECore
 {
 
@@ -53,6 +58,7 @@ class InternedString
 		inline InternedString( const std::string &value );
 		inline InternedString( const InternedString &other );
 		inline InternedString( const char *value );
+		inline InternedString( const char *value, size_t length );
 		inline InternedString( int64_t number );
 
 		inline ~InternedString();
@@ -81,6 +87,7 @@ class InternedString
 	private :
 
 		static const std::string *internedString( const char *value );
+		static const std::string *internedString( const char *value, size_t length );
 
 		const std::string *m_value;
 

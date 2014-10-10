@@ -92,7 +92,7 @@ class ShaderLoader : public IECore::RefCounted
 		/// and preprocessor searchpaths set using the
 		/// IECOREGL_SHADER_INCLUDE_PATHS environment
 		/// variable.
-		static ShaderLoaderPtr defaultShaderLoader();
+		static ShaderLoader *defaultShaderLoader();
 
 	private :
 

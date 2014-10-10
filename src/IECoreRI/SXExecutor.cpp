@@ -63,7 +63,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 			for( ShaderVector::const_iterator it=coshaders.begin(); it!=coshaders.end(); ++it )
 			{
-				storeParameterInfo( *it );
+				storeParameterInfo( *it, false );
 			}
 			for( ShaderVector::const_iterator it=lights.begin(); it!=lights.end(); ++it )
 			{
@@ -83,9 +83,11 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 
 			bool haveGrid = gridSize.x > 0 && gridSize.y > 0;
+			int numGrids = 0;
 			if( haveGrid )
 			{
-				if( numPoints != (size_t)(gridSize.x * gridSize.y) )
+				numGrids = numPoints / (size_t)(gridSize.x * gridSize.y);
+				if( numPoints != (size_t)( numGrids * gridSize.x * gridSize.y) )
 				{
 					throw Exception( boost::str( boost::format( "Wrong number of points (%d) for grid (%dx%d)." ) % numPoints % gridSize.x % gridSize.y ) );
 				}
@@ -94,13 +96,16 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			// create parameter list for the grid and set topology if we can.
 
 			boost::shared_ptr<void> vars( SxCreateParameterList( m_context, numPoints, "current" ), SxDestroyParameterList );
-
+			
+			std::vector<unsigned> nu;
+			std::vector<unsigned> nv;
 			if( haveGrid )
 			{
-				unsigned nu = gridSize.x; unsigned nv = gridSize.y;
-				SxSetParameterListGridTopology( vars.get(), 1, &nu, &nv );
+				nu.resize( numGrids, gridSize.x );
+				nv.resize( numGrids, gridSize.y );
+				SxSetParameterListGridTopology( vars.get(), numGrids, &nu.front(), &nv.front() );
 			}
-
+			
 			// fill the grid from our input data.
 
 			setVariables( vars.get(), points, numPoints );
@@ -152,7 +157,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			bool varying;
 		};
 		
-		void storeParameterInfo( SxShader shader )
+		void storeParameterInfo( SxShader shader, bool printWarnings = true )
 		{
 			unsigned numParameters = SxGetNumParameters( shader );
 			for( unsigned i=0; i<numParameters; i++ )
@@ -167,7 +172,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				TypeMap::const_iterator it = typeMap.find( name );
 				if( it != typeMap.end() )
 				{
-					if( it->second != info  )
+					if( it->second != info && printWarnings )
 					{
 						msg( Msg::Warning, "SXExecutor::storeParameterTypes", boost::format( "Shaders request conflicting types for parameter \"%s\"" ) % name );
 					}
@@ -258,14 +263,14 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				ParameterInfo info = predefinedParameterInfo( it->first.value().c_str() );
 				if( info.type != SxInvalid )
 				{
-					setVariable( parameterList, it->first.value().c_str(), info, true, it->second, numPoints );
+					setVariable( parameterList, it->first.value().c_str(), info, true, it->second.get(), numPoints );
 				}
 				else
 				{
 					TypeMap::const_iterator tIt = m_inputParameterTypes.find( it->first );
 					if( tIt != m_inputParameterTypes.end() )
 					{
-						setVariable( parameterList, it->first.value().c_str(), tIt->second, false, it->second, numPoints );
+						setVariable( parameterList, it->first.value().c_str(), tIt->second, false, it->second.get(), numPoints );
 					}
 					else
 					{
@@ -274,7 +279,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 						ParameterInfo info = assumedParameterInfo( it->second->typeId() );
 						if( info.type != SxInvalid )
 						{
-							setVariable( parameterList, it->first.value().c_str(), info, false, it->second, numPoints );
+							setVariable( parameterList, it->first.value().c_str(), info, false, it->second.get(), numPoints );
 						}
 						else
 						{
@@ -425,29 +430,29 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				switch( it->second.type )
 				{
 					case SxFloat :
-						getVariable<SxFloat>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxFloat>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxColor :
-						getVariable<SxColor>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxColor>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxPoint :
-						getVariable<SxPoint>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxPoint>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxVector :
-						getVariable<SxVector>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxVector>( parameterList, it->first.value().c_str(), result.get() );
 						break;
 					case SxNormal :
-						getVariable<SxNormal>( parameterList, it->first.value().c_str(), result );
+						getVariable<SxNormal>( parameterList, it->first.value().c_str(), result.get() );
 						break;				
 					default :
 						throw Exception( boost::str( boost::format( "Output parameter \"%s\" has unsupported type." ) % it->first.value() ) );
 				}
 			}
 
-			getVariable<SxColor>( parameterList, "Ci", result );
-			getVariable<SxColor>( parameterList, "Oi", result );
-			getVariable<SxPoint>( parameterList, "P", result );
-			getVariable<SxNormal>( parameterList, "N", result );
+			getVariable<SxColor>( parameterList, "Ci", result.get() );
+			getVariable<SxColor>( parameterList, "Oi", result.get() );
+			getVariable<SxPoint>( parameterList, "P", result.get() );
+			getVariable<SxNormal>( parameterList, "N", result.get() );
 
 			return result;						
 		}

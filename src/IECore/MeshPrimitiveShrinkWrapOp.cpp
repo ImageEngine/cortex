@@ -116,52 +116,52 @@ MeshPrimitiveShrinkWrapOp::~MeshPrimitiveShrinkWrapOp()
 
 MeshPrimitiveParameter * MeshPrimitiveShrinkWrapOp::targetMeshParameter()
 {
-	return m_targetMeshParameter;
+	return m_targetMeshParameter.get();
 }
 
 const MeshPrimitiveParameter * MeshPrimitiveShrinkWrapOp::targetMeshParameter() const
 {
-	return m_targetMeshParameter;
+	return m_targetMeshParameter.get();
 }
 
 IntParameter * MeshPrimitiveShrinkWrapOp::methodParameter()
 {
-	return m_methodParameter;
+	return m_methodParameter.get();
 }
 
 const IntParameter * MeshPrimitiveShrinkWrapOp::methodParameter() const
 {
-	return m_methodParameter;
+	return m_methodParameter.get();
 }
 
 IntParameter * MeshPrimitiveShrinkWrapOp::directionParameter()
 {
-	return m_directionParameter;
+	return m_directionParameter.get();
 }
 
 const IntParameter * MeshPrimitiveShrinkWrapOp::directionParameter() const
 {
-	return m_directionParameter;
+	return m_directionParameter.get();
 }
 
 MeshPrimitiveParameter * MeshPrimitiveShrinkWrapOp::directionMeshParameter()
 {
-	return m_directionMeshParameter;
+	return m_directionMeshParameter.get();
 }
 
 const MeshPrimitiveParameter * MeshPrimitiveShrinkWrapOp::directionMeshParameter() const
 {
-	return m_directionMeshParameter;
+	return m_directionMeshParameter.get();
 }
 
 FloatParameter * MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter()
 {
-	return m_triangulationToleranceParameter;
+	return m_triangulationToleranceParameter.get();
 }
 
 const FloatParameter * MeshPrimitiveShrinkWrapOp::triangulationToleranceParameter() const
 {
-	return m_triangulationToleranceParameter;
+	return m_triangulationToleranceParameter.get();
 }
 
 struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
@@ -252,7 +252,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			{
 				assert( sourceEvaluator );
 				assert( sourceResult );
-				sourceEvaluator->closestPoint( vertexPosition, sourceResult );
+				sourceEvaluator->closestPoint( vertexPosition, sourceResult.get() );
 				rayDirection = sourceResult->vectorPrimVar( nPrimVar ).normalized();
 			}
 			else if ( m_method == XAxis )
@@ -280,7 +280,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 
 			if ( m_direction == Inside )
 			{
-				hit = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult );
+				hit = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult.get() );
 				if ( hit )
 				{
 					vertexPosition = insideResult->point();
@@ -288,7 +288,7 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			}
 			else if ( m_direction == Outside )
 			{
-				hit = targetEvaluator->intersectionPoint( vertexPosition, rayDirection, outsideResult );
+				hit = targetEvaluator->intersectionPoint( vertexPosition, rayDirection, outsideResult.get() );
 				if ( hit )
 				{
 					vertexPosition = outsideResult->point();
@@ -298,8 +298,8 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 			{
 				assert( m_direction == Both );
 
-				bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult  );
-				bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  rayDirection, outsideResult );
+				bool insideHit  = targetEvaluator->intersectionPoint( vertexPosition, -rayDirection, insideResult.get()  );
+				bool outsideHit = targetEvaluator->intersectionPoint( vertexPosition,  rayDirection, outsideResult.get() );
 
 				/// Choose the closest, or the only, intersection
 				if ( insideHit && outsideHit )
@@ -357,7 +357,7 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 		throw InvalidArgumentException( "Mesh with invalid primitive variables given to MeshPrimitiveShrinkWrapOp" );
 	}
 
-	MeshPrimitive *target = targetMeshParameter()->getTypedValue< MeshPrimitive >( );
+	MeshPrimitivePtr target = targetMeshParameter()->getTypedValue< MeshPrimitive >( );
 	if ( !target )
 	{
 		return;
@@ -402,6 +402,6 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 		directionVerticesData = it->second.data;
 	}
 
-	ShrinkWrapFn fn( mesh, target, directionVerticesData, direction, method, this->triangulationToleranceParameter()->getNumericValue() );
-	despatchTypedData< ShrinkWrapFn, TypeTraits::IsFloatVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData, fn );
+	ShrinkWrapFn fn( mesh, target.get(), directionVerticesData.get(), direction, method, this->triangulationToleranceParameter()->getNumericValue() );
+	despatchTypedData< ShrinkWrapFn, TypeTraits::IsFloatVec3VectorTypedData, ShrinkWrapFn::ErrorHandler >( verticesData.get(), fn );
 }

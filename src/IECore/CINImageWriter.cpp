@@ -96,7 +96,7 @@ struct CINImageWriter::ChannelConverter
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataContainer )
+	ReturnType operator()( T *dataContainer )
 	{
 		assert( dataContainer );
 
@@ -132,7 +132,7 @@ struct CINImageWriter::ChannelConverter
 	struct ErrorHandler
 	{
 		template<typename T, typename F>
-		void operator()( typename T::ConstPtr data, const F& functor )
+		void operator()( const T *data, const F& functor )
 		{
 			assert( data );
 
@@ -280,7 +280,7 @@ void CINImageWriter::writeImage( const vector<string> &names, const ImagePrimiti
 		unsigned int shift = (32 - bpp) - (offset*bpp);
 
 		assert( image->variables.find( *i ) != image->variables.end() );
-		DataPtr dataContainer = image->variables.find( *i )->second.data;
+		Data *dataContainer = image->variables.find( *i )->second.data.get();
 		assert( dataContainer );
 
 		ChannelConverter converter( *i, image, dataWindow, shift, imageBuffer );

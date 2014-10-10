@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -49,16 +49,62 @@ import random
 ## cache needs to be refreshed before the deepSample returns a correct result. This may be due to a bug in nuke
 ## or an error in the IECoreNuke::DeepImageReader code. Further investigation is required.
 class DeepImageReaderTest( IECoreNuke.TestCase ) :
+	
+	__smokeWithoutZBack = "test/IECoreRI/data/exr/deepSmokeWithoutZBack.exr"
+	__output = "test/IECoreRI/data/exr/deepSmokeWithZBack.exr"
 
 	def __inputPaths( self ) :	
 		return { "exr" : "test/IECoreRI/data/exr/primitives.exr", "shw" : "test/IECoreRI/data/shw/primitives.shw" }
+
+	def testCreationOfZBack( self ) :
+
+		if not IECore.withDeepEXR :
+			return
+		
+		## This test is disabled because Nuke is seg faulting when executing
+		## a DeepWrite from command line mode. The same test in an interactive
+		## Nuke session works as expected. Last tested in Nuke8.0v3.
+		## \todo: Re-enable this test when the Nuke bug is fixed.
+		return
+		
+		# Create a DeepReader to read the deep EXR.
+		reader = nuke.createNode( "DeepRead" )
+		reader["file"].setText( DeepImageReaderTest.__smokeWithoutZBack )
+
+		# Write it back out. We do this because nuke's DeepSample node is un
+		writer = nuke.createNode( "DeepWrite" )
+		writer["file"].setText( DeepImageReaderTest.__output )
+		nuke.execute( writer, 1, 1 )
+		
+		# Read the image back in and check the values of it's ZBack channel.
+		reader = IECore.EXRDeepImageReader( DeepImageReaderTest.__output )
+		header = reader.readHeader()
+		resolution = reader['dataWindow'].size() + IECore.V2i( 1 )
+			
+		self.assertEqual( set( header['channelNames'] ), set( [ 'R', 'G', 'B', 'A', 'ZBack' ] ) )
+
+		for y in range( 0, resolution[0] ) :
+			for x in range( 0, resolution[1] ) :
+				
+				p = reader.readPixel( x, y )
+				n = p.numSamples()
+				zBackIndex = p.channelIndex( 'ZBack' )
+
+				if n >= 1 :
+					n = n - 1
+
+				for s in range( 0, n ) : 
+					front = p.getDepth( s )
+					back = p.getDepth( s+1 )
+					actualBack = p.channelData( s )[ zBackIndex ]
+					self.assertEqual( back, actualBack )
 
 	def testReadOfShwAgainstExr( self ) :
 		import IECoreRI
 	
 		# Create a DeepReader to read a deep EXR.	
-		readerExr = nuke.createNode( "DeepRead" )
-		readerExr["file"].setText( self.__inputPaths()["exr"] )
+		reader = nuke.createNode( "DeepRead" )
+		reader["file"].setText( self.__inputPaths()["exr"] )
 
 		# Create an ieDeepImageReader to read the deep SHW.
 		readerShw = nuke.createNode("DeepRead")
@@ -72,15 +118,20 @@ class DeepImageReaderTest( IECoreNuke.TestCase ) :
 			y = random.randint( 0, 511 )
 			
 			# Check that both image have the same number of samples.
-			nSamplesExr = readerExr.deepSampleCount( x, y )
+			nSamplesExr = reader.deepSampleCount( x, y )
 			nSamplesShw = readerShw.deepSampleCount( x, y )
 			self.assertEqual( nSamplesExr, nSamplesShw )
 		
 			for channel in [ "front", "back", "A" ] :
 				for idx in range( 0, nSamplesExr ) :
-					frontExr = readerExr.deepSample( channel, x, y, idx )
+					frontExr = reader.deepSample( channel, x, y, idx )
 					frontShw = readerShw.deepSample( channel, x, y, idx )
 					self.assertEqual( frontExr, frontShw )
+	
+	def tearDown( self ) :
+		
+		if os.path.isfile( DeepImageReaderTest.__output ) :
+			os.remove( DeepImageReaderTest.__output )
 							
 if __name__ == "__main__":
     unittest.main()

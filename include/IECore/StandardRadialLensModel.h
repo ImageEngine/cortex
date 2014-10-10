@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -45,9 +45,9 @@ namespace IECore
 
 /// StandardRadialLensModel
 /// An implementation of a 2 degree Anamorphic or 4 degree Radial lens model.
-/// This model and it's parameters are 3DE compatible and were created from
-/// freely available material. This algorithm was implemented from:
-/// www.alamaison.fr/3d/lmWarpDistort/distortion.pdf
+/// This model and it's parameters produce identical results to that of 3DE.
+/// It was implemented from a paper that is available on 3DE's website.
+/// http://www.3dequalizer.com/user_daten/tech_docs/pdf/distortion.pdf
 ///
 /// Further information on this algorithm and others can be found freely at:
 /// Lens Distortion Plugin Kit v1.3 by Uwe Sassenberg, Science-D-Visions 
@@ -72,19 +72,20 @@ class StandardRadialLensModel : public LensModel
 
 	private:
 
-		/// Transforms UV coordinates of the range 0-1
-		/// to diagonally normalized coordinates which
+		/// Transforms UV coordinates in the range 0-1
+		/// to dimesionless coordinates which
 		/// are used by the distortion algorithm.
 		Imath::V2d UVtoDN( const Imath::V2d& uv );
 		
-		/// Transforms the diagonally normalized coordinates
-		/// used by the distortion algorithm to UV coordinates of
-		/// the range 0-1.
+		/// Transforms the dimesionless coordinates
+		/// used by the distortion algorithm to UV
+		/// coordinates of in the range 0-1.
 		Imath::V2d DNtoUV( const Imath::V2d& uv );
 		
 		/// Coeficients needed by the distortion algorithm.
 		/// These values are calculated within validate().
 		double m_filmbackDiagonal;
+		Imath::V2d m_dnFilmback, m_dnOffset;
 		double m_cxx, m_cxy, m_cyx, m_cyy, m_cxxx;
 		double m_cxxy, m_cxyy, m_cyxx, m_cyyx, m_cyyy;
 

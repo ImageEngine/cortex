@@ -103,6 +103,10 @@ class PointSmoothSkinningOp : public ModifyOp
 		IntParameter * blendParameter();
 		const IntParameter * blendParameter() const;
 
+		/// parameter to map each input vertex index to an index in the smooth skinning data
+		IntVectorParameter * refIndicesParameter();
+		const IntVectorParameter * refIndicesParameter() const;
+
 	protected:
 
         virtual void modify( Object *object, const CompoundObject * operands );
@@ -115,8 +119,12 @@ class PointSmoothSkinningOp : public ModifyOp
 		IntParameterPtr m_blendParameter;
 		BoolParameterPtr m_deformNormalsParameter;
 		M44fVectorParameterPtr m_deformationPoseParameter;
+		IntVectorParameterPtr m_refIndicesParameter;
 
-		SmoothSkinningDataPtr m_prevSmoothSkinningData;
+		ConstSmoothSkinningDataPtr m_prevSmoothSkinningData;
+		
+		struct DeformPositions;
+		struct DeformNormals;
 };
 
 IE_CORE_DECLAREPTR( PointSmoothSkinningOp );

@@ -62,12 +62,12 @@ MeshFaceFilterOp::~MeshFaceFilterOp()
 
 IECore::ObjectParameter *MeshFaceFilterOp::filterParameter()
 {
-	return m_filterParameter;
+	return m_filterParameter.get();
 }
 
 const IECore::ObjectParameter *MeshFaceFilterOp::filterParameter() const
 {
-	return m_filterParameter;
+	return m_filterParameter.get();
 }
 
 void MeshFaceFilterOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands )

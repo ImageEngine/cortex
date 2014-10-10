@@ -280,7 +280,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				IntVectorDataPtr d( new IntVectorData );
 				d->writable().resize( numParticles() );
 				readElements( &d->writable()[0], it->second.position, numParticles() );
-				result = filterAttr<IntVectorData, IntVectorData>( d, particlePercentage(), idAttr );
+				result = filterAttr<IntVectorData, IntVectorData>( d.get(), particlePercentage(), idAttr );
 			}
 			break;
 		case Double :
@@ -308,10 +308,10 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<DoubleVectorData, DoubleVectorData>( d, particlePercentage(), idAttr );
+						result = filterAttr<DoubleVectorData, DoubleVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 					case Float :
-						result = filterAttr<FloatVectorData, DoubleVectorData>( d, particlePercentage(), idAttr );
+						result = filterAttr<FloatVectorData, DoubleVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 				}
 			}
@@ -355,10 +355,10 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<V3dVectorData, V3dVectorData>( d, particlePercentage(), idAttr );
+						result = filterAttr<V3dVectorData, V3dVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 					case Float :
-						result = filterAttr<V3fVectorData, V3dVectorData>( d, particlePercentage(), idAttr );
+						result = filterAttr<V3fVectorData, V3dVectorData>( d.get(), particlePercentage(), idAttr );
 						break;
 				}
 			}
@@ -402,7 +402,7 @@ const Data * PDCParticleReader::idAttribute()
 			}
 		}
 	}
-	return m_idAttribute;
+	return m_idAttribute.get();
 }
 
 std::string PDCParticleReader::positionPrimVarName()

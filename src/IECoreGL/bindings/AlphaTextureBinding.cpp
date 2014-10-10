@@ -48,8 +48,8 @@ namespace IECoreGL
 void bindAlphaTexture()
 {
 	IECorePython::RunTimeTypedClass<AlphaTexture>()
-		.def( init<unsigned int, unsigned int, IECore::ConstDataPtr, bool>() )
-		.def( init<IECore::ImagePrimitivePtr, bool>() )
+		.def( init<unsigned int, unsigned int, const IECore::Data *, bool>() )
+		.def( init<const IECore::ImagePrimitive *, bool>() )
 	;
 }
 

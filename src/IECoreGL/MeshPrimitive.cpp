@@ -81,7 +81,7 @@ class MeshPrimitive::MemberData : public IECore::RefCounted
 			}
 
 			template<typename T>
-			IECore::DataPtr operator()( typename T::Ptr inData )
+			IECore::DataPtr operator()( T *inData )
 			{
 				assert( inData );
 
@@ -144,7 +144,7 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	{
 		MemberData::ToFaceVaryingConverter primVarConverter( m_memberData->vertIds );
 		// convert to facevarying
-		IECore::DataPtr newData = IECore::despatchTypedData< MemberData::ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data, primVarConverter );
+		IECore::DataPtr newData = IECore::despatchTypedData< MemberData::ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data.get(), primVarConverter );
 		addVertexAttribute( name, newData );
 	}
 	else if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )

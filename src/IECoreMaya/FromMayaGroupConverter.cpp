@@ -77,7 +77,7 @@ IECore::ObjectPtr FromMayaGroupConverter::doConversion( const MDagPath &dagPath,
 	CompoundObject::ObjectMap::const_iterator it = operands->members().find( "ignoreIntermediateObjects" );
 	if ( it != operands->members().end() )
 	{
-		ignoreIntermediate = staticPointerCast< BoolData >( it->second )->readable();
+		ignoreIntermediate = boost::static_pointer_cast< BoolData >( it->second )->readable();
 	}
 
 	if( dagPath.apiType()==MFn::kTransform )

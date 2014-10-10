@@ -238,7 +238,7 @@ VRAY_ieProcedural::render()
 	if( parameterisedProcedural )
 	{
 		IECoreMantra::RendererPtr renderer = new IECoreMantra::Renderer( this );
-		parameterisedProcedural->render( renderer, false, false, true, true ); 
+		parameterisedProcedural->render( renderer.get(), false, false, true, true ); 
 	}
 }
 

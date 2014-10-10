@@ -46,8 +46,11 @@
 #include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 #include "boost/format.hpp"
 
 #include <iostream>
@@ -86,7 +89,7 @@ std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 // This constructor launches a render within the current application. It creates a SharedData instance,
 // which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
-	:	m_sharedData( new SharedData )
+	:	m_sharedData( new SharedData ), m_inWorld( false )
 {
 	m_options = new CompoundData();
 	constructCommon();
@@ -117,7 +120,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
 // that launched the procedural
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true )
 {
 	constructCommon();
 	
@@ -141,7 +144,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
 IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 ), m_options( 0 )
+	:	m_context( 0 ), m_options( 0 ), m_inWorld( true )
 {
 	constructCommon();
 	
@@ -172,10 +175,6 @@ IECoreRI::RendererImplementation::RendererImplementation()
 
 void IECoreRI::RendererImplementation::constructCommon()
 {
-	m_camera = new Camera;
-	m_camera->addStandardParameters();
-	m_camera->setTransform( new MatrixTransform() );
-
 	m_attributeStack.push( AttributeState() );
 
 	const char *fontPath = getenv( "IECORE_FONT_PATHS" );
@@ -226,7 +225,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 
-	m_inMotion = false;
+	m_motionType = None;
 	m_numDisplays = 0;
 }
 
@@ -419,77 +418,21 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	CompoundDataPtr parameterData = (new CompoundData( parameters ))->copy();
 
 	CameraPtr camera = new Camera( name, 0, parameterData );
-	camera->addStandardParameters(); // it simplifies outputCamera() to know that the camera is complete
+	camera->addStandardParameters(); // it simplifies things to know that the camera is complete
 
-	bool outputNow = false;
-	CompoundDataMap::const_iterator outputNowIt=parameters.find( "ri:outputNow" );
-	if( outputNowIt!=parameters.end() )
-	{
-		if( ConstBoolDataPtr b = runTimeCast<BoolData>( outputNowIt->second ) )
-		{
-			outputNow = b->readable();
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"ri:outputNow\" parameter should be of type BoolData." );
-		}
-	}
-
-	if( outputNow )
-	{
-		outputCamera( camera );
-		m_camera = 0;
-	}
-	else
-	{
-		// add transform and store for output at worldBegin().
-		CompoundDataMap::const_iterator transformIt=parameters.find( "transform" );
-		if( transformIt!=parameters.end() )
-		{
-			if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )
-			{
-				camera->setTransform( new MatrixTransform( m->readable() ) );
-			}
-			else
-			{
-				msg( Msg::Error, "IECoreRI::RendererImplementation::camera", "\"transform\" parameter should be of type M44fData." );
-			}
-		}
-		else
-		{
-			camera->setTransform( new MatrixTransform( getTransform() ) );
-		}
-		m_camera = camera;
-	}
-}
-
-void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
-{
-	// then shutter
+	// output shutter
 	CompoundDataMap::const_iterator it = camera->parameters().find( "shutter" );
 	ConstV2fDataPtr shutterD = runTimeCast<const V2fData>( it->second );
 	RiShutter( shutterD->readable()[0], shutterD->readable()[1] );
 
-	// then hider
-	it = camera->parameters().find( "ri:hider" );
-	if( it!=camera->parameters().end() )
-	{
-		ConstStringDataPtr d = runTimeCast<const StringData>( it->second );
-		if( d )
-		{
-			ParameterList p( camera->parameters(), "ri:hider:" );
-			RiHiderV( (char *)d->readable().c_str(), p.n(), p.tokens(), p.values() );
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Camera \"ri:hider\" parameter should be of type StringData." );
-		}
-	}
-
-	// then resolution
+	// then format
 	it = camera->parameters().find( "resolution" );
 	ConstV2iDataPtr d = runTimeCast<const V2iData>( it->second );
-	RiFormat( d->readable().x, d->readable().y, 1 );
+	RiFormat(
+		d->readable().x,
+		d->readable().y,
+		camera->parametersData()->member<FloatData>( "pixelAspectRatio" )->readable()
+	);
 
 	// then screen window
 	it = camera->parameters().find( "screenWindow" );
@@ -507,18 +450,52 @@ void IECoreRI::RendererImplementation::outputCamera( IECore::CameraPtr camera )
 	RiClipping( clippingD->readable()[0], clippingD->readable()[1] );
 
 	// then projection
+	RiIdentity();
 	it = camera->parameters().find( "projection" );
 	ConstStringDataPtr projectionD = runTimeCast<const StringData>( it->second );
 	ParameterList p( camera->parameters(), "projection:" );
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
-	// transform last
-	if( camera->getTransform() )
+	// then transform
+	const size_t numSamples = m_preWorldTransform.numSamples();
+	if( numSamples > 1 )
 	{
-		M44f m = camera->getTransform()->transform();
+		vector<float> sampleTimes;
+		for( size_t i = 0; i < numSamples; ++i )
+		{
+			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
+		}
+		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
+	}
+	
+	for( size_t i = 0; i < numSamples; ++i )
+	{
+		M44f m = m_preWorldTransform.sample( i );
 		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
 		m.invert();
-		setTransform( m );
+		RtMatrix mm;
+		convert( m, mm );
+		RiTransform( mm );
+	}
+	
+	if( numSamples > 1 )
+	{
+		RiMotionEnd();
+	}
+	
+	// then camera itself
+	RiCamera( name.c_str(), RI_NULL );
+	
+	if( name == m_lastCamera )
+	{
+		// we're in an edit, and need to update
+		// the world camera as well.
+		RiCamera( RI_WORLD, RI_NULL );
+	}
+	else
+	{
+		// remember which camera we output last
+		m_lastCamera = name;
 	}
 }
 
@@ -546,6 +523,20 @@ void IECoreRI::RendererImplementation::display( const std::string &name, const s
 
 void IECoreRI::RendererImplementation::worldBegin()
 {
+	if( m_inWorld )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::worldBegin", "Already in a world block." );
+		return;
+	}
+
+	if( m_lastCamera == "" )
+	{
+		// no camera was output explicitly. output one ourselves
+		// so that we end up with the cortex default camera rather
+		// than the renderman one.
+		camera( "main", CompoundDataMap() );
+	}
+
 	ScopedContext scopedContext( m_context );
 	
 	// we implement the "editable" option by specifying the raytrace hider with
@@ -628,26 +619,37 @@ void IECoreRI::RendererImplementation::worldBegin()
 			processed = true;
 		}
 		
-		if( !processed && ( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) )
+		if(
+			!processed &&
+			( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) &&
+			name != "ri:frame"
+		)
 		{
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
 		}
 	}
 	
-	// output any stored camera we might have
+	// output a frame block if ri:frame has been specified
 	
-	if( m_camera )
+	if( const IntData *frame = m_options->member<IntData>( "ri:frame" ) )
 	{
-		outputCamera( m_camera );
+		RiFrameBegin( frame->readable() );
 	}
 	
 	// get the world fired up
 	
 	RiWorldBegin();
+	m_inWorld = true;
 }
 
 void IECoreRI::RendererImplementation::worldEnd()
 {	
+	if( !m_inWorld )
+	{
+		msg( Msg::Error, "IECoreRI::RendererImplementation::worldEnd", "Not in a world block." );
+		return;
+	}
+	
 	// we can't simply use ScopedContext here to manage our context
 	// as we do in the other methods, because 3delight versions >= 11.0.0
 	// actually change context in RiWorldEnd when rerendering. the old
@@ -668,6 +670,12 @@ void IECoreRI::RendererImplementation::worldEnd()
 	
 	RiContext( m_context );
 	RiWorldEnd();
+	m_inWorld = false;
+	
+	if( m_options->member<IntData>( "ri:frame" ) )
+	{
+		RiFrameEnd();
+	}
 	
 	// get our new context which we can emit edits on. we can no longer make
 	// calls to our original context, and we must call RiEnd() with the new one
@@ -687,30 +695,56 @@ void IECoreRI::RendererImplementation::worldEnd()
 
 void IECoreRI::RendererImplementation::transformBegin()
 {
-	ScopedContext scopedContext( m_context );
-	RiTransformBegin();
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		RiTransformBegin();
+	}
+	else
+	{
+		m_preWorldTransform.push();
+	}
 }
 
 void IECoreRI::RendererImplementation::transformEnd()
 {
-	ScopedContext scopedContext( m_context );
-	RiTransformEnd();
+	if( m_inWorld )
+	{
+		ScopedContext scopedContext( m_context );
+		RiTransformEnd();
+	}
+	else
+	{
+		m_preWorldTransform.pop();
+	}
 }
 
 void IECoreRI::RendererImplementation::setTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RtMatrix mm;
-	convert( m, mm );
-	RiTransform( mm );
+	delayedMotionBegin( Transform );
+
+	if( m_inWorld )
+	{
+		RtMatrix mm;
+		convert( m, mm );
+		RiTransform( mm );
+	}
+	else
+	{
+		m_preWorldTransform.set( m );
+	}
 }
 
 void IECoreRI::RendererImplementation::setTransform( const std::string &coordinateSystem )
 {
 	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RiCoordSysTransform( (char *)coordinateSystem.c_str() );
+	delayedMotionBegin( Transform );
+
+	if( m_inWorld )
+	{
+		RiCoordSysTransform( (char *)coordinateSystem.c_str() );
+	}
 }
 
 Imath::M44f IECoreRI::RendererImplementation::getTransform() const
@@ -739,10 +773,18 @@ Imath::M44f IECoreRI::RendererImplementation::getTransform( const std::string &c
 void IECoreRI::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
 	ScopedContext scopedContext( m_context );
-	delayedMotionBegin();
-	RtMatrix mm;
-	convert( m, mm );
-	RiConcatTransform( mm );
+	delayedMotionBegin( Transform );
+
+	if( m_inWorld )
+	{
+		RtMatrix mm;
+		convert( m, mm );
+		RiConcatTransform( mm );
+	}
+	else
+	{
+		m_preWorldTransform.concatenate( m );
+	}
 }
 
 void IECoreRI::RendererImplementation::coordinateSystem( const std::string &name )
@@ -790,7 +832,7 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 		size_t i = name.find_first_of( ":", 3 );
 		if( i==string::npos )
 		{
-			const CompoundData *compoundValue = runTimeCast<const CompoundData>( value );
+			const CompoundData *compoundValue = runTimeCast<const CompoundData>( value.get() );
 			if( !compoundValue )
 			{
 				msg( Msg::Warning, "IECoreRI::RendererImplementation::setAttribute", format( "Expected CompoundData for name matching \"ri:*\" but got \"%s\"." ) % value->typeName() );
@@ -805,14 +847,14 @@ void IECoreRI::RendererImplementation::setAttribute( const std::string &name, IE
 		{
 			string s1( name, 3, i-3 );
 			string s2( name, i+1 );
-			ParameterList pl( s2, value );
+			ParameterList pl( s2, value.get() );
 			RiAttributeV( (char *)s1.c_str(), pl.n(), pl.tokens(), pl.values() );
 		}
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
 		string s( name, 5 );
-		ParameterList pl( s, value );
+		ParameterList pl( s, value.get() );
 		RiAttributeV( "user", pl.n(), pl.tokens(), pl.values() );
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -937,7 +979,7 @@ void IECoreRI::RendererImplementation::setNameAttribute( const std::string &name
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", format( "%s attribute expects a StringData value." ) % name );
 		return;
 	}
-	ParameterList pl( "name", f );
+	ParameterList pl( "name", f.get() );
 	RiAttributeV( "identifier", pl.n(), pl.tokens(), pl.values() );
 }
 
@@ -1268,7 +1310,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 			{
 				if( it->second->typeId()==StringData::staticTypeId() )
 				{
-					state.primVarTypeHints.insert( std::pair<string, string>( it->first, staticPointerCast<const StringData>( it->second )->readable() ) );
+					state.primVarTypeHints.insert( std::pair<string, string>( it->first, static_pointer_cast<const StringData>( it->second )->readable() ) );
 				}
 			}
 		}
@@ -1309,7 +1351,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
-			handleData = runTimeCast<const StringData>( it->second );
+			handleData = runTimeCast<const StringData>( it->second.get() );
 		}
 		if( !handleData )
 		{
@@ -1333,7 +1375,7 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 	CompoundDataMap::iterator it = parametersCopy.find( "ri:areaLight" );
 	if( it != parametersCopy.end() )
 	{
-		BoolData *b = runTimeCast<BoolData>( it->second );
+		BoolData *b = runTimeCast<BoolData>( it->second.get() );
 		if( b && b->readable() )
 		{
 			areaLight = true;
@@ -1371,64 +1413,90 @@ void IECoreRI::RendererImplementation::motionBegin( const std::set<float> &times
 	{
 		m_delayedMotionTimes[i++] = *it;
 	}
+	m_motionType = Pending;
 }
 
-void IECoreRI::RendererImplementation::delayedMotionBegin()
+void IECoreRI::RendererImplementation::delayedMotionBegin( MotionType type )
 {
-	if( m_delayedMotionTimes.size() )
+	assert( type == Transform || type == Primitive );
+	
+	if( m_motionType == Pending )
 	{
-		RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+		if( m_inWorld )
+		{
+			RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+		}
+		else
+		{
+			m_preWorldTransform.motionBegin( m_delayedMotionTimes );
+		}
+		m_motionType = type;
 		m_delayedMotionTimes.clear();
-		m_inMotion = true;
 	}
 }
 
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
-	if( !automaticInstancingEnabled() || m_inMotion )
+	
+	if( m_motionType == Transform )
 	{
-		// no auto instancing, or perhaps we're in a transform motion block
-		RiMotionEnd();
-	}
-	else
-	{
-		MurmurHash h;
-		for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
+		if( m_inWorld )
 		{
-			h.append( *it );
-		}
-		for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
-		{
-			(*it)->hash( h );
-		}
-		
-		std::string instanceName = "cortexAutomaticInstance" + h.toString();
-			
-		SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
-
-		SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );		
-		if( it != m_sharedData->objectHandles.end() )
-		{
-			instance( instanceName );
+			RiMotionEnd();
 		}
 		else
 		{
-			instanceBegin( instanceName, CompoundDataMap() );
-				emitPrimitiveAttributes( m_motionPrimitives[0] );
-				RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
-					for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
-					{
-						emitPrimitive( *it );
-					}
-				RiMotionEnd();	
-			instanceEnd();
-			instance( instanceName );
-			m_delayedMotionTimes.clear();
-			m_motionPrimitives.clear();
+			m_preWorldTransform.motionEnd();
 		}
 	}
-	m_inMotion = false;
+	else
+	{
+		// motionType == Primitive
+		if( !automaticInstancingEnabled() )
+		{
+			RiMotionEnd();
+		}
+		else
+		{
+		
+			MurmurHash h;
+			for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
+			{
+				h.append( *it );
+			}
+			for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
+			{
+				(*it)->hash( h );
+			}
+		
+			std::string instanceName = "cortexAutomaticInstance" + h.toString();
+			
+			SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
+
+			SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );
+			if( it != m_sharedData->objectHandles.end() )
+			{
+				instance( instanceName );
+			}
+			else
+			{
+				instanceBegin( instanceName, CompoundDataMap() );
+					emitPrimitiveAttributes( m_motionPrimitives[0].get() );
+					RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
+						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
+						{
+							emitPrimitive( it->get() );
+						}
+					RiMotionEnd();
+				instanceEnd();
+				instance( instanceName );
+				m_delayedMotionTimes.clear();
+				m_motionPrimitives.clear();
+			}
+		}
+	}
+	m_motionType = None;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -1578,12 +1646,12 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 	
 	if( !automaticInstancingEnabled() )
 	{
-		if( !m_inMotion )
+		if( m_motionType == None || m_motionType == Pending )
 		{
-			emitPrimitiveAttributes( primitive );		
+			emitPrimitiveAttributes( primitive.get() );		
 		}
-		delayedMotionBegin();		
-		emitPrimitive( primitive );
+		delayedMotionBegin( Primitive );
+		emitPrimitive( primitive.get() );
 	}
 	else
 	{
@@ -1604,8 +1672,8 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 			else
 			{
 				instanceBegin( instanceName, CompoundDataMap() );
-					emitPrimitiveAttributes( primitive );
-					emitPrimitive( primitive );
+					emitPrimitiveAttributes( primitive.get() );
+					emitPrimitive( primitive.get() );
 				instanceEnd();
 				instance( instanceName );
 			}
@@ -1837,21 +1905,29 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::Pat
 
 void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
-	ScopedContext scopedContext( m_context );
-
 	Imath::Box3f bound = proc->bound();
 	if( bound.isEmpty() )
 	{
 		return;
 	}
 
+	ScopedContext scopedContext( m_context );
+
+	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+	{
+		externalProcedural( externalProc );
+	}
+	else
+	{
+		standardProcedural( proc.get() );
+	}
+}
+
+void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
+{
+
 	RtBound riBound;
-	riBound[0] = bound.min.x;
-	riBound[1] = bound.max.x;
-	riBound[2] = bound.min.y;
-	riBound[3] = bound.max.y;
-	riBound[4] = bound.min.z;
-	riBound[5] = bound.max.z;
+	convert( proc->bound(), riBound );
 
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
@@ -1887,6 +1963,96 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 
 }
 
+namespace
+{
+
+struct Serialiser
+{
+
+	typedef void ReturnType;
+
+	Serialiser( std::ostringstream &stringStream )
+		:	m_stringStream( stringStream )
+	{
+	}
+
+	template<typename T>
+	void operator() ( const T *data )
+	{
+		const typename T::BaseType *b = data->baseReadable();
+		for( size_t i = 0, e = data->baseSize(); i < e; ++i )
+		{
+			m_stringStream << b[i];
+			if( i != e - 1 )
+			{
+				m_stringStream << " ";
+			}
+		}
+	}
+
+	private :
+
+		std::ostringstream &m_stringStream;
+
+};
+
+void dynamicLoadFree( void *voidData )
+{
+	char **data = (char **)voidData;
+	free( data[0] );
+	free( data[1] );
+	free( data );
+};
+
+} // namespace
+
+void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *proc )
+{
+	RtBound riBound;
+	convert( proc->bound(), riBound );
+
+	if( boost::algorithm::ends_with( proc->fileName(), ".rib" ) )
+	{
+		// RiProcDelayedReadArchive
+		const char **data = (const char **)malloc( sizeof( char * ) );
+		data[0] = proc->fileName().c_str();
+		RiProcedural( data, riBound, RiProcDelayedReadArchive, RiProcFree );
+	}
+	else
+	{
+		// RiProcDynamicLoad
+		const CompoundDataMap &parms = proc->parameters();
+
+		ostringstream dataStringStream;
+		CompoundDataMap::const_iterator it = parms.find( "ri:data" );
+		if( it != parms.end() )
+		{
+			if( const StringData *s = IECore::runTimeCast<const StringData>( it->second.get() ) )
+			{
+				dataStringStream << s->readable();
+			}
+		}
+
+		Serialiser serialiser( dataStringStream );
+		for( CompoundDataMap::const_iterator it = parms.begin(), eIt = parms.end(); it != eIt; ++it )
+		{
+			if( it->first == "ri:data" )
+			{
+				continue;
+			}
+			dataStringStream << " --" << it->first << " ";
+			IECore::despatchTypedData<Serialiser, TypeTraits::HasBaseType, DespatchTypedDataIgnoreError>( it->second.get(), serialiser );
+		}
+
+		const std::string dataString = dataStringStream.str();
+
+		const char **data = (const char **)malloc( sizeof( char * ) * 2 );
+		data[0] = strdup( proc->fileName().c_str() );
+		data[1] = strdup( dataString.c_str() );
+		RiProcedural( data, riBound, RiProcDynamicLoad, dynamicLoadFree );
+	}
+}
+
 void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 {
 	ProceduralData *proceduralData = reinterpret_cast<ProceduralData *>( data );
@@ -1896,7 +2062,7 @@ void IECoreRI::RendererImplementation::procSubdivide( void *data, float detail )
 	// renderer which doesn't own a context and therefore use the context 3delight has arranged to call subdivide with.
 	// we do however share SharedData with the parent renderer, so that we can share instances among procedurals.
 	IECoreRI::RendererPtr renderer = new IECoreRI::Renderer( new RendererImplementation( proceduralData->sharedData, proceduralData->options ) );
-	proceduralData->procedural->render( renderer );
+	proceduralData->procedural->render( renderer.get() );
 }
 
 void IECoreRI::RendererImplementation::procFree( void *data )
@@ -2054,10 +2220,14 @@ void RendererImplementation::editBegin( const std::string &name, const IECore::C
 	
 	ParameterList p( parameters );
 	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
+	
+	m_inWorld = name != "option";
 }
 
 void RendererImplementation::editEnd()
 {
 	ScopedContext scopedContext( m_context );
 	RiEditEnd();
+	
+	m_inWorld = false;
 }

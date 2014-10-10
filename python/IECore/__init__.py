@@ -38,12 +38,6 @@
 #
 # Some parts of the IECore library are defined purely in Python. These are shown below.
 
-# We register our own IntrusivePtrToPython converter in the bindings based on RefCountedClass. This allows
-# us to deal with object identity issues when pushing wrapped objects back into python. Boost python issues a warning
-# about this as it has already registered a converter, so we ignore the warnings here.
-import warnings
-warnings.filterwarnings( "ignore", "to-Python converter for IECore::IntrusivePtr.*already registered.", RuntimeWarning )
-
 from _IECore import *
 
 # access by a shorter name for convenience
@@ -93,6 +87,7 @@ from CompoundVectorParameter import CompoundVectorParameter
 from AttributeBlock import AttributeBlock
 from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
+from EditBlock import EditBlock
 from SequenceMergeOp import SequenceMergeOp
 from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *

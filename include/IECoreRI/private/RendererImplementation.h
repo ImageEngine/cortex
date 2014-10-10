@@ -56,6 +56,7 @@
 #include "IECore/PatchMeshPrimitive.h"
 
 #include "IECoreRI/Renderer.h"
+#include "IECoreRI/private/TransformStack.h"
 
 namespace IECoreRI
 {
@@ -187,9 +188,13 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getRxOption( const char *name ) const;
 
 		IECore::CompoundDataPtr m_options;
-		IECore::CameraPtr m_camera;
+		// Before RiWorldBegin we have to track the transform
+		// ourselves (because we must invert cortex camera
+		// transforms to get renderman camera transforms).
+		TransformStack m_preWorldTransform;
 		size_t m_numDisplays;
-		void outputCamera( IECore::CameraPtr camera );
+		std::string m_lastCamera;
+		bool m_inWorld;
 
 		struct AttributeState
 		{
@@ -250,6 +255,9 @@ class RendererImplementation : public IECore::Renderer
 		// This constructor is used to create a child renderer in procSubdivide()
 		RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options );
 		
+		void standardProcedural( Procedural *proc );
+		void externalProcedural( ExternalProcedural *proc );
+
 		static void procSubdivide( void *data, float detail );
 		static void procFree( void *data );
 
@@ -294,14 +302,28 @@ class RendererImplementation : public IECore::Renderer
 		/// difference is fine, except it means we have to implement curves() as a call to RiBasis followed
 		/// by RiCurves. Which is fine too, until we do that inside a motion block - at this point the context
 		/// is invalid for the basis call - we should just be emitting the RiCurves call. We work around
-		/// this by delaying all calls to motionBegin until the primitive or transform calls have had a chance
-		/// to emit something first. This is what this function is all about - all interface functions which
-		/// may be called from within a motion block must call delayedMotionBegin(). This makes for an ugly
-		/// implementation but a better interface for the client. delayedMotionBegin() assumes that the correct
+		/// this by delaying all calls to RiMotionBegin until the primitive or transform calls have had a chance
+		/// to emit something first.
+		///
+		/// This is complicated further by the necessity of tracking the pre-world transform stack ourselves,
+		/// so some motion calls be passed to RiMotionBegin at all but instead be directed to our internal
+		/// transform stack.
+		///
+		/// We keep track of the internal state necessary for dealing with both these issues using this enum.
+		enum MotionType
+		{
+			None, // outside any motionBegin()/motionEnd() pair
+			Pending, // motionBegin() has been called, and we're waiting to see what sort of motion we get
+			Transform, // we're in a transform motion block, having already called RiMotionBegin if necessary
+			Primitive // we're in a primitive motion block, having already called RiMotionBegin if necessary
+		};
+		/// Must be called by any methods which themselves may be called inside a motionBegin()/motionEnd()
+		/// pair, passing either Transform or Primitive as the MotionType. This will issue the appropriate
+		/// motion begin call to either RenderMan or to m_preWorldTransform. This assumes that the correct
 		/// RiContext will have been made current already.
-		void delayedMotionBegin();
-		/// True when an RiMotionBegin call has been emitted but we have not yet emitted the matching RiMotionEnd.
-		bool m_inMotion;
+		void delayedMotionBegin( MotionType type );
+		/// Our current motion type.
+		MotionType m_motionType;
 		/// The times we'll emit in delayedMotionBegin.
 		std::vector<float> m_delayedMotionTimes;
 		/// Renderman doesn't accept instances inside motion blocks, but it does accept motion blocks inside

@@ -195,8 +195,21 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_SceneShape1.queryPaths[1]" ), "/" )
 		self.assertTrue( maya.cmds.isConnected( "|test|sceneShape_1|sceneShape_SceneShape1.outObjects[1]", "|test|sceneShape_1|sceneShape_Shape1.inMesh" ) )
-
 	
+	def testComponentNames( self ):
+		
+		maya.cmds.file( new=True, f=True )
+		fn = IECoreMaya.FnSceneShape.create( "test" )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+".drawGeometry", 0 )
+		self.assertEqual( fn.componentNames(), [] )
+		
+		maya.cmds.setAttr( fn.fullPathName()+".drawGeometry", 1 )
+		self.assertEqual( fn.componentNames(), ['/', '/1', '/1/child', '/1/child/3'] )
+		
+		fn.selectComponentNames( ['/', '/1', '/1/child/3'] )
+		self.assertEqual( fn.selectedComponentNames(), set( ['/', '/1', '/1/child/3'] ) )
+		
 	def tearDown( self ) :
 		
 		if os.path.exists( FnSceneShapeTest.__testFile ) :

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -42,6 +42,7 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SceneInterface )
 
 const SceneInterface::Name &SceneInterface::rootName = IndexedIO::rootName;
 const SceneInterface::Path &SceneInterface::rootPath = IndexedIO::rootPath;
+const SceneInterface::Name &SceneInterface::visibilityName( "scene:visible" );
 
 class SceneInterface::CreatorMap : public std::map< std::pair< std::string, IndexedIO::OpenModeFlags >, CreatorFn>
 {
@@ -116,6 +117,11 @@ SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::Op
 
 SceneInterface::~SceneInterface()
 {
+}
+
+void SceneInterface::hash( HashType hashType, double time, MurmurHash &h ) const
+{
+	h.append( typeId() );
 }
 
 void SceneInterface::pathToString( const SceneInterface::Path &p, std::string &path )

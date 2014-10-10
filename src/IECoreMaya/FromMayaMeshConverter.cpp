@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -582,6 +582,11 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	vector<int>::iterator verticesPerFaceIt = verticesPerFaceData->writable().begin();
 
 	IntVectorDataPtr vertexIds = new IntVectorData;
+	// We are calling fnMesh.numFaceVertices() twice to work around a known bug in Maya. When accessing
+	// certain MFnMesh API calls, given a mesh with 6 or more UV sets, which has never been evaluated
+	// before, the first call returns 0 and kFailure, and the second call works as expected.
+	// See ToMayaMeshConverterTest.testManyUVConversionsFromPlug for an example of how this might occur.
+	fnMesh.numFaceVertices();
 	vertexIds->writable().resize( fnMesh.numFaceVertices() );
 	vector<int>::iterator vertexIdsIt = vertexIds->writable().begin();
 	
@@ -604,7 +609,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 				if ( interpolationIndex < m_interpolation->getPresets().size() - 1 )
 				{
 					// convert interpolation index to the preset value
-					interpolation = staticPointerCast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
+					interpolation = boost::static_pointer_cast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
 				}
 				else
 				{
@@ -633,38 +638,43 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
 	}
 
-	MString currentUVSet;
-	fnMesh.getCurrentUVSetName( currentUVSet );
-	MStringArray uvSets;
-	fnMesh.getUVSetNames( uvSets );
-	for( unsigned int i=0; i<uvSets.length(); i++ )
+	bool convertST = stParameter()->getTypedValue();
+	bool convertExtraST = extraSTParameter()->getTypedValue();
+	if ( convertST || convertExtraST )
 	{
-
-		FloatVectorDataPtr sData = new FloatVectorData;
-		FloatVectorDataPtr tData = new FloatVectorData;
-		
-		IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
-		
-		sAndT( uvSets[i], stIndicesData, sData, tData );
-		
-		if( uvSets[i]==currentUVSet )
+		MString currentUVSet;
+		fnMesh.getCurrentUVSetName( currentUVSet );
+		MStringArray uvSets;
+		fnMesh.getUVSetNames( uvSets );
+		for( unsigned int i=0; i<uvSets.length(); i++ )
 		{
-			if( m_st->getTypedValue() )
+	
+			FloatVectorDataPtr sData = new FloatVectorData;
+			FloatVectorDataPtr tData = new FloatVectorData;
+			
+			IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
+			
+			sAndT( uvSets[i], stIndicesData, sData, tData );
+			
+			if( uvSets[i]==currentUVSet )
 			{
-				result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-				result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-				result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+				if( m_st->getTypedValue() )
+				{
+					result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+					result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+					result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+				}
 			}
-		}
-		
-		if( m_extraST->getTypedValue() )
-		{
-			MString sName = uvSets[i] + "_s";
-			MString tName = uvSets[i] + "_t";
-			MString indicesName = uvSets[i] + "Indices";
-			result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-			result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-			result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+			
+			if( m_extraST->getTypedValue() )
+			{
+				MString sName = uvSets[i] + "_s";
+				MString tName = uvSets[i] + "_t";
+				MString indicesName = uvSets[i] + "Indices";
+				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+				result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+				result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+			}
 		}
 	}
 

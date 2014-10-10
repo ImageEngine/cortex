@@ -86,27 +86,27 @@ bool AttributeState::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const AttributeState *s = static_cast<const AttributeState *>( other );
-	return m_attributes->isEqualTo( s->m_attributes );
+	return m_attributes->isEqualTo( s->m_attributes.get() );
 }
 
 void AttributeState::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	StateRenderable::memoryUsage( a );
-	a.accumulate( m_attributes );
+	a.accumulate( m_attributes.get() );
 }
 
 void AttributeState::copyFrom( const Object *other, CopyContext *context )
 {
 	StateRenderable::copyFrom( other, context );
 	const AttributeState *s = static_cast<const AttributeState *>( other );
-	m_attributes = context->copy<CompoundData>( s->m_attributes );
+	m_attributes = context->copy<CompoundData>( s->m_attributes.get() );
 }
 
 void AttributeState::save( SaveContext *context ) const
 {
 	StateRenderable::save( context );
 	IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-	context->save( m_attributes, container, g_attributesEntry );
+	context->save( m_attributes.get(), container.get(), g_attributesEntry );
 }
 
 void AttributeState::load( LoadContextPtr context )
@@ -114,7 +114,7 @@ void AttributeState::load( LoadContextPtr context )
 	StateRenderable::load( context );
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-	m_attributes = context->load<CompoundData>( container, g_attributesEntry );
+	m_attributes = context->load<CompoundData>( container.get(), g_attributesEntry );
 }
 
 void AttributeState::hash( MurmurHash &h ) const

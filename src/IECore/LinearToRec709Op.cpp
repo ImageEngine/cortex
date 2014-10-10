@@ -79,6 +79,6 @@ void LinearToRec709Op::modifyChannels( const Imath::Box2i &displayWindow, const 
 	LinearToRec709Op::Converter converter;
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<LinearToRec709Op::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<LinearToRec709Op::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

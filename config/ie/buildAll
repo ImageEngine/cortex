@@ -59,16 +59,19 @@ if IEEnv.platform() == "cent6.x86_64" :
 			build( [ "COMPILER_VERSION="+compilerVersion, "DL_VERSION=UNDEFINED", "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=4.0.9.1" ] )
 	
 	for dlVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["3delight"] ):
-		build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION="+dlVersion, "PYTHON_VERSION=2.6", "ARNOLD_VERSION=UNDEFINED" ] )
+		for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
+			build( [ "COMPILER_VERSION=4.1.2", "DL_VERSION="+dlVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED" ] )
 	
 	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
 		build( [ "APP=maya", "APP_VERSION="+mayaVersion, "DL_VERSION=10.0.142", "ARNOLD_VERSION=4.0.9.1" ] )
 	
 	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+		if nukeVersion.startswith( "8" ) :
+			build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
 	
 	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
+		if houdiniVersion.endswith( "-python2.7" ) :
+			build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
 	
 	installDocs()
 	

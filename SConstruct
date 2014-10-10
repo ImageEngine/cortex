@@ -50,10 +50,10 @@ import subprocess
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
 
-ieCoreMajorVersion=8
-ieCoreMinorVersion=2
+ieCoreMajorVersion=9
+ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="a6"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -748,7 +748,6 @@ o.Add(
 		( "IECore.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
 		( "IECore.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
 		( "IECore.MeshMergeOp", "common/primitive/mesh/merge" ),
-		( "IECore.MeshPrimitiveImplicitSurfaceOp", "common/primitive/mesh/implicitSurface" ),
 		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
 		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
@@ -1459,6 +1458,15 @@ if doConfigure :
 		corePythonSources.remove( "src/IECorePython/EnvMapSHProjectorBinding.cpp" )
 		corePythonSources.remove( "src/IECorePython/ImageConvolveOpBinding.cpp" )
 	
+	if c.CheckHeader( "OpenEXR/ImfDeepFrameBuffer.h", "\"\"", "C++" ) :
+		for e in allCoreEnvs :
+			e.Append( CPPFLAGS = '-DIECORE_WITH_DEEPEXR' )
+	else :
+		coreSources.remove( "src/IECore/EXRDeepImageReader.cpp" )
+		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
+		coreSources.remove( "src/IECore/EXRDeepImageWriter.cpp" )
+		corePythonSources.remove( "src/IECorePython/EXRDeepImageWriterBinding.cpp" )
+	
 	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
@@ -1581,7 +1589,7 @@ if '-DIECORE_WITH_BOOSTFACTORIAL' not in coreTestEnv['CPPFLAGS'] :
 
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
-coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest >& test/IECore/results.txt" )
+coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest > test/IECore/results.txt 2>&1" )
 NoCache( coreTest )
 coreTestEnv.Alias( "testCore", coreTest )
 
@@ -2169,6 +2177,10 @@ nukeEnvAppends = {
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
 	
+	"LINKFLAGS" : [
+		"-Wl,-rpath-link=$NUKE_ROOT",
+	],
+
 	"LIBPATH" : [
 		"$NUKE_ROOT",
 	],
@@ -2270,6 +2282,9 @@ if doConfigure :
     					"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
 					]
 				)
+				
+				if "-DIECORE_WITH_DEEPEXR" in coreEnv["CPPFLAGS"] :
+					nukeEnv.Append( CPPFLAGS = [ "-DIECORE_WITH_DEEPEXR" ] )
 				
 				nukePythonModuleEnv.Append( LIBS = [
 					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -3046,6 +3061,16 @@ if doConfigure :
 		
 	else :
 	
+		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
+			alembicEnv.Prepend(
+				CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA",
+				LIBS = [
+					"AlembicAbcCoreFactory$ALEMBIC_LIB_SUFFIX",
+					"AlembicAbcCoreOgawa$ALEMBIC_LIB_SUFFIX",
+					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
+				]
+			)
+			
 		c.Finish()	
 		
 		alembicSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/*.cpp" ) )

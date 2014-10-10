@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
@@ -143,23 +143,10 @@
 #include "IECorePython/PointBoundsOpBinding.h"
 #include "IECorePython/ImathRandomBinding.h"
 #include "IECorePython/RandomRotationOpBinding.h"
-#include "IECorePython/ImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/CachedImplicitSurfaceFunctionBinding.h"
 #include "IECorePython/MeshPrimitiveBuilderBinding.h"
-#include "IECorePython/MarchingCubesBinding.h"
-#include "IECorePython/PointMeshOpBinding.h"
-#include "IECorePython/CSGImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/SphereImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/PlaneImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/BlobbyImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/ZhuBridsonImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/ParticleMeshOpBinding.h"
 #include "IECorePython/TypedPrimitiveOpBinding.h"
 #include "IECorePython/PrimitiveEvaluatorBinding.h"
 #include "IECorePython/MeshPrimitiveEvaluatorBinding.h"
-#include "IECorePython/PrimitiveImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/MeshPrimitiveImplicitSurfaceFunctionBinding.h"
-#include "IECorePython/MeshPrimitiveImplicitSurfaceOpBinding.h"
 #include "IECorePython/TriangulateOpBinding.h"
 #include "IECorePython/InternedStringBinding.h"
 #include "IECorePython/SpherePrimitiveBinding.h"
@@ -253,11 +240,7 @@
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
 #include "IECorePython/ColorSpaceTransformOpBinding.h"
-#include "IECorePython/BINParticleWriterBinding.h"
-#include "IECorePython/BINMeshReaderBinding.h"
-#include "IECorePython/BGEOParticleReaderBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
-#include "IECorePython/IFFHairReaderBinding.h"
 #include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
@@ -322,6 +305,9 @@
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
+#include "IECorePython/EXRDeepImageReaderBinding.h"
+#include "IECorePython/EXRDeepImageWriterBinding.h"
+#include "IECorePython/ExternalProceduralBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -442,23 +428,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointBoundsOp();
 	bindImathRandom();
 	bindRandomRotationOp();
-	bindImplicitSurfaceFunction();
-	bindCachedImplicitSurfaceFunction();
 	bindMeshPrimitiveBuilder();
-	bindMarchingCubes();
-	bindPointMeshOp();
-	bindCSGImplicitSurfaceFunction();
-	bindSphereImplicitSurfaceFunction();
-	bindPlaneImplicitSurfaceFunction();
-	bindBlobbyImplicitSurfaceFunction();
-	bindZhuBridsonImplicitSurfaceFunction();
-	bindParticleMeshOp();
 	bindTypedPrimitiveOp();
 	bindPrimitiveEvaluator();
 	bindMeshPrimitiveEvaluator();
-	bindPrimitiveImplicitSurfaceFunction();
-	bindMeshPrimitiveImplicitSurfaceFunction();
-	bindMeshPrimitiveImplicitSurfaceOp();
 	bindTriangulateOp();
 	bindInternedString();
 	bindSpherePrimitive();
@@ -565,11 +538,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindColorSpaceTransformOp();
-	bindBINParticleWriter();
-	bindBINMeshReader();
-	bindBGEOParticleReader();
 	bindNParticleReader();
-	bindIFFHairReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
@@ -646,6 +615,14 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindStandardRadialLensModel();
 	bindLensDistortOp();
 	bindObjectPool();
+	bindExternalProcedural();
+
+#ifdef IECORE_WITH_DEEPEXR
+
+	bindEXRDeepImageReader();
+	bindEXRDeepImageWriter();
+
+#endif
 
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
@@ -655,6 +632,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "withSignals", &IECore::withSignals );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );
+	def( "withDeepEXR", &IECore::withDeepEXR );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "withPNG", &IECore::withPNG );
 	def( "initThreads", &PyEval_InitThreads );

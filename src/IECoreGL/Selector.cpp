@@ -98,6 +98,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glMatrixMode( GL_PROJECTION );
 			glLoadIdentity();
 			gluPickMatrix( regionCenter.x, regionCenter.y, regionSize.x, regionSize.y, viewport );
+			glGetDoublev( GL_PROJECTION_MATRIX, m_postProjectionMatrix.getValue() );
 			glMultMatrixd( projectionMatrix );
 			glMatrixMode( GL_MODELVIEW );
 
@@ -164,6 +165,11 @@ class Selector::Implementation : public IECore::RefCounted
 			return m_mode;
 		}
 
+		const Imath::M44d &postProjectionMatrix()
+		{
+			return m_postProjectionMatrix;
+		}
+
 		void loadName( GLuint name )
 		{
 			switch( m_mode )
@@ -186,7 +192,7 @@ class Selector::Implementation : public IECore::RefCounted
 		
 		State *baseState()
 		{
-			return m_baseState;
+			return m_baseState.get();
 		}
 
 		void pushIDShader( const IECoreGL::Shader *shader )
@@ -200,7 +206,7 @@ class Selector::Implementation : public IECore::RefCounted
 			m_IDShaderStack.pop();
 			if( m_IDShaderStack.size() )
 			{
-				bindIDShader( m_IDShaderStack.top() );
+				bindIDShader( m_IDShaderStack.top().get() );
 			}
 		}
 
@@ -246,6 +252,7 @@ class Selector::Implementation : public IECore::RefCounted
 		}
 		
 		Mode m_mode;
+		Imath::M44d m_postProjectionMatrix;
 		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
 		GLuint m_currentName;
@@ -484,6 +491,11 @@ Selector::Mode Selector::mode() const
 	return m_implementation->mode();
 }
 
+const Imath::M44d &Selector::postProjectionMatrix()
+{
+	return m_implementation->postProjectionMatrix();
+}
+
 void Selector::loadName( GLuint name )
 {
 	m_implementation->loadName( name );
@@ -494,14 +506,11 @@ State *Selector::baseState()
 	return m_implementation->baseState();
 }
 
-void Selector::loadIDShader( const IECoreGL::Shader *idShader )
-{
-	m_implementation->pushIDShader( idShader );
-}
 void Selector::pushIDShader( const IECoreGL::Shader *idShader )
 {
 	m_implementation->pushIDShader( idShader );
 }
+
 void Selector::popIDShader()
 {
 	m_implementation->popIDShader();

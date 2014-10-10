@@ -72,13 +72,16 @@ void bindParameterised()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Parameterised, ParameterisedWrapPtr>()
+	CompoundParameter *(Parameterised::*parameters)() = &Parameterised::parameters;
+	CompoundObject *(Parameterised::*userData)() = &Parameterised::userData;
+
+	RunTimeTypedClass<Parameterised, ParameterisedWrap>()
 		.def( init< const std::string &>( ( arg( "description") ) ) )
 		.def( init< const std::string &, CompoundParameterPtr >( ( arg( "description") , arg( "compoundParameter") ) ) )
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
-		.def( "parameters", (CompoundParameterPtr (Parameterised::*)())&Parameterised::parameters )
+		.def( "parameters", parameters, return_value_policy<CastToIntrusivePtr>() )
 		.def( "__getitem__", &parameterisedGetItem )
-		.def( "userData", (CompoundObjectPtr (Parameterised::*)())&Parameterised::userData )
+		.def( "userData", userData, return_value_policy<CastToIntrusivePtr>() )
 	;
 
 }

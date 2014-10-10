@@ -77,7 +77,7 @@ void ObjectVector::copyFrom( const Object *other, CopyContext *context )
 		}
 		else
 		{
-			m_members[i] = context->copy<Object>( tOther->m_members[i] );
+			m_members[i] = context->copy<Object>( tOther->m_members[i].get() );
 		}
 	}
 }
@@ -98,7 +98,7 @@ void ObjectVector::save( SaveContext *context ) const
 		if( *it )
 		{
 			std::string name = str( boost::format( "%d" ) % i );
-			context->save( *it, ioMembers, name );
+			context->save( it->get(), ioMembers.get(), name );
 		}
 		i++;
 	}
@@ -123,7 +123,7 @@ void ObjectVector::load( LoadContextPtr context )
 	for( IndexedIO::EntryIDList::const_iterator it=l.begin(); it!=l.end(); it++ )
 	{
 		MemberContainer::size_type i = boost::lexical_cast<MemberContainer::size_type>( (*it).value() );
-		m_members[i] = context->load<Object>( ioMembers, *it );
+		m_members[i] = context->load<Object>( ioMembers.get(), *it );
 	}
 }
 
@@ -142,7 +142,7 @@ bool ObjectVector::isEqualTo( const Object *other ) const
 	{
 		if( m_members[i] )
 		{
-			if( !m_members[i]->isEqualTo( tOther->m_members[i] ) )
+			if( !m_members[i]->isEqualTo( tOther->m_members[i].get() ) )
 			{
 				return false;
 			}
@@ -165,7 +165,7 @@ void ObjectVector::memoryUsage( Object::MemoryAccumulator &a ) const
 	{
 		if( *it )
 		{
-			a.accumulate( *it );
+			a.accumulate( it->get() );
 		}
 	}
 }

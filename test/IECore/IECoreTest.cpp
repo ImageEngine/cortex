@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,6 @@
 #include "InterpolatorTest.h"
 #include "IndexedIOTest.h"
 #include "BoostUnitTestTest.h"
-#include "MarchingCubesTest.h"
 #include "DataConversionTest.h"
 #include "DataConvertTest.h"
 #include "DespatchTypedDataTest.h"
@@ -78,6 +77,7 @@
 #include "CompoundDataTest.h"
 #include "CompoundObjectTest.h"
 #include "ComputationCacheTest.h"
+#include "SceneCacheThreadingTest.h"
 
 using namespace boost::unit_test;
 using boost::test_tools::output_test_stream;
@@ -95,7 +95,6 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addTypedDataTest(test);
 		addInterpolatorTest(test);
 		addIndexedIOTest(test);
-		addMarchingCubesTest(test);
 		addDataConversionTest(test);
 		addDataConvertTest(test);
 		addDespatchTypedDataTest(test);
@@ -123,6 +122,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addCompoundDataTest(test);
 		addCompoundObjectTest(test);
 		addComputationCacheTest(test);
+		addSceneCacheThreadingTest(test);
 	}
 	catch (std::exception &ex)
 	{

@@ -140,6 +140,66 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		self.failIf( "notDotPyRan" in contextDict )
 
 		self.assertEqual( contextDict["a"], 1000 )
+	
+	def testOrderWithinDirectory( self ) :
+	
+		os.utime( os.path.dirname( __file__ ) + "/config/orderDir/a.py", None )
+	
+		contextDict = {}
+		IECore.loadConfig(
+		
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config/orderDir", ":" ),
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["lastRun"], "b" )
+	
+	def testSubdirectory( self ) :
+	
+		contextDict = {}
+		IECore.loadConfig(
+		
+			IECore.SearchPath( os.path.dirname( __file__ ) + "/config", ":" ),
+			contextDict,
+			subdirectory = "orderDir",
+			
+		)
+		
+		self.assertTrue( "lastRun" in contextDict )
+		self.assertFalse( "a" in contextDict )
+	
+	def testSearchPathAsEnvVar( self ) :
+	
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
+			os.path.dirname( __file__ ) + "/config/orderOne",
+			os.path.dirname( __file__ ) + "/config/orderTwo"
+		)
+		
+		contextDict = {}
+		IECore.loadConfig(
+		
+			"IECORE_CONFIGLOADERTEST_PATHS",
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["a"], 1 )
+		
+		os.environ["IECORE_CONFIGLOADERTEST_PATHS"] = "%s:%s" % (
+			os.path.dirname( __file__ ) + "/config/orderTwo",
+			os.path.dirname( __file__ ) + "/config/orderOne"
+		)
+		
+		contextDict = {}
+		IECore.loadConfig(
+		
+			"IECORE_CONFIGLOADERTEST_PATHS",
+			contextDict,
+			
+		)
+		
+		self.assertEqual( contextDict["a"], 2 )
 		
 if __name__ == "__main__":
 	unittest.main()

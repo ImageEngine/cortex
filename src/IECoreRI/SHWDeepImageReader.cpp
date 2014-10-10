@@ -153,10 +153,22 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 	{
 		previous[j] = 0.0;
 	}
-	
+
+	float nearClip = m_NDCToCamera[3][2] / m_NDCToCamera[3][3];
+	float correction = 1;
+	if( m_NDCToCamera[3][2] != 0 && m_NDCToCamera[2][3] != 0 )
+	{
+		// Compute a correction factor that converts from spherical distance to perpendicular distance,
+		// by comparing the closest distance to the near clip with the distance to the near clip at the current pixel position
+		correction = nearClip / ( Imath::V3f(((x+0.5f)/(m_dataWindow.max.x+1) * 2 - 1), -((y+0.5)/(m_dataWindow.max.y+1) * 2 - 1),0) * m_NDCToCamera ).length();
+	}
+
 	for ( int i=0; i < numSamples; ++i )
 	{
 		DtexPixelGetPoint( m_dtexPixel, i, &depth, channelData );
+
+		// Convert from "3delight distance" ( spherical distance from near clip ) to Z ( distance from eye plane )
+		depth = depth * correction + nearClip;
 		
 		for ( unsigned j=0; j < numRealChannels; ++j )
 		{
@@ -190,6 +202,7 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 	m_dataWindow.max.y = 0;
 	m_worldToCamera = Imath::M44f();
 	m_worldToNDC = Imath::M44f();
+	m_NDCToCamera = Imath::M44f();
 	
 	clean();
 	
@@ -214,6 +227,7 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		DtexNl( m_dtexImage, m_worldToCamera.getValue() );
 		DtexNP( m_dtexImage, m_worldToNDC.getValue() );
+		m_NDCToCamera = m_worldToNDC.inverse() * m_worldToCamera;
 	}
 	else
 	{

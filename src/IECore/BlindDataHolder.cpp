@@ -64,7 +64,7 @@ CompoundData *BlindDataHolder::blindData()
 	{
 		m_data = new CompoundData();
 	}
-	return m_data;
+	return m_data.get();
 }
 
 const CompoundData *BlindDataHolder::blindData() const
@@ -73,7 +73,7 @@ const CompoundData *BlindDataHolder::blindData() const
 	{
 		m_data = new CompoundData();
 	}
-	return m_data;
+	return m_data.get();
 }
 
 void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
@@ -82,7 +82,7 @@ void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
 	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
 	if ( tOther->m_data )
 	{
-		m_data = context->copy<CompoundData>( tOther->m_data );
+		m_data = context->copy<CompoundData>( tOther->m_data.get() );
 	}
 	else 
 	{
@@ -99,7 +99,7 @@ void BlindDataHolder::save( SaveContext *context ) const
 	if ( haveData )
 	{
 		IndexedIOPtr container = context->container( staticTypeName(), m_ioVersion );
-		context->save( m_data, container, g_blindDataEntry);
+		context->save( m_data.get(), container.get(), g_blindDataEntry);
 	}
 }
 
@@ -112,7 +112,7 @@ void BlindDataHolder::load( LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( typeName, v, false );
 	if ( container )
 	{
-		m_data = context->load<CompoundData>( container, g_blindDataEntry );
+		m_data = context->load<CompoundData>( container.get(), g_blindDataEntry );
 		assert(m_data);	
 	}
 	else
@@ -132,7 +132,7 @@ bool BlindDataHolder::isEqualTo( const Object *other ) const
 	{
 		if ( tOther->m_data )
 		{
-			return m_data->isEqualTo( tOther->m_data );
+			return m_data->isEqualTo( tOther->m_data.get() );
 		}
 		else 
 		{
@@ -151,7 +151,7 @@ void BlindDataHolder::memoryUsage( Object::MemoryAccumulator &a ) const
 	Object::memoryUsage( a );
 	if ( m_data )
 	{
-		a.accumulate( m_data );
+		a.accumulate( m_data.get() );
 	}
 }
 

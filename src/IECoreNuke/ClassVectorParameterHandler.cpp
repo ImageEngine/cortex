@@ -114,7 +114,7 @@ void ClassVectorParameterHandler::setState( IECore::Parameter *parameter, const 
 
 IECore::ObjectPtr ClassVectorParameterHandler::getState( const IECore::Parameter *parameter )
 {
-	CompoundObjectPtr result = staticPointerCast<CompoundObject>( CompoundParameterHandler::getState( parameter ) );
+	CompoundObjectPtr result = boost::static_pointer_cast<CompoundObject>( CompoundParameterHandler::getState( parameter ) );
 	if( !result )
 	{
 		result = new CompoundObject;

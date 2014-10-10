@@ -139,6 +139,9 @@ class Renderer : public RunTimeTyped
 		///	\li <b>"resolution"	V2iData</b><br>
 		/// The resolution of any output images. Should default to 640x480 if not specified.
 		///
+		/// \li <b>"pixelAspectRatio" FloatData</b><br>
+		/// The xSize/ySize aspect ratio for a pixel.
+		///
 		/// \li <b>"screenWindow" Box2fData</b><br>
 		/// The region in screen space which is mapped to the output resolution. If unspecified
 		/// then this should default to -1,1 in the smallest image dimension and the other
@@ -345,7 +348,7 @@ class Renderer : public RunTimeTyped
 				/// geometry. Any relevant methods of renderer may be called, but
 				/// the geometry generated must be contained within the
 				/// box returned by bound().
-				virtual void render( RendererPtr renderer ) const = 0;
+				virtual void render( Renderer *renderer ) const = 0;
 				/// Implement this to return a hash for procedural level instancing.
 				/// Procedurals with the same hash will be reused by renderers that
 				/// support this feature. If computing a sensible hash is difficult
@@ -355,6 +358,33 @@ class Renderer : public RunTimeTyped
 
 		};
 		IE_CORE_DECLAREPTR( Procedural );
+
+		/// A placeholder for specifying a procedural which the Renderer
+		/// must load from a file on disk.
+		class ExternalProcedural : public Procedural
+		{
+			public :
+
+				IE_CORE_DECLAREMEMBERPTR( ExternalProcedural )
+
+				ExternalProcedural( const std::string &fileName, const Imath::Box3f &bound, const CompoundDataMap &parameters );
+				virtual ~ExternalProcedural();
+
+				const std::string &fileName() const;
+				const CompoundDataMap &parameters() const;
+
+				virtual Imath::Box3f bound() const;
+				virtual void render( Renderer *renderer ) const;
+				virtual MurmurHash hash() const;
+
+			private :
+
+				std::string m_fileName;
+				Imath::Box3f m_bound;
+				CompoundDataMap m_parameters;
+
+		};
+		IE_CORE_DECLAREPTR( ExternalProcedural );
 
 		/// Renders a piece of procedural geometry.
 		virtual void procedural( ProceduralPtr proc ) = 0;

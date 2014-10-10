@@ -118,7 +118,7 @@ IndexedIOPtr Object::SaveContext::container( const std::string &typeName, unsign
 
 IndexedIO *Object::SaveContext::rawContainer()
 {
-	return m_ioInterface;
+	return m_ioInterface.get();
 }
 
 void Object::SaveContext::save( const Object *toSave, IndexedIO *container, const IndexedIO::EntryID &name )
@@ -198,7 +198,7 @@ ConstIndexedIOPtr Object::LoadContext::container( const std::string &typeName, u
 
 const IndexedIO *Object::LoadContext::rawContainer()
 {
-	return m_ioInterface;
+	return m_ioInterface.get();
 }
 
 ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container, const IndexedIO::EntryID &name )
@@ -234,7 +234,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 			// jump to the path..
 			ConstIndexedIOPtr ioObject = m_ioInterface->directory( pathParts );
 			// add the loaded object to the map.
-			ret.first->second = loadObject( ioObject );
+			ret.first->second = loadObject( ioObject.get() );
 		}
 		return ret.first->second;
 	}
@@ -249,7 +249,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 		if ( ret.second )
 		{
 			// add the loaded object to the map.
-			ret.first->second = loadObject( ioObject );
+			ret.first->second = loadObject( ioObject.get() );
 		}
 		return ret.first->second;
 	}
@@ -312,15 +312,15 @@ size_t Object::MemoryAccumulator::total() const
 
 ObjectPtr Object::copy() const
 {
-	boost::shared_ptr<CopyContext> c( new CopyContext );
-	ObjectPtr result = c->copy( this );
+	CopyContext c;
+	ObjectPtr result = c.copy( this );
 	return result;
 }
 
 void Object::save( IndexedIOPtr ioInterface, const IndexedIO::EntryID &name ) const
 {
 	boost::shared_ptr<SaveContext> context( new SaveContext( ioInterface ) );
-	context->save( this, ioInterface, name );
+	context->save( this, ioInterface.get(), name );
 }
 
 void Object::copyFrom( const Object *toCopy )
@@ -352,7 +352,7 @@ bool Object::isEqualTo( const Object *other ) const
 
 bool Object::operator==( const Object &other ) const
 {
-	return isEqualTo( ConstObjectPtr( &other ) );
+	return isEqualTo( &other );
 }
 
 bool Object::isNotEqualTo( const Object *other ) const
@@ -362,7 +362,7 @@ bool Object::isNotEqualTo( const Object *other ) const
 
 bool Object::operator!=( const Object &other ) const
 {
-	return isNotEqualTo( ConstObjectPtr( &other ) );
+	return isNotEqualTo( &other );
 }
 
 void Object::save( SaveContext *context ) const
@@ -481,6 +481,6 @@ ObjectPtr Object::create( const std::string &typeName )
 ObjectPtr Object::load( ConstIndexedIOPtr ioInterface, const IndexedIO::EntryID &name )
 {
 	LoadContextPtr context( new LoadContext( ioInterface ) );
-	ObjectPtr result = context->load<Object>( ioInterface, name );
+	ObjectPtr result = context->load<Object>( ioInterface.get(), name );
 	return result;
 }

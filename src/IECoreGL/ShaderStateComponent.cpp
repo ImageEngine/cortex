@@ -81,13 +81,13 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		Shader::Setup *shaderSetup()
 		{
 			ensureShaderSetup();
-			return m_shaderSetup;
+			return m_shaderSetup.get();
 		}
 		
 		const Shader::Setup *shaderSetup() const
 		{
 			ensureShaderSetup();
-			return m_shaderSetup;
+			return m_shaderSetup.get();
 		}
 
 		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const
@@ -111,7 +111,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()
 					)
 					{
-						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second ) );
+						texture = IECore::runTimeCast<const Texture>( CachedConverter::defaultCachedConverter()->convert( it->second.get() ) );
 					}
 					else if( it->second->typeId() == IECore::StringData::staticTypeId() )
 					{
@@ -126,7 +126,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 				}
 				else if( it->second->isInstanceOf( IECore::DataTypeId ) )
 				{
-					shaderSetup->addUniformParameter( it->first.value(), IECore::staticPointerCast<const IECore::Data>( it->second ) );
+					shaderSetup->addUniformParameter( it->first.value(), boost::static_pointer_cast<const IECore::Data>( it->second ) );
 				}
 			}
 		

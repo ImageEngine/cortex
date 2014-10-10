@@ -341,7 +341,7 @@ const char *ParameterisedHolder<BaseType>::inputLabel( unsigned pos ) const
 		return "";
 	}
 	
-	const Parameter *parm = m_inputParameters[pos];
+	const Parameter *parm = m_inputParameters[pos].get();
 	return ( parm->name() + ": " + parm->description() ).c_str();
 }
 

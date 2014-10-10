@@ -77,13 +77,13 @@ class RunTimeTypedWrapper : public RefCountedWrapper<T>
 /// in place of the usual boost::python::class_. It automatically makes sure the class is bound
 /// with the correct name and base class, as well as dealing with all the issues that RefCountedClass
 /// fixes.
-template<typename T, typename Ptr=IECore::IntrusivePtr<T> >
-class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, Ptr>
+template<typename T, typename TWrapper=T>
+class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, TWrapper>
 {
 
 	public :
 
-		typedef RefCountedClass<T, typename T::BaseClass, Ptr> BaseClass;
+		typedef RefCountedClass<T, typename T::BaseClass, TWrapper> BaseClass;
 
 		RunTimeTypedClass( const char *docString = 0 );
 

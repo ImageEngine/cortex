@@ -47,11 +47,11 @@ class AlphaTexture : public Texture
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::AlphaTexture, AlphaTextureTypeId, Texture );
 
 		/// Constructs a texture using the specified data.
-		AlphaTexture( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap=true );
+		AlphaTexture( unsigned int width, unsigned int height, const IECore::Data *a, bool mipMap=true );
 
 		/// Creates an AlphaTexture from the specified image. Currently ignores the display window and uses only
 		/// the data window. Image must have an "A" channel.
-		AlphaTexture( IECore::ConstImagePrimitivePtr image, bool mipMap=true );
+		AlphaTexture( const IECore::ImagePrimitive *image, bool mipMap=true );
 
 		virtual ~AlphaTexture();
 
@@ -61,7 +61,7 @@ class AlphaTexture : public Texture
 
 		struct Constructor;
 
-		void construct( unsigned int width, unsigned int height, IECore::ConstDataPtr a, bool mipMap );
+		void construct( unsigned int width, unsigned int height, const IECore::Data *a, bool mipMap );
 
 };
 

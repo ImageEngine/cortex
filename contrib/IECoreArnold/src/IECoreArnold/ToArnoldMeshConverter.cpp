@@ -161,7 +161,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 	PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
 	if( nIt != mesh->variables.end() )
 	{	
-		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data );
+		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
 		if( n )
 		{
 			PrimitiveVariable::Interpolation nInterpolation = nIt->second.interpolation;

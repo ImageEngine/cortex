@@ -41,9 +41,10 @@ import IECoreRI
 class TestSHWDeepImageWriter( unittest.TestCase ) :
 	
 	__shw = "test/IECoreRI/data/shw/translucentBoxes.shw"
+	__shwOrtho = "test/IECoreRI/data/shw/constantPlaneOrtho.shw"
 	__exr = "test/IECoreRI/data/dtex/groundPlane.exr"
 	__output = "test/IECoreRI/data/shw/written.shw"
-	
+
 	def testConstructor( self ) :
 	
 		self.failUnless( "shw" in IECore.DeepImageWriter.supportedExtensions() )
@@ -156,16 +157,16 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		p = reader.readPixel( 100, 100 )
 		self.assertEqual( p.channelNames(), ( "A", ) )
 		self.assertEqual( p.numSamples(), 1 )
-		self.assertAlmostEqual( p.getDepth( 0 ), 107.5978927, 6 )
+		self.assertAlmostEqual( p.getDepth( 0 ), 102.17636108, 6 )
 		self.assertAlmostEqual( p[0][0], 1.0, 6 )
 		
 		# hits one box then ground plane
 		p2 = reader.readPixel( 256, 256 )
 		self.assertEqual( p2.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( p2.numSamples(), 3 )
-		self.assertAlmostEqual( p2.getDepth( 0 ), 71.7940826, 6 )
-		self.assertAlmostEqual( p2.getDepth( 1 ), 76.9240646, 6 )
-		self.assertAlmostEqual( p2.getDepth( 2 ), 84.8475646, 6 )
+		self.assertAlmostEqual( p2.getDepth( 0 ), 72.6087493, 6 )
+		self.assertAlmostEqual( p2.getDepth( 1 ), 77.7387313, 6 )
+		self.assertAlmostEqual( p2.getDepth( 2 ), 85.6622314, 6 )
 		
 		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
@@ -175,11 +176,11 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		p3 = reader.readPixel( 195, 225 )
 		self.assertEqual( p3.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( p3.numSamples(), 5 )
-		self.assertAlmostEqual( p3.getDepth( 0 ), 68.2118148, 6 )
-		self.assertAlmostEqual( p3.getDepth( 1 ), 74.9367370, 6 )
-		self.assertAlmostEqual( p3.getDepth( 2 ), 77.0554046, 6 )
-		self.assertAlmostEqual( p3.getDepth( 3 ), 79.7311859, 6 )
-		self.assertAlmostEqual( p3.getDepth( 4 ), 88.5616073, 6 )
+		self.assertAlmostEqual( p3.getDepth( 0 ), 68.6177368, 6 )
+		self.assertAlmostEqual( p3.getDepth( 1 ), 75.3023605, 6 )
+		self.assertAlmostEqual( p3.getDepth( 2 ), 77.4083328, 6 )
+		self.assertAlmostEqual( p3.getDepth( 3 ), 80.0680771, 6 )
+		self.assertAlmostEqual( p3.getDepth( 4 ), 88.8455811, 6 )
 		
 		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
@@ -200,16 +201,16 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		rp = reader.readPixel( 0, 0 )
 		self.assertEqual( rp.channelNames(), ( "A", ) )
 		self.assertEqual( rp.numSamples(), 1 )
-		self.assertAlmostEqual( rp.getDepth( 0 ), 107.5978927, 6 )
+		self.assertAlmostEqual( rp.getDepth( 0 ), 102.17636108, 4 )
 		self.assertAlmostEqual( rp[0][0], 1.0, 6 )
 		
 		# hits one box then ground plane
 		rp2 = reader.readPixel( 0, 1 )
 		self.assertEqual( rp2.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( rp2.numSamples(), 3 )
-		self.assertAlmostEqual( rp2.getDepth( 0 ), 71.7940826, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 1 ), 76.9240646, 6 )
-		self.assertAlmostEqual( rp2.getDepth( 2 ), 84.8475646, 6 )
+		self.assertAlmostEqual( rp2.getDepth( 0 ), 72.6087493, 4 )
+		self.assertAlmostEqual( rp2.getDepth( 1 ), 77.7387313, 4 )
+		self.assertAlmostEqual( rp2.getDepth( 2 ), 85.6622314, 4 )
 		
 		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
@@ -219,11 +220,11 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		rp3 = reader.readPixel( 1, 1 )
 		self.assertEqual( rp3.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( rp3.numSamples(), 5 )
-		self.assertAlmostEqual( rp3.getDepth( 0 ), 68.2118148, 6 )
-		self.assertAlmostEqual( rp3.getDepth( 1 ), 74.9367370, 6 )
-		self.assertAlmostEqual( rp3.getDepth( 2 ), 77.0554046, 6 )
-		self.assertAlmostEqual( rp3.getDepth( 3 ), 79.7311859, 6 )
-		self.assertAlmostEqual( rp3.getDepth( 4 ), 88.5616073, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 0 ), 68.6177368, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 1 ), 75.3023605, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 2 ), 77.4083328, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 3 ), 80.0680771, 6 )
+		self.assertAlmostEqual( rp3.getDepth( 4 ), 88.8455811, 6 )
 		
 		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
@@ -299,17 +300,21 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.failUnless( isinstance( rp, IECore.DeepPixel ) )
 		self.assertEqual( rp[0], ( 0.5, ) )
 	
-	def testFileConversion( self ) :
+	def __testFileConversionWithFile( self, filename ) :
 		
-		reader = IECore.DeepImageReader.create( TestSHWDeepImageWriter.__shw )
+		reader = IECore.DeepImageReader.create( filename )
 		dataWindow = reader.dataWindow()
 		
 		writer = IECore.DeepImageWriter.create( TestSHWDeepImageWriter.__output )
 		writer.parameters()['channelNames'].setValue( reader.channelNames() )
 		writer.parameters()['resolution'].setTypedValue( dataWindow.size() + IECore.V2i( 1 ) )
+		writer.parameters()['worldToCameraMatrix'] = reader.worldToCameraMatrix()
+		writer.parameters()['worldToNDCMatrix'] = reader.worldToNDCMatrix()
+		writer.parameters()['tileSize'] = IECore.V2i( 16, 16 )
+
 		
-		for y in range( dataWindow.min.y, dataWindow.max.y ) :
-			for x in range( dataWindow.min.x, dataWindow.max.x ) :
+		for y in range( dataWindow.min.y, dataWindow.max.y + 1 ) :
+			for x in range( dataWindow.min.x, dataWindow.max.x + 1 ) :
 				writer.writePixel( x, y, reader.readPixel( x, y ) )
 		
 		del writer
@@ -319,8 +324,8 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 		self.assertEqual( reader2.dataWindow(), reader.dataWindow() )
 		self.assertEqual( reader2.read(), reader.read() )
 		
-		for y in range( dataWindow.min.y, dataWindow.max.y ) :
-			for x in range( dataWindow.min.x, dataWindow.max.x ) :
+		for y in range( dataWindow.min.y, dataWindow.max.y + 1 ) :
+			for x in range( dataWindow.min.x, dataWindow.max.x + 1 ) :
 				p = reader.readPixel( x, y )
 				p2 = reader2.readPixel( x, y )
 				if not p2 and not p :
@@ -329,9 +334,13 @@ class TestSHWDeepImageWriter( unittest.TestCase ) :
 				self.assertEqual( p2.channelNames(), p.channelNames() )
 				self.assertEqual( p2.numSamples(), p.numSamples() )
 				for i in range( 0, p.numSamples() ) :
-					self.assertEqual( p2.getDepth( i ), p.getDepth( i ) )
+					self.assertAlmostEqual( p2.getDepth( i ), p.getDepth( i ), 4 )
 					self.assertEqual( p2[i], p[i] )
-	
+
+	def testFileConversion( self ) :
+		self.__testFileConversionWithFile( TestSHWDeepImageWriter.__shw )
+		self.__testFileConversionWithFile( TestSHWDeepImageWriter.__shwOrtho )
+
 	def testStrangeOrder( self ) :
 		
 		writer = IECoreRI.SHWDeepImageWriter( TestSHWDeepImageWriter.__output )

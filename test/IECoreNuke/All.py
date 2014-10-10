@@ -47,6 +47,8 @@ from KnobConvertersTest import *
 from ParameterisedHolderTest import ParameterisedHolderTest
 from ObjectKnobTest import ObjectKnobTest
 from OpHolderTest import OpHolderTest
+from SceneCacheReaderTest import SceneCacheReaderTest
+
 if IECore.withPNG() :
 	from PNGReaderTest import PNGReaderTest
 

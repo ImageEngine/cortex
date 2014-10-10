@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -65,6 +65,16 @@ GEO_CortexPrimitive::GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset )
 	m_offset = allocateVertex();
 }
 
+GEO_CortexPrimitive::GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src )
+	: GEO_Primitive( static_cast<GEO_Detail *>( &detail ), offset )
+{
+	const GEO_CortexPrimitive *orig = static_cast<const GEO_CortexPrimitive *>( &src );
+	
+	m_offset = ( map.isIdentityMap( GA_ATTRIB_VERTEX ) ) ? orig->m_offset : map.mapDestFromSource( GA_ATTRIB_VERTEX, orig->m_offset );
+	
+	m_object = orig->m_object->copy();
+}
+
 GEO_CortexPrimitive::~GEO_CortexPrimitive()
 {
 	if ( GAisValid( m_offset ) )
@@ -111,8 +121,30 @@ GA_Primitive::GA_DereferenceStatus GEO_CortexPrimitive::dereferencePoints( const
 	return GA_DEREFERENCE_FAIL;
 }
 
+#if UT_MAJOR_VERSION_INT >= 13
+
+void GEO_CortexPrimitive::stashed( bool beingstashed, GA_Offset offset )
+{
+	GEO_Primitive::stashed( beingstashed, offset );
+	
+	if ( beingstashed )
+	{
+		m_object = 0;
+		m_offset = GA_INVALID_OFFSET;
+	}
+	else
+	{
+		m_object = 0;
+		m_offset = allocateVertex();
+	}	
+}
+
+#endif
+
 void GEO_CortexPrimitive::stashed( int onoff, GA_Offset offset )
 {
+	GEO_Primitive::stashed( onoff, offset );
+	
 	if ( onoff )
 	{
 		m_object = 0;
@@ -123,8 +155,6 @@ void GEO_CortexPrimitive::stashed( int onoff, GA_Offset offset )
 		m_object = 0;
 		m_offset = allocateVertex();
 	}
-	
-	GEO_Primitive::stashed( onoff, offset );
 }
 
 void GEO_CortexPrimitive::clearForDeletion()
@@ -162,7 +192,7 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 	
 	Imath::M44f transform = IECore::convert<Imath::M44f>( xform );
 	
-	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object ) )
+	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object.get() ) )
 	{
 		TransformOpPtr transformer = new TransformOp();
 		transformer->inputParameter()->setValue( primitive );
@@ -170,14 +200,14 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 		transformer->matrixParameter()->setValue( new M44fData( transform ) );
 		transformer->operate();
 	}
-	else if ( Group *group = IECore::runTimeCast<Group>( m_object ) )
+	else if ( Group *group = IECore::runTimeCast<Group>( m_object.get() ) )
 	{
 		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( group->getTransform() ) )
 		{
 			matTransform->matrix = transform * matTransform->matrix;
 		}
 	}
-	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object ) )
+	else if ( CoordinateSystem *coord = IECore::runTimeCast<CoordinateSystem>( m_object.get() ) )
 	{
 		if ( MatrixTransform *matTransform = IECore::runTimeCast<MatrixTransform>( coord->getTransform() ) )
 		{
@@ -197,7 +227,7 @@ int GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
 		return 0;
 	}
 	
-	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object );
+	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object.get() );
 	if ( !renderable )
 	{
 		return 0;
@@ -291,12 +321,12 @@ bool GEO_CortexPrimitive::evaluatePointRefMap( GA_Offset result_vtx, GA_Attribut
 
 IECore::Object *GEO_CortexPrimitive::getObject()
 {
-	return m_object;
+	return m_object.get();
 }
 
 const IECore::Object *GEO_CortexPrimitive::getObject() const
 {
-	return m_object;
+	return m_object.get();
 }
 
 void GEO_CortexPrimitive::setObject( const IECore::Object *object )
@@ -498,7 +528,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 						}
 						
 						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buf, IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
-						object( pr )->setObject( IECore::Object::load( io, "object" ) );
+						object( pr )->setObject( IECore::Object::load( io, "object" ).get() );
 					}
 					catch ( std::exception &e )
 					{

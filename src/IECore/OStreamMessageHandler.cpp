@@ -74,14 +74,14 @@ void OStreamMessageHandler::handle( Level level, const std::string &context, con
 // shared fellahs
 ///////////////////////////////////////////////////////////////////////////////////////
 
-OStreamMessageHandlerPtr OStreamMessageHandler::cErrHandler()
+OStreamMessageHandler *OStreamMessageHandler::cErrHandler()
 {
 	static OStreamMessageHandlerPtr s = new OStreamMessageHandler( cerr );
-	return s;
+	return s.get();
 }
 
-OStreamMessageHandlerPtr OStreamMessageHandler::cOutHandler()
+OStreamMessageHandler *OStreamMessageHandler::cOutHandler()
 {
 	static OStreamMessageHandlerPtr s = new OStreamMessageHandler( cout );
-	return s;
+	return s.get();
 }

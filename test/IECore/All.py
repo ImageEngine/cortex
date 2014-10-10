@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright (c) 2010, John Haddon. All rights reserved.
 #
@@ -110,16 +110,8 @@ from DataCastOp import *
 from DataPromoteOp import *
 from MatrixMultiplyOp import *
 from PointBoundsOp import *
-from ImplicitSurfaceFunction import *
-from CachedImplicitSurfaceFunction import *
-from MarchingCubes import *
-from PointMeshOp import *
-from CSGImplicitSurfaceFunction import *
-from ParticleMeshOp import *
 from PrimitiveEvaluator import *
 from MeshPrimitiveEvaluator import *
-from PrimitiveImplicitSurfaceFunction import *
-from MeshPrimitiveImplicitSurfaceOp import *
 from InternedStringTest import InternedStringTest
 from Writer import *
 from TriangulateOp import *
@@ -199,11 +191,8 @@ from DataTraitsTest import *
 from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
-from BINParticleWriterTest import *
-from BINMeshReaderTest import *
-from BGEOParticleReader import *
 from NParticleReader import *
-from IFFHairReader import *
+from OBJReaderTest import TestOBJReader
 from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
@@ -270,6 +259,11 @@ from StandardRadialLensModelTest import StandardRadialLensModelTest
 from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
+from ExternalProceduralTest import ExternalProceduralTest
+
+if IECore.withDeepEXR() :
+	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
+	from EXRDeepImageWriterTest import EXRDeepImageWriterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

@@ -40,7 +40,7 @@
 
 #include "IECore/LinkedScene.h"
 
-#include "IECoreHoudini/HoudiniScene.h"
+#include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/OBJ_SceneCacheNode.h"
 
 namespace IECoreHoudini
@@ -126,12 +126,12 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 	
 	private :
 		
-		/// functions registered in HoudiniScene as custom attributes
-		struct HoudiniSceneAddOn
+		/// functions registered in LiveScene as custom attributes
+		struct LiveSceneAddOn
 		{
-			HoudiniSceneAddOn();
+			LiveSceneAddOn();
 		};
-		static HoudiniSceneAddOn g_houdiniSceneAddOn;
+		static LiveSceneAddOn g_liveSceneAddOn;
 		
 		static void attributeNames( const OP_Node *node, IECore::SceneInterface::NameList &attrs );
 		static IECore::ConstObjectPtr readAttribute( const OP_Node *node, const IECore::SceneInterface::Name &name, double time );

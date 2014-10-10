@@ -66,6 +66,18 @@ inline size_t sizeOf<void>()
 	return 0;
 }
 
+template<typename T>
+inline bool shareable( const T &t )
+{
+	return false;
+}
+
+template<typename T>
+inline bool shareable( const SharedDataHolder<T> &t )
+{
+	return true;
+}
+
 } // namespace Detail
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +106,7 @@ TypedData<T>::~TypedData()
 template <class T>
 typename TypedData<T>::Ptr TypedData<T>::copy() const
 {
-	return staticPointerCast<TypedData<T> >( Data::copy() );
+	return boost::static_pointer_cast<TypedData<T> >( Data::copy() );
 }
 
 template <class T>
@@ -184,7 +196,21 @@ template<class T>
 void TypedData<T>::memoryUsage( Object::MemoryAccumulator &accumulator ) const
 {
 	Data::memoryUsage( accumulator );
-	accumulator.accumulate( &readable(), sizeof( T ) );
+	if( Detail::shareable( m_data ) )
+	{
+		// We may be sharing our data with another object using
+		// lazy-copy-on-write. We must tell the MemoryAccumulator
+		// what address our storage is at, so it can avoid double
+		// counting.
+		accumulator.accumulate( &readable(), sizeof( T ) );
+	}
+	else
+	{
+		// We store our own copy of the data - by not passing
+		// an address associated with the size we avoid
+		// unnecessary bookkeeping in the MemoryAccumulator.
+		accumulator.accumulate( sizeof( T ) );
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////////////////

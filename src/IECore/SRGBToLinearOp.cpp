@@ -78,6 +78,6 @@ void SRGBToLinearOp::modifyChannels( const Imath::Box2i &displayWindow, const Im
 	SRGBToLinearOp::Converter converter;
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<SRGBToLinearOp::Converter, TypeTraits::IsFloatVectorTypedData>( *it, converter );
+		despatchTypedData<SRGBToLinearOp::Converter, TypeTraits::IsFloatVectorTypedData>( it->get(), converter );
 	}
 }

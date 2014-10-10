@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -88,10 +88,23 @@ class SceneInterface : public RunTimeTyped
 			EveryTag = DescendantTag | LocalTag | AncestorTag
 		};
 
+		/// Defines the type of hash to be computed.
+		/// The hierarchy hash includes all the other types of hash for the queried location and all it's children locations.
+		enum HashType {
+			TransformHash,
+			AttributesHash,
+			BoundHash,
+			ObjectHash,
+			ChildNamesHash,
+			HierarchyHash,
+		};
+
 		/// Constant name assigned to the root location "/".
 		static const Name &rootName;
 		/// Utility variable that can be used anytime you want to refer to the root path in the Scene.
 		static const Path &rootPath;
+		/// Name of the visibility attribute
+		static const Name &visibilityName;
 
 		/// Create an instance of a subclass which is able to open the file found at "path".
 		/// Files can be opened for Read, Write, or Append depending on the derived classes.
@@ -228,6 +241,19 @@ class SceneInterface : public RunTimeTyped
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 		/// Returns a const interface for querying the scene at the given path (full path). 
 		virtual ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
+
+		/*
+		 * Hash
+		 */
+
+		/// Computes the requested type of hash for the current location on the scene at the given time.
+		/// The hash returned is not content-based, but it uniquely identifies the queried information so that 
+		/// it can be used for memory caches, for example, used by ComputationCache objects.
+		/// This function is only available when reading scenes and it raises an exception otherwise.
+		/// The base class implementation only adds the class typeId information to garantee that the hash won't 
+		/// collide with other Cortex objects and derived classes are responsible to call the base class implementation
+		/// as well as add the time dependency as applicable.
+		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;
 
 		/*
 		 * Utility functions

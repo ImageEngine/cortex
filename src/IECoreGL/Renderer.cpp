@@ -33,6 +33,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <stack>
+
+#include "tbb/mutex.h"
+
+#include "OpenEXR/ImathBoxAlgo.h"
+
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/BoxOps.h"
+#include "IECore/Camera.h"
+#include "IECore/Transform.h"
+#include "IECore/MatrixAlgo.h"
+#include "IECore/MeshPrimitive.h"
+#include "IECore/MeshNormalsOp.h"
+#include "IECore/SplineData.h"
+#include "IECore/SplineToImage.h"
+#include "IECore/CurvesPrimitive.h"
+#include "IECore/PointsPrimitive.h"
+
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/PointsPrimitive.h"
@@ -63,25 +82,6 @@
 #include "IECoreGL/TextPrimitive.h"
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/CachedConverter.h"
-
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/BoxOps.h"
-#include "IECore/Camera.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixAlgo.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/MeshNormalsOp.h"
-#include "IECore/SplineData.h"
-#include "IECore/SplineToImage.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-
-#include "OpenEXR/ImathBoxAlgo.h"
-
-#include "tbb/mutex.h"
-
-#include <stack>
 
 using namespace IECore;
 using namespace IECoreGL;
@@ -203,7 +203,7 @@ struct IECoreGL::Renderer::MemberData
 		{
 			addCurrentInstanceChild( glPrimitive );
 		}
-		else if( checkCulling<IECoreGL::Primitive>( glPrimitive ) )
+		else if( checkCulling<IECoreGL::Primitive>( glPrimitive.get() ) )
 		{
 			implementation->addPrimitive( glPrimitive );
 		}
@@ -214,7 +214,7 @@ struct IECoreGL::Renderer::MemberData
 		IECoreGL::GroupPtr childGroup = new IECoreGL::Group();
 		childGroup->setTransform( transformStack.top() );
 		/// \todo See todo in DeferredRendererImplementation::addPrimitive().
-		childGroup->addChild( constPointerCast<Renderable>( child ) );
+		childGroup->addChild( boost::const_pointer_cast<Renderable>( child ) );
 		currentInstance->addChild( childGroup );
 	}
 	
@@ -1682,7 +1682,7 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 
 	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
 
-	if ( !m_data->checkCulling<IECore::Primitive>( image ) )
+	if ( !m_data->checkCulling<IECore::Primitive>( image.get() ) )
 	{
 		return;
 	}
@@ -1779,9 +1779,21 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 		IECore::msg( IECore::Msg::Warning, "Renderer::procedural", "Procedurals currently not supported inside instances." );
 		return;
 	}
-	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc ) )
+	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc.get() ) )
 	{
-		m_data->implementation->addProcedural( proc, this );
+		if( ExternalProcedural *externalProcedural = dynamic_cast<ExternalProcedural *>( proc.get() ) )
+		{
+			attributeBegin();
+				setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
+				setAttribute( "gl:primitive:solid", new BoolData( false ) );
+				setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
+				IECore::CurvesPrimitive::createBox( externalProcedural->bound() )->render( this );
+			attributeEnd();
+		}
+		else
+		{
+			m_data->implementation->addProcedural( proc, this );
+		}
 	}
 }
 
@@ -1865,7 +1877,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		{
 			{
 				IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-				parent->removeChild( child );
+				parent->removeChild( child.get() );
 			}
 			{
 				tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
@@ -1903,7 +1915,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		// group after removal became empty, remove it too.
 		{
 			IECoreGL::Group::Mutex::scoped_lock lock( parent->mutex() );
-			parent->removeChild( child );
+			parent->removeChild( child.get() );
 		}
 		{
 			tbb::mutex::scoped_lock lock2( memberData->removedObjectsMutex );
@@ -2033,10 +2045,10 @@ void IECoreGL::Renderer::editEnd()
 
 IECoreGL::ShaderLoader *IECoreGL::Renderer::shaderLoader()
 {
-	return m_data->shaderLoader;
+	return m_data->shaderLoader.get();
 }
 
 IECoreGL::TextureLoader *IECoreGL::Renderer::textureLoader()
 {
-	return m_data->textureLoader;
+	return m_data->textureLoader.get();
 }

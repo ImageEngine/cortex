@@ -51,6 +51,7 @@ void IECoreGL::bindFontLoader()
 		.def( init<const IECore::SearchPath &>() )
 		.def( "load", &FontLoader::load )
 		.def( "clear", &FontLoader::clear )
-		.def( "defaultFontLoader", &FontLoader::defaultFontLoader ).staticmethod( "defaultFontLoader" )
+		.def( "defaultFontLoader", &FontLoader::defaultFontLoader, return_value_policy<IECorePython::CastToIntrusivePtr>() )
+		.staticmethod( "defaultFontLoader" )
 	;
 }

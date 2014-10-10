@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ bool withJPEG();
 bool withFreeType();
 /// Returns true if IECore was built with PNG suppport
 bool withPNG();
+/// Returns true if IECore was built with Deep EXR support
+bool withDeepEXR();
 
 }
 
@@ -113,14 +115,12 @@ bool withPNG();
 /// \section mainPageMemoryManagementSection Memory Management
 ///
 /// IECore uses reference counting for any reasonably complex class. The \link IECore::RefCounted RefCounted \endlink
-/// base class provides an internal reference count for the object, and IECore::IntrusivePtr
-/// is used most places where raw pointers would otherwise be used. This means that
-/// generally you don't need to worry about memory management - objects die appropriately
-/// when the last IntrusivePtr pointing to them goes out of scope.
+/// base class provides an internal reference count for the object, and boost::intrusive_ptr
+/// is used to share ownsership amongst interested parties.
 ///
 /// For convenience, all classes define typedefs of the form ClassPtr, ConstClassPtr,
 /// Class::Ptr and Class::ConstPtr - these should be used in preference to the
-/// clunkier IntrusivePtr<Class> syntax.
+/// clunkier boost::intrusive_ptr<Class> syntax.
 ///
 /// \code
 ///	{

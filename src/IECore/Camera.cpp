@@ -65,13 +65,13 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 	m_name = tOther->m_name;
 	if( tOther->m_transform )
 	{
-		m_transform = context->copy<Transform>( tOther->m_transform );
+		m_transform = context->copy<Transform>( tOther->m_transform.get() );
 	}
 	else
 	{
 		m_transform = 0;
 	}
-	m_parameters = context->copy<CompoundData>( tOther->m_parameters );
+	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
 
 void Camera::save( SaveContext *context ) const
@@ -81,9 +81,9 @@ void Camera::save( SaveContext *context ) const
 	container->write( g_nameEntry, m_name );
 	if( m_transform )
 	{
-		context->save( m_transform, container, g_transformEntry );
+		context->save( m_transform.get(), container.get(), g_transformEntry );
 	}
-	context->save( m_parameters, container, g_parametersEntry );
+	context->save( m_parameters.get(), container.get(), g_parametersEntry );
 }
 
 void Camera::load( LoadContextPtr context )
@@ -96,12 +96,12 @@ void Camera::load( LoadContextPtr context )
 	m_transform = 0;
 	try
 	{
-		m_transform = context->load<Transform>( container, g_transformEntry );
+		m_transform = context->load<Transform>( container.get(), g_transformEntry );
 	}
 	catch( ... )
 	{
 	}
-	m_parameters = context->load<CompoundData>( container, g_parametersEntry );
+	m_parameters = context->load<CompoundData>( container.get(), g_parametersEntry );
 }
 
 bool Camera::isEqualTo( const Object *other ) const
@@ -125,13 +125,13 @@ bool Camera::isEqualTo( const Object *other ) const
 		return false;
 	}
 
-	if( m_transform && !tOther->m_transform->isEqualTo( m_transform ) )
+	if( m_transform && !tOther->m_transform->isEqualTo( m_transform.get() ) )
 	{
 		return false;
 	}
 
 	// check parameters
-	if( !m_parameters->isEqualTo( tOther->m_parameters ) )
+	if( !m_parameters->isEqualTo( tOther->m_parameters.get() ) )
 	{
 		return false;
 	}
@@ -145,9 +145,9 @@ void Camera::memoryUsage( Object::MemoryAccumulator &a ) const
 	a.accumulate( m_name.capacity() );
 	if( m_transform )
 	{
-		a.accumulate( m_transform );
+		a.accumulate( m_transform.get() );
 	}
-	a.accumulate( m_parameters );
+	a.accumulate( m_parameters.get() );
 }
 
 void Camera::hash( MurmurHash &h ) const
@@ -176,14 +176,14 @@ void Camera::setTransform( TransformPtr transform )
 	m_transform = transform;
 }
 
-TransformPtr Camera::getTransform()
+Transform *Camera::getTransform()
 {
-	return m_transform;
+	return m_transform.get();
 }
 
-ConstTransformPtr Camera::getTransform() const
+const Transform *Camera::getTransform() const
 {
-	return m_transform;
+	return m_transform.get();
 }
 
 CompoundDataMap &Camera::parameters()
@@ -196,14 +196,14 @@ const CompoundDataMap &Camera::parameters() const
 	return m_parameters->readable();
 }
 
-CompoundDataPtr Camera::parametersData()
+CompoundData *Camera::parametersData()
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
-ConstCompoundDataPtr Camera::parametersData() const
+const CompoundData *Camera::parametersData() const
 {
-	return m_parameters;
+	return m_parameters.get();
 }
 
 void Camera::addStandardParameters()
@@ -213,7 +213,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator resIt=parameters().find( "resolution" );
 	if( resIt != parameters().end() && resIt->second->isInstanceOf( V2iDataTypeId ) )
 	{
-		resolution = staticPointerCast<V2iData>( resIt->second )->readable();
+		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
 	}
 	if( resolution.x < 1 || resolution.y < 1 )
 	{
@@ -221,16 +221,28 @@ void Camera::addStandardParameters()
 		parameters()["resolution"] = new V2iData( resolution );
 	}
 
+	// pixel aspect ratio
+	float pixelAspectRatio = 0.0f;
+	if( FloatData *pixelAspectRatioData = parametersData()->member<FloatData>( "pixelAspectRatio" ) )
+	{
+		pixelAspectRatio = pixelAspectRatioData->readable();
+	}
+	if( pixelAspectRatio == 0.0f )
+	{
+		pixelAspectRatio = 1.0f;
+		parameters()["pixelAspectRatio"] = new FloatData( pixelAspectRatio );
+	}
+
 	// screen window
 	Box2f screenWindow;
 	CompoundDataMap::const_iterator screenWindowIt=parameters().find( "screenWindow" );
 	if( screenWindowIt!=parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 	{
-		screenWindow = staticPointerCast<Box2fData>( screenWindowIt->second )->readable();
+		screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
 	}
 	if( screenWindow.isEmpty() )
 	{
-		float aspectRatio = (float)resolution.x/(float)resolution.y;
+		float aspectRatio = ((float)resolution.x * pixelAspectRatio)/(float)resolution.y;
 		if( aspectRatio < 1.0f )
 		{
 			screenWindow.min.x = -1;
@@ -253,7 +265,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator cropWindowIt=parameters().find( "cropWindow" );
 	if( cropWindowIt!=parameters().end() && cropWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 	{
-		cropWindow = staticPointerCast<Box2fData>( cropWindowIt->second )->readable();
+		cropWindow = boost::static_pointer_cast<Box2fData>( cropWindowIt->second )->readable();
 	}
 	if( cropWindow.isEmpty() || cropWindow.min.x < 0.0f || cropWindow.min.y < 0.0f ||
 		cropWindow.max.x > 1.0f || cropWindow.max.y > 1.0f )
@@ -267,7 +279,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator projectionIt=parameters().find( "projection" );
 	if( projectionIt!=parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
 	{
-		projection = staticPointerCast<StringData>( projectionIt->second )->readable();
+		projection = boost::static_pointer_cast<StringData>( projectionIt->second )->readable();
 	}
 	if( projection=="" )
 	{
@@ -282,7 +294,7 @@ void Camera::addStandardParameters()
 		CompoundDataMap::const_iterator fovIt=parameters().find( "projection:fov" );
 		if( fovIt!=parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
 		{
-			fov = staticPointerCast<FloatData>( fovIt->second )->readable();
+			fov = boost::static_pointer_cast<FloatData>( fovIt->second )->readable();
 		}
 		if( fov < 0.0f )
 		{
@@ -296,7 +308,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
 	if( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
-		clippingPlanes = staticPointerCast<V2fData>( clippingIt->second )->readable();
+		clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
 	}
 	if( clippingPlanes[0] < 0.0f || clippingPlanes[1] < 0.0f )
 	{
@@ -309,7 +321,7 @@ void Camera::addStandardParameters()
 	CompoundDataMap::const_iterator shutterIt=parameters().find( "shutter" );
 	if( shutterIt != parameters().end() && shutterIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
-		shutter = staticPointerCast<V2fData>( shutterIt->second )->readable();
+		shutter = boost::static_pointer_cast<V2fData>( shutterIt->second )->readable();
 	}
 	if( shutter[0] > shutter[1] )
 	{

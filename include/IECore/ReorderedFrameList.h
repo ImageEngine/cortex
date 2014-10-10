@@ -52,7 +52,7 @@ class ReorderedFrameList : public FrameList
 
 		ReorderedFrameList( FrameListPtr frameList );
 
-		FrameListPtr getFrameList();
+		FrameList *getFrameList();
 		void setFrameList( FrameListPtr frameList );
 
 		virtual ~ReorderedFrameList();

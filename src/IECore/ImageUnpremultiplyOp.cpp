@@ -61,12 +61,12 @@ ImageUnpremultiplyOp::~ImageUnpremultiplyOp()
 
 StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter()
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 const StringParameter * ImageUnpremultiplyOp::alphaChannelNameParameter() const
 {
-	return m_alphaChannelNameParameter;
+	return m_alphaChannelNameParameter.get();
 }
 
 struct ImageUnpremultiplyOp::ToFloatVectorData
@@ -74,7 +74,7 @@ struct ImageUnpremultiplyOp::ToFloatVectorData
 	typedef FloatVectorDataPtr ReturnType;
 
 	template<typename T>
-	ReturnType operator()( typename T::ConstPtr dataPtr )
+	ReturnType operator()( const T *dataPtr )
 	{
 		return DataConvert< T, FloatVectorData, ScaledDataConversion< typename T::ValueType::value_type, float > >()( dataPtr );
 	}
@@ -92,7 +92,7 @@ struct ImageUnpremultiplyOp::UnpremultFn
 	}
 
 	template<typename T>
-	ReturnType operator()( typename T::Ptr dataPtr )
+	ReturnType operator()( T *dataPtr )
 	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::value_type ValueType;
@@ -136,11 +136,11 @@ void ImageUnpremultiplyOp::modifyChannels( const Imath::Box2i &displayWindow, co
 		throw InvalidArgumentException( "ImageUnpremultiplyOp: Cannot find specified alpha channel" );
 	}
 
-	FloatVectorDataPtr alphaData = despatchTypedData< ToFloatVectorData, TypeTraits::IsNumericVectorTypedData >( it->second.data );
+	FloatVectorDataPtr alphaData = despatchTypedData< ToFloatVectorData, TypeTraits::IsNumericVectorTypedData >( it->second.data.get() );
 
-	ImageUnpremultiplyOp::UnpremultFn fn( alphaData );
+	ImageUnpremultiplyOp::UnpremultFn fn( alphaData.get() );
 	for ( ChannelVector::iterator it = channels.begin(); it != channels.end(); it++ )
 	{
-		despatchTypedData<ImageUnpremultiplyOp::UnpremultFn, TypeTraits::IsNumericVectorTypedData>( *it, fn );
+		despatchTypedData<ImageUnpremultiplyOp::UnpremultFn, TypeTraits::IsNumericVectorTypedData>( it->get(), fn );
 	}
 }

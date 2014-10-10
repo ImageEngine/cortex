@@ -54,7 +54,7 @@ SplineToGLTextureConverter::ConverterDescription<SplineToGLTextureConverter> Spl
 SplineToGLTextureConverter::SplineToGLTextureConverter( IECore::ConstObjectPtr toConvert )
 	:	ToGLConverter( "Converts IECore::SplineData objects to IECoreGL::Texture objects.", IECore::ObjectTypeId )
 {
-	srcParameter()->setValue( IECore::constPointerCast<IECore::Object>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECore::Object>( toConvert ) );
 
 	m_resolutionParameter = new IECore::V2iParameter(
 		"resolution",
@@ -73,9 +73,9 @@ IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstO
 	
 	TexturePtr t = 0;
 	IECore::SplineToImagePtr op = new IECore::SplineToImage();
-	op->splineParameter()->setValue( IECore::constPointerCast< IECore::Object >(src) );
+	op->splineParameter()->setValue( boost::const_pointer_cast< IECore::Object >(src) );
 	op->resolutionParameter()->setValue( m_resolutionParameter->getValue() );
-	IECore::ImagePrimitivePtr image = IECore::staticPointerCast<IECore::ImagePrimitive>( op->operate() );
+	IECore::ImagePrimitivePtr image = boost::static_pointer_cast<IECore::ImagePrimitive>( op->operate() );
 
 	bool r = image->channelValid( "R" );
 	bool g = image->channelValid( "G" );
@@ -84,11 +84,11 @@ IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstO
 
 	if ( !y && r && g && b )
 	{
-			t = new ColorTexture( image );
+			t = new ColorTexture( image.get() );
 	}
 	else if ( y && !r && !g && !b ) 
 	{
-			t = new LuminanceTexture( image );
+			t = new LuminanceTexture( image.get() );
 	}
 	else
 	{

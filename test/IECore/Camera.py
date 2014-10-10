@@ -80,6 +80,7 @@ class TestCamera( unittest.TestCase ) :
 		c.addStandardParameters()
 
 		self.assertEqual( c.parameters()["resolution"].value, V2i( 640, 480 ) )
+		self.assertEqual( c.parameters()["pixelAspectRatio"].value, 1.0 )
 		aspectRatio = 640.0/480.0
 		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -aspectRatio, -1 ), V2f( aspectRatio, 1 ) ) )
 
@@ -118,6 +119,15 @@ class TestCamera( unittest.TestCase ) :
 
 		c.addStandardParameters()
 		self.assertNotEqual( c.hash(), h )
+
+	def testAddStandardParametersWithNonSquarePixels( self ) :
+		
+		c = Camera()
+		c.parameters()["resolution"] = V2i( 100, 200 )
+		c.parameters()["pixelAspectRatio"] = 2.0
+		
+		c.addStandardParameters()
+		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -1 ), V2f( 1 ) ) )
 		
 	def tearDown( self ) :
 

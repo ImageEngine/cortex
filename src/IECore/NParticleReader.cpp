@@ -243,7 +243,7 @@ const IntVectorData * NParticleReader::frameTimes()
 		return 0;
 	}
 	
-	return m_frames;
+	return m_frames.get();
 }
 
 template<typename T, typename F>
@@ -352,10 +352,10 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<DoubleVectorData, DoubleVectorData>( d, particlePercentage() );
+						result = filterAttr<DoubleVectorData, DoubleVectorData>( d.get(), particlePercentage() );
 						break;
 					case Float :
-						result = filterAttr<FloatVectorData, DoubleVectorData>( d, particlePercentage() );
+						result = filterAttr<FloatVectorData, DoubleVectorData>( d.get(), particlePercentage() );
 						break;
 				}
 			}
@@ -372,10 +372,10 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<V3dVectorData, V3dVectorData>( d, particlePercentage() );
+						result = filterAttr<V3dVectorData, V3dVectorData>( d.get(), particlePercentage() );
 						break;
 					case Float :
-						result = filterAttr<V3fVectorData, V3dVectorData>( d, particlePercentage() );
+						result = filterAttr<V3fVectorData, V3dVectorData>( d.get(), particlePercentage() );
 						break;
 				}
 			}
@@ -392,10 +392,10 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 				{
 					case Native :
 					case Double :
-						result = filterAttr<V3dVectorData, V3fVectorData>( d, particlePercentage() );
+						result = filterAttr<V3dVectorData, V3fVectorData>( d.get(), particlePercentage() );
 						break;
 					case Float :
-						result = filterAttr<V3fVectorData, V3fVectorData>( d, particlePercentage() );
+						result = filterAttr<V3fVectorData, V3fVectorData>( d.get(), particlePercentage() );
 						break;
 				}
 			}

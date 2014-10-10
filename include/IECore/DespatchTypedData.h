@@ -34,7 +34,7 @@
 
 //! \file DespatchTypedData.h
 /// Defines useful functions for calling template functions to manipulate
-/// TypedData instances when given only a DataPtr.
+/// TypedData instances when given only a Data *.
 
 
 #ifndef IE_CORE_DESPATCHTYPEDDATA_H
@@ -50,8 +50,8 @@
 namespace IECore
 {
 
-/// Given a DataPtr which points to one a instance of the TypedData classes, call the operator() member function on an
-/// instance of Functor, passing the DataPtr downcast to the correct type. A template parameter, Enabler, allows the
+/// Given a Data * which points to an instance of one of the TypedData classes, call the operator() member function on an
+/// instance of Functor, passing the Data * downcast to the correct type. A template parameter, Enabler, allows the
 /// function to run only on certain subsets of TypedData, for example, only VectorTypeData. The template specified
 /// here should be compatible with boost::mpl - see examples in TypeTraits.h.
 ///
@@ -62,7 +62,7 @@ namespace IECore
 /// struct EH
 /// {
 ///     template<typename DataType, typename Functor>
-///     void operator()( typename DataType::ConstPtr , const Functor& )
+///     void operator()( const DataType *, const Functor & )
 ///     {
 ///         // Handle error here
 ///     }
@@ -77,7 +77,7 @@ namespace IECore
 ///	typedef unspecified-type ReturnType;
 ///
 ///	template<typename T>
-///	ReturnType operator()( typename T::Ptr data )
+///	ReturnType operator()( T *data )
 ///	{
 ///         // Deal with the data and, optionally, return some value
 ///	}
@@ -86,36 +86,36 @@ namespace IECore
 ///
 /// Example uses can be found it the ImageWriter-derived classes
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor, ErrorHandler &errorHandler );
+typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, ErrorHandler &errorHandler );
 
 /// Convenience version of despatchTypedData which constructs an ErrorHandler using its default constructor
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor );
+typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData which constructs the ErrorHandler and Functor using their default constructors
 template< class Functor, template<typename> class Enabler, typename ErrorHandler >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data );
+typename Functor::ReturnType despatchTypedData( Data *data );
 
 /// Convenience version of despatchTypedData, which throws an InvalidArgumentException when data which doesn't match the Enabler
 /// is encountered
 template< class Functor, template<typename> class Enabler >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor );
+typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData, which throws an InvalidArgumentException when data which doesn't match the Enabler
 /// is encountered.
 template< class Functor, template<typename> class Enabler >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data );
+typename Functor::ReturnType despatchTypedData( Data *data );
 
 /// Convenience version of despatchTypedData which operates on all TypedData classes, and constructs an ErrorHandler
 /// using its default constructor
 template< class Functor >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data, Functor &functor );
+typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor );
 
 /// Convenience version of despatchTypedData which operates on all TypedData classes, constructs the ErrorHandler
 /// and Functor using their default constructors, and throws an InvalidArgumentException when data which isn't TypedData
 /// is encountered.
 template< class Functor >
-typename Functor::ReturnType despatchTypedData( const DataPtr &data );
+typename Functor::ReturnType despatchTypedData( Data *data );
 
 /// Simply returns the result of Trait - this can be used to check TypeTraits at runtime.
 /// e.g. bool isSimple = despatchTraitsTest<TypeTraits::IsSimpleTypedData>( data ).

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -52,8 +52,8 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 {
 	public :
 		
-		/// \todo: We should probably provide a merge constructor as well
 		GU_CortexPrimitive( GU_Detail *gdp, GA_Offset offset = GA_INVALID_OFFSET );
+		GU_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 		virtual ~GU_CortexPrimitive();
 		
 		static const char *typeName;
@@ -61,12 +61,14 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 #if UT_MAJOR_VERSION_INT >= 13
 
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );
-
 #else
 
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset );
 
 #endif
+		
+		// merge constructor
+		static GA_Primitive *create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 
 		static GU_CortexPrimitive *build( GU_Detail *geo, const IECore::Object *object );
 		

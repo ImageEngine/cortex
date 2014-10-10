@@ -105,7 +105,6 @@ struct SweepAndPruneTest
 		boost::mt19937 generator( static_cast<boost::mt19937::result_type>( seed ) );
 
 		typedef typename BoxTraits<T>::BaseType VecType;
-		typedef typename VectorTraits<VecType>::BaseType BaseType;
 
 		boost::uniform_real<> uni_dist( 0.0f, 1.0f );
 		boost::variate_generator<boost::mt19937&, boost::uniform_real<> > uni( generator, uni_dist );

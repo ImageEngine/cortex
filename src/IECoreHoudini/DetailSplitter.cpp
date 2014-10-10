@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -115,6 +115,7 @@ bool DetailSplitter::validate()
 		GU_Detail *newGeo = new GU_Detail();
 		GA_Range matchPrims( geo->getPrimitiveMap(), oIt->second );
 		newGeo->mergePrimitives( *geo, matchPrims );
+		newGeo->incrementMetaCacheCount();
 		
 		GU_DetailHandle handle;
 		handle.allocateAndSet( newGeo, true );

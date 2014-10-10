@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -141,7 +141,7 @@ void SOP_SceneCacheSource::sceneChanged()
 	m_static = false;
 	
 	ConstSceneInterfacePtr scene = this->scene( file, getPath() );
-	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene );
+	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene.get() );
 	if ( sampledScene )
 	{
 		bool objectOnly = this->evalInt( pObjectOnly.getToken(), 0, 0 );
@@ -275,7 +275,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 		}
 	}
 	
-	loadObjects( scene, transform, readTime, space, params, rootPath.size() );
+	loadObjects( scene.get(), transform, readTime, space, params, rootPath.size() );
 	
 	if ( progress->opInterrupt( 100 ) )
 	{
@@ -359,7 +359,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 			if ( params.hasAnimatedPrimVars )
 			{
 				const ConstObjectPtr animatedPrimVarObj = scene->readAttribute( SceneCache::animatedObjectPrimVarsAttribute, 0 );
-				const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj );
+				const InternedStringVectorData *animatedPrimVarData = IECore::runTimeCast<const InternedStringVectorData>( animatedPrimVarObj.get() );
 				if ( animatedPrimVarData )
 				{
 					const std::vector<InternedString> &values = animatedPrimVarData->readable();
@@ -371,22 +371,22 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 		
 		// modify the object if necessary
-		object = modifyObject( object, params );
+		object = modifyObject( object.get(), params );
 		
 		// transform the object unless its an identity
 		if ( currentTransform != Imath::M44d() )
 		{
-			object = transformObject( object, currentTransform, params );
+			object = transformObject( object.get(), currentTransform, params );
 		}
 		
 		// convert the object to Houdini
-		if ( !convertObject( object, name, params ) )
+		if ( !convertObject( object.get(), name, params ) )
 		{
 			std::string fullName;
 			SceneInterface::Path path;
 			scene->path( path );
 			SceneInterface::pathToString( path, fullName );
-			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to houdini" ).c_str() );
+			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to Houdini" ).c_str() );
 		}
 	}
 	
@@ -401,9 +401,9 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	for ( SceneInterface::NameList::const_iterator it=children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr child = scene->child( *it );
-		if ( tagged( child, params.tagFilter ) )
+		if ( tagged( child.get(), params.tagFilter ) )
 		{
-			loadObjects( child, child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize );
+			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize );
 		}
 	}
 }
@@ -440,7 +440,9 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 						modified = primitive->copy();
 					}
 					
-					modified->variables[values[1]] = modified->variables[values[0]];
+					// we need to copy the data in case either copy will be modified later on
+					const PrimitiveVariable &orig = modified->variables[values[0]];
+					modified->variables[values[1]] = PrimitiveVariable( orig.interpolation, orig.data->copy() );
 				}
 			}
 			
@@ -455,7 +457,7 @@ ConstObjectPtr SOP_SceneCacheSource::modifyObject( const IECore::Object *object,
 }
 
 template<typename T>
-SOP_SceneCacheSource::TransformGeometricData::ReturnType SOP_SceneCacheSource::TransformGeometricData::operator()( typename T::ConstPtr data ) const
+SOP_SceneCacheSource::TransformGeometricData::ReturnType SOP_SceneCacheSource::TransformGeometricData::operator()( const T *data ) const
 {
 	GeometricData::Interpretation interp = data->getInterpretation();
 	return ( interp == GeometricData::Point || interp == GeometricData::Normal || interp == GeometricData::Vector );
@@ -470,14 +472,20 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 		transformer->copyParameter()->setTypedValue( true );
 		transformer->matrixParameter()->setValue( new M44dData( transform ) );
 		
-		// add all Point and Normal prim vars to the transformation list
+		// add all Point and Normal prim vars to the transformation list, except for rest/Pref
 		const PrimitiveVariableMap &variables = primitive->variables;
 		std::vector<std::string> &primVars = transformer->primVarsParameter()->getTypedValue();
 		primVars.clear();
 		for ( PrimitiveVariableMap::const_iterator it = variables.begin(); it != variables.end(); ++it )
 		{
-			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data ) )
+			if ( despatchTypedData<TransformGeometricData, IECore::TypeTraits::IsGeometricTypedData, DespatchTypedDataIgnoreError>( it->second.data.get() ) )
 			{
+				// we don't want to alter rest/Pref because Houdini excepts these to be non-transforming prim vars
+				if ( it->first == "rest" || it->first == "Pref" )
+				{
+					continue;
+				}
+				
 				primVars.push_back( it->first );
 				
 				// add the transforming prim vars to the animated list
@@ -564,9 +572,22 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			}
 			
 			converter->attributeFilterParameter()->setTypedValue( animatedPrimVarStr );
-			converter->transferAttribs( gdp, pointRange, primRange );
 			
-			return true;
+			try
+			{
+				converter->transferAttribs( gdp, pointRange, primRange );
+				return true;
+			}
+			catch ( std::exception &e )
+			{
+				addWarning( SOP_MESSAGE, e.what() );
+				return false;
+			}
+			catch ( ... )
+			{
+				addWarning( SOP_MESSAGE, "Attribute transfer failed for unknown reasons" );
+				return false;
+			}
 		}
 		else
 		{
@@ -578,7 +599,21 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	// fallback to full conversion
 	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( params.attributeFilter );
-	return converter->convert( myGdpHandle );
+	
+	try
+	{
+		return converter->convert( myGdpHandle );
+	}
+	catch ( std::exception &e )
+	{
+		addWarning( SOP_MESSAGE, e.what() );
+		return false;
+	}
+	catch ( ... )
+	{
+		addWarning( SOP_MESSAGE, "Conversion failed for unknown reasons" );
+		return false;
+	}
 }
 
 void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )

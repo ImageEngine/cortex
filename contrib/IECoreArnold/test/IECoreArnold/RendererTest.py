@@ -682,7 +682,56 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( result.floatPrimVar( e.R() ) > 0.2 )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.5, result.floatPrimVar( e.G() ) )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.25, result.floatPrimVar( e.B() ) )
+
+	def testExternalProcedural( self ) :
+
+		r = IECoreArnold.Renderer( self.__assFileName )
+
+		with IECore.WorldBlock( r ) :
 		
+			r.procedural(
+				r.ExternalProcedural(
+					"test.so",
+					IECore.Box3f(
+						IECore.V3f( 1, 2, 3 ),
+						IECore.V3f( 4, 5, 6 )
+					),
+					{
+						"colorParm" : IECore.Color3f( 1, 2, 3 ),
+						"stringParm" : "test",
+						"floatParm" : 1.5,
+						"intParm" : 2,
+					}
+				)
+			)
+
+		ass = "".join( file( self.__assFileName ).readlines() )
+
+		self.assertTrue( "procedural" in ass )
+		self.assertTrue( "min 1 2 3" in ass )
+		self.assertTrue( "max 4 5 6" in ass )
+		self.assertTrue( "dso \"test.so\"" in ass )
+		self.assertTrue( "declare stringParm constant STRING" in ass )
+		self.assertTrue( "declare floatParm constant FLOAT" in ass )
+		self.assertTrue( "declare intParm constant INT" in ass )
+		self.assertTrue( "declare colorParm constant RGB" in ass )
+		self.assertTrue( "stringParm \"test\"" in ass )
+		self.assertTrue( "floatParm 1.5" in ass )
+		self.assertTrue( "intParm 2" in ass )
+		self.assertTrue( "colorParm 1 2 3" in ass )
+
+	def testPixelAspectRatio( self ) :
+
+		r = IECoreArnold.Renderer( self.__assFileName )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "pixelAspectRatio" : 2.0 } )
+
+		with IECore.WorldBlock( r ) :
+			pass
+
+		ass = "".join( file( self.__assFileName ).readlines() )
+		self.assertTrue( "aspect_ratio 0.5" in ass )
+
 	def tearDown( self ) :
 			
 		for f in [

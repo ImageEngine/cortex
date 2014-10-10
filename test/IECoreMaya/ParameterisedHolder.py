@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -64,19 +64,19 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		h = IECoreMaya.FnParameterisedHolder( str(n) )
 		self.assert_( h )
 
-		p = IECore.ParticleMeshOp()
+		p = IECore.SequenceLsOp()
 
 		h.setParameterised( p )
 
-		p.parameters()["filename"] = "testValue"
-		h.setNodeValue( p.parameters()["filename"] )
-		pl = h.parameterPlug( p.parameters()["filename"] )
+		p.parameters()["dir"] = "testValue"
+		h.setNodeValue( p.parameters()["dir"] )
+		pl = h.parameterPlug( p.parameters()["dir"] )
 		v = IECoreMaya.FromMayaPlugConverter.create( pl, IECore.TypeId.StringData ).convert()
 		self.assertEqual( v.value, "testValue" )
 
 		cmds.setAttr( pl.name(), "testValue2", typ="string" )
-		h.setParameterisedValue( p.parameters()["filename"] )
-		self.assertEqual( p.parameters()["filename"].getValue().value, "testValue2" )
+		h.setParameterisedValue( p.parameters()["dir"] )
+		self.assertEqual( p.parameters()["dir"].getValue().value, "testValue2" )
 
 
 	def testParameterisedHolderSetReference( self ):

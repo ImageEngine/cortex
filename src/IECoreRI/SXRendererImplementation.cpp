@@ -34,6 +34,7 @@
 
 #include "IECoreRI/private/SXRendererImplementation.h"
 #include "IECoreRI/SXExecutor.h"
+#include "IECoreRI/Convert.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Shader.h"
@@ -41,7 +42,6 @@
 #include "IECore/SplineData.h"
 #include "IECore/MatrixAlgo.h"
 #include "IECore/Transform.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/Group.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
@@ -152,7 +152,34 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-		msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", "User options not yet supported" );
+		switch( value->typeId() )
+		{
+			case IntDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxInt, (void *)&(static_cast<const IntData *>( value.get() )->readable() ) );
+				break;
+			case FloatDataTypeId :
+				SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxFloat, (void *)&(static_cast<const FloatData *>( value.get() )->readable() ) );
+				break;
+			case StringDataTypeId :
+				{
+					const char *s = static_cast<const StringData *>( value.get() )->readable().c_str();
+					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &s );
+					break;	
+				}
+			case StringVectorDataTypeId :
+				{
+					const std::vector<std::string>& strings = static_cast<const StringVectorData *>( value.get() )->readable();
+					std::vector< const char* > s;
+					for( size_t i=0; i < strings.size(); ++i )
+					{
+						s.push_back( strings[i].c_str() );
+					}
+					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &(s[0]), s.size() );
+					break;	
+				}
+			default :
+				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
+		}
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
@@ -211,17 +238,25 @@ void IECoreRI::SXRendererImplementation::worldEnd()
 
 void IECoreRI::SXRendererImplementation::transformBegin()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::transformBegin", "Not implemented" );
+	// New push state onto the stack: deep copy flag is false, so we don't create a new SxContext, which will swallow up any
+	// coordinate systems declared before transformEnd():
+	m_stateStack.push( State( m_stateStack.top(), false ) );
 }
 
 void IECoreRI::SXRendererImplementation::transformEnd()
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::transformEnd", "Not implemented" );
+	unsigned minimumStack = m_inWorld ? 2 : 1;
+	if( m_stateStack.size() <= minimumStack )
+	{
+		IECore::msg( IECore::Msg::Error, "IECoreRI::SXRenderer::transformEnd", "No matching transformBegin." );
+		return;
+	}
+	m_stateStack.pop();
 }
 
 void IECoreRI::SXRendererImplementation::setTransform( const Imath::M44f &m )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setTransform", "Not implemented" );
+	m_stateStack.top().transform = m;
 }
 
 void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordinateSystem )
@@ -231,7 +266,7 @@ void IECoreRI::SXRendererImplementation::setTransform( const std::string &coordi
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform() const
 {
-	return getTransform( "object" );
+	return m_stateStack.top().transform;
 }
 
 Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string &coordinateSystem ) const
@@ -242,12 +277,15 @@ Imath::M44f IECoreRI::SXRendererImplementation::getTransform( const std::string 
 
 void IECoreRI::SXRendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::concatTransform", "Not implemented" );
+	m_stateStack.top().transform = m * m_stateStack.top().transform;
 }
 
 void IECoreRI::SXRendererImplementation::coordinateSystem( const std::string &name )
 {
-	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::coordinateSystem", "Not implemented" );
+	M44f m = m_stateStack.top().transform.transposed();
+	RtMatrix mm;
+	convert( m, mm );
+	SxDefineSpace ( m_stateStack.top().context.get(), name.c_str(), (RtFloat*)&mm[0][0] );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +345,7 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
-			handleData = runTimeCast<const StringData>( it->second );
+			handleData = runTimeCast<const StringData>( it->second.get() );
 		}
 		if( !handleData )
 		{
@@ -695,7 +733,7 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2
 	points->writable()[ "s" ] = sData;
 	points->writable()[ "t" ] = tData;
 	
-	return shade( points, resolution );
+	return shade( points.get(), resolution );
 }
 
 IECore::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const

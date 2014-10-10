@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,6 +50,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 	public :
 		
 		GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset = GA_INVALID_OFFSET );
+		GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 		virtual ~GEO_CortexPrimitive();
 		
 		virtual void swapVertexOffsets( const GA_Defragment &defrag );
@@ -57,6 +58,14 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual GA_Offset getVertexOffset( GA_Size index ) const;
 		virtual GA_DereferenceStatus dereferencePoint( GA_Offset point, bool dry_run = false );
 		virtual GA_DereferenceStatus dereferencePoints( const GA_RangeMemberQuery &pt_q, bool dry_run = false );
+
+#if UT_MAJOR_VERSION_INT >= 13
+
+		virtual void stashed( bool beingstashed, GA_Offset offset=GA_INVALID_OFFSET );
+
+#endif
+
+		// \todo: This signature is for Houdini 12.5 and earlier. Remove when we drop support
 		virtual void stashed( int onoff, GA_Offset offset=GA_INVALID_OFFSET );
 		virtual void clearForDeletion();
 		virtual bool isDegenerate() const;

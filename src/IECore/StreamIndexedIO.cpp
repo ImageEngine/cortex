@@ -484,12 +484,12 @@ class DirectoryNode : public NodeBase
 			return static_cast<SubIndexMode>(m_subindex);
 		}
 
-		inline bool subindexChildren()
+		inline bool subindexChildren() const
 		{
 			return m_subindexChildren;
 		}
 
-		inline Imf::Int64 offset()
+		inline Imf::Int64 offset() const
 		{
 			return m_offset;
 		}
@@ -500,14 +500,14 @@ class DirectoryNode : public NodeBase
 		}
 
 		/// Returns the current list of child Nodes. 
-		// This function is not thread-safe because SubIndexNode children can be replaced by DirectoryNodes as the function directoryChild() is called.
-		// So in order to have safe access, the Index::Mutex m_mutex was created.
+		// This function is not thread-safe and Index::lockDirectory must be used in read-only access
 		// \todo we may want to restrict more the access to the internal children and add the manipulation methods in the class instead.
 		inline ChildMap &children()
 		{
 			return m_children;
 		}
 
+		// This function is not thread-safe and Index::lockDirectory must be used in read-only access
 		inline void sortChildren()
 		{
 			if ( !m_sortedChildren )
@@ -517,6 +517,7 @@ class DirectoryNode : public NodeBase
 			}
 		}
 
+		// This function is not thread-safe and Index::lockDirectory must be used in read-only access
 		inline ChildMap::iterator findChild( IndexedIO::EntryID name )
 		{
 			sortChildren();
@@ -589,7 +590,6 @@ class StreamIndexedIO::Node
 		DirectoryNode *m_node;
 };
 
-
 /// A tree to represent nodes in a filesystem, along with their locations in a file.
 class StreamIndexedIO::Index : public RefCounted
 {
@@ -631,11 +631,18 @@ class StreamIndexedIO::Index : public RefCounted
 		/// read the subindex that contains the children of the given node
 		void readNodeFromSubIndex( DirectoryNode *n );
 
-		/// controls thread-safe access to the Node hierarchy
 		typedef tbb::spin_rw_mutex Mutex;
-		Mutex m_mutex;
+		typedef Mutex::scoped_lock MutexLock;
+		/// Returns an appropriate mutex scoped lock to access the given Directory node.
+		/// It selects on mutex from the pool, reducing the changes of blocking other threads that are accessing different locations.
+		void lockDirectory( MutexLock &lock, const DirectoryNode *n, bool writeAccess = false ) const;
 
 	protected:
+
+		static const int MAX_MUTEXES = 11;
+
+		/// defines a pool of mutexes for thread-safe access to the Node hierarchy
+		mutable Mutex m_mutexes[ MAX_MUTEXES ];
 
 		DirectoryNode *m_root;
 
@@ -844,21 +851,20 @@ StreamIndexedIO::Node::Node(Index* index, DirectoryNode *dirNode) : m_idx(index)
 
 bool StreamIndexedIO::Node::hasChild( const IndexedIO::EntryID &name ) const
 {
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
 	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
 	return cit != m_node->children().end();
 }
 
 DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &name ) const
 {
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
+
 	DirectoryNode::ChildMap::iterator it = m_node->findChild( name );
 	if ( it != m_node->children().end() )
 	{
-		Index::Mutex::scoped_lock lock;
-		if ( m_node->subindexChildren() )
-		{
-			lock.acquire( m_idx->m_mutex, false ); // read-only lock
-		}
-
 		if ( (*it)->nodeType() == NodeBase::Directory )
 		{
 			DirectoryNode *dir = static_cast< DirectoryNode *>( (*it) );
@@ -887,7 +893,7 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 			m_idx->readNodeFromSubIndex( newDir );
 
 			// now that we loaded the whole thing, lock our Index for writing
-			lock.acquire( m_idx->m_mutex, true );
+			m_idx->lockDirectory( lock, m_node, true );
 
 			// there's a chance that someone else already replaced the pointer...
 			if ( (*it)->nodeType() == NodeBase::Directory )
@@ -911,15 +917,12 @@ DirectoryNode* StreamIndexedIO::Node::directoryChild( const IndexedIO::EntryID &
 
 bool StreamIndexedIO::Node::dataChildInfo( const IndexedIO::EntryID &name, size_t &offset, size_t &size ) const
 {
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
+
 	DirectoryNode::ChildMap::const_iterator cit = m_node->findChild( name );
 	if ( cit != m_node->children().end() )
 	{
-		Index::Mutex::scoped_lock lock;
-		if ( m_node->subindexChildren() )
-		{
-			lock.acquire( m_idx->m_mutex, false ); // read-only lock
-		}
-
 		NodeBase *p = *cit;
 
 		if ( p->nodeType() == NodeBase::Data )
@@ -1010,6 +1013,10 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names ) const
 {
 	names.clear();
 	names.reserve( m_node->children().size() );
+
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
+
 	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->children().begin(); cit != m_node->children().end(); cit++ )
 	{
 		names.push_back( (*cit)->name() );
@@ -1022,6 +1029,9 @@ void StreamIndexedIO::Node::childNames( IndexedIO::EntryIDList &names, IndexedIO
 	names.reserve( m_node->children().size() );
 	
 	bool typeIsDirectory = ( type == IndexedIO::Directory );
+
+	Index::MutexLock lock;
+	m_idx->lockDirectory( lock, m_node );
 
 	for ( DirectoryNode::ChildMap::const_iterator cit = m_node->children().begin(); cit != m_node->children().end(); cit++ )
 	{
@@ -1959,8 +1969,23 @@ void StreamIndexedIO::Index::readNodeFromSubIndex( DirectoryNode *n )
 		n->registerChild( child );
 	}
 
+	/// make sure the children is sorted to avoid non-thread safe sorting happening later...
+	n->sortChildren();
+
 	/// mark the node as loaded from subindex
 	n->recoveredSubIndex();
+}
+
+void StreamIndexedIO::Index::lockDirectory( MutexLock &lock, const DirectoryNode *n, bool writeAccess ) const
+{
+	if ( n->subindexChildren() )
+	{
+		// choose one of the mutexes from the pool (in a deterministic way)
+		size_t v = (size_t)n / sizeof(DirectoryNode*);
+		unsigned int m = ( (v + 1) / 3 ) % MAX_MUTEXES;
+
+		lock.acquire( m_mutexes[ m ], writeAccess );
+	}
 }
 
 ///////////////////////////////////////////////
@@ -2113,7 +2138,7 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 {
 	IndexPtr newIndex = new Index( file );
 	newIndex->openStream();
-	m_node = new StreamIndexedIO::Node( newIndex, newIndex->root() );
+	m_node = new StreamIndexedIO::Node( newIndex.get(), newIndex->root() );
 	setRoot( root );
 	assert( m_node );
 	assert( m_node->dirNode() );
@@ -2240,7 +2265,7 @@ IndexedIOPtr StreamIndexedIO::subdirectory( const IndexedIO::EntryID &name, Inde
 			throw IOException( "StreamIndexedIO: Could not find child '" + name.value() + "'" );
 		}
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2261,7 +2286,7 @@ ConstIndexedIOPtr StreamIndexedIO::subdirectory( const IndexedIO::EntryID &name,
 		}
 		throw IOException( "StreamIndexedIO: Could not find child '" + name.value() + "'" );
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2278,7 +2303,7 @@ IndexedIOPtr StreamIndexedIO::createSubdirectory( const IndexedIO::EntryID &name
 	{
 		throw IOException( "StreamIndexedIO: Could not insert child '" + name.value() + "'" );
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, childNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), childNode );
 	return duplicate(*newNode);
 }
 
@@ -2323,16 +2348,13 @@ IndexedIO::Entry StreamIndexedIO::entry(const IndexedIO::EntryID &name) const
 	assert( m_node );
 	readable(name);
 
+	Index::MutexLock lock;
+	m_node->m_idx->lockDirectory( lock, m_node->m_node );
+
 	DirectoryNode::ChildMap::iterator it = m_node->m_node->findChild( name );
 	if ( it == m_node->m_node->children().end() )
 	{
 		throw IOException( "StreamIndexedIO::entry: Entry not found '" + name.value() + "'" );
-	}
-
-	Index::Mutex::scoped_lock lock;
-	if ( m_node->m_node->subindexChildren() )
-	{
-		lock.acquire( m_node->m_idx->m_mutex, false ); // read-only lock
 	}
 
 	NodeBase *node = *it;
@@ -2368,7 +2390,7 @@ IndexedIOPtr StreamIndexedIO::parentDirectory()
 	{
 		return NULL;
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, parentNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), parentNode );
 	return duplicate(*newNode);
 }
 
@@ -2380,14 +2402,14 @@ ConstIndexedIOPtr StreamIndexedIO::parentDirectory() const
 	{
 		return NULL;
 	}
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, parentNode );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), parentNode );
 	return duplicate(*newNode);
 }
 
 IndexedIOPtr StreamIndexedIO::directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour )
 {
 	// from the root go to the path
-	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx, m_node->m_idx->root() );
+	StreamIndexedIO::Node *newNode = new StreamIndexedIO::Node( m_node->m_idx.get(), m_node->m_idx->root() );
 
 	for ( IndexedIO::EntryIDList::const_iterator pIt = path.begin(); pIt != path.end(); pIt++ )
 	{
@@ -2442,7 +2464,7 @@ void StreamIndexedIO::write(const IndexedIO::EntryID &name, const InternedString
 	char *data = streamFile().ioBuffer(size);
 	assert(data);
 
-	Index *index = m_node->m_idx;
+	Index *index = m_node->m_idx.get();
 
 	StringCache &stringCache = index->stringCache();
 

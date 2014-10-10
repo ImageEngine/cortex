@@ -683,7 +683,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 			for( int i=0; i<steps; i++ )
 			{
 				float v = clamp( (float)i/(float)(steps-1), 0.0f, 1.0f );
-				pointAtV( curveIndex, v, result );
+				pointAtV( curveIndex, v, result.get() );
 				V3f p = result->point();
 				if( i!=0 )
 				{

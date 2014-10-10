@@ -139,7 +139,7 @@ void SpherePrimitive::renderInstances( size_t numInstances ) const
 		// we don't build the actual buffer until now, because in the constructor we're not guaranteed
 		// a valid GL context.
 		CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
-		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds ) );
+		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds.get() ) );
 	}
 	
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );

@@ -46,13 +46,13 @@ using namespace IECorePython;
 namespace IECoreRI
 {
 
-static IECore::CompoundDataPtr shade( SXRendererPtr r, const IECore::CompoundDataPtr points )
+static IECore::CompoundDataPtr shade( SXRendererPtr r, const IECore::CompoundData *points )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return r->shade( points );
 }
 
-static IECore::CompoundDataPtr shade2( SXRendererPtr r, const IECore::CompoundDataPtr points, const Imath::V2i &gridSize )
+static IECore::CompoundDataPtr shade2( SXRendererPtr r, const IECore::CompoundData *points, const Imath::V2i &gridSize )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return r->shade( points, gridSize );

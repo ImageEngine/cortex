@@ -1233,7 +1233,7 @@ void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IEC
 
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )
 	{
-		IECoreGL::Group *group = runTimeCast< IECoreGL::Group >( *it );
+		IECoreGL::Group *group = runTimeCast< IECoreGL::Group >( it->get() );
 
 		if ( group )
 		{
@@ -1259,7 +1259,7 @@ void SceneShapeInterface::recurseCopyGroup( const IECoreGL::Group *srcGroup, IEC
 				}
 			}
 			newGroup->setTransform( group->getTransform() );
-			recurseCopyGroup( group, newGroup, newName.size() ? newName.c_str() : namePrefix );
+			recurseCopyGroup( group, newGroup.get(), newName.size() ? newName.c_str() : namePrefix );
 			trgGroup->addChild( newGroup );
 		}
 		else
@@ -1384,11 +1384,15 @@ int SceneShapeInterface::selectionIndex( const IECore::InternedString &name )
 
 IECore::InternedString SceneShapeInterface::selectionName( int index )
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
 	return m_indexToNameMap[index];
 }
 
 const std::vector< InternedString > & SceneShapeInterface::componentNames() const
 {
+	// make sure the gl scene's been built, as this keeps m_indexToNameMap up to date
+	const_cast<SceneShapeInterface*>( this )->glScene();
 	return m_indexToNameMap;
 }
 

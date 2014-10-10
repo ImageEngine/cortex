@@ -51,6 +51,7 @@
 #include "IECore/CompoundFrameList.h"
 #include "IECore/EmptyFrameList.h"
 #include "IECore/FrameRange.h"
+#include "IECore/ReversedFrameList.h"
 
 #if BOOST_VERSION < 103400
 
@@ -258,12 +259,37 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 			return;
 		}
 		// Also accept frame ranges with number of digits greater than the padding.
-		if ( (*it)->getPadding() == 1 && (*it)->getFrameList()->typeId() == FrameRangeTypeId )
+		if ( (*it)->getPadding() == 1 )
 		{
-			FrameRangePtr fr = staticPointerCast< FrameRange >( (*it)->getFrameList() );
 			FrameList::Frame startFrame, endFrame;
-			startFrame = fr->getStart();
-			endFrame = fr->getEnd();
+			
+			if( FrameRange *fr = runTimeCast<FrameRange>( (*it)->getFrameList() ) )
+			{
+				// Can do a quick validation if the range is a FrameRange, by looking at the start and end only
+				startFrame = fr->getStart();
+				endFrame = fr->getEnd();
+			}
+			else
+			{
+				// Otherwise, have to get the full list
+				std::vector<FrameList::Frame> frames;
+				(*it)->getFrameList()->asList(frames);
+				// I know that there will be at least one frame, since the file sequence was found
+				startFrame = frames[ 0 ];
+				endFrame = frames[ 0 ];
+				for ( unsigned i=0; i < frames.size(); i++ )
+				{
+					if ( frames[ i ] < startFrame )
+					{
+						startFrame = frames[ i ];
+					}
+					else if ( frames[ i ] > endFrame )
+					{
+						endFrame = frames[ i ];
+					}
+				}
+			}
+			
 			// if goes through 0 then this is a no.
 			if ( !(startFrame < 0 && endFrame > 0) )
 			{
@@ -311,7 +337,14 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 			}
 			else
 			{
-				frameLists.push_back( new FrameRange( frames[ rangeStart ], frames[ rangeEnd -1 ], rangeStep ) );
+				if ( rangeStep > 0)
+				{
+					frameLists.push_back( new FrameRange( frames[ rangeStart ], frames[ rangeEnd -1 ], rangeStep ) );
+				}
+				else
+				{
+					frameLists.push_back( new ReversedFrameList( new FrameRange(frames[ rangeEnd -1 ], frames[ rangeStart ], -rangeStep ) ));
+				}
 			}
 
 			rangeStart = rangeEnd;

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -532,8 +532,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# P is transformed
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
 		# other Point data is as well
-		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 6, 0, 0 ) )
 		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "otherP" ), ( 6, 0, 0 ) )
+		# rest is not transformed
+		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
 		# other data is not
 		self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "Cd" ), ( 0, 0, 1 ) )
 	
@@ -664,8 +665,12 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		# ensure the rest does not transform along with P by making sure it matches the static P
+		original = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		for point in node.geometry().points() :
-			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+			rest = point.attribValue( "rest" )
+			self.assertNotEqual( point.attribValue( "P" ), rest )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
 		
 		# copying multiple prim vars
 		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
@@ -674,8 +679,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
+		# ensure the rest does not transform along with P by making sure it matches the static P
 		for point in node.geometry().points() :
-			self.assertEqual( point.attribValue( "P" ), point.attribValue( "rest" ) )
+			rest = point.attribValue( "rest" )
+			self.assertNotEqual( point.attribValue( "P" ), rest )
+			self.assertEqual( original["P"].data[ point.number() % 8 ], IECore.V3f( rest[0], rest[1], rest[2] ) )
 		for prim in node.geometry().prims() :
 			self.assertEqual( prim.attribValue( "Cd" ), prim.attribValue( "Cspecial" ) )
 		
@@ -710,7 +718,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		for key in result.keys() :
 			self.assertTrue( isinstance( result[key], IECore.MeshPrimitive ) )
 			self.assertEqual( sorted( result[key].keys() ), [ "Cs", "P", "Pref" ] )
-			self.assertEqual( result[key]["P"], result[key]["Pref"] )
+			self.assertNotEqual( result[key]["P"], result[key]["Pref"] )
+			self.assertEqual( original["P"], result[key]["Pref"] )
 	
 	def testExpandGeo( self ) :
 		
@@ -1334,13 +1343,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags(IECore.SceneInterface.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1353,14 +1362,14 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
 		hou.node( xform.path()+"/1" ).parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/1/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/1/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1374,13 +1383,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
 		for tag in scene.readTags( IECore.SceneInterface.EveryTag ) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b" ] )
@@ -1397,7 +1406,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		group2 = group.createOutputNode( "group" )
 		group2.parm( "crname" ).set( "notATag" )
 		group2.setRenderFlag( True )
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		# they don't currently affect parents, just the immediate node
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [] )
@@ -1407,7 +1416,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasTag( "user:tags", IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "green", IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "notATag", IECore.SceneInterface.EveryTag ) )
-		scene = IECoreHoudini.HoudiniScene( xform.path()+"/2" )
+		scene = IECoreHoudini.LiveScene( xform.path()+"/2" )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.AncestorTag ) ]), [ "ObjectType:MeshPrimitive", "a" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.DescendantTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "b", "green", "testing", "user:tags" ] )
@@ -1441,7 +1450,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		
 		# its a link before it is expanded
-		scene = IECoreHoudini.HoudiniScene( xform.path() )
+		scene = IECoreHoudini.LiveScene( xform.path() )
 		self.assertEqual( scene.attributeNames(), [ IECore.LinkedScene.linkAttribute ] )
 		self.assertTrue( scene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertEqual(
@@ -1821,6 +1830,39 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
 			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 0.5, -0.5, -0.5 ) )
 	
+	def testSopXformRestDoesNotTransform( self ) :
+		
+		self.writeAnimSCC()
+		
+		times = range( 0, 10 )
+		halves = [ x + 0.5 for x in times ]
+		quarters = [ x + 0.25 for x in times ]
+		times.extend( [ x + 0.75 for x in times ] )
+		times.extend( halves )
+		times.extend( quarters )
+		times.sort()
+		
+		spf = 1.0 / hou.fps()
+		
+		source = self.sop()
+		source.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		source.parm( "attributeCopy" ).set( "P:Pref" )
+		xform = source.createOutputNode( "ieSceneCacheTransform" )
+		xform.parm( "file" ).set( TestSceneCache.__testFile )
+		
+		for time in times :
+			hou.setTime( time - spf )
+			prims = xform.geometry().prims()
+			self.assertEqual( len(prims), 18 )
+			# positions are double transformed (once by the source sop and once by the xform)
+			self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 2, 2*time, 0 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 4*time, 0 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 12, 6*time, 0 ) )
+			# rest doesn't transform from either source or xform
+			self.assertEqual( prims[0].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
+			self.assertEqual( prims[6].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
+			self.assertEqual( prims[12].vertex( 0 ).point().attribValue( "rest" ), ( 0, 0, 0 ) )
+	
 	def testOBJOutputParms( self ) :
 		
 		self.writeAnimSCC()
@@ -2106,6 +2148,21 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
 	
+	def testRopFlattenedWithErrors( self ) :
+		
+		self.writeSCC()
+		geo = self.geometry()
+		geo.parm( "expand" ).pressButton()
+		rop = self.rop( geo )
+		rop.parm( "rootObject" ).set( geo.path() )
+		rop.parm( "trange" ).set( 1 )
+		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
+		geo.renderNode().parm( "file" ).set( "fake.scc" )
+		rop.parm( "execute" ).pressButton()
+		self.assertNotEqual( rop.errors(), "" )
+		self.assertTrue( geo.renderNode().path() in rop.errors() )
+		self.assertTrue( geo.renderNode().errors() in rop.errors() )
+	
 	def testRopLinked( self ) :
 		
 		self.writeTaggedSCC()
@@ -2163,7 +2220,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		xform.parm( "expand" ).pressButton()
-		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live )
 		
 		# make sure it doesn't crash if the linked scene doesn't exist anymore
@@ -2195,7 +2252,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
 			linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 			if bakedObjects :
-				live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+				live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 				self.compareScene( linked, live, bakedObjects = bakedObjects )
 			else :
 				orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
@@ -2436,7 +2493,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		b.parm( "expand" ).pressButton()
 		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		live = IECoreHoudini.HoudiniScene( xform.path(), rootPath = [ xform.name() ] )
+		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )
 	
 	def testTopologyChanges( self ) :
@@ -3045,7 +3102,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		node = self.xform()
 		node.parm( "expand" ).pressButton()
-		scene = IECoreHoudini.HoudiniScene( node.path(), rootPath = [ node.name() ] )
+		scene = IECoreHoudini.LiveScene( node.path(), rootPath = [ node.name() ] )
 		self.assertEqual( scene.attributeNames(), [] )
 		self.assertFalse( scene.hasAttribute( "test" ) )
 		self.assertEqual( scene.readAttribute( "test", 0 ), None )

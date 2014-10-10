@@ -84,6 +84,10 @@ class Renderer : public IECore::Renderer
 		/// \li <b>"ri:hider:*" StringData()</b></br>
 		/// Passed to an RiHider call.
 		///
+		/// \li <b>"ri:frame" IntData()</b></br>
+		/// Specifies the frame number for RiFrameBegin. If not specified,
+		/// then no frame block will be output.
+		///
 		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiOption call.
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
@@ -109,31 +113,8 @@ class Renderer : public IECore::Renderer
 		///
 		/// \par Implementation specific parameters supported :
 		///
-		/// \li <b>"transform" M44fData()</b><br>
-		/// This overrides the transform specified via the transform*() calls below. It's provided
-		/// to work around a bug that prevents RxTransform() from working when in RIB output mode.
-		/// \deprecated The "transform" parameter should no longer be used as the bug in 3delight
-		/// which required it has now been fixed.
-		///
 		///	\li <b>"projection:*"</b><br>
 		/// All parameters matching this naming convention are passed to the RiProjection call.
-		///
-		/// \li <b>"ri:hider" StringData()</b><br>
-		///
-		/// \li <b>"ri:hider:*"</b><br>
-		/// All parameters matching this naming convention are passed to an RiHider call.
-		///
-		/// \li <b>"ri:outputNow" BoolData false</b><br>
-		/// The renderman interface and the IECore::Renderer interface differ in their interpretation
-		/// of transforms before worldBegin, and the IECore::Renderer spec says that the last camera specified
-		/// is the one to render through whereas the renderman specification has only a single camera (ignoring
-		/// all that nasty frame camera stuff).
-		/// For these reasons it's necessary for the IECoreRI::Renderer to store the camera
-		/// and output it in the worldBegin() call. This is no good if the Renderer instance is being used to
-		/// specify just part of a scene (without a world block). This hacky parameter is therefore provided
-		/// to cause the immediate output of the camera to support this situation.
-		///
-		/// \todo Support moving cameras, and named cameras using RiCamera.
 		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
 
@@ -275,6 +256,16 @@ class Renderer : public IECore::Renderer
 
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 
+		/// ExternalProcedurals are treated as DelayedReadArchives if their filename ends with ".rib"
+		/// and as DynamicLoad procedurals otherwise. Because RenderMan has very poor support for passing
+		/// parameters to DynamicLoad procedurals (you can only pass a single string), the arbitrary parameters
+		/// of the ExternalProcedural are treated as follows :
+		///
+		/// - If an "ri:data" StringData parameter exists, it is passed verbatim to the procedural. This
+		/// allows procedurals which require data in a specific format to be supported.
+		/// - All other parameters are serialised in a command line "--name value" style and concatenated.
+		/// This allows the convenience of arbitrary typed parameters provided that the procedural itself
+		/// uses a command line style parser.
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 
 		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );

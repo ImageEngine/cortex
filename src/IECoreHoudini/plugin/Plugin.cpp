@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -195,6 +195,8 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 		std::cerr << "Warning: Duplicate definition for GU_CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
 		return;
 	}
+	
+	primDef->setMergeConstructor( GU_CortexPrimitive::create );
 	
 	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
 	GU_CortexPrimitive::setTypeDef( primDef );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -49,7 +49,7 @@ const DeepImageWriter::DeepImageWriterDescription<SHWDeepImageWriter> SHWDeepIma
 
 SHWDeepImageWriter::SHWDeepImageWriter()
 	:	DeepImageWriter( "Writes 3delight SHW deep shadow file format." ),
-		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 )
+		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 ), m_alphaOffset( 0 )
 {
 	std::vector<std::string> channels( 1, "A" );
 	m_channelsParameter->setValue( new StringVectorData( channels ) );
@@ -60,7 +60,7 @@ SHWDeepImageWriter::SHWDeepImageWriter()
 
 SHWDeepImageWriter::SHWDeepImageWriter( const std::string &fileName )
 	:	DeepImageWriter( "Writes 3delight SHW deep shadow file format." ),
-		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 )
+		m_outputFile( 0 ), m_dtexCache( 0 ), m_dtexImage( 0 ), m_dtexPixel( 0 ), m_alphaOffset( 0 )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 	
@@ -108,6 +108,17 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	
 	float previous = 0.0;
 	unsigned numSamples = pixel->numSamples();
+
+	const Imath::V2i &resolution = m_resolutionParameter->getTypedValue();
+	float nearClip = m_NDCToCamera[3][2] / m_NDCToCamera[3][3];
+	float correction = 1;
+	if( m_NDCToCamera[3][2] != 0 && m_NDCToCamera[2][3] != 0 )
+	{
+		// Compute a correction factor that converts from perpendicular distance to spherical distance,
+		// by comparing the closest distance to the near clip with the distance to the near clip at the current pixel position
+		correction = ( Imath::V3f(((x+0.5f)/resolution.x * 2 - 1), -((y+0.5)/resolution.y * 2 - 1),0) * m_NDCToCamera ).length() / nearClip;
+	}
+
 	for ( unsigned i=0; i < numSamples; ++i )
 	{
 		// SHW files require composited values, accumulated over depth, but we have uncomposited values
@@ -124,8 +135,13 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 		{
 			adjustedData[c] = value;
 		}
-		
-		DtexAppendPixel( m_dtexPixel, pixel->getDepth( i ), numChannels, adjustedData, 0 );
+	
+		float depth = pixel->getDepth( i );	
+
+		// Convert from Z ( distance from eye plane ) to "3delight distance" ( spherical distance from near clip )
+		depth = ( depth - nearClip ) * correction;
+
+		DtexAppendPixel( m_dtexPixel, depth, numChannels, adjustedData, 0 );
 	}
 	
 	DtexFinishPixel( m_dtexPixel );
@@ -164,7 +180,7 @@ void SHWDeepImageWriter::open()
 		throw InvalidArgumentException( std::string( "Tile size must be equal to or less than resolution." ) );
 	}
 	
-	if ( ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) || ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) )
+	if ( ( ( tileSize.x & ( tileSize.x - 1 ) ) != 0 ) || ( ( tileSize.y & ( tileSize.y - 1 ) ) != 0 ) )
 	{
 		throw InvalidArgumentException( std::string( "Tile width and height must be a power of two." ) );
 	}
@@ -183,6 +199,8 @@ void SHWDeepImageWriter::open()
 	
 	float *NL = worldToCameraParameter()->getTypedValue().getValue();
 	float *NP = worldToNDCParameter()->getTypedValue().getValue();
+
+	m_NDCToCamera = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
 	
 	/// \todo: does image name mean anything for this format?
 	int status = DtexAddImage(
@@ -190,6 +208,7 @@ void SHWDeepImageWriter::open()
 		resolution.x, resolution.y, tileSize.x, tileSize.y,
 		NP, NL, DTEX_COMPRESSION_NONE, DTEX_TYPE_FLOAT, &m_dtexImage
 	);
+
 	
 	if ( status != DTEX_NOERR )
 	{
@@ -198,7 +217,7 @@ void SHWDeepImageWriter::open()
 		clean();
 		throw IOException( std::string( "Failed to create the main sub-image in \"" ) + fileName() + "\" for writing." );
 	}
-	
+
 	m_dtexPixel = DtexMakePixel( numChannels );
 }
 

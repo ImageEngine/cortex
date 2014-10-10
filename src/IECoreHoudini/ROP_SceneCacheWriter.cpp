@@ -42,13 +42,14 @@
 #include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
+#include "SOP/SOP_Node.h"
 #include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECore/LinkedScene.h"
 
 #include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/HoudiniScene.h"
+#include "IECoreHoudini/LiveScene.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 
 using namespace IECore;
@@ -57,7 +58,7 @@ using namespace IECoreHoudini;
 const char *ROP_SceneCacheWriter::typeName = "ieSceneCacheWriter";
 
 ROP_SceneCacheWriter::ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op )
-	: ROP_Node( net, name, op ), m_houdiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
+	: ROP_Node( net, name, op ), m_liveHoudiniScene( 0 ), m_liveScene( 0 ), m_outScene( 0 ), m_forceFilter( 0 ), m_startTime( 0 ), m_endTime( 0 )
 {
 }
 
@@ -79,7 +80,7 @@ PRM_Default ROP_SceneCacheWriter::fileDefault( 0, "$HIP/output.scc" );
 PRM_Default ROP_SceneCacheWriter::rootObjectDefault( 0, "/obj" );
 PRM_SpareData ROP_SceneCacheWriter::forceObjectsSpareData;
 
-const SceneInterface::Name &ROP_SceneCacheWriter::visibleAttribute( "scene:visible" );
+const SceneInterface::Name &ROP_SceneCacheWriter::changingHierarchyAttribute( "sceneInterface:changingHierarchy" );
 
 OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 {
@@ -151,15 +152,15 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 	try
 	{
 		SceneInterface::Path emptyPath;
-		m_houdiniScene = new IECoreHoudini::HoudiniScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
+		m_liveHoudiniScene = new IECoreHoudini::LiveScene( nodePath, emptyPath, emptyPath, s + CHgetManager()->getSecsPerSample() );
 		// wrapping with a LinkedScene to ensure full expansion when writing the non-linked file
 		if ( linked( file ) )
 		{
-			m_liveScene = m_houdiniScene;
+			m_liveScene = m_liveHoudiniScene;
 		}
 		else
 		{
-			m_liveScene = new LinkedScene( m_houdiniScene );
+			m_liveScene = new LinkedScene( m_liveHoudiniScene );
 		}
 	}
 	catch ( IECore::Exception &e )
@@ -236,7 +237,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 	executePreFrameScript( time );
 	
 	// update the default evaluation time to avoid double cooking
-	m_houdiniScene->setDefaultTime( writeTime );
+	m_liveHoudiniScene->setDefaultTime( writeTime );
 	
 	SceneInterfacePtr outScene = m_outScene;
 	
@@ -264,12 +265,36 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 				else if ( numShapes == 1 )
 				{
 					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
-					if ( !strcmp( name, "" ) || !strcmp( name, "/" ) )
+					if( ( name == 0 ) || ( !strcmp( name, "" ) || !strcmp( name, "/" ) ) )
 					{
 						reRoot = true;
 					}
 				}
 			}
+		}
+		else
+		{
+			UT_String msg;
+			std::string messages = "Re-rooting flat geo failed.";
+			node->getErrorMessages( msg );
+			if ( msg != UT_String::getEmptyString() )
+			{
+				messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
+			}
+			
+			if ( SOP_Node *sop = node->getRenderSopPtr() )
+			{
+				sop->getErrorMessages( msg );
+				if ( msg != UT_String::getEmptyString() )
+				{
+					sop->getFullPath( nodePath );
+					messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
+				}
+			}
+			
+			addError( 0, messages.c_str() );
+			progress->opEnd();
+			return ROP_ABORT_RENDER;
 		}
 
 		if ( reRoot )
@@ -278,15 +303,19 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		}
 	}
 	
-	ROP_RENDER_CODE status = doWrite( m_liveScene, outScene, writeTime, progress );
-	executePostFrameScript( time );
+	ROP_RENDER_CODE status = doWrite( m_liveScene.get(), outScene.get(), writeTime, progress );
+	if ( status != ROP_ABORT_RENDER )
+	{
+		executePostFrameScript( time );
+	}
+	
 	progress->opEnd();
 	return status;
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 {
-	m_houdiniScene = 0;
+	m_liveHoudiniScene = 0;
 	m_liveScene = 0;
 	m_outScene = 0;
 	
@@ -304,11 +333,11 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	
 	if ( liveScene != m_liveScene )
 	{
-		outScene->writeTransform( liveScene->readTransform( time ), time );
+		outScene->writeTransform( liveScene->readTransform( time ).get(), time );
 	}
 	
 	Mode mode = NaturalExpand;
-	const HoudiniScene *hScene = IECore::runTimeCast<const HoudiniScene>( liveScene );
+	const LiveScene *hScene = IECore::runTimeCast<const LiveScene>( liveScene );
 	if ( hScene && m_forceFilter )
 	{
 		UT_String nodePath;
@@ -332,7 +361,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		
 		if ( ConstObjectPtr data = liveScene->readAttribute( *it, time ) )
 		{
-			outScene->writeAttribute( *it, data, time );
+			outScene->writeAttribute( *it, data.get(), time );
 		}
 	}
 	
@@ -342,7 +371,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		{
 			if ( ConstSceneInterfacePtr scene = sceneNode->scene() )
 			{
-				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene, time ), time );
+				outScene->writeAttribute( LinkedScene::linkAttribute, LinkedScene::linkAttributeData( scene.get(), time ).get(), time );
 				return ROP_CONTINUE_RENDER;
 			}
 		}
@@ -361,7 +390,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 	{
 		try
 		{
-			outScene->writeObject( liveScene->readObject( time ), time );
+			outScene->writeObject( liveScene->readObject( time ).get(), time );
 		}
 		catch ( IECore::Exception &e )
 		{
@@ -387,23 +416,24 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			
 			if ( time != m_startTime )
 			{
-				outChild->writeAttribute( visibleAttribute, new BoolData( false ), time - 1e-6 );
+				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
 			}
 		}
 		
-		if ( outChild->hasAttribute( visibleAttribute ) )
+		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
-			outChild->writeAttribute( visibleAttribute, new BoolData( true ), time );
+			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time );
 		}
 		
-		ROP_RENDER_CODE status = doWrite( liveChild, outChild, time, progress );
+		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
 		}
 	}
 	
-	// turn visibleAttribute off if the child disappears
+	// turn visibility off if the child disappears
 	SceneInterface::NameList outChildren;
 	outScene->childNames( outChildren );
 	for ( SceneInterface::NameList::iterator it = outChildren.begin(); it != outChildren.end(); ++it )
@@ -411,12 +441,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		if ( !liveScene->hasChild( *it ) )
 		{
 			SceneInterfacePtr outChild = outScene->child( *it );
-			if ( !outChild->hasAttribute( visibleAttribute ) )
+			if ( !outChild->hasAttribute( IECore::SceneInterface::visibilityName ) )
 			{
-				outChild->writeAttribute( visibleAttribute, new BoolData( true ), time - 1e-6 );
+				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
 			}
 			
-			outChild->writeAttribute( visibleAttribute, new BoolData( false ), time );
+			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
+			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time );
 		}
 	}
 	
