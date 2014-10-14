@@ -1,3 +1,25 @@
+# 9.0.0-a7
+
+#### IECore
+
+- Reduced overhead of calling memoryUsage() on SimpleTypedData.
+- Added pixelAspectRatio to list of standard camera parameters.
+- Added InternedString( const char *, size_t length ) constructor.
+
+#### IECoreRI
+
+- Added pixel aspect ratio support to IECoreRI::Renderer.
+- Fixed argument passing for RiProcDynamicLoad.
+
+#### IECoreArnold
+
+- Added pixel aspect ratio support to IECoreArnold::Renderer.
+
+#### IECoreHoudini
+
+- ToHoudiniGeometryConverter marks Pref and rest as non-transforming
+- Preventing SceneCache Source from transforming rest/Pref
+
 # 9.0.0-a6
 
 #### IECore
