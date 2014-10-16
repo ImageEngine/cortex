@@ -375,7 +375,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		}
 		return attr;
 	}
-	return 0;
+	return IECore::NullObject::defaultNullObject();
 }
 
 void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
