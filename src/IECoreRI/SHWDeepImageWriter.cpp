@@ -216,8 +216,30 @@ void SHWDeepImageWriter::open()
 	
 	float *NL = worldToCameraParameter()->getTypedValue().getValue();
 	float *NP = worldToNDCParameter()->getTypedValue().getValue();
+	// TODO - there should probably be a better way to perform this simple operation in double precision,
+	// but right now I really just need this to start working, so I'm doing the long version
+	// ( Plus we can hopefully get rid of this whole thing fairly soon, when 3delight fixes thier depth
+	// mapping to start with, and/or we throw this out and move to deep exr )
+	//m_NDCToCamera() = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
+	Imath::M44d worldToCameraDouble;
+	Imath::M44d worldToNDCDouble;
+	for( int ix = 0; ix < 4; ix++ )
+	{
+		for( int iy = 0; iy < 4; iy++ )
+		{
+			worldToCameraDouble[ix][iy] = worldToCameraParameter()->getTypedValue()[ix][iy];
+			worldToNDCDouble[ix][iy] = worldToNDCParameter()->getTypedValue()[ix][iy];
+		}
+	}
+	Imath::M44d NDCToCameraDouble = worldToNDCDouble.inverse() * worldToCameraDouble;
+	for( int ix = 0; ix < 4; ix++ )
+	{
+		for( int iy = 0; iy < 4; iy++ )
+		{
+			m_NDCToCamera()[ix][iy] = NDCToCameraDouble[ix][iy];
+		}
+	}
 
-	m_NDCToCamera() = worldToNDCParameter()->getTypedValue().inverse() * worldToCameraParameter()->getTypedValue();
 	
 	/// \todo: does image name mean anything for this format?
 	int status = DtexAddImage(

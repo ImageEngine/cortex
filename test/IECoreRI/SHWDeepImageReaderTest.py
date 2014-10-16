@@ -117,16 +117,16 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		p = reader.readPixel( 100, 100 )
 		self.assertEqual( p.channelNames(), ( "A", ) )
 		self.assertEqual( p.numSamples(), 1 )
-		self.assertAlmostEqual( p.getDepth( 0 ), 102.17636108, 6 )
+		self.assertAlmostEqual( p.getDepth( 0 ), 102.18660736, 6 )
 		self.assertAlmostEqual( p[0][0], 1.0, 6 )
 		
 		# hits one box then ground plane
 		p2 = reader.readPixel( 256, 256 )
 		self.assertEqual( p2.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( p2.numSamples(), 3 )
-		self.assertAlmostEqual( p2.getDepth( 0 ), 72.6087493, 6 )
-		self.assertAlmostEqual( p2.getDepth( 1 ), 77.7387313, 6 )
-		self.assertAlmostEqual( p2.getDepth( 2 ), 85.6622314, 6 )
+		self.assertAlmostEqual( p2.getDepth( 0 ), 72.6086884, 6 )
+		self.assertAlmostEqual( p2.getDepth( 1 ), 77.7386627, 6 )
+		self.assertAlmostEqual( p2.getDepth( 2 ), 85.6621628, 6 )
 		
 		expected = ( 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
@@ -136,11 +136,11 @@ class TestSHWDeepImageReader( unittest.TestCase ) :
 		p3 = reader.readPixel( 195, 225 )
 		self.assertEqual( p3.channelNames(), tuple(reader.channelNames()) )
 		self.assertEqual( p3.numSamples(), 5 )
-		self.assertAlmostEqual( p3.getDepth( 0 ), 68.6177368, 6 )
-		self.assertAlmostEqual( p3.getDepth( 1 ), 75.3023605, 6 )
-		self.assertAlmostEqual( p3.getDepth( 2 ), 77.4083328, 6 )
-		self.assertAlmostEqual( p3.getDepth( 3 ), 80.0680771, 6 )
-		self.assertAlmostEqual( p3.getDepth( 4 ), 88.8455811, 6 )
+		self.assertAlmostEqual( p3.getDepth( 0 ), 68.6202545, 6 )
+		self.assertAlmostEqual( p3.getDepth( 1 ), 75.3051300, 6 )
+		self.assertAlmostEqual( p3.getDepth( 2 ), 77.4111862, 6 )
+		self.assertAlmostEqual( p3.getDepth( 3 ), 80.0710297, 6 )
+		self.assertAlmostEqual( p3.getDepth( 4 ), 88.8488693, 6 )
 		
 		expected = ( 0.5, 0.75, 0.5, 0.5, 1.0 )
 		for i in range( 0, len(expected) ) :
