@@ -1,3 +1,9 @@
+# 8.5.4
+
+#### IECoreRI
+
+- Fixed precision issue with computing the projection matrix for SHW depth remapping.
+
 # 8.5.3
 
 #### IECore
