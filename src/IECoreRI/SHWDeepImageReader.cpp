@@ -240,7 +240,31 @@ bool SHWDeepImageReader::open( bool throwOnFailure )
 		
 		DtexNl( m_dtexImage, m_worldToCamera.getValue() );
 		DtexNP( m_dtexImage, m_worldToNDC.getValue() );
-		m_NDCToCamera() = m_worldToNDC.inverse() * m_worldToCamera;
+
+		// TODO - there should probably be a better way to perform this simple operation in double precision,
+		// but right now I really just need this to start working, so I'm doing the long version
+		// ( Plus we can hopefully get rid of this whole thing fairly soon, when 3delight fixes thier depth
+		// mapping to start with, and/or we throw this out and move to deep exr )
+		//m_NDCToCamera() = m_worldToNDC.inverse() * m_worldToCamera;
+		
+		Imath::M44d worldToCameraDouble;
+		Imath::M44d worldToNDCDouble;
+		for( int ix = 0; ix < 4; ix++ )
+		{
+			for( int iy = 0; iy < 4; iy++ )
+			{
+				worldToCameraDouble[ix][iy] = m_worldToCamera[ix][iy];
+				worldToNDCDouble[ix][iy] = m_worldToNDC[ix][iy];
+			}
+		}
+		Imath::M44d NDCToCameraDouble = worldToNDCDouble.inverse() * worldToCameraDouble;
+		for( int ix = 0; ix < 4; ix++ )
+		{
+			for( int iy = 0; iy < 4; iy++ )
+			{
+				m_NDCToCamera()[ix][iy] = NDCToCameraDouble[ix][iy];
+			}
+		}
 	}
 	else
 	{
