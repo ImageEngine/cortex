@@ -129,7 +129,9 @@ class InstancingTest( IECoreRI.TestCase ) :
 		# test writing a rib
 		
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
-		with WorldBlock( r ) :		
+		with WorldBlock( r ) :
+			# disable auto instancing, as we're testing explicit instancing:
+			r.setAttribute("ri:automaticInstancing", BoolData(False))
 			r.procedural( InstanceInheritingProcedural() )
 
 		rib = "".join( open( "test/IECoreRI/output/instancing.rib" ).readlines() )
@@ -146,7 +148,9 @@ class InstancingTest( IECoreRI.TestCase ) :
 			}
 		)
 		
-		with WorldBlock( r ) :		
+		with WorldBlock( r ) :
+			# disable auto instancing, as we're testing explicit instancing:
+			r.setAttribute("ri:automaticInstancing", BoolData(False))
 			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -10 ) ) )
 			r.procedural( InstanceInheritingProcedural() )
 
@@ -188,6 +192,8 @@ class InstancingTest( IECoreRI.TestCase ) :
 		
 		with WorldBlock( r ) :
 		
+			# disable auto instancing, as we're testing explicit instancing:
+			r.setAttribute("ri:automaticInstancing", BoolData(False))
 			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -20 ) ) )
 		
 			for i in range( 0, 100 ) :
@@ -336,6 +342,9 @@ class InstancingTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "test/IECoreRI/output/instancing.rib" )
 		
 		with WorldBlock( r ) :
+			# check auto instancing is on by default, and turn it off:
+			self.assertEqual( r.getAttribute("ri:automaticInstancing"), BoolData(True))
+			r.setAttribute("ri:automaticInstancing", BoolData(False))
 			m.render( r )
 			m.render( r )
 			
