@@ -37,6 +37,7 @@
 #include "IECore/Camera.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/Primitive.h"
+#include "IECore/NullObject.h"
 
 #include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
@@ -548,7 +549,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			}
 		}
 	}
-	return 0;
+	return IECore::NullObject::defaultNullObject();
 }
 
 PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const
