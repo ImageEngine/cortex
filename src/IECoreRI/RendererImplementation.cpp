@@ -89,7 +89,7 @@ std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 // This constructor launches a render within the current application. It creates a SharedData instance,
 // which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
-	:	m_sharedData( new SharedData ), m_inWorld( false )
+	:	m_sharedData( new SharedData ), m_inWorld( false ), m_inEdit( false )
 {
 	m_options = new CompoundData();
 	constructCommon();
@@ -120,7 +120,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
 // that launched the procedural
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true ), m_inEdit( false )
 {
 	constructCommon();
 	
@@ -144,7 +144,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
 IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 ), m_options( 0 ), m_inWorld( true )
+	:	m_context( 0 ), m_options( 0 ), m_inWorld( true ), m_inEdit( false )
 {
 	constructCommon();
 	
@@ -486,11 +486,15 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
 	
-	if( name == m_lastCamera )
+	if( m_inEdit )
 	{
-		// we're in an edit, and need to update
-		// the world camera as well.
-		RiCamera( RI_WORLD, RI_NULL );
+		if( name == m_lastCamera )
+		{
+			// we've just edited the world camera,
+			// and we have to say explicitly that
+			// that has happened.
+			RiCamera( RI_WORLD, RI_NULL );
+		}
 	}
 	else
 	{
@@ -2222,6 +2226,7 @@ void RendererImplementation::editBegin( const std::string &name, const IECore::C
 	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
 	
 	m_inWorld = name != "option";
+	m_inEdit = true;
 }
 
 void RendererImplementation::editEnd()
@@ -2230,4 +2235,5 @@ void RendererImplementation::editEnd()
 	RiEditEnd();
 	
 	m_inWorld = false;
+	m_inEdit = false;
 }
