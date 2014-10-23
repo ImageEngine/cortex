@@ -195,6 +195,7 @@ class RendererImplementation : public IECore::Renderer
 		size_t m_numDisplays;
 		std::string m_lastCamera;
 		bool m_inWorld;
+		bool m_inEdit;
 
 		struct AttributeState
 		{
