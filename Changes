@@ -1,3 +1,15 @@
+# 9.0.0-a8
+
+#### IECoreMaya
+
+- Stopped IECoreMaya::LiveScene::readObject() returning null pointers.
+- Stopped IECoreMaya::LiveScene::readAttribute() returning null pointers.
+
+#### IECoreRI
+
+- Fixed precision issue with computing the projection matrix for dsm depth remapping, which was causing deep holdout problems.
+- Fixed bug when editing cameras when dealing with multiple cameras.
+
 # 9.0.0-a7
 
 #### IECore
