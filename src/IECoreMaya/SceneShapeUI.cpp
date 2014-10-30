@@ -612,11 +612,19 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
 				// We're not in component selection mode. We'd like to be able to select the scene shape
-				// using the bounding box so we draw it too.
-				IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
+				// using the bounding box so we draw it too but only if it is visible
+
+				MPlug pDrawBound( sceneShape->thisMObject(), SceneShape::aDrawRootBound );
+				bool drawBound;
+				pDrawBound.getValue( drawBound );
+
+				if( drawBound )
+				{
+					IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
+				}
 			}
 		}
-						
+
 	view.endGL();
 	
 	if( hits.empty() )
