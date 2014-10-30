@@ -76,6 +76,7 @@
 #include "IECoreGL/bindings/SplineToGLTextureConverterBinding.h"
 #include "IECoreGL/bindings/ShaderStateComponentBinding.h"
 #include "IECoreGL/bindings/CurvesPrimitiveBinding.h"
+#include "IECoreGL/bindings/ToGLStateConverterBinding.h"
 
 using namespace IECoreGL;
 using namespace boost::python;
@@ -119,6 +120,7 @@ BOOST_PYTHON_MODULE( _IECoreGL )
 	bindSplineToGLTextureConverter();
 	bindShaderStateComponent();
 	bindCurvesPrimitive();
+	bindToGLStateConverter();
 
 #ifdef IECORE_WITH_FREETYPE
 
