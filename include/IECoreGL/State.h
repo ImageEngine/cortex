@@ -62,11 +62,15 @@ class State : public Bindable
 				/// new bindings. It is the caller's responsibility to keep both arguments
 				/// alive until after destruction of the ScopedBinding.
 				ScopedBinding( const State &s, State &currentState );
+				/// As above, but does nothing if bind is false.
+				ScopedBinding( const State &s, State &currentState, bool bind );
 				/// Reverts the state changes and modifications to currentState
 				/// made by the constructor.
 				~ScopedBinding();
 
 			private :
+
+				void init( const State &s, bool bind = true );
 
 				State &m_currentState;
 				std::vector<StateComponentPtr> m_savedComponents;

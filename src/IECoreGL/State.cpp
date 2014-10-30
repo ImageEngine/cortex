@@ -186,6 +186,22 @@ class State::Implementation : public IECore::RefCounted
 State::ScopedBinding::ScopedBinding( const State &s, State &currentState )
 	:	m_currentState( currentState )
 {
+	init( s );
+}
+
+State::ScopedBinding::ScopedBinding( const State &s, State &currentState, bool bind )
+	:	m_currentState( currentState )
+{
+	init( s, bind );
+}
+
+void State::ScopedBinding::init( const State &s, bool bind )
+{
+	if( !bind )
+	{
+		return;
+	}
+
 	m_savedComponents.reserve( s.m_implementation->m_components.size() );
 
 	for( Implementation::ComponentMap::const_iterator it=s.m_implementation->m_components.begin(); it!=s.m_implementation->m_components.end(); it++ )
