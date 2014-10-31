@@ -41,6 +41,9 @@ import os
 
 from IECore import *
 
+def extractColorPixel( file, index ):
+	return Color3f( file.read()["R"].data[index], file.read()["G"].data[index], file.read()["B"].data[index] )
+
 class TestTIFFReader(unittest.TestCase):
 
 	def testConstruction( self ):
@@ -151,6 +154,19 @@ class TestTIFFReader(unittest.TestCase):
 		self.assertEqual( Reader.create( "test/IECore/data/tiff/uvMap.200x100.rgba.32bit.tif" ).sourceColorSpace(), "linear" )
 		# for other bit-depths it assumes srgb
 		self.assertEqual( Reader.create( "test/IECore/data/tiff/uvMap.200x100.rgba.8bit.tif" ).sourceColorSpace(), "srgb" )
+
+	def testTDLColorSpace( self ):
+
+		linearFile = Reader.create( "test/IECore/data/tdl/grey50_linear.tdl" )
+		self.assertEqual( linearFile.sourceColorSpace(), "linear" )
+		self.assertEqual( extractColorPixel( linearFile, 0 ), Color3f( 0.501960814 ) )
+		srgbFile = Reader.create( "test/IECore/data/tdl/grey50_srgb.tdl" )
+		self.assertEqual( srgbFile.sourceColorSpace(), "srgb" )
+		self.assertEqual( extractColorPixel( srgbFile, 0 ), Color3f( 0.215860516 ) )
+		rec709File = Reader.create( "test/IECore/data/tdl/grey50_BT709.tdl" )
+		self.assertEqual( rec709File.sourceColorSpace(), "rec709" )
+		self.assertEqual( extractColorPixel( rec709File, 0 ), Color3f( 0.261481494 ) )
+		
 
 	def testDataWindow( self ):
 		r = Reader.create( "test/IECore/data/tiff/cropWindow.640x480.16bit.tif" )
