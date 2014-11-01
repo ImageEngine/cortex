@@ -35,12 +35,15 @@
 #ifndef IECOREGL_DIFFUSE_H
 #define IECOREGL_DIFFUSE_H
 
+#define M_PI 3.1415926535897932384626433832795
+
 vec3 ieDiffuse( vec3 P, vec3 N, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
 {
 	vec3 result = vec3( 0 );
+	float normalization = 1.0 / M_PI;
 	for( int i=0 ; i<nLights; i++ )
 	{
-		result += Cl[i] * max( 0.0, dot( N, normalize( L[i] ) ) );
+		result += Cl[i] * normalization * max( 0.0, dot( N, normalize( L[i] ) ) );
 	}
 	return result;
 }
