@@ -1260,7 +1260,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAutomaticInstancingAtt
 
 bool IECoreRI::RendererImplementation::automaticInstancingEnabled() const
 {
-	RtInt result = 0;
+	RtInt result = 1;
 	RxInfoType_t resultType;
 	int resultCount;
 	RxAttribute( "user:cortexAutomaticInstancing", &result, sizeof( RtInt ), &resultType, &resultCount );
