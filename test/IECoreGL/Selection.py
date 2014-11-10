@@ -68,7 +68,7 @@ class TestSelection( unittest.TestCase ) :
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-		names = [ x.name.value() for x in ss ]
+		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 		self.assertEqual( len( names ), 3 )
 		self.assert_( "one" in names )
 		self.assert_( "two" in names )
@@ -109,19 +109,19 @@ class TestSelection( unittest.TestCase ) :
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0, 0.5 ), IECore.V2f( 0.5, 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "red" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "red" )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "green" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "green" )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5, 0 ), IECore.V2f( 1, 0.5 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "blue" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "blue" )
 
 		ss = s.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0.5 ), IECore.V2f( 1 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "white" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "white" )
 
 	def testIDSelect( self ) :
 	
@@ -153,11 +153,11 @@ class TestSelection( unittest.TestCase ) :
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "frontLeft" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontLeft" )
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "frontRight" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
 
 	def testIDSelectDepths( self ) :
 	
@@ -176,11 +176,11 @@ class TestSelection( unittest.TestCase ) :
 
 		s1 = scene.select( IECoreGL.Selector.Mode.GLSelect, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		self.assertEqual( len( s1 ), 1 )
-		self.assertEqual( s1[0].name.value(), "ball" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( s1[0].name ), "ball" )
 
 		s2 = scene.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		self.assertEqual( len( s2 ), 1 )
-		self.assertEqual( s2[0].name.value(), "ball" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( s2[0].name ), "ball" )
 		
 		self.assertAlmostEqual( s1[0].depthMin, s2[0].depthMin, 5 )
 	
@@ -214,11 +214,11 @@ class TestSelection( unittest.TestCase ) :
 
 		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 0.25, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
-		self.assertEqual( set( [ x.name.value() for x in ss ] ), set( ( "frontLeft", "backLeft" ) ) )
+		self.assertEqual( set( [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ] ), set( ( "frontLeft", "backLeft" ) ) )
 
 		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0.75, 0 ), IECore.V2f( 1, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
-		self.assertEqual( set( [ x.name.value() for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
+		self.assertEqual( set( [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
 	
 	def testIDSelectWithAdditionalDisplayStyles( self ) :
 	
@@ -255,11 +255,11 @@ class TestSelection( unittest.TestCase ) :
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "frontLeft" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontLeft" )
 
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
-		self.assertEqual( ss[0].name.value(), "frontRight" )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
 	
 	def testPointsPrimitiveSelect( self ) :
 
@@ -279,7 +279,7 @@ class TestSelection( unittest.TestCase ) :
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-			names = [ x.name.value() for x in ss ]
+			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "pointsNeedSelectingToo" )
 	
@@ -312,7 +312,7 @@ class TestSelection( unittest.TestCase ) :
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-			names = [ x.name.value() for x in ss ]
+			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )
 			
@@ -346,7 +346,7 @@ class TestSelection( unittest.TestCase ) :
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-			names = [ x.name.value() for x in ss ]
+			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
 
@@ -382,7 +382,7 @@ class TestSelection( unittest.TestCase ) :
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-			names = [ x.name.value() for x in ss ]
+			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
 	
@@ -415,7 +415,7 @@ class TestSelection( unittest.TestCase ) :
 			selector.baseState().bind()
 			scene.root().render( selector.baseState() )
 				
-		names = [ x.name.value() for x in hits ]
+		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in hits ]
 		self.assertEqual( len( names ), 2 )
 		self.assert_( "one" in names )
 		self.assert_( "two" in names )
@@ -445,7 +445,7 @@ class TestSelection( unittest.TestCase ) :
 
 		for mode in ( IECoreGL.Selector.Mode.GLSelect, IECoreGL.Selector.Mode.OcclusionQuery, IECoreGL.Selector.Mode.IDRender ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
-			names = [ x.name.value() for x in ss ]
+			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( names, [ "selectableObj" ] )
 				
 if __name__ == "__main__":

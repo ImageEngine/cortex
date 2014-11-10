@@ -398,7 +398,7 @@ class Selector::Implementation : public IECore::RefCounted
 				std::map<unsigned int, HitRecord>::iterator it = idRecords.find( ids[i] );
 				if( it == idRecords.end() )
 				{
-					HitRecord r( Imath::limits<float>::max(), Imath::limits<float>::min(), NameStateComponent::nameFromGLName( ids[i] ) );
+					HitRecord r( Imath::limits<float>::max(), Imath::limits<float>::min(), ids[i] );
 					it = idRecords.insert( std::pair<unsigned int, HitRecord>( ids[i], r ) ).first;
 				}
 				it->second.depthMin = std::min( it->second.depthMin, z[i] );
@@ -461,7 +461,7 @@ class Selector::Implementation : public IECore::RefCounted
 				glGetQueryObjectuivARB( m_queries[i], GL_QUERY_RESULT_ARB, &samplesPassed );
 				if( samplesPassed )
 				{
-					m_hits.push_back( HitRecord( 0, 0, NameStateComponent::nameFromGLName( m_queryNames[i] ) ) );
+					m_hits.push_back( HitRecord( 0, 0, m_queryNames[i] ) );
 				}
 			}
 		
