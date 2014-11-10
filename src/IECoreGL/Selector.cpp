@@ -66,7 +66,7 @@ class Selector::Implementation : public IECore::RefCounted
 	public :
 	
 		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
-			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_currentIDShader( NULL )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( NULL )
 		{
 			// we don't want preexisting errors to trigger exceptions
 			// from error checking code in the begin*() methods, because
@@ -190,6 +190,13 @@ class Selector::Implementation : public IECore::RefCounted
 			m_currentName = name;
 		}
 		
+		GLuint loadName()
+		{
+			const GLuint name = m_nextGeneratedName++;
+			loadName( name );
+			return name;
+		}
+
 		State *baseState()
 		{
 			return m_baseState.get();
@@ -256,6 +263,7 @@ class Selector::Implementation : public IECore::RefCounted
 		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
 		GLuint m_currentName;
+		GLuint m_nextGeneratedName;
 		
 		static Selector *g_currentSelector;
 
@@ -499,6 +507,11 @@ const Imath::M44d &Selector::postProjectionMatrix()
 void Selector::loadName( GLuint name )
 {
 	m_implementation->loadName( name );
+}
+
+GLuint Selector::loadName()
+{
+	return m_implementation->loadName();
 }
 
 State *Selector::baseState()
