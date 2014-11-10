@@ -38,7 +38,6 @@
 #include "IECoreGL/State.h"
 #include "IECoreGL/Font.h"
 #include "IECoreGL/GL.h"
-#include "IECoreGL/TextureUnits.h"
 
 using namespace IECoreGL;
 using namespace Imath;
@@ -140,7 +139,7 @@ void TextPrimitive::renderSprites( State *state ) const
 		
 		glEnable( GL_TEXTURE_2D );
 		glDisable( GL_LIGHTING ); /// \todo Perhaps we could support lighting even in this mode?
-		glActiveTexture( textureUnits()[0] );
+		glActiveTexture( GL_TEXTURE0 );
 		m_font->texture()->bind();
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
