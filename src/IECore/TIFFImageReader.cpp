@@ -211,9 +211,18 @@ std::string TIFFImageReader::sourceColorSpace() const
 	// Handle 3delight tdls specially - they store the sourceColorSpace in the imageDescription
 	if( boost::starts_with( m_software, "tdlmake" ) )
 	{
-		if( m_imageDescription.find( "InputSpace:BT.709" ) != std::string::npos ) return "rec709";
-		else if( m_imageDescription.find( "InputSpace:sRGB" ) != std::string::npos ) return "srgb";
-		else return "linear";
+		if( m_imageDescription.find( "InputSpace:BT.709" ) != std::string::npos )
+		{
+			return "rec709";
+		}
+		else if( m_imageDescription.find( "InputSpace:sRGB" ) != std::string::npos )
+		{
+			return "srgb";
+		}
+		else
+		{
+			return "linear";
+		}
 	}
 
 	if ( m_sampleFormat == SAMPLEFORMAT_IEEEFP )
