@@ -118,7 +118,12 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 	
 	MFnDagNode fnLocator( locatorObj );
 	
-	Imath::M44f m = coordSys->getTransform()->transform();
+	Imath::M44f m;
+	const IECore::Transform* transform = coordSys->getTransform();
+	if( transform )
+	{
+		m = transform->transform();
+	}
 	Imath::V3f s,h,r,t;
 	Imath::extractSHRT(m, s, h, r, t);
 
