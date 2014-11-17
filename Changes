@@ -1,3 +1,22 @@
+# 9.0.0-a9
+
+#### IECore
+
+- TIFFImageReader now checks if the tif is tagged as coming from tdlmake, and if so, sets the sourceColorSpace from the image description set by tdlmake.
+
+#### IECoreGL
+
+-  Switched glsl diffuse and specular functions to match 3delight's properly normalized BRDFS
+
+#### IECoreMaya
+
+- Fixed coordinate system->maya locator converter crash for coordinate system with no transform
+- Fixed crash in SceneShape::hasSceneShapeObject for invalid scene
+
+#### IECoreRI
+
+- Automatic instancing now defaults to on
+
 # 9.0.0-a8
 
 #### IECoreMaya
