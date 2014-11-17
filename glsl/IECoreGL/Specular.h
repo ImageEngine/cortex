@@ -35,13 +35,39 @@
 #ifndef IECOREGL_SPECULAR_H
 #define IECOREGL_SPECULAR_H
 
-vec3 ieSpecular( vec3 P, vec3 N, vec3 V, float roughness, vec3 Cl[gl_MaxLights], vec3 L[gl_MaxLights], int nLights )
+#define M_PI 3.1415926535897932384626433832795
+
+vec3 ieSpecular( vec3 P, vec3 N, vec3 V, float roughness, vec3 lightColors[gl_MaxLights], vec3 lightDirs[gl_MaxLights], int nLights )
 {
+	float n = pow( roughness, -3.5 ) - 1;
+
+	// Blinn normalization
+	float normalization = ( n + 2.0 ) / ( 4.0 * M_PI * (2.0 - pow( 2.0, -n * 0.5 ) ) );
+
+	// Combine the visibility term from the denominator of the microfacet BRDF with the normalization
+	normalization /= dot( N, V );
+
+	// We use Schlick's approximation to the Smith G masking/shadowing function
+	float k = 0.2 * roughness * sqrt( 2.0 / M_PI );
+
+	// Eye Component of G : The masking term
+	float G1V = max( 0, dot( N, V ) ) / ( dot( N, V ) * ( 1 - k ) + k );
+
+
+
+
 	vec3 result = vec3( 0 );
 	for( int i=0 ; i<nLights; i++ )
 	{
-		vec3 H = normalize( normalize( L[i] ) + V );
-		result += Cl[i] * pow( max( 0.0, dot( N, H ) ), 1.0/roughness );
+		vec3 L = normalize( lightDirs[i] );
+		vec3 H = normalize( L + V );
+
+		// Light Component of G : The shadowing term
+		float G1L = max( 0, dot( N, L ) ) / ( dot( N, L ) * ( 1 - k ) + k );
+
+		// Blinn microfacet distribution
+		float D = pow( max( 0.0, dot( N, H ) ), n ) * normalization;
+		result += lightColors[i] * D * G1L * G1V;
 	}
 	return result;
 }
