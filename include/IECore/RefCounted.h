@@ -169,6 +169,16 @@ inline void intrusive_ptr_release( const IECore::RefCounted *r )
 	r->removeRef();
 }
 
+/// Implementation of tbb_hasher to allow intrusive_ptrs to be used
+/// with tbb_concurrent_* containers.
+template<typename T>
+inline size_t tbb_hasher( const boost::intrusive_ptr<T> &ptr )
+{
+	// This is the same as what tbb uses for raw pointers
+	const size_t h = reinterpret_cast<size_t>( ptr.get() );
+	return (h >> 3) ^ h;
+}
+
 } // namespace IECore
 
 
