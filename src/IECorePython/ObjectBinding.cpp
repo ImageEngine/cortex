@@ -38,8 +38,10 @@
 
 #include "IECore/Object.h"
 #include "IECore/MurmurHash.h"
+
 #include "IECorePython/ObjectBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILLock.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -49,6 +51,7 @@ namespace IECorePython
 
 static ObjectPtr creator( void *data )
 {
+	IECorePython::ScopedGILLock gilLock;
 	assert( data );
 	PyObject *d = (PyObject *)(data );
 
