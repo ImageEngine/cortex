@@ -51,7 +51,6 @@
 #include "IECoreGL/Buffer.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/CachedConverter.h"
-#include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/Selector.h"
 
 using namespace std;
@@ -517,7 +516,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		
 			virtual void bind()
 			{
-				glActiveTexture( textureUnits()[m_textureUnit] );
+				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
 				if( m_texture )
 				{
@@ -532,7 +531,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		
 			virtual void unbind()
 			{
-				glActiveTexture( textureUnits()[m_textureUnit] );
+				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
 			}
 		

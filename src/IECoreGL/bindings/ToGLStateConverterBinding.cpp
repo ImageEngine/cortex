@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,23 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_TEXTUREUNITS_H
-#define IECOREGL_TEXTUREUNITS_H
+#include "boost/python.hpp"
 
-#include "IECoreGL/GL.h"
+#include "IECore/CompoundObject.h"
 
-#include <vector>
+#include "IECoreGL/ToGLStateConverter.h"
+#include "IECoreGL/bindings/ToGLStateConverterBinding.h"
 
-namespace IECoreGL
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace std;
+
+
+void IECoreGL::bindToGLStateConverter()
 {
-
-/// Returns a vector containing GL_TEXTURE0, GL_TEXTURE1, ...
-/// GL_TEXTUREN for all texture unit enums up to
-/// GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS - 1. That way you can
-/// actually program texture code like a grown up,
-/// using like loops and stuff.
-const std::vector<GLenum> &textureUnits();
-
-} // namespace IECoreGL
-
-#endif // IECOREGL_TEXTUREUNITS_H
+	IECorePython::RunTimeTypedClass<ToGLStateConverter>()
+		.def( init<IECore::ConstCompoundObjectPtr>() )
+	;
+}

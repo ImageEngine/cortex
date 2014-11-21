@@ -45,7 +45,6 @@
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Shader.h"
-#include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
 #include "IECoreGL/CachedConverter.h"

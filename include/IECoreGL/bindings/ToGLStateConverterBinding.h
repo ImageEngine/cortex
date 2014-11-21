@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREGL_HITRECORD_H
-#define IECOREGL_HITRECORD_H
-
-#include "IECore/InternedString.h"
-
-#include "IECoreGL/GL.h"
+#ifndef IECOREGL_TOGLSTATECONVERTERBINDING_H
+#define IECOREGL_TOGLSTATECONVERTERBINDING_H
 
 namespace IECoreGL
 {
 
-/// The HitRecord struct represents hit records
-/// found in the glSelectBuffer.
-class HitRecord
-{
-
-	public :
-
-		/// Construct from a hit record in the format specified
-		/// for the OpenGL select buffer. Raises an exception if
-		/// more than one name is specified in the record.
-		HitRecord( const GLuint *hitRecord );
-		HitRecord( float dMin, float dMax, GLuint name );
-
-		/// The minimum and maximum depths of the hit, normalised
-		/// in the 0-1 range between the near and far clipping planes.
-		float depthMin;
-		float depthMax;
-
-		/// Identifier for the hit object.
-		GLuint name;
-
-		/// Performs comparison based on the depth.min member.
-		bool operator < ( const HitRecord &other ) const;
-
-		/// Returns the offset to the next hit record in the select
-		/// buffer - this is a constant as the constructor accepts
-		/// only hit records with a single name.
-		size_t offsetToNext() const;
-
-};
+void bindToGLStateConverter();
 
 } // namespace IECoreGL
 
-#endif // IECOREGL_HITRECORD_H
+#endif // IECOREGL_TOGLSTATECONVERTERBINDING_H

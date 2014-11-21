@@ -92,6 +92,10 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 
 		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const
 		{
+			if( !m_parameterMap )
+			{
+				return;
+			}
 			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
 			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
 			{

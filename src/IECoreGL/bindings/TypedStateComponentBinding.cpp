@@ -65,6 +65,9 @@ void bindTypedStateComponents()
 	bindTypedStateComponent< ProceduralThreadingStateComponent >( "ProceduralThreadingStateComponent" );
 	bindTypedStateComponent< CameraVisibilityStateComponent >( "CameraVisibilityStateComponent" );
 	bindTypedStateComponent< AutomaticInstancingStateComponent >( "AutomaticInstancingStateComponent" );
+	bindTypedStateComponent< PointSmoothingStateComponent >( "PointSmoothingStateComponent" );
+	bindTypedStateComponent< LineSmoothingStateComponent >( "LineSmoothingStateComponent" );
+	bindTypedStateComponent< PolygonSmoothingStateComponent >( "PolygonSmoothingStateComponent" );
 
 	enum_<GLPointsUsage>( "GLPointsUsage" )
 		.value( "ForPointsOnly", ForPointsOnly )

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,48 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreGL/TextureUnits.h"
+#include <boost/python.hpp>
 
-const std::vector<GLenum> &IECoreGL::textureUnits()
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECoreGL/CurvesPrimitive.h"
+
+#include "IECoreGL/bindings/CurvesPrimitiveBinding.h"
+#include "IECoreGL/bindings/TypedStateComponentBinding.inl"
+
+using namespace boost::python;
+
+namespace IECoreGL
 {
-	static std::vector<GLenum> t;
-	if( !t.size() )
-	{
-		t.push_back( GL_TEXTURE0 );
-		t.push_back( GL_TEXTURE1 );
-		t.push_back( GL_TEXTURE2 );
-		t.push_back( GL_TEXTURE3 );
-		t.push_back( GL_TEXTURE4 );
-		t.push_back( GL_TEXTURE5 );
-		t.push_back( GL_TEXTURE6 );
-		t.push_back( GL_TEXTURE7 );
-		t.push_back( GL_TEXTURE8 );
-		t.push_back( GL_TEXTURE9 );
-		t.push_back( GL_TEXTURE10 );
-		t.push_back( GL_TEXTURE11 );
-		t.push_back( GL_TEXTURE12 );
-		t.push_back( GL_TEXTURE13 );
-		t.push_back( GL_TEXTURE14 );
-		t.push_back( GL_TEXTURE15 );
-		t.push_back( GL_TEXTURE16 );
-		t.push_back( GL_TEXTURE17 );
-		t.push_back( GL_TEXTURE18 );
-		t.push_back( GL_TEXTURE19 );
-		t.push_back( GL_TEXTURE20 );
-		t.push_back( GL_TEXTURE21 );
-		t.push_back( GL_TEXTURE22 );
-		t.push_back( GL_TEXTURE23 );
-		t.push_back( GL_TEXTURE24 );
-		t.push_back( GL_TEXTURE25 );
-		t.push_back( GL_TEXTURE26 );
-		t.push_back( GL_TEXTURE27 );
-		t.push_back( GL_TEXTURE28 );
-		t.push_back( GL_TEXTURE29 );
-		t.push_back( GL_TEXTURE30 );
-		t.push_back( GL_TEXTURE31 );
-		GLint max = 0;
-		glGetIntegerv( GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &max );
-		t.resize( max );
-	}
-	return t;
+
+void bindCurvesPrimitive()
+{
+	scope s = IECorePython::RunTimeTypedClass<CurvesPrimitive>()
+		.def(
+			init<
+				const IECore::CubicBasisf &,
+				bool,
+				IECore::ConstIntVectorDataPtr,
+				float
+			>( (
+				arg_( "basis" ),
+				arg_( "periodic" ),
+				arg_( "vertsPerCurve" ),
+				arg_( "width" ) = 1.0f
+			) )
+		)
+	;
+	
+	bindTypedStateComponent<CurvesPrimitive::IgnoreBasis>( "IgnoreBasis" );
+	bindTypedStateComponent<CurvesPrimitive::UseGLLines>( "UseGLLines" );
+	bindTypedStateComponent<CurvesPrimitive::GLLineWidth>( "GLLineWidth" );
+	
 }
+
+} // namespace IECoreGL
