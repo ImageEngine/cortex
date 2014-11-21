@@ -669,8 +669,8 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 
 		// The pointer returned by TIFFGetField will be invalidated if we change the directory index.
 		// Copy it to a string to be safe
-		m_software = std::string( tiffField< char* >( TIFFTAG_SOFTWARE, "" ) );
-		m_imageDescription = std::string( tiffField< char* >( TIFFTAG_IMAGEDESCRIPTION, "" ) );
+		m_software = std::string( tiffField<const char *>( TIFFTAG_SOFTWARE, "" ) );
+		m_imageDescription = std::string( tiffField<const char *>( TIFFTAG_IMAGEDESCRIPTION, "" ) );
 
 		uint16 numExtraSamples;
 		uint16 *extraSamples;
