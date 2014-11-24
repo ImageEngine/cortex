@@ -1,3 +1,30 @@
+# 9.0.0-a10
+
+#### IECore
+
+- Fixed GIL bug in python Object creation
+- Added implementation of tbb_hasher for boost::intrusive_ptr
+
+#### IECoreGL
+
+- Added State::ScopedBinding overload, allowing a binding to be ignored
+- Changed IECoreGL::HitRecord::name field from InternedString to GLuint
+- Added IECoreGL::Selector::loadName() overload to auto-generates names
+- Removed TextureUnits.h
+- Added python bindings for CurvesPrimitive
+- Added python bindings for smoothing state components
+- Added ToGLStateConverter for converting attributes to State objects
+- Fixed crash in ShaderStateComponent::addParametersToShaderSetup()
+
+#### Incompatibilities
+
+- Changed IECoreGL::HitRecord members
+- Removed IECoreGL/TextureUnits.h
+
+#### Build
+
+- Fixed compilation for GCC 4.2 on OS X
+
 # 9.0.0-a9
 
 #### IECore
