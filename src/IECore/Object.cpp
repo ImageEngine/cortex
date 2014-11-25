@@ -94,6 +94,40 @@ Object::TypeInformation *Object::typeInformation()
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
+// copy context stuff
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Object::CopyContext::CopyContext()
+{
+}
+
+ObjectPtr Object::CopyContext::copyInternal( const Object *toCopy )
+{
+	if( toCopy->refCount() > 1 )
+	{
+		// object may occur multiple times in the data structure
+		// being copied - ensure we don't copy it twice.
+		std::map<const Object *, Object *>::const_iterator it = m_copies.find( toCopy );
+		if( it!=m_copies.end() )
+		{
+			return it->second;
+		}
+		ObjectPtr copy = create( toCopy->typeId() );
+		copy->copyFrom( toCopy, this );
+		m_copies.insert( std::pair<const Object *, Object *>( toCopy, copy.get() ) );
+		return copy;	
+	}
+	else
+	{
+		// object can only occur once in the data structure being
+		// counted - avoid unnecessary bookkeeping overhead.
+		ObjectPtr copy = create( toCopy->typeId() );
+		copy->copyFrom( toCopy, this );
+		return copy;	
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
 // save context stuff
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -285,9 +319,19 @@ void Object::MemoryAccumulator::accumulate( size_t bytes )
 
 void Object::MemoryAccumulator::accumulate( const Object *object )
 {
-	if( m_accumulated.find( object )==m_accumulated.end() )
+	if( object->refCount() > 1 )
 	{
-		m_accumulated.insert( object );
+		// object may occur multiple times in the data structure
+		// being counted - ensure that we don't count it twice.
+		if( m_accumulated.insert( object ).second )
+		{
+			object->memoryUsage( *this );
+		}
+	}
+	else
+	{
+		// object can only occur once in the data structure being
+		// counted - avoid unnecessary bookkeeping overhead.
 		object->memoryUsage( *this );
 	}
 }
