@@ -48,29 +48,29 @@ namespace IECoreAppleseed
 class TransformStack
 {
 
-    public :
+	public :
 
-        TransformStack();
+		TransformStack();
 
-        void push( const renderer::TransformSequence &m );
-        void push_identity();
+		void push( const renderer::TransformSequence &m );
+		void push_identity();
 
-        void pop();
+		void pop();
 
-        void clear();
-        std::size_t size() const;
+		void clear();
+		std::size_t size() const;
 
-        const renderer::TransformSequence& top() const;
-        renderer::TransformSequence& top();
+		const renderer::TransformSequence& top() const;
+		renderer::TransformSequence& top();
 
-        void setTransform( const Imath::M44f &m );
-        void concatTransform( const Imath::M44f &m );
+		void setTransform( const Imath::M44f &m );
+		void concatTransform( const Imath::M44f &m );
 
-    private :
+	private :
 
-        std::stack<renderer::TransformSequence> m_stack;
+		std::stack<renderer::TransformSequence> m_stack;
 
-        void makeTransform( const Imath::M44f &m, foundation::Transformd &xform ) const;
+		void makeTransform( const Imath::M44f &m, foundation::Transformd &xform ) const;
 
 };
 

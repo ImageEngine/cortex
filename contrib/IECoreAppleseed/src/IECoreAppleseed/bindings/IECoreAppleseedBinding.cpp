@@ -45,9 +45,9 @@ using namespace IECoreAppleseed;
 
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
 {
-    bindRenderer();
-    bindToAppleseedConverter();
-    bindToAppleseedCameraConverter();
-    bindToAppleseedShapeConverter();
-    bindToAppleseedMeshConverter();
+	bindRenderer();
+	bindToAppleseedConverter();
+	bindToAppleseedCameraConverter();
+	bindToAppleseedShapeConverter();
+	bindToAppleseedMeshConverter();
 }

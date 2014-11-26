@@ -41,13 +41,13 @@ namespace IECoreAppleseed
 template<class T>
 ToAppleseedConverter::ConverterDescription<T>::ConverterDescription()
 {
-    creators()[T::InputType::staticTypeId()] = &creator;
+	creators()[T::InputType::staticTypeId()] = &creator;
 };
 
 template<class T>
 ToAppleseedConverterPtr ToAppleseedConverter::ConverterDescription<T>::creator( IECore::ObjectPtr object )
 {
-    return new T( boost::static_pointer_cast<typename T::InputType>( object ) );
+	return new T( boost::static_pointer_cast<typename T::InputType>( object ) );
 }
 
 } // namespace IECoreAppleseed

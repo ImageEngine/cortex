@@ -55,9 +55,9 @@ IE_CORE_DEFINERUNTIMETYPED( ToAppleseedMeshConverter );
 ToAppleseedMeshConverter::ConverterDescription<ToAppleseedMeshConverter> ToAppleseedMeshConverter::g_description;
 
 ToAppleseedMeshConverter::ToAppleseedMeshConverter( IECore::MeshPrimitivePtr toConvert )
-    :	ToAppleseedShapeConverter( "Converts IECore::MeshPrimitives to appleseed mesh object entities", IECore::MeshPrimitive::staticTypeId() )
+	:	ToAppleseedShapeConverter( "Converts IECore::MeshPrimitives to appleseed mesh object entities", IECore::MeshPrimitive::staticTypeId() )
 {
-    srcParameter()->setValue( toConvert );
+	srcParameter()->setValue( toConvert );
 }
 
 ToAppleseedMeshConverter::~ToAppleseedMeshConverter()
@@ -66,168 +66,168 @@ ToAppleseedMeshConverter::~ToAppleseedMeshConverter()
 
 asr::Entity *ToAppleseedMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
 {
-    MeshPrimitivePtr mesh = static_cast<const MeshPrimitive *>( from.get() )->copy();
-    const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-    if( !p )
-    {
-        throw IECore::Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-    }
+	MeshPrimitivePtr mesh = static_cast<const MeshPrimitive *>( from.get() )->copy();
+	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+	if( !p )
+	{
+		throw IECore::Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+	}
 
-    asf::auto_release_ptr<asr::MeshObject> meshObj = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
-    const size_t materialSlot = meshObj->push_material_slot( "default" );
+	asf::auto_release_ptr<asr::MeshObject> meshObj = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
+	const size_t materialSlot = meshObj->push_material_slot( "default" );
 
-    // vertices
-    {
-        size_t numVertices = p->readable().size();
-        meshObj->reserve_vertices( numVertices );
-        const std::vector<Imath::V3f> &points = p->readable();
-        for( size_t i = 0; i < numVertices; ++i )
-        {
-            meshObj->push_vertex( asr::GVector3( points[i].x, points[i].y, points[i].z ) );
-        }
-    }
+	// vertices
+	{
+		size_t numVertices = p->readable().size();
+		meshObj->reserve_vertices( numVertices );
+		const std::vector<Imath::V3f> &points = p->readable();
+		for( size_t i = 0; i < numVertices; ++i )
+		{
+			meshObj->push_vertex( asr::GVector3( points[i].x, points[i].y, points[i].z ) );
+		}
+	}
 
-    // triangulate primitive (this should be in appleseed at some point)
-    {
-        IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
-        op->inputParameter()->setValue( mesh );
-        op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-        op->copyParameter()->setTypedValue( false );
-        op->operate();
-    }
+	// triangulate primitive (this should be in appleseed at some point)
+	{
+		IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
+		op->inputParameter()->setValue( mesh );
+		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
+		op->copyParameter()->setTypedValue( false );
+		op->operate();
+	}
 
-    // triangles
-    size_t numTriangles = mesh->numFaces();
-    std::vector<asr::Triangle> triangles;
-    triangles.reserve( numTriangles );
-    const std::vector<int> &vidx = mesh->vertexIds()->readable();
-    for( size_t i = 0; i < vidx.size(); i += 3 )
-    {
-        triangles.push_back( asr::Triangle( vidx[i], vidx[i+1], vidx[i+2], materialSlot ) );
-    }
+	// triangles
+	size_t numTriangles = mesh->numFaces();
+	std::vector<asr::Triangle> triangles;
+	triangles.reserve( numTriangles );
+	const std::vector<int> &vidx = mesh->vertexIds()->readable();
+	for( size_t i = 0; i < vidx.size(); i += 3 )
+	{
+		triangles.push_back( asr::Triangle( vidx[i], vidx[i+1], vidx[i+2], materialSlot ) );
+	}
 
-    // texture coords
-    {
-        const FloatVectorData *s = mesh->variableData<FloatVectorData>( "s" );
-        const FloatVectorData *t = mesh->variableData<FloatVectorData>( "t" );
-        if( s && t )
-        {
-            PrimitiveVariable::Interpolation sInterpolation = mesh->variables.find( "s" )->second.interpolation;
-            PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;
-            if( sInterpolation == tInterpolation )
-            {
-                if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
-                {
-                    size_t numSTs = s->readable().size();
-                    meshObj->reserve_tex_coords( numSTs );
-                    const std::vector<float> &svec = s->readable();
-                    const std::vector<float> &tvec = t->readable();
+	// texture coords
+	{
+		const FloatVectorData *s = mesh->variableData<FloatVectorData>( "s" );
+		const FloatVectorData *t = mesh->variableData<FloatVectorData>( "t" );
+		if( s && t )
+		{
+			PrimitiveVariable::Interpolation sInterpolation = mesh->variables.find( "s" )->second.interpolation;
+			PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;
+			if( sInterpolation == tInterpolation )
+			{
+				if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
+				{
+					size_t numSTs = s->readable().size();
+					meshObj->reserve_tex_coords( numSTs );
+					const std::vector<float> &svec = s->readable();
+					const std::vector<float> &tvec = t->readable();
 
-                    for( size_t i = 0; i < numSTs; ++i)
-                    {
-                        meshObj->push_tex_coords( asr::GVector2( svec[i], tvec[i] ) );
-                    }
+					for( size_t i = 0; i < numSTs; ++i)
+					{
+						meshObj->push_tex_coords( asr::GVector2( svec[i], tvec[i] ) );
+					}
 
-                    if( sInterpolation == PrimitiveVariable::FaceVarying )
-                    {
-                        for( size_t i = 0, j = 0; i < numTriangles; ++i)
-                        {
-                            asr::Triangle& tri = triangles[i];
-                            tri.m_a0 = j++;
-                            tri.m_a1 = j++;
-                            tri.m_a2 = j++;
-                        }
-                    }
-                    else
-                    {
-                        for( size_t i = 0; i < vidx.size(); i += 3)
-                        {
-                            asr::Triangle& tri = triangles[i / 3];
-                            tri.m_a0 = vidx[i];
-                            tri.m_a1 = vidx[i+1];
-                            tri.m_a2 = vidx[i+2];
-                        }
-                    }
-                }
-                else
-                {
-                    msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );
-                }
-            }
-            else
-            {
-                msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );
-            }
-        }
-        else if( s || t )
-        {
-            msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
-        }
-    }
+					if( sInterpolation == PrimitiveVariable::FaceVarying )
+					{
+						for( size_t i = 0, j = 0; i < numTriangles; ++i)
+						{
+							asr::Triangle& tri = triangles[i];
+							tri.m_a0 = j++;
+							tri.m_a1 = j++;
+							tri.m_a2 = j++;
+						}
+					}
+					else
+					{
+						for( size_t i = 0; i < vidx.size(); i += 3)
+						{
+							asr::Triangle& tri = triangles[i / 3];
+							tri.m_a0 = vidx[i];
+							tri.m_a1 = vidx[i+1];
+							tri.m_a2 = vidx[i+2];
+						}
+					}
+				}
+				else
+				{
+					msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );
+				}
+			}
+			else
+			{
+				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );
+			}
+		}
+		else if( s || t )
+		{
+			msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
+		}
+	}
 
-    // normals
-    {
-        PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
-        if( nIt != mesh->variables.end() )
-        {
-            const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
-            if( n )
-            {
-                PrimitiveVariable::Interpolation nInterpolation = nIt->second.interpolation;
-                if( nInterpolation == PrimitiveVariable::Varying || nInterpolation == PrimitiveVariable::Vertex || nInterpolation == PrimitiveVariable::FaceVarying )
-                {
-                    size_t numNormals = n->readable().size();
-                    meshObj->reserve_vertex_normals( numNormals );
-                    const std::vector<Imath::V3f> &normals = n->readable();
-                    for( size_t i = 0; i < numNormals; ++i)
-                    {
-                        asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );
-                        n = asf::normalize( n );
-                        meshObj->push_vertex_normal( n );
-                    }
+	// normals
+	{
+		PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
+		if( nIt != mesh->variables.end() )
+		{
+			const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
+			if( n )
+			{
+				PrimitiveVariable::Interpolation nInterpolation = nIt->second.interpolation;
+				if( nInterpolation == PrimitiveVariable::Varying || nInterpolation == PrimitiveVariable::Vertex || nInterpolation == PrimitiveVariable::FaceVarying )
+				{
+					size_t numNormals = n->readable().size();
+					meshObj->reserve_vertex_normals( numNormals );
+					const std::vector<Imath::V3f> &normals = n->readable();
+					for( size_t i = 0; i < numNormals; ++i)
+					{
+						asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );
+						n = asf::normalize( n );
+						meshObj->push_vertex_normal( n );
+					}
 
-                    if( nInterpolation == PrimitiveVariable::FaceVarying )
-                    {
-                        for( size_t i = 0, j = 0; i < numTriangles; ++i)
-                        {
-                            asr::Triangle& tri = triangles[i];
-                            tri.m_n0 = j++;
-                            tri.m_n1 = j++;
-                            tri.m_n2 = j++;
-                        }
-                    }
-                    else
-                    {
-                        for( size_t i = 0; i < vidx.size(); i += 3)
-                        {
-                            asr::Triangle& tri = triangles[i / 3];
-                            tri.m_n0 = vidx[i];
-                            tri.m_n1 = vidx[i+1];
-                            tri.m_n2 = vidx[i+2];
-                        }
-                    }
-                }
-                else
-                {
-                    msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );
-                }
-            }
-            else
-            {
-                msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
-            }
-        }
-    }
+					if( nInterpolation == PrimitiveVariable::FaceVarying )
+					{
+						for( size_t i = 0, j = 0; i < numTriangles; ++i)
+						{
+							asr::Triangle& tri = triangles[i];
+							tri.m_n0 = j++;
+							tri.m_n1 = j++;
+							tri.m_n2 = j++;
+						}
+					}
+					else
+					{
+						for( size_t i = 0; i < vidx.size(); i += 3)
+						{
+							asr::Triangle& tri = triangles[i / 3];
+							tri.m_n0 = vidx[i];
+							tri.m_n1 = vidx[i+1];
+							tri.m_n2 = vidx[i+2];
+						}
+					}
+				}
+				else
+				{
+					msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );
+				}
+			}
+			else
+			{
+				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
+			}
+		}
+	}
 
-    // copy triangles to mesh entity
-    {
-        meshObj->reserve_triangles( numTriangles );
+	// copy triangles to mesh entity
+	{
+		meshObj->reserve_triangles( numTriangles );
 
-        for( size_t i = 0; i < triangles.size(); ++i)
-        {
-            meshObj->push_triangle( triangles[i] );
-        }
-    }
+		for( size_t i = 0; i < triangles.size(); ++i)
+		{
+			meshObj->push_triangle( triangles[i] );
+		}
+	}
 
-    return meshObj.release();
+	return meshObj.release();
 }

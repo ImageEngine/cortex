@@ -45,7 +45,7 @@ using namespace boost::python;
 
 void IECoreAppleseed::bindToAppleseedCameraConverter()
 {
-    IECorePython::RunTimeTypedClass<IECoreAppleseed::ToAppleseedCameraConverter>()
-        .def( init<IECore::CameraPtr>() )
-    ;
+	IECorePython::RunTimeTypedClass<IECoreAppleseed::ToAppleseedCameraConverter>()
+		.def( init<IECore::CameraPtr>() )
+	;
 }

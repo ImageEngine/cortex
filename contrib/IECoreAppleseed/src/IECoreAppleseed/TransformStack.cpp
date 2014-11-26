@@ -39,68 +39,68 @@ namespace asr = renderer;
 
 IECoreAppleseed::TransformStack::TransformStack()
 {
-    clear();
+	clear();
 }
 
 void IECoreAppleseed::TransformStack::push( const asr::TransformSequence &m )
 {
-    m_stack.push(m);
+	m_stack.push(m);
 }
 
 void IECoreAppleseed::TransformStack::push_identity()
 {
-    push(asr::TransformSequence());
+	push(asr::TransformSequence());
 }
 
 void IECoreAppleseed::TransformStack::clear()
 {
-    while ( size() )
-        pop();
+	while ( size() )
+		pop();
 
-    m_stack.push(asr::TransformSequence());
+	m_stack.push(asr::TransformSequence());
 }
 
 void IECoreAppleseed::TransformStack::pop()
 {
-    m_stack.pop();
+	m_stack.pop();
 }
 
 std::size_t IECoreAppleseed::TransformStack::size() const
 {
-    return m_stack.size();
+	return m_stack.size();
 }
 
 const asr::TransformSequence& IECoreAppleseed::TransformStack::top() const
 {
-    return m_stack.top();
+	return m_stack.top();
 }
 
 asr::TransformSequence& IECoreAppleseed::TransformStack::top()
 {
-    return m_stack.top();
+	return m_stack.top();
 }
 
 void IECoreAppleseed::TransformStack::setTransform( const Imath::M44f &m )
 {
-    asf::Transformd xform;
-    makeTransform( m, xform );
-    m_stack.top().set_transform( 0.0, xform );
+	asf::Transformd xform;
+	makeTransform( m, xform );
+	m_stack.top().set_transform( 0.0, xform );
 }
 
 void IECoreAppleseed::TransformStack::concatTransform( const Imath::M44f &m )
 {
-    asf::Transformd xform;
-    makeTransform( m, xform );
-    asr::TransformSequence seq;
-    seq.set_transform( 0.0, xform );
-    m_stack.top() = seq * m_stack.top();
+	asf::Transformd xform;
+	makeTransform( m, xform );
+	asr::TransformSequence seq;
+	seq.set_transform( 0.0, xform );
+	m_stack.top() = seq * m_stack.top();
 }
 
 void IECoreAppleseed::TransformStack::makeTransform( const Imath::M44f &m, asf::Transformd &xform ) const
 {
-    Imath::M44d md( m );
-    xform.set_local_to_parent( asf::Matrix4d( md ) );
-    md.invert();
-    xform.set_parent_to_local( asf::Matrix4d( md ) );
+	Imath::M44d md( m );
+	xform.set_local_to_parent( asf::Matrix4d( md ) );
+	md.invert();
+	xform.set_parent_to_local( asf::Matrix4d( md ) );
 }
 

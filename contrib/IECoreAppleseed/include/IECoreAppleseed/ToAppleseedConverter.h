@@ -52,50 +52,50 @@ IE_CORE_FORWARDDECLARE( ToAppleseedConverter );
 class ToAppleseedConverter : public IECore::FromCoreConverter
 {
 
-    public :
+	public :
 
-        /// This typedef describes the input object type for the converter.
-        /// Derived classes /must/ override this typedef to more accurately
-        /// describe their particular conversion in detail - it is used by
-        /// the ConverterDescription to correctly register the converter
-        /// with the factory mechanism.
-        typedef IECore::Object InputType;
+		/// This typedef describes the input object type for the converter.
+		/// Derived classes /must/ override this typedef to more accurately
+		/// describe their particular conversion in detail - it is used by
+		/// the ConverterDescription to correctly register the converter
+		/// with the factory mechanism.
+		typedef IECore::Object InputType;
 
-        IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedConverter, ToAppleseedConverterTypeId, IECore::FromCoreConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedConverter, ToAppleseedConverterTypeId, IECore::FromCoreConverter );
 
-        /// Performs the conversion, returning an Appleseed entity representing the
-        /// input object.
-        renderer::Entity *convert() const;
+		/// Performs the conversion, returning an Appleseed entity representing the
+		/// input object.
+		renderer::Entity *convert() const;
 
-        /// Creates a suitable ToAppleseedConverter operating on the specified object.
-        static ToAppleseedConverterPtr create( IECore::ObjectPtr object );
+		/// Creates a suitable ToAppleseedConverter operating on the specified object.
+		static ToAppleseedConverterPtr create( IECore::ObjectPtr object );
 
-    protected:
+	protected:
 
-        ToAppleseedConverter( const std::string &description, IECore::TypeId supportedType );
+		ToAppleseedConverter( const std::string &description, IECore::TypeId supportedType );
 
-        virtual ~ToAppleseedConverter();
+		virtual ~ToAppleseedConverter();
 
-        /// Must be implemented by derived classes to perform the conversion. It is guaranteed that the object
-        /// is of the supported type and the parameter values have been validated and placed in operands.
-        virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const = 0;
+		/// Must be implemented by derived classes to perform the conversion. It is guaranteed that the object
+		/// is of the supported type and the parameter values have been validated and placed in operands.
+		virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
-        /// Creating a static instance of one of these (templated on your Converter type)
-        /// within your class will register your converter with the factory mechanism.
-        template<class T>
-        class ConverterDescription
-        {
-            public :
-                ConverterDescription();
-            private :
-                static ToAppleseedConverterPtr creator( IECore::ObjectPtr object );
-        };
+		/// Creating a static instance of one of these (templated on your Converter type)
+		/// within your class will register your converter with the factory mechanism.
+		template<class T>
+		class ConverterDescription
+		{
+			public :
+				ConverterDescription();
+			private :
+				static ToAppleseedConverterPtr creator( IECore::ObjectPtr object );
+		};
 
-    private :
+	private :
 
-        typedef ToAppleseedConverterPtr (*CreatorFn)( IECore::ObjectPtr );
-        typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
-        static CreatorMap &creators();
+		typedef ToAppleseedConverterPtr (*CreatorFn)( IECore::ObjectPtr );
+		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
+		static CreatorMap &creators();
 
 };
 

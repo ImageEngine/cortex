@@ -52,22 +52,22 @@ namespace asr = renderer;
 
 object IECoreAppleseed::entityToPythonObject( asr::Entity *entity )
 {
-    if( !entity )
-        return object();
+	if( !entity )
+		return object();
 
-    return object( asf::auto_release_ptr<asr::Entity>( entity ) );
+	return object( asf::auto_release_ptr<asr::Entity>( entity ) );
 }
 
 static object convertWrapper( ToAppleseedConverter &converter )
 {
-    return entityToPythonObject( converter.convert() );
+	return entityToPythonObject( converter.convert() );
 }
 
 void IECoreAppleseed::bindToAppleseedConverter()
 {
-    IECorePython::RunTimeTypedClass<ToAppleseedConverter>()
-        .def( "convert", &convertWrapper )
-        .def( "create", &ToAppleseedConverter::create )
-        .staticmethod( "create" )
-    ;
+	IECorePython::RunTimeTypedClass<ToAppleseedConverter>()
+		.def( "convert", &convertWrapper )
+		.def( "create", &ToAppleseedConverter::create )
+		.staticmethod( "create" )
+	;
 }

@@ -42,13 +42,13 @@ from RendererTest import RendererTest
 from ToAppleseedConverterTest import ToAppleseedConverterTest
 
 unittest.TestProgram(
-    testRunner = unittest.TextTestRunner(
-        stream = IECore.CompoundStream(
-            [
-                sys.stderr,
-                open( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", "w" )
-            ]
-        ),
-        verbosity = 2
-    )
+	testRunner = unittest.TextTestRunner(
+		stream = IECore.CompoundStream(
+			[
+				sys.stderr,
+				open( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", "w" )
+			]
+		),
+		verbosity = 2
+	)
 )

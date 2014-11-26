@@ -48,11 +48,11 @@ namespace IECoreAppleseed
 
 void bindRenderer()
 {
-    RunTimeTypedClass<Renderer>()
-        .def( init<>() )
-        .def( init<const std::string &>() )
-        .def( "appleseedProject", &Renderer::appleseedProject, return_internal_reference<>() )
-    ;
+	RunTimeTypedClass<Renderer>()
+		.def( init<>() )
+		.def( init<const std::string &>() )
+		.def( "appleseedProject", &Renderer::appleseedProject, return_internal_reference<>() )
+	;
 }
 
 } // namespace IECoreAppleseed

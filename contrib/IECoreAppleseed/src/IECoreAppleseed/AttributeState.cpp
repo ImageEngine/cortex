@@ -47,115 +47,115 @@ namespace asr = renderer;
 
 IECoreAppleseed::AttributeState::AttributeState()
 {
-    m_attributes = new CompoundData;
+	m_attributes = new CompoundData;
 }
 
 IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 {
-    m_attributes = other.m_attributes->copy();
-    m_shadingState = other.m_shadingState;
+	m_attributes = other.m_attributes->copy();
+	m_shadingState = other.m_shadingState;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
 {
-    m_attributes->writable()[name] = value->copy();
+	m_attributes->writable()[name] = value->copy();
 
-    if( 0 == name.compare( 0, 14, "as:visibility:" ) )
-    {
-        // visibility flags are not implemented yet in appleseed.
-        return;
-    }
+	if( 0 == name.compare( 0, 14, "as:visibility:" ) )
+	{
+		// visibility flags are not implemented yet in appleseed.
+		return;
+	}
 
-    if( name == "name" )
-    {
-        if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
-        {
-            m_name = f->readable();
-        }
-        else
-        {
-            msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "name attribute expects a StringData value." );
-        }
-    }
-    else if( name == "as:alpha_map" )
-    {
-        if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
-        {
-             m_shadingState.setAlphaMap( f->readable() );
-        }
-        else
-        {
-            msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:alpha_map attribute expects a StringData value." );
-        }
-    }
-    else if( name == "as:shading_samples" )
-    {
-        if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
-        {
-            m_shadingState.setShadingSamples( f->readable() );
-        }
-        else
-        {
-            msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
-        }
-    }
-    else if( name == "gaffer:deformationBlurSegments" )
-    {
-        if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
-        {
-            // round samples to the next power of 2 as
-            // appleseed only supports power of 2 number of deformation segments.
-            int samples = asf::next_pow2( f->readable() );
-            m_attributes->writable()[name] = new IntData( samples );
-        }
-        else
-        {
-            msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
-        }
-    }
+	if( name == "name" )
+	{
+		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+		{
+			m_name = f->readable();
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "name attribute expects a StringData value." );
+		}
+	}
+	else if( name == "as:alpha_map" )
+	{
+		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+		{
+			 m_shadingState.setAlphaMap( f->readable() );
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:alpha_map attribute expects a StringData value." );
+		}
+	}
+	else if( name == "as:shading_samples" )
+	{
+		if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
+		{
+			m_shadingState.setShadingSamples( f->readable() );
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
+		}
+	}
+	else if( name == "gaffer:deformationBlurSegments" )
+	{
+		if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
+		{
+			// round samples to the next power of 2 as
+			// appleseed only supports power of 2 number of deformation segments.
+			int samples = asf::next_pow2( f->readable() );
+			m_attributes->writable()[name] = new IntData( samples );
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
+		}
+	}
 }
 
 ConstDataPtr IECoreAppleseed::AttributeState::getAttribute( const string &name ) const
 {
-    return m_attributes->member<Data>( name );
+	return m_attributes->member<Data>( name );
 }
 
 const string &IECoreAppleseed::AttributeState::name() const
 {
-    return m_name;
+	return m_name;
 }
 
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
 {
-    m_shadingState.addOSLShader( shader );
+	m_shadingState.addOSLShader( shader );
 }
 
 void IECoreAppleseed::AttributeState::setOSLSurface( ConstShaderPtr surface )
 {
-    m_shadingState.setOSLSurface( surface );
+	m_shadingState.setOSLSurface( surface );
 }
 
 bool IECoreAppleseed::AttributeState::shadingStateValid() const
 {
-    return m_shadingState.valid();
+	return m_shadingState.valid();
 }
 
 const MurmurHash&IECoreAppleseed::AttributeState::shaderGroupHash() const
 {
-    return m_shadingState.shaderGroupHash();
+	return m_shadingState.shaderGroupHash();
 }
 
 const MurmurHash&IECoreAppleseed::AttributeState::materialHash() const
 {
-    return m_shadingState.materialHash();
+	return m_shadingState.materialHash();
 }
 
 string IECoreAppleseed::AttributeState::createShaderGroup( asr::Assembly &assembly )
 {
-    return m_shadingState.createShaderGroup( assembly );
+	return m_shadingState.createShaderGroup( assembly );
 }
 
 string IECoreAppleseed::AttributeState::createMaterial( asr::Assembly &assembly, const string &shaderGroupName, const asf::SearchPaths &searchPaths )
 {
-    return m_shadingState.createMaterial( assembly, shaderGroupName, searchPaths );
+	return m_shadingState.createMaterial( assembly, shaderGroupName, searchPaths );
 }

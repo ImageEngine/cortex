@@ -6,17 +6,17 @@
 //  modification, are permitted provided that the following conditions are
 //  met:
 //
-//     * Redistributions of source code must retain the above copyright
-//       notice, this list of conditions and the following disclaimer.
+//	 * Redistributions of source code must retain the above copyright
+//	   notice, this list of conditions and the following disclaimer.
 //
-//     * Redistributions in binary form must reproduce the above copyright
-//       notice, this list of conditions and the following disclaimer in the
-//       documentation and/or other materials provided with the distribution.
+//	 * Redistributions in binary form must reproduce the above copyright
+//	   notice, this list of conditions and the following disclaimer in the
+//	   documentation and/or other materials provided with the distribution.
 //
-//     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
-//       promote products derived from this software without specific prior
-//       written permission.
+//	 * Neither the name of Image Engine Design nor the names of any
+//	   other contributors to this software may be used to endorse or
+//	   promote products derived from this software without specific prior
+//	   written permission.
 //
 //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
 //  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
@@ -48,37 +48,37 @@ namespace IECoreAppleseed
 
 class ShadingState
 {
-    public :
+	public :
 
-        ShadingState();
+		ShadingState();
 
-        void setShadingSamples( int samples );
-        void setAlphaMap( const std::string &alphaMap );
+		void setShadingSamples( int samples );
+		void setAlphaMap( const std::string &alphaMap );
 
-        void addOSLShader( IECore::ConstShaderPtr shader );
-        void setOSLSurface( IECore::ConstShaderPtr surface );
+		void addOSLShader( IECore::ConstShaderPtr shader );
+		void setOSLSurface( IECore::ConstShaderPtr surface );
 
-        const IECore::MurmurHash &shaderGroupHash() const;
-        std::string createShaderGroup( renderer::Assembly &assembly );
+		const IECore::MurmurHash &shaderGroupHash() const;
+		std::string createShaderGroup( renderer::Assembly &assembly );
 
-        const IECore::MurmurHash &materialHash() const;
-        std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
+		const IECore::MurmurHash &materialHash() const;
+		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
 
-        bool valid() const;
+		bool valid() const;
 
-    private :
+	private :
 
-        void updateHashes();
+		void updateHashes();
 
-        renderer::ParamArray convertParameters( const IECore::CompoundDataMap &parameters );
-        void addConnections( const std::string &shaderHandle, const IECore::CompoundDataMap &parameters, renderer::ShaderGroup *shaderGroup );
+		renderer::ParamArray convertParameters( const IECore::CompoundDataMap &parameters );
+		void addConnections( const std::string &shaderHandle, const IECore::CompoundDataMap &parameters, renderer::ShaderGroup *shaderGroup );
 
-        std::vector<IECore::ConstShaderPtr> m_shaders;
-        IECore::ConstShaderPtr m_surfaceShader;
-        int m_shadingSamples;
-        std::string m_alphaMap;
-        IECore::MurmurHash m_shaderGroupHash;
-        IECore::MurmurHash m_materialHash;
+		std::vector<IECore::ConstShaderPtr> m_shaders;
+		IECore::ConstShaderPtr m_surfaceShader;
+		int m_shadingSamples;
+		std::string m_alphaMap;
+		IECore::MurmurHash m_shaderGroupHash;
+		IECore::MurmurHash m_materialHash;
 
 };
 

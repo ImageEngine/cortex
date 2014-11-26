@@ -45,7 +45,7 @@ using namespace boost::python;
 
 void IECoreAppleseed::bindToAppleseedMeshConverter()
 {
-    IECorePython::RunTimeTypedClass<IECoreAppleseed::ToAppleseedMeshConverter>()
-        .def( init<IECore::MeshPrimitivePtr>() )
-    ;
+	IECorePython::RunTimeTypedClass<IECoreAppleseed::ToAppleseedMeshConverter>()
+		.def( init<IECore::MeshPrimitivePtr>() )
+	;
 }

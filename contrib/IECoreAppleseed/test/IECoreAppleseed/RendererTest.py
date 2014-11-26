@@ -41,45 +41,45 @@ import IECoreAppleseed
 
 class RendererTest( unittest.TestCase ):
 
-    __geometryDir = "contrib/IECoreAppleseed/test/IECoreAppleseed/_geometry"
-    __appleseedFileName = "contrib/IECoreAppleseed/test/IECoreAppleseed/output.appleseed"
+	__geometryDir = "contrib/IECoreAppleseed/test/IECoreAppleseed/_geometry"
+	__appleseedFileName = "contrib/IECoreAppleseed/test/IECoreAppleseed/output.appleseed"
 
-    def testTypeId( self ) :
+	def testTypeId( self ) :
 
-        self.assertEqual( IECoreAppleseed.Renderer().typeId(), IECoreAppleseed.Renderer.staticTypeId() )
-        self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
+		self.assertEqual( IECoreAppleseed.Renderer().typeId(), IECoreAppleseed.Renderer.staticTypeId() )
+		self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
 
-    def testTypeName( self ) :
+	def testTypeName( self ) :
 
-        r = IECoreAppleseed.Renderer()
-        self.assertEqual( r.typeName(), "IECoreAppleseed::Renderer" )
+		r = IECoreAppleseed.Renderer()
+		self.assertEqual( r.typeName(), "IECoreAppleseed::Renderer" )
 
-    def testAppleseedOutput( self ) :
-        r = IECoreAppleseed.Renderer( self.__appleseedFileName )
-        self.failIf( os.path.exists( self.__appleseedFileName ) )
+	def testAppleseedOutput( self ) :
+		r = IECoreAppleseed.Renderer( self.__appleseedFileName )
+		self.failIf( os.path.exists( self.__appleseedFileName ) )
 
-        with IECore.WorldBlock( r ) :
+		with IECore.WorldBlock( r ) :
 
-            self.__createDefaultShader( r )
-            m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-            m.render( r )
+			self.__createDefaultShader( r )
+			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m.render( r )
 
-        self.failUnless( os.path.exists( self.__appleseedFileName ) )
+		self.failUnless( os.path.exists( self.__appleseedFileName ) )
 
-    def __createDefaultShader( self, r ) :
-        s = IECore.Shader( "data/shaders/matte.oso", "surface" )
-        s.render( r )
+	def __createDefaultShader( self, r ) :
+		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
+		s.render( r )
 
-    def tearDown( self ) :
+	def tearDown( self ) :
 
-        for f in [
-            self.__appleseedFileName,
-        ] :
-            if os.path.exists( f ) :
-                os.remove( f )
+		for f in [
+			self.__appleseedFileName,
+		] :
+			if os.path.exists( f ) :
+				os.remove( f )
 
-        shutil.rmtree( self.__geometryDir, ignore_errors = True )
+		shutil.rmtree( self.__geometryDir, ignore_errors = True )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
 

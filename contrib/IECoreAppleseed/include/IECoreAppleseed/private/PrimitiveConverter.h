@@ -59,29 +59,29 @@ namespace IECoreAppleseed
 class PrimitiveConverter : boost::noncopyable
 {
 
-    public :
+	public :
 
-        typedef enum
-        {
-            BinaryMeshFormat,
-            ObjFormat
-        } MeshFileFormat;
+		typedef enum
+		{
+			BinaryMeshFormat,
+			ObjFormat
+		} MeshFileFormat;
 
-        explicit PrimitiveConverter( const boost::filesystem::path &projectPath );
+		explicit PrimitiveConverter( const boost::filesystem::path &projectPath );
 
-        void setMeshFileFormat( MeshFileFormat format );
+		void setMeshFileFormat( MeshFileFormat format );
 
-        const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
+		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
 
-    private :
+	private :
 
-        foundation::auto_release_ptr<renderer::Object> convertAndWriteMeshPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &meshHash );
+		foundation::auto_release_ptr<renderer::Object> convertAndWriteMeshPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &meshHash );
 
-        void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj, const std::string &objSourceName, const std::string &materialName );
+		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj, const std::string &objSourceName, const std::string &materialName );
 
-        boost::filesystem::path m_projectPath;
-        std::string m_meshGeomExtension;
-        bool m_interactive;
+		boost::filesystem::path m_projectPath;
+		std::string m_meshGeomExtension;
+		bool m_interactive;
 
 };
 

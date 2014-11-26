@@ -46,7 +46,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( ToAppleseedShapeConverter );
 
 ToAppleseedShapeConverter::ToAppleseedShapeConverter( const std::string &description, IECore::TypeId supportedType )
-    :	ToAppleseedConverter( description, supportedType )
+	:	ToAppleseedConverter( description, supportedType )
 {
 }
 

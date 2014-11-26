@@ -53,9 +53,9 @@ IE_CORE_DEFINERUNTIMETYPED( ToAppleseedCameraConverter );
 ToAppleseedCameraConverter::ConverterDescription<ToAppleseedCameraConverter> ToAppleseedCameraConverter::g_description;
 
 ToAppleseedCameraConverter::ToAppleseedCameraConverter( IECore::CameraPtr toConvert )
-    :	ToAppleseedConverter( "Converts IECore::Cameras to appleseed camera nodes", IECore::Camera::staticTypeId() )
+	:	ToAppleseedConverter( "Converts IECore::Cameras to appleseed camera nodes", IECore::Camera::staticTypeId() )
 {
-    srcParameter()->setValue( toConvert );
+	srcParameter()->setValue( toConvert );
 }
 
 ToAppleseedCameraConverter::~ToAppleseedCameraConverter()
@@ -64,53 +64,53 @@ ToAppleseedCameraConverter::~ToAppleseedCameraConverter()
 
 asr::Entity *ToAppleseedCameraConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
 {
-    CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
-    camera->addStandardParameters();
+	CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
+	camera->addStandardParameters();
 
-    asr::ParamArray cameraParams;
+	asr::ParamArray cameraParams;
 
-    // set shutter
-    const Imath::V2f &shutter = camera->parametersData()->member<V2fData>( "shutter", true )->readable();
-    cameraParams.insert( "shutter_open_time", shutter.x );
-    cameraParams.insert( "shutter_close_time", shutter.y );
+	// set shutter
+	const Imath::V2f &shutter = camera->parametersData()->member<V2fData>( "shutter", true )->readable();
+	cameraParams.insert( "shutter_open_time", shutter.x );
+	cameraParams.insert( "shutter_close_time", shutter.y );
 
-    const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
-    {
-        foundation::Vector2d film_dims( resolution.x, resolution.y );
-        film_dims /= 10000.0;
-        std::stringstream ss;
-        ss << film_dims.x << " " << film_dims.y;
-        cameraParams.insert( "film_dimensions", ss.str().c_str() );
-    }
+	const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
+	{
+		foundation::Vector2d film_dims( resolution.x, resolution.y );
+		film_dims /= 10000.0;
+		std::stringstream ss;
+		ss << film_dims.x << " " << film_dims.y;
+		cameraParams.insert( "film_dimensions", ss.str().c_str() );
+	}
 
-    asr::CameraFactoryRegistrar cameraFactories;
-    const asr::ICameraFactory *cameraFactory = 0;
+	asr::CameraFactoryRegistrar cameraFactories;
+	const asr::ICameraFactory *cameraFactory = 0;
 
-    const std::string &projection = camera->parametersData()->member<StringData>( "projection", true )->readable();
+	const std::string &projection = camera->parametersData()->member<StringData>( "projection", true )->readable();
 
-    if( projection=="perspective" )
-    {
-        double horizontal_fov = camera->parametersData()->member<FloatData>( "projection:fov", true )->readable();
+	if( projection=="perspective" )
+	{
+		double horizontal_fov = camera->parametersData()->member<FloatData>( "projection:fov", true )->readable();
 
-        // adjust fov.
-        if( resolution.x > resolution.y )
-        {
-            horizontal_fov *= static_cast<float>( resolution.x ) / resolution.y;
-        }
+		// adjust fov.
+		if( resolution.x > resolution.y )
+		{
+			horizontal_fov *= static_cast<float>( resolution.x ) / resolution.y;
+		}
 
-        cameraParams.insert( "horizontal_fov", horizontal_fov );
-        cameraFactory = cameraFactories.lookup( "pinhole_camera" );
-    }
-    else if( projection=="spherical" )
-    {
-        cameraFactory = cameraFactories.lookup( "spherical_camera" );
-    }
-    else
-    {
-         IECore::msg( Msg::Warning, "ToAppleseedCameraConverter", "unsupported projection type. Creating a default camera" );
-         cameraFactory = cameraFactories.lookup( "pinhole_camera" );
-    }
+		cameraParams.insert( "horizontal_fov", horizontal_fov );
+		cameraFactory = cameraFactories.lookup( "pinhole_camera" );
+	}
+	else if( projection=="spherical" )
+	{
+		cameraFactory = cameraFactories.lookup( "spherical_camera" );
+	}
+	else
+	{
+		 IECore::msg( Msg::Warning, "ToAppleseedCameraConverter", "unsupported projection type. Creating a default camera" );
+		 cameraFactory = cameraFactories.lookup( "pinhole_camera" );
+	}
 
-    asf::auto_release_ptr<asr::Camera> result( cameraFactory->create( "camera", cameraParams ) );
-    return result.release();
+	asf::auto_release_ptr<asr::Camera> result( cameraFactory->create( "camera", cameraParams ) );
+	return result.release();
 }

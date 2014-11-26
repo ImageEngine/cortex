@@ -39,15 +39,15 @@ import IECoreAppleseed
 
 class ToAppleseedConverterTest( unittest.TestCase ) :
 
-    def testFactory( self ) :
+	def testFactory( self ) :
 
-        m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-        c = IECoreAppleseed.ToAppleseedConverter.create( m )
-        self.failUnless( isinstance( c, IECoreAppleseed.ToAppleseedMeshConverter ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		c = IECoreAppleseed.ToAppleseedConverter.create( m )
+		self.failUnless( isinstance( c, IECoreAppleseed.ToAppleseedMeshConverter ) )
 
-        cam = IECore.Camera()
-        c = IECoreAppleseed.ToAppleseedConverter.create( cam )
-        self.failUnless( isinstance( c, IECoreAppleseed.ToAppleseedCameraConverter ) )
+		cam = IECore.Camera()
+		c = IECoreAppleseed.ToAppleseedConverter.create( cam )
+		self.failUnless( isinstance( c, IECoreAppleseed.ToAppleseedCameraConverter ) )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

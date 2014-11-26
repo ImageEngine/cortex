@@ -51,15 +51,15 @@ namespace IECoreAppleseed
 class ToAppleseedShapeConverter : public ToAppleseedConverter
 {
 
-    public :
+	public :
 
-        IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedShapeConverter, ToAppleseedShapeConverterTypeId, ToAppleseedConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedShapeConverter, ToAppleseedShapeConverterTypeId, ToAppleseedConverter );
 
-        virtual ~ToAppleseedShapeConverter();
+		virtual ~ToAppleseedShapeConverter();
 
-    protected :
+	protected :
 
-        ToAppleseedShapeConverter( const std::string &description, IECore::TypeId supportedType );
+		ToAppleseedShapeConverter( const std::string &description, IECore::TypeId supportedType );
 
 };
 

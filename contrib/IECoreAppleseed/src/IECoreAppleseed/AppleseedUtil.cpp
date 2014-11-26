@@ -49,132 +49,132 @@ namespace asr = renderer;
 
 string IECoreAppleseed::dataToString( ConstDataPtr value )
 {
-    stringstream ss;
+	stringstream ss;
 
-    switch( value->typeId() )
-    {
-        case IntDataTypeId :
-            {
-                int x = static_cast<const IntData*>( value.get() )->readable();
-                ss << x;
-            }
-            break;
+	switch( value->typeId() )
+	{
+		case IntDataTypeId :
+			{
+				int x = static_cast<const IntData*>( value.get() )->readable();
+				ss << x;
+			}
+			break;
 
-        case FloatDataTypeId :
-            {
-                float x = static_cast<const FloatData*>( value.get() )->readable();
-                ss << x;
-            }
-            break;
+		case FloatDataTypeId :
+			{
+				float x = static_cast<const FloatData*>( value.get() )->readable();
+				ss << x;
+			}
+			break;
 
-        case StringDataTypeId :
-            {
-                const string &x = static_cast<const StringData*>( value.get() )->readable();
-                ss << x;
-            }
-            break;
+		case StringDataTypeId :
+			{
+				const string &x = static_cast<const StringData*>( value.get() )->readable();
+				ss << x;
+			}
+			break;
 
-        case V2iDataTypeId :
-            {
-                const Imath::V2i &x = static_cast<const V2iData*>( value.get() )->readable();
-                ss << x.x << ", " << x.y;
-            }
-            break;
+		case V2iDataTypeId :
+			{
+				const Imath::V2i &x = static_cast<const V2iData*>( value.get() )->readable();
+				ss << x.x << ", " << x.y;
+			}
+			break;
 
-        case Color3fDataTypeId :
-            {
-                const Imath::Color3f &x = static_cast<const Color3fData*>( value.get() )->readable();
-                ss << x.x << ", " << x.y << ", " << x.z;
-            }
-            break;
-        case BoolDataTypeId :
-            {
-                bool x = static_cast<const BoolData*>( value.get() )->readable();
-                ss << x;
-            }
-            break;
+		case Color3fDataTypeId :
+			{
+				const Imath::Color3f &x = static_cast<const Color3fData*>( value.get() )->readable();
+				ss << x.x << ", " << x.y << ", " << x.z;
+			}
+			break;
+		case BoolDataTypeId :
+			{
+				bool x = static_cast<const BoolData*>( value.get() )->readable();
+				ss << x;
+			}
+			break;
 
-        default:
-            break;
-    }
+		default:
+			break;
+	}
 
-    return ss.str();
+	return ss.str();
 }
 
 void IECoreAppleseed::setParam( const string &name, const Data *value, asr::ParamArray &params )
 {
-    switch( value->typeId() )
-    {
-        case IntDataTypeId :
-            {
-                int x = static_cast<const IntData*>( value)->readable();
-                params.insert( name, x );
-            }
-            break;
+	switch( value->typeId() )
+	{
+		case IntDataTypeId :
+			{
+				int x = static_cast<const IntData*>( value)->readable();
+				params.insert( name, x );
+			}
+			break;
 
-        case FloatDataTypeId :
-            {
-                float x = static_cast<const FloatData*>( value)->readable();
-                params.insert( name, x );
-            }
-            break;
+		case FloatDataTypeId :
+			{
+				float x = static_cast<const FloatData*>( value)->readable();
+				params.insert( name, x );
+			}
+			break;
 
-        case StringDataTypeId :
-            {
-                const string &x = static_cast<const StringData*>( value)->readable();
-                params.insert( name, x.c_str() );
-            }
-            break;
+		case StringDataTypeId :
+			{
+				const string &x = static_cast<const StringData*>( value)->readable();
+				params.insert( name, x.c_str() );
+			}
+			break;
 
-        case BoolDataTypeId :
-            {
-                bool x = static_cast<const BoolData*>( value)->readable();
-                params.insert( name, x);
-            }
-            break;
+		case BoolDataTypeId :
+			{
+				bool x = static_cast<const BoolData*>( value)->readable();
+				params.insert( name, x);
+			}
+			break;
 
-        default:
-            // some kind of warning would be nice here...
-            break;
-    }
+		default:
+			// some kind of warning would be nice here...
+			break;
+	}
 }
 
 asr::ParamArray IECoreAppleseed::convertParams( const CompoundDataMap &parameters )
 {
-    asr::ParamArray result;
+	asr::ParamArray result;
 
-    for( CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); ++it )
-        setParam( it->first.value(), it->second.get(), result );
+	for( CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); ++it )
+		setParam( it->first.value(), it->second.get(), result );
 
-    return result;
+	return result;
 }
 
 string IECoreAppleseed::createColorEntity( asr::ColorContainer &colorContainer, const Imath::C3f &color, const string &name )
 {
-    // for monochrome colors, we don't need to create a color entity at all.
-    if( color.x == color.y && color.x == color.z )
-    {
-        return boost::lexical_cast<string>( color.x );
-    }
+	// for monochrome colors, we don't need to create a color entity at all.
+	if( color.x == color.y && color.x == color.z )
+	{
+		return boost::lexical_cast<string>( color.x );
+	}
 
-    asr::ColorValueArray values( 3, &color.x );
-    asr::ParamArray params;
-    params.insert( "color_space", "linear_rgb" );
+	asr::ColorValueArray values( 3, &color.x );
+	asr::ParamArray params;
+	params.insert( "color_space", "linear_rgb" );
 
-    asf::auto_release_ptr<asr::ColorEntity> c = asr::ColorEntityFactory::create( name.c_str(), params, values );
-    return insertEntityWithUniqueName( colorContainer, c, name.c_str() );
+	asf::auto_release_ptr<asr::ColorEntity> c = asr::ColorEntityFactory::create( name.c_str(), params, values );
+	return insertEntityWithUniqueName( colorContainer, c, name.c_str() );
 }
 
 string IECoreAppleseed::createTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
 {
-    asr::ParamArray params;
-    params.insert( "filename", fileName.c_str() );
-    params.insert( "color_space", "linear_rgb" );
+	asr::ParamArray params;
+	params.insert( "filename", fileName.c_str() );
+	params.insert( "color_space", "linear_rgb" );
 
-    asf::auto_release_ptr<asr::Texture> texture( asr::DiskTexture2dFactory().create( textureName.c_str(), params, searchPaths ) );
-    string txName = insertEntityWithUniqueName( textureContainer, texture, textureName );
+	asf::auto_release_ptr<asr::Texture> texture( asr::DiskTexture2dFactory().create( textureName.c_str(), params, searchPaths ) );
+	string txName = insertEntityWithUniqueName( textureContainer, texture, textureName );
 
-    string textureInstanceName = txName + "_instance";
-    asf::auto_release_ptr<asr::TextureInstance> textureInstance( asr::TextureInstanceFactory().create( textureInstanceName.c_str(), asr::ParamArray(), txName.c_str() ) );
-    return insertEntityWithUniqueName( textureInstanceContainer, textureInstance, textureInstanceName.c_str() );
+	string textureInstanceName = txName + "_instance";
+	asf::auto_release_ptr<asr::TextureInstance> textureInstance( asr::TextureInstanceFactory().create( textureInstanceName.c_str(), asr::ParamArray(), txName.c_str() ) );
+	return insertEntityWithUniqueName( textureInstanceContainer, textureInstance, textureInstanceName.c_str() );
 }

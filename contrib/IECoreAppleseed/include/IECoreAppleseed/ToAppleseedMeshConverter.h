@@ -48,22 +48,22 @@ namespace IECoreAppleseed
 class ToAppleseedMeshConverter : public ToAppleseedShapeConverter
 {
 
-    public :
+	public :
 
-        typedef IECore::MeshPrimitive InputType;
+		typedef IECore::MeshPrimitive InputType;
 
-        IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedMeshConverter, ToAppleseedMeshConverterTypeId, ToAppleseedShapeConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedMeshConverter, ToAppleseedMeshConverterTypeId, ToAppleseedShapeConverter );
 
-        ToAppleseedMeshConverter( IECore::MeshPrimitivePtr toConvert );
-        virtual ~ToAppleseedMeshConverter();
+		ToAppleseedMeshConverter( IECore::MeshPrimitivePtr toConvert );
+		virtual ~ToAppleseedMeshConverter();
 
-    protected :
+	protected :
 
-        virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
-    private :
+	private :
 
-        static ConverterDescription<ToAppleseedMeshConverter> g_description;
+		static ConverterDescription<ToAppleseedMeshConverter> g_description;
 
 };
 

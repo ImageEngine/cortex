@@ -47,32 +47,32 @@ namespace IECoreAppleseed
 class AttributeState
 {
 
-    public :
+	public :
 
-        AttributeState();
-        AttributeState( const AttributeState &other );
+		AttributeState();
+		AttributeState( const AttributeState &other );
 
-        IECore::ConstDataPtr getAttribute( const std::string &name ) const;
-        void setAttribute( const std::string &name, IECore::ConstDataPtr value );
+		IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 
-        const std::string &name() const;
+		const std::string &name() const;
 
-        void addOSLShader( IECore::ConstShaderPtr shader );
-        void setOSLSurface( IECore::ConstShaderPtr surface );
+		void addOSLShader( IECore::ConstShaderPtr shader );
+		void setOSLSurface( IECore::ConstShaderPtr surface );
 
-        bool shadingStateValid() const;
+		bool shadingStateValid() const;
 
-        const IECore::MurmurHash &shaderGroupHash() const;
-        const IECore::MurmurHash &materialHash() const;
+		const IECore::MurmurHash &shaderGroupHash() const;
+		const IECore::MurmurHash &materialHash() const;
 
-        std::string createShaderGroup( renderer::Assembly &assembly );
-        std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
+		std::string createShaderGroup( renderer::Assembly &assembly );
+		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
 
-    private :
+	private :
 
-        IECore::CompoundDataPtr m_attributes;
-        ShadingState m_shadingState;
-        std::string m_name;
+		IECore::CompoundDataPtr m_attributes;
+		ShadingState m_shadingState;
+		std::string m_name;
 
 };
 

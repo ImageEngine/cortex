@@ -48,22 +48,22 @@ namespace IECoreAppleseed
 class ToAppleseedCameraConverter : public ToAppleseedConverter
 {
 
-    public :
+	public :
 
-        typedef IECore::Camera InputType;
+		typedef IECore::Camera InputType;
 
-        IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedCameraConverter, ToAppleseedCameraConverterTypeId, ToAppleseedConverter );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedCameraConverter, ToAppleseedCameraConverterTypeId, ToAppleseedConverter );
 
-        ToAppleseedCameraConverter( IECore::CameraPtr toConvert );
-        virtual ~ToAppleseedCameraConverter();
+		ToAppleseedCameraConverter( IECore::CameraPtr toConvert );
+		virtual ~ToAppleseedCameraConverter();
 
-    protected :
+	protected :
 
-        virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
-    private :
+	private :
 
-        static ConverterDescription<ToAppleseedCameraConverter> g_description;
+		static ConverterDescription<ToAppleseedCameraConverter> g_description;
 
 };
 
