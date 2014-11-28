@@ -1,3 +1,9 @@
+# 9.0.0-a11
+
+#### IECoreGL
+
+- Added support for setting array uniforms in shader parameters
+
 # 9.0.0-a10
 
 #### IECore
