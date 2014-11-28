@@ -1,5 +1,9 @@
 # 9.0.0-a11
 
+#### IECore
+
+- Optimised Object::memoryUsage() 
+
 #### IECoreGL
 
 - Added support for setting array uniforms in shader parameters
