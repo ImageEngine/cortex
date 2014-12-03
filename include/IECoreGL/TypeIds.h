@@ -122,6 +122,7 @@ enum TypeId
 	UIntTextureTypeId = 105079,
 	PrimitiveSelectableTypeId = 105080,
 	ToGLStateConverterTypeId = 105081,
+	ToGLSphereConverterTypeId = 105082,
 	LastCoreGLTypeId = 105999,
 };
 
