@@ -55,7 +55,8 @@ object IECoreAppleseed::entityToPythonObject( asr::Entity *entity )
 	if( !entity )
 		return object();
 
-	return object( asf::auto_release_ptr<asr::Entity>( entity ) );
+	asf::auto_release_ptr<asr::Entity> pointer( entity );
+	return object( pointer );
 }
 
 static object convertWrapper( ToAppleseedConverter &converter )
