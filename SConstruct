@@ -3256,6 +3256,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( appleseedEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				"appleseed",
 			]
 		)
 		appleseedPythonModule = appleseedPythonModuleEnv.SharedLibrary( "contrib/IECoreAppleseed/python/IECoreAppleseed/_IECoreAppleseed", appleseedPythonSources )
