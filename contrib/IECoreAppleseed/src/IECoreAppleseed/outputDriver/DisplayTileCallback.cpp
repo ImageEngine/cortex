@@ -32,22 +32,22 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <vector>
+
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include "foundation/image/image.h"
+#include "foundation/utility/autoreleaseptr.h"
+
+#include "renderer/api/frame.h"
 #include "renderer/api/rendering.h"
+#include "renderer/api/utility.h"
 
 #include "IECore/DisplayDriver.h"
 #include "IECore/BoxAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
-
-#include "foundation/image/image.h"
-#include "foundation/utility/autoreleaseptr.h"
-#include "renderer/api/frame.h"
-#include "renderer/api/utility.h"
-
-#include <boost/thread/locks.hpp>
-#include <boost/thread/mutex.hpp>
-
-#include <vector>
 
 using namespace IECore;
 using namespace Imath;
@@ -93,7 +93,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			// the tile callback factory deletes this instance.
 		}
 
-		/// This method is called after a tile is rendered (final rendering).
+		// This method is called after a tile is rendered (final rendering).
 		virtual void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
@@ -106,7 +106,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			write_tile( frame, tileX, tileY );
 		}
 
-		/// This method is called after a whole frame is rendered (progressive rendering).
+		// This method is called after a whole frame is rendered (progressive rendering).
 		virtual void post_render( const asr::Frame *frame )
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
@@ -164,6 +164,10 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			p["remoteDisplayType"] = new StringData( m_params.get( "remoteDisplayType" ) );
 			p["type"] = new StringData( m_params.get( "type" ) );
 
+			// reserve space for one tile
+			const asf::CanvasProperties &frameProps = frame->image().properties();
+			m_buffer.reserve( frameProps.m_tile_width * frameProps.m_tile_height * frameProps.m_channel_count );
+
 			try
 			{
 				m_driver = IECore::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_dataWindow, channelNames, parameters );
@@ -188,30 +192,34 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			int x1 = x0 + frameProps.m_tile_width - 1;
 			int y1 = y0 + frameProps.m_tile_height - 1;
 
+			// intersect the tile area with the crop / data window.
 			Box2i bucketBox( V2i( std::max( x0, m_dataWindow.min.x ), std::max( y0, m_dataWindow.min.y ) ),
 							 V2i( std::min( x1, m_dataWindow.max.x ), std::min( y1, m_dataWindow.max.y ) ) );
 
-			try
+			m_buffer.clear();
+
+			for( int j = bucketBox.min.y; j <= bucketBox.max.y; ++j )
 			{
-				m_buffer.clear();
-				m_buffer.reserve( bucketBox.size().x * bucketBox.size().y * frameProps.m_channel_count );
+				int y = j - y0;
 
-				for( int j = bucketBox.min.y; j <= bucketBox.max.y; ++j )
+				for( int i = bucketBox.min.x; i <= bucketBox.max.x; ++i )
 				{
-					int y = j - y0;
+					int x = i - x0;
 
-					for( int i = bucketBox.min.x; i <= bucketBox.max.x; ++i )
+					for( size_t k = 0; k < frameProps.m_channel_count; ++k )
 					{
-						int x = i - x0;
-
-						for( size_t k = 0; k < frameProps.m_channel_count; ++k )
-						{
-							m_buffer.push_back( tile.get_component<float>( x, y, k ) );
-						}
+						m_buffer.push_back( tile.get_component<float>( x, y, k ) );
 					}
 				}
+			}
 
-				m_driver->imageData( bucketBox, &m_buffer.front(), m_buffer.size() );
+			try
+			{
+				// don't send anything to the Driver if there are no pixels.
+				if( !m_buffer.empty() )
+				{
+					m_driver->imageData( bucketBox, &m_buffer.front(), m_buffer.size() );
+				}
 			}
 			catch( const std::exception &e )
 			{
@@ -267,7 +275,7 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 extern "C"
 {
 
-/// Display plugin entry point.
+// Display plugin entry point.
 asr::ITileCallbackFactory* create_tile_callback_factory( const asr::ParamArray *params )
 {
 	return new IECoreAppleseed::DisplayTileCallbackFactory( *params );

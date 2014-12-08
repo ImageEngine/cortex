@@ -233,13 +233,20 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	appleseedCamera->transform_sequence() = m_transformStack.top();
 	m_project->get_scene()->set_camera( appleseedCamera );
 
-	// Create a frame.
-	{
-		m_project->get_frame()->get_parameters().insert( "camera", "camera" );
-		const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
-		asf::Vector2i res( resolution->readable().x, resolution->readable().y );
-		m_project->get_frame()->get_parameters().insert( "resolution", res );
-	}
+	// resolution
+	m_project->get_frame()->get_parameters().insert( "camera", "camera" );
+	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
+	asf::Vector2i res( resolution->readable().x, resolution->readable().y );
+	m_project->get_frame()->get_parameters().insert( "resolution", res );
+
+	// crop window
+	const Box2fData *cropWindow = cortexCamera->parametersData()->member<Box2fData>( "cropWindow" );
+	asf::AABB2u crop;
+	crop.min[0] = cropWindow->readable().min.x * ( res[0] - 1 );
+	crop.min[1] = cropWindow->readable().min.y * ( res[1] - 1 );
+	crop.max[0] = cropWindow->readable().max.x * ( res[0] - 1 );
+	crop.max[1] = cropWindow->readable().max.y * ( res[1] - 1 );
+	m_project->get_frame()->set_crop_window( crop );
 }
 
 void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const IECore::CompoundDataMap &parameters )
