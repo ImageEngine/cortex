@@ -3193,7 +3193,10 @@ appleseedPythonModuleEnv.Append(
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
 		"-DAPPLESEED_WITH_OSL",
 		"-DAPPLESEED_USE_SSE",
-	]
+	],
+	LIBPATH = [
+		"$APPLESEED_LIB_PATH",
+	],
 )
 
 
