@@ -450,7 +450,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	sceneInterface->path( objPath );
 	IECore::SceneInterface::pathToString( objPath, objPathStr );
 	
-	objPathStr += hits[depthMinIndex].name;
+	objPathStr += IECoreGL::NameStateComponent::nameFromGLName( hits[depthMinIndex].name );
 	IECore::SceneInterface::stringToPath( objPathStr, objPath );
 
 	// Validate the hit selection.
@@ -637,7 +637,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		int index = sceneShape->selectionIndex( hits[i].name );
+		int index = sceneShape->selectionIndex( IECoreGL::NameStateComponent::nameFromGLName( hits[i].name ) );
 		componentIndices.append( index );
 	}
 	
