@@ -775,7 +775,11 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			if( type == CoordinateSystemTypeId )
 			{
 				IECore::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
-				Imath::M44f m = coordSys->getTransform()->transform();
+				Imath::M44f m;
+				if( coordSys->getTransform() )
+				{
+					m = coordSys->getTransform()->transform();
+				}
 				Imath::V3f s,h,r,t;
 				Imath::extractSHRT(m, s, h, r, t);
 
