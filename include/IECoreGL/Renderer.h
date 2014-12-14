@@ -38,6 +38,7 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 
 namespace IECoreGL
@@ -60,7 +61,7 @@ IE_CORE_FORWARDDECLARE( ShaderLoader );
 /// images and deferred mode rendering allows scenes to be captured for later interactive
 /// display.
 /// \ingroup renderingGroup
-class Renderer : public IECore::Renderer
+class IECOREGL_API Renderer : public IECore::Renderer
 {
 	public :
 

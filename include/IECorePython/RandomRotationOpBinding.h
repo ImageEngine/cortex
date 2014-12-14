@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_RANDOMROTATIONOPBINDING_H
 #define IECOREPYTHON_RANDOMROTATIONOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindRandomRotationOp();
+IECOREPYTHON_API void bindRandomRotationOp();
 }
 
 #endif // IECOREPYTHON_RANDOMROTATIONOPBINDING_H

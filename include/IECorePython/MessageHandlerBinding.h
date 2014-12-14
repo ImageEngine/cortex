@@ -37,11 +37,11 @@
 
 #include <boost/python.hpp>
 #include "IECore/MessageHandler.h"
+#include "IECorePython/Export.h"
 
 namespace IECorePython
 {
-void bindMessageHandler();
-
+IECOREPYTHON_API void bindMessageHandler();
 }
 
 #endif // IECOREPYTHON_MESSAGEHANDLERBINDING_H

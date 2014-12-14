@@ -38,6 +38,7 @@
 #include "IECore/Writer.h"
 #include "IECore/SimpleTypedParameter.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECore
@@ -52,7 +53,7 @@ namespace IECoreRI
 
 /// The RIBWriter class generates RIBs from IECore::Renderables.
 /// \ingroup ioGroup
-class RIBWriter : public IECore::Writer
+class IECORERI_API RIBWriter : public IECore::Writer
 {
 
 	public :

@@ -36,6 +36,7 @@
 #define IECOREARNOLD_TOARNOLDCURVESCONVERTER_H
 
 #include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/Export.h"
 
 namespace IECore
 {
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( CurvesPrimitive );
 namespace IECoreArnold
 {
 
-class ToArnoldCurvesConverter : public ToArnoldShapeConverter
+class IECOREARNOLD_API ToArnoldCurvesConverter : public ToArnoldShapeConverter
 {
 
 	public :

@@ -35,12 +35,13 @@
 #ifndef IECOREGL_ORTHOGRAPHICCAMERA_H
 #define IECOREGL_ORTHOGRAPHICCAMERA_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Camera.h"
 
 namespace IECoreGL
 {
 
-class OrthographicCamera : public Camera
+class IECOREGL_API OrthographicCamera : public Camera
 {
 
 	public :

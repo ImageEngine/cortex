@@ -42,6 +42,7 @@
 
 #include "OpenEXR/half.h"
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/InternedString.h"
 
@@ -53,7 +54,7 @@ IE_CORE_FORWARDDECLARE( IndexedIO );
 /// Abstract interface to define operations on a random-access indexed input/output device. All methods throw an instance of IOException,
 /// or one of its subclasses, if an error is encountered.
 /// \ingroup ioGroup
-class IndexedIO : public RunTimeTyped
+class IECORE_API IndexedIO : public RunTimeTyped
 {
 	public:
 		
@@ -488,7 +489,7 @@ class IndexedIO : public RunTimeTyped
 		virtual void read(const IndexedIO::EntryID &name, unsigned short &x) const  = 0;
 
 		/// A representation of a single file/directory
-		class Entry
+		class IECORE_API Entry
 		{
 			public:
 				Entry();

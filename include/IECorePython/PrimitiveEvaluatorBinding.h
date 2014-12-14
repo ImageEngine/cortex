@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_PRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPrimitiveEvaluator();
+IECOREPYTHON_API void bindPrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_PRIMITIVEEVALUATORBINDING_H

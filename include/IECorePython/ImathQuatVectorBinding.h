@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMATHQUATVECTORBINDING_H
 #define IECOREPYTHON_IMATHQUATVECTORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-extern void bindImathQuatVectorTypedData();
+IECOREPYTHON_API extern void bindImathQuatVectorTypedData();
 }
 
 #endif // IECOREPYTHON_IMATHQUATVECTORBINDING_H

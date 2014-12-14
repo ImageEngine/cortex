@@ -37,13 +37,14 @@
 
 #include "boost/python.hpp"
 #include "IECore/SceneInterface.h"
+#include "IECorePython/Export.h"
 
 namespace IECorePython
 {
 
-void bindSceneInterface();
+IECOREPYTHON_API void bindSceneInterface();
 
-void listToSceneInterfaceNameList( boost::python::list l, IECore::SceneInterface::NameList &p );
+IECOREPYTHON_API void listToSceneInterfaceNameList( boost::python::list l, IECore::SceneInterface::NameList &p );
 
 }
 

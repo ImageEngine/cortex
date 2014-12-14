@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/CubeColorLookupData.h"
+#include "IECore/Export.h"
 #include "IECore/TypedData.inl"
 
 #include <iostream>
@@ -133,5 +134,5 @@ SPECIALISE( CubeColorLookupdData )
 }
 
 // Instantiations
-template class TypedData<CubeColorLookupf>;
-template class TypedData<CubeColorLookupd>;
+template class IECORE_API TypedData<CubeColorLookupf>;
+template class IECORE_API TypedData<CubeColorLookupd>;

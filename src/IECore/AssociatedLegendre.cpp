@@ -33,10 +33,11 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/AssociatedLegendre.h"
+#include "IECore/Export.h"
 
 namespace IECore
 {
 
-template class AssociatedLegendre<double>;
+template class IECORE_API AssociatedLegendre<double>;
 
 }

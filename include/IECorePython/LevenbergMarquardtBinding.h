@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LEVENBERGMARQUARDTBINDING_H
 #define IECOREPYTHON_LEVENBERGMARQUARDTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLevenbergMarquardt();
+IECOREPYTHON_API void bindLevenbergMarquardt();
 
 }
 

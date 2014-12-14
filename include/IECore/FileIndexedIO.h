@@ -35,6 +35,7 @@
 #ifndef IE_CORE_FILEINDEXEDIO_H
 #define IE_CORE_FILEINDEXEDIO_H
 
+#include "IECore/Export.h"
 #include "StreamIndexedIO.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// An implementation of StreamIndexedIO which operates within a single file on disk.
 /// \ingroup ioGroup
-class FileIndexedIO : public StreamIndexedIO
+class IECORE_API FileIndexedIO : public StreamIndexedIO
 {
 	public:
 

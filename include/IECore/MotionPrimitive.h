@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PRIMITIVEMOTION_H
 #define IE_CORE_PRIMITIVEMOTION_H
 
+#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 
 namespace IECore
@@ -45,7 +46,7 @@ namespace IECore
 /// stop you from calling motionBegin/motionEnd to construct motion blocks yourself
 /// but this form is simple, and loadable and savable and copyable and all that.
 /// \ingroup renderingGroup
-class MotionPrimitive : public VisibleRenderable
+class IECORE_API MotionPrimitive : public VisibleRenderable
 {
 	public:
 

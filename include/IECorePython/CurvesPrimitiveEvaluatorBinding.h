@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CURVESPRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_CURVESPRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCurvesPrimitiveEvaluator();
+IECOREPYTHON_API void bindCurvesPrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_CURVESPRIMITIVEEVALUATORBINDING_H

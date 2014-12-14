@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CURVELINEARISERBINDING_H
 #define IECOREPYTHON_CURVELINEARISERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCurveLineariser();
+IECOREPYTHON_API void bindCurveLineariser();
 
 } // namespace IECorePython
 

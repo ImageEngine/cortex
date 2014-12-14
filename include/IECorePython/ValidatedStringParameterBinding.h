@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_VALIDATEDSTRINGPARAMETERBINDING_H
 #define IECOREPYTHON_VALIDATEDSTRINGPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindValidatedStringParameter();
+IECOREPYTHON_API void bindValidatedStringParameter();
 }
 
 #endif // IECOREPYTHON_VALIDATEDSTRINGPARAMETERBINDING_H

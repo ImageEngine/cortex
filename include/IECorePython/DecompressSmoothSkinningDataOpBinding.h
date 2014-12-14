@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DECOMPRESSSMOOTHSKINNINGDATAOPBINDING_H
 #define IECOREPYTHON_DECOMPRESSSMOOTHSKINNINGDATAOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDecompressSmoothSkinningDataOp();
+IECOREPYTHON_API void bindDecompressSmoothSkinningDataOp();
 }
 
 #endif // IECOREPYTHON_DECOMPRESSSMOOTHSKINNINGDATAOPBINDING_H

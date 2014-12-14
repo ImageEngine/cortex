@@ -35,6 +35,7 @@
 #ifndef IE_CORE_GROUP_H
 #define IE_CORE_GROUP_H
 
+#include "IECore/Export.h"
 #include "IECore/StateRenderable.h"
 #include "IECore/VisibleRenderable.h"
 #include "IECore/Transform.h"
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( Data );
 /// of VisibleRenderables, applying a specific set of Transforms
 /// and StateRenderables to them.
 /// \ingroup renderingGroup
-class Group : public VisibleRenderable
+class IECORE_API Group : public VisibleRenderable
 {
 
 	public:

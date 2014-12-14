@@ -38,6 +38,7 @@
 #include "OpenEXR/ImathBox.h"
 #include "OpenEXR/ImathMatrix.h"
 
+#include "IECore/Export.h"
 #include "IECore/Object.h"
 #include "IECore/Renderable.h"
 #include "IECore/PrimitiveVariable.h"
@@ -65,7 +66,7 @@ IE_CORE_FORWARDDECLARE( SceneInterface );
 /// \todo Implement a TransformStack class that can represent any custom 
 /// transformation that could be interpolated and consider using it here as the
 /// returned type as opposed to DataPtr.
-class SceneInterface : public RunTimeTyped
+class IECORE_API SceneInterface : public RunTimeTyped
 {
 	public :
 

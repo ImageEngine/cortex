@@ -35,6 +35,7 @@
 #ifndef IE_CORE_ATTRIBUTESTATE_H
 #define IE_CORE_ATTRIBUTESTATE_H
 
+#include "IECore/Export.h"
 #include "IECore/StateRenderable.h"
 
 namespace IECore
@@ -44,7 +45,7 @@ namespace IECore
 /// \todo Make order of rendering match order of addition - there are cases where
 /// 3delight cares very much what order attributes are specified in (subsurface attributes in particular).
 /// \ingroup renderingGroup
-class AttributeState : public StateRenderable
+class IECORE_API AttributeState : public StateRenderable
 {
 	public:
 

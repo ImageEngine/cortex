@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_RENDERABLEBINDING_H
 #define IECOREPYTHON_RENDERABLEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindRenderable();
+IECOREPYTHON_API void bindRenderable();
 }
 
 #endif // IECOREPYTHON_RENDERABLEBINDING_H

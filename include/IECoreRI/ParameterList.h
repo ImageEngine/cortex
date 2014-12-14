@@ -37,12 +37,14 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 /// This class provides a means of converting from an IECore::CompoundDataMap
 /// to the form passable through the Renderman Interface.
-class ParameterList
+class IECORERI_API ParameterList
 {
 
 	public :

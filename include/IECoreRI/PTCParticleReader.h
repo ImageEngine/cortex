@@ -38,6 +38,7 @@
 #include "IECore/CompoundData.h"
 #include "IECore/ParticleReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 #include "IECoreRI/PTCParticleIO.h"
 
@@ -47,7 +48,7 @@ namespace IECoreRI
 /// The PTCParticleReader class implements the ParticleReader
 /// interface for Renderman .ptc format particle caches.
 /// \ingroup ioGroup
-class PTCParticleReader : public IECore::ParticleReader
+class IECORERI_API PTCParticleReader : public IECore::ParticleReader
 {
 	public :
 

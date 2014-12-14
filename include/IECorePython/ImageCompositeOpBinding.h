@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMAGECOMPOSITEOPBINDING_H
 #define IECOREPYTHON_IMAGECOMPOSITEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImageCompositeOp();
+IECOREPYTHON_API void bindImageCompositeOp();
 
 } // namespace IECorePython
 

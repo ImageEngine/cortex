@@ -35,6 +35,7 @@
 #ifndef IECORE_FACEAREAOP_H
 #define IECORE_FACEAREAOP_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 
 namespace IECore
@@ -43,7 +44,7 @@ namespace IECore
 /// The FaceAreaOp computes area and texture area for each face of a MeshPrimitive,
 /// storing the result as a PrimitiveVariable.
 /// \ingroup geometryProcessingGroup
-class FaceAreaOp : public MeshPrimitiveOp
+class IECORE_API FaceAreaOp : public MeshPrimitiveOp
 {
 	public:
 

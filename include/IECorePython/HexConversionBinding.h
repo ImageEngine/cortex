@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_HEXCONVERSIONBINDING_H
 #define IECOREPYTHON_HEXCONVERSIONBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindHexConversion();
+IECOREPYTHON_API void bindHexConversion();
 }
 
 #endif // IECOREPYTHON_HEXCONVERSIONBINDING_H

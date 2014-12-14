@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TGAIMAGEWRITERBINDING_H
 #define IECOREPYTHON_TGAIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTGAImageWriter();
+IECOREPYTHON_API void bindTGAImageWriter();
 }
 
 #endif // IECOREPYTHON_TGAIMAGEWRITERBINDING_H

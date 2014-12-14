@@ -35,6 +35,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 #include "IECore/DateTimeData.h"
+#include "IECore/Export.h"
 #include "IECore/TypedData.inl"
 #include "IECore/MurmurHash.h"
 
@@ -109,6 +110,6 @@ void SimpleDataHolder<boost::posix_time::ptime>::hash( MurmurHash &h ) const
 	h.append( boost::posix_time::to_iso_string( readable() ) );
 }
 
-template class TypedData< boost::posix_time::ptime >;
+template class IECORE_API TypedData< boost::posix_time::ptime >;
 
 } // namespace IECore

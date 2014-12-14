@@ -35,6 +35,7 @@
 #ifndef IECOREGL_CAMERA_H
 #define IECOREGL_CAMERA_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
 
 #include "OpenEXR/ImathVec.h"
@@ -43,7 +44,7 @@
 namespace IECoreGL
 {
 
-class Camera : public Renderable
+class IECOREGL_API Camera : public Renderable
 {
 
 	public :

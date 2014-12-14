@@ -36,6 +36,7 @@
 #define IECOREPYTHON_SIMPLETYPEDDATABINDING_H
 
 #include "boost/python.hpp"
+#include "IECorePython/Export.h"
 
 namespace IECorePython
 {
@@ -52,7 +53,7 @@ struct TypedDataFromType
 	
 };
 
-extern void bindAllSimpleTypedData();
+IECOREPYTHON_API extern void bindAllSimpleTypedData();
 
 }
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_EXRIMAGEREADERBINDING_H
 #define IECOREPYTHON_EXRIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindEXRImageReader();
+IECOREPYTHON_API void bindEXRImageReader();
 }
 
 #endif // IECOREPYTHON_EXRIMAGEREADERBINDING_H

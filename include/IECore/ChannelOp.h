@@ -35,6 +35,7 @@
 #ifndef IECORE_CHANNELOP_H
 #define IECORE_CHANNELOP_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/VectorTypedParameter.h"
 
@@ -44,7 +45,7 @@ namespace IECore
 /// A base class for operations which modify a selection of
 /// channels on an ImagePrimitive.
 /// \ingroup imageProcessingGroup
-class ChannelOp : public ImagePrimitiveOp
+class IECORE_API ChannelOp : public ImagePrimitiveOp
 {
 	public:
 

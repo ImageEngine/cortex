@@ -35,6 +35,7 @@
 #ifndef IECORE_FROMCORECONVERTER_H
 #define IECORE_FROMCORECONVERTER_H
 
+#include "IECore/Export.h"
 #include "IECore/Converter.h"
 #include "IECore/ObjectParameter.h"
 
@@ -44,7 +45,7 @@ namespace IECore
 /// The FromCoreConverter class is a Converter derived class to be
 /// used as a base for all classes able to perform some kind of
 /// conversion from an IECore datatype to an external datatype.
-class FromCoreConverter : public Converter
+class IECORE_API FromCoreConverter : public Converter
 {
 
 	public :

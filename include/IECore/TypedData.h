@@ -36,6 +36,7 @@
 #define IECORE_TYPEDDATA_H
 
 #include "IECore/Data.h"
+#include "IECore/Export.h"
 #include "IECore/TypedDataInternals.h"
 
 namespace IECore
@@ -60,7 +61,7 @@ namespace IECore
 /// TypedData class - see comments in those files for further details.
 /// \ingroup coreGroup
 template <class T>
-class TypedData : public Data
+class IECORE_API TypedData : public Data
 {
 	public:
 	
@@ -147,7 +148,7 @@ class TypedData : public Data
 /// for small types.
 #define IECORE_DECLARE_TYPEDDATA( TYPENAME, T, BASETYPE, DATAHOLDER ) \
 	template <> \
-	class TypedDataTraits<T> \
+	class IECORE_API TypedDataTraits<T> \
 	{ \
 		public : \
 			typedef BASETYPE BaseType; \

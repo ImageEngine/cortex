@@ -37,6 +37,7 @@
 
 #include "IECore/SimpleTypedParameter.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECoreGL
@@ -47,7 +48,7 @@ IE_CORE_FORWARDDECLARE( Texture )
 /// Converts IECore::SplineData objects into IECoreGL::Texture objects.
 /// The default conversion gives an image of 8x512 and it can return a ColorTexture or a LuminanceTexture.
 /// \ingroup conversionGroup
-class SplineToGLTextureConverter : public ToGLConverter
+class IECOREGL_API SplineToGLTextureConverter : public ToGLConverter
 {
 
 	public :

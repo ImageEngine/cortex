@@ -35,6 +35,7 @@
 #ifndef IE_CORE_POINTREPULSIONOP_H
 #define IE_CORE_POINTREPULSIONOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/MeshPrimitive.h"
@@ -52,7 +53,7 @@ IE_CORE_FORWARDDECLARE( MeshPrimitiveEvaluator )
 
 /// \todo Class docs
 /// \ingroup geometryProcessingGroup
-class PointRepulsionOp : public ModifyOp
+class IECORE_API PointRepulsionOp : public ModifyOp
 {
 	public :
 

@@ -40,6 +40,8 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECoreArnold/Export.h"
+
 struct AtNode;
 
 namespace IECoreArnold
@@ -49,7 +51,7 @@ IE_CORE_FORWARDDECLARE( RendererImplementation )
 
 /// An IECore::Renderer subclass which renders to Arnold through the AI interface.
 /// \ingroup renderingGroup
-class Renderer : public IECore::Renderer
+class IECOREARNOLD_API Renderer : public IECore::Renderer
 {
 
 	public :

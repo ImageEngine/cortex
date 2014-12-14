@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SUMMEDAREAOPBINDING_H
 #define IECOREPYTHON_SUMMEDAREAOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSummedAreaOp();
+IECOREPYTHON_API void bindSummedAreaOp();
 
 } // namespace IECorePython
 

@@ -35,6 +35,7 @@
 #ifndef IE_CORE_LIGHT_H
 #define IE_CORE_LIGHT_H
 
+#include "IECore/Export.h"
 #include "IECore/StateRenderable.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// A class to represent lights.
 /// \ingroup renderingGroup
-class Light : public StateRenderable
+class IECORE_API Light : public StateRenderable
 {
 	public:
 

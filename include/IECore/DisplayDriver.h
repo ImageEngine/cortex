@@ -44,6 +44,7 @@
 
 #include "OpenEXR/ImathBox.h"
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/CompoundData.h"
 
@@ -57,7 +58,7 @@ IE_CORE_FORWARDDECLARE( DisplayDriver );
 /// Abstract base class for generic image display drivers.
 /// Derived classes should implement the virtual methods that are used as callbacks for opening a new pass, updating an image block and closing the image.
 /// \ingroup renderingGroup
-class DisplayDriver : public RunTimeTyped
+class IECORE_API DisplayDriver : public RunTimeTyped
 {
 	public :
 

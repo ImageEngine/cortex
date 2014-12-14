@@ -35,6 +35,7 @@
 #ifndef IE_CORE_TYPEDPRIMITIVEOP_H
 #define IE_CORE_TYPEDPRIMITIVEOP_H
 
+#include "IECore/Export.h"
 #include "IECore/PrimitiveOp.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/ImagePrimitive.h"

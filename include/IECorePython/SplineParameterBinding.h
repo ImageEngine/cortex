@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SPLINEPARAMETERBINDING_H
 #define IECOREPYTHON_SPLINEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSplineParameter();
+IECOREPYTHON_API void bindSplineParameter();
 }
 
 #endif // IECOREPYTHON_SPLINEPARAMETERBINDING_H

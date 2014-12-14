@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTDISTRIBUTIONBINDING_H
 #define IECOREPYTHON_POINTDISTRIBUTIONBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointDistribution();
+IECOREPYTHON_API void bindPointDistribution();
 }
 
 #endif // IECOREPYTHON_POINTDISTRIBUTIONBINDING_H

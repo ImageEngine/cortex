@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PRIMITIVEOPBINDING_H
 #define IECOREPYTHON_PRIMITIVEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPrimitiveOp();
+IECOREPYTHON_API void bindPrimitiveOp();
 }
 
 #endif // IECOREPYTHON_PRIMITIVEOPBINDING_H

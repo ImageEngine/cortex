@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MATRIXTRANSFORMBINDING_H
 #define IECOREPYTHON_MATRIXTRANSFORMBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMatrixTransform();
+IECOREPYTHON_API void bindMatrixTransform();
 }
 
 #endif // IECOREPYTHON_MATRIXTRANSFORMBINDING_H

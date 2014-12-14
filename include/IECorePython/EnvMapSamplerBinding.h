@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_ENVMAPSAMPLERBINDING_H
 #define IECOREPYTHON_ENVMAPSAMPLERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindEnvMapSampler();
+IECOREPYTHON_API void bindEnvMapSampler();
 
 } // namespace IECorePython
 

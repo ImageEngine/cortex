@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TRIANGULATEOPBINDING_H
 #define IECOREPYTHON_TRIANGULATEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTriangulateOp();
+IECOREPYTHON_API void bindTriangulateOp();
 }
 
 #endif // IECOREPYTHON_TRIANGULATEOPBINDING_H

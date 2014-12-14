@@ -35,6 +35,7 @@
 #ifndef IE_CORE_VALIDATEDSTRINGPARAMETER_H
 #define IE_CORE_VALIDATEDSTRINGPARAMETER_H
 
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// This class implements a StringParameter object with validation
 /// of the value based on regular expressions.
-class ValidatedStringParameter : public StringParameter
+class IECORE_API ValidatedStringParameter : public StringParameter
 {
 	public :
 

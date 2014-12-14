@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_POINTSMOTIONOPBINDING_H
 #define IECOREPYTHON_POINTSMOTIONOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindPointsMotionOp();
+IECOREPYTHON_API void bindPointsMotionOp();
 
 } // namespace IECorePython
 

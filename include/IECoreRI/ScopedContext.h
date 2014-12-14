@@ -39,6 +39,8 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
@@ -46,7 +48,7 @@ namespace IECoreRI
 /// to RiContext() so you can manage calls to many contexts
 /// relatively easily, with little fear of Exceptions or
 /// multiple return paths leaving you in the wrong context.
-class ScopedContext : public boost::noncopyable
+class IECORERI_API ScopedContext : public boost::noncopyable
 {
 
 	public :

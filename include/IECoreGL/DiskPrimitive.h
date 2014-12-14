@@ -35,12 +35,13 @@
 #ifndef IECOREGL_DISKPRIMITIVE_H
 #define IECOREGL_DISKPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
 {
 
-class DiskPrimitive : public Primitive
+class IECOREGL_API DiskPrimitive : public Primitive
 {
 
 	public :

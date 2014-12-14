@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LOOKUPBINDING_H
 #define IECOREPYTHON_LOOKUPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLookup();
+IECOREPYTHON_API void bindLookup();
 
 } // namespace IECorePython
 

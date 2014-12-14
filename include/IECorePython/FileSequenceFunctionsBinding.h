@@ -36,10 +36,12 @@
 #ifndef IECOREPYTHON_FILESEQUENCEFUNCTIONSBINDING_H
 #define IECOREPYTHON_FILESEQUENCEFUNCTIONSBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFileSequenceFunctions();
+IECOREPYTHON_API void bindFileSequenceFunctions();
 
 }
 

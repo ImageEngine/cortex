@@ -37,6 +37,7 @@
 
 #include "IECore/TypeIds.h"
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/MarschnerParameter.h"
 #include "IECore/NumericParameter.h"
@@ -77,7 +78,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter );
 /// NOTE: This this is keyed with the -1.0 values of s/t at 0. In an OpenGL
 /// implementation you may need to use 1-t as your lookup, rather than t.
 /// \ingroup renderingGroup
-class MarschnerLookupTableOp : public Op
+class IECORE_API MarschnerLookupTableOp : public Op
 {
 	public :
 

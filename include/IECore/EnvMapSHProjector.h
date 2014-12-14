@@ -35,6 +35,7 @@
 #ifndef IECORE_ENVMAPSHPROJECTOR_H
 #define IECORE_ENVMAPSHPROJECTOR_H
 
+#include "IECore/Export.h"
 #include "IECore/TypeIds.h"
 
 #include "IECore/Op.h"
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter );
 
 /// Projects a Lat-Long environment map on a SphericalHarmonics object and returns the resulting SH coefficients.
 /// \ingroup shGroup
-class EnvMapSHProjector : public Op
+class IECORE_API EnvMapSHProjector : public Op
 {
 	public :
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SGIIMAGEREADERBINDING_H
 #define IECOREPYTHON_SGIIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSGIImageReader();
+IECOREPYTHON_API void bindSGIImageReader();
 }
 
 #endif // IECOREPYTHON_CINIMAGEREADERBINDING_H

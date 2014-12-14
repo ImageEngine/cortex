@@ -35,6 +35,7 @@
 #ifndef IE_CORE_SHADER_H
 #define IE_CORE_SHADER_H
 
+#include "IECore/Export.h"
 #include "IECore/StateRenderable.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// A class to represent shaders.
 /// \ingroup renderingGroup
-class Shader : public StateRenderable
+class IECORE_API Shader : public StateRenderable
 {
 	public:
 

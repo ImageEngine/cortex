@@ -35,6 +35,7 @@
 #ifndef IECORE_CAMERA_H
 #define IECORE_CAMERA_H
 
+#include "IECore/Export.h"
 #include "IECore/PreWorldRenderable.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( Transform )
 
-class Camera : public PreWorldRenderable
+class IECORE_API Camera : public PreWorldRenderable
 {
 	public:
 

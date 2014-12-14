@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LINEARTOPANALOGOPBINDING_H
 #define IECOREPYTHON_LINEARTOPANALOGOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLinearToPanalogOp();
+IECOREPYTHON_API void bindLinearToPanalogOp();
 
 } // namespace IECorePython
 

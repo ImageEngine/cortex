@@ -40,6 +40,7 @@
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/TypedStateComponent.h"
@@ -54,7 +55,7 @@ IE_CORE_FORWARDDECLARE( State );
 /// be rendered in OpenGL. Primitives may be rendered in a variety
 /// of styles defined by State objects, or just rendered as raw geometry
 /// in the current OpenGL state.
-class Primitive : public Renderable
+class IECOREGL_API Primitive : public Renderable
 {
 	public :
 

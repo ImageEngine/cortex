@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TEXTPRIMITIVE_H
 #define IECOREGL_TEXTPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/TypedStateComponent.h"
 
@@ -43,7 +44,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Font )
 
-class TextPrimitive : public Primitive
+class IECOREGL_API TextPrimitive : public Primitive
 {
 
 	public :

@@ -43,12 +43,14 @@
 
 #include "IECore/CompoundData.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 /// This class simplifies the execution of shaders using the Sx library by
 /// wrapping it to accept IECore datatypes for input and output.
-class SXExecutor : public boost::noncopyable
+class IECORERI_API SXExecutor : public boost::noncopyable
 {
 
 	public :

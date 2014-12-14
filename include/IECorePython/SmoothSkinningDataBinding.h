@@ -38,10 +38,12 @@
 #ifndef IE_COREPYTHON_SMOOTHSKINNINGDATABINDING_H
 #define IE_COREPYTHON_SMOOTHSKINNINGDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSmoothSkinningData();
+IECOREPYTHON_API void bindSmoothSkinningData();
 
 }
 

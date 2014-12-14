@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTDENSITIESOPBINDING_H
 #define IECOREPYTHON_POINTDENSITIESOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointDensitiesOp();
+IECOREPYTHON_API void bindPointDensitiesOp();
 }
 
 #endif // IECOREPYTHON_POINTDENSITIESOPBINDING_H

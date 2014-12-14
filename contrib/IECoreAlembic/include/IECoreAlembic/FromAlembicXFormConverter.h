@@ -40,12 +40,13 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
 /// \todo Maybe template this to also be able to return M44d?
-class FromAlembicXFormConverter : public FromAlembicConverter
+class IECOREALEMBIC_API FromAlembicXFormConverter : public FromAlembicConverter
 {
 
 	public :

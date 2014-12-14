@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PATHPARAMETERBINDING_H
 #define IECOREPYTHON_PATHPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPathParameter();
+IECOREPYTHON_API void bindPathParameter();
 }
 
 #endif // IECOREPYTHON_PATHPARAMETERBINDING_H

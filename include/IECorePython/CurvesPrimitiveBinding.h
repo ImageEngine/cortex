@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CURVESPRIMITIVEBINDING_H
 #define IECOREPYTHON_CURVESPRIMITIVEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-  void bindCurvesPrimitive();
+IECOREPYTHON_API void bindCurvesPrimitive();
 
 } // namespace IECorePython
 

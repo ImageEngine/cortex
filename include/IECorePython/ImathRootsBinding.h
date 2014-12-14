@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMATHROOTSBINDING_H
 #define IECOREPYTHON_IMATHROOTSBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImathRoots();
+IECOREPYTHON_API void bindImathRoots();
 
 }
 

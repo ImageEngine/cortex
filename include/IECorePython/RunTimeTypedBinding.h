@@ -38,13 +38,14 @@
 
 #include "IECore/RunTimeTyped.h"
 
+#include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 
 namespace IECorePython
 {
 
-void bindRunTimeTyped();
+IECOREPYTHON_API void bindRunTimeTyped();
 
 /// A class for wrapping RunTimeTyped objects to allow overriding
 /// in Python. It automatically forwards all RunTimeTyped virtual

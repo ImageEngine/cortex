@@ -32,8 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/SphericalHarmonicsTransferMatrix.h"
 
 
-template class IECore::SphericalHarmonicsTransferMatrix< double >;
-template class IECore::SphericalHarmonicsTransferMatrix< float >;
+template class IECORE_API IECore::SphericalHarmonicsTransferMatrix< double >;
+template class IECORE_API IECore::SphericalHarmonicsTransferMatrix< float >;

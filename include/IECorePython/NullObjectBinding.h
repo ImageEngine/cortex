@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_NULLOBJECTBINDING_H
 #define IECOREPYTHON_NULLOBJECTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindNullObject();
+IECOREPYTHON_API void bindNullObject();
 }
 
 #endif // IECOREPYTHON_NULLOBJECTBINDING_H

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CUBECOLORLOOKUPPARAMETERBINDING_H
 #define IECOREPYTHON_CUBECOLORLOOKUPPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCubeColorLookupParameter();
+IECOREPYTHON_API void bindCubeColorLookupParameter();
 }
 
 #endif // IECOREPYTHON_CUBECOLORLOOKUPPARAMETERBINDING_H

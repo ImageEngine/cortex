@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMATHBOXBINDING_H
 #define IECOREPYTHON_IMATHBOXBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImathBox();
+IECOREPYTHON_API void bindImathBox();
 }
 
 #endif // IECOREPYTHON_IMATHBOXBINDING_H

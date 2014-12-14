@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SPLINETOIMAGEBINDING_H
 #define IECOREPYTHON_SPLINETOIMAGEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSplineToImage();
+IECOREPYTHON_API void bindSplineToImage();
 }
 
 #endif // IECOREPYTHON_SPLINETOIMAGEBINDING_H

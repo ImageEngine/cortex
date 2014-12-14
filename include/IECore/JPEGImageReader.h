@@ -35,6 +35,7 @@
 #ifndef IE_CORE_JPEGIMAGEREADER_H
 #define IE_CORE_JPEGIMAGEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageReader.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// The JPEGImageReader reads Joint Photographic Experts Group (JPEG) files
 /// \ingroup ioGroup
-class JPEGImageReader : public ImageReader
+class IECORE_API JPEGImageReader : public ImageReader
 {
 
 	public:

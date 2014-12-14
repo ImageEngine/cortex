@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SIMPLETYPEDPARAMETERBINDING_H
 #define IECOREPYTHON_SIMPLETYPEDPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSimpleTypedParameter();
+IECOREPYTHON_API void bindSimpleTypedParameter();
 }
 
 #endif // IECOREPYTHON_SIMPLETYPEDPARAMETERBINDING_H

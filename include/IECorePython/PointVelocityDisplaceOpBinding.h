@@ -38,9 +38,11 @@
 #ifndef IECOREPYTHON_POINTVELOCITYDISPLACEOPBINDING_H
 #define IECOREPYTHON_POINTVELOCITYDISPLACEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointVelocityDisplaceOp();
+IECOREPYTHON_API void bindPointVelocityDisplaceOp();
 }
 
 #endif // IECOREPYTHON_POINTVELOCITYDISPLACEOPBINDING_H

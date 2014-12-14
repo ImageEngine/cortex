@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_HENYEYGREENSTEINBINDING_H
 #define IECOREPYTHON_HENYEYGREENSTEINBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindHenyeyGreenstein();
+IECOREPYTHON_API void bindHenyeyGreenstein();
 }
 
 #endif // IECOREPYTHON_HENYEYGREENSTEINBINDING_H

@@ -38,6 +38,7 @@
 #ifndef IE_CORE_IMAGEDISPLAYDRIVER
 #define IE_CORE_IMAGEDISPLAYDRIVER
 
+#include "IECore/Export.h"
 #include "IECore/DisplayDriver.h"
 #include "IECore/ImagePrimitive.h"
 
@@ -47,7 +48,7 @@ namespace IECore
 /// Display driver that creates an ImagePrimitive object held
 /// in memory.
 /// \ingroup renderingGroup
-class ImageDisplayDriver : public DisplayDriver
+class IECORE_API ImageDisplayDriver : public DisplayDriver
 {
 	public:
 

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHDISTORTIONSOPBINDING_H
 #define IECOREPYTHON_MESHDISTORTIONSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshDistortionsOp();
+IECOREPYTHON_API void bindMeshDistortionsOp();
 
 } // namespace IECorePython
 

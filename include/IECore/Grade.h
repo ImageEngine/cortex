@@ -37,6 +37,7 @@
 
 #include "OpenEXR/ImathColor.h"
 
+#include "IECore/Export.h"
 #include "IECore/ColorTransformOp.h"
 #include "IECore/SimpleTypedParameter.h"
 
@@ -49,7 +50,7 @@ namespace IECore
 /// B = offset + lift - A * blackPoint
 /// output = pow( A * input + B, 1/gamma )
 /// \ingroup imageProcessingGroup
-class Grade : public ColorTransformOp
+class IECORE_API Grade : public ColorTransformOp
 {
 	public :
 

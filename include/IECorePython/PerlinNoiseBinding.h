@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PERLINNOISEBINDING_H
 #define IECOREPYTHON_PERLINNOISEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPerlinNoise();
+IECOREPYTHON_API void bindPerlinNoise();
 }
 
 #endif // IECOREPYTHON_PERLINNOISEBINDING_H

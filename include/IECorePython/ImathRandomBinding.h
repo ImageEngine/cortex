@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMATHRANDOMBINDING_H
 #define IECOREPYTHON_IMATHRANDOMBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImathRandom();
+IECOREPYTHON_API void bindImathRandom();
 
 }
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_VECTORDATAFILTEROPBINDING_H
 #define IECOREPYTHON_VECTORDATAFILTEROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindVectorDataFilterOp();
+IECOREPYTHON_API void bindVectorDataFilterOp();
 }
 
 #endif // IECOREPYTHON_VECTORDATAFILTEROPBINDING_H

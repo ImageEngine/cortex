@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLCONVERTER_H
 #define IECOREGL_TOGLCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 
 #include "IECore/FromCoreConverter.h"
@@ -47,7 +48,7 @@ IE_CORE_FORWARDDECLARE( ToGLConverter )
 
 /// The ToGLConverter class is a to be used as a base for all classes able to perform
 /// some kind of conversion from an IECore datatype to an IECoreGL datatype.
-class ToGLConverter : public IECore::FromCoreConverter
+class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 {
 
 	public :
