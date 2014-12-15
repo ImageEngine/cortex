@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/TransformationMatrix.h"
 
 namespace IECore
 {
 
-template class TransformationMatrix<double>;
-template class TransformationMatrix<float>;
+template class IECORE_API TransformationMatrix<double>;
+template class IECORE_API TransformationMatrix<float>;
 
 } // namespace IECore

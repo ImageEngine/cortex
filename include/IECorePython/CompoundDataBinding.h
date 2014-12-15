@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_COMPOUNDDATABINDING_H
 #define IECOREPYTHON_COMPOUNDDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCompoundData();
+IECOREPYTHON_API void bindCompoundData();
 }
 
 #endif // IECOREPYTHON_COMPOUNDDATABINDING_H

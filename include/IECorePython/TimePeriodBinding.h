@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TIMEPERIODBINDING_H
 #define IECOREPYTHON_TIMEPERIODBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTimePeriod();
+IECOREPYTHON_API void bindTimePeriod();
 }
 
 #endif // IECOREPYTHON_TIMEPERIODBINDING_H

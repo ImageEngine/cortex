@@ -37,6 +37,8 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
@@ -50,7 +52,7 @@ namespace IECorePython
 /// See the IECoreMaya bindings for examples - they use this class to allow
 /// interoperation with types held by the Maya Python API.
 template<typename T>
-class PointerFromSWIG
+class IECOREPYTHON_API PointerFromSWIG
 {
 	public :
 

@@ -35,6 +35,7 @@
 #ifndef IE_CORE_FILTEREDMESSAGEHANDLER_H
 #define IE_CORE_FILTEREDMESSAGEHANDLER_H
 
+#include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
 
 namespace IECore
@@ -45,7 +46,7 @@ IE_CORE_DECLAREPTR( FilteredMessageHandler );
 
 /// This abstract base class that implements filtering MessageHandler of any kind.
 /// \ingroup utilityGroup
-class FilteredMessageHandler : public MessageHandler
+class IECORE_API FilteredMessageHandler : public MessageHandler
 {
 	public :
 

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MPLAYDISPLAYDRIVERBINDING_H
 #define IECOREPYTHON_MPLAYDISPLAYDRIVERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMPlayDisplayDriver();
+IECOREPYTHON_API void bindMPlayDisplayDriver();
 
 }
 

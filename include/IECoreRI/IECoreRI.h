@@ -36,11 +36,13 @@
 #ifndef IE_CORERI_CORE_H
 #define IE_CORERI_CORE_H
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 /// Returns true if IECoreRI was built against a renderer API with the RiProceduralV function
-bool withRiProceduralV();
+IECORERI_API bool withRiProceduralV();
 
 }
 

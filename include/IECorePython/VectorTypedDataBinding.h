@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_VECTORTYPEDDATABINDING_H
 #define IECOREPYTHON_VECTORTYPEDDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-extern void bindAllVectorTypedData();
+extern IECOREPYTHON_API void bindAllVectorTypedData();
 }
 
 #endif // IECOREPYTHON_VECTORTYPEDDATABINDING_H

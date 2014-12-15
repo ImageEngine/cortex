@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundData.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/TypeIds.h"
 
@@ -46,14 +47,14 @@ namespace IECoreGL
 IE_CORE_FORWARDDECLARE( State );
 IE_CORE_FORWARDDECLARE( StateComponent );
 
-class State : public Bindable
+class IECOREGL_API State : public Bindable
 {
 
 	public :
 
 		/// This class binds a State upon construction, and on destruction makes
 		/// sure that the previous state is reverted to.
-		class ScopedBinding : private boost::noncopyable
+		class IECOREGL_API ScopedBinding : private boost::noncopyable
 		{
 		
 			public :

@@ -35,6 +35,7 @@
 #ifndef IECORE_SAMPLEDSCENEINTERFACE_H
 #define IECORE_SAMPLEDSCENEINTERFACE_H
 
+#include "IECore/Export.h"
 #include "IECore/SceneInterface.h"
 
 namespace IECore
@@ -56,7 +57,7 @@ IE_CORE_FORWARDDECLARE( SampledSceneInterface );
 /// nearly exactly with a single sample, 0 is returned and floorIndex==ceilIndex
 /// will hold.
 /// \ingroup ioGroup
-class SampledSceneInterface : public SceneInterface
+class IECORE_API SampledSceneInterface : public SceneInterface
 {
 	public :
 

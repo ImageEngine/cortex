@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_ADDSMOOTHSKINNINGINFLUENCESOPBINDING_H
 #define IECOREPYTHON_ADDSMOOTHSKINNINGINFLUENCESOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindAddSmoothSkinningInfluencesOp();
+IECOREPYTHON_API void bindAddSmoothSkinningInfluencesOp();
 }
 
 #endif // IECOREPYTHON_ADDSMOOTHSKINNINGINFLUENCESOPBINDING_H

@@ -35,6 +35,7 @@
 #ifndef IECORE_DATACONVERTOP_H
 #define IECORE_DATACONVERTOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/NumericParameter.h"
@@ -48,7 +49,7 @@ namespace IECore
 /// another without scaling.
 /// \ingroup coreGroup
 /// \see DataCastOp, DataPromoteOp
-class DataConvertOp : public Op
+class IECORE_API DataConvertOp : public Op
 {
 	public :
 

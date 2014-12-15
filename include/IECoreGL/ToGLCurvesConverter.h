@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLCURVESCONVERTER_H
 #define IECOREGL_TOGLCURVESCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( CurvesPrimitive );
 
 /// Converts IECore::CurvesPrimitive objects into IECoreGL::CurvesPrimitive objects.
 /// \ingroup conversionGroup
-class ToGLCurvesConverter : public ToGLConverter
+class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 {
 
 	public :

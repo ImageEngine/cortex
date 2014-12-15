@@ -35,6 +35,7 @@
 #ifndef IE_CORE_CINIMAGEWRITER_H
 #define IE_CORE_CINIMAGEWRITER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageWriter.h"
 #include "IECore/VectorTypedData.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// The CINImageWriter class serializes images to the Kodak Cineon 10-bit log image format
 /// \ingroup ioGroup
-class CINImageWriter : public ImageWriter
+class IECORE_API CINImageWriter : public ImageWriter
 {
 
 	public:

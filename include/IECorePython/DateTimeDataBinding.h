@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATETIMEDATABINDING_H
 #define IECOREPYTHON_DATETIMEDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDateTimeData();
+IECOREPYTHON_API void bindDateTimeData();
 }
 
 #endif // IECOREPYTHON_DATETIMEDATABINDING_H

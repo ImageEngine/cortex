@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/ImagePrimitive.h"
 
@@ -45,7 +46,7 @@ namespace IECore
 
 /// An implementation of PrimitiveEvaluator to allow queries to be performed on ImagePrimitive instances
 /// \ingroup imageProcessingGroup
-class ImagePrimitiveEvaluator : public PrimitiveEvaluator
+class IECORE_API ImagePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
 
@@ -53,7 +54,7 @@ class ImagePrimitiveEvaluator : public PrimitiveEvaluator
 
 		IE_CORE_DECLARERUNTIMETYPED( ImagePrimitiveEvaluator, PrimitiveEvaluator );
 
-		class Result : public PrimitiveEvaluator::Result
+		class IECORE_API Result : public PrimitiveEvaluator::Result
 		{
 			friend class ImagePrimitiveEvaluator;
 

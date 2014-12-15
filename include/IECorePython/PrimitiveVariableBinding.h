@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PRIMITIVEVARIABLEBINDING_H
 #define IECOREPYTHON_PRIMITIVEVARIABLEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPrimitiveVariable();
+IECOREPYTHON_API void bindPrimitiveVariable();
 }
 
 #endif // IECOREPYTHON_PRIMITIVEVARIABLEBINDING_H

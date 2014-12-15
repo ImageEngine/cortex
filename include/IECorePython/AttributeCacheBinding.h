@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_ATTRIBUTECACHEBINDING_H
 #define IECOREPYTHON_ATTRIBUTECACHEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindAttributeCache();
+IECOREPYTHON_API void bindAttributeCache();
 }
 
 #endif // IECOREPYTHON_ATTRIBUTECACHEBINDING_H

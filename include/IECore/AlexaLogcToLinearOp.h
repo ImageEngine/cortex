@@ -35,6 +35,7 @@
 #ifndef IECORE_ALEXALOGCTOLINEAROP_H
 #define IECORE_ALEXALOGCTOLINEAROP_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 #include "IECore/ColorSpaceTransformOp.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// Applies Avexa (V3) Log C to linear conversion on ImagePrimitive channels.
 /// \ingroup imageProcessingGroup
-class AlexaLogcToLinearOp : public ChannelOp
+class IECORE_API AlexaLogcToLinearOp : public ChannelOp
 {
 	public:
 

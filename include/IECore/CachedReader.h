@@ -37,6 +37,7 @@
 
 #include "boost/shared_ptr.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/ObjectPool.h"
 #include "IECore/SearchPath.h"
 #include "IECore/ModifyOp.h"
@@ -65,7 +66,7 @@ IE_CORE_FORWARDDECLARE( CachedReader );
 /// \todo Can we do something to make sure that two paths to the same
 /// file (symlinks) result in only a single cache entry?
 /// \ingroup ioGroup
-class CachedReader : public RefCounted
+class IECORE_API CachedReader : public RefCounted
 {
 
 	public :

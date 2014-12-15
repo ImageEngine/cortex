@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_RADIXSORTBINDING_H
 #define IECOREPYTHON_RADIXSORTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindRadixSort();
+IECOREPYTHON_API void bindRadixSort();
 }
 
 #endif // IECOREPYTHON_RADIXSORTBINDING_H

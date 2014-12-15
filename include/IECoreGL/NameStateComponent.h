@@ -43,6 +43,7 @@
 #include "boost/multi_index/member.hpp"
 #include "boost/multi_index/ordered_index.hpp"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECore/InternedString.h"
 
@@ -52,7 +53,7 @@ namespace IECoreGL
 /// The NameStateComponent class is used to specify the names of objects being rendered.
 /// It maps from a public name stored as a string to an integer name which is used
 /// with the Selector::loadName() method to perform selection of rendered objects.
-class NameStateComponent : public StateComponent
+class IECOREGL_API NameStateComponent : public StateComponent
 {
 	public :
 

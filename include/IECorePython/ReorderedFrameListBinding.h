@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_REORDEREDFRAMELISTBINDING_H
 #define IECOREPYTHON_REORDEREDFRAMELISTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindReorderedFrameList();
+IECOREPYTHON_API void bindReorderedFrameList();
 }
 
 #endif // IECOREPYTHON_REORDEREDFRAMELISTBINDING_H

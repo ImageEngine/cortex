@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CUBICBASISBINDING_H
 #define IECOREPYTHON_CUBICBASISBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCubicBasis();
+IECOREPYTHON_API void bindCubicBasis();
 
 }
 

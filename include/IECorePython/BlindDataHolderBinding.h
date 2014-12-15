@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_BLINDDATAHOLDERBINDING_H
 #define IECOREPYTHON_BLINDDATAHOLDERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindBlindDataHolder();
+IECOREPYTHON_API void bindBlindDataHolder();
 }
 
 #endif // IECOREPYTHON_BLINDDATAHOLDERBINDING_H

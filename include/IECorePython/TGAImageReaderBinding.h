@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TGAIMAGEREADERBINDING_H
 #define IECOREPYTHON_TGAIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTGAImageReader();
+IECOREPYTHON_API void bindTGAImageReader();
 }
 
 #endif // IECOREPYTHON_TGAIMAGEREADERBINDING_H

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MARSCHNERLOOKUPTABLEOPOPBINDING_H
 #define IECOREPYTHON_MARSCHNERLOOKUPTABLEOPOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMarschnerLookupTableOp();
+IECOREPYTHON_API void bindMarschnerLookupTableOp();
 
 } // namespace IECoreGL
 

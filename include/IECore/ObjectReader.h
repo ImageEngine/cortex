@@ -35,6 +35,7 @@
 #ifndef IE_CORE_OBJECTREADER_H
 #define IE_CORE_OBJECTREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundData.h"
@@ -44,7 +45,7 @@ namespace IECore
 
 /// An ObjectReader reads instances of a single Object from a file with a .cob extension
 /// \ingroup ioGroup
-class ObjectReader : public Reader
+class IECORE_API ObjectReader : public Reader
 {
 
 	public :

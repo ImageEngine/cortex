@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TRIANGLEALGOBINDING_H
 #define IECOREPYTHON_TRIANGLEALGOBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTriangleAlgo();
+IECOREPYTHON_API void bindTriangleAlgo();
 }
 
 #endif // IECOREPYTHON_TRIANGLEALGOBINDING_H

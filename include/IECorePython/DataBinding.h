@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATABINDING_H
 #define IECOREPYTHON_DATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindData();
+IECOREPYTHON_API void bindData();
 }
 
 #endif // IECOREPYTHON_DATABINDING_H

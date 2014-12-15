@@ -35,6 +35,7 @@
 #ifndef IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
 #define IE_CORE_UNIFORMRANDOMPOINTDISTRIBUTIONOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/MeshPrimitive.h"
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// For a fast, even distribution, the PointDistributionOp may be preferable to this one. However, if the mesh UVs
 /// are poorly layed out, this op may be the best choice.
 /// \ingroup geometryProcessingGroup
-class UniformRandomPointDistributionOp : public Op
+class IECORE_API UniformRandomPointDistributionOp : public Op
 {
 	public :
 

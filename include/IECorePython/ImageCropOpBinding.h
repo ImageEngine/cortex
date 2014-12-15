@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGECROPOPBINDING_H
 #define IECOREPYTHON_IMAGECROPOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImageCropOp();
+IECOREPYTHON_API void bindImageCropOp();
 }
 
 #endif // IECOREPYTHON_IMAGECROPOPBINDING_H

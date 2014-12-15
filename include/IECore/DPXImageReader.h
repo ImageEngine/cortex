@@ -35,6 +35,7 @@
 #ifndef IE_CORE_DPXIMAGEREADER_H
 #define IE_CORE_DPXIMAGEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
 
@@ -45,7 +46,7 @@ namespace IECore
 /// Currently, only the overwhelmingly popular 10-bit log-encoded pixel-interlaced
 /// format is loaded
 /// \ingroup ioGroup
-class DPXImageReader : public ImageReader
+class IECORE_API DPXImageReader : public ImageReader
 {
 
 	public:

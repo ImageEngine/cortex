@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PARTICLEREADER_H
 #define IE_CORE_PARTICLEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/Reader.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
@@ -48,7 +49,7 @@ namespace IECore
 /// Its main purpose is to define a standard set of parameters
 /// which all ParticleReaders should obey.
 /// \ingroup ioGroup
-class ParticleReader : public Reader
+class IECORE_API ParticleReader : public Reader
 {
 
 	public :

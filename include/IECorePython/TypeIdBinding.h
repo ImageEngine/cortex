@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TYPEIDBINDING_H
 #define IECOREPYTHON_TYPEIDBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTypeId();
+IECOREPYTHON_API void bindTypeId();
 }
 
 #endif // IECOREPYTHON_TYPEIDBINDING_H

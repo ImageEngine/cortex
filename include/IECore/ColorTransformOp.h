@@ -35,6 +35,7 @@
 #ifndef IECORE_COLORTRANSFORMOP_H
 #define IECORE_COLORTRANSFORMOP_H
 
+#include "IECore/Export.h"
 #include "IECore/PrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
 
@@ -46,7 +47,7 @@ namespace IECore
 /// "G", and "B" channels are transformed but this can be changed
 /// using the appropriate parameters.
 /// \ingroup imageProcessingGroup
-class ColorTransformOp : public PrimitiveOp
+class IECORE_API ColorTransformOp : public PrimitiveOp
 {
 	public :
 

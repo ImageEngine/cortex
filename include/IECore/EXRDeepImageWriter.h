@@ -38,6 +38,7 @@
 #include "OpenEXR/ImfCompression.h"
 #include "OpenEXR/half.h"
 
+#include "IECore/Export.h"
 #include "IECore/DeepImageWriter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/TypeIds.h"
@@ -49,7 +50,7 @@ namespace IECore
 /// \todo Currently we only support the writing of pixels by scanline in ascending order. Add random access.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class EXRDeepImageWriter : public DeepImageWriter
+class IECORE_API EXRDeepImageWriter : public DeepImageWriter
 {
 	public :
 

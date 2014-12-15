@@ -35,6 +35,7 @@
 #ifndef IECORE_DATAINTERLEAVEOP_H
 #define IECORE_DATAINTERLEAVEOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/NumericParameter.h"
@@ -45,7 +46,7 @@ namespace IECore
 /// The DataInterleaveOp interleaves the elements of a series
 /// of VectorTypedData into a single VectorTypedData result.
 /// \ingroup coreGroup
-class DataInterleaveOp : public Op
+class IECORE_API DataInterleaveOp : public Op
 {
 	public :
 

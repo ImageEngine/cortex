@@ -35,6 +35,8 @@
 #ifndef IECORERI_DSPY_H
 #define IECORERI_DSPY_H
 
+#include "IECoreRI/Export.h"
+
 #include "ndspy.h"
 
 namespace IECoreRI
@@ -45,7 +47,7 @@ namespace IECoreRI
 /// automatically registered with RenderMan using DspyRegisterDriverTable,
 /// but are public to allow their use in implementing display driver dsos
 /// as well.
-class Dspy
+class IECORERI_API Dspy
 {
 	
 	public :

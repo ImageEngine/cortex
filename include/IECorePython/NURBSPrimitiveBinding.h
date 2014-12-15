@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_NURBSPRIMITIVEBINDING_H
 #define IECOREPYTHON_NURBSPRIMITIVEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-	void bindNURBSPrimitive();
+IECOREPYTHON_API void bindNURBSPrimitive();
 }
 
 #endif // IECOREPYTHON_NURBSPRIMITIVEBINDING_H

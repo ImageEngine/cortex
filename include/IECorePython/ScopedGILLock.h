@@ -36,6 +36,7 @@
 #define IECOREPYTHON_SCOPEDGILLOCK_H
 
 #include "boost/python.hpp"
+#include "IECorePython/Export.h"
 
 namespace IECorePython
 {
@@ -45,7 +46,7 @@ namespace IECorePython
 /// other threads may have access to the interpreter. This should be used wherever
 /// C++ code calls the python C API, for instance in Wrapper methods which use
 /// get_override() to call into python.
-class ScopedGILLock : boost::noncopyable
+class IECOREPYTHON_API ScopedGILLock : boost::noncopyable
 {
 	
 	public :

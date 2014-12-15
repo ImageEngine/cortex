@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_OVERSAMPLESCALCULATORBINDING_H
 #define IECOREPYTHON_OVERSAMPLESCALCULATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindOversamplesCalculator();
+IECOREPYTHON_API void bindOversamplesCalculator();
 
 } // namespace IECorePython
 

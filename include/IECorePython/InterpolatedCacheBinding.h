@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_INTERPOLATEDCACHEBINDING_H
 #define IECOREPYTHON_INTERPOLATEDCACHEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindInterpolatedCache();
+IECOREPYTHON_API void bindInterpolatedCache();
 }
 
 #endif // IECOREPYTHON_INTERPOLATEDCACHEBINDING_H

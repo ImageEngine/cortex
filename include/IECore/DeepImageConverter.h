@@ -35,7 +35,9 @@
 #ifndef IECORE_DEEPIMAGECONVERTER_H
 #define IECORE_DEEPIMAGECONVERTER_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
+#include "IECore/FileNameParameter.h"
 
 namespace IECore
 {
@@ -48,7 +50,7 @@ IE_CORE_FORWARDDECLARE( FileNameParameter );
 /// \todo: should this operate on a FileSequence rather than a single file?
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class DeepImageConverter : public Op
+class IECORE_API DeepImageConverter : public Op
 {
 	public:
 

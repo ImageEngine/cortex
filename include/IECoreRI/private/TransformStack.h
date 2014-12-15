@@ -40,10 +40,12 @@
 
 #include "OpenEXR/ImathMatrix.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 		
-class TransformStack
+class IECORERI_API TransformStack
 {
 
 	public :

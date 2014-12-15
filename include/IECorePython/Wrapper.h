@@ -38,6 +38,7 @@
 #include <boost/python.hpp>
 #include <cassert>
 
+#include "IECorePython/Export.h"
 #include "IECorePython/WrapperGarbageCollector.h"
 
 namespace IECorePython

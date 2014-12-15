@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMATHVECVECTORBINDING_H
 #define IECOREPYTHON_IMATHVECVECTORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-extern void bindImathVecVectorTypedData();
+IECOREPYTHON_API extern void bindImathVecVectorTypedData();
 }
 
 #endif // IECOREPYTHON_IMATHVECVECTORBINDING_H

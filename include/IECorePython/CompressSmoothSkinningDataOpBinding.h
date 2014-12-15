@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_COMPRESSSMOOTHSKINNINGDATAOPBINDING_H
 #define IECOREPYTHON_COMPRESSSMOOTHSKINNINGDATAOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCompressSmoothSkinningDataOp();
+IECOREPYTHON_API void bindCompressSmoothSkinningDataOp();
 }
 
 #endif // IECOREPYTHON_COMPRESSSMOOTHSKINNINGDATAOPBINDING_H

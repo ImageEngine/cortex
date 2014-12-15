@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMAGETHINNERBINDING_H
 #define IECOREPYTHON_IMAGETHINNERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImageThinner();
+IECOREPYTHON_API void bindImageThinner();
 
 } // namespace IECorePython
 

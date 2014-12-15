@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_FILESEQUENCEVECTORPARAMETERBINDING_H
 #define IECOREPYTHON_FILESEQUENCEVECTORPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFileSequenceVectorParameter();
+IECOREPYTHON_API void bindFileSequenceVectorParameter();
 
 }
 

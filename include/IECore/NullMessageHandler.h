@@ -35,6 +35,7 @@
 #ifndef IE_CORE_NULLMESSAGEHANDLER_H
 #define IE_CORE_NULLMESSAGEHANDLER_H
 
+#include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
 
 namespace IECore
@@ -48,7 +49,7 @@ IE_CORE_DECLAREPTR( NullMessageHandler );
 /// messages. It can therefore be used to
 /// suppress all message output.
 /// \ingroup utilityGroup
-class NullMessageHandler : public MessageHandler
+class IECORE_API NullMessageHandler : public MessageHandler
 {
 
 	public :

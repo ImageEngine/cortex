@@ -37,6 +37,7 @@
 
 #include "boost/static_assert.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/CompoundObject.h"
 
@@ -226,7 +227,7 @@ void TypedParameter<T>::setTypedValue( const T &value )
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class TypedParameter<T>;
+	template class IECORE_API TypedParameter<T>;
 
 }
 

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_FACEAREAOPBINDING_H
 #define IECOREPYTHON_FACEAREAOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFaceAreaOp();
+IECOREPYTHON_API void bindFaceAreaOp();
 
 } // namespace IECorePython
 

@@ -35,6 +35,7 @@
 #ifndef IECORE_CURVELINEARISER_H
 #define IECORE_CURVELINEARISER_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/NumericParameter.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// An op to convert cubic curves to linear curves.
 /// \ingroup geometryProcessingGroup
-class CurveLineariser : public CurvesPrimitiveOp
+class IECORE_API CurveLineariser : public CurvesPrimitiveOp
 {
 	public :
 

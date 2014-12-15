@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PDCPARTICLEWRITER_H
 #define IE_CORE_PDCPARTICLEWRITER_H
 
+#include "IECore/Export.h"
 #include "IECore/ParticleWriter.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// The PDCParticleWriter class creates files in maya pdc format.
 /// \ingroup ioGroup
-class PDCParticleWriter : public ParticleWriter
+class IECORE_API PDCParticleWriter : public ParticleWriter
 {
 
 	public :

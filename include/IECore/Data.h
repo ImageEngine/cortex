@@ -35,6 +35,7 @@
 #ifndef IE_CORE_DATA_H
 #define IE_CORE_DATA_H
 
+#include "IECore/Export.h"
 #include "IECore/Object.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// A base class for data storage.
 /// \ingroup coreGroup
-class Data : public Object
+class IECORE_API Data : public Object
 {
 	public :
 

@@ -32,9 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/SphericalHarmonicsRotationMatrix.h"
 
 using namespace IECore;
 
-template class SphericalHarmonicsRotationMatrix<float>;
-template class SphericalHarmonicsRotationMatrix<double>;
+template class IECORE_API SphericalHarmonicsRotationMatrix<float>;
+template class IECORE_API SphericalHarmonicsRotationMatrix<double>;

@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PRIMITIVE_H
 #define IE_CORE_PRIMITIVE_H
 
+#include "IECore/Export.h"
 #include "IECore/VisibleRenderable.h"
 #include "IECore/PrimitiveVariable.h"
 
@@ -50,7 +51,7 @@ namespace IECore
 /// the renderer to define various aspects of its appearance.
 /// \todo Validation of variableSizes before rendering.
 /// \ingroup geometryGroup
-class Primitive : public VisibleRenderable
+class IECORE_API Primitive : public VisibleRenderable
 {
 	public:
 

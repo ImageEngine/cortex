@@ -35,6 +35,7 @@
 #ifndef IECORE_CONVERTER_H
 #define IECORE_CONVERTER_H
 
+#include "IECore/Export.h"
 #include "IECore/Parameterised.h"
 
 namespace IECore
@@ -48,7 +49,7 @@ namespace IECore
 /// objects where there are no parameters necessary (for example vector types)
 /// see Convert.h.
 /// \ingroup conversionGroup
-class Converter : public Parameterised
+class IECORE_API Converter : public Parameterised
 {
 
 	public :

@@ -35,6 +35,7 @@
 #ifndef IECORE_IMAGETHINNER_H
 #define IECORE_IMAGETHINNER_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 #include "IECore/NumericParameter.h"
 
@@ -56,7 +57,7 @@ namespace IECore
 ///
 /// http://tog.acm.org/resources/GraphicsGems/
 /// \ingroup imageProcessingGroup
-class ImageThinner : public ChannelOp
+class IECORE_API ImageThinner : public ChannelOp
 {
 	public:
 

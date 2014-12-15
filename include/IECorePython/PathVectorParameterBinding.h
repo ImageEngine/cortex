@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PATHVECTORPARAMETERBINDING_H
 #define IECOREPYTHON_PATHVECTORPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPathVectorParameter();
+IECOREPYTHON_API void bindPathVectorParameter();
 }
 
 #endif // IECOREPYTHON_PATHVECTORPARAMETERBINDING_H

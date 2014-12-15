@@ -35,6 +35,7 @@
 #ifndef IECOREGL_STATECOMPONENT_H
 #define IECOREGL_STATECOMPONENT_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/State.h"
@@ -47,7 +48,7 @@ IE_CORE_FORWARDDECLARE( StateComponent );
 /// \todo We shouldn't be using TypeId objects for the StateComponent identifiers - we should
 /// use summink else (we need to have a Shader and a FixedShader component that both occupy the
 /// same slot).
-class StateComponent : public Bindable
+class IECOREGL_API StateComponent : public Bindable
 {
 
 	public :

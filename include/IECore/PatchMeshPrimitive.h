@@ -35,6 +35,7 @@
 #ifndef IECORE_PATCHMESHPRIMITIVE_H
 #define IECORE_PATCHMESHPRIMITIVE_H
 
+#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"
@@ -44,7 +45,7 @@ namespace IECore
 
 /// A Primitive representation of an RiPatchMesh
 /// \ingroup geometryGroup
-class PatchMeshPrimitive : public Primitive
+class IECORE_API PatchMeshPrimitive : public Primitive
 {
 	public :
 

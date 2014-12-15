@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_PREWORLDRENDERABLEBINDING_H
 #define IECOREPYTHON_PREWORLDRENDERABLEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindPreWorldRenderable();
+IECOREPYTHON_API void bindPreWorldRenderable();
 
 }
 

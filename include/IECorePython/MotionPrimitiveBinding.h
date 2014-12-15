@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MOTIONPRIMITIVEBINDING_H
 #define IECOREPYTHON_MOTIONPRIMITIVEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMotionPrimitive();
+IECOREPYTHON_API void bindMotionPrimitive();
 }
 
 #endif // IECOREPYTHON_MOTIONPRIMITIVEBINDING_H

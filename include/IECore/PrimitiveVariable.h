@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PRIMITIVEVARIABLE_H
 #define IE_CORE_PRIMITIVEVARIABLE_H
 
+#include "IECore/Export.h"
 #include "IECore/Data.h"
 
 namespace IECore
@@ -43,7 +44,7 @@ namespace IECore
 /// The PrimitiveVariable defines a simple
 /// structure to store primitive variables to
 /// be used by the Renderer and Primitive classes.
-struct PrimitiveVariable {
+struct IECORE_API PrimitiveVariable {
 	/// The Interpolation enum is used to describe how the
 	/// values of a Variable are to be interpolated
 	/// across the surface of a Primitive. The types are

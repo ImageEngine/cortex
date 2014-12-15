@@ -42,6 +42,7 @@
 
 #include "boost/static_assert.hpp"
 
+#include "IECore/export.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
@@ -91,6 +92,6 @@ bool TypedObjectParameter<T>::valueValid( const Object *value, std::string *reas
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class TypedObjectParameter<T>;
+	template class IECORE_API TypedObjectParameter<T>;
 
 }

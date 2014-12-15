@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_WARPOPBINDING_H
 #define IECOREPYTHON_WARPOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindWarpOp();
+IECOREPYTHON_API void bindWarpOp();
 
 } // namespace IECorePython
 

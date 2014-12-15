@@ -35,6 +35,7 @@
 #ifndef IE_CORE_COMPOUNDMESSAGEHANDLER_H
 #define IE_CORE_COMPOUNDMESSAGEHANDLER_H
 
+#include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
 
 #include <set>
@@ -47,7 +48,7 @@ namespace IECore
 /// messages to a set containing an arbitrary number
 /// of child message handlers.
 /// \ingroup utilityGroup
-class CompoundMessageHandler : public MessageHandler
+class IECORE_API CompoundMessageHandler : public MessageHandler
 {
 
 	public :

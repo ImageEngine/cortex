@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_TIMECODEPARAMETERBINDING_H
 #define IECOREPYTHON_TIMECODEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindTimeCodeParameter();
+IECOREPYTHON_API void bindTimeCodeParameter();
 
 }
 
