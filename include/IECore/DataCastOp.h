@@ -35,6 +35,7 @@
 #ifndef IE_CORE_DATACASTOP_H
 #define IE_CORE_DATACASTOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NumericParameter.h"
@@ -45,7 +46,7 @@ namespace IECore
 /// The CastDataOp performs cast convertion on Data types.
 /// \ingroup coreGroup
 /// \see DataPromoteOp, DataConvertOp
-class DataCastOp : public Op
+class IECORE_API DataCastOp : public Op
 {
 	public :
 

@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundObject.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Shader.h"
 
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( TextureLoader )
 /// from StateComponent and therefore can be used to apply Shaders
 /// to Primitives within a Group or Scene.
 /// \todo Allow this to specify texture filtering and wrap modes.
-class ShaderStateComponent : public StateComponent
+class IECOREGL_API ShaderStateComponent : public StateComponent
 {
 
 	public :
@@ -65,6 +66,8 @@ class ShaderStateComponent : public StateComponent
 		/// it possible to create ShaderStateComponents concurrently in multiple threads, with the actual
 		/// GL resource creation deferred until the drawing thread uses shaderSetup().
 		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues );
+		/// Destructor
+		virtual ~ShaderStateComponent();
 
 		/// Implemented to do nothing - it is the responsibility of the Primitive
 		/// to actually bind the shaderSetup() at an appropriate time.

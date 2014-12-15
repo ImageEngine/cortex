@@ -35,10 +35,12 @@
 #ifndef IECOREGL_CURVESPRIMITIVEBINDING_H
 #define IECOREGL_CURVESPRIMITIVEBINDING_H
 
+#include "IECoreGL/Export.h"
+
 namespace IECoreGL
 {
 
-void bindCurvesPrimitive();
+IECOREGL_API void bindCurvesPrimitive();
 
 } // namespace IECoreGL
 

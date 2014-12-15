@@ -40,6 +40,7 @@
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/Primitive.h"
 
@@ -53,7 +54,7 @@ IE_CORE_FORWARDDECLARE( PrimitiveEvaluator );
 /// them by creating static instances of PrimitiveEvaluator::Description. The evaluator takes an internal copy of the primitive,
 /// so subsequent changes to it will not be reflected in the evaluator's results.
 /// \ingroup geometryProcessingGroup
-class PrimitiveEvaluator : public RunTimeTyped
+class IECORE_API PrimitiveEvaluator : public RunTimeTyped
 {
 	public:
 

@@ -35,6 +35,7 @@
 #ifndef IECOREGL_RENDERABLE_H
 #define IECOREGL_RENDERABLE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 
 #include "IECore/RunTimeTyped.h"
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( State );
 /// The Renderable class provides an abstract base class
 /// for all classes capable of producing a visible result in
 /// an OpenGL context.
-class Renderable : public IECore::RunTimeTyped
+class IECOREGL_API Renderable : public IECore::RunTimeTyped
 {
 
 	public :

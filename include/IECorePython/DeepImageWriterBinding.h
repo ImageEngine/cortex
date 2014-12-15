@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_DEEPIMAGEWRITERBINDING_H
 #define IECOREPYTHON_DEEPIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindDeepImageWriter();
+IECOREPYTHON_API void bindDeepImageWriter();
 
 }
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_LINESEGMENTBINDING_H
 #define IECOREPYTHON_LINESEGMENTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindLineSegment();
+IECOREPYTHON_API void bindLineSegment();
 }
 
 #endif // IECOREPYTHON_LINESEGMENTBINDING_H

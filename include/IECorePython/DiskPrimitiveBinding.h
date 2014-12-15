@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DISKPRIMITIVEBINDING_H
 #define IECOREPYTHON_DISKPRIMITIVEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-	void bindDiskPrimitive();
+IECOREPYTHON_API void bindDiskPrimitive();
 }
 
 #endif // IECOREPYTHON_DISKPRIMITIVEBINDING_H

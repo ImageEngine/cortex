@@ -35,6 +35,7 @@
 #ifndef IE_CORE_BINARYFRAMELIST_H
 #define IE_CORE_BINARYFRAMELIST_H
 
+#include "IECore/Export.h"
 #include "IECore/ReorderedFrameList.h"
 
 namespace IECore
@@ -46,7 +47,7 @@ namespace IECore
 /// the whole sequence, providing earlier information about stuff going on
 /// in the middle and end of the sequence.
 /// \ingroup fileSequenceGroup
-class BinaryFrameList : public ReorderedFrameList
+class IECORE_API BinaryFrameList : public ReorderedFrameList
 {
 	public:
 

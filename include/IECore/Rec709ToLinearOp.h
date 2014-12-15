@@ -35,6 +35,7 @@
 #ifndef IECORE_REC709TOLINEAROP_H
 #define IECORE_REC709TOLINEAROP_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 #include "IECore/ColorSpaceTransformOp.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// Applies Rec709 to linear conversion on ImagePrimitive channels.
 /// \ingroup imageProcessingGroup
-class Rec709ToLinearOp : public ChannelOp
+class IECORE_API Rec709ToLinearOp : public ChannelOp
 {
 	public:
 

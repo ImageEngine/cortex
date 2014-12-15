@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CAMELCASEBINDING_H
 #define IECOREPYTHON_CAMELCASEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCamelCase();
+IECOREPYTHON_API void bindCamelCase();
 
 } // namespace IECorePython
 

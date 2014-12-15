@@ -39,13 +39,15 @@
 
 #include "IECore/Primitive.h"
 
+#include "IECoreArnold/Export.h"
+
 namespace IECoreArnold
 {
 
 /// A class for managing the conversion of a series of IECore::Primitives to
 /// AtNodes, automatically returning ginstances when a previously converted
 /// primitive is processed again.
-class InstancingConverter : public IECore::RefCounted
+class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 {
 
 	public :

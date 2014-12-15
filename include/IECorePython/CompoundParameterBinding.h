@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_COMPOUNDPARAMETERBINDING_H
 #define IECOREPYTHON_COMPOUNDPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCompoundParameter();
+IECOREPYTHON_API void bindCompoundParameter();
 }
 
 #endif // IECOREPYTHON_COMPOUNDPARAMETERBINDING_H

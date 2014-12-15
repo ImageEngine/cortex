@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLCAMERACONVERTER_H
 #define IECOREGL_TOGLCAMERACONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 #include "IECore/Camera.h"
@@ -46,7 +47,7 @@ IE_CORE_FORWARDDECLARE( Camera );
 
 /// Converts IECore::Camera objects into IECoreGL::Camera objects.
 /// \ingroup conversionGroup
-class ToGLCameraConverter : public ToGLConverter
+class IECOREGL_API ToGLCameraConverter : public ToGLConverter
 {
 
 	public :

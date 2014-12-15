@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PARTICLEWRITER_H
 #define IE_CORE_PARTICLEWRITER_H
 
+#include "IECore/Export.h"
 #include "IECore/Writer.h"
 #include "IECore/VectorTypedParameter.h"
 
@@ -48,7 +49,7 @@ IE_CORE_FORWARDDECLARE( PointsPrimitive );
 /// Its main purpose is to define a standard set of parameters
 /// which all ParticleWriters should obey.
 /// \ingroup ioGroup
-class ParticleWriter : public Writer
+class IECORE_API ParticleWriter : public Writer
 {
 
 	public :

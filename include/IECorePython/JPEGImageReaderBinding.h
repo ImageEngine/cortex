@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_JPEGIMAGEREADERBINDING_H
 #define IECOREPYTHON_JPEGIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindJPEGImageReader();
+IECOREPYTHON_API void bindJPEGImageReader();
 }
 
 #endif // IECOREPYTHON_JPEGIMAGEREADERBINDING_H

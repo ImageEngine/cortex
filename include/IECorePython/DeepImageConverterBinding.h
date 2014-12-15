@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_DEEPIMAGECONVERTERBINDING_H
 #define IECOREPYTHON_DEEPIMAGECONVERTERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindDeepImageConverter();
+IECOREPYTHON_API void bindDeepImageConverter();
 
 } // namespace IECorePython
 

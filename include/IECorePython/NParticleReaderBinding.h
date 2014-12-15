@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IFFNPARTICLEREADERBINDING_H
 #define IECOREPYTHON_IFFNPARTICLEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-  void bindNParticleReader();
+IECOREPYTHON_API void bindNParticleReader();
 }
 
 #endif // IECOREPYTHON_IFFNPARTICLEREADERBINDING_H

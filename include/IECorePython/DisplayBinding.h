@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_DISPLAYBINDING_H
 #define IECOREPYTHON_DISPLAYBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindDisplay();
+IECOREPYTHON_API void bindDisplay();
 
 }
 

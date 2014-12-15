@@ -35,6 +35,7 @@
 #ifndef IECORE_POINTDISTRIBUTIONOP_H
 #define IECORE_POINTDISTRIBUTIONOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/MeshPrimitiveEvaluator.h"
 #include "IECore/NumericParameter.h"
@@ -48,7 +49,7 @@ namespace IECore
 /// and mapping it to 3d space. It gives a more even distribution than MappedRandomPointDistributionOp,
 /// but requires UVs that are well layed out in order to work efficiently.
 /// \ingroup geometryProcessingGroup
-class PointDistributionOp : public Op
+class IECORE_API PointDistributionOp : public Op
 {
 	public :
 

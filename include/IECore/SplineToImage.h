@@ -35,6 +35,7 @@
 #ifndef IECORE_SPLINETOIMAGE_H
 #define IECORE_SPLINETOIMAGE_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/ObjectParameter.h"
@@ -47,7 +48,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// This Op creates ImagePrimitives from SplineData.
 /// \todo Different projections would be nice.
 /// \ingroup imageProcessingGroup
-class SplineToImage : public Op
+class IECORE_API SplineToImage : public Op
 {
 	public :
 

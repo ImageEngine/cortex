@@ -35,6 +35,7 @@
 #ifndef IECORE_UVDISTORT_H
 #define IECORE_UVDISTORT_H
 
+#include "IECore/Export.h"
 #include "IECore/WarpOp.h"
 #include "ObjectParameter.h"
 
@@ -46,7 +47,7 @@ namespace IECore
 // The normalized coordinates (0,0)x(1,1) in the uv map will map to the display window of the input image.
 // The resulting image will have the same data window as the reference UV map.
 /// \ingroup imageProcessingGroup
-class UVDistortOp : public WarpOp
+class IECORE_API UVDistortOp : public WarpOp
 {
 	public:
 

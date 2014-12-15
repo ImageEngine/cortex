@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_EXRIMAGEWRITERBINDING_H
 #define IECOREPYTHON_EXRIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindEXRImageWriter();
+IECOREPYTHON_API void bindEXRImageWriter();
 }
 
 #endif // IECOREPYTHON_EXRIMAGEWRITERBINDING_H

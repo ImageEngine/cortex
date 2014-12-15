@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_REVERSEDFRAMELISTBINDING_H
 #define IECOREPYTHON_REVERSEDFRAMELISTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindReversedFrameList();
+IECOREPYTHON_API void bindReversedFrameList();
 }
 
 #endif // IECOREPYTHON_REVERSEDFRAMELISTBINDING_H

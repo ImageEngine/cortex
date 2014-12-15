@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_FONTBINDING_H
 #define IECOREPYTHON_FONTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindFont();
+IECOREPYTHON_API void bindFont();
 }
 
 #endif // IECOREPYTHON_FONTBINDING_H

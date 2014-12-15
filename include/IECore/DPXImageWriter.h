@@ -35,6 +35,7 @@
 #ifndef IE_CORE_DPXIMAGEWRITER_H
 #define IE_CORE_DPXIMAGEWRITER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageWriter.h"
 #include "IECore/VectorTypedData.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// The DPXImageWriter class serializes images to the Digital Picture eXchange 10-bit log image format
 /// \ingroup ioGroup
-class DPXImageWriter : public ImageWriter
+class IECORE_API DPXImageWriter : public ImageWriter
 {
 
 	public:

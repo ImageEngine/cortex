@@ -42,6 +42,8 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/ToCoreConverter.h"
 
+#include "IECoreAlembic/Export.h"
+
 namespace IECoreAlembic
 {
 
@@ -53,7 +55,7 @@ IE_CORE_FORWARDDECLARE( AlembicInput )
 /// reading of 3D scene data only. Finer control and lower level
 /// access can be obtained by using a combination of the Alembic
 /// APIs and the FromAlembicConverters.
-class AlembicInput : public IECore::RefCounted
+class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 {
 
 	public :

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_HITMISSTRANSFORMBINDING_H
 #define IECOREPYTHON_HITMISSTRANSFORMBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindHitMissTransform();
+IECOREPYTHON_API void bindHitMissTransform();
 
 } // namespace IECorePython
 

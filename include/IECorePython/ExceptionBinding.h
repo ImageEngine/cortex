@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_EXCEPTIONBINDING_H
 #define IECOREPYTHON_EXCEPTIONBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindException();
+IECOREPYTHON_API void bindException();
 }
 
 #endif // IECOREPYTHON_EXCEPTIONBINDING_H

@@ -35,6 +35,7 @@
 #ifndef IECOREGL_COLORTEXTURE_H
 #define IECOREGL_COLORTEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
@@ -44,7 +45,7 @@ namespace IECoreGL
 /// channels and an optional alpha channel.
 /// It is suitable for use as the color attachment for
 /// a FrameBuffer.
-class ColorTexture : public Texture
+class IECOREGL_API ColorTexture : public Texture
 {
 	public :
 

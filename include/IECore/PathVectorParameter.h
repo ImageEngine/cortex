@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PATHVECTORPARAMETER_H
 #define IE_CORE_PATHVECTORPARAMETER_H
 
+#include "IECore/Export.h"
 #include "IECore/VectorTypedParameter.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// This class implements a StringVectorParameter object with validation
 /// of its elements based on it representing a list of file/directory paths.
-class PathVectorParameter : public StringVectorParameter
+class IECORE_API PathVectorParameter : public StringVectorParameter
 {
 	public :
 

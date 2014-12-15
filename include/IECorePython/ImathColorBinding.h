@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMATHCOLORBINDING_H
 #define IECOREPYTHON_IMATHCOLORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImathColor();
+IECOREPYTHON_API void bindImathColor();
 }
 
 #endif // IECOREPYTHON_IMATHCOLORBINDING_H

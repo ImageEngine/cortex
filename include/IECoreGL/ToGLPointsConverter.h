@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLPOINTSCONVERTER_H
 #define IECOREGL_TOGLPOINTSCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( PointsPrimitive );
 
 /// Converts IECore::PointsPrimitive objects into IECoreGL::PointsPrimitive objects.
 /// \ingroup conversionGroup
-class ToGLPointsConverter : public ToGLConverter
+class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 {
 
 	public :

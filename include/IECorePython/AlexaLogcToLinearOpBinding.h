@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_ALEXALOGCTOLINEAROPBINDING_H
 #define IECOREPYTHON_ALEXALOGCTOLINEAROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindAlexaLogcToLinearOp();
+IECOREPYTHON_API void bindAlexaLogcToLinearOp();
 
 } // namespace IECorePython
 

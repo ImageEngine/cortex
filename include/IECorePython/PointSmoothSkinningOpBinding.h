@@ -38,9 +38,11 @@
 #ifndef IE_COREPYTHON_POINTSMOOTHSKINNINGOPBINDING_H
 #define IE_COREPYTHON_POINTSMOOTHSKINNINGOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointSmoothSkinningOp();
+IECOREPYTHON_API void bindPointSmoothSkinningOp();
 }
 
 #endif //IE_COREPYTHON_POINTSMOOTHSKINNINGOPBINDING_H

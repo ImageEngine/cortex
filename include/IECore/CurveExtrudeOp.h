@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The CurveExtrudeOp lofts RiCurves into RiPatchMesh cylinders, obeying any width primvars present.
 /// \ingroup geometryProcessingGroup
-class CurveExtrudeOp : public Op
+class IECORE_API CurveExtrudeOp : public Op
 {
 	public :
 

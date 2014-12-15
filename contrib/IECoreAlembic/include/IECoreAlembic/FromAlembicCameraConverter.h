@@ -40,11 +40,12 @@
 #include "IECore/Camera.h"
 
 #include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-class FromAlembicCameraConverter : public FromAlembicConverter
+class IECOREALEMBIC_API FromAlembicCameraConverter : public FromAlembicConverter
 {
 
 	public :

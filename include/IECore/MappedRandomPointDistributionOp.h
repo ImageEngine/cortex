@@ -35,6 +35,7 @@
 #ifndef IE_CORE_MAPPEDRANDOMPOINTDISTRIBUTIONOP_H
 #define IE_CORE_MAPPEDRANDOMPOINTDISTRIBUTIONOP_H
 
+#include "IECore/Export.h"
 #include "IECore/UniformRandomPointDistributionOp.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/ImagePrimitiveEvaluator.h"
@@ -50,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 /// For a fast, even distribution, the PointDistributionOp may be preferable to this one. However, if the mesh UVs
 /// are poorly layed out, this op may be the best choice.
 /// \ingroup geometryProcessingGroup
-class MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
+class IECORE_API MappedRandomPointDistributionOp : public UniformRandomPointDistributionOp
 {
 	public :
 

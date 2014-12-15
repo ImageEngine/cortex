@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SRGBTOLINEAROPBINDING_H
 #define IECOREPYTHON_SRGBTOLINEAROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSRGBToLinearOp();
+IECOREPYTHON_API void bindSRGBToLinearOp();
 
 } // namespace IECorePython
 

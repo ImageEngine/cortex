@@ -35,6 +35,7 @@
 #ifndef IE_CORE_OSTREAMMESSAGEHANDLER_H
 #define IE_CORE_OSTREAMMESSAGEHANDLER_H
 
+#include "IECore/Export.h"
 #include "IECore/MessageHandler.h"
 
 #include <ostream>
@@ -48,7 +49,7 @@ IE_CORE_DECLAREPTR( OStreamMessageHandler );
 /// This class implements a simple MessageHandler
 /// to write to a std::ostream object.
 /// \ingroup utilityGroup
-class OStreamMessageHandler : public MessageHandler
+class IECORE_API OStreamMessageHandler : public MessageHandler
 {
 
 	public :

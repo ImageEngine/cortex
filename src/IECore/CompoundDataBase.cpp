@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/CompoundDataBase.h"
+#include "IECore/Export.h"
 #include "IECore/TypedData.inl"
 
 #include <iostream>
@@ -209,4 +210,4 @@ void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
 } // namespace IECore
 
 // Instantiate that bad boy.
-template class TypedData<CompoundDataMap>;
+template class IECORE_API TypedData<CompoundDataMap>;

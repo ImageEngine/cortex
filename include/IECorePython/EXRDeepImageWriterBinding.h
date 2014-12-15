@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_EXRDEEPIMAGEWRITER_BINDING
 #define IECOREPYTHON_EXRDEEPIMAGEWRITER_BINDING
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 #ifdef IECORE_WITH_DEEPEXR
-	void bindEXRDeepImageWriter();
+IECOREPYTHON_API void bindEXRDeepImageWriter();
 #endif
 }
 

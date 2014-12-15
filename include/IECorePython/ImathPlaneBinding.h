@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMATHPLANEBINDING_H
 #define IECOREPYTHON_IMATHPLANEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImathPlane();
+IECOREPYTHON_API void bindImathPlane();
 
 }
 

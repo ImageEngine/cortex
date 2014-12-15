@@ -38,6 +38,7 @@
 #ifndef IE_CORE_SMOOTHSKINNINGDATA_H
 #define IE_CORE_SMOOTHSKINNINGDATA_H
 
+#include "IECore/Export.h"
 #include "IECore/Data.h"
 #include "IECore/VectorTypedData.h"
 
@@ -85,7 +86,7 @@ IE_CORE_FORWARDDECLARE( SmoothSkinningData )
 /// arrays. In our example, the 4th point is influenced by 0.9*trfA and 0.1*trfB. The 2nd point is influenced by 1.0*trfA
 /// and the third point is influenced by 50% from both infA and infB.
 /// \ingroup skinningGroup
-class SmoothSkinningData : public Data
+class IECORE_API SmoothSkinningData : public Data
 {
 	public:
 

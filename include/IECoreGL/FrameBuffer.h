@@ -39,6 +39,7 @@
 
 #include "IECore/RunTimeTyped.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypeIds.h"
 
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( DepthTexture );
 /// The FrameBuffer object provides a nice reference counted wrapper
 /// around the OpenGL framebuffer object extension. It uses the Texture
 /// classes to set the components of the framebuffer.
-class FrameBuffer : public IECore::RunTimeTyped
+class IECOREGL_API FrameBuffer : public IECore::RunTimeTyped
 {
 	public :
 

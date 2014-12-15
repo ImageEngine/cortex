@@ -52,7 +52,7 @@ MeshPrimitiveBuilder::MeshPrimitiveBuilder()
 namespace IECore
 {
 
-template<>
+template<> IECORE_API
 void MeshPrimitiveBuilder::addVertex<float>( const Imath::Vec3<float> &p, const Imath::Vec3<float> &n )
 {
 	assert( m_P );
@@ -62,7 +62,7 @@ void MeshPrimitiveBuilder::addVertex<float>( const Imath::Vec3<float> &p, const 
 	m_N->writable().push_back( n.normalized() );
 }
 
-template<>
+template<> IECORE_API
 void MeshPrimitiveBuilder::addVertex<double>( const Imath::Vec3<double> &p, const Imath::Vec3<double> &n )
 {
 	assert( m_P );

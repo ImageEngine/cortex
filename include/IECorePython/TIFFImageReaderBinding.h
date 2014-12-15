@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TIFFIMAGEREADERBINDING_H
 #define IECOREPYTHON_TIFFIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTIFFImageReader();
+IECOREPYTHON_API void bindTIFFImageReader();
 }
 
 #endif // IECOREPYTHON_TIFFIMAGEREADERBINDING_H

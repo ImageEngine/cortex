@@ -34,6 +34,7 @@
 #ifndef IE_CORE_TIFFIMAGEREADER_H
 #define IE_CORE_TIFFIMAGEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
 
@@ -67,7 +68,7 @@ namespace IECore
 /// TIFFTAG_YPOSITION<br>
 ///
 /// \ingroup ioGroup
-class TIFFImageReader : public ImageReader
+class IECORE_API TIFFImageReader : public ImageReader
 {
 
 	public:

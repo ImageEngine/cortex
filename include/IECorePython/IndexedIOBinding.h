@@ -35,6 +35,8 @@
 #ifndef IECOREPYTHON_INDEXEDIOBINDING_H
 #define IECOREPYTHON_INDEXEDIOBINDING_H
 
-extern void bindIndexedIO();
+#include "IECorePython/Export.h"
+
+extern IECOREPYTHON_API void bindIndexedIO();
 
 #endif // IECOREPYTHON_INDEXEDIOBINDING_H

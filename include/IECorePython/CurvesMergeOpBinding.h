@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CURVESMERGEOPBINDING_H
 #define IECOREPYTHON_CURVESMERGEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCurvesMergeOp();
+IECOREPYTHON_API void bindCurvesMergeOp();
 
 } // namespace IECorePython
 

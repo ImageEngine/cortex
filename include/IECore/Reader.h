@@ -40,6 +40,7 @@
 
 #include "boost/function.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/CompoundObject.h"
 
@@ -52,7 +53,7 @@ IE_CORE_FORWARDDECLARE( FileNameParameter );
 /// The Reader class defines an interface for loading
 /// files of arbitrary type in the form of Object instances.
 /// \ingroup ioGroup
-class Reader : public Op
+class IECORE_API Reader : public Op
 {
 
 	public :

@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLMESHCONVERTER_H
 #define IECOREGL_TOGLMESHCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( MeshPrimitive );
 
 /// Converts IECore::MeshPrimitive objects into IECoreGL::MeshPrimitive objects.
 /// \ingroup conversionGroup
-class ToGLMeshConverter : public ToGLConverter
+class IECOREGL_API ToGLMeshConverter : public ToGLConverter
 {
 
 	public :

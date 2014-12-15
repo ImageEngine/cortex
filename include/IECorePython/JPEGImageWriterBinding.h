@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_JPEGIMAGEWRITERBINDING_H
 #define IECOREPYTHON_JPEGIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindJPEGImageWriter();
+IECOREPYTHON_API void bindJPEGImageWriter();
 }
 
 #endif // IECOREPYTHON_JPEGIMAGEWRITERBINDING_H

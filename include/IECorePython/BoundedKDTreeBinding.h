@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_BOUNDEDKDTREEBINDING_H
 #define IECOREPYTHON_BOUNDEDKDTREEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindBoundedKDTree();
+IECOREPYTHON_API void bindBoundedKDTree();
 }
 
 #endif // IECOREPYTHON_BOUNDEDKDTREEBINDING_H

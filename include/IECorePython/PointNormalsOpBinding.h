@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTNORMALSOPBINDING_H
 #define IECOREPYTHON_POINTNORMALSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointNormalsOp();
+IECOREPYTHON_API void bindPointNormalsOp();
 }
 
 #endif // IECOREPYTHON_POINTNORMALSOPBINDING_H

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SHAREDSCENEINTERFACESBINDING_H
 #define IECOREPYTHON_SHAREDSCENEINTERFACESBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSharedSceneInterfaces();
+IECOREPYTHON_API void bindSharedSceneInterfaces();
 
 }
 

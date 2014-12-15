@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMATHEULERBINDING_H
 #define IECOREPYTHON_IMATHEULERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImathEuler();
+IECOREPYTHON_API void bindImathEuler();
 
 }
 

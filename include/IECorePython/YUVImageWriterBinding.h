@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_YUVIMAGEWRITERBINDING_H
 #define IECOREPYTHON_YUVIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindYUVImageWriter();
+IECOREPYTHON_API void bindYUVImageWriter();
 }
 
 #endif // IECOREPYTHON_YUVIMAGEWRITERBINDING_H

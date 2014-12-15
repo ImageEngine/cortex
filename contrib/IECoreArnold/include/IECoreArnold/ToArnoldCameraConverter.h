@@ -36,6 +36,7 @@
 #define IECOREARNOLD_TOARNOLDCAMERACONVERTER_H
 
 #include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/Export.h"
 
 namespace IECore
 {
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( Camera );
 namespace IECoreArnold
 {
 
-class ToArnoldCameraConverter : public ToArnoldConverter
+class IECOREARNOLD_API ToArnoldCameraConverter : public ToArnoldConverter
 {
 
 	public :

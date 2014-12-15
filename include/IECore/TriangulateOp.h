@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
@@ -48,7 +49,7 @@ namespace IECore
 /// \todo Currently we just do a simple "fan" across the face, but we eventually need
 /// to deal with concave polygons, polgons with holes, and non-planar polygons
 /// \ingroup geometryProcessingGroup
-class TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
+class IECORE_API TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 {
 	public:
 

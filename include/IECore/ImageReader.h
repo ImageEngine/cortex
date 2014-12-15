@@ -35,6 +35,7 @@
 #ifndef IE_CORE_IMAGEREADER_H
 #define IE_CORE_IMAGEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/Reader.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
@@ -55,7 +56,7 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 /// possible to the original data type stored on the file. Note that most image Ops available on IECore
 /// will only work on float data channels.
 /// \ingroup ioGroup
-class ImageReader : public Reader
+class IECORE_API ImageReader : public Reader
 {
 
 	public:

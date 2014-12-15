@@ -44,6 +44,7 @@
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/half.h"
 
+#include "IECore/Export.h"
 #include "IECore/TypedData.h"
 #include "IECore/GeometricTypedData.h"
 #include "IECore/LineSegment.h"
@@ -97,7 +98,7 @@ IECORE_DECLARE_TYPEDDATA( LineSegment3dData, LineSegment3d, double, SimpleDataHo
 /// \deprecated This class allows data of the obsolete typeId LongDataTypeId or typename "LongData" to register
 /// itself with an IntData constructor to the Object factory. This allows temporary backwards compatibility (since
 /// long and int were both 32-bits wide on 32-bit platforms)
-class LongDataAlias : private IntData
+class IECORE_API LongDataAlias : private IntData
 {
 	protected:
 		static TypeDescription<IntData> m_typeDescription;

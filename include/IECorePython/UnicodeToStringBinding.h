@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_UNICODETOSTRINGBINDING_H
 #define IECOREPYTHON_UNICODETOSTRINGBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindUnicodeToString();
+IECOREPYTHON_API void bindUnicodeToString();
 }
 
 #endif // IECOREPYTHON_UNICODETOSTRINGBINDING_H

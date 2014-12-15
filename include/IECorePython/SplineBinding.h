@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SPLINEBINDING_H
 #define IECOREPYTHON_SPLINEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSpline();
+IECOREPYTHON_API void bindSpline();
 
 }
 

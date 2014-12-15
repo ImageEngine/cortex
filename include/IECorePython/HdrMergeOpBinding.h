@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_HDRMERGEOPBINDING_H
 #define IECOREPYTHON_HDRMERGEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindHdrMergeOp();
+IECOREPYTHON_API void bindHdrMergeOp();
 }
 
 #endif // IECOREPYTHON_HDRMERGEOPBINDING_H

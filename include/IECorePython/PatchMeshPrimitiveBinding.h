@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_PATCHMESHPRIMITIVEBINDING_H
 #define IECOREPYTHON_PATCHMESHPRIMITIVEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindPatchMeshPrimitive();
+IECOREPYTHON_API void bindPatchMeshPrimitive();
 
 } // namespace IECorePython
 

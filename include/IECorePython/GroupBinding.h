@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_GROUPBINDING_H
 #define IECOREPYTHON_GROUPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindGroup();
+IECOREPYTHON_API void bindGroup();
 }
 
 #endif // IECOREPYTHON_GROUPBINDING_H

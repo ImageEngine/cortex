@@ -32,10 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/SphericalHarmonicsProjector.h"
 
 using namespace IECore;
 
-template class SphericalHarmonicsProjector<float>;
-template class SphericalHarmonicsProjector<double>;
+template class IECORE_API SphericalHarmonicsProjector<float>;
+template class IECORE_API SphericalHarmonicsProjector<double>;
 

@@ -35,6 +35,8 @@
 #ifndef IECOREGL_COREGL_H
 #define IECOREGL_COREGL_H
 
+#include "IECoreGL/Export.h"
+
 /// The namespace within which all CoreGL functionality is defined.
 namespace IECoreGL
 {
@@ -44,10 +46,10 @@ namespace IECoreGL
 /// to true if you have setup an OpenGL context already, and false if
 /// you wish one to be created for you. There is no harm in calling
 /// it multiple times.
-void init( bool glAlreadyInitialised = false );
+IECOREGL_API void init( bool glAlreadyInitialised = false );
 
 /// Returns the current GLSL version.
-int glslVersion();
+IECOREGL_API int glslVersion();
 
 } // namespace IECoreGL
 

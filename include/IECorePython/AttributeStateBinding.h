@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_ATTRIBUTESTATEBINDING_H
 #define IECOREPYTHON_ATTRIBUTESTATEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
  
- void bindAttributeState();
+IECOREPYTHON_API void bindAttributeState();
 
 } // namespace IECorePython
 

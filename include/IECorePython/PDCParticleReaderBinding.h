@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PDCPARTICLEREADERBINDING_H
 #define IECOREPYTHON_PDCPARTICLEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPDCParticleReader();
+IECOREPYTHON_API void bindPDCParticleReader();
 }
 
 #endif // IECOREPYTHON_PDCPARTICLEREADERBINDING_H

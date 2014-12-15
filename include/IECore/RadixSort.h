@@ -39,6 +39,7 @@
 
 #include "boost/static_assert.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/VectorTypedData.h"
 
 namespace IECore
@@ -48,7 +49,7 @@ namespace IECore
 /// or non-commercial program" licence. The RadixSort class maintains state so that successive calls to it are able to exploit any coherence
 /// in the source data. Sorting is done in ascending order.
 /// \ingroup mathGroup
-class RadixSort
+class IECORE_API RadixSort
 {
 	public:
 

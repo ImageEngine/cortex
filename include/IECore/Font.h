@@ -38,6 +38,7 @@
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathBox.h"
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 
 namespace IECore
@@ -50,7 +51,7 @@ IE_CORE_FORWARDDECLARE( Group );
 /// The Font class allows the loading of fonts and their
 /// conversion to MeshPrimitives and ImagePrimitives.
 /// \ingroup renderingGroup
-class Font : public RunTimeTyped
+class IECORE_API Font : public RunTimeTyped
 {
 
 	public :

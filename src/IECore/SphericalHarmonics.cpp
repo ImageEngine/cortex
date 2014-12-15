@@ -32,12 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/SphericalHarmonics.h"
 
 using namespace IECore;
 
-template class SphericalHarmonics<float>;
-template class SphericalHarmonics<double>;
+template class IECORE_API SphericalHarmonics<float>;
+template class IECORE_API SphericalHarmonics<double>;
 
-template class SphericalHarmonics< Imath::V3f >;
-template class SphericalHarmonics< Imath::V3d >;
+template class IECORE_API SphericalHarmonics< Imath::V3f >;
+template class IECORE_API SphericalHarmonics< Imath::V3d >;

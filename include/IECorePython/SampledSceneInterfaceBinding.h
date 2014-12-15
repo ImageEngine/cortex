@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SAMPLEDSCENEINTERFACEBINDING_H
 #define IECOREPYTHON_SAMPLEDSCENEINTERFACEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSampledSceneInterface();
+IECOREPYTHON_API void bindSampledSceneInterface();
 
 }
 

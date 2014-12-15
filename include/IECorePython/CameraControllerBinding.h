@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CAMERACONTROLLERBINDING_H
 #define IECOREPYTHON_CAMERACONTROLLERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCameraController();
+IECOREPYTHON_API void bindCameraController();
 
 }
 
