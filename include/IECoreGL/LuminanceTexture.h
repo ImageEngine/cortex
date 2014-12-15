@@ -35,6 +35,7 @@
 #ifndef IECOREGL_LUMINANCETEXTURE_H
 #define IECOREGL_LUMINANCETEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
@@ -42,7 +43,7 @@ namespace IECoreGL
 
 /// The LuminanceTexture class represents a texture with a single
 /// luminance channel and an optional alpha channel.
-class LuminanceTexture : public Texture
+class IECOREGL_API LuminanceTexture : public Texture
 {
 	public :
 

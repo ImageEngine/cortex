@@ -35,6 +35,7 @@
 #ifndef IECOREGL_DEPTHTEXTURE_H
 #define IECOREGL_DEPTHTEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
@@ -43,7 +44,7 @@ namespace IECoreGL
 /// The DepthTexture class represents a texture with a single
 /// z channel. It is suitable for use as the depth attachment for
 /// a FrameBuffer.
-class DepthTexture : public Texture
+class IECOREGL_API DepthTexture : public Texture
 {
 	public :
 

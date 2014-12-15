@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_STATERENDERABLEBINDING_H
 #define IECOREPYTHON_STATERENDERABLEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindStateRenderable();
+IECOREPYTHON_API void bindStateRenderable();
 }
 
 #endif // IECOREPYTHON_STATERENDERABLEBINDING_H

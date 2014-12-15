@@ -37,12 +37,14 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 /// This class provides a means of converting from an IECore::PrimitiveVariableMap
 /// to the nasty form passable through the Renderman Interface.
-class PrimitiveVariableList
+class IECORERI_API PrimitiveVariableList
 {
 
 	public :

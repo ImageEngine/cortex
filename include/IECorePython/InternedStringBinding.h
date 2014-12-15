@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_INTERNEDSTRINGBINDING_H
 #define IECOREPYTHON_INTERNEDSTRINGBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindInternedString();
+IECOREPYTHON_API void bindInternedString();
 
 }
 

@@ -39,6 +39,7 @@
 
 #include "IECore/DeepImageWriter.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECoreRI
@@ -49,7 +50,7 @@ namespace IECoreRI
 /// channel will be used in its place, regardless of name.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class SHWDeepImageWriter : public IECore::DeepImageWriter
+class IECORERI_API SHWDeepImageWriter : public IECore::DeepImageWriter
 {
 	public :
 

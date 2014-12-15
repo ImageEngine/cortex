@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SPLINEDATABINDING_H
 #define IECOREPYTHON_SPLINEDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSplineData();
+IECOREPYTHON_API void bindSplineData();
 }
 
 #endif // IECOREPYTHON_SPLINEDATABINDING_H

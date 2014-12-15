@@ -42,6 +42,7 @@
 
 #include "IECore/RefCounted.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/HitRecord.h"
 
 namespace IECoreGL
@@ -52,7 +53,7 @@ IE_CORE_FORWARDDECLARE( Shader );
 
 /// The Selector class simplifies the process of selecting objects
 /// rendered with OpenGL.
-class Selector : boost::noncopyable
+class IECOREGL_API Selector : boost::noncopyable
 {
 
 	public :

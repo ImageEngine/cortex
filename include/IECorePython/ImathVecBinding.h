@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMATHVECBINDING_H
 #define IECOREPYTHON_IMATHVECBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImathVec();
+IECOREPYTHON_API void bindImathVec();
 
 }
 

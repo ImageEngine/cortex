@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATACONVERTOPBINDING_H
 #define IECOREPYTHON_DATACONVERTOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDataConvertOp();
+IECOREPYTHON_API void bindDataConvertOp();
 }
 
 #endif // IECOREPYTHON_DATACONVERTOPBINDING_H

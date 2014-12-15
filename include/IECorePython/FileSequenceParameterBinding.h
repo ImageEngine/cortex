@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_FILESEQUENCEPARAMETERBINDING_H
 #define IECOREPYTHON_FILESEQUENCEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFileSequenceParameter();
+IECOREPYTHON_API void bindFileSequenceParameter();
 
 }
 

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHTANGENTSOPBINDING_H
 #define IECOREPYTHON_MESHTANGENTSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshTangentsOp();
+IECOREPYTHON_API void bindMeshTangentsOp();
 
 } // namespace IECorePython
 

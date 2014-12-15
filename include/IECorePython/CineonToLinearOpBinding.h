@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CINEONTOLINEAROPBINDING_H
 #define IECOREPYTHON_CINEONTOLINEAROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCineonToLinearOp();
+IECOREPYTHON_API void bindCineonToLinearOp();
 
 } // namespace IECorePython
 

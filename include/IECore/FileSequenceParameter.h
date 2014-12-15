@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/FrameList.h"
 #include "IECore/FileSequence.h"
 #include "IECore/PathParameter.h"
@@ -47,7 +48,7 @@ namespace IECore
 /// The FileSequenceParameter class implements a Parameter to define FileSequences.
 /// As it can't store FileSequence objects as its value (they're not derived from Object) it stores
 /// a string representing the sequence instead, but provides methods for turning this into a FileSequence.
-class FileSequenceParameter : public PathParameter
+class IECORE_API FileSequenceParameter : public PathParameter
 {
 	public:
 

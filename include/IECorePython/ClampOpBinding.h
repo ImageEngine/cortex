@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CLAMPOPBINDING_H
 #define IECOREPYTHON_CLAMPOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindClampOp();
+IECOREPYTHON_API void bindClampOp();
 
 } // namespace IECorePython
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGECONVOLVEOPBINDING_H
 #define IECOREPYTHON_IMAGECONVOLVEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImageConvolveOp();
+IECOREPYTHON_API void bindImageConvolveOp();
 }
 
 #endif // IECOREPYTHON_IMAGECONVOLVEOPBINDING_H

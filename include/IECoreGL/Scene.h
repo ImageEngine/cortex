@@ -35,6 +35,7 @@
 #ifndef IECOREGL_SCENE_H
 #define IECOREGL_SCENE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
 #include "IECoreGL/HitRecord.h"
 #include "IECoreGL/Selector.h"
@@ -45,7 +46,7 @@ namespace IECoreGL
 IE_CORE_FORWARDDECLARE( Group );
 IE_CORE_FORWARDDECLARE( Camera );
 
-class Scene : public Renderable
+class IECOREGL_API Scene : public Renderable
 {
 	public :
 

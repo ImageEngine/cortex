@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CINIMAGEREADERBINDING_H
 #define IECOREPYTHON_CINIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCINImageReader();
+IECOREPYTHON_API void bindCINImageReader();
 }
 
 #endif // IECOREPYTHON_CINIMAGEREADERBINDING_H

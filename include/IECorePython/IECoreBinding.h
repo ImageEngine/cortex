@@ -39,6 +39,8 @@
 
 #include <string>
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
@@ -57,7 +59,7 @@ namespace IECorePython
 /// \todo If we used a class instead, then partial specialisations would allow us to more
 ///       easily bind templates without the need for macros to instantiate all the str variations.
 template<typename T>
-std::string str( T &x );
+IECOREPYTHON_API std::string str( T &x );
 
 /// Same as above, except for __repr__. repr()
 /// implementations should be in a richer form than
@@ -72,12 +74,12 @@ std::string str( T &x );
 /// \todo If we used a class instead, then partial specialisations would allow us to more
 ///       easily bind templates without the need for macros to instantiate all the repr variations.
 template<typename T>
-std::string repr( T &x );
+IECOREPYTHON_API std::string repr( T &x );
 
 
 /// For backwards compatibility with older versions of boost,
 /// which don't provide boost::python::len
-inline ssize_t len( const boost::python::object &obj )
+IECOREPYTHON_API inline ssize_t len( const boost::python::object &obj )
 {
 	ssize_t result = PyObject_Length( obj.ptr() );
 	

@@ -35,6 +35,7 @@
 #ifndef IE_CORE_OBJECTINTERPOLATOR_H
 #define IE_CORE_OBJECTINTERPOLATOR_H
 
+#include "IECore/Export.h"
 #include "IECore/Interpolator.h"
 
 namespace IECore
@@ -63,10 +64,10 @@ struct CubicInterpolator< Object >
 };
 
 /// Utility function that applies linear interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
-ObjectPtr linearObjectInterpolation( const Object *y0, const Object *y1, double x );
+IECORE_API ObjectPtr linearObjectInterpolation( const Object *y0, const Object *y1, double x );
 
 /// Utility function that applies cubic interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
-ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x );
+IECORE_API ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x );
 
 } // namespace IECore
 

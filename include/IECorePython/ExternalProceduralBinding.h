@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_EXTERNALPROCEDURALBINDING_H
 #define IECOREPYTHON_EXTERNALPROCEDURALBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindExternalProcedural();
+IECOREPYTHON_API void bindExternalProcedural();
 
 } // namespace IECorePython
 

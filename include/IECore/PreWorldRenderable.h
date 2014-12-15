@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PREWORLDRENDERABLE_H
 #define IE_CORE_PREWORLDRENDERABLE_H
 
+#include "IECore/Export.h"
 #include "IECore/Renderable.h"
 
 namespace IECore
@@ -43,7 +44,7 @@ namespace IECore
 /// The PreWorldRenderable class is an abstract base class for all Renderables
 /// which set things which are constant across a whole worldBegin()/worldEnd()
 /// block, and must therefore be called before worldBegin().
-class PreWorldRenderable : public Renderable
+class IECORE_API PreWorldRenderable : public Renderable
 {
 	public:
 

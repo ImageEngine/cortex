@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_ANGLECONVERSIONBINDING_H
 #define IECOREPYTHON_ANGLECONVERSIONBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindAngleConversion();
+IECOREPYTHON_API void bindAngleConversion();
 
 }
 

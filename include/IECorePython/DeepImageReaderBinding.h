@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_DEEPIMAGEREADERBINDING_H
 #define IECOREPYTHON_DEEPIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindDeepImageReader();
+IECOREPYTHON_API void bindDeepImageReader();
 
 }
 

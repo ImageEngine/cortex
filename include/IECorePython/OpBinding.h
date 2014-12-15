@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_OPBINDING_H
 #define IECOREPYTHON_OPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindOp();
+IECOREPYTHON_API void bindOp();
 }
 
 #endif // IECOREPYTHON_OPBINDING_H

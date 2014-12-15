@@ -38,6 +38,8 @@
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 
+#include "IECoreGL/Export.h"
+
 #include <map>
 #include <string>
 
@@ -50,7 +52,7 @@ IE_CORE_FORWARDDECLARE( TextureLoader );
 /// \todo At some point we'll need to deal with the fact that
 /// there's limited texture memory and we can't just keep loading
 /// things forever without getting rid of something.
-class TextureLoader : public IECore::RefCounted
+class IECOREGL_API TextureLoader : public IECore::RefCounted
 {
 
 	public :

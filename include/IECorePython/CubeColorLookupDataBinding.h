@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CUBECOLORLOOKUPDATABINDING_H
 #define IECOREPYTHON_CUBECOLORLOOKUPDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCubeColorLookupData();
+IECOREPYTHON_API void bindCubeColorLookupData();
 }
 
 #endif // IECOREPYTHON_CUBECOLORLOOKUPDATABINDING_H

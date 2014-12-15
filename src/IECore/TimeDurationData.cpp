@@ -34,6 +34,7 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/TimeDurationData.h"
 #include "IECore/TypedData.inl"
 
@@ -99,6 +100,6 @@ void SimpleDataHolder<boost::posix_time::time_duration>::hash( MurmurHash &h ) c
 	h.append( boost::posix_time::to_simple_string( readable() ) );
 }
 
-template class TypedData< boost::posix_time::time_duration >;
+template class IECORE_API TypedData< boost::posix_time::time_duration >;
 
 } // namespace IECore

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MURMURHASHBINDING_H
 #define IECOREPYTHON_MURMURHASHBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMurmurHash();
+IECOREPYTHON_API void bindMurmurHash();
 
 }
 

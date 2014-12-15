@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CHANNELOPBINDING_H
 #define IECOREPYTHON_CHANNELOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindChannelOp();
+IECOREPYTHON_API void bindChannelOp();
 
 } // namespace IECorePython
 

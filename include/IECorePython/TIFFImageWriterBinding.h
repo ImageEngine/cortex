@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TIFFIMAGEWRITERBINDING_H
 #define IECOREPYTHON_TIFFIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTIFFImageWriter();
+IECOREPYTHON_API void bindTIFFImageWriter();
 }
 
 #endif // IECOREPYTHON_TIFFIMAGEWRITERBINDING_H

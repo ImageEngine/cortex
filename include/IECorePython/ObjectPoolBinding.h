@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_OBJECTPOOL_H
 #define IECOREPYTHON_OBJECTPOOL_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindObjectPool();
+IECOREPYTHON_API void bindObjectPool();
 }
 
 #endif // IECOREPYTHON_OBJECTPOOL_H

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_EMPTYFRAMELISTBINDING_H
 #define IECOREPYTHON_EMPTYFRAMELISTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindEmptyFrameList();
+IECOREPYTHON_API void bindEmptyFrameList();
 }
 
 #endif // IECOREPYTHON_EMPTYFRAMELISTBINDING_H

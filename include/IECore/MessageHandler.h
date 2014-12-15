@@ -40,6 +40,7 @@
 #include "boost/format.hpp"
 #include "boost/noncopyable.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/RefCounted.h"
 
 namespace IECore
@@ -54,7 +55,7 @@ IE_CORE_DECLAREPTR( MessageHandler );
 /// to implement multiple message handlers appropriate to
 /// specific application contexts.
 /// \ingroup utilityGroup
-class MessageHandler : public RefCounted
+class IECORE_API MessageHandler : public RefCounted
 {
 
 	public :
@@ -105,7 +106,7 @@ class MessageHandler : public RefCounted
 		/// destruction.
 		/// \threading The Scope class provides a threadsafe means of
 		/// installing and uninstalling MessageHandlers.
-		class Scope : boost::noncopyable
+		class IECORE_API Scope : boost::noncopyable
 		{
 		
 			public :
@@ -152,8 +153,8 @@ typedef MessageHandler Msg;
 
 /// Free functions which calls MessageHandler::output() with their arguments. These are provided
 /// for brevity.
-void msg( MessageHandler::Level level, const std::string &context, const std::string &message );
-void msg( MessageHandler::Level level, const std::string &context, const boost::format &message );
+IECORE_API void msg( MessageHandler::Level level, const std::string &context, const std::string &message );
+IECORE_API void msg( MessageHandler::Level level, const std::string &context, const boost::format &message );
 
 }; // namespace IECore
 

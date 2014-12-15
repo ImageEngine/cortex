@@ -35,6 +35,7 @@
 #ifndef IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 #define IECOREPYTHON_RUNTIMETYPEDBINDING_INL
 
+#include "IECorePython/Export.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECore/RunTimeTyped.h"
 
@@ -44,7 +45,7 @@ namespace IECorePython
 namespace Detail
 {
 
-const char *nameWithoutNamespace( const char *name );
+IECOREPYTHON_API const char *nameWithoutNamespace( const char *name );
 
 template<class T>
 static IECore::TypeId typeId( T &t )

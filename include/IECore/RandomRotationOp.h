@@ -35,6 +35,7 @@
 #ifndef IE_CORE_RANDOMROTATIONOP_H
 #define IE_CORE_RANDOMROTATIONOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
 
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The RandomRotationOp calculates a set of random vectors which rotate
 /// coherently over time.
-class RandomRotationOp : public Op
+class IECORE_API RandomRotationOp : public Op
 {
 	public :
 

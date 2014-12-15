@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLBUFFERCONVERTER_H
 #define IECOREGL_TOGLBUFFERCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( Buffer )
 
 /// Converts IECore::Data objects into IECoreGL::Buffer objects.
 /// \ingroup conversionGroup
-class ToGLBufferConverter : public ToGLConverter
+class IECOREGL_API ToGLBufferConverter : public ToGLConverter
 {
 
 	public :

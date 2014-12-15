@@ -35,6 +35,7 @@
 #ifndef IECOREGL_CACHEDCONVERTER_H
 #define IECOREGL_CACHEDCONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECore/Object.h"
 
 namespace IECoreGL
@@ -42,7 +43,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( CachedConverter )
 
-class CachedConverter : public IECore::RefCounted
+class IECOREGL_API CachedConverter : public IECore::RefCounted
 {
 
 	public :

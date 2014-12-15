@@ -35,6 +35,7 @@
 #ifndef IE_CORE_SGIIMAGEREADER_H
 #define IE_CORE_SGIIMAGEREADER_H
 
+#include "IECore/Export.h"
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// The SGIImageReader reads SGI RGB files.
 /// \ingroup ioGroup
-class SGIImageReader : public ImageReader
+class IECORE_API SGIImageReader : public ImageReader
 {
 
 	public:

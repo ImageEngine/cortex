@@ -38,6 +38,8 @@
 #include "IECore/Convert.h"
 #include "IECore/Data.h"
 
+#include "IECoreRI/Export.h"
+
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathBox.h"
@@ -52,21 +54,21 @@ namespace IECore
 {
 
 template<>
-Imath::V3f convert( const RtPoint &from );
+IECORERI_API Imath::V3f convert( const RtPoint &from );
 
 template<>
-Imath::Color3f convert( const RtColor &from );
+IECORERI_API Imath::Color3f convert( const RtColor &from );
 
 template<>
-Imath::Box3f convert( const RtBound &from );
+IECORERI_API Imath::Box3f convert( const RtBound &from );
 
 /// Conversions to RI types can't return the type, as typically they're typedefs for arrays.
-void convert( const Imath::M44f &from, RtMatrix to );
-void convert( const Imath::Box3f &from, RtBound to );
+IECORERI_API void convert( const Imath::M44f &from, RtMatrix to );
+IECORERI_API void convert( const Imath::Box3f &from, RtBound to );
 
 /// This function is intended for converting the results of RxAttribute and RxOption
 /// into useful IECore types.
-DataPtr convert( const char *data, RxInfoType_t type, RtInt count );
+IECORERI_API DataPtr convert( const char *data, RxInfoType_t type, RtInt count );
 
 } // namespace IECore
 

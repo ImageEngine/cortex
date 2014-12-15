@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTREPULSIONOPBINDING_H
 #define IECOREPYTHON_POINTREPULSIONOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointRepulsionOp();
+IECOREPYTHON_API void bindPointRepulsionOp();
 }
 
 #endif // IECOREPYTHON_POINTREPULSIONOPBINDING_H

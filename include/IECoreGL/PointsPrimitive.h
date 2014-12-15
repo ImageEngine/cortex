@@ -35,6 +35,7 @@
 #ifndef IECOREGL_POINTSPRIMITIVE_H
 #define IECOREGL_POINTSPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 #include "IECore/VectorTypedData.h"
@@ -42,7 +43,7 @@
 namespace IECoreGL
 {
 
-class PointsPrimitive : public Primitive
+class IECOREGL_API PointsPrimitive : public Primitive
 {
 
 	public :

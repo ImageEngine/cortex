@@ -35,6 +35,7 @@
 #ifndef IE_CORE_OP_H
 #define IE_CORE_OP_H
 
+#include "IECore/Export.h"
 #include "IECore/Parameterised.h"
 
 namespace IECore
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( CompoundObject );
 /// Parameter objects are used to define both the format of the inputs and
 /// the result.
 /// \ingroup coreGroup
-class Op : public Parameterised
+class IECORE_API Op : public Parameterised
 {
 	public :
 

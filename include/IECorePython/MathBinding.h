@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MATHBINDING_H
 #define IECOREPYTHON_MATHBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMath();
+IECOREPYTHON_API void bindMath();
 }
 
 #endif // IECOREPYTHON_MATHBINDING_H

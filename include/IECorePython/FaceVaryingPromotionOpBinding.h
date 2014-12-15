@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_FACEVARYINGPROMOTIONOPBINDING_H
 #define IECOREPYTHON_FACEVARYINGPROMOTIONOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFaceVaryingPromotionOp();
+IECOREPYTHON_API void bindFaceVaryingPromotionOp();
 
 } // namespace IECorePython
 

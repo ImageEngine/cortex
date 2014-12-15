@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MEDIANCUTSAMPLERBINDING_H
 #define IECOREPYTHON_MEDIANCUTSAMPLERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMedianCutSampler();
+IECOREPYTHON_API void bindMedianCutSampler();
 
 } // namespace IECorePython
 

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATAINTERLEAVEOPBINDING_H
 #define IECOREPYTHON_DATAINTERLEAVEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDataInterleaveOp();
+IECOREPYTHON_API void bindDataInterleaveOp();
 }
 
 #endif // IECOREPYTHON_DATAINTERLEAVEOPBINDING_H

@@ -40,17 +40,18 @@
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
 
+#include "IECorePython/Export.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 
 namespace IECorePython
 {
 
-void bindParameter();
+IECOREPYTHON_API void bindParameter();
 
 // Exposed so it can be used in the bindings for the other Parameter types.
 template<class T>
-T parameterPresets( const boost::python::object &o );
+IECOREPYTHON_API T parameterPresets( const boost::python::object &o );
 
 /// The following macros and functions provide a good example to follow in trying to
 /// wrap non trivial C++ objects so they can be derived from in Python, as they solve
@@ -103,9 +104,9 @@ T parameterPresets( const boost::python::object &o );
 	.def( "valueValid", &valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." )			\
 
 template<typename T>
-boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value );
+IECOREPYTHON_API boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value );
 
-boost::python::tuple valueValid2( const IECore::Parameter &that );
+IECOREPYTHON_API boost::python::tuple valueValid2( const IECore::Parameter &that );
 
 }
 

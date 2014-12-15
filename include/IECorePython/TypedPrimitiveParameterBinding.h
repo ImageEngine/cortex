@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H
 #define IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTypedPrimitiveParameter();
+IECOREPYTHON_API void bindTypedPrimitiveParameter();
 }
 
 #endif // IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H

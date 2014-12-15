@@ -35,6 +35,7 @@
 #ifndef IECORE_TOCORECONVERTER_H
 #define IECORE_TOCORECONVERTER_H
 
+#include "IECore/Export.h"
 #include "IECore/Converter.h"
 
 namespace IECore
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( Object );
 /// The ToCoreConverter class is a Converter derived class to be
 /// used as a base for all classes able to perform some kind of
 /// conversion resulting in an IECore datatype.
-class ToCoreConverter : public Converter
+class IECORE_API ToCoreConverter : public Converter
 {
 
 	public :

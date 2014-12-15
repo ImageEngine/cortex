@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_KDTREEBINDING_H
 #define IECOREPYTHON_KDTREEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindKDTree();
+IECOREPYTHON_API void bindKDTree();
 }
 
 #endif // IECOREPYTHON_KDTREEBINDING_H

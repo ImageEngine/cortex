@@ -40,6 +40,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/DeepImageReader.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECoreRI
@@ -49,7 +50,7 @@ namespace IECoreRI
 /// read the first RixDeepTexture::DeepImage in the RixDeepTexture::DeepFile.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class DTEXDeepImageReader : public IECore::DeepImageReader
+class IECORERI_API DTEXDeepImageReader : public IECore::DeepImageReader
 {
 	public :
 

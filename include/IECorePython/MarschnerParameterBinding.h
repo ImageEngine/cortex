@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MARSCHNERPARAMETERBINDING_H
 #define IECOREPYTHON_MARSCHNERPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMarschnerParameter();
+IECOREPYTHON_API void bindMarschnerParameter();
 }
 
 #endif // IECOREPYTHON_MARSCHNERPARAMETERBINDING_H

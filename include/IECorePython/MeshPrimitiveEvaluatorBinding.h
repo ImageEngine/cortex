@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MESHPRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_MESHPRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMeshPrimitiveEvaluator();
+IECOREPYTHON_API void bindMeshPrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_MESHPRIMITIVEEVALUATORBINDING_H

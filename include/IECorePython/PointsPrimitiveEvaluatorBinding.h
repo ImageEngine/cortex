@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTSPRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_POINTSPRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointsPrimitiveEvaluator();
+IECOREPYTHON_API void bindPointsPrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_POINTSPRIMITIVEEVALUATORBINDING_H

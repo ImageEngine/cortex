@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLTEXTURECONVERTER_H
 #define IECOREGL_TOGLTEXTURECONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 #include "IECore/CompoundData.h"
@@ -76,7 +77,7 @@ IE_CORE_FORWARDDECLARE( Texture )
 ///	   compoundData["channels"] = channelData
 /// \endcode
 /// \ingroup conversionGroup
-class ToGLTextureConverter : public ToGLConverter
+class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 {
 
 	public :

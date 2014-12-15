@@ -36,6 +36,7 @@
 #ifndef IE_CORE_MESHPRIMITIVEBUILDER_H
 #define IE_CORE_MESHPRIMITIVEBUILDER_H
 
+#include "IECore/Export.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/MeshPrimitive.h"
 
@@ -47,7 +48,7 @@ namespace IECore
 /// using this as a model. One possible client of this class is IECore::MarchingCubes.
 /// \todo This is too specific to MarchingCubes. Some algorithms want to make faces other than triangles, and
 /// some algorithms don't want to supply normals.
-class MeshPrimitiveBuilder : public RefCounted
+class IECORE_API MeshPrimitiveBuilder : public RefCounted
 {
 	public:
 

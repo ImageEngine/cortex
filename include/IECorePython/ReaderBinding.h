@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_READERBINDING_H
 #define IECOREPYTHON_READERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindReader();
+IECOREPYTHON_API void bindReader();
 }
 
 #endif // IECOREPYTHON_READERBINDING_H

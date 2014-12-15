@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHMERGEOPBINDING_H
 #define IECOREPYTHON_MESHMERGEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshMergeOp();
+IECOREPYTHON_API void bindMeshMergeOp();
 
 } // namespace IECorePython
 

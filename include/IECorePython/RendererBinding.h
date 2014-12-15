@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_RENDERERBINDING_H
 #define IECOREPYTHON_RENDERERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindRenderer();
+IECOREPYTHON_API void bindRenderer();
 }
 
 #endif // IECOREPYTHON_RENDERERBINDING_H

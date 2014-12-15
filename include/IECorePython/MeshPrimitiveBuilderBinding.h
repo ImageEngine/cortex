@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MESHPRIMITIVEBUILDERBINDING_H
 #define IECOREPYTHON_MESHPRIMITIVEBUILDERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMeshPrimitiveBuilder();
+IECOREPYTHON_API void bindMeshPrimitiveBuilder();
 }
 
 #endif // IECOREPYTHON_MESHPRIMITIVEBUILDERBINDING_H

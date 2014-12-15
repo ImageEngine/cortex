@@ -35,12 +35,13 @@
 #ifndef IECOREGL_PERSPECTIVECAMERA_H
 #define IECOREGL_PERSPECTIVECAMERA_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Camera.h"
 
 namespace IECoreGL
 {
 
-class PerspectiveCamera : public Camera
+class IECOREGL_API PerspectiveCamera : public Camera
 {
 
 	public :

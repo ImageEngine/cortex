@@ -35,8 +35,10 @@
 #ifndef IE_CORE_WRITER_H
 #define IE_CORE_WRITER_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/ObjectParameter.h"
+#include "IECore/FileNameParameter.h"
 
 #include <map>
 #include <vector>
@@ -50,7 +52,7 @@ IE_CORE_FORWARDDECLARE( FileNameParameter );
 /// The Writer class defines an interface for creating
 /// files of arbitrary type from Object instances.
 /// \ingroup ioGroup
-class Writer : public Op
+class IECORE_API Writer : public Op
 {
 
 	public :

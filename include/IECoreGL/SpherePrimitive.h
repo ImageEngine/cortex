@@ -35,6 +35,7 @@
 #ifndef IECOREGL_SPHEREPRIMITIVE_H
 #define IECOREGL_SPHEREPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
@@ -42,7 +43,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Buffer )
 
-class SpherePrimitive : public Primitive
+class IECOREGL_API SpherePrimitive : public Primitive
 {
 
 	public :

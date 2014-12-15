@@ -32,13 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECorePython/Export.h"
+
 #ifndef IECOREPYTHON_BEZIERALGOBINDING_H
 #define IECOREPYTHON_BEZIERALGOBINDING_H
 
 namespace IECorePython
 {
 
-void bindBezierAlgo();
+IECOREPYTHON_API void bindBezierAlgo();
 
 } // namespace IECorePython
 

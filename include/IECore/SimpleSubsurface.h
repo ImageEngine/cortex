@@ -35,6 +35,7 @@
 #ifndef IECORE_SIMPLESUBSURFACE_H
 #define IECORE_SIMPLESUBSURFACE_H
 
+#include "IECore/Export.h"
 #include "IECore/RefCounted.h"
 #include "IECore/KDTree.h"
 #include "IECore/VectorTypedData.h"
@@ -47,7 +48,7 @@ namespace IECore
 /// than use the standard dipole approximation it allows the falloff to be controlled
 /// explicitly using a spline.
 /// \ingroup renderingGroup
-class SimpleSubsurface : public IECore::RefCounted
+class IECORE_API SimpleSubsurface : public IECore::RefCounted
 {
 
 	public :

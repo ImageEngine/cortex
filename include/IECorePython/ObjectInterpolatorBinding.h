@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_OBJECTINTERPOLATORBINDING_H
 #define IECOREPYTHON_OBJECTINTERPOLATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindObjectInterpolator();
+IECOREPYTHON_API void bindObjectInterpolator();
 }
 
 #endif // IECOREPYTHON_OBJECTINTERPOLATORBINDING_H

@@ -46,6 +46,8 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/MeshPrimitiveEvaluator.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
@@ -53,7 +55,7 @@ namespace IECoreRI
 /// wrapping it to accept IECore datatypes for input and output.
 /// \todo Can we make this refcounted? It will help simplify most threaded implementations.
 /// \ingroup geometryProcessingGroup
-class GXEvaluator : public boost::noncopyable
+class IECORERI_API GXEvaluator : public boost::noncopyable
 {
 
 	public :

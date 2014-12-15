@@ -35,6 +35,7 @@
 #ifndef IECORE_HITMISSTRANSFORM_H
 #define IECORE_HITMISSTRANSFORM_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 #include "IECore/NumericParameter.h"
 
@@ -48,7 +49,7 @@ namespace IECore
 ///
 /// http://homepages.inf.ed.ac.uk/rbf/HIPR2/hitmiss.htm
 /// \ingroup imageProcessingGroup
-class HitMissTransform : public ChannelOp
+class IECORE_API HitMissTransform : public ChannelOp
 {
 	public:
 

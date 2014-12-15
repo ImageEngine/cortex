@@ -36,6 +36,7 @@
 #ifndef IECORE_COMPOUNDDATA_H
 #define IECORE_COMPOUNDDATA_H
 
+#include "IECore/Export.h"
 #include "IECore/CompoundDataBase.h"
 
 namespace IECore
@@ -43,7 +44,7 @@ namespace IECore
 
 /// A class for storing a map of named Data items.
 /// \ingroup coreGroup
-class CompoundData : public CompoundDataBase
+class IECORE_API CompoundData : public CompoundDataBase
 {
 	public :
 	

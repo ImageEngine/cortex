@@ -35,6 +35,7 @@
 #ifndef IECORE_SPHEREPRIMITIVE_H
 #define IECORE_SPHEREPRIMITIVE_H
 
+#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// SpherePrimitive represents a renderable parametric sphere
 /// \ingroup geometryGroup
-class SpherePrimitive : public Primitive
+class IECORE_API SpherePrimitive : public Primitive
 {
 
 	public:

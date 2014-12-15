@@ -39,6 +39,7 @@
 #include <vector>
 #include <map>
 
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypedPrimitiveOp.h"
 
@@ -47,7 +48,7 @@ namespace IECore
 
 /// A MeshPrimitiveOp to reorder the vertices of a mesh based on an initial selection of 3 vertices
 /// \ingroup geometryProcessingGroup
-class MeshVertexReorderOp : public MeshPrimitiveOp
+class IECORE_API MeshVertexReorderOp : public MeshPrimitiveOp
 {
 	public:
 

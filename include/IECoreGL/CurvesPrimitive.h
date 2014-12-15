@@ -38,6 +38,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/CubicBasis.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
@@ -45,7 +46,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Buffer )
 
-class CurvesPrimitive : public Primitive
+class IECOREGL_API CurvesPrimitive : public Primitive
 {
 	public :
 

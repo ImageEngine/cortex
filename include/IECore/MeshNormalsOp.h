@@ -35,6 +35,7 @@
 #ifndef IECORE_MESHNORMALSOP_H
 #define IECORE_MESHNORMALSOP_H
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/NumericParameter.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// A MeshPrimitiveOp to calculate vertex normals.
 /// \ingroup geometryProcessingGroup
-class MeshNormalsOp : public MeshPrimitiveOp
+class IECORE_API MeshNormalsOp : public MeshPrimitiveOp
 {
 	public:
 

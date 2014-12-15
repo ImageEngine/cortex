@@ -91,6 +91,6 @@ bool TypedObjectParameter<T>::valueValid( const Object *value, std::string *reas
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class TypedObjectParameter<T>;
+	template class IECORE_API TypedObjectParameter<T>;
 
 }

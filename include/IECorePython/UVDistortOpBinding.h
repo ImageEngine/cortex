@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_UVDISTORTOPBINDING_H
 #define IECOREPYTHON_UVDISTORTOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindUVDistortOp();
+IECOREPYTHON_API void bindUVDistortOp();
 
 } // namespace IECorePython
 

@@ -37,6 +37,7 @@
 
 #include "boost/shared_ptr.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/Object.h"
 #include "IECore/MurmurHash.h"
 
@@ -56,7 +57,7 @@ IE_CORE_FORWARDDECLARE( ObjectPool );
 /// so there will be one single place where the total memory used by IECore objects is defined. 
 /// 
 /// \ingroup utilityGroup
-class ObjectPool : public RefCounted
+class IECORE_API ObjectPool : public RefCounted
 {
 	public:
 

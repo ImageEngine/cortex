@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TYPEDPARAMETERBINDING_H
 #define IECOREPYTHON_TYPEDPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTypedParameter();
+IECOREPYTHON_API void bindTypedParameter();
 }
 
 #include "IECorePython/TypedParameterBinding.inl"

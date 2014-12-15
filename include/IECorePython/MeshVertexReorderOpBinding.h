@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHVERTEXREORDEROPBINDING_H
 #define IECOREPYTHON_MESHVERTEXREORDEROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshVertexReorderOp();
+IECOREPYTHON_API void bindMeshVertexReorderOp();
 
 } // namespace IECorePython
 

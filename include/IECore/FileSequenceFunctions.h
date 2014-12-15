@@ -35,6 +35,7 @@
 #ifndef IE_CORE_FILESEQUENCEFUNCTIONS_H
 #define IE_CORE_FILESEQUENCEFUNCTIONS_H
 
+#include "IECore/Export.h"
 #include "IECore/FileSequence.h"
 #include "IECore/FrameList.h"
 
@@ -44,23 +45,23 @@ namespace IECore
 /// Returns a list of FileSequence objects representing all the sequences in names.
 /// names is just a list of arbitrary strings, which may or may not represent files
 /// on disk. The returned sequences have at least 2 elements.
-void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences );
+IECORE_API void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences );
 
 /// Returns a list of FileSequence objects representing all the sequences in names.
 /// names is just a list of arbitrary strings, which may or may not represent files
 /// on disk. The returned sequences have at least the minSequenceSize elements.
-void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
+IECORE_API void findSequences( const std::vector< std::string > &names, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize );
 
 /// Generates all sequences with at least minSequenceSize elements residing in given directory in the form of a list of FileSequences.
-void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize = 2 );
+IECORE_API void ls( const std::string &path, std::vector< FileSequencePtr > &sequences, size_t minSequenceSize = 2 );
 
 /// Attempts to find a sequence matching the given sequence template (e.g. with at least one '#' character).
-void ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize = 2 );
+IECORE_API void ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize = 2 );
 
 /// Returns a FrameList instance that "best" represents the specified list of integer
 /// frame numbers. This function attempts to be intelligent and uses a CompoundFrameList
 /// of FrameRange objects to represent the specified frames compactly.
-FrameListPtr frameListFromList( const std::vector< FrameList::Frame > &frames );
+IECORE_API FrameListPtr frameListFromList( const std::vector< FrameList::Frame > &frames );
 
 } // namespace IECore
 

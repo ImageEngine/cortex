@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POLYGONALGOBINDING_H
 #define IECOREPYTHON_POLYGONALGOBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPolygonAlgo();
+IECOREPYTHON_API void bindPolygonAlgo();
 }
 
 #endif // IECOREPYTHON_POLYGONALGOBINDING_H
