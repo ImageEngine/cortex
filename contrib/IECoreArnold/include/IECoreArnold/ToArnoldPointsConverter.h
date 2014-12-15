@@ -36,6 +36,7 @@
 #define IECOREARNOLD_TOARNOLDPOINTSCONVERTER_H
 
 #include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/Export.h"
 
 namespace IECore
 {
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( PointsPrimitive );
 namespace IECoreArnold
 {
 
-class ToArnoldPointsConverter : public ToArnoldShapeConverter
+class IECOREARNOLD_API ToArnoldPointsConverter : public ToArnoldShapeConverter
 {
 
 	public :

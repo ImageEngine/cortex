@@ -42,13 +42,14 @@
 #include "IECore/NumericParameter.h"
 
 #include "IECoreAlembic/TypeIds.h"
+#include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
 IE_CORE_FORWARDDECLARE( FromAlembicConverter )
 
-class FromAlembicConverter : public IECore::ToCoreConverter
+class IECOREALEMBIC_API FromAlembicConverter : public IECore::ToCoreConverter
 {
 
 	public :

@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +33,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
+#ifndef IECOREARNOLD_EXPORT_H
+#define IECOREARNOLD_EXPORT_H
 
-#include "Alembic/AbcGeom/IXform.h"
+#include "IECore/Export.h"
 
-#include "IECore/SimpleTypedData.h"
+// define IECOREARNOLD_API macro based on whether or not we are compiling
+// IECoreArnold, or including headers for linking to it. the
+// IECOREARNOLD_API macro is the one that is used in the class definitions.
+#ifdef IECOREARNOLD_EXPORTS
+  #define IECOREARNOLD_API IECORE_EXPORT
+#else
+  #define IECOREARNOLD_API IECORE_IMPORT
+#endif
 
-#include "IECoreAlembic/FromAlembicConverter.h"
-#include "IECoreAlembic/Export.h"
-
-namespace IECoreAlembic
-{
-
-/// \todo Maybe template this to also be able to return M44d?
-class IECOREALEMBIC_API FromAlembicXFormConverter : public FromAlembicConverter
-{
-
-	public :
-
-		typedef Alembic::AbcGeom::IXform InputType;
-		typedef IECore::M44fData ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicXFormConverter, FromAlembicXFormConverterTypeId, FromAlembicConverter );
-
-		FromAlembicXFormConverter( Alembic::Abc::IObject iXForm );
-
-	protected :
-
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-
-	private :
-	
-		static ConverterDescription<FromAlembicXFormConverter> g_description;
-		
-};
-
-IE_CORE_DECLAREPTR( FromAlembicXFormConverter )
-
-} // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
+#endif // #ifndef IECOREARNOLD_EXPORT_H

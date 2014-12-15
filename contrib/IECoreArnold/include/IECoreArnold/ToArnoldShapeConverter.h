@@ -38,6 +38,7 @@
 #include "IECore/VectorTypedData.h"
 
 #include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/Export.h"
 
 namespace IECore
 {
@@ -48,7 +49,7 @@ struct PrimitiveVariable;
 namespace IECoreArnold
 {
 
-class ToArnoldShapeConverter : public ToArnoldConverter
+class IECOREARNOLD_API ToArnoldShapeConverter : public ToArnoldConverter
 {
 
 	public :
