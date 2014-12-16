@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SMOOTHSMOOTHSKINNINGWEIGHTSOPBINDING_H
 #define IECOREPYTHON_SMOOTHSMOOTHSKINNINGWEIGHTSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSmoothSmoothSkinningWeightsOp();
+IECOREPYTHON_API void bindSmoothSmoothSkinningWeightsOp();
 }
 
 #endif // IECOREPYTHON_SMOOTHSMOOTHSKINNINGWEIGHTSOPBINDING_H

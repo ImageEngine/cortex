@@ -37,6 +37,7 @@
 
 #include <map>
 
+#include "IECore/Export.h"
 #include "IECore/Object.h"
 #include "IECore/Parameter.h"
 #include "IECore/Parameterised.h"
@@ -71,7 +72,7 @@ IE_CORE_FORWARDDECLARE( LensModel );
 /// * Call validate() to validate the parameters and set up any internal state as necessary.
 /// * Call distort(), undistort() or bounds() as desired to query distorted UV values.
 ///
-class LensModel : public Parameterised
+class IECORE_API LensModel : public Parameterised
 {
 	public:
 

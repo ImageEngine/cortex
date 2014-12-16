@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CURVEEXTRUDEOPBINDING_H
 #define IECOREPYTHON_CURVEEXTRUDEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCurveExtrudeOp();
+IECOREPYTHON_API void bindCurveExtrudeOp();
 }
 
 #endif // IECOREPYTHON_CURVEEXTRUDEOPBINDING_H

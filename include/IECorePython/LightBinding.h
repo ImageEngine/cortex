@@ -35,8 +35,11 @@
 #ifndef IECOREPYTHON_LIGHTBINDING_H
 #define IECOREPYTHON_LIGHTBINDING_H
 
-namespace IECorePython {
-  void bindLight();
+#include "IECorePython/Export.h"
+
+namespace IECorePython
+{
+IECOREPYTHON_API void bindLight();
 }
 
 #endif // IECOREPYTHON_LIGHTBINDING_H

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PARAMETERISEDPROCEDURALBINDING_H
 #define IECOREPYTHON_PARAMETERISEDPROCEDURALBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindParameterisedProcedural();
+IECOREPYTHON_API void bindParameterisedProcedural();
 }
 
 #endif // IECOREPYTHON_PARAMETERISEDPROCEDURALBINDING_H

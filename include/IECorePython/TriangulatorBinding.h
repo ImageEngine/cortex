@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TRIANGULATORBINDING_H
 #define IECOREPYTHON_TRIANGULATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTriangulator();
+IECOREPYTHON_API void bindTriangulator();
 }
 
 #endif // IECOREPYTHON_TRIANGULATORBINDING_H

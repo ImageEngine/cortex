@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_OPTIONSBINDING_H
 #define IECOREPYTHON_OPTIONSBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
  
- void bindOptions();
+IECOREPYTHON_API void bindOptions();
 
 } // namespace IECorePython
 

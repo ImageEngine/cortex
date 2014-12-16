@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MESHPRIMITIVESHRINKWRAPOPBINDING_H
 #define IECOREPYTHON_MESHPRIMITIVESHRINKWRAPOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindMeshPrimitiveShrinkWrapOp();
+IECOREPYTHON_API void bindMeshPrimitiveShrinkWrapOp();
 }
 
 #endif // IECOREPYTHON_MESHPRIMITIVESHRINKWRAPOPBINDING_H

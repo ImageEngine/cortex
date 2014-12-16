@@ -38,6 +38,7 @@
 #include "ai.h"
 
 #include "IECoreArnold/TypeIds.h"
+#include "IECoreArnold/Export.h"
 
 #include "IECore/FromCoreConverter.h"
 #include "IECore/CompoundData.h"
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( ToArnoldConverter );
 
 /// A base class for all classes which convert from an IECore datatype
 /// to an Arnold node.
-class ToArnoldConverter : public IECore::FromCoreConverter
+class IECOREARNOLD_API ToArnoldConverter : public IECore::FromCoreConverter
 {
 
 	public :

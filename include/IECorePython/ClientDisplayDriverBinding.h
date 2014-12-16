@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CLIENTDISPLAYDRIVERBINDING_H
 #define IECOREPYTHON_CLIENTDISPLAYDRIVERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindClientDisplayDriver();
+IECOREPYTHON_API void bindClientDisplayDriver();
 
 }
 

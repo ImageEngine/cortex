@@ -35,12 +35,14 @@
 #ifndef IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_H
 #define IECOREPYTHON_TYPEDOBJECTPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTypedObjectParameter();
+IECOREPYTHON_API void bindTypedObjectParameter();
 
 template<typename T>
-class TypedObjectParameterWrap;
+class IECOREPYTHON_API TypedObjectParameterWrap;
 
 }
 

@@ -36,6 +36,7 @@
 #define IECOREARNOLD_TOARNOLDMESHCONVERTER_H
 
 #include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/Export.h"
 
 namespace IECore
 {
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( MeshPrimitive );
 namespace IECoreArnold
 {
 
-class ToArnoldMeshConverter : public ToArnoldShapeConverter
+class IECOREARNOLD_API ToArnoldMeshConverter : public ToArnoldShapeConverter
 {
 
 	public :

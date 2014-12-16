@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_LENSMODEL_BINDING
 #define IECOREPYTHON_LENSMODEL_BINDING
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-	void bindLensModel();
+IECOREPYTHON_API void bindLensModel();
 }
 
 #endif // IECOREPYTHON_LENSMODEL_BINDING

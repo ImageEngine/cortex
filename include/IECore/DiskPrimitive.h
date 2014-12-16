@@ -35,6 +35,7 @@
 #ifndef IECORE_DISKPRIMITIVE_H
 #define IECORE_DISKPRIMITIVE_H
 
+#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// The DiskPrimitive represents a renderable parametric disk
 /// \ingroup geometryGroup
-class DiskPrimitive : public Primitive
+class IECORE_API DiskPrimitive : public Primitive
 {
 
 	public:

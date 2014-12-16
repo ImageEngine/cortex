@@ -37,6 +37,7 @@
 
 #include "IECore/Reader.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECoreRI
@@ -44,7 +45,7 @@ namespace IECoreRI
 
 /// The SLOReader reads compiled RenderMan shaders, returning IECore::Shader objects.
 /// \ingroup ioGroup
-class SLOReader : public IECore::Reader
+class IECORERI_API SLOReader : public IECore::Reader
 {
 
 	public :

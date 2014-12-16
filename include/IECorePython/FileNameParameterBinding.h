@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_FILENAMEPARAMETERBINDING_H
 #define IECOREPYTHON_FILENAMEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindFileNameParameter();
+IECOREPYTHON_API void bindFileNameParameter();
 }
 
 #endif // IECOREPYTHON_FILENAMEPARAMETERBINDING_H

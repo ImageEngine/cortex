@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PATHPARAMETER_H
 #define IE_CORE_PATHPARAMETER_H
 
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// This base class implements a StringParameter object with validation
 /// of the value based on it representing a file/directory path.
-class PathParameter : public StringParameter
+class IECORE_API PathParameter : public StringParameter
 {
 	public :
 

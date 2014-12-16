@@ -35,12 +35,13 @@
 #ifndef IECOREGL_ALPHATEXTURE_H
 #define IECOREGL_ALPHATEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
 {
 
-class AlphaTexture : public Texture
+class IECOREGL_API AlphaTexture : public Texture
 {
 	public :
 

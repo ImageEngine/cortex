@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_DEEPPIXELBINDING_H
 #define IECOREPYTHON_DEEPPIXELBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindDeepPixel();
+IECOREPYTHON_API void bindDeepPixel();
 
 }
 

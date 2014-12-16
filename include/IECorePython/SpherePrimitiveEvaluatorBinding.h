@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_SPHEREPRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_SPHEREPRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindSpherePrimitiveEvaluator();
+IECOREPYTHON_API void bindSpherePrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_SPHEREPRIMITIVEEVALUATORBINDING_H

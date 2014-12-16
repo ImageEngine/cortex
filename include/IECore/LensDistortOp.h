@@ -35,6 +35,7 @@
 #ifndef IECORE_LENSDISTORT_H
 #define IECORE_LENSDISTORT_H
 
+#include "IECore/Export.h"
 #include "IECore/WarpOp.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/RunTimeTyped.h"
@@ -47,7 +48,7 @@ namespace IECore
 /// Distorts an ImagePrimitive using a parametric lens model.
 /// This Op expects a CompoundObject which contains the lens model's parameters.
 /// \ingroup imageProcessingGroup
-class LensDistortOp : public IECore::WarpOp
+class IECORE_API LensDistortOp : public IECore::WarpOp
 {
 	public:
 

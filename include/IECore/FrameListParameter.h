@@ -35,13 +35,14 @@
 #ifndef IE_CORE_FRAMELISTPARAMETER_H
 #define IE_CORE_FRAMELISTPARAMETER_H
 
+#include "IECore/Export.h"
 #include "IECore/FrameList.h"
 #include "IECore/SimpleTypedParameter.h"
 
 namespace IECore
 {
 
-class FrameListParameter : public StringParameter
+class IECORE_API FrameListParameter : public StringParameter
 {
 	public:
 

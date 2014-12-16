@@ -37,6 +37,7 @@
 
 #include "IECore/InternedString.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 
 namespace IECoreGL
@@ -44,7 +45,7 @@ namespace IECoreGL
 
 /// The HitRecord struct represents hit records
 /// found in the glSelectBuffer.
-class HitRecord
+class IECOREGL_API HitRecord
 {
 
 	public :

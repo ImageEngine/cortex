@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_REC709TOLINEAROPBINDING_H
 #define IECOREPYTHON_REC709TOLINEAROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindRec709ToLinearOp();
+IECOREPYTHON_API void bindRec709ToLinearOp();
 
 } // namespace IECorePython
 

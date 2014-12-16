@@ -55,13 +55,15 @@
 #include "IECore/NURBSPrimitive.h"
 #include "IECore/PatchMeshPrimitive.h"
 
+#include "IECoreRI/Export.h"
+
 #include "IECoreRI/Renderer.h"
 #include "IECoreRI/private/TransformStack.h"
 
 namespace IECoreRI
 {
 
-class RendererImplementation : public IECore::Renderer
+class IECORERI_API RendererImplementation : public IECore::Renderer
 {
 
 	public :

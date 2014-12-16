@@ -39,11 +39,13 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include "IECore/Export.h"
+
 namespace IECore
 {
 
 /// A default constructable boost::posix_time::time_period, for use as parameter to IECore::TypedData template
-class TimePeriod : public  boost::posix_time::time_period
+class IECORE_API TimePeriod : public  boost::posix_time::time_period
 {
 	public :
 		TimePeriod();

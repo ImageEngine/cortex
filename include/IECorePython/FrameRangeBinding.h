@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_FRAMERANGEBINDING_H
 #define IECOREPYTHON_FRAMERANGEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindFrameRange();
+IECOREPYTHON_API void bindFrameRange();
 }
 
 #endif // IECOREPYTHON_FRAMERANGEBINDING_H

@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/SpherePrimitive.h"
 
@@ -46,7 +47,7 @@ namespace IECore
 /// An implementation of PrimitiveEvaluator to allow spatial queries to be performed on spheres.
 /// \todo Currently ignores zMin, zMax, thetaMax parameters, instead assuming that there sphere is whole and facing outwards.
 /// \ingroup geometryProcessingGroup
-class SpherePrimitiveEvaluator : public PrimitiveEvaluator
+class IECORE_API SpherePrimitiveEvaluator : public PrimitiveEvaluator
 {
 	public:
 

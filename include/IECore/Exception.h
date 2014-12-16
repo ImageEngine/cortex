@@ -40,11 +40,13 @@
 
 #include "RefCounted.h"
 
+#include "IECore/Export.h"
+
 namespace IECore
 {
 	/// The base class from which all IE core library exceptions should derive.
 	/// \ingroup utilityGroup
-	class Exception : public std::exception
+	class IECORE_API Exception : public std::exception
 	{
 		public:
 			/// Construct with cause of exception
@@ -86,7 +88,7 @@ namespace IECore
 	};
 
 	/// Base class for Input/Output exceptions
-	class IOException : public Exception
+	class IECORE_API IOException : public Exception
 	{
 		public:
 			IOException(const char *what) : Exception(what) {};
@@ -96,7 +98,7 @@ namespace IECore
 	};
 
 	/// A class to represent "file not found" exceptions
-	class FileNotFoundIOException : public IOException
+	class IECORE_API FileNotFoundIOException : public IOException
 	{
 		public:
 			FileNotFoundIOException(const char *what) : IOException(what) {};
@@ -106,7 +108,7 @@ namespace IECore
 	};
 
 	/// Base class for Invalid Argument exceptions
-	class InvalidArgumentException : public Exception
+	class IECORE_API InvalidArgumentException : public Exception
 	{
 		public:
 			InvalidArgumentException(const char *what) : Exception(what) {};
@@ -116,7 +118,7 @@ namespace IECore
 	};
 
 	/// A class to represent "permission denied" exceptions
-	class PermissionDeniedIOException : public IOException
+	class IECORE_API PermissionDeniedIOException : public IOException
 	{
 		public:
 			PermissionDeniedIOException(const char *what) : IOException(what) {};
@@ -126,7 +128,7 @@ namespace IECore
 	};
 
 	/// A class to represent "not implemented" exceptions
-	class NotImplementedException : public Exception
+	class IECORE_API NotImplementedException : public Exception
 	{
 		public:
 			NotImplementedException(const char *what) : Exception(what) {};

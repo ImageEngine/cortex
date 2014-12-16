@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMATHQUATBINDING_H
 #define IECOREPYTHON_IMATHQUATBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImathQuat();
+IECOREPYTHON_API void bindImathQuat();
 }
 
 #endif // IECOREPYTHON_IMATHQUATBINDING_H

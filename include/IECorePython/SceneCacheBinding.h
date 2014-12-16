@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_SCENECACHEBINDING_H
 #define IECOREPYTHON_SCENECACHEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindSceneCache();
+IECOREPYTHON_API void bindSceneCache();
 
 }
 

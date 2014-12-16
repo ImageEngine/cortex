@@ -39,6 +39,7 @@
 #ifndef IECORE_TETRAHEDRONALGO_H
 #define IECORE_TETRAHEDRONALGO_H
 
+#include "IECore/Export.h"
 #include "IECore/VectorTraits.h"
 
 namespace IECore
@@ -88,7 +89,7 @@ typename VectorTraits<Vec>::BaseType tetrahedronClosestBarycentric(
 
 /// A tetrahedron has 4 faces, each of which is triangle. This function returns the vertex indices which make up
 /// the triangle on the specified face.
-inline Imath::V3i tetrahedronFaceIndices( int face );
+IECORE_API inline Imath::V3i tetrahedronFaceIndices(int face);
 
 } // namespace IECore
 

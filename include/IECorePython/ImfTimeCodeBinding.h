@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMFTIMECODEBINDING_H
 #define IECOREPYTHON_IMFTIMECODEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImfTimeCode();
+IECOREPYTHON_API void bindImfTimeCode();
 
 }
 

@@ -35,6 +35,7 @@
 #ifndef IECORERI_RENDERER_H
 #define IECORERI_RENDERER_H
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 #include "IECore/Renderer.h"
@@ -50,7 +51,7 @@ IE_CORE_FORWARDDECLARE( RendererImplementation );
 /// be expanded concurrently in multiple threads, and in this case each procedural will see a separate
 /// Renderer instance to provide thread safety.
 /// \ingroup renderingGroup
-class Renderer : public IECore::Renderer
+class IECORERI_API Renderer : public IECore::Renderer
 {
 
 	public :

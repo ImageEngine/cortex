@@ -36,6 +36,7 @@
 
 #include "OpenEXR/ImfDeepScanLineInputFile.h"
 
+#include "IECore/Export.h"
 #include "IECore/DeepImageReader.h"
 #include "IECore/LRUCache.h"
 #include "IECore/TypeIds.h"
@@ -46,9 +47,9 @@ namespace IECore
 /// The EXRDeepImageReader class reads EXR 2.0 deep image files.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class EXRDeepImageReader : public DeepImageReader
+class IECORE_API EXRDeepImageReader : public DeepImageReader
 {
-	public :
+	public:
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( EXRDeepImageReader, EXRDeepImageReaderTypeId, DeepImageReader );
 
@@ -79,7 +80,7 @@ class EXRDeepImageReader : public DeepImageReader
 		/// Exception is thrown rather than false being returned.
 		bool open( bool throwOnFailure = false );
 		
-		class Scanline : public RefCounted
+		class IECORE_API Scanline : public RefCounted
 		{
 			public :
 				

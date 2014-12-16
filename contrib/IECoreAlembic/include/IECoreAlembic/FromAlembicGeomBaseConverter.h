@@ -40,11 +40,12 @@
 #include "IECore/MeshPrimitive.h"
 
 #include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-class FromAlembicGeomBaseConverter : public FromAlembicConverter
+class IECOREALEMBIC_API FromAlembicGeomBaseConverter : public FromAlembicConverter
 {
 
 	public :

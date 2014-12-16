@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundObject.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Shader.h"
 
@@ -51,7 +52,7 @@ IE_CORE_FORWARDDECLARE( TextureLoader )
 /// from StateComponent and therefore can be used to apply Shaders
 /// to Primitives within a Group or Scene.
 /// \todo Allow this to specify texture filtering and wrap modes.
-class ShaderStateComponent : public StateComponent
+class IECOREGL_API ShaderStateComponent : public StateComponent
 {
 
 	public :

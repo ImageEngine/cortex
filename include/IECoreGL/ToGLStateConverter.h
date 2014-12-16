@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TOGLSTATECONVERTER_H
 #define IECOREGL_TOGLSTATECONVERTER_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
 namespace IECore
@@ -54,7 +55,7 @@ IE_CORE_FORWARDDECLARE( StateComponent )
 /// Converts IECore::CompoundObject objects containing shaders and attributes
 /// into IECoreGL::State objects.
 /// \ingroup conversionGroup
-class ToGLStateConverter : public ToGLConverter
+class IECOREGL_API ToGLStateConverter : public ToGLConverter
 {
 
 	public :

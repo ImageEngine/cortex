@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TIMEDURATIONDATABINDING_H
 #define IECOREPYTHON_TIMEDURATIONDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTimeDurationData();
+IECOREPYTHON_API void bindTimeDurationData();
 }
 
 #endif // IECOREPYTHON_TIMEDURATIONDATABINDING_H

@@ -39,6 +39,7 @@
 
 #include "IECore/DeepImageReader.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECoreRI
@@ -47,7 +48,7 @@ namespace IECoreRI
 /// The SHWDeepImageReader class reads 3delight deep shadow files. Note that this is an Alpha-only format.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class SHWDeepImageReader : public IECore::DeepImageReader
+class IECORERI_API SHWDeepImageReader : public IECore::DeepImageReader
 {
 	public :
 

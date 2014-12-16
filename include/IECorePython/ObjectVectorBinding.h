@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_OBJECTVECTOR_H
 #define IECOREPYTHON_OBJECTVECTOR_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindObjectVector();
+IECOREPYTHON_API void bindObjectVector();
 }
 
 #endif // IECOREPYTHON_OBJECTVECTOR_H

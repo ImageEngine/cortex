@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CUBECOLORTRANSFORMOPBINDING_H
 #define IECOREPYTHON_CUBECOLORTRANSFORMOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCubeColorTransformOp();
+IECOREPYTHON_API void bindCubeColorTransformOp();
 }
 
 #endif // IECOREPYTHON_CUBECOLORTRANSFORMOPBINDING_H

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_COMPOUNDFRAMELISTBINDING_H
 #define IECOREPYTHON_COMPOUNDFRAMELISTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCompoundFrameList();
+IECOREPYTHON_API void bindCompoundFrameList();
 }
 
 #endif // IECOREPYTHON_COMPOUNDFRAMELISTBINDING_H

@@ -35,6 +35,7 @@
 #ifndef IECORE_REORDERSMOOTHSKINNINGINFLUENCESOP_H
 #define IECORE_REORDERSMOOTHSKINNINGINFLUENCESOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/VectorTypedParameter.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// The ReorderSmoothSkinningInfluencesOp changes the order of the influences in SmoothSkinningData
 /// \ingroup skinningGroup
-class ReorderSmoothSkinningInfluencesOp : public ModifyOp
+class IECORE_API ReorderSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :
 

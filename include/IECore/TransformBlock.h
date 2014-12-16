@@ -37,6 +37,7 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/Renderer.h"
 
 namespace IECore
@@ -46,7 +47,7 @@ namespace IECore
 /// calls are matched by renderer->transformEnd() calls, even in the face of exceptions and
 /// multiple return statements from a function.
 /// \ingroup renderingGroup
-class TransformBlock : public boost::noncopyable
+class IECORE_API TransformBlock : public boost::noncopyable
 {
 	public :
 

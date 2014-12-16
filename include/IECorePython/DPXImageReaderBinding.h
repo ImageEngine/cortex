@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DPXIMAGEREADERBINDING_H
 #define IECOREPYTHON_DPXIMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDPXImageReader();
+IECOREPYTHON_API void bindDPXImageReader();
 }
 
 #endif // IECOREPYTHON_DPXIMAGEREADERBINDING_H

@@ -35,12 +35,13 @@
 #ifndef IECOREGL_BOXPRIMITIVE_H
 #define IECOREGL_BOXPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
 {
 
-class BoxPrimitive : public Primitive
+class IECOREGL_API BoxPrimitive : public Primitive
 {
 
 	public :

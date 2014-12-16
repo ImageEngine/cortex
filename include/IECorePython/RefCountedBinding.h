@@ -35,12 +35,13 @@
 #ifndef IECOREPYTHON_REFCOUNTEDBINDING_H
 #define IECOREPYTHON_REFCOUNTEDBINDING_H
 
+#include "IECorePython/Export.h"
 #include "IECorePython/WrapperGarbageCollector.h"
 
 namespace IECorePython
 {
 
-void bindRefCounted();
+IECOREPYTHON_API void bindRefCounted();
 
 /// A class similar to boost::python::wrapper, but with specialisations
 /// making it more suitable for use wrapping RefCounted types. See

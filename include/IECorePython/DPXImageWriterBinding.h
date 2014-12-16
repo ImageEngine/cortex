@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DPXIMAGEWRITERBINDING_H
 #define IECOREPYTHON_DPXIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDPXImageWriter();
+IECOREPYTHON_API void bindDPXImageWriter();
 }
 
 #endif // IECOREPYTHON_DPXIMAGEWRITERBINDING_H

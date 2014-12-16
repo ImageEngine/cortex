@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_EXCLUSIONFRAMELISTBINDING_H
 #define IECOREPYTHON_EXCLUSIONFRAMELISTBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindExclusionFrameList();
+IECOREPYTHON_API void bindExclusionFrameList();
 }
 
 #endif // IECOREPYTHON_EXCLUSIONFRAMELISTBINDING_H

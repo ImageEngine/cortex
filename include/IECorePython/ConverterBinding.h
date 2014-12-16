@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CONVERTERBINDING_H
 #define IECOREPYTHON_CONVERTERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindConverter();
+IECOREPYTHON_API void bindConverter();
 
 }
 

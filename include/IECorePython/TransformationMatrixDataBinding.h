@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TRANSFORMATIONMATRIXDATABINDING_H
 #define IECOREPYTHON_TRANSFORMATIONMATRIXDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTransformationMatrixData();
+IECOREPYTHON_API void bindTransformationMatrixData();
 }
 
 #endif // IECOREPYTHON_TRANSFORMATIONMATRIXDATABINDING_H

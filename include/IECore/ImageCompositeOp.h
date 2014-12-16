@@ -37,6 +37,7 @@
 
 #include "OpenEXR/ImathVec.h"
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
@@ -49,7 +50,7 @@ namespace IECore
 
 /// Performs basic compositing of images.
 /// \ingroup imageProcessingGroup
-class ImageCompositeOp : public ImagePrimitiveOp
+class IECORE_API ImageCompositeOp : public ImagePrimitiveOp
 {
 	public :
 

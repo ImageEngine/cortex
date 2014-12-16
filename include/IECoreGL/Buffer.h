@@ -37,6 +37,7 @@
 
 #include "IECore/RunTimeTyped.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/TypeIds.h"
 
@@ -46,7 +47,7 @@ namespace IECoreGL
 /// The Buffer class provides a simple reference counted wrapper
 /// around an OpenGL buffer object, making the lifetime management
 /// of shared buffers straightforward.
-class Buffer : public IECore::RunTimeTyped
+class IECOREGL_API Buffer : public IECore::RunTimeTyped
 {
 
 	public :

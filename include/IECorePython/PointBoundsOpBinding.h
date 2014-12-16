@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_POINTBOUNDSOPBINDING_H
 #define IECOREPYTHON_POINTBOUNDSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPointBoundsOp();
+IECOREPYTHON_API void bindPointBoundsOp();
 }
 
 #endif // IECOREPYTHON_POINTBOUNDSOPBINDING_H

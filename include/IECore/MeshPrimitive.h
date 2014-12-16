@@ -35,6 +35,7 @@
 #ifndef IECORE_MESHPRIMITIVE_H
 #define IECORE_MESHPRIMITIVE_H
 
+#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 #include "IECore/VectorTypedData.h"
 
@@ -52,7 +53,7 @@ class PolygonIterator;
 /// setting attributes in the Renderer. This definition of winding order is the same as
 /// the OpenGL and Maya conventions but the opposite of RenderMan's.
 /// \ingroup geometryGroup
-class MeshPrimitive : public Primitive
+class IECORE_API MeshPrimitive : public Primitive
 {
 
 	public:

@@ -35,6 +35,7 @@
 #ifndef IECORE_CONTRASTSMOOTHSKINNINGWEIGHTSOP_H
 #define IECORE_CONTRASTSMOOTHSKINNINGWEIGHTSOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/NumericParameter.h"
@@ -50,7 +51,7 @@ namespace IECore
 /// The shape of the step function varies from linear to a hard step function with the contrast ratio parameter and the
 /// middle contrast point is defined by contrast center parameter.
 /// \ingroup skinningGroup
-class ContrastSmoothSkinningWeightsOp : public ModifyOp
+class IECORE_API ContrastSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :
 

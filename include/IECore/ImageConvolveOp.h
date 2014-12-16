@@ -35,6 +35,7 @@
 #ifndef IECORE_IMAGECONVOLVEOP_H
 #define IECORE_IMAGECONVOLVEOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SphericalHarmonicsProjector.h"
@@ -48,7 +49,7 @@ namespace IECore
 // Using more bands you get sharper maps ( for specular convolution ).
 /// \ingroup imageProcessingGroup
 /// \ingroup shGroup
-class ImageConvolveOp : public ChannelOp
+class IECORE_API ImageConvolveOp : public ChannelOp
 {
 	public:
 

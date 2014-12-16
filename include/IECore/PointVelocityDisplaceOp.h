@@ -38,6 +38,7 @@
 #ifndef IE_CORE_POINTVELOCITYDISPLACEOP_H
 #define IE_CORE_POINTVELOCITYDISPLACEOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 
@@ -59,7 +60,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 ///
 /// Pnew = P + ( v * sampleLength )
 /// \ingroup geometryProcessingGroup
-class PointVelocityDisplaceOp : public ModifyOp
+class IECORE_API PointVelocityDisplaceOp : public ModifyOp
 {
 	public :
 		IE_CORE_DECLARERUNTIMETYPED( PointVelocityDisplaceOp, ModifyOp );

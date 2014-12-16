@@ -35,6 +35,7 @@
 #ifndef IECOREGL_GROUP_H
 #define IECOREGL_GROUP_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Renderable.h"
 
 #include "OpenEXR/ImathMatrix.h"
@@ -48,7 +49,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( State );
 
-class Group : public Renderable
+class IECOREGL_API Group : public Renderable
 {
 
 	public :

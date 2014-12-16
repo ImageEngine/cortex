@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_ENVMAPSHPROJECTORBINDING_H
 #define IECOREPYTHON_ENVMAPSHPROJECTORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindEnvMapSHProjectorOp();
+IECOREPYTHON_API void bindEnvMapSHProjectorOp();
 
 } // namespace IECorePython
 

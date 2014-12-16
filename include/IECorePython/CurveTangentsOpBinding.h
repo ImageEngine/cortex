@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CURVETANGENTSOPBINDING_H
 #define IECOREPYTHON_CURVETANGENTSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCurveTangentsOp();
+IECOREPYTHON_API void bindCurveTangentsOp();
 }
 
 #endif // IECOREPYTHON_CURVETANGENTSOPBINDING_H

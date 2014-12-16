@@ -37,6 +37,7 @@
 
 #include "tbb/mutex.h"
 
+#include "IECore/Export.h"
 #include "IECore/PrimitiveEvaluator.h"
 #include "IECore/BoundedKDTree.h"
 
@@ -48,7 +49,7 @@ IE_CORE_FORWARDDECLARE( CurvesPrimitive )
 /// Implements the PrimitiveEvaluator interface to allow queries of
 /// CurvesPrimitives.
 /// \ingroup geometryProcessingGroup
-class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
+class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 {
 
 	public :
@@ -57,7 +58,7 @@ class CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		IE_CORE_DECLARERUNTIMETYPED( CurvesPrimitiveEvaluator, PrimitiveEvaluator );
 
-		class Result : public PrimitiveEvaluator::Result
+		class IECORE_API Result : public PrimitiveEvaluator::Result
 		{
 			public :
 

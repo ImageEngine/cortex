@@ -37,6 +37,7 @@
 
 #include "boost/iterator/counting_iterator.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/PolygonVertexIterator.h"
 
 namespace IECore
@@ -45,7 +46,7 @@ namespace IECore
 /// An iterator type suitable for iterating over the faces of a MeshPrimitive. Generally
 /// these wouldn't be created directly, instead being created by calls to MeshPrimitive::faceBegin() and MeshPrimitive::faceEnd().
 /// \ingroup geometryProcessingGroup
-class PolygonIterator
+class IECORE_API PolygonIterator
 {
 
 	public :

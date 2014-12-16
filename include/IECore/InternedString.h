@@ -37,6 +37,8 @@
 
 #include <string>
 
+#include "IECore/Export.h"
+
 /// May be used to detect the existence of the
 /// InternedString( const char *, size_t length )
 /// constructor.
@@ -50,7 +52,7 @@ namespace IECore
 /// by keeping a static table with the actual values in it, with
 /// the object instances just referencing the values in the table.
 /// \ingroup utilityGroup
-class InternedString
+class IECORE_API InternedString
 {
 	public :
 
@@ -96,7 +98,7 @@ class InternedString
 
 };
 
-std::ostream &operator << ( std::ostream &o, const InternedString &str );
+IECORE_API std::ostream &operator << ( std::ostream &o, const InternedString &str );
 
 } // namespace IECore
 

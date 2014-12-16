@@ -37,6 +37,7 @@
 
 #include "IECore/Font.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 #include "IECoreGL/AlphaTexture.h"
 
@@ -46,7 +47,7 @@ namespace IECoreGL
 IE_CORE_FORWARDDECLARE( MeshPrimitive );
 IE_CORE_FORWARDDECLARE( State );
 
-class Font : public IECore::RunTimeTyped
+class IECOREGL_API Font : public IECore::RunTimeTyped
 {
 	public :
 
