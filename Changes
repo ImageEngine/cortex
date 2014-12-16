@@ -1,3 +1,38 @@
+# 9.0.0-b1
+
+#### IECore
+
+- Fixed GILReleasePtr crash.
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreMaya
+
+- Fixed ieSceneShape component selection bug.
+- Fixed crash when expanding ieSceneShapes containing coordinate systems.
+
+#### IECoreGL
+
+- Added ToGLSphereConverter.
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreRI
+
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreArnold
+
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreAppleseed
+
+- Added initial support for Appleseed.
+- Added crop window support.
+- Fixed OSX compilation and linking issues.
+
+#### IECoreAlembic
+
+- Adding the export macros for proper exporting of symbols.
+
 # 9.0.0-a11
 
 #### IECore
@@ -7,6 +42,10 @@
 #### IECoreGL
 
 - Added support for setting array uniforms in shader parameters
+
+#### IECoreAppleseed
+
+- Added initial support for Appleseed
 
 # 9.0.0-a10
 
