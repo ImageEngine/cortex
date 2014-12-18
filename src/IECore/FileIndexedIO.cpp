@@ -37,6 +37,30 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/FileIndexedIO.h"
 
+#ifdef _MSC_VER
+#include <Windows.h>
+#include <tchar.h>
+int truncate( const char* filename, long offset )
+{
+	TCHAR tfilename[255];
+	wsprintf(tfilename, _T("%s"), filename);
+	HANDLE filet = CreateFile(tfilename, FILE_WRITE_DATA, FILE_SHARE_READ, NULL, OPEN_ALWAYS, 0, NULL);
+	if( filet == INVALID_HANDLE_VALUE )
+		return -1;
+	SetFilePointer(filet, offset, NULL, FILE_BEGIN);
+	if (SetEndOfFile(filet))
+	{
+		CloseHandle(filet);
+		return 0;
+	}
+	else
+	{
+		CloseHandle( filet );
+		return -1;
+	}
+}
+#endif
+
 using namespace IECore;
 
 namespace fs = boost::filesystem;
