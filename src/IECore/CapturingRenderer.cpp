@@ -33,7 +33,13 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <stack>
+#ifdef _MSC_VER
+#include <Windows.h>
+#include "Shlwapi.h"
+#pragma comment(lib,"shlwapi.lib")
+#else
 #include <fnmatch.h>
+#endif
 
 #include "boost/regex.hpp"
 #include "boost/tokenizer.hpp"
@@ -500,7 +506,11 @@ class CapturingRenderer::Implementation
 			
 			for( ; filterIter != filterPath.end(); ++filterIter, ++nameIter )
 			{
+#ifdef _MSC_VER
+				if( PathMatchSpec( nameIter->c_str(), filterIter->c_str() ) )
+#else
 				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+#endif
 				{
 					// this means the tokens don't match: lets quit.
 					return false;
@@ -550,7 +560,11 @@ class CapturingRenderer::Implementation
 			
 			for( ; nameIter != namePath.end(); ++filterIter, ++nameIter )
 			{
-				if( fnmatch( filterIter->c_str(), nameIter->c_str(), 0 ) )
+#ifdef _MSC_VER
+				if (PathMatchSpec(nameIter->c_str(), filterIter->c_str()))
+#else
+				if (fnmatch(filterIter->c_str(), nameIter->c_str(), 0))
+#endif
 				{
 					// this means the tokens don't match: lets quit.
 					return false;
