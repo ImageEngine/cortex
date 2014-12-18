@@ -37,6 +37,7 @@
 #include "IECore/PointsPrimitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/CompoundObject.h"
 
 #include "IECoreArnold/ToArnoldPointsConverter.h"
 

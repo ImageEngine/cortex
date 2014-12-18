@@ -39,6 +39,7 @@
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundObject.h"
 
 #include "IECoreArnold/ToArnoldCurvesConverter.h"
 
