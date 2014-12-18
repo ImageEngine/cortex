@@ -40,6 +40,8 @@
 #include "IECore/DeepPixel.h"
 #include "IECorePython/RefCountedBinding.h"
 
+#include "IECorePython/DeepPixelBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 
@@ -167,13 +169,19 @@ struct DeepPixelHelper
 		
 		unsigned numChannels = pixel->numChannels();
 
+#ifdef _MSC_VER
+		float* data = new float[numChannels];
+#else
 		float data[numChannels];
+#endif
 		pixel->interpolatedChannelData( depth, data );
 		for ( unsigned c=0; c < numChannels; ++c )
 		{
 			result.append( data[c] );
 		}
-
+#ifdef _MSC_VER
+		delete[] data;
+#endif
 		return tuple( result );
 	}
 	
@@ -194,7 +202,11 @@ struct DeepPixelHelper
 	{
 		unsigned numChannels = pixel->numChannels();
 		
+#ifdef _MSC_VER
+		float* data = new float[numChannels];
+#else
 		float data[numChannels];
+#endif
 		
 		pixel->composite( data );
 		
@@ -203,7 +215,9 @@ struct DeepPixelHelper
 		{
 			result.append( data[c] );
 		}
-		
+#ifdef _MSC_VER
+		delete[] data;
+#endif
 		return result;
 	}
 	
