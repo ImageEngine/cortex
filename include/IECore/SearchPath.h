@@ -35,6 +35,10 @@
 #ifndef IE_CORE_SEARCHPATH_H
 #define IE_CORE_SEARCHPATH_H
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #include <list>
 
 #include "boost/filesystem/path.hpp"
