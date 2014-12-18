@@ -39,6 +39,7 @@
 #include "IECore/PrimitiveOp.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/VectorTypedParameter.h"
+#include "IECore/MatrixMultiplyOp.h"
 
 namespace IECore
 {
