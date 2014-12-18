@@ -147,8 +147,13 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 	unsigned numRealChannels = DtexNumChan( m_dtexImage );
 	
 	float depth = 0;
+#ifdef _MSC_VER
+	float* channelData = new float[numRealChannels];
+	float* previous = new float[numRealChannels];
+#else
 	float channelData[numRealChannels];
 	float previous[numRealChannels];
+#endif
 	for ( unsigned j=0; j < numRealChannels; ++j )
 	{
 		previous[j] = 0.0;
@@ -184,6 +189,10 @@ DeepPixelPtr SHWDeepImageReader::doReadPixel( int x, int y )
 		
 		pixel->addSample( depth, channelData );
 	}
+#ifdef _MSC_VER
+	delete[] channelData;
+	delete[] previous;
+#endif
 	
 	return pixel;
 }
