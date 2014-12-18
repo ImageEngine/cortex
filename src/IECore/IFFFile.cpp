@@ -196,11 +196,20 @@ void IFFFile::Chunk::read( std::string &data )
 {
 	m_file->m_iStream->seekg( m_filePosition, std::ios_base::beg );
 	
-	char buffer[m_dataSize];
+#ifdef _MSC_VER
+	char *buffer = new char[m_dataSize];
 	m_file->m_iStream->read( buffer, m_dataSize );
-	
+
 	data.clear();
 	data = buffer;
+	delete[] buffer;
+#else
+	char buffer[m_dataSize];
+	m_file->m_iStream->read( buffer, m_dataSize );
+
+	data.clear();
+	data = buffer;
+#endif
 }
 
 int IFFFile::Chunk::alignmentQuota()

@@ -195,7 +195,11 @@ DeepPixelPtr EXRDeepImageReader::doReadPixel( int x, int y )
 	DeepPixelPtr pixel = new DeepPixel( m_channelNames, numSamples );
 	
 	int numChannels = pixel->numChannels();
+#ifdef _MSC_VER
+	float* channelData = new float[numChannels];
+#else
 	float channelData[numChannels];
+#endif
 	
 	unsigned cIndex = 0;
 	float depth = 0;
@@ -231,7 +235,9 @@ DeepPixelPtr EXRDeepImageReader::doReadPixel( int x, int y )
 		
 		pixel->addSample( depth, channelData );
 	}
-	
+#ifdef _MSC_VER
+	delete[] channelData;
+#endif
 	return pixel;
 }
 
