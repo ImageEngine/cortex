@@ -60,7 +60,7 @@ ParticleWriter::ParticleWriter( const std::string &description )
 
 bool ParticleWriter::canWrite( ConstObjectPtr object, const std::string &fileName )
 {
-	return runTimeCast<const PointsPrimitive>( object );
+	return (bool)runTimeCast<const PointsPrimitive>( object );
 }
 
 const PointsPrimitive * ParticleWriter::particleObject()

@@ -38,6 +38,10 @@
 #include "boost/format.hpp"
 #include "boost/lexical_cast.hpp"
 
+#ifdef SearchPath
+#undef SearchPath
+#endif
+
 #include "IECore/CachedReader.h"
 #include "IECore/ComputationCache.h"
 #include "IECore/Reader.h"
@@ -207,7 +211,7 @@ bool CachedReader::cached( const std::string &file ) const
 		}
 	}
 
-	return m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing );
+	return (bool)m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing );
 }
 
 void CachedReader::clear()
