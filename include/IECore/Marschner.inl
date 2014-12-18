@@ -41,11 +41,11 @@ namespace IECore
 
 template < typename T >
 MarschnerBCSDF<T>::MarschnerBCSDF( 
-				MarschnerBCSDF<T>::V refraction, const T &absorption, MarschnerBCSDF<T>::V eccentricity, 
-				MarschnerBCSDF<T>::V shiftR, MarschnerBCSDF<T>::V shiftTT, MarschnerBCSDF<T>::V shiftTRT, 
-				MarschnerBCSDF<T>::V widthR, MarschnerBCSDF<T>::V widthTT, MarschnerBCSDF<T>::V widthTRT, 
-				MarschnerBCSDF<T>::V glint, 
-				MarschnerBCSDF<T>::V causticWidth, MarschnerBCSDF<T>::V causticFade, MarschnerBCSDF<T>::V causticLimit ) :
+				typename MarschnerBCSDF<T>::V refraction, const T &absorption, typename MarschnerBCSDF<T>::V eccentricity, 
+				typename MarschnerBCSDF<T>::V shiftR, typename MarschnerBCSDF<T>::V shiftTT, typename MarschnerBCSDF<T>::V shiftTRT, 
+				typename MarschnerBCSDF<T>::V widthR, typename MarschnerBCSDF<T>::V widthTT, typename MarschnerBCSDF<T>::V widthTRT, 
+				typename MarschnerBCSDF<T>::V glint, 
+				typename MarschnerBCSDF<T>::V causticWidth, typename MarschnerBCSDF<T>::V causticFade, typename MarschnerBCSDF<T>::V causticLimit ) :
 		m_refraction( refraction ),
 		m_absorption( absorption ),
 		m_eccentricity( eccentricity ),
@@ -62,7 +62,8 @@ MarschnerBCSDF<T>::~MarschnerBCSDF()
 } 
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::marschnerM( MarschnerBCSDF<T>::V shift, MarschnerBCSDF<T>::V width, MarschnerBCSDF<T>::V normWidth, MarschnerBCSDF<T>::V x ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::marschnerM( typename MarschnerBCSDF<T>::V shift, typename MarschnerBCSDF<T>::V width, 
+	                                                         typename MarschnerBCSDF<T>::V normWidth, typename MarschnerBCSDF<T>::V x ) const
 {
 	//                   (deg to radians)
 	V norm = 1.0 /( ((normWidth/180.0)* M_PI) * sqrt( 2.0 * M_PI ) );
@@ -72,7 +73,8 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::marschnerM( MarschnerBCSDF<T>::
 
 /// \TODO Migrate to boost or some other library functions.
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::gaussian( MarschnerBCSDF<T>::V a, MarschnerBCSDF<T>::V b, MarschnerBCSDF<T>::V c, MarschnerBCSDF<T>::V x ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::gaussian( typename MarschnerBCSDF<T>::V a, typename MarschnerBCSDF<T>::V b, 
+	                                                       typename MarschnerBCSDF<T>::V c, typename MarschnerBCSDF<T>::V x ) const
 {
 	V o = ( x - b );
 	return a * exp( -( o * o ) / ( 2.0 * c * c ) );
@@ -80,7 +82,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::gaussian( MarschnerBCSDF<T>::V 
 
 /// \TODO Migrate to boost or some other library functions.
 template < typename T >
-typename MarschnerBCSDF<T>::V3 MarschnerBCSDF<T>::gaussianPDF( MarschnerBCSDF<T>::V mu, MarschnerBCSDF<T>::V sigma ) const
+typename MarschnerBCSDF<T>::V3 MarschnerBCSDF<T>::gaussianPDF( typename MarschnerBCSDF<T>::V mu, typename MarschnerBCSDF<T>::V sigma ) const
 {
 	V3 values;
 	values[0] = 1.0 / ( sigma * sqrt( 2.0 * M_PI ) );
@@ -90,7 +92,7 @@ typename MarschnerBCSDF<T>::V3 MarschnerBCSDF<T>::gaussianPDF( MarschnerBCSDF<T>
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( Imath::M44f hairSystem, const MarschnerBCSDF<T>::V3 &pos ) const
+typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( Imath::M44f hairSystem, const typename MarschnerBCSDF<T>::V3 &pos ) const
 {
 	V3 posLocal;
 	hairSystem.multVecMatrix( pos, posLocal );
@@ -98,7 +100,7 @@ typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( Imath::M44
 }
 	
 template < typename T >
-typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( const MarschnerBCSDF<T>::V3 &pos ) const
+typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( const typename MarschnerBCSDF<T>::V3 &pos ) const
 {
 	// convert euclidian vector to spherical coordinates 
 	V2 res = m_sphericalConverter.transform( pos );
@@ -110,7 +112,7 @@ typename MarschnerBCSDF<T>::V2 MarschnerBCSDF<T>::computeLocalVector( const Mars
 // converts a given refraction index ( eta ) to work on a 2d plane that is a cross section of the hair.
 // the theta parameter is the angle from the incident light to the cross section plane.
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::bravaisIndex( MarschnerBCSDF<T>::V theta, MarschnerBCSDF<T>::V eta )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::bravaisIndex( typename MarschnerBCSDF<T>::V theta, typename MarschnerBCSDF<T>::V eta )
 {
 	V sinTheta = sin( theta );
 	return sqrt( eta*eta - sinTheta*sinTheta ) / cos( theta );
@@ -119,7 +121,8 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::bravaisIndex( MarschnerBCSDF<T>
 // Computes reflectance fresnel with different index (eta) of refractions for perpendicular and parallel polarized light.
 // Assumes the source media is vaccuum ( n = 1 ).
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::fresnel( MarschnerBCSDF<T>::V incidenceAngle, MarschnerBCSDF<T>::V etaPerp, MarschnerBCSDF<T>::V etaParal, bool invert )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::fresnel( typename MarschnerBCSDF<T>::V incidenceAngle, typename MarschnerBCSDF<T>::V etaPerp,
+	                                                      typename MarschnerBCSDF<T>::V etaParal, bool invert )
 {
 	V n1, n2;
 	
@@ -169,7 +172,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::fresnel( MarschnerBCSDF<T>::V i
 
 // computes a new refraction index based on the hair eccentricity and the azimuth distance.
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::eccentricityRefraction( MarschnerBCSDF<T>::V averageAzimuth ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::eccentricityRefraction( typename MarschnerBCSDF<T>::V averageAzimuth ) const
 {
 	V n1 = 2.0 * ( m_refraction - 1.0 ) * m_eccentricity * m_eccentricity - m_refraction + 2.0;
 	V n2 = 2.0 * ( m_refraction - 1.0 ) / ( m_eccentricity * m_eccentricity ) - m_refraction + 2.0;
@@ -178,7 +181,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::eccentricityRefraction( Marschn
 
  	
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::exitAngle( int p, MarschnerBCSDF<T>::V eta, MarschnerBCSDF<T>::V h )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::exitAngle( int p, typename MarschnerBCSDF<T>::V eta, typename MarschnerBCSDF<T>::V h )
 {
 	// use polynomial that approximates original equation.
 	V gamma = asin( h );
@@ -187,7 +190,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::exitAngle( int p, MarschnerBCSD
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::dExitAngle( int p, MarschnerBCSDF<T>::V eta, MarschnerBCSDF<T>::V h )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::dExitAngle( int p, typename MarschnerBCSDF<T>::V eta, typename MarschnerBCSDF<T>::V h )
 {
 	// computes the derivative of the polynomial relative to h.
 	V gamma = asin( h );
@@ -198,7 +201,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::dExitAngle( int p, MarschnerBCS
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::ddExitAngle( int p, MarschnerBCSDF<T>::V eta, MarschnerBCSDF<T>::V h )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::ddExitAngle( int p, typename MarschnerBCSDF<T>::V eta, typename MarschnerBCSDF<T>::V h )
 {
 	// computes the second derivative of the polynomial relative to h.
 	V gamma = asin( h );
@@ -210,11 +213,11 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::ddExitAngle( int p, MarschnerBC
 
 template < typename T >
 T MarschnerBCSDF<T>::marschnerA( int p, 
-								 MarschnerBCSDF<T>::V gammaI,
-								 MarschnerBCSDF<T>::V refraction,
-								 MarschnerBCSDF<T>::V etaPerp,
-								 MarschnerBCSDF<T>::V etaParal,
-								 const MarschnerBCSDF<T>::V2 &light
+								 typename MarschnerBCSDF<T>::V gammaI,
+								 typename MarschnerBCSDF<T>::V refraction,
+								 typename MarschnerBCSDF<T>::V etaPerp,
+								 typename MarschnerBCSDF<T>::V etaParal,
+								 const typename MarschnerBCSDF<T>::V2 &light
 ) const
 {
 	
@@ -251,7 +254,7 @@ T MarschnerBCSDF<T>::marschnerA( int p,
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::targetAngle( int p, MarschnerBCSDF<T>::V relativeAzimuth )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::targetAngle( int p, typename MarschnerBCSDF<T>::V relativeAzimuth )
 {
 	V t = fabs(relativeAzimuth);
 
@@ -271,11 +274,11 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::targetAngle( int p, MarschnerBC
 
 template < typename T >
 T MarschnerBCSDF<T>::marschnerNP( int p,
-								  MarschnerBCSDF<T>::V refraction,
-								  MarschnerBCSDF<T>::V etaPerp,
-								  MarschnerBCSDF<T>::V etaParal,
-								  const MarschnerBCSDF<T>::V2 &light,
-								  MarschnerBCSDF<T>::V targetAngle
+								  typename MarschnerBCSDF<T>::V refraction,
+								  typename MarschnerBCSDF<T>::V etaPerp,
+								  typename MarschnerBCSDF<T>::V etaParal,
+								  const typename MarschnerBCSDF<T>::V2 &light,
+								  typename MarschnerBCSDF<T>::V targetAngle
 ) const
 {		
 
@@ -314,11 +317,11 @@ T MarschnerBCSDF<T>::marschnerNP( int p,
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::marschnerNTRT( MarschnerBCSDF<T>::V refraction,
-									MarschnerBCSDF<T>::V etaPerp,
-									MarschnerBCSDF<T>::V etaParal,
-									const MarschnerBCSDF<T>::V2 &light,
-									MarschnerBCSDF<T>::V targetAngle
+T MarschnerBCSDF<T>::marschnerNTRT( typename MarschnerBCSDF<T>::V refraction,
+									typename MarschnerBCSDF<T>::V etaPerp,
+									typename MarschnerBCSDF<T>::V etaParal,
+									const typename MarschnerBCSDF<T>::V2 &light,
+									typename MarschnerBCSDF<T>::V targetAngle
 ) const
 {	
 	V dH, t, hc, Oc1, Oc2;
@@ -358,14 +361,14 @@ T MarschnerBCSDF<T>::marschnerNTRT( MarschnerBCSDF<T>::V refraction,
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::operator() ( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+T MarschnerBCSDF<T>::operator() ( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V2 r, tt, trt;
 	return MarschnerBCSDF<T>( eye, light, r, tt, trt );
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::operator() ( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light, T &R, T &TT, T &TRT ) const
+T MarschnerBCSDF<T>::operator() ( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light, T &R, T &TT, T &TRT ) const
 {
 	// converts 3d light position into angular position using Z as hair direction (root to tip) and
 	// X as major axis direction ( in case the hair is elliptical ). The x component is the inclination
@@ -406,7 +409,7 @@ T MarschnerBCSDF<T>::operator() ( const MarschnerBCSDF<T>::V2 &eye, const Marsch
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MR( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MR( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V rWidth = 5.0;
 	V averageTheta = ( eye.y + light.y ) / 2.0;
@@ -420,7 +423,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MR( const MarschnerBCSDF<T>::V2
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTT( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V rWidth = 5.0;
 	V averageTheta = ( eye.y + light.y ) / 2.0;
@@ -434,7 +437,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTT( const MarschnerBCSDF<T>::V
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTRT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTRT( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V rWidth = 5.0;
 	V averageTheta = ( eye.y + light.y ) / 2.0;
@@ -448,7 +451,7 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::MTRT( const MarschnerBCSDF<T>::
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::NR( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+T MarschnerBCSDF<T>::NR( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V relativeTheta = fabs( eye.y - light.y ) / 2.0;	
 	V relativeAzimuth = fmod( fabs( eye.x - light.x ), 2.0 * M_PI );
@@ -460,7 +463,7 @@ T MarschnerBCSDF<T>::NR( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::NTT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+T MarschnerBCSDF<T>::NTT( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V relativeTheta = fabs( eye.y - light.y ) / 2.0;	
 	V relativeAzimuth = fmod( fabs( eye.x - light.x ), 2.0 * M_PI );
@@ -472,7 +475,7 @@ T MarschnerBCSDF<T>::NTT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF
 }
 
 template < typename T >
-T MarschnerBCSDF<T>::NTRT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSDF<T>::V2 &light ) const
+T MarschnerBCSDF<T>::NTRT( const typename MarschnerBCSDF<T>::V2 &eye, const typename MarschnerBCSDF<T>::V2 &light ) const
 {
 	V relativeTheta = fabs( eye.y - light.y ) / 2.0;	
 	V relativeAzimuth = fmod( fabs( eye.x - light.x ), 2.0 * M_PI );
@@ -488,7 +491,8 @@ T MarschnerBCSDF<T>::NTRT( const MarschnerBCSDF<T>::V2 &eye, const MarschnerBCSD
 /// \TODO Migrate these to boost or some other library solves
 // Computes real roots for a given cubic polynomial (x^3+Ax^2+Bx+C = 0).
 template < typename T >
-int MarschnerBCSDF<T>::cubicRoots( MarschnerBCSDF<T>::V A, MarschnerBCSDF<T>::V B, MarschnerBCSDF<T>::V C, MarschnerBCSDF<T>::V D, MarschnerBCSDF<T>::V roots[3] )
+int MarschnerBCSDF<T>::cubicRoots( typename MarschnerBCSDF<T>::V A, typename MarschnerBCSDF<T>::V B, typename MarschnerBCSDF<T>::V C, 
+	                               typename MarschnerBCSDF<T>::V D, typename MarschnerBCSDF<T>::V roots[3] )
 {	
 	if( fabs(A) < Imath::limits<V>::epsilon() )
 	{
@@ -502,7 +506,8 @@ int MarschnerBCSDF<T>::cubicRoots( MarschnerBCSDF<T>::V A, MarschnerBCSDF<T>::V 
 
 // Computes real roots for a given cubic polynomial (x^3+Ax^2+Bx+C = 0).
 template < typename T >
-int MarschnerBCSDF<T>::normalizedCubicRoots( MarschnerBCSDF<T>::V A, MarschnerBCSDF<T>::V B, MarschnerBCSDF<T>::V C, MarschnerBCSDF<T>::V roots[3] )
+int MarschnerBCSDF<T>::normalizedCubicRoots( typename MarschnerBCSDF<T>::V A, typename MarschnerBCSDF<T>::V B, typename MarschnerBCSDF<T>::V C, 
+	                                         typename MarschnerBCSDF<T>::V roots[3] )
 {		
 	if( fabs(C) < Imath::limits<V>::epsilon() )
 	{
@@ -533,7 +538,7 @@ int MarschnerBCSDF<T>::normalizedCubicRoots( MarschnerBCSDF<T>::V A, MarschnerBC
 }
 
 template < typename T >
-typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::cubicRoot( MarschnerBCSDF<T>::V v )
+typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::cubicRoot( typename MarschnerBCSDF<T>::V v )
 {
 	if ( v < 0 ) {
 		return -pow( -v, 1.0 / 3.0 );
@@ -543,7 +548,8 @@ typename MarschnerBCSDF<T>::V MarschnerBCSDF<T>::cubicRoot( MarschnerBCSDF<T>::V
 
 
 template < typename T >
-int MarschnerBCSDF<T>::quadraticRoots( MarschnerBCSDF<T>::V a, MarschnerBCSDF<T>::V b,MarschnerBCSDF<T>::V c, MarschnerBCSDF<T>::V roots[2] )
+int MarschnerBCSDF<T>::quadraticRoots( typename MarschnerBCSDF<T>::V a, typename MarschnerBCSDF<T>::V b, typename MarschnerBCSDF<T>::V c, 
+	                                   typename MarschnerBCSDF<T>::V roots[2] )
 {		
 	if( fabs(a) < Imath::limits<V>::epsilon() )
 	{
@@ -570,7 +576,7 @@ int MarschnerBCSDF<T>::quadraticRoots( MarschnerBCSDF<T>::V a, MarschnerBCSDF<T>
 }
 
 template < typename T >
-int MarschnerBCSDF<T>::linearRoots( MarschnerBCSDF<T>::V a, MarschnerBCSDF<T>::V b, MarschnerBCSDF<T>::V &root )
+int MarschnerBCSDF<T>::linearRoots( typename MarschnerBCSDF<T>::V a, typename MarschnerBCSDF<T>::V b, typename MarschnerBCSDF<T>::V &root )
 {		
 	int rootCount = -1;
 	if( a != 0.0 )
