@@ -38,6 +38,7 @@
 #include "boost/date_time/posix_time/time_parsers.hpp"
 
 #include "IECore/TimePeriodData.h"
+#include "IECorePython/TimePeriodBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
 #include <sstream>

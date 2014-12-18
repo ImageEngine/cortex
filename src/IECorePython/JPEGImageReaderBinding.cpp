@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/JPEGImageReader.h"
+#include "IECorePython/JPEGImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

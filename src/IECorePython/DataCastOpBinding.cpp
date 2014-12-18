@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/DataCastOp.h"
+#include "IECorePython/DataCastOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

@@ -38,6 +38,8 @@
 #include "IECore/MPlayDisplayDriver.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/MPlayDisplayDriverBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

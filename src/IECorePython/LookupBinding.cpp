@@ -45,6 +45,8 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/Spline.h"
 
+#include "IECorePython/LookupBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

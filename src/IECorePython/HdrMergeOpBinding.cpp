@@ -38,6 +38,8 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/HdrMergeOpBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

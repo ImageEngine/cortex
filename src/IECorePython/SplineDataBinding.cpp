@@ -38,6 +38,7 @@
 #include <sstream>
 
 #include "IECore/SplineData.h"
+#include "IECorePython/SplineDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/SimpleTypedDataBinding.h"

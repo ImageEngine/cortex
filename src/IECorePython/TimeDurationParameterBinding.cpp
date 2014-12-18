@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/TimeDurationParameter.h"
 

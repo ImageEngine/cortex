@@ -42,6 +42,8 @@
 
 #include "IECore/TransformationMatrix.h"
 
+#include "IECorePython/TransformationMatrixBinding.h"
+
 using namespace boost::python;
 using namespace Imath;
 using namespace std;

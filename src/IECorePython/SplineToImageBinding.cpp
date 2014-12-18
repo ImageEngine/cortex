@@ -39,6 +39,7 @@
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SplineToImageBinding.h"
 
 using namespace boost;
 using namespace boost::python;

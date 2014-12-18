@@ -40,6 +40,7 @@
 
 #include "IECore/InterpolatedCache.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/InterpolatedCacheBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
 

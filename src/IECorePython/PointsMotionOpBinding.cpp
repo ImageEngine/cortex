@@ -38,6 +38,8 @@
 #include "IECore/PointsMotionOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/PointsMotionOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

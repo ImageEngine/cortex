@@ -36,6 +36,7 @@
 
 #include "IECore/ParticleReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/ParticleReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

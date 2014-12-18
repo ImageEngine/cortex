@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/SGIImageReader.h"
+#include "IECorePython/SGIImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

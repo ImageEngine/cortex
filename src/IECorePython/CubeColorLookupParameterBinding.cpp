@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/CubeColorLookupParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/CubeColorLookupParameter.h"
 

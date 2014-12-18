@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImageCropOp.h"
+#include "IECorePython/ImageCropOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/VectorTypedParameter.h"
 

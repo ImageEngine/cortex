@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/DataPromoteOp.h"
+#include "IECorePython/DataPromoteOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

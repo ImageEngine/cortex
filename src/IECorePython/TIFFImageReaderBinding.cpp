@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/TIFFImageReader.h"
+#include "IECorePython/TIFFImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

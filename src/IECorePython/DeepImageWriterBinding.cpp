@@ -36,7 +36,7 @@
 
 #include "IECore/DeepImageWriter.h"
 #include "IECore/FileNameParameter.h"
-
+#include "IECorePython/DeepImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;

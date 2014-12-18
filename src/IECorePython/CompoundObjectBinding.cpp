@@ -37,6 +37,7 @@
 #include <sstream>
 
 #include "IECore/CompoundObject.h"
+#include "IECorePython/CompoundObjectBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include <exception>

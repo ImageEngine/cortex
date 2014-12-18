@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/UnicodeToStringBinding.h"
+
 using namespace boost::python;
 
 namespace IECorePython

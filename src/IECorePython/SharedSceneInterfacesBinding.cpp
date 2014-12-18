@@ -36,6 +36,8 @@
 
 #include "IECore/SharedSceneInterfaces.h"
 
+#include "IECorePython/SharedSceneInterfacesBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 
