@@ -168,27 +168,47 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 		case V2fVectorDataTypeId :
 		{
 			Promote2Fn<V2fVectorData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case V2dVectorDataTypeId :
 		{
 			Promote2Fn<V2dVectorData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case V3fVectorDataTypeId :
 		{
 			Promote2Fn<V3fVectorData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case V3dVectorDataTypeId :
 		{
 			Promote2Fn<V3dVectorData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case Color3fVectorDataTypeId :
 		{
 			Promote2Fn<Color3fVectorData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		default :
 			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );
@@ -207,27 +227,47 @@ struct DataPromoteOp::Promote1Fn::Func< F, typename boost::enable_if< TypeTraits
 		case V2fDataTypeId :
 		{
 			Promote2Fn<V2fData> fn;
+#ifdef _MSC_VER
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V2dDataTypeId :
 		{
 			Promote2Fn<V2dData> fn;
+#ifdef _MSC_VER
+			return fn.operator()<F>( d );
+#else
 			return fn.template operator()<F>( d );
+#endif
 		}
 		case V3fDataTypeId :
 		{
 			Promote2Fn<V3fData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case V3dDataTypeId :
 		{
 			Promote2Fn<V3dData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		case Color3fDataTypeId :
 		{
 			Promote2Fn<Color3fData> fn;
-			return fn.template operator()<F>( d );
+#ifdef _MSC_VER
+			return fn.operator()<F>(d);
+#else
+			return fn.template operator()<F>(d);
+#endif
 		}
 		default :
 			throw Exception( "DataPromoteOp: Unsupported target data type \"" + std::string( Object::typeNameFromTypeId( targetType ) ) + "\"." );
