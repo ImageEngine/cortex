@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include"boost/tuple/tuple.hpp"
+#include "boost/tuple/tuple.hpp"
 #include "tbb/concurrent_hash_map.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
@@ -280,7 +280,9 @@ class SceneCache::Implementation : public RefCounted
 					throw Exception( "Unsupported transform data type!" );
 			}
 		}
-
+#ifdef _MSC_VER
+		public:
+#endif
 		IndexedIOPtr m_indexedIO;
 };
 
