@@ -37,6 +37,8 @@
 #include "IECore/EnvMapSHProjector.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/EnvMapSHProjectorBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

@@ -37,6 +37,7 @@
 #include "IECore/PDCParticleWriter.h"
 #include "IECore/FileNameParameter.h"
 
+#include "IECorePython/PDCParticleWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

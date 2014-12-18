@@ -36,6 +36,7 @@
 
 #include "IECore/EnvMapSampler.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/EnvMapSamplerBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

@@ -41,6 +41,8 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/CapturingRendererBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

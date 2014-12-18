@@ -36,6 +36,7 @@
 
 #include "IECore/Writer.h"
 #include "IECore/Object.h"
+#include "IECorePython/WriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
 

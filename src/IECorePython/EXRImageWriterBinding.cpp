@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/EXRImageWriter.h"
+#include "IECorePython/EXRImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

@@ -45,6 +45,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 

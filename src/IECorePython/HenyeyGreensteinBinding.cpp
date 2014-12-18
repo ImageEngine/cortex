@@ -40,6 +40,8 @@
 
 #include "IECore/HenyeyGreenstein.h"
 
+#include "IECorePython/HenyeyGreensteinBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

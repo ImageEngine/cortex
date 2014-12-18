@@ -36,6 +36,7 @@
 
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/ImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

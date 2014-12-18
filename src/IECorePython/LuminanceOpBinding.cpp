@@ -36,6 +36,7 @@
 
 #include "IECore/LuminanceOp.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/LuminanceOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

@@ -38,6 +38,7 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/FrameListBinding.h"
+#include "IECorePython/CompoundFrameListBinding.h"
 
 #include "IECore/CompoundFrameList.h"
 #include "IECore/Exception.h"

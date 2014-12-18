@@ -36,6 +36,7 @@
 
 #include "IECore/Grade.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/GradeBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

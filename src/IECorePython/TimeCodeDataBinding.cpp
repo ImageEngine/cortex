@@ -39,6 +39,8 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
+#include "IECorePython/TimeCodeDataBinding.h"
+
 #include <sstream>
 
 using namespace boost;

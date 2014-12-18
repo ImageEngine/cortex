@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/JPEGImageWriter.h"
+#include "IECorePython/JPEGImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

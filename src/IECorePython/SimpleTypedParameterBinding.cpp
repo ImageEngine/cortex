@@ -34,6 +34,7 @@
 
 #include "boost/python.hpp"
 
+#include "IECorePython/SimpleTypedParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/SimpleTypedData.h"
