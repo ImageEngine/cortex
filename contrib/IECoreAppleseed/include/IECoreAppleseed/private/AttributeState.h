@@ -57,6 +57,8 @@ class AttributeState
 
 		const std::string &name() const;
 
+		const foundation::Dictionary &visibilityDictionary() const;
+
 		void addOSLShader( IECore::ConstShaderPtr shader );
 		void setOSLSurface( IECore::ConstShaderPtr surface );
 
@@ -73,6 +75,7 @@ class AttributeState
 		IECore::CompoundDataPtr m_attributes;
 		ShadingState m_shadingState;
 		std::string m_name;
+		foundation::Dictionary m_visibilityDictionary;
 
 };
 

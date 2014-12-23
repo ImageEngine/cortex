@@ -720,7 +720,10 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const string &assemblyName )
 {
 	string assemblyInstanceName = m_attributeStack.top().name() + "_instance";
-	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), asr::ParamArray(), assemblyName.c_str() );
+
+	asr::ParamArray params;
+	params.insert( "visibility", m_attributeStack.top().visibilityDictionary() );
+	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), params, assemblyName.c_str() );
 
 	assemblyInstance->transform_sequence() = m_transformStack.top();
 	insertEntityWithUniqueName( m_mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
