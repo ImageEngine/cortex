@@ -221,21 +221,23 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+
+	/// \todo Why don't we choose an internal format matching the data provided, rather than using 16
+	/// bit integers for everything? Hardcoding GL_RGB16 means that sometimes we're using more memory than
+	/// needed, and sometimes we're throwing away information.
+	glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA16 : GL_RGB16, width, height, 0, ra ? GL_RGBA : GL_RGB,
+		NumericTraits<ElementType>::glType(), &interleaved[0] );
 
 	if( mipMap )
 	{
-		/// \todo Why don't we choose an internal format matching the data provided, rather than using 16
-		/// bit integers for everything? Hardcoding GL_RGB16 means that sometimes we're using more memory than
-		/// needed, and sometimes we're throwing away information.
-		gluBuild2DMipmaps( GL_TEXTURE_2D, ra ? GL_RGBA16 : GL_RGB16, width, height, ra ? GL_RGBA : GL_RGB,
-			NumericTraits<ElementType>::glType(), &interleaved[0] );
+		glGenerateMipmap( GL_TEXTURE_2D );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	}
 	else
 	{
-		glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA16 : GL_RGB16, width, height, 0, ra ? GL_RGBA : GL_RGB,
-			NumericTraits<ElementType>::glType(), &interleaved[0] );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	}
 
 	IECoreGL::Exception::throwIfError();
