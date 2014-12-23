@@ -54,17 +54,12 @@ IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 {
 	m_attributes = other.m_attributes->copy();
 	m_shadingState = other.m_shadingState;
+	m_visibilityDictionary = other.m_visibilityDictionary;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
 {
 	m_attributes->writable()[name] = value->copy();
-
-	if( 0 == name.compare( 0, 14, "as:visibility:" ) )
-	{
-		// visibility flags are not implemented yet in appleseed.
-		return;
-	}
 
 	if( name == "name" )
 	{
@@ -81,7 +76,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	{
 		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
 		{
-			 m_shadingState.setAlphaMap( f->readable() );
+			m_shadingState.setAlphaMap( f->readable() );
 		}
 		else
 		{
@@ -113,6 +108,18 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
 		}
 	}
+	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
+	{
+		if( ConstBoolDataPtr f = runTimeCast<const BoolData>( value ) )
+		{
+			string flag_name( name, 14, string::npos );
+			m_visibilityDictionary.insert( flag_name.c_str(), f->readable() ? "true" : "false" );
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "visibility attributes expect a BoolData value." );
+		}
+	}
 }
 
 ConstDataPtr IECoreAppleseed::AttributeState::getAttribute( const string &name ) const
@@ -123,6 +130,11 @@ ConstDataPtr IECoreAppleseed::AttributeState::getAttribute( const string &name )
 const string &IECoreAppleseed::AttributeState::name() const
 {
 	return m_name;
+}
+
+const asf::Dictionary &IECoreAppleseed::AttributeState::visibilityDictionary() const
+{
+	return m_visibilityDictionary;
 }
 
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
