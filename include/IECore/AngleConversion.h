@@ -40,6 +40,7 @@
 #define IE_CORE_ANGLECONVERSION_H
 
 #include <math.h>
+#include "IECore/Math.h"
 
 namespace IECore
 {
