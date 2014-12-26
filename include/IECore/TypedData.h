@@ -114,7 +114,7 @@ class IECORE_API TypedData : public Data
 
 		/// Return the size of the internal data structure in terms of base type elements.
 		/// Throws an Exception if this type has no single base type.
-		size_t baseSize() const;
+		std::size_t baseSize() const;
 
 	protected:
 
