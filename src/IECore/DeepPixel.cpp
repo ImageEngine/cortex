@@ -347,13 +347,8 @@ DeepPixelPtr DeepPixel::average( std::vector<const DeepPixel *> &pixels, std::ve
 	
 	DeepPixelPtr result = new DeepPixel( *pixels[0]->channelNames(), numSamples );
 	
-	#ifdef _MSC_VER
-	float *averageData = new float[numChannels];
-	float *currentData = new float[numChannels];
-	#else
 	float averageData[numChannels];
 	float currentData[numChannels];
-	#endif
 	
 	for ( unsigned i=0; i < numSamples; ++i )
 	{
@@ -375,10 +370,6 @@ DeepPixelPtr DeepPixel::average( std::vector<const DeepPixel *> &pixels, std::ve
 		
 		result->addSample( depth, averageData );
 	}
-	#ifdef _MSC_VER
-	delete[] currentData;
-	delete[] averageData;
-	#endif
 	
 	return result;
 }
