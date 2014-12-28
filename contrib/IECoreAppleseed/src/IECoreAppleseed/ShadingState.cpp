@@ -215,7 +215,7 @@ asr::ParamArray IECoreAppleseed::ShadingState::convertParameters( const Compound
 			case IntDataTypeId :
 			{
 				const int *p = static_cast<const IntData *>( data )->baseReadable();
-				ss << "float " << *p;
+				ss << "int " << *p;
 			}
 			break;
 
