@@ -41,6 +41,8 @@
 
 #include "IECore/CamelCase.h"
 
+#include "IECorePython/CamelCaseBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace std;

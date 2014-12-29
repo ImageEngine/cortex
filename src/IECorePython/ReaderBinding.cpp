@@ -37,6 +37,7 @@
 #include "IECore/Reader.h"
 #include "IECore/Object.h"
 #include "IECore/FileNameParameter.h"
+#include "IECorePython/ReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
@@ -133,7 +134,11 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 			override o = this->get_override( "readHeader" );
 			if( o )
 			{
+#ifdef _MSC_VER
+				CompoundObjectPtr r = o().as<CompoundObjectPtr>();
+#else
 				CompoundObjectPtr r = o();
+#endif
 				if( !r )
 				{
 					throw Exception( "readHeader() python method didn't return a CompoundObject." );
@@ -152,7 +157,11 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
+#ifdef _MSC_VER
+				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) ).as<ObjectPtr>();
+#else
 				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+#endif
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );

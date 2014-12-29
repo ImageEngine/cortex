@@ -45,6 +45,7 @@
 #include "IECorePython/ImathVecBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
+using namespace boost;
 using namespace boost::python;
 using namespace Imath;
 using namespace std;
@@ -103,20 +104,20 @@ struct EulerHelper
 {
 	typedef typename Euler<T>::Order OrderType;
 
-	static tuple angleOrder( Euler<T> &e )
+	static python::tuple angleOrder(Euler<T> &e)
 	{
 		int i, j, k;
 		e.angleOrder( i, j, k );
 
-		return make_tuple( i, j, k );
+		return python::make_tuple(i, j, k);
 	}
 
-	static tuple angleMapping( Euler<T> &e )
+	static python::tuple angleMapping(Euler<T> &e)
 	{
 		int i, j, k;
 		e.angleMapping( i, j, k );
 
-		return make_tuple( i, j, k );
+		return python::make_tuple(i, j, k);
 	}
 
 	static Vec3<T> simpleXYZRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )

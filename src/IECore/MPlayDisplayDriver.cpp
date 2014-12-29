@@ -35,6 +35,12 @@
 #include <stdio.h>
 #include "boost/format.hpp"
 
+#ifdef _MSC_VER
+#include <conio.h>
+#define popen _popen
+#define pclose _pclose
+#endif
+
 #include "IECore/MPlayDisplayDriver.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"

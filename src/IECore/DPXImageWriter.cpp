@@ -51,6 +51,10 @@
 
 #include <fstream>
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
 using namespace IECore;
 using namespace std;
 using namespace boost;

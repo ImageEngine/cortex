@@ -35,6 +35,15 @@
 #ifndef IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
 #define IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
 
+// For some reason GCC is complaining about this when pyconfig.h is included
+// through boost python.
+#ifdef _POSIX_C_SOURCE
+#undef _POSIX_C_SOURCE
+#endif
+#ifdef _XOPEN_SOURCE
+#undef _XOPEN_SOURCE
+#endif
+
 #include "boost/python.hpp"
 #include "ai.h"
 

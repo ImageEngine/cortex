@@ -36,6 +36,7 @@
 
 #include "IECore/TransformOp.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/TransformOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

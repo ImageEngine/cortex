@@ -40,6 +40,7 @@
 #include "IECore/Parameterised.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
+#include "IECore/FileNameParameter.h"
 
 namespace IECore
 {

@@ -36,6 +36,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/LinearToAlexaLogcOp.h"
+#include "IECorePython/LinearToAlexaLogcOpBinding.h"
 #include "IECorePython/LinearToCineonOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 

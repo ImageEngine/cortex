@@ -51,6 +51,7 @@
 #include "IECorePython/ImathColorVectorBinding.h"
 #include "IECorePython/ImathBoxVectorBinding.h"
 #include "IECorePython/ImathQuatVectorBinding.h"
+#include "IECorePython/VectorTypedDataBinding.h"
 #include "IECorePython/VectorTypedDataBinding.inl"
 #include "IECorePython/RunTimeTypedBinding.h"
 

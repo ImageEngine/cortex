@@ -39,6 +39,7 @@
 
 #include "IECore/Camera.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/CompoundObject.h"
 
 #include "IECoreArnold/ToArnoldCameraConverter.h"
 

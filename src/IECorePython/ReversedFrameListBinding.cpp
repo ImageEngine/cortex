@@ -37,6 +37,7 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/FrameListBinding.h"
+#include "IECorePython/ReversedFrameListBinding.h"
 
 #include "IECore/ReversedFrameList.h"
 #include "IECore/Exception.h"

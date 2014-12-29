@@ -49,6 +49,7 @@
 #include "IECorePython/ImathMatrixBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
+using namespace boost;
 using namespace boost::python;
 using namespace Imath;
 using namespace std;
@@ -125,18 +126,18 @@ struct MatrixBaseType< M44d >
 template <typename T>
 struct MatrixDimensions
 {
-	static tuple get(const T &x)
+	static python::tuple get(const T &x)
 	{
-		return make_tuple(3, 3);
+		return python::make_tuple(3, 3);
 	}
 };
 
 template<typename T>
 struct MatrixDimensions< Matrix44<T> >
 {
-	static tuple get(const Matrix44<T> &x)
+	static python::tuple get(const Matrix44<T> &x)
 	{
-		return make_tuple(4, 4);
+		return python::make_tuple(4, 4);
 	}
 };
 
@@ -193,9 +194,9 @@ template<typename T>
 struct MatrixWrapper
 {
 	typedef typename MatrixBaseType<T>::BaseType V;
-	static V get(const T &m, tuple i)
+	static V get(const T &m, python::tuple i)
 	{
-		static tuple dims = MatrixDimensions<T>::get(m);
+		static python::tuple dims = MatrixDimensions<T>::get(m);
 
 		int x = extract<int>(i[0]);
 		int y = extract<int>(i[1]);
@@ -210,9 +211,9 @@ struct MatrixWrapper
 		return m[x][y];
 	}
 
-	static void set(T &m, tuple i, const V &v)
+	static void set(T &m, python::tuple i, const V &v)
 	{
-		static tuple dims = MatrixDimensions<T>::get(m);
+		static python::tuple dims = MatrixDimensions<T>::get(m);
 
 		int x = extract<int>(i[0]);
 		int y = extract<int>(i[1]);
@@ -289,21 +290,21 @@ void removeScaling( M &m )
 }
 
 template<typename T>
-tuple extractScalingAndShear33( const Matrix33<T> &m )
+python::tuple extractScalingAndShear33(const Matrix33<T> &m)
 {
 	Vec2<T> scl;
 	T shr;
 	extractScalingAndShear( m, scl, shr );
-	return make_tuple( scl, shr );
+	return python::make_tuple(scl, shr);
 }
 
 template<typename T>
-tuple extractScalingAndShear44( const Matrix44<T> &m )
+python::tuple extractScalingAndShear44(const Matrix44<T> &m)
 {
 	Vec3<T> scl;
 	Vec3<T> shr;
 	extractScalingAndShear( m, scl, shr );
-	return make_tuple( scl, shr );
+	return python::make_tuple(scl, shr);
 }
 
 template<typename M>
@@ -319,20 +320,20 @@ void removeScalingAndShear( M &m )
 }
 
 template<typename T>
-tuple extractAndRemoveScalingAndShear33( Matrix33<T> &m )
+python::tuple extractAndRemoveScalingAndShear33(Matrix33<T> &m)
 {
 	Vec2<T> scl;
 	T shr;
 	extractAndRemoveScalingAndShear( m, scl, shr, true );
-	return make_tuple( scl, shr );
+	return python::make_tuple(scl, shr);
 }
 
 template<typename T>
-tuple extractAndRemoveScalingAndShear44( Matrix44<T> &m )
+python::tuple extractAndRemoveScalingAndShear44(Matrix44<T> &m)
 {
 	Vec3<T> scl, shr;
 	extractAndRemoveScalingAndShear( m, scl, shr, true );
-	return make_tuple( scl, shr );
+	return python::make_tuple(scl, shr);
 }
 
 template<typename M, typename V>
@@ -352,20 +353,20 @@ V extractEulerZYX( const M &m )
 }
 
 template<typename T>
-tuple extractSHRT44( const Matrix44<T> &m )
+python::tuple extractSHRT44(const Matrix44<T> &m)
 {
 	Vec3<T> s, h, r, t;
 	extractSHRT( m, s, h, r, t, true );
-	return make_tuple( s, h, r, t );
+	return python::make_tuple(s, h, r, t);
 }
 
 template<typename T>
-tuple extractSHRT33( const Matrix33<T> &m )
+python::tuple extractSHRT33(const Matrix33<T> &m)
 {
 	Vec2<T> s, t;
 	T h, r;
 	extractSHRT( m, s, h, r, t, true );
-	return make_tuple( s, h, r, t );
+	return python::make_tuple(s, h, r, t);
 }
 
 #define DEFINEMATRIXSTRSPECIALISATION( TYPE, D )\

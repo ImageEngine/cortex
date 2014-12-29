@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/DPXImageWriter.h"
+#include "IECorePython/DPXImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

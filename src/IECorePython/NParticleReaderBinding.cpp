@@ -37,6 +37,8 @@
 #include "IECore/NParticleReader.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/NParticleReaderBinding.h"
+
 using std::string;
 using namespace boost;
 using namespace boost::python;

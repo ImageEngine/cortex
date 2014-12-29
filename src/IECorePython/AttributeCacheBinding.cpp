@@ -41,6 +41,7 @@
 #include "IECore/IndexedIO.h"
 #include "IECore/AttributeCache.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/AttributeCacheBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 
 using namespace boost::python;

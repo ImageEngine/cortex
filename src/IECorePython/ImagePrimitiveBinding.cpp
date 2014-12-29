@@ -55,7 +55,7 @@ static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wan
 	{
 		std::string reason;
 		bool v = that.channelValid( p, &reason );
-		return make_tuple( v, reason );
+		return (object)make_tuple( v, reason );
 	}
 	bool v = that.channelValid( p );
 	return object( v );
@@ -67,7 +67,7 @@ static object channelValid2( ImagePrimitive &that, const char * n, bool wantReas
 	{
 		std::string reason;
 		bool v = that.channelValid( n, &reason );
-		return make_tuple( v, reason );
+		return (object)make_tuple( v, reason );
 	}
 	bool v = that.channelValid( n );
 	return object( v );

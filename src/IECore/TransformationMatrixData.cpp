@@ -112,7 +112,7 @@ static IndexedIO::EntryID g_valueEntry("value");
 			base.rotate.extract( Imath::Quat<TNAME::BaseType>( order, base.rotate.x, base.rotate.y, base.rotate.z ));	\
 		} else																						\
 		{																							\
-			base.rotate.setOrder( (Imath::Euler<TNAME::BaseType>::Order)(order) );		\
+			base.rotate.setOrder( (Imath::Euler<TNAME::BaseType>::Order)((int)(order)) );		\
 		}																							\
 		base.rotatePivotTranslation.x = *p++;														\
 		base.rotatePivotTranslation.y = *p++;														\

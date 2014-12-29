@@ -50,6 +50,9 @@ namespace IECore
 {
 
 template<typename T>
+#ifdef _MSC_VER
+typename
+#endif
 TypedObjectParameter<T>::TypeDescription<TypedObjectParameter<T> > TypedObjectParameter<T>::g_typeDescription;
 
 template<typename T>

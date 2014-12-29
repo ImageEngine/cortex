@@ -37,6 +37,8 @@
 #include "IECore/DataConvertOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/DataConvertOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

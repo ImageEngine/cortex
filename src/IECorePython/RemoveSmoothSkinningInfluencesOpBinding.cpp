@@ -37,6 +37,8 @@
 #include "IECore/RemoveSmoothSkinningInfluencesOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/RemoveSmoothSkinningInfluencesOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

@@ -40,6 +40,7 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECore/Spline.h"
 
+using namespace boost;
 using namespace boost::python;
 using namespace Imath;
 using namespace std;
@@ -99,15 +100,15 @@ static T *construct( const typename T::Basis &basis, object o )
 }
 
 template<typename T>
-static tuple points( const T &s )
+static python::tuple points( const T &s )
 {
 	boost::python::list p;
 	typename T::PointContainer::const_iterator it;
 	for( it=s.points.begin(); it!=s.points.end(); it++ )
 	{
-		p.append( make_tuple( it->first, it->second ) );
+		p.append(python::make_tuple(it->first, it->second));
 	}
-	return tuple( p );
+	return python::tuple( p );
 }
 
 template<typename T>
@@ -153,7 +154,7 @@ static size_t len( const T &s )
 }
 
 template<typename T>
-static tuple keys( const T &s )
+static python::tuple keys( const T &s )
 {
 	boost::python::list p;
 	typename T::PointContainer::const_iterator it;
@@ -161,11 +162,11 @@ static tuple keys( const T &s )
 	{
 		p.append( it->first );
 	}
-	return tuple( p );
+	return python::tuple( p );
 }
 
 template<typename T>
-static tuple values( const T &s )
+static python::tuple values( const T &s )
 {
 	boost::python::list p;
 	typename T::PointContainer::const_iterator it;
@@ -173,24 +174,24 @@ static tuple values( const T &s )
 	{
 		p.append( it->second );
 	}
-	return tuple( p );
+	return python::tuple( p );
 }
 
 template<typename T>
-static tuple interval( const T &s )
+static python::tuple interval( const T &s )
 {
 	/// \todo If we had bindings for boost::interval then we could return one
 	/// of those instead.
 	typename T::XInterval i = s.interval();
-	return make_tuple( i.lower(), i.upper() );
+	return python::make_tuple( i.lower(), i.upper() );
 }
 
 template<typename T>
-static tuple solve( const T &s, typename T::XType x )
+static python::tuple solve(const T &s, typename T::XType x)
 {
 	typename T::YType segment[4];
 	typename T::XType t = s.solve( x, segment );
-	return make_tuple( t, make_tuple( segment[0], segment[1], segment[2], segment[3] ) );
+	return python::make_tuple(t, python::make_tuple(segment[0], segment[1], segment[2], segment[3]));
 }
 
 template<typename T>

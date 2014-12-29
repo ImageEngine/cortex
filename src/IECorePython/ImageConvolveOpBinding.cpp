@@ -37,6 +37,8 @@
 #include "IECore/ImageConvolveOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/ImageConvolveOpBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

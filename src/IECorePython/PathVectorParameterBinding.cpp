@@ -37,6 +37,7 @@
 #include "IECorePython/ParameterBinding.h"
 #include "IECore/PathVectorParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/PathVectorParameterBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 

@@ -195,7 +195,7 @@ DeepPixelPtr EXRDeepImageReader::doReadPixel( int x, int y )
 	DeepPixelPtr pixel = new DeepPixel( m_channelNames, numSamples );
 	
 	int numChannels = pixel->numChannels();
-	float channelData[numChannels];
+	std::vector<float> channelData(numChannels);
 	
 	unsigned cIndex = 0;
 	float depth = 0;
@@ -229,7 +229,7 @@ DeepPixelPtr EXRDeepImageReader::doReadPixel( int x, int y )
 			offset += channelSize * numSamples;
 		}
 		
-		pixel->addSample( depth, channelData );
+		pixel->addSample( depth, &channelData[0] );
 	}
 	
 	return pixel;

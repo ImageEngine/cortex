@@ -37,6 +37,7 @@
 #include "IECorePython/ParameterBinding.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/FileNameParameterBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 

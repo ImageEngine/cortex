@@ -37,6 +37,7 @@
 
 #include "IECore/Export.h"
 #include "IECore/Op.h"
+#include "IECore/FileNameParameter.h"
 
 namespace IECore
 {

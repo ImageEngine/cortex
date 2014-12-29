@@ -38,6 +38,8 @@
 
 #include "IECore/Math.h"
 
+#include "IECorePython/MathBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

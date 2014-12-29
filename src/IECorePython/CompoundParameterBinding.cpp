@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/CompoundParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
 #include "IECorePython/Wrapper.h"
 

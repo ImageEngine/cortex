@@ -39,6 +39,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/PathParameterBinding.h"
 
 using namespace std;
 using namespace boost;

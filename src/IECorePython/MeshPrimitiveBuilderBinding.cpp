@@ -38,6 +38,8 @@
 
 #include "IECore/MeshPrimitiveBuilder.h"
 
+#include "IECorePython/MeshPrimitiveBuilderBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 using namespace IECore;

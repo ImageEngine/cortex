@@ -38,6 +38,7 @@
 #include "IECore/ObjectWriter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
+#include "IECorePython/ObjectWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

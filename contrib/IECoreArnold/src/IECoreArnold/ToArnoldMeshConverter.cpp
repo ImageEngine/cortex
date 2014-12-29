@@ -40,6 +40,7 @@
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/CompoundObject.h"
 
 #include "IECoreArnold/ToArnoldMeshConverter.h"
 

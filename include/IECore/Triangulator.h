@@ -63,7 +63,7 @@ class Triangulator : public RefCounted
 
 		IE_CORE_DECLAREMEMBERPTR( Triangulator );
 
-		Triangulator( typename MeshBuilder::Ptr builder );
+		Triangulator( typename MeshBuilder::Ptr builder = 0 );
 		virtual ~Triangulator();
 
 		/// Triangulates the polygon specified by the points in the

@@ -38,6 +38,7 @@
 #include "IECore/ParticleWriter.h"
 #include "IECore/FileNameParameter.h"
 
+#include "IECorePython/ParticleWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

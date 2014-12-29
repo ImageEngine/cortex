@@ -38,6 +38,8 @@
 
 #include "IECorePython/TypedParameterBinding.h"
 
+#include "IECorePython/TimeCodeParameterBinding.h"
+
 using namespace IECore;
 
 namespace IECorePython

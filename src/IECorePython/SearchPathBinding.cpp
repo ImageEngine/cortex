@@ -36,6 +36,7 @@
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/SearchPath.h"
+#include "IECorePython/SearchPathBinding.h"
 
 #include <vector>
 

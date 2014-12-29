@@ -83,7 +83,7 @@ size_t ComputationCache<T>::cachedComputations() const
 }
 
 template< typename T >
-ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::MissingBehaviour missingBehaviour )
+ConstObjectPtr ComputationCache<T>::get( const T &args, typename ComputationCache::MissingBehaviour missingBehaviour )
 {
 	ConstObjectPtr obj(0);
 	MurmurHash computationHash = m_hashFn(args);

@@ -37,6 +37,8 @@
 #include "IECore/PointDistributionOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/PointDistributionOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

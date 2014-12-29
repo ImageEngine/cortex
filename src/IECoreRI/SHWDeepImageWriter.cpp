@@ -104,7 +104,11 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	int numChannels = 3;
 	DtexClearPixel( m_dtexPixel, numChannels );
 	
+#ifdef _MSC_VER
+	float* adjustedData = new float[numChannels];
+#else
 	float adjustedData[numChannels];
+#endif
 	
 	float previous = 0.0;
 	unsigned numSamples = pixel->numSamples();
@@ -146,6 +150,9 @@ void SHWDeepImageWriter::doWritePixel( int x, int y, const DeepPixel *pixel )
 	
 	DtexFinishPixel( m_dtexPixel );
 	DtexSetPixel( m_dtexImage, x, y, m_dtexPixel );
+#ifdef _MSC_VER
+	delete[] adjustedData;
+#endif
 }
 
 void SHWDeepImageWriter::open()

@@ -38,6 +38,7 @@
 #include "IECore/DisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/DisplayDriverBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
 

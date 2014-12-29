@@ -37,6 +37,8 @@
 #include "IECore/PerlinNoise.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECorePython/PerlinNoiseBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace std;

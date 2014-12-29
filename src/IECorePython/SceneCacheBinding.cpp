@@ -39,6 +39,8 @@
 #include "IECore/SceneCache.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/SceneCacheBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 
