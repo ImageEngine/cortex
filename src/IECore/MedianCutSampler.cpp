@@ -32,15 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/multi_array.hpp"
+#include "boost/format.hpp"
+
 #include "IECore/MedianCutSampler.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/SummedAreaOp.h"
 #include "IECore/CompoundParameter.h"
-
-#include "boost/multi_array.hpp"
-#include "boost/format.hpp"
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace boost;

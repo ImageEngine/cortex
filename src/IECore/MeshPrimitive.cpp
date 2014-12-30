@@ -39,6 +39,7 @@
 #include "IECore/Renderer.h"
 #include "IECore/PolygonIterator.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/Math.h"
 
 using namespace std;
 using namespace IECore;

@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/MarschnerParameter.h"
+#include "IECore/Math.h"
 
 using namespace IECore;
 

@@ -32,10 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "tbb/parallel_for.h"
+
 #include "IECore/ImageConvolveOp.h"
 #include "IECore/CompoundParameter.h"
-#include "tbb/parallel_for.h"
 #include "IECore/SphericalHarmonicsAlgo.h"
+#include "IECore/Math.h"
 
 using namespace tbb;
 using namespace IECore;

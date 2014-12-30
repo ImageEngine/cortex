@@ -40,6 +40,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/LuminanceOp.h"
 #include "IECore/AngleConversion.h"
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace boost;

@@ -39,8 +39,16 @@
 #ifndef IECORE_MATH_H
 #define IECORE_MATH_H
 
+#include <cmath>
+
 namespace IECore
 {
+
+// M_PI isn't part of the C++ standard, and as such is
+// not available by default in MSVC.
+#ifndef M_PI
+#define M_PI 3.14159265358979323846264338327950288
+#endif
 
 /// Returns -1 for negative numbers, 1 for positive, and 0 for 0.
 template<typename T>

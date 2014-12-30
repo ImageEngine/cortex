@@ -37,6 +37,8 @@
 #include "boost/math/special_functions/factorials.hpp"
 #include "OpenEXR/ImathMath.h"
 
+#include "IECore/Math.h"
+
 namespace IECore
 {
 

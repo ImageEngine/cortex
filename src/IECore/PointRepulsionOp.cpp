@@ -60,6 +60,7 @@
 #include "IECore/KDTree.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SweepAndPrune.h"
+#include "IECore/Math.h"
 
 #include "IECore/PointRepulsionOp.h"
 

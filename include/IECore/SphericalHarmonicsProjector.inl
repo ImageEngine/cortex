@@ -35,6 +35,7 @@
 #include <cassert>
 #include "OpenEXR/ImathRandom.h"
 #include "IECore/SphericalToEuclideanTransform.h"
+#include "IECore/Math.h"
 
 namespace IECore
 {

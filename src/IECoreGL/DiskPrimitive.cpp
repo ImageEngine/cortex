@@ -35,6 +35,7 @@
 #include "OpenEXR/ImathMath.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/Math.h"
 
 #include "IECoreGL/DiskPrimitive.h"
 #include "IECoreGL/GL.h"

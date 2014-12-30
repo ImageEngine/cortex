@@ -32,9 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/math/special_functions/factorials.hpp"
+
 #include "IECore/SphericalHarmonics.h"
 #include "IECore/SphericalHarmonicsTensor.h"
-#include "boost/math/special_functions/factorials.hpp"
+#include "IECore/Math.h"
 
 namespace IECore
 {
