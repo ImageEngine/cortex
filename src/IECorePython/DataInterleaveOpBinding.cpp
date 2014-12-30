@@ -37,6 +37,8 @@
 #include "IECore/DataInterleaveOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/DataInterleaveOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

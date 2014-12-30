@@ -36,6 +36,7 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/TypedObjectParameterBinding.h"
+#include "IECorePython/TypedPrimitiveParameterBinding.h"
 
 #include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/CompoundObject.h"

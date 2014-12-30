@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImageUnpremultiplyOp.h"
+#include "IECorePython/ImageUnpremultiplyOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

@@ -40,6 +40,7 @@
 #include "datetime.h"
 
 #include "IECore/DateTimeData.h"
+#include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 

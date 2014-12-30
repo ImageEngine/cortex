@@ -43,6 +43,8 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/PointVelocityDisplaceOpBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

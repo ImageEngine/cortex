@@ -38,6 +38,7 @@
 #include "IECore/SimpleSubsurface.h"
 #include "IECore/ColorAlgo.h"
 #include "IECore/Lookup.h"
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace std;

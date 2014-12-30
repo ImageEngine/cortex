@@ -37,6 +37,8 @@
 #include "IECore/PNGImageReader.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/PNGImageReaderBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

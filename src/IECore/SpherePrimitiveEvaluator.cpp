@@ -42,6 +42,7 @@
 #include "IECore/SpherePrimitiveEvaluator.h"
 #include "IECore/TriangleAlgo.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace Imath;

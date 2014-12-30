@@ -43,6 +43,7 @@
 #include "boost/python/call_method.hpp"
 
 #include "IECore/CompoundData.h"
+#include "IECorePython/CompoundDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

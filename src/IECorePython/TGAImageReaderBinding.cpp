@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/TGAImageReader.h"
+#include "IECorePython/TGAImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

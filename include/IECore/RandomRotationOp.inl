@@ -38,6 +38,8 @@
 #include "OpenEXR/ImathRandom.h"
 #include "OpenEXR/ImathQuat.h"
 
+#include "IECore/Math.h"
+
 namespace IECore
 {
 

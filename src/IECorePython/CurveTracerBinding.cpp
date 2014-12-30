@@ -37,6 +37,8 @@
 #include "IECore/CurveTracer.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/CurveTracerBinding.h"
+
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;

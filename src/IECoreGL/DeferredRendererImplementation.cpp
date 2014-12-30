@@ -33,12 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECoreGL/private/DeferredRendererImplementation.h"
+#include "IECoreGL/private/Display.h"
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/Group.h"
 #include "IECoreGL/State.h"
 #include "IECoreGL/StateComponent.h"
 #include "IECoreGL/Primitive.h"
 #include "IECoreGL/Camera.h"
+#include "IECoreGL/Texture.h"
 
 #include "IECore/MessageHandler.h"
 #include "boost/noncopyable.hpp"

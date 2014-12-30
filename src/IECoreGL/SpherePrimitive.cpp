@@ -36,6 +36,7 @@
 #include "OpenEXR/ImathFun.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/Math.h"
 
 #include "IECoreGL/SpherePrimitive.h"
 #include "IECoreGL/Buffer.h"

@@ -37,6 +37,7 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/SphericalHarmonicsAlgo.h"
+#include "IECore/Math.h"
 
 using namespace tbb;
 using namespace IECore;

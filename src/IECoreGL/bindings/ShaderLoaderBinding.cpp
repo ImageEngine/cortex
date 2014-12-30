@@ -40,16 +40,17 @@
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/bindings/ShaderLoaderBinding.h"
 
+using namespace boost;
 using namespace boost::python;
 
 namespace IECoreGL
 {
 
-static tuple loadSource( ShaderLoader &s, const std::string &name )
+static python::tuple loadSource( ShaderLoader &s, const std::string &name )
 {
 	std::string vertexSource, geometrySource, fragmentSource;
 	s.loadSource( name, vertexSource, geometrySource, fragmentSource );
-	return make_tuple( vertexSource, geometrySource, fragmentSource );
+	return python::make_tuple( vertexSource, geometrySource, fragmentSource );
 }
 
 void bindShaderLoader()

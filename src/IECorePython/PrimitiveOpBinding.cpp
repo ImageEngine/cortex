@@ -39,6 +39,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/PrimitiveOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"

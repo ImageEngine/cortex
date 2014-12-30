@@ -37,6 +37,7 @@
 #include "IECore/ValidatedStringParameter.h"
 #include "IECore/CompoundObject.h"
 
+#include "IECorePython/ValidatedStringParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"

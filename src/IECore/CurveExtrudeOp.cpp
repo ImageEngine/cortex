@@ -50,6 +50,7 @@
 #include "IECore/Interpolator.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/Math.h"
 
 #include "IECore/CurveExtrudeOp.h"
 

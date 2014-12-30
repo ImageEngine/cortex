@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Math.h"
+
 #include "IECoreGL/PerspectiveCamera.h"
 #include "IECoreGL/GL.h"
 

@@ -38,6 +38,7 @@
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 
+#include "IECoreGL/Texture.h"
 #include "IECoreGL/Export.h"
 
 #include <map>

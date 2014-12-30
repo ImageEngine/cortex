@@ -36,6 +36,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/ImageWriter.h"
+#include "IECorePython/ImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

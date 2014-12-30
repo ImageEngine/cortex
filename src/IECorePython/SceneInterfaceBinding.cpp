@@ -39,6 +39,8 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
+#include "IECorePython/SceneInterfaceBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

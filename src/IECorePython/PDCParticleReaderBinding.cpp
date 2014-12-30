@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/PDCParticleReader.h"
+#include "IECorePython/PDCParticleReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

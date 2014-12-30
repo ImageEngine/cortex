@@ -37,6 +37,7 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/FrameListBinding.h"
+#include "IECorePython/BinaryFrameListBinding.h"
 
 #include "IECore/BinaryFrameList.h"
 #include "IECore/Exception.h"

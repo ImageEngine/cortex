@@ -37,6 +37,8 @@
 #include "IECore/CompressSmoothSkinningDataOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

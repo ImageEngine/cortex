@@ -38,6 +38,7 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/PointBoundsOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;
