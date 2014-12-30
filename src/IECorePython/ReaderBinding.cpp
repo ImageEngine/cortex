@@ -134,11 +134,7 @@ class ReaderWrap : public Reader, public Wrapper<Reader>
 			override o = this->get_override( "readHeader" );
 			if( o )
 			{
-#ifdef _MSC_VER
 				CompoundObjectPtr r = o().as<CompoundObjectPtr>();
-#else
-				CompoundObjectPtr r = o();
-#endif
 				if( !r )
 				{
 					throw Exception( "readHeader() python method didn't return a CompoundObject." );
