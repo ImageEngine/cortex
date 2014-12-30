@@ -168,11 +168,7 @@ FileIndexedIO::StreamFile::~StreamFile()
 			m_stream = 0;
 
 			/// Truncate the file at the end of the index
-			int err = truncate( m_filename.c_str(), m_endPosition );
-			if ( err != 0 )
-			{
-				msg( Msg::Error, "FileIndexedIO::StreamFile", boost::format ( "Error truncating file '%s' to %d bytes: %s" ) % m_filename % m_endPosition % strerror( err ) );
-			}
+			fs::resize_file( m_filename, m_endPosition );
 		}
 	}
 }
