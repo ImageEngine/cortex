@@ -252,8 +252,6 @@
 #include "IECorePython/CurveLineariserBinding.h"
 #include "IECorePython/ImageConvolveOpBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
-#include "IECorePython/MarschnerParameterBinding.h"
-#include "IECorePython/MarschnerLookupTableOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
 #include "IECorePython/MeshDistortionsOpBinding.h"
@@ -549,8 +547,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImageThinner();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
-	bindMarschnerParameter();
-	bindMarschnerLookupTableOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
 

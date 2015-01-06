@@ -361,8 +361,8 @@ enum TypeId
 	ClassParameterTypeId = 313,
 	ClassVectorParameterTypeId = 314,
 	CurveTangentsOpTypeId = 315,
-	MarschnerParameterTypeId = 316,
-	MarschnerLookupTableOpTypeId = 317,
+	MarschnerParameterTypeId = 316, // obsolete - available for reuse
+	MarschnerLookupTableOpTypeId = 317, // obsolete - available for reuse
 	SmoothSkinningDataTypeId = 318,
 	FaceVaryingPromotionOpTypeId = 319,
 	MeshDistortionsOpTypeId = 320,
