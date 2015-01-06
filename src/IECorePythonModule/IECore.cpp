@@ -174,9 +174,7 @@
 #include "IECorePython/PolygonAlgoBinding.h"
 #include "IECorePython/MeshMergeOpBinding.h"
 #include "IECorePython/FontBinding.h"
-#include "IECorePython/UniformRandomPointDistributionOpBinding.h"
 #include "IECorePython/UnicodeToStringBinding.h"
-#include "IECorePython/MappedRandomPointDistributionOpBinding.h"
 #include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
@@ -246,14 +244,11 @@
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECorePython/HdrMergeOpBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
-#include "IECorePython/HitMissTransformBinding.h"
 #include "IECorePython/CurveTracerBinding.h"
 #include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
 #include "IECorePython/ImageConvolveOpBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
-#include "IECorePython/MarschnerParameterBinding.h"
-#include "IECorePython/MarschnerLookupTableOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
 #include "IECorePython/MeshDistortionsOpBinding.h"
@@ -465,9 +460,7 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #endif
 
-	bindUniformRandomPointDistributionOp();
 	bindUnicodeToString();
-	bindMappedRandomPointDistributionOp();
 	bindRadixSort();
 	bindPointRepulsionOp();
 	bindAngleConversion();
@@ -544,13 +537,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesPrimitiveEvaluator();
 	bindHdrMergeOp();
 	bindPointDistribution();
-	bindHitMissTransform();
 	bindCurveTracer();
 	bindImageThinner();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
-	bindMarschnerParameter();
-	bindMarschnerLookupTableOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
 

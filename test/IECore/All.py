@@ -141,9 +141,7 @@ from BezierAlgoTest import *
 from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
-from UniformRandomPointDistributionOpTest import *
 from UnicodeToStringTest import *
-from MappedRandomPointDistributionOpTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
@@ -209,7 +207,6 @@ from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
 from CurveTangentsOpTest import CurveTangentsOpTest
-from MarschnerLookupTableOpTest import MarschnerLookupTableOpTest
 from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest

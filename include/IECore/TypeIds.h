@@ -352,7 +352,7 @@ enum TypeId
 	CurvesPrimitiveOpTypeId = 304,
 	CurvesPrimitiveEvaluatorTypeId = 305,
 	HdrMergeOpTypeId = 306,
-	HitMissTransformTypeId = 307,
+	HitMissTransformTypeId = 307, // obsolete - available for reuse
 	CurveTracerTypeId = 308,
 	ImageThinnerTypeId = 309,
 	CurveLineariserTypeId = 310,
@@ -361,8 +361,8 @@ enum TypeId
 	ClassParameterTypeId = 313,
 	ClassVectorParameterTypeId = 314,
 	CurveTangentsOpTypeId = 315,
-	MarschnerParameterTypeId = 316,
-	MarschnerLookupTableOpTypeId = 317,
+	MarschnerParameterTypeId = 316, // obsolete - available for reuse
+	MarschnerLookupTableOpTypeId = 317, // obsolete - available for reuse
 	SmoothSkinningDataTypeId = 318,
 	FaceVaryingPromotionOpTypeId = 319,
 	MeshDistortionsOpTypeId = 320,
