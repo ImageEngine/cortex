@@ -174,9 +174,7 @@
 #include "IECorePython/PolygonAlgoBinding.h"
 #include "IECorePython/MeshMergeOpBinding.h"
 #include "IECorePython/FontBinding.h"
-#include "IECorePython/UniformRandomPointDistributionOpBinding.h"
 #include "IECorePython/UnicodeToStringBinding.h"
-#include "IECorePython/MappedRandomPointDistributionOpBinding.h"
 #include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
@@ -462,9 +460,7 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #endif
 
-	bindUniformRandomPointDistributionOp();
 	bindUnicodeToString();
-	bindMappedRandomPointDistributionOp();
 	bindRadixSort();
 	bindPointRepulsionOp();
 	bindAngleConversion();

@@ -141,9 +141,7 @@ from BezierAlgoTest import *
 from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
-from UniformRandomPointDistributionOpTest import *
 from UnicodeToStringTest import *
-from MappedRandomPointDistributionOpTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
