@@ -352,7 +352,7 @@ enum TypeId
 	CurvesPrimitiveOpTypeId = 304,
 	CurvesPrimitiveEvaluatorTypeId = 305,
 	HdrMergeOpTypeId = 306,
-	HitMissTransformTypeId = 307,
+	HitMissTransformTypeId = 307, // obsolete - available for reuse
 	CurveTracerTypeId = 308,
 	ImageThinnerTypeId = 309,
 	CurveLineariserTypeId = 310,

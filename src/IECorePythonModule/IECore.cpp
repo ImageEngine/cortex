@@ -246,7 +246,6 @@
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECorePython/HdrMergeOpBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
-#include "IECorePython/HitMissTransformBinding.h"
 #include "IECorePython/CurveTracerBinding.h"
 #include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
@@ -542,7 +541,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesPrimitiveEvaluator();
 	bindHdrMergeOp();
 	bindPointDistribution();
-	bindHitMissTransform();
 	bindCurveTracer();
 	bindImageThinner();
 	bindCurveLineariser();
