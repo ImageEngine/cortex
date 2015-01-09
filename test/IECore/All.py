@@ -43,7 +43,6 @@ import IECore
 warnings.simplefilter( "error", DeprecationWarning )
 
 from ClassLoader import *
-from AttributeCache import *
 from BlindDataHolder import *
 from CompoundData import *
 from CompoundObject import *
@@ -92,7 +91,6 @@ from Group import *
 from NamespacePollution import *
 from OptionalCompoundParameter import *
 from ObjectInterpolation import *
-from InterpolatedCache import *
 from TransformationMatrixData import *
 from ReversedFrameList import *
 from BinaryFrameList import *

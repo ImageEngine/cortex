@@ -55,7 +55,6 @@
 #include "IECorePython/TypeIdBinding.h"
 #include "IECorePython/CompoundDataBinding.h"
 #include "IECorePython/MessageHandlerBinding.h"
-#include "IECorePython/AttributeCacheBinding.h"
 #include "IECorePython/ReaderBinding.h"
 #include "IECorePython/ParticleReaderBinding.h"
 #include "IECorePython/PDCParticleReaderBinding.h"
@@ -126,7 +125,6 @@
 #include "IECorePython/ObjectInterpolatorBinding.h"
 #include "IECorePython/PointNormalsOpBinding.h"
 #include "IECorePython/PointDensitiesOpBinding.h"
-#include "IECorePython/InterpolatedCacheBinding.h"
 #include "IECorePython/TransformationMatrixBinding.h"
 #include "IECorePython/TransformationMatrixDataBinding.h"
 #include "IECorePython/BoundedKDTreeBinding.h"
@@ -327,7 +325,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompoundData();
 	bindIndexedIO();
 	bindMessageHandler();
-	bindAttributeCache();
 	bindParameterised();
 	bindOp();
 	bindReader();
@@ -406,7 +403,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointNormalsOp();
 	bindPointDensitiesOp();
 	bindOversamplesCalculator();
-	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
 	bindBoundedKDTree();
