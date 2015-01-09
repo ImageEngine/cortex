@@ -1,0 +1,21 @@
+language: cpp
+
+os:
+    - linux
+
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq libboost-all-dev
+    - sudo apt-get install -qq libopenexr-dev
+    - sudo apt-get install -qq libtbb-dev
+    - sudo apt-get install -qq libfreetype6-dev
+
+script:
+    - scons testCore testCorePython CXX=$CXX ENV_VARS_TO_IMPORT="PATH TRAVIS" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
+
+compiler:
+    ## \todo Enable clang here too. We can't with the default Ubuntu boost
+    # install though, because it is broken for Clang :
+    #
+    # https://svn.boost.org/trac/boost/ticket/6156
+    - gcc
