@@ -196,7 +196,6 @@ from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
 from PointDistributionTest import PointDistributionTest
-from HitMissTransformTest import HitMissTransformTest
 from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
