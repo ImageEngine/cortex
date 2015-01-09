@@ -1089,17 +1089,5 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 		self.assertEqual( p.valueValid()[0], True )
 		p.validate()
 
-class TestMarschnerParameter( unittest.TestCase ) :
-
-	def test( self ) :
-
-		p1 = MarschnerParameter( "m", "", True )
-		self.failIf( "color" not in p1 )
-		self.failIf( "absorption" in p1 )
-
-		p2 = MarschnerParameter( "m", "", False )
-		self.failIf( "absorption" not in p2 )
-		self.failIf( "color" in p2 )
-
 if __name__ == "__main__":
         unittest.main()
