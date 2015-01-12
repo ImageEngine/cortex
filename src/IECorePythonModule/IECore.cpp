@@ -247,7 +247,6 @@
 #include "IECorePython/CurveTracerBinding.h"
 #include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
-#include "IECorePython/ImageConvolveOpBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
@@ -269,7 +268,6 @@
 #include "IECorePython/PointsPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointsMotionOpBinding.h"
 #include "IECorePython/CapturingRendererBinding.h"
-#include "IECorePython/EnvMapSHProjectorBinding.h"
 #include "IECorePython/LightBinding.h"
 #include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/CamelCaseBinding.h"
@@ -543,14 +541,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
-	bindImageConvolveOp();
-	bindEnvMapSHProjectorOp();
-
-#endif
-
 	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
 	bindHexConversion();

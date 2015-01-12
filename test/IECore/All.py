@@ -201,7 +201,6 @@ from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
-from ImageConvolveOpTest import *
 from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
