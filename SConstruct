@@ -1483,16 +1483,6 @@ if doConfigure :
 			e.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
 	else :
 		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
-		coreSources.remove( "src/IECore/AssociatedLegendre.cpp" )
-		coreSources.remove( "src/IECore/SphericalHarmonics.cpp" )
-		coreSources.remove( "src/IECore/SphericalHarmonicsTensor.cpp" )
-		coreSources.remove( "src/IECore/SphericalHarmonicsRotationMatrix.cpp" )
-		coreSources.remove( "src/IECore/SphericalHarmonicsTransferMatrix.cpp" )
-		coreSources.remove( "src/IECore/SphericalHarmonicsProjector.cpp" )
-		coreSources.remove( "src/IECore/EnvMapSHProjector.cpp" )
-		coreSources.remove( "src/IECore/ImageConvolveOp.cpp" )
-		corePythonSources.remove( "src/IECorePython/EnvMapSHProjectorBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/ImageConvolveOpBinding.cpp" )
 	
 	if c.CheckHeader( "OpenEXR/ImfDeepFrameBuffer.h", "\"\"", "C++" ) :
 		for e in allCoreEnvs :

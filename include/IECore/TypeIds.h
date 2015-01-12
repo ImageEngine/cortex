@@ -357,7 +357,7 @@ enum TypeId
 	ImageThinnerTypeId = 309,
 	CurveLineariserTypeId = 310,
 	CompoundDataBaseTypeId = 311,
-	ImageConvolveOpTypeId = 312,
+	ImageConvolveOpTypeId = 312, // obsolete - available for reuse
 	ClassParameterTypeId = 313,
 	ClassVectorParameterTypeId = 314,
 	CurveTangentsOpTypeId = 315,
@@ -385,7 +385,7 @@ enum TypeId
 	CapturingRendererTypeId = 337,
 	LinearToPanalogOpTypeId = 338,
 	PanalogToLinearOpTypeId = 339,
-	EnvMapSHProjectorTypeId = 340,
+	EnvMapSHProjectorTypeId = 340, // obsolete - available for reuse
 	LightTypeId = 341,
 	ContrastSmoothSkinningWeightsOpTypeId = 342,
 	PointDistributionOpTypeId = 343,

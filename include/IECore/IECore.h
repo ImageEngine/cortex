@@ -306,9 +306,6 @@ IECORE_API bool withDeepEXR();
 
 /// \defgroup renderingGroup Rendering
 
-/// \defgroup shGroup Spherical Harmonics
-/// \ingroup mathGroup
-
 /// \defgroup utilityGroup Utilities
 ///
 /// Basic classes and functions.

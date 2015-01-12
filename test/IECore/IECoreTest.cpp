@@ -60,8 +60,6 @@
 
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 	
-	#include "AssociatedLegendreTest.h"
-	#include "SphericalHarmonicsTest.h"
 	#include "LevenbergMarquardtTest.h"
 
 #endif
@@ -105,8 +103,6 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
-		addAssociatedLegendreTest(test);
-		addSphericalHarmonicsTest(test);
 		addLevenbergMarquardtTest(test);
 
 #endif
