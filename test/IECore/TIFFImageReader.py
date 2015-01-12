@@ -421,8 +421,8 @@ class TestTIFFReader(unittest.TestCase):
 	
 		# 3delight has started using the SMinSampleValue and SMaxSampleValue tags to store
 		# the range of values in a tdl file. this is jolly useful for shader writers but a pain
-		# for anyone using libtiff to read the images. libtiff currently doesn't support the
-		# storage of different values per sample, and therefore complains when given
+		# for anyone using libtiff to read the images. not all libtiff versions support the
+		# storage of different values per sample, and therefore libtiff may complain when given
 		# one of these files. we deal with this by pretending nothing has happened and allowing
 		# all directories except the last one to be read (it's only the last one that has the
 		# problem).
@@ -435,13 +435,17 @@ class TestTIFFReader(unittest.TestCase):
 			( 16, 8 ),
 			( 8, 4 ),
 			( 4, 2 ),
-			# there should be a ( 2, 1 ) as well, but the best we can do is
-			# ignore it.
+			( 2, 1 ), # this is the one that could cause a problem
 		]
 		
-		self.assertEqual( r.numDirectories(), len( expectedResolutions ) )
+		self.assertTrue(
+			# good libtiff version
+			r.numDirectories() == len( expectedResolutions ) or
+			# bad libtiff version
+			r.numDirectories() == len( expectedResolutions ) - 1
+		)
 		
-		for i in range( 0, len( expectedResolutions ) ) :
+		for i in range( 0, r.numDirectories() ) :
 			r.setDirectory( i )
 			image = r.read()
 			size = image.dataWindow.size()
