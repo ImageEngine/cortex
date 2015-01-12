@@ -64,11 +64,6 @@ from FormattedParameterHelp import formatParameterHelp
 from ReadProcedural import ReadProcedural
 from ClassLsOp import ClassLsOp
 from OptionalCompoundParameter import OptionalCompoundParameter
-from FileExaminer import FileExaminer
-from NukeFileExaminer import NukeFileExaminer
-from RIBFileExaminer import RIBFileExaminer
-from FileDependenciesOp import FileDependenciesOp
-from CheckFileDependenciesOp import CheckFileDependenciesOp
 from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
 import Enum
