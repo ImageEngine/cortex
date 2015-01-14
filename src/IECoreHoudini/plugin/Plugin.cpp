@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -56,7 +56,6 @@
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/SOP_CortexConverter.h"
-#include "IECoreHoudini/SOP_InterpolatedCacheReader.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/SOP_SceneCacheTransform.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
@@ -101,12 +100,6 @@ void newSopOperator(OP_OperatorTable *table)
 	);
 	converter->setIconName( "CortexLogoMini" );
 	
-	OP_Operator *cacheReader = new OP_Operator(
-		"ieInterpolatedCacheReader", "Interpolated Cache Reader",
-		SOP_InterpolatedCacheReader::create, SOP_InterpolatedCacheReader::parameters, 1, 1, 0
-	);
-	cacheReader->setIconName( "SOP_ieInterpolatedCacheReader" );
-	
 	OP_Operator *sceneCacheSource = new OP_Operator(
 		SOP_SceneCacheSource::typeName, "SceneCache Source",
 		SOP_SceneCacheSource::create, SOP_SceneCacheSource::buildParameters(), 0, 0,
@@ -125,14 +118,12 @@ void newSopOperator(OP_OperatorTable *table)
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
-	table->addOperator( cacheReader );
 	table->addOperator( sceneCacheSource );
 	table->addOperator( sceneCacheTransform );
 	
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
-	table->addOpHidden( cacheReader->getName() );
 	table->addOpHidden( sceneCacheSource->getName() );
 	table->addOpHidden( sceneCacheTransform->getName() );
 }
