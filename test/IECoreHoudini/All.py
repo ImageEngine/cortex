@@ -42,7 +42,6 @@ import IECoreHoudini
 
 from ProceduralHolder import *
 from OpHolder import *
-from CortexWriter import *
 from CortexRmanInject import *
 from ActiveTake import *
 from NodeHandle import *
