@@ -259,6 +259,7 @@ class ThreadingTest( unittest.TestCase ) :
 		runThread = False
 		newThread.join()
 
+	@unittest.skipIf( "TRAVIS" in os.environ, "Not enough cores available on Travis instances" )
 	def testInterpolatedCacheGains( self ) :
 	
 		numObjects = 100

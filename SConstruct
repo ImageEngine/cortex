@@ -123,13 +123,13 @@ o.Add(
 o.Add(
 	"BOOST_INCLUDE_PATH",
 	"The path to the boost include directory.",
-	"/usr/local/include/boost-1_34_1",
+	"/usr/include",
 )
 
 o.Add(
 	"BOOST_LIB_PATH",
 	"The path to the boost library directory.",
-	"/usr/local/lib",
+	"/usr/lib",
 )
 
 o.Add(
@@ -145,13 +145,13 @@ o.Add(
 o.Add(
 	"OPENEXR_INCLUDE_PATH",
 	"The path to the OpenEXR include directory.",
-	"/usr/local/include/OpenEXR",
+	"/usr/include/OpenEXR",
 )
 
 o.Add(
 	"OPENEXR_LIB_PATH",
 	"The path to the OpenEXR lib directory.",
-	"/usr/local/lib",
+	"/usr/lib",
 )
 
 o.Add(
@@ -227,7 +227,7 @@ o.Add(
 o.Add(
 	"FREETYPE_INCLUDE_PATH",
 	"The path to the FreeType include directory.",
-	"/usr/local/include/freetype2",
+	"/usr/include/freetype2",
 )
 
 o.Add(
