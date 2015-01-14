@@ -72,6 +72,13 @@ void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 	const uint64_t c1 = 0x87c37b91114253d5;
 	const uint64_t c2 = 0x4cf5ad432745937f;
 
+	// local copies of m_h1, and m_h2. we'll work
+	// with these before copying back at the end.
+	// this gives the optimiser more freedom to do
+	// its thing.
+	uint64_t h1 = m_h1;
+	uint64_t h2 = m_h2;
+
 	// body
 	
 	const uint64_t *blocks = (const uint64_t *)data;
@@ -80,13 +87,13 @@ void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 		uint64_t k1 = blocks[i*2];
 		uint64_t k2 = blocks[i*2+1];
 	
-		k1 *= c1; k1  = rotl64( k1, 31 ); k1 *= c2; m_h1 ^= k1;
+		k1 *= c1; k1  = rotl64( k1, 31 ); k1 *= c2; h1 ^= k1;
 		
-		m_h1 = rotl64( m_h1, 27 ); m_h1 += m_h2; m_h1 = m_h1*5 + 0x52dce729;
+		h1 = rotl64( h1, 27 ); h1 += h2; h1 = h1*5 + 0x52dce729;
 		
-		k2 *= c2; k2  = rotl64( k2, 33 ); k2 *= c1; m_h2 ^= k2;
+		k2 *= c2; k2  = rotl64( k2, 33 ); k2 *= c1; h2 ^= k2;
 		
-		m_h2 = rotl64( m_h2, 31); m_h2 += m_h1; m_h2 = m_h2*5 + 0x38495ab5;	
+		h2 = rotl64( h2, 31); h2 += h1; h2 = h2*5 + 0x38495ab5;
 	}
 
 	// tail
@@ -105,7 +112,7 @@ void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 	case 11: k2 ^= uint64_t(tail[10]) << 16;
 	case 10: k2 ^= uint64_t(tail[ 9]) << 8;
 	case  9: k2 ^= uint64_t(tail[ 8]) << 0;
-		   k2 *= c2; k2  = rotl64(k2,33); k2 *= c1; m_h2 ^= k2;
+		   k2 *= c2; k2  = rotl64(k2,33); k2 *= c1; h2 ^= k2;
 	
 	case  8: k1 ^= uint64_t(tail[ 7]) << 56;
 	case  7: k1 ^= uint64_t(tail[ 6]) << 48;
@@ -115,21 +122,24 @@ void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 	case  3: k1 ^= uint64_t(tail[ 2]) << 16;
 	case  2: k1 ^= uint64_t(tail[ 1]) << 8;
 	case  1: k1 ^= uint64_t(tail[ 0]) << 0;
-		   k1 *= c1; k1  = rotl64(k1,31); k1 *= c2; m_h1 ^= k1;
+		   k1 *= c1; k1  = rotl64(k1,31); k1 *= c2; h1 ^= k1;
 	};
 	
 	// finalisation
 	
-	m_h1 ^= bytes; m_h2 ^= bytes;
+	h1 ^= bytes; h2 ^= bytes;
 	
-	m_h1 += m_h2;
-	m_h2 += m_h1;
+	h1 += h2;
+	h2 += h1;
 	
-	m_h1 = fmix( m_h1 );
-	m_h2 = fmix( m_h2 );
+	h1 = fmix( h1 );
+	h2 = fmix( h2 );
 	
-	m_h1 += m_h2;
-	m_h2 += m_h1;
+	h1 += h2;
+	h2 += h1;
+	
+	m_h1 = h1;
+	m_h2 = h2;
 }
 
 std::string MurmurHash::toString() const
