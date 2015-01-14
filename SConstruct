@@ -766,8 +766,6 @@ o.Add(
 		( "IECore.RenamePrimitiveVariables", "common/primitive/renameVariables" ), 
 		( "IECore.PointsExpressionOp", "common/primitive/pointsExpression" ),
 		( "IECore.ClassLsOp", "common/classes/classLs" ), 
-		( "IECore.FileDependenciesOp", "common/fileSystem/depLs" ), 
-		( "IECore.CheckFileDependenciesOp", "common/fileSystem/depCheck" ), 
 		( "IECore.LsHeaderOp", "common/fileSystem/lsHeader" ),
 		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
 		( "IECore.CheckImagesOp", "common/fileSystem/checkImages" ),

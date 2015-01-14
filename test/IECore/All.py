@@ -126,7 +126,6 @@ from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
 from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
-from FileExaminer import *
 from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
