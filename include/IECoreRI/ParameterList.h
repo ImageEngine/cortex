@@ -98,6 +98,8 @@ class IECORERI_API ParameterList
 		std::vector<float> m_floats;
 		std::vector<const char *> m_tokens;
 		std::vector<const void *> m_values;
+		
+		static const IECore::InternedString g_handleParameterName;
 
 };
 

@@ -46,12 +46,19 @@ using namespace IECoreRI;
 using namespace std;
 using namespace boost;
 
+const InternedString ParameterList::g_handleParameterName( "__handle" );
+
 ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const std::map<std::string, std::string> *typeHints )
 {
 	reserve( parameters );
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
+		if( it->first == g_handleParameterName )
+		{
+			// skip parameters called __handle
+			continue;
+		}
 		appendParameter( it->first, it->second.get(), typeHints );
 	}
 }
