@@ -104,6 +104,12 @@ class DateTimeDataTest( unittest.TestCase ) :
 	
 		self.failIf( IECore.DateTimeData.hasBase() )
 
+	def testImplicitConversion( self ) :
+
+		c = IECore.CompoundData()
+		c["d"] = datetime.datetime.now()
+		self.assertTrue( isinstance( c["d"], IECore.DateTimeData ) )
+
 	def setUp(self):
 
 		if os.path.isfile( "test/IECore/DateTimeData.cob" ) :
