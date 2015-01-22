@@ -42,6 +42,7 @@
 #include "IECore/DateTimeData.h"
 #include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/SimpleTypedDataBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
 #include <sstream>
@@ -184,6 +185,8 @@ void bindDateTimeData()
 
 	ptime_from_python_datetime();
 	to_python_converter<posix_time::ptime, ptime_to_python > ();
+
+	TypedDataFromType<DateTimeData>();
 
 	RunTimeTypedClass<DateTimeData>()
 		.def( init<>() )
