@@ -83,6 +83,14 @@ ParameterList::ParameterList( const std::string &name, const IECore::Data *param
 	appendParameter( name, parameter, typeHints );
 }
 
+ParameterList::~ParameterList()
+{
+	for( size_t i=0; i < m_strings.size(); ++i )
+	{
+		delete[] m_strings[i];
+	}
+}
+
 int ParameterList::n()
 {
 	return m_tokens.size();
@@ -322,6 +330,84 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 	}
 }
 
+int ParameterList::numPlaces( size_t n )
+{
+	if (n < 10) return 1;
+	if (n < 100) return 2;
+	if (n < 1000) return 3;
+	if (n < 10000) return 4;
+	if (n < 100000) return 5;
+	if (n < 1000000) return 6;
+	if (n < 10000000) return 7;
+	if (n < 100000000) return 8;
+	if (n < 1000000000) return 9;
+	return 10;
+}
+
+void ParameterList::appendInt( char *&str, size_t n )
+{
+	str += numPlaces( n );
+	char* cc = str;
+	--cc;
+	while(n != 0)
+	{
+	    *cc-- = n%10+'0';
+	    n=n/10;
+	}
+}
+
+void ParameterList::appendString( char *&str, const char* toAppend, size_t len )
+{
+	memcpy( str, toAppend, len );
+	str += len;
+}
+
+void ParameterList::appendString( char *&str, const std::string &toAppend )
+{
+	appendString( str, toAppend.c_str(), toAppend.size() );
+}
+
+
+void ParameterList::buildPositionsString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 10 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "float ", 6 );
+	appendString( c, name );
+	appendString( c, "Positions[", 10 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+void ParameterList::buildColorValuesString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "color ", 6 );
+	appendString( c, name );
+	appendString( c, "Values[", 7 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+void ParameterList::buildFloatValuesString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "float ", 6 );
+	appendString( c, name );
+	appendString( c, "Values[", 7 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+
 void ParameterList::appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints )
 {
 	if( !d )
@@ -338,16 +424,18 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_strings.resize( m_strings.size() + 1 );
+			buildPositionsString( m_strings.back(), name, size );
+			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.push_back( boost::str( boost::format( "float %sValues[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_strings.resize( m_strings.size() + 1 );
+			buildFloatValuesString( m_strings.back(), name, size );
+			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -367,16 +455,18 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_strings.resize( m_strings.size() + 1 );
+			buildPositionsString( m_strings.back(), name, size );
+			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.push_back( boost::str( boost::format( "color %sValues[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_strings.resize( m_strings.size() + 1 );
+			buildColorValuesString( m_strings.back(), name, size );
+			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -399,15 +489,36 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		const char *t = type( name, d, isArray, arraySize, typeHints );
 		if( t )
 		{
+			m_strings.resize( m_strings.size() + 1 );
+			int typeNameLen = strlen(t);
 			if( isArray )
 			{
-				m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
+				// manually build boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ):
+				
+				m_strings.back() = new char[ typeNameLen + 1 + name.size() + 1 + numPlaces( arraySize ) + 2 ];
+				char* c = m_strings.back();
+				
+				appendString( c, t, typeNameLen );
+				*c++ = ' ';
+				appendString( c, name );
+				*c++ = '[';
+				appendInt( c, arraySize );
+				*c++ = ']';
+				*c = 0;
 			}
 			else
 			{
-				m_strings.push_back( string( t ) + " " + name );
+				// maually build string( t ) + " " + name ):
+				
+				m_strings.back() = new char[ typeNameLen + 1 + name.size() + 1 ];
+				char *c = m_strings.back();
+				
+				appendString( c, t, typeNameLen );
+				*c++ = ' ';
+				appendString( c, name );
+				*c++ = 0;
 			}
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( value( d ) );
 		}
 	}
