@@ -341,7 +341,17 @@ int ParameterList::numPlaces( size_t n )
 	if (n < 10000000) return 7;
 	if (n < 100000000) return 8;
 	if (n < 1000000000) return 9;
-	return 10;
+	if (n < 10000000000) return 10;
+	if (n < 100000000000) return 11;
+	if (n < 1000000000000) return 12;
+	if (n < 10000000000000) return 13;
+	if (n < 100000000000000) return 14;
+	if (n < 1000000000000000) return 15;
+	if (n < 10000000000000000) return 16;
+	if (n < 100000000000000000) return 17;
+	if (n < 1000000000000000000) return 18;
+	// maximum size_t ~= 1.8e19:
+	return 19;
 }
 
 void ParameterList::appendInt( char *&str, size_t n )
