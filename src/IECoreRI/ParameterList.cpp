@@ -356,6 +356,12 @@ int ParameterList::numPlaces( size_t n )
 
 void ParameterList::appendInt( char *&str, size_t n )
 {
+	if( n == 0 )
+	{
+		*str++ = '0';
+		return;
+	}
+	
 	str += numPlaces( n );
 	char* cc = str;
 	--cc;
