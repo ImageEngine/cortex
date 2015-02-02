@@ -589,7 +589,7 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation", "Geometry without materials (it will render pink)" );
 	}
 
-	const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly );
+	const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly, m_project->search_paths() );
 	if( !assembly )
 	{
 		msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::Mesh", "Error converting mesh" );

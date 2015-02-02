@@ -36,7 +36,6 @@
 #define IECOREAPPLESEED_PRIMITIVECONVERTER_H
 
 #include <map>
-#include <set>
 
 #include "boost/noncopyable.hpp"
 #include "boost/filesystem/path.hpp"
@@ -71,7 +70,7 @@ class PrimitiveConverter : boost::noncopyable
 
 		void setMeshFileFormat( MeshFileFormat format );
 
-		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
+		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly, const foundation::SearchPaths &searchPaths );
 
 	private :
 
@@ -81,6 +80,7 @@ class PrimitiveConverter : boost::noncopyable
 
 		boost::filesystem::path m_projectPath;
 		std::string m_meshGeomExtension;
+		std::map<std::string, const renderer::Assembly*> m_instanceMap;
 		bool m_interactive;
 
 };

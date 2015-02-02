@@ -59,13 +59,15 @@ class AttributeState
 
 		const foundation::Dictionary &visibilityDictionary() const;
 
+		const std::string &alphaMap() const;
+
 		void addOSLShader( IECore::ConstShaderPtr shader );
 		void setOSLSurface( IECore::ConstShaderPtr surface );
 
 		bool shadingStateValid() const;
 
 		const IECore::MurmurHash &shaderGroupHash() const;
-		const IECore::MurmurHash &materialHash() const;
+		const IECore::MurmurHash materialHash() const;
 
 		std::string createShaderGroup( renderer::Assembly &assembly );
 		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
@@ -75,6 +77,7 @@ class AttributeState
 		IECore::CompoundDataPtr m_attributes;
 		ShadingState m_shadingState;
 		std::string m_name;
+		std::string m_alphaMap;
 		foundation::Dictionary m_visibilityDictionary;
 
 };
