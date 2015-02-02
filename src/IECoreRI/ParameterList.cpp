@@ -85,9 +85,9 @@ ParameterList::ParameterList( const std::string &name, const IECore::Data *param
 
 ParameterList::~ParameterList()
 {
-	for( size_t i=0; i < m_strings.size(); ++i )
+	for( size_t i=0; i < m_tokens.size(); ++i )
 	{
-		delete[] m_strings[i];
+		delete[] m_tokens[i];
 	}
 }
 
@@ -260,7 +260,7 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	{
 		accumulateReservations( it->second.get(), numStrings, numCharPtrs, numInts, numFloats );
 	}
-	m_strings.reserve( numStrings );
+	m_tokens.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
@@ -273,7 +273,7 @@ void ParameterList::reserve( const IECore::Data *parameter )
 	size_t numInts = 0;
 	size_t numFloats = 0;
 	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats );
-	m_strings.reserve( numStrings );
+	m_tokens.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
@@ -434,18 +434,16 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.resize( m_strings.size() + 1 );
-			buildPositionsString( m_strings.back(), name, size );
-			m_tokens.push_back( m_strings.back() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildPositionsString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.resize( m_strings.size() + 1 );
-			buildFloatValuesString( m_strings.back(), name, size );
-			m_tokens.push_back( m_strings.back() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildFloatValuesString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -465,18 +463,16 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.resize( m_strings.size() + 1 );
-			buildPositionsString( m_strings.back(), name, size );
-			m_tokens.push_back( m_strings.back() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildPositionsString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.resize( m_strings.size() + 1 );
-			buildColorValuesString( m_strings.back(), name, size );
-			m_tokens.push_back( m_strings.back() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildColorValuesString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -499,14 +495,14 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		const char *t = type( name, d, isArray, arraySize, typeHints );
 		if( t )
 		{
-			m_strings.resize( m_strings.size() + 1 );
+			m_tokens.resize( m_tokens.size() + 1 );
 			int typeNameLen = strlen(t);
 			if( isArray )
 			{
 				// manually build boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ):
 				
-				m_strings.back() = new char[ typeNameLen + 1 + name.size() + 1 + numPlaces( arraySize ) + 2 ];
-				char* c = m_strings.back();
+				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 + numPlaces( arraySize ) + 2 ];
+				char* c = m_tokens.back();
 				
 				appendString( c, t, typeNameLen );
 				*c++ = ' ';
@@ -520,15 +516,14 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 			{
 				// maually build string( t ) + " " + name ):
 				
-				m_strings.back() = new char[ typeNameLen + 1 + name.size() + 1 ];
-				char *c = m_strings.back();
+				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 ];
+				char *c = m_tokens.back();
 				
 				appendString( c, t, typeNameLen );
 				*c++ = ' ';
 				appendString( c, name );
 				*c++ = 0;
 			}
-			m_tokens.push_back( m_strings.back() );
 			m_values.push_back( value( d ) );
 		}
 	}

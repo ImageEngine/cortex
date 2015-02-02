@@ -104,10 +104,9 @@ class IECORERI_API ParameterList
 		// Then call this n times to populate the member data
 		void appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
-		std::vector<char*> m_strings;
 		std::vector<int> m_ints;
 		std::vector<float> m_floats;
-		std::vector<const char *> m_tokens;
+		std::vector<char *> m_tokens;
 		std::vector<const void *> m_values;
 		
 		static const IECore::InternedString g_handleParameterName;
