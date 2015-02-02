@@ -83,7 +83,7 @@ class Renderer : public IECore::Renderer
 		/// True if the environment is visible in the background.
 		///
 		/// \li <b>"as:cfg:*"</b><br>
-		/// Passed to appleseed Configuration.
+		/// Passed to appleseed configuration (render settings).
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 

@@ -67,7 +67,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 		explicit DisplayTileCallback( const asr::ParamArray &params ) : m_params( params )
 		{
-			m_displayInitialized = false;
+			m_display_initialized = false;
 		}
 
 		virtual ~DisplayTileCallback()
@@ -93,14 +93,25 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			// the tile callback factory deletes this instance.
 		}
 
+		// This method is called before a region is rendered.
+		virtual void pre_render( const size_t x, const size_t y, const size_t width, const size_t height)
+		{
+			boost::lock_guard<boost::mutex> guard( m_mutex );
+
+			if( m_display_initialized )
+			{
+				hightlight_region( x, y, width, height );
+			}
+		}
+
 		// This method is called after a tile is rendered (final rendering).
 		virtual void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
-			if( !m_displayInitialized )
+			if( !m_display_initialized )
 			{
-				initDisplay( frame );
+				init_display( frame );
 			}
 
 			write_tile( frame, tileX, tileY );
@@ -111,9 +122,9 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
-			if( !m_displayInitialized )
+			if( !m_display_initialized )
 			{
-				initDisplay( frame );
+				init_display( frame );
 			}
 
 			const asf::CanvasProperties &frame_props = frame->image().properties();
@@ -129,13 +140,13 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 	private:
 
-		void initDisplay( const asr::Frame *frame )
+		void init_display( const asr::Frame *frame )
 		{
-			assert( !m_displayInitialized );
+			assert( !m_display_initialized );
 
 			Box2i displayWindow( V2i( 0, 0 ), V2i( frame->image().properties().m_canvas_width - 1, frame->image().properties().m_canvas_height - 1 ) );
 
-			m_dataWindow = Box2i(  V2i( frame->get_crop_window().min[0], frame->get_crop_window().min[1] ),
+			m_data_window = Box2i( V2i( frame->get_crop_window().min[0], frame->get_crop_window().min[1] ),
 								   V2i( frame->get_crop_window().max[0], frame->get_crop_window().max[1] ) );
 
 			std::vector<std::string> channelNames;
@@ -166,11 +177,14 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 			// reserve space for one tile
 			const asf::CanvasProperties &frameProps = frame->image().properties();
-			m_buffer.reserve( frameProps.m_tile_width * frameProps.m_tile_height * frameProps.m_channel_count );
+			m_tile_width = frameProps.m_tile_width;
+			m_tile_height = frameProps.m_tile_height;
+			m_channel_count = frameProps.m_channel_count;
+			m_buffer.reserve( m_tile_width * m_tile_height * m_channel_count );
 
 			try
 			{
-				m_driver = IECore::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_dataWindow, channelNames, parameters );
+				m_driver = IECore::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
 			}
 			catch( const std::exception &e )
 			{
@@ -179,22 +193,51 @@ class DisplayTileCallback : public asr::TileCallbackBase
 				msg( Msg::Error, "ieOutputDriver:driverOpen", e.what() );
 			}
 
-			m_displayInitialized = true;
+			m_display_initialized = true;
+		}
+
+		void hightlight_region( const size_t x, const size_t y, const size_t width, const size_t height )
+		{
+			const int inset = 0;
+			Box2i bucketBox( box_inside_data_window( x + inset, y + inset, width - inset, height - inset ) );
+
+			if( bucketBox.size().x == 0 || bucketBox.size().y == 0)
+				return;
+
+			m_buffer.clear();
+
+			for( int i = bucketBox.min.x; i <= bucketBox.max.x; ++i )
+			{
+				for( size_t k = 0; k < m_channel_count; ++k )
+				{
+					m_buffer.push_back( 1.0f );
+				}
+			}
+
+			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.min.y ) ) );
+			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.max.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
+
+			m_buffer.clear();
+
+			for( int i = bucketBox.min.y; i <= bucketBox.max.y; ++i )
+			{
+				for( size_t k = 0; k < m_channel_count; ++k )
+				{
+					m_buffer.push_back( 1.0f );
+				}
+			}
+
+			write_buffer( Box2i( V2i( bucketBox.min.x, bucketBox.min.y ), V2i( bucketBox.min.x, bucketBox.max.y ) ) );
+			write_buffer( Box2i( V2i( bucketBox.max.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
 		}
 
 		void write_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
 		{
-			const asf::CanvasProperties &frameProps = frame->image().properties();
 			const asf::Tile &tile = frame->image().tile( tileX, tileY );
 
-			int x0 = tileX * frameProps.m_tile_width;
-			int y0 = tileY * frameProps.m_tile_height;
-			int x1 = x0 + frameProps.m_tile_width - 1;
-			int y1 = y0 + frameProps.m_tile_height - 1;
-
-			// intersect the tile area with the crop / data window.
-			Box2i bucketBox( V2i( std::max( x0, m_dataWindow.min.x ), std::max( y0, m_dataWindow.min.y ) ),
-							 V2i( std::min( x1, m_dataWindow.max.x ), std::min( y1, m_dataWindow.max.y ) ) );
+			int x0 = tileX * m_tile_width;
+			int y0 = tileY * m_tile_height;
+			Box2i bucketBox( box_inside_data_window( x0, y0, m_tile_width, m_tile_height ) );
 
 			m_buffer.clear();
 
@@ -206,13 +249,18 @@ class DisplayTileCallback : public asr::TileCallbackBase
 				{
 					int x = i - x0;
 
-					for( size_t k = 0; k < frameProps.m_channel_count; ++k )
+					for( size_t k = 0; k < m_channel_count; ++k )
 					{
 						m_buffer.push_back( tile.get_component<float>( x, y, k ) );
 					}
 				}
 			}
 
+			write_buffer( bucketBox );
+		}
+
+		void write_buffer( const Box2i &bucketBox ) const
+		{
 			try
 			{
 				// don't send anything to the Driver if there are no pixels.
@@ -229,12 +277,24 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			}
 		}
 
+		Box2i box_inside_data_window( int x, int y, int w, int h ) const
+		{
+			int x1 = x + w - 1;
+			int y1 = y + h - 1;
+
+			return Box2i( V2i( std::max( x , m_data_window.min.x ), std::max( y , m_data_window.min.y ) ),
+						  V2i( std::min( x1, m_data_window.max.x ), std::min( y1, m_data_window.max.y ) ) );
+		}
+
 		asr::ParamArray m_params;
 		mutex m_mutex;
-		bool m_displayInitialized;
+		bool m_display_initialized;
 		DisplayDriverPtr m_driver;
-		Box2i m_dataWindow;
+		Box2i m_data_window;
 		vector<float> m_buffer;
+		size_t m_tile_width;
+		size_t m_tile_height;
+		size_t m_channel_count;
 };
 
 class DisplayTileCallbackFactory : public asr::ITileCallbackFactory

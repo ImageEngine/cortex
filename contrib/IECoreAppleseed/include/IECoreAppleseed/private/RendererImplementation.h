@@ -39,10 +39,11 @@
 #include <stack>
 
 #include "boost/filesystem/path.hpp"
-#include "boost/shared_ptr.hpp"
 
 #include "renderer/modeling/project/project.h"
 #include "renderer/modeling/scene/assembly.h"
+
+#include "IECore/Camera.h"
 
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
@@ -122,17 +123,9 @@ class RendererImplementation : public IECore::Renderer
 
 	private :
 
-		enum Mode
-		{
-			GenerateProject,
-			Render
-		};
+		void constructCommon();
 
-		// this class is non-copyable for now as
-		// appleseed does not have support for procedurals yet...
-		RendererImplementation( const RendererImplementation &other );
-
-		void constructCommon( Mode mode );
+		void setCamera( IECore::CameraPtr cortexCamera, foundation::auto_release_ptr<renderer::Camera> &camera );
 
 		std::string currentShaderGroupName();
 		std::string currentMaterialName();
@@ -155,7 +148,7 @@ class RendererImplementation : public IECore::Renderer
 			return 0;
 		}
 
-		Mode m_mode;
+		bool m_interactive;
 		std::string m_fileName;
 		boost::filesystem::path m_projectPath;
 
@@ -180,7 +173,7 @@ class RendererImplementation : public IECore::Renderer
 		// project related
 		foundation::auto_release_ptr<renderer::Project> m_project;
 		renderer::Assembly *m_mainAssembly;
-		boost::shared_ptr<PrimitiveConverter> m_primitiveConverter;
+		std::auto_ptr<PrimitiveConverter> m_primitiveConverter;
 
 		friend class IECoreAppleseed::Renderer;
 

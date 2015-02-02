@@ -32,11 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/filesystem/convenience.hpp"
-
+#include "renderer/api/version.h"
 #include "renderer/api/entity.h"
 
 #include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
 
@@ -50,21 +50,17 @@ using namespace IECore;
 namespace asf = foundation;
 namespace asr = renderer;
 
-#include <iostream>
-
-IECoreAppleseed::PrimitiveConverter::PrimitiveConverter( const filesystem::path &projectPath )
+IECoreAppleseed::PrimitiveConverter::PrimitiveConverter( const asf::SearchPaths &searchPaths ) : m_searchPaths( searchPaths )
 {
-	m_projectPath = projectPath;
-	m_interactive = m_projectPath.empty();
-	setMeshFileFormat( BinaryMeshFormat );
+	m_autoInstancing = true;
 }
 
-void IECoreAppleseed::PrimitiveConverter::setMeshFileFormat( MeshFileFormat format )
+IECoreAppleseed::PrimitiveConverter::~PrimitiveConverter()
 {
-	if( format == BinaryMeshFormat )
-		m_meshGeomExtension = ".binarymesh";
-	else
-		m_meshGeomExtension = ".obj";
+}
+
+void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDataPtr value )
+{
 }
 
 const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( PrimitivePtr primitive, const AttributeState &attrState, const string &materialName, asr::Assembly &parentAssembly )
@@ -73,118 +69,52 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	MurmurHash geometryHash;
 	primitive->hash( geometryHash );
 
+	MurmurHash geomAndAttributesHash( geometryHash );
+	geomAndAttributesHash.append( attrState.alphaMap() );
+
 	// Right now, appleseed instances share all the same material.
 	// This will be lifted soon, but for now, we need to include
 	// the shading / material state in the hash so that objects with
 	// the same geometry but different materials are not instances.
-	MurmurHash geomAndShadingHash( geometryHash );
+	MurmurHash geomAndShadingHash( geomAndAttributesHash );
 	geomAndShadingHash.append( attrState.materialHash() );
 
-	string assemblyName = geomAndShadingHash.toString() + "_assembly";
-
 	// Check if we already processed this primitive.
-	if( const asr::Assembly *ass = parentAssembly.assemblies().get_by_name( assemblyName.c_str() ) )
+	InstanceMapType::const_iterator it = m_instanceMap.find( geomAndShadingHash );
+	if( it != m_instanceMap.end() )
 	{
-		return ass;
+		return it->second;
 	}
 
-	asf::auto_release_ptr<asr::Object> obj;
-
-	if( m_interactive )
-	{
-		ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() );
-
-		if( !converter )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
-		}
-
-		obj.reset( static_cast<asr::Object*>( converter->convert() ) );
-	}
-	else
-	{
-		switch( primitive->typeId() )
-		{
-			case MeshPrimitiveTypeId :
-				obj = convertAndWriteMeshPrimitive( primitive, geometryHash );
-				break;
-
-			case CurvesPrimitiveTypeId :
-			case PointsPrimitiveTypeId :
-			case DiskPrimitiveTypeId :
-			case SpherePrimitiveTypeId :
-			case NURBSPrimitiveTypeId :
-			case PatchMeshPrimitiveTypeId :
-			default :
-				return 0;
-		}
-	}
+	asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( primitive, geometryHash );
 
 	if( !obj.get() )
 	{
 		return 0;
 	}
 
-	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory::create( assemblyName.c_str(), asr::ParamArray() );
 	string objName = obj->get_name();
+
+	if( !attrState.alphaMap().empty() )
+	{
+		string alphaMapTextureInstanceName = createAlphaMapTextureEntity( parentAssembly.textures(), parentAssembly.texture_instances(), m_searchPaths, objName + "_alpha_map", attrState.alphaMap() );
+		obj->get_parameters().insert( "alpha_map", alphaMapTextureInstanceName.c_str() );
+	}
+
+	string assemblyName = attrState.name();
+	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory::create( assemblyName.c_str(), asr::ParamArray() );
 	const asr::Object *objPtr = obj.get();
 	ass->objects().insert( obj );
 	createObjectInstance( *ass, objPtr, objName, materialName );
 	const asr::Assembly *p = ass.get();
 	parentAssembly.assemblies().insert( ass );
+
+	if( m_autoInstancing )
+	{
+		m_instanceMap[geomAndShadingHash] = p;
+	}
+
 	return p;
-}
-
-asf::auto_release_ptr<asr::Object> IECoreAppleseed::PrimitiveConverter::convertAndWriteMeshPrimitive( PrimitivePtr primitive, const MurmurHash &meshHash )
-{
-	asf::auto_release_ptr<asr::Object> entity;
-	string objectName = meshHash.toString();
-
-	// Check if we already have a mesh saved for this object.
-	string fileName = string( "_geometry/" ) + objectName + m_meshGeomExtension;
-	filesystem::path p = m_projectPath / fileName;
-
-	if( !filesystem::exists( p ) )
-	{
-		ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() );
-
-		if( !converter )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
-		}
-
-		entity.reset( static_cast<asr::Object*>( converter->convert() ) );
-
-		if( entity.get() == 0 )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
-			return entity;
-		}
-
-		entity->set_name( objectName.c_str() );
-		const asr::MeshObject *mesh = static_cast<const asr::MeshObject*>( entity.get() );
-
-		// Write the mesh to a file.
-		p = m_projectPath / fileName;
-		if( asr::MeshObjectWriter::write( *mesh, mesh->get_name(), p.string().c_str() ) )
-		{
-			// we don't need the mesh data anymore.
-			// Replace the object by a new empty mesh object referencing the file
-			// we just saved.
-			entity.reset( asr::MeshObjectFactory().create( objectName.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ).release() );
-		}
-		else
-		{
-			msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't save mesh primitive" );
-			entity.reset();
-		}
-	}
-	else
-	{
-		entity.reset( asr::MeshObjectFactory().create( objectName.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ).release() );
-	}
-
-	return entity;
 }
 
 void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj, const string &objSourceName, const string &materialName )
@@ -192,7 +122,7 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 	assert( obj );
 
 	string sourceName = objSourceName + "." + objSourceName;
-	string instanceName = string( obj->get_name() ) + "_instance";
+	string instanceName = string( assembly.get_name() ) + "_obj_instance";
 
 	asf::StringDictionary materials;
 

@@ -53,7 +53,6 @@ class ShadingState
 		ShadingState();
 
 		void setShadingSamples( int samples );
-		void setAlphaMap( const std::string &alphaMap );
 
 		void addOSLShader( IECore::ConstShaderPtr shader );
 		void setOSLSurface( IECore::ConstShaderPtr surface );
@@ -62,7 +61,7 @@ class ShadingState
 		std::string createShaderGroup( renderer::Assembly &assembly );
 
 		const IECore::MurmurHash &materialHash() const;
-		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName, const foundation::SearchPaths &searchPaths );
+		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );
 
 		bool valid() const;
 
@@ -76,7 +75,6 @@ class ShadingState
 		std::vector<IECore::ConstShaderPtr> m_shaders;
 		IECore::ConstShaderPtr m_surfaceShader;
 		int m_shadingSamples;
-		std::string m_alphaMap;
 		IECore::MurmurHash m_shaderGroupHash;
 		IECore::MurmurHash m_materialHash;
 

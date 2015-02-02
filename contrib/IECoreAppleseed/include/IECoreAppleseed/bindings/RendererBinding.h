@@ -40,6 +40,6 @@ namespace IECoreAppleseed
 
 void bindRenderer();
 
-} // namespace IECoreArnold
+} // namespace IECoreAppleseed
 
 #endif // IECOREAPPLESEED_RENDERERBINDING_H

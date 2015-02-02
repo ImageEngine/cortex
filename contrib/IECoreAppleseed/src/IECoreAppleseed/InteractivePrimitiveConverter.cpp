@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_ATTRIBUTESTATE_H
-#define IECOREAPPLESEED_ATTRIBUTESTATE_H
+#include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 
-#include "renderer/api/utility.h"
+#include "IECore/MessageHandler.h"
 
-#include "IECore/CompoundData.h"
+#include "IECoreAppleseed/ToAppleseedConverter.h"
 
-#include "IECoreAppleseed/private/ShadingState.h"
+using namespace std;
 
-namespace IECoreAppleseed
+using namespace IECore;
+
+namespace asf = foundation;
+namespace asr = renderer;
+
+IECoreAppleseed::InteractivePrimitiveConverter::InteractivePrimitiveConverter( const asf::SearchPaths &searchPaths ) : PrimitiveConverter( searchPaths )
 {
+}
 
-class AttributeState
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const MurmurHash &primitiveHash )
 {
+	asf::auto_release_ptr<asr::Object> obj;
 
-	public :
+	if( ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() ) )
+	{
+		obj.reset( static_cast<asr::Object*>( converter->convert() ) );
+	}
 
-		AttributeState();
-		AttributeState( const AttributeState &other );
+	if( obj.get() )
+	{
+		string objectName = primitiveHash.toString();
+		obj->set_name( objectName.c_str() );
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
+	}
 
-		IECore::ConstDataPtr getAttribute( const std::string &name ) const;
-		void setAttribute( const std::string &name, IECore::ConstDataPtr value );
-
-		const std::string &name() const;
-
-		const foundation::Dictionary &visibilityDictionary() const;
-
-		const std::string &alphaMap() const;
-
-		void addOSLShader( IECore::ConstShaderPtr shader );
-		void setOSLSurface( IECore::ConstShaderPtr surface );
-
-		bool shadingStateValid() const;
-
-		const IECore::MurmurHash &shaderGroupHash() const;
-		const IECore::MurmurHash &materialHash() const;
-
-		std::string createShaderGroup( renderer::Assembly &assembly );
-		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );
-
-	private :
-
-		IECore::CompoundDataPtr m_attributes;
-		ShadingState m_shadingState;
-		std::string m_name;
-		std::string m_alphaMap;
-		foundation::Dictionary m_visibilityDictionary;
-
-};
-
-} // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_ATTRIBUTESTATE_H
+	return obj;
+}
