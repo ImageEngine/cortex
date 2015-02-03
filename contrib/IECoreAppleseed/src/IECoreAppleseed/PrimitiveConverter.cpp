@@ -79,7 +79,9 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	// the shading / material state in the hash so that objects with
 	// the same geometry but different materials are not instances.
 	MurmurHash geomAndShadingHash( geometryHash );
+#if APPLESEED_VERSION > 10100
 	geomAndShadingHash.append( attrState.alphaMap() );
+#endif
 	geomAndShadingHash.append( attrState.materialHash() );
 
 	// Check if we already processed this primitive.
