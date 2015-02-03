@@ -84,6 +84,7 @@ std::string insertEntityWithUniqueName( Container &container, foundation::auto_r
 
 std::string createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 std::string createTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
+std::string createAlphaMapTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
 
 } // namespace IECoreAppleseed
 

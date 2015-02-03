@@ -165,16 +165,33 @@ string IECoreAppleseed::createColorEntity( asr::ColorContainer &colorContainer, 
 	return insertEntityWithUniqueName( colorContainer, c, name.c_str() );
 }
 
-string IECoreAppleseed::createTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
+namespace
+{
+
+string doCreateTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName, const asr::ParamArray &txInstanceParams )
 {
 	asr::ParamArray params;
 	params.insert( "filename", fileName.c_str() );
 	params.insert( "color_space", "linear_rgb" );
 
 	asf::auto_release_ptr<asr::Texture> texture( asr::DiskTexture2dFactory().create( textureName.c_str(), params, searchPaths ) );
-	string txName = insertEntityWithUniqueName( textureContainer, texture, textureName );
+	string txName = IECoreAppleseed::insertEntityWithUniqueName( textureContainer, texture, textureName );
 
 	string textureInstanceName = txName + "_instance";
-	asf::auto_release_ptr<asr::TextureInstance> textureInstance( asr::TextureInstanceFactory().create( textureInstanceName.c_str(), asr::ParamArray(), txName.c_str() ) );
-	return insertEntityWithUniqueName( textureInstanceContainer, textureInstance, textureInstanceName.c_str() );
+	asf::auto_release_ptr<asr::TextureInstance> textureInstance( asr::TextureInstanceFactory().create( textureInstanceName.c_str(), txInstanceParams, txName.c_str() ) );
+	return IECoreAppleseed::insertEntityWithUniqueName( textureInstanceContainer, textureInstance, textureInstanceName.c_str() );
+}
+
+}
+
+string IECoreAppleseed::createTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
+{
+	return doCreateTextureEntity( textureContainer, textureInstanceContainer, searchPaths, textureName, fileName, asr::ParamArray() );
+}
+
+string IECoreAppleseed::createAlphaMapTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
+{
+	asr::ParamArray params;
+	params.insert( "alpha_mode", "detect" );
+	return doCreateTextureEntity( textureContainer, textureInstanceContainer, searchPaths, textureName, fileName, params );
 }
