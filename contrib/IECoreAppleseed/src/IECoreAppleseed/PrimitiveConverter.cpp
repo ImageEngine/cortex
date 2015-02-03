@@ -85,8 +85,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	geomAndShadingHash.append( attrState.materialHash() );
 
 	// Check if we already processed this primitive.
-	string assemblyKey = geomAndShadingHash.toString() + "_assembly";
-	std::map<string, const asr::Assembly*>::const_iterator it = m_instanceMap.find( assemblyKey );
+	InstanceMapType::const_iterator it = m_instanceMap.find( geomAndShadingHash );
 	if( it != m_instanceMap.end() )
 	{
 		return it->second;
@@ -151,7 +150,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	createObjectInstance( *ass, objPtr, objName, materialName );
 	const asr::Assembly *p = ass.get();
 	parentAssembly.assemblies().insert( ass );
-	m_instanceMap[assemblyKey] = p;
+	m_instanceMap[geomAndShadingHash] = p;
 	return p;
 }
 

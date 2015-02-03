@@ -78,9 +78,11 @@ class PrimitiveConverter : boost::noncopyable
 
 		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj, const std::string &objSourceName, const std::string &materialName );
 
+		typedef std::map<IECore::MurmurHash, const renderer::Assembly*> InstanceMapType;
+
 		boost::filesystem::path m_projectPath;
 		std::string m_meshGeomExtension;
-		std::map<std::string, const renderer::Assembly*> m_instanceMap;
+		InstanceMapType m_instanceMap;
 		bool m_interactive;
 
 };
