@@ -586,6 +586,17 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		# tests a bug where calling attributeNames at the root raised an exception
 		scene.attributeNames()
 	
+	def testTags( self ) :
+		
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.addAttr( t, ln="ieTags", dt="string" )
+		maya.cmds.setAttr( t + ".ieTags", "pizza burger", type="string" )
+		
+		scene = IECoreMaya.LiveScene()
+		transformScene = scene.child(str(t))
+		
+		self.assertEqual( set( transformScene.readTags() ), set( [IECore.InternedString("pizza"), IECore.InternedString("burger") ] ) )
+
 	def testCustomTags( self ) :
 
 		t = maya.cmds.createNode( "transform" )
@@ -659,7 +670,49 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False
 	
-	
+	def testAttributes( self ) :
+		
+		maya.cmds.currentTime( "0sec" )
+		t = maya.cmds.createNode( "transform", name="t1" )
+		
+		maya.cmds.addAttr( t, ln="ieAttr_bool", at="bool" )
+		maya.cmds.addAttr( t, ln="ieAttr_float", at="float" )
+		maya.cmds.addAttr( t, ln="ieAttr_double", at="double" )
+		maya.cmds.addAttr( t, ln="ieAttr_doubleAngle", at="doubleAngle" )
+		maya.cmds.addAttr( t, ln="ieAttr_doubleLinear", at="doubleLinear" )
+		maya.cmds.addAttr( t, ln="ieAttr_message", at="message" )
+		maya.cmds.addAttr( t, ln="ieAttr_time", at="time" )
+		maya.cmds.addAttr( t, ln="ieAttr_fltMatrix", at="fltMatrix" )
+		maya.cmds.addAttr( t, ln="ieAttr_string", dt="string" )
+		
+		scene = IECoreMaya.LiveScene()
+		transformScene = scene.child(str(t))
+		
+		self.assertEqual( set( transformScene.attributeNames()),
+			set( [
+				"scene:visible",
+				"user:bool",
+				"user:float",
+				"user:double",
+				"user:doubleAngle",
+				"user:doubleLinear",
+				"user:message",
+				"user:time",
+				"user:fltMatrix",
+				"user:string"
+			] )
+		)
+		
+		self.failUnless( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:float",0), IECore.FloatData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:double",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:doubleAngle",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:doubleLinear",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:message",0), IECore.NullObject ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
+
 	def testCustomAttributes( self ) :
 	
 		t = maya.cmds.createNode( "transform" )
