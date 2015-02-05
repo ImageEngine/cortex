@@ -101,6 +101,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			isArray = true;
 			arraySize = static_cast<const V3fVectorData *>( d )->readable().size();
 		case V3fDataTypeId :
+		case V3dDataTypeId :
 			if( typeHints )
 			{
 				map<string, string>::const_iterator it = typeHints->find( name );
@@ -114,11 +115,13 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			isArray = true;
 			arraySize = static_cast<const Color3fVectorData *>( d )->readable().size();
 		case Color3fDataTypeId :
+		case Color3dDataTypeId :
 			return "color";
 		case FloatVectorDataTypeId :
 			isArray = true;
 			arraySize = static_cast<const FloatVectorData *>( d )->readable().size();
 		case FloatDataTypeId :
+		case DoubleDataTypeId :
 			return "float";
 		case V2iDataTypeId :
 			isArray = true;
@@ -179,6 +182,8 @@ const void *ParameterList::value( const IECore::Data *d )
 		
 			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 			return &*(m_ints.rbegin());
+		
+		// convert double precision types to single precision:
 		case M44dDataTypeId :
 			{
 				const Imath::M44d& t = static_cast<const M44dData *>( d )->readable();
@@ -201,6 +206,27 @@ const void *ParameterList::value( const IECore::Data *d )
 
 				return &*(m_floats.rbegin() + 15);
 			}
+		case V3dDataTypeId :
+			{
+				const Imath::V3d& t = static_cast<const V3dData *>( d )->readable();
+				m_floats.push_back( (float)t.x );
+				m_floats.push_back( (float)t.y );
+				m_floats.push_back( (float)t.z );
+				return &*(m_floats.rbegin() + 2);
+			}
+		case Color3dDataTypeId :
+			{
+				const Imath::Color3<double>& t = static_cast<const Color3dData *>( d )->readable();
+				m_floats.push_back( (float)t[0] );
+				m_floats.push_back( (float)t[1] );
+				m_floats.push_back( (float)t[2] );
+				return &*(m_floats.rbegin() + 2);
+			}
+		case DoubleDataTypeId :
+
+			m_floats.push_back( (float)static_cast<const DoubleData *>( d )->readable() );
+			return &*(m_floats.rbegin());
+
 		default :
 		
 			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
@@ -259,6 +285,15 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 			break;
 		case M44dDataTypeId :
 			numFloats += 16;
+			break;
+		case V3dDataTypeId :
+			numFloats += 3;
+			break;
+		case Color3dDataTypeId :
+			numFloats += 3;
+			break;
+		case DoubleDataTypeId :
+			numFloats++;
 			break;
 		case SplineffDataTypeId :
 			{
