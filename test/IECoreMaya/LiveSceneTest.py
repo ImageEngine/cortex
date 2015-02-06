@@ -824,6 +824,48 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		finally:
 			doDuplicateNameTest = False
 
+	def testCustomAttributePrecedence( self ) :
+		
+		doCustomAttributePrecedenceTest = True
+		
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.currentTime( "0sec" )
+		
+		def myAttributeNames1( node ):
+			if not doCustomAttributePrecedenceTest:
+				return []
+			return["test"]
+
+		def readMyAttribute1( node, attr ):
+			if not doCustomAttributePrecedenceTest:
+				return None
+			if attr == "test":
+				return IECore.IntData( 1 )
+
+		def myAttributeNames2( node ):
+			if not doCustomAttributePrecedenceTest:
+				return []
+			return["test"]
+
+		def readMyAttribute2( node, attr ):
+			if not doCustomAttributePrecedenceTest:
+				return None
+			if attr == "test":
+				return IECore.IntData( 2 )
+
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames1, readMyAttribute1 )
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames2, readMyAttribute2 )
+		
+		try:
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+
+			# The second custom reader we registered should have taken precedence:
+			self.assertEqual( transformScene.readAttribute( "test", 0 ), IECore.IntData(2) )
+		finally:
+			doCustomAttributePrecedenceTest = False
+		
+	
 	def testSceneVisible( self ) :
 		
 		maya.cmds.createNode( "transform", name = "t1" )

@@ -388,7 +388,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 	}
 
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
-	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
+	for ( std::vector< CustomAttributeReader >::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
 	{
 		ConstObjectPtr attr = it->m_read( m_dagPath, name );
 		if( !attr )
