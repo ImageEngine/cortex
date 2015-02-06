@@ -296,6 +296,10 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	{
 		it->m_names( m_dagPath, attrs );
 	}
+
+	// remove duplicates:
+	std::sort( attrs.begin(), attrs.end() );
+	attrs.erase( std::unique( attrs.begin(), attrs.end() ), attrs.end() );
 }
 
 ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
@@ -383,6 +387,17 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		return new BoolData( true );
 	}
 
+	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
+	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
+	{
+		ConstObjectPtr attr = it->m_read( m_dagPath, name );
+		if( !attr )
+		{
+			continue;
+		}
+		return attr;
+	}
+
 	if( strstr( name.c_str(), "user:" ) == name.c_str() )
 	{
 
@@ -399,17 +414,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 			return plugConverter->convert();
 		}
 	}
-	
-	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
-	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
-	{
-		ConstObjectPtr attr = it->m_read( m_dagPath, name );
-		if( !attr )
-		{
-			continue;
-		}
-		return attr;
-	}
+
 	return IECore::NullObject::defaultNullObject();
 }
 

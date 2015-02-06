@@ -766,26 +766,64 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 	
 			return IECore.StringData("mesh")
 		
+		try:
+			IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+			sphereScene = scene.child('pSphere')
+			self.assertEqual( set( scene.attributeNames() ), set( [ "scene:visible", "root" ] ) )
+			self.assertEqual( scene.readAttribute("anyAttr", 0.0), IECore.NullObject.defaultNullObject() )
+			self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
+			self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
+
+			self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
+			self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
+			self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), IECore.NullObject.defaultNullObject() )
+			self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
+			self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString('shapeAttribute') ] )
+			self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
+		
+		finally:
+			# Disable custom attribute functions so they don't mess with other tests
+			doTest = False
+	
+	def testNoDuplicateAttributeNames( self ) :
+
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.currentTime( "0sec" )
+
+		maya.cmds.addAttr( t, ln="ieAttr_test", at="bool" )
+
+		doDuplicateNameTest = True
+
+		def myAttributeNames( node ):
+			if not doDuplicateNameTest:
+				return []
+			return["user:test"]
+
+		def readMyAttribute( node, attr ):
+			if not doDuplicateNameTest:
+				return None
+			if attr == "user:test":
+				return IECore.IntData( 1 )
+
 		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
-	
-		scene = IECoreMaya.LiveScene()
-		transformScene = scene.child(str(t))
-		sphereScene = scene.child('pSphere')
-		self.assertEqual( scene.attributeNames(), [ "scene:visible", "root" ] )
-		self.assertEqual( scene.readAttribute("anyAttr", 0.0), IECore.NullObject.defaultNullObject() )
-		self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
-		self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
-		
-		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
-		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
-		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), IECore.NullObject.defaultNullObject() )
-		self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
-		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString('shapeAttribute') ] )
-		self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
-		
-		# Disable custom attribute functions so they don't mess with other tests
-		doTest = False
-	
+
+		try:
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+
+			# we've specified an attribute called "user:test" in two ways - once through an ieAttr_,
+			# once through a custom reader. The name "user:test" should only appear once:
+			self.assertEqual( len( transformScene.attributeNames() ), 2 )
+			self.assertEqual( set( transformScene.attributeNames() ), set( ["scene:visible", "user:test"] ) )
+
+			# The custom reader should override the ieAttr_
+			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.IntData ) )
+		finally:
+			doDuplicateNameTest = False
+
 	def testSceneVisible( self ) :
 		
 		maya.cmds.createNode( "transform", name = "t1" )
