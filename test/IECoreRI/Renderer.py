@@ -152,19 +152,28 @@ class RendererTest( IECoreRI.TestCase ) :
 			l = " ".join( l.split() )
 			self.assert_( t[2] in l )
 	
-	def testM44dAttribute( self ) :
+	def testDoublePrecisionAttributes( self ) :
 		
 		# separate test case for M44d attributes, as they get converted to M44f before being 
 		# written into the rib:
 		
-		r = IECoreRI.Renderer( "test/IECoreRI/output/testM44dAttribute.rib" )
+		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoublePrecisionAttributes.rib" )
 		with WorldBlock( r ) :
 			r.setAttribute( "user:Mref", M44dData( M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
 			self.assertEqual( r.getAttribute( "user:Mref" ), M44fData( M44f( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
+			r.setAttribute( "user:v", V3dData( V3d( 3,4,5 ) ) )
+			self.assertEqual( r.getAttribute( "user:v" ), V3fData( V3f( 3,4,5 ) ) )
+			r.setAttribute( "user:c", Color3dData( Color3d( 0,1,2 ) ) )
+			self.assertEqual( r.getAttribute( "user:c" ), Color3fData( Color3f( 0,1,2 ) ) )
+			r.setAttribute( "user:number", DoubleData( 10 ) )
+			self.assertEqual( r.getAttribute( "user:number" ), FloatData( 10 ) )
 
-		l = "".join( file( "test/IECoreRI/output/testM44dAttribute.rib" ).readlines() )
+		l = "".join( file( "test/IECoreRI/output/testDoublePrecisionAttributes.rib" ).readlines() )
 		l = " ".join( l.split() )
 		self.assert_( "Attribute \"user\" \"matrix Mref\" [ 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ]" in l )
+		self.assert_( "Attribute \"user\" \"vector v\" [ 3 4 5 ]" in l )
+		self.assert_( "Attribute \"user\" \"color c\" [ 0 1 2 ]" in l )
+		self.assert_( "Attribute \"user\" \"float number\" [ 10 ]" in l )
 	
 	def testCompoundDataAttributes( self ) :
 	
