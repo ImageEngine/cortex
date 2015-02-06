@@ -774,6 +774,10 @@ void LinkedScene::readTags( NameList &tags, int filter ) const
 			m_mainScene->readTags( mainTags, mainFilter );
 			tags.insert( tags.end(), mainTags.begin(), mainTags.end() );
 		}
+		
+		// remove duplicates:
+		std::sort( tags.begin(), tags.end() );
+		tags.erase( std::unique( tags.begin(), tags.end() ), tags.end() );
 	}
 	else
 	{
