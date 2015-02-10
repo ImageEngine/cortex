@@ -1,3 +1,25 @@
+# 9.0.0-b3
+
+#### IECore
+
+* Added implicit conversion from python datetime to DateTimeData.
+* Linked scenes no longer return duplicate tags
+
+#### IECoreMaya
+
+* Only allow selection using the bounding box if the box is visible
+* Latest registered custom attribute reader now takes precedence in IECoreMaya.LiveScene
+* On transform nodes, plugs with names prefixed by "ieAttr_" are now translated into "user:" attributes by the IECoreMaya.LiveScene
+* String attributes called "ieTags" on transform nodes now interpreted as a space separated list of tags
+
+#### IECoreHoudini
+
+* Latest registered custom attribute reader now takes precedence in IECoreHoudini.LiveScene
+
+#### IECoreRI
+
+* added IECoreRI support for DoubleData, V3dData and Color3dData attributes
+
 # 9.0.0-b2
 
 #### IECore
