@@ -46,12 +46,19 @@ using namespace IECoreRI;
 using namespace std;
 using namespace boost;
 
+const InternedString ParameterList::g_handleParameterName( "__handle" );
+
 ParameterList::ParameterList( const IECore::CompoundDataMap &parameters, const std::map<std::string, std::string> *typeHints )
 {
 	reserve( parameters );
 	CompoundDataMap::const_iterator it;
 	for( it=parameters.begin(); it!=parameters.end(); it++ )
 	{
+		if( it->first == g_handleParameterName )
+		{
+			// skip parameters called __handle
+			continue;
+		}
 		appendParameter( it->first, it->second.get(), typeHints );
 	}
 }
@@ -74,6 +81,14 @@ ParameterList::ParameterList( const std::string &name, const IECore::Data *param
 {
 	reserve( parameter );
 	appendParameter( name, parameter, typeHints );
+}
+
+ParameterList::~ParameterList()
+{
+	for( size_t i=0; i < m_tokens.size(); ++i )
+	{
+		delete[] m_tokens[i];
+	}
 }
 
 int ParameterList::n()
@@ -245,7 +260,7 @@ void ParameterList::reserve( const IECore::CompoundDataMap &parameters )
 	{
 		accumulateReservations( it->second.get(), numStrings, numCharPtrs, numInts, numFloats );
 	}
-	m_strings.reserve( numStrings );
+	m_tokens.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
@@ -258,7 +273,7 @@ void ParameterList::reserve( const IECore::Data *parameter )
 	size_t numInts = 0;
 	size_t numFloats = 0;
 	accumulateReservations( parameter, numStrings, numCharPtrs, numInts, numFloats );
-	m_strings.reserve( numStrings );
+	m_tokens.reserve( numStrings );
 	m_charPtrs.reserve( numCharPtrs );
 	m_ints.reserve( numInts );
 	m_floats.reserve( numFloats );
@@ -315,12 +330,108 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 	}
 }
 
+int ParameterList::numPlaces( size_t n )
+{
+	if (n < 10) return 1;
+	if (n < 100) return 2;
+	if (n < 1000) return 3;
+	if (n < 10000) return 4;
+	if (n < 100000) return 5;
+	if (n < 1000000) return 6;
+	if (n < 10000000) return 7;
+	if (n < 100000000) return 8;
+	if (n < 1000000000) return 9;
+	if (n < 10000000000) return 10;
+	if (n < 100000000000) return 11;
+	if (n < 1000000000000) return 12;
+	if (n < 10000000000000) return 13;
+	if (n < 100000000000000) return 14;
+	if (n < 1000000000000000) return 15;
+	if (n < 10000000000000000) return 16;
+	if (n < 100000000000000000) return 17;
+	if (n < 1000000000000000000) return 18;
+	// maximum size_t ~= 1.8e19:
+	return 19;
+}
+
+void ParameterList::appendInt( char *&str, size_t n )
+{
+	if( n == 0 )
+	{
+		*str++ = '0';
+		return;
+	}
+	
+	str += numPlaces( n );
+	char* cc = str;
+	--cc;
+	while(n != 0)
+	{
+	    *cc-- = n%10+'0';
+	    n=n/10;
+	}
+}
+
+void ParameterList::appendString( char *&str, const char* toAppend, size_t len )
+{
+	memcpy( str, toAppend, len );
+	str += len;
+}
+
+void ParameterList::appendString( char *&str, const std::string &toAppend )
+{
+	appendString( str, toAppend.c_str(), toAppend.size() );
+}
+
+
+void ParameterList::buildPositionsString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 10 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "float ", 6 );
+	appendString( c, name );
+	appendString( c, "Positions[", 10 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+void ParameterList::buildColorValuesString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "color ", 6 );
+	appendString( c, name );
+	appendString( c, "Values[", 7 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+void ParameterList::buildFloatValuesString( char*& str, const std::string& name, size_t arraySize )
+{
+	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
+	
+	char* c = str;
+	appendString( c, "float ", 6 );
+	appendString( c, name );
+	appendString( c, "Values[", 7 );
+	appendInt( c, arraySize );
+	*c++ = ']';
+	*c++ = 0;
+}
+
+
 void ParameterList::appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints )
 {
 	if( !d )
 	{
 		return;
 	}
+	
+	// \todo: Investigate caching these parameter name strings so we don't have to allocate memory all the time.
 
 	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
 	IECore::TypeId typeId = d->typeId();
@@ -331,16 +442,16 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildPositionsString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.push_back( boost::str( boost::format( "float %sValues[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildFloatValuesString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::Splineff::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -360,16 +471,16 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		if ( size )
 		{
 			// put all the positions in one array parameter
-			m_strings.push_back( boost::str( boost::format( "float %sPositions[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildPositionsString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
 				m_floats.push_back( it->first );
 			}
 			// and put all the values in another
-			m_strings.push_back( boost::str( boost::format( "color %sValues[%d]" ) % name % size ) );
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
+			m_tokens.resize( m_tokens.size() + 1 );
+			buildColorValuesString( m_tokens.back(), name, size );
 			m_values.push_back( &(m_floats[0]) + m_floats.size() );
 			for( IECore::SplinefColor3f::PointContainer::const_iterator it=spline.points.begin(); it!=spline.points.end(); it++ )
 			{
@@ -392,15 +503,35 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 		const char *t = type( name, d, isArray, arraySize, typeHints );
 		if( t )
 		{
+			m_tokens.resize( m_tokens.size() + 1 );
+			int typeNameLen = strlen(t);
 			if( isArray )
 			{
-				m_strings.push_back( boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ) );
+				// manually build boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ):
+				
+				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 + numPlaces( arraySize ) + 2 ];
+				char* c = m_tokens.back();
+				
+				appendString( c, t, typeNameLen );
+				*c++ = ' ';
+				appendString( c, name );
+				*c++ = '[';
+				appendInt( c, arraySize );
+				*c++ = ']';
+				*c = 0;
 			}
 			else
 			{
-				m_strings.push_back( string( t ) + " " + name );
+				// maually build string( t ) + " " + name ):
+				
+				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 ];
+				char *c = m_tokens.back();
+				
+				appendString( c, t, typeNameLen );
+				*c++ = ' ';
+				appendString( c, name );
+				*c++ = 0;
 			}
-			m_tokens.push_back( m_strings.rbegin()->c_str() );
 			m_values.push_back( value( d ) );
 		}
 	}

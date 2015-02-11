@@ -1362,9 +1362,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 			msg( Msg::Error, "IECoreRI::RendererImplementation::shader", "Must specify StringData \"__handle\" parameter for coshaders." );
 			return;
 		}
-		CompoundDataMap parametersCopy = parameters;
-		parametersCopy.erase( "__handle" );
-		ParameterList pl( parametersCopy, &state.primVarTypeHints );
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiShaderV( (char *)name.c_str(), (char *)handleData->readable().c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 }
