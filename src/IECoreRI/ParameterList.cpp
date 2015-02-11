@@ -430,6 +430,8 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 	{
 		return;
 	}
+	
+	// \todo: Investigate caching these parameter name strings so we don't have to allocate memory all the time.
 
 	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
 	IECore::TypeId typeId = d->typeId();
