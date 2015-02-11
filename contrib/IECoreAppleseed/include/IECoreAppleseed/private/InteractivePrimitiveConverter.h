@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_ATTRIBUTESTATE_H
-#define IECOREAPPLESEED_ATTRIBUTESTATE_H
+#ifndef IECOREAPPLESEED_INTERACTIVEPRIMITIVECONVERTER_H
+#define IECOREAPPLESEED_INTERACTIVEPRIMITIVECONVERTER_H
 
-#include "renderer/api/utility.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/private/ShadingState.h"
+#include "IECoreAppleseed/private/PrimitiveConverter.h"
 
 namespace IECoreAppleseed
 {
 
-class AttributeState
+/// A PrimitiveConverter subclass that converts primitives to appleseed entities.
+class InteractivePrimitiveConverter : public PrimitiveConverter
 {
-
 	public :
 
-		AttributeState();
-		AttributeState( const AttributeState &other );
-
-		IECore::ConstDataPtr getAttribute( const std::string &name ) const;
-		void setAttribute( const std::string &name, IECore::ConstDataPtr value );
-
-		const std::string &name() const;
-
-		const foundation::Dictionary &visibilityDictionary() const;
-
-		const std::string &alphaMap() const;
-
-		void addOSLShader( IECore::ConstShaderPtr shader );
-		void setOSLSurface( IECore::ConstShaderPtr surface );
-
-		bool shadingStateValid() const;
-
-		const IECore::MurmurHash &shaderGroupHash() const;
-		const IECore::MurmurHash &materialHash() const;
-
-		std::string createShaderGroup( renderer::Assembly &assembly );
-		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );
+		explicit InteractivePrimitiveConverter( const foundation::SearchPaths &searchPaths );
 
 	private :
 
-		IECore::CompoundDataPtr m_attributes;
-		ShadingState m_shadingState;
-		std::string m_name;
-		std::string m_alphaMap;
-		foundation::Dictionary m_visibilityDictionary;
-
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &primitiveHash );
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_ATTRIBUTESTATE_H
+#endif // IECOREAPPLESEED_INTERACTIVEPRIMITIVECONVERTER_H

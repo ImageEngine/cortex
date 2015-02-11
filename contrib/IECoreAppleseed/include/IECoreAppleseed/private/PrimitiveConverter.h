@@ -36,10 +36,8 @@
 #define IECOREAPPLESEED_PRIMITIVECONVERTER_H
 
 #include <map>
-#include <set>
 
 #include "boost/noncopyable.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "renderer/api/scene.h"
 #include "renderer/api/object.h"
@@ -47,13 +45,12 @@
 #include "IECore/MurmurHash.h"
 #include "IECore/Primitive.h"
 
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
 #include "IECoreAppleseed/private/AttributeState.h"
 
 namespace IECoreAppleseed
 {
 
-/// A class for managing the conversion of a series of IECore::Primitives to
+/// An abstract base class for managing the conversion of a series of IECore::Primitives to
 /// appleseed entities, automatically creating instances when a previously
 /// converted primitive is processed again.
 class PrimitiveConverter : boost::noncopyable
@@ -61,27 +58,25 @@ class PrimitiveConverter : boost::noncopyable
 
 	public :
 
-		typedef enum
-		{
-			BinaryMeshFormat,
-			ObjFormat
-		} MeshFileFormat;
+		explicit PrimitiveConverter( const foundation::SearchPaths &searchPaths );
 
-		explicit PrimitiveConverter( const boost::filesystem::path &projectPath );
+		virtual ~PrimitiveConverter();
 
-		void setMeshFileFormat( MeshFileFormat format );
+		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 
 		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
 
 	private :
 
-		foundation::auto_release_ptr<renderer::Object> convertAndWriteMeshPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &meshHash );
-
 		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj, const std::string &objSourceName, const std::string &materialName );
 
-		boost::filesystem::path m_projectPath;
-		std::string m_meshGeomExtension;
-		bool m_interactive;
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &primitiveHash ) = 0;
+
+		typedef std::map<IECore::MurmurHash, const renderer::Assembly*> InstanceMapType;
+
+		const foundation::SearchPaths &m_searchPaths;
+		InstanceMapType m_instanceMap;
+		bool m_autoInstancing;
 
 };
 

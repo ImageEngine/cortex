@@ -66,12 +66,6 @@ void IECoreAppleseed::ShadingState::setShadingSamples(int samples)
 	updateHashes();
 }
 
-void IECoreAppleseed::ShadingState::setAlphaMap( const string& alphaMap )
-{
-	m_alphaMap = alphaMap;
-	updateHashes();
-}
-
 void IECoreAppleseed::ShadingState::addOSLShader( ConstShaderPtr shader )
 {
 	if( m_surfaceShader )
@@ -136,7 +130,7 @@ const MurmurHash&IECoreAppleseed::ShadingState::materialHash() const
 	return m_materialHash;
 }
 
-string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, const std::string &shaderGroupName, const asf::SearchPaths &searchPaths )
+string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, const std::string &shaderGroupName )
 {
 	asr::ParamArray params;
 
@@ -149,12 +143,6 @@ string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, c
 	params.insert( "surface_shader", surfaceShaderName.c_str() );
 	params.insert( "osl_surface", shaderGroupName.c_str() );
 	asf::auto_release_ptr<asr::Material> mat( asr::OSLMaterialFactory().create( "material", params ) );
-
-	if( !m_alphaMap.empty() )
-	{
-		string alphaMapTextureInstanceName = createTextureEntity( assembly.textures(), assembly.texture_instances(), searchPaths, m_surfaceShader->getName() + "_alpha_map", m_alphaMap );
-		mat->get_parameters().insert( "alpha_map", alphaMapTextureInstanceName.c_str() );
-	}
 
 	string materialName = insertEntityWithUniqueName( assembly.materials(), mat, m_surfaceShader->getName() + "_material" );
 	return materialName;
@@ -176,7 +164,6 @@ void IECoreAppleseed::ShadingState::updateHashes()
 
 	m_materialHash = m_shaderGroupHash;
 	m_materialHash.append( m_shadingSamples );
-	m_materialHash.append( m_alphaMap );
 }
 
 asr::ParamArray IECoreAppleseed::ShadingState::convertParameters( const CompoundDataMap &parameters )

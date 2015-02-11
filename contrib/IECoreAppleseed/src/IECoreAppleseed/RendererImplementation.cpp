@@ -58,13 +58,12 @@
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
-#include "IECore/Camera.h"
-#include "IECore/Transform.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/CurvesPrimitive.h"
+#include "IECore/Transform.h"
 
 #include "IECoreAppleseed/private/RendererImplementation.h"
-#include "IECoreAppleseed/ToAppleseedConverter.h"
+#include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
+#include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 #include "IECoreAppleseed/ToAppleseedCameraConverter.h"
 
 using namespace IECore;
@@ -82,11 +81,14 @@ namespace asr = renderer;
 
 IECoreAppleseed::RendererImplementation::RendererImplementation()
 {
-	constructCommon( Render );
+	m_interactive = true;
+	constructCommon();
+	m_primitiveConverter.reset( new InteractivePrimitiveConverter( m_project->search_paths() ) );
 }
 
 IECoreAppleseed::RendererImplementation::RendererImplementation( const string &fileName )
 {
+	m_interactive = false;
 	m_fileName = fileName;
 	m_projectPath = filesystem::path( fileName ).parent_path();
 
@@ -96,17 +98,19 @@ IECoreAppleseed::RendererImplementation::RendererImplementation( const string &f
 	if( !filesystem::exists( geomPath ) )
 	{
 		if( !filesystem::create_directory( geomPath ) )
-			msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::RendererImplementation", "Couldn't create _geometry directory" );
+		{
+			msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::RendererImplementation", "Couldn't create _geometry directory." );
+		}
 	}
 
-	constructCommon( GenerateProject );
+	constructCommon();
 	m_project->set_path( fileName.c_str() );
 	m_project->search_paths().set_root_path( m_projectPath.string().c_str() );
+	m_primitiveConverter.reset( new BatchPrimitiveConverter( m_projectPath, m_project->search_paths() ) );
 }
 
-void IECoreAppleseed::RendererImplementation::constructCommon( Mode mode )
+void IECoreAppleseed::RendererImplementation::constructCommon()
 {
-	m_mode = mode;
 	m_mainAssembly = 0;
 
 	m_transformStack.clear();
@@ -129,8 +133,6 @@ void IECoreAppleseed::RendererImplementation::constructCommon( Mode mode )
 	asf::auto_release_ptr<asr::Scene> scene = asr::SceneFactory::create();
 	m_project->set_scene( scene );
 	m_project->get_scene()->set_environment( asr::EnvironmentFactory().create( "environment", asr::ParamArray() ) );
-
-	m_primitiveConverter.reset( new PrimitiveConverter( m_projectPath ) );
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -143,6 +145,8 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 
 	if( 0 == name.compare( 0, 7, "as:cfg:" ) )
 	{
+		// appleseed render settings.
+
 		string optName( name, 7, string::npos );
 		std::replace( optName.begin(), optName.end(), ':', '.' );
 		string valueStr = dataToString( value );
@@ -163,6 +167,8 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 	}
 	else if( 0 == name.compare( 0, 3, "as:" ) )
 	{
+		// other appleseed options.
+
 		string optName( name, 3, string::npos );
 
 		if( optName == "searchpath" )
@@ -172,20 +178,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 		}
 		else if( optName == "mesh_file_format" )
 		{
-			const string &str = static_cast<const StringData *>( value.get() )->readable();
-
-			if( str == "binarymesh" )
-			{
-				m_primitiveConverter->setMeshFileFormat( PrimitiveConverter::BinaryMeshFormat );
-			}
-			else if( str == "obj" )
-			{
-				m_primitiveConverter->setMeshFileFormat( PrimitiveConverter::ObjFormat );
-			}
-			else
-			{
-				msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setOption", format( "Unknown mesh file format \"%s\"." ) % str );
-			}
+			m_primitiveConverter->setOption( name, value );
 		}
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -226,27 +219,12 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 
 	if( !appleseedCamera.get() )
 	{
-		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::camera", "Couldn't create camera" );
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::camera", "Couldn't create camera." );
 		return;
 	}
 
 	appleseedCamera->transform_sequence() = m_transformStack.top();
-	m_project->get_scene()->set_camera( appleseedCamera );
-
-	// resolution
-	m_project->get_frame()->get_parameters().insert( "camera", "camera" );
-	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
-	asf::Vector2i res( resolution->readable().x, resolution->readable().y );
-	m_project->get_frame()->get_parameters().insert( "resolution", res );
-
-	// crop window
-	const Box2fData *cropWindow = cortexCamera->parametersData()->member<Box2fData>( "cropWindow" );
-	asf::AABB2u crop;
-	crop.min[0] = cropWindow->readable().min.x * ( res[0] - 1 );
-	crop.min[1] = cropWindow->readable().min.y * ( res[1] - 1 );
-	crop.max[0] = cropWindow->readable().max.x * ( res[0] - 1 );
-	crop.max[1] = cropWindow->readable().max.y * ( res[1] - 1 );
-	m_project->get_frame()->set_crop_window( crop );
+	setCamera( cortexCamera, appleseedCamera );
 }
 
 void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const IECore::CompoundDataMap &parameters )
@@ -308,23 +286,32 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	// create a default camera if needed
 	if( !m_project->get_scene()->get_camera() )
 	{
-		asf::auto_release_ptr<asr::Camera> camera = asr::CameraFactoryRegistrar().lookup( "pinhole_camera" )->create( "camera", asr::ParamArray() );
-		m_project->get_scene()->set_camera( camera );
+		CameraPtr cortexCamera = new Camera();
+		cortexCamera->parameters()["projection"] = new StringData("perspective");
+
+		if( const V2i *res = getOptionAs<V2i>( "camera:resolution" ) )
+		{
+			cortexCamera->parameters()["resolution"] = new V2iData( *res );
+		}
+
+		cortexCamera->addStandardParameters();
+
+		ToAppleseedCameraConverterPtr converter = new ToAppleseedCameraConverter( cortexCamera );
+		asf::auto_release_ptr<asr::Camera> camera( static_cast<asr::Camera*>( converter->convert() ) );
+		assert( camera.get() );
+
+		setCamera( cortexCamera, camera );
 	}
 
 	// instance the main assembly
 	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( "assembly_inst", asr::ParamArray(), "assembly" );
 	m_project->get_scene()->assembly_instances().insert( assemblyInstance );
 
-	if( m_mode == Render )
+	if( m_fileName.empty() )
 	{
-		asf::auto_release_ptr<asr::IRendererController> controller( new asr::DefaultRendererController() );
-		asr::ParamArray params;
-
-		asr::MasterRenderer renderer( *m_project, params, controller.get() );
-		renderer.render();
+		// TODO: interactive render here...
 	}
-	else // if( m_mode == GenerateProject )
+	else
 	{
 		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles );
 	}
@@ -357,7 +344,7 @@ void IECoreAppleseed::RendererImplementation::setTransform( const Imath::M44f &m
 
 void IECoreAppleseed::RendererImplementation::setTransform( const string &coordinateSystem )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setTransform", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setTransform", "Not implemented." );
 }
 
 Imath::M44f IECoreAppleseed::RendererImplementation::getTransform() const
@@ -368,7 +355,7 @@ Imath::M44f IECoreAppleseed::RendererImplementation::getTransform() const
 
 Imath::M44f IECoreAppleseed::RendererImplementation::getTransform( const string &coordinateSystem ) const
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::getTransform", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::getTransform", "Not implemented." );
 	return M44f();
 }
 
@@ -379,7 +366,7 @@ void IECoreAppleseed::RendererImplementation::concatTransform( const Imath::M44f
 
 void IECoreAppleseed::RendererImplementation::coordinateSystem( const string &name )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::coordinateSystem", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::coordinateSystem", "Not implemented." );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -512,7 +499,6 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 		}
 
 		asf::auto_release_ptr<asr::Light> light( factory->create( m_attributeStack.top().name().c_str(), params ) );
-
 		light->set_transform( m_transformStack.top().get_earliest_transform() );
 		insertEntityWithUniqueName( m_mainAssembly->lights(), light, m_attributeStack.top().name() );
 	}
@@ -520,7 +506,7 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 
 void IECoreAppleseed::RendererImplementation::illuminate( const string &lightHandle, bool on )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::illuminate", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::illuminate", "Not implemented." );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -529,12 +515,12 @@ void IECoreAppleseed::RendererImplementation::illuminate( const string &lightHan
 
 void IECoreAppleseed::RendererImplementation::motionBegin( const std::set<float> &times )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionBegin", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionBegin", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::motionEnd()
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Not implemented." );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -543,39 +529,39 @@ void IECoreAppleseed::RendererImplementation::motionEnd()
 
 void IECoreAppleseed::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::points", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::points", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::disk", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::disk", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::curves", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::curves", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::text( const string &font, const string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::text", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::text", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::sphere", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::sphere", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::image", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::image", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const string &interpolation, const IECore::PrimitiveVariableMap &primVars )
 {
 	if( !m_mainAssembly )
 	{
-		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation", "Geometry not inside world block, ignoring" );
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation", "Geometry not inside world block, ignoring." );
 		return;
 	}
 
@@ -584,35 +570,25 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 
 	string materialName = currentMaterialName();
 
-	if( materialName.empty() )
+	if( const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly ) )
 	{
-		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation", "Geometry without materials (it will render pink)" );
+		createAssemblyInstance( assembly->get_name() );
 	}
-
-	const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly );
-	if( !assembly )
-	{
-		msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::Mesh", "Error converting mesh" );
-		return;
-	}
-
-	string assemblyName = assembly->get_name();
-	createAssemblyInstance( assemblyName );
 }
 
 void IECoreAppleseed::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::nurbs", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::nurbs", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::patchMesh", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::patchMesh", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::geometry( const string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::geometry", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::geometry", "Not implemented." );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -621,7 +597,7 @@ void IECoreAppleseed::RendererImplementation::geometry( const string &type, cons
 
 void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
-	// appleseed does not support procedurals yet, so we expand them inmediatly.
+	// appleseed does not support procedurals yet, so we expand them immediately.
 	proc->render( this );
 }
 
@@ -631,17 +607,17 @@ void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::Proc
 
 void IECoreAppleseed::RendererImplementation::instanceBegin( const string &name, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceBegin", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceBegin", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::instanceEnd()
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceEnd", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceEnd", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::instance( const string &name )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instance", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instance", "Not implemented." );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -650,7 +626,7 @@ void IECoreAppleseed::RendererImplementation::instance( const string &name )
 
 IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::command", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::command", "Not implemented." );
 	return 0;
 }
 
@@ -660,12 +636,36 @@ IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &
 
 void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const IECore::CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editBegin", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editBegin", "Not implemented." );
 }
 
 void IECoreAppleseed::RendererImplementation::editEnd()
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editEnd", "Not implemented" );
+	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editEnd", "Not implemented." );
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+// private
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void IECoreAppleseed::RendererImplementation::setCamera( CameraPtr cortexCamera, asf::auto_release_ptr<asr::Camera> &appleseedCamera )
+{
+	m_project->get_scene()->set_camera( appleseedCamera );
+
+	// resolution
+	m_project->get_frame()->get_parameters().insert( "camera", "camera" );
+	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
+	asf::Vector2i res( resolution->readable().x, resolution->readable().y );
+	m_project->get_frame()->get_parameters().insert( "resolution", res );
+
+	// crop window
+	const Box2fData *cropWindow = cortexCamera->parametersData()->member<Box2fData>( "cropWindow" );
+	asf::AABB2u crop;
+	crop.min[0] = cropWindow->readable().min.x * ( res[0] - 1 );
+	crop.min[1] = cropWindow->readable().min.y * ( res[1] - 1 );
+	crop.max[0] = cropWindow->readable().max.x * ( res[0] - 1 );
+	crop.max[1] = cropWindow->readable().max.y * ( res[1] - 1 );
+	m_project->get_frame()->set_crop_window( crop );
 }
 
 string IECoreAppleseed::RendererImplementation::currentShaderGroupName()
@@ -705,7 +705,7 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 		if( it == m_materialNames.end() )
 		{
 			string ShaderGroupName = currentShaderGroupName();
-			materialName = m_attributeStack.top().createMaterial( *m_mainAssembly, ShaderGroupName, m_project->search_paths() );
+			materialName = m_attributeStack.top().createMaterial( *m_mainAssembly, ShaderGroupName );
 			m_materialNames[materialHash] = materialName;
 		}
 		else

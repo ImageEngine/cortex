@@ -34,6 +34,8 @@
 
 #include "foundation/math/scalar.h"
 
+#include "renderer/api/version.h"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -55,6 +57,7 @@ IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 	m_attributes = other.m_attributes->copy();
 	m_shadingState = other.m_shadingState;
 	m_visibilityDictionary = other.m_visibilityDictionary;
+	m_alphaMap = other.m_alphaMap;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
@@ -76,7 +79,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	{
 		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
 		{
-			m_shadingState.setAlphaMap( f->readable() );
+			m_alphaMap = f->readable();
 		}
 		else
 		{
@@ -137,6 +140,11 @@ const asf::Dictionary &IECoreAppleseed::AttributeState::visibilityDictionary() c
 	return m_visibilityDictionary;
 }
 
+const std::string &IECoreAppleseed::AttributeState::alphaMap() const
+{
+	return m_alphaMap;
+}
+
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
 {
 	m_shadingState.addOSLShader( shader );
@@ -152,12 +160,12 @@ bool IECoreAppleseed::AttributeState::shadingStateValid() const
 	return m_shadingState.valid();
 }
 
-const MurmurHash&IECoreAppleseed::AttributeState::shaderGroupHash() const
+const MurmurHash &IECoreAppleseed::AttributeState::shaderGroupHash() const
 {
 	return m_shadingState.shaderGroupHash();
 }
 
-const MurmurHash&IECoreAppleseed::AttributeState::materialHash() const
+const MurmurHash &IECoreAppleseed::AttributeState::materialHash() const
 {
 	return m_shadingState.materialHash();
 }
@@ -167,7 +175,7 @@ string IECoreAppleseed::AttributeState::createShaderGroup( asr::Assembly &assemb
 	return m_shadingState.createShaderGroup( assembly );
 }
 
-string IECoreAppleseed::AttributeState::createMaterial( asr::Assembly &assembly, const string &shaderGroupName, const asf::SearchPaths &searchPaths )
+string IECoreAppleseed::AttributeState::createMaterial( asr::Assembly &assembly, const string &shaderGroupName )
 {
-	return m_shadingState.createMaterial( assembly, shaderGroupName, searchPaths );
+	return m_shadingState.createMaterial( assembly, shaderGroupName );
 }
