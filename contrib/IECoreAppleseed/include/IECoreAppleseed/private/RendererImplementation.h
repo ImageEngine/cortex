@@ -48,6 +48,7 @@
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
 #include "IECoreAppleseed/private/AppleseedUtil.h"
+#include "IECoreAppleseed/private/MotionBlockHandler.h"
 #include "IECoreAppleseed/private/TransformStack.h"
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
 
@@ -169,6 +170,9 @@ class RendererImplementation : public IECore::Renderer
 		// materials
 		typedef std::map<IECore::MurmurHash, std::string> MaterialMap;
 		MaterialMap m_materialNames;
+
+		// motion
+		std::auto_ptr<MotionBlockHandler> m_motionHandler;
 
 		// project related
 		foundation::auto_release_ptr<renderer::Project> m_project;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,58 +32,70 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TRANSFORMSTACK_H
-#define IECOREAPPLESEED_TRANSFORMSTACK_H
+#ifndef IECOREAPPLESEED_MOTIONBLOCKHANDLER_H
+#define IECOREAPPLESEED_MOTIONBLOCKHANDLER_H
+
+#include "boost/noncopyable.hpp"
 
 #include <set>
-#include <stack>
-#include <vector>
+#include <string>
 
-#include "OpenEXR/ImathMatrix.h"
+#include <OpenEXR/ImathMatrix.h>
 
-#include "renderer/api/utility.h"
+#include "renderer/api/scene.h"
+
+#include "IECore/Primitive.h"
+
+#include "IECoreAppleseed/private/AttributeState.h"
+#include "IECoreAppleseed/private/TransformStack.h"
+#include "IECoreAppleseed/private/PrimitiveConverter.h"
 
 namespace IECoreAppleseed
 {
 
-// transform stack stuff
-class TransformStack
+class MotionBlockHandler : boost::noncopyable
 {
 
 	public :
 
-		TransformStack();
+		MotionBlockHandler( TransformStack &transformStack,
+			PrimitiveConverter &primitiveConverter );
 
-		void push( const renderer::TransformSequence &m );
-		void push_identity();
+		bool insideMotionBlock() const;
 
-		void pop();
-
-		void clear();
-		std::size_t size() const;
-
-		const renderer::TransformSequence& top() const;
-		renderer::TransformSequence& top();
+		void motionBegin( const std::set<float> &times );
+		void motionEnd( const AttributeState &attrState,
+			renderer::Assembly *mainAssembly );
 
 		void setTransform( const Imath::M44f &m );
-		void setTransform( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms );
-
 		void concatTransform( const Imath::M44f &m );
-		void concatTransform( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms );
+
+		void primitive( IECore::PrimitivePtr primitive,
+			const std::string &materialName );
 
 	private :
 
-		std::stack<renderer::TransformSequence> m_stack;
+		enum BlockType
+		{
+			NoBlock,
+			SetTransformBlock,
+			ConcatTransformBlock,
+			PrimitiveBlock
+		};
 
-		void makeTransform( const Imath::M44f &m, foundation::Transformd &xform ) const;
+		BlockType m_blockType;
+		const std::set<float> *m_times;
 
-		void makeTransformSequence( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq ) const;
+		// transform
+		TransformStack &m_transformStack;
+		std::vector<Imath::M44f> m_transforms;
 
+		// primitives
+		PrimitiveConverter &m_primitiveConverter;
+		std::vector<IECore::PrimitivePtr> m_primitives;
+		std::string m_materialName;
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_TRANSFORMSTACK_H
+#endif // IECOREAPPLESEED_MOTIONBLOCKHANDLER_H
