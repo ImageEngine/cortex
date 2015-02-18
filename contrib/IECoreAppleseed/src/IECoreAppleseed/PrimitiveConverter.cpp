@@ -61,6 +61,17 @@ IECoreAppleseed::PrimitiveConverter::~PrimitiveConverter()
 
 void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDataPtr value )
 {
+	if( name == "as:automatic_instancing" )
+	{
+		if( ConstBoolDataPtr f = runTimeCast<const BoolData>( value ) )
+		{
+			m_autoInstancing = f->readable();
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:automatic_instancing option expects a BoolData value." );
+		}
+	}
 }
 
 const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( PrimitivePtr primitive, const AttributeState &attrState, const string &materialName, asr::Assembly &parentAssembly )
