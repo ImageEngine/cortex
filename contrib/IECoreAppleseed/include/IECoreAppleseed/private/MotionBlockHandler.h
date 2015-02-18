@@ -93,6 +93,7 @@ class MotionBlockHandler : boost::noncopyable
 		// primitives
 		PrimitiveConverter &m_primitiveConverter;
 		std::vector<IECore::PrimitivePtr> m_primitives;
+		IECore::TypeId m_primitiveType;
 		std::string m_materialName;
 };
 

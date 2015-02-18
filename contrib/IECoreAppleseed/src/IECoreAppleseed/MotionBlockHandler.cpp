@@ -162,6 +162,7 @@ void IECoreAppleseed::MotionBlockHandler::primitive( PrimitivePtr primitive, con
 		assert( m_primitives.empty() );
 
 		m_blockType = PrimitiveBlock;
+		m_primitiveType = primitive->typeId();
 		m_materialName = materialName;
 	}
 	else
@@ -169,6 +170,11 @@ void IECoreAppleseed::MotionBlockHandler::primitive( PrimitivePtr primitive, con
 		if( m_blockType != PrimitiveBlock )
 		{
 			msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::primitive", "Bad call in motion block." );
+		}
+
+		if( m_primitiveType != primitive->typeId() )
+		{
+			msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::primitive", "Cannot mix primitive types in motion block." );
 		}
 	}
 
