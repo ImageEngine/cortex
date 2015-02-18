@@ -60,19 +60,24 @@ void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, IE
 {
 	if( name == "as:mesh_file_format" )
 	{
-		const string &str = static_cast<const StringData *>( value.get() )->readable();
-
-		if( str == "binarymesh" )
+		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
 		{
-			m_meshGeomExtension = ".binarymesh";
-		}
-		else if( str == "obj" )
-		{
-			m_meshGeomExtension = ".obj";
+			if( f->readable() == "binarymesh" )
+			{
+				m_meshGeomExtension = ".binarymesh";
+			}
+			else if( f->readable() == "obj" )
+			{
+				m_meshGeomExtension = ".obj";
+			}
+			else
+			{
+				msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setOption", format( "as:mesh_file_format, unknown mesh file format \"%s\"." ) % f->readable() );
+			}
 		}
 		else
 		{
-			msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setOption", format( "Unknown mesh file format \"%s\"." ) % str );
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:mesh_file_format option expects a StringData value." );
 		}
 	}
 	else
