@@ -35,6 +35,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include "renderer/api/color.h"
+#include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -194,4 +195,13 @@ string IECoreAppleseed::createAlphaMapTextureEntity( asr::TextureContainer &text
 	asr::ParamArray params;
 	params.insert( "alpha_mode", "detect" );
 	return doCreateTextureEntity( textureContainer, textureInstanceContainer, searchPaths, textureName, fileName, params );
+}
+
+asf::auto_release_ptr<asr::Assembly> IECoreAppleseed::createAssembly( const string &name )
+{
+#if APPLESEED_VERSION > 10101
+	return asr::AssemblyFactory().create( name.c_str(), asr::ParamArray() );
+#else
+	return asr::AssemblyFactory::create( name.c_str(), asr::ParamArray() );
+#endif
 }
