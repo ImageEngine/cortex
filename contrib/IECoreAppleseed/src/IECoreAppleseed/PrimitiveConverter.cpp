@@ -32,12 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "renderer/api/version.h"
 #include "renderer/api/entity.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "IECoreAppleseed/private/AppleseedUtil.h"
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
 
 #include "IECoreAppleseed/ToAppleseedConverter.h"
@@ -101,8 +101,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 		obj->get_parameters().insert( "alpha_map", alphaMapTextureInstanceName.c_str() );
 	}
 
-	string assemblyName = attrState.name();
-	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory::create( assemblyName.c_str(), asr::ParamArray() );
+	asf::auto_release_ptr<asr::Assembly> ass = createAssembly( attrState.name() );
 	const asr::Object *objPtr = obj.get();
 	ass->objects().insert( obj );
 	createObjectInstance( *ass, objPtr, objName, materialName );

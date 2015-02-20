@@ -82,6 +82,7 @@ std::string insertEntityWithUniqueName( Container &container, foundation::auto_r
 	}
 }
 
+foundation::auto_release_ptr<renderer::Assembly> createAssembly( const std::string &name );
 std::string createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 std::string createTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
 std::string createAlphaMapTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
