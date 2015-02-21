@@ -121,13 +121,6 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	m_project = asr::ProjectFactory::create( "project" );
 	m_project->add_default_configurations();
 
-	// create some needed parameters that don't get created by default.
-	// possible bug in appleseed?
-	{
-		asr::Configuration *cfg = m_project->configurations().get_by_name( "final" );
-		cfg->get_parameters().insert_path( "sppm.initial_radius", "1.0" );
-	}
-
 	// create some basic project entities.
 	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray() ) );
 	m_project->set_frame( frame );

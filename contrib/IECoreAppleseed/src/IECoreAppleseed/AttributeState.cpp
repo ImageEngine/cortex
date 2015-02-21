@@ -97,20 +97,6 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
 		}
 	}
-	else if( name == "gaffer:deformationBlurSegments" )
-	{
-		if( const IntData *f = runTimeCast<const IntData>( value.get() ) )
-		{
-			// round samples to the next power of 2 as
-			// appleseed only supports power of 2 number of deformation segments.
-			int samples = asf::next_pow2( f->readable() );
-			m_attributes->writable()[name] = new IntData( samples );
-		}
-		else
-		{
-			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
-		}
-	}
 	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
 	{
 		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
