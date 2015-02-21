@@ -101,7 +101,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	}
 	else if( name == "as:photon_target" )
 	{
-		if( const BoolData *f = runTimeCast<const BoolData>( value ) )
+		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
 		{
 			m_photonTarget = f->readable();
 		}
@@ -149,6 +149,12 @@ bool IECoreAppleseed::AttributeState::photonTarget() const
 	return m_photonTarget;
 }
 
+void IECoreAppleseed::AttributeState::attributesHash( IECore::MurmurHash &hash ) const
+{
+	hash.append( m_alphaMap );
+	hash.append( m_photonTarget );
+}
+
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
 {
 	m_shadingState.addOSLShader( shader );
@@ -164,14 +170,14 @@ bool IECoreAppleseed::AttributeState::shadingStateValid() const
 	return m_shadingState.valid();
 }
 
-const MurmurHash &IECoreAppleseed::AttributeState::shaderGroupHash() const
+void IECoreAppleseed::AttributeState::shaderGroupHash( IECore::MurmurHash &hash ) const
 {
-	return m_shadingState.shaderGroupHash();
+	m_shadingState.shaderGroupHash( hash );
 }
 
-const MurmurHash &IECoreAppleseed::AttributeState::materialHash() const
+void IECoreAppleseed::AttributeState::materialHash( IECore::MurmurHash &hash ) const
 {
-	return m_shadingState.materialHash();
+	m_shadingState.materialHash( hash );
 }
 
 string IECoreAppleseed::AttributeState::createShaderGroup( asr::Assembly &assembly )

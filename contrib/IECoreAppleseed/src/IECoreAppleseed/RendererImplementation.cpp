@@ -712,7 +712,8 @@ string IECoreAppleseed::RendererImplementation::currentShaderGroupName()
 
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash shaderGroupHash = m_attributeStack.top().shaderGroupHash();
+		MurmurHash shaderGroupHash;
+		m_attributeStack.top().shaderGroupHash( shaderGroupHash );
 
 		ShaderGroupMap::const_iterator it( m_shaderGroupNames.find( shaderGroupHash ) );
 
@@ -736,7 +737,8 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash materialHash = m_attributeStack.top().materialHash();
+		MurmurHash materialHash;
+		m_attributeStack.top().materialHash( materialHash );
 
 		MaterialMap::const_iterator it( m_materialNames.find( materialHash ) );
 

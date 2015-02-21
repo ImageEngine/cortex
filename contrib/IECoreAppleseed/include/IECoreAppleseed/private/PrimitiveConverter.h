@@ -76,7 +76,7 @@ class PrimitiveConverter : boost::noncopyable
 		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj,
 			const std::string &objSourceName, const AttributeState &attrState, const std::string &materialName );
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &primitiveHash ) = 0;
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const std::string &name ) = 0;
 
 		typedef std::map<IECore::MurmurHash, const renderer::Assembly*> InstanceMapType;
 

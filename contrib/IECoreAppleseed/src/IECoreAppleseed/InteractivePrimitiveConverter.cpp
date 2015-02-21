@@ -49,7 +49,7 @@ IECoreAppleseed::InteractivePrimitiveConverter::InteractivePrimitiveConverter( c
 {
 }
 
-asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const MurmurHash &primitiveHash )
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive,  const string &name )
 {
 	asf::auto_release_ptr<asr::Object> obj;
 
@@ -60,8 +60,7 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 
 	if( obj.get() )
 	{
-		string objectName = primitiveHash.toString();
-		obj->set_name( objectName.c_str() );
+		obj->set_name( name.c_str() );
 	}
 	else
 	{

@@ -63,13 +63,15 @@ class AttributeState
 
 		bool photonTarget() const;
 
+		void attributesHash( IECore::MurmurHash &hash ) const;
+
 		void addOSLShader( IECore::ConstShaderPtr shader );
 		void setOSLSurface( IECore::ConstShaderPtr surface );
 
 		bool shadingStateValid() const;
 
-		const IECore::MurmurHash &shaderGroupHash() const;
-		const IECore::MurmurHash &materialHash() const;
+		void shaderGroupHash( IECore::MurmurHash &hash ) const;
+		void materialHash( IECore::MurmurHash &hash ) const;
 
 		std::string createShaderGroup( renderer::Assembly &assembly );
 		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );

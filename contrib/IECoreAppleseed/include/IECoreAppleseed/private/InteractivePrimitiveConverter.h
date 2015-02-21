@@ -49,7 +49,9 @@ class InteractivePrimitiveConverter : public PrimitiveConverter
 
 	private :
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &primitiveHash );
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+			const std::string &name );
+
 };
 
 } // namespace IECoreAppleseed

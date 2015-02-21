@@ -56,9 +56,8 @@ class BatchPrimitiveConverter : public PrimitiveConverter
 		boost::filesystem::path m_projectPath;
 		std::string m_meshGeomExtension;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &primitiveHash );
-
-		foundation::auto_release_ptr<renderer::Object> convertAndWriteMeshPrimitive( IECore::PrimitivePtr primitive, const IECore::MurmurHash &meshHash );
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+			const std::string &name );
 
 };
 

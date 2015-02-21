@@ -63,7 +63,6 @@ IECoreAppleseed::ShadingState::ShadingState()
 void IECoreAppleseed::ShadingState::setShadingSamples(int samples)
 {
 	m_shadingSamples = samples;
-	updateHashes();
 }
 
 void IECoreAppleseed::ShadingState::addOSLShader( ConstShaderPtr shader )
@@ -75,7 +74,6 @@ void IECoreAppleseed::ShadingState::addOSLShader( ConstShaderPtr shader )
 	}
 
 	m_shaders.push_back( shader );
-	updateHashes();
 }
 
 void IECoreAppleseed::ShadingState::setOSLSurface( ConstShaderPtr surface )
@@ -87,12 +85,19 @@ void IECoreAppleseed::ShadingState::setOSLSurface( ConstShaderPtr surface )
 	}
 
 	m_surfaceShader = surface;
-	updateHashes();
 }
 
-const MurmurHash &IECoreAppleseed::ShadingState::shaderGroupHash() const
+void IECoreAppleseed::ShadingState::shaderGroupHash( IECore::MurmurHash &hash ) const
 {
-	return m_shaderGroupHash;
+	for( int i = 0, e = m_shaders.size(); i < e; ++i)
+	{
+		m_shaders[i]->hash( hash );
+	}
+
+	if( m_surfaceShader )
+	{
+		m_surfaceShader->hash( hash );
+	}
 }
 
 string IECoreAppleseed::ShadingState::createShaderGroup( asr::Assembly& assembly )
@@ -125,9 +130,10 @@ string IECoreAppleseed::ShadingState::createShaderGroup( asr::Assembly& assembly
 }
 
 
-const MurmurHash&IECoreAppleseed::ShadingState::materialHash() const
+void IECoreAppleseed::ShadingState::materialHash( IECore::MurmurHash &hash ) const
 {
-	return m_materialHash;
+	shaderGroupHash( hash );
+	hash.append( m_shadingSamples );
 }
 
 string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, const std::string &shaderGroupName )
@@ -146,24 +152,6 @@ string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, c
 
 	string materialName = insertEntityWithUniqueName( assembly.materials(), mat, m_surfaceShader->getName() + "_material" );
 	return materialName;
-}
-
-void IECoreAppleseed::ShadingState::updateHashes()
-{
-	m_shaderGroupHash = MurmurHash();
-
-	for( int i = 0, e = m_shaders.size(); i < e; ++i)
-	{
-		m_shaders[i]->hash( m_shaderGroupHash );
-	}
-
-	if( m_surfaceShader )
-	{
-		m_surfaceShader->hash( m_shaderGroupHash );
-	}
-
-	m_materialHash = m_shaderGroupHash;
-	m_materialHash.append( m_shadingSamples );
 }
 
 asr::ParamArray IECoreAppleseed::ShadingState::convertParameters( const CompoundDataMap &parameters )
