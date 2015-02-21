@@ -116,7 +116,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory().create( assemblyName.c_str(), asr::ParamArray() );
 	const asr::Object *objPtr = obj.get();
 	ass->objects().insert( obj );
-	createObjectInstance( *ass, objPtr, objName, materialName );
+	createObjectInstance( *ass, objPtr, objName, attrState, materialName );
 	const asr::Assembly *p = ass.get();
 	parentAssembly.assemblies().insert( ass );
 
@@ -136,7 +136,8 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( cons
 	return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
 }
 
-void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj, const string &objSourceName, const string &materialName )
+void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj,
+	const string &objSourceName, const AttributeState &attrState, const string &materialName )
 {
 	assert( obj );
 
@@ -150,6 +151,13 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 		materials.insert( "default", materialName.c_str() );
 	}
 
-	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(), asr::ParamArray(), sourceName.c_str(), asf::Transformd::make_identity(), materials, materials );
+	asr::ParamArray params;
+
+	if( attrState.photonTarget() )
+	{
+		params.insert( "photon_target", "true" );
+	}
+
+	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(), params, sourceName.c_str(), asf::Transformd::make_identity(), materials, materials );
 	assembly.object_instances().insert( objInstance );
 }

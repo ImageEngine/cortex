@@ -61,6 +61,8 @@ class AttributeState
 
 		const std::string &alphaMap() const;
 
+		bool photonTarget() const;
+
 		void addOSLShader( IECore::ConstShaderPtr shader );
 		void setOSLSurface( IECore::ConstShaderPtr surface );
 
@@ -78,6 +80,7 @@ class AttributeState
 		ShadingState m_shadingState;
 		std::string m_name;
 		std::string m_alphaMap;
+		bool m_photonTarget;
 		foundation::Dictionary m_visibilityDictionary;
 
 };

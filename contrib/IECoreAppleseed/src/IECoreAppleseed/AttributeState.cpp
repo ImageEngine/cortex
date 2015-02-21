@@ -50,14 +50,16 @@ namespace asr = renderer;
 IECoreAppleseed::AttributeState::AttributeState()
 {
 	m_attributes = new CompoundData;
+	m_photonTarget = false;
 }
 
 IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 {
 	m_attributes = other.m_attributes->copy();
 	m_shadingState = other.m_shadingState;
-	m_visibilityDictionary = other.m_visibilityDictionary;
 	m_alphaMap = other.m_alphaMap;
+	m_photonTarget = other.m_photonTarget;
+	m_visibilityDictionary = other.m_visibilityDictionary;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
@@ -97,6 +99,17 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
 		}
 	}
+	else if( name == "as:photon_target" )
+	{
+		if( const BoolData *f = runTimeCast<const BoolData>( value ) )
+		{
+			m_photonTarget = f->readable();
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "photon_target attribute expect a BoolData value." );
+		}
+	}
 	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
 	{
 		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
@@ -129,6 +142,11 @@ const asf::Dictionary &IECoreAppleseed::AttributeState::visibilityDictionary() c
 const std::string &IECoreAppleseed::AttributeState::alphaMap() const
 {
 	return m_alphaMap;
+}
+
+bool IECoreAppleseed::AttributeState::photonTarget() const
+{
+	return m_photonTarget;
 }
 
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
