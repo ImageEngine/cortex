@@ -83,6 +83,25 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		self.failUnless( self.__countAssemblies( r ) == 3 )
 		self.failUnless( self.__countAssemblyInstances( r ) == 3 )
 
+	def testNoAutoInstancing( self ) :
+
+		r = IECoreAppleseed.Renderer()
+		r.setOption( "as:automatic_instancing", False )
+		r.worldBegin()
+
+		self.__createDefaultShader( r )
+
+		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m2 = m1.copy()
+		m3 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+
+		m1.render( r )
+		m2.render( r )
+		m3.render( r )
+		m2.render( r )
+
+		self.failUnless( self.__countAssemblies( r ) == 4 )
+		self.failUnless( self.__countAssemblyInstances( r ) == 4 )
 
 	def __createDefaultShader( self, r ) :
 

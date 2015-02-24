@@ -175,10 +175,20 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 
 		if( optName == "searchpath" )
 		{
-			const string &str = static_cast<const StringData *>( value.get() )->readable();
-			m_project->search_paths().push_back( str.c_str() );
+			if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
+			{
+				m_project->search_paths().push_back( f->readable().c_str() );
+			}
+			else
+			{
+				msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:searchpath option expects a StringData value." );
+			}
 		}
 		else if( optName == "mesh_file_format" )
+		{
+			m_primitiveConverter->setOption( name, value );
+		}
+		else if( optName == "automatic_instancing" )
 		{
 			m_primitiveConverter->setOption( name, value );
 		}
