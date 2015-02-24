@@ -273,7 +273,7 @@ void IECoreAppleseed::RendererImplementation::worldBegin()
 	}
 
 	// create the main assembly
-	asf::auto_release_ptr<asr::Assembly> assembly = asr::AssemblyFactory::create( "assembly", asr::ParamArray() );
+	asf::auto_release_ptr<asr::Assembly> assembly = asr::AssemblyFactory().create( "assembly", asr::ParamArray() );
 	m_mainAssembly = assembly.get();
 	m_project->get_scene()->assemblies().insert( assembly );
 }

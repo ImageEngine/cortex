@@ -102,7 +102,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	}
 
 	string assemblyName = attrState.name();
-	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory::create( assemblyName.c_str(), asr::ParamArray() );
+	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory().create( assemblyName.c_str(), asr::ParamArray() );
 	const asr::Object *objPtr = obj.get();
 	ass->objects().insert( obj );
 	createObjectInstance( *ass, objPtr, objName, materialName );
