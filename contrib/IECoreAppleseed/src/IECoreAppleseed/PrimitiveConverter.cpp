@@ -63,7 +63,7 @@ void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDa
 {
 	if( name == "as:automatic_instancing" )
 	{
-		if( ConstBoolDataPtr f = runTimeCast<const BoolData>( value ) )
+		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
 		{
 			m_autoInstancing = f->readable();
 		}

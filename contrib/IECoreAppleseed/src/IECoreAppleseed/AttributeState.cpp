@@ -66,7 +66,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 
 	if( name == "name" )
 	{
-		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+		if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
 		{
 			m_name = f->readable();
 		}
@@ -77,7 +77,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	}
 	else if( name == "as:alpha_map" )
 	{
-		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+		if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
 		{
 			m_alphaMap = f->readable();
 		}
@@ -88,7 +88,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	}
 	else if( name == "as:shading_samples" )
 	{
-		if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
+		if( const IntData *f = runTimeCast<const IntData>( value.get() ) )
 		{
 			m_shadingState.setShadingSamples( f->readable() );
 		}
@@ -99,7 +99,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	}
 	else if( name == "gaffer:deformationBlurSegments" )
 	{
-		if( ConstIntDataPtr f = runTimeCast<const IntData>( value ) )
+		if( const IntData *f = runTimeCast<const IntData>( value.get() ) )
 		{
 			// round samples to the next power of 2 as
 			// appleseed only supports power of 2 number of deformation segments.
@@ -113,7 +113,7 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 	}
 	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
 	{
-		if( ConstBoolDataPtr f = runTimeCast<const BoolData>( value ) )
+		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
 		{
 			string flag_name( name, 14, string::npos );
 			m_visibilityDictionary.insert( flag_name.c_str(), f->readable() ? "true" : "false" );

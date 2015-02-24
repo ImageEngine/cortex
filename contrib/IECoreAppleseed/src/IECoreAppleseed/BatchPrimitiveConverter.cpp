@@ -60,7 +60,7 @@ void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, IE
 {
 	if( name == "as:mesh_file_format" )
 	{
-		if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+		if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
 		{
 			if( f->readable() == "binarymesh" )
 			{

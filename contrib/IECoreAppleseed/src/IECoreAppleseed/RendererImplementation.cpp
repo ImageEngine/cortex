@@ -173,7 +173,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 
 		if( optName == "searchpath" )
 		{
-			if( ConstStringDataPtr f = runTimeCast<const StringData>( value ) )
+			if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
 			{
 				m_project->search_paths().push_back( f->readable().c_str() );
 			}
