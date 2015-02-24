@@ -83,7 +83,7 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		self.failUnless( self.__countAssemblies( r ) == 3 )
 		self.failUnless( self.__countAssemblyInstances( r ) == 3 )
 
-	def __testNoAutoInstancing( self ) :
+	def testNoAutoInstancing( self ) :
 
 		r = IECoreAppleseed.Renderer()
 		r.setOption( "as:automatic_instancing", False )
