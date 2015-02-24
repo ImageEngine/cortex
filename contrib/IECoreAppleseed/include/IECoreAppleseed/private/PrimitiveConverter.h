@@ -36,6 +36,7 @@
 #define IECOREAPPLESEED_PRIMITIVECONVERTER_H
 
 #include <map>
+#include <set>
 
 #include "boost/noncopyable.hpp"
 
@@ -65,6 +66,10 @@ class PrimitiveConverter : boost::noncopyable
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 
 		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
+
+		const renderer::Assembly *convertPrimitive( const std::set<float> &times,
+			const std::vector<IECore::PrimitivePtr> &primitives, const AttributeState &attrState,
+			const std::string &materialName, renderer::Assembly &parentAssembly );
 
 	private :
 

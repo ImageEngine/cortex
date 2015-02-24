@@ -84,6 +84,7 @@ IECoreAppleseed::RendererImplementation::RendererImplementation()
 	m_interactive = true;
 	constructCommon();
 	m_primitiveConverter.reset( new InteractivePrimitiveConverter( m_project->search_paths() ) );
+	m_motionHandler.reset( new MotionBlockHandler( m_transformStack, *m_primitiveConverter ) );
 }
 
 IECoreAppleseed::RendererImplementation::RendererImplementation( const string &fileName )
@@ -107,6 +108,7 @@ IECoreAppleseed::RendererImplementation::RendererImplementation( const string &f
 	m_project->set_path( fileName.c_str() );
 	m_project->search_paths().set_root_path( m_projectPath.string().c_str() );
 	m_primitiveConverter.reset( new BatchPrimitiveConverter( m_projectPath, m_project->search_paths() ) );
+	m_motionHandler.reset( new MotionBlockHandler( m_transformStack, *m_primitiveConverter ) );
 }
 
 void IECoreAppleseed::RendererImplementation::constructCommon()
@@ -339,7 +341,14 @@ void IECoreAppleseed::RendererImplementation::transformEnd()
 
 void IECoreAppleseed::RendererImplementation::setTransform( const Imath::M44f &m )
 {
-	m_transformStack.setTransform( m );
+	if( m_motionHandler->insideMotionBlock() )
+	{
+		m_motionHandler->setTransform( m );
+	}
+	else
+	{
+		m_transformStack.setTransform( m );
+	}
 }
 
 void IECoreAppleseed::RendererImplementation::setTransform( const string &coordinateSystem )
@@ -361,7 +370,14 @@ Imath::M44f IECoreAppleseed::RendererImplementation::getTransform( const string 
 
 void IECoreAppleseed::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	m_transformStack.concatTransform( m );
+	if( m_motionHandler->insideMotionBlock() )
+	{
+		m_motionHandler->concatTransform( m );
+	}
+	else
+	{
+		m_transformStack.concatTransform( m );
+	}
 }
 
 void IECoreAppleseed::RendererImplementation::coordinateSystem( const string &name )
@@ -515,12 +531,24 @@ void IECoreAppleseed::RendererImplementation::illuminate( const string &lightHan
 
 void IECoreAppleseed::RendererImplementation::motionBegin( const std::set<float> &times )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionBegin", "Not implemented." );
+	if (m_motionHandler->insideMotionBlock() )
+	{
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionBegin", "No matching motionEnd() call." );
+		return;
+	}
+
+	m_motionHandler->motionBegin( times );
 }
 
 void IECoreAppleseed::RendererImplementation::motionEnd()
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Not implemented." );
+	if (!m_motionHandler->insideMotionBlock() )
+	{
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "No matching motionBegin() call." );
+		return;
+	}
+
+	m_motionHandler->motionEnd( m_attributeStack.top(), m_mainAssembly );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -570,9 +598,16 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 
 	string materialName = currentMaterialName();
 
-	if( const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly ) )
+	if( m_motionHandler->insideMotionBlock() )
 	{
-		createAssemblyInstance( assembly->get_name() );
+		m_motionHandler->primitive( mesh, materialName );
+	}
+	else
+	{
+		if( const asr::Assembly *assembly = m_primitiveConverter->convertPrimitive( mesh, m_attributeStack.top(), materialName, *m_mainAssembly ) )
+		{
+			createAssemblyInstance( assembly->get_name() );
+		}
 	}
 }
 

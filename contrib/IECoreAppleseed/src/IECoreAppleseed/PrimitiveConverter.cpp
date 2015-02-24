@@ -117,6 +117,14 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	return p;
 }
 
+const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( const set<float> &times,
+			const vector<IECore::PrimitivePtr> &primitives, const AttributeState &attrState,
+			const string &materialName, renderer::Assembly &parentAssembly )
+{
+	// For now, ignore motion blur and convert only the first primitive.
+	return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
+}
+
 void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj, const string &objSourceName, const string &materialName )
 {
 	assert( obj );
