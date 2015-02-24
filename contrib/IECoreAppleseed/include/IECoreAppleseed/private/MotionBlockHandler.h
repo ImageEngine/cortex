@@ -84,7 +84,7 @@ class MotionBlockHandler : boost::noncopyable
 		};
 
 		BlockType m_blockType;
-		const std::set<float> *m_times;
+		std::set<float> m_times;
 
 		// transform
 		TransformStack &m_transformStack;

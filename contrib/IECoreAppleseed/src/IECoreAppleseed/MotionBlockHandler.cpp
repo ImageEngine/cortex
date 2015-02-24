@@ -49,18 +49,17 @@ IECoreAppleseed::MotionBlockHandler::MotionBlockHandler( TransformStack &transfo
 	PrimitiveConverter &primitiveConverter )
 	: m_transformStack( transformStack ), m_primitiveConverter( primitiveConverter )
 {
-	m_times = 0;
 	m_blockType = NoBlock;
 }
 
 bool IECoreAppleseed::MotionBlockHandler::insideMotionBlock() const
 {
-	return m_times != 0;
+	return !m_times.empty();
 }
 
 void IECoreAppleseed::MotionBlockHandler::motionBegin( const set<float> &times )
 {
-	m_times = &times;
+	m_times = times;
 	m_transforms.clear();
 	m_primitives.clear();
 }
@@ -68,12 +67,12 @@ void IECoreAppleseed::MotionBlockHandler::motionBegin( const set<float> &times )
 void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrState,
 	renderer::Assembly *mainAssembly )
 {
-	assert( m_times );
+	assert( !m_times.empty() );
 
 	size_t numCalls = ( m_blockType == PrimitiveBlock ) ?
 		m_primitives.size() : m_transforms.size();
 
-	if( numCalls != m_times->size() )
+	if( numCalls != m_times.size() )
 	{
 		msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::motionEnd", "Wrong number of calls in motion block." );
 	}
@@ -81,11 +80,11 @@ void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrS
 	switch( m_blockType )
 	{
 		case SetTransformBlock:
-			m_transformStack.setTransform( *m_times, m_transforms );
+			m_transformStack.setTransform( m_times, m_transforms );
 		break;
 
 		case ConcatTransformBlock:
-			m_transformStack.concatTransform( *m_times, m_transforms );
+			m_transformStack.concatTransform( m_times, m_transforms );
 		break;
 
 		case PrimitiveBlock:
@@ -93,7 +92,7 @@ void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrS
 
 			msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Deformation motion blur is not supported yet." );
 
-			if( const asr::Assembly *assembly = m_primitiveConverter.convertPrimitive( *m_times, m_primitives, attrState, m_materialName, *mainAssembly ) )
+			if( const asr::Assembly *assembly = m_primitiveConverter.convertPrimitive( m_times, m_primitives, attrState, m_materialName, *mainAssembly ) )
 			{
 				string assemblyName = assembly->get_name();
 				string assemblyInstanceName = attrState.name() + "_instance";
@@ -113,7 +112,7 @@ void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrS
 		break;
 	}
 
-	m_times = 0;
+	m_times.clear();
 	m_blockType = NoBlock;
 }
 
