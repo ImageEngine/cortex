@@ -201,6 +201,20 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		
 		self.assertEqual( contextDict["a"], 2 )
 		
+	def testFile( self ) :
+
+		contextDict = {}
+		path = os.path.dirname( __file__ ) + "/config/getFile"
+		IECore.loadConfig(
+		
+			IECore.SearchPath( path, ":" ),
+			contextDict,
+			
+		)
+		
+		expectedFile = os.path.abspath( os.path.join( path, "config.py" ) )
+		self.assertEqual( contextDict["myFile"], expectedFile )
+		
 if __name__ == "__main__":
 	unittest.main()
 
