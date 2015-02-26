@@ -257,7 +257,13 @@ bool LiveScene::hasAttribute( const Name &name ) const
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
 		NameList names;
-		it->m_names( m_dagPath, names );
+		{
+			// call it->m_names under a mutex, as it could be reading plug values,
+			// which isn't thread safe:
+			tbb::mutex::scoped_lock l( s_mutex );
+			it->m_names( m_dagPath, names );
+		}
+		
 		if ( std::find(names.begin(), names.end(), name) != names.end() )
 		{
 			return true;
