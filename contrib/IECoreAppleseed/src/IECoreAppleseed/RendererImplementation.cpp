@@ -759,7 +759,7 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 
 void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const string &assemblyName )
 {
-	string assemblyInstanceName = m_attributeStack.top().name() + "_instance";
+	string assemblyInstanceName = m_attributeStack.top().name() + "_assembly_instance";
 
 	asr::ParamArray params;
 	params.insert( "visibility", m_attributeStack.top().visibilityDictionary() );
