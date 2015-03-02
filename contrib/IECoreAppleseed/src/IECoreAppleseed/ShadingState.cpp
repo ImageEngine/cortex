@@ -253,15 +253,17 @@ void IECoreAppleseed::ShadingState::addConnections( const std::string &shaderHan
 		const std::string &value = static_cast<const StringData *>( it->second.get() )->readable();
 		if( boost::starts_with( value, "link:" ) )
 		{
-			vector<string> splitValue;
-			boost::algorithm::split( splitValue, value, is_any_of( "." ), token_compress_on );
-			if( splitValue.size() != 2 )
+			size_t dot_pos = value.find_first_of( '.' );
+
+			if( dot_pos == string::npos )
 			{
 				msg( Msg::Warning, "AppleseedRenderer", boost::format( "Parameter \"%s\" has unexpected value \"%s\" - expected value of the form \"link:sourceShader.sourceParameter" ) % it->first.string() % value );
 				continue;
 			}
 
-			shaderGroup->add_connection( splitValue[0].c_str() + 5, splitValue[1].c_str(), shaderHandle.c_str(), it->first.c_str() );
+			shaderGroup->add_connection( string( value, 5, dot_pos - 5 ).c_str(),
+				string( value, dot_pos + 1).c_str(), shaderHandle.c_str(),
+				it->first.c_str() );
 		}
 	}
 }
