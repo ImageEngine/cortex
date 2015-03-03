@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,68 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_TRANSFORMSTACK_H
-#define IECORERI_TRANSFORMSTACK_H
+#ifndef IECORE_CLIPPINGPLANE_H
+#define IECORE_CLIPPINGPLANE_H
 
-#include <vector>
-#include <stack>
+#include "IECore/Export.h"
+#include "IECore/PreWorldRenderable.h"
 
-#include "OpenEXR/ImathMatrix.h"
-
-#include "IECoreRI/Export.h"
-
-namespace IECoreRI
-{
-		
-class IECORERI_API TransformStack
+namespace IECore
 {
 
-	public :
-			
-		TransformStack();
-	
-		void push();
-		void pop();
-		size_t size() const;
-	
-		void motionBegin( const std::vector<float> &times );
-		void motionEnd();
-	
-		void set( const Imath::M44f &matrix );
-		void concatenate( const Imath::M44f &matrix );
+class IECORE_API ClippingPlane : public PreWorldRenderable
+{
+	public:
 
-		Imath::M44f get() const;
-		Imath::M44f get( float time ) const;
-		
-		size_t numSamples() const;
-		Imath::M44f sample( size_t sampleIndex ) const;
-		float sampleTime( size_t sampleIndex ) const;
-		
-	private :
-	
-		struct Sample
-		{
-			Sample( float t, const Imath::M44f &m )
-				:	time( t ), matrix( m )
-			{
-			}
-			
-			bool operator < ( float t ) const
-			{
-				return time < t;
-			}
-			
-			float time;
-			Imath::M44f matrix;
-		};
-		typedef std::vector<Sample> Samples;
+		ClippingPlane();
+		virtual ~ClippingPlane();
 
-		typedef std::stack<Samples> Stack;
-		Stack m_stack;
-		int m_motionIndex;
+		IE_CORE_DECLAREOBJECT( ClippingPlane, PreWorldRenderable );
+
+		virtual void render( Renderer *renderer ) const;
 
 };
 
-} // namespace IECoreRI
+IE_CORE_DECLAREPTR( ClippingPlane );
 
-#endif // IECORERI_TRANSFORMSTACK_H
+} // namespace IECore
+
+#endif // IECORE_CLIPPINGPLANE_H

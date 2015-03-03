@@ -166,12 +166,12 @@ size_t TransformStack::numSamples() const
 	return m_stack.top().size();
 }
 
-Imath::M44f TransformStack::sample( size_t sampleIndex )
+Imath::M44f TransformStack::sample( size_t sampleIndex ) const
 {
 	return m_stack.top()[sampleIndex].matrix;
 }
 
-float TransformStack::sampleTime( size_t sampleIndex )
+float TransformStack::sampleTime( size_t sampleIndex ) const
 {
 	return m_stack.top()[sampleIndex].time;
 }

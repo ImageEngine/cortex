@@ -221,6 +221,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::getTextureCoordinatesAttribute;
 	m_getAttributeHandlers["ri:automaticInstancing"] = &IECoreRI::RendererImplementation::getAutomaticInstancingAttribute;
 
+	m_commandHandlers["clippingPlane"] = &IECoreRI::RendererImplementation::clippingPlaneCommand;
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
@@ -457,31 +458,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
 	// then transform
-	const size_t numSamples = m_preWorldTransform.numSamples();
-	if( numSamples > 1 )
-	{
-		vector<float> sampleTimes;
-		for( size_t i = 0; i < numSamples; ++i )
-		{
-			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
-		}
-		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
-	}
-	
-	for( size_t i = 0; i < numSamples; ++i )
-	{
-		M44f m = m_preWorldTransform.sample( i );
-		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-		m.invert();
-		RtMatrix mm;
-		convert( m, mm );
-		RiTransform( mm );
-	}
-	
-	if( numSamples > 1 )
-	{
-		RiMotionEnd();
-	}
+	outputPreWorldTransform( /* forCamera = */ true );
 	
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
@@ -1265,6 +1242,45 @@ bool IECoreRI::RendererImplementation::automaticInstancingEnabled() const
 	int resultCount;
 	RxAttribute( "user:cortexAutomaticInstancing", &result, sizeof( RtInt ), &resultType, &resultCount );
 	return result;
+}
+
+void IECoreRI::RendererImplementation::outputPreWorldTransform( bool forCamera ) const
+{
+	const size_t numSamples = m_preWorldTransform.numSamples();
+	if( numSamples > 1 )
+	{
+		vector<float> sampleTimes;
+		for( size_t i = 0; i < numSamples; ++i )
+		{
+			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
+		}
+		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
+	}
+	
+	for( size_t i = 0; i < numSamples; ++i )
+	{
+		M44f m = m_preWorldTransform.sample( i );	
+		if( forCamera )
+		{
+			m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+			m.invert();
+		}
+		RtMatrix mm;
+		convert( m, mm );
+		if( forCamera )
+		{
+			RiTransform( mm );
+		}
+		else
+		{
+			RiConcatTransform( mm );
+		}
+	}
+	
+	if( numSamples > 1 )
+	{
+		RiMotionEnd();
+	}
 }
 
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
@@ -2131,6 +2147,18 @@ IECore::DataPtr IECoreRI::RendererImplementation::command( const std::string &na
 		return 0;
 	}
 	return (this->*(it->second))( name, parameters );
+}
+
+IECore::DataPtr IECoreRI::RendererImplementation::clippingPlaneCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ScopedContext scopedContext( m_context );
+	RiTransformBegin();
+	
+		outputPreWorldTransform( /* forCamera = */ false );
+		RiClippingPlane( 0, 0, 0, 0, 0, 1 );
+	
+	RiTransformEnd();
+	return NULL;	
 }
 
 IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )

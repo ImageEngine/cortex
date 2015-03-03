@@ -199,6 +199,8 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		bool m_inWorld;
 		bool m_inEdit;
 
+		void outputPreWorldTransform( bool forCamera ) const;
+
 		struct AttributeState
 		{
 			AttributeState();
@@ -268,8 +270,8 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		typedef std::map<std::string, CommandHandler> CommandHandlerMap;
 		CommandHandlerMap m_commandHandlers;
 
+		IECore::DataPtr clippingPlaneCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 

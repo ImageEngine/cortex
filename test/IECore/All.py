@@ -252,6 +252,7 @@ from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from ExternalProceduralTest import ExternalProceduralTest
+from ClippingPlaneTest import ClippingPlaneTest
 
 if IECore.withDeepEXR() :
 	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
