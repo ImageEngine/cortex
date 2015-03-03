@@ -59,6 +59,7 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory 
 				fullFileName = os.path.abspath( os.path.join( dirPath, fileName ) )
 
 				contextDict["__file__"] = fullFileName
+				IECore.msg( IECore.Msg.Level.Debug, "IECore.loadConfig", "Loading file \"%s\"" % fullFileName )
 
 				if raiseExceptions:
 					execfile( fullFileName, contextDict, contextDict )
