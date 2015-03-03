@@ -65,6 +65,22 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+
+		self.__createDefaultShader( r )
+		m.render( r )
+
+		self.__createGlossyShader( r )
+		m.render( r )
+
+		self.failUnless( self.__countAssemblies( r ) == 2 )
+		self.failUnless( self.__countAssemblyInstances( r ) == 2 )
+
+	def testAttributesNoInstancing( self ) :
+
+		r = IECoreAppleseed.Renderer()
+		r.worldBegin()
+
 		self.__createDefaultShader( r )
 
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
@@ -80,8 +96,13 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		m.render( r )
 		r.attributeEnd()
 
-		self.failUnless( self.__countAssemblies( r ) == 3 )
-		self.failUnless( self.__countAssemblyInstances( r ) == 3 )
+		r.attributeBegin()
+		r.setAttribute( "as:photon_target", IECore.BoolData( True ) )
+		m.render( r )
+		r.attributeEnd()
+
+		self.failUnless( self.__countAssemblies( r ) == 4 )
+		self.failUnless( self.__countAssemblyInstances( r ) == 4 )
 
 	def testNoAutoInstancing( self ) :
 
@@ -106,6 +127,11 @@ class PrimitiveConverterTest( unittest.TestCase ):
 	def __createDefaultShader( self, r ) :
 
 		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
+		s.render( r )
+
+	def __createGlossyShader( self, r ) :
+
+		s = IECore.Shader( "data/shaders/glossy.oso", "surface" )
 		s.render( r )
 
 	def __getMainAssembly( self, r ) :

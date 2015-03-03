@@ -1,0 +1,27 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.6.2dev
+surface glossy
+param	float	Ks	0.80000001		%read{2,2} %write{2147483647,-1}
+param	color	Cs	1 1 1		%read{2,2} %write{2147483647,-1}
+global	normal	N	%read{1,1} %write{2147483647,-1}
+global	closure color	Ci	%read{2147483647,-1} %write{3,3}
+temp	closure color	$tmp1	%read{3,3} %write{1,1}
+const	string	$const1	"ggx"		%read{1,1} %write{2147483647,-1}
+const	float	$const2	0.050000001		%read{1,1} %write{2147483647,-1}
+const	float	$const3	1.5		%read{1,1} %write{2147483647,-1}
+const	int	$const4	0		%read{1,1} %write{2147483647,-1}
+const	string	$const5	"microfacet"		%read{0,1} %write{2147483647,-1}
+const	vector	$const6	0 0 0		%read{1,1} %write{2147483647,-1}
+temp	color	$tmp3	%read{3,3} %write{2,2}
+code ___main___
+# glossy.osl:4
+#     Ci = Ks * Cs * microfacet("ggx", N, 0.05, 1.5, 0);
+	functioncall	$const5 2 	%filename{"glossy.osl"} %line{4} %argrw{"r"}
+# /home/est/Devel/appleseedhq/appleseed/sandbox/shaders/stdosl.h:529
+#                          float yalpha, float eta, int refract) BUILTIN;
+	closure		$tmp1 $const5 $const1 N $const6 $const2 $const2 $const3 $const4 	%filename{"/home/est/Devel/appleseedhq/appleseed/sandbox/shaders/stdosl.h"} %line{529} %argrw{"wrrrrrrrr"}
+# glossy.osl:4
+#     Ci = Ks * Cs * microfacet("ggx", N, 0.05, 1.5, 0);
+	mul		$tmp3 Ks Cs 	%filename{"glossy.osl"} %line{4} %argrw{"wrr"}
+	mul		Ci $tmp1 $tmp3 	%argrw{"wrr"}
+	end

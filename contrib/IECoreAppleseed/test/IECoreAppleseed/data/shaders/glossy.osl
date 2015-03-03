@@ -1,0 +1,5 @@
+
+surface glossy(float Ks = 0.8, color Cs = 1)
+{
+    Ci = Ks * Cs * microfacet("ggx", N, 0.05, 1.5, 0);
+}
