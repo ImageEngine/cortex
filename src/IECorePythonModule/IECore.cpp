@@ -299,6 +299,7 @@
 #include "IECorePython/EXRDeepImageReaderBinding.h"
 #include "IECorePython/EXRDeepImageWriterBinding.h"
 #include "IECorePython/ExternalProceduralBinding.h"
+#include "IECorePython/ClippingPlaneBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -592,6 +593,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLensDistortOp();
 	bindObjectPool();
 	bindExternalProcedural();
+	bindClippingPlane();
 
 #ifdef IECORE_WITH_DEEPEXR
 

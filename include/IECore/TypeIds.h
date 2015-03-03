@@ -231,7 +231,7 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
-	PointMeshOpTypeId = 186, // obsolete - available for reuse
+	ClippingPlaneTypeId = 186,
 	ParticleMeshOpTypeId = 187, // obsolete - available for reuse
 	HalfDataTypeId = 188,
 	MeshPrimitiveOpTypeId = 189,
