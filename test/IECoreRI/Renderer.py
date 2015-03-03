@@ -677,6 +677,25 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertTrue( "Procedural \"DelayedReadArchive\" [ \"testArchive.rib\" ]" in rib )
 		self.assertTrue( "[ 1 4 2 5 3 6 ]" in rib )
 
+	def testClippingPlane( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+		
+		with TransformBlock( r ) :
+
+			r.concatTransform( M44f.createTranslated( V3f( 1, 2, 3 ) ) )
+			r.command( "clippingPlane", {} )
+
+		with WorldBlock( r ) :
+
+			pass
+
+		del r
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		self.assertTrue( "ClippingPlane" in rib )
+		self.assertTrue( "1 2 3 1" in rib )
+
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )

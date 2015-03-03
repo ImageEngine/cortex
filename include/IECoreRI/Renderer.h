@@ -276,6 +276,10 @@ class IECORERI_API Renderer : public IECore::Renderer
 		///
 		/// Supports the following commands :
 		///
+		/// "clippingPlane"
+		/// Makes an RiClippingPlane. This implementation is currently limited to making
+		/// clipping planes only after all cameras have been specified.
+		///
 		///	"ri:readArchive"
 		/// Expects a single StringData parameter called "name", and calls RiReadArchive with it.
 		/// \todo Make a VisibleRenderable subclass to encapsulate a call to this.

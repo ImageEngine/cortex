@@ -407,6 +407,12 @@ class IECORE_API Renderer : public RunTimeTyped
 		/// Generic call for executing arbitrary renderer commands. This is intended to allow
 		/// derived classes to support calls such as RiMakeTexture via calls of the form
 		/// renderer->command( "ri:makeTexture", ... ).
+		///
+		/// Renderers supporting arbitrary clipping planes should implement a "clippingPlane"
+		/// command which must be issued before worldBegin(), and which makes a clipping plane
+		/// using the current transformation.
+		///
+		/// \todo Make a dedicated virtual clippingPlane() method for the next major version.
 		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters ) = 0;
 
 		//! @name Interactive rerendering
