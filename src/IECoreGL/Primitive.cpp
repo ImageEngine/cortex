@@ -130,6 +130,55 @@ static Shader *constant2()
 	return s.get();
 }
 
+
+static Shader *flatConstant()
+{
+
+	static const char *vertexSource =
+
+		"#version 120\n"
+		""
+		"#if __VERSION__ <= 120\n"
+		"#define in attribute\n"
+		"#define out varying\n"
+		"#endif\n"
+		""
+		"uniform vec3 Cs = vec3( 1, 1, 1 );"
+		""
+		"in vec3 vertexP;"
+		"in vec3 vertexCs;"
+		""
+		"out vec3 geometryCs;"
+		""
+		"out vec3 fragmentCs;"
+		""
+		"void main()"
+		"{"
+		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
+		"	gl_Position = gl_ProjectionMatrix * pCam;"
+		"	geometryCs = Cs;"
+		""
+		"	fragmentCs = geometryCs;"
+		"}";
+
+	static const char *fragmentSource =
+
+		"#if __VERSION__ <= 120\n"
+		"#define in varying\n"
+		"#endif\n"
+		""
+		"in vec3 fragmentCs;"
+		""
+		"void main()"
+		"{"
+		"	gl_FragColor = vec4( fragmentCs, 1 );"
+		"}";
+
+	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	return s.get();
+}
+
+
 void Primitive::render( State *state ) const
 {
 	const Selector *currentSelector = Selector::currentSelector();
@@ -193,7 +242,7 @@ void Primitive::render( State *state ) const
 	}
 	
 	// get a constant shader suitable for drawing wireframes, points etc.
-	const Shader *constantShader = Shader::constant();
+	const Shader *constantShader = flatConstant();
 	if( currentSelector && currentSelector->mode() == Selector::IDRender )
 	{
 		// if we're in IDRender mode, then the constant shader is unsuitable,
@@ -284,7 +333,7 @@ const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state 
 	}
 	
 	Shader::SetupPtr setup = new Shader::Setup( shader );
-	addPrimitiveVariablesToShaderSetup( setup.get()  );
+	addPrimitiveVariablesToShaderSetup( setup.get() );
 		
 	m_shaderSetups.push_back( setup );
 	return setup.get();
