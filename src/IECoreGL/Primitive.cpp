@@ -130,51 +130,19 @@ static Shader *constant2()
 	return s.get();
 }
 
-
 static Shader *flatConstant()
 {
 
-	static const char *vertexSource =
-
-		"#version 120\n"
-		""
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#define out varying\n"
-		"#endif\n"
-		""
-		"uniform vec3 Cs = vec3( 1, 1, 1 );"
-		""
-		"in vec3 vertexP;"
-		"in vec3 vertexCs;"
-		""
-		"out vec3 geometryCs;"
-		""
-		"out vec3 fragmentCs;"
-		""
-		"void main()"
-		"{"
-		"	vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );"
-		"	gl_Position = gl_ProjectionMatrix * pCam;"
-		"	geometryCs = Cs;"
-		""
-		"	fragmentCs = geometryCs;"
-		"}";
-
 	static const char *fragmentSource =
 
-		"#if __VERSION__ <= 120\n"
-		"#define in varying\n"
-		"#endif\n"
-		""
-		"in vec3 fragmentCs;"
+		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
 		""
 		"void main()"
 		"{"
-		"	gl_FragColor = vec4( fragmentCs, 1 );"
+		"	gl_FragColor = vec4( Cs, 1 );"
 		"}";
 
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	static ShaderPtr s = new Shader( "", fragmentSource );
 	return s.get();
 }
 
