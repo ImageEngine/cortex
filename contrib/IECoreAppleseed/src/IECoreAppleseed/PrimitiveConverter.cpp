@@ -77,27 +77,24 @@ void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDa
 const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( PrimitivePtr primitive, const AttributeState &attrState, const string &materialName, asr::Assembly &parentAssembly )
 {
 	// Compute the hash of the primitive and save it for later use.
-	MurmurHash geometryHash;
-	primitive->hash( geometryHash );
-
-	MurmurHash geomAndAttributesHash( geometryHash );
-	geomAndAttributesHash.append( attrState.alphaMap() );
+	MurmurHash primitiveHash;
+	primitive->hash( primitiveHash );
+	attrState.attributesHash( primitiveHash );
 
 	// Right now, appleseed instances share all the same material.
 	// This will be lifted soon, but for now, we need to include
 	// the shading / material state in the hash so that objects with
 	// the same geometry but different materials are not instances.
-	MurmurHash geomAndShadingHash( geomAndAttributesHash );
-	geomAndShadingHash.append( attrState.materialHash() );
+	attrState.materialHash( primitiveHash );
 
 	// Check if we already processed this primitive.
-	InstanceMapType::const_iterator it = m_instanceMap.find( geomAndShadingHash );
+	InstanceMapType::const_iterator it = m_instanceMap.find( primitiveHash );
 	if( it != m_instanceMap.end() )
 	{
 		return it->second;
 	}
 
-	asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( primitive, geometryHash );
+	asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( primitive, attrState.name() );
 
 	if( !obj.get() )
 	{
@@ -112,31 +109,32 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 		obj->get_parameters().insert( "alpha_map", alphaMapTextureInstanceName.c_str() );
 	}
 
-	string assemblyName = attrState.name();
+	string assemblyName = attrState.name() + "_assembly";
 	asf::auto_release_ptr<asr::Assembly> ass = asr::AssemblyFactory().create( assemblyName.c_str(), asr::ParamArray() );
 	const asr::Object *objPtr = obj.get();
 	ass->objects().insert( obj );
-	createObjectInstance( *ass, objPtr, objName, materialName );
+	createObjectInstance( *ass, objPtr, objName, attrState, materialName );
 	const asr::Assembly *p = ass.get();
 	parentAssembly.assemblies().insert( ass );
 
 	if( m_autoInstancing )
 	{
-		m_instanceMap[geomAndShadingHash] = p;
+		m_instanceMap[primitiveHash] = p;
 	}
 
 	return p;
 }
 
 const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( const set<float> &times,
-			const vector<IECore::PrimitivePtr> &primitives, const AttributeState &attrState,
+			const vector<PrimitivePtr> &primitives, const AttributeState &attrState,
 			const string &materialName, renderer::Assembly &parentAssembly )
 {
 	// For now, ignore motion blur and convert only the first primitive.
 	return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
 }
 
-void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj, const string &objSourceName, const string &materialName )
+void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj,
+	const string &objSourceName, const AttributeState &attrState, const string &materialName )
 {
 	assert( obj );
 
@@ -150,6 +148,13 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 		materials.insert( "default", materialName.c_str() );
 	}
 
-	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(), asr::ParamArray(), sourceName.c_str(), asf::Transformd::make_identity(), materials, materials );
+	asr::ParamArray params;
+
+	if( attrState.photonTarget() )
+	{
+		params.insert( "photon_target", "true" );
+	}
+
+	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(), params, sourceName.c_str(), asf::Transformd::make_identity(), materials, materials );
 	assembly.object_instances().insert( objInstance );
 }

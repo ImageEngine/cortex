@@ -121,13 +121,6 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	m_project = asr::ProjectFactory::create( "project" );
 	m_project->add_default_configurations();
 
-	// create some needed parameters that don't get created by default.
-	// possible bug in appleseed?
-	{
-		asr::Configuration *cfg = m_project->configurations().get_by_name( "final" );
-		cfg->get_parameters().insert_path( "sppm.initial_radius", "1.0" );
-	}
-
 	// create some basic project entities.
 	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray() ) );
 	m_project->set_frame( frame );
@@ -719,7 +712,8 @@ string IECoreAppleseed::RendererImplementation::currentShaderGroupName()
 
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash shaderGroupHash = m_attributeStack.top().shaderGroupHash();
+		MurmurHash shaderGroupHash;
+		m_attributeStack.top().shaderGroupHash( shaderGroupHash );
 
 		ShaderGroupMap::const_iterator it( m_shaderGroupNames.find( shaderGroupHash ) );
 
@@ -743,7 +737,8 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash materialHash = m_attributeStack.top().materialHash();
+		MurmurHash materialHash;
+		m_attributeStack.top().materialHash( materialHash );
 
 		MaterialMap::const_iterator it( m_materialNames.find( materialHash ) );
 
@@ -764,7 +759,7 @@ string IECoreAppleseed::RendererImplementation::currentMaterialName()
 
 void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const string &assemblyName )
 {
-	string assemblyInstanceName = m_attributeStack.top().name() + "_instance";
+	string assemblyInstanceName = m_attributeStack.top().name() + "_assembly_instance";
 
 	asr::ParamArray params;
 	params.insert( "visibility", m_attributeStack.top().visibilityDictionary() );

@@ -84,52 +84,51 @@ void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, IE
 		PrimitiveConverter::setOption( name, value );
 }
 
-asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const MurmurHash &primitiveHash )
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const string &name )
 {
+	MurmurHash primitiveHash;
+	primitive->hash( primitiveHash );
+
 	if( primitive->typeId() == MeshPrimitiveTypeId )
 	{
-		return convertAndWriteMeshPrimitive( primitive, primitiveHash );
+		string objectName = primitiveHash.toString();
+
+		// Check if we already have a mesh saved for this object.
+		string fileName = string( "_geometry/" ) + objectName + m_meshGeomExtension;
+		filesystem::path p = m_projectPath / fileName;
+
+		if( !filesystem::exists( p ) )
+		{
+			ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() );
+
+			if( !converter )
+			{
+				msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't convert primitive." );
+				return asf::auto_release_ptr<asr::Object>();
+			}
+
+			asf::auto_release_ptr<asr::Object> entity;
+			entity.reset( static_cast<asr::Object*>( converter->convert() ) );
+
+			if( entity.get() == 0 )
+			{
+				msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't convert primitive." );
+				return asf::auto_release_ptr<asr::Object>();
+			}
+
+			// Write the mesh to a file.
+			p = m_projectPath / fileName;
+			if( !asr::MeshObjectWriter::write( static_cast<const asr::MeshObject&>( *entity ), objectName.c_str(), p.string().c_str() ) )
+			{
+				msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't save mesh primitive." );
+				return asf::auto_release_ptr<asr::Object>();
+			}
+		}
+
+		asf::auto_release_ptr<asr::MeshObject> meshObj( asr::MeshObjectFactory().create( objectName.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ) );
+		return asf::auto_release_ptr<asr::Object>( meshObj.release() );
 	}
 
 	return asf::auto_release_ptr<asr::Object>();
 }
 
-asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::convertAndWriteMeshPrimitive( PrimitivePtr primitive, const MurmurHash &meshHash )
-{
-	string objectName = meshHash.toString();
-
-	// Check if we already have a mesh saved for this object.
-	string fileName = string( "_geometry/" ) + objectName + m_meshGeomExtension;
-	filesystem::path p = m_projectPath / fileName;
-
-	if( !filesystem::exists( p ) )
-	{
-		ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() );
-
-		if( !converter )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't convert primitive." );
-			return asf::auto_release_ptr<asr::Object>();
-		}
-
-		asf::auto_release_ptr<asr::Object> entity;
-		entity.reset( static_cast<asr::Object*>( converter->convert() ) );
-
-		if( entity.get() == 0 )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't convert primitive." );
-			return asf::auto_release_ptr<asr::Object>();
-		}
-
-		// Write the mesh to a file.
-		p = m_projectPath / fileName;
-		if( !asr::MeshObjectWriter::write( static_cast<const asr::MeshObject&>( *entity ), objectName.c_str(), p.string().c_str() ) )
-		{
-			msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't save mesh primitive." );
-			return asf::auto_release_ptr<asr::Object>();
-		}
-	}
-
-	asf::auto_release_ptr<asr::MeshObject> meshObj( asr::MeshObjectFactory().create( objectName.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ) );
-	return asf::auto_release_ptr<asr::Object>( meshObj.release() );
-}

@@ -50,14 +50,16 @@ namespace asr = renderer;
 IECoreAppleseed::AttributeState::AttributeState()
 {
 	m_attributes = new CompoundData;
+	m_photonTarget = false;
 }
 
 IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 {
 	m_attributes = other.m_attributes->copy();
 	m_shadingState = other.m_shadingState;
-	m_visibilityDictionary = other.m_visibilityDictionary;
 	m_alphaMap = other.m_alphaMap;
+	m_photonTarget = other.m_photonTarget;
+	m_visibilityDictionary = other.m_visibilityDictionary;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
@@ -97,18 +99,15 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
 		}
 	}
-	else if( name == "gaffer:deformationBlurSegments" )
+	else if( name == "as:photon_target" )
 	{
-		if( const IntData *f = runTimeCast<const IntData>( value.get() ) )
+		if( const BoolData *f = runTimeCast<const BoolData>( value.get() ) )
 		{
-			// round samples to the next power of 2 as
-			// appleseed only supports power of 2 number of deformation segments.
-			int samples = asf::next_pow2( f->readable() );
-			m_attributes->writable()[name] = new IntData( samples );
+			m_photonTarget = f->readable();
 		}
 		else
 		{
-			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:shading_samples attribute expects an IntData value." );
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "photon_target attribute expect a BoolData value." );
 		}
 	}
 	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
@@ -145,6 +144,17 @@ const std::string &IECoreAppleseed::AttributeState::alphaMap() const
 	return m_alphaMap;
 }
 
+bool IECoreAppleseed::AttributeState::photonTarget() const
+{
+	return m_photonTarget;
+}
+
+void IECoreAppleseed::AttributeState::attributesHash( IECore::MurmurHash &hash ) const
+{
+	hash.append( m_alphaMap );
+	hash.append( m_photonTarget );
+}
+
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )
 {
 	m_shadingState.addOSLShader( shader );
@@ -160,14 +170,14 @@ bool IECoreAppleseed::AttributeState::shadingStateValid() const
 	return m_shadingState.valid();
 }
 
-const MurmurHash &IECoreAppleseed::AttributeState::shaderGroupHash() const
+void IECoreAppleseed::AttributeState::shaderGroupHash( IECore::MurmurHash &hash ) const
 {
-	return m_shadingState.shaderGroupHash();
+	m_shadingState.shaderGroupHash( hash );
 }
 
-const MurmurHash &IECoreAppleseed::AttributeState::materialHash() const
+void IECoreAppleseed::AttributeState::materialHash( IECore::MurmurHash &hash ) const
 {
-	return m_shadingState.materialHash();
+	m_shadingState.materialHash( hash );
 }
 
 string IECoreAppleseed::AttributeState::createShaderGroup( asr::Assembly &assembly )
