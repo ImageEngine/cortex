@@ -754,6 +754,39 @@ class ShadingTest( unittest.TestCase ) :
 			]
 		)
 
+	def testVertexCsDoesntAffectWireframe( self ) :
+
+		m = self.mesh()
+		m["Cs"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.Color3fVectorData(
+				[ IECore.Color3f( 0 ) ] * len( m["P"].data )
+			)
+		)
+
+		g = IECore.Group()
+		g.addChild( m )
+		
+		g.addState(
+			IECore.AttributeState(
+				{
+					"gl:primitive:solid" : IECore.BoolData( True ),
+					"gl:primitive:wireframe" : IECore.BoolData( True ),
+					"gl:primitive:wireframeColor" : IECore.Color4f( 0, 1, 0, 1 ),
+					"gl:primitive:wireframeWidth" : 6.0,
+				}
+			)
+		)
+
+		image = self.renderImage( g )
+		# wireframe is green, and vertex Cs is black,
+		# so there should be no contribution from 
+		# wireframe or solid shading in the red channel.
+		self.assertEqual( sum( image["R"].data ), 0 )
+		# black vertex colour should have no effect on
+		# green wireframe, so we should have some wireframe
+		# contribution in the green channel.
+		self.assertTrue( sum( image["G"].data ) > 0 )
 
 	def testUniformFloatArrayParameters( self ) :
 	
