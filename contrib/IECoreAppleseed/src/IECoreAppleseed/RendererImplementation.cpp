@@ -218,7 +218,8 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 		return;
 	}
 
-	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
+	CompoundDataPtr params = new CompoundData( parameters );
+	CameraPtr cortexCamera = new Camera( name, 0, params );
 	ToAppleseedCameraConverterPtr converter = new ToAppleseedCameraConverter( cortexCamera );
 	asf::auto_release_ptr<asr::Camera> appleseedCamera( static_cast<asr::Camera*>( converter->convert() ) );
 
@@ -227,6 +228,10 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::camera", "Couldn't create camera." );
 		return;
 	}
+
+	// pass the shutter interval to the primitive converter.
+	const V2f &shutter = params->member<V2fData>( "shutter", true )->readable();
+	m_primitiveConverter->setShutterInterval( shutter.x, shutter.y );
 
 	appleseedCamera->transform_sequence() = m_transformStack.top();
 	setCamera( cortexCamera, appleseedCamera );
