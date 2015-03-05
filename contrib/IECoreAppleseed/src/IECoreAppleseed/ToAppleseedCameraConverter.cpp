@@ -52,8 +52,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToAppleseedCameraConverter );
 
 ToAppleseedCameraConverter::ConverterDescription<ToAppleseedCameraConverter> ToAppleseedCameraConverter::g_description;
 
-ToAppleseedCameraConverter::ToAppleseedCameraConverter( IECore::CameraPtr toConvert )
-	:	ToAppleseedConverter( "Converts IECore::Cameras to appleseed camera nodes", IECore::Camera::staticTypeId() )
+ToAppleseedCameraConverter::ToAppleseedCameraConverter( CameraPtr toConvert )
+	:	ToAppleseedConverter( "Converts IECore::Cameras to appleseed camera nodes", Camera::staticTypeId() )
 {
 	srcParameter()->setValue( toConvert );
 }
@@ -62,7 +62,7 @@ ToAppleseedCameraConverter::~ToAppleseedCameraConverter()
 {
 }
 
-asr::Entity *ToAppleseedCameraConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+asr::Entity *ToAppleseedCameraConverter::doConversion( ConstObjectPtr from, ConstCompoundObjectPtr operands ) const
 {
 	CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
 	camera->addStandardParameters();
@@ -107,7 +107,7 @@ asr::Entity *ToAppleseedCameraConverter::doConversion( IECore::ConstObjectPtr fr
 	}
 	else
 	{
-		 IECore::msg( Msg::Warning, "ToAppleseedCameraConverter", "unsupported projection type. Creating a default camera" );
+		 msg( Msg::Warning, "ToAppleseedCameraConverter", "unsupported projection type. Creating a default camera" );
 		 cameraFactory = cameraFactories.lookup( "pinhole_camera" );
 	}
 

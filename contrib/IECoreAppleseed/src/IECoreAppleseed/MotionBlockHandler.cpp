@@ -65,7 +65,7 @@ void IECoreAppleseed::MotionBlockHandler::motionBegin( const set<float> &times )
 }
 
 void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrState,
-	renderer::Assembly *mainAssembly )
+	asr::Assembly *mainAssembly )
 {
 	assert( !m_times.empty() );
 

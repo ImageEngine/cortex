@@ -63,6 +63,8 @@ class PrimitiveConverter : boost::noncopyable
 
 		virtual ~PrimitiveConverter();
 
+		void setShutterInterval( float openTime, float closeTime );
+
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 
 		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
@@ -83,6 +85,8 @@ class PrimitiveConverter : boost::noncopyable
 		const foundation::SearchPaths &m_searchPaths;
 		InstanceMapType m_instanceMap;
 		bool m_autoInstancing;
+		float m_shutterOpenTime;
+		float m_shutterCloseTime;
 
 };
 

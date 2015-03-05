@@ -87,7 +87,7 @@ void IECoreAppleseed::ShadingState::setOSLSurface( ConstShaderPtr surface )
 	m_surfaceShader = surface;
 }
 
-void IECoreAppleseed::ShadingState::shaderGroupHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::ShadingState::shaderGroupHash( MurmurHash &hash ) const
 {
 	for( int i = 0, e = m_shaders.size(); i < e; ++i)
 	{
@@ -130,7 +130,7 @@ string IECoreAppleseed::ShadingState::createShaderGroup( asr::Assembly& assembly
 }
 
 
-void IECoreAppleseed::ShadingState::materialHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::ShadingState::materialHash( MurmurHash &hash ) const
 {
 	shaderGroupHash( hash );
 	hash.append( m_shadingSamples );

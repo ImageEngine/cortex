@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "renderer/api/version.h"
 #include "renderer/api/entity.h"
 
 #include "IECore/MessageHandler.h"
@@ -53,10 +52,18 @@ namespace asr = renderer;
 IECoreAppleseed::PrimitiveConverter::PrimitiveConverter( const asf::SearchPaths &searchPaths ) : m_searchPaths( searchPaths )
 {
 	m_autoInstancing = true;
+	m_shutterOpenTime = 0.0f;
+	m_shutterCloseTime = 0.0f;
 }
 
 IECoreAppleseed::PrimitiveConverter::~PrimitiveConverter()
 {
+}
+
+void IECoreAppleseed::PrimitiveConverter::setShutterInterval( float openTime, float closeTime )
+{
+	m_shutterOpenTime = openTime;
+	m_shutterCloseTime = closeTime;
 }
 
 void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDataPtr value )
@@ -127,7 +134,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 
 const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( const set<float> &times,
 			const vector<PrimitivePtr> &primitives, const AttributeState &attrState,
-			const string &materialName, renderer::Assembly &parentAssembly )
+			const string &materialName, asr::Assembly &parentAssembly )
 {
 	// For now, ignore motion blur and convert only the first primitive.
 	return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
