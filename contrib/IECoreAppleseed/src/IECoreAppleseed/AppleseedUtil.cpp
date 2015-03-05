@@ -42,6 +42,8 @@
 #include "IECoreAppleseed/private/AppleseedUtil.h"
 
 using namespace IECore;
+using namespace Imath;
+using namespace boost;
 using namespace std;
 
 namespace asf = foundation;
@@ -76,14 +78,14 @@ string IECoreAppleseed::dataToString( ConstDataPtr value )
 
 		case V2iDataTypeId :
 			{
-				const Imath::V2i &x = static_cast<const V2iData*>( value.get() )->readable();
+				const V2i &x = static_cast<const V2iData*>( value.get() )->readable();
 				ss << x.x << ", " << x.y;
 			}
 			break;
 
 		case Color3fDataTypeId :
 			{
-				const Imath::Color3f &x = static_cast<const Color3fData*>( value.get() )->readable();
+				const Color3f &x = static_cast<const Color3fData*>( value.get() )->readable();
 				ss << x.x << ", " << x.y << ", " << x.z;
 			}
 			break;
@@ -149,12 +151,12 @@ asr::ParamArray IECoreAppleseed::convertParams( const CompoundDataMap &parameter
 	return result;
 }
 
-string IECoreAppleseed::createColorEntity( asr::ColorContainer &colorContainer, const Imath::C3f &color, const string &name )
+string IECoreAppleseed::createColorEntity( asr::ColorContainer &colorContainer, const C3f &color, const string &name )
 {
 	// for monochrome colors, we don't need to create a color entity at all.
 	if( color.x == color.y && color.x == color.z )
 	{
-		return boost::lexical_cast<string>( color.x );
+		return lexical_cast<string>( color.x );
 	}
 
 	asr::ColorValueArray values( 3, &color.x );

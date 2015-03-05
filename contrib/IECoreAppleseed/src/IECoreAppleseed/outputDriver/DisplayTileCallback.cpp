@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <vector>
+#include <exception>
 
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
@@ -52,7 +53,6 @@
 using namespace IECore;
 using namespace Imath;
 using namespace boost;
-using namespace std;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -96,7 +96,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		// This method is called before a region is rendered.
 		virtual void pre_render( const size_t x, const size_t y, const size_t width, const size_t height)
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
+			lock_guard<mutex> guard( m_mutex );
 
 			if( m_display_initialized )
 			{
@@ -107,7 +107,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		// This method is called after a tile is rendered (final rendering).
 		virtual void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
+			lock_guard<mutex> guard( m_mutex );
 
 			if( !m_display_initialized )
 			{
@@ -120,7 +120,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		// This method is called after a whole frame is rendered (progressive rendering).
 		virtual void post_render( const asr::Frame *frame )
 		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
+			lock_guard<mutex> guard( m_mutex );
 
 			if( !m_display_initialized )
 			{
@@ -184,7 +184,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 			try
 			{
-				m_driver = IECore::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
+				m_driver = DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
 			}
 			catch( const std::exception &e )
 			{
@@ -291,7 +291,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		bool m_display_initialized;
 		DisplayDriverPtr m_driver;
 		Box2i m_data_window;
-		vector<float> m_buffer;
+		std::vector<float> m_buffer;
 		size_t m_tile_width;
 		size_t m_tile_height;
 		size_t m_channel_count;

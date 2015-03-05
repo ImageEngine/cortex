@@ -36,6 +36,8 @@
 
 #include <cassert>
 
+using namespace Imath;
+
 namespace asf = foundation;
 namespace asr = renderer;
 
@@ -82,7 +84,7 @@ asr::TransformSequence& IECoreAppleseed::TransformStack::top()
 	return m_stack.top();
 }
 
-void IECoreAppleseed::TransformStack::setTransform( const Imath::M44f &m )
+void IECoreAppleseed::TransformStack::setTransform( const M44f &m )
 {
 	asf::Transformd xform;
 	makeTransform( m, xform );
@@ -90,12 +92,12 @@ void IECoreAppleseed::TransformStack::setTransform( const Imath::M44f &m )
 }
 
 void IECoreAppleseed::TransformStack::setTransform( const std::set<float> &times,
-	const std::vector<Imath::M44f> &transforms )
+	const std::vector<M44f> &transforms )
 {
 	makeTransformSequence( times, transforms, m_stack.top() );
 }
 
-void IECoreAppleseed::TransformStack::concatTransform( const Imath::M44f &m )
+void IECoreAppleseed::TransformStack::concatTransform( const M44f &m )
 {
 	asf::Transformd xform;
 	makeTransform( m, xform );
@@ -105,23 +107,23 @@ void IECoreAppleseed::TransformStack::concatTransform( const Imath::M44f &m )
 }
 
 void IECoreAppleseed::TransformStack::concatTransform( const std::set<float> &times,
-	const std::vector<Imath::M44f> &transforms )
+	const std::vector<M44f> &transforms )
 {
 	asr::TransformSequence seq;
 	makeTransformSequence( times, transforms, seq );
 	m_stack.top() = seq * m_stack.top();
 }
 
-void IECoreAppleseed::TransformStack::makeTransform( const Imath::M44f &m, asf::Transformd &xform ) const
+void IECoreAppleseed::TransformStack::makeTransform( const M44f &m, asf::Transformd &xform ) const
 {
-	Imath::M44d md( m );
+	M44d md( m );
 	xform.set_local_to_parent( asf::Matrix4d( md ) );
 	md.invert();
 	xform.set_parent_to_local( asf::Matrix4d( md ) );
 }
 
 void IECoreAppleseed::TransformStack::makeTransformSequence( const std::set<float> &times,
-	const std::vector<Imath::M44f> &transforms,
+	const std::vector<M44f> &transforms,
 	renderer::TransformSequence &xformSeq ) const
 {
 	assert( times.size() == transforms.size() );

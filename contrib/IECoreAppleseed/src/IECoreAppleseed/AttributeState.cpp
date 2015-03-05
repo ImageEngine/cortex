@@ -149,7 +149,7 @@ bool IECoreAppleseed::AttributeState::photonTarget() const
 	return m_photonTarget;
 }
 
-void IECoreAppleseed::AttributeState::attributesHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::attributesHash( MurmurHash &hash ) const
 {
 	hash.append( m_alphaMap );
 	hash.append( m_photonTarget );
@@ -170,12 +170,12 @@ bool IECoreAppleseed::AttributeState::shadingStateValid() const
 	return m_shadingState.valid();
 }
 
-void IECoreAppleseed::AttributeState::shaderGroupHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::shaderGroupHash( MurmurHash &hash ) const
 {
 	m_shadingState.shaderGroupHash( hash );
 }
 
-void IECoreAppleseed::AttributeState::materialHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::materialHash( MurmurHash &hash ) const
 {
 	m_shadingState.materialHash( hash );
 }

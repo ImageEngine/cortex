@@ -69,8 +69,8 @@
 using namespace IECore;
 using namespace IECoreAppleseed;
 using namespace Imath;
-using namespace std;
 using namespace boost;
+using namespace std;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -134,7 +134,7 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 // options
 ////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::setOption( const string &name, IECore::ConstDataPtr value )
+void IECoreAppleseed::RendererImplementation::setOption( const string &name, ConstDataPtr value )
 {
 	m_optionsMap[name] = value;
 
@@ -143,7 +143,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 		// appleseed render settings.
 
 		string optName( name, 7, string::npos );
-		std::replace( optName.begin(), optName.end(), ':', '.' );
+		replace( optName.begin(), optName.end(), ':', '.' );
 		string valueStr = dataToString( value );
 
 		if( !valueStr.empty() )
@@ -196,7 +196,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 	}
 }
 
-IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const string &name ) const
+ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const string &name ) const
 {
 	OptionsMap::const_iterator it( m_optionsMap.find( name ) );
 
@@ -205,10 +205,10 @@ IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const s
 		return it->second;
 	}
 
-	return IECore::ConstDataPtr();
+	return ConstDataPtr();
 }
 
-void IECoreAppleseed::RendererImplementation::camera( const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::camera( const string &name, const CompoundDataMap &parameters )
 {
 	const string *cameraName = getOptionAs<string>( "render:camera" );
 
@@ -232,7 +232,7 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	setCamera( cortexCamera, appleseedCamera );
 }
 
-void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const CompoundDataMap &parameters )
 {
 	// exr and png are special...
 	if( type == "exr" || type == "png" )
@@ -342,7 +342,7 @@ void IECoreAppleseed::RendererImplementation::transformEnd()
 	m_transformStack.pop();
 }
 
-void IECoreAppleseed::RendererImplementation::setTransform( const Imath::M44f &m )
+void IECoreAppleseed::RendererImplementation::setTransform( const M44f &m )
 {
 	if( m_motionHandler->insideMotionBlock() )
 	{
@@ -359,19 +359,19 @@ void IECoreAppleseed::RendererImplementation::setTransform( const string &coordi
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setTransform", "Not implemented." );
 }
 
-Imath::M44f IECoreAppleseed::RendererImplementation::getTransform() const
+M44f IECoreAppleseed::RendererImplementation::getTransform() const
 {
 	M44d m = m_transformStack.top().get_earliest_transform().get_local_to_parent();
 	return M44f( m );
 }
 
-Imath::M44f IECoreAppleseed::RendererImplementation::getTransform( const string &coordinateSystem ) const
+M44f IECoreAppleseed::RendererImplementation::getTransform( const string &coordinateSystem ) const
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::getTransform", "Not implemented." );
 	return M44f();
 }
 
-void IECoreAppleseed::RendererImplementation::concatTransform( const Imath::M44f &m )
+void IECoreAppleseed::RendererImplementation::concatTransform( const M44f &m )
 {
 	if( m_motionHandler->insideMotionBlock() )
 	{
@@ -404,17 +404,17 @@ void IECoreAppleseed::RendererImplementation::attributeEnd()
 	transformEnd();
 }
 
-void IECoreAppleseed::RendererImplementation::setAttribute( const string &name, IECore::ConstDataPtr value )
+void IECoreAppleseed::RendererImplementation::setAttribute( const string &name, ConstDataPtr value )
 {
 	m_attributeStack.top().setAttribute( name, value );
 }
 
-IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getAttribute( const string &name ) const
+ConstDataPtr IECoreAppleseed::RendererImplementation::getAttribute( const string &name ) const
 {
 	return m_attributeStack.top().getAttribute( name );
 }
 
-void IECoreAppleseed::RendererImplementation::shader( const string &type, const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::shader( const string &type, const string &name, const CompoundDataMap &parameters )
 {
 	if( type == "osl:shader" || type == "shader" )
 	{
@@ -432,9 +432,9 @@ void IECoreAppleseed::RendererImplementation::shader( const string &type, const 
 	}
 }
 
-void IECoreAppleseed::RendererImplementation::light( const string &name, const string &handle, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::light( const string &name, const string &handle, const CompoundDataMap &parameters )
 {
-	bool isEnvironment = boost::algorithm::ends_with( name, "_environment_edf" );
+	bool isEnvironment = algorithm::ends_with( name, "_environment_edf" );
 	const string *environmentEDFName = 0;
 
 	// ignore enviromnment EDFs not selected in the appleseed options node.
@@ -470,7 +470,7 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 			if( paramValue->typeId() == Color3fDataTypeId )
 			{
 				string colorName = m_attributeStack.top().name() + "." + paramName;
-				const Imath::Color3f &col = static_cast<const Color3fData*>( paramValue.get() )->readable();
+				const Color3f &col = static_cast<const Color3fData*>( paramValue.get() )->readable();
 				colorName = createColorEntity( m_project->get_scene()->colors(), col, colorName.c_str() );
 				params.insert( paramName.c_str(), colorName.c_str() );
 			}
@@ -532,7 +532,7 @@ void IECoreAppleseed::RendererImplementation::illuminate( const string &lightHan
 // motion blur
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::motionBegin( const std::set<float> &times )
+void IECoreAppleseed::RendererImplementation::motionBegin( const set<float> &times )
 {
 	if (m_motionHandler->insideMotionBlock() )
 	{
@@ -558,37 +558,37 @@ void IECoreAppleseed::RendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::points( size_t numPoints, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::points", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::disk", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::curves", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::text( const string &font, const string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::text( const string &font, const string &text, float kerning, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::text", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::sphere", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::image( const Box2i &dataWindow, const Box2i &displayWindow, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::image", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const string &interpolation, const PrimitiveVariableMap &primVars )
 {
 	if( !m_mainAssembly )
 	{
@@ -596,7 +596,7 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 		return;
 	}
 
-	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+	MeshPrimitivePtr mesh = new MeshPrimitive( vertsPerFace, vertIds, interpolation );
 	mesh->variables = primVars;
 
 	string materialName = currentMaterialName();
@@ -614,7 +614,7 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 	}
 }
 
-void IECoreAppleseed::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::nurbs", "Not implemented." );
 }
@@ -633,7 +633,7 @@ void IECoreAppleseed::RendererImplementation::geometry( const string &type, cons
 // procedurals
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreAppleseed::RendererImplementation::procedural( Renderer::ProceduralPtr proc )
 {
 	// appleseed does not support procedurals yet, so we expand them immediately.
 	proc->render( this );
@@ -643,7 +643,7 @@ void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::Proc
 // instancing
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::instanceBegin( const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::instanceBegin( const string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceBegin", "Not implemented." );
 }
@@ -662,7 +662,7 @@ void IECoreAppleseed::RendererImplementation::instance( const string &name )
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////
 
-IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
+DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::command", "Not implemented." );
 	return 0;
@@ -672,7 +672,7 @@ IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &
 // rerendering
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editBegin", "Not implemented." );
 }
