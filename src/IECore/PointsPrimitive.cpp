@@ -36,7 +36,10 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/Renderer.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/SimpleTypedData.h"
 
+using namespace std;
+using namespace Imath;
 using namespace IECore;
 
 static IndexedIO::EntryID g_numPointsEntry("numPoints");
@@ -126,6 +129,89 @@ size_t PointsPrimitive::getNumPoints() const
 void PointsPrimitive::setNumPoints( size_t n )
 {
 	m_numPoints = n;
+}
+
+Imath::Box3f PointsPrimitive::bound() const
+{
+	// Gather the data we need from the primitive variables.
+	// We'll tolerate the wrong data sizes if necessary - considering
+	// only the minimum of getNumPoints() and the available data
+	// sizes.
+
+	size_t count = getNumPoints();
+	const V3f *p = NULL;
+	if( const V3fVectorData *pData = variableData<V3fVectorData>( "P" ) )
+	{
+		p = &pData->readable().front();
+		count = min( count, pData->readable().size() );
+	}
+
+	if( !p )
+	{
+		return Box3f();
+	}
+
+	float constantWidth = 1.0f;
+	if( const FloatData *constantWidthData = variableData<FloatData>( "constantwidth" ) )
+	{
+		constantWidth = constantWidthData->readable();
+	}
+
+	const float one = 1.0f;
+	const float *width = &one;
+	size_t widthStep = 0;
+	if( const FloatVectorData *widthData = variableData<FloatVectorData>( "width" ) )
+	{
+		width = &widthData->readable().front();
+		widthStep = 1;
+		count = min( count, widthData->readable().size() );
+	}
+
+	const float *aspectRatio = NULL;
+	size_t aspectRatioStep = 0;
+	if( const StringData *typeData = variableData<StringData>( "type" ) )
+	{
+		if( typeData->readable() == "patch" )
+		{
+			aspectRatio = &one;
+			if( const FloatData *constantAspectRatioData = variableData<FloatData>( "patchaspectratio" ) )
+			{
+				aspectRatio = &constantAspectRatioData->readable();
+			}
+			else if( const FloatVectorData *aspectRatioData = variableData<FloatVectorData>( "patchaspectratio" ) )
+			{
+				aspectRatio = &aspectRatioData->readable().front();
+				aspectRatioStep = 1;
+				count = min( count, aspectRatioData->readable().size() );
+			}
+		}
+	}
+
+	// Compute the bounding box from the gathered data.
+
+	Box3f result;
+	for( size_t i = 0; i < count; ++i )
+	{
+		float r = constantWidth * *width / 2.0f;
+		width += widthStep;
+		if( aspectRatio )
+		{
+			// Type is patch - the diagonal will be
+			// longer than either the width or the
+			// height, so derive a new radius from that.
+			float hh = r; // half the height
+			if( *aspectRatio != 0.0f )
+			{
+				hh /= *aspectRatio;
+			}
+			r = sqrtf( r * r + hh * hh );
+			aspectRatio += aspectRatioStep;
+		}
+		result.extendBy( Box3f( *p - V3f( r ), *p + V3f( r ) ) );
+		p++;
+	}
+
+	return result;
 }
 
 size_t PointsPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const

@@ -67,6 +67,8 @@ class IECORE_API PointsPrimitive : public Primitive
 		/// data.
 		void setNumPoints( size_t n );
 
+		virtual Imath::Box3f bound() const;
+
 		/// Returns numPoints() for Vertex, Varying, and FaceVarying interpolations,
 		/// and 1 for all other types.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;

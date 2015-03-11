@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import math
 import unittest
 
 from IECore import *
@@ -153,6 +154,100 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		p3["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( p3.hash(), p2.hash() )
 		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
+	
+	def testBound( self ) :
+
+		p = PointsPrimitive( 2 )
+		self.assertEqual( p.bound(), Box3f() )
+
+		p["P"] = PrimitiveVariable(
+			PrimitiveVariable.Interpolation.Vertex,
+			V3fVectorData( [ V3f( 1, 2, 3 ), V3f( 12, 13, 14 ) ] )
+		)
+
+		# when no width is specified, it defaults to 1
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 1 ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 1 ) / 2.0
+			)
+		)
+
+		# constantwidth overrides the default
+		p["constantwidth"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
 		
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 2 ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 2 ) / 2.0
+			)
+		)
+
+		# vertex width works too, and multiplies with constantwidth
+
+		p["width"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 2, 4 ] ) )
+
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 2 * 2 ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 2 * 4 ) / 2.0
+			)
+		)
+
+		# aspect ratio should have no effect whatsoever if type is not "patch"
+
+		p["patchaspectratio"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
+		del p["width"]
+		del p["constantwidth"]
+
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 1 ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 1 ) / 2.0
+			)
+		)
+
+		# but it should take effect when type is "patch"
+
+		p["type"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, "patch" )
+		
+		diagonal = math.sqrt( 1 ** 2 + 0.5 ** 2 )
+
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( diagonal ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( diagonal ) / 2.0
+			)
+		)
+
+		# and "constantwidth" should still be taken into account for patches
+
+		p["constantwidth"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
+
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 2 * diagonal ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 2 * diagonal ) / 2.0
+			)
+		)
+
+		# as should "width"
+
+		p["width"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 2, 4 ] ) )
+
+		self.assertEqual(
+			p.bound(),
+			Box3f(
+				V3f( 1, 2, 3 ) - V3f( 2 * 2 * diagonal ) / 2.0,
+				V3f( 12, 13, 14 ) + V3f( 2 * 4 * diagonal ) / 2.0
+			)
+		)
+
 if __name__ == "__main__":
     unittest.main()
