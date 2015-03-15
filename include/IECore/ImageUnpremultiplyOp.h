@@ -35,6 +35,7 @@
 #ifndef IECORE_IMAGEUNPREMULTIPLYOP_H
 #define IECORE_IMAGEUNPREMULTIPLYOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ChannelOp.h"
 
 namespace IECore
@@ -42,7 +43,7 @@ namespace IECore
 
 /// Performs unpremultiplication.
 /// \ingroup imageProcessingGroup
-class ImageUnpremultiplyOp : public ChannelOp
+class IECORE_API ImageUnpremultiplyOp : public ChannelOp
 {
 	public:
 

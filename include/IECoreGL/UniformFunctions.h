@@ -35,6 +35,7 @@
 #ifndef IECOREGL_UNIFORMFUNCTIONS_H
 #define IECOREGL_UNIFORMFUNCTIONS_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 
 #include <vector>
@@ -47,14 +48,14 @@ typedef void (*UniformFloatFunction)( GLint, GLsizei, const GLfloat * );
 /// Returns a vector containing function pointers to glUniform1fv, glUniform2fv ... glUniform4fv.
 /// This can be useful to avoid switching on your datasize when setting shader parameters - you
 /// can instead index straight into this vector to retrieve the appropriate function to call.
-const std::vector<UniformFloatFunction> &uniformFloatFunctions();
+IECOREGL_API const std::vector<UniformFloatFunction> &uniformFloatFunctions();
 
 /// The type of the glUniformNiv functions.
 typedef void (*UniformIntFunction)( GLint, GLsizei, const GLint * );
 /// Returns a vector containing function pointers to glUniform1iv, glUniform2iv ... glUniform4iv.
 /// This can be useful to avoid switching on your datasize when setting shader parameters - you
 /// can instead index straight into this vector to retrieve the appropriate function to call.
-const std::vector<UniformIntFunction> &uniformIntFunctions();
+IECOREGL_API const std::vector<UniformIntFunction> &uniformIntFunctions();
 
 /// The type of the glUniformMatrix*fv functions.
 typedef void (*UniformMatrixFunction)( GLint, GLsizei, GLboolean, const GLfloat * );
@@ -62,7 +63,7 @@ typedef void (*UniformMatrixFunction)( GLint, GLsizei, GLboolean, const GLfloat 
 /// This can be useful to avoid switching on your matrix dimensions when setting shader parameters - you
 /// can instead index straight into the vectors using the matrix dimensions to retrieve the
 /// appropriate function to call.
-const std::vector<std::vector<UniformMatrixFunction> > &uniformMatrixFunctions();
+IECOREGL_API const std::vector<std::vector<UniformMatrixFunction> > &uniformMatrixFunctions();
 
 } // namespace IECoreGL
 

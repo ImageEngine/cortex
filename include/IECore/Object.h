@@ -40,6 +40,7 @@
 #include <string>
 
 #include "boost/shared_ptr.hpp"
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/IndexedIO.h"
 
@@ -100,7 +101,7 @@ class MurmurHash;
 /// A base class defining copying and streaming.
 /// \ingroup coreGroup
 /// \todo rename virtual functions that match non-virtual functions so that pointers to derived classes still provide access the non-virtual ones: example hash(), memoryUsage(), save().
-class Object : public RunTimeTyped
+class IECORE_API Object : public RunTimeTyped
 {
 	public:
 
@@ -225,7 +226,7 @@ class Object : public RunTimeTyped
 		/// a means of copying Object derived member data while
 		/// ensuring the uniqueness of copies of objects in the case
 		/// that an object is referred to more than once.
-		class CopyContext
+		class IECORE_API CopyContext
 		{
 			public :
 				/// Returns a copy of the specified object.
@@ -243,7 +244,7 @@ class Object : public RunTimeTyped
 		virtual void copyFrom( const Object *other, CopyContext *context ) = 0;
 
 		/// The class provided to the save() method implemented by subclasses.
-		class SaveContext
+		class IECORE_API SaveContext
 		{
 			public :
 				SaveContext( IndexedIOPtr ioInterface );
@@ -282,7 +283,7 @@ class Object : public RunTimeTyped
 		};
 
 		/// The class provided to the load() method implemented by subclasses.
-		class LoadContext : public RefCounted
+		class IECORE_API LoadContext : public RefCounted
 		{
 			public :
 				LoadContext( ConstIndexedIOPtr ioInterface );
@@ -329,7 +330,7 @@ class Object : public RunTimeTyped
 
 		/// The class provided to the memoryUsage() virtual method implemented
 		/// by subclasses.
-		class MemoryAccumulator
+		class IECORE_API MemoryAccumulator
 		{
 			public :
 				MemoryAccumulator();

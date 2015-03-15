@@ -67,6 +67,7 @@ from BufferTest import BufferTest
 from ShadingTest import ShadingTest
 from ShaderLoaderTest import ShaderLoaderTest
 from ShaderStateComponentTest import ShaderStateComponentTest
+from ToGLStateConverterTest import ToGLStateConverterTest
 
 if IECore.withFreeType() :
 

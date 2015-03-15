@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CACHEDREADERBINDING_H
 #define IECOREPYTHON_CACHEDREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCachedReader();
+IECOREPYTHON_API void bindCachedReader();
 }
 
 #endif // IECOREPYTHON_CACHEDREADERBINDING_H

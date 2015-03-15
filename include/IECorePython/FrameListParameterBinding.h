@@ -36,10 +36,12 @@
 #ifndef IECOREPYTHON_FRAMELISTPARAMETERBINDING_H
 #define IECOREPYTHON_FRAMELISTPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindFrameListParameter();
+IECOREPYTHON_API void bindFrameListParameter();
 
 }
 

@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/CINImageWriter.h"
+#include "IECorePython/CINImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

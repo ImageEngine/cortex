@@ -35,6 +35,7 @@
 #ifndef IE_CORE_RUNTIMETYPED_H
 #define IE_CORE_RUNTIMETYPED_H
 
+#include "IECore/Export.h"
 #include "IECore/RefCounted.h"
 #include "IECore/TypeIds.h"
 
@@ -131,40 +132,40 @@ namespace IECore
 #define IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TYPENAME, TYPEID )		\
 																				\
 																				\
-	template<>																	\
+	template<> IECORE_API																	\
 	IECore::TypeId TYPENAME::typeId() const										\
 	{																			\
 		return IECore::TypeId( TYPEID );										\
 	}																			\
-	template<>																	\
+	template<> IECORE_API																	\
 	IECore::TypeId TYPENAME::staticTypeId()										\
 	{																			\
 		return IECore::TypeId( TYPEID );										\
 	}																			\
-	template<>																	\
+	template<> IECORE_API																	\
 	const char *TYPENAME::typeName() const										\
 	{																			\
 		return #TYPENAME;														\
 	}																			\
-	template<>																	\
+	template<> IECORE_API																	\
 	const char *TYPENAME::staticTypeName()										\
 	{																			\
 		return #TYPENAME;														\
 	}																			\
 																				\
-	template<> 																	\
+	template<> IECORE_API 																	\
 	IECore::TypeId TYPENAME::baseTypeId()										\
 	{																			\
 		return BaseClass::staticTypeId();									\
 	}																			\
 																				\
-	template<> 																	\
+	template<> IECORE_API 																	\
 	const char *TYPENAME::baseTypeName()										\
 	{																			\
 		return BaseClass::staticTypeName();									\
 	}																			\
 																				\
-	template<>																	\
+	template<> IECORE_API																	\
 	bool TYPENAME::isInstanceOf( IECore::TypeId typeId ) const					\
 	{																			\
 		if( typeId==staticTypeId() )											\
@@ -174,7 +175,7 @@ namespace IECore
 		return BaseClass::isInstanceOf( typeId );							\
 	}																			\
 																				\
-	template<>																	\
+	template<> IECORE_API																	\
 	bool TYPENAME::isInstanceOf( const char *typeName ) const					\
 	{																			\
 		if( !strcmp( typeName, staticTypeName() ) )								\
@@ -184,13 +185,13 @@ namespace IECore
 		return BaseClass::isInstanceOf( typeName );							\
 	}																			\
 																				\
-	template<>																	\
+	template<> IECORE_API																	\
 	bool TYPENAME::inheritsFrom( IECore::TypeId typeId )						\
 	{																			\
 		return BaseClass::staticTypeId()==typeId ? true : BaseClass::inheritsFrom( typeId );	\
 	}																			\
 																				\
-	template<>																	\
+	template<> IECORE_API																	\
 	bool TYPENAME::inheritsFrom( const char *typeName )							\
 	{																			\
 		return !strcmp( BaseClass::staticTypeName(), typeName ) ? true : BaseClass::inheritsFrom( typeName );	\
@@ -207,7 +208,7 @@ namespace IECore
 /// of serialised objects in files (see the serialisation
 /// interface defined in Object), but the C++ type_info object
 /// provides us with no information we can usefully use for that.
-class RunTimeTyped : public RefCounted
+class IECORE_API RunTimeTyped : public RefCounted
 {
 	public:
 

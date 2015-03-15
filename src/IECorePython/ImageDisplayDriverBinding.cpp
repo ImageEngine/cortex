@@ -38,6 +38,7 @@
 #include "IECore/ImageDisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/ImageDisplayDriverBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

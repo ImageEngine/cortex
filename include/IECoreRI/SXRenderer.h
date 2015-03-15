@@ -41,12 +41,14 @@
 
 #include "IECore/ImagePrimitive.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 IE_CORE_FORWARDDECLARE( SXRendererImplementation );
 
-class SXRenderer : public IECore::Renderer
+class IECORERI_API SXRenderer : public IECore::Renderer
 {
 
 	public :

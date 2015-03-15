@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMFBINDING_H
 #define IECOREPYTHON_IMFBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImf();
+IECOREPYTHON_API void bindImf();
 
 }
 

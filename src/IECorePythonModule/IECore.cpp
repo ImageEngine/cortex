@@ -55,7 +55,6 @@
 #include "IECorePython/TypeIdBinding.h"
 #include "IECorePython/CompoundDataBinding.h"
 #include "IECorePython/MessageHandlerBinding.h"
-#include "IECorePython/AttributeCacheBinding.h"
 #include "IECorePython/ReaderBinding.h"
 #include "IECorePython/ParticleReaderBinding.h"
 #include "IECorePython/PDCParticleReaderBinding.h"
@@ -126,7 +125,6 @@
 #include "IECorePython/ObjectInterpolatorBinding.h"
 #include "IECorePython/PointNormalsOpBinding.h"
 #include "IECorePython/PointDensitiesOpBinding.h"
-#include "IECorePython/InterpolatedCacheBinding.h"
 #include "IECorePython/TransformationMatrixBinding.h"
 #include "IECorePython/TransformationMatrixDataBinding.h"
 #include "IECorePython/BoundedKDTreeBinding.h"
@@ -174,9 +172,7 @@
 #include "IECorePython/PolygonAlgoBinding.h"
 #include "IECorePython/MeshMergeOpBinding.h"
 #include "IECorePython/FontBinding.h"
-#include "IECorePython/UniformRandomPointDistributionOpBinding.h"
 #include "IECorePython/UnicodeToStringBinding.h"
-#include "IECorePython/MappedRandomPointDistributionOpBinding.h"
 #include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
@@ -246,14 +242,10 @@
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECorePython/HdrMergeOpBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
-#include "IECorePython/HitMissTransformBinding.h"
 #include "IECorePython/CurveTracerBinding.h"
 #include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
-#include "IECorePython/ImageConvolveOpBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
-#include "IECorePython/MarschnerParameterBinding.h"
-#include "IECorePython/MarschnerLookupTableOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
 #include "IECorePython/MeshDistortionsOpBinding.h"
@@ -274,7 +266,6 @@
 #include "IECorePython/PointsPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointsMotionOpBinding.h"
 #include "IECorePython/CapturingRendererBinding.h"
-#include "IECorePython/EnvMapSHProjectorBinding.h"
 #include "IECorePython/LightBinding.h"
 #include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/CamelCaseBinding.h"
@@ -308,6 +299,7 @@
 #include "IECorePython/EXRDeepImageReaderBinding.h"
 #include "IECorePython/EXRDeepImageWriterBinding.h"
 #include "IECorePython/ExternalProceduralBinding.h"
+#include "IECorePython/ClippingPlaneBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -332,7 +324,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCompoundData();
 	bindIndexedIO();
 	bindMessageHandler();
-	bindAttributeCache();
 	bindParameterised();
 	bindOp();
 	bindReader();
@@ -411,7 +402,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindPointNormalsOp();
 	bindPointDensitiesOp();
 	bindOversamplesCalculator();
-	bindInterpolatedCache();
 	bindTransformationMatrix();
 	bindTransformationMatrixData();
 	bindBoundedKDTree();
@@ -465,9 +455,7 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #endif
 
-	bindUniformRandomPointDistributionOp();
 	bindUnicodeToString();
-	bindMappedRandomPointDistributionOp();
 	bindRadixSort();
 	bindPointRepulsionOp();
 	bindAngleConversion();
@@ -544,23 +532,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesPrimitiveEvaluator();
 	bindHdrMergeOp();
 	bindPointDistribution();
-	bindHitMissTransform();
 	bindCurveTracer();
 	bindImageThinner();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
-	bindMarschnerParameter();
-	bindMarschnerLookupTableOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
-	bindImageConvolveOp();
-	bindEnvMapSHProjectorOp();
-
-#endif
-
 	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
 	bindHexConversion();
@@ -616,6 +593,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLensDistortOp();
 	bindObjectPool();
 	bindExternalProcedural();
+	bindClippingPlane();
 
 #ifdef IECORE_WITH_DEEPEXR
 

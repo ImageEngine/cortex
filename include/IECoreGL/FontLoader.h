@@ -35,6 +35,7 @@
 #ifndef IECOREGL_FONTLOADER_H
 #define IECOREGL_FONTLOADER_H
 
+#include "IECoreGL/Export.h"
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( FontLoader );
 
 /// Loads Fonts from disk, using searchpaths to find them and
 /// keeping a cache to reduce load times.
-class FontLoader : public IECore::RefCounted
+class IECOREGL_API FontLoader : public IECore::RefCounted
 {
 
 	public :

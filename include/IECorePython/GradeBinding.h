@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_GRADEBINDING_H
 #define IECOREPYTHON_GRADEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindGrade();
+IECOREPYTHON_API void bindGrade();
 }
 
 #endif // IECOREPYTHON_GRADEBINDING_H

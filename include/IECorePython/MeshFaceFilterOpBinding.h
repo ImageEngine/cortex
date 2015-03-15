@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHFACEFILTEROPBINDING_H
 #define IECOREPYTHON_MESHFACEFILTEROPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshFaceFilterOp();
+IECOREPYTHON_API void bindMeshFaceFilterOp();
 
 } // namespace IECorePython
 

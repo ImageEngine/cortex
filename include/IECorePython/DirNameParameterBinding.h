@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DIRNAMEPARAMETERBINDING_H
 #define IECOREPYTHON_DIRNAMEPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDirNameParameter();
+IECOREPYTHON_API void bindDirNameParameter();
 }
 
 #endif // IECOREPYTHON_DIRNAMEPARAMETERBINDING_H

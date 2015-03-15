@@ -35,9 +35,11 @@
 #ifndef ICOREPYTHON_COORDINATESYSTEMBINDING_H
 #define ICOREPYTHON_COORDINATESYSTEMBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-  void bindCoordinateSystem();
+IECOREPYTHON_API void bindCoordinateSystem();
 }
 
 #endif // ICOREPYTHON_COORDINATESYSTEMBINDING_H

@@ -45,7 +45,6 @@
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/ShaderStateComponent.h"
 #include "IECoreGL/Shader.h"
-#include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
 #include "IECoreGL/CachedConverter.h"
@@ -131,6 +130,23 @@ static Shader *constant2()
 	return s.get();
 }
 
+static Shader *flatConstant()
+{
+
+	static const char *fragmentSource =
+
+		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
+		""
+		"void main()"
+		"{"
+		"	gl_FragColor = vec4( Cs, 1 );"
+		"}";
+
+	static ShaderPtr s = new Shader( "", fragmentSource );
+	return s.get();
+}
+
+
 void Primitive::render( State *state ) const
 {
 	const Selector *currentSelector = Selector::currentSelector();
@@ -194,7 +210,7 @@ void Primitive::render( State *state ) const
 	}
 	
 	// get a constant shader suitable for drawing wireframes, points etc.
-	const Shader *constantShader = Shader::constant();
+	const Shader *constantShader = flatConstant();
 	if( currentSelector && currentSelector->mode() == Selector::IDRender )
 	{
 		// if we're in IDRender mode, then the constant shader is unsuitable,
@@ -285,7 +301,7 @@ const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state 
 	}
 	
 	Shader::SetupPtr setup = new Shader::Setup( shader );
-	addPrimitiveVariablesToShaderSetup( setup.get()  );
+	addPrimitiveVariablesToShaderSetup( setup.get() );
 		
 	m_shaderSetups.push_back( setup );
 	return setup.get();

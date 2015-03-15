@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_TIMECODEDATABINDING_H
 #define IECOREPYTHON_TIMECODEDATABINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindTimeCodeData();
+IECOREPYTHON_API void bindTimeCodeData();
 
 }
 

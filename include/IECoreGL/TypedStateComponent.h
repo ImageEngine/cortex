@@ -36,6 +36,7 @@
 #ifndef IECOREGL_TYPEDSTATECOMPONENT_H
 #define IECOREGL_TYPEDSTATECOMPONENT_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/StateComponent.h"
 
 #include "OpenEXR/ImathColor.h"
@@ -94,30 +95,30 @@ class TypedStateComponent : public StateComponent
 /// Use this macro to specialise the necessary parts of a TypedStateComponent instantiation.
 #define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )				\
 	template<>																				\
-	const char *TYPE::typeName() const														\
+	IECOREGL_API const char *TYPE::typeName() const														\
 	{																						\
 		return # TYPE;																		\
 	}																						\
 																							\
 	template<>																				\
-	const char *TYPE::staticTypeName()														\
+	IECOREGL_API const char *TYPE::staticTypeName()														\
 	{																						\
 		return # TYPE;																		\
 	}																						\
 																							\
 	template<>																				\
-	BASETYPE TYPE::defaultValue()															\
+	IECOREGL_API BASETYPE TYPE::defaultValue()															\
 	{																						\
 		return DEFAULTVALUE;																\
 	}
 
 #define IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( TYPE, TYPEID, BASETYPE, DEFAULTVALUE )	\
 	IECOREGL_TYPEDSTATECOMPONENT_SPECIALISE( TYPE, BASETYPE, DEFAULTVALUE )								\
-	template class TypedStateComponent<BASETYPE, TYPEID>;										\
+	template IECOREGL_API class TypedStateComponent<BASETYPE, TYPEID>;										\
 
 typedef TypedStateComponent<Imath::Color4f, ColorTypeId> Color;
 template<>
-void Color::bind() const;
+IECOREGL_API void Color::bind() const;
 
 /// \todo Consider also moving the following state components to Primitive header since the renderer maps then to "gl:primitive:*"
 /// Used to signify that the shading for a primitive may produce transparent values. The Renderer
@@ -141,7 +142,7 @@ enum GLPointsUsage
 	ForAll
 };
 
-struct BlendFactors
+struct IECOREGL_API BlendFactors
 {
 	BlendFactors( GLenum src, GLenum dst );
 	BlendFactors( const BlendFactors &other );
@@ -149,7 +150,7 @@ struct BlendFactors
 	GLenum dst;
 };
 
-struct AlphaFunc
+struct IECOREGL_API AlphaFunc
 {
 	AlphaFunc( GLenum m, GLfloat value );
 	AlphaFunc( const AlphaFunc &other );
@@ -159,59 +160,59 @@ struct AlphaFunc
 
 typedef TypedStateComponent<BlendFactors, BlendFuncStateComponentTypeId> BlendFuncStateComponent;
 template<>
-void BlendFuncStateComponent::bind() const;
+IECOREGL_API void BlendFuncStateComponent::bind() const;
 
 typedef TypedStateComponent<Imath::Color4f, BlendColorStateComponentTypeId> BlendColorStateComponent;
 template<>
-void BlendColorStateComponent::bind() const;
+IECOREGL_API void BlendColorStateComponent::bind() const;
 
 typedef TypedStateComponent<GLenum, BlendEquationStateComponentTypeId> BlendEquationStateComponent;
 template<>
-void BlendEquationStateComponent::bind() const;
+IECOREGL_API void BlendEquationStateComponent::bind() const;
 
 typedef TypedStateComponent<bool, AlphaTestStateComponentTypeId> AlphaTestStateComponent;
 template<>
-void AlphaTestStateComponent::bind() const;
+IECOREGL_API void AlphaTestStateComponent::bind() const;
 
 typedef TypedStateComponent<AlphaFunc, AlphaFuncStateComponentTypeId> AlphaFuncStateComponent;
 template<>
-void AlphaFuncStateComponent::bind() const;
+IECOREGL_API void AlphaFuncStateComponent::bind() const;
 
 /// Used to specify enable state of GL_CULL_FACE
 typedef TypedStateComponent<bool, DoubleSidedStateComponentTypeId> DoubleSidedStateComponent;
 template<>
-void DoubleSidedStateComponent::bind() const;
+IECOREGL_API void DoubleSidedStateComponent::bind() const;
 
 /// Used to implement the "rightHandedOrientation" Renderer attribute. Implemented by calling
 /// glFrontFace( GL_CCW ) when true and glFrontFace( GL_CW ) when false.
 typedef TypedStateComponent<bool, RightHandedOrientationStateComponentTypeId> RightHandedOrientationStateComponent;
 template<>
-void RightHandedOrientationStateComponent::bind() const;
+IECOREGL_API void RightHandedOrientationStateComponent::bind() const;
 
 /// Used to specify enable state of GL_LINE_SMOOTH
 typedef TypedStateComponent<bool, LineSmoothingStateComponentTypeId> LineSmoothingStateComponent;
 template<>
-void LineSmoothingStateComponent::bind() const;
+IECOREGL_API void LineSmoothingStateComponent::bind() const;
 
 /// Used to specify enable state of GL_POINT_SMOOTH
 typedef TypedStateComponent<bool, PointSmoothingStateComponentTypeId> PointSmoothingStateComponent;
 template<>
-void PointSmoothingStateComponent::bind() const;
+IECOREGL_API void PointSmoothingStateComponent::bind() const;
 
 /// Used to specify enable state of GL_POLYGON_SMOOTH
 typedef TypedStateComponent<bool, PolygonSmoothingStateComponentTypeId> PolygonSmoothingStateComponent;
 template<>
-void PolygonSmoothingStateComponent::bind() const;
+IECOREGL_API void PolygonSmoothingStateComponent::bind() const;
 
 /// Used to specify enable state of GL_DEPTH_TEST
 typedef TypedStateComponent<bool, DepthTestStateComponentTypeId> DepthTestStateComponent;
 template<>
-void DepthTestStateComponent::bind() const;
+IECOREGL_API void DepthTestStateComponent::bind() const;
 
 /// Used to set glDepthMask to GL_TRUE or GL_FALSE
 typedef TypedStateComponent<bool, DepthMaskStateComponentTypeId> DepthMaskStateComponent;
 template<>
-void DepthMaskStateComponent::bind() const;
+IECOREGL_API void DepthMaskStateComponent::bind() const;
 
 // \todo: implement CurrentSpace, ShaderSpace, CameraSpace, ScreenSpace, RasterSpace and NDCSpace like in Renderman interface.
 enum RendererSpace

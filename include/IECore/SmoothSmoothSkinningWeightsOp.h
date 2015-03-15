@@ -37,6 +37,7 @@
 
 #include "boost/graph/adjacency_list.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/FrameListParameter.h"
 #include "IECore/MeshPrimitive.h"
@@ -54,7 +55,7 @@ namespace IECore
 /// parameter which applies smoothing to user chosen vertices only. In this case, the smoothing weights will still be
 /// interpolated from all connected vertices, regardless of which vertices have been selected.
 /// \ingroup skinningGroup
-class SmoothSmoothSkinningWeightsOp : public ModifyOp
+class IECORE_API SmoothSmoothSkinningWeightsOp : public ModifyOp
 {
 	public :
 

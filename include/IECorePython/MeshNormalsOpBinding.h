@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_MESHNORMALSOPBINDING_H
 #define IECOREPYTHON_MESHNORMALSOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindMeshNormalsOp();
+IECOREPYTHON_API void bindMeshNormalsOp();
 
 } // namespace IECorePython
 

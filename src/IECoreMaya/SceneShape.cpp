@@ -355,8 +355,14 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 	{
 		return false;
 	}
-
-	return sceneShape->getSceneInterface()->hasObject();
+	
+	IECore::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
+	if( !sceneInterface )
+	{
+		return false;
+	}
+	
+	return sceneInterface->hasObject();
 }
 
 ConstObjectPtr SceneShape::readSceneShapeObject( const MDagPath &p )

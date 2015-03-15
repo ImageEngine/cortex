@@ -49,7 +49,10 @@ GXEvaluator::GXEvaluator( const IECore::Primitive *primitive )
 	RiBegin( 0 );
 	m_context = RiGetContext();
 	
+	// create a renderer with automatic instancing disabled, as we want to explicitly create an instanceable object:
 	RendererPtr renderer = new IECoreRI::Renderer();
+	renderer->setAttribute( "ri:automaticInstancing", new IECore::BoolData( false ) );
+	
 	RtObjectHandle objectHandle = RiObjectBegin();
 	
 		primitive->render( renderer.get() );

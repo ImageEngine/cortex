@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_HEADERGENERATORBINGING_H
 #define IECOREPYTHON_HEADERGENERATORBINGING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindHeaderGenerator();
+IECOREPYTHON_API void bindHeaderGenerator();
 }
 
 #endif // IECOREPYTHON_HEADERGENERATORBINGING_H

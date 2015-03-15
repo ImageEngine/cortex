@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_IMAGEDISPLAYDRIVERBINDING_H
 #define IECOREPYTHON_IMAGEDISPLAYDRIVERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindImageDisplayDriver();
+IECOREPYTHON_API void bindImageDisplayDriver();
 
 }
 

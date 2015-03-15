@@ -37,8 +37,10 @@
 #include "IECore/Camera.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/Primitive.h"
+#include "IECore/NullObject.h"
 
 #include "IECoreMaya/LiveScene.h"
+#include "IECoreMaya/FromMayaPlugConverter.h"
 #include "IECoreMaya/FromMayaTransformConverter.h"
 #include "IECoreMaya/FromMayaShapeConverter.h"
 #include "IECoreMaya/FromMayaDagNodeConverter.h"
@@ -53,6 +55,7 @@
 #include "maya/MFnCamera.h"
 #include "maya/MFnMatrixData.h"
 #include "maya/MFnNumericData.h"
+#include "maya/MFnAttribute.h"
 #include "maya/MSelectionList.h"
 #include "maya/MAnimControl.h"
 #include "maya/MString.h"
@@ -254,7 +257,13 @@ bool LiveScene::hasAttribute( const Name &name ) const
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
 		NameList names;
-		it->m_names( m_dagPath, names );
+		{
+			// call it->m_names under a mutex, as it could be reading plug values,
+			// which isn't thread safe:
+			tbb::mutex::scoped_lock l( s_mutex );
+			it->m_names( m_dagPath, names );
+		}
+		
 		if ( std::find(names.begin(), names.end(), name) != names.end() )
 		{
 			return true;
@@ -269,14 +278,34 @@ void LiveScene::attributeNames( NameList &attrs ) const
 	{
 		throw Exception( "IECoreMaya::LiveScene::attributeNames: Dag path no longer exists!" );
 	}
-	
+
 	tbb::mutex::scoped_lock l( s_mutex );
 	attrs.clear();
 	attrs.push_back( SceneInterface::visibilityName );
+
+	// translate attributes with names starting with "ieAttr_":
+	MFnDependencyNode fnNode( m_dagPath.node() );
+	unsigned int n = fnNode.attributeCount();
+	for( unsigned int i=0; i<n; i++ )
+	{
+		MObject attr = fnNode.attribute( i );
+		MFnAttribute fnAttr( attr );
+		MString attrName = fnAttr.name();
+		if( attrName.length() > 7 && ( strstr( attrName.asChar(),"ieAttr_" ) == attrName.asChar() ) )
+		{
+			attrs.push_back( ( "user:" + attrName.substring( 7, attrName.length()-1 ) ).asChar() );
+		}
+	}
+
+	// add attributes from custom readers:
 	for ( std::vector< CustomAttributeReader >::const_iterator it = customAttributeReaders().begin(); it != customAttributeReaders().end(); it++ )
 	{
 		it->m_names( m_dagPath, attrs );
 	}
+
+	// remove duplicates:
+	std::sort( attrs.begin(), attrs.end() );
+	attrs.erase( std::unique( attrs.begin(), attrs.end() ), attrs.end() );
 }
 
 ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
@@ -363,9 +392,9 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 	{
 		return new BoolData( true );
 	}
-	
+
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
-	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
+	for ( std::vector< CustomAttributeReader >::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
 	{
 		ConstObjectPtr attr = it->m_read( m_dagPath, name );
 		if( !attr )
@@ -374,7 +403,25 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		}
 		return attr;
 	}
-	return 0;
+
+	if( strstr( name.c_str(), "user:" ) == name.c_str() )
+	{
+
+		MStatus st;
+		MFnDependencyNode fnNode( m_dagPath.node() );
+		MPlug attrPlug = fnNode.findPlug( ( "ieAttr_" + name.string().substr(5) ).c_str(), false, &st );
+		if( st )
+		{
+			FromMayaConverterPtr plugConverter = FromMayaPlugConverter::create( attrPlug );
+			if( !plugConverter )
+			{
+				return IECore::NullObject::defaultNullObject();
+			}
+			return plugConverter->convert();
+		}
+	}
+
+	return IECore::NullObject::defaultNullObject();
 }
 
 void LiveScene::writeAttribute( const Name &name, const Object *attribute, double time )
@@ -421,6 +468,26 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 	}
 	
 	std::set<Name> uniqueTags;
+
+	// read tags from ieTags attribute:
+	MStatus st;
+	MFnDependencyNode fnNode( m_dagPath.node() );
+	MPlug tagsPlug = fnNode.findPlug( "ieTags", false, &st );
+	if( st )
+	{
+		std::string tagsStr( tagsPlug.asString().asChar() );
+		boost::tokenizer<boost::char_separator<char> > t( tagsStr, boost::char_separator<char>( " " ) );
+		for (
+			boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin();
+			it != t.end();
+			++it
+		)
+		{
+			uniqueTags.insert( Name( *it ) );
+		}
+	}
+
+	// read tags from custom readers:
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
@@ -548,7 +615,7 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 			}
 		}
 	}
-	return 0;
+	return IECore::NullObject::defaultNullObject();
 }
 
 PrimitiveVariableMap LiveScene::readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const

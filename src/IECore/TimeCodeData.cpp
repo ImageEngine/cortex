@@ -32,6 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/Export.h"
 #include "IECore/TimeCodeData.h"
 #include "IECore/TypedData.inl"
 #include "IECore/MurmurHash.h"
@@ -92,6 +93,6 @@ void SimpleDataHolder<Imf::TimeCode>::hash( MurmurHash &h ) const
 	h.append( Imath::V2i( timeCode.timeAndFlags(), timeCode.userData() ) );
 }
 
-template class TypedData<Imf::TimeCode>;
+template class IECORE_API TypedData<Imf::TimeCode>;
 
 } // namespace IECore

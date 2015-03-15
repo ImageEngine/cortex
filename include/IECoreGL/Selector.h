@@ -42,6 +42,7 @@
 
 #include "IECore/RefCounted.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/HitRecord.h"
 
 namespace IECoreGL
@@ -52,7 +53,7 @@ IE_CORE_FORWARDDECLARE( Shader );
 
 /// The Selector class simplifies the process of selecting objects
 /// rendered with OpenGL.
-class Selector : boost::noncopyable
+class IECOREGL_API Selector : boost::noncopyable
 {
 
 	public :
@@ -107,6 +108,10 @@ class Selector : boost::noncopyable
 		/// If rendering a Scene, this will be called automatically
 		/// by the NameStateComponents within the Scene.
 		void loadName( GLuint name );
+		/// Generates a new name (by incrementing an internal counter) and
+		/// loads and returns it. No guarantee is made that generated names
+		/// will not clash with names loaded explicitly with the method above.
+		GLuint loadName();
 		
 		/// A State that should be used as the base state for
 		/// selection drawing.

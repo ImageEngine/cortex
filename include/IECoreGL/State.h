@@ -37,6 +37,7 @@
 
 #include "IECore/CompoundData.h"
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/TypeIds.h"
 
@@ -46,14 +47,14 @@ namespace IECoreGL
 IE_CORE_FORWARDDECLARE( State );
 IE_CORE_FORWARDDECLARE( StateComponent );
 
-class State : public Bindable
+class IECOREGL_API State : public Bindable
 {
 
 	public :
 
 		/// This class binds a State upon construction, and on destruction makes
 		/// sure that the previous state is reverted to.
-		class ScopedBinding : private boost::noncopyable
+		class IECOREGL_API ScopedBinding : private boost::noncopyable
 		{
 		
 			public :
@@ -62,11 +63,15 @@ class State : public Bindable
 				/// new bindings. It is the caller's responsibility to keep both arguments
 				/// alive until after destruction of the ScopedBinding.
 				ScopedBinding( const State &s, State &currentState );
+				/// As above, but does nothing if bind is false.
+				ScopedBinding( const State &s, State &currentState, bool bind );
 				/// Reverts the state changes and modifications to currentState
 				/// made by the constructor.
 				~ScopedBinding();
 
 			private :
+
+				void init( const State &s, bool bind = true );
 
 				State &m_currentState;
 				std::vector<StateComponentPtr> m_savedComponents;

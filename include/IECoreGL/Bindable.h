@@ -35,6 +35,7 @@
 #ifndef IECOREGL_BINDABLE_H
 #define IECOREGL_BINDABLE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 
 #include "IECore/RunTimeTyped.h"
@@ -45,7 +46,7 @@ namespace IECoreGL
 /// The Bindable class provides an abstract base class
 /// for all classes which can bind to OpenGL, modifying
 /// the state in some way.
-class Bindable : public IECore::RunTimeTyped
+class IECOREGL_API Bindable : public IECore::RunTimeTyped
 {
 
 	public :

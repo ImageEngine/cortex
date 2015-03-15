@@ -34,6 +34,7 @@
 
 #include "boost/static_assert.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/TypedPrimitiveOp.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
@@ -73,7 +74,7 @@ const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::
 	\
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME##TypeId );\
 	\
-	template class TypedPrimitiveOp<T>;
+	template class IECORE_API TypedPrimitiveOp<T>;
 
 namespace IECore
 {

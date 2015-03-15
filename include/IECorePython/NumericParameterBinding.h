@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_NUMERICPARAMETERBINDING_H
 #define IECOREPYTHON_NUMERICPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindNumericParameter();
+IECOREPYTHON_API void bindNumericParameter();
 }
 
 #endif // IECOREPYTHON_NUMERICPARAMETERBINDING_H

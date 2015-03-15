@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LUMINANCEOPBINDING_H
 #define IECOREPYTHON_LUMINANCEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLuminanceOp();
+IECOREPYTHON_API void bindLuminanceOp();
 
 } // namespace IECorePython
 

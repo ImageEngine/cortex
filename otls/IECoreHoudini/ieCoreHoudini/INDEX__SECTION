@@ -11,16 +11,3 @@ Python:       false
 Empty:        false
 Modified:     Mon Nov 15 19:07:44 2010
 
-Operator:     cortexWriter
-Label:        Cortex Writer
-Path:         oplib:/Sop/cortexWriter?Sop/cortexWriter
-Icon:         opdef:/Sop/cortexWriter?media-floppy.svg
-Table:        Sop
-License:      
-Extra:        
-Inputs:       1 to 1
-Subnet:       true
-Python:       false
-Empty:        false
-Modified:     Mon Dec 20 16:51:14 2010
-

@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CURVETRACERBINDING_H
 #define IECOREPYTHON_CURVETRACERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCurveTracer();
+IECOREPYTHON_API void bindCurveTracer();
 
 } // namespace IECorePython
 

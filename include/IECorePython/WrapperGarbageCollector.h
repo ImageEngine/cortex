@@ -41,6 +41,8 @@
 
 #include "IECore/RefCounted.h"
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
@@ -51,7 +53,7 @@ namespace IECorePython
 /// the identity problem when pushing RefCountedPtr to python (we
 /// need to find the corresponding PyObject).
 //\todo Optimize the collect() function. The function is taking too much tests on reference counting when many objects are allocated.
-class WrapperGarbageCollector
+class IECOREPYTHON_API WrapperGarbageCollector
 {
 
 	public :

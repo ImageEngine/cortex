@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <cassert>
+
 #include "IECore/PointDensitiesOp.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/ObjectParameter.h"
@@ -39,8 +41,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/Object.h"
 #include "IECore/KDTree.h"
-
-#include <cassert>
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace Imath;

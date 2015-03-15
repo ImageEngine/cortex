@@ -35,6 +35,7 @@
 #ifndef IECOREGL_MESHPRIMITIVE_H
 #define IECOREGL_MESHPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 #include "IECore/VectorTypedData.h"
@@ -43,7 +44,7 @@ namespace IECoreGL
 {
 
 /// \todo Fast drawing, uvs etc. Consider using NVIDIA tristrip library? something else? GLU?
-class MeshPrimitive : public Primitive
+class IECOREGL_API MeshPrimitive : public Primitive
 {
 
 	public :

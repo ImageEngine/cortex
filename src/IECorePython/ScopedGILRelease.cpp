@@ -37,7 +37,7 @@
 using namespace IECorePython;
 
 ScopedGILRelease::ScopedGILRelease()
-	:	m_threadsInitialised( PyEval_ThreadsInitialized() )
+	:	m_threadsInitialised( Py_IsInitialized() && PyEval_ThreadsInitialized() )
 {
 	if( m_threadsInitialised )
 	{

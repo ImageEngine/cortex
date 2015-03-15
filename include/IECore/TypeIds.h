@@ -231,7 +231,7 @@ enum TypeId
 	RandomRotationOpTypeId = 183,
 	V2iVectorDataTypeId = 184,
 	V3iVectorDataTypeId = 185,
-	PointMeshOpTypeId = 186, // obsolete - available for reuse
+	ClippingPlaneTypeId = 186,
 	ParticleMeshOpTypeId = 187, // obsolete - available for reuse
 	HalfDataTypeId = 188,
 	MeshPrimitiveOpTypeId = 189,
@@ -352,17 +352,17 @@ enum TypeId
 	CurvesPrimitiveOpTypeId = 304,
 	CurvesPrimitiveEvaluatorTypeId = 305,
 	HdrMergeOpTypeId = 306,
-	HitMissTransformTypeId = 307,
+	HitMissTransformTypeId = 307, // obsolete - available for reuse
 	CurveTracerTypeId = 308,
 	ImageThinnerTypeId = 309,
 	CurveLineariserTypeId = 310,
 	CompoundDataBaseTypeId = 311,
-	ImageConvolveOpTypeId = 312,
+	ImageConvolveOpTypeId = 312, // obsolete - available for reuse
 	ClassParameterTypeId = 313,
 	ClassVectorParameterTypeId = 314,
 	CurveTangentsOpTypeId = 315,
-	MarschnerParameterTypeId = 316,
-	MarschnerLookupTableOpTypeId = 317,
+	MarschnerParameterTypeId = 316, // obsolete - available for reuse
+	MarschnerLookupTableOpTypeId = 317, // obsolete - available for reuse
 	SmoothSkinningDataTypeId = 318,
 	FaceVaryingPromotionOpTypeId = 319,
 	MeshDistortionsOpTypeId = 320,
@@ -385,7 +385,7 @@ enum TypeId
 	CapturingRendererTypeId = 337,
 	LinearToPanalogOpTypeId = 338,
 	PanalogToLinearOpTypeId = 339,
-	EnvMapSHProjectorTypeId = 340,
+	EnvMapSHProjectorTypeId = 340, // obsolete - available for reuse
 	LightTypeId = 341,
 	ContrastSmoothSkinningWeightsOpTypeId = 342,
 	PointDistributionOpTypeId = 343,
@@ -483,6 +483,9 @@ enum TypeId
 	
 	FirstCoreArnoldTypeId = 114000,
 	LastCoreArnoldTypeId = 114999,
+
+	FirstCoreAppleseedTypeId = 115000,
+	LastCoreAppleseedTypeId = 115999,
 
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,

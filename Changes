@@ -1,3 +1,226 @@
+# 9.0.0-b4
+
+#### IECore
+
+- Added IECore::ClippingPlane object
+- Set __file__ when loading configs
+- Emitting a debug message for each config file loaded
+
+#### IECoreMaya
+
+- Added a mutex inside IECoreMaya::LiveScene::hasAttribute()
+
+#### IECoreGL
+
+- Wireframe shading uses Cs instead of vertexCs
+
+#### IECoreRI
+
+- Several IECoreRI::shader() optimizations
+- Added clipping plane support to IECoreRI::Renderer
+
+#### IECoreAppleseed
+
+- Refactored IECore primitive to appleseed entities conversions code.
+- Simplified IECoreAppleseed::RendererImplementation.
+- Use appleseed object alpha maps instead of material alpha maps.
+- Fixed a bug when trying to render a scene without cameras.
+- Use the names set with setAttribute to name the appleseed entities in generated appleseed scene files.
+- Highlight regions being rendered in the interactive display driver. Useful when doing multipass rendering.
+- Small refactors in the display driver code.
+- Removed some unused headers and other formatting changes.
+- Camera and transformation motion blur support
+- Added as:automatic_instancing option to enable / disable auto-instancing.
+- Better error handling for as:mesh_file_format option
+- Better error handling for searchpath option. Added automatic_instancing option
+- Support for appleseed 1.1.2
+- Fixed bug when connecting members of stuct parameters in OSL shaders.
+- Added photon target attribute for objects
+- PrimitiveConverter interface changes. Changed the way hashes are computed in IECoreAppleseed.
+- Fixed assembly instance names when generating appleseed projects.
+
+# 9.0.0-b3
+
+#### IECore
+
+* Added implicit conversion from python datetime to DateTimeData.
+* Linked scenes no longer return duplicate tags
+
+#### IECoreMaya
+
+* Only allow selection using the bounding box if the box is visible
+* Latest registered custom attribute reader now takes precedence in IECoreMaya.LiveScene
+* On transform nodes, plugs with names prefixed by "ieAttr_" are now translated into "user:" attributes by the IECoreMaya.LiveScene
+* String attributes called "ieTags" on transform nodes now interpreted as a space separated list of tags
+
+#### IECoreHoudini
+
+* Latest registered custom attribute reader now takes precedence in IECoreHoudini.LiveScene
+
+#### IECoreRI
+
+* added IECoreRI support for DoubleData, V3dData and Color3dData attributes
+
+# 9.0.0-b2
+
+#### IECore
+
+- Removed SimpleSubsurface
+- Removed Marschner code
+- Removed HitMissTransform
+- Removed TypeInfoCmp
+- Removed UniformRandomPointDistributionOp
+- Removed MappedRandomPointDistributionOp
+- Removed AttributeCache
+- Removed InterpolatedCache
+- Removed spherical harmonics code
+- Removed FileExampiners
+- Improved MurmurHash performance
+
+#### IECoreGL
+
+- Added mip mapping to ColorTexture.
+
+#### IECoreAppleseed
+
+- Added visibility attributes support.
+- Fixed bug converting OSL int shader parameters.
+
+#### Build
+
+- Windows build fixes.
+- Updated default build arguments to work with standard packages on Ubuntu 12.04.
+- Configured Travis automated testing.
+
+# 9.0.0-b1
+
+#### IECore
+
+- Fixed GILReleasePtr crash.
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreMaya
+
+- Fixed ieSceneShape component selection bug.
+- Fixed crash when expanding ieSceneShapes containing coordinate systems.
+
+#### IECoreGL
+
+- Added ToGLSphereConverter.
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreRI
+
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreArnold
+
+- Adding the export macros for proper exporting of symbols.
+
+#### IECoreAppleseed
+
+- Added initial support for Appleseed.
+- Added crop window support.
+- Fixed OSX compilation and linking issues.
+
+#### IECoreAlembic
+
+- Adding the export macros for proper exporting of symbols.
+
+# 9.0.0-a11
+
+#### IECore
+
+- Optimised Object::memoryUsage() 
+
+#### IECoreGL
+
+- Added support for setting array uniforms in shader parameters
+
+#### IECoreAppleseed
+
+- Added initial support for Appleseed
+
+# 9.0.0-a10
+
+#### IECore
+
+- Fixed GIL bug in python Object creation
+- Added implementation of tbb_hasher for boost::intrusive_ptr
+
+#### IECoreGL
+
+- Added State::ScopedBinding overload, allowing a binding to be ignored
+- Changed IECoreGL::HitRecord::name field from InternedString to GLuint
+- Added IECoreGL::Selector::loadName() overload to auto-generates names
+- Removed TextureUnits.h
+- Added python bindings for CurvesPrimitive
+- Added python bindings for smoothing state components
+- Added ToGLStateConverter for converting attributes to State objects
+- Fixed crash in ShaderStateComponent::addParametersToShaderSetup()
+
+#### Incompatibilities
+
+- Changed IECoreGL::HitRecord members
+- Removed IECoreGL/TextureUnits.h
+
+#### Build
+
+- Fixed compilation for GCC 4.2 on OS X
+
+# 9.0.0-a9
+
+#### IECore
+
+- TIFFImageReader now checks if the tif is tagged as coming from tdlmake, and if so, sets the sourceColorSpace from the image description set by tdlmake.
+
+#### IECoreGL
+
+-  Switched glsl diffuse and specular functions to match 3delight's properly normalized BRDFS
+
+#### IECoreMaya
+
+- Fixed coordinate system->maya locator converter crash for coordinate system with no transform
+- Fixed crash in SceneShape::hasSceneShapeObject for invalid scene
+
+#### IECoreRI
+
+- Automatic instancing now defaults to on
+
+# 9.0.0-a8
+
+#### IECoreMaya
+
+- Stopped IECoreMaya::LiveScene::readObject() returning null pointers.
+- Stopped IECoreMaya::LiveScene::readAttribute() returning null pointers.
+
+#### IECoreRI
+
+- Fixed precision issue with computing the projection matrix for dsm depth remapping, which was causing deep holdout problems.
+- Fixed bug when editing cameras when dealing with multiple cameras.
+
+# 9.0.0-a7
+
+#### IECore
+
+- Reduced overhead of calling memoryUsage() on SimpleTypedData.
+- Added pixelAspectRatio to list of standard camera parameters.
+- Added InternedString( const char *, size_t length ) constructor.
+
+#### IECoreRI
+
+- Added pixel aspect ratio support to IECoreRI::Renderer.
+- Fixed argument passing for RiProcDynamicLoad.
+
+#### IECoreArnold
+
+- Added pixel aspect ratio support to IECoreArnold::Renderer.
+
+#### IECoreHoudini
+
+- ToHoudiniGeometryConverter marks Pref and rest as non-transforming
+- Preventing SceneCache Source from transforming rest/Pref
+
 # 9.0.0-a6
 
 #### IECore

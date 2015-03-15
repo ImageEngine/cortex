@@ -35,12 +35,13 @@
 #ifndef IECOREGL_UINTTEXTURE_H
 #define IECOREGL_UINTTEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
 {
 
-class UIntTexture : public Texture
+class IECOREGL_API UIntTexture : public Texture
 {
 	public :
 

@@ -45,6 +45,7 @@
 #include "IECoreGL/CachedConverter.h"
 
 using namespace std;
+using namespace IECore;
 using namespace IECoreGL;
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,6 +93,10 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 
 		void addParametersToShaderSetup( Shader::Setup *shaderSetup ) const
 		{
+			if( !m_parameterMap )
+			{
+				return;
+			}
 			const IECore::CompoundObject::ObjectMap &d = m_parameterMap->members();
 			for( IECore::CompoundObject::ObjectMap::const_iterator it = d.begin(), eIt = d.end(); it != eIt; it++ )
 			{
@@ -178,6 +183,10 @@ ShaderStateComponent::ShaderStateComponent()
 
 ShaderStateComponent::ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
 	:	m_implementation( new Implementation( shaderLoader, textureLoader, vertexSource, geometrySource, fragmentSource, parameterValues ) )
+{
+}
+
+ShaderStateComponent::~ShaderStateComponent()
 {
 }
 

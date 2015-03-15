@@ -36,6 +36,7 @@
 
 #include "IECore/ColorTransformOp.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/ColorTransformOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"

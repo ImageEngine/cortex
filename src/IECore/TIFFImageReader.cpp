@@ -52,6 +52,7 @@
 
 #include "boost/static_assert.hpp"
 #include "boost/format.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 
 #include "tiffio.h"
 
@@ -206,6 +207,24 @@ Imath::Box2i TIFFImageReader::displayWindow()
 std::string TIFFImageReader::sourceColorSpace() const
 {
 	readCurrentDirectory( true );
+
+	// Handle 3delight tdls specially - they store the sourceColorSpace in the imageDescription
+	if( boost::starts_with( m_software, "tdlmake" ) )
+	{
+		if( m_imageDescription.find( "InputSpace:BT.709" ) != std::string::npos )
+		{
+			return "rec709";
+		}
+		else if( m_imageDescription.find( "InputSpace:sRGB" ) != std::string::npos )
+		{
+			return "srgb";
+		}
+		else
+		{
+			return "linear";
+		}
+	}
+
 	if ( m_sampleFormat == SAMPLEFORMAT_IEEEFP )
 	{
 		// Usually the tiffs are in linear colorspace if the channels are float.
@@ -647,6 +666,11 @@ bool TIFFImageReader::readCurrentDirectory( bool throwOnFailure )
 		{
 			throw IOException( ( boost::format("TIFFImageReader: Unsupported value (%d) for TIFFTAG_PLANARCONFIG") % m_orientation ).str() );
 		}
+
+		// The pointer returned by TIFFGetField will be invalidated if we change the directory index.
+		// Copy it to a string to be safe
+		m_software = std::string( tiffField<const char *>( TIFFTAG_SOFTWARE, "" ) );
+		m_imageDescription = std::string( tiffField<const char *>( TIFFTAG_IMAGEDESCRIPTION, "" ) );
 
 		uint16 numExtraSamples;
 		uint16 *extraSamples;

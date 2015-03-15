@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGEPRIMITIVEEVALUATORBINDING_H
 #define IECOREPYTHON_IMAGEPRIMITIVEEVALUATORBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImagePrimitiveEvaluator();
+IECOREPYTHON_API void bindImagePrimitiveEvaluator();
 }
 
 #endif // IECOREPYTHON_IMAGEPRIMITIVEEVALUATORBINDING_H

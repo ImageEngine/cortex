@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_CINIMAGEWRITERBINDING_H
 #define IECOREPYTHON_CINIMAGEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindCINImageWriter();
+IECOREPYTHON_API void bindCINImageWriter();
 }
 
 #endif // IECOREPYTHON_CINIMAGEWRITERBINDING_H

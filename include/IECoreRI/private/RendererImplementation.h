@@ -55,13 +55,15 @@
 #include "IECore/NURBSPrimitive.h"
 #include "IECore/PatchMeshPrimitive.h"
 
+#include "IECoreRI/Export.h"
+
 #include "IECoreRI/Renderer.h"
 #include "IECoreRI/private/TransformStack.h"
 
 namespace IECoreRI
 {
 
-class RendererImplementation : public IECore::Renderer
+class IECORERI_API RendererImplementation : public IECore::Renderer
 {
 
 	public :
@@ -195,6 +197,9 @@ class RendererImplementation : public IECore::Renderer
 		size_t m_numDisplays;
 		std::string m_lastCamera;
 		bool m_inWorld;
+		bool m_inEdit;
+
+		void outputPreWorldTransform( bool forCamera ) const;
 
 		struct AttributeState
 		{
@@ -265,8 +270,8 @@ class RendererImplementation : public IECore::Renderer
 		typedef std::map<std::string, CommandHandler> CommandHandlerMap;
 		CommandHandlerMap m_commandHandlers;
 
+		IECore::DataPtr clippingPlaneCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
-
 		IECore::DataPtr archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 		IECore::DataPtr illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters );
 

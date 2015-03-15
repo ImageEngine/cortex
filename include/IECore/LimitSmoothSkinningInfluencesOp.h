@@ -35,6 +35,7 @@
 #ifndef IECORE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
 #define IECORE_LIMITSMOOTHSKINNINGINFLUENCESOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/FrameListParameter.h"
@@ -49,7 +50,7 @@ namespace IECore
 /// There is a parameter to control whether the result should be compressed or left as is. Locks can be applied
 /// in WeightLimit and MaxInfluences mode to control which influences are affected.
 /// \ingroup skinningGroup
-class LimitSmoothSkinningInfluencesOp : public ModifyOp
+class IECORE_API LimitSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :
 

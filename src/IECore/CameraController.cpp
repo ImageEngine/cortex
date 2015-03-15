@@ -33,16 +33,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "OpenEXR/ImathMatrix.h"
+#include "OpenEXR/ImathMatrixAlgo.h"
+#include "OpenEXR/ImathVec.h"
+#include "OpenEXR/ImathBoxAlgo.h"
+
 #include "IECore/CameraController.h"
 #include "IECore/Camera.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/Exception.h"
 #include "IECore/AngleConversion.h"
-
-#include "OpenEXR/ImathMatrix.h"
-#include "OpenEXR/ImathMatrixAlgo.h"
-#include "OpenEXR/ImathVec.h"
-#include "OpenEXR/ImathBoxAlgo.h"
+#include "IECore/Math.h"
 
 using namespace IECore;
 using namespace Imath;

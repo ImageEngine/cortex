@@ -285,9 +285,19 @@ void Object::MemoryAccumulator::accumulate( size_t bytes )
 
 void Object::MemoryAccumulator::accumulate( const Object *object )
 {
-	if( m_accumulated.find( object )==m_accumulated.end() )
+	if( object->refCount() > 1 )
 	{
-		m_accumulated.insert( object );
+		// object may occur multiple times in the data structure
+		// being counted - ensure that we don't count it twice.
+		if( m_accumulated.insert( object ).second )
+		{
+			object->memoryUsage( *this );
+		}
+	}
+	else
+	{
+		// object can only occur once in the data structure being
+		// counted - avoid unnecessary bookkeeping overhead.
 		object->memoryUsage( *this );
 	}
 }

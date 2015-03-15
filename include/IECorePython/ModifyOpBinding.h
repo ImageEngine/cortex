@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_MODIFYOPBINDING_H
 #define IECOREPYTHON_MODIFYOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindModifyOp();
+IECOREPYTHON_API void bindModifyOp();
 }
 
 #endif // IECOREPYTHON_MODIFYOPBINDING_H

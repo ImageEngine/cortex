@@ -450,7 +450,7 @@ bool SceneShapeUI::snap( MSelectInfo &snapInfo ) const
 	sceneInterface->path( objPath );
 	IECore::SceneInterface::pathToString( objPath, objPathStr );
 	
-	objPathStr += hits[depthMinIndex].name;
+	objPathStr += IECoreGL::NameStateComponent::nameFromGLName( hits[depthMinIndex].name );
 	IECore::SceneInterface::stringToPath( objPathStr, objPath );
 
 	// Validate the hit selection.
@@ -612,8 +612,14 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
 				// We're not in component selection mode. We'd like to be able to select the scene shape
-				// using the bounding box so we draw it too.
-				IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
+				// using the bounding box so we draw it too but only if it is visible
+				MPlug pDrawBound( sceneShape->thisMObject(), SceneShape::aDrawRootBound );
+				bool drawBound;
+				pDrawBound.getValue( drawBound );
+				if( drawBound )
+				{
+					IECoreGL::BoxPrimitive::renderWireframe( IECore::convert<Imath::Box3f>( sceneShape->boundingBox() ) );
+				}
 			}
 		}
 						
@@ -637,7 +643,7 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		int index = sceneShape->selectionIndex( hits[i].name );
+		int index = sceneShape->selectionIndex( IECoreGL::NameStateComponent::nameFromGLName( hits[i].name ) );
 		componentIndices.append( index );
 	}
 	

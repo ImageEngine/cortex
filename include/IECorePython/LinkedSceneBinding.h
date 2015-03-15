@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LINKEDSCENEBINDING_H
 #define IECOREPYTHON_LINKEDSCENEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLinkedScene();
+IECOREPYTHON_API void bindLinkedScene();
 
 }
 

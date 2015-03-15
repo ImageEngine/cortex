@@ -35,6 +35,7 @@
 #ifndef IECOREGL_QUADPRIMITIVE_H
 #define IECOREGL_QUADPRIMITIVE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Primitive.h"
 
 namespace IECoreGL
@@ -42,7 +43,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Buffer )
 
-class QuadPrimitive : public Primitive
+class IECOREGL_API QuadPrimitive : public Primitive
 {
 
 	public :

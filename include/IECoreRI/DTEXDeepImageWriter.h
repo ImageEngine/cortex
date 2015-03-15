@@ -39,6 +39,7 @@
 
 #include "IECore/DeepImageWriter.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 
 namespace IECoreRI
@@ -47,7 +48,7 @@ namespace IECoreRI
 /// The DTEXDeepImageWriter class writes PRMan deep texture files.
 /// \ingroup deepCompositingGroup
 /// \ingroup ioGroup
-class DTEXDeepImageWriter : public IECore::DeepImageWriter
+class IECORERI_API DTEXDeepImageWriter : public IECore::DeepImageWriter
 {
 	public :
 

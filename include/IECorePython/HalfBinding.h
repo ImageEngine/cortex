@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_HALFBINDING_H
 #define IECOREPYTHON_HALFBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindHalf();
+IECOREPYTHON_API void bindHalf();
 }
 
 #endif // IECOREPYTHON_HALFBINDING_H

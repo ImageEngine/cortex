@@ -34,6 +34,7 @@
 
 #include "boost/date_time/posix_time/posix_time.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/TimePeriodData.h"
 #include "IECore/TypedData.inl"
 #include "IECore/DateTimeData.h"
@@ -132,6 +133,6 @@ void SimpleDataHolder<TimePeriod>::hash( MurmurHash &h ) const
 	h.append( boost::posix_time::to_iso_string( readable().end() ) );
 }
 
-template class TypedData< TimePeriod >;
+template class IECORE_API TypedData< TimePeriod >;
 
 } // namespace IECore

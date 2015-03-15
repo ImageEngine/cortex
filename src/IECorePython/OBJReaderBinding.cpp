@@ -36,6 +36,7 @@
 
 #include "IECore/OBJReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/OBJReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using std::string;

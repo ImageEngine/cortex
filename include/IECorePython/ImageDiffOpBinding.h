@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGEDIFFOPBINDING_H
 #define IECOREPYTHON_IMAGEDIFFOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImageDiffOp();
+IECOREPYTHON_API void bindImageDiffOp();
 }
 
 #endif // IECOREPYTHON_IMAGEDIFFOPBINDING_H

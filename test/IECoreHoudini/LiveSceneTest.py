@@ -856,6 +856,7 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		
 		doTest = True
 		
+		# declare functions for reading custom attribute names/values:
 		def names( node ) :
 			
 			if not doTest :
@@ -865,6 +866,21 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 				return [ "custom" ]
 			
 			return []
+		
+		# Register a function that returns nonsense - if the system's working properly,
+		# we should be able to override this custom attribute reader with one that actually
+		# returns real names:
+		def readDummyName( node, name, time ) :
+			
+			if not doTest :
+				return None
+			
+			if node.type().name() == "geo" and name == "custom" :
+				return IECore.StringData( "blahblahblah" )
+			
+			return None
+		
+		IECoreHoudini.LiveScene.registerCustomAttributes( names, readDummyName )
 		
 		def readName( node, name, time ) :
 			
@@ -885,7 +901,9 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertEqual( sub1.attributeNames(), [] )
 		self.assertFalse( sub1.hasAttribute( "custom" ) )
 		self.assertEqual( sub1.readAttribute( "custom", 0 ), None )
-		# geo nodes have the new attribute
+		
+		# geo nodes have the new attribute. We registered two custom readers: there should be no duplicate
+		# attribute names, and the last reader we registered should take precedence:
 		self.assertEqual( torus1.attributeNames(), [ "custom" ] )
 		self.assertTrue( torus1.hasAttribute( "custom" ) )
 		self.assertEqual( torus1.readAttribute( "custom", 0 ), IECore.StringData( torus1.node().path() ) )

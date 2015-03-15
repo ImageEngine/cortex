@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TIMERBINDING_H
 #define IECOREPYTHON_TIMERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTimer();
+IECOREPYTHON_API void bindTimer();
 }
 
 #endif // IECOREPYTHON_TIMERBINDING_H

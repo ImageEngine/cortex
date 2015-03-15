@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_CAPTURINGRENDERERBINDING_H
 #define IECOREPYTHON_CAPTURINGRENDERERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindCapturingRenderer();
+IECOREPYTHON_API void bindCapturingRenderer();
 
 }
 

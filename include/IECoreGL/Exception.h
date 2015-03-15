@@ -35,6 +35,7 @@
 #ifndef IECOREGL_EXCEPTION_H
 #define IECOREGL_EXCEPTION_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 
 #include "IECore/Exception.h"
@@ -44,7 +45,7 @@ namespace IECoreGL
 
 /// The Exception class provides a convenient means of turning
 /// OpenGL errors into Exceptions.
-class Exception : public IECore::Exception
+class IECOREGL_API Exception : public IECore::Exception
 {
 	public :
 

@@ -37,6 +37,8 @@
 #include "IECore/EXRDeepImageWriter.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/EXRDeepImageWriterBinding.h"
+
 using std::string;
 using namespace boost;
 using namespace boost::python;

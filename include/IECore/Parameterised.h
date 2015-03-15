@@ -35,6 +35,7 @@
 #ifndef IE_CORE_PARAMETERISED_H
 #define IE_CORE_PARAMETERISED_H
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/ParameterisedInterface.h"
 
@@ -45,7 +46,7 @@ IE_CORE_FORWARDDECLARE( CompoundObject )
 
 /// The Parameterised class provides a useful base class for all
 /// classes wishing to implement both RunTimeTyped and ParameterisedInterface.
-class Parameterised : public RunTimeTyped, public ParameterisedInterface
+class IECORE_API Parameterised : public RunTimeTyped, public ParameterisedInterface
 {
 
 	public :

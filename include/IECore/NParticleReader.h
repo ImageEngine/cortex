@@ -37,6 +37,7 @@
 
 #include <vector>
 
+#include "IECore/Export.h"
 #include "IECore/ParticleReader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/IFFFile.h"
@@ -46,7 +47,7 @@ namespace IECore
 
 /// The NParticleReader class defines a class for reading IFF cache files (Maya nCaches) onto a PointsPrimitive.
 /// \ingroup ioGroup
-class NParticleReader : public ParticleReader
+class IECORE_API NParticleReader : public ParticleReader
 {
 	public:
 		

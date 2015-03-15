@@ -43,7 +43,6 @@ import IECore
 warnings.simplefilter( "error", DeprecationWarning )
 
 from ClassLoader import *
-from AttributeCache import *
 from BlindDataHolder import *
 from CompoundData import *
 from CompoundObject import *
@@ -92,7 +91,6 @@ from Group import *
 from NamespacePollution import *
 from OptionalCompoundParameter import *
 from ObjectInterpolation import *
-from InterpolatedCache import *
 from TransformationMatrixData import *
 from ReversedFrameList import *
 from BinaryFrameList import *
@@ -126,7 +124,6 @@ from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
 from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
-from FileExaminer import *
 from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
@@ -141,9 +138,7 @@ from BezierAlgoTest import *
 from MeshNormalsOpTest import *
 from PrimitiveTest import *
 from MeshMergeOpTest import *
-from UniformRandomPointDistributionOpTest import *
 from UnicodeToStringTest import *
-from MappedRandomPointDistributionOpTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
@@ -198,18 +193,15 @@ from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
 from PointDistributionTest import PointDistributionTest
-from HitMissTransformTest import HitMissTransformTest
 from CurveTracerTest import CurveTracerTest
 from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
-from ImageConvolveOpTest import *
 from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
 from CurveTangentsOpTest import CurveTangentsOpTest
-from MarschnerLookupTableOpTest import MarschnerLookupTableOpTest
 from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest
@@ -260,6 +252,7 @@ from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from ExternalProceduralTest import ExternalProceduralTest
+from ClippingPlaneTest import ClippingPlaneTest
 
 if IECore.withDeepEXR() :
 	from EXRDeepImageReaderTest import EXRDeepImageReaderTest

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TRANSFORMOPBINDING_H
 #define IECOREPYTHON_TRANSFORMOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTransformOp();
+IECOREPYTHON_API void bindTransformOp();
 }
 
 #endif // IECOREPYTHON_TRANSFORMOPBINDING_H

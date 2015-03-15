@@ -39,6 +39,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
+#include "IECorePython/OpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILRelease.h"
@@ -65,7 +66,7 @@ class OpWrap : public Op, public Wrapper<Op>
 			override o = this->get_override( "doOperation" );
 			if( o )
 			{
-				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>(operands ) ) ).as<ObjectPtr>();
 				if( !r )
 				{
 					throw Exception( "doOperation() python method didn't return an Object." );

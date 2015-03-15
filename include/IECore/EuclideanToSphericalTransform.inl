@@ -42,6 +42,7 @@
 #include "OpenEXR/ImathMath.h"
 
 #include "IECore/VectorTraits.h"
+#include "IECore/Math.h"
 
 namespace IECore
 {

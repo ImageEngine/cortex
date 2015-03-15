@@ -35,8 +35,11 @@
 #ifndef IECOREPYTHON_SHADERBINDING_H
 #define IECOREPYTHON_SHADERBINDING_H
 
-namespace IECorePython {
-  void bindShader();
+#include "IECorePython/Export.h"
+
+namespace IECorePython
+{
+IECOREPYTHON_API void bindShader();
 }
 
 #endif // IECOREPYTHON_SHADERBINDING_H

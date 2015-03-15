@@ -36,6 +36,7 @@
 #define IECOREPYTHON_SCOPEDGILRELEASE_H
 
 #include "boost/python.hpp"
+#include "IECorePython/Export.h"
 
 namespace IECorePython
 {
@@ -45,7 +46,7 @@ namespace IECorePython
 /// which may take a while to return - for instance heavy computations
 /// or IO. Please note that it is only safe to use this class from
 /// a thread which currently holds the GIL.
-class ScopedGILRelease : boost::noncopyable
+class IECOREPYTHON_API ScopedGILRelease : boost::noncopyable
 {
 	
 	public :

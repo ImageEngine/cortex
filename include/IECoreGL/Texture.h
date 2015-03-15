@@ -35,6 +35,7 @@
 #ifndef IECOREGL_TEXTURE_H
 #define IECOREGL_TEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Bindable.h"
 
@@ -55,7 +56,7 @@ IE_CORE_FORWARDDECLARE( FrameBuffer );
 /// GLSL ends up with the image upside down from the expected, but perhaps there
 /// are other places relying on the current ordering? See TestTexture.performShaderParameterTest()
 /// for a test that should be checking this but isn't.
-class Texture : public Bindable
+class IECOREGL_API Texture : public Bindable
 {
 	public :
 
@@ -71,7 +72,7 @@ class Texture : public Bindable
 		/// Binds the texture as the current GL texture.
 		virtual void bind() const;
 		
-		class ScopedBinding
+		class IECOREGL_API ScopedBinding
 		{
 			
 			public :

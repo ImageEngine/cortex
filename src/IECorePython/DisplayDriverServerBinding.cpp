@@ -36,6 +36,7 @@
 #include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECore/DisplayDriverServer.h"
+#include "IECorePython/DisplayDriverServerBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost;

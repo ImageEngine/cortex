@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_TURBULENCEBINDING_H
 #define IECOREPYTHON_TURBULENCEBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindTurbulence();
+IECOREPYTHON_API void bindTurbulence();
 }
 
 #endif // IECOREPYTHON_TURBULENCEBINDING_H

@@ -51,11 +51,16 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory 
 
 	paths = searchPaths.paths
 	paths.reverse()
+
 	for path in paths :
 		pyExtTest = re.compile( "^[^~].*\.py$" )
 		for dirPath, dirNames, fileNames in os.walk( os.path.join( path, subdirectory ) ) :
 			for fileName in filter( pyExtTest.search, sorted( fileNames ) ) :
-				fullFileName = os.path.join( dirPath, fileName )
+				fullFileName = os.path.abspath( os.path.join( dirPath, fileName ) )
+
+				contextDict["__file__"] = fullFileName
+				IECore.msg( IECore.Msg.Level.Debug, "IECore.loadConfig", "Loading file \"%s\"" % fullFileName )
+
 				if raiseExceptions:
 					execfile( fullFileName, contextDict, contextDict )
 				else:
@@ -64,5 +69,7 @@ def loadConfig( searchPaths, contextDict, raiseExceptions = False, subdirectory 
 					except Exception, m :
 						stacktrace = traceback.format_exc()
 						IECore.msg( IECore.Msg.Level.Error, "IECore.loadConfig", "Error executing file \"%s\" - \"%s\".\n %s" % ( fullFileName, m, stacktrace ) )
+
+				del( contextDict["__file__"] )
 
 loadConfig( "IECORE_CONFIG_PATHS", { "IECore" : IECore } )

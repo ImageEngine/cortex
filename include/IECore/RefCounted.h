@@ -39,6 +39,7 @@
 
 #include "tbb/atomic.h"
 
+#include "IECore/Export.h"
 #include "boost/noncopyable.hpp"
 #include "boost/intrusive_ptr.hpp"
 
@@ -120,7 +121,7 @@ typedef boost::intrusive_ptr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 /// \todo Disallow construction on the heap by having a private destructor - do we
 /// need to do this for all derived classes as well?
 /// \ingroup utilityGroup
-class RefCounted : private boost::noncopyable
+class IECORE_API RefCounted : private boost::noncopyable
 {
 	public:
 
@@ -159,14 +160,24 @@ class RefCounted : private boost::noncopyable
 IE_CORE_DECLAREPTR( RefCounted )
 
 /// Functions required to allow use of RefCounted with boost::intrusive_ptr
-inline void intrusive_ptr_add_ref( const IECore::RefCounted *r )
+IECORE_API inline void intrusive_ptr_add_ref( const IECore::RefCounted *r )
 {
 	r->addRef();
 }
 
-inline void intrusive_ptr_release( const IECore::RefCounted *r )
+IECORE_API inline void intrusive_ptr_release(const IECore::RefCounted *r)
 {
 	r->removeRef();
+}
+
+/// Implementation of tbb_hasher to allow intrusive_ptrs to be used
+/// with tbb_concurrent_* containers.
+template<typename T>
+inline size_t tbb_hasher( const boost::intrusive_ptr<T> &ptr )
+{
+	// This is the same as what tbb uses for raw pointers
+	const size_t h = reinterpret_cast<size_t>( ptr.get() );
+	return (h >> 3) ^ h;
 }
 
 } // namespace IECore

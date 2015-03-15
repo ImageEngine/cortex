@@ -48,7 +48,7 @@ void bindHitRecord()
 {
 
 	class_<HitRecord>( "HitRecord", init<const GLuint *>() )
-		.def( init<float, float, const IECore::InternedString &>() )
+		.def( init<float, float, GLuint>() )
 		.def_readwrite( "depthMin", &HitRecord::depthMin )
 		.def_readwrite( "depthMax", &HitRecord::depthMax )
 		.def_readwrite( "name", &HitRecord::name )

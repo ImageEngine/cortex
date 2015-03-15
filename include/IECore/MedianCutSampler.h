@@ -35,6 +35,7 @@
 #ifndef IECORE_MEDIANCUTSAMPLER_H
 #define IECORE_MEDIANCUTSAMPLER_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
@@ -51,7 +52,7 @@ namespace IECore
 /// as a simple 2d point distribution algorithm in addition to
 /// a light probe sampler.
 /// \ingroup imageProcessingGroup
-class MedianCutSampler : public Op
+class IECORE_API MedianCutSampler : public Op
 {
 	public :
 

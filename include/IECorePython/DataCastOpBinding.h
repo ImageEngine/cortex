@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATACASTOPBINDING_H
 #define IECOREPYTHON_DATACASTOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDataCastOp();
+IECOREPYTHON_API void bindDataCastOp();
 }
 
 #endif // IECOREPYTHON_DATACASTOPBINDING_H

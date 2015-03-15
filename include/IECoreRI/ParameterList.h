@@ -37,12 +37,14 @@
 
 #include "IECore/Renderer.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 
 /// This class provides a means of converting from an IECore::CompoundDataMap
 /// to the form passable through the Renderman Interface.
-class ParameterList
+class IECORERI_API ParameterList
 {
 
 	public :
@@ -67,6 +69,8 @@ class ParameterList
 		ParameterList( const std::string &name, const IECore::Data *parameter,
 			const std::map<std::string, std::string> *typeHints = 0 );
 
+		~ParameterList();
+
 		/// Returns the number of parameters, to be passed as the
 		/// n argument to the Ri call.
 		int n();
@@ -84,6 +88,15 @@ class ParameterList
 		const char *type( const std::string &name, const IECore::Data *d, bool &isArray, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
 		const void *value( const IECore::Data *d );
 
+		// Methods for building strings:
+		inline int numPlaces( size_t n );
+		inline void appendInt( char *&str, size_t n );
+		inline void appendString( char *&str, const char* toAppend, size_t len );
+		inline void appendString( char *&str, const std::string &toAppend );		
+		inline void buildPositionsString( char*& str, const std::string& name, size_t arraySize );
+		inline void buildColorValuesString( char*& str, const std::string& name, size_t arraySize );
+		inline void buildFloatValuesString( char*& str, const std::string& name, size_t arraySize );
+
 		// Call one of these to reserve enough space in the arrays below to represent all the parameters.
 		void reserve( const IECore::CompoundDataMap &parameters );
 		void reserve( const IECore::Data *parameter );
@@ -91,11 +104,12 @@ class ParameterList
 		// Then call this n times to populate the member data
 		void appendParameter( const std::string &name, const IECore::Data *d, const std::map<std::string, std::string> *typeHints );
 		std::vector<const char *> m_charPtrs;
-		std::vector<std::string> m_strings;
 		std::vector<int> m_ints;
 		std::vector<float> m_floats;
-		std::vector<const char *> m_tokens;
+		std::vector<char *> m_tokens;
 		std::vector<const void *> m_values;
+		
+		static const IECore::InternedString g_handleParameterName;
 
 };
 

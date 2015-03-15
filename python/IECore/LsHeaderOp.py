@@ -38,7 +38,7 @@ class LsHeaderOp( Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self, "Lists the contents of file headers using reader classes such as AttributeCache, HierarchicalCache and Reader.",
+		Op.__init__( self, "Lists the contents of Cortex file headers.",
 			Parameter(
 				name = "result",
 				description = "A list of meta-data contained in the file header.",
@@ -54,7 +54,7 @@ class LsHeaderOp( Op ) :
 					description = "The file to list the header from.",
 					defaultValue = "",
 					check = FileNameParameter.CheckType.MustExist,
-					extensions = " ".join( IndexedIO.supportedExtensions() + Reader.supportedExtensions() ),
+					extensions = " ".join( Reader.supportedExtensions() ),
 					allowEmptyString = False,
 				),
 
@@ -79,25 +79,13 @@ class LsHeaderOp( Op ) :
 								)
 
 	def doOperation( self, operands ) :
-
-		# \todo Do the exception handling properly!
-		headers = None
+		
 		try:
-			cache = HierarchicalCache( operands["file"].value, IndexedIO.OpenMode.Read )
-			headers = cache.readHeader()
+			reader = Reader.create( operands["file"].value )
+			headers = reader.readHeader()
 		except:
-			debugException( "Error reading header as HierarchicalCache." )
-			try:
-				cache = AttributeCache( operands["file"].value, IndexedIO.OpenMode.Read )
-				headers = cache.readHeader()
-			except:
-				debugException( "Error reading header as AttributeCache." )
-				try:
-					reader = Reader.create( operands["file"].value )
-					headers = reader.readHeader()
-				except:
-					debugException( "Error reading header as Reader." )
-					headers = None
+			debugException( "Error reading header" )
+			headers = None
 
 		if headers is None:
 			raise Exception, ("Could not get header from file " + operands["file"].value)

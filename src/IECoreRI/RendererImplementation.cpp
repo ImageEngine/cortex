@@ -89,7 +89,7 @@ std::vector<int> IECoreRI::RendererImplementation::g_nLoops;
 // This constructor launches a render within the current application. It creates a SharedData instance,
 // which gets propagated down to the renderers this object creates by launching procedurals.
 IECoreRI::RendererImplementation::RendererImplementation( const std::string &name )
-	:	m_sharedData( new SharedData ), m_inWorld( false )
+	:	m_sharedData( new SharedData ), m_inWorld( false ), m_inEdit( false )
 {
 	m_options = new CompoundData();
 	constructCommon();
@@ -120,7 +120,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
 // that launched the procedural
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true )
+	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true ), m_inEdit( false )
 {
 	constructCommon();
 	
@@ -144,7 +144,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
 IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 ), m_options( 0 ), m_inWorld( true )
+	:	m_context( 0 ), m_options( 0 ), m_inWorld( true ), m_inEdit( false )
 {
 	constructCommon();
 	
@@ -221,6 +221,7 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_getAttributeHandlers["ri:textureCoordinates"] = &IECoreRI::RendererImplementation::getTextureCoordinatesAttribute;
 	m_getAttributeHandlers["ri:automaticInstancing"] = &IECoreRI::RendererImplementation::getAutomaticInstancingAttribute;
 
+	m_commandHandlers["clippingPlane"] = &IECoreRI::RendererImplementation::clippingPlaneCommand;
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
 	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
@@ -457,40 +458,20 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	RiProjectionV( (char *)projectionD->readable().c_str(), p.n(), p.tokens(), p.values() );
 
 	// then transform
-	const size_t numSamples = m_preWorldTransform.numSamples();
-	if( numSamples > 1 )
-	{
-		vector<float> sampleTimes;
-		for( size_t i = 0; i < numSamples; ++i )
-		{
-			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
-		}
-		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
-	}
-	
-	for( size_t i = 0; i < numSamples; ++i )
-	{
-		M44f m = m_preWorldTransform.sample( i );
-		m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
-		m.invert();
-		RtMatrix mm;
-		convert( m, mm );
-		RiTransform( mm );
-	}
-	
-	if( numSamples > 1 )
-	{
-		RiMotionEnd();
-	}
+	outputPreWorldTransform( /* forCamera = */ true );
 	
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
 	
-	if( name == m_lastCamera )
+	if( m_inEdit )
 	{
-		// we're in an edit, and need to update
-		// the world camera as well.
-		RiCamera( RI_WORLD, RI_NULL );
+		if( name == m_lastCamera )
+		{
+			// we've just edited the world camera,
+			// and we have to say explicitly that
+			// that has happened.
+			RiCamera( RI_WORLD, RI_NULL );
+		}
 	}
 	else
 	{
@@ -1256,11 +1237,50 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAutomaticInstancingAtt
 
 bool IECoreRI::RendererImplementation::automaticInstancingEnabled() const
 {
-	RtInt result = 0;
+	RtInt result = 1;
 	RxInfoType_t resultType;
 	int resultCount;
 	RxAttribute( "user:cortexAutomaticInstancing", &result, sizeof( RtInt ), &resultType, &resultCount );
 	return result;
+}
+
+void IECoreRI::RendererImplementation::outputPreWorldTransform( bool forCamera ) const
+{
+	const size_t numSamples = m_preWorldTransform.numSamples();
+	if( numSamples > 1 )
+	{
+		vector<float> sampleTimes;
+		for( size_t i = 0; i < numSamples; ++i )
+		{
+			sampleTimes.push_back( m_preWorldTransform.sampleTime( i ) );
+		}
+		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
+	}
+	
+	for( size_t i = 0; i < numSamples; ++i )
+	{
+		M44f m = m_preWorldTransform.sample( i );	
+		if( forCamera )
+		{
+			m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
+			m.invert();
+		}
+		RtMatrix mm;
+		convert( m, mm );
+		if( forCamera )
+		{
+			RiTransform( mm );
+		}
+		else
+		{
+			RiConcatTransform( mm );
+		}
+	}
+	
+	if( numSamples > 1 )
+	{
+		RiMotionEnd();
+	}
 }
 
 IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
@@ -1358,9 +1378,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 			msg( Msg::Error, "IECoreRI::RendererImplementation::shader", "Must specify StringData \"__handle\" parameter for coshaders." );
 			return;
 		}
-		CompoundDataMap parametersCopy = parameters;
-		parametersCopy.erase( "__handle" );
-		ParameterList pl( parametersCopy, &state.primVarTypeHints );
+		ParameterList pl( parameters, &state.primVarTypeHints );
 		RiShaderV( (char *)name.c_str(), (char *)handleData->readable().c_str(), pl.n(), pl.tokens(), pl.values() );
 	}
 }
@@ -2131,6 +2149,18 @@ IECore::DataPtr IECoreRI::RendererImplementation::command( const std::string &na
 	return (this->*(it->second))( name, parameters );
 }
 
+IECore::DataPtr IECoreRI::RendererImplementation::clippingPlaneCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
+{
+	ScopedContext scopedContext( m_context );
+	RiTransformBegin();
+	
+		outputPreWorldTransform( /* forCamera = */ false );
+		RiClippingPlane( 0, 0, 0, 0, 0, 1 );
+	
+	RiTransformEnd();
+	return NULL;	
+}
+
 IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
@@ -2222,6 +2252,7 @@ void RendererImplementation::editBegin( const std::string &name, const IECore::C
 	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
 	
 	m_inWorld = name != "option";
+	m_inEdit = true;
 }
 
 void RendererImplementation::editEnd()
@@ -2230,4 +2261,5 @@ void RendererImplementation::editEnd()
 	RiEditEnd();
 	
 	m_inWorld = false;
+	m_inEdit = false;
 }

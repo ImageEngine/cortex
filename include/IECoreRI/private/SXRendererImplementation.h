@@ -39,6 +39,7 @@
 
 #include "sx.h"
 
+#include "IECoreRI/Export.h"
 #include "IECoreRI/SXRenderer.h"
 #include "IECoreRI/SXExecutor.h"
 
@@ -47,7 +48,7 @@ namespace IECoreRI
 
 IE_CORE_FORWARDDECLARE( SXRendererImplementation );
 
-class SXRendererImplementation : public IECore::Renderer
+class IECORERI_API SXRendererImplementation : public IECore::Renderer
 {
 
 	public :

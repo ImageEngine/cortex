@@ -586,6 +586,17 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		# tests a bug where calling attributeNames at the root raised an exception
 		scene.attributeNames()
 	
+	def testTags( self ) :
+		
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.addAttr( t, ln="ieTags", dt="string" )
+		maya.cmds.setAttr( t + ".ieTags", "pizza burger", type="string" )
+		
+		scene = IECoreMaya.LiveScene()
+		transformScene = scene.child(str(t))
+		
+		self.assertEqual( set( transformScene.readTags() ), set( [IECore.InternedString("pizza"), IECore.InternedString("burger") ] ) )
+
 	def testCustomTags( self ) :
 
 		t = maya.cmds.createNode( "transform" )
@@ -659,7 +670,49 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		# Disable custom tag functions so they don't mess with other tests
 		doTest = False
 	
-	
+	def testAttributes( self ) :
+		
+		maya.cmds.currentTime( "0sec" )
+		t = maya.cmds.createNode( "transform", name="t1" )
+		
+		maya.cmds.addAttr( t, ln="ieAttr_bool", at="bool" )
+		maya.cmds.addAttr( t, ln="ieAttr_float", at="float" )
+		maya.cmds.addAttr( t, ln="ieAttr_double", at="double" )
+		maya.cmds.addAttr( t, ln="ieAttr_doubleAngle", at="doubleAngle" )
+		maya.cmds.addAttr( t, ln="ieAttr_doubleLinear", at="doubleLinear" )
+		maya.cmds.addAttr( t, ln="ieAttr_message", at="message" )
+		maya.cmds.addAttr( t, ln="ieAttr_time", at="time" )
+		maya.cmds.addAttr( t, ln="ieAttr_fltMatrix", at="fltMatrix" )
+		maya.cmds.addAttr( t, ln="ieAttr_string", dt="string" )
+		
+		scene = IECoreMaya.LiveScene()
+		transformScene = scene.child(str(t))
+		
+		self.assertEqual( set( transformScene.attributeNames()),
+			set( [
+				"scene:visible",
+				"user:bool",
+				"user:float",
+				"user:double",
+				"user:doubleAngle",
+				"user:doubleLinear",
+				"user:message",
+				"user:time",
+				"user:fltMatrix",
+				"user:string"
+			] )
+		)
+		
+		self.failUnless( isinstance( transformScene.readAttribute("user:bool",0), IECore.BoolData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:float",0), IECore.FloatData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:double",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:doubleAngle",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:doubleLinear",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:message",0), IECore.NullObject ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:time",0), IECore.DoubleData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:fltMatrix",0), IECore.M44dData ) )
+		self.failUnless( isinstance( transformScene.readAttribute("user:string",0), IECore.StringData ) )
+
 	def testCustomAttributes( self ) :
 	
 		t = maya.cmds.createNode( "transform" )
@@ -713,25 +766,105 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 	
 			return IECore.StringData("mesh")
 		
-		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+		try:
+			IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+			sphereScene = scene.child('pSphere')
+			self.assertEqual( set( scene.attributeNames() ), set( [ "scene:visible", "root" ] ) )
+			self.assertEqual( scene.readAttribute("anyAttr", 0.0), IECore.NullObject.defaultNullObject() )
+			self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
+			self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
+
+			self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
+			self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
+			self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), IECore.NullObject.defaultNullObject() )
+			self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
+			self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString('shapeAttribute') ] )
+			self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
+		
+		finally:
+			# Disable custom attribute functions so they don't mess with other tests
+			doTest = False
 	
-		scene = IECoreMaya.LiveScene()
-		transformScene = scene.child(str(t))
-		sphereScene = scene.child('pSphere')
-		self.assertEqual( scene.attributeNames(), [ "scene:visible", "root" ] )
-		self.assertEqual( scene.readAttribute("anyAttr", 0.0), None )
-		self.assertEqual( scene.readAttribute("scene:visible", 0.0), IECore.BoolData(True) )
-		self.assertEqual( scene.readAttribute("root", 0.0), IECore.BoolData(True) )
+	def testNoDuplicateAttributeNames( self ) :
+
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.currentTime( "0sec" )
+
+		maya.cmds.addAttr( t, ln="ieAttr_test", at="bool" )
+
+		doDuplicateNameTest = True
+
+		def myAttributeNames( node ):
+			if not doDuplicateNameTest:
+				return []
+			return["user:test"]
+
+		def readMyAttribute( node, attr ):
+			if not doDuplicateNameTest:
+				return None
+			if attr == "user:test":
+				return IECore.IntData( 1 )
+
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute )
+
+		try:
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+
+			# we've specified an attribute called "user:test" in two ways - once through an ieAttr_,
+			# once through a custom reader. The name "user:test" should only appear once:
+			self.assertEqual( len( transformScene.attributeNames() ), 2 )
+			self.assertEqual( set( transformScene.attributeNames() ), set( ["scene:visible", "user:test"] ) )
+
+			# The custom reader should override the ieAttr_
+			self.failUnless( isinstance( transformScene.readAttribute( "user:test", 0 ), IECore.IntData ) )
+		finally:
+			doDuplicateNameTest = False
+
+	def testCustomAttributePrecedence( self ) :
 		
-		self.assertEqual( transformScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString("transformAttribute") ] )
-		self.assertEqual( transformScene.hasAttribute("shapeAttribute"), False )
-		self.assertEqual( transformScene.readAttribute("shapeAttribute", 0.0), None )
-		self.assertEqual( transformScene.readAttribute( "transformAttribute", 0.0), IECore.FloatData(5) )
-		self.assertEqual( sphereScene.attributeNames(), [ IECore.InternedString("scene:visible"), IECore.InternedString('shapeAttribute') ] )
-		self.assertEqual( sphereScene.readAttribute( "shapeAttribute", 0.0), IECore.StringData("mesh") )
+		doCustomAttributePrecedenceTest = True
 		
-		# Disable custom attribute functions so they don't mess with other tests
-		doTest = False
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.currentTime( "0sec" )
+		
+		def myAttributeNames1( node ):
+			if not doCustomAttributePrecedenceTest:
+				return []
+			return["test"]
+
+		def readMyAttribute1( node, attr ):
+			if not doCustomAttributePrecedenceTest:
+				return None
+			if attr == "test":
+				return IECore.IntData( 1 )
+
+		def myAttributeNames2( node ):
+			if not doCustomAttributePrecedenceTest:
+				return []
+			return["test"]
+
+		def readMyAttribute2( node, attr ):
+			if not doCustomAttributePrecedenceTest:
+				return None
+			if attr == "test":
+				return IECore.IntData( 2 )
+
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames1, readMyAttribute1 )
+		IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames2, readMyAttribute2 )
+		
+		try:
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+
+			# The second custom reader we registered should have taken precedence:
+			self.assertEqual( transformScene.readAttribute( "test", 0 ), IECore.IntData(2) )
+		finally:
+			doCustomAttributePrecedenceTest = False
+		
 	
 	def testSceneVisible( self ) :
 		

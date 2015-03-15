@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_LENSDISTORTOPBINDING_H
 #define IECOREPYTHON_LENSDISTORTOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindLensDistortOp();
+IECOREPYTHON_API void bindLensDistortOp();
 
 } // namespace IECorePython
 

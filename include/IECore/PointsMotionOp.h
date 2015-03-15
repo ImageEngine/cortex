@@ -41,6 +41,7 @@
 #include <map>
 #endif
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypedObjectParameter.h"
@@ -57,7 +58,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// Masked primvars are set to zero.
 /// \ingroup geometryProcessingGroup
 /// \ingroup renderingGroup
-class PointsMotionOp : public Op
+class IECORE_API PointsMotionOp : public Op
 {
 	public :
 

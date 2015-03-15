@@ -381,8 +381,9 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
 	OP_Node *node = retrieveNode();
 	
+	// iterate attribute readers in reverse order so the ones registered later take precedence:
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
-	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
+	for ( std::vector<CustomAttributeReader>::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
 	{
 		if ( IECore::ConstObjectPtr object = it->m_read( node, name, time ) )
 		{

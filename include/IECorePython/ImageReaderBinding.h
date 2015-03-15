@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGEREADERBINDING_H
 #define IECOREPYTHON_IMAGEREADERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImageReader();
+IECOREPYTHON_API void bindImageReader();
 }
 
 #endif // IECOREPYTHON_IMAGEREADERBINDING_H

@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_IMAGEPREMULTIPLYTOPBINDING_H
 #define IECOREPYTHON_IMAGEPREMULTIPLYTOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindImagePremultiplyOp();
+IECOREPYTHON_API void bindImagePremultiplyOp();
 }
 
 #endif // IECOREPYTHON_IMAGEPREMULTIPLYTOPBINDING_H

@@ -35,6 +35,7 @@
 #ifndef IE_CORE_RENDERER_H
 #define IE_CORE_RENDERER_H
 
+#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/PrimitiveVariable.h"
 #include "IECore/VectorTypedData.h"
@@ -89,7 +90,7 @@ IE_CORE_FORWARDDECLARE( Renderer );
 /// and make it available for query, but otherwise it should have no effect. This applies
 /// mostly to the attribute and option calls.
 /// \ingroup renderingGroup
-class Renderer : public RunTimeTyped
+class IECORE_API Renderer : public RunTimeTyped
 {
 
 	public :
@@ -331,7 +332,7 @@ class Renderer : public RunTimeTyped
 		/// The Procedural class defines an interface via which the Renderer can
 		/// ask for geometry to be generated in a deferred fashion, at a time
 		/// which is convenient to it.
-		class Procedural : public RefCounted
+		class IECORE_API Procedural : public RefCounted
 		{
 			public :
 
@@ -361,7 +362,7 @@ class Renderer : public RunTimeTyped
 
 		/// A placeholder for specifying a procedural which the Renderer
 		/// must load from a file on disk.
-		class ExternalProcedural : public Procedural
+		class IECORE_API ExternalProcedural : public Procedural
 		{
 			public :
 
@@ -406,6 +407,12 @@ class Renderer : public RunTimeTyped
 		/// Generic call for executing arbitrary renderer commands. This is intended to allow
 		/// derived classes to support calls such as RiMakeTexture via calls of the form
 		/// renderer->command( "ri:makeTexture", ... ).
+		///
+		/// Renderers supporting arbitrary clipping planes should implement a "clippingPlane"
+		/// command which must be issued before worldBegin(), and which makes a clipping plane
+		/// using the current transformation.
+		///
+		/// \todo Make a dedicated virtual clippingPlane() method for the next major version.
 		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters ) = 0;
 
 		//! @name Interactive rerendering

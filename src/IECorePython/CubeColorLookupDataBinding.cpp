@@ -36,6 +36,7 @@
 #include "boost/python/make_constructor.hpp"
 
 #include "IECore/CubeColorLookupData.h"
+#include "IECorePython/CubeColorLookupDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 

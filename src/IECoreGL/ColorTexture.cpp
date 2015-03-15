@@ -64,7 +64,7 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 ColorTexture::ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
 	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
 {
-	construct( width, height, r, g, b, a );
+	construct( width, height, r, g, b, a, true );
 }
 
 static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, const char **names )
@@ -89,6 +89,20 @@ static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, c
 
 ColorTexture::ColorTexture( const IECore::ImagePrimitive *image )
 {
+	construct( image, true );
+}
+
+ColorTexture::ColorTexture( const IECore::ImagePrimitive *image, bool mipMap )
+{
+	construct( image, mipMap );
+}
+
+ColorTexture::~ColorTexture()
+{
+}
+
+void ColorTexture::construct( const IECore::ImagePrimitive *image, bool mipMap )
+{
 	static const char *redNames[] = { "r", "R", "red", 0 };
 	static const char *greenNames[] = { "g", "G", "green", 0 };
 	static const char *blueNames[] = { "b", "B", "blue", 0 };
@@ -106,15 +120,11 @@ ColorTexture::ColorTexture( const IECore::ImagePrimitive *image )
 
 	int width = image->getDataWindow().size().x + 1;
 	int height = image->getDataWindow().size().y + 1;
-	construct( width, height, r, g, b, a );
-}
-
-ColorTexture::~ColorTexture()
-{
+	construct( width, height, r, g, b, a, mipMap );
 }
 
 void ColorTexture::construct( unsigned int width, unsigned int height, const IECore::Data *r,
-	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a, bool mipMap )
 {
 	if( r->typeId() != g->typeId() ||
 		r->typeId() != b->typeId() ||
@@ -125,31 +135,31 @@ void ColorTexture::construct( unsigned int width, unsigned int height, const IEC
 
 	if( r->typeId()==UCharVectorData::staticTypeId() )
 	{
-		castConstruct<UCharVectorData>( width, height, r, g, b, a );
+		castConstruct<UCharVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==CharVectorData::staticTypeId() )
 	{
-		castConstruct<CharVectorData>( width, height, r, g, b, a );
+		castConstruct<CharVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==UIntVectorData::staticTypeId() )
 	{
-		castConstruct<UIntVectorData>( width, height, r, g, b, a );
+		castConstruct<UIntVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==IntVectorData::staticTypeId() )
 	{
-		castConstruct<IntVectorData>( width, height, r, g, b, a );
+		castConstruct<IntVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==HalfVectorData::staticTypeId() )
 	{
-		castConstruct<HalfVectorData>( width, height, r, g, b, a );
+		castConstruct<HalfVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==FloatVectorData::staticTypeId() )
 	{
-		castConstruct<FloatVectorData>( width, height, r, g, b, a );
+		castConstruct<FloatVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else if( r->typeId()==DoubleVectorData::staticTypeId() )
 	{
-		castConstruct<DoubleVectorData>( width, height, r, g, b, a );
+		castConstruct<DoubleVectorData>( width, height, r, g, b, a, mipMap );
 	}
 	else {
 		throw Exception( boost::str( boost::format( "Unsupported channel type \"%s\"." ) % r->typeName() ) );
@@ -158,18 +168,20 @@ void ColorTexture::construct( unsigned int width, unsigned int height, const IEC
 
 template<class T>
 void ColorTexture::castConstruct( unsigned int width, unsigned int height, const IECore::Data *r,
-	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a )
+	const IECore::Data *g, const IECore::Data *b, const IECore::Data *a, bool mipMap )
 {
 	templateConstruct( width, height,
 		static_cast<const T *>( r ),
 		static_cast<const T *>( g ),
 		static_cast<const T *>( b ),
-		static_cast<const T *>( a )	);
+		static_cast<const T *>( a ),
+		mipMap
+	);
 }
 
 template<typename T>
 void ColorTexture::templateConstruct( unsigned int width, unsigned int height, const T *r,
-	const T *g, const T *b, const T *a )
+	const T *g, const T *b, const T *a, bool mipMap )
 {
 	typedef typename T::ValueType::value_type ElementType;
 
@@ -217,11 +229,21 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-	glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA16 : GL_RGB16, width, height, 0, ra ? GL_RGBA : GL_RGB,
-		NumericTraits<ElementType>::glType(), &interleaved[0] );
+	if( mipMap )
+	{
+		/// \todo Why don't we choose an internal format matching the data provided, rather than using 16
+		/// bit integers for everything? Hardcoding GL_RGB16 means that sometimes we're using more memory than
+		/// needed, and sometimes we're throwing away information.
+		gluBuild2DMipmaps( GL_TEXTURE_2D, ra ? GL_RGBA16 : GL_RGB16, width, height, ra ? GL_RGBA : GL_RGB,
+			NumericTraits<ElementType>::glType(), &interleaved[0] );
+	}
+	else
+	{
+		glTexImage2D( GL_TEXTURE_2D, 0, ra ? GL_RGBA16 : GL_RGB16, width, height, 0, ra ? GL_RGBA : GL_RGB,
+			NumericTraits<ElementType>::glType(), &interleaved[0] );
+	}
 
 	Exception::throwIfError();
-
 }
 
 ImagePrimitivePtr ColorTexture::imagePrimitive() const

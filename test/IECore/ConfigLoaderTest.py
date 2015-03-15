@@ -88,9 +88,10 @@ class ConfigLoaderTest( unittest.TestCase ) :
 				
 			)
 
-		self.assertEqual( len( m.messages ), 1 )
-		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Error )
-		self.failUnless( "I am a very naughty boy" in m.messages[0].message )
+		errors = [ msg for msg in m.messages if msg.level == IECore.Msg.Level.Error ]
+		self.assertEqual( len( errors ), 1 )
+		self.assertEqual( errors[0].level, IECore.Msg.Level.Error )
+		self.failUnless( "I am a very naughty boy" in errors[0].message )
 
 		self.assertEqual( contextDict["a"], 1 )
 		
@@ -200,6 +201,20 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		)
 		
 		self.assertEqual( contextDict["a"], 2 )
+		
+	def testFile( self ) :
+
+		contextDict = {}
+		path = os.path.dirname( __file__ ) + "/config/getFile"
+		IECore.loadConfig(
+		
+			IECore.SearchPath( path, ":" ),
+			contextDict,
+			
+		)
+		
+		expectedFile = os.path.abspath( os.path.join( path, "config.py" ) )
+		self.assertEqual( contextDict["myFile"], expectedFile )
 		
 if __name__ == "__main__":
 	unittest.main()

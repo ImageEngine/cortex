@@ -46,7 +46,7 @@ using namespace IECoreGL;
 HitRecord::HitRecord( const GLuint *hitRecord )
 	:	depthMin( (float)hitRecord[1]/(float)Imath::limits<GLuint>::max() ),
 		depthMax( (float)hitRecord[2]/(float)Imath::limits<GLuint>::max() ),
-		name( NameStateComponent::nameFromGLName( hitRecord[3] ) )
+		name( hitRecord[3] )
 
 {
 	if( hitRecord[0] != 1 )
@@ -55,8 +55,8 @@ HitRecord::HitRecord( const GLuint *hitRecord )
 	}
 }
 
-HitRecord::HitRecord( float dMin, float dMax, const IECore::InternedString &primName )
-	:	depthMin( dMin ), depthMax( dMax ), name( primName )
+HitRecord::HitRecord( float dMin, float dMax, GLuint name )
+	:	depthMin( dMin ), depthMax( dMax ), name( name )
 {
 }
 

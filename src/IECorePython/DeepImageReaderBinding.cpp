@@ -36,6 +36,7 @@
 
 #include "IECore/DeepImageReader.h"
 #include "IECore/VectorTypedData.h"
+#include "IECorePython/DeepImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace boost::python;

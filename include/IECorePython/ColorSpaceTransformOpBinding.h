@@ -35,10 +35,12 @@
 #ifndef IECOREPYTHON_COLORSPACETRANSFORMOPBINDING_H
 #define IECOREPYTHON_COLORSPACETRANSFORMOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
 
-void bindColorSpaceTransformOp();
+IECOREPYTHON_API void bindColorSpaceTransformOp();
 
 } // namespace IECorePython
 

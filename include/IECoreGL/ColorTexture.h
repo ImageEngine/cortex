@@ -35,6 +35,7 @@
 #ifndef IECOREGL_COLORTEXTURE_H
 #define IECOREGL_COLORTEXTURE_H
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/Texture.h"
 
 namespace IECoreGL
@@ -44,7 +45,7 @@ namespace IECoreGL
 /// channels and an optional alpha channel.
 /// It is suitable for use as the color attachment for
 /// a FrameBuffer.
-class ColorTexture : public Texture
+class IECOREGL_API ColorTexture : public Texture
 {
 	public :
 
@@ -63,6 +64,9 @@ class ColorTexture : public Texture
 		/// Image must have at least RGB channels and all channels
 		/// must be of the same type.
 		ColorTexture( const IECore::ImagePrimitive *image );
+		/// \todo Make all constructors take a mipMap argument with a useful default
+		/// value, then remove this version.
+		ColorTexture( const IECore::ImagePrimitive *image, bool mipMap );
 
 		virtual ~ColorTexture();
 
@@ -71,16 +75,18 @@ class ColorTexture : public Texture
 
 	private :
 
+		void construct( const IECore::ImagePrimitive *image, bool mipMap );
+
 		void construct( unsigned int width, unsigned int height, const IECore::Data *r,
-			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a );
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a, bool mipMap );
 
 		template<typename T>
 		void castConstruct( unsigned int width, unsigned int height, const IECore::Data *r,
-			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a );
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a, bool mipMap );
 
 		template<typename T>
 		void templateConstruct( unsigned int width, unsigned int height, const T *r,
-			const T *g, const T *b, const T *a );
+			const T *g, const T *b, const T *a, bool mipMap );
 
 };
 

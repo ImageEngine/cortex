@@ -39,6 +39,7 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/Exception.h"
 
+#include "IECorePython/FrameListParameterBinding.h"
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/FrameListBinding.h"

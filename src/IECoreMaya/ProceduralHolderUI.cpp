@@ -402,7 +402,9 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 			depthMinIndex = componentIndices.length();
 		}
 		
-		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find( hits[i].name.value() );
+		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find(
+			IECoreGL::NameStateComponent::nameFromGLName( hits[i].name )
+		);
 		assert( compIt != proceduralHolder->m_componentsMap.end() );
 		componentIndices.append( compIt->second.first );		
 	}

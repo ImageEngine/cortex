@@ -37,6 +37,8 @@
 #include "IECore/SmoothSmoothSkinningWeightsOp.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+#include "IECorePython/SmoothSmoothSkinningWeightsOpBinding.h"
+
 using namespace boost::python;
 using namespace IECore;
 

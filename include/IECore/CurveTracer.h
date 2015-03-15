@@ -37,6 +37,7 @@
 
 #include "boost/graph/adjacency_list.hpp"
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
@@ -49,7 +50,7 @@ namespace IECore
 /// The CurveTracer class takes images like those produced by the
 /// ImageThinner and outputs a CurvesPrimitive matching the lines.
 /// \ingroup imageProcessingGroup
-class CurveTracer : public Op
+class IECORE_API CurveTracer : public Op
 {
 	public :
 

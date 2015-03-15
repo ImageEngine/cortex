@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PDCPARTICLEWRITERBINDING_H
 #define IECOREPYTHON_PDCPARTICLEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindPDCParticleWriter();
+IECOREPYTHON_API void bindPDCParticleWriter();
 }
 
 #endif // IECOREPYTHON_PDCPARTICLEWRITERBINDING_H

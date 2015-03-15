@@ -51,7 +51,6 @@
 #include "IECoreGL/Buffer.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/CachedConverter.h"
-#include "IECoreGL/TextureUnits.h"
 #include "IECoreGL/Selector.h"
 
 using namespace std;
@@ -517,7 +516,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		
 			virtual void bind()
 			{
-				glActiveTexture( textureUnits()[m_textureUnit] );
+				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
 				if( m_texture )
 				{
@@ -532,7 +531,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		
 			virtual void unbind()
 			{
-				glActiveTexture( textureUnits()[m_textureUnit] );
+				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
 			}
 		
@@ -549,8 +548,8 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		struct UniformFloatValue : public Value
 		{
 	
-			UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLfloat> &values )
-				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+			UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, GLsizei count, std::vector<GLfloat> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_count( count ), m_values( values )
 			{
 				m_previousValues.resize( m_values.size() );
 			}
@@ -558,12 +557,12 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			virtual void bind()
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
 		
 			virtual void unbind()
 			{
-				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
 	
 			private :
@@ -571,6 +570,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				GLuint m_program;
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions;
+				GLsizei m_count;
 				std::vector<GLfloat> m_values;
 				std::vector<GLfloat> m_previousValues;
 			
@@ -580,8 +580,8 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 		struct UniformIntegerValue : public Value
 		{
 	
-			UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, std::vector<GLint> &values )
-				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_values( values )
+			UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, GLsizei count, std::vector<GLint> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_count( count ), m_values( values )
 			{
 				m_previousValues.resize( m_values.size() );
 			}
@@ -589,12 +589,12 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			virtual void bind()
 			{
 				glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-				uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_values[0]) );
+				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
 		
 			virtual void unbind()
 			{
-				uniformIntFunctions()[m_dimensions]( m_uniformIndex, 1, &(m_previousValues[0]) );
+				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
 	
 			private :
@@ -602,6 +602,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				GLuint m_program;
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions;
+				GLsizei m_count;
 				std::vector<GLint> m_values;
 				std::vector<GLint> m_previousValues;
 			
@@ -609,8 +610,8 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 	
 		struct UniformMatrixValue : public Value
 		{
-			UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, std::vector<GLfloat> &values )
-				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions0( dimensions0 ), m_dimensions1( dimensions1 ), m_values( values )
+			UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, GLsizei count, std::vector<GLfloat> &values )
+				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions0( dimensions0 ), m_dimensions1( dimensions1 ), m_count( count ), m_values( values )
 			{
 				m_previousValues.resize( m_values.size(), 0 );
 			}
@@ -618,12 +619,12 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			virtual void bind()
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
-				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_values[0]) );
+				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_values[0]) );
 			}
 		
 			virtual void unbind()
 			{
-				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, 1, GL_FALSE, &(m_previousValues[0]) );
+				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_previousValues[0]) );
 			}
 		
 			private :
@@ -632,6 +633,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions0;
 				unsigned char m_dimensions1;
+				GLsizei m_count;
 				std::vector<GLfloat> m_values;
 				std::vector<GLfloat> m_previousValues;
 				
@@ -704,16 +706,10 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		return;
 	}
 	
-	if( p->size > 1 )
-	{
-		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Array parameter \"%s\" is currently unsupported." ) % name );
-		return;
-	}
 	
 	if( p->type == GL_BOOL || p->type == GL_INT || p->type == GL_INT_VEC2 || p->type == GL_INT_VEC3 )
 	{
 		// integer value
-		
 		vector<GLint> integers;
 		if( value->isInstanceOf( IECore::BoolDataTypeId ) )
 		{
@@ -743,15 +739,15 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				case GL_INT_VEC3 :
 					dimensions = 3;	
 			}
-			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, integers ) );
+			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers ) );
 		}
 	}
 	else if( p->type == GL_FLOAT || p->type == GL_FLOAT_VEC2 || p->type == GL_FLOAT_VEC3 || p->type == GL_FLOAT_VEC4 )
 	{
 		// float value
-		
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
+		
 		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
 		if( !floats.size() )
 		{
@@ -776,7 +772,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 					dimensions = 4;
 					break;
 			}
-			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, floats ) );
+			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats ) );
 		}
 		
 		if( name == "Cs" )
@@ -802,13 +798,13 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
 		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
-		if( floats.size() != dimensions0 * dimensions1 )
+		if( int( floats.size() ) != dimensions0 * dimensions1 * p->size )
 		{
 			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Matrix parameter \"%s\" requires %d values but value of type \%s\" provided %d" ) % name % (dimensions0 * dimensions1) % value->typeName() % floats.size() );
 			return;
 		}
 		
-		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, floats ) );
+		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats ) );
 	}
 	else
 	{

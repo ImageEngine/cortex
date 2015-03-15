@@ -37,6 +37,8 @@
 #include "IECorePython/ParameterBinding.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/CompoundObject.h"
+
+#include "IECorePython/NumericParameterBinding.h"
 #include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 

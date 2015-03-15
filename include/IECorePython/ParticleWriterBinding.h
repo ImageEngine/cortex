@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_PARTICLEWRITERBINDING_H
 #define IECOREPYTHON_PARTICLEWRITERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindParticleWriter();
+IECOREPYTHON_API void bindParticleWriter();
 }
 
 #endif // IECOREPYTHON_PARTICLEWRITERBINDING_H

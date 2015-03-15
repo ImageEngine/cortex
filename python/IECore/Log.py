@@ -73,12 +73,15 @@ def setLogLevel( level ):
 	
 	debug("setLogLevel(", level, ")")
 
+def __getCallStr(frame):
+	return frame.f_globals.get("__name__", frame.f_globals.get("__file__", "N/A"))
+
 def __getCallContext(frame = None, withLineNumber = False):
 	if frame is None:
 		f = inspect.currentframe().f_back.f_back
 	else:
 		f = frame
-	callStr = f.f_globals["__name__"]
+	callStr = __getCallStr(f)
 	if withLineNumber:
 		callStr += " #" + str(f.f_lineno)
 	return callStr
@@ -92,7 +95,7 @@ def showCallStack():
 	index = 0
 	callstack = "Callstack:\n"
 	while not f is None:
-		callstack += "> " + str(index) + ": " + f.f_globals["__name__"] + " #" + str(f.f_lineno) + "\n"
+		callstack += "> " + str(index) + ": " + __getCallStr(f) + " #" + str(f.f_lineno) + "\n"
 		f = f.f_back
 		index += 1
 	Msg.output(Msg.Level.Debug, __getCallContext( withLineNumber = True ), callstack )

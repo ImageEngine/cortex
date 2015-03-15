@@ -41,6 +41,8 @@
 #include "IECore/RefCounted.h"
 #include "IECore/SearchPath.h"
 
+#include "IECoreGL/Export.h"
+
 namespace IECoreGL
 {
 
@@ -49,7 +51,7 @@ IE_CORE_FORWARDDECLARE( ShaderLoader );
 
 /// This class provides loading and preprocessing of GLSL shaders, and manages
 /// a cache of Shader objects compiled from that source.
-class ShaderLoader : public IECore::RefCounted
+class IECOREGL_API ShaderLoader : public IECore::RefCounted
 {
 
 	public :

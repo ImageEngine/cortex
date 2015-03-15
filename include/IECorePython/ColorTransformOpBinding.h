@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_COLORTRANSFORMOPBINDING_H
 #define IECOREPYTHON_COLORTRANSFORMOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindColorTransformOp();
+IECOREPYTHON_API void bindColorTransformOp();
 }
 
 #endif // IECOREPYTHON_COLORTRANSFORMOPBINDING_H

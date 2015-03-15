@@ -35,6 +35,7 @@
 #ifndef IE_CORE_POINTNORMALSOP_H
 #define IE_CORE_POINTNORMALSOP_H
 
+#include "IECore/Export.h"
 #include "IECore/Op.h"
 #include "IECore/NumericParameter.h"
 
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE( ObjectParameter )
 /// \todo This was written for a production and then never needed. The normals it produces
 /// are somewhat noisy - we could probably do with improving the process.
 /// \ingroup geometryProcessingGroup
-class PointNormalsOp : public Op
+class IECORE_API PointNormalsOp : public Op
 {
 	public :
 

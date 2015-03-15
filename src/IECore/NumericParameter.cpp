@@ -37,6 +37,7 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/Exception.h"
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedData.h"
 
 using namespace std;
@@ -166,7 +167,7 @@ bool NumericParameter<T>::valueValid( const Object *value, std::string *reason )
 #define IE_CORE_DEFINENUMERICPARAMETERSPECIALISATION( T, TNAME ) \
 	IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( TNAME, TNAME ## TypeId ); \
 	\
-	template class NumericParameter<T>;
+	template class IECORE_API NumericParameter<T>;
 
 namespace IECore
 {

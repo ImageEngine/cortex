@@ -40,6 +40,7 @@
 
 #include <boost/utility.hpp>
 
+#include "IECoreGL/Export.h"
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Bindable.h"
 #include "IECoreGL/TypeIds.h"
@@ -53,7 +54,7 @@ IE_CORE_FORWARDDECLARE( Shader );
 IE_CORE_FORWARDDECLARE( Texture );
 
 /// A class to represent GLSL shaders.
-class Shader : public IECore::RunTimeTyped
+class IECOREGL_API Shader : public IECore::RunTimeTyped
 {
 
 	public :
@@ -86,7 +87,7 @@ class Shader : public IECore::RunTimeTyped
 		const std::string &fragmentSource() const;
 		//@}
 		
-		struct Parameter
+		struct IECOREGL_API Parameter
 		{
 			
 			/// Type as reported by glGetActiveUnifom() or
@@ -145,7 +146,7 @@ class Shader : public IECore::RunTimeTyped
 		/// will be a necessary. The Setup class encapsulates a set of such
 		/// values and provides a means of cleanly binding and unbinding the
 		/// Shader using them.
-		class Setup : public IECore::RefCounted
+		class IECOREGL_API Setup : public IECore::RefCounted
 		{
 		
 			public :
@@ -169,7 +170,7 @@ class Shader : public IECore::RunTimeTyped
 				/// The ScopedBinding class cleanly binds and unbinds the shader
 				/// Setup, making the shader current and setting the uniform
 				/// and vertex values as necessary.
-				class ScopedBinding
+				class IECOREGL_API ScopedBinding
 				{
 				
 					public :

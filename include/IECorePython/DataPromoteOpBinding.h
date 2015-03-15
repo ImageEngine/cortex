@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_DATAPROMOTEOPBINDING_H
 #define IECOREPYTHON_DATAPROMOTEOPBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindDataPromoteOp();
+IECOREPYTHON_API void bindDataPromoteOp();
 }
 
 #endif // IECOREPYTHON_DATAPROMOTEOPBINDING_H

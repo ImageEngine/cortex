@@ -35,6 +35,7 @@
 #ifndef IECORE_MESHDISTORTIONSOP_H
 #define IECORE_MESHDISTORTIONSOP_H
 
+#include "IECore/Export.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/TypedPrimitiveOp.h"
 
@@ -43,7 +44,7 @@ namespace IECore
 
 /// A MeshPrimitiveOp to calculate the distortions (expansion and contraction) on the mesh edges by comparing P and Pref prim vars.
 /// \ingroup geometryProcessingGroup
-class MeshDistortionsOp : public MeshPrimitiveOp
+class IECORE_API MeshDistortionsOp : public MeshPrimitiveOp
 {
 	public:
 

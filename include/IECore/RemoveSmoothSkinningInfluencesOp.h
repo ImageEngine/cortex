@@ -35,6 +35,7 @@
 #ifndef IECORE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
 #define IECORE_REMOVESMOOTHSKINNINGINFLUENCESOP_H
 
+#include "IECore/Export.h"
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/VectorTypedParameter.h"
@@ -45,7 +46,7 @@ namespace IECore
 /// The RemoveSmoothSkinningInfluencesOp removes influences from the SmoothSkinningData, regardless of
 /// existing weights. It is the user's responsibility to normalize the resulting SmoothSkinningData if desired.
 /// \ingroup skinningGroup
-class RemoveSmoothSkinningInfluencesOp : public ModifyOp
+class IECORE_API RemoveSmoothSkinningInfluencesOp : public ModifyOp
 {
 	public :
 

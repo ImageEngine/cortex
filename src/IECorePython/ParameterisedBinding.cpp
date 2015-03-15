@@ -36,6 +36,7 @@
 
 #include "IECore/Parameterised.h"
 #include "IECore/CompoundParameter.h"
+#include "IECorePython/ParameterisedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/Wrapper.h"
 

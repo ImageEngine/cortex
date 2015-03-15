@@ -36,6 +36,7 @@
 #include "boost/python/make_constructor.hpp"
 
 #include "IECore/TransformationMatrixData.h"
+#include "IECorePython/TransformationMatrixDataBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/IECoreBinding.h"
 

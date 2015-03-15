@@ -35,6 +35,7 @@
 #include "boost/python.hpp"
 
 #include "IECore/TIFFImageWriter.h"
+#include "IECorePython/TIFFImageWriterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "tiffio.h"

@@ -42,9 +42,10 @@
 #include "boost/optional.hpp"
 #include "boost/iostreams/filtering_stream.hpp"
 
-#include "IndexedIO.h"
-#include "Exception.h"
-#include "VectorTypedData.h"
+#include "IECore/Export.h"
+#include "IECore/IndexedIO.h"
+#include "IECore/Exception.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECore
 {
@@ -52,7 +53,7 @@ namespace IECore
 /// It handles data instancing transparently for compact file sizes.
 /// Read operations are thread safe on read-only opened files.
 /// \ingroup ioGroup
-class StreamIndexedIO : public IndexedIO
+class IECORE_API StreamIndexedIO : public IndexedIO
 {
 	public:
 

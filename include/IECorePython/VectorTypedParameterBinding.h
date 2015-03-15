@@ -35,9 +35,11 @@
 #ifndef IECOREPYTHON_VECTORTYPEDPARAMETERBINDING_H
 #define IECOREPYTHON_VECTORTYPEDPARAMETERBINDING_H
 
+#include "IECorePython/Export.h"
+
 namespace IECorePython
 {
-void bindVectorTypedParameter();
+IECOREPYTHON_API void bindVectorTypedParameter();
 }
 
 #endif // IECOREPYTHON_VECTORTYPEDPARAMETERBINDING_H

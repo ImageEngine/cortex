@@ -40,10 +40,12 @@
 
 #include "OpenEXR/ImathMatrix.h"
 
+#include "IECoreRI/Export.h"
+
 namespace IECoreRI
 {
 		
-class TransformStack
+class IECORERI_API TransformStack
 {
 
 	public :
@@ -64,8 +66,8 @@ class TransformStack
 		Imath::M44f get( float time ) const;
 		
 		size_t numSamples() const;
-		Imath::M44f sample( size_t sampleIndex );
-		float sampleTime( size_t sampleIndex );
+		Imath::M44f sample( size_t sampleIndex ) const;
+		float sampleTime( size_t sampleIndex ) const;
 		
 	private :
 	

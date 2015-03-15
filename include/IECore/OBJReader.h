@@ -39,6 +39,7 @@
 
 #include "OpenEXR/ImathVec.h"
 
+#include "IECore/Export.h"
 #include "IECore/Reader.h"
 
 namespace IECore
@@ -49,7 +50,7 @@ IE_CORE_FORWARDDECLARE(MeshPrimitive);
 /// The OBJReader class defines a class for reading OBJ mesh data.
 /// This is a subset of the full setup of objects encodable in OBJ.
 /// \ingroup ioGroup
-class OBJReader : public Reader
+class IECORE_API OBJReader : public Reader
 {
 	public:
 

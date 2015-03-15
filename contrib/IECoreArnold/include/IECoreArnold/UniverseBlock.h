@@ -37,13 +37,15 @@
 
 #include "boost/noncopyable.hpp"
 
+#include "IECoreArnold/Export.h"
+
 namespace IECoreArnold
 {
 
 /// The UniverseBlock provides a simple means of managing calls to AiBegin/AiEnd
 /// in a way which easily handles exceptions and multiple return statements from
 /// functions.
-class UniverseBlock : public boost::noncopyable
+class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 {
 
 	public :

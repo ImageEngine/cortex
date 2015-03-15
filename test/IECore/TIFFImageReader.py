@@ -41,6 +41,9 @@ import os
 
 from IECore import *
 
+def extractColorPixel( file, index ):
+	return Color3f( file.read()["R"].data[index], file.read()["G"].data[index], file.read()["B"].data[index] )
+
 class TestTIFFReader(unittest.TestCase):
 
 	def testConstruction( self ):
@@ -151,6 +154,19 @@ class TestTIFFReader(unittest.TestCase):
 		self.assertEqual( Reader.create( "test/IECore/data/tiff/uvMap.200x100.rgba.32bit.tif" ).sourceColorSpace(), "linear" )
 		# for other bit-depths it assumes srgb
 		self.assertEqual( Reader.create( "test/IECore/data/tiff/uvMap.200x100.rgba.8bit.tif" ).sourceColorSpace(), "srgb" )
+
+	def testTDLColorSpace( self ):
+
+		linearFile = Reader.create( "test/IECore/data/tdl/grey50_linear.tdl" )
+		self.assertEqual( linearFile.sourceColorSpace(), "linear" )
+		self.assertEqual( extractColorPixel( linearFile, 0 ), Color3f( 0.501960814 ) )
+		srgbFile = Reader.create( "test/IECore/data/tdl/grey50_srgb.tdl" )
+		self.assertEqual( srgbFile.sourceColorSpace(), "srgb" )
+		self.assertEqual( extractColorPixel( srgbFile, 0 ), Color3f( 0.215860516 ) )
+		rec709File = Reader.create( "test/IECore/data/tdl/grey50_BT709.tdl" )
+		self.assertEqual( rec709File.sourceColorSpace(), "rec709" )
+		self.assertEqual( extractColorPixel( rec709File, 0 ), Color3f( 0.261481494 ) )
+		
 
 	def testDataWindow( self ):
 		r = Reader.create( "test/IECore/data/tiff/cropWindow.640x480.16bit.tif" )
@@ -405,8 +421,8 @@ class TestTIFFReader(unittest.TestCase):
 	
 		# 3delight has started using the SMinSampleValue and SMaxSampleValue tags to store
 		# the range of values in a tdl file. this is jolly useful for shader writers but a pain
-		# for anyone using libtiff to read the images. libtiff currently doesn't support the
-		# storage of different values per sample, and therefore complains when given
+		# for anyone using libtiff to read the images. not all libtiff versions support the
+		# storage of different values per sample, and therefore libtiff may complain when given
 		# one of these files. we deal with this by pretending nothing has happened and allowing
 		# all directories except the last one to be read (it's only the last one that has the
 		# problem).
@@ -419,13 +435,17 @@ class TestTIFFReader(unittest.TestCase):
 			( 16, 8 ),
 			( 8, 4 ),
 			( 4, 2 ),
-			# there should be a ( 2, 1 ) as well, but the best we can do is
-			# ignore it.
+			( 2, 1 ), # this is the one that could cause a problem
 		]
 		
-		self.assertEqual( r.numDirectories(), len( expectedResolutions ) )
+		self.assertTrue(
+			# good libtiff version
+			r.numDirectories() == len( expectedResolutions ) or
+			# bad libtiff version
+			r.numDirectories() == len( expectedResolutions ) - 1
+		)
 		
-		for i in range( 0, len( expectedResolutions ) ) :
+		for i in range( 0, r.numDirectories() ) :
 			r.setDirectory( i )
 			image = r.read()
 			size = image.dataWindow.size()
