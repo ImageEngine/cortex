@@ -532,13 +532,14 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 		// ignore edits for extra environment lights.
 		if( insideEditBlock() )
 		{
-			assert( !m_project->get_scene()->environment_edfs().empty() );
-
-			asr::EnvironmentEDF *envLight = m_project->get_scene()->environment_edfs().get_by_index( 0 );
-
-			if( lightName != envLight->get_name() )
+			if( !m_project->get_scene()->environment_edfs().empty() )
 			{
-				return;
+				asr::EnvironmentEDF *envLight = m_project->get_scene()->environment_edfs().get_by_index( 0 );
+
+				if( lightName != envLight->get_name() )
+				{
+					return;
+				}
 			}
 		}
 
