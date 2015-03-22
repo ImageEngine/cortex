@@ -74,6 +74,8 @@ class AttributeState
 		void materialHash( IECore::MurmurHash &hash ) const;
 
 		std::string createShaderGroup( renderer::Assembly &assembly );
+		void editShaderGroup( renderer::Assembly &assembly, const std::string &name );
+
 		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );
 
 	private :

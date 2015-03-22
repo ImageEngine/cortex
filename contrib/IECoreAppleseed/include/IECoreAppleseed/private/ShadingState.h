@@ -58,10 +58,11 @@ class ShadingState
 		void setOSLSurface( IECore::ConstShaderPtr surface );
 
 		void shaderGroupHash( IECore::MurmurHash &hash ) const;
-		std::string createShaderGroup( renderer::Assembly &assembly );
+		std::string createShaderGroup( renderer::Assembly &assembly, const std::string &name );
+		void editShaderGroup( renderer::Assembly &assembly, const std::string &name );
 
 		void materialHash( IECore::MurmurHash &hash ) const;
-		std::string createMaterial( renderer::Assembly &assembly, const std::string &shaderGroupName );
+		std::string createMaterial( renderer::Assembly &assembly, const std::string &name, const std::string &shaderGroupName );
 
 		bool valid() const;
 
