@@ -50,9 +50,7 @@
 #include "renderer/api/light.h"
 #include "renderer/api/material.h"
 #include "renderer/api/object.h"
-#include "renderer/api/project.h"
 #include "renderer/api/rendering.h"
-#include "renderer/api/scene.h"
 #include "renderer/api/surfaceshader.h"
 #include "renderer/api/utility.h"
 
@@ -62,6 +60,7 @@
 #include "IECore/Transform.h"
 
 #include "IECoreAppleseed/private/RendererImplementation.h"
+#include "IECoreAppleseed/private/LogTarget.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 #include "IECoreAppleseed/ToAppleseedCameraConverter.h"
@@ -69,8 +68,8 @@
 using namespace IECore;
 using namespace IECoreAppleseed;
 using namespace Imath;
-using namespace std;
 using namespace boost;
+using namespace std;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -81,15 +80,17 @@ namespace asr = renderer;
 
 IECoreAppleseed::RendererImplementation::RendererImplementation()
 {
-	m_interactive = true;
+	m_logTarget.reset( new IECoreLogTarget() );
+	asr::global_logger().add_target( m_logTarget.get() );
+
 	constructCommon();
 	m_primitiveConverter.reset( new InteractivePrimitiveConverter( m_project->search_paths() ) );
 	m_motionHandler.reset( new MotionBlockHandler( m_transformStack, *m_primitiveConverter ) );
+	m_editHandler.reset( new EditBlockHandler( *m_project ) );
 }
 
 IECoreAppleseed::RendererImplementation::RendererImplementation( const string &fileName )
 {
-	m_interactive = false;
 	m_fileName = fileName;
 	m_projectPath = filesystem::path( fileName ).parent_path();
 
@@ -121,8 +122,17 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	m_project = asr::ProjectFactory::create( "project" );
 	m_project->add_default_configurations();
 
+	// Insert some config params needed by the interactive renderer.
+	asr::Configuration *cfg = m_project->configurations().get_by_name( "interactive" );
+	asr::ParamArray &params = cfg->get_parameters();
+	params.insert( "sample_renderer", "generic" );
+	params.insert( "sample_generator", "generic" );
+	params.insert( "tile_renderer", "generic" );
+	params.insert( "frame_renderer", "progressive" );
+	params.insert( "lighting_engine", "pt" );
+
 	// create some basic project entities.
-	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray() ) );
+	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray().insert( "resolution", "640 480") ) );
 	m_project->set_frame( frame );
 
 	asf::auto_release_ptr<asr::Scene> scene = asr::SceneFactory::create();
@@ -130,11 +140,16 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	m_project->get_scene()->set_environment( asr::EnvironmentFactory().create( "environment", asr::ParamArray() ) );
 }
 
+IECoreAppleseed::RendererImplementation::~RendererImplementation()
+{
+	asr::global_logger().remove_target( m_logTarget.get() );
+}
+
 ////////////////////////////////////////////////////////////////////////
 // options
 ////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::setOption( const string &name, IECore::ConstDataPtr value )
+void IECoreAppleseed::RendererImplementation::setOption( const string &name, ConstDataPtr value )
 {
 	m_optionsMap[name] = value;
 
@@ -143,7 +158,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 		// appleseed render settings.
 
 		string optName( name, 7, string::npos );
-		std::replace( optName.begin(), optName.end(), ':', '.' );
+		replace( optName.begin(), optName.end(), ':', '.' );
 		string valueStr = dataToString( value );
 
 		if( !valueStr.empty() )
@@ -153,7 +168,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 
 			// if the number of passes is different than one, we need to
 			// switch the shading result framebuffer in the final rendering config.
-			if( optName == "generic_frame_renderer.passes" )
+			if( optName == "generic_frame_renderer.passes" && !isInteractive() )
 			{
 				int numPasses = static_cast<const IntData*>( value.get() )->readable();
 				m_project->configurations().get_by_name( "final" )->get_parameters().insert( "shading_result_framebuffer", numPasses == 1 ? "ephemeral" : "permanent" );
@@ -190,13 +205,17 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, IEC
 	{
 		// ignore options prefixed for some other renderer
 	}
+	else if( name == "editable" )
+	{
+		// ignore
+	}
 	else
 	{
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
 	}
 }
 
-IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const string &name ) const
+ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const string &name ) const
 {
 	OptionsMap::const_iterator it( m_optionsMap.find( name ) );
 
@@ -205,20 +224,41 @@ IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getOption( const s
 		return it->second;
 	}
 
-	return IECore::ConstDataPtr();
+	return ConstDataPtr();
 }
 
-void IECoreAppleseed::RendererImplementation::camera( const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::camera( const string &name, const CompoundDataMap &parameters )
 {
+	// ignore other cameras if a camera has been specified
+	// using the render:camera option.
 	const string *cameraName = getOptionAs<string>( "render:camera" );
 
-	// ignore secondary cameras.
-	if( !cameraName || name != *cameraName )
+	if( cameraName && *cameraName != name )
 	{
 		return;
 	}
 
-	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
+	// ignore extra cameras if we already have one.
+	if( !insideEditBlock() && m_project->get_scene()->get_camera() )
+	{
+		return;
+	}
+
+	// ignore edits for extra cameras.
+	if( insideEditBlock() )
+	{
+		assert( m_project->get_scene()->get_camera() );
+
+		if( name != m_project->get_scene()->get_camera()->get_name() )
+		{
+			return;
+		}
+	}
+
+	CompoundDataPtr params = new CompoundData( parameters );
+	CameraPtr cortexCamera = new Camera( name, 0, params );
+	cortexCamera->addStandardParameters();
+
 	ToAppleseedCameraConverterPtr converter = new ToAppleseedCameraConverter( cortexCamera );
 	asf::auto_release_ptr<asr::Camera> appleseedCamera( static_cast<asr::Camera*>( converter->convert() ) );
 
@@ -228,11 +268,29 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 		return;
 	}
 
-	appleseedCamera->transform_sequence() = m_transformStack.top();
-	setCamera( cortexCamera, appleseedCamera );
+	if( insideEditBlock() )
+	{
+		// Update the camera.
+		asr::Camera *camera = m_project->get_scene()->get_camera();
+
+		// Update the transform if needed.
+		if( m_transformStack.size() )
+		{
+			camera->transform_sequence() = m_transformStack.top();
+		}
+	}
+	else
+	{
+		// pass the shutter interval to the primitive converter.
+		const V2f &shutter = params->member<V2fData>( "shutter", true )->readable();
+		m_primitiveConverter->setShutterInterval( shutter.x, shutter.y );
+
+		appleseedCamera->transform_sequence() = m_transformStack.top();
+		setCamera( name, cortexCamera, appleseedCamera );
+	}
 }
 
-void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::display( const string &name, const string &type, const string &data, const CompoundDataMap &parameters )
 {
 	// exr and png are special...
 	if( type == "exr" || type == "png" )
@@ -279,6 +337,8 @@ void IECoreAppleseed::RendererImplementation::worldBegin()
 	asf::auto_release_ptr<asr::Assembly> assembly = asr::AssemblyFactory().create( "assembly", asr::ParamArray() );
 	m_mainAssembly = assembly.get();
 	m_project->get_scene()->assemblies().insert( assembly );
+
+	m_lightHandler.reset( new LightHandler( *m_project->get_scene(), m_project->search_paths() ) );
 }
 
 void IECoreAppleseed::RendererImplementation::worldEnd()
@@ -305,16 +365,16 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 		asf::auto_release_ptr<asr::Camera> camera( static_cast<asr::Camera*>( converter->convert() ) );
 		assert( camera.get() );
 
-		setCamera( cortexCamera, camera );
+		setCamera( "camera", cortexCamera, camera );
 	}
 
 	// instance the main assembly
 	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( "assembly_inst", asr::ParamArray(), "assembly" );
 	m_project->get_scene()->assembly_instances().insert( assemblyInstance );
 
-	if( m_fileName.empty() )
+	if( isInteractive() )
 	{
-		// TODO: interactive render here...
+		m_editHandler->startRendering();
 	}
 	else
 	{
@@ -328,6 +388,11 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 
 void IECoreAppleseed::RendererImplementation::transformBegin()
 {
+	if( insideEditBlock() && m_transformStack.size() == 0 )
+	{
+		m_transformStack.clear();
+	}
+
 	m_transformStack.push( ( m_transformStack.top() ) );
 }
 
@@ -342,9 +407,9 @@ void IECoreAppleseed::RendererImplementation::transformEnd()
 	m_transformStack.pop();
 }
 
-void IECoreAppleseed::RendererImplementation::setTransform( const Imath::M44f &m )
+void IECoreAppleseed::RendererImplementation::setTransform( const M44f &m )
 {
-	if( m_motionHandler->insideMotionBlock() )
+	if( insideMotionBlock() )
 	{
 		m_motionHandler->setTransform( m );
 	}
@@ -359,21 +424,21 @@ void IECoreAppleseed::RendererImplementation::setTransform( const string &coordi
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::setTransform", "Not implemented." );
 }
 
-Imath::M44f IECoreAppleseed::RendererImplementation::getTransform() const
+M44f IECoreAppleseed::RendererImplementation::getTransform() const
 {
 	M44d m = m_transformStack.top().get_earliest_transform().get_local_to_parent();
 	return M44f( m );
 }
 
-Imath::M44f IECoreAppleseed::RendererImplementation::getTransform( const string &coordinateSystem ) const
+M44f IECoreAppleseed::RendererImplementation::getTransform( const string &coordinateSystem ) const
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::getTransform", "Not implemented." );
 	return M44f();
 }
 
-void IECoreAppleseed::RendererImplementation::concatTransform( const Imath::M44f &m )
+void IECoreAppleseed::RendererImplementation::concatTransform( const M44f &m )
 {
-	if( m_motionHandler->insideMotionBlock() )
+	if( insideMotionBlock() )
 	{
 		m_motionHandler->concatTransform( m );
 	}
@@ -404,17 +469,17 @@ void IECoreAppleseed::RendererImplementation::attributeEnd()
 	transformEnd();
 }
 
-void IECoreAppleseed::RendererImplementation::setAttribute( const string &name, IECore::ConstDataPtr value )
+void IECoreAppleseed::RendererImplementation::setAttribute( const string &name, ConstDataPtr value )
 {
 	m_attributeStack.top().setAttribute( name, value );
 }
 
-IECore::ConstDataPtr IECoreAppleseed::RendererImplementation::getAttribute( const string &name ) const
+ConstDataPtr IECoreAppleseed::RendererImplementation::getAttribute( const string &name ) const
 {
 	return m_attributeStack.top().getAttribute( name );
 }
 
-void IECoreAppleseed::RendererImplementation::shader( const string &type, const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::shader( const string &type, const string &name, const CompoundDataMap &parameters )
 {
 	if( type == "osl:shader" || type == "shader" )
 	{
@@ -425,6 +490,11 @@ void IECoreAppleseed::RendererImplementation::shader( const string &type, const 
 	{
 		ConstShaderPtr shader( new Shader( name, "surface", parameters ) );
 		m_attributeStack.top().setOSLSurface( shader );
+
+		if( insideEditBlock() )
+		{
+			m_attributeStack.top().editShaderGroup( *m_mainAssembly, m_editHandler->exactScopeName() );
+		}
 	}
 	else
 	{
@@ -432,109 +502,74 @@ void IECoreAppleseed::RendererImplementation::shader( const string &type, const 
 	}
 }
 
-void IECoreAppleseed::RendererImplementation::light( const string &name, const string &handle, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::light( const string &name, const string &handle, const CompoundDataMap &parameters )
 {
-	bool isEnvironment = boost::algorithm::ends_with( name, "_environment_edf" );
-	const string *environmentEDFName = 0;
-
-	// ignore enviromnment EDFs not selected in the appleseed options node.
-	if( isEnvironment )
+	if( !m_lightHandler.get() )
 	{
-		environmentEDFName = getOptionAs<string>( "as:environment_edf" );
-
-		if( !environmentEDFName || m_attributeStack.top().name() != *environmentEDFName )
-			return;
+		msg( MessageHandler::Error ,"IECoreAppleseed::RendererImplementation::light", "Light specified before worldBegin." );
+		return;
 	}
 
-	asr::ParamArray params;
-	for( CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
+	// check if the light is an environment light.
+	if( algorithm::ends_with( name, "_environment_edf" ) )
 	{
-		string paramName = it->first.value();
-		ConstDataPtr paramValue = it->second;
+		const string &lightName = m_attributeStack.top().name();
+		const string *environmentEDFName = getOptionAs<string>( "as:environment_edf" );
 
-		if( isEnvironment && paramName == "radiance_map" )
+		// ignore other environment lights if one has been specified
+		// using the as:environment_edf option.
+		if( environmentEDFName && *environmentEDFName != lightName )
 		{
-			if( paramValue->typeId() != StringDataTypeId )
-			{
-				msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::light", "Expected radianceMap parameter to be a string" );
-				continue;
-			}
-
-			const string &fileName = static_cast<const StringData*>( paramValue.get() )->readable();
-			string textureName = m_attributeStack.top().name() + "." + paramName;
-			string textureInstanceName = createTextureEntity( m_project->get_scene()->textures(), m_project->get_scene()->texture_instances(), m_project->search_paths(), textureName, fileName );
-			params.insert( "radiance", textureInstanceName.c_str() );
-		}
-		else
-		{
-			if( paramValue->typeId() == Color3fDataTypeId )
-			{
-				string colorName = m_attributeStack.top().name() + "." + paramName;
-				const Imath::Color3f &col = static_cast<const Color3fData*>( paramValue.get() )->readable();
-				colorName = createColorEntity( m_project->get_scene()->colors(), col, colorName.c_str() );
-				params.insert( paramName.c_str(), colorName.c_str() );
-			}
-			else
-			{
-				params.insert( paramName.c_str(), dataToString( paramValue ) );
-			}
-		}
-	}
-
-	if( isEnvironment )
-	{
-		asr::EnvironmentEDFFactoryRegistrar factoryRegistrar;
-		const asr::IEnvironmentEDFFactory *factory = factoryRegistrar.lookup( name.c_str() );
-
-		if( !factory )
-		{
-			msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::light", format( "Unknown light model \"%s\"." ) % name );
 			return;
 		}
 
-		asf::auto_release_ptr<asr::EnvironmentEDF> light( factory->create( m_attributeStack.top().name().c_str(), params ) );
-		insertEntityWithUniqueName( m_project->get_scene()->environment_edfs(), light, m_attributeStack.top().name() );
-		m_project->get_scene()->get_environment()->get_parameters().insert( "environment_edf", environmentEDFName->c_str() );
+		// ignore extra environment lights if we already have one.
+		if( !insideEditBlock() && !m_project->get_scene()->environment_edfs().empty() )
+		{
+			return;
+		}
+
+		// ignore edits for extra environment lights.
+		if( insideEditBlock() )
+		{
+			assert( !m_project->get_scene()->environment_edfs().empty() );
+
+			asr::EnvironmentEDF *envLight = m_project->get_scene()->environment_edfs().get_by_index( 0 );
+
+			if( lightName != envLight->get_name() )
+			{
+				return;
+			}
+		}
 
 		const bool *envEDFVisible = getOptionAs<bool>( "as:environment_edf_background" );
-		if( envEDFVisible && *envEDFVisible == true )
-		{
-			asr::ParamArray params;
-			params.insert( "environment_edf", environmentEDFName->c_str() );
-			asf::auto_release_ptr<asr::EnvironmentShader> envShader( asr::EnvironmentShaderFactoryRegistrar().lookup( "edf_environment_shader" )->create( "environment_shader", params ) );
-			m_project->get_scene()->environment_shaders().insert( envShader );
-			m_project->get_scene()->get_environment()->get_parameters().insert( "environment_shader", "environment_shader" );
-		}
+		m_lightHandler->environment( name, handle, envEDFVisible && *envEDFVisible, parameters );
 	}
-	else // normal, singular light
+	else
 	{
-		asr::LightFactoryRegistrar factoryRegistrar;
-		const asr::ILightFactory *factory = factoryRegistrar.lookup( name.c_str() );
-
-		if( !factory )
-		{
-			msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::light", format( "Unknown light model \"%s\"." ) % name );
-			return;
-		}
-
-		asf::auto_release_ptr<asr::Light> light( factory->create( m_attributeStack.top().name().c_str(), params ) );
-		light->set_transform( m_transformStack.top().get_earliest_transform() );
-		insertEntityWithUniqueName( m_mainAssembly->lights(), light, m_attributeStack.top().name() );
+		m_lightHandler->light( name, handle,
+			m_transformStack.top().get_earliest_transform(), parameters );
 	}
 }
 
 void IECoreAppleseed::RendererImplementation::illuminate( const string &lightHandle, bool on )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::illuminate", "Not implemented." );
+	if( !m_lightHandler.get() )
+	{
+		msg( MessageHandler::Error ,"IECoreAppleseed::RendererImplementation::light", "illuminate called before worldBegin." );
+		return;
+	}
+
+	m_lightHandler->illuminate( lightHandle, on );
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // motion blur
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::motionBegin( const std::set<float> &times )
+void IECoreAppleseed::RendererImplementation::motionBegin( const set<float> &times )
 {
-	if (m_motionHandler->insideMotionBlock() )
+	if (insideMotionBlock() )
 	{
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionBegin", "No matching motionEnd() call." );
 		return;
@@ -545,7 +580,7 @@ void IECoreAppleseed::RendererImplementation::motionBegin( const std::set<float>
 
 void IECoreAppleseed::RendererImplementation::motionEnd()
 {
-	if (!m_motionHandler->insideMotionBlock() )
+	if (!insideMotionBlock() )
 	{
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "No matching motionBegin() call." );
 		return;
@@ -558,37 +593,37 @@ void IECoreAppleseed::RendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::points( size_t numPoints, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::points", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::disk", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::curves", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::text( const string &font, const string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::text( const string &font, const string &text, float kerning, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::text", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::sphere", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::image( const Box2i &dataWindow, const Box2i &displayWindow, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::image", "Not implemented." );
 }
 
-void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const string &interpolation, const PrimitiveVariableMap &primVars )
 {
 	if( !m_mainAssembly )
 	{
@@ -596,12 +631,12 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 		return;
 	}
 
-	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
+	MeshPrimitivePtr mesh = new MeshPrimitive( vertsPerFace, vertIds, interpolation );
 	mesh->variables = primVars;
 
 	string materialName = currentMaterialName();
 
-	if( m_motionHandler->insideMotionBlock() )
+	if( insideMotionBlock() )
 	{
 		m_motionHandler->primitive( mesh, materialName );
 	}
@@ -614,7 +649,7 @@ void IECoreAppleseed::RendererImplementation::mesh( IECore::ConstIntVectorDataPt
 	}
 }
 
-void IECoreAppleseed::RendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreAppleseed::RendererImplementation::nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::nurbs", "Not implemented." );
 }
@@ -633,7 +668,7 @@ void IECoreAppleseed::RendererImplementation::geometry( const string &type, cons
 // procedurals
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreAppleseed::RendererImplementation::procedural( Renderer::ProceduralPtr proc )
 {
 	// appleseed does not support procedurals yet, so we expand them immediately.
 	proc->render( this );
@@ -643,7 +678,7 @@ void IECoreAppleseed::RendererImplementation::procedural( IECore::Renderer::Proc
 // instancing
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::instanceBegin( const string &name, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::instanceBegin( const string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::instanceBegin", "Not implemented." );
 }
@@ -662,7 +697,7 @@ void IECoreAppleseed::RendererImplementation::instance( const string &name )
 // commands
 /////////////////////////////////////////////////////////////////////////////////////////
 
-IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
+DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::command", "Not implemented." );
 	return 0;
@@ -672,29 +707,69 @@ IECore::DataPtr IECoreAppleseed::RendererImplementation::command( const string &
 // rerendering
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const IECore::CompoundDataMap &parameters )
+void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const CompoundDataMap &parameters )
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editBegin", "Not implemented." );
+	if( isInteractive() )
+	{
+		m_transformStack.clear();
+
+		if( editType == "option" )
+		{
+			// Option edits begin with no transform in place.
+			m_transformStack.pop();
+		}
+
+		// Clear attribute stack.
+		while ( m_attributeStack.size() )
+			m_attributeStack.pop();
+
+		m_attributeStack.push( AttributeState() );
+
+		m_editHandler->editBegin( editType, parameters );
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editBegin", "Non editable render." );
+	}
 }
 
 void IECoreAppleseed::RendererImplementation::editEnd()
 {
-	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editEnd", "Not implemented." );
+	if( isInteractive() )
+	{
+		m_editHandler->editEnd();
+	}
+	else
+	{
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::editEnd", "Non editable render." );
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // private
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreAppleseed::RendererImplementation::setCamera( CameraPtr cortexCamera, asf::auto_release_ptr<asr::Camera> &appleseedCamera )
+bool IECoreAppleseed::RendererImplementation::isInteractive() const
 {
+	return m_fileName.empty();
+}
+
+void IECoreAppleseed::RendererImplementation::setCamera( const string &name, CameraPtr cortexCamera,
+	asf::auto_release_ptr<asr::Camera> &appleseedCamera )
+{
+	appleseedCamera->set_name( name.c_str() );
 	m_project->get_scene()->set_camera( appleseedCamera );
 
 	// resolution
-	m_project->get_frame()->get_parameters().insert( "camera", "camera" );
+	m_project->get_frame()->get_parameters().insert( "camera", name.c_str() );
 	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
 	asf::Vector2i res( resolution->readable().x, resolution->readable().y );
 	m_project->get_frame()->get_parameters().insert( "resolution", res );
+
+	// replace the frame by an updated one.
+	// this is needed when doing interactive rendering
+	asr::ParamArray params = m_project->get_frame()->get_parameters();
+	m_project->set_frame( asr::FrameFactory().create( "beauty", params ) );
 
 	// crop window
 	const Box2fData *cropWindow = cortexCamera->parametersData()->member<Box2fData>( "cropWindow" );
@@ -708,53 +783,23 @@ void IECoreAppleseed::RendererImplementation::setCamera( CameraPtr cortexCamera,
 
 string IECoreAppleseed::RendererImplementation::currentShaderGroupName()
 {
-	string shaderGroupName;
-
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash shaderGroupHash;
-		m_attributeStack.top().shaderGroupHash( shaderGroupHash );
-
-		ShaderGroupMap::const_iterator it( m_shaderGroupNames.find( shaderGroupHash ) );
-
-		if( it == m_shaderGroupNames.end() )
-		{
-			shaderGroupName = m_attributeStack.top().createShaderGroup( *m_mainAssembly );
-			m_shaderGroupNames[shaderGroupHash] = shaderGroupName;
-		}
-		else
-		{
-			shaderGroupName = it->second;
-		}
+		return m_attributeStack.top().createShaderGroup( *m_mainAssembly );
 	}
 
-	return shaderGroupName;
+	return string();
 }
 
 string IECoreAppleseed::RendererImplementation::currentMaterialName()
 {
-	string materialName;
-
 	if( m_attributeStack.top().shadingStateValid() )
 	{
-		MurmurHash materialHash;
-		m_attributeStack.top().materialHash( materialHash );
-
-		MaterialMap::const_iterator it( m_materialNames.find( materialHash ) );
-
-		if( it == m_materialNames.end() )
-		{
-			string ShaderGroupName = currentShaderGroupName();
-			materialName = m_attributeStack.top().createMaterial( *m_mainAssembly, ShaderGroupName );
-			m_materialNames[materialHash] = materialName;
-		}
-		else
-		{
-			materialName = it->second;
-		}
+		string ShaderGroupName = currentShaderGroupName();
+		return m_attributeStack.top().createMaterial( *m_mainAssembly, ShaderGroupName );
 	}
 
-	return materialName;
+	return string();
 }
 
 void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const string &assemblyName )
@@ -762,11 +807,26 @@ void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const stri
 	string assemblyInstanceName = m_attributeStack.top().name() + "_assembly_instance";
 
 	asr::ParamArray params;
-	params.insert( "visibility", m_attributeStack.top().visibilityDictionary() );
+
+	if( !m_attributeStack.top().visibilityDictionary().empty() )
+	{
+		params.insert( "visibility", m_attributeStack.top().visibilityDictionary() );
+	}
+
 	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), params, assemblyName.c_str() );
 
 	assemblyInstance->transform_sequence() = m_transformStack.top();
 	insertEntityWithUniqueName( m_mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
+}
+
+bool RendererImplementation::insideMotionBlock() const
+{
+	return m_motionHandler->insideMotionBlock();
+}
+
+bool RendererImplementation::insideEditBlock() const
+{
+	return m_editHandler.get() && m_editHandler->insideEditBlock();
 }
 
 asr::Project *IECoreAppleseed::RendererImplementation::appleseedProject() const

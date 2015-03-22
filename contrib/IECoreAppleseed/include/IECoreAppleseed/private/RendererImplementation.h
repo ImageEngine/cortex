@@ -40,14 +40,17 @@
 
 #include "boost/filesystem/path.hpp"
 
-#include "renderer/modeling/project/project.h"
-#include "renderer/modeling/scene/assembly.h"
+#include "renderer/api/log.h"
+#include "renderer/api/scene.h"
+#include "renderer/api/project.h"
 
 #include "IECore/Camera.h"
 
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
 #include "IECoreAppleseed/private/AppleseedUtil.h"
+#include "IECoreAppleseed/private/EditBlockHandler.h"
+#include "IECoreAppleseed/private/LightHandler.h"
 #include "IECoreAppleseed/private/MotionBlockHandler.h"
 #include "IECoreAppleseed/private/TransformStack.h"
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
@@ -62,6 +65,8 @@ class RendererImplementation : public IECore::Renderer
 
 		RendererImplementation();
 		RendererImplementation( const std::string &fileName );
+
+		virtual ~RendererImplementation();
 
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
@@ -126,7 +131,10 @@ class RendererImplementation : public IECore::Renderer
 
 		void constructCommon();
 
-		void setCamera( IECore::CameraPtr cortexCamera, foundation::auto_release_ptr<renderer::Camera> &camera );
+		bool isInteractive() const;
+
+		void setCamera( const std::string &name, IECore::CameraPtr cortexCamera,
+			foundation::auto_release_ptr<renderer::Camera> &camera );
 
 		std::string currentShaderGroupName();
 		std::string currentMaterialName();
@@ -149,35 +157,31 @@ class RendererImplementation : public IECore::Renderer
 			return 0;
 		}
 
-		bool m_interactive;
+		bool insideMotionBlock() const;
+		bool insideEditBlock() const;
+
+		// logging
+		foundation::auto_release_ptr<foundation::ILogTarget> m_logTarget;
+
+		// project related
+		foundation::auto_release_ptr<renderer::Project> m_project;
 		std::string m_fileName;
 		boost::filesystem::path m_projectPath;
 
 		typedef std::map<std::string,IECore::ConstDataPtr> OptionsMap;
 		OptionsMap m_optionsMap;
 
-		// transforms
-		TransformStack m_transformStack;
-
 		typedef std::stack<AttributeState> AttributeStack;
 		AttributeStack m_attributeStack;
 
-		// shadergroups
-		typedef std::map<IECore::MurmurHash, std::string> ShaderGroupMap;
-		ShaderGroupMap m_shaderGroupNames;
-		std::string m_currentShaderGroupName;
+		TransformStack m_transformStack;
 
-		// materials
-		typedef std::map<IECore::MurmurHash, std::string> MaterialMap;
-		MaterialMap m_materialNames;
-
-		// motion
-		std::auto_ptr<MotionBlockHandler> m_motionHandler;
-
-		// project related
-		foundation::auto_release_ptr<renderer::Project> m_project;
 		renderer::Assembly *m_mainAssembly;
+		std::auto_ptr<LightHandler> m_lightHandler;
+		std::string m_currentShaderGroupName;
 		std::auto_ptr<PrimitiveConverter> m_primitiveConverter;
+		std::auto_ptr<MotionBlockHandler> m_motionHandler;
+		std::auto_ptr<EditBlockHandler> m_editHandler;
 
 		friend class IECoreAppleseed::Renderer;
 
