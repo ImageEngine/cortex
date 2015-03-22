@@ -76,6 +76,9 @@ class Renderer : public IECore::Renderer
 		/// File format used to save meshes when creating a project file.
 		/// Can be "obj" or "binarymesh".
 		///
+		/// \li <b>"as:automatic_instancing" BoolData()</b><br>
+		/// Enables or disables automatic instancing.
+		///
 		/// \li <b>"as:environment_edf" StringData()</b><br>
 		/// Name of the environment light used when rendering.
 		///
@@ -120,11 +123,17 @@ class Renderer : public IECore::Renderer
 		///
 		////////////////////////////////////////////////////////////////////////////
 		///
+		/// \li <b>"as:visibility:*" BoolData</b><br>
+		/// Visibility flags.
+		///
 		/// \li <b>"as:shading_samples" FloatData</b><br>
-		/// Number of shading samples to use for the current material.
+		/// Number of shading samples to use for the current shader.
 		///
 		/// \li <b>"as:alpha_map" StringData</b><br>
 		/// Specifies a texture to use as an alpha map.
+		///
+		/// \li <b>"as:photon_target" BoolData</b><br>
+		/// Specifies that an object is an important target for photons.
 		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
 
@@ -164,8 +173,8 @@ class Renderer : public IECore::Renderer
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
 
-		/// Returns a pointer to the appleseed Project held by
-		/// the renderer. This is used in unit tests.
+		/// Returns a pointer to the appleseed Project held by the renderer.
+		/// It is used in IECoreAppleseed unit tests.
 		renderer::Project *appleseedProject() const;
 
 	private :
