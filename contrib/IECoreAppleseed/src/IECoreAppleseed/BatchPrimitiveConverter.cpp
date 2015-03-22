@@ -33,6 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/filesystem/convenience.hpp"
+#include "boost/lexical_cast.hpp"
+
+#include "foundation/math/scalar.h"
 
 #include "renderer/api/entity.h"
 
@@ -56,7 +59,7 @@ IECoreAppleseed::BatchPrimitiveConverter::BatchPrimitiveConverter( const filesys
 	m_meshGeomExtension = ".binarymesh";
 }
 
-void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, IECore::ConstDataPtr value )
+void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, ConstDataPtr value )
 {
 	if( name == "as:mesh_file_format" )
 	{
@@ -91,10 +94,8 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doC
 
 	if( primitive->typeId() == MeshPrimitiveTypeId )
 	{
-		string objectName = primitiveHash.toString();
-
 		// Check if we already have a mesh saved for this object.
-		string fileName = string( "_geometry/" ) + objectName + m_meshGeomExtension;
+		string fileName = string( "_geometry/" ) + primitiveHash.toString() + m_meshGeomExtension;
 		filesystem::path p = m_projectPath / fileName;
 
 		if( !filesystem::exists( p ) )
@@ -118,17 +119,47 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doC
 
 			// Write the mesh to a file.
 			p = m_projectPath / fileName;
-			if( !asr::MeshObjectWriter::write( static_cast<const asr::MeshObject&>( *entity ), objectName.c_str(), p.string().c_str() ) )
+			if( !asr::MeshObjectWriter::write( static_cast<const asr::MeshObject&>( *entity ), name.c_str(), p.string().c_str() ) )
 			{
 				msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't save mesh primitive." );
 				return asf::auto_release_ptr<asr::Object>();
 			}
 		}
 
-		asf::auto_release_ptr<asr::MeshObject> meshObj( asr::MeshObjectFactory().create( objectName.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ) );
+		asf::auto_release_ptr<asr::MeshObject> meshObj( asr::MeshObjectFactory().create( name.c_str(), asr::ParamArray().insert( "filename", fileName.c_str() ) ) );
 		return asf::auto_release_ptr<asr::Object>( meshObj.release() );
 	}
 
 	return asf::auto_release_ptr<asr::Object>();
 }
 
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doConvertPrimitive( const vector<PrimitivePtr> &primitives,  const string &name )
+{
+	assert( asf::is_pow2( primitives.size() ) );
+
+	// convert all the primitives one by one and save all the filenames in a dictionary.
+	asf::Dictionary filenames;
+
+	for( size_t i = 0, e = primitives.size(); i < e; ++i )
+	{
+		asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( primitives[i], name );
+
+		if( !obj.get() )
+		{
+			return asf::auto_release_ptr<asr::Object>();
+		}
+
+		filenames.insert( lexical_cast<string>( i ), obj->get_parameters().get( "filename" ) );
+	}
+
+	// create a new mesh object referencing all the filenames for the motion samples.
+	asr::ParamArray params;
+	params.insert( "filename", filenames );
+	asf::auto_release_ptr<asr::MeshObject> meshObj( asr::MeshObjectFactory().create( name.c_str(), params ) );
+	return asf::auto_release_ptr<asr::Object>( meshObj.release() );
+}
+
+string IECoreAppleseed::BatchPrimitiveConverter::objectEntityName( const string& objectName ) const
+{
+	return objectName + "." + objectName;
+}

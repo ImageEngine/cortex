@@ -34,13 +34,16 @@
 
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 
+#include "foundation/math/scalar.h"
+
 #include "IECore/MessageHandler.h"
+#include "IECore/MeshPrimitive.h"
 
 #include "IECoreAppleseed/ToAppleseedConverter.h"
 
 using namespace std;
-
 using namespace IECore;
+using namespace Imath;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -49,7 +52,7 @@ IECoreAppleseed::InteractivePrimitiveConverter::InteractivePrimitiveConverter( c
 {
 }
 
-asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive,  const string &name )
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const string &name )
 {
 	asf::auto_release_ptr<asr::Object> obj;
 
@@ -68,4 +71,50 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 	}
 
 	return obj;
+}
+
+asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( const vector<PrimitivePtr> &primitives, const string &name )
+{
+	assert( asf::is_pow2( primitives.size() ) );
+
+	// convert the first primitive
+	asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( primitives[0], name );
+
+	if( !obj.get() )
+	{
+		return obj;
+	}
+
+	if( primitives[0]->typeId() == MeshPrimitiveTypeId )
+	{
+		// set the point positions for all other time samples.
+		asr::MeshObject *mesh = static_cast<asr::MeshObject*>( obj.get() );
+		mesh->set_motion_segment_count( primitives.size() - 1 );
+
+		for( size_t i = 1, e = primitives.size(); i < e; ++i )
+		{
+			const MeshPrimitive *m = static_cast<const MeshPrimitive*>( primitives[i].get() );
+			const V3fVectorData *p = m->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+
+			if( !p )
+			{
+				throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+			}
+
+			const std::vector<V3f> &points = p->readable();
+			for( size_t j = 0, numVertices = p->readable().size() ; j < numVertices; ++j )
+			{
+				mesh->set_vertex_pose( j, i - 1, asr::GVector3( points[j].x, points[j].y, points[j].z ) );
+			}
+
+			// TODO: Handle normals and tangents here when issue #682 is fixed in appleseed.
+		}
+	}
+
+	return obj;
+}
+
+string IECoreAppleseed::InteractivePrimitiveConverter::objectEntityName( const string& objectName ) const
+{
+	return objectName;
 }

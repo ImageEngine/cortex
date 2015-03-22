@@ -32,11 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "renderer/api/version.h"
+#include <algorithm>
+
+#include "foundation/math/scalar.h"
+
 #include "renderer/api/entity.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/ObjectInterpolator.h"
 
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
 
@@ -53,6 +57,8 @@ namespace asr = renderer;
 IECoreAppleseed::PrimitiveConverter::PrimitiveConverter( const asf::SearchPaths &searchPaths ) : m_searchPaths( searchPaths )
 {
 	m_autoInstancing = true;
+	m_shutterOpenTime = 1.0f;
+	m_shutterCloseTime = 0.0f;
 }
 
 IECoreAppleseed::PrimitiveConverter::~PrimitiveConverter()
@@ -74,9 +80,15 @@ void IECoreAppleseed::PrimitiveConverter::setOption( const string &name, ConstDa
 	}
 }
 
-const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( PrimitivePtr primitive, const AttributeState &attrState, const string &materialName, asr::Assembly &parentAssembly )
+void IECoreAppleseed::PrimitiveConverter::setShutterInterval( float openTime, float closeTime )
 {
-	// Compute the hash of the primitive and save it for later use.
+	m_shutterOpenTime = openTime;
+	m_shutterCloseTime = closeTime;
+}
+
+const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( PrimitivePtr primitive, const AttributeState &attrState,
+	const string &materialName, asr::Assembly &parentAssembly )
+{
 	MurmurHash primitiveHash;
 	primitive->hash( primitiveHash );
 	attrState.attributesHash( primitiveHash );
@@ -101,6 +113,120 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 		return 0;
 	}
 
+	return addObjectToScene( obj, primitiveHash, attrState, materialName, parentAssembly );
+}
+
+const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( const set<float> &times,
+			const vector<PrimitivePtr> &primitives, const AttributeState &attrState,
+			const string &materialName, renderer::Assembly &parentAssembly )
+{
+	assert( times.size() >= 2 );
+
+	if( m_shutterCloseTime <= m_shutterOpenTime )
+	{
+		msg( Msg::Error, "IECoreAppleseed::RendererImplementation::motionEnd", "Camera shutter times not specified." );
+
+		// shutter interval is not set or empty. ignore motion blur.
+		return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
+	}
+
+	// appleseed requires a power of 2 number of deformation samples,
+	// equally spaced between shutter open / close times.
+	// check if the time samples satisfy the conditions.
+	const vector<PrimitivePtr> *primitivesPtr = &primitives;
+	vector<PrimitivePtr> resampledPrimitives;
+
+	if( !checkTimeSamples( times ) )
+	{
+		// we need to resample the deformation samples.
+		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Resampling primitive samples." );
+
+		int samples = asf::is_pow2( times.size() ) ? times.size() : asf::next_pow2( times.size() );
+		vector<float> sortedTimes( times.begin(), times.end() );
+
+		for( int i = 0; i < samples; ++i)
+		{
+			const float time = static_cast<float>( i ) / (samples - 1) * (m_shutterCloseTime - m_shutterOpenTime) + m_shutterOpenTime;
+
+			if( time <= sortedTimes.front())
+			{
+				resampledPrimitives.push_back( primitives.front() );
+				continue;
+			}
+
+			if( time >= sortedTimes.back())
+			{
+				resampledPrimitives.push_back( primitives.back() );
+				continue;
+			}
+
+			vector<float>::const_iterator it = lower_bound(sortedTimes.begin(), sortedTimes.end(), time);
+			int index = it - sortedTimes.begin() - 1;
+
+			float t = (time - sortedTimes[index]) / (sortedTimes[index + 1] - sortedTimes[index]);
+
+			ObjectPtr obj = linearObjectInterpolation( primitives[index].get(), primitives[index + 1].get(), t);
+
+			if( !obj )
+			{
+				msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Error converting primitive. Disabling motion blur." );
+				return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
+			}
+
+			PrimitivePtr p = runTimeCast<Primitive>( obj );
+
+			if( !p )
+			{
+				msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Error converting primitive. Disabling motion blur." );
+				return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
+			}
+
+			resampledPrimitives.push_back( p );
+		}
+
+		primitivesPtr = &resampledPrimitives;
+	}
+
+	// compute the hash of all the deformation samples.
+	MurmurHash primitiveHash;
+	primitiveHash.append( primitivesPtr->size() );
+	primitiveHash.append( m_shutterOpenTime );
+	primitiveHash.append( m_shutterCloseTime );
+
+	for( size_t i = 0, e = primitivesPtr->size(); i < e; ++i )
+	{
+		(*primitivesPtr)[i]->hash( primitiveHash );
+	}
+
+	attrState.attributesHash( primitiveHash );
+
+	// Right now, appleseed instances share all the same material.
+	// This will be lifted soon, but for now, we need to include
+	// the shading / material state in the hash so that objects with
+	// the same geometry but different materials are not instances.
+	attrState.materialHash( primitiveHash );
+
+	// Check if we already processed this primitive.
+	InstanceMapType::const_iterator it = m_instanceMap.find( primitiveHash );
+	if( it != m_instanceMap.end() )
+	{
+		return it->second;
+	}
+
+	asf::auto_release_ptr<asr::Object> obj = doConvertPrimitive( *primitivesPtr, attrState.name() );
+
+	if( !obj.get() )
+	{
+		return 0;
+	}
+
+	return addObjectToScene( obj, primitiveHash, attrState, materialName, parentAssembly );
+}
+
+const asr::Assembly *IECoreAppleseed::PrimitiveConverter::addObjectToScene( asf::auto_release_ptr<asr::Object> &obj,
+	const MurmurHash &primitiveHash, const AttributeState &attrState,
+	const string &materialName, asr::Assembly &parentAssembly )
+{
 	string objName = obj->get_name();
 
 	if( !attrState.alphaMap().empty() )
@@ -125,20 +251,11 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 	return p;
 }
 
-const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( const set<float> &times,
-			const vector<PrimitivePtr> &primitives, const AttributeState &attrState,
-			const string &materialName, renderer::Assembly &parentAssembly )
-{
-	// For now, ignore motion blur and convert only the first primitive.
-	return convertPrimitive( primitives[0], attrState, materialName, parentAssembly );
-}
-
 void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &assembly, const renderer::Object *obj,
 	const string &objSourceName, const AttributeState &attrState, const string &materialName )
 {
 	assert( obj );
 
-	string sourceName = objSourceName + "." + objSourceName;
 	string instanceName = string( assembly.get_name() ) + "_obj_instance";
 
 	asf::StringDictionary materials;
@@ -155,6 +272,47 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 		params.insert( "photon_target", "true" );
 	}
 
-	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(), params, sourceName.c_str(), asf::Transformd::make_identity(), materials, materials );
+	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(),
+		params, objectEntityName( objSourceName ).c_str(), asf::Transformd::make_identity(), materials, materials );
 	assembly.object_instances().insert( objInstance );
+}
+
+bool IECoreAppleseed::PrimitiveConverter::checkTimeSamples( const set<float> &times ) const
+{
+	// check that the number of samples is a power of 2.
+	if( !asf::is_pow2( times.size() ) )
+	{
+		return false;
+	}
+
+	const float eps = 0.01f;
+
+	// check that the first and last sample matches the shutter times.
+	if( !asf::feq( m_shutterOpenTime, *times.begin(), eps ) )
+	{
+		return false;
+	}
+
+	if( !asf::feq( m_shutterCloseTime, *times.rbegin(), eps ) )
+	{
+		return false;
+	}
+
+	// check that the samples are equally spaced.
+	set<float>::const_iterator next( times.begin() );
+	set<float>::const_iterator it( next++ );
+
+	float sampleInterval = *next - *it;
+
+	for( set<float>::const_iterator e( times.end() ) ; next != e; ++next )
+	{
+		if( !asf::feq( sampleInterval, *next - *it, eps ) )
+		{
+			return false;
+		}
+
+		it = next;
+	}
+
+	return true;
 }
