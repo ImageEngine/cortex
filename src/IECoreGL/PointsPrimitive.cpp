@@ -254,7 +254,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 			case Sphere :
 				if( !m_memberData->spherePrimitive )
 				{
-					m_memberData->spherePrimitive = new SpherePrimitive();
+					m_memberData->spherePrimitive = new SpherePrimitive( 0.5f );
 				}
 				m_memberData->spherePrimitive->addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "instance" );
 				break;
