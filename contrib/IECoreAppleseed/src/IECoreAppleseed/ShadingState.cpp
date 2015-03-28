@@ -38,8 +38,11 @@
 #include "boost/algorithm/string/split.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 #include "boost/algorithm/string/classification.hpp"
+#include "boost/format.hpp"
 
 #include "renderer/api/material.h"
+#include "renderer/api/scene.h"
+#include "renderer/api/shadergroup.h"
 #include "renderer/api/surfaceshader.h"
 
 #include "IECore/MessageHandler.h"
@@ -87,7 +90,7 @@ void IECoreAppleseed::ShadingState::setOSLSurface( ConstShaderPtr surface )
 	m_surfaceShader = surface;
 }
 
-void IECoreAppleseed::ShadingState::shaderGroupHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::ShadingState::shaderGroupHash( MurmurHash &hash ) const
 {
 	for( int i = 0, e = m_shaders.size(); i < e; ++i)
 	{
@@ -100,57 +103,77 @@ void IECoreAppleseed::ShadingState::shaderGroupHash( IECore::MurmurHash &hash ) 
 	}
 }
 
-string IECoreAppleseed::ShadingState::createShaderGroup( asr::Assembly& assembly )
+string IECoreAppleseed::ShadingState::createShaderGroup( asr::Assembly& assembly, const string &name )
 {
-	string shaderGroupName;
-
-	asf::auto_release_ptr<asr::ShaderGroup> sg( asr::ShaderGroupFactory::create( "shadergroup" ) );
-
-	for( int i = 0, e = m_shaders.size(); i < e; ++i)
+	string shaderGroupName = name + "_shader_group";
+	if( !assembly.shader_groups().get_by_name( shaderGroupName.c_str() ) )
 	{
-		asr::ParamArray params = convertParameters( m_shaders[i]->parameters() );
-		const StringData *handle = m_shaders[i]->parametersData()->member<StringData>( "__handle" );
-		sg->add_shader( "shader", m_shaders[i]->getName().c_str(), handle ? handle->readable().c_str() : m_shaders[i]->getName().c_str(), params );
-
-		if( handle )
-		{
-			addConnections( handle->readable(), m_shaders[i]->parameters(), sg.get() );
-		}
-	}
-
-	// surface
-	{
-		asr::ParamArray params = convertParameters( m_surfaceShader->parameters() );
-		sg->add_shader( "surface", m_surfaceShader->getName().c_str(), "appleseedRenderer:surface", params );
-		addConnections( "appleseedRenderer:surface", m_surfaceShader->parameters(), sg.get() );
-		shaderGroupName = insertEntityWithUniqueName( assembly.shader_groups(), sg, m_surfaceShader->getName() + "_shadergroup" );
+		asf::auto_release_ptr<asr::ShaderGroup> sg( asr::ShaderGroupFactory::create( shaderGroupName.c_str() ) );
+		assembly.shader_groups().insert( sg );
+		editShaderGroup( assembly, name );
 	}
 
 	return shaderGroupName;
 }
 
+void IECoreAppleseed::ShadingState::editShaderGroup( asr::Assembly& assembly, const string &name )
+{
+	string shaderGroupName = name + "_shader_group";
 
-void IECoreAppleseed::ShadingState::materialHash( IECore::MurmurHash &hash ) const
+	if( asr::ShaderGroup *sg = assembly.shader_groups().get_by_name( shaderGroupName.c_str() ) )
+	{
+		sg->clear();
+
+		for( int i = 0, e = m_shaders.size(); i < e; ++i )
+		{
+			asr::ParamArray params = convertParameters( m_shaders[i]->parameters() );
+			const StringData *handle = m_shaders[i]->parametersData()->member<StringData>( "__handle" );
+			sg->add_shader( "shader", m_shaders[i]->getName().c_str(), handle ? handle->readable().c_str() : m_shaders[i]->getName().c_str(), params );
+
+			if( handle )
+			{
+				addConnections( handle->readable(), m_shaders[i]->parameters(), sg );
+			}
+		}
+
+		// surface
+		{
+			asr::ParamArray params = convertParameters( m_surfaceShader->parameters() );
+			sg->add_shader( "surface", m_surfaceShader->getName().c_str(), "appleseedRenderer:surface", params );
+			addConnections( "appleseedRenderer:surface", m_surfaceShader->parameters(), sg );
+		}
+	}
+}
+
+void IECoreAppleseed::ShadingState::materialHash( MurmurHash &hash ) const
 {
 	shaderGroupHash( hash );
 	hash.append( m_shadingSamples );
 }
 
-string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, const std::string &shaderGroupName )
+string IECoreAppleseed::ShadingState::createMaterial( asr::Assembly &assembly, const string &name, const string &shaderGroupName )
 {
-	asr::ParamArray params;
+	string materialName = name + "_material";
+	if( !assembly.materials().get_by_name( materialName.c_str() ) )
+	{
+		asr::ParamArray params;
 
-	params.insert( "front_lighting_samples", m_shadingSamples );
-	params.insert( "back_lighting_samples", m_shadingSamples );
-	asf::auto_release_ptr<asr::SurfaceShader> surfaceShader( asr::PhysicalSurfaceShaderFactory().create( "surface_shader", params ) );
-	string surfaceShaderName = insertEntityWithUniqueName( assembly.surface_shaders(), surfaceShader, m_surfaceShader->getName() + "_surface_shader" );
+		string surfaceShaderName = name + "_surface_shader";
+		if( !assembly.surface_shaders().get_by_name( surfaceShaderName.c_str() ) )
+		{
+			params.insert( "front_lighting_samples", m_shadingSamples );
+			params.insert( "back_lighting_samples", m_shadingSamples );
+			asf::auto_release_ptr<asr::SurfaceShader> surfaceShader( asr::PhysicalSurfaceShaderFactory().create( surfaceShaderName.c_str(), params ) );
+			assembly.surface_shaders().insert( surfaceShader );
+		}
 
-	params.clear();
-	params.insert( "surface_shader", surfaceShaderName.c_str() );
-	params.insert( "osl_surface", shaderGroupName.c_str() );
-	asf::auto_release_ptr<asr::Material> mat( asr::OSLMaterialFactory().create( "material", params ) );
+		params.clear();
+		params.insert( "surface_shader", surfaceShaderName.c_str() );
+		params.insert( "osl_surface", shaderGroupName.c_str() );
+		asf::auto_release_ptr<asr::Material> mat( asr::OSLMaterialFactory().create( materialName.c_str(), params ) );
+		assembly.materials().insert( mat );
+	}
 
-	string materialName = insertEntityWithUniqueName( assembly.materials(), mat, m_surfaceShader->getName() + "_material" );
 	return materialName;
 }
 

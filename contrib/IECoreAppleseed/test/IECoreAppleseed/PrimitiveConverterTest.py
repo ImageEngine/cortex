@@ -33,21 +33,22 @@
 ##########################################################################
 
 import os
-import unittest
 
 import appleseed
 
 import IECore
 import IECoreAppleseed
 
-class PrimitiveConverterTest( unittest.TestCase ):
+import AppleseedTest
+
+class PrimitiveConverterTest( AppleseedTest.TestCase ):
 
 	def testSingleMaterial( self ) :
 
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
-		self.__createDefaultShader( r )
+		self._createDefaultShader( r )
 
 		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m2 = m1.copy()
@@ -57,8 +58,9 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		m2.render( r )
 		m3.render( r )
 
-		self.failUnless( self.__countAssemblies( r ) == 2 )
-		self.failUnless( self.__countAssemblyInstances( r ) == 3 )
+        # we should have 2 unique primitives, instanced 3 times.
+		self.failUnless( self._countAssemblies( r ) == 2 )
+		self.failUnless( self._countAssemblyInstances( r ) == 3 )
 
 	def testMultipleMaterialsNoInstancing( self ) :
 
@@ -67,21 +69,22 @@ class PrimitiveConverterTest( unittest.TestCase ):
 
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
-		self.__createDefaultShader( r )
+		self._createDefaultShader( r )
 		m.render( r )
 
-		self.__createGlossyShader( r )
+		self._createGlossyShader( r )
 		m.render( r )
 
-		self.failUnless( self.__countAssemblies( r ) == 2 )
-		self.failUnless( self.__countAssemblyInstances( r ) == 2 )
+        # we should have 2 unique primitives, instanced 1 time each.
+		self.failUnless( self._countAssemblies( r ) == 2 )
+		self.failUnless( self._countAssemblyInstances( r ) == 2 )
 
 	def testAttributesNoInstancing( self ) :
 
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
 
-		self.__createDefaultShader( r )
+		self._createDefaultShader( r )
 
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m.render( r )
@@ -101,8 +104,8 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		m.render( r )
 		r.attributeEnd()
 
-		self.failUnless( self.__countAssemblies( r ) == 4 )
-		self.failUnless( self.__countAssemblyInstances( r ) == 4 )
+		self.failUnless( self._countAssemblies( r ) == 4 )
+		self.failUnless( self._countAssemblyInstances( r ) == 4 )
 
 	def testNoAutoInstancing( self ) :
 
@@ -110,7 +113,7 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		r.setOption( "as:automatic_instancing", False )
 		r.worldBegin()
 
-		self.__createDefaultShader( r )
+		self._createDefaultShader( r )
 
 		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m2 = m1.copy()
@@ -121,40 +124,8 @@ class PrimitiveConverterTest( unittest.TestCase ):
 		m3.render( r )
 		m2.render( r )
 
-		self.failUnless( self.__countAssemblies( r ) == 4 )
-		self.failUnless( self.__countAssemblyInstances( r ) == 4 )
-
-	def __createDefaultShader( self, r ) :
-
-		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
-		s.render( r )
-
-	def __createGlossyShader( self, r ) :
-
-		s = IECore.Shader( "data/shaders/glossy.oso", "surface" )
-		s.render( r )
-
-	def __getMainAssembly( self, r ) :
-
-		proj = r.appleseedProject()
-		scn = proj.get_scene()
-		return scn.assemblies().get_by_name( "assembly" )
-
-	def __countAssemblies( self, r ) :
-
-		ass = self.__getMainAssembly( r )
-		return len( ass.assemblies() )
-
-	def __countAssemblyInstances( self, r ) :
-
-		ass = self.__getMainAssembly( r )
-		return len( ass.assembly_instances() )
-
-	def __writeAppleseedProject( self, r, filename ) :
-
-		proj = r.appleseedProject()
-		writer = appleseed.ProjectFileWriter()
-		writer.write( proj, filename, appleseed.ProjectFileWriterOptions.OmitWritingGeometryFiles | appleseed.ProjectFileWriterOptions.OmitBringingAssets )
+		self.failUnless( self._countAssemblies( r ) == 4 )
+		self.failUnless( self._countAssemblyInstances( r ) == 4 )
 
 if __name__ == "__main__":
 	unittest.main()

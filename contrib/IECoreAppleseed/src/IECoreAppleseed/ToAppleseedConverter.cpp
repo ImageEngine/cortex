@@ -63,7 +63,7 @@ renderer::Entity *ToAppleseedConverter::convert() const
 	return doConversion( srcParameter()->getValidatedValue(), operands );
 }
 
-ToAppleseedConverterPtr ToAppleseedConverter::create( IECore::ObjectPtr object )
+ToAppleseedConverterPtr ToAppleseedConverter::create( ObjectPtr object )
 {
 	const CreatorMap &m = creators();
 	CreatorMap::const_iterator it = m.find( object->typeId() );

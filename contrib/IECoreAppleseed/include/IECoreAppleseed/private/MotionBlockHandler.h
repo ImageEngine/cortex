@@ -53,6 +53,9 @@
 namespace IECoreAppleseed
 {
 
+/// The MotionBlockHandler class saves the required state
+/// between motionBegin / End calls and creates motion
+/// blurred appleseed entities when the motion block finishes.
 class MotionBlockHandler : boost::noncopyable
 {
 
@@ -60,6 +63,8 @@ class MotionBlockHandler : boost::noncopyable
 
 		MotionBlockHandler( TransformStack &transformStack,
 			PrimitiveConverter &primitiveConverter );
+
+		void setShutterInterval( float openTime, float closeTime );
 
 		bool insideMotionBlock() const;
 
@@ -74,6 +79,9 @@ class MotionBlockHandler : boost::noncopyable
 			const std::string &materialName );
 
 	private :
+
+		float m_shutterOpenTime;
+		float m_shutterCloseTime;
 
 		enum BlockType
 		{

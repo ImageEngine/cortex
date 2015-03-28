@@ -32,40 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
-#define IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#ifndef IECOREAPPLESEED_LOGTARGET_H
+#define IECOREAPPLESEED_LOGTARGET_H
 
-#include "boost/filesystem/path.hpp"
-
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "renderer/api/log.h"
 
 namespace IECoreAppleseed
 {
 
-/// A PrimitiveConverter subclass that writes primitives to geometry files.
-class BatchPrimitiveConverter : public PrimitiveConverter
+/// An appleseed log target that uses IECore's MessageHandler
+/// to log appleseed messages.
+class IECoreLogTarget : public foundation::ILogTarget
 {
-	public :
+	public:
 
-		BatchPrimitiveConverter( const boost::filesystem::path &projectPath, const foundation::SearchPaths &searchPaths );
+		virtual void release();
 
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
-
-	private :
-
-		boost::filesystem::path m_projectPath;
-		std::string m_meshGeomExtension;
-
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
-
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
-
-		virtual std::string objectEntityName( const std::string& objectName ) const;
+		virtual void write( const foundation::LogMessage::Category category,
+			const char* file, const size_t line, const char* header, const char* message);
 
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#endif // IECOREAPPLESEED_LOGTARGET_H
