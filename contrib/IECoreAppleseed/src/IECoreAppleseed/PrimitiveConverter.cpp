@@ -189,7 +189,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( cons
 
 	// compute the hash of all the deformation samples.
 	MurmurHash primitiveHash;
-	primitiveHash.append( primitivesPtr->size() );
+	primitiveHash.append( (uint64_t)primitivesPtr->size() );
 	primitiveHash.append( m_shutterOpenTime );
 	primitiveHash.append( m_shutterCloseTime );
 
