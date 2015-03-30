@@ -84,6 +84,12 @@ IECoreAppleseed::RendererImplementation::RendererImplementation()
 	asr::global_logger().add_target( m_logTarget.get() );
 
 	constructCommon();
+
+	// 16 bits float (half) is the default pixel format in appleseed.
+	// For progressive rendering, force the pixel format to float
+	// to avoid half -> float conversions in the display driver.
+	m_project->get_frame()->get_parameters().insert( "pixel_format", "float" );
+
 	m_primitiveConverter.reset( new InteractivePrimitiveConverter( m_project->search_paths() ) );
 	m_motionHandler.reset( new MotionBlockHandler( m_transformStack, *m_primitiveConverter ) );
 	m_editHandler.reset( new EditBlockHandler( *m_project ) );
@@ -130,9 +136,10 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	params.insert( "tile_renderer", "generic" );
 	params.insert( "frame_renderer", "progressive" );
 	params.insert( "lighting_engine", "pt" );
+	params.insert_path( "progressive_frame_renderer.max_fps", "5" );
 
 	// create some basic project entities.
-	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray().insert( "resolution", "640 480") ) );
+	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray().insert( "resolution", "640 480" ) ) );
 	m_project->set_frame( frame );
 
 	asf::auto_release_ptr<asr::Scene> scene = asr::SceneFactory::create();
