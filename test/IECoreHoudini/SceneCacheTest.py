@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -1078,12 +1078,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testParmTrickleDown( self ) :
 		
-		def checkParms( node, geoType, tagFilter, attribFilter, shapeFilter, attribCopy ) :
+		def checkParms( node, geoType, tagFilter, attribFilter, shapeFilter, attribCopy, fullPathName ) :
 			
 			self.assertEqual( node.parm( "geometryType" ).eval(), geoType )
 			self.assertEqual( node.parm( "attributeFilter" ).eval(), attribFilter )
 			self.assertEqual( node.parm( "attributeCopy" ).eval(), attribCopy )
 			self.assertEqual( node.parm( "shapeFilter" ).eval(), shapeFilter )
+			self.assertEqual( node.parm( "fullPathName" ).eval(), fullPathName )
 			if isinstance( node, hou.ObjNode ) :
 				self.assertEqual( node.parm( "expanded" ).eval(), True )
 				
@@ -1093,40 +1094,44 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 					self.assertEqual( node.parm( "tagFilter" ).eval(), "*" )
 			
 			for child in node.children() :
-				checkParms( child, geoType, tagFilter, attribFilter, shapeFilter, attribCopy )
+				checkParms( child, geoType, tagFilter, attribFilter, shapeFilter, attribCopy, fullPathName )
 		
 		self.writeDualTaggedSCC()
 		xform = self.xform()
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
 		xform.parm( "shapeFilter" ).set( "*" )
+		xform.parm( "fullPathName" ).set( "fullPath" )
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "", "fullPath" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "attributeCopy" ).set( "P:Pref" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
+		xform.parm( "fullPathName" ).set( "customName" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "P:Pref" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "P:Pref", "customName" )
 		
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		xform.parm( "attributeFilter" ).set( "*" )
 		xform.parm( "attributeCopy" ).set( "" )
 		xform.parm( "shapeFilter" ).set( "*" )
+		xform.parm( "fullPathName" ).set( "fullPath" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "*", "*", "", "fullPath" )
 		
 		xform.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "attributeCopy" ).set( "v:vIn" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
+		xform.parm( "fullPathName" ).set( "customName" )
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "v:vIn" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "*", "P ^N", "2 ^3", "v:vIn", "customName" )
 		
 		# now check just pushing the parms
 		
@@ -1137,8 +1142,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "attributeFilter" ).set( "P ^N" )
 		xform.parm( "attributeCopy" ).set( "P:Pref" )
 		xform.parm( "shapeFilter" ).set( "2 ^3" )
+		xform.parm( "fullPathName" ).set( "fullPath" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N", "2 ^3", "P:Pref" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Cortex, "*", "P ^N", "2 ^3", "P:Pref", "fullPath" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
@@ -1153,9 +1159,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "attributeFilter" ).set( "P N" )
 		xform.parm( "attributeCopy" ).set( "P:Pref v:vIn" )
 		xform.parm( "shapeFilter" ).set( "2 3" )
+		xform.parm( "fullPathName" ).set( "customName" )
 		xform.parm( "tagFilter" ).set( "d" )
 		xform.parm( "push" ).pressButton()
-		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "d", "P N", "2 3", "P:Pref v:vIn" )
+		checkParms( xform, IECoreHoudini.SceneCacheNode.GeometryType.Houdini, "d", "P N", "2 3", "P:Pref v:vIn", "customName" )
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
 		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isObjectDisplayed() )
 		self.assertFalse( hou.node( xform.path()+"/1/2" ).isObjectDisplayed() )
