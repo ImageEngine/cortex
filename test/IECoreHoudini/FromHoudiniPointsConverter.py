@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -122,8 +122,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.typeId(), IECore.PointsPrimitive.staticTypeId() )
 		
 		bbox = result.bound()
-		self.assertEqual( bbox.min.x, -1.5 )
-		self.assertEqual( bbox.max.x, 1.5 )
+		self.assertEqual( bbox.min.x, -2.0 )
+		self.assertEqual( bbox.max.x, 2.0 )
 		self.assertEqual( result.numPoints, 100 )
 		for i in range( result.numPoints ) :
 			self.assert_( result["P"].data[i].x >= bbox.min.x )
@@ -227,8 +227,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 		
 		bbox = result.bound()
-		self.assertEqual( bbox.min.x, -1.5 )
-		self.assertEqual( bbox.max.x, 1.5 )
+		self.assertEqual( bbox.min.x, -2.0 )
+		self.assertEqual( bbox.max.x, 2.0 )
 		self.assertEqual( result.numPoints, 100 )
 		for i in range( result.numPoints ) :
 			self.assert_( result["P"].data[i].x >= bbox.min.x )
@@ -370,8 +370,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 		
 		bbox = result.bound()
-		self.assertEqual( bbox.min.x, -1.5 )
-		self.assertEqual( bbox.max.x, 1.5 )
+		self.assertEqual( bbox.min.x, -2.0 )
+		self.assertEqual( bbox.max.x, 2.0 )
 		self.assertEqual( result.numPoints, 100 )
 		for i in range( result.numPoints ) :
 			self.assert_( result["P"].data[i].x >= bbox.min.x )
