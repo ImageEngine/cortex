@@ -1503,6 +1503,77 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( c.readAttribute( "animColor", 0.5 ), IECore.Color3dData( IECore.Color3d( 0.5 ) ) )
 		self.assertEqual( c.readAttribute( "animColor", 1 ), IECore.Color3dData( IECore.Color3d( 1 ) ) )
 	
+	def testFullPathName( self ) :
+		
+		self.writeSCC()
+		node = self.sop()
+		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		
+		# make sure the full path doesn't load until the parm has a value
+		self.assertEqual( node.parm( "fullPathName" ).eval(), "" )
+		self.assertEqual( node.geometry().findPrimAttrib( "path" ), None )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
+		
+		# now lets load it an validate the paths
+		node.parm( "fullPathName" ).set( "path" )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name", "path"] )
+		
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 18 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		pathAttr = node.geometry().findPrimAttrib( "path" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		self.assertEqual( pathAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		for path in pathAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "path" ) == path ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
+		
+		node.parm( "root" ).set( "/1" )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 18 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		pathAttr = node.geometry().findPrimAttrib( "path" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/2', '/2/3' ] ) )
+		self.assertEqual( pathAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		for path in pathAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "path" ) == path ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 1, 0, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( prims[12].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
+		
+		node.parm( "root" ).set( "/1/2" )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 12 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		pathAttr = node.geometry().findPrimAttrib( "path" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/', '/3' ] ) )
+		self.assertEqual( pathAttr.strings(), tuple( [ '/1/2', '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		for path in pathAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "path" ) == path ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 3, 0, 0 ) )
+		self.assertEqual( prims[6].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
+		
+		node.parm( "root" ).set( "/1/2/3" )
+		prims = node.geometry().prims()
+		self.assertEqual( len(prims), 6 )
+		nameAttr = node.geometry().findPrimAttrib( "name" )
+		pathAttr = node.geometry().findPrimAttrib( "path" )
+		self.assertEqual( nameAttr.strings(), tuple( [ '/' ] ) )
+		self.assertEqual( pathAttr.strings(), tuple( [ '/1/2/3' ] ) )
+		for name in nameAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+		for path in pathAttr.strings() :
+			self.assertEqual( len([ x for x in prims if x.attribValue( "path" ) == path ]), 6 )
+		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )		
+	
 	def testReloadButton( self ) :
 		
 		def testNode( node ) :

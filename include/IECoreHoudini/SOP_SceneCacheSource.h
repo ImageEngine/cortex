@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -79,6 +79,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			GeometryType geometryType;
 			std::string attributeFilter;
 			std::string attributeCopy;
+			std::string fullPathName;
 			UT_StringMMPattern shapeFilter;
 			UT_StringMMPattern tagFilter;
 			
@@ -94,7 +95,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
 		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( const IECore::Object *object, const std::string &name, Parameters &params );
+		bool convertObject( const IECore::Object *object, const std::string &name, const IECore::SceneInterface *scene, Parameters &params );
 		
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
