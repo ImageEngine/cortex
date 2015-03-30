@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -89,6 +89,9 @@ PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
 
 template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pShapeFilter( "shapeFilter", "Shape Filter" );
+
+template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pFullPathName( "fullPathName", "Full Path Name" );
 
 template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pGeometryType( "geometryType", "Geometry Type" );
@@ -191,7 +194,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[6];
+		thisTemplate = new PRM_Template[7];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
@@ -226,6 +229,14 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 			"match the filter will remain collapsed. In Parenting mode, the tag filters just control initial "
 			"visibility. In FlatGeometry mode they essentially delete the non-tagged geometry. Uses Houdini "
 			"matching syntax, but matches *any* of the tags."
+		);
+		
+		thisTemplate[5] = PRM_Template(
+			PRM_STRING, 1, &pFullPathName, 0, 0, 0, 0, 0, 0,
+			"Load the full path of the object as a primitive attribute with this name. This is for user "
+			"convenience and has no meaning in terms of processing or exporting SceneCaches. If left empty, "
+			"the full path will not be loaded. It is the user's responsibility to remove this attribute prior "
+			"to exporting new SceneCaches if necessary."
 		);
 	}
 	
@@ -516,6 +527,18 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setShapeFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pShapeFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::getFullPathName( UT_String &name ) const
+{
+	this->evalString( name, pFullPathName.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setFullPathName( const UT_String &name )
+{
+	this->setString( name, CH_STRING_LITERAL, pFullPathName.getToken(), 0, 0 );
 }
 
 template<typename BaseType>
