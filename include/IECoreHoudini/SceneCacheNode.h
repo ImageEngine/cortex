@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -67,6 +67,7 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pAttributeCopy;
 		static PRM_Name pTagFilter;
 		static PRM_Name pShapeFilter;
+		static PRM_Name pFullPathName;
 		
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
@@ -122,6 +123,8 @@ class SceneCacheNode : public BaseType
 		void getShapeFilter( UT_String &filter ) const;
 		void getShapeFilter( UT_StringMMPattern &filter ) const;
 		void setShapeFilter( const UT_String &filter );
+		void getFullPathName( UT_String &name ) const;
+		void setFullPathName( const UT_String &name );
 		void referenceParent( const char *parmName );
 		
 		/// Access point to the actual SceneCache. All users should only access the cache
