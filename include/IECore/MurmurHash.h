@@ -153,8 +153,8 @@ class IECORE_API MurmurHash
 		std::string toString() const;
 
 	private :
-	
-		void append( const void *data, size_t bytes, int elementSize );
+
+		inline void append( const void *data, size_t bytes, int elementSize );
 	
 		uint64_t m_h1;
 		uint64_t m_h2;
