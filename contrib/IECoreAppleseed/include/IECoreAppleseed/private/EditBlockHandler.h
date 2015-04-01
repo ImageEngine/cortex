@@ -73,8 +73,8 @@ class EditBlockHandler : boost::noncopyable
 		class RendererController;
 
 		renderer::Project &m_project;
-		RendererController *m_rendererController;
-		renderer::MasterRenderer *m_renderer;
+		std::auto_ptr<RendererController> m_rendererController;
+		std::auto_ptr<renderer::MasterRenderer> m_renderer;
 		boost::thread m_renderingThread;
 		int m_editDepth;
 		std::string m_exactScopeName;
