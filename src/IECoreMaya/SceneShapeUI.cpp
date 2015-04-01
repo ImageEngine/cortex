@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -559,7 +559,10 @@ bool SceneShapeUI::select( MSelectInfo &selectInfo, MSelectionList &selectionLis
 	if( selectInfo.displayStatus() != M3dView::kHilite )
 	{
 		MSelectionMask meshMask( MSelectionMask::kSelectMeshes );
-		if( !selectInfo.selectable( meshMask ) )
+		// Apparently selectInfo.selectable() still returns true when meshes are not
+		// displayed by the M3dView, so we are also testing the objectDisplay status.
+		// This was last confirmed in Maya 2014, and is presumably a Maya bug.
+		if( !selectInfo.selectable( meshMask ) || !selectInfo.objectDisplayStatus( M3dView::kDisplayMeshes ) )
 		{
 			return false;
 		}
