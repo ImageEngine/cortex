@@ -59,11 +59,6 @@ class IECoreAppleseed::EditBlockHandler::RendererController : public asr::Defaul
 			m_status = ContinueRendering;
 		}
 
-		virtual void release()
-		{
-			delete this;
-		}
-
 		virtual Status get_status() const
 		{
 			return m_status;
