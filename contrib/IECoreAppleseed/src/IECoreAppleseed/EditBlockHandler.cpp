@@ -59,11 +59,6 @@ class IECoreAppleseed::EditBlockHandler::RendererController : public asr::Defaul
 			m_status = ContinueRendering;
 		}
 
-		virtual void release()
-		{
-			delete this;
-		}
-
 		virtual Status get_status() const
 		{
 			return m_status;
@@ -81,18 +76,14 @@ class IECoreAppleseed::EditBlockHandler::RendererController : public asr::Defaul
 
 IECoreAppleseed::EditBlockHandler::EditBlockHandler( asr::Project &project )
 	: m_project( project )
-	, m_renderer(0)
 {
 	m_editDepth = 0;
-	m_rendererController = new RendererController();
+	m_rendererController.reset( new RendererController() );
 }
 
 IECoreAppleseed::EditBlockHandler::~EditBlockHandler()
 {
 	stopRendering();
-
-	m_rendererController->release();
-	delete m_renderer;
 }
 
 void IECoreAppleseed::EditBlockHandler::renderThreadFunc( EditBlockHandler *self )
@@ -118,9 +109,9 @@ void IECoreAppleseed::EditBlockHandler::startRendering()
 		asr::Configuration *cfg = m_project.configurations().get_by_name( "interactive" );
 		const asr::ParamArray &params = cfg->get_parameters();
 
-		if( !m_renderer )
+		if( !m_renderer.get() )
 		{
-			m_renderer = new asr::MasterRenderer( m_project, params, m_rendererController );
+			m_renderer.reset( new asr::MasterRenderer( m_project, params, m_rendererController.get() ) );
 		}
 		else
 		{
@@ -155,7 +146,7 @@ const string & IECoreAppleseed::EditBlockHandler::exactScopeName() const
 
 void IECoreAppleseed::EditBlockHandler::editBegin( const string &editType, const CompoundDataMap &parameters )
 {
-	if( !m_renderer )
+	if( !m_renderer.get() )
 	{
 		msg( Msg::Error, "IECoreAppleseed::RendererImplementation::editBegin", "editBegin called before worldEnd." );
 		return;
@@ -191,7 +182,7 @@ void IECoreAppleseed::EditBlockHandler::editBegin( const string &editType, const
 
 void IECoreAppleseed::EditBlockHandler::editEnd()
 {
-	if( !m_renderer )
+	if( !m_renderer.get() )
 	{
 		msg( Msg::Error, "IECoreAppleseed::RendererImplementation::editEnd", "editEnd called before worldEnd." );
 		return;
