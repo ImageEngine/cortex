@@ -3161,6 +3161,7 @@ appleseedEnv.Append(
 		"contrib/IECoreAppleseed/include",
 	],
 	CPPFLAGS = [
+		"-msse4.1",
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
 		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
@@ -3179,6 +3180,7 @@ appleseedPythonModuleEnv.Append(
 		"contrib/IECoreAppleseed/include/bindings",
 	],
 	CPPFLAGS = [
+		"-msse4.1",
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
 		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
