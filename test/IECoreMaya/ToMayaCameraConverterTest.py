@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -51,6 +51,8 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( camA+".farClipPlane" ), maya.cmds.getAttr( camB+".farClipPlane" ) )
 		self.assertAlmostEqual( maya.cmds.getAttr( camA+".horizontalFilmAperture" ), maya.cmds.getAttr( camB+".horizontalFilmAperture" ) )
 		self.assertAlmostEqual( maya.cmds.getAttr( camA+".verticalFilmAperture" ), maya.cmds.getAttr( camB+".verticalFilmAperture" ) )
+		self.assertAlmostEqual( maya.cmds.getAttr( camA+".horizontalFilmOffset" ), maya.cmds.getAttr( camB+".horizontalFilmOffset" ) )
+		self.assertAlmostEqual( maya.cmds.getAttr( camA+".verticalFilmOffset" ), maya.cmds.getAttr( camB+".verticalFilmOffset" ) )
 		self.assertEqual( maya.cmds.getAttr( camA+".orthographic" ), maya.cmds.getAttr( camB+".orthographic" ) )
 		matA = maya.cmds.getAttr( camA+".worldMatrix[0]" )
 		matB = maya.cmds.getAttr( camB+".worldMatrix[0]" )
@@ -85,6 +87,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( coreCam.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( mayaCam+".worldMatrix[0]" ) ) )
 		self.assertEqual( coreCam.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".nearClipPlane" ), maya.cmds.getAttr(  mayaCam+".farClipPlane" ) ) )
 		self.assertEqual( coreCam.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmAperture" ), maya.cmds.getAttr(  mayaCam+".verticalFilmAperture" ) ) )
+		self.assertEqual( coreCam.blindData()["maya"]["filmOffset"].value, IECore.V2f( maya.cmds.getAttr(  mayaCam+".horizontalFilmOffset" ), maya.cmds.getAttr(  mayaCam+".verticalFilmOffset" ) ) )
 		
 		if coreCam.parameters()["projection"].value == "perspective" :
 			self.assertFalse( maya.cmds.getAttr(  mayaCam+".orthographic" ) )
@@ -179,6 +182,29 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len( messageHandler.messages ), 1 )
 		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
 		self.assertEqual( messageHandler.messages[0].context, "ToMayaCameraConverter::doConversion" )
+	
+	def testFilmOffset( self ) :
+		
+		for x in [ -0.5, -0.25, 0, 0.25, 0.5 ] :
+			
+			maya.cmds.setAttr( "perspShape.horizontalFilmOffset", x )
+			self.assertNotAlmostEqual( maya.cmds.getAttr( "frontShape.horizontalFilmOffset" ), maya.cmds.getAttr( "perspShape.horizontalFilmOffset" ) )
+			
+			for y in [ -0.5, -0.25, 0, 0.25, 0.5 ] :
+				
+				maya.cmds.setAttr( "perspShape.verticalFilmOffset", y )
+				self.assertNotAlmostEqual( maya.cmds.getAttr( "frontShape.verticalFilmOffset" ), maya.cmds.getAttr( "perspShape.verticalFilmOffset" ) )
+				
+				front = IECoreMaya.FromMayaCameraConverter( "frontShape" ).convert()
+				persp = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
+				self.assertIECoreCamsNotEqual( front, persp )
+				
+				self.failUnless( IECoreMaya.ToMayaCameraConverter( persp ).convert( "front" ) )
+				self.assertMayaCamsEqual( "frontShape", "perspShape" )
+				self.assertIECoreCamAndMayaCamEqual( persp, "frontShape" )
+				
+				newFront = IECoreMaya.FromMayaCameraConverter( "frontShape" ).convert()
+				self.assertIECoreCamsEqual( persp, newFront )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

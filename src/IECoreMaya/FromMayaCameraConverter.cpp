@@ -148,6 +148,7 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	CompoundDataPtr maya = new CompoundData;
 	result->blindData()->writable()["maya"] = maya;
 	maya->writable()["aperture"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmAperture(), fnCamera.verticalFilmAperture() ) );
+	maya->writable()["filmOffset"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmOffset(), fnCamera.verticalFilmOffset() ) );
 
 	return result;
 }

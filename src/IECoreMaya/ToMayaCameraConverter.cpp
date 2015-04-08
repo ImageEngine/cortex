@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -157,6 +157,14 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			Imath::V2f aperture = apertureData->readable();
 			fnCamera.setHorizontalFilmAperture( aperture[0] );
 			fnCamera.setVerticalFilmAperture( aperture[1] );
+		}
+		
+		const V2fData *filmOffsetData = mayaData->member<V2fData>( "filmOffset" );
+		if ( filmOffsetData )
+		{
+			Imath::V2f filmOffset = filmOffsetData->readable();
+			fnCamera.setHorizontalFilmOffset( filmOffset[0] );
+			fnCamera.setVerticalFilmOffset( filmOffset[1] );
 		}
 	}
 	
