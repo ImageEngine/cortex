@@ -1,3 +1,9 @@
+# 9.0.0-b6
+
+#### IECore
+
+- Fixed thread safety bug in BlindDataHolder::blindData()
+
 # 9.0.0-b5
 
 #### IECore
