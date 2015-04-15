@@ -102,6 +102,9 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		b2 = Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
+		
+		# should have written a "blindData" entry into the indexed io hierarchy
+		self.failUnless( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IndexedIO.MissingBehaviour.NullIfMissing ), IndexedIO ) )
 
 		# second test: overriding with no blind data
 		b1 = BlindDataHolder()
@@ -123,6 +126,9 @@ class TestBlindDataHolder(unittest.TestCase):
 		g1.save( iface, "test" )
 		g2 = Object.load( iface, "test" )
 		self.assertEqual( g1, g2 )
+		
+		# "blindData" entry should be excluded from the IndexedIO hierarchy
+		self.assertEqual( iface.directory( ["test","data","BlindDataHolder"], IndexedIO.MissingBehaviour.NullIfMissing ), None )
 		
 	def testHash( self ) :
 	

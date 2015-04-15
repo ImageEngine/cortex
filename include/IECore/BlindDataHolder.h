@@ -61,7 +61,7 @@ class IECORE_API BlindDataHolder : public Object
 
 	private :
 
-		mutable CompoundDataPtr m_data;
+		CompoundDataPtr m_data;
 
 		static const unsigned int m_ioVersion;
 

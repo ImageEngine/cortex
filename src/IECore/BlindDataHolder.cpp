@@ -46,7 +46,7 @@ IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(BlindDataHolder);
 
 BlindDataHolder::BlindDataHolder()
 {
-	m_data = 0;
+	m_data = new CompoundData();
 }
 
 BlindDataHolder::BlindDataHolder(CompoundDataPtr data) : m_data(data)
@@ -60,19 +60,11 @@ BlindDataHolder::~BlindDataHolder()
 
 CompoundData *BlindDataHolder::blindData()
 {
-	if ( !m_data )
-	{
-		m_data = new CompoundData();
-	}
 	return m_data.get();
 }
 
 const CompoundData *BlindDataHolder::blindData() const
 {
-	if ( !m_data )
-	{
-		m_data = new CompoundData();
-	}
 	return m_data.get();
 }
 
@@ -80,21 +72,14 @@ void BlindDataHolder::copyFrom( const Object *other, CopyContext *context )
 {
 	Object::copyFrom( other, context );
 	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
-	if ( tOther->m_data )
-	{
-		m_data = context->copy<CompoundData>( tOther->m_data.get() );
-	}
-	else 
-	{
-		m_data = 0;
-	}
+	m_data = context->copy<CompoundData>( tOther->m_data.get() );
 }
 
 void BlindDataHolder::save( SaveContext *context ) const
 {
 	Object::save( context );
 
-	bool haveData = ( m_data && m_data->readable().size() );
+	bool haveData = m_data->readable().size();
 
 	if ( haveData )
 	{
@@ -117,7 +102,7 @@ void BlindDataHolder::load( LoadContextPtr context )
 	}
 	else
 	{
-		m_data = 0;
+		m_data = new CompoundData();
 	}
 }
 
@@ -128,31 +113,13 @@ bool BlindDataHolder::isEqualTo( const Object *other ) const
 		return false;
 	}
 	const BlindDataHolder *tOther = static_cast<const BlindDataHolder *>( other );
-	if ( m_data )
-	{
-		if ( tOther->m_data )
-		{
-			return m_data->isEqualTo( tOther->m_data.get() );
-		}
-		else 
-		{
-			return ( m_data->readable().size() == 0 );
-		}
-	}
-	if ( tOther->m_data )
-	{
-		return ( tOther->m_data->readable().size() == 0 );
-	}
-	return true;
+	return m_data->isEqualTo( tOther->m_data.get() );
 }
 
 void BlindDataHolder::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
-	if ( m_data )
-	{
-		a.accumulate( m_data.get() );
-	}
+	a.accumulate( m_data.get() );
 }
 
 void BlindDataHolder::hash( MurmurHash &h ) const
@@ -160,7 +127,7 @@ void BlindDataHolder::hash( MurmurHash &h ) const
 	Object::hash( h );
 	// Our hash when blindData is empty or when m_data is unnitialized is the same.
 	// This is currently garanteed by CompoundData but we are safer this way.
-	if ( m_data && m_data->readable().size() )
+	if ( m_data->readable().size() )
 	{
 		m_data->hash( h );
 	}
