@@ -50,6 +50,7 @@
 #include "IECoreMaya/ProceduralHolder.h"
 #include "IECoreMaya/PythonCmd.h"
 
+
 class ProceduralHolderTranslator : public CShapeTranslator
 {
 
@@ -57,17 +58,22 @@ class ProceduralHolderTranslator : public CShapeTranslator
 	
 		virtual AtNode *CreateArnoldNodes()
 		{
+
+#if AI_VERSION_ARCH_NUM >=4 && AI_VERSION_MAJOR_NUM >= 2 
                   m_isMasterDag =  IsMasterInstance(m_masterDag);
 
                   if (m_isMasterDag)
                   {
 
-			return AddArnoldNode( "procedural" );
+                        return AddArnoldNode( "procedural" );
                   }
                   else
                   {
                         return AddArnoldNode( "ginstance" );
                   }
+#else 
+                  return AddArnoldNode( "procedural" );
+#endif
 		}
 		
 
