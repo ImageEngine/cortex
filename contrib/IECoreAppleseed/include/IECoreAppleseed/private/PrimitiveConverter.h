@@ -52,7 +52,7 @@ namespace IECoreAppleseed
 {
 
 /// An abstract base class for managing the conversion of a series of IECore::Primitives to
-/// appleseed entities, automatically creating instances when a previously
+/// appleseed entities and optionally, automatically creating instances when a previously
 /// converted primitive is processed again.
 class PrimitiveConverter : boost::noncopyable
 {
@@ -65,6 +65,8 @@ class PrimitiveConverter : boost::noncopyable
 
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 
+		void setShutterInterval( float openTime, float closeTime );
+
 		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
 
 		const renderer::Assembly *convertPrimitive( const std::set<float> &times,
@@ -73,16 +75,30 @@ class PrimitiveConverter : boost::noncopyable
 
 	private :
 
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+			const std::string &name ) = 0;
+
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
+			const std::string &name ) = 0;
+
+		const renderer::Assembly *addObjectToScene( foundation::auto_release_ptr<renderer::Object> &obj, const IECore::MurmurHash &primitiveHash,
+			const AttributeState &attrState, const std::string &materialName,
+			renderer::Assembly &parentAssembly );
+
 		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj,
 			const std::string &objSourceName, const AttributeState &attrState, const std::string &materialName );
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive, const std::string &name ) = 0;
+		bool checkTimeSamples( const std::set<float> &times ) const;
+
+		virtual std::string objectEntityName( const std::string& objectName ) const = 0;
 
 		typedef std::map<IECore::MurmurHash, const renderer::Assembly*> InstanceMapType;
 
 		const foundation::SearchPaths &m_searchPaths;
 		InstanceMapType m_instanceMap;
 		bool m_autoInstancing;
+		float m_shutterOpenTime;
+		float m_shutterCloseTime;
 
 };
 

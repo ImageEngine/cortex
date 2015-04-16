@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
 #  its affiliates and/or its licensors.
@@ -53,7 +53,7 @@ SConsignFile()
 ieCoreMajorVersion=9
 ieCoreMinorVersion=0
 ieCorePatchVersion=0
-ieCoreVersionSuffix="b4"	# used for alpha/beta releases. Example: "a1", "b2", etc.
+ieCoreVersionSuffix="b6"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
 # Command line options
@@ -3162,6 +3162,7 @@ appleseedEnv.Append(
 	],
 	CPPFLAGS = [
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
+		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
 		"-DAPPLESEED_USE_SSE",
 	]
@@ -3179,6 +3180,7 @@ appleseedPythonModuleEnv.Append(
 	],
 	CPPFLAGS = [
 		"-DAPPLESEED_ENABLE_IMATH_INTEROP",
+		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
 		"-DAPPLESEED_USE_SSE",
 	],

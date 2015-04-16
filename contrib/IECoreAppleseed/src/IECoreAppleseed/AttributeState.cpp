@@ -32,10 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "foundation/math/scalar.h"
-
-#include "renderer/api/version.h"
-
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -149,7 +145,7 @@ bool IECoreAppleseed::AttributeState::photonTarget() const
 	return m_photonTarget;
 }
 
-void IECoreAppleseed::AttributeState::attributesHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::attributesHash( MurmurHash &hash ) const
 {
 	hash.append( m_alphaMap );
 	hash.append( m_photonTarget );
@@ -170,22 +166,27 @@ bool IECoreAppleseed::AttributeState::shadingStateValid() const
 	return m_shadingState.valid();
 }
 
-void IECoreAppleseed::AttributeState::shaderGroupHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::shaderGroupHash( MurmurHash &hash ) const
 {
 	m_shadingState.shaderGroupHash( hash );
 }
 
-void IECoreAppleseed::AttributeState::materialHash( IECore::MurmurHash &hash ) const
+void IECoreAppleseed::AttributeState::materialHash( MurmurHash &hash ) const
 {
 	m_shadingState.materialHash( hash );
 }
 
 string IECoreAppleseed::AttributeState::createShaderGroup( asr::Assembly &assembly )
 {
-	return m_shadingState.createShaderGroup( assembly );
+	return m_shadingState.createShaderGroup( assembly, name() );
+}
+
+void IECoreAppleseed::AttributeState::editShaderGroup( renderer::Assembly &assembly, const string &name )
+{
+	m_shadingState.editShaderGroup( assembly, name );
 }
 
 string IECoreAppleseed::AttributeState::createMaterial( asr::Assembly &assembly, const string &shaderGroupName )
 {
-	return m_shadingState.createMaterial( assembly, shaderGroupName );
+	return m_shadingState.createMaterial( assembly, name(), shaderGroupName );
 }

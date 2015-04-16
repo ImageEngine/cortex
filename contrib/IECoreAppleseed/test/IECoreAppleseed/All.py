@@ -37,6 +37,9 @@ import unittest
 
 import IECore
 
+from CameraTest import CameraTest
+from LightTest import LightTest
+from MotionTest import MotionTest
 from PrimitiveConverterTest import PrimitiveConverterTest
 from RendererTest import RendererTest
 from ToAppleseedConverterTest import ToAppleseedConverterTest

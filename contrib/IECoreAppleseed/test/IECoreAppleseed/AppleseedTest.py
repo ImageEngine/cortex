@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+#  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,51 +32,44 @@
 #
 ##########################################################################
 
-import os
-import shutil
+import unittest
 
 import IECore
-import IECoreAppleseed
 
-import AppleseedTest
+import appleseed
 
-class RendererTest( AppleseedTest.TestCase ):
+class TestCase( unittest.TestCase ):
 
-	__geometryDir = "contrib/IECoreAppleseed/test/IECoreAppleseed/_geometry"
-	__appleseedFileName = "contrib/IECoreAppleseed/test/IECoreAppleseed/output.appleseed"
+	def _createDefaultShader( self, r ) :
 
-	def testTypeId( self ) :
+		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
+		s.render( r )
 
-		self.assertEqual( IECoreAppleseed.Renderer().typeId(), IECoreAppleseed.Renderer.staticTypeId() )
-		self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
+	def _createGlossyShader( self, r ) :
 
-	def testTypeName( self ) :
+		s = IECore.Shader( "data/shaders/glossy.oso", "surface" )
+		s.render( r )
 
-		r = IECoreAppleseed.Renderer()
-		self.assertEqual( r.typeName(), "IECoreAppleseed::Renderer" )
+	def _getScene( self, r ) :
 
-	def testAppleseedOutput( self ) :
-		r = IECoreAppleseed.Renderer( self.__appleseedFileName )
-		self.failIf( os.path.exists( self.__appleseedFileName ) )
+		proj = r.appleseedProject()
+		return proj.get_scene()
 
-		with IECore.WorldBlock( r ) :
+	def _getCamera( self, r ) :
 
-			self._createDefaultShader( r )
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m.render( r )
+		scn = self._getScene( r )
+		return scn.get_camera()
 
-		self.failUnless( os.path.exists( self.__appleseedFileName ) )
+	def _getMainAssembly( self, r ) :
 
-	def tearDown( self ) :
+		return self._getScene( r ).assemblies().get_by_name( "assembly" )
 
-		for f in [
-			self.__appleseedFileName,
-		] :
-			if os.path.exists( f ) :
-				os.remove( f )
+	def _countAssemblies( self, r ) :
 
-		shutil.rmtree( self.__geometryDir, ignore_errors = True )
+		ass = self._getMainAssembly( r )
+		return len( ass.assemblies() )
 
-if __name__ == "__main__":
-	unittest.main()
+	def _countAssemblyInstances( self, r ) :
 
+		ass = self._getMainAssembly( r )
+		return len( ass.assembly_instances() )

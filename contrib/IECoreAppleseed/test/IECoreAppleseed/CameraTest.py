@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+#  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,50 +33,37 @@
 ##########################################################################
 
 import os
-import shutil
+import unittest
+
+import appleseed
 
 import IECore
 import IECoreAppleseed
 
 import AppleseedTest
 
-class RendererTest( AppleseedTest.TestCase ):
+class CameraTest( AppleseedTest.TestCase ):
 
-	__geometryDir = "contrib/IECoreAppleseed/test/IECoreAppleseed/_geometry"
-	__appleseedFileName = "contrib/IECoreAppleseed/test/IECoreAppleseed/output.appleseed"
-
-	def testTypeId( self ) :
-
-		self.assertEqual( IECoreAppleseed.Renderer().typeId(), IECoreAppleseed.Renderer.staticTypeId() )
-		self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
-
-	def testTypeName( self ) :
+	def testDefaultFirstCamera( self ) :
 
 		r = IECoreAppleseed.Renderer()
-		self.assertEqual( r.typeName(), "IECoreAppleseed::Renderer" )
 
-	def testAppleseedOutput( self ) :
-		r = IECoreAppleseed.Renderer( self.__appleseedFileName )
-		self.failIf( os.path.exists( self.__appleseedFileName ) )
+		r.camera( "camera1", {} )
+		r.camera( "camera2", {} )
 
-		with IECore.WorldBlock( r ) :
+		cam = self._getCamera( r )
+		self.failUnless( cam.get_name() == "camera1" )
 
-			self._createDefaultShader( r )
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m.render( r )
+	def testChooseCameraOption( self ) :
 
-		self.failUnless( os.path.exists( self.__appleseedFileName ) )
+		r = IECoreAppleseed.Renderer()
+		r.setOption( "render:camera", IECore.StringData( "camera2" ) )
 
-	def tearDown( self ) :
+		r.camera( "camera1", {} )
+		r.camera( "camera2", {} )
 
-		for f in [
-			self.__appleseedFileName,
-		] :
-			if os.path.exists( f ) :
-				os.remove( f )
-
-		shutil.rmtree( self.__geometryDir, ignore_errors = True )
+		cam = self._getCamera( r )
+		self.failUnless( cam.get_name() == "camera2" )
 
 if __name__ == "__main__":
 	unittest.main()
-

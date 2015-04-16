@@ -32,40 +32,70 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
-#define IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#ifndef IECOREAPPLESEED_LIGHTHANDLER_H
+#define IECOREAPPLESEED_LIGHTHANDLER_H
 
-#include "boost/filesystem/path.hpp"
+#include <map>
+#include <string>
 
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "boost/noncopyable.hpp"
+
+#include "foundation/utility/searchpaths.h"
+
+#include "renderer/api/scene.h"
+#include "renderer/api/utility.h"
+
+#include "IECore/CompoundData.h"
 
 namespace IECoreAppleseed
 {
 
-/// A PrimitiveConverter subclass that writes primitives to geometry files.
-class BatchPrimitiveConverter : public PrimitiveConverter
+/// The LightHandler class manages the list of lights in an
+/// appleseed project, creating, editing and deleting them as needed.
+class LightHandler : public boost::noncopyable
 {
-	public :
+	public:
 
-		BatchPrimitiveConverter( const boost::filesystem::path &projectPath, const foundation::SearchPaths &searchPaths );
+		LightHandler( renderer::Scene &scene, const foundation::SearchPaths &searchPaths );
 
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
+		void environment( const std::string &name, const std::string &handle,
+			bool visible, const IECore::CompoundDataMap &parameters );
 
-	private :
+		void light( const std::string &name, const std::string &handle,
+			const foundation::Transformd &transform, const IECore::CompoundDataMap &parameters );
 
-		boost::filesystem::path m_projectPath;
-		std::string m_meshGeomExtension;
+		void illuminate( const std::string &lightHandle, bool on );
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
+	private:
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
+		renderer::Scene &m_scene;
+		const foundation::SearchPaths &m_searchPaths;
+		renderer::Assembly *m_mainAssembly;
 
-		virtual std::string objectEntityName( const std::string& objectName ) const;
+		// environment light
+		std::string m_environmentHandle;
+		std::string m_environmentModel;
+		renderer::ParamArray m_environmentParams;
+		bool m_environmentVisible;
 
+		// singular lights
+		struct LightEntry
+		{
+			std::string model;
+			renderer::ParamArray parameters;
+			foundation::Transformd transform;
+		};
+
+		typedef std::map<std::string, LightEntry> LightMap;
+		LightMap m_lightMap;
+
+		renderer::ParamArray convertParams( const std::string &handle,
+			const IECore::CompoundDataMap &parameters, bool isEnvironment ) const;
+
+		void createOrUpdateLight( const std::string &handle, const LightEntry &lightEntry );
+		void createOrUpdateEnvironment();
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#endif // IECOREAPPLESEED_LIGHTHANDLER_H

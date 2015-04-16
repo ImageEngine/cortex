@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -97,11 +97,12 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 
 void OBJ_SceneCacheGeometry::pushToHierarchy()
 {
-	UT_String attribFilter, attribCopy, tagFilter, shapeFilter;
+	UT_String attribFilter, attribCopy, tagFilter, shapeFilter, fullPathName;
 	getAttributeFilter( attribFilter );
 	getAttributeCopy( attribCopy );
 	getTagFilter( tagFilter );
 	getShapeFilter( shapeFilter );
+	getFullPathName( fullPathName );
 	GeometryType geomType = getGeometryType();
 	
 	UT_PtrArray<OP_Node*> children;
@@ -113,6 +114,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 		sop->setAttributeCopy( attribCopy );
 		sop->setTagFilter( tagFilter );
 		sop->setShapeFilter( shapeFilter );
+		sop->setFullPathName( fullPathName );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
 	}
 }
@@ -135,7 +137,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
 	
-	UT_String attribFilter, attribCopy, tagFilter, shapeFilter;
+	UT_String attribFilter, attribCopy, tagFilter, shapeFilter, fullPathName;
 	getAttributeFilter( attribFilter );
 	sop->setAttributeFilter( attribFilter );
 	getAttributeCopy( attribCopy );
@@ -144,6 +146,8 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setTagFilter( tagFilter );
 	getShapeFilter( shapeFilter );
 	sop->setShapeFilter( shapeFilter );
+	getFullPathName( fullPathName );
+	sop->setFullPathName( fullPathName );
 	
 	sop->setSpace( sopSpace );
 	sop->setObjectOnly( objectOnly );

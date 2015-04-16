@@ -32,40 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
-#define IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
 
-#include "boost/filesystem/path.hpp"
+#include <memory>
 
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "boost/noncopyable.hpp"
+#include "boost/thread/thread.hpp"
+
+#include "renderer/api/project.h"
+#include "renderer/api/rendering.h"
+
+#include "IECore/CompoundData.h"
 
 namespace IECoreAppleseed
 {
 
-/// A PrimitiveConverter subclass that writes primitives to geometry files.
-class BatchPrimitiveConverter : public PrimitiveConverter
+/// The EditBlockHandler class manages an interactive appleseed
+/// rendering session, starting, stopping and pausing rendering
+/// when edits are being made.
+class EditBlockHandler : boost::noncopyable
 {
+
 	public :
 
-		BatchPrimitiveConverter( const boost::filesystem::path &projectPath, const foundation::SearchPaths &searchPaths );
+		explicit EditBlockHandler( renderer::Project &project );
+		~EditBlockHandler();
 
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
+		void startRendering();
+
+		bool insideEditBlock() const;
+
+		const std::string &exactScopeName() const;
+
+		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
+		void editEnd();
 
 	private :
 
-		boost::filesystem::path m_projectPath;
-		std::string m_meshGeomExtension;
+		class RendererController;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
+		renderer::Project &m_project;
+		std::auto_ptr<RendererController> m_rendererController;
+		std::auto_ptr<renderer::MasterRenderer> m_renderer;
+		boost::thread m_renderingThread;
+		int m_editDepth;
+		std::string m_exactScopeName;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
+		static void renderThreadFunc( EditBlockHandler *self );
 
-		virtual std::string objectEntityName( const std::string& objectName ) const;
+		void pauseRendering();
+		void stopRendering();
 
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H

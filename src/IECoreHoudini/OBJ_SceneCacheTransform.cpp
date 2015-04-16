@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -143,6 +143,7 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilterStr );
 	getTagFilter( params.tagFilter );
+	getFullPathName( params.fullPathName );
 	
 	if ( params.hierarchy == FlatGeometry )
 	{
@@ -216,6 +217,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	geo->setAttributeFilter( params.attributeFilter );
 	geo->setAttributeCopy( params.attributeCopy );
 	geo->setShapeFilter( params.shapeFilter );
+	geo->setFullPathName( params.fullPathName );
 	
 	bool visible = tagged( scene, params.tagFilter );
 	if ( visible )
@@ -241,6 +243,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandChild( const SceneInterface *scene, O
 	xform->setAttributeFilter( params.attributeFilter );
 	xform->setAttributeCopy( params.attributeCopy );
 	xform->setShapeFilter( params.shapeFilter );
+	xform->setFullPathName( params.fullPathName );
 	xform->setInt( pHierarchy.getToken(), 0, 0, params.hierarchy );
 	xform->setInt( pDepth.getToken(), 0, 0, params.depth );
 	
@@ -342,10 +345,11 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 
 void OBJ_SceneCacheTransform::pushToHierarchy()
 {
-	UT_String attribFilter, attribCopy, shapeFilter;
+	UT_String attribFilter, attribCopy, shapeFilter, fullPathName;
 	getAttributeFilter( attribFilter );
 	getAttributeCopy( attribCopy );
 	getShapeFilter( shapeFilter );
+	getFullPathName( fullPathName );
 	GeometryType geometryType = getGeometryType();
 	
 	UT_String tagFilterStr;
@@ -361,6 +365,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 		xform->setAttributeFilter( attribFilter );
 		xform->setAttributeCopy( attribCopy );
 		xform->setShapeFilter( shapeFilter );
+		xform->setFullPathName( fullPathName );
 		xform->setGeometryType( geometryType );
 		
 		std::string file;
@@ -387,6 +392,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 		geo->setAttributeFilter( attribFilter );
 		geo->setAttributeCopy( attribCopy );
 		geo->setShapeFilter( shapeFilter );
+		geo->setFullPathName( fullPathName );
 		geo->setGeometryType( (OBJ_SceneCacheGeometry::GeometryType)geometryType );
 		
 		std::string file;
@@ -420,6 +426,7 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 	shapeFilter = other.shapeFilter;
 	tagFilterStr = other.tagFilterStr;
 	tagFilter.compile( tagFilterStr );
+	fullPathName = other.fullPathName;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////

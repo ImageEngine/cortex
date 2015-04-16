@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -105,6 +105,7 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 			UT_String shapeFilter;
 			UT_String tagFilterStr;
 			UT_StringMMPattern tagFilter;
+			UT_String fullPathName;
 		};
 		
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.

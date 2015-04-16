@@ -45,6 +45,7 @@
 
 using namespace IECoreAppleseed;
 using namespace IECore;
+using namespace Imath;
 using namespace std;
 
 namespace asf = foundation;
@@ -54,8 +55,8 @@ IE_CORE_DEFINERUNTIMETYPED( ToAppleseedMeshConverter );
 
 ToAppleseedMeshConverter::ConverterDescription<ToAppleseedMeshConverter> ToAppleseedMeshConverter::g_description;
 
-ToAppleseedMeshConverter::ToAppleseedMeshConverter( IECore::MeshPrimitivePtr toConvert )
-	:	ToAppleseedShapeConverter( "Converts IECore::MeshPrimitives to appleseed mesh object entities", IECore::MeshPrimitive::staticTypeId() )
+ToAppleseedMeshConverter::ToAppleseedMeshConverter( MeshPrimitivePtr toConvert )
+	:	ToAppleseedShapeConverter( "Converts IECore::MeshPrimitives to appleseed mesh object entities", MeshPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( toConvert );
 }
@@ -64,13 +65,13 @@ ToAppleseedMeshConverter::~ToAppleseedMeshConverter()
 {
 }
 
-asr::Entity *ToAppleseedMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstCompoundObjectPtr operands ) const
 {
 	MeshPrimitivePtr mesh = static_cast<const MeshPrimitive *>( from.get() )->copy();
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
-		throw IECore::Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
 
 	asf::auto_release_ptr<asr::MeshObject> meshObj = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
@@ -80,7 +81,7 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( IECore::ConstObjectPtr from
 	{
 		size_t numVertices = p->readable().size();
 		meshObj->reserve_vertices( numVertices );
-		const std::vector<Imath::V3f> &points = p->readable();
+		const std::vector<V3f> &points = p->readable();
 		for( size_t i = 0; i < numVertices; ++i )
 		{
 			meshObj->push_vertex( asr::GVector3( points[i].x, points[i].y, points[i].z ) );
@@ -89,7 +90,7 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( IECore::ConstObjectPtr from
 
 	// triangulate primitive (this should be in appleseed at some point)
 	{
-		IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
+		TriangulateOpPtr op = new TriangulateOp();
 		op->inputParameter()->setValue( mesh );
 		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
 		op->copyParameter()->setTypedValue( false );
@@ -178,7 +179,7 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( IECore::ConstObjectPtr from
 				{
 					size_t numNormals = n->readable().size();
 					meshObj->reserve_vertex_normals( numNormals );
-					const std::vector<Imath::V3f> &normals = n->readable();
+					const std::vector<V3f> &normals = n->readable();
 					for( size_t i = 0; i < numNormals; ++i)
 					{
 						asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );

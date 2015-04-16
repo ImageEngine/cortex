@@ -1,3 +1,37 @@
+# 9.0.0-b6
+
+#### IECore
+
+- Fixed thread safety bug in BlindDataHolder::blindData()
+
+# 9.0.0-b5
+
+#### IECore
+
+- Fixed PointsPrimitive::bound() to account the width or aspect ratio of the points.
+- Made MurmurHash::append() an inline function
+
+#### IECoreMaya
+
+- SceneShapeUI::select now returns false when polygons aren't being displayed in the viewport.
+
+#### IECoreHoudini
+
+- SceneCacheNodes have a new "Full Path Name" parm which creates an attrib for the full path for each shape (default is off).
+
+#### IECoreGL
+
+- Fixed radius of spheres rendered by IECoreGL::PointsPrimitive.
+
+#### IECoreAppleseed
+
+- Camera, transformation, deformation motion blur support.
+- Lights can now be turned on and off.
+- Interactive rendering support.
+- Added support for the photon target attribute.
+- Added support for orthographic cameras.
+- Added an appleseed log handler that uses MessageHandler to log messages.
+
 # 9.0.0-b4
 
 #### IECore

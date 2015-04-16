@@ -32,40 +32,40 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
-#define IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+#include "IECoreAppleseed/private/LogTarget.h"
 
-#include "boost/filesystem/path.hpp"
+#include "IECore/MessageHandler.h"
 
-#include "IECoreAppleseed/private/PrimitiveConverter.h"
+using namespace IECore;
 
-namespace IECoreAppleseed
+namespace asf = foundation;
+
+void IECoreAppleseed::IECoreLogTarget::release()
 {
+	delete this;
+}
 
-/// A PrimitiveConverter subclass that writes primitives to geometry files.
-class BatchPrimitiveConverter : public PrimitiveConverter
+void IECoreAppleseed::IECoreLogTarget::write( const asf::LogMessage::Category category, const char* file,
+			const size_t line, const char* header, const char* message)
 {
-	public :
+	switch( category )
+	{
+		case asf::LogMessage::Debug:
+			msg( MessageHandler::Debug, "appleseed", message );
+		break;
 
-		BatchPrimitiveConverter( const boost::filesystem::path &projectPath, const foundation::SearchPaths &searchPaths );
+		case asf::LogMessage::Warning:
+			msg( MessageHandler::Warning, "appleseed", message );
+		break;
 
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
+		case asf::LogMessage::Error:
+		case asf::LogMessage::Fatal:
+			msg( MessageHandler::Error, "appleseed", message );
+		break;
 
-	private :
-
-		boost::filesystem::path m_projectPath;
-		std::string m_meshGeomExtension;
-
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
-
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
-
-		virtual std::string objectEntityName( const std::string& objectName ) const;
-
-};
-
-} // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_BATCHPRIMITIVECONVERTER_H
+		default:
+		case asf::LogMessage::Info:
+			msg( MessageHandler::Info, "appleseed", message );
+		break;
+	}
+}

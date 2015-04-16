@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -194,6 +194,9 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	UT_String attributeCopy;
 	getAttributeCopy( attributeCopy );
 	
+	UT_String fullPathName;
+	getFullPathName( fullPathName );
+	
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
@@ -210,6 +213,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
 	hash.append( attributeCopy );
+	hash.append( fullPathName );
 	hash.append( geometryType );
 	hash.append( getObjectOnly() );
 	
@@ -237,6 +241,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	getAttributeFilter( attribFilter );
 	params.attributeFilter = attribFilter.toStdString();
 	params.attributeCopy = attributeCopy.toStdString();
+	params.fullPathName = fullPathName.toStdString();
 	params.geometryType = getGeometryType();
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
@@ -380,7 +385,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 		
 		// convert the object to Houdini
-		if ( !convertObject( object.get(), name, params ) )
+		if ( !convertObject( object.get(), name, scene, params ) )
 		{
 			std::string fullName;
 			SceneInterface::Path path;
@@ -525,7 +530,7 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	return object;
 }
 
-bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const std::string &name, Parameters &params )
+bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const std::string &name, const SceneInterface *scene, Parameters &params )
 {
 	ToHoudiniGeometryConverterPtr converter = 0;
 	if ( params.geometryType == Cortex )
@@ -602,7 +607,28 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	
 	try
 	{
-		return converter->convert( myGdpHandle );
+		GA_Offset firstNewPrim = gdp->getPrimitiveMap().lastOffset() + 1;
+		
+		bool status = converter->convert( myGdpHandle );
+		
+		if ( params.fullPathName != "" )
+		{
+			// adds the full path in addition to the relative name
+			const GA_IndexMap &primMap = gdp->getPrimitiveMap();
+			GA_Range newPrims( primMap, firstNewPrim, primMap.lastOffset() + 1 );
+			if ( newPrims.isValid() )
+			{
+				std::string fullName;
+				SceneInterface::Path path;
+				scene->path( path );
+				SceneInterface::pathToString( path, fullName );
+				
+				GA_RWAttributeRef pathAttribRef = ToHoudiniStringVectorAttribConverter::convertString( params.fullPathName, fullName, gdp, newPrims );
+				status = status && pathAttribRef.isValid();
+			}
+		}
+		
+		return status;
 	}
 	catch ( std::exception &e )
 	{

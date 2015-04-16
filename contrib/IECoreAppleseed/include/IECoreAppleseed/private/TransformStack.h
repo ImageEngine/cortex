@@ -46,7 +46,7 @@
 namespace IECoreAppleseed
 {
 
-// transform stack stuff
+/// A stack of possibly time varying transformations.
 class TransformStack
 {
 

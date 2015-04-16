@@ -49,6 +49,8 @@ IECoreAppleseed::MotionBlockHandler::MotionBlockHandler( TransformStack &transfo
 	PrimitiveConverter &primitiveConverter )
 	: m_transformStack( transformStack ), m_primitiveConverter( primitiveConverter )
 {
+	m_shutterOpenTime = 1.0f;
+	m_shutterCloseTime = 0.0f;
 	m_blockType = NoBlock;
 }
 
@@ -65,7 +67,7 @@ void IECoreAppleseed::MotionBlockHandler::motionBegin( const set<float> &times )
 }
 
 void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrState,
-	renderer::Assembly *mainAssembly )
+	asr::Assembly *mainAssembly )
 {
 	assert( !m_times.empty() );
 
@@ -90,15 +92,17 @@ void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrS
 		case PrimitiveBlock:
 			assert( mainAssembly );
 
-			msg( MessageHandler::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Deformation motion blur is not supported yet." );
-
 			if( const asr::Assembly *assembly = m_primitiveConverter.convertPrimitive( m_times, m_primitives, attrState, m_materialName, *mainAssembly ) )
 			{
 				string assemblyName = assembly->get_name();
 				string assemblyInstanceName = attrState.name() + "_instance";
 
 				asr::ParamArray params;
-				params.insert( "visibility", attrState.visibilityDictionary() );
+
+				if( !attrState.visibilityDictionary().empty() )
+				{
+					params.insert( "visibility", attrState.visibilityDictionary() );
+				}
 
 				asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), params, assemblyName.c_str() );
 				assemblyInstance->transform_sequence() = m_transformStack.top();
