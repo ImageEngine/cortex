@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,8 @@
 #ifndef IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 #define IECOREHOUDINI_GEOCOBIOTRANSLATOR_H
 
+#include <ostream>
+
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
 #include "UT/UT_IStream.h"
@@ -58,11 +60,27 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 		virtual int checkExtension( const char *fileName );
 		virtual int checkMagicNumber( unsigned magic );
 
+		/// This is the Houdini 14 interface
+		////////////////////////////////////////////////////////////
+		//@{
 		/// Loads a cob if the content of the cob has a registered ToHoudiniGeometryConverter
-		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );
-		
+		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, bool ate_magic );
+		/// Implemented to return false, since we don't have access to the expected file, we can't use the ObjectWriter.
+		virtual GA_Detail::IOStatus fileSave( const GEO_Detail *geo, std::ostream &os );
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
-		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, ostream &os, const char *fileName );
+		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, const char *fileName );
+		//@}
+		
+		/// This is the Houdini 13 interface
+		// \todo: remove when we drop support for Houdini 13 and older.
+		////////////////////////////////////////////////////////////
+		//@{
+		/// Loads a cob if the content of the cob has a registered ToHoudiniGeometryConverter
+		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );		
+		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
+		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, std::ostream &os, const char *fileName );
+		//@}
+
 };
 
 } // namespace IECoreHoudini
