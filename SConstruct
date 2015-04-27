@@ -994,7 +994,7 @@ o.Add(
 o.Add(
 	"DOXYGEN",
 	"The path to the doxygen binary.",
-	"/usr/local/bin/doxygen"
+	"doxygen"
 )
 
 ###########################################################################################
@@ -3295,7 +3295,7 @@ if doConfigure :
 
 	sys.stdout.write( "Checking for doxygen... " )
 
-	if os.path.exists( docEnv["DOXYGEN"] ) :
+	if docEnv.WhereIs( docEnv["DOXYGEN"] ) :
 	
 		sys.stdout.write( "yes\n" )
 				
