@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -62,6 +62,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		(op,fn) = self.testCreateCortexConverter()
 		torus = op.createOutputNode( "ieCortexConverter" )
 		scatter = torus.createOutputNode( "scatter" )
+		scatter.parm( "npts" ).set( 5000 )
 		attr = scatter.createOutputNode( "attribcreate", exact_type_name=True )
 		attr.parm("name").set("testAttribute")
 		attr.parm("value1").setExpression("$PT")
@@ -93,6 +94,8 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( p.type(), hou.primType.Polygon )
 		n = hou.node("/obj/geo1")
 		h_torus = n.createNode( "torus" )
+		h_torus.parm( "rows" ).set( 10 )
+		h_torus.parm( "cols" ).set( 10 )
 		h_geo = h_torus.geometry()
 		self.assertEqual( len(geo.pointAttribs()), len(h_geo.pointAttribs()) )
 		self.assertEqual( len(geo.prims()), len(h_geo.prims()) )
@@ -128,6 +131,8 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		nameB = boxB.createOutputNode( "name" )
 		nameB.parm( "name1" ).set( "boxB" )
 		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		nameC = torus.createOutputNode( "name" )
 		nameC.parm( "name1" ).set( "torus" )
 		merge = geo.createNode( "merge" )

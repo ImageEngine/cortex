@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -47,6 +47,8 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		tex = torus.createOutputNode( "texture" )
 		point = tex.createOutputNode( "point" )
 		point.parm("doclr").set(1)

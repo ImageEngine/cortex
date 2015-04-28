@@ -2917,6 +2917,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		facet = geo.createNode( "facet" )
 		facet.parm("postnml").set(True)
 		points = geo.createNode( "scatter" )
+		points.parm( "npts" ).set( 5000 )
 		facet.setInput( 0, box )
 		points.setInput( 0, facet )
 		points.setRenderFlag( True )

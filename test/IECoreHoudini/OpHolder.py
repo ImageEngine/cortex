@@ -338,6 +338,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setParameterised( cl )
 		op.parm("parm_quiet").set( True )
 		torus = op.createInputNode(0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( op.errors(), "" )
@@ -363,6 +365,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		cl = IECore.ClassLoader.defaultOpLoader().load( "multiTypeObject", 1 )()
 		fn.setParameterised( cl )
 		torus = op.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assert_( not op.errors() )
@@ -397,6 +401,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		cl = IECore.ClassLoader.defaultOpLoader().load("parameters/primitives/primParam", 1)()
 		fn.setParameterised( cl )
 		torus = op.createInputNode(0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
 		self.assertEqual( op.errors(), "" )
@@ -470,6 +476,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		group1 = attrib1.createInputNode( 0, "group" )
 		group1.parm( "crname" ).set( "torusGroup" )
 		torus = group1.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 
 		attrib2 = merge.createInputNode( 1, "attribcreate" )
 		attrib2.parm( "name1" ).set( "name" )
@@ -850,6 +858,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		
 		holder = self.namedScene( "meshMerge" )
 		torus = holder.parent().createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		holder.setInput( 1, torus )
 		
 		def verify( numMergedFaces, passThrough = [] ) :

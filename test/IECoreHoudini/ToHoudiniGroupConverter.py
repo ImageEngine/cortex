@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -440,7 +440,9 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( len(sop.geometry().points()), 32 )
 		self.assertEqual( len(sop.geometry().prims()), 8 )
 		
-		sop.createInputNode( 0, "torus" )
+		torus = sop.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		
 		self.assertEqual( len(sop.geometry().points()), 32 )
 		self.assertEqual( len(sop.geometry().prims()), 8 )
