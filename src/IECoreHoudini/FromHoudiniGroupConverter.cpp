@@ -43,20 +43,24 @@
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
+
+using namespace IECore;
+using namespace IECoreHoudini;
 
 #if UT_MAJOR_VERSION_INT >= 14
 
+typedef GEO_CortexPrimitive CortexPrimitive;
 typedef GA_PrimitiveGroup GroupType;
 
 #else
 
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
 typedef GA_ElementGroup GroupType;
 
 #endif
-
-using namespace IECore;
-using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGroupConverter );
 
@@ -133,19 +137,21 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 		}
 	}
 	
-	// are there multiple GU_CortexPrimitives holding VisibleRenderables?
+	// are there multiple CortexPrimitives holding VisibleRenderables?
 	unsigned numCortex = 0;
 	unsigned numVisibleRenderable = 0;
 	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 	{
 		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( prim->getTypeId() != GU_CortexPrimitive::typeId() )
+
+		if ( prim->getTypeId() != CortexPrimitive::typeId() )
 		{
 			continue;
 		}
 		
 		numCortex++;
-		if ( IECore::runTimeCast<const VisibleRenderable>( ((GU_CortexPrimitive *)prim)->getObject() ) )
+
+		if ( IECore::runTimeCast<const VisibleRenderable>( ((CortexPrimitive *)prim)->getObject() ) )
 		{
 			numVisibleRenderable++;
 		}
@@ -349,7 +355,8 @@ void FromHoudiniGroupConverter::doUnnamedConversion( const GU_Detail *geo, Group
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	for ( GA_Iterator pIt=geo->getPrimitiveRange().begin(); !pIt.atEnd(); ++pIt )
 	{
-		if ( primitives.get( pIt.getOffset() )->getTypeId() == GU_CortexPrimitive::typeId() )
+
+		if ( primitives.get( pIt.getOffset() )->getTypeId() == CortexPrimitive::typeId() )
 		{
 			GA_OffsetList offsets;
 			offsets.append( pIt.getOffset() );

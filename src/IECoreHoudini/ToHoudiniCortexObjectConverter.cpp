@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -36,12 +36,24 @@
 #include "UT/UT_StringMMPattern.h"
 
 #include "IECoreHoudini/Convert.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCortexObjectConverter );
 
@@ -61,7 +73,8 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 	ConstObjectPtr result = filterAttribs( object );
 	
 	size_t numPrims = geo->getNumPrimitives();
-	GU_CortexPrimitive::build( geo, result.get() );
+
+	CortexPrimitive::build( geo, result.get() );
 	
 	GA_OffsetList offsets;
 	offsets.append( geo->primitiveOffset( numPrims ) );
@@ -86,13 +99,16 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 void ToHoudiniCortexObjectConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
 {
 	GA_Primitive *hPrim = geo->getPrimitiveList().get( prims.begin().getOffset() );
-	if ( hPrim->getTypeId() != GU_CortexPrimitive::typeId() )
+
+	if ( hPrim->getTypeId() != CortexPrimitive::typeId() )
 	{
 		return;
 	}
 	
 	const Primitive *input = IECore::runTimeCast<const Primitive>( srcParameter()->getValue() );
-	Primitive *output = IECore::runTimeCast<Primitive>( ((GU_CortexPrimitive *)hPrim)->getObject() );
+
+	Primitive *output = IECore::runTimeCast<Primitive>( ((CortexPrimitive *)hPrim)->getObject() );
+
 	if ( !input || !output )
 	{
 		return;

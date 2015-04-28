@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -31,6 +31,10 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
+
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT < 14
 
 #ifndef IECOREHOUDINI_GUCORTEXPRIMITIVE_H
 #define IECOREHOUDINI_GUCORTEXPRIMITIVE_H
@@ -70,8 +74,6 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		// merge constructor
 		static GA_Primitive *create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 
-		static GU_CortexPrimitive *build( GU_Detail *geo, const IECore::Object *object );
-		
 		virtual int64 getMemoryUsage() const;
 		
 #if UT_MAJOR_VERSION_INT >= 13
@@ -82,10 +84,6 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 #endif
 		
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
-		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
-		/// Maybe we should just give up registration in the plugin and do it all here.
-		static void setTypeDef( GA_PrimitiveDefinition *def );
-		static GA_PrimitiveTypeId typeId();
 		
 		virtual GEO_Primitive *convert( GU_ConvertParms &parms, GA_PointGroup *usedpts = 0 );
 		virtual GEO_Primitive *convertNew( GU_ConvertParms &parms );
@@ -99,16 +97,6 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		virtual GU_RayIntersect *createRayCache( int &persistent );
 
 #endif
-		
-		/// Convenience method to inspect a GU_Detail and return some information about
-		/// the GU_CortexPrimitives within, if there are any.
-		static void infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms );
-	
-	private :
-		
-		GEO_Primitive *doConvert( GU_ConvertParms &parms );
-		
-		static GA_PrimitiveDefinition *m_definition;
 
 };
 
@@ -116,4 +104,4 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 
 #endif // IECOREHOUDINI_GUCORTEXPRIMITIVE_H
 
-
+#endif // excluded in Houdini 14 and newer
