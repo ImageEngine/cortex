@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"

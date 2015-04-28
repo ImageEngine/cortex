@@ -35,6 +35,7 @@
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_WorkArgs.h"
 
