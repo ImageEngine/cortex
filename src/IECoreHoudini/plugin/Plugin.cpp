@@ -41,7 +41,6 @@
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
-#include <GR/GR_RenderTable.h>
 
 /// Used to our new Render Hook for Houdini 12.5 and later
 #if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
@@ -60,10 +59,16 @@
 #include "IECoreHoudini/SOP_SceneCacheTransform.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
-#include "IECoreHoudini/GR_Cortex.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 #include "IECoreHoudini/UT_ObjectPoolCache.h"
+
+#if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
+
+	#include <GR/GR_RenderTable.h>
+	#include "IECoreHoudini/GR_Cortex.h"
+
+#endif
 
 using namespace IECoreHoudini;
 
