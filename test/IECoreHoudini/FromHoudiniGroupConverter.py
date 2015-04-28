@@ -526,7 +526,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
 		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap']
-		if hou.applicationVersion()[0] == 13 :
+		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
 		
 		for child in result.children() :
@@ -597,7 +597,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		result = converter.convert()
 		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap']
-		if hou.applicationVersion()[0] == 13 :
+		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
 		
 		for child in result.children() :
