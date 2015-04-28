@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -44,6 +44,16 @@
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
 #include "IECoreHoudini/GU_CortexPrimitive.h"
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GA_PrimitiveGroup GroupType;
+
+#else
+
+typedef GA_ElementGroup GroupType;
+
+#endif
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -228,7 +238,7 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 		size_t numResultPrims = 0;
 		size_t numOrigPrims = geo->getNumPrimitives();
 
-		for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+		for ( GA_GroupTable::iterator<GroupType> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 		{
 			GA_PrimitiveGroup *group = static_cast<GA_PrimitiveGroup*>( it.group() );
 			if ( group->getInternal() || group->isEmpty() )
@@ -254,7 +264,8 @@ ObjectPtr FromHoudiniGroupConverter::doConversion( ConstCompoundObjectPtr operan
 
 		GU_Detail ungroupedGeo( (GU_Detail*)geo );
 		GA_PrimitiveGroup *ungrouped = static_cast<GA_PrimitiveGroup*>( ungroupedGeo.createInternalElementGroup( GA_ATTRIB_PRIMITIVE, "FromHoudiniGroupConverter__ungroupedPrimitives" ) );
-		for ( GA_GroupTable::iterator<GA_ElementGroup> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+
+		for ( GA_GroupTable::iterator<GroupType> it=geo->primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 		{
 			*ungrouped |= *static_cast<GA_PrimitiveGroup*>( it.group() );
 		}
@@ -317,7 +328,7 @@ size_t FromHoudiniGroupConverter::regroup( GU_Detail *geo, PrimIdGroupMap &group
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	for ( GA_Iterator pIt=geo->getPrimitiveRange().begin(); !pIt.atEnd(); ++pIt )
 	{
-		GA_Primitive *prim = primitives.get( pIt.getOffset() );
+		const GA_Primitive *prim = primitives.get( pIt.getOffset() );
 		unsigned primType = prim->getTypeId().get();
 		it = groupMap.find( primType );
 		if ( it == groupMap.end() )
@@ -423,7 +434,8 @@ ObjectPtr FromHoudiniGroupConverter::doDetailConversion( const GU_Detail *geo, c
 void FromHoudiniGroupConverter::convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, GroupPtr &result, const CompoundObject *operands, const std::string &name ) const
 {
 	GU_Detail childGeo( geo, group );
-	for ( GA_GroupTable::iterator<GA_ElementGroup> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
+
+	for ( GA_GroupTable::iterator<GroupType> it=childGeo.primitiveGroups().beginTraverse(); !it.atEnd(); ++it )
 	{
 		it.group()->clear();
 	}
