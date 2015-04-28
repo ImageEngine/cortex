@@ -190,15 +190,55 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	{
 		const IECoreGL::Shader *shader = state->get<IECoreGL::ShaderStateComponent>()->shaderSetup()->shader();
 		glUseProgram( shader->program() );
+
+#if UT_MAJOR_VERSION_INT < 14
+
 		glUniform1i( shader->uniformParameter( "objectPickId" )->location, r->getObjectPickID() );
+
+#else
+
+		/// \todo: this suggestion was provided by SideFx but does not seem to work,
+		// or at least, this change in itself does not enable object picking. I'm
+		// leaving it here for now so we don't lose track of their advice.
+		int *ids = (int*)r->getUniform( RE_UNIFORM_PICK_BASE_ID )->getValue( 0 );
+		glUniform1i( shader->uniformParameter( "objectPickId" )->location, ids[1] );
+
+#endif
+
 	}
 	
+#if UT_MAJOR_VERSION_INT < 14
+
 	r->pushMatrix();
 		
 		r->multiplyMatrix( transform );
 		m_scene->render( state );
 	
 	r->popMatrix();
+
+#else
+
+	UT_Matrix4D proj, view;
+	
+	memcpy( proj.data(), r->getUniform( RE_UNIFORM_PROJECT_MATRIX )->getValue(), sizeof(double) * 16 );
+	memcpy( view.data(), r->getUniform( RE_UNIFORM_VIEW_MATRIX )->getValue(), sizeof(double) * 16 );
+	
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+		
+		glLoadMatrixd( proj.data() );
+		glMatrixMode( GL_MODELVIEW );
+		glPushMatrix();
+			
+			glLoadMatrixd( (transform * view).data() );
+			m_scene->render( state );
+		
+		glPopMatrix();
+	
+	glMatrixMode( GL_PROJECTION );
+	glPopMatrix();
+
+#endif
 	
 	if ( render_mode == GR_RENDER_OBJECT_PICK )
 	{
