@@ -206,6 +206,25 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	}
 }
 
+void GR_CortexPrimitive::renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials, int render_instance )
+{
+	/// \todo: implement this to support instanced rendering.
+	/// renderInstances() is for doing instanced drawing of
+	/// your primitive, which will be called if it's instanced
+	/// at the object level, or contained in a packed primitive
+	/// which is copied multiple times. In those cases, update()
+	/// will be passed a non-NULL UT_Matrix4DArray and an instance
+	/// group to which they belong (in GR_UpdateParms). The
+	/// instance_group passed to renderInstances() is used to
+	/// indicate the group being rendered.
+}
+
+int GR_CortexPrimitive::renderPick( RE_Render *r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map )
+{
+	// return 0 to indicate we don't support component picking
+	return 0;
+}
+
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_shaded = 0;
 IECoreGL::StatePtr GR_CortexPrimitive::g_wire = 0;
