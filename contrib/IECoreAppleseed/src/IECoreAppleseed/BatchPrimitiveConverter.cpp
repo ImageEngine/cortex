@@ -90,6 +90,7 @@ void IECoreAppleseed::BatchPrimitiveConverter::setOption( const string &name, Co
 asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const string &name )
 {
 	MurmurHash primitiveHash;
+	primitiveHash.append( name );
 	primitive->hash( primitiveHash );
 
 	if( primitive->typeId() == MeshPrimitiveTypeId )
