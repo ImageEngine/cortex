@@ -2982,8 +2982,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 			
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
-			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			sc2.writeTransform( IECore.M44dData( matrix ), time )
 			
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
@@ -2992,10 +2992,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		self.assertTrue( hou.node( xform.path()+"/1" ).isTimeDependent() )
-		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
 		self.assertFalse( hou.node( xform.path()+"/1/geo/1" ).isTimeDependent() )
-		self.assertFalse( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isTimeDependent() )
 		self.assertFalse( hou.node( xform.path()+"/1/2/geo/2" ).isTimeDependent() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
@@ -3010,8 +3010,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
 			
-			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
-			sc1.writeTransform( IECore.M44dData( matrix ), time )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
+			sc2.writeTransform( IECore.M44dData( matrix ), time )
 			
 			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( time, 1, 0 ) ] * 6 ) )
 			sc2.writeObject( mesh, time )
@@ -3020,13 +3020,16 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		xform.parm( "collapse" ).pressButton()
 		xform.parm( "expand" ).pressButton()
-		self.assertTrue( hou.node( xform.path()+"/1" ).isTimeDependent() )
-		self.assertTrue( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1" ).isTimeDependent() )
+		self.assertFalse( hou.node( xform.path()+"/1/geo" ).isTimeDependent() )
 		self.assertFalse( hou.node( xform.path()+"/1/geo/1" ).isTimeDependent() )
-		self.assertFalse( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
+		self.assertTrue( hou.node( xform.path()+"/1/2" ).isTimeDependent() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/geo" ).isTimeDependent() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/geo/2" ).isTimeDependent() )
-		self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
+		if hou.applicationVersion()[0] >= 14 :
+			self.assertTrue( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
+		else :
+			self.assertFalse( hou.node( xform.path()+"/1/2/3" ).isTimeDependent() )
 		self.assertTrue( hou.node( xform.path()+"/1/2/3/geo" ).isTimeDependent() )
 		self.assertFalse( hou.node( xform.path()+"/1/2/3/geo/3" ).isTimeDependent() )
 	
