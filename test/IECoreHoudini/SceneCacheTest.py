@@ -1672,10 +1672,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b = [ x for x in a.children() if x.name() != "geo" ][0]
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			if hou.applicationVersion()[0] >= 14 :
+				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time * 2, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, time * 3, 0 ) ) )
+			else :
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 		
 		for time in times :
 			hou.setTime( time - spf )
@@ -1691,10 +1701,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b = xform.children()[1]
 		c = xform.children()[2]
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
+			if hou.applicationVersion()[0] >= 14 :
+				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
+			else :
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, 2*time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time -spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, 3*time, 0 ) ) )
 	
 		for time in times :
 			hou.setTime( time - spf )
@@ -1979,7 +1999,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		null2.parm( "tx" ).setExpression( 'origin( "", "%s", "TX" )' % c.path() )
 		null2.parm( "ty" ).setExpression( 'origin( "", "%s", "TY" )' % c.path() )
 		null2.parm( "tz" ).setExpression( 'origin( "", "%s", "TZ" )' % c.path() )
-		self.assertEqual( null2.parmTuple( "t" ).eval(), ( 3, 2.5, 0 ) )
+		if hou.applicationVersion()[0] >= 14 :
+			self.assertEqual( null2.parmTuple( "t" ).eval(), ( 6, 2.5 * 3, 0 ) )
+		else :
+			self.assertEqual( null2.parmTuple( "t" ).eval(), ( 3, 2.5, 0 ) )
 		self.assertEqual( c.parmTuple( "outT" ).eval(), ( 3, 2.5, 0 ) )
 		self.assertEqual( c.cookCount(), 1 )
 		
@@ -3044,10 +3067,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b = [ x for x in a.children() if x.name() != "geo" ][0]
 		c = [ x for x in b.children() if x.name() != "geo" ][0]
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+			if hou.applicationVersion()[0] >= 14 :
+				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time * 2, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 6, time * 3, 0 ) ) )
+			else :
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) ) )
 		
 		for time in times :
 			hou.setTime( time - spf )
@@ -3061,10 +3094,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		c.parm( "tx" ).setExpression( "$T+1/$FPS" )
 		
 		for time in times :
-			self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
-			self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
-			self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
+			if hou.applicationVersion()[0] >= 14 :
+				self.assertEqual( IECore.M44d( list(xform.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.localTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2 + time, time, 0 ) ) )
+			else :
+				self.assertEqual( IECore.M44d( list(xform.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d() )
+				self.assertEqual( IECore.M44d( list(a.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(b.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) ) )
+				self.assertEqual( IECore.M44d( list(c.worldTransformAtTime( time - spf ).asTuple()) ), IECore.M44d.createTranslated( IECore.V3d( time, 0, 0 ) ) )
 		
 		for time in times :
 			hou.setTime( time - spf )
