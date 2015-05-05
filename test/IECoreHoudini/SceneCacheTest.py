@@ -93,6 +93,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
 		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
 		rop.parm( "rootObject" ).set( rootObject.path() )
+		rop.parmTuple( "f" ).deleteAllKeyframes()
 		return rop
 	
 	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
