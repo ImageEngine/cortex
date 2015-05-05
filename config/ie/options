@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -55,15 +55,22 @@ def getOption( name, default ) :
 # are dictated by the application.
 
 platform = IEEnv.platform()
+# This allows us to override the platform when picking versions from the IEEnv Registry.
+# We currently use it to comply with the VFX Platform regardless of OS platform. Note
+# that it only affects which versions of the dependencies are used to compile Cortex,
+# but we still use the real platform to locate the dependencies once the versions have
+# been determined, and we still install Cortex to the real platform, under the appropriate
+# lib and python paths according to the chosen versions.
+platformOverride = getOption( "PLATFORM_OVERRIDE", platform )
 
 compiler = getOption( "COMPILER", None )
 compilerVersion = getOption( "COMPILER_VERSION", None )
 pythonVersion = getOption( "PYTHON_VERSION", None )
 targetApp = getOption( "APP", None )
 
-# get cortex config information from the registry. if we have setting specific to this platform then use them, otherwise
-# fall back to the generic settings for this major version.
-cortexReg = IEEnv.registry["libraries"]["cortex"]["9"].get( platform, IEEnv.registry["libraries"]["cortex"]["9"] )
+# get cortex config information from the registry. if we have setting specific to this platform override then use them,
+# otherwise fall back to the generic settings for this major version.
+cortexReg = IEEnv.registry["libraries"]["cortex"]["9"].get( platformOverride, IEEnv.registry["libraries"]["cortex"]["9"] )
 
 tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
@@ -90,7 +97,7 @@ if targetApp :
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
-	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
+	platformReg = IEEnv.registry["platformDefaults"][platformOverride]
 	if not compiler :
 		compiler = platformReg.get( "toolsCompiler", platformReg["compiler"] )
 	if not compilerVersion :
@@ -225,7 +232,7 @@ if targetApp :
 	LIBPATH = ":".join( libPaths )
 
 # ignore python-config stuff and specify it all explicitly ourselves
-pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
+pythonReg = IEEnv.registry['apps']['python'][pythonVersion][platform]
 
 pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
 
