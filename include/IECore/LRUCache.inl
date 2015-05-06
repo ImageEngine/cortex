@@ -46,10 +46,16 @@ namespace IECore
 
 template<typename Key, typename Value>
 LRUCache<Key, Value>::CacheEntry::CacheEntry()
-	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( New )
+	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( New ), mutex()
 {
 }
-			
+
+template<typename Key, typename Value>
+LRUCache<Key, Value>::CacheEntry::CacheEntry( const CacheEntry &other )
+	:	value( other.value ), cost( other.cost ), previous( other.previous ), next( other.next ), status( other.status ), mutex()
+{
+}
+
 template<typename Key, typename Value>
 LRUCache<Key, Value>::LRUCache( GetterFunction getter )
 	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( 500 )

@@ -155,6 +155,7 @@ class LRUCache : private boost::noncopyable
 		struct CacheEntry
 		{
 			CacheEntry(); // status == New, previous == next == NULL
+			CacheEntry( const CacheEntry &other );
 			
 			Value value; // value for this item
 			Cost cost; // the cost for this item
