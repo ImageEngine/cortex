@@ -132,30 +132,51 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 			case SLO_TYPE_VECTOR :
 			case SLO_TYPE_NORMAL :
 				{
+					GeometricData::Interpretation interpretation;
+					switch( arg->svd_type )
+					{
+						case SLO_TYPE_POINT : 
+							interpretation = GeometricData::Point;
+							break;
+						case SLO_TYPE_VECTOR :
+							interpretation = GeometricData::Vector;
+							break;
+						case SLO_TYPE_NORMAL :
+							interpretation = GeometricData::Normal;
+							break;
+						default:
+							interpretation = GeometricData::Numeric;
+							break;
+					}
+					
 					if( arg->svd_arraylen==0 )
 					{
 						const SLO_POINT *p = arg->svd_default.pointval;
 						if( p )
 						{
-							data = new V3fData( V3f( p->xval, p->yval, p->zval ) );
+							data = new V3fData( V3f( p->xval, p->yval, p->zval ), interpretation );
 						}
 						else
 						{
 							// 0 length and null value signifies a variable length array
-							data = new V3fVectorData();
+							V3fVectorDataPtr vData = new V3fVectorData;
+							vData->setInterpretation( interpretation );
+							data = vData;
 						}
 					}
 					else
 					{
-						V3fVectorDataPtr vData = new V3fVectorData();
-						data = vData;
+						V3fVectorDataPtr vData = new V3fVectorData;
 						for( int j=0; j<arg->svd_arraylen; j++ )
 						{
 							SLO_VISSYMDEF *a = Slo_GetArrayArgElement( arg, j );
 							const SLO_POINT *p = a->svd_default.pointval;
 							vData->writable().push_back( V3f( p->xval, p->yval, p->zval ) );
 						}
+						vData->setInterpretation( interpretation );
+						data = vData;
 					}
+
 					typeHints->writable().insert( pair<string, DataPtr>( arg->svd_name, new StringData( Slo_TypetoStr( arg->svd_type ) ) ) );
 					break;
 				}
