@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -810,6 +810,18 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( "ieMeshInterpolation" not in result.keys() )
 		self.assertEqual( result.interpolation, "linear" )
 		self.assertTrue( "N" in result.keys() )
+	
+	def testRename( self ) :
+		
+		torus = self.createTorus()
+		name = torus.createOutputNode( "name" )
+		name.parm( "name1" ).set( "foo" )
+		rename = name.createOutputNode( "name" )
+		rename.parm( "name1" ).set( "bar" )
+		
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( rename )
+		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
+		self.assertTrue( isinstance( converter.convert(), IECore.MeshPrimitive ) )
 
 if __name__ == "__main__":
     unittest.main()

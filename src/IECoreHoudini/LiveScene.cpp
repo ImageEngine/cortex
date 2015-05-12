@@ -591,7 +591,9 @@ bool LiveScene::hasObject() const
 		
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_Size numShapes = tuple->getTableEntries( nameAttr );
+		GA_StringTableStatistics stats;
+		tuple->getStatistics( nameAttr, stats );
+		GA_Size numShapes = stats.getEntries();
 		if ( !numShapes )
 		{
 			return true;
@@ -716,7 +718,9 @@ void LiveScene::childNames( NameList &childNames ) const
 		
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_Size numShapes = tuple->getTableEntries( nameAttr );
+		GA_StringTableStatistics stats;
+		tuple->getStatistics( nameAttr, stats );
+		GA_Size numShapes = stats.getEntries();
 		for ( GA_Size i=0; i < numShapes; ++i )
 		{
 			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
@@ -888,7 +892,9 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 				{
 					const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 					const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-					GA_Size numShapes = tuple->getTableEntries( nameAttr );
+					GA_StringTableStatistics stats;
+					tuple->getStatistics( nameAttr, stats );
+					GA_Size numShapes = stats.getEntries();
 					for ( GA_Size i=0; i < numShapes; ++i )
 					{
 						const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );

@@ -257,7 +257,9 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 				reRoot = false;
 				const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 				const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-				GA_Size numShapes = tuple->getTableEntries( nameAttr );
+				GA_StringTableStatistics stats;
+				tuple->getStatistics( nameAttr, stats );
+				GA_Size numShapes = stats.getEntries();
 				if ( numShapes == 0 )
 				{
 					reRoot = true;

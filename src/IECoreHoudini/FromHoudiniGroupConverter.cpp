@@ -115,7 +115,9 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniGroupConverter::canConve
 	{
 		const GA_Attribute *nameAttr = attrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		if ( tuple->getTableEntries( nameAttr ) > 1 )
+		GA_StringTableStatistics stats;
+		tuple->getStatistics( nameAttr, stats );
+		if ( stats.getEntries() > 1 )
 		{
 			return Ideal;
 		}

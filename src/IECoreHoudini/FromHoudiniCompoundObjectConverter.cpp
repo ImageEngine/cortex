@@ -70,7 +70,9 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	{
 		const GA_Attribute *nameAttr = attrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		if ( tuple->getTableEntries( nameAttr ) < 2 )
+		GA_StringTableStatistics stats;
+		tuple->getStatistics( nameAttr, stats );
+		if ( stats.getEntries() < 2 )
 		{
 			return Inapplicable;
 		}
