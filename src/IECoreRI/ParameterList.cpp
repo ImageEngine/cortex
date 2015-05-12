@@ -117,15 +117,48 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			arraySize = static_cast<const V3fVectorData *>( d )->readable().size();
 		case V3fDataTypeId :
 		case V3dDataTypeId :
-			if( typeHints )
+			
+			// find what kind of geometric object this data is supposed to represent:
+			GeometricData::Interpretation interpretation;
+			switch( d->typeId() )
 			{
-				map<string, string>::const_iterator it = typeHints->find( name );
-				if( it!=typeHints->end() )
-				{
-					return it->second.c_str();
-				}
+				case V3fVectorDataTypeId :
+					interpretation = static_cast<const V3fVectorData *>( d )->getInterpretation();
+					break;
+				case V3fDataTypeId :
+					interpretation = static_cast<const V3fData *>( d )->getInterpretation();
+					break;
+				case V3dDataTypeId :
+					interpretation = static_cast<const V3dData *>( d )->getInterpretation();
+					break;
+				default:
+					interpretation = GeometricData::Numeric;
+					break;
 			}
-			return "vector";
+
+			switch( interpretation )
+			{
+				case GeometricData::Numeric:
+					// no geometric information has been provided - check the type hints:
+					if( typeHints )
+					{
+						map<string, string>::const_iterator it = typeHints->find( name );
+						if( it!=typeHints->end() )
+						{
+							return it->second.c_str();
+						}
+					}
+					return "vector";
+				case GeometricData::Point:
+					return "point";
+				case GeometricData::Normal:
+					return "normal";
+				case GeometricData::Vector:
+					return "vector";
+				case GeometricData::Color:
+					return "color";
+			}
+
 		case Color3fVectorDataTypeId :
 			isArray = true;
 			arraySize = static_cast<const Color3fVectorData *>( d )->readable().size();
