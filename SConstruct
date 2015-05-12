@@ -2480,6 +2480,9 @@ if env["PLATFORM"] == "posix" :
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
 mantraEnv = houdiniEnv.Clone( IECORE_NAME="IECoreMantra")
+## \todo: This is a stopgap measure to get IECoreMantra building for Houdini 14.
+# We should come back and address the deprecations appropriately.
+mantraEnv.Append( CXXFLAGS = [ "-Wno-deprecated-declarations" ] )
 mantraPythonModuleEnv = houdiniPythonModuleEnv.Clone( IECORE_NAME="IECoreMantra" )
 mantraProceduralEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieProcedural" )
 mantraWorldEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieWorld" )
