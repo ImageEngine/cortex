@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -118,6 +118,30 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		sel.getDagPath( 0, dag )
 		fn = maya.OpenMaya.MFnCamera( dag )
 		self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
+	
+	def testFilmOffset( self ) :
+		
+		for x in [ -0.5, -0.25, 0, 0.25, 0.5 ] :
+			
+			for y in [ -0.5, -0.25, 0, 0.25, 0.5 ] :
+				
+				maya.cmds.setAttr( "perspShape.horizontalFilmOffset", x )
+				maya.cmds.setAttr( "perspShape.verticalFilmOffset", y )
+				camera = IECoreMaya.FromMayaCameraConverter( "perspShape" ).convert()
+				
+				self.assertEqual( camera.getName(), "perspShape" )
+				self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+				self.assertEqual( camera.parameters()["resolution"].value, IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) ) )
+				self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+				self.assertEqual( camera.parameters()["projection"].value, "perspective" )
+				self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+				
+				sel = maya.OpenMaya.MSelectionList()
+				sel.add( "perspShape" )
+				dag = maya.OpenMaya.MDagPath()
+				sel.getDagPath( 0, dag )
+				fn = maya.OpenMaya.MFnCamera( dag )
+				self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

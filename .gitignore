@@ -20,6 +20,7 @@ lib
 build
 config.log
 mayaLog
+projects
 test/IECore/IECoreTest
 test/IECore/results.txt
 test/IECore/resultsPython.txt

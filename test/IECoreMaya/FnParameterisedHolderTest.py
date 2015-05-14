@@ -906,7 +906,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 
 		for f in [
 			"test/IECoreMaya/referenceEditCounts.ma",
-			"test/IECoreMaya/resultAttrLoadTest.ma"
+			"test/IECoreMaya/resultAttrLoadTest.ma",
 			"test/IECoreMaya/resultGetParameterisedTest.ma",
 		] :
 

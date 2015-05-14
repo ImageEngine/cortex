@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -133,13 +133,14 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 		result->parameters()["projection"] = new StringData( "perspective" );
 
 		// derive horizontal field of view from the viewing frustum
-		float fov = Math<double>::atan( frustum.max.x / clippingPlanes[0] ) * 2.0f;
+		float horizontalFrustumOffset = frustum.max.x - (frustum.max.x - frustum.min.x) / 2.0f;
+		float fov = Math<double>::atan( (frustum.max.x - horizontalFrustumOffset) / ( clippingPlanes[0] ) ) * 2.0f;
 		fov = radiansToDegrees( fov );
 		result->parameters()["projection:fov"] = new FloatData( fov );
 
 		// scale the frustum so that it's -1,1 in x and that gives us the screen window
 		float frustumScale = 2.0f/(frustum.max.x - frustum.min.x);
-		Box2f screenWindow( V2f( -1, frustum.min.y * frustumScale ), V2f( 1, frustum.max.y * frustumScale ) );
+		Box2f screenWindow( V2f( -1 + (horizontalFrustumOffset * frustumScale), frustum.min.y * frustumScale ), V2f( 1 + (horizontalFrustumOffset * frustumScale), frustum.max.y * frustumScale ) );
 		result->parameters()["screenWindow"] = new Box2fData( screenWindow );
 	}
 
@@ -147,6 +148,7 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	CompoundDataPtr maya = new CompoundData;
 	result->blindData()->writable()["maya"] = maya;
 	maya->writable()["aperture"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmAperture(), fnCamera.verticalFilmAperture() ) );
+	maya->writable()["filmOffset"] = new V2fData( Imath::V2f( fnCamera.horizontalFilmOffset(), fnCamera.verticalFilmOffset() ) );
 
 	return result;
 }
