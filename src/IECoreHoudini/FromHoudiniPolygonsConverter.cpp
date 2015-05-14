@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -78,7 +78,9 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 	{
 		const GA_Attribute *nameAttr = attrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		if ( tuple->getTableEntries( nameAttr ) < 2 )
+		GA_StringTableStatistics stats;
+		tuple->getStatistics( nameAttr, stats );
+		if ( stats.getEntries() < 2 )
 		{
 			return Ideal;
 		}
