@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,16 +38,31 @@
 /// which in turn references the renderableObjectShapeFilter created in the same
 /// file. The renderableObjectShapeFilter is hardcoded to pass through only certain built
 /// in types, even though the API allows the creation of custom shapes, and the low level light linking
-/// code works fine with those custom shapes. This function munges the lightLinkingObjectFilter
-/// to pass through ieProceduralHolder nodes, so that we can get full light linking functionality
-/// with them.
+/// code works fine with those custom shapes. This function adds ieProceduralHolder nodes to the
+/// renderableObjectShapeFilter, and then redefines the lightLinkingObjectFilter in terms of that update.
+/// See $MAYA_LOCATION/scripts/startup/dynamicsLoaded.mel for a similar example.
 global proc ieProceduralHolderUIFixLightLinking()
 {
-	itemFilter -e -cls "other" lightLinkingObjectFilter; // must reclassify to allow renaming in maya 2012
-	string $l = `rename lightLinkingObjectFilter lightLinkingObjectFilterBeforeIEProcedurals`;
-	itemFilter -e -cls "builtIn" lightLinkingObjectFilterBeforeIEProcedurals;
-	string $p = `itemFilter -cls "builtIn" -byType ieProceduralHolder ieProceduralHolderFilter`;
-	itemFilter -union $l ieProceduralHolderFilter -cls "builtIn" lightLinkingObjectFilter;
+	if ( `itemFilter -exists renderableObjectShapeFilter` )
+	{
+		itemFilter -e -byType "ieProceduralHolder" -classification "builtIn" renderableObjectShapeFilter;
+
+		//  Need to delete and recreate these guys as they have copies of the old filter.
+		if ( `itemFilter -exists renderableObjectsAndSetsFilter` )
+		{
+			itemFilter -e -cls "user" renderableObjectsAndSetsFilter;
+			delete renderableObjectsAndSetsFilter;
+		}
+
+		if ( `itemFilter -exists lightLinkingObjectFilter` )
+		{
+			itemFilter -e -cls "user" lightLinkingObjectFilter;
+			delete lightLinkingObjectFilter;
+		}
+
+		itemFilter -union "renderableObjectShapeFilter" "renderableObjectSetFilter" -classification "builtIn" renderableObjectsAndSetsFilter;
+		itemFilter -union "renderableObjectsAndSetsFilter" "DefaultShadingGroupsFilter"	-classification "builtIn" lightLinkingObjectFilter;
+	}
 }
 // Call the above function once on startup.
 global int $ieProceduralHolderUIFixedLightLinking;
