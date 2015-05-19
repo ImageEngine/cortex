@@ -915,7 +915,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
-		self.__torusTestFile = "test/IECoreHoudini/data/torus.cob"
+		self.__torusTestFile = "test/IECoreHoudini/data/torus.cob" if hou.applicationVersion()[0] < 14 else "test/IECoreHoudini/data/torusH14.cob"
 		self.__torusNormalsTestFile = "test/IECoreHoudini/data/torus_with_normals.cob"
 		if not os.path.exists( "test/opHolder_testData" ):
 			os.mkdir( "test/opHolder_testData" )
