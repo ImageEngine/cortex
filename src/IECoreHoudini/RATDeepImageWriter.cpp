@@ -260,7 +260,19 @@ void RATDeepImageWriter::open()
 	
 #if UT_MAJOR_VERSION_INT >= 13
 
-	bool success = m_outputFile->create( fileName().c_str(), resolution.x, resolution.y );
+	bool success = false;
+	const std::string &path = fileName();
+	if ( !path.empty() )
+	{
+		try
+		{
+			success = m_outputFile->create( path.c_str(), resolution.x, resolution.y );
+		}
+		catch ( ... )
+		{
+			success = false;
+		}
+	}
 	
 #else
 
