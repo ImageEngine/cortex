@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,14 @@
 
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/vector_indexing_suite.hpp"
+
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+#include "RE/RE_QtVisual.h"
+
+#endif
 
 #include "OP/OP_Director.h"
 #include "OP/OP_Node.h"
@@ -98,6 +106,19 @@ static void *extractNodeFromHOM( PyObject *o )
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
+#if UT_MAJOR_VERSION_INT >= 14
+
+// This little function returns the address of Houdini's shared QGLWidget
+// This can be necessary when wanting to create your own OpenGL context
+// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
+// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
+static uint64_t sharedGLWidget()
+{
+	return (uint64_t)RE_QtVisual::getSharedGLWidget();
+}
+
+#else
+
 // This little function makes the OpenGL context for Houdini's main window
 // current. This can be necessary when wanting to create your own OpenGL context
 // which shares resources (textures, vertex buffers etc) with Houdini's contexts.
@@ -114,6 +135,8 @@ static void makeMainGLContextCurrent()
 		false
 	);
 }
+
+#endif
 
 BOOST_PYTHON_MODULE(_IECoreHoudini)
 {
@@ -154,7 +177,15 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
 	
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
-		
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+	def( "sharedGLWidget", &sharedGLWidget );
+
+#else
+
 	def( "makeMainGLContextCurrent", &makeMainGLContextCurrent );
-	
+
+#endif
+
 }
