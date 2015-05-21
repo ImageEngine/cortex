@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,7 +37,23 @@
 
 #include "GA/GA_Defines.h"
 #include "GEO/GEO_Primitive.h"
+#include "GU/GU_Detail.h"
+#include "OP/OP_Context.h"
+#include "OP/OP_NodeInfoParms.h"
 #include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_ConvertParms ConvertParms;
+
+#else
+
+#include "GU/GU_Prim.h"
+
+typedef GU_Primitive::NormalComp NormalComp;
+typedef GU_ConvertParms ConvertParms;
+
+#endif
 
 #include "IECore/Object.h"
 
@@ -79,7 +95,35 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual void enlargePointBounds( UT_BoundingBox &box ) const;
 		virtual UT_Vector3 computeNormal() const;
 		virtual int detachPoints( GA_PointGroup &grp );
+
+		static const char *typeName;
+
+#if UT_MAJOR_VERSION_INT >= 14
 		
+		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );		
+		// merge constructor
+		static GA_Primitive *create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
+
+#endif
+
+		// factory
+		static GEO_CortexPrimitive *build( GU_Detail *geo, const IECore::Object *object );
+		
+		virtual int64 getMemoryUsage() const;
+		virtual void countMemory( UT_MemoryCounter &counter ) const;
+		virtual void copyPrimitive( const GEO_Primitive *src );
+		
+		virtual const GA_PrimitiveDefinition &getTypeDef() const;
+		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
+		/// Maybe we should just give up registration in the plugin and do it all here.
+		static void setTypeDef( GA_PrimitiveDefinition *def );
+		static GA_PrimitiveTypeId typeId();
+		
+		virtual GEO_Primitive *convert( ConvertParms &parms, GA_PointGroup *usedpts = 0 );
+		virtual GEO_Primitive *convertNew( ConvertParms &parms );
+		virtual void normal( NormalComp &output ) const;
+		virtual int intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax=1E17F, float tol=1E-12F, float *distance=0, UT_Vector3 *pos=0, UT_Vector3 *nml=0, int accurate=0, float *u=0, float *v=0, int ignoretrim=1 ) const;
+
 		/// Set the IECore::Object contained by this GEO_Primitive. Note that in most situations
 		/// this method takes a copy of the object. However, for ParameterisedProcedurals it does
 		/// not, and it is the users responsibility to treat the contained object as const.
@@ -89,6 +133,10 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		/// Allowing non-const access to the IECore::Object so it can be updated in-place.
 		/// Most users should prefer the const method above.
 		IECore::Object *getObject();
+		
+		/// Convenience method to inspect a GU_Detail and return some information about
+		/// the GU_CortexPrimitives within, if there are any.
+		static void infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms );
 	
 	protected :
 
@@ -107,6 +155,10 @@ class GEO_CortexPrimitive : public GEO_Primitive
 	private :
 		
 		class geo_CortexPrimitiveJSON;
+
+		GEO_Primitive *doConvert( ConvertParms &parms );
+		
+		static GA_PrimitiveDefinition *m_definition;
 
 };
 

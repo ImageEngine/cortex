@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,10 +37,22 @@
 #include "IECore/CompoundObject.h"
 
 #include "IECoreHoudini/FromHoudiniCompoundObjectConverter.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCompoundObjectConverter );
 
@@ -88,13 +100,13 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 	{
 		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		
-		if ( prim->getTypeId() != GU_CortexPrimitive::typeId() )
+
+		if ( prim->getTypeId() != CortexPrimitive::typeId() )
 		{
 			return Inapplicable;
 		}
 		
-		if ( !IECore::runTimeCast<const VisibleRenderable>( ((GU_CortexPrimitive *)prim)->getObject() ) )
+		if ( !IECore::runTimeCast<const VisibleRenderable>( ((CortexPrimitive *)prim)->getObject() ) )
 		{
 			nonRenderable = true;
 		}
@@ -119,7 +131,8 @@ ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detai
 	for ( GA_Iterator it = geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 	{
 		const GA_Primitive *prim = primitives.get( it.getOffset() );
-		if ( prim->getTypeId() != GU_CortexPrimitive::typeId() )
+
+		if ( prim->getTypeId() != CortexPrimitive::typeId() )
 		{
 			throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Geometry contains non-CortexObject primitives" );
 		}
@@ -131,7 +144,8 @@ ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detai
 			name = tmp;
 		}
 		
-		ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
+		ConstObjectPtr object = ((CortexPrimitive *)prim)->getObject();
+
 		result->members()[name] = ( object ) ? object->copy() : 0;
 	}
 	

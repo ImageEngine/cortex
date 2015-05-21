@@ -3,7 +3,7 @@
 #  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 #  its affiliates and/or its licensors.
 #
-#  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -289,6 +289,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testObjectParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 2, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 1 )
@@ -316,6 +318,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testObjectParameterWithMultipleTypesConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 3, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 1 )
@@ -340,6 +344,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testPointsParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 1, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 1 )
@@ -361,6 +367,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testMeshParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural( "primitiveParameters/meshRender" )
 		torus = proc.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 1 )
@@ -383,8 +391,12 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testMultipleInputs( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		box = proc.createInputNode( 2, "box" )
 		torus2 = proc.createInputNode( 3, "torus" )
+		torus2.parm( "rows" ).set( 10 )
+		torus2.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( len(proc.geometry().points()), 1 )
@@ -414,6 +426,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 	def testCortexInputs( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.parent().createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		op = torus.createOutputNode( "ieOpHolder" )
 		IECoreHoudini.FnOpHolder( op ).setOp( "objectDebug", 1 )
 		op.parm( "parm_quiet" ).set( True )
@@ -423,6 +437,8 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		fn2 = IECoreHoudini.FnProceduralHolder( proc2 )
 		fn2.setProcedural( "primitiveParameters/meshRender", 1 )
 		torus2 = proc2.createInputNode( 0, "torus" )
+		torus2.parm( "rows" ).set( 10 )
+		torus2.parm( "cols" ).set( 10 )
 		proc.cook()
 		self.assertEqual( proc.errors(), "" )
 		self.assertEqual( proc2.errors(), "" )

@@ -2,7 +2,7 @@
 //
 //  Copyright 2012 Electric Theatre Collective Limited. All rights reserved.
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -64,10 +64,21 @@ IECoreMantra::ProceduralPrimitive::~ProceduralPrimitive()
 {
 }
 
+#if UT_MAJOR_VERSION_INT >= 14
+
+const char *IECoreMantra::ProceduralPrimitive::className() const
+{
+	return "ProceduralPrimitive";
+}
+
+#else
+
 const char * IECoreMantra::ProceduralPrimitive::getClassName()
 {
 	return "ProceduralPrimitive";
 }
+
+#endif
 
 int IECoreMantra::ProceduralPrimitive::initialize(const UT_BoundingBox* box)
 {

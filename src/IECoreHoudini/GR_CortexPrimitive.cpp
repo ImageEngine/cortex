@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -57,19 +57,41 @@
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GR_CortexPrimitive.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 using namespace IECoreHoudini;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
 
 GR_CortexPrimitive::GR_CortexPrimitive( const GR_RenderInfo *info, const char *cache_name, const GEO_Primitive *prim )
 	: GR_Primitive( info, cache_name, GA_PrimCompat::TypeMask(0) )
 {
 	IECoreGL::init( true );
 	
-	if ( prim->getTypeDef().getId() == GU_CortexPrimitive::typeId().get() )
+	if ( prim->getTypeDef().getId() == CortexPrimitive::typeId().get() )
 	{
+
+#if UT_MAJOR_VERSION_INT < 14
+
 		m_primId = prim->getNum();
+
+#else
+
+		m_primId = prim->getMapIndex();
+#endif
+
 	}
+
 }
 
 GR_CortexPrimitive::~GR_CortexPrimitive()
@@ -79,9 +101,20 @@ GR_CortexPrimitive::~GR_CortexPrimitive()
 
 GR_PrimAcceptResult GR_CortexPrimitive::acceptPrimitive( GT_PrimitiveType t, int geo_type, const GT_PrimitiveHandle &ph, const GEO_Primitive *prim )
 {
-	if ( geo_type == GU_CortexPrimitive::typeId().get() )
+
+	if ( geo_type == CortexPrimitive::typeId().get() )
 	{
+
+#if UT_MAJOR_VERSION_INT < 14
+
 		m_primId = prim->getNum();
+
+#else
+
+		m_primId = prim->getMapIndex();
+
+#endif
+
 		return GR_PROCESSED;
 	}
 	
@@ -97,7 +130,9 @@ void GR_CortexPrimitive::resetPrimitives()
 void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p )
 {
 	GA_Offset offset = p.geometry.primitiveOffset( m_primId );
-	const GU_CortexPrimitive *prim = dynamic_cast<const GU_CortexPrimitive *>( p.geometry.getGEOPrimitive( offset ) );
+
+	const CortexPrimitive *prim = dynamic_cast<const CortexPrimitive *>( p.geometry.getGEOPrimitive( offset ) );
+
 	if ( !prim )
 	{
 		m_scene = 0;
@@ -155,20 +190,79 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	{
 		const IECoreGL::Shader *shader = state->get<IECoreGL::ShaderStateComponent>()->shaderSetup()->shader();
 		glUseProgram( shader->program() );
+
+#if UT_MAJOR_VERSION_INT < 14
+
 		glUniform1i( shader->uniformParameter( "objectPickId" )->location, r->getObjectPickID() );
+
+#else
+
+		/// \todo: this suggestion was provided by SideFx but does not seem to work,
+		// or at least, this change in itself does not enable object picking. I'm
+		// leaving it here for now so we don't lose track of their advice.
+		int *ids = (int*)r->getUniform( RE_UNIFORM_PICK_BASE_ID )->getValue( 0 );
+		glUniform1i( shader->uniformParameter( "objectPickId" )->location, ids[1] );
+
+#endif
+
 	}
 	
+#if UT_MAJOR_VERSION_INT < 14
+
 	r->pushMatrix();
 		
 		r->multiplyMatrix( transform );
 		m_scene->render( state );
 	
 	r->popMatrix();
+
+#else
+
+	UT_Matrix4D proj, view;
+	
+	memcpy( proj.data(), r->getUniform( RE_UNIFORM_PROJECT_MATRIX )->getValue(), sizeof(double) * 16 );
+	memcpy( view.data(), r->getUniform( RE_UNIFORM_VIEW_MATRIX )->getValue(), sizeof(double) * 16 );
+	
+	glMatrixMode( GL_PROJECTION );
+	glPushMatrix();
+		
+		glLoadMatrixd( proj.data() );
+		glMatrixMode( GL_MODELVIEW );
+		glPushMatrix();
+			
+			glLoadMatrixd( (transform * view).data() );
+			m_scene->render( state );
+		
+		glPopMatrix();
+	
+	glMatrixMode( GL_PROJECTION );
+	glPopMatrix();
+
+#endif
 	
 	if ( render_mode == GR_RENDER_OBJECT_PICK )
 	{
 		glUseProgram( currentProgram );
 	}
+}
+
+void GR_CortexPrimitive::renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials, int render_instance )
+{
+	/// \todo: implement this to support instanced rendering.
+	/// renderInstances() is for doing instanced drawing of
+	/// your primitive, which will be called if it's instanced
+	/// at the object level, or contained in a packed primitive
+	/// which is copied multiple times. In those cases, update()
+	/// will be passed a non-NULL UT_Matrix4DArray and an instance
+	/// group to which they belong (in GR_UpdateParms). The
+	/// instance_group passed to renderInstances() is used to
+	/// indicate the group being rendered.
+}
+
+int GR_CortexPrimitive::renderPick( RE_Render *r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map )
+{
+	// return 0 to indicate we don't support component picking
+	return 0;
 }
 
 IECoreGL::StatePtr GR_CortexPrimitive::g_lit = 0;
@@ -322,7 +416,7 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 
 			return g_wireConstGhost.get();
 		}
-		// hovering on GU_CortexPrimitives during GR_RENDER_OBJECT_PICK mode flips the mode
+		// hovering on CortexPrimitives during GR_RENDER_OBJECT_PICK mode flips the mode
 		// to GR_RENDER_MATTE. Since we're not supporting that on its own, we'll consider it
 		// a continued pick for now. This avoids strange popping draws on hover.
 		case GR_RENDER_MATTE :

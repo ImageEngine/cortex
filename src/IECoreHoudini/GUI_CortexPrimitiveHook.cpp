@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,13 +37,25 @@
 #include "UT/UT_Version.h"
 #if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
 
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/GR_CortexPrimitive.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
 #include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 
 using namespace IECoreHoudini;
 
-GUI_CortexPrimitiveHook::GUI_CortexPrimitiveHook() : GUI_PrimitiveHook( GU_CortexPrimitive::typeName )
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
+
+GUI_CortexPrimitiveHook::GUI_CortexPrimitiveHook() : GUI_PrimitiveHook( CortexPrimitive::typeName )
 {
 }
 

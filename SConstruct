@@ -1135,6 +1135,9 @@ if doConfigure :
 	if int( env["BOOST_MINOR_VERSION"] ) >=35 :
 		env.Append( LIBS = [ "boost_system" + env["BOOST_LIB_SUFFIX"] ] )
 	
+	if int( env["BOOST_MINOR_VERSION"] ) >=55 :
+		env.Append( CXXFLAGS = [ "-DBOOST_SIGNALS_NO_DEPRECATION_WARNING" ] )
+	
 	if not c.CheckLibWithHeader( env.subst( "boost_iostreams" + env["BOOST_LIB_SUFFIX"] ), "boost/iostreams/chain.hpp", "CXX" ) :
 		sys.stderr.write( "ERROR : unable to find the boost libraries - check BOOST_LIB_PATH.\n" )
 		Exit( 1 )
@@ -2477,6 +2480,9 @@ if env["PLATFORM"] == "posix" :
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
 mantraEnv = houdiniEnv.Clone( IECORE_NAME="IECoreMantra")
+## \todo: This is a stopgap measure to get IECoreMantra building for Houdini 14.
+# We should come back and address the deprecations appropriately.
+mantraEnv.Append( CXXFLAGS = [ "-Wno-deprecated-declarations" ] )
 mantraPythonModuleEnv = houdiniPythonModuleEnv.Clone( IECORE_NAME="IECoreMantra" )
 mantraProceduralEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieProcedural" )
 mantraWorldEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieWorld" )

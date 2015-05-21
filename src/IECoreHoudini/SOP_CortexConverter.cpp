@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
 #include "IECoreHoudini/SOP_CortexConverter.h"
@@ -242,7 +242,7 @@ void SOP_CortexConverter::getNodeSpecificInfoText( OP_Context &context, OP_NodeI
 {
 	SOP_Node::getNodeSpecificInfoText( context, parms );
 	
-	GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
+	GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 	
 	if ( !evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) )
 	{

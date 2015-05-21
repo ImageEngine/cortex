@@ -2,6 +2,8 @@
 //
 //  Copyright 2012 Electric Theatre Collective Limited. All rights reserved.
 //
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
+//
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
 //  met:
@@ -35,7 +37,9 @@
 #ifndef IECOREMANTRA_PROCEDURALPRIMITIVE_H
 #define IECOREMANTRA_PROCEDURALPRIMITIVE_H
 
-#include <VRAY/VRAY_Procedural.h>
+#include "VRAY/VRAY_Procedural.h"
+#include "UT/UT_Version.h"
+
 #include "IECore/VisibleRenderable.h"
 
 
@@ -49,8 +53,17 @@ class ProceduralPrimitive : public VRAY_Procedural
 	public:
 		ProceduralPrimitive();
 		virtual ~ProceduralPrimitive();
-		// mantra interface
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+		virtual const char *className() const;
+
+#else
+
 		virtual const char *getClassName();
+
+#endif
+
 		virtual int initialize( const UT_BoundingBox * );
 		virtual void getBoundingBox( UT_BoundingBox &box );
 		virtual void render();

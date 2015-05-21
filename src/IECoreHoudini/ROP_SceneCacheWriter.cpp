@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -43,6 +43,7 @@
 #include "PRM/PRM_SpareData.h"
 #include "ROP/ROP_Error.h"
 #include "SOP/SOP_Node.h"
+#include "UT/UT_Interrupt.h"
 #include "UT/UT_PtrArray.h"
 #include "UT/UT_StringMMPattern.h"
 

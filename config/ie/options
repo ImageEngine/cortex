@@ -65,7 +65,6 @@ targetApp = getOption( "APP", None )
 # fall back to the generic settings for this major version.
 cortexReg = IEEnv.registry["libraries"]["cortex"]["9"].get( platform, IEEnv.registry["libraries"]["cortex"]["9"] )
 
-tbbVersion = cortexReg["tbbVersion"]
 if targetApp :
 	
 	if targetApp not in ( "nuke", "maya", "houdini" ) :
@@ -88,6 +87,7 @@ if targetApp :
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
+	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
@@ -176,15 +176,23 @@ if compilerVersionInt < 350 :
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
 
-# find tbb
+
+# set the dependency paths
 TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
 TBB_LIB_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "lib" )
-
-# set the include paths
 BOOST_INCLUDE_PATH = os.path.join( "/software/tools/include", platform, "boost", boostVersion )
+BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
+OPENEXR_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+ILMBASE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
+GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_LIB_SUFFIX = "-" + glewVersion
+
+PNG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+JPEG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+TIFF_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
 if platform == "cent6.x86_64" :
 	# use the /usr/lib versions of tiff, png, freetype and jpeg
@@ -206,7 +214,10 @@ else:
 OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
 # find the right libraries based on compiler and platform
-LIBPATH = "/software/tools/lib/" + platform + "/" + compiler + "/" + compilerVersion
+LIBPATH = ":".join( [
+	os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion ),
+	os.path.join( "/software", "apps", compiler, compilerVersion, platform, "lib64" ),
+] )
 if targetApp :
 	## \todo: the final or in this statement is for Nuke. Remove once the Nuke registry has been updated to use libPaths
 	libPaths = [ os.path.join( targetAppReg["location"], x ) for x in targetAppReg.get( "libPaths", [] ) ] or [ targetAppReg["location"] ]

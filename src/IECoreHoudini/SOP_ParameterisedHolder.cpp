@@ -3,7 +3,7 @@
 //  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
-//  Copyright (c) 2010-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -50,7 +50,7 @@
 #include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
 using namespace boost;
@@ -258,5 +258,5 @@ void SOP_ParameterisedHolder::getNodeSpecificInfoText( OP_Context &context, OP_N
 	SOP_Node::getNodeSpecificInfoText( context, parms );
 	
 	// add type descriptions for the Cortex Objects
-	GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
+	GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 }

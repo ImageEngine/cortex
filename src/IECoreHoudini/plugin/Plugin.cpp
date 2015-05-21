@@ -41,7 +41,6 @@
 #include <UT/UT_IOTable.h>
 #include <UT/UT_Version.h>
 #include <OP/OP_OperatorTable.h>
-#include <GR/GR_RenderTable.h>
 
 /// Used to our new Render Hook for Houdini 12.5 and later
 #if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
@@ -60,12 +59,30 @@
 #include "IECoreHoudini/SOP_SceneCacheTransform.h"
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
-#include "IECoreHoudini/GR_Cortex.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 #include "IECoreHoudini/UT_ObjectPoolCache.h"
 
+#if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
+
+	#include <GR/GR_RenderTable.h>
+	#include "IECoreHoudini/GR_Cortex.h"
+
+#endif
+
 using namespace IECoreHoudini;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
 
 /// Tell Houdini that this plugin should be loaded with RTLD_GLOBAL
 extern "C"
@@ -176,22 +193,24 @@ void newRenderHook( GR_RenderTable *table )
 
 void newGeometryPrim( GA_PrimitiveFactory *factory )
 {
+
 	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
-		GU_CortexPrimitive::typeName, GU_CortexPrimitive::create,
-		GA_FAMILY_NONE, ( std::string( GU_CortexPrimitive::typeName ) + "s" ).c_str()
+		CortexPrimitive::typeName, CortexPrimitive::create,
+		GA_FAMILY_NONE, ( std::string( CortexPrimitive::typeName ) + "s" ).c_str()
 	);
 	
 	if ( !primDef )
 	{
-		std::cerr << "Warning: Duplicate definition for GU_CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
+		std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
 		return;
 	}
 	
-	primDef->setMergeConstructor( GU_CortexPrimitive::create );
+	primDef->setMergeConstructor( CortexPrimitive::create );
+	primDef->setHasLocalTransform( true );
 	
-	/// \todo: This method is silly. Should we just give up and do the whole registration in GU_CortexPrimitive?
-	GU_CortexPrimitive::setTypeDef( primDef );
-	
+	/// \todo: This method is silly. Should we just give up and do the whole registration in CortexPrimitive?
+	CortexPrimitive::setTypeDef( primDef );
+
 	/// Create the default ObjectPool cache
 	UT_ObjectPoolCache::defaultObjectPoolCache();
 

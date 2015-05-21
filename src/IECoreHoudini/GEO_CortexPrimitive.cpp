@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,10 +38,11 @@
 #include "GA/GA_MergeMap.h"
 #include "GA/GA_PrimitiveJSON.h"
 #include "GA/GA_SaveMap.h"
+#include "GEO/GEO_Detail.h"
+#include "GU/GU_RayIntersect.h"
 #include "UT/UT_JSONParser.h"
 #include "UT/UT_JSONWriter.h"
-
-#include "GEO/GEO_Detail.h"
+#include "UT/UT_MemoryCounter.h"
 
 #include "IECore/CoordinateSystem.h"
 #include "IECore/Group.h"
@@ -55,6 +56,18 @@
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+
+#if UT_MAJOR_VERSION_INT < 14
+
+	#include "GU/GU_ConvertParms.h"
+	#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+#else
+
+	#include "GEO/GEO_ConvertParms.h"
+
+#endif
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -282,8 +295,19 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src, GEO_Point **p
 	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
 	
 	GA_Offset v = m_offset;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+	GA_Offset p = srcPoints.offsetFromIndex( srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) ) );
+	wireVertex( v, p );
+
+#else
+
 	GEO_Point *point = ptredirect[ srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) ) ];
 	wireVertex( v, point ? point->getMapOffset() : GA_INVALID_OFFSET );
+
+#endif
+
 	vertexWrangler.copyAttributeValues( v, orig->m_offset );
 }
 
@@ -340,6 +364,230 @@ void GEO_CortexPrimitive::setObject( const IECore::Object *object )
 		/// \todo: should this be a deep copy?
 		m_object = object->copy();
 	}
+}
+
+const char *GEO_CortexPrimitive::typeName = "CortexObject";
+GA_PrimitiveDefinition *GEO_CortexPrimitive::m_definition = 0;
+
+const GA_PrimitiveDefinition &GEO_CortexPrimitive::getTypeDef() const
+{
+	return *m_definition;
+}
+
+void GEO_CortexPrimitive::setTypeDef( GA_PrimitiveDefinition *def )
+{
+	if ( !m_definition )
+	{
+		m_definition = def;
+	}
+}
+
+GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
+{
+	return m_definition->getId();
+}
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+GA_Primitive *GEO_CortexPrimitive::create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition )
+{
+	return new GEO_CortexPrimitive( static_cast<GU_Detail *>( &detail ), offset );
+}
+
+GA_Primitive *GEO_CortexPrimitive::create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src )
+{
+	return new GEO_CortexPrimitive( map, detail, offset, src );
+}
+
+#endif
+
+GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::Object *object )
+{
+	GEO_CortexPrimitive *result = (GEO_CortexPrimitive *)geo->appendPrimitive( m_definition->getId() );
+	
+	GA_Offset point = geo->appendPointOffset();
+	result->wireVertex( result->m_offset, point );
+	result->setObject( object );
+	
+	if ( const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object ) )
+	{
+		geo->setPos3( point, IECore::convert<UT_Vector3>( renderable->bound().center() ) );
+		return result;
+	}
+	
+	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
+	{
+		if ( const IECore::Transform *transform = coord->getTransform() )
+		{
+			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
+		}
+		
+		return result;
+	}
+	
+	return result;
+}
+
+int64 GEO_CortexPrimitive::getMemoryUsage() const
+{
+	size_t total = sizeof( this );
+	
+	if ( m_object )
+	{
+		total += m_object->memoryUsage();
+	}
+	
+	return total;
+}
+
+void GEO_CortexPrimitive::countMemory( UT_MemoryCounter &counter ) const
+{
+	/// \todo: its unclear how we're supposed to count objects which are held by multiple
+	/// GEO_CortexPrimitives, so we're just counting them every time for now.
+	counter.countUnshared( getMemoryUsage() );
+}
+
+void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src )
+{
+	if ( src == this )
+	{
+		return;
+	}
+	
+	const GEO_CortexPrimitive *orig = (const GEO_CortexPrimitive *)src;
+	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
+	
+	/// \todo: should we make a shallow or a deep copy?
+	m_object = orig->m_object;
+	
+	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
+	
+	GA_Offset v = m_offset;
+	GA_Offset p = srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) );
+	
+	wireVertex( v, p );
+	vertexWrangler.copyAttributeValues( v, orig->m_offset );
+}
+
+GEO_Primitive *GEO_CortexPrimitive::convert( ConvertParms &parms, GA_PointGroup *usedpts )
+{
+	GEO_Primitive *prim = doConvert( parms );
+	if ( !prim )
+	{
+		return 0;
+	}
+	
+	if ( usedpts )
+	{
+		addPointRefToGroup( *usedpts );
+	}
+	
+	if ( GA_PrimitiveGroup *group = parms.getDeletePrimitives() )
+	{
+		group->add( this );
+	}
+	else
+	{
+		getParent()->deletePrimitive( *this, usedpts != NULL );
+	}
+	
+	return prim;
+}
+
+GEO_Primitive *GEO_CortexPrimitive::convertNew( ConvertParms &parms )
+{
+	return doConvert( parms );
+}
+
+GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
+{
+	if ( !m_object )
+	{
+		return 0;
+	}
+	
+	GA_PrimCompat::TypeMask type = parms.toType();
+	
+	/// \todo: should the GEO_PrimTypeCompat be registered with the converters?
+	if ( m_object->isInstanceOf( IECore::MeshPrimitiveTypeId ) && type == GEO_PrimTypeCompat::GEOPRIMPOLY )
+	{
+		GU_DetailHandle handle;
+		handle.allocateAndSet( (GU_Detail*)getParent(), false );
+		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object.get() ) );
+		if ( !converter->convert( handle ) )
+		{
+			return 0;
+		}
+	}
+	
+	/// \todo: support for CurvesPrimitive, PointsPrimitive, and any other existing converters
+	
+	return 0;
+}
+
+void GEO_CortexPrimitive::normal( NormalComp &output ) const
+{
+}
+
+/// \todo: build ray cache and intersect properly
+int GEO_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax, float tol, float *distance, UT_Vector3 *pos, UT_Vector3 *nml, int accurate, float *u, float *v, int ignoretrim ) const
+{
+	UT_BoundingBox bbox;
+	getBBox( &bbox );
+	
+	float dist;
+	int result = bbox.intersectRay( o, d, tmax, &dist, nml );
+	if ( result )
+	{
+		if ( distance )
+		{
+			*distance = dist;
+		}
+		
+		if ( pos )
+		{
+			*pos = o + dist * d;
+		}
+	}
+	
+	return result;
+}
+
+void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms )
+{
+	if ( !geo )
+	{
+		return;
+	}
+	
+	std::map<std::string, int> typeMap;
+	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
+	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
+	{
+		const GA_Primitive *prim = primitives.get( it.getOffset() );
+
+		if ( prim->getTypeId() == GEO_CortexPrimitive::typeId() )
+		{
+			const IECore::Object *object = ((GEO_CortexPrimitive *)prim)->getObject();
+
+			if ( object )
+			{
+				typeMap[object->typeName()] += 1;
+			}
+		}
+	}
+	
+	if ( typeMap.empty() )
+	{
+		return;
+	}
+	
+	parms.append( "Cortex Object Details:\n" );
+	for ( std::map<std::string, int>::iterator it = typeMap.begin(); it != typeMap.end(); ++it )
+	{
+		parms.append( ( boost::format( "  %d " + it->first + "s\n" ) % it->second ).str().c_str() );
+	}
+	parms.append( "\n" );
 }
 
 class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -52,6 +52,8 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		bname = actualBox.createOutputNode( "name" )
 		bname.parm( "name1" ).set( "/" )
 		torus = box1.createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		tname = torus.createOutputNode( "name" )
 		tname.parm( "name1" ).set( "/gap/torus" )
 		merge = bname.createOutputNode( "merge" )
@@ -60,9 +62,13 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		box2 = obj.createNode( "geo", "box2", run_init_scripts=False )
 		box2.createNode( "box", "actualBox" )
 		torus1 = sub1.createNode( "geo", "torus1", run_init_scripts=False )
-		torus1.createNode( "torus", "actualTorus" )
+		actualTorus1 = torus1.createNode( "torus", "actualTorus" )
+		actualTorus1.parm( "rows" ).set( 10 )
+		actualTorus1.parm( "cols" ).set( 10 )
 		torus2 = torus1.createOutputNode( "geo", "torus2", run_init_scripts=False )
-		torus2.createNode( "torus", "actualTorus" )
+		actualTorus2 = torus2.createNode( "torus", "actualTorus" )
+		actualTorus2.parm( "rows" ).set( 10 )
+		actualTorus2.parm( "cols" ).set( 10 )
 		
 		return IECoreHoudini.LiveScene()
 	
@@ -760,7 +766,9 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		scene = self.buildScene()
 		name = hou.node( "/obj/box1" ).renderNode().createInputNode( 2, "name" )
 		name.parm( "name1" ).set( "/gap/torus2" )
-		name.createInputNode( 0, "torus" )
+		torus = name.createInputNode( 0, "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
 		
 		box1 = scene.scene( [ "sub1", "box1" ] )
 		self.assertEqual( box1.childNames(), [ "gap" ] )

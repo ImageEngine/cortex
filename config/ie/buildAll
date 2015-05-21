@@ -70,7 +70,7 @@ if IEEnv.platform() == "cent6.x86_64" :
 			build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
 	
 	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-		if houdiniVersion.endswith( "-python2.7" ) :
+		if houdiniVersion.startswith( "14" ) or ( houdiniVersion.startswith( "13" ) and houdiniVersion.endswith( "-python2.7" ) ) :
 			build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
 	
 	installDocs()

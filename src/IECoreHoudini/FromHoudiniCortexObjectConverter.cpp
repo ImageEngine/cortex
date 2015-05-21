@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,10 +38,22 @@
 #include "IECore/ParameterisedProcedural.h"
 
 #include "IECoreHoudini/FromHoudiniCortexObjectConverter.h"
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+typedef GEO_CortexPrimitive CortexPrimitive;
+
+#else
+
+#include "IECoreHoudini/GU_CortexPrimitive.h"
+
+typedef GU_CortexPrimitive CortexPrimitive;
+
+#endif
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniCortexObjectConverter );
 
@@ -68,7 +80,8 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCortexObjectConverter::c
 	if ( numPrims == 1 )
 	{
 		const GA_Primitive *prim = geo->getPrimitiveList().get( geo->getPrimitiveRange().begin().getOffset() );
-		if ( prim->getTypeId() == GU_CortexPrimitive::typeId() )
+
+		if ( prim->getTypeId() == CortexPrimitive::typeId() )
 		{
 			return Ideal;
 		}
@@ -80,12 +93,14 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCortexObjectConverter::c
 ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_Primitive *prim = geo->getPrimitiveList().get( geo->getPrimitiveRange().begin().getOffset() );
-	if ( prim->getTypeId() != GU_CortexPrimitive::typeId() )
+
+	if ( prim->getTypeId() != CortexPrimitive::typeId() )
 	{
 		throw std::runtime_error( "FromHoudiniCortexObjectConverter: Geometry does not contain a single CortexObject primitive" );
 	}
 	
-	ConstObjectPtr object = ((GU_CortexPrimitive *)prim)->getObject();
+	ConstObjectPtr object = ((CortexPrimitive *)prim)->getObject();
+
 	ObjectPtr result = filterAttribs( object.get(), operands->member<StringData>( "attributeFilter" )->readable().c_str() );
 	
 	if ( result )

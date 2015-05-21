@@ -100,7 +100,17 @@ class VRAY_ieProcedural : public ProceduralPrimitive {
 public:
 	VRAY_ieProcedural();
 	virtual ~VRAY_ieProcedural();
+
+#if UT_MAJOR_VERSION_INT >= 14
+
+	virtual const char *className() const;
+
+#else
+
 	virtual const char  *getClassName();
+
+#endif
+
 	virtual int	  initialize(const UT_BoundingBox *);
 	virtual void	 getBoundingBox(UT_BoundingBox &box);
 	virtual void	 render();
@@ -136,11 +146,21 @@ VRAY_ieProcedural::~VRAY_ieProcedural()
 {
 }
 
-const char *
-VRAY_ieProcedural::getClassName()
+#if UT_MAJOR_VERSION_INT >= 14
+
+const char *VRAY_ieProcedural::className() const
 {
 	return "VRAY_ieProcedural";
 }
+
+#else
+
+const char *VRAY_ieProcedural::getClassName()
+{
+	return "VRAY_ieProcedural";
+}
+
+#endif
 
 // The initialize method is called when the procedural is created. 
 // Returning zero (failure) will abort the rendering of this procedural.

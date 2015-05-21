@@ -35,6 +35,7 @@
 #include "OP/OP_NodeInfoParms.h"
 #include "PRM/PRM_ChoiceList.h"
 #include "PRM/PRM_Default.h"
+#include "UT/UT_Interrupt.h"
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_WorkArgs.h"
 
@@ -47,7 +48,7 @@
 #include "IECore/TypeTraits.h"
 #include "IECore/VisibleRenderable.h"
 
-#include "IECoreHoudini/GU_CortexPrimitive.h"
+#include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
 #include "IECoreHoudini/ToHoudiniAttribConverter.h"
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
@@ -650,7 +651,7 @@ void SOP_SceneCacheSource::getNodeSpecificInfoText( OP_Context &context, OP_Node
 	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
 	if ( geometryType == Cortex )
 	{
-		GU_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
+		GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 		return;
 	}
 	
