@@ -70,9 +70,19 @@ class TestObjectWriter( unittest.TestCase ) :
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
 	
+	def testBoundInHeader( self ) :
+
+		o = IECore.SpherePrimitive()
+		w = IECore.Writer.create( o, "test/spherePrimitive.cob" )
+		w.write()
+
+		h = IECore.Reader.create( "test/spherePrimitive.cob" ).readHeader()
+
+		self.assertEqual( h["bound"].value, o.bound() )
+
 	def tearDown( self ) :
 		
-		for f in ( "test/compoundData.cob", "test/intData.cob" ) :
+		for f in ( "test/compoundData.cob", "test/intData.cob", "test/spherePrimitive.cob" ) :
 			if os.path.isfile( f ) :
 				os.remove( f )
 
