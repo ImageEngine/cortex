@@ -170,16 +170,86 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 
 		if( !valueStr.empty() )
 		{
+			if( optName == "rendering_threads" )
+			{
+				if( const IntData *numThreadsData = runTimeCast<const IntData>( value.get() ) )
+				{
+					// if numThreads is 0, we want to use all the CPU cores.
+					// We can remove any previous "rendering_threads" param and
+					// let appleseed choose the number of threads to use.
+					if( numThreadsData->readable() == 0 )
+					{
+						m_project->configurations().get_by_name( "final" )->get_parameters().remove_path( optName.c_str() );
+						m_project->configurations().get_by_name( "interactive" )->get_parameters().remove_path( optName.c_str() );
+						return;
+					}
+				}
+				else
+				{
+					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:cfg:rendering_threads option expects an IntData value." );
+				}
+			}
+			else if( algorithm::ends_with( optName, "max_path_length" ) )
+			{
+				if( const IntData *maxPathLengthData = runTimeCast<const IntData>( value.get() ) )
+				{
+					// if maxPathLength is 0, we want to use and unlimited number of bounces and let
+					// russian roulette terminate paths when their contribution is too low.
+					// We can disable max path lengths by remove any previous param.
+					if( maxPathLengthData->readable() == 0 )
+					{
+						m_project->configurations().get_by_name( "final" )->get_parameters().remove_path( optName.c_str() );
+						m_project->configurations().get_by_name( "interactive" )->get_parameters().remove_path( optName.c_str() );
+						return;
+					}
+				}
+				else
+				{
+					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", format( "%s option expects an IntData value." ) % optName );
+				}
+			}
+			else if( optName == "pt.max_ray_intensity" )
+			{
+				if( const FloatData *maxIntensityData = runTimeCast<const FloatData>( value.get() ) )
+				{
+					// if maxIntensity is 0 disable it.
+					if( maxIntensityData->readable() == 0.0f )
+					{
+						m_project->configurations().get_by_name( "final" )->get_parameters().remove_path( optName.c_str() );
+						m_project->configurations().get_by_name( "interactive" )->get_parameters().remove_path( optName.c_str() );
+						return;
+					}
+				}
+				else
+				{
+					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:cfg:pt:max_ray_intensity option expects a FloatData value." );
+				}
+			}
+			else if( optName == "generic_frame_renderer.passes" )
+			{
+				if( const IntData *numPassesData = runTimeCast<const IntData>( value.get() ) )
+				{
+					int numPasses = numPassesData->readable();
+
+					// if the number of passes is greater than one, we need to
+					// switch the shading result framebuffer in the final rendering config.
+					if( !isInteractive() )
+					{
+						m_project->configurations().get_by_name( "final" )->get_parameters().insert( "shading_result_framebuffer", numPasses > 1 ? "permanent" : "ephemeral" );
+					}
+
+					// enable decorrelate pixels if the number of render passes is greater than one.
+					m_project->configurations().get_by_name( "final" )->get_parameters().insert_path( "uniform_pixel_renderer.decorrelate_pixels", numPasses > 1 ? "true" : "false" );
+					m_project->configurations().get_by_name( "interactive" )->get_parameters().insert_path( "uniform_pixel_renderer.decorrelate_pixels", numPasses > 1 ? "true" : "false" );
+				}
+				else
+				{
+					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:cfg:generic_frame_renderer:passes option expects an IntData value." );
+				}
+			}
+
 			m_project->configurations().get_by_name( "final" )->get_parameters().insert_path( optName.c_str(), valueStr.c_str() );
 			m_project->configurations().get_by_name( "interactive" )->get_parameters().insert_path( optName.c_str(), valueStr.c_str() );
-
-			// if the number of passes is different than one, we need to
-			// switch the shading result framebuffer in the final rendering config.
-			if( optName == "generic_frame_renderer.passes" && !isInteractive() )
-			{
-				int numPasses = static_cast<const IntData*>( value.get() )->readable();
-				m_project->configurations().get_by_name( "final" )->get_parameters().insert( "shading_result_framebuffer", numPasses == 1 ? "ephemeral" : "permanent" );
-			}
 		}
 	}
 	else if( 0 == name.compare( 0, 3, "as:" ) )
@@ -190,9 +260,9 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 
 		if( optName == "searchpath" )
 		{
-			if( const StringData *f = runTimeCast<const StringData>( value.get() ) )
+			if( const StringData *searchPathData = runTimeCast<const StringData>( value.get() ) )
 			{
-				m_project->search_paths().push_back( f->readable().c_str() );
+				m_project->search_paths().push_back( searchPathData->readable().c_str() );
 			}
 			else
 			{
