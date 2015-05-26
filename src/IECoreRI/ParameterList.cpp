@@ -113,8 +113,6 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 	switch( d->typeId() )
 	{
 		case V3fVectorDataTypeId :
-			isArray = true;
-			arraySize = static_cast<const V3fVectorData *>( d )->readable().size();
 		case V3fDataTypeId :
 		case V3dDataTypeId :
 			
@@ -123,6 +121,8 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			switch( d->typeId() )
 			{
 				case V3fVectorDataTypeId :
+					isArray = true;
+					arraySize = static_cast<const V3fVectorData *>( d )->readable().size();
 					interpretation = static_cast<const V3fVectorData *>( d )->getInterpretation();
 					break;
 				case V3fDataTypeId :

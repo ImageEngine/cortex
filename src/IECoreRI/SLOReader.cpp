@@ -126,29 +126,31 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 		DataPtr data = 0;
 
 		SLO_VISSYMDEF *arg = Slo_GetArgById( i );
+		
+		// find geometric interpretation, if this is relevant:
+		GeometricData::Interpretation interpretation;
+		switch( arg->svd_type )
+		{
+			case SLO_TYPE_POINT : 
+				interpretation = GeometricData::Point;
+				break;
+			case SLO_TYPE_VECTOR :
+				interpretation = GeometricData::Vector;
+				break;
+			case SLO_TYPE_NORMAL :
+				interpretation = GeometricData::Normal;
+				break;
+			default:
+				interpretation = GeometricData::Numeric;
+				break;
+		}
+		
 		switch( arg->svd_type )
 		{
 			case SLO_TYPE_POINT :
 			case SLO_TYPE_VECTOR :
 			case SLO_TYPE_NORMAL :
 				{
-					GeometricData::Interpretation interpretation;
-					switch( arg->svd_type )
-					{
-						case SLO_TYPE_POINT : 
-							interpretation = GeometricData::Point;
-							break;
-						case SLO_TYPE_VECTOR :
-							interpretation = GeometricData::Vector;
-							break;
-						case SLO_TYPE_NORMAL :
-							interpretation = GeometricData::Normal;
-							break;
-						default:
-							interpretation = GeometricData::Numeric;
-							break;
-					}
-					
 					if( arg->svd_arraylen==0 )
 					{
 						const SLO_POINT *p = arg->svd_default.pointval;
