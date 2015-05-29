@@ -310,12 +310,33 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_f3.parm("value3").setExpression("$VTX*0.1")
 		vert_f3.setInput( 0, vert_f2 )
 
+		vert_quat = geo.createNode( "attribcreate", node_name = "vert_quat", exact_type_name=True )
+		vert_quat.parm("name").set("orient")
+		vert_quat.parm("class").set(3)
+		vert_quat.parm("size").set(4)
+		vert_quat.parm("value1").setExpression("$VTX*0.1")
+		vert_quat.parm("value2").setExpression("$VTX*0.2")
+		vert_quat.parm("value3").setExpression("$VTX*0.3")
+		vert_quat.parm("value4").setExpression("$VTX*0.4")
+		vert_quat.setInput( 0, vert_f3 )
+
+		vert_quat2 = geo.createNode( "attribcreate", node_name = "vert_quat2", exact_type_name=True )
+		vert_quat2.parm("name").set("quat_2")
+		vert_quat2.parm("class").set(3)
+		vert_quat2.parm("size").set(4)
+		vert_quat2.parm("typeinfo").set(6)  # set type info to quaternion
+		vert_quat2.parm("value1").setExpression("$VTX*0.2")
+		vert_quat2.parm("value2").setExpression("$VTX*0.4")
+		vert_quat2.parm("value3").setExpression("$VTX*0.6")
+		vert_quat2.parm("value4").setExpression("$VTX*0.8")
+		vert_quat2.setInput( 0, vert_quat )
+
 		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
-		vert_i1.setInput( 0, vert_f3 )
+		vert_i1.setInput( 0, vert_quat2 )
 
 		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
@@ -412,7 +433,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 				self.assert_( result["Cs"].data[i][j] <= 1.0 )
 
 		# test vertex attributes
-		attrs = [ "vert_f1", "vert_f2", "vert_f3", "vert_i1", "vert_i2", "vert_i3", "vert_v3f", "vertStringIndices" ]
+		attrs = [ "vert_f1", "vert_f2", "vert_f3", "orient", "quat_2", "vert_i1", "vert_i2", "vert_i3", "vert_v3f", "vertStringIndices" ]
 		for a in attrs :
 			self.assert_( a in result )
 			self.assertEqual( result[a].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
@@ -421,12 +442,23 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["vert_f1"].data.typeId(), IECore.FloatVectorData.staticTypeId() )
 		self.assertEqual( result["vert_f2"].data.typeId(), IECore.V2fVectorData.staticTypeId() )
 		self.assertEqual( result["vert_f3"].data.typeId(), IECore.V3fVectorData.staticTypeId() )
+		self.assertEqual( result["orient"].data.typeId(), IECore.QuatfVectorData.staticTypeId() )
 		
 		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
 			for j in range( 0, 3 ) :
 				self.assert_( result["vert_f3"].data[i][j] >= 0.0 )
 				self.assert_( result["vert_f3"].data[i][j] < 400.1 )
-		
+
+			self.assertAlmostEqual( result["orient"].data[i][0], i * 0.4,5 )
+			self.assertAlmostEqual( result["orient"].data[i][1], i * 0.1,5 )
+			self.assertAlmostEqual( result["orient"].data[i][2], i * 0.2,5 )
+			self.assertAlmostEqual( result["orient"].data[i][3], i * 0.3,5 )
+
+			self.assertAlmostEqual( result["quat_2"].data[i][0], i * 0.8,5 )
+			self.assertAlmostEqual( result["quat_2"].data[i][1], i * 0.2,5 )
+			self.assertAlmostEqual( result["quat_2"].data[i][2], i * 0.4,5 )
+			self.assertAlmostEqual( result["quat_2"].data[i][3], i * 0.6,5 )
+
 		self.assertEqual( result["vert_i1"].data.typeId(), IECore.IntVectorData.staticTypeId() )
 		self.assertEqual( result["vert_i2"].data.typeId(), IECore.V2iVectorData.staticTypeId() )
 		self.assertEqual( result["vert_i3"].data.typeId(), IECore.V3iVectorData.staticTypeId() )

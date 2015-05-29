@@ -126,6 +126,9 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	return data;
 }
 
+template <>
+IECore::QuatfVectorDataPtr FromHoudiniGeometryConverter::extractData<IECore::QuatfVectorData>( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const;
+
 template <typename T>
 typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *attr ) const
 {
