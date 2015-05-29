@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -34,6 +34,7 @@
 
 import random
 import os
+import unittest
 
 import maya.cmds
 
@@ -292,6 +293,7 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
 		
+	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() >= 201500, "Reference edits for splines don't work in Maya 2016" )
 	def testAddColorSplineToReferencedNode( self ) :
 	
 		# make a scene with an empty op holder
@@ -353,6 +355,7 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 			)
 		)
 
+	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() >= 201500, "Reference edits for splines don't work in Maya 2016" )
 	def testAddFloatSplineToReferencedNode( self ) :
 	
 		# make a scene with an empty op holder
