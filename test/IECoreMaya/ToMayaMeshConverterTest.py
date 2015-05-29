@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -31,6 +31,8 @@
 #  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ##########################################################################
+
+import unittest
 
 import maya.cmds
 import maya.OpenMaya as OpenMaya
@@ -168,6 +170,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
 		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
 	
+	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Invisible meshes with 6+ UV sets cause seg faults prior to Maya 2016" )
 	def testManyUVConversionsFromPlug( self ) :
 		
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
@@ -201,9 +204,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		# evaluate as expected. Despite this, the resulting mesh cannot be evaluated on the first try.
 		# Making the mesh visible, or making any attempt to evaluate it, will trigger some unknown
 		# internal updating, and subsequent attempts to evaluate it will succeed. Meshes with 5 or less
-		# UV sets do not suffer from this problem. Leaving this test failing in case it is fixed in a
-		# future Maya, and to mark the issue so users of ToMayaMeshConverter have breadcrumbs to follow.
-		self.assertEqual( fnMesh.numFaceVertices(), 2280 ) # Known failure. See note above for an explanation.
+		# UV sets do not suffer from this problem. This was fixed in Maya 2016, but I'll leave
+		# this explanation so users of ToMayaMeshConverter have breadcrumbs to follow.
+		self.assertEqual( fnMesh.numFaceVertices(), 2280 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
 		

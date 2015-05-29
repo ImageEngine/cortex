@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,6 +35,7 @@
 from __future__ import with_statement
 
 import os
+import unittest
 
 import maya.cmds
 import maya.OpenMaya
@@ -812,6 +813,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
 		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
 	
+	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Inactive node state causes a seg fault prior to Maya 2016" )
 	def testResultAttrSaveLoadMeshConnections( self ) :
 		
 		box = maya.cmds.listRelatives( maya.cmds.polyCube(), shapes=True )[0]
@@ -825,8 +827,6 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		mesh = maya.cmds.createNode( "mesh" )
 		maya.cmds.connectAttr( node + ".result", mesh + ".inMesh" )
 		quads = maya.cmds.polyQuad( mesh )[0]
-		## \todo: this makes the test fail, but not seg fault. remove once the seg fault is solved.
-		maya.cmds.setAttr( quads + ".nodeState", 1 )
 		joint = maya.cmds.createNode( "joint" )
 		cluster = maya.cmds.skinCluster( mesh, joint )
 		
@@ -842,7 +842,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( fnMesh.numVertices(), 408 )
 		self.assertEqual( fnMesh.numPolygons(), 406 )
 		
-		self.assertEqual( maya.cmds.getAttr( quads + ".nodeState" ), 0 ) # Known bug. See todo above.
+		self.assertEqual( maya.cmds.getAttr( quads + ".nodeState" ), 0 )
 	
 	def testParameterPlugForMissingPlug( self ) :
 	
