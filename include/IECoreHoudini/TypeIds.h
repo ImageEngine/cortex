@@ -80,6 +80,7 @@ namespace IECoreHoudini
 		ToHoudiniCortexObjectConverterTypeId = 111033,
 		FromHoudiniCompoundObjectConverterTypeId = 111034,
 		ToHoudiniCompoundObjectConverterTypeId = 111035,
+		ToHoudiniQuatVectorAttribConverterTypeId = 111036,
 		// remember to update TypeIdBinding.cpp
 		LastTypeId = 111999,
 	};
