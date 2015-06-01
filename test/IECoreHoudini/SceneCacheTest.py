@@ -516,8 +516,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			sc.writeTransform( IECore.M44dData( matrix ), 0 )
 			
 			mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-			mesh["Pref"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data.copy() )
-			mesh["otherP"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data.copy() )
+			mesh["Pref"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data )
+			mesh["otherP"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, mesh["P"].data )
 			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 8 ) )
 			sc.writeObject( mesh, 0 )
 		
