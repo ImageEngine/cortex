@@ -1,5 +1,11 @@
 # Development
 
+- If the rendering_threads option is set to zero, use all CPU cores for rendering.
+- Max intensity clamping can be disabled now by setting the as:cfg:pt:max_ray_intensity option to zero.
+- Fixed appleseed errors while binding inputs of object instances when objects are renamed in Gaffer.
+
+# 9.0.0-b5
+
 - Camera, transformation, deformation motion blur support.
 - Lights can now be turned on and off.
 - Interactive rendering support.
