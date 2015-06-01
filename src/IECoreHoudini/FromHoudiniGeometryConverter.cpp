@@ -449,6 +449,13 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					}
 					break;
 				}
+				case 4 :
+				{
+					if( attr->getTypeInfo() == GA_TYPE_QUATERNION || ( !strcmp( attr->getName(), "orient" ) && attr->getTypeInfo() == GA_TYPE_VOID ) )
+					{
+						dataPtr = extractData<QuatfVectorData>( attr, range, elementIndex );
+					}
+				}
 				default :
 				{
 					break;
@@ -762,6 +769,33 @@ GU_DetailHandle FromHoudiniGeometryConverter::extract( const GU_Detail *geo, con
 	}
 	
 	return GU_DetailHandle();
+}
+
+template <>
+IECore::QuatfVectorDataPtr FromHoudiniGeometryConverter::extractData<IECore::QuatfVectorData>( const GA_Attribute *attr, const GA_Range &range, int elementIndex ) const
+{
+	QuatfVectorDataPtr data = new QuatfVectorData;
+	data->writable().resize( range.getEntries() );
+	QuatfVectorData::BaseType *dest = data->baseWritable();
+
+	if ( elementIndex == -1 )
+	{
+		attr->getAIFTuple()->getRange( attr, range, dest );
+	}
+	else
+	{
+		attr->getAIFTuple()->getRange( attr, range, dest, elementIndex, 1 );
+	}
+
+	// rearrange quaternion components: houdini stores them as "i,j,k,s", Imath
+	// stores them as "s,i,j,k":
+	for( std::vector<Imath::Quatf>::iterator it = data->writable().begin(); it != data->writable().end(); ++it )
+	{
+		*it = Imath::Quatf( (*it)[3], (*it)[0], (*it)[1], (*it)[2] );
+	}
+
+	return data;
+	
 }
 
 /////////////////////////////////////////////////////////////////////////////////
