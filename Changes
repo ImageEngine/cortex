@@ -1,3 +1,40 @@
+# 9.0.0-b7
+
+#### IECore
+
+- Storing the bounding box in .cob headers if the object is a VisibleRenderable.
+- TransformOp now takes a copy of the data before altering it.
+- GCC 4.8 compatibility.
+- Boost 1.55.0 compatibility.
+- TBB 4.3 compatibility.
+
+#### IECoreMaya
+
+- Fixed FromMayaCameraConverter to account for non-zero film offsets.
+- ToMayaCameraConverter now supports setting the film offset using blindData on the Camera.
+- Maya 2016 compatibility.
+
+#### IECoreHoudini
+
+- Fixed issue exporting string attributes when Houdini reports an extra null string in the detail.
+- Added support for converting quaternions to and from Houdini.
+- Houdini 14 compatibility.
+
+#### IECoreRI
+
+- SLOReader sets geometric interpretation on parameters.
+- ParameterList makes use of geometric interpretation when available.
+
+#### IECoreAppleseed
+
+- Fixed appleseed error while binding inputs of object instances.
+- Various options changes:
+  - Set decorrelate_pixels automatically depending on render passes.
+  - If the rendering_threads option is zero, use all CPU cores for rendering.
+  - If the as:cfg:pt:max_ray_intensity is zero, disable max intensity clamping.
+  - Disable max number of bounces for max_path_length options set to zero.
+  - Check the type of the Data passed to setOption before accessing it.
+
 # 9.0.0-b6
 
 #### IECore
