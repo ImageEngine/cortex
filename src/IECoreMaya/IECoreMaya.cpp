@@ -246,7 +246,7 @@ MStatus initialize(MFnPlugin &plugin)
 
 	g_refCount ++;
 
-	return s;
+	return MS::kSuccess;
 }
 
 MStatus uninitialize(MFnPlugin &plugin)
