@@ -1685,15 +1685,15 @@ if doConfigure :
 			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleReaderBinding.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/PTCParticleWriterBinding.cpp" )
 			
-		if c.CheckFunc( "RiObjectBeginV" ) :
+		if c.CheckFunc( "RiObjectBeginV", language="CXX" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_OBJECTBEGINV" ] )
 			
-		if c.CheckFunc( "RiProceduralV" ) :
+		if c.CheckFunc( "RiProceduralV", language="CXX" ) :
 			
 			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_PROCEDURALV" ] )
 		
-		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter" ) :
+		if haveDelight and c.CheckCXXHeader( "sx.h" ) and c.CheckFunc( "SxGetParameter", language="CXX" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
@@ -1709,7 +1709,7 @@ if doConfigure :
 			
 				sys.stderr.write( "WARNING : Supported Sx API version not found - not building SXRenderer. Use 3delight 9.0.36 or later.\n" )
 		
-		if haveDelight and c.CheckCXXHeader( "gx.h" ) and c.CheckFunc( "GxGetGeometry" ) :
+		if haveDelight and c.CheckCXXHeader( "gx.h" ) and c.CheckFunc( "GxGetGeometry", language="CXX" ) :
 		
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_GX" )
