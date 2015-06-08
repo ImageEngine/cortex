@@ -95,7 +95,7 @@ bool JPEGImageReader::canRead( const string &fileName )
 	in.seekg(0, ios_base::beg);
 	in.read((char *) &magic, sizeof(unsigned int));
 
-	return magic == 0xe0ffd8ff || magic == 0xffd8ffe0 || magic == 0xe1ffd8ff || magic == 0xffd8ffe1 ;
+	return magic == 0xe0ffd8ff || magic == 0xffd8ffe0 || magic == 0xe1ffd8ff || magic == 0xffd8ffe1 || magic == 0xdbffd8ff;
 }
 
 void JPEGImageReader::channelNames( vector<string> &names )
