@@ -194,15 +194,10 @@ JPEG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, c
 TIFF_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
+# we use the /usr/lib64 versions of tiff, png, freetype and jpeg
+# with the exception of freetype on CentOS 6.
 if platform == "cent6.x86_64" :
-	# use the /usr/lib versions of tiff, png, freetype and jpeg
 	FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
-else :
-	TIFF_INCLUDE_PATH = "/software/tools/include/tiff/3.8.2"
-	JPEG_INCLUDE_PATH = "/software/tools/include/jpeg/6b"
-	FREETYPE_INCLUDE_PATH = "/software/tools/include/freetype/2.3.5/freetype2"
-	PNG_INCLUDE_PATH = "/software/tools/include/png/1.5.2"
-	CXXFLAGS += [ "-isystem", "/software/tools/include/freetype/2.3.5" ]
 
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
@@ -334,7 +329,9 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-	PNG_INCLUDE_PATH = os.path.join( houdiniReg['location'], houdiniReg['includes'][0] )
+	
+	if "pngVersion" in houdiniReg :
+		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + houdiniReg["pngVersion"]
 	
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
