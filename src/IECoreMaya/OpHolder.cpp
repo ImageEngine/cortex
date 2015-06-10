@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -113,7 +113,7 @@ void *OpHolder<B>::creator()
 template<typename B>
 MStatus OpHolder<B>::initialize()
 {
-	MStatus s = inheritAttributesFrom( ParameterisedHolder<B>::typeName );
+	MStatus s = OpHolder<B>::inheritAttributesFrom( ParameterisedHolder<B>::typeName );
 	if( !s )
 	{
 		return s;
