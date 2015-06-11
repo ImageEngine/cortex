@@ -402,6 +402,19 @@ IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId result
 		
 size_t AlembicInput::numChildren() const
 {
+	if(
+		!IXform::matches( m_data->object.getMetaData() ) &&
+		m_data->object.getParent()
+	)
+	{
+		// not a transform, and not the top of the archive.
+		// we want to ignore any children, because they won't
+		// be something we consider part of the hierarchy -
+		// alembic implements face sets as objects parented to
+		// a mesh for instance, whereas we would just think
+		// of them as a property of the mesh.
+		return 0;
+	}
 	return m_data->object.getNumChildren();
 }
 
@@ -421,7 +434,7 @@ IECore::StringVectorDataPtr AlembicInput::childNames() const
 {
 	StringVectorDataPtr resultData = new StringVectorData;
 	std::vector<std::string> &resultVector = resultData->writable();
-	size_t numChildren = m_data->object.getNumChildren();
+	size_t numChildren = this->numChildren();
 	for( size_t i=0; i<numChildren; i++ )
 	{
 		resultVector.push_back( m_data->object.getChildHeader( i ).getName() );

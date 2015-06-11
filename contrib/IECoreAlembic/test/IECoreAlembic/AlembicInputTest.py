@@ -449,6 +449,18 @@ class AlembicInputTest( unittest.TestCase ) :
 		
 		c = a.child( "persp" ).child( "perspShape" ).objectAtTime( 0 )
 		self.failUnless( isinstance( c, IECore.Camera ) )		
-		
+
+	def testHierarchyIgnoresShadingGroups( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/sphereWithShadingGroups.abc" )
+		self.assertEqual( a.numChildren(), 1 )
+		self.assertEqual( a.childNames(), IECore.StringVectorData( [ "pSphere1" ] ) )
+
+		g = a.child( "pSphere1" )
+		m = g.child( "pSphereShape1" )
+
+		self.assertEqual( m.numChildren(), 0 )
+		self.assertEqual( m.childNames(), IECore.StringVectorData() )
+
 if __name__ == "__main__":
     unittest.main()
