@@ -256,12 +256,34 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 		}
 
+		bool parameterTypesConsistent( SxType type, IECore::TypeId typeId ) const
+		{
+			switch( typeId )
+			{
+				case FloatVectorDataTypeId :
+					return type == SxFloat;
+				case V3fVectorDataTypeId :
+				case V3fDataTypeId :
+					return type == SxVector || type == SxNormal || type == SxPoint;
+				case Color3fVectorDataTypeId :
+				case Color3fDataTypeId :
+					return type == SxColor;
+				case StringVectorDataTypeId :
+				case StringDataTypeId :
+					return type == SxString;
+				case FloatDataTypeId :
+					return type == SxFloat;
+				default :
+					return type == SxInvalid;
+			}
+		}
+
 		void setVariables( SxParameterList parameterList, const IECore::CompoundData *points, size_t numPoints ) const
 		{
 			for( CompoundDataMap::const_iterator it=points->readable().begin(); it!=points->readable().end(); it++ )
 			{
 				ParameterInfo info = predefinedParameterInfo( it->first.value().c_str() );
-				if( info.type != SxInvalid )
+				if( info.type != SxInvalid && parameterTypesConsistent( info.type, it->second->typeId() ) )
 				{
 					setVariable( parameterList, it->first.value().c_str(), info, true, it->second.get(), numPoints );
 				}
