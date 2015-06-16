@@ -66,6 +66,9 @@ class IECORE_API MemoryIndexedIO : public StreamIndexedIO
 		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
 
 		class StreamFile;
+		class IStreamFile;
+		class OStreamFile;
+		class CharVectorDataDevice;
 };
 
 IE_CORE_DECLAREPTR( MemoryIndexedIO )
