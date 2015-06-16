@@ -83,6 +83,7 @@ if targetApp :
 	compilerVersion = targetAppReg["compilerVersion"]
 	openEXRVersion = targetAppReg.get( "OpenEXRVersion", cortexReg["OpenEXRVersion"] )
 	alembicVersion = targetAppReg.get( "AlembicVersion", cortexReg["AlembicVersion"] )
+	bloscVersion = targetAppReg.get( "bloscVersion", cortexReg["bloscVersion"] )
 	hdf5Version = targetAppReg.get( "hdf5Version", cortexReg["hdf5Version"] )
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
@@ -99,6 +100,7 @@ else :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
 	alembicVersion = cortexReg["AlembicVersion"]
+	bloscVersion = cortexReg["bloscVersion"]
 	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
@@ -371,6 +373,10 @@ ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
 HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+
+# find blosc:
+BLOSC_INCLUDE_PATH = os.path.join( "/software/tools/include/blosc/", bloscVersion )
+BLOSC_LIB_SUFFIX = "-" + bloscVersion
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )

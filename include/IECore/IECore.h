@@ -59,6 +59,8 @@ IECORE_API bool withASIO();
 IECORE_API bool withSignals();
 /// Returns true if IECore was built with boost::math::factorial support
 IECORE_API bool withBoostFactorial();
+/// Returns true if IECore was built with blosc support
+IECORE_API bool withBlosc();
 /// Returns true if IECore was built with TIFF support
 IECORE_API bool withTIFF();
 /// Returns true if IECore was built with JPEG support
