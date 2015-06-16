@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,9 +34,14 @@
 
 #include <cassert>
 
+#include "boost/filesystem/convenience.hpp"
+#include "boost/iostreams/filter/gzip.hpp"
+
 #include "IECore/ObjectWriter.h"
 #include "IECore/FileIndexedIO.h"
+#include "IECore/MemoryIndexedIO.h"
 #include "IECore/FileNameParameter.h"
+#include "IECore/NumericParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/CompoundData.h"
@@ -44,6 +49,10 @@
 #include "IECore/IECore.h"
 #include "IECore/HeaderGenerator.h"
 #include "IECore/VisibleRenderable.h"
+
+#ifdef IECORE_WITH_BLOSC
+#include "blosc.h"
+#endif // IECORE_WITH_BLOSC
 
 using namespace IECore;
 using namespace std;
@@ -82,7 +91,9 @@ void ObjectWriter::doWrite( const CompoundObject *operands )
 	// write the header
 	CompoundDataPtr header = boost::static_pointer_cast<CompoundData>( m_headerParameter->getValue()->copy() );
 
+	std::string compressionType = parameters()->parameter<StringParameter>("compressionType")->getTypedValue();
 	header->writable()["typeName"] = new StringData( object()->typeName() );
+	header->writable()["compressionType"] = new StringData( compressionType );
 
 	if( const VisibleRenderable* visibleRenderable = runTimeCast<const VisibleRenderable>(object()) )
 	{
@@ -101,8 +112,73 @@ void ObjectWriter::doWrite( const CompoundObject *operands )
 
 	((ObjectPtr)header)->save( io, "header" );
 
-	// write the object
-	object()->save( io, "object" );
+#ifdef IECORE_WITH_BLOSC
+	if( compressionType == "blosc" )
+	{
+		// write the object to a memory buffer:
+		MemoryIndexedIOPtr bodyIO = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
+		object()->save( bodyIO, "object" );
+
+		IndexedIOPtr objectCompressed = io->createSubdirectory( "objectCompressed" );
+
+		// blosc_compress() can only accept input buffers up to 2147483631 bytes in size, so we compress the file in 1gb blocks:
+		size_t bufferPos = 0;
+		CharVectorDataPtr buffer = bodyIO->buffer();
+		size_t bufferEnd = buffer->readable().size();
+		size_t numBlocks=0;
+		
+		// blosc
+		const size_t blockSize = 1024l * 1024l * 1024l;
+		blosc_init();		
+		for( ; bufferPos < bufferEnd; ++numBlocks, bufferPos += blockSize )
+		{
+			size_t blockEnd = std::min( bufferEnd, bufferPos + blockSize );
+
+			// compress:
+			std::vector<char> compressedData( (blockEnd - bufferPos) + BLOSC_MAX_OVERHEAD );
+
+			int dataSize = blosc_compress(
+				9,
+				true,
+				4,
+				(blockEnd - bufferPos),
+				buffer->readable().data() + bufferPos,
+				compressedData.data(),
+				compressedData.size()
+			);
+
+			if( dataSize == 0 )
+			{
+				blosc_destroy();
+				throw Exception( ( boost::format( "ObjectWriter::doWrite(): Could not compress %d bytes into %d bytes" ) % (blockEnd - bufferPos) % compressedData.size() ).str() );
+			}
+			if( dataSize < 0 )
+			{
+				blosc_destroy();
+				throw Exception( "ObjectWriter::doWrite(): internal error in the blosc compression library" );
+			}
+			compressedData.resize( dataSize );
+			std::string blockName = ( boost::format( "%d" ) % numBlocks ).str();
+			IndexedIOPtr compressedBlock = objectCompressed->createSubdirectory( blockName );
+			compressedBlock->write( "decompressedSize", (blockEnd - bufferPos) );
+			compressedBlock->write( "compressedSize", compressedData.size() );
+			compressedBlock->write( "data", compressedData.data(), compressedData.size() );
+		}
+		blosc_destroy();
+
+		objectCompressed->write( "numBlocks", numBlocks );
+		return;
+
+	}
+#endif // IECORE_WITH_BLOSC
+	if( compressionType == "none" )
+	{
+		// no compression, just write the object:
+		object()->save( io, "object" );
+		return;
+	}
+	
+	throw Exception( "ObjectWriter::doWrite(): unsupported compression type '" + compressionType + "'" );
 }
 
 void ObjectWriter::constructParameters()
@@ -115,4 +191,17 @@ void ObjectWriter::constructParameters()
 	);
 
 	parameters()->addParameter( m_headerParameter );
+
+
+	StringParameter::PresetsContainer compressionTypePresets;
+	compressionTypePresets.push_back( StringParameter::Preset( "none", "none" ) );
+	compressionTypePresets.push_back( StringParameter::Preset( "blosc", "blosc" ) );
+
+	parameters()->addParameter( new StringParameter(
+		"compressionType",
+		"Compression type to use",
+		"blosc",
+		compressionTypePresets,
+		true
+	) );
 }
