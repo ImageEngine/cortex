@@ -173,7 +173,32 @@ CompoundObjectPtr ObjectReader::readHeader()
 	CompoundObjectPtr header = Reader::readHeader();
 
 	IndexedIOPtr io = open(fileName());
-	CompoundDataPtr objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	IndexedIOPtr headerIO = io->subdirectory( "header", IndexedIO::NullIfMissing );
+	if( !headerIO )
+	{
+		throw Exception( "ObjectReader::readHeader(): couldn't find header io entry" );
+	}
+
+	// older .cob files store the header in "header/object" rather than "/header",
+	// so we need to check for that:
+	CompoundDataPtr objectHeader;
+	IndexedIO::EntryIDList names;
+	headerIO->entryIds( names );
+	if( names.size() == 1 && names[0] == "object" )
+	{
+		// load from "/header/object"
+		objectHeader = runTimeCast<CompoundData>( Object::load( headerIO, "object" ) );
+	}
+	else
+	{
+		// load from "/header"
+		objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	}
+
+	if( !objectHeader )
+	{
+		throw Exception( "ObjectReader::readHeader(): header was not a CompoundData" );
+	}
 
 	for ( CompoundData::ValueType::const_iterator it = objectHeader->readable().begin(); it != objectHeader->readable().end(); ++it )
 	{
