@@ -36,8 +36,6 @@
 
 #include <cassert>
 
-#include "tbb/atomic.h"
-
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
@@ -49,30 +47,6 @@ using namespace std;
 
 namespace asf = foundation;
 namespace asr = renderer;
-
-class IECoreAppleseed::EditBlockHandler::RendererController : public asr::DefaultRendererController
-{
-	public :
-
-		RendererController()
-		{
-			m_status = ContinueRendering;
-		}
-
-		virtual Status get_status() const
-		{
-			return m_status;
-		}
-
-		void set_status( Status status )
-		{
-			m_status = status;
-		}
-
-	private :
-
-		tbb::atomic<Status> m_status;
-};
 
 IECoreAppleseed::EditBlockHandler::EditBlockHandler( asr::Project &project )
 	: m_project( project )

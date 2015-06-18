@@ -63,6 +63,7 @@
 #include "IECoreAppleseed/private/LogTarget.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
+#include "IECoreAppleseed/private/RendererController.h"
 #include "IECoreAppleseed/ToAppleseedCameraConverter.h"
 
 using namespace IECore;
@@ -92,11 +93,15 @@ IECoreAppleseed::RendererImplementation::RendererImplementation()
 
 	m_primitiveConverter.reset( new InteractivePrimitiveConverter( m_project->search_paths() ) );
 	m_motionHandler.reset( new MotionBlockHandler( m_transformStack, *m_primitiveConverter ) );
-	m_editHandler.reset( new EditBlockHandler( *m_project ) );
 }
 
 IECoreAppleseed::RendererImplementation::RendererImplementation( const string &fileName )
 {
+	if( fileName.empty() )
+	{
+		msg( MessageHandler::Error, "IECoreAppleseed::RendererImplementation::RendererImplementation", "Empty project filename" );
+	}
+
 	m_fileName = fileName;
 	m_projectPath = filesystem::path( fileName ).parent_path();
 
@@ -233,10 +238,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 
 					// if the number of passes is greater than one, we need to
 					// switch the shading result framebuffer in the final rendering config.
-					if( !isInteractive() )
-					{
-						m_project->configurations().get_by_name( "final" )->get_parameters().insert( "shading_result_framebuffer", numPasses > 1 ? "permanent" : "ephemeral" );
-					}
+					m_project->configurations().get_by_name( "final" )->get_parameters().insert( "shading_result_framebuffer", numPasses > 1 ? "permanent" : "ephemeral" );
 
 					// enable decorrelate pixels if the number of render passes is greater than one.
 					m_project->configurations().get_by_name( "final" )->get_parameters().insert_path( "uniform_pixel_renderer.decorrelate_pixels", numPasses > 1 ? "true" : "false" );
@@ -284,7 +286,21 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 	}
 	else if( name == "editable" )
 	{
-		// ignore
+		if( const BoolData *editableData = runTimeCast<const BoolData>( value.get() ) )
+		{
+			if( editableData->readable() )
+			{
+				m_editHandler.reset( new EditBlockHandler( *m_project ) );
+			}
+			else
+			{
+				m_editHandler.reset();
+			}
+		}
+		else
+		{
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "editable option expects an BoolData value." );
+		}
 	}
 	else
 	{
@@ -449,13 +465,22 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( "assembly_inst", asr::ParamArray(), "assembly" );
 	m_project->get_scene()->assembly_instances().insert( assemblyInstance );
 
-	if( isInteractive() )
+	// render or export the project
+	if( isEditable() )
 	{
 		m_editHandler->startRendering();
 	}
-	else
+	else if( isProjectGen() )
 	{
 		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles );
+	}
+	else
+	{
+		// interactive non-editable render.
+		RendererController rendererController;
+		asr::Configuration *cfg = m_project->configurations().get_by_name( "final" );
+		asr::MasterRenderer renderer( *m_project, cfg->get_parameters(), &rendererController);
+		renderer.render();
 	}
 }
 
@@ -787,7 +812,7 @@ DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, co
 
 void IECoreAppleseed::RendererImplementation::editBegin( const string &editType, const CompoundDataMap &parameters )
 {
-	if( isInteractive() )
+	if( isEditable() )
 	{
 		m_transformStack.clear();
 
@@ -813,7 +838,7 @@ void IECoreAppleseed::RendererImplementation::editBegin( const string &editType,
 
 void IECoreAppleseed::RendererImplementation::editEnd()
 {
-	if( isInteractive() )
+	if( isEditable() )
 	{
 		m_editHandler->editEnd();
 	}
@@ -827,9 +852,14 @@ void IECoreAppleseed::RendererImplementation::editEnd()
 // private
 /////////////////////////////////////////////////////////////////////////////////////////
 
-bool IECoreAppleseed::RendererImplementation::isInteractive() const
+bool IECoreAppleseed::RendererImplementation::isProjectGen() const
 {
-	return m_fileName.empty();
+	return !m_fileName.empty();
+}
+
+bool IECoreAppleseed::RendererImplementation::isEditable() const
+{
+	return m_editHandler.get();
 }
 
 void IECoreAppleseed::RendererImplementation::setCamera( const string &name, CameraPtr cortexCamera,
