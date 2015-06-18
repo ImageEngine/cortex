@@ -439,18 +439,20 @@ class SXRendererTest( unittest.TestCase ) :
 
 		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0 ), IECore.BoolData( False ) )
 	
-	def testWrongType( self ) :
-	
+	def testVVector( self ) :
+
 		self.assertEqual( os.system( "shaderdl -Irsl -o test/IECoreRI/shaders/splineTest.sdl test/IECoreRI/shaders/splineTest.sl" ), 0 )
 
 		r = IECoreRI.SXRenderer()
-		
+
 		r.shader( "surface", "test/IECoreRI/shaders/splineTest.sdl", {} )
-				
+	
 		p = self.__rectanglePoints( IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) ) )
-		p["t"] = p["P"]
-		
-		self.assertRaises( RuntimeError, r.shade, p )
+
+		# this should work, as you might want to use a V3f primvar called v (velocity) in
+		# your shader:
+		p["v"] = p["P"]
+		r.shade( p )
 
 	def testWrongSize( self ) :
 	
@@ -951,9 +953,7 @@ class SXRendererTest( unittest.TestCase ) :
 			transP = points["P"][i] * IECore.M44f.createTranslated( IECore.V3f(0,0,2) ) * IECore.M44f.createRotated( IECore.V3f(1,0,0) )
 			
 			self.failUnless( ( shaderP - transP ).length() < 1.e-5 )
-			
-		
-	
+
 	def tearDown( self ) :
 				
 		files = [
