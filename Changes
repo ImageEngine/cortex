@@ -1,3 +1,25 @@
+# 9.0.0-b8
+
+#### IECore
+
+- Added a new magic number for JPG compatibility
+
+#### IECoreMaya
+
+- Maya 2016 compile fixes for gcc 4.8
+
+#### IECoreAlembic
+
+- Fixed bug where face sets were treated as children.
+
+#### IECoreRI
+
+- Changed SXExecutor parameter interpretation.
+
+#### IECoreAppleseed
+
+- Added support for interactive non-editable final rendering.
+
 # 9.0.0-b7
 
 #### IECore
