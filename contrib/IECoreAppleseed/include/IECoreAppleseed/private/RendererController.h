@@ -32,60 +32,40 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
-#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#ifndef IECOREAPPLESEED_RENDERERCONTROLLER_H
+#define IECOREAPPLESEED_RENDERERCONTROLLER_H
 
-#include <memory>
+#include "tbb/atomic.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/thread/thread.hpp"
-
-#include "renderer/api/project.h"
 #include "renderer/api/rendering.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/private/RendererController.h"
 
 namespace IECoreAppleseed
 {
 
-/// The EditBlockHandler class manages an interactive appleseed
-/// rendering session, starting, stopping and pausing rendering
-/// when edits are being made.
-class EditBlockHandler : boost::noncopyable
+class RendererController : public renderer::DefaultRendererController
 {
-
 	public :
 
-		explicit EditBlockHandler( renderer::Project &project );
-		~EditBlockHandler();
+		RendererController()
+		{
+			m_status = ContinueRendering;
+		}
 
-		void startRendering();
+		virtual Status get_status() const
+		{
+			return m_status;
+		}
 
-		bool insideEditBlock() const;
-
-		const std::string &exactScopeName() const;
-
-		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
-		void editEnd();
+		void set_status( Status status )
+		{
+			m_status = status;
+		}
 
 	private :
 
-		renderer::Project &m_project;
-		std::auto_ptr<RendererController> m_rendererController;
-		std::auto_ptr<renderer::MasterRenderer> m_renderer;
-		boost::thread m_renderingThread;
-		int m_editDepth;
-		std::string m_exactScopeName;
-
-		static void renderThreadFunc( EditBlockHandler *self );
-
-		void pauseRendering();
-		void stopRendering();
-
+		tbb::atomic<Status> m_status;
 };
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#endif // IECOREAPPLESEED_RENDERERCONTROLLER_H

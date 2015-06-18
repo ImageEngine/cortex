@@ -131,7 +131,8 @@ class RendererImplementation : public IECore::Renderer
 
 		void constructCommon();
 
-		bool isInteractive() const;
+		bool isProjectGen() const;
+		bool isEditable() const;
 
 		void setCamera( const std::string &name, IECore::CameraPtr cortexCamera,
 			foundation::auto_release_ptr<renderer::Camera> &camera );
