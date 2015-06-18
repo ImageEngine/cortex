@@ -781,7 +781,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 				{
 					m = coordSys->getTransform()->transform();
 				}
-				Imath::V3f s,h,r,t;
+				Imath::V3f s(0), h(0), r(0), t(0);
 				Imath::extractSHRT(m, s, h, r, t);
 
 				MFnNumericData fnData;

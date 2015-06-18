@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -86,7 +86,7 @@ void FromMayaImageConverter::writeChannels( ImagePrimitivePtr target, const std:
 	assert( target );
 	unsigned numChannels = m_image.depth() / ( m_image.pixelType() == MImage::kFloat ? sizeof(float) : sizeof(unsigned char) );
 	unsigned width, height;
-	MStatus s = m_image.getSize( width, height );
+	m_image.getSize( width, height );
 	assert( width );
 	assert( height );
 
@@ -119,7 +119,7 @@ void FromMayaImageConverter::writeDepth( ImagePrimitivePtr target, const float *
 {
 	assert( target );
 	unsigned width, height;
-	MStatus s = m_image.getSize( width, height );
+	m_image.getSize( width, height );
 	assert( width );
 	assert( height );
 

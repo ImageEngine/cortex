@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -124,7 +124,7 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 	{
 		m = transform->transform();
 	}
-	Imath::V3f s,h,r,t;
+	Imath::V3f s(0), h(0), r(0), t(0);
 	Imath::extractSHRT(m, s, h, r, t);
 
 	/// obtain local position and scale from locator

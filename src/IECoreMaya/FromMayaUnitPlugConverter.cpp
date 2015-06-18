@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -150,7 +150,6 @@ template<typename T>
 IECore::ObjectPtr FromMayaUnitPlugConverter<T>::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
 	typedef IECore::TypedData<T> ResultType;
-	typedef typename IECore::TypedData<T>::Ptr ResultTypePtr;
 
 	MObject attr = plug().attribute();
 	MFnUnitAttribute fnUAttr( attr );

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -724,7 +724,7 @@ IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBeh
 	sel.add( m_dagPath.fullPathName() + "|" + std::string( name ).c_str() );
 	
 	MDagPath path;
-	MStatus st = sel.getDagPath( 0, path );
+	sel.getDagPath( 0, path );
 	
 	if( !path.hasFn( MFn::kTransform ) )
 	{
