@@ -215,7 +215,40 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 			}
 			else
 			{
-				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
+				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) % nIt->second.data->typeName() );
+			}
+		}
+	}
+
+	// tangents
+	{
+		PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( "uTangent" );
+		if( tIt != mesh->variables.end() )
+		{
+			const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
+			if( t )
+			{
+				PrimitiveVariable::Interpolation tInterpolation = tIt->second.interpolation;
+				if( tInterpolation == PrimitiveVariable::Varying || tInterpolation == PrimitiveVariable::Vertex )
+				{
+					size_t numTangents = t->readable().size();
+					meshObj->reserve_vertex_tangents( numTangents );
+					const std::vector<V3f> &tangents = t->readable();
+					for( size_t i = 0; i < numTangents; ++i)
+					{
+						asr::GVector3 t( tangents[i].x, tangents[i].y, tangents[i].z );
+						t = asf::normalize( t );
+						meshObj->push_vertex_tangent( t );
+					}
+				}
+				else
+				{
+					msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variable \"uTangent\" has unsupported interpolation type - not generating tangents." );
+				}
+			}
+			else
+			{
+				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", boost::format( "Variable \"uTangent\" has unsupported type \"%s\" (expected V3fVectorData)." ) % tIt->second.data->typeName() );
 			}
 		}
 	}
