@@ -35,6 +35,7 @@
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 
 #include "foundation/math/scalar.h"
+#include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
@@ -107,7 +108,57 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 				mesh->set_vertex_pose( j, i - 1, asr::GVector3( points[j].x, points[j].y, points[j].z ) );
 			}
 
-			// TODO: Handle normals and tangents here when issue #682 is fixed in appleseed.
+			// motion blur for normals and tangents is only supported since appleseed 1.2.0
+			#if APPLESEED_VERSION >= 10200
+				PrimitiveVariableMap::const_iterator nIt = m->variables.find( "N" );
+				if( nIt != m->variables.end() )
+				{
+					const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
+					if( n )
+					{
+						const std::vector<V3f> &normals = n->readable();
+						for( size_t j = 0, numNormals = n->readable().size() ; j < numNormals; ++j )
+						{
+							mesh->set_vertex_normal_pose( j, i - 1, asf::normalize( asr::GVector3( normals[j].x, normals[j].y, normals[j].z ) ) );
+						}
+					}
+					else
+					{
+						throw Exception( ( boost::format( "MeshPrimitive \"N\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % nIt->second.data->typeName() ).str() );
+					}
+				}
+
+				// tangents, only if we have texture coords.
+				if( mesh->get_tex_coords_count() != 0 )
+				{
+					PrimitiveVariableMap::const_iterator tIt = m->variables.find( "uTangent" );
+					if( tIt != m->variables.end() )
+					{
+						const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
+						if( t )
+						{
+							const std::vector<V3f> &tangents = t->readable();
+							size_t numTangents = t->readable().size();
+
+							if( numTangents == mesh->get_tex_coords_count() )
+							{
+								for( size_t j = 0 ; j < numTangents; ++j )
+								{
+									mesh->set_vertex_tangent_pose( j, i - 1, asf::normalize( asr::GVector3( tangents[j].x, tangents[j].y, tangents[j].z ) ) );
+								}
+							}
+							else
+							{
+								throw Exception( "MeshPrimitive \"uTangent\" primitive variable has different interpolation type than texture coordinates - not generating tangents." );
+							}
+						}
+						else
+						{
+							throw Exception( ( boost::format( "MeshPrimitive \"uTangent\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % tIt->second.data->typeName() ).str() );
+						}
+					}
+				}
+			#endif
 		}
 	}
 
