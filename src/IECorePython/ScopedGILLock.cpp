@@ -37,7 +37,7 @@
 using namespace IECorePython;
 
 ScopedGILLock::ScopedGILLock()
-	:	m_threadsInitialised( PyEval_ThreadsInitialized() )
+	:	m_threadsInitialised( Py_IsInitialized() && PyEval_ThreadsInitialized() )
 {
 	if( m_threadsInitialised )
 	{
