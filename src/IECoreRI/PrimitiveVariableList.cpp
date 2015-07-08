@@ -78,7 +78,7 @@ PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap
 	for( it=primVars.begin(); it!=primVars.end(); it++ )
 	{
 		size_t arraySize = 0;
-		const char *t = type( it->first, it->second.data, arraySize, typeHints );
+		const char *t = type( it->first, it->second.data, arraySize );
 		const char *i = interpolation( it->second.interpolation );
 		if( t && i )
 		{
@@ -89,6 +89,13 @@ PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap
 				// multiple elements to be an array. ideally we'd have a mechanism
 				// for specifying arrays with other interpolations, but this requires
 				// much more information than we have - we'd need the Primitive::variableSize().
+
+				// We can't output an array of float[3], so use vector in this case
+				if( strcmp( t, "float[3]" ) == 0 )
+				{
+					t = "vector";
+				}
+
 				m_strings.push_back( boost::str( boost::format( "%s %s %s[%d]" ) % i % t % it->first % arraySize ) );
 			}
 			else
@@ -116,7 +123,40 @@ void **PrimitiveVariableList::values()
 	return (void **)&*(m_values.begin());
 }
 
-const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints )
+namespace
+{
+	const char* geometryInterpretationToType( GeometricData::Interpretation interpretation, const std::string &name )
+	{
+		switch( interpretation )
+		{
+			case GeometricData::Point:
+				return "point";
+			case GeometricData::Normal:
+				return "normal";
+			case GeometricData::Vector:
+				return "vector";
+			case GeometricData::Color:
+				return "color";
+			default:
+				// TODO - remove these fallbacks once all our data has correctly set interpretations
+				if( name=="P" || name=="Pref"  )
+				{
+					return "point";
+				}
+				else if( name=="N" )
+				{
+					return "normal";
+				}
+				else
+				{
+					return "float[3]";
+				}
+		}
+	}
+}
+
+
+const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d, size_t &arraySize )
 {
 	arraySize = 0;
 	IECore::TypeId t = d->typeId();
@@ -124,36 +164,9 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 	{
 		case V3fVectorDataTypeId :
 			arraySize = boost::static_pointer_cast<const V3fVectorData>( d )->readable().size();
-			if( name=="P" || name=="Pref"  )
-			{
-				return "point";
-			}
-			else if( name=="N" )
-			{
-				return "normal";
-			}
-			else
-			{
-				if( typeHints )
-				{
-					map<string, string>::const_iterator it = typeHints->find( name );
-					if( it!=typeHints->end() )
-					{
-						return it->second.c_str();
-					}
-				}
-				return "vector";
-			}
+			return geometryInterpretationToType( boost::static_pointer_cast<const V3fVectorData>( d )->getInterpretation(), name );
 		case V3fDataTypeId :
-			if( typeHints )
-			{
-				map<string, string>::const_iterator it = typeHints->find( name );
-				if( it!=typeHints->end() )
-				{
-					return it->second.c_str();
-				}
-			}
-			return "vector";
+			return geometryInterpretationToType( boost::static_pointer_cast<const V3fData>( d )->getInterpretation(), name );
 		case Color3fVectorDataTypeId :
 			arraySize = boost::static_pointer_cast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
