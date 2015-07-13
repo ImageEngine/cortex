@@ -37,6 +37,7 @@ from __future__ import with_statement
 import threading
 import unittest
 import sys
+import os
 
 import IECore
 
@@ -351,6 +352,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 			h = IECore.MurmurHash()
 			return h
 	
+	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testTopLevelProceduralThreading( self ) :
 	
 		# this is necessary so python will allow threads created by the renderer
@@ -379,6 +381,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 			self.assertEqual( len( c.children() ), 1 )
 			self.failUnless( isinstance( c.children()[0], IECore.SpherePrimitive ) )
 			
+	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testRecursiveProceduralThreading( self ) :
 	
 		# this is necessary so python will allow threads created by the renderer
@@ -418,6 +421,7 @@ class CapturingRendererTest( unittest.TestCase ) :
 		
 		IECore.ObjectWriter( w, "/tmp/flake.cob" ).write()
 	
+	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testDisableProceduralThreading( self ) :
 	
 		# this is necessary so python will allow threads created by the renderer

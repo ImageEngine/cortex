@@ -66,6 +66,7 @@ class ThreadingTest( unittest.TestCase ) :
 
 				t.join()
 
+	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testThreadedOpGains( self ) :
 	
 		## Checks that we actually get a speedup by running a bunch of slow
@@ -208,6 +209,7 @@ class ThreadingTest( unittest.TestCase ) :
 			cachedReader.clear()
 			self.callSomeThings( calls, args=args, threaded=True )
 
+	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testCachedReaderGains( self ) :
 	
 		args = [
