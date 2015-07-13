@@ -53,6 +53,12 @@ class TestTypedData( unittest.TestCase ) :
 		self.assertEqual( c["d"], IECore.FloatData( 10.1 ) )
 		self.assertEqual( c["e"], IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
 		
+	def testInterpretation( self ) :
+
+		self.assertNotEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point ))
+		self.assertEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.None ))
+		self.assertEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Numeric ))
+
 	def testHash( self ) :
 	
 		# although the underlying data is identical, these objects
@@ -64,7 +70,7 @@ class TestTypedData( unittest.TestCase ) :
 		a = IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point )
 		b = a.copy()
 		self.assertEqual( a.hash(), b.hash() )
-		b.setInterpretation( IECore.GeometricData.Interpretation.Numeric )
+		b.setInterpretation( IECore.GeometricData.Interpretation.None )
 		self.assertNotEqual( a.hash(), b.hash() )
 		
 		a = IECore.V2dVectorData( [ IECore.V2d( 1, 2 ) ] )

@@ -141,7 +141,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 				interpretation = GeometricData::Normal;
 				break;
 			default:
-				interpretation = GeometricData::Numeric;
+				interpretation = GeometricData::None;
 				break;
 		}
 		

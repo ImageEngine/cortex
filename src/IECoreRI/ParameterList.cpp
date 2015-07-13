@@ -132,13 +132,13 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 					interpretation = static_cast<const V3dData *>( d )->getInterpretation();
 					break;
 				default:
-					interpretation = GeometricData::Numeric;
+					interpretation = GeometricData::None;
 					break;
 			}
 
 			switch( interpretation )
 			{
-				case GeometricData::Numeric:
+				case GeometricData::None:
 					// no geometric information has been provided - check the type hints:
 					if( typeHints )
 					{

@@ -43,13 +43,13 @@ Object::TypeDescription<GeometricTypedData<T> > GeometricTypedData<T>::m_typeDes
 
 template<class T>
 GeometricTypedData<T>::GeometricTypedData()
-	: TypedData<T>(), m_interpretation( GeometricData::Numeric )
+	: TypedData<T>(), m_interpretation( GeometricData::None )
 {
 }
 
 template<class T>
 GeometricTypedData<T>::GeometricTypedData( const ValueType &data )
-	: TypedData<T>( data ), m_interpretation( GeometricData::Numeric )
+	: TypedData<T>( data ), m_interpretation( GeometricData::None )
 {
 }
 

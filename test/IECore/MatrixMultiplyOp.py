@@ -98,7 +98,7 @@ class TestMultiplyMatrixOp( unittest.TestCase ) :
 		
 		# nothing happens for numeric
 		v4 = v.copy()
-		v4.setInterpretation( GeometricData.Interpretation.Numeric )
+		v4.setInterpretation( GeometricData.Interpretation.None )
 		vt = o( object = v4, matrix = M44fData( M44f.createTranslated( V3f( 1, 2, 3 ) ) ) )
 		for i in range( v.size() ) :
 			self.assertEqual( vt[i], v[i] )

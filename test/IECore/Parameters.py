@@ -528,9 +528,9 @@ class TestTypedParameter( unittest.TestCase ) :
 		
 		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
 		self.assertEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.None )
 		self.assertEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
 		
 		value = V3fData( V3f( 12, 13, 14 ) )
 		value.setInterpretation( GeometricData.Interpretation.Vector )
@@ -559,7 +559,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		
 		p.setValue( V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
 		self.assertEqual( p.getValue(), V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
-		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
 
 class TestValidatedStringParameter( unittest.TestCase ) :
 
