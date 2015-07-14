@@ -249,6 +249,23 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:cfg:generic_frame_renderer:passes option expects an IntData value." );
 				}
 			}
+			else if( optName == "shading_engine.override_shading.mode" )
+			{
+				if( const StringData *overrideData = runTimeCast<const StringData>( value.get() ) )
+				{
+					// if no shading override is specified, remove the params.
+					if( overrideData->readable() == "no_override" )
+					{
+						m_project->configurations().get_by_name( "final" )->get_parameters().remove_path( "shading_engine.override_shading" );
+						m_project->configurations().get_by_name( "interactive" )->get_parameters().remove_path( "shading_engine.override_shading" );
+						return;
+					}
+				}
+				else
+				{
+					msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setOption", "as:cfg:shading_engine:override_shading:mode option expects a StringData value." );
+				}
+			}
 
 			m_project->configurations().get_by_name( "final" )->get_parameters().insert_path( optName.c_str(), valueStr.c_str() );
 			m_project->configurations().get_by_name( "interactive" )->get_parameters().insert_path( optName.c_str(), valueStr.c_str() );
