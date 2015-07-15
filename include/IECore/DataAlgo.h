@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_DATAALGO_H
+#define IECORE_DATAALGO_H
 
 #include "IECore/GeometricTypedData.h"
-#include "IECorePython/GeometricTypedDataBinding.h"
+#include "IECore/Data.h"
 
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECore
 {
 
-class GeometricTypedDataHelper
-{
-};
+/// Try to get the geometric interpretation of the given data.  Returns None if the data is not geometric.
+GeometricData::Interpretation getGeometricInterpretation( const IECore::Data * data );
 
-void bindGeometricTypedData()
-{
-	scope geometricTypedDataScope = class_<GeometricTypedDataHelper>( "GeometricData" );
-	
-	enum_<GeometricData::Interpretation>( "Interpretation" )
-		.value( "None", GeometricData::None )
-		.value( "Numeric", GeometricData::Numeric )
-		.value( "Point", GeometricData::Point )
-		.value( "Normal", GeometricData::Normal )
-		.value( "Vector", GeometricData::Vector )
-		.value( "Color", GeometricData::Color )
-	;
-}
+/// Try to set the geometric interpretation of the given data.  Has no effect if the data is not geometric.
+void setGeometricInterpretation( IECore::Data *data, GeometricData::Interpretation interpretation );
 
-} // namespace IECorePython
+} // namespace IECore
+
+#endif // IECORE_DATAALGO_H

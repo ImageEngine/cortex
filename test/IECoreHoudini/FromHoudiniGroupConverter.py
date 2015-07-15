@@ -609,7 +609,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( sorted(child.keys()), expectedKeys )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.Numeric )
+			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.None )
 			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 	
 	def testInterpolation( self ) :

@@ -105,16 +105,16 @@ void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 		{
 			GeometricData::Interpretation interp = v3fData->getInterpretation();
 			
-			if ( interp == GeometricData::Numeric )
+			if ( interp == GeometricData::None )
 			{
 				if ( *it == "P" )
 				{
-					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains Numeric data named P. Converting to Point data." );
+					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains data named P with no interpretation. Converting to Point data." );
 					v3fData->setInterpretation( GeometricData::Point );
 				}
 				else if ( *it == "N" )
 				{
-					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains Numeric data named N. Converting to Normal data." );
+					IECore::msg( IECore::MessageHandler::Warning, "TransformOp", "Primitive contains data named N with no interpretation. Converting to Normal data." );
 					v3fData->setInterpretation( GeometricData::Normal );
 				}
 			}

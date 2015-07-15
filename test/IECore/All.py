@@ -253,6 +253,7 @@ from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from ExternalProceduralTest import ExternalProceduralTest
 from ClippingPlaneTest import ClippingPlaneTest
+from DataAlgoTest import DataAlgoTest
 
 if IECore.withDeepEXR() :
 	from EXRDeepImageReaderTest import EXRDeepImageReaderTest

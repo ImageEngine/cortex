@@ -54,7 +54,7 @@ struct IGeomParamTraits
 	
 	static IECore::GeometricData::Interpretation geometricInterpretation()
 	{
-		return IECore::GeometricData::Numeric;
+		return IECore::GeometricData::None;
 	}
 	
 };

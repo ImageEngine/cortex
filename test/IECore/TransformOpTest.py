@@ -70,7 +70,7 @@ class TestTransformOp( unittest.TestCase ) :
 		self.assertEqual( ms["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
 		self.assertEqual( ms["N"].data.getInterpretation(), GeometricData.Interpretation.Normal )
 		self.assertEqual( ms["vel"].data.getInterpretation(), GeometricData.Interpretation.Vector )
-		self.assertEqual( ms["notVel"].data.getInterpretation(), GeometricData.Interpretation.Numeric )
+		self.assertEqual( ms["notVel"].data.getInterpretation(), GeometricData.Interpretation.None )
 	
 	def testPrimVarParameter( self ) :
 		

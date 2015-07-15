@@ -43,9 +43,15 @@ namespace IECore
 namespace GeometricData
 {
 
+/// \todo - we now call the default interpretation None
+///        It means there is no special geometric interpretation, numeric data is just numeric,
+///        but it could also apply to data like strings, which are just interpreted as strings
+///        Once we have removed old code using Numeric, we can remove the duplicate declaration
+///        as Numeric, and just have None.
 enum Interpretation
 {
-	Numeric = 0,
+	None = 0,
+	Numeric = 0,  
 	Point,
 	Normal,
 	Vector,

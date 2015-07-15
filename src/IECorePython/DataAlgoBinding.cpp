@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,32 +34,19 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/GeometricTypedData.h"
-#include "IECorePython/GeometricTypedDataBinding.h"
+#include "IECore/DataAlgo.h"
+#include "IECorePython/DataAlgoBinding.h"
 
-using namespace boost;
 using namespace boost::python;
 using namespace IECore;
 
 namespace IECorePython
 {
 
-class GeometricTypedDataHelper
+void bindDataAlgo()
 {
-};
-
-void bindGeometricTypedData()
-{
-	scope geometricTypedDataScope = class_<GeometricTypedDataHelper>( "GeometricData" );
-	
-	enum_<GeometricData::Interpretation>( "Interpretation" )
-		.value( "None", GeometricData::None )
-		.value( "Numeric", GeometricData::Numeric )
-		.value( "Point", GeometricData::Point )
-		.value( "Normal", GeometricData::Normal )
-		.value( "Vector", GeometricData::Vector )
-		.value( "Color", GeometricData::Color )
-	;
+	def( "getGeometricInterpretation", &getGeometricInterpretation );
+	def( "setGeometricInterpretation", &setGeometricInterpretation );
 }
 
 } // namespace IECorePython
