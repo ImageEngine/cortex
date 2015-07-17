@@ -119,6 +119,62 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		fn = maya.OpenMaya.MFnCamera( dag )
 		self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
 	
+	def testPixelAspectRatio( self ) :
+		
+		def verify( camera, resolution, pixelAspectRatio, expectedScreenWindow ) :
+			
+			self.assertEqual( camera.getName(), "perspShape" )
+			self.assertEqual( camera.getTransform().transform(), IECore.M44f( maya.cmds.getAttr( "persp.worldMatrix[0]" ) ) )
+			self.assertEqual( camera.parameters()["resolution"].value, resolution )
+			self.assertEqual( camera.parameters()["clippingPlanes"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.nearClipPlane" ), maya.cmds.getAttr( "perspShape.farClipPlane" ) ) )
+			self.assertEqual( camera.parameters()["projection"].value, "perspective" )
+			self.assertTrue( camera.parameters()["screenWindow"].value.min.equalWithAbsError( expectedScreenWindow.min, 1e-6 ) )
+			self.assertTrue( camera.parameters()["screenWindow"].value.max.equalWithAbsError( expectedScreenWindow.max, 1e-6 ) )
+			self.assertEqual( camera.blindData()["maya"]["aperture"].value, IECore.V2f( maya.cmds.getAttr( "perspShape.horizontalFilmAperture" ), maya.cmds.getAttr( "perspShape.verticalFilmAperture" ) ) )
+			
+			sel = maya.OpenMaya.MSelectionList()
+			sel.add( "perspShape" )
+			dag = maya.OpenMaya.MDagPath()
+			sel.getDagPath( 0, dag )
+			fn = maya.OpenMaya.MFnCamera( dag )
+			self.assertAlmostEqual( camera.parameters()["projection:fov"].value, IECore.radiansToDegrees( fn.horizontalFieldOfView() ), 5 )
+	
+		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
+		
+		# from the render globals
+		converter.parameters()["resolutionMode"].setValue( "renderGlobals" )
+		
+		# this crazy 3 step approach seem to be the only way to set
+		# the pixel aspect ratio without altering the resolution
+		# settings. this was essentially cribbed from Maya's
+		# changeMayaSoftwareResolution() mel function.
+		def setGlobalPixelAspectRatio( pixelAspectRatio ) :
+			maya.cmds.setAttr( "defaultResolution.deviceAspectRatio", float(pixelAspectRatio) / ( float(maya.cmds.getAttr( "defaultResolution.height" )) / float(maya.cmds.getAttr( "defaultResolution.width" )) ) )
+			maya.cmds.setAttr( "defaultResolution.lockDeviceAspectRatio", 0 )
+			maya.cmds.setAttr( "defaultResolution.pixelAspect", pixelAspectRatio )
+		
+		globalRes = IECore.V2i( maya.cmds.getAttr( "defaultResolution.width" ), maya.cmds.getAttr( "defaultResolution.height" ) )
+		self.assertEqual( globalRes, IECore.V2i( 960, 540 ) )
+		globalScreenWindow = IECore.Box2f( IECore.V2f( -1, -0.5625 ), IECore.V2f( 1, 0.5625 ) )
+		setGlobalPixelAspectRatio( 1 )
+		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 1, expectedScreenWindow = globalScreenWindow )
+		setGlobalPixelAspectRatio( 2 )
+		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 2, expectedScreenWindow = IECore.Box2f( globalScreenWindow.min / IECore.V2f( 1, 2 ), globalScreenWindow.max / IECore.V2f( 1, 2 ) ) )
+		setGlobalPixelAspectRatio( 3 )
+		verify( converter.convert(), resolution = globalRes, pixelAspectRatio = 3, expectedScreenWindow = IECore.Box2f( globalScreenWindow.min / IECore.V2f( 1, 3 ), globalScreenWindow.max / IECore.V2f( 1, 3 ) ) )
+		
+		# from the parameters
+		customRes = IECore.V2i( 1024, 778 )
+		customScreenWindow = IECore.Box2f( IECore.V2f( -1, -0.759765 ), IECore.V2f( 1, 0.759765 ) )
+		converter.parameters()["resolutionMode"].setValue( "specified" )
+		converter.parameters()["resolution"].setTypedValue( customRes )
+		converter.parameters()["pixelAspectRatio"].setTypedValue( 1 )
+		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 1, expectedScreenWindow = customScreenWindow )
+		converter.parameters()["pixelAspectRatio"].setTypedValue( 2 )
+		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 2, expectedScreenWindow = IECore.Box2f( customScreenWindow.min / IECore.V2f( 1, 2 ), customScreenWindow.max / IECore.V2f( 1, 2 ) ) )
+		converter.parameters()["pixelAspectRatio"].setTypedValue( 3 )
+		verify( converter.convert(), resolution = customRes, pixelAspectRatio = 3, expectedScreenWindow = IECore.Box2f( customScreenWindow.min / IECore.V2f( 1, 3 ), customScreenWindow.max / IECore.V2f( 1, 3 ) ) )
+		
 	def testFilmOffset( self ) :
 		
 		for x in [ -0.5, -0.25, 0, 0.25, 0.5 ] :
