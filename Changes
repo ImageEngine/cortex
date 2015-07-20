@@ -10,9 +10,17 @@
 
 - FromMayaCameraConverter now accounts for pixelAspectRatio.
 
+#### IECoreRI
+
+- Primitive variable types in RI now set from the prim var interpretation.  Type hints now ignored.
+
 #### IECoreAppleseed
 
 - Added support for shading overrides.
+- Added mesh tangents and motion normals.
+  - Mesh tangents (primitive variable uTangent) are now exported to appleseed meshes.
+  - Time varying tangents and normals for primitives with deformation blur are now exported if appleseed supports them (since version 1.2.0).
+- Fixed a warning message in ToAppleseedMeshConverter.
 
 #### Build
 
