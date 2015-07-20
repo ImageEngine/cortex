@@ -1,3 +1,24 @@
+# 9.0.0
+
+#### IECore
+
+- Renamed GeometricData::Interpretation::Numeric to GeometricData::Interpretation::None, so that it makes sense as a deafult for non-numeric types.
+  - GeometricData::Interpretation::Numeric still exists for compatibility.
+- Added DataAlgo.h with setDataInterpretation() and getDataInterpretation().
+
+#### IECoreMaya
+
+- FromMayaCameraConverter now accounts for pixelAspectRatio.
+
+#### IECoreAppleseed
+
+- Added support for shading overrides.
+
+#### Build
+
+- Travis : Updated to container-based build infrastructure.
+- Travis : Skipped some threading tests on Travis.
+
 # 9.0.0-b9
 
 #### IECore
