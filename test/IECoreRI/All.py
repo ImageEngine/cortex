@@ -65,6 +65,7 @@ from CoshaderTest import CoshaderTest
 from GroupTest import GroupTest
 from DspyTest import DspyTest
 from RerenderingTest import RerenderingTest
+from PrimVarInterpretationTest import PrimVarInterpretationTest
 
 if hasattr( IECoreRI, "SXRenderer" ) :
 	from SXRendererTest import SXRendererTest

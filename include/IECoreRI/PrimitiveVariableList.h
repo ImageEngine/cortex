@@ -59,6 +59,8 @@ class IECORERI_API PrimitiveVariableList
 		/// simply maps from the name of the primitive variable to the
 		/// Renderman type token. It too is expected to exist for as long
 		/// as you still use the PrimitiveVariableList.
+		///
+		/// TODO - typeHints is now unused and should be removed
 		PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars,
 			const std::map<std::string, std::string> *typeHints = 0 );
 
@@ -76,7 +78,7 @@ class IECORERI_API PrimitiveVariableList
 
 	private :
 
-		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize, const std::map<std::string, std::string> *typeHints );
+		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize );
 		const char *interpolation( IECore::PrimitiveVariable::Interpolation i );
 		const void *value( IECore::DataPtr d );
 
