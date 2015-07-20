@@ -52,6 +52,7 @@
 #include "maya/MFnCamera.h"
 #include "maya/MFnStringArrayData.h"
 #include "maya/MStringArray.h"
+#undef None // must come after certain Maya includes which include X11/X.h
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
