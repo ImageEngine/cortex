@@ -56,6 +56,7 @@
 #include "maya/MFnMesh.h"
 #include "maya/MFnGenericAttribute.h"
 #include "maya/MPxManipContainer.h"
+#undef None // must come after certain Maya includes which include X11/X.h
 
 #include "IECoreMaya/ParameterisedHolder.h"
 #include "IECoreMaya/ParameterHandler.h"

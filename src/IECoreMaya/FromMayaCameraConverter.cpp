@@ -89,6 +89,13 @@ FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 
 	parameters()->addParameter( m_resolution );
 
+	parameters()->addParameter(
+		new FloatParameter(
+			"pixelAspectRatio",
+			"Specifies the pixel aspect ratio of the camera when mode is set to \"Specified\".",
+			1
+		)
+	);
 }
 
 IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
@@ -103,15 +110,18 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	result->setTransform( new MatrixTransform( IECore::convert<Imath::M44f>( dagPath.inclusiveMatrix() ) ) );
 
 	V2i resolution;
+	float pixelAspectRatio = 1;
 	if( operands->member<IntData>( "resolutionMode" )->readable()==RenderGlobals )
 	{
 		MCommonRenderSettingsData renderSettings;
 		MRenderUtil::getCommonRenderSettings( renderSettings );
 		resolution = Imath::V2i( renderSettings.width, renderSettings.height );
+		pixelAspectRatio = renderSettings.pixelAspectRatio;
 	}
 	else
 	{
 		resolution = operands->member<V2iData>( "resolution" )->readable();
+		pixelAspectRatio = operands->member<FloatData>( "pixelAspectRatio" )->readable();
 	}
 	result->parameters()["resolution"] = new V2iData( resolution );
 
@@ -119,7 +129,7 @@ IECore::ObjectPtr FromMayaCameraConverter::doConversion( const MDagPath &dagPath
 	result->parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
 
 	Imath::Box2d frustum;
-	fnCamera.getRenderingFrustum( (float)resolution.x / (float)resolution.y, frustum.min.x, frustum.max.x, frustum.min.y, frustum.max.y );
+	fnCamera.getRenderingFrustum( ( (float)resolution.x * pixelAspectRatio ) / (float)resolution.y, frustum.min.x, frustum.max.x, frustum.min.y, frustum.max.y );
 
 	if( fnCamera.isOrtho() )
 	{
