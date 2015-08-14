@@ -40,6 +40,7 @@
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "boost/format.hpp"
+#include "boost/algorithm/string/predicate.hpp"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
@@ -484,10 +485,23 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 
 void IECoreArnold::RendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
-	AtNode *l = AiNode( name.c_str() );
+	const char *unprefixedName = name.c_str();
+	if( name.find( ':' ) != string::npos )
+	{
+		if( boost::starts_with( name, "ai:" ) )
+		{
+			unprefixedName += 3;
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	AtNode *l = AiNode( unprefixedName );
 	if( !l )
 	{
-		msg( Msg::Warning, "IECoreArnold::RendererImplementation::light", boost::format( "Couldn't load light \"%s\"" ) % name );
+		msg( Msg::Warning, "IECoreArnold::RendererImplementation::light", boost::format( "Couldn't load light \"%s\"" ) % unprefixedName );
 		return;
 	}
 	for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )

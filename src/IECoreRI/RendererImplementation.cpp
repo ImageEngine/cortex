@@ -1385,6 +1385,19 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 
 void IECoreRI::RendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
+	const char *unprefixedName = name.c_str();
+	if( name.find( ':' ) != string::npos )
+	{
+		if( boost::starts_with( name, "ri:" ) )
+		{
+			unprefixedName += 3;
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	ScopedContext scopedContext( m_context );
 	IECore::CompoundDataMap parametersCopy = parameters;
 	parametersCopy["__handleid"] = new StringData( handle );
@@ -1405,11 +1418,11 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 
 	if( areaLight )
 	{
-		RiAreaLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+		RiAreaLightSourceV( const_cast<char *>( unprefixedName ), pl.n(), pl.tokens(), pl.values() );
 	}
 	else
 	{
-		RiLightSourceV( const_cast<char *>(name.c_str()), pl.n(), pl.tokens(), pl.values() );
+		RiLightSourceV( const_cast<char *>( unprefixedName ), pl.n(), pl.tokens(), pl.values() );
 	}
 }
 

@@ -629,8 +629,21 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 		return;
 	}
 
+	const char *unprefixedName = name.c_str();
+	if( name.find( ':' ) != string::npos )
+	{
+		if( boost::starts_with( name, "as:" ) )
+		{
+			unprefixedName += 3;
+		}
+		else
+		{
+			return;
+		}
+	}
+
 	// check if the light is an environment light.
-	if( algorithm::ends_with( name, "_environment_edf" ) )
+	if( algorithm::ends_with( unprefixedName, "_environment_edf" ) )
 	{
 		const string &lightName = m_attributeStack.top().name();
 		const string *environmentEDFName = getOptionAs<string>( "as:environment_edf" );
@@ -663,11 +676,11 @@ void IECoreAppleseed::RendererImplementation::light( const string &name, const s
 		}
 
 		const bool *envEDFVisible = getOptionAs<bool>( "as:environment_edf_background" );
-		m_lightHandler->environment( name, handle, envEDFVisible && *envEDFVisible, parameters );
+		m_lightHandler->environment( unprefixedName, handle, envEDFVisible && *envEDFVisible, parameters );
 	}
 	else
 	{
-		m_lightHandler->light( name, handle,
+		m_lightHandler->light( unprefixedName, handle,
 			m_transformStack.top().get_earliest_transform(), parameters );
 	}
 }

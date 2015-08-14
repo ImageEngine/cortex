@@ -696,6 +696,23 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertTrue( "ClippingPlane" in rib )
 		self.assertTrue( "1 2 3 1" in rib )
 
+	def testLightPrefixes( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/lightPrefixes.rib" )
+
+		with WorldBlock( r ) :
+
+			r.light( "genericLight", "genericHandle", {} )
+			r.light( "ri:renderManLight", "renderManHandle", {} )
+			r.light( "ai:arnoldLight", "arnoldLight", {} )
+
+		del r
+
+		rib = "".join( file( "test/IECoreRI/output/lightPrefixes.rib" ).readlines() )
+		self.assertTrue( 'LightSource "genericLight"' in rib )
+		self.assertTrue( 'LightSource "renderManLight"' in rib )
+		self.assertFalse( "arnold" in rib )
+
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )
