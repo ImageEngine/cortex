@@ -122,5 +122,27 @@ class LightTest( AppleseedTest.TestCase ):
 		r.illuminate( "light", True )
 		self.failUnless( len( ass.lights() ) == 1 )
 
+	def testLightPrefixes( self ) :
+
+		r = IECoreAppleseed.Renderer()
+		r.worldBegin()
+
+		r.light( "ai:gradient_environment_edf", "arnoldEnvHandle", {} )
+		scn = self._getScene( r )
+		self.failUnless( len( scn.environment_edfs() ) == 0 )
+
+		r.light( "as:gradient_environment_edf", "appleseedEnvHandle", {} )
+		self.failUnless( len( scn.environment_edfs() ) == 1 )
+		self.failUnless( scn.environment_edfs()[0].get_model() == "gradient_environment_edf" )
+
+		r.light( "directional_light", "genericHandle", {} )
+		r.light( "ri:point_light", "renderManHandle", {} )
+		r.light( "as:point_light", "appleseedLight", {} )
+		ass = self._getMainAssembly( r )
+
+		self.failUnless( len( ass.lights() ) == 2 )
+		self.failUnless( ass.lights()[0].get_model() == "directional_light" )
+		self.failUnless( ass.lights()[1].get_model() == "point_light" )
+
 if __name__ == "__main__":
 	unittest.main()
