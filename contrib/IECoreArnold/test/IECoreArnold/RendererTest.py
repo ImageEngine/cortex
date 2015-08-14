@@ -732,8 +732,24 @@ class RendererTest( unittest.TestCase ) :
 		ass = "".join( file( self.__assFileName ).readlines() )
 		self.assertTrue( "aspect_ratio 0.5" in ass )
 
+	def testLightPrefixes( self ) :
+
+		r = IECoreArnold.Renderer( self.__assFileName )
+
+		with IECore.WorldBlock( r ) :
+
+			r.light( "distant_light", "genericHandle", {} )
+			r.light( "ri:point_light", "renderManHandle", {} )
+			r.light( "ai:spot_light", "arnoldLight", {} )
+
+		ass = "".join( file( self.__assFileName ).readlines() )
+
+		self.assertTrue( "distant_light" in ass )
+		self.assertTrue( "spot_light" in ass )
+		self.assertTrue( "point_light" not in ass )
+
 	def tearDown( self ) :
-			
+
 		for f in [
 			self.__displayFileName,
 			self.__assFileName,
