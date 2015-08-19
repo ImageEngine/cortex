@@ -41,6 +41,7 @@
 #include "IECore/CompoundData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/ToCoreConverter.h"
+#include "IECore/MurmurHash.h"
 
 #include "IECoreAlembic/Export.h"
 
@@ -139,6 +140,9 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		IECore::ObjectPtr objectAtSample( size_t sampleIndex = 0, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		/// As above, but performing linear interpolation between samples where necessary.
 		IECore::ObjectPtr objectAtTime( double time, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
+		/// Appends the object hash to h at the specified time, if the info exists
+		/// Returns false if it doesn't:
+		bool objectHash( double time, IECore::MurmurHash &h ) const;
 		//@}
 		
 		//! @name Child access

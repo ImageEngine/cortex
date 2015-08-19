@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#include "boost/python.hpp"
 
-namespace IECoreAlembic
+#include "IECoreAlembic/AlembicScene.h"
+#include "IECoreAlembic/bindings/AlembicSceneBinding.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
+using namespace boost::python;
+using namespace IECoreAlembic;
+
+void IECoreAlembicBindings::bindAlembicScene()
 {
-
-enum TypeId
-{
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	
-	LastCoreAlembicTypeId = 112999,
-};
-
-} // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_TYPEIDS_H
+	IECorePython::RunTimeTypedClass<AlembicScene>( "AlembicScene" );
+}

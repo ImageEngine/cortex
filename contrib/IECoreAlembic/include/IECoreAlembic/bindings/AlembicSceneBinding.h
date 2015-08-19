@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_ALEMBICSCENEBINDING_H
+#define IECOREALEMBIC_ALEMBICSCENEBINDING_H
 
-namespace IECoreAlembic
+namespace IECoreAlembicBindings
 {
 
-enum TypeId
-{
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	
-	LastCoreAlembicTypeId = 112999,
-};
+void bindAlembicScene();
 
-} // namespace IECoreAlembic
+} // namespace IECoreAlembicBindings
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_ALEMBICSCENEBINDING_H

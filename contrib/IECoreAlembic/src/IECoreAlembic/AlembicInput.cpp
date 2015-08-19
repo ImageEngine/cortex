@@ -55,6 +55,7 @@
 using namespace Imath;
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
+using namespace Alembic::Util;
 using namespace IECoreAlembic;
 using namespace IECore;
 
@@ -399,7 +400,23 @@ IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId result
 		return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
 	}
 }
-		
+
+bool AlembicInput::objectHash( double time, IECore::MurmurHash &h ) const
+{
+	Digest alembicHash;
+	if( m_data->object.getPropertiesHash( alembicHash ) )
+	{
+		h.append( alembicHash.words[0] );
+		h.append( alembicHash.words[1] );
+		if( numSamples() )
+		{
+			h.append( time );
+		}
+		return true;
+	}
+	return false;
+}
+
 size_t AlembicInput::numChildren() const
 {
 	if(
