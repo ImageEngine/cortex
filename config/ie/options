@@ -411,7 +411,7 @@ else :
 	# the dlReg section for an explanation.
 	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_RMANPROCEDURAL_NAME = os.path.join( dlPrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", "$IECORE_NAME" )
-	INSTALL_RMANDISPLAY_NAME = os.path.join( dlPrefix, "3delight", dlVersion, "displayDrivers", "$IECORE_NAME" )
+	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
