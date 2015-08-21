@@ -1041,7 +1041,12 @@ Imath::Box3d SceneShapeInterface::componentBound( int idx )
 	SceneInterface::Path path;
 	path = fullPathName( name.value() );
 	ConstSceneInterfacePtr scene = getSceneInterface()->scene( path,  SceneInterface::NullIfMissing );
-	
+	if( !scene )
+	{
+		msg( Msg::Warning, "SceneShapeInterface::componentBound",  boost::format( "no scene for component %s" ) % name.value() );
+		return Imath::Box3d( Imath::V3d(-1), Imath::V3d(1) );
+	}
+
 	MPlug pTime( thisMObject(), aTime );
 	MTime time;
 	pTime.getValue( time );
@@ -1177,8 +1182,33 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 	if( drawGeometry && subSceneInterface->hasObject() )
 	{
 		ConstObjectPtr object = subSceneInterface->readObject( time );
-		const Renderable *o = runTimeCast< const Renderable >(object.get());
-		if( o )
+		
+		if( runTimeCast< const CoordinateSystem >(object.get()) )
+		{
+			// manually draw coordinate systems so they don't override the gl name state:
+			AttributeBlock a(renderer);
+			renderer->setAttribute( "gl:curvesPrimitive:useGLLines", new IECore::BoolData( true ) );
+			renderer->setAttribute( "gl:curvesPrimitive:glLineWidth", new IECore::FloatData( 2 ) );
+			
+			IECore::V3fVectorDataPtr p = new IECore::V3fVectorData;
+
+			p->writable().push_back( Imath::V3f( 0, 0, 0 ) );
+			p->writable().push_back( Imath::V3f( 1, 0, 0 ) );
+			
+			p->writable().push_back( Imath::V3f( 0, 0, 0 ) );
+			p->writable().push_back( Imath::V3f( 0, 1, 0 ) );
+			
+			p->writable().push_back( Imath::V3f( 0, 0, 0 ) );
+			p->writable().push_back( Imath::V3f( 0, 0, 1 ) );
+			
+			IECore::IntVectorDataPtr inds = new IECore::IntVectorData;
+			inds->writable().resize( 3, 2 );
+			
+			CurvesPrimitivePtr curves = new IECore::CurvesPrimitive( inds, IECore::CubicBasisf::linear(), false, p );
+			
+			curves->render( renderer );
+		}
+		else if( const Renderable *o = runTimeCast< const Renderable >(object.get()) )
 		{
 			o->render(renderer);
 		}
@@ -1291,9 +1321,7 @@ IECoreGL::ConstScenePtr SceneShapeInterface::glScene()
 
 		IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 		renderer->setOption( "gl:mode", new StringData( "deferred" ) );
-		// Always draw locators. They can be hidden by using tags.
-		renderer->setOption( "gl:drawCoordinateSystems", new BoolData( true ) );
-		
+
 		renderer->worldBegin();
 		{
 			buildScene( renderer, sceneInterface );
