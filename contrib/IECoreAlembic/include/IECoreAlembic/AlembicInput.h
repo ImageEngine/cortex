@@ -42,6 +42,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/ToCoreConverter.h"
 #include "IECore/MurmurHash.h"
+#include "IECore/ComputationCache.h"
 
 #include "IECoreAlembic/Export.h"
 
@@ -159,10 +160,22 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		AlembicInput();
 	
 		void ensureTimeSampling() const;
-	
+
 		struct DataMembers;
 		
 		boost::shared_ptr<DataMembers> m_data;
+		
+		// If no explicit bounding box has been written at a location, the bounding box
+		// is calculated from scratch.. This can lead to a full hierarchy traversal,
+		// which can be unacceptably slow in some cases, eg if an alembic file is
+		// loaded into an ieSceneShape in maya. These members are part of a caching
+		// system to mitigate this.
+		
+		typedef std::pair< const AlembicInput *, double > BoundCacheKey;
+		typedef IECore::ComputationCache< BoundCacheKey > BoundCache;
+
+		static IECore::MurmurHash boundHash( const BoundCacheKey &key );
+		static IECore::ObjectPtr doReadBoundAtTime( const BoundCacheKey &key );
 
 };
 

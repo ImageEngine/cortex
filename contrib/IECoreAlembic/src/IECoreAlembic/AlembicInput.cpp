@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <boost/filesystem.hpp>
+
 #include "OpenEXR/ImathBoxAlgo.h"
 
 #include "Alembic/AbcCoreHDF5/ReadWrite.h"
@@ -61,13 +63,16 @@ using namespace IECore;
 
 struct AlembicInput::DataMembers
 {
+
 	DataMembers()
 		: numSamples( -1 )
 	{
 	}
-	
-	boost::shared_ptr<IArchive> archive;
+
+	IECore::MurmurHash fileHash;
+	boost::shared_ptr<IArchive> archive;	
 	IObject object;
+	BoundCache::Ptr boundCache;
 	int numSamples;
 	TimeSamplingPtr timeSampling;
 };
@@ -75,7 +80,13 @@ struct AlembicInput::DataMembers
 AlembicInput::AlembicInput( const std::string &fileName )
 {
 	m_data = boost::shared_ptr<DataMembers>( new DataMembers );
+	m_data->boundCache = new BoundCache( doReadBoundAtTime, boundHash,  10000 );
 	
+	// build a hash of the file and its last write time:
+	m_data->fileHash.append( fileName );
+	boost::filesystem::path p( fileName );
+	m_data->fileHash.append( boost::filesystem::last_write_time( p ) );
+
 #ifdef IECOREALEMBIC_WITH_OGAWA
 	Alembic::AbcCoreFactory::IFactory factory;
 	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( factory.getArchive( fileName ) ) );
@@ -225,9 +236,61 @@ bool AlembicInput::hasStoredBound() const
 	}
 	return false;
 }
-		
+
+IECore::MurmurHash AlembicInput::boundHash( const BoundCacheKey &key )
+{
+	const AlembicInput* input = key.first;
+	double time = key.second;
+
+	// hash in scene location, sample index and the file hash,
+	// which is built using the file name and the time stamp:
+	IECore::MurmurHash h;
+	h.append( input->m_data->object.getFullName() );
+	h.append( time );
+	h.append( input->m_data->fileHash );
+
+	return h;
+}
+
+IECore::ObjectPtr AlembicInput::doReadBoundAtTime( const BoundCacheKey &key )
+{
+	const AlembicInput* input = key.first;
+	double time = key.second;
+	
+	if( input->hasStoredBound() )
+	{
+		size_t index0, index1;
+		double lerpFactor = input->sampleIntervalAtTime( time, index0, index1 );
+		if( index0 == index1 )
+		{
+			return new IECore::Box3dData( input->boundAtSample( index0 ) );
+		}
+		else
+		{
+			Box3d bound0 = input->boundAtSample( index0 );
+			Box3d bound1 = input->boundAtSample( index1 );		
+			Box3d result;
+			result.min = lerp( bound0.min, bound1.min, lerpFactor );	
+			result.max = lerp( bound0.max, bound1.max, lerpFactor );
+			return new IECore::Box3dData( result );
+		}
+	}
+	else
+	{
+		Box3d result;
+		for( size_t i=0, n=input->numChildren(); i<n; i++ )
+		{
+			AlembicInputPtr c = input->child( i );
+			Box3d childBound = c->boundAtTime( time );
+			childBound = Imath::transform( childBound, c->transformAtTime( time ) );
+			result.extendBy( childBound );
+		}
+		return new IECore::Box3dData( result );
+	}
+}
+
 Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
-{	
+{
 	const MetaData &md = m_data->object.getMetaData();
 
 	if( !m_data->object.getParent() )
@@ -253,41 +316,14 @@ Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
 		return geomBase.getSchema().getValue( ISampleSelector( (index_t)sampleIndex ) ).getSelfBounds();
 	}
 
-	return Box3d();
+	return Imath::Box3d();
 }
 
 Imath::Box3d AlembicInput::boundAtTime( double time ) const
 {
-	if( hasStoredBound() )
-	{
-		size_t index0, index1;
-		double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
-		if( index0 == index1 )
-		{
-			return boundAtSample( index0 );
-		}
-		else
-		{
-			Box3d bound0 = boundAtSample( index0 );
-			Box3d bound1 = boundAtSample( index1 );		
-			Box3d result;
-			result.min = lerp( bound0.min, bound1.min, lerpFactor );	
-			result.max = lerp( bound0.max, bound1.max, lerpFactor );
-			return result;
-		}
-	}
-	else
-	{
-		Box3d result;
-		for( size_t i=0, n=numChildren(); i<n; i++ )
-		{
-			AlembicInputPtr c = child( i );
-			Box3d childBound = c->boundAtTime( time );
-			childBound = Imath::transform( childBound, c->transformAtTime( time ) );
-			result.extendBy( childBound );
-		}
-		return result;
-	}
+	BoundCacheKey k( this, time );
+	ConstObjectPtr cachedBound = m_data->boundCache->get( k );
+	return runTimeCast<const Box3dData>( cachedBound.get() )->readable();
 }
 
 Imath::M44d AlembicInput::transformAtSample( size_t sampleIndex ) const
@@ -440,6 +476,8 @@ AlembicInputPtr AlembicInput::child( size_t index ) const
 	AlembicInputPtr result = new AlembicInput();
 	result->m_data = boost::shared_ptr<DataMembers>( new DataMembers );
 	result->m_data->archive = this->m_data->archive;
+	result->m_data->boundCache = this->m_data->boundCache;
+	result->m_data->fileHash = this->m_data->fileHash;
 	/// \todo this is documented as not being the best way of doing things in
 	/// the alembic documentation. I'm not sure what would be better though,
 	/// and it appears to work fine so far.
@@ -470,6 +508,8 @@ AlembicInputPtr AlembicInput::child( const std::string &name ) const
 	AlembicInputPtr result = new AlembicInput();
 	result->m_data = boost::shared_ptr<DataMembers>( new DataMembers );
 	result->m_data->archive = m_data->archive;
+	result->m_data->boundCache = m_data->boundCache;
+	result->m_data->fileHash = m_data->fileHash;
 	result->m_data->object = c;
 	return result;
 }
