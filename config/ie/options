@@ -244,7 +244,6 @@ if targetApp :
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
 dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
-dlPrefix = basePrefix
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
 	if dlReg["compiler"]==compiler :
@@ -253,14 +252,6 @@ try :
 	
 		# Add ribdepends location to path
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
-		
-		# We don't want to build the renderman procedurals when the compiler version doesn't match,
-		# as otherwise they end up overwriting the proper installs. We do install IECoreRI in this
-		# case however, since the libs are installed to compiler (or app) specific paths.
-		##\todo: install procedurals on a compiler specific path if we ever want to use them from
-		# multiple compilers.
-		if dlReg["compilerVersion"] != compilerVersion :
-			dlPrefix = "/tmp/unwantedRMan"
 except :
 	pass
 	
@@ -410,7 +401,7 @@ else :
 	# We use basePrefix for IECoreRI, but dlPrefix for the renderman procedurals. See the note in
 	# the dlReg section for an explanation.
 	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( dlPrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", "$IECORE_NAME" )
+	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "$IECORE_NAME" )
