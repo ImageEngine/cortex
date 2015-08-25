@@ -1,3 +1,25 @@
+# 9.1.0
+
+#### IECoreAppleseed
+
+- Support renderer type prefixes in Renderer::light().
+
+#### IECoreArnold
+
+- Support renderer type prefixes in Renderer::light().
+
+#### IECoreRI
+
+- Support renderer type prefixes in Renderer::light().
+
+#### IECoreMaya
+
+- Fixed crash when zooming in on coordinate systems in scene shapes
+
+#### Build
+
+- 3delight display drivers and procedurals now installed to compiler specific locations at IE
+
 # 9.0.0
 
 #### IECore
