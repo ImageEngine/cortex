@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,28 +32,50 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_TOALEMBICCAMERACONVERTER_H
+#define IECOREALEMBIC_TOALEMBICCAMERACONVERTER_H
+
+#include "Alembic/AbcGeom/OCamera.h"
+
+#include "IECoreAlembic/ToAlembicConverter.h"
+#include "IECoreAlembic/Export.h"
+
+namespace IECore
+{
+IE_CORE_FORWARDDECLARE( Camera );
+} // namespace IECore
 
 namespace IECoreAlembic
 {
 
-enum TypeId
+class IECOREALEMBIC_API ToAlembicCameraConverter : public ToAlembicConverter
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	ToAlembicConverterTypeId = 112007,
-	ToAlembicMeshConverterTypeId = 112008,
-	ToAlembicCameraConverterTypeId = 112009,
-	
-	LastCoreAlembicTypeId = 112999,
+
+	public :
+
+		typedef IECore::Camera InputType;
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAlembicCameraConverter, ToAlembicCameraConverterTypeId, ToAlembicConverter );
+
+		ToAlembicCameraConverter( Alembic::Abc::OObject transform );
+		virtual ~ToAlembicCameraConverter();
+
+	protected :
+
+		virtual void ensureAlembicObject( Alembic::Abc::OObject &transform );
+		virtual void updateTimeSampling( Alembic::Abc::TimeSamplingPtr timeSampling );
+		virtual void writeAlembicObject();
+
+	private :
+
+		static ConverterDescription<ToAlembicCameraConverter> g_description;
+
+		Alembic::AbcGeom::OCamera m_camera;
+
 };
+
+IE_CORE_DECLAREPTR( ToAlembicCameraConverter );
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_TOALEMBICCAMERACONVERTER_H

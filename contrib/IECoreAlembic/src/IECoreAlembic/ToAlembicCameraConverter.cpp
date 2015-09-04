@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
+//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -32,28 +33,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#include "IECore/Camera.h"
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
 
-namespace IECoreAlembic
-{
+#include "IECoreAlembic/ToAlembicCameraConverter.h"
 
-enum TypeId
+using namespace IECoreAlembic;
+using namespace IECore;
+using namespace std;
+
+using namespace Alembic::Abc;
+using namespace Alembic::AbcGeom;
+
+IE_CORE_DEFINERUNTIMETYPED( ToAlembicCameraConverter );
+
+ToAlembicCameraConverter::ConverterDescription<ToAlembicCameraConverter> ToAlembicCameraConverter::g_description;
+
+ToAlembicCameraConverter::ToAlembicCameraConverter( OObject transform )
+	:	ToAlembicConverter( "Converts IECore::CameraPrimitives to alembic camera nodes", IECore::Camera::staticTypeId(), transform )
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	ToAlembicConverterTypeId = 112007,
-	ToAlembicMeshConverterTypeId = 112008,
-	ToAlembicCameraConverterTypeId = 112009,
+}
+
+ToAlembicCameraConverter::~ToAlembicCameraConverter()
+{
+}
+
+void ToAlembicCameraConverter::ensureAlembicObject( Alembic::Abc::OObject &transform )
+{
+	if( !m_camera )
+	{
+		m_camera = OCamera( transform, "camera" );
+	}
+}
+
+void ToAlembicCameraConverter::writeAlembicObject()
+{
+	const Camera *camera = runTimeCast<Camera>( srcParameter()->getValue() );
 	
-	LastCoreAlembicTypeId = 112999,
-};
+	CameraSample sample;
+	if( const Box2fData *screenWindowData = camera->parametersData()->member<Box2fData>( "screenWindow" ) )
+	{
+		const Imath::Box2f &screenWindow = screenWindowData->readable();
+		sample = CameraSample( screenWindow.max.y, screenWindow.min.y, screenWindow.min.x, screenWindow.max.x );
+	}
+	
+	m_camera.getSchema().set( sample );
+}
 
-} // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_TYPEIDS_H
+void ToAlembicCameraConverter::updateTimeSampling( Alembic::Abc::TimeSamplingPtr timeSampling )
+{
+	m_camera.getSchema().setTimeSampling( timeSampling );
+}
