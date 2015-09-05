@@ -39,7 +39,6 @@
 
 #include "IECoreAlembic/TypeIds.h"
 #include "IECoreAlembic/Export.h"
-#include "IECoreAlembic/AlembicInput.h"
 
 namespace IECoreAlembic
 {
@@ -127,10 +126,14 @@ class IECOREALEMBIC_API AlembicScene : public IECore::SampledSceneInterface
 
 	private:
 
-		AlembicScene( AlembicInputPtr input, AlembicInputPtr rootInput, IECore::MurmurHash fileNameHash );
+		IE_CORE_FORWARDDECLARE( AlembicIO );
+		IE_CORE_FORWARDDECLARE( AlembicReader );
+		IE_CORE_FORWARDDECLARE( AlembicWriter );
 
-		AlembicInputPtr m_input;
-		AlembicInputPtr m_rootInput;
+		AlembicScene( AlembicIOPtr input, AlembicIOPtr rootInput, IECore::MurmurHash fileNameHash );
+
+		AlembicIOPtr m_io;
+		AlembicIOPtr m_root;
 		IECore::MurmurHash m_fileNameHash;
 
 

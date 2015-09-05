@@ -42,7 +42,13 @@
 using namespace boost::python;
 using namespace IECoreAlembic;
 
+static AlembicScenePtr constructor( const std::string &fileName, IECore::IndexedIO::OpenMode mode )
+{
+	return new AlembicScene( fileName, mode );
+}
+
 void IECoreAlembicBindings::bindAlembicScene()
 {
-	IECorePython::RunTimeTypedClass<AlembicScene>( "AlembicScene" );
+	IECorePython::RunTimeTypedClass<AlembicScene>( "AlembicScene" )
+		.def( "__init__", make_constructor( &constructor ), "Opens a scene file for read or write." );
 }

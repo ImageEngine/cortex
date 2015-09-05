@@ -44,15 +44,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testSupportedExtension( self ) :
 		self.assertTrue( "abc" in IECore.SceneInterface.supportedExtensions() )
 		self.assertTrue( "abc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Read ) )
+		self.assertTrue( "abc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Write ) )
 		self.assertFalse( "abc" in IECore.SceneInterface.supportedExtensions( IECore.IndexedIO.OpenMode.Append ) )
 
 	def testFactoryFunction( self ) :
 		# test Write factory function 
-		#m = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Write )
-		#self.assertTrue( isinstance( m, IECore.AlembicScene ) )
+		m = IECore.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertTrue( isinstance( m, IECoreAlembic.AlembicScene ) )
 		#self.assertEqual( m.fileName(), os.path.dirname( __file__ ) + "/data/cube.abc" )
-		#self.assertRaises( RuntimeError, m.readBound, 0.0 )
-		#del m
+		self.assertRaises( RuntimeError, m.readBound, 0.0 )
+		del m
 		# test Read factory function
 		m = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertTrue( isinstance( m, IECoreAlembic.AlembicScene ) )
@@ -476,6 +477,184 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( b.child( "group1" ).child("pCube1").hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ), a.child("pCube1").hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ) )
 		self.assertEqual( a.hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ), a.hash( IECore.SceneInterface.HashType.ChildNamesHash, 1000 ) )
 		self.assertNotEqual( b.hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ), a.hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ) )
+
+	def testWriteConstructor( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		self.assertRaises( Exception, IECoreAlembic.AlembicScene, "/tmp/blah/blah/blah/blah/blah.abc", IECore.IndexedIO.OpenMode.Write )
+
+	def testHierarchy( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.createChild("blah")
+		a.child("yeah", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( set( a.childNames() ), set([ "yeah", "blah" ]) )
+
+		a.child("blah").createChild("whatever")
+		self.assertEqual( set(a.child("blah").childNames()), set(["whatever"]) )
+
+		self.assertEqual( set( a.childNames() ), set([ "yeah", "blah" ]) )
+		self.assertEqual( set( a.child("blah").childNames() ), set(["whatever"]) )
+		self.assertEqual( set( a.child("yeah").childNames() ), set() )
+		self.assertEqual( set( a.child("blah").child("whatever").childNames() ), set() )
+
+		self.assertEqual( a.child("blah").name(), "blah" )
+		self.assertEqual( a.child("blah").child("whatever").name(), "whatever" )
+		self.assertEqual( a.child("yeah").name(), "yeah" )
+
+		self.assertEqual( a.path(), [] )
+		self.assertEqual( a.child("blah").path(), ["blah"] )
+		self.assertEqual( a.child("blah").child("whatever").path(), ["blah","whatever"] )
+		self.assertEqual( a.child("yeah").path(), ["yeah"] )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( set( a.childNames() ), set([ "yeah", "blah" ]) )
+		self.assertEqual( set( a.child("blah").childNames() ), set(["whatever"]) )
+		self.assertEqual( set( a.child("yeah").childNames() ), set() )
+		self.assertEqual( set( a.child("blah").child("whatever").childNames() ), set() )
+
+	def testWriteStaticTransform( self ) :
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		self.assertRaises( RuntimeError, a.writeTransform, IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(0,2,0) ) ), 0 )
+		a.createChild("blah").writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(1,2,3) ) ), 0 )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.readTransformAsMatrix( 0 ), IECore.M44d() )
+		self.assertEqual( a.child("blah").readTransformAsMatrix( 0 ), IECore.M44d.createRotated( IECore.V3d(1,2,3) ) )
+		self.assertEqual( a.child("blah").readTransformAsMatrix( 10 ), IECore.M44d.createRotated( IECore.V3d(1,2,3) ) )
+
+	def testWriteAnimatedTransform( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		a.createChild("blah").writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(1,2,3) ) ), -1 )
+		a.child("blah").writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(4,5,6) ) ), 1 )
+		a.child("blah").writeTransform( IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(7,8,9) ) ), 1.5 )
+
+		self.assertRaises( RuntimeError, a.writeTransform, IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(0,2,0) ) ), -2 )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.child("blah").readTransform( -2 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(1,2,3) ) ) )
+		self.assertEqual( a.child("blah").readTransform( -1 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(1,2,3) ) ) )
+		self.assertEqual( a.child("blah").readTransform( 0 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(2.5,3.5,4.5) ) ) )
+		self.assertEqual( a.child("blah").readTransform( 1 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(4,5,6) ) ) )
+		self.assertEqual( a.child("blah").readTransform( 1.25 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(5.5,6.5,7.5) ) ) )
+		self.assertEqual( a.child("blah").readTransform( 1.5 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(7,8,9) ) ) )
+		
+		self.assertEqual( a.child("blah").readTransform( 2 ), IECore.M44dData( IECore.M44d.createTranslated( IECore.V3d(7,8,9) ) ) )
+
+	def testWriteMesh( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.createChild("blah")
+
+		mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
+		self.assertRaises( RuntimeError, a.writeObject, mesh, 0 )
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, None, 0 )
+
+		# write an actual mesh:
+		a.child("blah").writeObject( mesh, 0 )
+
+		# make sure new child name doesn't show up:
+		self.assertEqual( len( a.child("blah").childNames() ), 0 )
+
+		# write a different type of object:
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, IECore.BoolData(), 0 )
+		
+		# write the same object at an earlier time:
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, mesh, -1 )
+		
+		# try and write a subdiv mesh:
+		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
+		subdivMesh.interpolation = "catmullClark"
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, subdivMesh, 2 )
+
+		# write a different mesh at a later time:
+		a.child("blah").writeObject( IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ), 1 )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( a.child("blah").childNames() ), set(["mesh"]) )
+		self.assertEqual( a.child("blah").child("mesh").readObject( -1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
+		self.assertEqual( a.child("blah").child("mesh").readObject( 0 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
+		self.assertEqual( a.child("blah").child("mesh").readObject( 0.5 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1.5), IECore.V3f(1.5) ) ) )
+		self.assertEqual( a.child("blah").child("mesh").readObject( 1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
+		self.assertEqual( a.child("blah").child("mesh").readObject( 2 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
+
+	def testWriteSubdiv( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.createChild("blah")
+
+		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
+		subdivMesh.interpolation = "catmullClark"
+		self.assertRaises( RuntimeError, a.writeObject, subdivMesh, 0 )
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, None, 0 )
+
+		# write an actual mesh:
+		a.child("blah").writeObject( subdivMesh, 0 )
+
+		# make sure new child name doesn't show up:
+		self.assertEqual( len( a.child("blah").childNames() ), 0 )
+
+		# write a different type of object:
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, IECore.BoolData(), 0 )
+
+		# write the same object at an earlier time:
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, subdivMesh, -1 )
+
+		# try and write a subdiv mesh:
+		self.assertRaises( RuntimeError, a.child("blah").writeObject, IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ), 2 )
+
+		# write a different mesh at a later time:
+		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) )
+		subdivMesh.interpolation = "catmullClark"
+		a.child("blah").writeObject( subdivMesh, 1 )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( a.child("blah").childNames() ), set(["subdiv"]) )
+
+		self.assertEqual( a.child("blah").child("subdiv").readObject( 1 ), subdivMesh )
+		self.assertEqual( a.child("blah").child("subdiv").readObject( 2 ), subdivMesh )
+
+		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
+		subdivMesh.interpolation = "catmullClark"
+
+		self.assertEqual( a.child("blah").child("subdiv").readObject( -1 ), subdivMesh )
+		self.assertEqual( a.child("blah").child("subdiv").readObject( 0 ), subdivMesh )
+
+		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1.5), IECore.V3f(1.5) ) )
+		subdivMesh.interpolation = "catmullClark"
+
+		self.assertEqual( a.child("blah").child("subdiv").readObject( 0.5 ), subdivMesh )
+
+	def testWriteCamera( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.createChild("blah").writeObject( IECore.Camera(), 0 )
+
+		# make sure new child name doesn't show up:
+		self.assertEqual( len( a.child("blah").childNames() ), 0 )
+
+		del a
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		self.assertEqual( set( a.child("blah").childNames() ), set(["camera"]) )
+		self.assertTrue( isinstance( a.child("blah").child("camera").readObject(0), IECore.Camera ) )
 
 if __name__ == "__main__":
     unittest.main()
