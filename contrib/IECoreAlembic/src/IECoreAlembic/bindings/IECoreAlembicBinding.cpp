@@ -34,7 +34,6 @@
 
 #include <boost/python.hpp>
 
-#include "IECoreAlembic/bindings/AlembicInputBinding.h"
 #include "IECoreAlembic/bindings/AlembicSceneBinding.h"
 
 using namespace IECoreAlembicBindings;
@@ -43,7 +42,6 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE( _IECoreAlembic )
 {
 
-	bindAlembicInput();
 	bindAlembicScene();
 
 }
