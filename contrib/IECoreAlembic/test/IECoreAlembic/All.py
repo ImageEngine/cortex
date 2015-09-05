@@ -41,7 +41,6 @@ import IECore
 warnings.simplefilter( "error", DeprecationWarning )
 
 from AlembicSceneTest import AlembicSceneTest
-from ABCToMDCTest import ABCToMDCTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
