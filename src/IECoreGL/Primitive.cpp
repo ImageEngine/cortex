@@ -102,7 +102,7 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-static Shader *constant2()
+static Shader *mostBasicShader()
 {
 
 	static const char *vertexSource =
@@ -163,9 +163,9 @@ void Primitive::render( State *state ) const
 	// with a simple shader and early out.
 	if( currentSelector && currentSelector->mode() == Selector::GLSelect )
 	{
-		const Shader *constantShader = constant2();
-		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
-		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+		const Shader *basicShader = mostBasicShader();
+		const Shader::Setup *basicSetup = shaderSetup( basicShader, state );
+		Shader::Setup::ScopedBinding basicBinding( *basicSetup );
 		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
