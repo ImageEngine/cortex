@@ -74,7 +74,58 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::PointWidth, Pr
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::Selectable, PrimitiveSelectableTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySort, PrimitiveTransparencySortStateComponentTypeId, bool, true );
 
+} // namespace IECoreGL
+
+//////////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+Shader *mostBasicShader()
+{
+	static const char *vertexSource =
+		
+		"#if __VERSION__ <= 120\n"
+		"#define in attribute\n"
+		"#define out varying\n"
+		"#endif\n"
+		""
+		"in vec3 vertexP;"
+		""
+		"void main()"
+		"{"
+		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
+		"}";
+		
+	static const char *fragmentSource =
+	
+		"void main()"
+		"{"
+			"gl_FragColor = vec4( 1, 1, 1, 1 );"
+		"}";
+
+	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
+	return s.get();
 }
+
+Shader *flatConstant()
+{
+	static const char *fragmentSource =
+
+		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
+		""
+		"void main()"
+		"{"
+		"	gl_FragColor = vec4( Cs, 1 );"
+		"}";
+
+	static ShaderPtr s = new Shader( "", fragmentSource );
+	return s.get();
+}
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Primitive implementation
@@ -101,51 +152,6 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 		addVertexAttribute( name, primVar.data );
 	}
 }
-
-static Shader *mostBasicShader()
-{
-
-	static const char *vertexSource =
-		
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#define out varying\n"
-		"#endif\n"
-		""
-		"in vec3 vertexP;"
-		""
-		"void main()"
-		"{"
-		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
-		"}";
-		
-	static const char *fragmentSource =
-	
-		"void main()"
-		"{"
-			"gl_FragColor = vec4( 1, 1, 1, 1 );"
-		"}";
-
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
-	return s.get();
-}
-
-static Shader *flatConstant()
-{
-
-	static const char *fragmentSource =
-
-		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
-		""
-		"void main()"
-		"{"
-		"	gl_FragColor = vec4( Cs, 1 );"
-		"}";
-
-	static ShaderPtr s = new Shader( "", fragmentSource );
-	return s.get();
-}
-
 
 void Primitive::render( State *state ) const
 {
