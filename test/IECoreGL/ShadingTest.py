@@ -35,6 +35,7 @@
 import os
 import unittest
 import shutil
+import inspect
 
 import IECore
 import IECoreGL
@@ -204,9 +205,47 @@ class ShadingTest( unittest.TestCase ) :
 				gl_FragColor = vec4( m3 * vec3( 0, 0, 1) + (m4 * vec4( 0, 0, 1, 1 )).xyz + accum, 1.0);
 			}
 		"""
-		
+
 		return s
-		
+
+	def offsetShader( self, offset ) :
+
+		s = IECore.Shader( "test", "gl:surface" )
+
+		s.parameters["gl:vertexSource"] = inspect.cleandoc( """
+
+			#version 120
+			#if __VERSION__ <= 120
+				#define in attribute
+			#endif
+
+			uniform vec3 offset;
+
+			in vec3 vertexP;
+			void main()
+			{
+				vec3 translatedVertexP = vertexP + offset;
+				vec4 pCam = gl_ModelViewMatrix * vec4( translatedVertexP, 1 );
+				gl_Position = gl_ProjectionMatrix * pCam;
+			}
+
+		""" )
+
+		s.parameters["gl:fragmentSource"] = inspect.cleandoc( """
+
+			void main()
+			{
+
+				gl_FragColor = vec4( 1, 0, 0, 1 );
+
+			}
+
+		""" )
+
+		s.parameters["offset"] = offset
+
+		return s
+
 	def renderImage( self, group ) :
 	
 		r = IECoreGL.Renderer()
@@ -895,7 +934,61 @@ class ShadingTest( unittest.TestCase ) :
 			]
 		)
 		
-				
+	def testWireframeWithCustomVertexShader( self ) :
+
+		def renderOffsetImage( offset ) :
+
+			m = self.mesh()
+
+			g = IECore.Group()
+			g.addChild( m )
+
+			g.addState(
+				IECore.AttributeState(
+					{
+						"gl:primitive:solid" : IECore.BoolData( True ),
+						"gl:primitive:wireframe" : IECore.BoolData( True ),
+						"gl:primitive:wireframeColor" : IECore.Color4f( 0, 1, 0, 1 ),
+						"gl:primitive:wireframeWidth" : 6.0,
+					}
+				)
+			)
+			g.addState( self.offsetShader( offset = offset ) )
+
+			return self.renderImage( g )
+
+		# Offset shader offsets in X in the vertex shader,
+		# and renders red in the fragment shader. The wireframe
+		# shading should inherit the offset but not the red.
+
+		image = renderOffsetImage( offset = IECore.V3f( 0.2, 0, 0 ) )
+
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.6, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.65, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.8, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+			]
+		)
+
+		image = renderOffsetImage( offset = IECore.V3f( -0.2, 0, 0 ) )
+
+		self.assertImageValues(
+			image,
+			[
+				( IECore.V2f( 0.2, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.35, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.4, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+			]
+		)
+
 	def setUp( self ) :
 		
 		if not os.path.isdir( "test/IECoreGL/output" ) :
