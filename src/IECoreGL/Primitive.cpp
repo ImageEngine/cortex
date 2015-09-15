@@ -84,33 +84,6 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySo
 namespace
 {
 
-Shader *mostBasicShader()
-{
-	static const char *vertexSource =
-		
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#define out varying\n"
-		"#endif\n"
-		""
-		"in vec3 vertexP;"
-		""
-		"void main()"
-		"{"
-		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
-		"}";
-		
-	static const char *fragmentSource =
-	
-		"void main()"
-		"{"
-			"gl_FragColor = vec4( 1, 1, 1, 1 );"
-		"}";
-
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
-	return s.get();
-}
-
 struct FlatConstant
 {
 
@@ -223,9 +196,10 @@ void Primitive::render( State *state ) const
 	// with a simple shader and early out.
 	if( currentSelector && currentSelector->mode() == Selector::GLSelect )
 	{
-		const Shader *basicShader = mostBasicShader();
-		const Shader::Setup *basicSetup = shaderSetup( basicShader, state );
-		Shader::Setup::ScopedBinding basicBinding( *basicSetup );
+		const Shader::Setup *uniformSetup = flatConstantShaderSetup( state, /* forIDRender = */ false );
+		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
+		const Shader::Setup *primitiveSetup = shaderSetup( uniformSetup->shader(), state );
+		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
 		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
