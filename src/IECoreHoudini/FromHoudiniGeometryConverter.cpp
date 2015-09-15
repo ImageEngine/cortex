@@ -39,6 +39,7 @@
 
 #include "CH/CH_Manager.h"
 #include "UT/UT_StringMMPattern.h"
+#include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
 #include "IECore/CompoundObject.h"
@@ -350,9 +351,9 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		}
 		
 		// check for remapping information for this attribute
-		if ( attributeMap.count( attr->getName() ) == 1 )
+		if ( attributeMap.count( name.buffer() ) == 1 )
 		{
-			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
+			std::vector<RemapInfo> &map = attributeMap[name.buffer()];
 			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
 			{
 				transferAttribData( result, interpolation, attrRef, range, &*rIt );
