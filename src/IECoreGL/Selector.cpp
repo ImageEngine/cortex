@@ -243,40 +243,6 @@ class Selector::Implementation : public IECore::RefCounted
 
 	private :
 		
-		void bindIDShader( const IECoreGL::Shader *shader )
-		{
-			if( shader == m_currentIDShader )
-			{
-				// early out to avoid the relatively expensive operations
-				// below if we've already loaded the shader.
-				return;
-			}
-		
-			const IECoreGL::Shader::Parameter *nameParameter = shader->uniformParameter( "ieCoreGLNameIn" );
-			if( !nameParameter )
-			{
-				throw IECore::Exception( "ID shader does not have an ieCoreGLNameIn parameter" );
-			}
-			
-			GLint fragDataLocation = glGetFragDataLocation( shader->program(), "ieCoreGLNameOut" );
-			if( fragDataLocation < 0 )
-			{
-				throw IECore::Exception( "ID shader does not have an ieCoreGLNameOut output" );			
-			}
-			
-			m_nameUniformLocation = nameParameter->location;
-			
-			m_currentIDShader = shader;
-			glUseProgram( m_currentIDShader->program() );
-			
-			std::vector<GLenum> buffers;
-			buffers.resize( fragDataLocation + 1, GL_NONE );
-			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
-			glDrawBuffers( buffers.size(), &buffers[0] );
-			
-			loadNameIDRender( m_currentName );
-		}
-		
 		Mode m_mode;
 		Imath::M44d m_postProjectionMatrix;
 		std::vector<HitRecord> &m_hits;
@@ -400,6 +366,40 @@ class Selector::Implementation : public IECore::RefCounted
 			{
 				m_hits.push_back( it->second );
 			}
+		}
+
+		void bindIDShader( const IECoreGL::Shader *shader )
+		{
+			if( shader == m_currentIDShader )
+			{
+				// early out to avoid the relatively expensive operations
+				// below if we've already loaded the shader.
+				return;
+			}
+
+			const IECoreGL::Shader::Parameter *nameParameter = shader->uniformParameter( "ieCoreGLNameIn" );
+			if( !nameParameter )
+			{
+				throw IECore::Exception( "ID shader does not have an ieCoreGLNameIn parameter" );
+			}
+
+			GLint fragDataLocation = glGetFragDataLocation( shader->program(), "ieCoreGLNameOut" );
+			if( fragDataLocation < 0 )
+			{
+				throw IECore::Exception( "ID shader does not have an ieCoreGLNameOut output" );
+			}
+
+			m_nameUniformLocation = nameParameter->location;
+
+			m_currentIDShader = shader;
+			glUseProgram( m_currentIDShader->program() );
+
+			std::vector<GLenum> buffers;
+			buffers.resize( fragDataLocation + 1, GL_NONE );
+			buffers[buffers.size()-1] = GL_COLOR_ATTACHMENT0;
+			glDrawBuffers( buffers.size(), &buffers[0] );
+
+			loadNameIDRender( m_currentName );
 		}
 
 		//////////////////////////////////////////////////////////////////////////
