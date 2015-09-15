@@ -129,10 +129,19 @@ void GR_CortexPrimitive::resetPrimitives()
 
 void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p )
 {
-	GA_Offset offset = p.geometry.primitiveOffset( m_primId );
 
-	const CortexPrimitive *prim = dynamic_cast<const CortexPrimitive *>( p.geometry.getGEOPrimitive( offset ) );
+#if UT_MAJOR_VERSION_INT >= 15
 
+	const GU_Detail *detail = p.geometry.castAwayConst().readLock();
+
+#else
+
+	const GU_Detail *detail = &p.geometry;
+
+#endif
+
+	GA_Offset offset = detail->primitiveOffset( m_primId );
+	const CortexPrimitive *prim = dynamic_cast<const CortexPrimitive *>( detail->getGEOPrimitive( offset ) );
 	if ( !prim )
 	{
 		m_scene = 0;
