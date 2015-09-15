@@ -185,7 +185,7 @@ BOOST_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, 
 OPENEXR_INCLUDE_PATH = "/software/tools/include/" + platform + "/OpenEXR/" + openEXRVersion
 OPENEXR_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 ILMBASE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion + "/GL"
+GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
 GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_LIB_SUFFIX = "-" + glewVersion
 
