@@ -217,6 +217,25 @@ class Selector::Implementation : public IECore::RefCounted
 			}
 		}
 
+		static const Shader *defaultIDShader()
+		{
+			const char *fragmentSource =
+
+				"#version 330\n"
+				""
+				"uniform uint ieCoreGLNameIn;"
+				""
+				"layout( location=0 ) out uint ieCoreGLNameOut;"
+				""
+				"void main()"
+				"{"
+				"	ieCoreGLNameOut = ieCoreGLNameIn;"
+				"}";
+
+			static ShaderPtr s = new Shader( "", fragmentSource );
+			return s.get();
+		}
+
 		static Selector *currentSelector()
 		{
 			return g_currentSelector;
@@ -318,38 +337,6 @@ class Selector::Implementation : public IECore::RefCounted
 		std::stack<ConstShaderPtr> m_IDShaderStack;
 		GLint m_prevViewport[4];
 		GLint m_nameUniformLocation;
-		
-		static const std::string &idShaderFragmentSource()
-		{
-			static const std::string fragmentSource = 
-
-				"#version 330\n"
-				""
-				"uniform uint ieCoreGLNameIn;"
-				""
-				"layout( location=0 ) out uint ieCoreGLNameOut;"
-				""
-				"void main()"
-				"{"
-				"	ieCoreGLNameOut = ieCoreGLNameIn;"
-				"}";
-
-			return fragmentSource;
-		}
-
-		static std::vector<StateComponentPtr> &idStateComponents()
-		{
-			static std::vector<StateComponentPtr> s;
-			if( !s.size() )
-			{
-				s.push_back( new ShaderStateComponent(
-					ShaderLoader::defaultShaderLoader(), TextureLoader::defaultTextureLoader(),
-					"", "", idShaderFragmentSource(),
-					new IECore::CompoundObject()
-				) );
-			}
-			return s;
-		}
 
 		void beginIDRender()
 		{
@@ -366,14 +353,8 @@ class Selector::Implementation : public IECore::RefCounted
 			glClearDepth( 1.0 );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 			
-			const std::vector<StateComponentPtr> &stateComponents = idStateComponents();
-			for( std::vector<StateComponentPtr>::const_iterator it = stateComponents.begin(), eIt = stateComponents.end(); it != eIt; it++ )
-			{
-				m_baseState->add( *it, true /* override */ );
-			}
-			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
-			pushIDShader( m_baseState->get<ShaderStateComponent>()->shaderSetup()->shader() );	
+			pushIDShader( defaultIDShader() );
 		}
 
 		void loadNameIDRender( GLuint name )
@@ -527,6 +508,11 @@ void Selector::pushIDShader( const IECoreGL::Shader *idShader )
 void Selector::popIDShader()
 {
 	m_implementation->popIDShader();
+}
+
+const Shader *Selector::defaultIDShader()
+{
+	return Implementation::defaultIDShader();
 }
 
 Selector *Selector::currentSelector()

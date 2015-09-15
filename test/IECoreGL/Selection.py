@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import inspect
 import os.path
 
 import IECore
@@ -447,6 +448,63 @@ class TestSelection( unittest.TestCase ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( names, [ "selectableObj" ] )
-				
+
+	def testIDSelectWithCustomVertexShader( self ) :
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			# translate to the left with the transform stack
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+
+			# but translate back to the right using a vertex shader
+			r.shader(
+
+				"gl:surface", "test", {
+
+					"gl:vertexSource" : inspect.cleandoc( """
+
+						#version 120
+						#if __VERSION__ <= 120
+							#define in attribute
+						#endif
+
+						uniform vec3 offset;
+
+						in vec3 vertexP;
+						void main()
+						{
+							vec3 translatedVertexP = vertexP + offset;
+							vec4 pCam = gl_ModelViewMatrix * vec4( translatedVertexP, 1 );
+							gl_Position = gl_ProjectionMatrix * pCam;
+						}
+
+					""" ),
+
+					"offset" : IECore.V3f( 2, 0, 0 ),
+
+				}
+
+			)
+
+			r.setAttribute( "name", IECore.StringData( "sphere" ) )
+			r.geometry( "sphere", {}, {} )
+
+		s = r.scene()
+		s.setCamera( IECoreGL.OrthographicCamera() )
+
+		# on the left should be nothing, because the vertex shader moved it over
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.25, 0.5 ), IECore.V2f( 0.26, 0.51 ) ) )
+		self.assertEqual( len( ss ), 0 )
+
+		# and on the right we should find the sphere
+		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
+		self.assertEqual( len( ss ), 1 )
+		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "sphere" )
+
 if __name__ == "__main__":
     unittest.main()
