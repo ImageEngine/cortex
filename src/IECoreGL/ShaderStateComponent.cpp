@@ -61,12 +61,14 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 			:	m_shaderLoader( ShaderLoader::defaultShaderLoader() ), m_textureLoader( TextureLoader::defaultTextureLoader() ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ), 
 				m_parameterMap( 0 ), m_shaderSetup( 0 )
 		{
+			initHash();
 		}
 
 		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
 			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), m_geometrySource( geometrySource ),
 				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
 		{
+			initHash();
 		}
 
 		ShaderLoader *shaderLoader()
@@ -77,6 +79,11 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		TextureLoader *textureLoader()
 		{
 			return m_textureLoader.get();
+		}
+
+		IECore::MurmurHash hash() const
+		{
+			return m_hash;
 		}
 		
 		Shader::Setup *shaderSetup()
@@ -144,8 +151,20 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		std::string m_fragmentSource;
 		std::string m_geometrySource;
 		std::string m_vertexSource;
-		IECore::CompoundObjectPtr m_parameterMap;		
+		IECore::CompoundObjectPtr m_parameterMap;
+		IECore::MurmurHash m_hash;
 		mutable Shader::SetupPtr m_shaderSetup;
+
+		void initHash()
+		{
+			m_hash.append( m_fragmentSource );
+			m_hash.append( m_geometrySource );
+			m_hash.append( m_vertexSource );
+			if( m_parameterMap )
+			{
+				m_parameterMap->hash( m_hash );
+			}
+		}
 
 		void ensureShaderSetup() const
 		{
@@ -203,7 +222,12 @@ TextureLoader *ShaderStateComponent::textureLoader()
 {
 	return m_implementation->textureLoader();
 }
-		
+
+IECore::MurmurHash ShaderStateComponent::hash() const
+{
+	return m_implementation->hash();
+}
+
 Shader::Setup *ShaderStateComponent::shaderSetup()
 {
 	return m_implementation->shaderSetup();

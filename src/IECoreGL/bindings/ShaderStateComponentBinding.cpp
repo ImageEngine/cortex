@@ -68,6 +68,7 @@ void bindShaderStateComponent()
 		.def( init<ShaderLoaderPtr, TextureLoaderPtr, const std::string &, const std::string &, const std::string &, IECore::ConstCompoundObjectPtr>() )
 		.def( "shaderLoader", &shaderLoader )
 		.def( "textureLoader", &textureLoader )
+		.def( "hash", &ShaderStateComponent::hash )
 		.def( "shaderSetup", &shaderSetup )
 	;
 }
