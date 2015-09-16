@@ -121,29 +121,34 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			m_data->archive = boost::shared_ptr<IArchive>( new IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), fileName ) );
 		#endif
 
-			m_data->object = m_data->archive->getTop();
+			m_data->xform = m_data->archive->getTop();
+			m_data->storedBound = (m_data->xform.getProperties().getPropertyHeader( ".childBnds" ) != 0x0);
 		}
 
 		virtual ~AlembicReader() {}
 
 		virtual void childNames( NameList &childNames ) const
 		{
+			// list the names of all transforms that are child of this node:
 			size_t numChildren = this->numChildren();
 			for( size_t i=0; i<numChildren; i++ )
 			{
-				childNames.push_back( m_data->object.getChildHeader( i ).getName() );
+				if( IXform::matches( m_data->xform.getChildHeader( i ).getMetaData() ) )
+				{
+					childNames.push_back( m_data->xform.getChildHeader( i ).getName() );
+				}
 			}
 		}
 
 		virtual Name name() const
 		{
-			return m_data->object.getName();
+			return m_data->xform.getName();
 		}
 
 		virtual void path( Path &p ) const
 		{
 			p.clear();
-			std::string path = m_data->object.getFullName();
+			std::string path = m_data->xform.getFullName();
 			boost::tokenizer<boost::char_separator<char> > t( path, boost::char_separator<char>( "/" ) );
 			for (
 				boost::tokenizer<boost::char_separator<char> >::iterator it = t.begin();
@@ -157,18 +162,14 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 
 		virtual AlembicIOPtr child( const Name &name )
 		{
-			IObject c = m_data->object.getChild( name.string() );
-			if( !c )
+			IObject c = m_data->xform.getChild( name.string() );
+			if( !c || !IXform::matches( c.getMetaData() ) )
 			{
-				throw InvalidArgumentException( name.string() );
+				return 0;
 			}
 
 			AlembicReaderPtr result = new AlembicReader();
-			result->m_data = boost::shared_ptr<DataMembers>( new DataMembers );
-			result->m_data->archive = m_data->archive;
-			result->m_data->boundCache = m_data->boundCache;
-			result->m_data->fileHash = m_data->fileHash;
-			result->m_data->object = c;
+			result->createDataMembers( m_data.get(), c );
 			return result;
 		}
 
@@ -187,152 +188,131 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			return reader;
 		}
 
-		/// Returns the number of samples.
-		size_t numSamples() const
+		/// Returns the number of samples on this transform.
+		size_t numXformSamples() const
 		{
 			if( m_data->numSamples != -1 )
 			{
 				return m_data->numSamples;
 			}
 
-			// wouldn't it be grand if the different things we had to call getNumSamples()
-			// on had some sort of base class where getNumSamples() was defined?
-			/// \todo See todo in ensureTimeSampling().
-
-			const MetaData &md = m_data->object.getMetaData();
-
-			if( !m_data->object.getParent() )
-			{
-				// top of archive
-				if( m_data->object.getProperties().getPropertyHeader( ".childBnds" ) )
-				{
-					Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
-					m_data->numSamples = boundsProperty.getNumSamples();
-				}
-				else
-				{
-					m_data->numSamples = 0;
-				}
-			}
-			else if( IXform::matches( md ) )
-			{
-				IXform iXForm( m_data->object, kWrapExisting );
-				m_data->numSamples = iXForm.getSchema().getNumSamples();
-			}
-			else if( ICamera::matches( md ) )
-			{
-				ICamera iCamera( m_data->object, kWrapExisting );
-				m_data->numSamples = iCamera.getSchema().getNumSamples();	
-			}
-			else
-			{
-				IGeomBaseObject geomBase( m_data->object, kWrapExisting );
-				m_data->numSamples = geomBase.getSchema().getNumSamples();
-			}
-
+			m_data->numSamples = calculateNumSamples( m_data->xform );
 			return m_data->numSamples;
 		}
 
-		/// Returns the time associated with the specified sample.
-		double timeAtSample( size_t sampleIndex ) const
+		size_t numObjectSamples() const
 		{
-			if( sampleIndex >= numSamples() )
+			if( m_data->numObjectSamples != -1 )
+			{
+				return m_data->numObjectSamples;
+			}
+
+			m_data->numObjectSamples = calculateNumSamples( m_data->object );
+			return m_data->numObjectSamples;
+		}
+
+		size_t numBoundSamples() const
+		{
+			if( m_data->storedBound )
+			{
+				return numXformSamples();
+			}
+			else
+			{
+				return numObjectSamples();
+			}
+		}
+
+		/// Returns the time associated with the specified sample.
+		double timeAtXformSample( size_t sampleIndex ) const
+		{
+			if( sampleIndex >= numXformSamples() )
 			{
 				throw InvalidArgumentException( "Sample index out of range" );
 			}
 			ensureTimeSampling();
-			return m_data->timeSampling->getSampleTime( sampleIndex );
+			return m_data->xformTimeSampling->getSampleTime( sampleIndex );
 		}
 
+		double timeAtObjectSample( size_t sampleIndex ) const
+		{
+			if( sampleIndex >= numObjectSamples() )
+			{
+				throw InvalidArgumentException( "Sample index out of range" );
+			}
+			ensureTimeSampling();
+			return m_data->objectTimeSampling->getSampleTime( sampleIndex );
+		}
+
+		double timeAtBoundSample( size_t sampleIndex ) const
+		{
+			if( m_data->storedBound )
+			{
+				return timeAtXformSample( sampleIndex );
+			}
+			else
+			{
+				return timeAtObjectSample( sampleIndex );
+			}
+		}
 		/// Computes a sample interval suitable for use in producing interpolated
 		/// values, returning the appropriate lerp factor between the two samples.
 		/// In the case of time falling outside of the sample range, or coinciding
 		/// nearly exactly with a single sample, 0 is returned and floorIndex==ceilIndex
 		/// will hold.
-		double sampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
+		double xformSampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
 		{
-			ensureTimeSampling();	
-
-			std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> f = m_data->timeSampling->getFloorIndex( time, numSamples() );
-			if( fabs( time - f.second ) < 0.0001 )
-			{
-				// it's going to be very common to be reading on the whole frame, so we want to make sure
-				// that anything thereabouts is loaded as a single uninterpolated sample for speed.
-				floorIndex = ceilIndex = f.first;
-				return 0.0;
-			}
-
-			std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> c = m_data->timeSampling->getCeilIndex( time, numSamples() );
-			if( f.first == c.first || fabs( time - c.second ) < 0.0001 )
-			{
-				// return a result not needing interpolation if possible. either we only had one sample
-				// to pick from or the ceiling sample was close enough to perfect.
-				floorIndex = ceilIndex = c.first;
-				return 0.0;
-			}
-
-			floorIndex = f.first;
-			ceilIndex = c.first;
-
-			return ( time - f.second ) / ( c.second - f.second );
+			ensureTimeSampling();
+			return calculateSampleIntervalAtTime( m_data->xformTimeSampling, numXformSamples(), time, floorIndex, ceilIndex );
 		}
 
-		/// Alembic archives don't necessarily store bounding box
-		/// information for every object in the scene graph. This method
-		/// can be used to determine whether or not a bound has been
-		/// stored for this object. You can NOT EXACTLY rely on having
-		/// stored bounds at the top of the archive and at any geometry-containing
-		/// nodes.
-		bool hasStoredBound() const
+		double objectSampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
 		{
-			const MetaData &md = m_data->object.getMetaData();
-			if( !m_data->object.getParent() )
+			ensureTimeSampling();
+			return calculateSampleIntervalAtTime( m_data->objectTimeSampling, numObjectSamples(), time, floorIndex, ceilIndex );
+		}
+		double boundSampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
+		{
+			if( m_data->storedBound )
 			{
-				return m_data->object.getProperties().getPropertyHeader( ".childBnds" ) != 0x0;
+				return xformSampleIntervalAtTime( time, floorIndex, ceilIndex );
 			}
-			else if( IXform::matches( md ) )
+			else
 			{
-				IXform iXForm( m_data->object, kWrapExisting );
-				IXformSchema &iXFormSchema = iXForm.getSchema();
-				return iXFormSchema.getChildBoundsProperty();
+				return objectSampleIntervalAtTime( time, floorIndex, ceilIndex );
 			}
-			else if( IGeomBase::matches( md ) )
-			{
-				return true;
-			}
-			return false;
 		}
 
 		/// Returns the local bounding box of this node stored for the specified
-		/// sample. If hasStoredBound() is false then throws an Exception.
+		/// sample, the bounding box of the object if none exists or an empty bounding box
+		/// if the object's not there either.
 		Imath::Box3d boundAtSample( size_t sampleIndex ) const
 		{
-			const MetaData &md = m_data->object.getMetaData();
-
-			if( !m_data->object.getParent() )
+			if( !m_data->xform.getParent() )
 			{
 				// top of archive
 				return GetIArchiveBounds( *(m_data->archive) ).getValue( ISampleSelector( (index_t)sampleIndex ) );
 			}
-			else if( IXform::matches( md ) )
+			else
 			{
-				IXform iXForm( m_data->object, kWrapExisting );
+				IXform iXForm( m_data->xform, kWrapExisting );
 				IXformSchema &iXFormSchema = iXForm.getSchema();
 
 				if( !iXFormSchema.getChildBoundsProperty() )
 				{
-					throw IECore::Exception( "No stored bounds available" );
+					if( m_data->object )
+					{
+						IGeomBaseObject geomBase( m_data->object, kWrapExisting );
+						return geomBase.getSchema().getValue( ISampleSelector( (index_t)sampleIndex ) ).getSelfBounds();
+					}
+					else
+					{
+						return Imath::Box3d();
+					}
 				}
 
 				return iXFormSchema.getChildBoundsProperty().getValue( ISampleSelector( (index_t)sampleIndex ) );
 			}
-			else
-			{
-				IGeomBaseObject geomBase( m_data->object, kWrapExisting );
-				return geomBase.getSchema().getValue( ISampleSelector( (index_t)sampleIndex ) ).getSelfBounds();
-			}
-
-			return Imath::Box3d();
 		}
 
 		/// Returns the interpolated local bounding box of this node at the
@@ -351,9 +331,9 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 		Imath::M44d transformAtSample( size_t sampleIndex = 0 ) const
 		{
 			M44d result;
-			if( IXform::matches( m_data->object.getMetaData() ) )
+			if( IXform::matches( m_data->xform.getMetaData() ) )
 			{
-				IXform iXForm( m_data->object, kWrapExisting );
+				IXform iXForm( m_data->xform, kWrapExisting );
 				IXformSchema &iXFormSchema = iXForm.getSchema();
 				XformSample sample;
 				iXFormSchema.get( sample, ISampleSelector( (index_t)sampleIndex ) );
@@ -367,12 +347,12 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 		{
 			M44d result;
 
-			if( IXform::matches( m_data->object.getMetaData() ) )
+			if( IXform::matches( m_data->xform.getMetaData() ) )
 			{
 				size_t index0, index1;
-				double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+				double lerpFactor = xformSampleIntervalAtTime( time, index0, index1 );
 
-				IXform iXForm( m_data->object, kWrapExisting );
+				IXform iXForm( m_data->xform, kWrapExisting );
 				IXformSchema &iXFormSchema = iXForm.getSchema();
 
 				if( index0 == index1 )
@@ -419,14 +399,10 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			return result;
 		}
 
-		/// Returns a converter capable of converting the Alembic object into
-		/// the specified form, or 0 if no such converter exists. The converter
-		/// is returned as a ToCoreConverter rather than a FromAlembicConverter
-		/// as the latter exposes the underlying Alembic APIs, which we are
-		/// deliberately hiding with the AlembicReader class.
-		IECore::ToCoreConverterPtr converter( IECore::TypeId resultType = IECore::ObjectTypeId ) const
+		/// do we have an object?
+		bool hasObject() const
 		{
-			return FromAlembicConverter::create( m_data->object, resultType );
+			return m_data->object;
 		}
 
 		/// Converts the alembic object into Cortex form, preferring conversions
@@ -452,7 +428,7 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			}
 
 			size_t index0, index1;
-			double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+			double lerpFactor = objectSampleIntervalAtTime( time, index0, index1 );
 			if( index0==index1 )
 			{
 				c->sampleIndexParameter()->setNumericValue( index0 );
@@ -477,7 +453,7 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			{
 				h.append( alembicHash.words[0] );
 				h.append( alembicHash.words[1] );
-				if( numSamples() )
+				if( numObjectSamples() )
 				{
 					h.append( time );
 				}
@@ -489,8 +465,8 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 		size_t numChildren() const
 		{
 			if(
-				!IXform::matches( m_data->object.getMetaData() ) &&
-				m_data->object.getParent()
+				!IXform::matches( m_data->xform.getMetaData() ) &&
+				m_data->xform.getParent()
 			)
 			{
 				// not a transform, and not the top of the archive.
@@ -501,7 +477,7 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 				// of them as a property of the mesh.
 				return 0;
 			}
-			return m_data->object.getNumChildren();
+			return m_data->xform.getNumChildren();
 		}
 
 	private:
@@ -510,38 +486,116 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 	
 		void ensureTimeSampling() const		
 		{
-			if( m_data->timeSampling )
+			if( m_data->xformTimeSampling )
 			{
 				return;
 			}
-			const MetaData &md = m_data->object.getMetaData();
+			const MetaData &md = m_data->xform.getMetaData();
 
-			/// \todo It's getting a bit daft having to cover all the
-			/// types in here. We either need to find a generic way of
-			/// doing it (seems like that might not be Alembic's style though)
-			/// or perhaps we should have a timeSampling() method on the
-			/// converters?
-			if( !m_data->object.getParent() )
+			if( !m_data->xform.getParent() )
 			{
 				// top of archive
-				Alembic::Abc::IBox3dProperty boundsProperty( m_data->object.getProperties(), ".childBnds" );
-				m_data->timeSampling = boundsProperty.getTimeSampling();
+				Alembic::Abc::IBox3dProperty boundsProperty( m_data->xform.getProperties(), ".childBnds" );
+				m_data->xformTimeSampling = boundsProperty.getTimeSampling();
 			}
 			else if( IXform::matches( md ) )
 			{
-				IXform iXForm( m_data->object, kWrapExisting );
-				m_data->timeSampling = iXForm.getSchema().getTimeSampling();
+				IXform iXForm( m_data->xform, kWrapExisting );
+				m_data->xformTimeSampling = iXForm.getSchema().getTimeSampling();
+			}
+			
+			if( m_data->object )
+			{
+				const MetaData &md = m_data->object.getMetaData();
+
+				/// \todo It's getting a bit daft having to cover all the
+				/// types in here. We either need to find a generic way of
+				/// doing it (seems like that might not be Alembic's style though)
+				/// or perhaps we should have a timeSampling() method on the
+				/// converters?
+				if( ICamera::matches( md ) )
+				{
+					ICamera iCamera( m_data->object, kWrapExisting );
+					m_data->objectTimeSampling = iCamera.getSchema().getTimeSampling();	
+				}
+				else
+				{
+					IGeomBaseObject geomBase( m_data->object, kWrapExisting );
+					m_data->objectTimeSampling = geomBase.getSchema().getTimeSampling();
+				}
+			}
+		}
+
+		int calculateNumSamples( const IObject &object ) const
+		{
+			if( !object )
+			{
+				return 0;
+			}
+
+			const MetaData &md = object.getMetaData();
+
+			if( !object.getParent() )
+			{
+				// top of archive
+				if( object.getProperties().getPropertyHeader( ".childBnds" ) )
+				{
+					Alembic::Abc::IBox3dProperty boundsProperty( object.getProperties(), ".childBnds" );
+					return boundsProperty.getNumSamples();
+				}
+				else
+				{
+					return 0;
+				}
+			}
+			else if( IXform::matches( md ) )
+			{
+				IXform iXForm( object, kWrapExisting );
+				return iXForm.getSchema().getNumSamples();
 			}
 			else if( ICamera::matches( md ) )
 			{
-				ICamera iCamera( m_data->object, kWrapExisting );
-				m_data->timeSampling = iCamera.getSchema().getTimeSampling();	
+				ICamera iCamera( object, kWrapExisting );
+				return iCamera.getSchema().getNumSamples();	
 			}
 			else
 			{
-				IGeomBaseObject geomBase( m_data->object, kWrapExisting );
-				m_data->timeSampling = geomBase.getSchema().getTimeSampling();
+				IGeomBaseObject geomBase( object, kWrapExisting );
+				return geomBase.getSchema().getNumSamples();
 			}
+		}
+
+
+		double calculateSampleIntervalAtTime( TimeSamplingPtr timeSampling, size_t numSamples, double time, size_t &floorIndex, size_t &ceilIndex ) const
+		{
+			if( !timeSampling )
+			{
+				floorIndex = ceilIndex = 0;
+				return 0;
+			}
+
+			std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> f = timeSampling->getFloorIndex( time, numSamples );
+			if( fabs( time - f.second ) < 0.0001 )
+			{
+				// it's going to be very common to be reading on the whole frame, so we want to make sure
+				// that anything thereabouts is loaded as a single uninterpolated sample for speed.
+				floorIndex = ceilIndex = f.first;
+				return 0.0;
+			}
+
+			std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> c = timeSampling->getCeilIndex( time, numSamples );
+			if( f.first == c.first || fabs( time - c.second ) < 0.0001 )
+			{
+				// return a result not needing interpolation if possible. either we only had one sample
+				// to pick from or the ceiling sample was close enough to perfect.
+				floorIndex = ceilIndex = c.first;
+				return 0.0;
+			}
+
+			floorIndex = f.first;
+			ceilIndex = c.first;
+
+			return ( time - f.second ) / ( c.second - f.second );
 		}
 
 		// If no explicit bounding box has been written at a location, the bounding box
@@ -556,14 +610,11 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 		AlembicReaderPtr child( size_t index ) const
 		{
 			AlembicReaderPtr result = new AlembicReader();
-			result->m_data = boost::shared_ptr<DataMembers>( new DataMembers );
-			result->m_data->archive = this->m_data->archive;
-			result->m_data->boundCache = this->m_data->boundCache;
-			result->m_data->fileHash = this->m_data->fileHash;
 			/// \todo this is documented as not being the best way of doing things in
 			/// the alembic documentation. I'm not sure what would be better though,
 			/// and it appears to work fine so far.
-			result->m_data->object = this->m_data->object.getChild( index );
+			IObject c = this->m_data->xform.getChild( index );
+			result->createDataMembers( m_data.get(), c );
 			return result;
 		}
 
@@ -575,7 +626,7 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			// hash in scene location, sample index and the file hash,
 			// which is built using the file name and the time stamp:
 			IECore::MurmurHash h;
-			h.append( input->m_data->object.getFullName() );
+			h.append( input->m_data->xform.getFullName() );
 			h.append( time );
 			h.append( input->m_data->fileHash );
 
@@ -587,10 +638,10 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 			const AlembicReader* input = key.first;
 			double time = key.second;
 
-			if( input->hasStoredBound() )
+			if( input->m_data->storedBound || ( input->m_data->xform.getParent() && input->m_data->object ) )
 			{
 				size_t index0, index1;
-				double lerpFactor = input->sampleIntervalAtTime( time, index0, index1 );
+				double lerpFactor = input->xformSampleIntervalAtTime( time, index0, index1 );
 				if( index0 == index1 )
 				{
 					return new IECore::Box3dData( input->boundAtSample( index0 ) );
@@ -610,10 +661,13 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 				Box3d result;
 				for( size_t i=0, n=input->numChildren(); i<n; i++ )
 				{
-					ConstAlembicReaderPtr c = reader( input->child( i ).get() );
-					Box3d childBound = c->boundAtTime( time );
-					childBound = Imath::transform( childBound, c->transformAtTime( time ) );
-					result.extendBy( childBound );
+					if( IXform::matches( input->m_data->xform.getChildHeader( i ).getMetaData() ) )
+					{
+						ConstAlembicReaderPtr c = reader( input->child( i ).get() );
+						Box3d childBound = c->boundAtTime( time );
+						childBound = Imath::transform( childBound, c->transformAtTime( time ) );
+						result.extendBy( childBound );
+					}
 				}
 				return new IECore::Box3dData( result );
 			}
@@ -623,17 +677,48 @@ class AlembicScene::AlembicReader : public AlembicScene::AlembicIO
 		{
 
 			DataMembers()
-				: numSamples( -1 )
+				: numSamples( -1 ), numObjectSamples( -1 ), numBoundSamples( -1 ), storedBound( false )
 			{
 			}
 
 			IECore::MurmurHash fileHash;
 			boost::shared_ptr<IArchive> archive;	
+			IObject xform;
 			IObject object;
 			BoundCache::Ptr boundCache;
+			
 			int numSamples;
-			TimeSamplingPtr timeSampling;
+			int numObjectSamples;
+
+			bool storedBound;
+
+			TimeSamplingPtr xformTimeSampling;
+			TimeSamplingPtr objectTimeSampling;
 		};
+
+		void createDataMembers( DataMembers *data, IObject &c )
+		{
+			m_data = boost::shared_ptr<DataMembers>( new DataMembers );
+			m_data->archive = data->archive;
+			m_data->boundCache = data->boundCache;
+			m_data->fileHash = data->fileHash;
+			m_data->xform = c;
+			
+			// find the first child of this node that isn't a transform:
+			size_t numChildren = m_data->xform.getNumChildren();
+			for( size_t i=0; i<numChildren; i++ )
+			{
+				if( !IXform::matches( m_data->xform.getChildHeader( i ).getMetaData() ) )
+				{
+					m_data->object = m_data->xform.getChild( i );
+					break;
+				}
+			}
+
+			IXform iXForm( m_data->xform, kWrapExisting );
+			IXformSchema &iXFormSchema = iXForm.getSchema();
+			m_data->storedBound = iXFormSchema.getChildBoundsProperty();
+		}
 
 		boost::shared_ptr<DataMembers> m_data;
 
@@ -873,17 +958,17 @@ AlembicScene::Name AlembicScene::name() const
 
 size_t AlembicScene::numBoundSamples() const
 {
-	return AlembicReader::reader( m_io.get() )->numSamples();
+	return AlembicReader::reader( m_io.get() )->numBoundSamples();
 }
 
 double AlembicScene::boundSampleTime( size_t sampleIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->timeAtSample( sampleIndex );
+	return AlembicReader::reader( m_io.get() )->timeAtBoundSample( sampleIndex );
 }
 
 double AlembicScene::boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->sampleIntervalAtTime( time, floorIndex, ceilIndex );
+	return AlembicReader::reader( m_io.get() )->boundSampleIntervalAtTime( time, floorIndex, ceilIndex );
 }
 
 Imath::Box3d AlembicScene::readBoundAtSample( size_t sampleIndex ) const
@@ -903,17 +988,17 @@ void AlembicScene::writeBound( const Imath::Box3d &bound, double time )
 
 size_t AlembicScene::numTransformSamples() const
 {
-	return AlembicReader::reader( m_io.get() )->numSamples();
+	return AlembicReader::reader( m_io.get() )->numXformSamples();
 }
 
 double AlembicScene::transformSampleTime( size_t sampleIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->timeAtSample( sampleIndex );
+	return AlembicReader::reader( m_io.get() )->timeAtXformSample( sampleIndex );
 }
 
 double AlembicScene::transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->sampleIntervalAtTime( time, floorIndex, ceilIndex );
+	return AlembicReader::reader( m_io.get() )->xformSampleIntervalAtTime( time, floorIndex, ceilIndex );
 }
 
 ConstDataPtr AlembicScene::readTransformAtSample( size_t sampleIndex ) const
@@ -959,17 +1044,17 @@ void AlembicScene::attributeNames( NameList &attrs ) const
 
 size_t AlembicScene::numAttributeSamples( const Name &name ) const
 {
-	return AlembicReader::reader( m_io.get() )->numSamples();
+	return AlembicReader::reader( m_io.get() )->numXformSamples();
 }
 
 double AlembicScene::attributeSampleTime( const Name &name, size_t sampleIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->timeAtSample( sampleIndex );
+	return AlembicReader::reader( m_io.get() )->timeAtXformSample( sampleIndex );
 }
 
 double AlembicScene::attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->sampleIntervalAtTime( time, floorIndex, ceilIndex );
+	return AlembicReader::reader( m_io.get() )->xformSampleIntervalAtTime( time, floorIndex, ceilIndex );
 }
 
 ConstObjectPtr AlembicScene::readAttributeAtSample( const Name &name, size_t sampleIndex ) const
@@ -1004,22 +1089,22 @@ void AlembicScene::writeTags( const NameList &tags )
 
 bool AlembicScene::hasObject() const
 {
-	return AlembicReader::reader( m_io.get() )->converter( IECore::RenderableTypeId );
+	return AlembicReader::reader( m_io.get() )->hasObject();
 }
 
 size_t AlembicScene::numObjectSamples() const
 {
-	return AlembicReader::reader( m_io.get() )->numSamples();
+	return AlembicReader::reader( m_io.get() )->numObjectSamples();
 }
 
 double AlembicScene::objectSampleTime( size_t sampleIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->timeAtSample( sampleIndex );
+	return AlembicReader::reader( m_io.get() )->timeAtObjectSample( sampleIndex );
 }
 
 double AlembicScene::objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
-	return AlembicReader::reader( m_io.get() )->sampleIntervalAtTime( time, floorIndex, ceilIndex );
+	return AlembicReader::reader( m_io.get() )->objectSampleIntervalAtTime( time, floorIndex, ceilIndex );
 }
 
 ConstObjectPtr AlembicScene::readObjectAtSample( size_t sampleIndex ) const
@@ -1141,23 +1226,8 @@ void AlembicScene::hash( HashType hashType, double time, MurmurHash &h ) const
 		}
 		case BoundHash:
 		{
-			if( input->hasStoredBound() )
-			{
-				// this read will be quick as the bound has been stored, so we can use it in the hash:
-				h.append( readBound( time ) );
-			}
-			else
-			{
-				// fall back and just hash in a bunch of stuff:
-				h.append( m_fileNameHash );
-				Path p;
-				input->path( p );
-				h.append( p.data(), p.size() );
-				if( numBoundSamples() > 1 )
-				{
-					h.append( time );
-				}
-			}
+			// this read will be quick as the bound has been stored, so we can use it in the hash:
+			h.append( readBound( time ) );
 			break;
 		}
 		case ObjectHash:

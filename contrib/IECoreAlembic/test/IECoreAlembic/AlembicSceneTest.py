@@ -84,31 +84,35 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( c.name(), "pCube1" )
 		self.assertEqual( c.path(), ["group1","pCube1"] )
 
-		self.assertEqual( c.childNames(), [ "pCubeShape1" ] )
+		# make sure mesh shape is hidden:
+		self.assertEqual( c.childNames(), [] )
+		self.assertRaises( Exception, c.child, "pCubeShape1" )
+		self.assertRaises( Exception, c.child, "pCubeShape1", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( c.child( "pCubeShape1", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 
-		cs = c.child( "pCubeShape1" )
-		self.assertEqual( cs.childNames(), [] )
+		# make sure bogus child name doesn't exist either:
+		self.assertRaises( Exception, c.child, "iDontExist" )
+		self.assertRaises( Exception, c.child, "iDontExist", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( c.child( "iDontExist", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 
-		self.assertRaises( Exception, cs.child, "iDontExist" )
 
 	def testHasObject( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( a.hasObject() )
 		self.assertFalse( a.child("group1").hasObject() )
-		self.assertFalse( a.child("group1").child("pCube1").hasObject() )
-		self.assertTrue( a.child("group1").child("pCube1").child("pCubeShape1").hasObject() )
+		self.assertTrue( a.child("group1").child("pCube1").hasObject() )
 
 	def testConvertMesh( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
 
-		c = a.child( "group1" ).child( "pCube1" )
+		c = a.child( "group1" )
 		self.assertEqual( c.hasObject(), False )
 		self.assertEqual( c.readObjectAtSample( 0 ), IECore.NullObject.defaultNullObject() )
 
-		cs = c.child( "pCubeShape1" )
-		m = cs.readObject( 0 )
+		c = c.child( "pCube1" )
+		m = c.readObject( 0 )
 
 		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
 
@@ -128,19 +132,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 		t = c.readTransformAsMatrix( 0 )
 		self.assertEqual( t, IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
 
-		cs = c.child( "pCubeShape1" )
-		t = cs.readTransformAsMatrixAtSample( 0 )
-		self.assertEqual( t, IECore.M44d() )
-
 	def testBound( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/cube.abc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( a.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
 		self.assertEqual( a.readBound( 0 ), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
 
-		cs = a.child( "group1" ).child( "pCube1" ).child( "pCubeShape1" )
+		cs = a.child( "group1" ).child( "pCube1" )
 		self.assertEqual( cs.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
-		self.assertEqual( cs.readBound( 0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )	
+		self.assertEqual( cs.readBound( 0 ), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 
 	def testTransform( self ) :
 
@@ -153,18 +153,12 @@ class AlembicSceneTest( unittest.TestCase ) :
 		c = g.child( "pCube1" )
 		self.assertEqual( c.readTransformAsMatrixAtSample( 0 ), IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
 
-		cs = c.child( "pCubeShape1" )
-		self.assertEqual( cs.readTransformAsMatrixAtSample( 0 ), IECore.M44d() )
-
 	def testConvertSubD( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/subdPlane.abc", IECore.IndexedIO.OpenMode.Read )
 
 		c = a.child( "pPlane1" )
-		self.assertEqual( c.readObjectAtSample( 0 ), IECore.NullObject.defaultNullObject() )
-
-		cs = c.child( "pPlaneShape1" )
-		m = cs.readObjectAtSample( 0 )
+		m = c.readObjectAtSample( 0 )
 
 		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
 		self.assertEqual( m.interpolation, "catmullClark" )
@@ -173,7 +167,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
 
-		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).readObjectAtSample( 0 )
+		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
 		self.failUnless( m.arePrimitiveVariablesValid() )
 
@@ -198,7 +192,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testConvertUVs( self ) :
 	
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
-		m = a.child( "pPlane1" ).child( "pPlaneShape1" ).readObjectAtSample( 0 )
+		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
 		self.failUnless( "s" in m )
 		self.failUnless( "t" in m )				
@@ -226,10 +220,9 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for i in range( 0, t.numTransformSamples() ) :
 			self.assertAlmostEqual( t.transformSampleTime( i ), (i + 1) / 24.0 )
 
-		m = t.child( "pCubeShape1" )
-		self.assertEqual( m.numTransformSamples(), 10 )	
-		for i in range( 0, m.numTransformSamples() ) :
-			self.assertAlmostEqual( m.transformSampleTime( i ), (i + 1) / 24.0 )
+		self.assertEqual( t.numObjectSamples(), 10 )
+		for i in range( 0, t.numObjectSamples() ) :
+			self.assertAlmostEqual( t.objectSampleTime( i ), (i + 1) / 24.0 )
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc", IECore.IndexedIO.OpenMode.Read )
 
@@ -246,7 +239,35 @@ class AlembicSceneTest( unittest.TestCase ) :
 		#a.readBoundAtSample(0)
 		#a.readObjectAtSample(0)
 		#a.readTransformAtSample(0)
+		
+	def testDifferentSampleTypes( self ) :
 
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		b = a.createChild("blah")
+
+		b.writeObject( IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ), 0 )
+		b.writeObject( IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ), 1 )
+
+		b.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(1,2,3) ) ), -1.0 )
+		b.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(2,3,4) ) ), -0.75 )
+		b.writeTransform( IECore.M44dData( IECore.M44d.createRotated( IECore.V3d(3,4,5) ) ), -0.5 )
+
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		b = a.child("blah")
+
+		# test object samples:
+		self.assertEqual( b.numObjectSamples(), 2 )
+		self.assertEqual( b.objectSampleTime(0), 0.0 )
+		self.assertEqual( b.objectSampleTime(1), 1.0 )
+
+		# test transform samples:
+		self.assertEqual( b.numTransformSamples(), 3 )
+		self.assertEqual( b.transformSampleTime(0), -1.0 )
+		self.assertEqual( b.transformSampleTime(1), -0.75 )
+		self.assertEqual( b.transformSampleTime(2), -0.5 )
+		
 	def testOutOfRangeSamplesRaise( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
@@ -300,7 +321,7 @@ class AlembicSceneTest( unittest.TestCase ) :
 	def testConvertInterpolated( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
-		m = a.child( "pCube1" ).child( "pCubeShape1" )
+		m = a.child( "pCube1" )
 
 		mesh0 = m.readObjectAtSample( 0 )
 		mesh1 = m.readObjectAtSample( 1 )
@@ -351,18 +372,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual( a.readBoundAtSample( a.numBoundSamples()-1 ), IECore.Box3d( IECore.V3d( 0.5, -0.5, -0.5 ), IECore.V3d( 1.5, 2, 0.5 ) ) )
 
 		t = a.child( "pCube1" )
-		self.assertRaises( Exception, t.readBoundAtSample, 0 )
-		self.assertRaises( Exception, t.readBoundAtSample, t.numBoundSamples() - 1 )		
-
-		m = t.child( "pCubeShape1" )
-		self.assertEqual( m.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
-		self.assertEqual( m.readBoundAtSample( m.numBoundSamples()-1 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 2, 0.5 ) ) )
+		self.assertEqual( t.readBoundAtSample( 0 ), IECore.Box3d( IECore.V3d( -0.5 ), IECore.V3d( 0.5 ) ) )
+		self.assertEqual( t.readBoundAtSample( t.numBoundSamples()-1 ), IECore.Box3d( IECore.V3d( -0.5, -0.5, -0.5 ), IECore.V3d( 0.5, 2, 0.5 ) ) )
 
 	def testBoundAtTime( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
 		t = a.child( "pCube1" )
-		m = t.child( "pCubeShape1" )
 
 		startTime = a.boundSampleTime( 0 )
 		endTime = a.boundSampleTime( a.numBoundSamples() - 1 )
@@ -370,8 +386,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 		aStartBound = a.readBoundAtSample( 0 )
 		aEndBound = a.readBoundAtSample( a.numBoundSamples() - 1 )
 
-		mStartBound = m.readBoundAtSample( 0 )
-		mEndBound = m.readBoundAtSample( m.numBoundSamples() - 1 )
+		mStartBound = t.readBoundAtSample( 0 )
+		mEndBound = t.readBoundAtSample( t.numBoundSamples() - 1 )
 
 		def lerp( a, b, x ) :
 
@@ -395,19 +411,15 @@ class AlembicSceneTest( unittest.TestCase ) :
 			self.failUnless( aBound.min.equalWithAbsError( expectedABound.min, 0.000001 ) )
 			self.failUnless( aBound.max.equalWithAbsError( expectedABound.max, 0.000001 ) )
 
-			mBound = m.readBound( time )
-			expectedMBound = lerpBox( mStartBound, mEndBound, lerpFactor )
-			self.failUnless( mBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
-			self.failUnless( mBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
-
 			tBound = t.readBound( time )
+			expectedMBound = lerpBox( mStartBound, mEndBound, lerpFactor )
 			self.failUnless( tBound.min.equalWithAbsError( expectedMBound.min, 0.000001 ) )
 			self.failUnless( tBound.max.equalWithAbsError( expectedMBound.max, 0.000001 ) )
 
 	def testConvertNormals( self ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
-		m = a.child( "pCube1" ).child( "pCubeShape1" )
+		m = a.child( "pCube1" )
 		mesh = m.readObjectAtSample( 0 )
 
 		self.failUnless( "N" in mesh )
@@ -419,21 +431,11 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/animatedCube.abc", IECore.IndexedIO.OpenMode.Read )
 
-		c = a.child( "persp" ).child( "perspShape" ).readObjectAtSample( 0 )
+		c = a.child( "persp" ).readObjectAtSample( 0 )
 		self.failUnless( isinstance( c, IECore.Camera ) )		
 
-		c = a.child( "persp" ).child( "perspShape" ).readObject( 0 )
+		c = a.child( "persp" ).readObject( 0 )
 		self.failUnless( isinstance( c, IECore.Camera ) )		
-
-	def testHierarchyIgnoresShadingGroups( self ) :
-
-		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/sphereWithShadingGroups.abc", IECore.IndexedIO.OpenMode.Read )
-		self.assertEqual( a.childNames(), [ "pSphere1" ] )
-
-		g = a.child( "pSphere1" )
-		m = g.child( "pSphereShape1" )
-
-		self.assertEqual( m.childNames(), [] )
 
 	def testAttributes( self ) :
 
@@ -467,11 +469,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertNotEqual( t.hash( IECore.SceneInterface.HashType.TransformHash, 1.0/24 ), t.hash( IECore.SceneInterface.HashType.TransformHash, 1.1/24 ) )
 
 		# BoundHash:
-		s = t.child( "pCubeShape1" )
 		self.assertNotEqual( t.hash( IECore.SceneInterface.HashType.BoundHash, 0 ), t.hash( IECore.SceneInterface.HashType.BoundHash, 100 ) )
 
 		# ObjectHash:
-		self.assertNotEqual( s.hash( IECore.SceneInterface.HashType.ObjectHash, 0 ), s.hash( IECore.SceneInterface.HashType.ObjectHash, 100 ) )
+		self.assertNotEqual( t.hash( IECore.SceneInterface.HashType.ObjectHash, 0 ), t.hash( IECore.SceneInterface.HashType.ObjectHash, 100 ) )
 
 		# ChildNamesHash:
 		self.assertEqual( b.child( "group1" ).child("pCube1").hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ), a.child("pCube1").hash( IECore.SceneInterface.HashType.ChildNamesHash, 0 ) )
@@ -583,13 +584,23 @@ class AlembicSceneTest( unittest.TestCase ) :
 		del a
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		b = a.child("blah")
 
-		self.assertEqual( set( a.child("blah").childNames() ), set(["mesh"]) )
-		self.assertEqual( a.child("blah").child("mesh").readObject( -1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
-		self.assertEqual( a.child("blah").child("mesh").readObject( 0 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
-		self.assertEqual( a.child("blah").child("mesh").readObject( 0.5 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1.5), IECore.V3f(1.5) ) ) )
-		self.assertEqual( a.child("blah").child("mesh").readObject( 1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
-		self.assertEqual( a.child("blah").child("mesh").readObject( 2 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
+		self.assertEqual( set( b.childNames() ), set() )
+
+		# test object samples:
+		self.assertEqual( b.numObjectSamples(), 2 )
+		self.assertEqual( b.objectSampleTime(0), 0.0 )
+		self.assertEqual( b.objectSampleTime(1), 1.0 )
+		self.assertEqual( b.readObjectAtSample( 0 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
+		self.assertEqual( b.readObjectAtSample( 1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
+
+		# test interpolated objects:
+		self.assertEqual( b.readObject( -1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
+		self.assertEqual( b.readObject( 0 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ) )
+		self.assertEqual( b.readObject( 0.5 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1.5), IECore.V3f(1.5) ) ) )
+		self.assertEqual( b.readObject( 1 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
+		self.assertEqual( b.readObject( 2 ), IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-2), IECore.V3f(2) ) ) )
 
 	def testWriteSubdiv( self ) :
 
@@ -625,21 +636,21 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( set( a.child("blah").childNames() ), set(["subdiv"]) )
+		self.assertEqual( set( a.child("blah").childNames() ), set() )
 
-		self.assertEqual( a.child("blah").child("subdiv").readObject( 1 ), subdivMesh )
-		self.assertEqual( a.child("blah").child("subdiv").readObject( 2 ), subdivMesh )
+		self.assertEqual( a.child("blah").readObject( 1 ), subdivMesh )
+		self.assertEqual( a.child("blah").readObject( 2 ), subdivMesh )
 
 		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) )
 		subdivMesh.interpolation = "catmullClark"
 
-		self.assertEqual( a.child("blah").child("subdiv").readObject( -1 ), subdivMesh )
-		self.assertEqual( a.child("blah").child("subdiv").readObject( 0 ), subdivMesh )
+		self.assertEqual( a.child("blah").readObject( -1 ), subdivMesh )
+		self.assertEqual( a.child("blah").readObject( 0 ), subdivMesh )
 
 		subdivMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1.5), IECore.V3f(1.5) ) )
 		subdivMesh.interpolation = "catmullClark"
 
-		self.assertEqual( a.child("blah").child("subdiv").readObject( 0.5 ), subdivMesh )
+		self.assertEqual( a.child("blah").readObject( 0.5 ), subdivMesh )
 
 	def testWriteCamera( self ) :
 
@@ -653,8 +664,8 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
 
-		self.assertEqual( set( a.child("blah").childNames() ), set(["camera"]) )
-		self.assertTrue( isinstance( a.child("blah").child("camera").readObject(0), IECore.Camera ) )
+		self.assertEqual( set( a.child("blah").childNames() ), set() )
+		self.assertTrue( isinstance( a.child("blah").readObject(0), IECore.Camera ) )
 
 if __name__ == "__main__":
     unittest.main()
