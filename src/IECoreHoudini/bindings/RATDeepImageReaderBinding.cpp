@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT < 15
+
 #include "boost/python.hpp"
 
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -58,3 +62,4 @@ void bindRATDeepImageReader()
 
 } // namespace IECoreHoudini
 
+#endif // UT_MAJOR_VERSION_INT

@@ -35,6 +35,12 @@
 #ifndef IECOREHOUDINI_RATDEEPIMAGEREADER_H
 #define IECOREHOUDINI_RATDEEPIMAGEREADER_H
 
+#include "UT/UT_Version.h"
+
+// We haven't updated deep rat support for the changes in Houdini 15,
+// since we're considering dropping deep rat support entirely.
+#if UT_MAJOR_VERSION_INT < 15
+
 #include "IMG/IMG_DeepShadow.h"
 
 #include "IECore/CompoundObject.h"
@@ -102,5 +108,7 @@ class RATDeepImageReader : public IECore::DeepImageReader
 IE_CORE_DECLAREPTR( RATDeepImageReader );
 
 } // namespace IECoreHoudini
+
+#endif // UT_MAJOR_VERSION_INT
 
 #endif // IECOREHOUDINI_RATDEEPIMAGEREADER_H

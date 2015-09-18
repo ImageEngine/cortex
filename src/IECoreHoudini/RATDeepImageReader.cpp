@@ -32,11 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "UT/UT_Version.h"
+
+#if UT_MAJOR_VERSION_INT < 15
+
 #include "boost/format.hpp"
 
 #include "UT/UT_Matrix.h"
 #include "UT/UT_Options.h"
-#include "UT/UT_Version.h"
 
 #include "IECore/FileNameParameter.h"
 
@@ -316,3 +319,5 @@ bool RATDeepImageReader::open( bool throwOnFailure )
 
 	return true;
 }
+
+#endif // UT_MAJOR_VERSION_INT
