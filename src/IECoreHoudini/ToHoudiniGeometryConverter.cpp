@@ -343,7 +343,17 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 					// mark rest as non-transforming so it doesn't get manipulated once inside Houdini
 					if ( name == "rest" || name == "Pref" )
 					{
+
+#if UT_MAJOR_VERSION_INT >= 15
+
+						attrRef.setTypeInfo( GA_TYPE_VOID );
+
+#else
+
 						attrRef.getAttribute()->setNonTransforming( true );
+
+#endif
+
 					}
 				}
 				catch ( std::exception &e )

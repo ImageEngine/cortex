@@ -441,6 +441,18 @@ void FromHoudiniGeometryConverter::transferAttribData(
 								default :
 								{
 									dataPtr = extractData<V3fVectorData>( attr, range );
+
+#if UT_MAJOR_VERSION_INT >= 15
+
+									// special case for rest/Pref since Houdini considers rest Numeric
+									// but Cortex is expecting it to be Point.
+									if ( attr->getName().equal( "rest" ) || attr->getName().equal( "Pref" ) )
+									{
+										V3fVectorData *restData = IECore::runTimeCast<V3fVectorData>( dataPtr.get() );
+										restData->setInterpretation( IECore::GeometricData::Point );
+									}
+
+#endif
 									break;
 								}
 
