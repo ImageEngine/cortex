@@ -230,6 +230,9 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	PrimitiveVariable::Interpolation detailInterpolation
 ) const
 {
+
+#if UT_MAJOR_VERSION_INT < 15
+
 	// add position (this can't be done as a regular attrib because it would be V4fVectorData)
 	GA_Range pointRange = geo->getPointRange();
 	std::vector<Imath::V3f> pData( pointRange.getEntries() );
@@ -240,6 +243,8 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData, GeometricData::Point ) );
 	
+#endif
+
 	// get RI remapping information from the detail
 	AttributeMap pointAttributeMap;
 	AttributeMap primitiveAttributeMap;
