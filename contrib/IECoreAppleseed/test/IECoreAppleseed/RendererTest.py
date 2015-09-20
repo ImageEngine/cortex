@@ -56,6 +56,7 @@ class RendererTest( AppleseedTest.TestCase ):
 		self.assertEqual( r.typeName(), "IECoreAppleseed::Renderer" )
 
 	def testAppleseedOutput( self ) :
+
 		r = IECoreAppleseed.Renderer( self.__appleseedFileName )
 		self.failIf( os.path.exists( self.__appleseedFileName ) )
 
