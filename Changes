@@ -1,3 +1,26 @@
+# 9.2.0
+
+#### IECoreGL
+
+- Added ShaderStateComponent::hash() method.
+- Fixed wireframe rendering with user vertex shaders.
+- Fixed IDRender selection with user vertex shaders.
+- Fixed selection with custom vertex shaders on OSX.
+
+#### IECoreAppleseed
+
+- Added default render params needed by interactive final rendering.
+- Fix display when used with the ImageDisplayDriver driver type.
+
+#### IECoreHoudini
+
+- Removed deep RAT support for Houdini 15 (it is still there for older Houdini versions)
+
+#### Build
+
+- Houdini 15 compatibility
+- Fixed build issue for running 3delight inside Maya at IE
+
 # 9.1.0
 
 #### IECoreAppleseed
