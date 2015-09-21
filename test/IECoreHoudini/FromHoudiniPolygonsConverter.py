@@ -747,7 +747,11 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( uvunwrap )
 		result = converter.convert()
-		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "width" ] )
+		else :
+			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
+		
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -769,7 +773,10 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		
 		converter["convertStandardAttributes"].setTypedValue( False )
 		result = converter.convert()
-		self.assertEqual( result.keys(), [ "Cd", "P", "pscale", "rest", "uv", "varmap" ] )
+		if hou.applicationVersion()[0] >= 15 :
+			self.assertEqual( result.keys(), [ "Cd", "P", "pscale", "rest", "uv" ] )
+		else :
+			self.assertEqual( result.keys(), [ "Cd", "P", "pscale", "rest", "uv", "varmap" ] )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )

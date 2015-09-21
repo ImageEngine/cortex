@@ -163,8 +163,14 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniCurvesConverter();
 	bindFromHoudiniGroupConverter();
 	bindToHoudiniGroupConverter();
+
+#if UT_MAJOR_VERSION_INT < 15
+
 	bindRATDeepImageReader();
 	bindRATDeepImageWriter();
+
+#endif // UT_MAJOR_VERSION_INT
+
 	bindSceneCacheNode();
 	bindLiveScene();
 	bindFromHoudiniCortexObjectConverter();

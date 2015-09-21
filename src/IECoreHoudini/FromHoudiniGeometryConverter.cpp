@@ -39,6 +39,7 @@
 
 #include "CH/CH_Manager.h"
 #include "UT/UT_StringMMPattern.h"
+#include "UT/UT_Version.h"
 #include "UT/UT_WorkArgs.h"
 
 #include "IECore/CompoundObject.h"
@@ -229,6 +230,9 @@ void FromHoudiniGeometryConverter::transferAttribs(
 	PrimitiveVariable::Interpolation detailInterpolation
 ) const
 {
+
+#if UT_MAJOR_VERSION_INT < 15
+
 	// add position (this can't be done as a regular attrib because it would be V4fVectorData)
 	GA_Range pointRange = geo->getPointRange();
 	std::vector<Imath::V3f> pData( pointRange.getEntries() );
@@ -239,6 +243,8 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, new V3fVectorData( pData, GeometricData::Point ) );
 	
+#endif
+
 	// get RI remapping information from the detail
 	AttributeMap pointAttributeMap;
 	AttributeMap primitiveAttributeMap;
@@ -350,9 +356,9 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		}
 		
 		// check for remapping information for this attribute
-		if ( attributeMap.count( attr->getName() ) == 1 )
+		if ( attributeMap.count( name.buffer() ) == 1 )
 		{
-			std::vector<RemapInfo> &map = attributeMap[attr->getName()];
+			std::vector<RemapInfo> &map = attributeMap[name.buffer()];
 			for ( std::vector<RemapInfo>::iterator rIt=map.begin(); rIt != map.end(); ++rIt )
 			{
 				transferAttribData( result, interpolation, attrRef, range, &*rIt );
@@ -440,6 +446,18 @@ void FromHoudiniGeometryConverter::transferAttribData(
 								default :
 								{
 									dataPtr = extractData<V3fVectorData>( attr, range );
+
+#if UT_MAJOR_VERSION_INT >= 15
+
+									// special case for rest/Pref since Houdini considers rest Numeric
+									// but Cortex is expecting it to be Point.
+									if ( attr->getName().equal( "rest" ) || attr->getName().equal( "Pref" ) )
+									{
+										V3fVectorData *restData = IECore::runTimeCast<V3fVectorData>( dataPtr.get() );
+										restData->setInterpretation( IECore::GeometricData::Point );
+									}
+
+#endif
 									break;
 								}
 

@@ -578,7 +578,11 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
+			if hou.applicationVersion()[0] >= 15 :
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'width'] )
+			else :
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
+
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -588,7 +592,10 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter["convertStandardAttributes"].setTypedValue( False )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v', 'varmap'] )
+			if hou.applicationVersion()[0] >= 15 :
+				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v'] )
+			else :
+				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v', 'varmap'] )
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
