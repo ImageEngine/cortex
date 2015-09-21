@@ -132,7 +132,15 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 
 #if UT_MAJOR_VERSION_INT >= 15
 
-	const GU_Detail *detail = p.geometry.castAwayConst().readLock();
+	GU_DetailHandleAutoReadLock handle( p.geometry );
+	if ( !handle.isValid() )
+	{
+		m_scene = 0;
+		m_renderable = 0;
+		return;
+	}
+	
+	const GU_Detail *detail = handle.getGdp();
 
 #else
 
