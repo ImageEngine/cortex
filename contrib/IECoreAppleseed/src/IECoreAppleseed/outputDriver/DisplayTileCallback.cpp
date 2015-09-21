@@ -140,6 +140,14 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 	private:
 
+		void copy_optional_param( const char *key, CompoundDataMap &dst ) const
+		{
+			if( m_params.strings().exist( key ) )
+			{
+				dst[key] = new StringData( m_params.get( key ) );
+			}
+		}
+
 		void init_display( const asr::Frame *frame )
 		{
 			assert( !m_display_initialized );
@@ -169,11 +177,13 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 			CompoundDataPtr parameters = new CompoundData();
 			CompoundDataMap &p = parameters->writable();
-			p["displayHost"] = new StringData( m_params.get( "displayHost" ) );
-			p["displayPort"] = new StringData( m_params.get( "displayPort" ) );
-			p["driverType"] = new StringData( m_params.get( "driverType" ) );
-			p["remoteDisplayType"] = new StringData( m_params.get( "remoteDisplayType" ) );
 			p["type"] = new StringData( m_params.get( "type" ) );
+
+			copy_optional_param( "displayHost", p );
+			copy_optional_param( "displayPort", p );
+			copy_optional_param( "driverType", p );
+			copy_optional_param( "remoteDisplayType", p );
+			copy_optional_param( "handle", p );
 
 			// reserve space for one tile
 			const asf::CanvasProperties &frameProps = frame->image().properties();

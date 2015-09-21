@@ -135,13 +135,25 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 
 	// Insert some config params needed by the interactive renderer.
 	asr::Configuration *cfg = m_project->configurations().get_by_name( "interactive" );
-	asr::ParamArray &params = cfg->get_parameters();
-	params.insert( "sample_renderer", "generic" );
-	params.insert( "sample_generator", "generic" );
-	params.insert( "tile_renderer", "generic" );
-	params.insert( "frame_renderer", "progressive" );
-	params.insert( "lighting_engine", "pt" );
-	params.insert_path( "progressive_frame_renderer.max_fps", "5" );
+	asr::ParamArray *params = &cfg->get_parameters();
+	params->insert( "sample_renderer", "generic" );
+	params->insert( "sample_generator", "generic" );
+	params->insert( "tile_renderer", "generic" );
+	params->insert( "frame_renderer", "progressive" );
+	params->insert( "lighting_engine", "pt" );
+	params->insert_path( "progressive_frame_renderer.max_fps", "5" );
+
+	// Insert some config params needed by the final renderer.
+	cfg = m_project->configurations().get_by_name( "final" );
+	params = &cfg->get_parameters();
+	params->insert( "sample_renderer", "generic" );
+	params->insert( "sample_generator", "generic" );
+	params->insert( "tile_renderer", "generic" );
+	params->insert( "frame_renderer", "generic" );
+	params->insert( "lighting_engine", "pt" );
+	params->insert( "pixel_renderer", "uniform" );
+	params->insert( "sampling_mode", "rng" );
+	params->insert_path( "uniform_pixel_renderer.samples", "1" );
 
 	// create some basic project entities.
 	asf::auto_release_ptr<asr::Frame> frame( asr::FrameFactory::create( "beauty", asr::ParamArray().insert( "resolution", "640 480" ) ) );

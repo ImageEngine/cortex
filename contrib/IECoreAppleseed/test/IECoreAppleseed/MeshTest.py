@@ -32,51 +32,34 @@
 #
 ##########################################################################
 
+import os
 import unittest
 
 import IECore
+import IECoreAppleseed
 
-import appleseed
+import AppleseedTest
 
-class TestCase( unittest.TestCase ):
+class MeshTest( AppleseedTest.TestCase ):
 
-	def _createDefaultShader( self, r ) :
+	def testUVs( self ) :
 
-		s = IECore.Shader( "data/shaders/matte.oso", "surface" )
-		s.render( r )
+		r = IECoreAppleseed.Renderer()
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
-	def _createGlossyShader( self, r ) :
+		r.setOption( "as:cfg:shading_engine:override_shading:mode", IECore.StringData( "uv" ) )
 
-		s = IECore.Shader( "data/shaders/glossy.oso", "surface" )
-		s.render( r )
+		with IECore.WorldBlock( r ) :
 
-	def _getScene( self, r ) :
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) ).render( r )
 
-		proj = r.appleseedProject()
-		return proj.get_scene()
+		del r
 
-	def _getCamera( self, r ) :
+		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/referenceImages/expectedMeshUVs.exr" ).read()
 
-		scn = self._getScene( r )
-		return scn.get_camera()
+		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
-	def _getMainAssembly( self, r ) :
-
-		return self._getScene( r ).assemblies().get_by_name( "assembly" )
-
-	def _countAssemblies( self, r ) :
-
-		ass = self._getMainAssembly( r )
-		return len( ass.assemblies() )
-
-	def _countAssemblyInstances( self, r ) :
-
-		ass = self._getMainAssembly( r )
-		return len( ass.assembly_instances() )
-
-	def _writeProject( self, r, filename ) :
-
-		proj = r.appleseedProject()
-		opts = appleseed.ProjectFileWriterOptions.OmitBringingAssets | appleseed.ProjectFileWriterOptions.OmitWritingGeometryFiles
-		w = appleseed.ProjectFileWriter()
-		w.write( proj, filename, opts )
+if __name__ == "__main__":
+	unittest.main()
