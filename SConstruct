@@ -1648,8 +1648,18 @@ riLibs = []
 
 if doConfigure :
 
-	c = Configure( riEnv )
-
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary for 3delight 12.0.20 and newer, which use
+	# a run-time compatible, but link-time incompatbile libstdc++
+	# in some obscure studio setups. This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	riCheckEnv = riEnv.Clone()
+	riCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	riCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( riCheckEnv )
+	
 	haveDelight = c.CheckLibWithHeader( "3delight", "ri.h", "CXX" )
 	havePRMan = c.CheckLibWithHeader( "prman", "ri.h", "CXX" )
 
