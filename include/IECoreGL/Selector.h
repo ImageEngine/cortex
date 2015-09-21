@@ -119,14 +119,18 @@ class IECOREGL_API Selector : boost::noncopyable
 		
 		/// The IDRender mode requires a shader which takes a name
 		/// via a "uniform uint ieCoreGLName" parameter and outputs it
-		/// via an "out uint ieCoreGLNameOut" fragment output.
-		/// Typically one is set up automatically in baseState(), but
-		/// if rendering must be performed with an alternative shader
-		/// then it may be passed via this function.
+		/// via an "out uint ieCoreGLNameOut" fragment output. The
+		/// defaultIDShader() meets these criteria and will be bound
+		/// automatically when the selector constructs in IDRender mode.
+		/// Note however, that if any other shaders are subsequently
+		/// bound while the selector is active, they too must meet the
+		/// same critera.
 		void pushIDShader( const IECoreGL::Shader *idShader );
-		
-		/// Revert to previous ID shader:
+		/// Reverts to the previous ID shader.
 		void popIDShader();
+
+		/// A shader suitable for use in IDRender mode.
+		static const Shader *defaultIDShader();
 		
 		/// Returns the currently active Selector - this may be used
 		/// in drawing code to retrieve a selector to call loadName()

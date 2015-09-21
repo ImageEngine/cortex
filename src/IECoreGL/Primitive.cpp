@@ -44,6 +44,7 @@
 #include "IECoreGL/Exception.h"
 #include "IECoreGL/TypedStateComponent.h"
 #include "IECoreGL/ShaderStateComponent.h"
+#include "IECoreGL/ShaderLoader.h"
 #include "IECoreGL/Shader.h"
 #include "IECoreGL/NumericTraits.h"
 #include "IECoreGL/UniformFunctions.h"
@@ -74,7 +75,84 @@ IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::PointWidth, Pr
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::Selectable, PrimitiveSelectableTypeId, bool, true );
 IECOREGL_TYPEDSTATECOMPONENT_SPECIALISEANDINSTANTIATE( Primitive::TransparencySort, PrimitiveTransparencySortStateComponentTypeId, bool, true );
 
+} // namespace IECoreGL
+
+//////////////////////////////////////////////////////////////////////////
+// Utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+struct FlatConstant
+{
+
+	FlatConstant( const IECore::MurmurHash &hash, const Shader::ConstSetupPtr &shaderSetup = Shader::ConstSetupPtr() )
+		:	hash( hash ), shaderSetup( shaderSetup )
+	{
+	}
+
+	IECore::MurmurHash hash;
+	Shader::ConstSetupPtr shaderSetup;
+
+	bool operator < ( const FlatConstant &rhs )
+	{
+		return hash < rhs.hash;
+	}
+
+};
+
+// Makes a constant shader by taking the vertex and geometry
+// shader from the state and combining them with a flat fragment
+// shader.
+const Shader::Setup *flatConstantShaderSetup( State *state, bool forIDRender )
+{
+	ShaderStateComponent *shaderStateComponent = state->get<ShaderStateComponent>();
+
+	// Get a hash to represent the shader we're about to make.
+	IECore::MurmurHash hash = shaderStateComponent->hash();
+	hash.append( forIDRender );
+
+	// If we've made an equivalent shader before, then
+	// just return it.
+	static vector<FlatConstant> flatConstants;
+	vector<FlatConstant>::iterator it = lower_bound(
+		flatConstants.begin(),
+		flatConstants.end(),
+		hash
+	);
+	if( it != flatConstants.end() && it->hash == hash )
+	{
+		return it->shaderSetup.get();
+	}
+
+	// If we haven't, then make one.
+
+	static const std::string constantFragmentSource =
+
+		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
+		""
+		"void main()"
+		"{"
+		"	gl_FragColor = vec4( Cs, 1 );"
+		"}";
+
+	const std::string &fragmentSource = forIDRender ? Selector::defaultIDShader()->fragmentSource() : constantFragmentSource;
+
+	const Shader *originalShader = shaderStateComponent->shaderSetup()->shader();
+	ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
+	ConstShaderPtr shader = shaderLoader->create( originalShader->vertexSource(), originalShader->geometrySource(), fragmentSource );
+	Shader::SetupPtr shaderSetup = new Shader::Setup( shader );
+	shaderStateComponent->addParametersToShaderSetup( shaderSetup.get() );
+
+	// Put it in our store so we don't have to remake it next time.
+
+	flatConstants.insert( it, FlatConstant( hash, shaderSetup.get() ) );
+
+	return shaderSetup.get();
 }
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////
 // Primitive implementation
@@ -102,51 +180,6 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 	}
 }
 
-static Shader *constant2()
-{
-
-	static const char *vertexSource =
-		
-		"#if __VERSION__ <= 120\n"
-		"#define in attribute\n"
-		"#define out varying\n"
-		"#endif\n"
-		""
-		"in vec3 vertexP;"
-		""
-		"void main()"
-		"{"
-		"	gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * vec4( vertexP, 1 );"
-		"}";
-		
-	static const char *fragmentSource =
-	
-		"void main()"
-		"{"
-			"gl_FragColor = vec4( 1, 1, 1, 1 );"
-		"}";
-
-	static ShaderPtr s = new Shader( vertexSource, fragmentSource );
-	return s.get();
-}
-
-static Shader *flatConstant()
-{
-
-	static const char *fragmentSource =
-
-		"uniform vec3 Cs;" // get colour from uniform Cs, bypassing vertexCs
-		""
-		"void main()"
-		"{"
-		"	gl_FragColor = vec4( Cs, 1 );"
-		"}";
-
-	static ShaderPtr s = new Shader( "", fragmentSource );
-	return s.get();
-}
-
-
 void Primitive::render( State *state ) const
 {
 	const Selector *currentSelector = Selector::currentSelector();
@@ -163,9 +196,10 @@ void Primitive::render( State *state ) const
 	// with a simple shader and early out.
 	if( currentSelector && currentSelector->mode() == Selector::GLSelect )
 	{
-		const Shader *constantShader = constant2();
-		const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
-		Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+		const Shader::Setup *uniformSetup = flatConstantShaderSetup( state, /* forIDRender = */ false );
+		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
+		const Shader::Setup *primitiveSetup = shaderSetup( uniformSetup->shader(), state );
+		Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
 		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
@@ -177,8 +211,18 @@ void Primitive::render( State *state ) const
 	{
 		glDepthMask( !depthSortRequested( state ) );
 		// the state itself will have a shader with some nice uniform parameter
-		// values. we are responsible for binding this setup.
-		Shader::Setup *uniformSetup = state->get<ShaderStateComponent>()->shaderSetup();
+		// values. we are responsible for binding this setup. unless we're performing
+		// an id render for selection, in which case we're responsible for binding an
+		// id shader.
+		const Shader::Setup *uniformSetup = NULL;
+		if( currentSelector && currentSelector->mode() == Selector::IDRender )
+		{
+			uniformSetup = flatConstantShaderSetup( state, /* forIDRender = */ true );
+		}
+		else
+		{
+			uniformSetup = state->get<ShaderStateComponent>()->shaderSetup();
+		}
 		Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
 		// we then bind our own setup on top, adding in the parameters
 		// stored on the primitive itself.
@@ -210,18 +254,18 @@ void Primitive::render( State *state ) const
 	}
 	
 	// get a constant shader suitable for drawing wireframes, points etc.
-	const Shader *constantShader = flatConstant();
-	if( currentSelector && currentSelector->mode() == Selector::IDRender )
-	{
-		// if we're in IDRender mode, then the constant shader is unsuitable,
-		// and we should instead use the ID shader we've been given.
-		constantShader = state->get<ShaderStateComponent>()->shaderSetup()->shader();
-	}
-	
-	const Shader::Setup *constantSetup = shaderSetup( constantShader, state );
-	Shader::Setup::ScopedBinding constantBinding( *constantSetup );
+	// we do this by taking the current shader from the state and overriding
+	// just the fragment shader within it - we want to keep any vertex or
+	// geometry shader the user has specified. again, if we're performing an
+	// id render, we're responsible for binding an id shader instead.
+	const Shader::Setup *uniformSetup = flatConstantShaderSetup( state, currentSelector && currentSelector->mode() == Selector::IDRender );
+	Shader::Setup::ScopedBinding uniformBinding( *uniformSetup );
+
+	const Shader::Setup *primitiveSetup = shaderSetup( uniformSetup->shader(), state );
+	Shader::Setup::ScopedBinding primitiveBinding( *primitiveSetup );
+
 	GLint csIndex = -1;
-	if( const Shader::Parameter *csParameter = constantSetup->shader()->csParameter() )
+	if( const Shader::Parameter *csParameter = uniformSetup->shader()->csParameter() )
 	{
 		csIndex = csParameter->location;
 	}

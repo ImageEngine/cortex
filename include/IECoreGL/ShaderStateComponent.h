@@ -76,6 +76,9 @@ class IECOREGL_API ShaderStateComponent : public StateComponent
 		ShaderLoader *shaderLoader();
 		TextureLoader *textureLoader();
 
+		/// Returns a hash to uniquely identify this shader state.
+		IECore::MurmurHash hash() const;
+
 		/// Returns a Shader::Setup object for binding the shader. This function can
 		/// only be called from a thread with a valid GL context.
 		Shader::Setup *shaderSetup();

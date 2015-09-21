@@ -96,6 +96,23 @@ class IECOREGL_API Primitive : public Renderable
 		/// Most classes will not need to override this method - reasons for overriding would be
 		/// to substitute in custom geometry or vertex shaders and/or to bind in attributes
 		/// not already specified with addUniformAttribute() or addVertexAttribute().
+		///
+		/// \todo We need to rethink this mechanism. The problem is that we've ended up using
+		/// this method for two things - firstly to get a ShaderSetup where all the primitive
+		/// variables are bound (good), and secondly we've abused it to actually change the
+		/// shader in PointsPrimitive and CurvePrimitive. Asking for a setup for one shader and getting
+		/// back a setup for another doesn't make a great deal of sense. There are several
+		/// competing sources of source code for shaders :
+		///
+		/// - The user-provided source coming through Renderer::shader().
+		/// - The vertex and geometry shaders that PointsPrimitive and CurvesPrimitive need
+		///   to insert.
+		/// - The constant fragment shader that Primitive needs to insert to do wireframe
+		///   shading etc.
+		/// - The ID fragment shader needed for the Selector.
+		///
+		/// We should redesign our API so that we first resolve these requirements to generate
+		/// a shader, and then use shaderSetup() just to apply primitive variables to it.
 		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
 		/// Adds the primitive variables held by this Primitive to the specified Shader::Setup.
 		/// Vertex attributes will be prefixed as specified, and for each vertex attribute
