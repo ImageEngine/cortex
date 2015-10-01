@@ -670,13 +670,13 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 {
 	StringVectorDataPtr data = new StringVectorData();
 	
-	std::vector<std::string> &dest = data->writable();
 	
 	size_t numStrings = 0;
+	std::vector<std::string> strings;
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
 	for ( GA_AIFSharedStringTuple::iterator it=tuple->begin( attr ); !it.atEnd(); ++it )
 	{
-		dest.push_back( it.getString() );
+		strings.push_back( it.getString() );
 		numStrings++;
 	}
 	
@@ -704,7 +704,7 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 		{
 			if ( !adjustedDefault )
 			{
-				dest.push_back( "" );
+				strings.push_back( "" );
 				adjustedDefault = true;
 			}
 			
@@ -715,7 +715,54 @@ DataPtr FromHoudiniGeometryConverter::extractStringVectorData( const GA_Attribut
 			indices[i] = adjustedHandles[index];
 		}
 	}
-	
+
+	// The order of "strings" is not guaranteed, and can be unstable
+	// from frame to frame in certain situations, so we sort them
+	// alphabetically and update the indices accordingly:
+
+	// find a permutation that orders strings alphabetically:
+	std::vector<int> alphabeticalOrdering;
+	for( size_t i=0; i < strings.size(); ++i )
+	{
+		alphabeticalOrdering.push_back( i );
+	}
+	struct Comparator
+	{
+		Comparator( const std::vector<std::string> &s ) : strings( s )
+		{
+		}
+
+		const std::vector<std::string> &strings;
+		bool operator()( int a, int b )
+		{
+			return strings[a] < strings[b];
+		}
+	};
+	std::sort(
+		alphabeticalOrdering.begin(),
+		alphabeticalOrdering.end(),
+		Comparator(strings)
+	);
+
+	// find inverse:
+	std::vector<int> inverseAlphabeticalOrdering( strings.size() );
+	for( size_t i=0; i < alphabeticalOrdering.size(); ++i )
+	{
+		inverseAlphabeticalOrdering[ alphabeticalOrdering[i] ] = i;
+	}
+
+	// apply permutation:
+	for( size_t i=0; i < indexData->readable().size(); ++i )
+	{
+		indices[i] = inverseAlphabeticalOrdering[ indices[i] ];
+	}
+	std::vector<std::string> &dest = data->writable();
+	dest.resize( alphabeticalOrdering.size() );
+	for( size_t i=0; i < alphabeticalOrdering.size(); ++i )
+	{
+		dest[ i ] = strings[ alphabeticalOrdering[i] ];
+	}
+
 	return data;
 }
 
