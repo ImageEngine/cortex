@@ -370,8 +370,17 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vertString.parm("name").set("vertString")
 		vertString.parm("class").set(3)
 		vertString.parm("type").set(3)
-		vertString.parm("string").set("string $VTX!")
+		vertString.parm("string").setExpression("'string %06d!' % pwd().curPoint().number()", hou.exprLanguage.Python)
 		vertString.setInput( 0, vert_v3f )
+
+
+		vertString2 = geo.createNode( "attribcreate", node_name = "vertString2", exact_type_name=True )
+		vertString2.parm("name").set("vertString2")
+		vertString2.parm("class").set(3)
+		vertString2.parm("type").set(3)
+		vertString2.parm("string").setExpression("vals = [ 'd','c','e','a','g','f','b' ]\nreturn vals[ pwd().curPoint().number() % 7 ]", hou.exprLanguage.Python)
+		vertString2.setInput( 0, vertString )
+
 
 		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3", exact_type_name=True )
 		detail_i3.parm("name").set("detail_i3")
@@ -381,7 +390,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detail_i3.parm("value1").set(123)
 		detail_i3.parm("value2").set(456.789) # can we catch it out with a float?
 		detail_i3.parm("value3").set(789)
-		detail_i3.setInput( 0, vertString )
+		detail_i3.setInput( 0, vertString2 )
 
 		out = geo.createNode( "null", node_name="OUT" )
 		out.setInput( 0, detail_i3 )
@@ -474,11 +483,17 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["vertStringIndices"].data.typeId(), IECore.TypeId.IntVectorData )
 		
 		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
-			self.assertEqual( result["vertString"].data[i], "string %d!" % i )
+			self.assertEqual( result["vertString"].data[i], "string %06d!" % i )
 			self.assertEqual( result["vertStringIndices"].data[i], i )
+
+		# make sure the string tables are alphabetically sorted:
+		self.assertEqual( result["vertString2"].data, IECore.StringVectorData( ['a','b','c','d','e','f','g'] ) )
+		stringVals = [ 'd','c','e','a','g','f','b' ]
+		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
+			self.assertEqual( result["vertString2"].data[ result["vertString2Indices"].data[i] ], stringVals[ i % 7 ] )
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
-	
+
 	# convert some points
 	def testConvertPoints( self ) :
 		points = self.createPoints()
@@ -564,10 +579,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set( 3 ) # string
-		attr.parm( "string" ).set( "string $PT!" )
+		attr.parm( "string" ).setExpression("'string %06d!' % pwd().curPoint().number()", hou.exprLanguage.Python)
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringVectorData )
-		self.assertEqual( result["test_attribute"].data[10], "string 10!" )
+		self.assertEqual( result["test_attribute"].data[10], "string 000010!" )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result["test_attributeIndices"].data.typeId(), IECore.TypeId.IntVectorData )
@@ -885,4 +900,4 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

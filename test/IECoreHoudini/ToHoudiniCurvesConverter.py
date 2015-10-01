@@ -83,7 +83,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		intVectorData = IECore.IntVectorData( intRange )
 		v2iVectorData = IECore.V2iVectorData( [ IECore.V2i( x, -x ) for x in intRange ] )
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
-		stringVectorData = IECore.StringVectorData( [ "string number %d!" % x for x in intRange ] )
+		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 		
 		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
 		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
@@ -368,9 +368,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		dataIndices = prim["stringPointIndices"].data
 		
 		if multipleConversions :
+			defaultData = origSopPrim["stringPoint"].data
 			defaultIndices = origSopPrim["stringPointIndices"].data
 			for i in range( 0, origNumPoints ) :
-				val = "" if ( defaultIndices[i] >= data.size() ) else data[ defaultIndices[i] ]
+				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopPoints[ i ].attribValue( "stringPoint" ) )
 		else :
 			defaultValues = [ "" ] * origNumPoints
@@ -413,9 +414,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		dataIndices = prim["stringPrimIndices"].data
 		
 		if multipleConversions :
+			defaultData = origSopPrim["stringPrim"].data
 			defaultIndices = origSopPrim["stringPrimIndices"].data
 			for i in range( 0, origNumPrims ) :
-				val = "" if ( defaultIndices[i] >= data.size() ) else data[ defaultIndices[i] ]
+				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopPrims[ i ].attribValue( "stringPrim" ) )
 		else :
 			defaultValues = [ "" ] * origNumPrims

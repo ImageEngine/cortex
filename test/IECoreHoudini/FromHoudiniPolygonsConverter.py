@@ -422,10 +422,10 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 		
 		attr.parm("type").set( 3 ) # string
-		attr.parm( "string" ).set( "string $PT!" )
+		attr.parm( "string" ).setExpression("'string %06d!' % pwd().curPoint().number()", hou.exprLanguage.Python)
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringVectorData )
-		self.assertEqual( result["test_attribute"].data[10], "string 10!" )
+		self.assertEqual( result["test_attribute"].data[10], "string 000010!" )
 		self.assertEqual( result["test_attribute"].data.size(), 100 )
 		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result["test_attributeIndices"].data.typeId(), IECore.TypeId.IntVectorData )
