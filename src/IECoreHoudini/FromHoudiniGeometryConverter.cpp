@@ -473,6 +473,12 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					{
 						dataPtr = extractData<QuatfVectorData>( attr, range, elementIndex );
 					}
+					break;
+				}
+				case 16 :
+				{
+					dataPtr = extractData<M44fVectorData>( attr, range, elementIndex );
+					break;
 				}
 				default :
 				{

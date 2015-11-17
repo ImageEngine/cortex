@@ -331,12 +331,26 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_quat2.parm("value4").setExpression("$VTX*0.8")
 		vert_quat2.setInput( 0, vert_quat )
 
+
+		vert_m44create = geo.createNode( "attribcreate", node_name = "vert_m44create", exact_type_name=True )
+		vert_m44create.parm("name").set("m44")
+		vert_m44create.parm("class").set(3)
+		vert_m44create.parm("size").set(16)
+		vert_m44create.parm("typeinfo").set(7)  # set type info to transformation matrix
+		vert_m44create.setInput( 0, vert_quat2 )
+
+
+		vert_m44 = geo.createNode( "attribwrangle", node_name = "vert_m44", exact_type_name=True )
+		vert_m44.parm("snippet").set("matrix mat = ident();vector v = {10,20,30};translate(mat, v);4@m44 = mat;")
+		vert_m44.parm("class").set(3)
+		vert_m44.setInput( 0, vert_m44create )
+
 		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
-		vert_i1.setInput( 0, vert_quat2 )
+		vert_i1.setInput( 0, vert_m44 )
 
 		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
@@ -476,6 +490,12 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
 			self.assertEqual( result["vertString"].data[i], "string %d!" % i )
 			self.assertEqual( result["vertStringIndices"].data[i], i )
+		
+		self.assertEqual( result["m44"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["m44"].data.typeId(), IECore.M44fVectorData.staticTypeId() )
+		
+		matrixTranslation = IECore.M44f.extractSHRT( result["m44"].data[0] )[3] 
+		self.assertEqual( matrixTranslation, IECore.V3f( 10,20,30 ) )
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 	
