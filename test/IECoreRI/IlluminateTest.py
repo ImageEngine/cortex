@@ -91,5 +91,20 @@ class IlluminateTest( IECoreRI.TestCase ) :
 		self.assert_( "AreaLightSource \"spotlight\" \"myLightHandle\"" in l )
 		self.assert_( "LightSource \"spotlight\" \"myLightHandle2\"" in l )
 
+	def testAreaLightNew( self ) :
+		r = IECoreRI.Renderer( self.outputFileName )
+		
+		r.worldBegin()
+		
+		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "__areaLight" : True } )
+		r.light( "spotlight", "myLightHandle2", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "__areaLight" : False } )
+		
+		r.worldEnd()
+
+		l = "".join( file( self.outputFileName ).readlines() )
+
+		self.assert_( "AreaLightSource \"spotlight\" \"myLightHandle\"" in l )
+		self.assert_( "LightSource \"spotlight\" \"myLightHandle2\"" in l )
+
 if __name__ == "__main__":
     unittest.main()
