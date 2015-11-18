@@ -1,3 +1,15 @@
+# 9.3.0
+
+#### IECore
+
+- Added const parameterData method to IECore::Light
+- Added alternate AreaLight shader control parameter named "__areaLight"
+
+#### IECoreHoudini
+
+- String tables for converted string primitive variables are now sorted alphabetically
+- Houdini geo converters now support M44f primvars
+
 # 9.2.0
 
 #### IECoreGL
