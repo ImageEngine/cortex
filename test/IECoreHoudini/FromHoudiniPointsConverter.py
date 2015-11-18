@@ -40,6 +40,7 @@ import IECore
 import IECoreHoudini
 import unittest
 import os
+import math
 
 class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
@@ -331,12 +332,26 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_quat2.parm("value4").setExpression("$VTX*0.8")
 		vert_quat2.setInput( 0, vert_quat )
 
+
+		vert_m44create = geo.createNode( "attribcreate", node_name = "vert_m44create", exact_type_name=True )
+		vert_m44create.parm("name").set("m44")
+		vert_m44create.parm("class").set(3)
+		vert_m44create.parm("size").set(16)
+		vert_m44create.parm("typeinfo").set(7)  # set type info to transformation matrix
+		vert_m44create.setInput( 0, vert_quat2 )
+
+
+		vert_m44 = geo.createNode( "attribwrangle", node_name = "vert_m44", exact_type_name=True )
+		vert_m44.parm("snippet").set("4@m44 = maketransform(0,0,{ 10, 20, 30 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 });")
+		vert_m44.parm("class").set(3)
+		vert_m44.setInput( 0, vert_m44create )
+
 		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
-		vert_i1.setInput( 0, vert_quat2 )
+		vert_i1.setInput( 0, vert_m44 )
 
 		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
@@ -491,6 +506,16 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		stringVals = [ 'd','c','e','a','g','f','b' ]
 		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
 			self.assertEqual( result["vertString2"].data[ result["vertString2Indices"].data[i] ], stringVals[ i % 7 ] )
+		
+		self.assertEqual( result["m44"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["m44"].data.typeId(), IECore.M44fVectorData.staticTypeId() )
+
+		matrixScale = IECore.M44f.extractSHRT( result["m44"].data[0] )[0]
+		matrixRot = IECore.M44f.extractSHRT( result["m44"].data[0] )[2]
+		matrixTranslation = IECore.M44f.extractSHRT( result["m44"].data[0] )[3]
+		self.assertEqual( matrixTranslation, IECore.V3f( 10,20,30 ) )
+		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
+		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
 		
 		self.assert_( result.arePrimitiveVariablesValid() )
 
