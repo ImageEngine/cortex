@@ -63,7 +63,10 @@ class IECORE_API Light : public StateRenderable
 		/// This is mostly of use for the binding - the parameters()
 		/// function gives more direct access to the contents of the CompoundData
 		/// (it calls readable() or writable() for you).
+		/// \todo: Should return raw pointer to CompoundData, and we should probably remove the
+		/// parameters() methods since the helper methods on ParametersData make it more useful
 		CompoundDataPtr parametersData();
+		const CompoundDataPtr parametersData() const;
 
 		/// Sets this light in Renderer.
 		virtual void render( Renderer *renderer ) const;

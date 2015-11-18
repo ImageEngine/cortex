@@ -57,7 +57,7 @@ namespace IECorePython
 			.def( "__init__", make_constructor( &construct, default_call_policies(), ( boost::python::arg_( "name" )="distantlight", boost::python::arg_( "handle" )="", boost::python::arg_( "parameters" )=0 ) ) )
 			.add_property( "name", make_function( &Light::getName, return_value_policy<copy_const_reference>() ), &Light::setName )
 			.add_property( "handle", make_function( &Light::getHandle, return_value_policy<copy_const_reference>() ), &Light::setHandle )
-			.add_property( "parameters", &Light::parametersData )
+			.add_property( "parameters", (CompoundDataPtr (Light::*)() )( &Light::parametersData ) )
 		;
 	}
 

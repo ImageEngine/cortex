@@ -1414,6 +1414,17 @@ void IECoreRI::RendererImplementation::light( const std::string &name, const std
 		parametersCopy.erase( it );
 	}
 
+	it = parametersCopy.find( "__areaLight" );
+	if( it != parametersCopy.end() )
+	{
+		BoolData *b = runTimeCast<BoolData>( it->second.get() );
+		if( b && b->readable() )
+		{
+			areaLight = true;
+		}
+		parametersCopy.erase( it );
+	}
+
 	ParameterList pl( parametersCopy );
 
 	if( areaLight )

@@ -97,6 +97,11 @@ CompoundDataPtr Light::parametersData()
 	return m_parameters;
 }
 
+const CompoundDataPtr Light::parametersData() const
+{
+	return m_parameters;
+}
+
 void Light::render( Renderer *renderer ) const
 {
 	renderer->light( m_name, m_handle, parameters() );
