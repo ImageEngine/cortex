@@ -760,6 +760,32 @@ class ImathM33f(unittest.TestCase):
 
 	def testIndexing(self):
 		"""Test M33f indexing via [] operator"""
+		
+		m = IECore.M33f()
+		
+		# test tuple indexing:
+		m[(0,0)] = 10.0
+		m[(0,1)] = 11.0
+		m[(0,2)] = 12.0
+		m[(1,0)] = 13.0
+		m[(1,1)] = 14.0
+		m[(1,2)] = 15.0
+		m[(2,0)] = 16.0
+		m[(2,1)] = 17.0
+		m[(2,2)] = 18.0
+		
+		# test __getitem__( tuple ):
+		self.assertEqual( m[(0,0)], 10.0 )
+		self.assertEqual( m[(0,1)], 11.0 )
+		self.assertEqual( m[(0,2)], 12.0 )
+		self.assertEqual( m[(1,0)], 13.0 )
+		self.assertEqual( m[(1,1)], 14.0 )
+		self.assertEqual( m[(1,2)], 15.0 )
+		self.assertEqual( m[(2,0)], 16.0 )
+		self.assertEqual( m[(2,1)], 17.0 )
+		self.assertEqual( m[(2,2)], 18.0 )
+
+		self.assertEqual( m, IECore.M33f( 10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0 ) )
 
 	def testOperators(self):
 		"""Test M33f operators"""
@@ -910,7 +936,45 @@ class ImathM44f(unittest.TestCase):
 
 	def testIndexing(self):
 		"""Test M44f indexing via [] operator"""
-		pass
+		m = IECore.M44f()
+		
+		# test tuple indexing:
+		m[(0,0)] = 10.0
+		m[(0,1)] = 11.0
+		m[(0,2)] = 12.0
+		m[(0,3)] = 13.0
+		m[(1,0)] = 14.0
+		m[(1,1)] = 15.0
+		m[(1,2)] = 16.0
+		m[(1,3)] = 17.0
+		m[(2,0)] = 18.0
+		m[(2,1)] = 19.0
+		m[(2,2)] = 20.0
+		m[(2,3)] = 21.0
+		m[(3,0)] = 22.0
+		m[(3,1)] = 23.0
+		m[(3,2)] = 24.0
+		m[(3,3)] = 25.0
+		
+		# test __getitem__( tuple ):
+		self.assertEqual( m[(0,0)], 10.0 )
+		self.assertEqual( m[(0,1)], 11.0 )
+		self.assertEqual( m[(0,2)], 12.0 )
+		self.assertEqual( m[(0,3)], 13.0 )
+		self.assertEqual( m[(1,0)], 14.0 )
+		self.assertEqual( m[(1,1)], 15.0 )
+		self.assertEqual( m[(1,2)], 16.0 )
+		self.assertEqual( m[(1,3)], 17.0 )
+		self.assertEqual( m[(2,0)], 18.0 )
+		self.assertEqual( m[(2,1)], 19.0 )
+		self.assertEqual( m[(2,2)], 20.0 )
+		self.assertEqual( m[(2,3)], 21.0 )
+		self.assertEqual( m[(3,0)], 22.0 )
+		self.assertEqual( m[(3,1)], 23.0 )
+		self.assertEqual( m[(3,2)], 24.0 )
+		self.assertEqual( m[(3,3)], 25.0 )
+
+		self.assertEqual( m, IECore.M44f( 10.0,11.0,12.0,13.0,14.0,15.0,16.0,17.0,18.0,19.0,20.0,21.0,22.0,23.0,24.0,25.0 ) )
 
 	def testOperators(self):
 		"""Test M44f operators"""
