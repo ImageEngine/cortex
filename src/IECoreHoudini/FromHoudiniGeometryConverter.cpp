@@ -475,6 +475,11 @@ void FromHoudiniGeometryConverter::transferAttribData(
 					}
 					break;
 				}
+				case 9 :
+				{
+					dataPtr = extractData<M33fVectorData>( attr, range, elementIndex );
+					break;
+				}
 				case 16 :
 				{
 					dataPtr = extractData<M44fVectorData>( attr, range, elementIndex );
@@ -619,6 +624,16 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 							}
 
 						}
+						break;
+					}
+					case 9:
+					{
+						dataPtr = extractData<M33fData>( attr );
+						break;
+					}
+					case 16:
+					{
+						dataPtr = extractData<M44fData>( attr );
 						break;
 					}
 					default :
