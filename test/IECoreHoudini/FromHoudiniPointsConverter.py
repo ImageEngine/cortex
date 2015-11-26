@@ -332,7 +332,6 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_quat2.parm("value4").setExpression("$VTX*0.8")
 		vert_quat2.setInput( 0, vert_quat )
 
-
 		vert_m44create = geo.createNode( "attribcreate", node_name = "vert_m44create", exact_type_name=True )
 		vert_m44create.parm("name").set("m44")
 		vert_m44create.parm("class").set(3)
@@ -340,18 +339,28 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vert_m44create.parm("typeinfo").set(7)  # set type info to transformation matrix
 		vert_m44create.setInput( 0, vert_quat2 )
 
-
 		vert_m44 = geo.createNode( "attribwrangle", node_name = "vert_m44", exact_type_name=True )
 		vert_m44.parm("snippet").set("4@m44 = maketransform(0,0,{ 10, 20, 30 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 });")
 		vert_m44.parm("class").set(3)
 		vert_m44.setInput( 0, vert_m44create )
+
+		vert_m33create = geo.createNode( "attribcreate", node_name = "vert_m33create", exact_type_name=True )
+		vert_m33create.parm("name").set("m33")
+		vert_m33create.parm("class").set(3)
+		vert_m33create.parm("size").set(9)
+		vert_m33create.setInput( 0, vert_m44 )
+
+		vert_m33 = geo.createNode( "attribwrangle", node_name = "vert_m33", exact_type_name=True )
+		vert_m33.parm("snippet").set("3@m33 = matrix3(maketransform(0,0,{ 0, 0, 0 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 }));")
+		vert_m33.parm("class").set(3)
+		vert_m33.setInput( 0, vert_m33create )
 
 		vert_i1 = geo.createNode( "attribcreate", node_name = "vert_i1", exact_type_name=True )
 		vert_i1.parm("name").set("vert_i1")
 		vert_i1.parm("class").set(3)
 		vert_i1.parm("type").set(1)
 		vert_i1.parm("value1").setExpression("$VTX*0.1")
-		vert_i1.setInput( 0, vert_m44 )
+		vert_i1.setInput( 0, vert_m33 )
 
 		vert_i2 = geo.createNode( "attribcreate", node_name = "vert_i2", exact_type_name=True )
 		vert_i2.parm("name").set("vert_i2")
@@ -407,8 +416,30 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detail_i3.parm("value3").set(789)
 		detail_i3.setInput( 0, vertString2 )
 
+		detail_m33create = geo.createNode( "attribcreate", node_name = "detail_m33create", exact_type_name=True )
+		detail_m33create.parm("name").set("detail_m33")
+		detail_m33create.parm("class").set(0)
+		detail_m33create.parm("size").set(9)
+		detail_m33create.setInput( 0, detail_i3 )
+
+		detail_m33 = geo.createNode( "attribwrangle", node_name = "detail_m33", exact_type_name=True )
+		detail_m33.parm("snippet").set("3@detail_m33 = matrix3( maketransform(0,0,{ 10, 20, 30 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 }) );")
+		detail_m33.parm("class").set(0)
+		detail_m33.setInput( 0, detail_m33create )
+
+		detail_m44create = geo.createNode( "attribcreate", node_name = "detail_m44create", exact_type_name=True )
+		detail_m44create.parm("name").set("detail_m44")
+		detail_m44create.parm("class").set(0)
+		detail_m44create.parm("size").set(16)
+		detail_m44create.setInput( 0, detail_m33 )
+
+		detail_m44 = geo.createNode( "attribwrangle", node_name = "detail_m44", exact_type_name=True )
+		detail_m44.parm("snippet").set("4@detail_m44 = maketransform(0,0,{ 10, 20, 30 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 });")
+		detail_m44.parm("class").set(0)
+		detail_m44.setInput( 0, detail_m44create )
+
 		out = geo.createNode( "null", node_name="OUT" )
-		out.setInput( 0, detail_i3 )
+		out.setInput( 0, detail_m44 )
 
 		# convert it all
 		converter = IECoreHoudini.FromHoudiniPointsConverter( out )
@@ -514,6 +545,48 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		matrixRot = IECore.M44f.extractSHRT( result["m44"].data[0] )[2]
 		matrixTranslation = IECore.M44f.extractSHRT( result["m44"].data[0] )[3]
 		self.assertEqual( matrixTranslation, IECore.V3f( 10,20,30 ) )
+		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
+		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
+				
+		self.assertEqual( result["detail_m44"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["detail_m44"].data.typeId(), IECore.M44fData.staticTypeId() )
+
+		matrixScale = IECore.M44f.extractSHRT( result["detail_m44"].data.value )[0]
+		matrixRot = IECore.M44f.extractSHRT( result["detail_m44"].data.value )[2]
+		matrixTranslation = IECore.M44f.extractSHRT( result["detail_m44"].data.value )[3]
+		self.assertEqual( matrixTranslation, IECore.V3f( 10,20,30 ) )
+		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
+		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
+		
+		self.assertEqual( result["m33"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["m33"].data.typeId(), IECore.M33fVectorData.staticTypeId() )
+
+		m3 = result["m33"].data[0]
+		m4 = IECore.M44f(
+			m3[(0,0)], m3[(0,1)], m3[(0,2)], 0.0,
+			m3[(1,0)], m3[(1,1)], m3[(1,2)], 0.0,
+			m3[(2,0)], m3[(2,1)], m3[(2,2)], 0.0,
+			0.0, 0.0, 0.0, 1.0
+		)
+		
+		matrixScale = IECore.M44f.extractSHRT( m4 )[0]
+		matrixRot = IECore.M44f.extractSHRT( m4 )[2]
+		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
+		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
+		
+		self.assertEqual( result["detail_m33"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["detail_m33"].data.typeId(), IECore.M33fData.staticTypeId() )
+
+		m3 = result["detail_m33"].data.value
+		m4 = IECore.M44f(
+			m3[(0,0)], m3[(0,1)], m3[(0,2)], 0.0,
+			m3[(1,0)], m3[(1,1)], m3[(1,2)], 0.0,
+			m3[(2,0)], m3[(2,1)], m3[(2,2)], 0.0,
+			0.0, 0.0, 0.0, 1.0
+		)
+		
+		matrixScale = IECore.M44f.extractSHRT( m4 )[0]
+		matrixRot = IECore.M44f.extractSHRT( m4 )[2]
 		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
 		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
 		

@@ -138,7 +138,7 @@ typename T::Ptr FromHoudiniGeometryConverter::extractData( const GA_Attribute *a
 	typename T::Ptr data = new T();
 	BaseType *dest = data->baseWritable();
 
-	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
+	unsigned dimensions = sizeof(ValueType) / sizeof(BaseType);
 	attr->getAIFTuple()->get( attr, 0, dest, dimensions );
 
 	// set the geometric interpretation if it exists

@@ -106,7 +106,7 @@ GA_RWAttributeRef ToHoudiniNumericVectorAttribConverter<T>::doConversion( const 
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType::value_type ValueType;
 
- 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
+ 	unsigned dimensions = sizeof( ValueType ) / sizeof( BaseType );
 
 	GA_RWAttributeRef attrRef;
 	
@@ -168,7 +168,7 @@ GA_RWAttributeRef ToHoudiniNumericDetailAttribConverter<T>::doConversion( const 
 	typedef typename T::BaseType BaseType;
 	typedef typename T::ValueType ValueType;
 
- 	unsigned dimensions = IECore::VectorTraits<ValueType>::dimensions();
+ 	unsigned dimensions = sizeof( ValueType ) / sizeof( BaseType );
 	
 	GA_RWAttributeRef attrRef;
 	

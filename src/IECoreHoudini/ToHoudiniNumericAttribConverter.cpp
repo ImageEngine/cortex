@@ -46,6 +46,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniColor3fVectorAttribCo
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniIntVectorAttribConverter, ToHoudiniIntVectorAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2iVectorAttribConverter, ToHoudiniV2iVectorAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV3iVectorAttribConverter, ToHoudiniV3iVectorAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM33fVectorAttribConverter, ToHoudiniM33fVectorAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44fVectorAttribConverter, ToHoudiniM44fVectorAttribConverterTypeId )
 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniFloatDetailAttribConverter, ToHoudiniFloatDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2fDetailAttribConverter, ToHoudiniV2fDetailAttribConverterTypeId )
@@ -54,6 +56,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniColor3fDetailAttribCo
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniIntDetailAttribConverter, ToHoudiniIntDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV2iDetailAttribConverter, ToHoudiniV2iDetailAttribConverterTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniV3iDetailAttribConverter, ToHoudiniV3iDetailAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM33fDetailAttribConverter, ToHoudiniM33fDetailAttribConverterTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( ToHoudiniM44fDetailAttribConverter, ToHoudiniM44fDetailAttribConverterTypeId )
 
 // Explicit instantiations for numeric vector classes
 template class ToHoudiniNumericVectorAttribConverter<IECore::FloatVectorData>;
@@ -63,6 +67,8 @@ template class ToHoudiniNumericVectorAttribConverter<IECore::Color3fVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::IntVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::V2iVectorData>;
 template class ToHoudiniNumericVectorAttribConverter<IECore::V3iVectorData>;
+template class ToHoudiniNumericVectorAttribConverter<IECore::M33fVectorData>;
+template class ToHoudiniNumericVectorAttribConverter<IECore::M44fVectorData>;
 
 // Explicit instantiations for numeric detail classes
 template class ToHoudiniNumericDetailAttribConverter<IECore::FloatData>;
@@ -72,5 +78,7 @@ template class ToHoudiniNumericDetailAttribConverter<IECore::Color3fData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::IntData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::V2iData>;
 template class ToHoudiniNumericDetailAttribConverter<IECore::V3iData>;
+template class ToHoudiniNumericDetailAttribConverter<IECore::M33fData>;
+template class ToHoudiniNumericDetailAttribConverter<IECore::M44fData>;
 
 } // namespace IECoreHoudini
