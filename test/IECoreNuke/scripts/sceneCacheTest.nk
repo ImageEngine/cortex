@@ -1,33 +1,38 @@
-#! /software/apps/nuke/7.0v8/cent6.x86_64/Nuke7.0 -nx
-version 7.0 v8
+#! /software/apps/nuke/9.0v6/cent6.x86_64/libnuke-9.0.6.so -nx
+#write_info Write1 file:"[file dirname [value root.name] ]/data/sceneCacheTestResults.%04d.exr" format:"640 480 1" chans:":rgba.red:rgba.green:rgba.blue:" framerange:"1 80" fps:"0" colorspace:"default (linear)" datatype:"16 bit half" transfer:"unknown" views:"main"
+version 9.0 v6
 define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 <layout version="1.0">
-    <window x="66" y="29" w="1688" h="1052" screen="0">
+    <window x="0" y="25" w="1920" h="1150" screen="0">
         <splitter orientation="1">
-            <split size="1062"/>
-            <splitter orientation="1">
-                <split size="40"/>
-                <dock id="" hideTitles="1" activePageId="Toolbar.1">
-                    <page id="Toolbar.1"/>
+            <split size="40"/>
+            <dock id="" hideTitles="1" activePageId="Toolbar.1">
+                <page id="Toolbar.1"/>
+            </dock>
+            <split size="1868" stretch="1"/>
+            <splitter orientation="2">
+                <split size="1101"/>
+                <dock id="" activePageId="Viewer.1">
+                    <page id="Viewer.1"/>
                 </dock>
-                <split size="1018"/>
-                <splitter orientation="2">
-                    <split size="585"/>
-                    <dock id="" activePageId="Viewer.1">
-                        <page id="Viewer.1"/>
-                    </dock>
-                    <split size="411"/>
-                    <dock id="" activePageId="DAG.1">
-                        <page id="DAG.1"/>
-                        <page id="Curve Editor.1"/>
-                        <page id="DopeSheet.1"/>
-                    </dock>
-                </splitter>
             </splitter>
-            <split size="614"/>
-            <dock id="" activePageId="Properties.1">
-                <page id="Properties.1"/>
-                <page id="Script Editor.1"/>
+        </splitter>
+    </window>
+    <window x="1920" y="25" w="1920" h="1174" screen="1">
+        <splitter orientation="1">
+            <split size="399"/>
+            <splitter orientation="2">
+                <split size="1150"/>
+                <dock id="" activePageId="Properties.1">
+                    <page id="Properties.1"/>
+                </dock>
+            </splitter>
+            <split size="1509"/>
+            <dock id="" activePageId="DAG.1" focus="true">
+                <page id="DAG.1"/>
+                <page id="DopeSheet.1"/>
+                <page id="Curve Editor.1"/>
+                <page id="uk.co.thefoundry.scripteditor.1"/>
             </dock>
         </splitter>
     </window>
@@ -35,7 +40,7 @@ define_window_layout_xml {<?xml version="1.0" encoding="UTF-8"?>
 }
 Root {
  inputs 0
- name /home/lucio/dev/cortex/test/IECoreNuke/scripts/sceneCacheTest.nk
+ name /home/lucienf/dev/git/cortex/test/IECoreNuke/scripts/sceneCacheTest.nk
  last_frame 80
  lock_range true
  format "640 480 0 0 640 480 1 PC_Video"
@@ -49,6 +54,7 @@ Root {
    Panalog {"-0.042784 + 0.042784 * exp(4.971170*(x*1.06674-0.066736))"}
    ieAlexaV3LogC {"(x > 0.1496582 ? pow(10.0, (x - 0.385537) / 0.2471896) : x / 0.9661776 - 0.04378604) * 0.18 - 0.00937677"}}
  defaultViewerLUT "OCIO LUTs"
+ OCIOConfigPath /data/jobs/IDR/sequences/rnd/shots/pipeline/config/openColorIO/config.ocio
  addUserKnob {20 IE}
  addUserKnob {1 IEENV_WORKING_PATH +DISABLED}
  IEENV_WORKING_PATH /data/jobs/FSQ/sequences/rnd/shots/pipe
@@ -57,15 +63,15 @@ Read {
  inputs 0
  file "\[file dirname \[value root.name] ]/data/sceneCacheExpectedResults.####.exr"
  format "640 480 0 0 640 480 1 PC_Video"
- last 100
- origlast 100
+ last 80
+ origlast 80
  origset true
+ on_error black
+ version 23
  name Read1
- xpos 158
- ypos 291
+ xpos 153
+ ypos 279
 }
-set N35b4cc10 [stack 0]
-push $N35b4cc10
 Camera2 {
  inputs 0
  translate {0 0 50}
@@ -79,18 +85,18 @@ CheckerBoard2 {
  xpos -10
  ypos -29
 }
-set N2ea03360 [stack 0]
+set N719ca10 [stack 0]
 ieSceneCacheReader {
  file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
  sceneRoot /
  filterByTag None
  filterByName ""
- sceneView {{0} imported: 0 1 selected: 0 items: /root/A/a /root/B/b}
+ sceneView {{0} imported: 0 1 2 3 selected: 0 2 3 items: /root/A/a /root/B/b /root/bezier1 /root/particle1}
  translate {8 0 0}
  loadAll true
  name ieSceneCacheReader3
- xpos 287
- ypos 79
+ xpos 285
+ ypos 74
 }
 FrameHold {
  first_frame 70
@@ -98,57 +104,59 @@ FrameHold {
  xpos 322
  ypos 158
 }
-push $N2ea03360
+push $N719ca10
 ieSceneCacheReader {
  file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
  sceneRoot /
  filterByTag None
  filterByName ""
- sceneView {{0} imported: 0 1 selected: 0 items: /root/A/a /root/B/b}
+ sceneView {{0} imported: 0 1 2 3 selected: 0 items: /root/A/a /root/B/b /root/bezier1 /root/particle1}
  translate {5 0 0}
  loadAll true
  name ieSceneCacheReader4
- xpos 139
- ypos 78
+ xpos 140
+ ypos 72
 }
-set N38de6c70 [stack 0]
+set N711e890 [stack 0]
 TimeOffset {
  time_offset 30
+ time ""
  name TimeOffset2
  xpos 186
  ypos 151
 }
-push $N38de6c70
-push $N2ea03360
+push $N711e890
+push $N719ca10
 ieSceneCacheReader {
  file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
  sceneRoot /
  filterByTag None
  filterByName ""
- sceneView {{0} imported: 0 1 selected: 0 1 items: /root/A/a /root/B/b}
+ sceneView {{0} imported: 0 1 2 3 selected: 0 1 2 3 items: /root/A/a /root/B/b /root/bezier1 /root/particle1}
  loadAll true
  name ieSceneCacheReader2
  xpos -10
- ypos 87
+ ypos 84
 }
 TimeOffset {
  time_offset 10
+ time ""
  name TimeOffset1
  xpos -10
  ypos 130
 }
-push $N2ea03360
+push $N719ca10
 ieSceneCacheReader {
  file "\[file dirname \[value root.name] ]/animatedSpheres.scc"
  sceneRoot /
  filterByTag None
  filterByName ""
- sceneView {{0} imported: 0 1 selected: 0 1 items: /root/A/a /root/B/b}
+ sceneView {{0} imported: 0 1 2 3 selected: 0 1 2 3 items: /root/A/a /root/B/b /root/bezier1 /root/particle1}
  translate {-5 0 0}
  loadAll true
  name ieSceneCacheReader1
- xpos -164
- ypos 90
+ xpos -161
+ ypos 85
 }
 Scene {
  inputs 5
@@ -166,19 +174,32 @@ ScanlineRender {
  xpos -10
  ypos 293
 }
+ModifyMetaData {
+ metadata {
+  {remove exr/jabuka* ""}
+  {set exr/jabukaNukeScript /home/lucienf/dev/git/cortex/test/IECoreNuke/scripts/sceneCacheTest.nk}
+  {set exr/jabukaSourceList "\[]"}
+  {set exr/jabukaContents ""}
+  {set exr/jabukaNukeUnpublishedFiles "\[]"}
+ }
+ name ModifyMetaData1
+ xpos -10
+ ypos 319
+}
 Write {
  file "\[file dirname \[value root.name] ]/data/sceneCacheTestResults.####.exr"
  file_type exr
- version 3
+ metadata "default metadata and exr/*"
+ version 7
  name Write1
- selected true
  xpos -10
- ypos 334
+ ypos 345
 }
 Viewer {
- inputs 3
+ frame 1
+ frame_range 1-80
  input_process false
  name Viewer1
- xpos 54
- ypos 413
+ xpos -10
+ ypos 448
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013-2014, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -861,16 +861,12 @@ void SceneCacheReader::updateTagFilterKnob()
 /// This recursive method traverses the sceneInterface to build a list of item names and a mapping of the tags to the indices in the items.
 static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen )
 {
-	static IECore::InternedString g_geometryTag( "ObjectType:MeshPrimitive" );
 
 	assert ( firstReader() == this );
 
 	if( sceneInterface )
 	{
-		//\todo: We currently only support mesh geomentry as there isn't an IECoreNuke curve or points primitive converter.
-		// As a result we check that the object which we have encountered has a MeshPrimitive tag.
-		// When IECoreNuke supports curves and points primitive converters, remove this assertion.
-		if( sceneInterface->hasObject() && sceneInterface->hasTag( g_geometryTag ) )
+		if( sceneInterface->hasObject()  )
 		{
 			IECore::SceneInterface::NameList tagNames;
 			sceneInterface->readTags( tagNames, IECore::SceneInterface::LocalTag );
@@ -1071,7 +1067,10 @@ void SceneCacheReader::loadPrimitive( DD::Image::GeometryList &out, const std::s
 		object = transformer->operate();
 		
 		IECoreNuke::ToNukeGeometryConverterPtr converter = IECoreNuke::ToNukeGeometryConverter::create( object );
-		converter->convert( out );
+		if (converter)
+		{
+			converter->convert( out );
+		}
 	}
 }
 

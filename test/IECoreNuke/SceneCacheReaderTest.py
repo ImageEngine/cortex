@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -68,8 +68,8 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a']) )
 
 		# now force loading A+B and test in frame 20
-		v.setSelectedItems(['/root/A/a', '/root/B/b'])
-		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a', '/root/B/b']) )
+		v.setSelectedItems(['/root/A/a', '/root/B/b', '/root/bezier1', '/root/particle1'])
+		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a', '/root/B/b', '/root/bezier1', '/root/particle1' ]) )
 		nuke.executeMultiple( [ w ], [(20,20,1)] )
 		imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResultsB.0020.exr" )()
 		imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.0020.exr" )()
