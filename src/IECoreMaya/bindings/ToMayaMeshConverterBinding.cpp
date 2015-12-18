@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -37,6 +37,8 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/MessageHandler.h"
+
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
 #include "IECoreMaya/bindings/ToMayaMeshConverterBinding.h"
@@ -48,7 +50,7 @@ using namespace IECoreMaya;
 using namespace boost::python;
 
 // we use the shape name instead of MObject
-static void setMeshInterpolationAttribute( std::string n, std::string interpolation )
+static bool setMeshInterpolationAttribute( std::string n, std::string interpolation )
 {
 	MSelectionList l;
 	StatusException::throwIfError( l.add( MString( n.c_str() ) ) );
@@ -59,13 +61,17 @@ static void setMeshInterpolationAttribute( std::string n, std::string interpolat
 	s = l.getDependNode( 0, o );
 	if( !s )
 	{
-		throw Exception("Could not get depedency node!");
+		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::setMeshInterpolationAttribute",  "Could not get depedency node: " + n );
+		return false;
 	}
 
 	if ( !ToMayaMeshConverter::setMeshInterpolationAttribute( o, interpolation ) )
 	{
-		throw Exception( "Failed to set interpolation attribute in " + n );
+		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::setMeshInterpolationAttribute",  "Failed to set interpolation attribute in " + n );
+		return false;
 	}
+	
+	return true;
 }
 
 void IECoreMaya::bindToMayaMeshConverter()
