@@ -46,7 +46,7 @@ import StringUtil
 
 
 ## A function set for operating on the IECoreMaya::SceneShape type.
-class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
+class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
@@ -55,7 +55,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if isinstance( object, str ) or isinstance( object, unicode ) :
 			object = StringUtil.dependencyNodeFromString( object )
 
-		maya.OpenMaya.MFnDependencyNode.__init__( self, object )
+		maya.OpenMaya.MFnDagNode.__init__( self, object )
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
@@ -144,18 +144,6 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if toSelect:
 			maya.cmds.select( toSelect, r=True )
 			
-	
-	## Returns the full path name to this node.
-	def fullPathName( self ) :
-		
-		try :
-			f = maya.OpenMaya.MFnDagNode( self.object() )
-			return f.fullPathName()
-		except :
-			pass
-
-		return self.name()
-		
 	def sceneInterface( self ) :
 
 		return _IECoreMaya._sceneShapeSceneInterface( self )
