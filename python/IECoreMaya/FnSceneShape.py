@@ -187,22 +187,17 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	# If the path isn't already in the queries, add it and return the new index.
 	def __queryIndexForPath( self, path ):
 
-		node = self.fullPathName()
-		index = None
-		validIndices = maya.cmds.getAttr( node+".queryPaths", mi=True )
-		if not validIndices:
-			index = 0
-		else:
-			for id in validIndices:
-				# Check if we can reuse a query path
-				if maya.cmds.getAttr( node+".queryPaths["+str(id)+"]" ) == path:
-					index = id
-					break
-			if index is None:
-				# Didn't find path, get the next available index
-				index = max( i for i in validIndices ) +1
-				
-		maya.cmds.setAttr( node+".queryPaths["+str(index)+"]", path, type="string" )
+		queryPaths = self.findPlug( "queryPaths" )
+		validIndices = maya.OpenMaya.MIntArray()
+		queryPaths.getExistingArrayAttributeIndices( validIndices )
+		for i in validIndices:
+			# Check if we can reuse a query path
+			if queryPaths.elementByLogicalIndex( i ).asString() == path :
+				return i
+
+		# Didn't find path, get the next available index
+		index = max(validIndices) + 1 if validIndices else 0
+		queryPaths.elementByLogicalIndex( index ).setString( path )
 		return index
 	
 	## create the given child for the scene shape
