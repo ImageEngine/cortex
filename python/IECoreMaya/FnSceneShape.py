@@ -81,12 +81,21 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		else :
 			shapeName = parentShort + "SceneShape"
 			
-		shapeNode = maya.cmds.createNode( "ieSceneShape", name=shapeName, parent=parentNode, skipSelect=True )
+		dagMod = maya.OpenMaya.MDagModifier()
+		shapeNode = dagMod.createNode( "ieSceneShape", IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
+		dagMod.renameNode( shapeNode, shapeName )
+		dagMod.doIt()
 		
 		fnScS = FnSceneShape( shapeNode )
+		
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
-		maya.cmds.setAttr( fnScS.fullPathName()+".objectOnly", l=True )
-		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
+		
+		fnScS.findPlug( "objectOnly" ).setLocked( True )
+		
+		dgMod = maya.OpenMaya.MDGModifier()
+		outTime = IECoreMaya.StringUtil.plugFromString( "time1.outTime" )
+		dgMod.connect( outTime, fnScS.findPlug( "time" ) )
+		dgMod.doIt()
 		
 		return fnScS
 
@@ -192,36 +201,69 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# Returns a the function set for the child scene shape.
 	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "" ) :
 		
-		node = self.fullPathName()
-		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		dag = maya.OpenMaya.MDagPath()
+		self.getPath( dag )
+		dag.pop()
+		parentPath = dag.fullPathName()
+		childPath = parentPath+"|"+childName
+		try :
+			childDag = IECoreMaya.dagPathFromString( childPath )
+			childExists = True
+		except RuntimeError :
+			childExists = False
 		
-		if maya.cmds.objExists( transform+"|"+childName ):
-			shape = maya.cmds.listRelatives( transform+"|"+childName, f=True, type="ieSceneShape" )
+		if childExists :
+			shape = maya.cmds.listRelatives( childPath, f=True, type="ieSceneShape" )
 			if shape:
 				fnChild = IECoreMaya.FnSceneShape( shape[0] )
 			else:
-				fnChild = IECoreMaya.FnSceneShape.createShape( transform+"|"+childName )
+				fnChild = IECoreMaya.FnSceneShape.createShape( childPath )
 		else:
-			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = transform )
+			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = parentPath )
 
-		childNode = fnChild.fullPathName()
-		childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
-		maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
+		fnChild.findPlug( "file" ).setString( sceneFile )
 		sceneRootName = "/"+childName if sceneRoot == "/" else sceneRoot+"/"+childName
-		maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
+		fnChild.findPlug( "root" ).setString( sceneRootName )
+		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
 		
 		index = self.__queryIndexForPath( "/"+childName )
-		outTransform = node+".outTransform["+str(index)+"]"
-		if not maya.cmds.isConnected( outTransform+".outTranslate", childTransform+".translate" ):
-			maya.cmds.connectAttr( outTransform+".outTranslate", childTransform+".translate", f=True )
-		if not maya.cmds.isConnected( outTransform+".outRotate", childTransform+".rotate" ):
-			maya.cmds.connectAttr( outTransform+".outRotate", childTransform+".rotate", f=True )
-		if not maya.cmds.isConnected( outTransform+".outScale", childTransform+".scale" ):
-			maya.cmds.connectAttr( outTransform+".outScale", childTransform+".scale", f=True )
+		outTransform = self.findPlug( "outTransform" ).elementByLogicalIndex( index )
+		
+		dgMod = maya.OpenMaya.MDGModifier()
+		
+		childTranslate = fnChildTransform.findPlug( "translate" )
+		if childTranslate.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childTranslate.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childTranslate )
+		dgMod.connect( outTransform.child( self.attribute( "outTranslate" ) ), childTranslate )
+		
+		childRotate = fnChildTransform.findPlug( "rotate" )
+		if childRotate.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childRotate.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childRotate )
+		dgMod.connect( outTransform.child( self.attribute( "outRotate" ) ), childRotate )
+		
+		childScale = fnChildTransform.findPlug( "scale" )
+		if childScale.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childScale.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childScale )
+		dgMod.connect( outTransform.child( self.attribute( "outScale" ) ), childScale )
+		
+		childTime = fnChild.findPlug( "time" )
+		if childTime.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childTime.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childTime )
+		dgMod.connect( self.findPlug( "outTime" ), childTime )
+		
+		dgMod.doIt()
 
-		maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
-		maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
-		maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
+		fnChild.findPlug( "drawGeometry" ).setBool( drawGeo )
+		fnChild.findPlug( "drawChildBounds" ).setBool( drawChildBounds )
+		fnChild.findPlug( "drawRootBound" ).setBool( drawRootBound )
 
 		if drawTagsFilter:
 			parentTags = drawTagsFilter.split()
@@ -229,13 +271,9 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			commonTags = filter( lambda x: str(x) in childTags, parentTags )
 			if not commonTags:
 				# Hide that child since it doesn't match any filter
-				maya.cmds.setAttr( childTransform+".visibility", 0 )
+				fnChildTransform.findPlug( "visibility" ).setBool( False )
 			else:
-				maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
-		
-		# Connect child time to its parent so they're in sync
-		if not maya.cmds.isConnected( node+".outTime", childNode+".time" ):
-			maya.cmds.connectAttr( node+".outTime", childNode+".time", f=True )
+				fnChild.findPlug( "drawTagsFilter" ).setString( " ".join( commonTags ) )
 		
 		return fnChild
 
@@ -244,8 +282,6 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	# Missing child transforms and shapes will be created, missing connections and attribute values will be reset.
 	def expandOnce( self ) :
 
-		node = self.fullPathName()
-		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		scene = self.sceneInterface()
 		if not scene:
 			return []
@@ -256,19 +292,20 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			# No children to expand to
 			return []
 
-		sceneFile = maya.cmds.getAttr( node+".file" )
-		sceneRoot = maya.cmds.getAttr( node+".root" )
+		sceneFile = self.findPlug( "file" ).asString()
+		sceneRoot = self.findPlug( "root" ).asString()
 		
 		# Set querySpace to world (which is world space starting from the root)
-		maya.cmds.setAttr( node+".querySpace", 0 )
-		maya.cmds.setAttr( node+".objectOnly", l=False )
-		maya.cmds.setAttr( node+".objectOnly", 1 )
-		maya.cmds.setAttr( node+".objectOnly", l=True )
+		self.findPlug( "querySpace" ).setInt( 0 )
+		objectOnlyPlug = self.findPlug( "objectOnly" )
+		objectOnlyPlug.setLocked( False )
+		objectOnlyPlug.setBool( True )
+		objectOnlyPlug.setLocked( True )
 		
-		drawGeo = maya.cmds.getAttr( node+".drawGeometry" )
-		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
-		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
-		drawTagsFilter = maya.cmds.getAttr( node+".drawTagsFilter" )
+		drawGeo = self.findPlug( "drawGeometry" ).asBool()
+		drawChildBounds = self.findPlug( "drawChildBounds" ).asBool()
+		drawRootBound = self.findPlug( "drawRootBound" ).asBool()
+		drawTagsFilter = self.findPlug( "drawTagsFilter" ).asString()
 		
 		newSceneShapeFns = []
 
