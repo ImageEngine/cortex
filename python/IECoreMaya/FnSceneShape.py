@@ -375,14 +375,14 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
 
 		for sceneShape in allSceneShapes:
-			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
-			
 			fn = FnSceneShape( sceneShape )
+			fn.findPlug( "querySpace" ).setInt( 1 )
+			
 			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 				fn.convertObjectToGeometry()
 
 			# turn the scene node an intermediateObject so it can't be seen by LiveScene
-			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )
+			fn.findPlug( "intermediateObject" ).setBool( True )
 	
 	## Converts the object (if any) in the scene interface into maya geometry.
 	# If a shape with the expected name but incompatible type is found under the transform, we rename it and create a new proper shape.
@@ -393,10 +393,12 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if not self.sceneInterface().hasObject():
 			return
 
-		node = self.fullPathName()
 		if not transformNode:
 			# No transform provided, use the transform of the reader
-			transformNode = maya.cmds.listRelatives( node, f=True, p=True )[0]
+			dag = maya.OpenMaya.MDagPath()
+			self.getPath( dag )
+			dag.pop()
+			transformNode = dag.fullPathName()
 
 		type, plug = self.__mayaCompatibleShapeAndPlug()
 		if not (type and plug):
@@ -404,24 +406,44 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		
 		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
 		shape = transformNode + "|" + shapeName
-		create = False
-		if not maya.cmds.objExists( shape ):
-			create = True				
-		elif maya.cmds.nodeType( shape ) != type:
+		
+		fnShape = None
+		try :
+			fnShape = maya.OpenMaya.MFnDagNode( IECoreMaya.StringUtil.dagPathFromString( shape ) )
+		except RuntimeError :
+			pass
+		
+		if fnShape and maya.cmds.nodeType( shape ) != type :
 			# Rename existing shape
 			newName = shapeName + "_orig"
 			maya.cmds.rename( shape, newName )
 			IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Renaming incompatible shape %s to %s." % shape, newName )
-			create = True
+			fnShape = None
 
-		if create:
-			maya.cmds.createNode( type, parent = transformNode, name = shapeName )
+		if not fnShape :
+			dagMod = maya.OpenMaya.MDagModifier()
+			shapeNode = dagMod.createNode( type, IECoreMaya.StringUtil.dependencyNodeFromString( transformNode ) )
+			dagMod.renameNode( shapeNode, shapeName )
+			dagMod.doIt()
+			
+			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
+
 			if type == "mesh":
 				maya.cmds.sets(shape, add="initialShadingGroup" )
 
-		index = self.__queryIndexForPath( "/" )
-		if not maya.cmds.listConnections( shape+"."+plug, source = True, destination = False ) and not maya.cmds.getAttr( shape+"."+plug, l=True ):
-			maya.cmds.connectAttr( node+'.outObjects['+str(index)+']', shape+"."+plug, f=True )
+		plug = fnShape.findPlug( plug )
+		if plug.isLocked() :
+			return
+		
+		connections = maya.OpenMaya.MPlugArray()
+		if plug.isConnected() :
+			plug.connectedTo( connections, True, False )
+		
+		if not connections.length() :
+			dgMod = maya.OpenMaya.MDGModifier()
+			dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( self.__queryIndexForPath( "/" ) ), plug )
+			dgMod.doIt()
+			
 			if type == "mesh":
 				object = self.sceneInterface().readObject(0.0)
 				interpolation = object.interpolation
