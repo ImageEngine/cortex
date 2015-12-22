@@ -53,6 +53,7 @@ IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 {
 	m_attributes = other.m_attributes->copy();
 	m_shadingState = other.m_shadingState;
+	m_name = other.m_name;
 	m_alphaMap = other.m_alphaMap;
 	m_photonTarget = other.m_photonTarget;
 	m_visibilityDictionary = other.m_visibilityDictionary;

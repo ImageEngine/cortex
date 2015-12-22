@@ -119,5 +119,16 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
+	def testNestedAttributeBlock( self ) :
+
+		r = IECoreAppleseed.Renderer()
+		r.worldBegin()
+
+		r.attributeBegin()
+		r.setAttribute( "name", IECore.StringData( "object_name" ) )
+		r.attributeBegin()
+
+		self.failUnless( r.getAttribute( "name" ) == IECore.StringData( "object_name" ) )
+
 if __name__ == "__main__":
 	unittest.main()
