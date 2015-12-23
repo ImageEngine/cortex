@@ -229,6 +229,11 @@ struct IECoreGL::Renderer::MemberData
 		}
 	
 		Imath::Box3f b = p->bound();
+		if( b == Procedural::noBound )
+		{
+			return true;
+		}
+
 		switch( implementation->getState<CullingSpaceStateComponent>()->value() )
 		{
 			case ObjectSpace :
