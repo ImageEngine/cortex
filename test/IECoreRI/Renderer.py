@@ -51,12 +51,18 @@ class SimpleProcedural( Renderer.Procedural ) :
 		self.__c = CompoundData()
 		self.__c["a"] = IntData( 4 )
 
+		self.numBoundCalls = 0
+		self.numRenderCalls = 0
+
 	def bound( self ) :
+
+		self.numBoundCalls += 1
 
 		return Box3f( V3f( -self.__scale ), V3f( self.__scale ) )
 
 	def render( self, renderer ) :
 
+		self.numRenderCalls += 1
 		self.rendererTypeName = renderer.typeName()
 		self.rendererTypeId = renderer.typeId()
 
@@ -215,13 +221,13 @@ class RendererTest( IECoreRI.TestCase ) :
 	def testProcedural( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testProcedural.rib" )
-		r.worldBegin()
+		with WorldBlock( r ) :
 
-		p = SimpleProcedural( 10.5 )
-		r.procedural( p )
+			p = SimpleProcedural( 10.5 )
+			r.procedural( p )
 
-		r.worldEnd()
-
+		self.assertEqual( p.numBoundCalls, 1 )
+		self.assertEqual( p.numRenderCalls, 1 )
 		self.assertEqual( p.rendererTypeId, IECoreRI.Renderer.staticTypeId() )
 		self.assertEqual( p.rendererTypeName, "IECoreRI::Renderer" )
 		self.assertEqual( p.rendererTypeName, IECoreRI.Renderer.staticTypeName() )
