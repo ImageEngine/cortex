@@ -39,14 +39,16 @@ import unittest
 import os
 
 from IECore import *
+import IECore
 import IECoreRI
 
 class SimpleProcedural( Renderer.Procedural ) :
 
-	def __init__( self, scale ) :
+	def __init__( self, scale, computeBound = True ) :
 
 		Renderer.Procedural.__init__( self )
 		self.__scale = scale
+		self.__computeBound = computeBound
 		self.__t = StringData( "hello" )
 		self.__c = CompoundData()
 		self.__c["a"] = IntData( 4 )
@@ -58,7 +60,10 @@ class SimpleProcedural( Renderer.Procedural ) :
 
 		self.numBoundCalls += 1
 
-		return Box3f( V3f( -self.__scale ), V3f( self.__scale ) )
+		if self.__computeBound :
+			return Box3f( V3f( -self.__scale ), V3f( self.__scale ) )
+		else :
+			return self.noBound
 
 	def render( self, renderer ) :
 
@@ -66,16 +71,19 @@ class SimpleProcedural( Renderer.Procedural ) :
 		self.rendererTypeName = renderer.typeName()
 		self.rendererTypeId = renderer.typeId()
 
-		renderer.transformBegin()
+		with IECore.TransformBlock( renderer ) :
 
-		m = M44f()
-		m.scale( V3f( self.__scale ) )
-		renderer.concatTransform( m )
+			m = M44f()
+			m.scale( V3f( self.__scale ) )
+			renderer.concatTransform( m )
 
-		renderer.transformEnd()
-	
+			if self.__computeBound :
+				renderer.procedural( SimpleProcedural( 1, False ) )
+			else :
+				renderer.sphere( 1, -1, 1, 360, {} )
+
 	def hash( self ):
-	
+
 		h = MurmurHash()
 		return h
 
@@ -719,10 +727,53 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertTrue( 'LightSource "renderManLight"' in rib )
 		self.assertFalse( "arnold" in rib )
 
+	def testProceduralWithoutBounds( self ) :
+
+		r = IECoreRI.Renderer( "" )
+
+		r.camera(
+			"main",
+			{
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 0.1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
+			}
+		)
+		r.display(
+			"test", "ieDisplay", "rgba",
+			{
+				"driverType" : "ImageDisplayDriver",
+				"handle" : "test",
+				"quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ),
+			}
+		)
+
+		# Must use the raytrace hider in order to use unspecified
+		# procedural bounds in 3delight - it is not supported in
+		# REYES mode.
+		r.setOption( "ri:hider", "raytrace" )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -10 ) ) )
+
+			procedural = SimpleProcedural( 1, computeBound = False )
+			r.procedural( procedural )
+
+		self.assertEqual( procedural.numRenderCalls, 1 )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
+		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )
-		
+
 		files = [
 			"test/IECoreRI/shaders/types.sdl",
 		]
