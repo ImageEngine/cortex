@@ -998,22 +998,56 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 
 double LinkedScene::remappedLinkTime( double time ) const
 {
-	ConstDoubleDataPtr t = runTimeCast< const DoubleData >( m_mainScene->readAttribute( timeLinkAttribute, time ) );
-	if ( !t )
+	if( m_mainScene->hasAttribute( timeLinkAttribute ) )
 	{
-		throw Exception( "Invalid time when querying for time remapping!" );
+		ConstDoubleDataPtr t = runTimeCast< const DoubleData >( m_mainScene->readAttribute( timeLinkAttribute, time ) );
+		if ( !t )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		return t->readable();
 	}
-	return t->readable();
+	else
+	{
+		ConstCompoundDataPtr d = runTimeCast< const CompoundData >( m_mainScene->readAttribute( linkAttribute, time ) );
+		if( !d )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		ConstDoubleDataPtr t = d->member<DoubleData>( g_time );
+		if( !t )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		return t->readable();
+	}
 }
 
 double LinkedScene::remappedLinkTimeAtSample( size_t sampleIndex ) const
 {
-	ConstDoubleDataPtr t = runTimeCast< const DoubleData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( timeLinkAttribute, sampleIndex ) );
-	if ( !t )
+	if( m_mainScene->hasAttribute( timeLinkAttribute ) )
 	{
-		throw Exception( "Invalid time when querying for time remapping!" );
+		ConstDoubleDataPtr t = runTimeCast< const DoubleData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( timeLinkAttribute, sampleIndex ) );
+		if ( !t )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		return t->readable();
 	}
-	return t->readable();
+	else
+	{
+		ConstCompoundDataPtr d = runTimeCast< const CompoundData >( static_cast<const SampledSceneInterface*>(m_mainScene.get())->readAttributeAtSample( linkAttribute, sampleIndex ) );
+		if( !d )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		ConstDoubleDataPtr t = d->member<DoubleData>( g_time );
+		if( !t )
+		{
+			throw Exception( "Invalid time when querying for time remapping!" );
+		}
+		return t->readable();
+	}
 }
 
 SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missingBehaviour )
@@ -1090,7 +1124,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstCompoundDataPtr d = runTimeCast< const CompoundData >( c->readAttribute( linkAttribute, 0 ) );
 			/// we found the link attribute...
 			int linkDepth;
-			bool timeRemapped = false;
+			bool timeRemapped = ( d->member<DoubleData>( g_time ) != NULL );
 			ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 			if ( l )
 			{
