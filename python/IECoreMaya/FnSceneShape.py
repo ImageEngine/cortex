@@ -46,7 +46,7 @@ import StringUtil
 
 
 ## A function set for operating on the IECoreMaya::SceneShape type.
-class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
+class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 	## Initialise the function set for the given procedural object, which may
 	# either be an MObject or a node name in string or unicode form.
@@ -55,7 +55,7 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if isinstance( object, str ) or isinstance( object, unicode ) :
 			object = StringUtil.dependencyNodeFromString( object )
 
-		maya.OpenMaya.MFnDependencyNode.__init__( self, object )
+		maya.OpenMaya.MFnDagNode.__init__( self, object )
 
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
@@ -81,12 +81,21 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		else :
 			shapeName = parentShort + "SceneShape"
 			
-		shapeNode = maya.cmds.createNode( "ieSceneShape", name=shapeName, parent=parentNode, skipSelect=True )
+		dagMod = maya.OpenMaya.MDagModifier()
+		shapeNode = dagMod.createNode( "ieSceneShape", IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
+		dagMod.renameNode( shapeNode, shapeName )
+		dagMod.doIt()
 		
 		fnScS = FnSceneShape( shapeNode )
+		
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
-		maya.cmds.setAttr( fnScS.fullPathName()+".objectOnly", l=True )
-		maya.cmds.connectAttr( "time1.outTime", fnScS.fullPathName()+'.time' )
+		
+		fnScS.findPlug( "objectOnly" ).setLocked( True )
+		
+		dgMod = maya.OpenMaya.MDGModifier()
+		outTime = IECoreMaya.StringUtil.plugFromString( "time1.outTime" )
+		dgMod.connect( outTime, fnScS.findPlug( "time" ) )
+		dgMod.doIt()
 		
 		return fnScS
 
@@ -144,18 +153,6 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if toSelect:
 			maya.cmds.select( toSelect, r=True )
 			
-	
-	## Returns the full path name to this node.
-	def fullPathName( self ) :
-		
-		try :
-			f = maya.OpenMaya.MFnDagNode( self.object() )
-			return f.fullPathName()
-		except :
-			pass
-
-		return self.name()
-		
 	def sceneInterface( self ) :
 
 		return _IECoreMaya._sceneShapeSceneInterface( self )
@@ -187,58 +184,86 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	# If the path isn't already in the queries, add it and return the new index.
 	def __queryIndexForPath( self, path ):
 
-		node = self.fullPathName()
-		index = None
-		validIndices = maya.cmds.getAttr( node+".queryPaths", mi=True )
-		if not validIndices:
-			index = 0
-		else:
-			for id in validIndices:
-				# Check if we can reuse a query path
-				if maya.cmds.getAttr( node+".queryPaths["+str(id)+"]" ) == path:
-					index = id
-					break
-			if index is None:
-				# Didn't find path, get the next available index
-				index = max( i for i in validIndices ) +1
-				
-		maya.cmds.setAttr( node+".queryPaths["+str(index)+"]", path, type="string" )
+		queryPaths = self.findPlug( "queryPaths" )
+		validIndices = maya.OpenMaya.MIntArray()
+		queryPaths.getExistingArrayAttributeIndices( validIndices )
+		for i in validIndices:
+			# Check if we can reuse a query path
+			if queryPaths.elementByLogicalIndex( i ).asString() == path :
+				return i
+
+		# Didn't find path, get the next available index
+		index = max(validIndices) + 1 if validIndices else 0
+		queryPaths.elementByLogicalIndex( index ).setString( path )
 		return index
 	
 	## create the given child for the scene shape
 	# Returns a the function set for the child scene shape.
 	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "" ) :
 		
-		node = self.fullPathName()
-		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
+		dag = maya.OpenMaya.MDagPath()
+		self.getPath( dag )
+		dag.pop()
+		parentPath = dag.fullPathName()
+		childPath = parentPath+"|"+childName
+		try :
+			childDag = IECoreMaya.dagPathFromString( childPath )
+			childExists = True
+		except RuntimeError :
+			childExists = False
 		
-		if maya.cmds.objExists( transform+"|"+childName ):
-			shape = maya.cmds.listRelatives( transform+"|"+childName, f=True, type="ieSceneShape" )
+		if childExists :
+			shape = maya.cmds.listRelatives( childPath, f=True, type="ieSceneShape" )
 			if shape:
 				fnChild = IECoreMaya.FnSceneShape( shape[0] )
 			else:
-				fnChild = IECoreMaya.FnSceneShape.createShape( transform+"|"+childName )
+				fnChild = IECoreMaya.FnSceneShape.createShape( childPath )
 		else:
-			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = transform )
+			fnChild = IECoreMaya.FnSceneShape.create( childName, transformParent = parentPath )
 
-		childNode = fnChild.fullPathName()
-		childTransform = maya.cmds.listRelatives( childNode, parent=True, f=True )[0]
-		maya.cmds.setAttr( childNode+".file", sceneFile, type="string" )
+		fnChild.findPlug( "file" ).setString( sceneFile )
 		sceneRootName = "/"+childName if sceneRoot == "/" else sceneRoot+"/"+childName
-		maya.cmds.setAttr( childNode+".root", sceneRootName, type="string" )
+		fnChild.findPlug( "root" ).setString( sceneRootName )
+		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
 		
 		index = self.__queryIndexForPath( "/"+childName )
-		outTransform = node+".outTransform["+str(index)+"]"
-		if not maya.cmds.isConnected( outTransform+".outTranslate", childTransform+".translate" ):
-			maya.cmds.connectAttr( outTransform+".outTranslate", childTransform+".translate", f=True )
-		if not maya.cmds.isConnected( outTransform+".outRotate", childTransform+".rotate" ):
-			maya.cmds.connectAttr( outTransform+".outRotate", childTransform+".rotate", f=True )
-		if not maya.cmds.isConnected( outTransform+".outScale", childTransform+".scale" ):
-			maya.cmds.connectAttr( outTransform+".outScale", childTransform+".scale", f=True )
+		outTransform = self.findPlug( "outTransform" ).elementByLogicalIndex( index )
+		
+		dgMod = maya.OpenMaya.MDGModifier()
+		
+		childTranslate = fnChildTransform.findPlug( "translate" )
+		if childTranslate.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childTranslate.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childTranslate )
+		dgMod.connect( outTransform.child( self.attribute( "outTranslate" ) ), childTranslate )
+		
+		childRotate = fnChildTransform.findPlug( "rotate" )
+		if childRotate.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childRotate.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childRotate )
+		dgMod.connect( outTransform.child( self.attribute( "outRotate" ) ), childRotate )
+		
+		childScale = fnChildTransform.findPlug( "scale" )
+		if childScale.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childScale.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childScale )
+		dgMod.connect( outTransform.child( self.attribute( "outScale" ) ), childScale )
+		
+		childTime = fnChild.findPlug( "time" )
+		if childTime.isConnected() :
+			connections = maya.OpenMaya.MPlugArray()
+			childTime.connectedTo( connections, True, False )
+			dgMod.disconnect( connections[0], childTime )
+		dgMod.connect( self.findPlug( "outTime" ), childTime )
+		
+		dgMod.doIt()
 
-		maya.cmds.setAttr( childNode+".drawGeometry", drawGeo )
-		maya.cmds.setAttr( childNode+".drawChildBounds", drawChildBounds )
-		maya.cmds.setAttr( childNode+".drawRootBound", drawRootBound )
+		fnChild.findPlug( "drawGeometry" ).setBool( drawGeo )
+		fnChild.findPlug( "drawChildBounds" ).setBool( drawChildBounds )
+		fnChild.findPlug( "drawRootBound" ).setBool( drawRootBound )
 
 		if drawTagsFilter:
 			parentTags = drawTagsFilter.split()
@@ -246,13 +271,9 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			commonTags = filter( lambda x: str(x) in childTags, parentTags )
 			if not commonTags:
 				# Hide that child since it doesn't match any filter
-				maya.cmds.setAttr( childTransform+".visibility", 0 )
+				fnChildTransform.findPlug( "visibility" ).setBool( False )
 			else:
-				maya.cmds.setAttr( childNode+".drawTagsFilter", " ".join(commonTags),type="string" )
-		
-		# Connect child time to its parent so they're in sync
-		if not maya.cmds.isConnected( node+".outTime", childNode+".time" ):
-			maya.cmds.connectAttr( node+".outTime", childNode+".time", f=True )
+				fnChild.findPlug( "drawTagsFilter" ).setString( " ".join( commonTags ) )
 		
 		return fnChild
 
@@ -261,8 +282,6 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 	# Missing child transforms and shapes will be created, missing connections and attribute values will be reset.
 	def expandOnce( self ) :
 
-		node = self.fullPathName()
-		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		scene = self.sceneInterface()
 		if not scene:
 			return []
@@ -273,19 +292,20 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 			# No children to expand to
 			return []
 
-		sceneFile = maya.cmds.getAttr( node+".file" )
-		sceneRoot = maya.cmds.getAttr( node+".root" )
+		sceneFile = self.findPlug( "file" ).asString()
+		sceneRoot = self.findPlug( "root" ).asString()
 		
 		# Set querySpace to world (which is world space starting from the root)
-		maya.cmds.setAttr( node+".querySpace", 0 )
-		maya.cmds.setAttr( node+".objectOnly", l=False )
-		maya.cmds.setAttr( node+".objectOnly", 1 )
-		maya.cmds.setAttr( node+".objectOnly", l=True )
+		self.findPlug( "querySpace" ).setInt( 0 )
+		objectOnlyPlug = self.findPlug( "objectOnly" )
+		objectOnlyPlug.setLocked( False )
+		objectOnlyPlug.setBool( True )
+		objectOnlyPlug.setLocked( True )
 		
-		drawGeo = maya.cmds.getAttr( node+".drawGeometry" )
-		drawChildBounds = maya.cmds.getAttr( node+".drawChildBounds" )
-		drawRootBound = maya.cmds.getAttr( node+".drawRootBound" )
-		drawTagsFilter = maya.cmds.getAttr( node+".drawTagsFilter" )
+		drawGeo = self.findPlug( "drawGeometry" ).asBool()
+		drawChildBounds = self.findPlug( "drawChildBounds" ).asBool()
+		drawRootBound = self.findPlug( "drawRootBound" ).asBool()
+		drawTagsFilter = self.findPlug( "drawTagsFilter" ).asString()
 		
 		newSceneShapeFns = []
 
@@ -355,14 +375,14 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
 
 		for sceneShape in allSceneShapes:
-			maya.cmds.setAttr( sceneShape+".querySpace", 1 )
-			
 			fn = FnSceneShape( sceneShape )
+			fn.findPlug( "querySpace" ).setInt( 1 )
+			
 			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 				fn.convertObjectToGeometry()
 
 			# turn the scene node an intermediateObject so it can't be seen by LiveScene
-			maya.cmds.setAttr( sceneShape+".intermediateObject", 1 )
+			fn.findPlug( "intermediateObject" ).setBool( True )
 	
 	## Converts the object (if any) in the scene interface into maya geometry.
 	# If a shape with the expected name but incompatible type is found under the transform, we rename it and create a new proper shape.
@@ -373,10 +393,12 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		if not self.sceneInterface().hasObject():
 			return
 
-		node = self.fullPathName()
 		if not transformNode:
 			# No transform provided, use the transform of the reader
-			transformNode = maya.cmds.listRelatives( node, f=True, p=True )[0]
+			dag = maya.OpenMaya.MDagPath()
+			self.getPath( dag )
+			dag.pop()
+			transformNode = dag.fullPathName()
 
 		type, plug = self.__mayaCompatibleShapeAndPlug()
 		if not (type and plug):
@@ -384,24 +406,44 @@ class FnSceneShape( maya.OpenMaya.MFnDependencyNode ) :
 		
 		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
 		shape = transformNode + "|" + shapeName
-		create = False
-		if not maya.cmds.objExists( shape ):
-			create = True				
-		elif maya.cmds.nodeType( shape ) != type:
+		
+		fnShape = None
+		try :
+			fnShape = maya.OpenMaya.MFnDagNode( IECoreMaya.StringUtil.dagPathFromString( shape ) )
+		except RuntimeError :
+			pass
+		
+		if fnShape and maya.cmds.nodeType( shape ) != type :
 			# Rename existing shape
 			newName = shapeName + "_orig"
 			maya.cmds.rename( shape, newName )
 			IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Renaming incompatible shape %s to %s." % shape, newName )
-			create = True
+			fnShape = None
 
-		if create:
-			maya.cmds.createNode( type, parent = transformNode, name = shapeName )
+		if not fnShape :
+			dagMod = maya.OpenMaya.MDagModifier()
+			shapeNode = dagMod.createNode( type, IECoreMaya.StringUtil.dependencyNodeFromString( transformNode ) )
+			dagMod.renameNode( shapeNode, shapeName )
+			dagMod.doIt()
+			
+			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
+
 			if type == "mesh":
 				maya.cmds.sets(shape, add="initialShadingGroup" )
 
-		index = self.__queryIndexForPath( "/" )
-		if not maya.cmds.listConnections( shape+"."+plug, source = True, destination = False ) and not maya.cmds.getAttr( shape+"."+plug, l=True ):
-			maya.cmds.connectAttr( node+'.outObjects['+str(index)+']', shape+"."+plug, f=True )
+		plug = fnShape.findPlug( plug )
+		if plug.isLocked() :
+			return
+		
+		connections = maya.OpenMaya.MPlugArray()
+		if plug.isConnected() :
+			plug.connectedTo( connections, True, False )
+		
+		if not connections.length() :
+			dgMod = maya.OpenMaya.MDGModifier()
+			dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( self.__queryIndexForPath( "/" ) ), plug )
+			dgMod.doIt()
+			
 			if type == "mesh":
 				object = self.sceneInterface().readObject(0.0)
 				interpolation = object.interpolation
