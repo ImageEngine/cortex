@@ -409,6 +409,45 @@ class LinkedSceneTest( unittest.TestCase ) :
 		self.assertEqual( Aa.readTransformAsMatrix( 0.8 ), A.readTransformAsMatrix( 0.8 / 8 ) )
 		self.assertEqual( Aa.readTransformAsMatrix( 0.9 ), A.readTransformAsMatrix( 0.9 / 8 ) )
 	
+	def testOldStyleTimeRemapping( self ):
+
+		# write as a scene cache so we can write old style attributes:
+		l2 = IECore.SceneCache( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Write )
+		t2 = l2.createChild("transform2")
+		i2 = t2.createChild("instance2")
+		
+		# write with time locked to zero:
+		linkAttr = IECore.CompoundData( 
+			{
+				"fileName": IECore.StringData("test/IECore/data/sccFiles/animatedSpheres.scc"),
+				"root": IECore.InternedStringVectorData( [] ),
+				"time": IECore.DoubleData( 0.0 )
+			}
+		)
+		i2.writeAttribute( IECore.LinkedScene.linkAttribute, linkAttr, 0.0 )
+
+		del l2, i2, t2
+		
+		l = IECore.LinkedScene( "/tmp/test.lscc", IECore.IndexedIO.OpenMode.Read )
+		t2 = l.child("transform2")
+		i2 = t2.child("instance2")
+		A = i2.child("A")
+		
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		Aa = m.child("A")
+		
+		# time should be locked to zero:
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.1 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.2 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.3 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.4 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.5 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.6 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.7 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.8 / 8 ) )
+		self.assertEqual( Aa.readTransformAsMatrix( 0.0 ), A.readTransformAsMatrix( 0.9 / 8 ) )
+
+	
 	def readSavedScenes( self, fileVersion ):
 
 		def recurseCompare( basePath, virtualScene, realScene, atLink = True ) :
