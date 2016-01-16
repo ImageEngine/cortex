@@ -405,6 +405,16 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		vertString2.parm("string").setExpression("vals = [ 'd','c','e','a','g','f','b' ]\nreturn vals[ pwd().curPoint().number() % 7 ]", hou.exprLanguage.Python)
 		vertString2.setInput( 0, vertString )
 
+		vert_iList = geo.createNode( "attribwrangle", node_name = "vert_iList", exact_type_name=True )
+		vert_iList.parm("snippet").set("int i[];\ni[]@vert_iList = i;")
+		vert_iList.parm("class").set(3)
+		vert_iList.setInput( 0, vertString2 )
+
+		vert_fList = geo.createNode( "attribwrangle", node_name = "vert_fList", exact_type_name=True )
+		vert_fList.parm("snippet").set("float f[];\nf[]@vert_fList = f;")
+		vert_fList.parm("class").set(3)
+		vert_fList.setInput( 0, vert_iList )
+
 
 		detail_i3 = geo.createNode( "attribcreate", node_name = "detail_i3", exact_type_name=True )
 		detail_i3.parm("name").set("detail_i3")
@@ -414,7 +424,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detail_i3.parm("value1").set(123)
 		detail_i3.parm("value2").set(456.789) # can we catch it out with a float?
 		detail_i3.parm("value3").set(789)
-		detail_i3.setInput( 0, vertString2 )
+		detail_i3.setInput( 0, vert_fList )
 
 		detail_m33create = geo.createNode( "attribcreate", node_name = "detail_m33create", exact_type_name=True )
 		detail_m33create.parm("name").set("detail_m33")
@@ -437,9 +447,19 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detail_m44.parm("snippet").set("4@detail_m44 = maketransform(0,0,{ 10, 20, 30 },{ 30, 45, 60},{ 3, 4, 5 },{ 0, 0, 0 });")
 		detail_m44.parm("class").set(0)
 		detail_m44.setInput( 0, detail_m44create )
+		
+		detail_iList = geo.createNode( "attribwrangle", node_name = "detail_iList", exact_type_name=True )
+		detail_iList.parm("snippet").set("int i[];\ni[]@detail_iList = i;")
+		detail_iList.parm("class").set(0)
+		detail_iList.setInput( 0, detail_m44 )
+
+		detail_fList = geo.createNode( "attribwrangle", node_name = "detail_fList", exact_type_name=True )
+		detail_fList.parm("snippet").set("float f[];\nf[]@detail_fList = f;")
+		detail_fList.parm("class").set(0)
+		detail_fList.setInput( 0, detail_iList )
 
 		out = geo.createNode( "null", node_name="OUT" )
-		out.setInput( 0, detail_m44 )
+		out.setInput( 0, detail_fList )
 
 		# convert it all
 		converter = IECoreHoudini.FromHoudiniPointsConverter( out )
@@ -455,6 +475,12 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		for i in range( result.numPoints ) :
 			self.assert_( result["P"].data[i].x >= bbox.min.x )
 			self.assert_( result["P"].data[i].x <= bbox.max.x )
+		
+		# integer and float list attributes are not currently supported, so should not appear in the primitive variable lists:
+		self.assertTrue( "vert_iList" not in result.keys() )
+		self.assertTrue( "vert_fList" not in result.keys() )
+		self.assertTrue( "detail_iList" not in result.keys() )
+		self.assertTrue( "detail_fList" not in result.keys() )
 		
 		# test point attributes
 		self.assert_( "P" in result )
