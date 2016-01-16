@@ -394,6 +394,11 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	{
 		case GA_STORECLASS_FLOAT :
 		{
+			if( !attr->getAIFTuple() )
+			{
+				// not supporting variable lists
+				return;
+			}
 			switch ( attr->getTupleSize() )
 			{
 				case 1 :
@@ -494,6 +499,11 @@ void FromHoudiniGeometryConverter::transferAttribData(
 		}
 		case GA_STORECLASS_INT :
  		{
+			if( !attr->getAIFTuple() )
+			{
+				// not supporting variable lists
+				return;
+			}
 			switch ( attr->getTupleSize() )
 			{
 				case 1 :
@@ -595,7 +605,12 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 		switch ( attrRef.getStorageClass() )
 		{
 			case GA_STORECLASS_FLOAT :
-			{
+			{	
+				if( !attr->getAIFTuple() )
+				{
+					// not supporting variable lists
+					continue;
+				}
 				switch ( attr->getTupleSize() )
 				{
 					case 1 :
@@ -645,6 +660,11 @@ void FromHoudiniGeometryConverter::transferDetailAttribs( const GU_Detail *geo, 
 			}
 			case GA_STORECLASS_INT :
  			{
+				if( !attr->getAIFTuple() )
+				{
+					// not supporting variable lists
+					continue;
+				}
 				switch ( attr->getTupleSize() )
 				{
 					case 1 :
