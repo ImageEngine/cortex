@@ -1940,19 +1940,13 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitive( const IECore::Pat
 		pv.n(), pv.tokens(), pv.values()
 	);
 }
-	
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // procedurals
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
 {
-	Imath::Box3f bound = proc->bound();
-	if( bound.isEmpty() )
-	{
-		return;
-	}
-
 	ScopedContext scopedContext( m_context );
 
 	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
@@ -1967,9 +1961,14 @@ void IECoreRI::RendererImplementation::procedural( IECore::Renderer::ProceduralP
 
 void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
 {
+	const Imath::Box3f bound = proc->bound();
+	if( bound.isEmpty() )
+	{
+		return;
+	}
 
 	RtBound riBound;
-	convert( proc->bound(), riBound );
+	convert( bound, riBound );
 
 	ProceduralData *data = new ProceduralData;
 	data->procedural = proc;
@@ -2050,8 +2049,14 @@ void dynamicLoadFree( void *voidData )
 
 void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *proc )
 {
+	const Imath::Box3f bound = proc->bound();
+	if( bound.isEmpty() )
+	{
+		return;
+	}
+
 	RtBound riBound;
-	convert( proc->bound(), riBound );
+	convert( bound, riBound );
 
 	if( boost::algorithm::ends_with( proc->fileName(), ".rib" ) )
 	{

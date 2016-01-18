@@ -36,7 +36,10 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 
+using namespace Imath;
 using namespace IECore;
+
+const Box3f Renderer::Procedural::noBound( V3f( -std::numeric_limits<float>::infinity() ), V3f( std::numeric_limits<float>::infinity() ) );
 
 IE_CORE_DEFINERUNTIMETYPED( Renderer );
 

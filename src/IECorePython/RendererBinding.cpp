@@ -87,7 +87,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			}
 			return Imath::Box3f(); // empty
 		}
-		
+
 		virtual void render( Renderer *r ) const
 		{
 			ScopedGILLock gilLock;
@@ -118,7 +118,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 				msg( Msg::Error, "ProceduralWrap::render", "Caught unknown exception" );
 			}
 		}
-		
+
 		virtual MurmurHash hash() const
 		{
 			ScopedGILLock gilLock;
@@ -394,7 +394,7 @@ void bindRenderer()
 		.def("instance", &Renderer::instance)
 
 		.def("command", &command)
-		
+
 		.def("editBegin", &editBegin)
 		.def("editEnd", &Renderer::editEnd)
 	;
@@ -404,6 +404,7 @@ void bindRenderer()
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )
 		.def( "hash", &Renderer::Procedural::hash )
+		.def_readonly( "noBound", &Renderer::Procedural::noBound )
 	;
 
 	RefCountedClass<Renderer::ExternalProcedural, Renderer::Procedural>( "ExternalProcedural" )

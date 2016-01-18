@@ -357,6 +357,13 @@ class IECORE_API Renderer : public RunTimeTyped
 				/// and this feature will be disabled.
 				virtual MurmurHash hash() const = 0;
 
+				/// Sentinel value which may be returned by bound()
+				/// implementations if a bound is not available, or
+				/// computing one would be prohibitively expensive.
+				/// Renderers should expand such procedurals
+				/// unconditionally.
+				static const Imath::Box3f noBound;
+
 		};
 		IE_CORE_DECLAREPTR( Procedural );
 
@@ -428,7 +435,7 @@ class IECORE_API Renderer : public RunTimeTyped
 		/// Ends the current scene edit.
 		virtual void editEnd() = 0;
 		//@}
-		
+
 };
 
 }
