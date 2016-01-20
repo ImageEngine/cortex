@@ -798,7 +798,7 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 
 void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 {
-	int visibility = 0;
+	AtByte visibility = 0;
 	const BoolData *visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:camera" );
 	if( visData->readable() )
 	{
@@ -835,7 +835,7 @@ void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 		visibility |= AI_RAY_GLOSSY;
 	}
 
-	AiNodeSetInt( node, "visibility", visibility );
+	AiNodeSetByte( node, "visibility", visibility );
 }
 
 void IECoreArnold::RendererImplementation::addNode( AtNode *node )
