@@ -65,7 +65,7 @@ class IECOREARNOLD_API ToArnoldCurvesConverter : public ToArnoldShapeConverter
 	private :
 
 		static ConverterDescription<ToArnoldCurvesConverter> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ToArnoldCurvesConverter );

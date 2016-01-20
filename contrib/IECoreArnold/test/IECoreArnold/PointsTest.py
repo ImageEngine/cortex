@@ -44,43 +44,43 @@ import IECoreArnold
 class PointsTest( unittest.TestCase ) :
 
 	def testConverterResultType( self ) :
-	
+
 		with IECoreArnold.UniverseBlock() :
-		
+
 			p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
 			c = IECoreArnold.ToArnoldPointsConverter( p )
 			n = c.convert()
-		
+
 			self.failUnless( type( n ) is type( arnold.AiNode( "points" ) ) )
 
 	def testMode( self ) :
-	
+
 		with IECoreArnold.UniverseBlock() :
 
 			p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
-					
+
 			c = IECoreArnold.ToArnoldPointsConverter( p )
 			n = c.convert()
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
-			
-			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "particle" )	
+
+			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "particle" )
 			n = c.convert()
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
-		
-			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "disk" )	
+
+			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "disk" )
 			n = c.convert()
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
-			
-			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "sphere" )	
+
+			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "sphere" )
 			n = c.convert()
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "sphere" )
 
-			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "patch" )	
+			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "patch" )
 			n = c.convert()
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "quad" )
-			
+
 	def testDiskRendering( self ) :
-	
+
 		numPoints = 10
 		p = IECore.V3fVectorData( numPoints )
 		random.seed( 0 )
@@ -99,37 +99,37 @@ class PointsTest( unittest.TestCase ) :
 			}
 		)
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
 			r.points( numPoints, { "P" : p } )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
 		del image["A"]
-		
+
 		# raise blackPoint massively to remove possible watermark
 		IECore.Grade()( input = image, copyInput = False, blackPoint = IECore.Color3f( 0.9 ) )
-			
+
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/pointsImages/points.tif" ).read()
 
 		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 
 	def testConstantPrimitiveVariable( self ) :
-	
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
 		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
-		
+
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
 			self.assertEqual( arnold.AiNodeGetInt( n, "user:myPrimVar" ), 10 )
-	
+
 	def testConstantArrayPrimitiveVariable( self ) :
-	
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
 		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntVectorData( range( 0, 10 ) ) )
-	
+
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
@@ -137,12 +137,12 @@ class PointsTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nelements, 10 )
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
-			
+
 	def testUniformPrimitiveVariable( self ) :
-	
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
 		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 0, 10 ) ) )
-		
+
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
@@ -150,18 +150,18 @@ class PointsTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nelements, 10 )
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
-			
+
 	def testBooleanPrimitiveVariable( self ) :
-	
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
 		p["truePrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.BoolData( True ) )
 		p["falsePrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.BoolData( False ) )
-		
+
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.ToArnoldPointsConverter( p ).convert()
 			self.assertEqual( arnold.AiNodeGetBool( n, "user:truePrimVar" ), True )
 			self.assertEqual( arnold.AiNodeGetBool( n, "user:falsePrimVar" ), False )
-		
+
 if __name__ == "__main__":
     unittest.main()

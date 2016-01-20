@@ -97,7 +97,7 @@ void ToArnoldShapeConverter::convertRadius( const IECore::Primitive *primitive, 
 		}
 		radius = calculatedRadius;
 	}
-	
+
 	AiNodeSetArray(
 		shape,
 		"radius",
@@ -111,7 +111,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 	{
 		setParameter( shape, name, primitiveVariable.data.get() );
 	}
-	else 
+	else
 	{
 		bool isArray = false;
 		int type = parameterType( primitiveVariable.data->typeId(), isArray );
@@ -124,7 +124,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 			);
 			return;
 		}
-		
+
 		std::string typeString;
 		if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
@@ -136,9 +136,9 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 		}
 		else if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Vertex ) )
 		{
-			typeString = "varying ";	
+			typeString = "varying ";
 		}
-		
+
 		if( typeString == "" )
 		{
 			msg(
@@ -148,7 +148,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 			);
 			return;
 		}
-					
+
 		typeString += AiParamGetTypeName( type );
 		AiNodeDeclare( shape, name, typeString.c_str() );
 		AtArray *array = dataToArray( primitiveVariable.data.get() );
@@ -162,7 +162,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 				Msg::Warning,
 				"ToArnoldShapeConverter::convertPrimitiveVariable",
 				boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
-			);	
+			);
 		}
 	}
 }
@@ -172,7 +172,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariables( const IECore::Primitive 
 	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it!=eIt; it++ )
 	{
 		if( namesToIgnore )
-		{	
+		{
 			bool skip = false;
 			for( const char **n = namesToIgnore; *n; n++ )
 			{
@@ -191,7 +191,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariables( const IECore::Primitive 
 		// we prefix all the names, as otherwise the chance of a conflict between
 		// an arbitrary primitive variable name and an existing arnold parameter name
 		// seems too great.
-		string prefixedName = "user:" + it->first;		
+		string prefixedName = "user:" + it->first;
 		convertPrimitiveVariable( primitive, it->second, shape, prefixedName.c_str() );
 	}
 }

@@ -62,7 +62,7 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// UniverseBlock.
 		InstancingConverter();
 		virtual ~InstancingConverter();
-		
+
 		/// Returns the Primitive converted to an appropriate AtNode type, returning
 		/// a ginstance if an identical primitive has already been processed. This version
 		/// of the function simply calls the version below using primitive->hash()
@@ -74,7 +74,7 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// can append to the primitive hash to represent the post-processing they intend
 		/// to do.
 		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &hash );
-		
+
 	private :
 
 		struct MemberData;

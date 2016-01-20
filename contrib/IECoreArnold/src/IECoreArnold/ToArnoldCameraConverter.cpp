@@ -80,17 +80,17 @@ AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	{
 		result = AiNode( projection.c_str() );
 	}
-	
+
 	// set clipping planes
 	const Imath::V2f &clippingPlanes = camera->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
 	AiNodeSetFlt( result, "near_clip", clippingPlanes[0] );
 	AiNodeSetFlt( result, "far_clip", clippingPlanes[1] );
-	
+
 	// set shutter
 	const Imath::V2f &shutter = camera->parametersData()->member<V2fData>( "shutter", true )->readable();
 	AiNodeSetFlt( result, "shutter_start", shutter[0] );
 	AiNodeSetFlt( result, "shutter_end", shutter[1] );
-	
+
 	// set screen window
 	const Imath::Box2f &screenWindow = camera->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
 	const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
@@ -98,6 +98,6 @@ AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
 	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
 	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
-	
+
 	return result;
 }

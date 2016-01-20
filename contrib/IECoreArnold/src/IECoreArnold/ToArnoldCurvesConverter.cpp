@@ -68,9 +68,9 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	{
 		throw Exception( "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
-	
+
 	// make the result curves and add points
-	
+
 	AtNode *result = AiNode( "curves" );
 
 	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
@@ -81,9 +81,9 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	);
 
 	convertP( p, result, "points" );
-	
+
 	// set basis
-	
+
 	if( curves->basis() == CubicBasisf::bezier() )
 	{
 		AiNodeSetStr( result, "basis", "bezier" );
@@ -104,15 +104,15 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	{
 		// just accept the default
 	}
-	
+
 	// add radius
-	
+
 	convertRadius( curves, result );
 
 	// add arbitrary user parameters
-	
+
 	const char *ignore[] = { "P", "width", "radius", 0 };
 	convertPrimitiveVariables( curves, result, ignore );
-	
+
 	return result;
 }

@@ -45,17 +45,17 @@ class UniverseBlockTest( unittest.TestCase ) :
 	def test( self ) :
 
 		self.failIf( arnold.AiUniverseIsActive() )
-		
+
 		with IECoreArnold.UniverseBlock() :
 
 			self.failUnless( arnold.AiUniverseIsActive() )
-		
+
 			with IECoreArnold.UniverseBlock() :
-			
+
 				self.failUnless( arnold.AiUniverseIsActive() )
-	
+
 			self.failUnless( arnold.AiUniverseIsActive() )
-			
+
 		self.failIf( arnold.AiUniverseIsActive() )
 
 if __name__ == "__main__":

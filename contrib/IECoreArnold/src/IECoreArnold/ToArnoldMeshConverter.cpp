@@ -69,9 +69,9 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 	{
 		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
-	
+
 	// make the result mesh and add topology and points
-	
+
 	AtNode *result = AiNode( "polymesh" );
 
 	const std::vector<int> verticesPerFace = mesh->verticesPerFace()->readable();
@@ -87,25 +87,25 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 		"vidxs",
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
-	
+
 	convertP( p, result, "vlist" );
-	
+
 	// set subdivision
-	
+
 	if( mesh->interpolation()=="catmullClark" )
 	{
 		AiNodeSetStr( result, "subdiv_type", "catclark" );
 		AiNodeSetBool( result, "smoothing", true );
 	}
-	
+
 	// add uvs
-	
+
 	const FloatVectorData *s = mesh->variableData<FloatVectorData>( "s" );
 	const FloatVectorData *t = mesh->variableData<FloatVectorData>( "t" );
 	if( s && t )
 	{
 		PrimitiveVariable::Interpolation sInterpolation = mesh->variables.find( "s" )->second.interpolation;
-		PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;		
+		PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;
 		if( sInterpolation == tInterpolation )
 		{
 			if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
@@ -118,7 +118,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 					st.push_back( *sIt );
 					st.push_back( *tIt );
 				}
-				AiNodeSetArray( 
+				AiNodeSetArray(
 					result,
 					"uvlist",
 					AiArrayConvert( s->readable().size(), 1, AI_TYPE_POINT2, (void *)&(st[0]) )
@@ -126,7 +126,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 				// build uv indices
 				if( sInterpolation == PrimitiveVariable::FaceVarying )
 				{
-					AiNodeSetArray( 
+					AiNodeSetArray(
 						result,
 						"uvidxs",
 						faceVaryingIndices( mesh )
@@ -143,24 +143,24 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 			}
 			else
 			{
-				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );						
-			}	
+				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );
+			}
 		}
 		else
 		{
-			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );			
+			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );
 		}
 	}
 	else if( s || t )
 	{
 		msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
 	}
-	
+
 	/// add normals
-	
+
 	PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
 	if( nIt != mesh->variables.end() )
-	{	
+	{
 		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
 		if( n )
 		{
@@ -192,7 +192,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 			}
 			else
 			{
-				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );									
+				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );
 			}
 		}
 		else
@@ -200,12 +200,12 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
 		}
 	}
-	
+
 	// add arbitrary user parameters
-	
+
 	const char *ignore[] = { "P", "s", "t", "N", 0 };
 	convertPrimitiveVariables( mesh, result, ignore );
-	
+
 	return result;
 }
 

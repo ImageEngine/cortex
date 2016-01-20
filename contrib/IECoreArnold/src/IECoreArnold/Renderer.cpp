@@ -266,12 +266,12 @@ void Renderer::editEnd()
 {
 	m_implementation->editEnd();
 }
-	
+
 size_t Renderer::numProceduralNodes() const
 {
 	return m_implementation->m_nodes.size();
 }
-		
+
 void *Renderer::proceduralNode( size_t index )
 {
 	return m_implementation->m_nodes[index];

@@ -51,7 +51,7 @@ boost::python::object IECoreArnold::atNodeToPythonObject( AtNode *node )
 
 	object ctypes = import( "ctypes" );
 	object arnold = import( "arnold" );
-	
+
 	object atNodeType = arnold.attr( "AtNode" );
 	object pointerType = ctypes.attr( "POINTER" )( atNodeType );
 	object converted = ctypes.attr( "cast" )( (size_t)node, pointerType );

@@ -66,15 +66,15 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	{
 		throw Exception( "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
-	
+
 	// make the result points and set the positions
-	
+
 	AtNode *result = AiNode( "points" );
-		
+
 	convertP( p, result, "points" );
-	
+
 	// mode
-	
+
 	const StringData *t = points->variableData<StringData>( "type", PrimitiveVariable::Constant );
 	if( t )
 	{
@@ -99,9 +99,9 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	convertRadius( points, result );
 
 	/// \todo Aspect, rotation
-	
+
 	// add arbitrary user parameters
-	
+
 	const char *ignore[] = { "P", "width", "radius", 0 };
 	convertPrimitiveVariables( points, result, ignore );
 

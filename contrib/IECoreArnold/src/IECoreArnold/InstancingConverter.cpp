@@ -87,7 +87,7 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 			return instance;
 		}
 	}
-		
+
 	return 0;
 
 

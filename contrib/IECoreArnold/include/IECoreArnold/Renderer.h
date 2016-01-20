@@ -64,7 +64,7 @@ class IECOREARNOLD_API Renderer : public IECore::Renderer
 		/// Makes a renderer which can be used for expanding the procedural
 		/// passed as an argument.
 		Renderer( const AtNode *proceduralNode );
-		
+
 		virtual ~Renderer();
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreArnold::Renderer, RendererTypeId, IECore::Renderer );
@@ -158,7 +158,7 @@ class IECOREARNOLD_API Renderer : public IECore::Renderer
 
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 		/// May be called when this renderer is being used to run a procedural, to return the number of
 		/// Arnold nodes created by the procedural.
 		size_t numProceduralNodes() const;
@@ -169,7 +169,7 @@ class IECOREARNOLD_API Renderer : public IECore::Renderer
 	private :
 
 		friend class RendererImplementation;
-		
+
 		Renderer( RendererImplementationPtr implementation );
 
 		RendererImplementationPtr m_implementation;

@@ -73,7 +73,7 @@ void ToArnoldConverter::setParameter( AtNode *node, const AtParamEntry *paramete
 		type = AiParamGetDefault( parameter )->ARRAY->type;
 		isArray = true;
 	}
-	
+
 	setParameterInternal( node, AiParamGetName( parameter ), type, isArray, value );
 }
 
@@ -127,7 +127,7 @@ IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const AtUserParam
 {
 	return getParameterInternal( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
 }
-		
+
 IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name )
 {
 	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
@@ -143,7 +143,7 @@ IECore::DataPtr ToArnoldConverter::getParameter( AtNode *node, const char *name 
 			return getParameter( node, userParameter );
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -151,7 +151,7 @@ void ToArnoldConverter::getParameters( AtNode *node, IECore::CompoundDataMap &va
 {
 	/// \todo Non-user parameters
 
-	AtUserParamIterator *it = AiNodeGetUserParamIterator( node );  	
+	AtUserParamIterator *it = AiNodeGetUserParamIterator( node );
 	while( const AtUserParamEntry *param = AiUserParamIteratorGetNext( it ) )
 	{
 		DataPtr d = getParameter( node, param );
@@ -223,7 +223,7 @@ AtArray *ToArnoldConverter::dataToArray( const IECore::Data *data )
 	{
 		return 0;
 	}
-	
+
 	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
 	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
 	return AiArrayConvert( dataSize, 1, type, dataAddress );
@@ -237,7 +237,7 @@ static inline const T *dataCast( const char *name, const IECore::Data *data )
 	{
 		return result;
 	}
-	msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected %s)." ) % data->typeName() % name % T::staticTypeName() );			
+	msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected %s)." ) % data->typeName() % name % T::staticTypeName() );
 	return 0;
 }
 
@@ -248,15 +248,15 @@ void ToArnoldConverter::setParameterInternal( AtNode *node, const char *name, in
 		AtArray *a = dataToArray( value );
 		if( !a )
 		{
-			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );			
+			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );
 			return;
 		}
 		if( a->type != parameterType )
 		{
-			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array of type %s from data of type \"%s\" for parameter \"%s\"" ) % AiParamGetTypeName( parameterType ) % value->typeName() % name );			
-			return;		
+			msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Unable to create array of type %s from data of type \"%s\" for parameter \"%s\"" ) % AiParamGetTypeName( parameterType ) % value->typeName() % name );
+			return;
 		}
-		AiNodeSetArray( node, name, a );	
+		AiNodeSetArray( node, name, a );
 	}
 	else
 	{
@@ -309,7 +309,7 @@ void ToArnoldConverter::setParameterInternal( AtNode *node, const char *name, in
 			}
 			default :
 			{
-				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );	
+				msg( Msg::Warning, "ToArnoldConverter::setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );
 			}
 		}
 	}

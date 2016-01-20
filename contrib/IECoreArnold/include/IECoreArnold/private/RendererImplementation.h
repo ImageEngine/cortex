@@ -60,7 +60,7 @@ class RendererImplementation : public IECore::Renderer
 		// Initialises transform and attribute stacks from proceduralNode - used to
 		// create an appropriate context for the cortex procedural DSO.
 		RendererImplementation( const AtNode *proceduralNode );
-	
+
 		virtual ~RendererImplementation();
 
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
@@ -119,24 +119,24 @@ class RendererImplementation : public IECore::Renderer
 
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 	private :
-	
+
 		enum Mode
 		{
 			AssGen,
 			Render,
 			Procedural
 		};
-	
+
 		void constructCommon( Mode mode );
-		
+
 		void addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix );
 		void addShape( AtNode *shape );
 		void applyTransformToNode( AtNode *node );
 		void applyVisibilityToNode( AtNode *node );
 		void addNode( AtNode *node );
-		
+
 		// this is what we use in the userptr for procedurals. it contains
 		// the procedural we wish to render, and a renderer which contains the
 		// state at the point the procedural was emitted.
@@ -145,60 +145,60 @@ class RendererImplementation : public IECore::Renderer
 			IECore::Renderer::ProceduralPtr procedural;
 			RendererPtr renderer;
 		};
-		
+
 		static int procLoader( AtProcVtable *vTable );
 		static int procInit( AtNode *node, void **userPtr );
 		static int procCleanup( void *userPtr );
 		static int procNumNodes( void *userPtr );
 		static AtNode *procGetNode( void *userPtr, int i );
-	
+
 		boost::shared_ptr<UniverseBlock> m_universe;
 		InstancingConverterPtr m_instancingConverter;
-	
+
 		Mode m_mode;
 		std::string m_assFileName;
-	
+
 		// created in constructor.
 		AtNode *m_defaultFilter;
-	
+
 		// built by the display() method, and passed to the arnold global options in worldBegin().
 		std::vector<std::string> m_outputDescriptions;
-	
+
 		// transform stack stuff
 		typedef std::stack<Imath::M44f> TransformStack;
 		TransformStack m_transformStack;
-	
+
 		// attribute stack stuff
 		class AttributeState
 		{
-			
+
 			public :
-			
+
 				AttributeState();
 				AttributeState( const AttributeState &other );
-		
+
 				AtNode *surfaceShader;
 				AtNode *displacementShader;
-				
+
 				// shaders specified using "shader" or "ai:shader" type.
 				// these are used as input connections to other shaders.
 				typedef std::map<std::string, AtNode *> ShaderMap;
 				ShaderMap shaders;
-				
+
 				IECore::CompoundDataPtr attributes;
-		
+
 		};
-		
+
 		typedef std::stack<AttributeState> AttributeStack;
 		AttributeStack m_attributeStack;
-		
+
 		// list of nodes that have been output so far. we have
 		// to collect this so we can support dripfeeding nodes to
 		// arnold one by one in procedurals.
 		std::vector<AtNode *> m_nodes;
-		
+
 		friend class IECoreArnold::Renderer;
-		
+
 };
 
 } // namespace IECoreArnold

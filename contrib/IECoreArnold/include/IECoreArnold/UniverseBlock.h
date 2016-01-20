@@ -56,7 +56,7 @@ class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 		/// Calls AiEnd() when the number of destructor calls
 		/// matches the number of constructor calls.
 		~UniverseBlock();
-		
+
 };
 
 } // namespace IECoreArnold

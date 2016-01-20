@@ -63,7 +63,7 @@ class IECOREARNOLD_API ToArnoldMeshConverter : public ToArnoldShapeConverter
 		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh );
 
 		static ConverterDescription<ToArnoldMeshConverter> g_description;

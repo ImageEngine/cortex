@@ -43,20 +43,20 @@ import IECoreArnold
 class ProceduralDSOTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
-		
+
 		image = IECore.EXRImageReader( "testProceduralDSO.exr" ).read()
 		evaluator = IECore.ImagePrimitiveEvaluator( image )
 		result = evaluator.createResult()
 		evaluator.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.failUnless( result.floatPrimVar( image["A"] ) > 0.99 )
-		
+
 	def tearDown( self ) :
-	
+
 		for f in [ "testProceduralDSO.exr" ] :
 			if os.path.exists( f ) :
 				os.remove( f )
-				
+
 if __name__ == "__main__":
     unittest.main()

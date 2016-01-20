@@ -92,9 +92,9 @@ static const char **driverExtension()
 }
 
 static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
-{	
+{
 	std::vector<std::string> channelNames;
-	
+
 	const char *name = 0;
 	int pixelType = 0;
 	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
@@ -104,7 +104,7 @@ static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2
 		{
 			namePrefix = std::string( name ) + ".";
 		}
-		
+
 		switch( pixelType )
 		{
 			case AI_TYPE_RGB :
@@ -137,12 +137,12 @@ static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2
 		V2i( dataWindow.minx, dataWindow.miny ),
 		V2i( dataWindow.maxx, dataWindow.maxy )
 	);
-		
+
 	CompoundDataPtr parameters = new CompoundData();
-	ToArnoldConverter::getParameters( node, parameters->writable() );	
+	ToArnoldConverter::getParameters( node, parameters->writable() );
 
 	const char *driverType = AiNodeGetStr( node, "driverType" );
-	
+
 	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
 	try
 	{
@@ -184,7 +184,7 @@ static void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, 
 	{
 		return;
 	}
-	
+
 	const int numOutputChannels = (*driver)->channelNames().size();
 
 	std::vector<float> interleavedData;
@@ -210,7 +210,7 @@ static void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, 
 				numChannels = 1;
 				break;
 		}
-		
+
 		for( int c = 0; c < numChannels; c++ )
 		{
 			float *in = (float *)(bucketData) + c;
@@ -226,9 +226,9 @@ static void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, 
 			}
 			outChannelOffset += 1;
 		}
-		
+
 	}
-	
+
 	Box2i bucketBox(
 		V2i( x, y ),
 		V2i( x + sx - 1, y + sy - 1 )
@@ -253,7 +253,7 @@ static void driverClose( AtNode *node, struct AtOutputIterator *iterator )
 	{
 		try
 		{
-			(*driver)->imageClose(); 
+			(*driver)->imageClose();
 		}
 		catch( const std::exception &e )
 		{
@@ -274,8 +274,8 @@ static void driverFinish( AtNode *node )
 AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 {
 	if( i==0 )
-	{		
-		static AtCommonMethods commonMethods = { 
+	{
+		static AtCommonMethods commonMethods = {
 			driverParameters,
 			driverInitialize,
 			driverUpdate,
@@ -299,13 +299,13 @@ AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 			&commonMethods,
 			&driverMethods
 		};
-		
+
 		node->node_type = AI_NODE_DRIVER;
 		node->output_type = AI_TYPE_NONE;
 		node->name = "ieDisplay";
 		node->methods = &nodeMethods;
 		sprintf( node->version, AI_VERSION );
-		
+
 		return true;
 	}
 

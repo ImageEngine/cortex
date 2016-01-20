@@ -49,54 +49,54 @@ class MeshTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		with IECore.WorldBlock( r ) :		
+		with IECore.WorldBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "uv" } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
-			
+
 		del r
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
 		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/meshImages/expectedMeshUVs.exr" ).read()
-			
+
 		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
-		
+
 	def testNormals( self ) :
 
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		with IECore.WorldBlock( r ) :		
+		with IECore.WorldBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "n" } )
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.9 ), IECore.V2f( 0.9 ) ) )
 			m["N"] = IECore.PrimitiveVariable(
-					IECore.PrimitiveVariable.Interpolation.Vertex, 
+					IECore.PrimitiveVariable.Interpolation.Vertex,
 					IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ) ] )
-			)			
+			)
 			m.render( r )
-			
+
 		del r
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		
+
 		e = IECore.PrimitiveEvaluator.create( image )
 		result = e.createResult()
-		
+
 		# the utility shader encodes the normals in the range 0-1 rather than -1-1,
 		# which is why we're checking G and B against .5 rather than 0.
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 4 )
 		self.assertAlmostEqual( result.floatPrimVar( e.G() ), 0.5, 4 )
 		self.assertAlmostEqual( result.floatPrimVar( e.B() ), 0.5, 4 )
-		
+
 	def testVertexPrimitiveVariables( self ) :
-		
+
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m["myPrimVar"] = IECore.PrimitiveVariable(
 			IECore.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 0, 1, 2, 3 ] )
 		)
-		
+
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.ToArnoldMeshConverter( m ).convert()
@@ -104,6 +104,6 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nelements, 4 )
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
-						
+
 if __name__ == "__main__":
     unittest.main()

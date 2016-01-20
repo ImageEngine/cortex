@@ -48,14 +48,14 @@ class ToArnoldConverterTest( unittest.TestCase ) :
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		c = IECoreArnold.ToArnoldConverter.create( m )
 		self.failUnless( isinstance( c, IECoreArnold.ToArnoldMeshConverter ) )
-		
+
 		cp = IECore.CurvesPrimitive()
 		c = IECoreArnold.ToArnoldConverter.create( cp )
 		self.failUnless( isinstance( c, IECoreArnold.ToArnoldCurvesConverter ) )
-		
+
 		p = IECore.PointsPrimitive( 1 )
 		c = IECoreArnold.ToArnoldConverter.create( p )
-		self.failUnless( isinstance( c, IECoreArnold.ToArnoldPointsConverter ) )		
-		
+		self.failUnless( isinstance( c, IECoreArnold.ToArnoldPointsConverter ) )
+
 if __name__ == "__main__":
     unittest.main()
