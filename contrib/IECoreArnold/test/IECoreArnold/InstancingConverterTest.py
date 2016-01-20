@@ -125,8 +125,8 @@ class InstancingConverterTest( unittest.TestCase ) :
 			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
-			h1 = m1.hash()
-			h2 = m2.hash()
+			h1 = IECore.MurmurHash()
+			h2 = IECore.MurmurHash()
 
 			h1.append( 10 )
 			h2.append( 10 )

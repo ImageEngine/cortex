@@ -724,7 +724,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 	AtNode *shape = 0;
 	if( automaticInstancing )
 	{
-		IECore::MurmurHash hash = primitive->::IECore::Object::hash();
+		IECore::MurmurHash hash;
 		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
 		{
 			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )

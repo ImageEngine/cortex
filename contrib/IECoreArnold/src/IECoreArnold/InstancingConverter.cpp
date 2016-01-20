@@ -61,14 +61,16 @@ InstancingConverter::~InstancingConverter()
 
 AtNode *InstancingConverter::convert( const IECore::Primitive *primitive )
 {
-	IECore::MurmurHash h = primitive->::IECore::Object::hash();
-	return convert( primitive, h );
+	return convert( primitive, IECore::MurmurHash() );
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &hash )
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash )
 {
+	IECore::MurmurHash h = primitive->::IECore::Object::hash();
+	h.append( additionalHash );
+
 	MemberData::Cache::accessor a;
-	if( m_data->cache.insert( a, hash ) )
+	if( m_data->cache.insert( a, h ) )
 	{
 		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
 		if( !converter )
