@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2016, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,37 +33,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
-#include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
+#include "IECore/MeshPrimitive.h"
 
-#include "IECoreArnold/ToArnoldMeshConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+#include "IECoreArnold/MeshAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldMeshConverter );
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
 
-ToArnoldMeshConverter::ConverterDescription<ToArnoldMeshConverter> ToArnoldMeshConverter::g_description;
-
-ToArnoldMeshConverter::ToArnoldMeshConverter( IECore::MeshPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::MeshPrimitives to arnold polymesh nodes", IECore::MeshPrimitive::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
+
+AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh )
+{
+	vector<int> ids;
+	ids.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
+	for( size_t i=0, e=ids.size(); i < e; i++ )
+	{
+		ids[i] = i;
+	}
+	return AiArrayConvert( ids.size(), 1, AI_TYPE_INT, (void *)&(ids[0]) );
 }
 
-ToArnoldMeshConverter::~ToArnoldMeshConverter()
-{
-}
+NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert );
 
-AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API
+//////////////////////////////////////////////////////////////////////////
+
+AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 {
-	const MeshPrimitive *mesh = static_cast<const MeshPrimitive *>( from.get() );
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
@@ -88,7 +99,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 
-	convertP( p, result, "vlist" );
+	ShapeAlgo::convertP( p, result, "vlist" );
 
 	// set subdivision
 
@@ -204,18 +215,7 @@ AtNode *ToArnoldMeshConverter::doConversion( IECore::ConstObjectPtr from, IECore
 	// add arbitrary user parameters
 
 	const char *ignore[] = { "P", "s", "t", "N", 0 };
-	convertPrimitiveVariables( mesh, result, ignore );
+	ShapeAlgo::convertPrimitiveVariables( mesh, result, ignore );
 
 	return result;
-}
-
-AtArray *ToArnoldMeshConverter::faceVaryingIndices( const IECore::MeshPrimitive *mesh )
-{
-	vector<int> ids;
-	ids.resize( mesh->variableSize( PrimitiveVariable::FaceVarying ) );
-	for( size_t i=0, e=ids.size(); i < e; i++ )
-	{
-		ids[i] = i;
-	}
-	return AiArrayConvert( ids.size(), 1, AI_TYPE_INT, (void *)&(ids[0]) );
 }

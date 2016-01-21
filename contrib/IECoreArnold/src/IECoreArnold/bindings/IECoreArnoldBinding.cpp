@@ -40,7 +40,6 @@
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
 #include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
 
 using namespace IECoreArnold;
@@ -54,6 +53,5 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 	bindNodeAlgo();
 	bindToArnoldPointsConverter();
 	bindToArnoldCurvesConverter();
-	bindToArnoldMeshConverter();
 	bindInstancingConverter();
 }

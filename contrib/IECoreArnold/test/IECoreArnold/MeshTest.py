@@ -99,7 +99,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock() :
 
-			n = IECoreArnold.ToArnoldMeshConverter( m ).convert()
+			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
 			self.assertEqual( a.contents.nelements, 4 )
 			for i in range( 0, 4 ) :
