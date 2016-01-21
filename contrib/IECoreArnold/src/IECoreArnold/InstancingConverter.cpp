@@ -39,7 +39,7 @@
 #include "tbb/concurrent_hash_map.h"
 
 #include "IECoreArnold/InstancingConverter.h"
-#include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
 
 using namespace IECoreArnold;
 
@@ -72,12 +72,7 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	MemberData::Cache::accessor a;
 	if( m_data->cache.insert( a, h ) )
 	{
-		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
-		if( !converter )
-		{
-			return 0;
-		}
-		a->second = converter->convert();
+		a->second = NodeAlgo::convert( primitive );
 		return a->second;
 	}
 	else

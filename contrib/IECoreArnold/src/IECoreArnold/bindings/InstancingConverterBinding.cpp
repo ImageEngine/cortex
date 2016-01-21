@@ -42,10 +42,11 @@
 #include "IECorePython/ScopedGILRelease.h"
 
 #include "IECoreArnold/InstancingConverter.h"
-#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
+#include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
 
 using namespace IECoreArnold;
+using namespace IECoreArnoldBindings;
 using namespace boost::python;
 
 static object convertWrapper( InstancingConverter &c, IECore::Primitive *primitive )
