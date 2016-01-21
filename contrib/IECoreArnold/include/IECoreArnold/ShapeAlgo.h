@@ -46,7 +46,11 @@ namespace ShapeAlgo
 {
 
 void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *name );
+void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const char *name );
+
 void convertRadius( const IECore::Primitive *primitive, AtNode *shape );
+void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNode *shape );
+
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name );
 /// Converts primitive variables from primitive into user parameters on shape, ignoring any variables
 /// whose names are present in the ignore array.

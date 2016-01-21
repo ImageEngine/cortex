@@ -42,9 +42,57 @@
 #include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
+
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+ConstFloatVectorDataPtr radius( const Primitive *primitive )
+{
+	if( ConstFloatVectorDataPtr radius = primitive->variableData<FloatVectorData>( "radius" ) )
+	{
+		return radius;
+	}
+
+	FloatVectorDataPtr calculatedRadius = new FloatVectorData();
+	if( const FloatData *constantRadius = primitive->variableData<FloatData>( "radius", PrimitiveVariable::Constant ) )
+	{
+		calculatedRadius->writable().push_back( constantRadius->readable() );
+	}
+	else if( const FloatVectorData *width = primitive->variableData<FloatVectorData>( "width" ) )
+	{
+		calculatedRadius->writable().resize( width->readable().size() );
+		const std::vector<float>::iterator end = calculatedRadius->writable().end();
+		std::vector<float>::const_iterator wIt = width->readable().begin();
+		for( std::vector<float>::iterator it = calculatedRadius->writable().begin(); it != end; it++, wIt++ )
+		{
+			*it = *wIt / 2.0f;
+		}
+	}
+	else
+	{
+		const FloatData *constantWidth = primitive->variableData<FloatData>( "width", PrimitiveVariable::Constant );
+		if( !constantWidth )
+		{
+			constantWidth = primitive->variableData<FloatData>( "constantwidth", PrimitiveVariable::Constant );
+		}
+		float r = constantWidth ? constantWidth->readable() / 2.0f : 0.5f;
+		calculatedRadius->writable().push_back( r );
+	}
+	return calculatedRadius;
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API.
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECoreArnold
 {
@@ -67,44 +115,52 @@ void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *na
 	);
 }
 
+void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const char *name )
+{
+	vector<const Data *> dataSamples;
+	dataSamples.reserve( samples.size() );
+
+	for( vector<const Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		const V3fVectorData *p = (*it)->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+		if( !p )
+		{
+			throw Exception( "Primitive does not have \"P\" primitive variable of interpolation type Vertex." );
+		}
+		dataSamples.push_back( p );
+	}
+
+	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_POINT );
+	AiNodeSetArray( shape, name, array );
+}
+
 void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
 {
-	ConstFloatVectorDataPtr radius = primitive->variableData<FloatVectorData>( "radius" );
-	if( !radius )
-	{
-		FloatVectorDataPtr calculatedRadius = new FloatVectorData();
-		if( const FloatData *constantRadius = primitive->variableData<FloatData>( "radius", PrimitiveVariable::Constant ) )
-		{
-			calculatedRadius->writable().push_back( constantRadius->readable() );
-		}
-		else if( const FloatVectorData *width = primitive->variableData<FloatVectorData>( "width" ) )
-		{
-			calculatedRadius->writable().resize( width->readable().size() );
-			const std::vector<float>::iterator end = calculatedRadius->writable().end();
-			std::vector<float>::const_iterator wIt = width->readable().begin();
-			for( std::vector<float>::iterator it = calculatedRadius->writable().begin(); it != end; it++, wIt++ )
-			{
-				*it = *wIt / 2.0f;
-			}
-		}
-		else
-		{
-			const FloatData *constantWidth = primitive->variableData<FloatData>( "width", PrimitiveVariable::Constant );
-			if( !constantWidth )
-			{
-				constantWidth = primitive->variableData<FloatData>( "constantwidth", PrimitiveVariable::Constant );
-			}
-			float r = constantWidth ? constantWidth->readable() / 2.0f : 0.5f;
-			calculatedRadius->writable().push_back( r );
-		}
-		radius = calculatedRadius;
-	}
+	ConstFloatVectorDataPtr r = radius( primitive );
 
 	AiNodeSetArray(
 		shape,
 		"radius",
-		AiArrayConvert( radius->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( radius->readable()[0] ) )
+		AiArrayConvert( r->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( r->readable()[0] ) )
 	);
+}
+
+void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNode *shape )
+{
+	vector<ConstFloatVectorDataPtr> radiusSamples; // for ownership
+	vector<const Data *> dataSamples; // for passing to dataToArray()
+	radiusSamples.reserve( samples.size() );
+	dataSamples.reserve( samples.size() );
+
+	for( vector<const Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		ConstFloatVectorDataPtr r = radius( *it );
+		radiusSamples.push_back( r );
+		dataSamples.push_back( r.get() );
+	}
+
+	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_FLOAT );
+	AiNodeSetArray( shape, "radius", array );
 }
 
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
