@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREARNOLD_SHAPEALGO_H
+#define IECOREARNOLD_SHAPEALGO_H
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
+#include "IECore/Primitive.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost::python;
-
-void IECoreArnold::bindToArnoldShapeConverter()
+namespace IECoreArnold
 {
-	IECorePython::RunTimeTypedClass<IECoreArnold::ToArnoldShapeConverter>();
-}
+
+namespace ShapeAlgo
+{
+
+void convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name );
+void convertRadius( const IECore::Primitive *primitive, AtNode *shape );
+void convertPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name );
+/// Converts primitive variables from primitive into user parameters on shape, ignoring any variables
+/// whose names are present in the ignore array.
+void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore=NULL );
+
+} // namespace ShapeAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_SHAPEALGO_H

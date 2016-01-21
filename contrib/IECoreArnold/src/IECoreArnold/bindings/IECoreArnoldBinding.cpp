@@ -38,7 +38,6 @@
 #include "IECoreArnold/bindings/RendererBinding.h"
 #include "IECoreArnold/bindings/UniverseBlockBinding.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
 #include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
 #include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
 #include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
@@ -53,7 +52,6 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 	bindRenderer();
 	bindUniverseBlock();
 	bindNodeAlgo();
-	bindToArnoldShapeConverter();
 	bindToArnoldPointsConverter();
 	bindToArnoldCurvesConverter();
 	bindToArnoldMeshConverter();

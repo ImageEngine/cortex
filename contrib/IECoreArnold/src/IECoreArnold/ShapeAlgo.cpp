@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -40,24 +40,19 @@
 #include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/ParameterAlgo.h"
-#include "IECoreArnold/ToArnoldShapeConverter.h"
+#include "IECoreArnold/ShapeAlgo.h"
 
 using namespace IECoreArnold;
 using namespace IECore;
 using namespace std;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldShapeConverter );
-
-ToArnoldShapeConverter::ToArnoldShapeConverter( const std::string &description, IECore::TypeId supportedType )
-	:	ToArnoldConverter( description, supportedType )
+namespace IECoreArnold
 {
-}
 
-ToArnoldShapeConverter::~ToArnoldShapeConverter()
+namespace ShapeAlgo
 {
-}
 
-void ToArnoldShapeConverter::convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name ) const
+void convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name )
 {
 	AiNodeSetArray(
 		shape,
@@ -66,7 +61,7 @@ void ToArnoldShapeConverter::convertP( const IECore::V3fVectorData *p, AtNode *s
 	);
 }
 
-void ToArnoldShapeConverter::convertRadius( const IECore::Primitive *primitive, AtNode *shape ) const
+void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
 {
 	ConstFloatVectorDataPtr radius = primitive->variableData<FloatVectorData>( "radius" );
 	if( !radius )
@@ -106,7 +101,7 @@ void ToArnoldShapeConverter::convertRadius( const IECore::Primitive *primitive, 
 	);
 }
 
-void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name ) const
+void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
 	if( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
@@ -168,7 +163,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 	}
 }
 
-void ToArnoldShapeConverter::convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore ) const
+void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore )
 {
 	for( PrimitiveVariableMap::const_iterator it = primitive->variables.begin(), eIt = primitive->variables.end(); it!=eIt; it++ )
 	{
@@ -196,3 +191,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariables( const IECore::Primitive 
 		convertPrimitiveVariable( primitive, it->second, shape, prefixedName.c_str() );
 	}
 }
+
+} // namespace ShapeAlgo
+
+} // namespace IECoreArnold
