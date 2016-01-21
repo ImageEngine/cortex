@@ -56,11 +56,6 @@ NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::conve
 
 AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 {
-	const V3fVectorData *p = curves->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		throw Exception( "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
 
 	// make the result curves and add points
 
@@ -73,7 +68,7 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
-	ShapeAlgo::convertP( p, result, "points" );
+	ShapeAlgo::convertP( curves, result, "points" );
 
 	// set basis
 

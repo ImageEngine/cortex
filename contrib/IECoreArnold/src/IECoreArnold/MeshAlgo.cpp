@@ -75,11 +75,6 @@ NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert )
 
 AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 {
-	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
 
 	// make the result mesh and add topology and points
 
@@ -99,7 +94,7 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 
-	ShapeAlgo::convertP( p, result, "vlist" );
+	ShapeAlgo::convertP( mesh, result, "vlist" );
 
 	// set subdivision
 

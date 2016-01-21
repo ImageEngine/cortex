@@ -55,17 +55,11 @@ NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::conve
 
 AtNode *PointsAlgo::convert( const IECore::PointsPrimitive *points )
 {
-	const V3fVectorData *p = points->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		throw Exception( "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
-
 	// make the result points and set the positions
 
 	AtNode *result = AiNode( "points" );
 
-	ShapeAlgo::convertP( p, result, "points" );
+	ShapeAlgo::convertP( points, result, "points" );
 
 	// mode
 

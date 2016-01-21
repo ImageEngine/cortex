@@ -52,8 +52,14 @@ namespace IECoreArnold
 namespace ShapeAlgo
 {
 
-void convertP( const IECore::V3fVectorData *p, AtNode *shape, const char *name )
+void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *name )
 {
+	const V3fVectorData *p = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+	if( !p )
+	{
+		throw Exception( "Primitive does not have \"P\" primitive variable of interpolation type Vertex." );
+	}
+
 	AiNodeSetArray(
 		shape,
 		name,
