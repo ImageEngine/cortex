@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,31 +38,24 @@
 
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
 
-#include "IECoreArnold/ToArnoldCurvesConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+#include "IECoreArnold/CurvesAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldCurvesConverter );
-
-ToArnoldCurvesConverter::ConverterDescription<ToArnoldCurvesConverter> ToArnoldCurvesConverter::g_description;
-
-ToArnoldCurvesConverter::ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::CurvesPrimitives to arnold curves nodes", IECore::CurvesPrimitive::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToArnoldCurvesConverter::~ToArnoldCurvesConverter()
-{
-}
+NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert );
 
-AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+} // namespace
+
+AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 {
-	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( from.get() );
 	const V3fVectorData *p = curves->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
@@ -80,7 +73,7 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
-	convertP( p, result, "points" );
+	ShapeAlgo::convertP( p, result, "points" );
 
 	// set basis
 
@@ -107,12 +100,12 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 
 	// add radius
 
-	convertRadius( curves, result );
+	ShapeAlgo::convertRadius( curves, result );
 
 	// add arbitrary user parameters
 
 	const char *ignore[] = { "P", "width", "radius", 0 };
-	convertPrimitiveVariables( curves, result, ignore );
+	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
 
 	return result;
 }

@@ -39,7 +39,6 @@
 #include "IECoreArnold/bindings/UniverseBlockBinding.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
-#include "IECoreArnold/bindings/ToArnoldCurvesConverterBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
 
 using namespace IECoreArnold;
@@ -52,6 +51,5 @@ BOOST_PYTHON_MODULE( _IECoreArnold )
 	bindUniverseBlock();
 	bindNodeAlgo();
 	bindToArnoldPointsConverter();
-	bindToArnoldCurvesConverter();
 	bindInstancingConverter();
 }
