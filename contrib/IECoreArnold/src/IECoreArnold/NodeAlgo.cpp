@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,18 +32,53 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
-#define IECOREARNOLD_TOARNOLDCONVERTERBINDING_H
+#include "boost/unordered_map.hpp"
 
-#include "boost/python.hpp"
-#include "ai.h"
+#include "IECoreArnold/NodeAlgo.h"
+
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+typedef boost::unordered_map<IECore::TypeId, IECoreArnold::NodeAlgo::Converter> Registry;
+
+Registry &registry()
+{
+	static Registry g_registry;
+	return g_registry;
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Public implementation
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECoreArnold
 {
 
-boost::python::object atNodeToPythonObject( AtNode *node );
-void bindToArnoldConverter();
+namespace NodeAlgo
+{
+
+AtNode *convert( const IECore::Object *object )
+{
+	const Registry &r = registry();
+	Registry::const_iterator it = r.find( object->typeId() );
+	if( it == r.end() )
+	{
+		return NULL;
+	}
+	return it->second( object );
+}
+
+void registerConverter( IECore::TypeId fromType, Converter converter )
+{
+	registry()[fromType] = converter;
+}
+
+} // namespace NodeAlgo
 
 } // namespace IECoreArnold
-
-#endif //  IECOREARNOLD_TOARNOLDCONVERTERBINDING_H

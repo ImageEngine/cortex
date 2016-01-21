@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,51 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
+#ifndef IECOREARNOLD_NODEALGOBINDING_H
+#define IECOREARNOLD_NODEALGOBINDING_H
+
+#include "boost/python.hpp"
 #include "ai.h"
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/DespatchTypedData.h"
-
-#include "IECoreArnold/ToArnoldConverter.h"
-
-using namespace IECore;
-using namespace IECoreArnold;
-
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldConverter );
-
-ToArnoldConverter::ToArnoldConverter( const std::string &description, IECore::TypeId supportedType )
-	:	IECore::FromCoreConverter( description, supportedType )
+namespace IECoreArnoldBindings
 {
-}
 
-ToArnoldConverter::~ToArnoldConverter()
-{
-}
+boost::python::object atNodeToPythonObject( AtNode *node );
+void bindNodeAlgo();
 
-AtNode *ToArnoldConverter::convert() const
-{
-	IECore::ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<IECore::CompoundObject>();
-	return doConversion( srcParameter()->getValidatedValue(), operands );
-}
+} // namespace IECoreArnoldBindings
 
-ToArnoldConverterPtr ToArnoldConverter::create( IECore::ObjectPtr object )
-{
-	const CreatorMap &m = creators();
-	CreatorMap::const_iterator it = m.find( object->typeId() );
-	if( it != m.end() )
-	{
-		return it->second( object );
-	}
-	return 0;
-}
-
-ToArnoldConverter::CreatorMap &ToArnoldConverter::creators()
-{
-	static CreatorMap m;
-	return m;
-}
-
+#endif //  IECOREARNOLD_NODEALGOBINDING_H

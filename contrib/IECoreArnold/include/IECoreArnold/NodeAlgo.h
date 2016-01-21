@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,52 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDCONVERTER_INL
-#define IECOREARNOLD_TOARNOLDCONVERTER_INL
+#ifndef IECOREARNOLD_NODEALGO_H
+#define IECOREARNOLD_NODEALGO_H
+
+#include "ai.h"
+
+#include "IECore/Object.h"
 
 namespace IECoreArnold
 {
 
-template<class T>
-ToArnoldConverter::ConverterDescription<T>::ConverterDescription()
+namespace NodeAlgo
 {
-	creators()[T::InputType::staticTypeId()] = &creator;
+
+/// Converts the specified IECore::Object into an equivalent
+/// Arnold object, returning NULL if no conversion is
+/// available.
+AtNode *convert( const IECore::Object *object );
+
+/// Signature of a function which can convert an IECore::Object
+/// into an Arnold object.
+typedef AtNode * (*Converter)( const IECore::Object * );
+/// Registers a converter for a specific type.
+/// Use the ConverterDescription utility class in preference to
+/// this, since it provides additional type safety.
+void registerConverter( IECore::TypeId fromType, Converter converter );
+
+/// Class which registers a converter for type T automatically
+/// when instantiated.
+template<typename T>
+class ConverterDescription
+{
+
+	public :
+
+		/// Type-specific conversion function.
+		typedef AtNode *(*Converter)( const T * );
+
+		ConverterDescription( Converter converter )
+		{
+			registerConverter( T::staticTypeId(), reinterpret_cast<NodeAlgo::Converter>( converter ) );
+		}
+
 };
 
-template<class T>
-ToArnoldConverterPtr ToArnoldConverter::ConverterDescription<T>::creator( IECore::ObjectPtr object )
-{
-	return new T( boost::static_pointer_cast<typename T::InputType>( object ) );
-}
+} // namespace NodeAlgo
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDCONVERTER_INL
+#endif // IECOREARNOLD_NODEALGO_H

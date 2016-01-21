@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,17 +32,29 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreArnold/ToArnoldConverter.h"
-#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/bindings/NodeAlgoBinding.h"
 
 #include "IECore/Object.h"
 
-using namespace IECoreArnold;
 using namespace boost::python;
+using namespace IECoreArnold;
+using namespace IECoreArnoldBindings;
 
-boost::python::object IECoreArnold::atNodeToPythonObject( AtNode *node )
+namespace
+{
+
+object convertWrapper( const IECore::Object *object )
+{
+	return atNodeToPythonObject( NodeAlgo::convert( object ) );
+}
+
+} // namespace
+
+namespace IECoreArnoldBindings
+{
+
+boost::python::object atNodeToPythonObject( AtNode *node )
 {
 	if( !node )
 	{
@@ -58,16 +70,15 @@ boost::python::object IECoreArnold::atNodeToPythonObject( AtNode *node )
 	return converted;
 }
 
-static object convertWrapper( ToArnoldConverter &converter )
+void bindNodeAlgo()
 {
-	return atNodeToPythonObject( converter.convert() );
+
+	object nodeAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreArnold.NodeAlgo" ) ) ) );
+	scope().attr( "NodeAlgo" ) = nodeAlgoModule;
+	scope nodeAlgoModuleScope( nodeAlgoModule );
+
+	def( "convert", &convertWrapper );
+
 }
 
-void IECoreArnold::bindToArnoldConverter()
-{
-	IECorePython::RunTimeTypedClass<ToArnoldConverter>()
-		.def( "convert", &convertWrapper )
-		.def( "create", &ToArnoldConverter::create )
-		.staticmethod( "create" )
-	;
-}
+} // namespace IECoreArnoldBindings
