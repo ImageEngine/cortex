@@ -46,20 +46,19 @@ using namespace std;
 using namespace IECore;
 using namespace IECoreArnold;
 
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
 
-NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert );
+NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-} // namespace
-
-AtNode *PointsAlgo::convert( const IECore::PointsPrimitive *points )
+AtNode *convertCommon( const IECore::PointsPrimitive *points )
 {
-	// make the result points and set the positions
 
 	AtNode *result = AiNode( "points" );
-
-	ShapeAlgo::convertP( points, result, "points" );
 
 	// mode
 
@@ -84,14 +83,55 @@ AtNode *PointsAlgo::convert( const IECore::PointsPrimitive *points )
 		}
 	}
 
-	ShapeAlgo::convertRadius( points, result );
-
-	/// \todo Aspect, rotation
-
-	// add arbitrary user parameters
+	// arbitrary user parameters
 
 	const char *ignore[] = { "P", "width", "radius", 0 };
 	ShapeAlgo::convertPrimitiveVariables( points, result, ignore );
 
 	return result;
+
 }
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreArnold
+{
+
+namespace PointsAlgo
+{
+
+AtNode *convert( const IECore::PointsPrimitive *points )
+{
+	AtNode *result = convertCommon( points );
+
+	ShapeAlgo::convertP( points, result, "points" );
+	ShapeAlgo::convertRadius( points, result );
+
+	/// \todo Aspect, rotation
+
+	return result;
+}
+
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	AtNode *result = convertCommon( samples.front() );
+
+	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertRadius( primitiveSamples, result );
+
+	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+
+	/// \todo Aspect, rotation
+
+	return result;
+}
+
+} // namespace PointsAlgo
+
+} // namespace IECoreArnold
+
