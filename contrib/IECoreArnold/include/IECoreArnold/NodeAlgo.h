@@ -49,14 +49,23 @@ namespace NodeAlgo
 /// Arnold object, returning NULL if no conversion is
 /// available.
 AtNode *convert( const IECore::Object *object );
+/// Converts the specified IECore::Object samples into an
+/// equivalent moving Arnold object. If no motion converter
+/// is available, then returns a standard conversion of the
+/// first sample.
+AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes );
 
 /// Signature of a function which can convert an IECore::Object
 /// into an Arnold object.
 typedef AtNode * (*Converter)( const IECore::Object * );
+/// Signature of a function which can convert a series of IECore::Object
+/// samples into a moving Arnold object.
+typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes );
+
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
 /// this, since it provides additional type safety.
-void registerConverter( IECore::TypeId fromType, Converter converter );
+void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter = NULL );
 
 /// Class which registers a converter for type T automatically
 /// when instantiated.
@@ -66,12 +75,17 @@ class ConverterDescription
 
 	public :
 
-		/// Type-specific conversion function.
+		/// Type-specific conversion functions.
 		typedef AtNode *(*Converter)( const T * );
+		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, const std::vector<float> & );
 
-		ConverterDescription( Converter converter )
+		ConverterDescription( Converter converter, MotionConverter motionConverter = NULL )
 		{
-			registerConverter( T::staticTypeId(), reinterpret_cast<NodeAlgo::Converter>( converter ) );
+			registerConverter(
+				T::staticTypeId(),
+				reinterpret_cast<NodeAlgo::Converter>( converter ),
+				reinterpret_cast<NodeAlgo::MotionConverter>( motionConverter )
+			);
 		}
 
 };

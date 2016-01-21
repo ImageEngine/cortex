@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/python/suite/indexing/container_utils.hpp"
+
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 
@@ -47,6 +49,16 @@ namespace
 object convertWrapper( const IECore::Object *object )
 {
 	return atNodeToPythonObject( NodeAlgo::convert( object ) );
+}
+
+object convertWrapper2( object pythonSamples, object pythonSampleTimes )
+{
+	std::vector<const IECore::Object *> samples;
+	std::vector<float> sampleTimes;
+	container_utils::extend_container( samples, pythonSamples );
+	container_utils::extend_container( sampleTimes, pythonSampleTimes );
+
+	return atNodeToPythonObject( NodeAlgo::convert( samples, sampleTimes ) );
 }
 
 } // namespace
@@ -78,6 +90,7 @@ void bindNodeAlgo()
 	scope nodeAlgoModuleScope( nodeAlgoModule );
 
 	def( "convert", &convertWrapper );
+	def( "convert", &convertWrapper2 );
 
 }
 

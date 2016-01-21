@@ -43,7 +43,22 @@
 namespace
 {
 
-typedef boost::unordered_map<IECore::TypeId, IECoreArnold::NodeAlgo::Converter> Registry;
+using namespace IECoreArnold;
+
+struct Converters
+{
+
+	Converters( NodeAlgo::Converter converter, NodeAlgo::MotionConverter motionConverter )
+		:	converter( converter ), motionConverter( motionConverter )
+	{
+	}
+
+	NodeAlgo::Converter converter;
+	NodeAlgo::MotionConverter motionConverter;
+
+};
+
+typedef boost::unordered_map<IECore::TypeId, Converters> Registry;
 
 Registry &registry()
 {
@@ -71,12 +86,46 @@ AtNode *convert( const IECore::Object *object )
 	{
 		return NULL;
 	}
-	return it->second( object );
+	return it->second.converter( object );
 }
 
-void registerConverter( IECore::TypeId fromType, Converter converter )
+AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes )
 {
-	registry()[fromType] = converter;
+	if( samples.empty() )
+	{
+		return NULL;
+	}
+
+	const IECore::Object *firstSample = samples.front();
+	const IECore::TypeId firstSampleTypeId = firstSample->typeId();
+	for( std::vector<const IECore::Object *>::const_iterator it = samples.begin()+1, eIt = samples.end(); it != eIt; ++it )
+	{
+		if( (*it)->typeId() != firstSampleTypeId )
+		{
+			throw IECore::Exception( "Inconsistent object types." );
+		}
+	}
+
+	const Registry &r = registry();
+	Registry::const_iterator it = r.find( firstSampleTypeId );
+	if( it == r.end() )
+	{
+		return NULL;
+	}
+
+	if( it->second.motionConverter )
+	{
+		return it->second.motionConverter( samples, sampleTimes );
+	}
+	else
+	{
+		return it->second.converter( firstSample );
+	}
+}
+
+void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter )
+{
+	registry().insert( Registry::value_type( fromType, Converters( converter, motionConverter ) ) );
 }
 
 } // namespace NodeAlgo
