@@ -51,8 +51,9 @@
 #include "IECore/PointsPrimitive.h"
 
 #include "IECoreArnold/private/RendererImplementation.h"
-#include "IECoreArnold/ToArnoldCameraConverter.h"
 #include "IECoreArnold/ParameterAlgo.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/CameraAlgo.h"
 
 using namespace IECore;
 using namespace IECoreArnold;
@@ -212,8 +213,7 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
 	cortexCamera->addStandardParameters();
 
-	ToArnoldCameraConverterPtr converter = new ToArnoldCameraConverter( cortexCamera );
-	AtNode *arnoldCamera = converter->convert();
+	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
 	AtNode *options = AiUniverseGetOptions();
 	AiNodeSetPtr( options, "camera", arnoldCamera );
 
@@ -738,8 +738,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 	}
 	else
 	{
-		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
-		shape = converter->convert();
+		shape = NodeAlgo::convert( primitive );
 	}
 
 	if( strcmp( AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ), "ginstance" ) )
