@@ -39,6 +39,7 @@
 #include "IECore/Primitive.h"
 #include "IECore/MessageHandler.h"
 
+#include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/ToArnoldShapeConverter.h"
 
 using namespace IECoreArnold;
@@ -109,12 +110,12 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 {
 	if( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		setParameter( shape, name, primitiveVariable.data.get() );
+		ParameterAlgo::setParameter( shape, name, primitiveVariable.data.get() );
 	}
 	else
 	{
 		bool isArray = false;
-		int type = parameterType( primitiveVariable.data->typeId(), isArray );
+		int type = ParameterAlgo::parameterType( primitiveVariable.data->typeId(), isArray );
 		if( type == AI_TYPE_NONE || !isArray )
 		{
 			msg(
@@ -151,7 +152,7 @@ void ToArnoldShapeConverter::convertPrimitiveVariable( const IECore::Primitive *
 
 		typeString += AiParamGetTypeName( type );
 		AiNodeDeclare( shape, name, typeString.c_str() );
-		AtArray *array = dataToArray( primitiveVariable.data.get() );
+		AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
 		if( array )
 		{
 			AiNodeSetArray( shape, name, array );

@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,51 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
+#ifndef IECOREARNOLD_PARAMETERALGO_H
+#define IECOREARNOLD_PARAMETERALGO_H
+
 #include "ai.h"
 
-#include "IECore/CompoundParameter.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/MessageHandler.h"
-#include "IECore/DespatchTypedData.h"
+#include "IECoreArnold/TypeIds.h"
+#include "IECoreArnold/Export.h"
 
-#include "IECoreArnold/ToArnoldConverter.h"
+#include "IECore/FromCoreConverter.h"
+#include "IECore/CompoundData.h"
 
-using namespace IECore;
-using namespace IECoreArnold;
-
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldConverter );
-
-ToArnoldConverter::ToArnoldConverter( const std::string &description, IECore::TypeId supportedType )
-	:	IECore::FromCoreConverter( description, supportedType )
+namespace IECoreArnold
 {
-}
 
-ToArnoldConverter::~ToArnoldConverter()
+namespace ParameterAlgo
 {
-}
 
-AtNode *ToArnoldConverter::convert() const
-{
-	IECore::ConstCompoundObjectPtr operands = parameters()->getTypedValidatedValue<IECore::CompoundObject>();
-	return doConversion( srcParameter()->getValidatedValue(), operands );
-}
+IECOREARNOLD_API void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value );
+IECOREARNOLD_API void setParameter( AtNode *node, const char *name, const IECore::Data *value );
+IECOREARNOLD_API void setParameters( AtNode *node, const IECore::CompoundDataMap &values );
 
-ToArnoldConverterPtr ToArnoldConverter::create( IECore::ObjectPtr object )
-{
-	const CreatorMap &m = creators();
-	CreatorMap::const_iterator it = m.find( object->typeId() );
-	if( it != m.end() )
-	{
-		return it->second( object );
-	}
-	return 0;
-}
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter );
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter );
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const char *name );
+IECOREARNOLD_API void getParameters( AtNode *node, IECore::CompoundDataMap &values );
 
-ToArnoldConverter::CreatorMap &ToArnoldConverter::creators()
-{
-	static CreatorMap m;
-	return m;
-}
+/// Returns the Arnold parameter type (AI_TYPE_INT etc) suitable for
+/// storing Cortex data of the specified type, setting array to true
+/// or false depending on whether or not the Arnold type will be an
+/// array. Returns AI_TYPE_NONE if there is no suitable Arnold type.
+IECOREARNOLD_API int parameterType( IECore::TypeId dataType, bool &array );
 
+IECOREARNOLD_API AtArray *dataToArray( const IECore::Data *data );
+
+} // namespace ParameterAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_PARAMETERALGO_H

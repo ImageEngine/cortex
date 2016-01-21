@@ -43,7 +43,7 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/ParameterAlgo.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -139,7 +139,7 @@ static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2
 	);
 
 	CompoundDataPtr parameters = new CompoundData();
-	ToArnoldConverter::getParameters( node, parameters->writable() );
+	ParameterAlgo::getParameters( node, parameters->writable() );
 
 	const char *driverType = AiNodeGetStr( node, "driverType" );
 
