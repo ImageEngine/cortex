@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2016, Image Engine Design Inc. All rights reserved.
 //  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,44 +33,36 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
 #include "IECore/Camera.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreArnold/ToArnoldCameraConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/CameraAlgo.h"
 
-using namespace IECoreArnold;
 using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldCameraConverter );
-
-ToArnoldCameraConverter::ConverterDescription<ToArnoldCameraConverter> ToArnoldCameraConverter::g_description;
-
-ToArnoldCameraConverter::ToArnoldCameraConverter( IECore::CameraPtr toConvert )
-	:	ToArnoldConverter( "Converts IECore::Cameras to arnold camera nodes", IECore::Camera::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToArnoldCameraConverter::~ToArnoldCameraConverter()
-{
-}
+NodeAlgo::ConverterDescription<Camera> g_description( CameraAlgo::convert );
 
-AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+} // namespace
+
+AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 {
-	CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
-	camera->addStandardParameters();
+	CameraPtr cameraCopy = camera->copy();
+	cameraCopy->addStandardParameters();
 
 	// use projection to decide what sort of camera node to create
-	const std::string &projection = camera->parametersData()->member<StringData>( "projection", true )->readable();
+	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
 	AtNode *result = 0;
 	if( projection=="perspective" )
 	{
 		result = AiNode( "persp_camera" );
-		AiNodeSetFlt( result, "fov", camera->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
+		AiNodeSetFlt( result, "fov", cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
 	}
 	else if( projection=="orthographic" )
 	{
@@ -82,19 +74,19 @@ AtNode *ToArnoldCameraConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	}
 
 	// set clipping planes
-	const Imath::V2f &clippingPlanes = camera->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
+	const Imath::V2f &clippingPlanes = cameraCopy->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
 	AiNodeSetFlt( result, "near_clip", clippingPlanes[0] );
 	AiNodeSetFlt( result, "far_clip", clippingPlanes[1] );
 
 	// set shutter
-	const Imath::V2f &shutter = camera->parametersData()->member<V2fData>( "shutter", true )->readable();
+	const Imath::V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
 	AiNodeSetFlt( result, "shutter_start", shutter[0] );
 	AiNodeSetFlt( result, "shutter_end", shutter[1] );
 
 	// set screen window
-	const Imath::Box2f &screenWindow = camera->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
-	const Imath::V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
-	const float pixelAspectRatio = camera->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
+	const Imath::Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
+	const Imath::V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
+	const float pixelAspectRatio = cameraCopy->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
 	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
 	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
 	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
