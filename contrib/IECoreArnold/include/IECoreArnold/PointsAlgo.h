@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREARNOLD_POINTSALGO_H
+#define IECOREARNOLD_POINTSALGO_H
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
-
-#include "IECoreArnold/ToArnoldPointsConverter.h"
-#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
-
-#include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECore/PointsPrimitive.h"
 
-using namespace IECoreArnold;
-using namespace boost::python;
-
-void IECoreArnold::bindToArnoldPointsConverter()
+namespace IECoreArnold
 {
-	IECorePython::RunTimeTypedClass<ToArnoldPointsConverter>()
-		.def( init<IECore::PointsPrimitivePtr>() )
-	;
-}
+
+namespace PointsAlgo
+{
+
+AtNode *convert( const IECore::PointsPrimitive *points );
+
+} // namespace PointsAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_POINTSALGO_H

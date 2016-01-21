@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,29 +38,23 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreArnold/ToArnoldPointsConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+#include "IECoreArnold/PointsAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldPointsConverter );
-
-ToArnoldPointsConverter::ConverterDescription<ToArnoldPointsConverter> ToArnoldPointsConverter::g_description;
-
-ToArnoldPointsConverter::ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::PointsPrimitives to arnold points nodes", IECore::PointsPrimitive::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToArnoldPointsConverter::~ToArnoldPointsConverter()
-{
-}
+NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert );
 
-AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+} // namespace
+
+AtNode *PointsAlgo::convert( const IECore::PointsPrimitive *points )
 {
-	const PointsPrimitive *points = static_cast<const PointsPrimitive *>( from.get() );
 	const V3fVectorData *p = points->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
@@ -71,7 +65,7 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 
 	AtNode *result = AiNode( "points" );
 
-	convertP( p, result, "points" );
+	ShapeAlgo::convertP( p, result, "points" );
 
 	// mode
 
@@ -96,14 +90,14 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 		}
 	}
 
-	convertRadius( points, result );
+	ShapeAlgo::convertRadius( points, result );
 
 	/// \todo Aspect, rotation
 
 	// add arbitrary user parameters
 
 	const char *ignore[] = { "P", "width", "radius", 0 };
-	convertPrimitiveVariables( points, result, ignore );
+	ShapeAlgo::convertPrimitiveVariables( points, result, ignore );
 
 	return result;
 }
