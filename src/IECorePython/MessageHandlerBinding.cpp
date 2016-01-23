@@ -47,8 +47,9 @@
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
 class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
@@ -65,22 +66,24 @@ class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
 
 };
 
-static void addHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
+void addHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
 {
 	h.handlers.insert( hh );
 }
 
-static void removeHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
+void removeHandler( CompoundMessageHandler &h, MessageHandlerPtr hh )
 {
 	h.handlers.erase( hh );
 }
 
-static LevelFilteredMessageHandlerPtr levelFilteredMessageHandlerConstructor(MessageHandlerPtr handle, MessageHandler::Level level)
+LevelFilteredMessageHandlerPtr levelFilteredMessageHandlerConstructor(MessageHandlerPtr handle, MessageHandler::Level level)
 {
 	return new LevelFilteredMessageHandler( handle, level );
 }
 
-void bindMessageHandler()
+} // namespace
+
+void IECorePython::bindMessageHandler()
 {
 
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
@@ -141,7 +144,5 @@ void bindMessageHandler()
 
 	class_<MessageHandler::Scope, boost::noncopyable>( "_Scope", init<MessageHandler *>() )
 	;
-
-}
 
 }
