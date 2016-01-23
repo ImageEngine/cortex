@@ -42,7 +42,6 @@
 #include "IECore/LevelFilteredMessageHandler.h"
 #include "IECorePython/MessageHandlerBinding.h"
 #include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost::python;
@@ -52,16 +51,26 @@ using namespace IECorePython;
 namespace
 {
 
-class MessageHandlerWrap : public MessageHandler, public Wrapper<MessageHandler>
+class MessageHandlerWrapper : public RefCountedWrapper<MessageHandler>
 {
 	public :
 
-		MessageHandlerWrap( PyObject *self ) : Wrapper<MessageHandler>( self, this ) {}
+		MessageHandlerWrapper( PyObject *self ) : RefCountedWrapper<MessageHandler>( self )
+		{
+		}
 
 		virtual void handle( MessageHandler::Level level, const std::string &context, const std::string &message )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "handle" )( level, context, message );
+			try
+			{
+				this->methodOverride( "handle" )( level, context, message );
+			}
+			catch( const error_already_set &e )
+			{
+				/// \todo Move GafferBindings::ExceptionAlgo to Cortex and use it here?
+				PyErr_Print();
+			}
 		}
 
 };
@@ -88,7 +97,7 @@ void IECorePython::bindMessageHandler()
 
 	def( "msg", (void (*)( MessageHandler::Level, const std::string &, const std::string &))&msg );
 
-	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrap>( "MessageHandler" )
+	object mh = RefCountedClass<MessageHandler, RefCounted, MessageHandlerWrapper>( "MessageHandler" )
 		.def( init<>() )
 		.def( "handle", pure_virtual( &MessageHandler::handle ) )
 		.def( "setDefaultHandler", &MessageHandler::setDefaultHandler )
