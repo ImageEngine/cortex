@@ -63,6 +63,8 @@ class AttributeState
 
 		bool photonTarget() const;
 
+		int volumePriority() const;
+
 		void attributesHash( IECore::MurmurHash &hash ) const;
 
 		void addOSLShader( IECore::ConstShaderPtr shader );
@@ -86,6 +88,7 @@ class AttributeState
 		std::string m_alphaMap;
 		bool m_photonTarget;
 		foundation::Dictionary m_visibilityDictionary;
+		int m_volumePriority;
 
 };
 

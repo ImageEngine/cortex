@@ -272,6 +272,11 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 		params.insert( "photon_target", "true" );
 	}
 
+	if( attrState.volumePriority() != 0 )
+	{
+		params.insert( "volume_priority", attrState.volumePriority() );
+	}
+
 	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(),
 		params, objectEntityName( objSourceName ).c_str(), asf::Transformd::make_identity(), materials, materials );
 	assembly.object_instances().insert( objInstance );
