@@ -119,6 +119,40 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
+	def testVolumePriorities( self ) :
+
+		r = IECoreAppleseed.Renderer()
+		r.worldBegin()
+
+		self._createDefaultShader( r )
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+
+		r.attributeBegin()
+		r.setAttribute( "name", IECore.StringData( "plane1" ) )
+		r.setAttribute( "as:volume_priority", IECore.IntData( 4 ) )
+		m.render( r )
+		r.attributeEnd()
+
+		r.attributeBegin()
+		r.setAttribute( "name", IECore.StringData( "plane2" ) )
+		r.setAttribute( "as:volume_priority", IECore.IntData( 2 ) )
+		m.render( r )
+		r.attributeEnd()
+
+		ass = self._getMainAssembly( r )
+
+		self.failUnless( len( ass.assemblies() ) == 2 )
+		self.failUnless( len( ass.assembly_instances() ) == 2 )
+
+		objAss = ass.assemblies()["plane1_assembly"]
+		objInst = objAss.object_instances()[0]
+		self.failUnless( objInst.get_parameters()['volume_priority'] == 4 )
+
+		objAss = ass.assemblies()["plane2_assembly"]
+		objInst = objAss.object_instances()[0]
+		self.failUnless( objInst.get_parameters()['volume_priority'] == 2 )
+
 	def testNestedAttributeBlock( self ) :
 
 		r = IECoreAppleseed.Renderer()
@@ -126,9 +160,11 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "object_name" ) )
+		r.setAttribute( "as:volume_priority", IECore.IntData( 7 ) )
 		r.attributeBegin()
 
 		self.failUnless( r.getAttribute( "name" ) == IECore.StringData( "object_name" ) )
+		self.failUnless( r.getAttribute( "as:volume_priority" ) == IECore.IntData( 7 ) )
 
 if __name__ == "__main__":
 	unittest.main()
