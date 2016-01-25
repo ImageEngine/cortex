@@ -286,7 +286,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		if not scene:
 			return []
 			
-		sceneChildren = scene.childNames()
+		sceneChildren = sorted( scene.childNames() )
 		
 		if sceneChildren == []:
 			# No children to expand to

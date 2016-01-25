@@ -184,12 +184,12 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		fn.convertAllToGeometry()
 		
-		children = set( ["|test|testSceneShape", "|test|sceneShape_1"] )
-		self.assertEqual( set(maya.cmds.listRelatives( "|test", f=True )), children )
+		children = ["|test|testSceneShape", "|test|sceneShape_1"]
+		self.assertEqual( maya.cmds.listRelatives( "|test", f=True ), children )
 		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".intermediateObject" ), 1 )
 		
-		children = set( ["|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_Shape1"] )
-		self.assertEqual( set(maya.cmds.listRelatives( "|test|sceneShape_1", f=True )), children )
+		children = ["|test|sceneShape_1|sceneShape_SceneShape1", "|test|sceneShape_1|child", "|test|sceneShape_1|sceneShape_Shape1"]
+		self.assertEqual( maya.cmds.listRelatives( "|test|sceneShape_1", f=True ), children )
 		self.assertEqual( maya.cmds.getAttr( "|test|sceneShape_1|sceneShape_SceneShape1.intermediateObject" ), 1 )
 		self.assertEqual( maya.cmds.nodeType( "|test|sceneShape_1|sceneShape_Shape1" ), "mesh")
 		
