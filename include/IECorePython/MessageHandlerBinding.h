@@ -35,8 +35,6 @@
 #ifndef IECOREPYTHON_MESSAGEHANDLERBINDING_H
 #define IECOREPYTHON_MESSAGEHANDLERBINDING_H
 
-#include <boost/python.hpp>
-#include "IECore/MessageHandler.h"
 #include "IECorePython/Export.h"
 
 namespace IECorePython
