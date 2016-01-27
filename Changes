@@ -1,3 +1,17 @@
+# 9.6.1
+
+#### IECore
+
+- MessageHandler handles python exceptions before they get to c++
+
+#### IECoreMaya
+
+- Sorting childNames during ieSceneShape expansion
+
+#### IECoreAppleseed
+
+- Added nested volume priority attribute
+
 # 9.6.0
 
 #### IECore
