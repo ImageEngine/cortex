@@ -35,11 +35,13 @@
 #ifndef IECORE_LRUCACHE_H
 #define IECORE_LRUCACHE_H
 
+#include <vector>
+
 #include "tbb/spin_mutex.h"
-#include "tbb/concurrent_unordered_map.h"
 
 #include "boost/noncopyable.hpp"
 #include "boost/function.hpp"
+#include "boost/unordered_map.hpp"
 
 namespace IECore
 {
@@ -47,9 +49,10 @@ namespace IECore
 /// A mapping from keys to values, where values are computed from keys using a user
 /// supplied function. Recently computed values are stored in the cache to accelerate
 /// subsequent lookups. Each value has a cost associated with it, and the cache has
-/// a maximum total cost above which it will remove the least recently accessed items. 
+/// a maximum total cost above which it will remove the (approximately) least recently
+/// accessed items.
 ///
-/// The Key type must have a tbb_hasher implementation.
+/// The Key type must be hashable using boost::hash().
 ///
 /// The Value type must be default constructible, copy constructible and assignable.
 /// Note that Values are returned by value, and erased by assigning a default constructed
@@ -61,9 +64,9 @@ template<typename Key, typename Value>
 class LRUCache : private boost::noncopyable
 {
 	public:
-	
+
 		typedef size_t Cost;
-		
+
 		/// The GetterFunction is responsible for computing the value and cost for a cache entry
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
 		/// any reason. It is unsafe to access the LRUCache itself from the GetterFunction.
@@ -72,8 +75,7 @@ class LRUCache : private boost::noncopyable
 		///  It is unsafe to access the LRUCache itself from the RemovalCallback.
 		typedef boost::function<void ( const Key &key, const Value &data )> RemovalCallback;
 
-		LRUCache( GetterFunction getter );
-		LRUCache( GetterFunction getter, Cost maxCost );
+		LRUCache( GetterFunction getter, Cost maxCost = 500 );
 		LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost );
 		virtual ~LRUCache();
 
@@ -116,7 +118,7 @@ class LRUCache : private boost::noncopyable
 		Cost currentCost() const;
 
 	private :
-		
+
 		// Data
 		//////////////////////////////////////////////////////////////////////////
 
@@ -129,114 +131,226 @@ class LRUCache : private boost::noncopyable
 		{
 			New, // brand new unpopulated entry
 			Cached, // entry complete with value
-			Erased, // entry once had value but it was removed to meet cost limits
 			TooCostly, // entry cost exceeds m_maxCost and therefore isn't stored
 			Failed // m_getter failed when computing entry
 		};
-		
-		// The type used to store a single cached item.
-		struct CacheEntry;
-
-		// Map from keys to items - this forms the basis of
-		// our cache. The concurrent_unordered_map has the
-		// following pertinent properties :
-		//
-		// - find(), insert() and traversal may be invoked concurrently
-		// - erase() may _not_ be invoked concurrently (hence we don't use it)
-		// - value access is not locked in any way (we are responsible for
-		// our own locking when accessing the CacheEntry).
-		typedef tbb::concurrent_unordered_map<Key, CacheEntry> Map;
-		typedef typename Map::iterator MapIterator;
-		typedef typename Map::const_iterator ConstMapIterator;
-		typedef typename Map::value_type MapValue;
-		Map m_map;
 
 		// CacheEntry implementation - a single item of the cache.
 		struct CacheEntry
 		{
-			CacheEntry(); // status == New, previous == next == NULL
+			CacheEntry(); // status == New
 			CacheEntry( const CacheEntry &other );
-			
+
 			Value value; // value for this item
 			Cost cost; // the cost for this item
-			
-			// Pointers to previous and next items
-			// in the LRU list. We use the CacheEntries
-			// themselves to store the list because it is
-			// quicker than using an external structure
-			// like a std::list. Note that although the
-			// purpose of the list is to track items where
-			// status==Cached, the two are not updated
-			// atomically, so it may _not_ be assumed
-			// that status==Cached implies previous!=NULL
-			// or status!=Cached implies previous==NULL
-			// at any given moment.
-			MapValue *previous;
-			MapValue *next;
-			
+
 			char status; // status of this item
-			// Mutex - must be held before accessing any
-			// fields other than the list fields (previous
-			// and next). To access the list fields, m_listMutex
-			// must be held instead.
-			tbb::spin_mutex mutex;
+			bool recentlyUsed;
 		};
 
-		// Dummy MapValues to represent the start and end of our LRU list.
-		// Items are moved to the end when they are accessed, and removed
-		// from the start when we need to reduce costs.
-		MapValue m_listStart;
-		MapValue m_listEnd;
-	
-		// The list is inherently a serial data structure, so we must
-		// protect all accesses with this mutex. The mutex _must_ be held
-		// before the list fields of _any_ MapValue may be accessed.
-		typedef tbb::spin_mutex ListMutex;
-		ListMutex m_listMutex;
-		
+		// Map from keys to items - this forms the basis of
+		// our cache.
+		typedef boost::unordered_map<Key, CacheEntry> Map;
+		typedef typename Map::value_type MapValue;
+
+		// In various use cases we need to support
+		// concurrent access from many threads, and it's
+		// important that we do this efficiently. Our
+		// map type is not threadsafe, and a global mutex
+		// would be inefficient, so we take a binned approach.
+		// We store N internal maps, and use the hash of the
+		// key to determine which particular map that key
+		// should be stored in. This means that provided
+		// different threads are accessing different map
+		// values, they don't contend for a mutex at all.
+		struct Bin
+		{
+			typedef tbb::spin_mutex Mutex;
+			Map map;
+			Mutex mutex;
+		};
+
+		typedef std::vector<boost::shared_ptr<Bin> > Bins;
+		Bins m_bins;
+
+		// Handle class to abstract away the binned
+		// storage strategy. Internally holds an iterator
+		// into one of the maps and holds the lock for
+		// that map. All access to the bins must be
+		// made through this class.
+		class Handle : public boost::noncopyable
+		{
+
+			public :
+
+				Handle()
+					:	m_cache( NULL ), m_binIndex( 0 )
+				{
+				}
+
+				Handle( LRUCache *cache )
+					:	m_cache( NULL ), m_binIndex( 0 )
+				{
+					begin( cache );
+				}
+
+				Handle( LRUCache *cache, const Key &key, bool createIfMissing = false )
+					:	m_cache( NULL ), m_binIndex( 0 )
+				{
+					acquire( cache, key, createIfMissing );
+				}
+
+				~Handle()
+				{
+					release();
+				}
+
+				bool begin( LRUCache *cache )
+				{
+					for( size_t i = 0, e = cache->m_bins.size(); i < e; ++i )
+					{
+						release();
+						m_cache = cache;
+						m_binIndex = i;
+						m_cache->m_bins[m_binIndex]->mutex.lock();
+						m_it = m_cache->m_bins[m_binIndex]->map.begin();
+						if( m_it != m_cache->m_bins[m_binIndex]->map.end() )
+						{
+							return true;
+						}
+					}
+					release();
+					return false;
+				}
+
+				bool acquire( LRUCache *cache, const Key &key, bool createIfMissing = false )
+				{
+					release();
+					m_cache = cache;
+					m_binIndex = binIndex( key );
+					m_cache->m_bins[m_binIndex]->mutex.lock();
+					if( createIfMissing )
+					{
+						m_it = m_cache->m_bins[m_binIndex]->map.insert( MapValue( key, CacheEntry() ) ).first;
+						return true;
+					}
+					else
+					{
+						m_it = m_cache->m_bins[m_binIndex]->map.find( key );
+						if( m_it != m_cache->m_bins[m_binIndex]->map.end() )
+						{
+							return true;
+						}
+						else
+						{
+							release();
+							return false;
+						}
+					}
+				}
+
+				void release()
+				{
+					if( m_cache )
+					{
+						m_cache->m_bins[m_binIndex]->mutex.unlock();
+						m_cache = NULL;
+					}
+				}
+
+				void increment()
+				{
+					m_it++;
+					while( m_it == m_cache->m_bins[m_binIndex]->map.end() && m_binIndex < m_cache->m_bins.size() - 1 )
+					{
+						m_cache->m_bins[m_binIndex]->mutex.unlock();
+						m_binIndex++;
+						m_cache->m_bins[m_binIndex]->mutex.lock();
+						m_it = m_cache->m_bins[m_binIndex]->map.begin();
+					}
+				}
+
+				void erase()
+				{
+					m_cache->m_bins[m_binIndex]->map.erase( m_it );
+				}
+
+				void eraseAndIncrement()
+				{
+					Iterator nextIt = m_it; nextIt++;
+					size_t nextBinIndex = m_binIndex;
+					while( nextIt == m_cache->m_bins[nextBinIndex]->map.end() && nextBinIndex < m_cache->m_bins.size() - 1 )
+					{
+						if( nextBinIndex != m_binIndex )
+						{
+							m_cache->m_bins[nextBinIndex]->mutex.unlock();
+						}
+						nextBinIndex++;
+						m_cache->m_bins[nextBinIndex]->mutex.lock();
+						nextIt = m_cache->m_bins[nextBinIndex]->map.begin();
+					}
+
+					m_cache->m_bins[m_binIndex]->map.erase( m_it );
+
+					if( nextBinIndex != m_binIndex )
+					{
+						m_cache->m_bins[m_binIndex]->mutex.unlock();
+						m_binIndex = nextBinIndex;
+					}
+
+					m_it = nextIt;
+				}
+
+				bool valid()
+				{
+					return m_cache && m_it != m_cache->m_bins[m_binIndex]->map.end();
+				}
+
+				MapValue &operator*()
+				{
+					return *m_it;
+				}
+
+				MapValue *operator->()
+				{
+					return &(*m_it);
+				}
+
+			private :
+
+				typedef typename Map::iterator Iterator;
+
+				LRUCache *m_cache;
+				size_t m_binIndex;
+				Iterator m_it;
+
+				size_t binIndex( const Key &key ) const
+				{
+					return boost::hash<Key>()( key ) % m_cache->m_bins.size();
+				}
+
+		};
+
 		// Total cost. We store the current cost atomically so it can be updated
 		// concurrently by multiple threads.
 		typedef tbb::atomic<Cost> AtomicCost;
 		AtomicCost m_currentCost;
 		Cost m_maxCost;
 
-		// Methods
-		//
-		// Note that great care must be taken to properly handle the
-		// CacheEntry and list mutexes to avoid deadlock. If both m_listMutex
-		// and a CacheEntry::mutex must be held, the list mutex must be acquired
-		// _first_, and the CacheEntry::mutex _second_. Pay attention to the
-		// documentation for each method, to ensure that the right locks are held
-		// at the right times.
-		//////////////////////////////////////////////////////////////////////////
+		// These methods set/erase a cached value, updating the current
+		// cost appropriately. The caller must hold the lock for the bin
+		// containing the value.
+		bool setInternal( MapValue &mapValue, const Value &value, Cost cost );
+		bool eraseInternal( MapValue &mapValue );
 
-		// Updates the cache entry with the new value and updates m_currentCost
-		// appropriately. Returns true if the value was stored and false if it
-		// exceeded the maximum cost. The mutex for the CacheEntry must be held by
-		// the caller.
-		bool setInternal( MapValue *mapValue, const Value &value, Cost cost );
-		
-		// Sets the status for the cache entry to Erased, removes any
-		// previously Cached value, updates m_currentCost and removes
-		// the entry from the LRU list. The caller must hold m_listMutex, and
-		// must _not_ hold the mutex for the cache entry.
-		bool eraseInternal( MapValue *mapValue );
-
-		// Caller must not hold any locks.
+		// When our current cost goes over the limit, we must discard
+		// cached values until the cost is back under the threshold.
+		// We do this by cycling through our cache using a "second chance"
+		// algorithm to determine what to remove. No locks must be held
+		// when calling limitCost().
+		tbb::spin_mutex m_limitCostMutex;
+		Key m_limitCostSweepPosition;
 		void limitCost();
-
-		// Either erases the item from the list, or moves it to
-		// the end, depending on whether or not it is cached.
-		// Caller must not hold any locks.
-		void updateListPosition( MapValue *mapValue );
-
-		// If the item is in the list, erases it, otherwise
-		// does nothing. Caller must hold m_listMutex.
-		void listErase( MapValue *mapValue );
-		// Inserts the item at the end of the list - the
-		// item must _not_ already be in the list.
-		// Caller must hold m_listMutex.
-		void listInsertAtEnd( MapValue *mapValue );
 
 		static void nullRemovalCallback( const Key &key, const Value &value );
 
