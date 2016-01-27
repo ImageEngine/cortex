@@ -52,7 +52,7 @@ namespace boost
 namespace python
 {
 
-inline size_t tbb_hasher( const boost::python::object &o )
+size_t hash_value(  const boost::python::object &o )
 {
 	return PyObject_Hash( o.ptr() );
 }
@@ -69,32 +69,32 @@ struct LRUCacheGetter
 		:	getter( g )
 	{
 	}
-	
+
 	object operator() ( object key, LRUCache<object, object>::Cost &cost )
 	{
 		tuple t = extract<tuple>( getter( key ) );
 		cost = extract<LRUCache<object, object>::Cost>( t[1] );
 		return t[0];
 	}
-	
+
 	object getter;
 };
 
 class PythonLRUCache : public LRUCache<object, object>
 {
-	
+
 	public :
-	
+
 		PythonLRUCache( object getter, LRUCache<object, object>::Cost maxCost )
 			:	LRUCache<object, object>( LRUCacheGetter( getter ), maxCost )
 		{
 		}
-		
+
 		PythonLRUCache( object getter, object removalCallback, LRUCache<object, object>::Cost maxCost )
 			:	LRUCache<object, object>( LRUCacheGetter( getter ), removalCallback, maxCost )
 		{
 		}
-		
+
 		object get( const object &key )
 		{
 			// we must hold the GIL when entering LRUCache<object, object>::get()
@@ -121,7 +121,7 @@ class PythonLRUCache : public LRUCache<object, object>
 			// deal because all python execution is serialised anyway.
 			//
 			// see test/IECore/LRUCache.py, in particular testYieldGILInGetter().
-			
+
 			Mutex::scoped_lock lock;
 			{
 				IECorePython::ScopedGILRelease gilRelease;
@@ -131,7 +131,7 @@ class PythonLRUCache : public LRUCache<object, object>
 		}
 
 	private :
-	
+
 		typedef tbb::mutex Mutex;
 		Mutex m_getMutex;
 
@@ -150,12 +150,12 @@ static int get( int key, size_t &cost )
 struct GetFromTestCache
 {
 	public :
-	
+
 		GetFromTestCache( TestCache &cache, size_t numValues, size_t clearFrequency )
 			:	m_cache( cache ), m_numValues( numValues ), m_clearFrequency( clearFrequency )
 		{
 		}
-		
+
 		void operator()( const blocked_range<size_t> &r ) const
 		{
 			for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -166,22 +166,22 @@ struct GetFromTestCache
 				{
 					throw Exception( "Incorrect LRUCache value found" );
 				}
-				
+
 				if( m_clearFrequency && (i % m_clearFrequency == 0) )
 				{
 					m_cache.clear();
 				}
 			}
 		}
-		
+
 	private :
-	
+
 		TestCache &m_cache;
 		size_t m_numValues;
 		size_t m_clearFrequency;
-		
+
 };
-	
+
 void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int clearFrequency = 0 )
 {
 	// do lots of parallel cache accesses. then clear the cache in the main
@@ -190,18 +190,18 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 
 	TestCache cache( get, maxCost );
 	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues, clearFrequency ) );
-	
+
 	if( cache.currentCost() > cache.getMaxCost() )
 	{
 		throw Exception( "LRUCache exceeds maximum cost" );
 	}
-	
+
 	cache.clear();
 	if( cache.currentCost() != 0 )
 	{
 		throw Exception( "Cost not 0 after LRUCache::clear()" );
 	}
-	
+
 	// as above, but using setMaxCost( 0 ) to clear the cache.
 
 	TestCache cache2( get, maxCost );
@@ -211,7 +211,7 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 	{
 		throw Exception( "LRUCache exceeds maximum cost" );
 	}
-	
+
 	cache2.setMaxCost( 0 );
 	if( cache2.currentCost() != 0 )
 	{
@@ -221,7 +221,7 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 
 void IECorePython::bindLRUCache()
 {
-	
+
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
 		.def( init<object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "maxCost" )=500  ) ) )
 		.def( init<object, object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "removalCallback" ), boost::python::arg_( "maxCost" )  ) ) )
@@ -234,7 +234,7 @@ void IECorePython::bindLRUCache()
 		.def( "set", &PythonLRUCache::set )
 		.def( "cached", &PythonLRUCache::cached )
 	;
-	
+
 	/// \todo If we create an IECoreTest module, move this into it.
 	def(
 		"testLRUCacheThreading",
@@ -246,5 +246,5 @@ void IECorePython::bindLRUCache()
 			boost::python::arg( "clearFrequency" ) = 0
 		)
 	);
-	
+
 }
