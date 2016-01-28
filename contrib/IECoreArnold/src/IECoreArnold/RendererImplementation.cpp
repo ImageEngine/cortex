@@ -61,6 +61,14 @@ using namespace Imath;
 using namespace std;
 using namespace boost;
 
+namespace
+{
+
+InternedString g_aiAutomaticInstancingAttributeName( "ai:automaticInstancing" );
+InternedString g_automaticInstancingAttributeName( "automaticInstancing" );
+
+} // namespace
+
 ////////////////////////////////////////////////////////////////////////
 // AttributeState implementation
 ////////////////////////////////////////////////////////////////////////
@@ -703,27 +711,31 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	addNode( procedural );
 }
 
+bool IECoreArnold::RendererImplementation::automaticInstancing() const
+{
+	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
+	CompoundDataMap::const_iterator it = attributes.find( g_aiAutomaticInstancingAttributeName );
+	if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
+	{
+		return static_cast<const IECore::BoolData *>( it->second.get() )->readable();
+	}
+	else
+	{
+		it = attributes.find( g_automaticInstancingAttributeName );
+		if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
+		{
+			return static_cast<const IECore::BoolData *>( it->second.get() )->readable();
+		}
+	}
+	return true;
+}
+
 void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
 {
 	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
 
-	bool automaticInstancing = true;
-	CompoundDataMap::const_iterator it = attributes.find( "ai:automaticInstancing" );
-	if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
-	{
-		automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();
-	}
-	else
-	{
-		it = attributes.find( "automaticInstancing" );
-		if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
-		{
-			automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();
-		}
-	}
-
-	AtNode *shape = 0;
-	if( automaticInstancing )
+	AtNode *shape = NULL;
+	if( automaticInstancing() )
 	{
 		IECore::MurmurHash hash;
 		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )

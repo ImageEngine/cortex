@@ -131,6 +131,7 @@ class RendererImplementation : public IECore::Renderer
 
 		void constructCommon( Mode mode );
 
+		bool automaticInstancing() const;
 		void addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix );
 		void addShape( AtNode *shape );
 		void applyTransformToNode( AtNode *node );
