@@ -71,6 +71,10 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// modifications that will be made to the AtNode after conversion.
 		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash );
 
+		/// Motion blurred versions of the above conversion functions.
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes );
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes, const IECore::MurmurHash &additionalHash );
+
 	private :
 
 		struct MemberData;

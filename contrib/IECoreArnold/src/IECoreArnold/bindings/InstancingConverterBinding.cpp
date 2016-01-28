@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 // This must come before the Cortex includes, because on OSX headers included
 // by TBB define macros which conflict with the inline functions in ai_types.h.
@@ -45,11 +46,46 @@
 #include "IECoreArnold/bindings/NodeAlgoBinding.h"
 #include "IECoreArnold/bindings/InstancingConverterBinding.h"
 
+using namespace std;
+using namespace boost::python;
+using namespace IECore;
 using namespace IECoreArnold;
 using namespace IECoreArnoldBindings;
-using namespace boost::python;
 
-static object convertWrapper( InstancingConverter &c, IECore::Primitive *primitive )
+namespace
+{
+
+object convertWrapper1( InstancingConverter &c, object pythonSamples, object pythonSampleTimes )
+{
+	vector<const Primitive *> samples;
+	vector<float> sampleTimes;
+	boost::python::container_utils::extend_container( samples, pythonSamples );
+	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
+
+	AtNode *node;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		node = c.convert( samples, sampleTimes );
+	}
+	return atNodeToPythonObject( node );
+}
+
+object convertWrapper2( InstancingConverter &c, object pythonSamples, object pythonSampleTimes, const IECore::MurmurHash &h )
+{
+	vector<const Primitive *> samples;
+	vector<float> sampleTimes;
+	boost::python::container_utils::extend_container( samples, pythonSamples );
+	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
+
+	AtNode *node;
+	{
+		IECorePython::ScopedGILRelease gilRelease;
+		node = c.convert( samples, sampleTimes, h );
+	}
+	return atNodeToPythonObject( node );
+}
+
+object convertWrapper3( InstancingConverter &c, IECore::Primitive *primitive )
 {
 	AtNode *node;
 	{
@@ -59,7 +95,7 @@ static object convertWrapper( InstancingConverter &c, IECore::Primitive *primiti
 	return atNodeToPythonObject( node );
 }
 
-static object convertWrapper2( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h )
+object convertWrapper4( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h )
 {
 	AtNode *node;
 	{
@@ -69,11 +105,15 @@ static object convertWrapper2( InstancingConverter &c, IECore::Primitive *primit
 	return atNodeToPythonObject( node );
 }
 
+} // namespace
+
 void IECoreArnold::bindInstancingConverter()
 {
 	IECorePython::RefCountedClass<InstancingConverter, IECore::RefCounted>( "InstancingConverter" )
 		.def( init<>() )
-		.def( "convert", &convertWrapper )
+		.def( "convert", &convertWrapper1 )
 		.def( "convert", &convertWrapper2 )
+		.def( "convert", &convertWrapper3 )
+		.def( "convert", &convertWrapper4 )
 	;
 }

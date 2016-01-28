@@ -143,5 +143,30 @@ class InstancingConverterTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( am2b ) ), "ginstance" )
 			self.assertEqual( arnold.AiNodeGetPtr( am2b, "node" ), ctypes.addressof( am2a.contents ) )
 
+	def testMotion( self ) :
+
+		with IECoreArnold.UniverseBlock() :
+
+			c = IECoreArnold.InstancingConverter()
+
+			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+
+			n1 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
+			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+
+			n2 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n2 ) ), "ginstance" )
+			self.assertEqual( arnold.AiNodeGetPtr( n2, "node" ), ctypes.addressof( n1.contents ) )
+
+			n3 = c.convert( [ m2, m1 ], [ -0.25, 0.25 ] )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
+			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+
+			n4 = c.convert( [ m1, m2 ], [ -0.5, 0.5 ] )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
+			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+
 if __name__ == "__main__":
     unittest.main()
