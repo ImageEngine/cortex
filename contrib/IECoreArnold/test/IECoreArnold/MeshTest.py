@@ -105,5 +105,45 @@ class MeshTest( unittest.TestCase ) :
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
 
+	def testMotion( self ) :
+
+		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		IECore.MeshNormalsOp()( input = m1, copyInput = False )
+
+		m2 = m1.copy()
+		m2["P"].data[0] -= IECore.V3f( 0, 0, 1 )
+		m2["P"].data[1] -= IECore.V3f( 0, 0, 1 )
+		IECore.MeshNormalsOp()( input = m2, copyInput = False )
+
+		with IECoreArnold.UniverseBlock() :
+
+			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+
+			vList = arnold.AiNodeGetArray( node, "vlist" )
+			self.assertEqual( vList.contents.nelements, 4 )
+			self.assertEqual( vList.contents.nkeys, 2 )
+
+			nList = arnold.AiNodeGetArray( node, "nlist" )
+			self.assertEqual( nList.contents.nelements, 4 )
+			self.assertEqual( nList.contents.nkeys, 2 )
+
+			for i in range( 0, 4 ) :
+				p = arnold.AiArrayGetPnt( vList, i )
+				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m1["P"].data[i] )
+				n = arnold.AiArrayGetPnt( nList, i )
+				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m1["N"].data[i] )
+
+			for i in range( 4, 8 ) :
+				p = arnold.AiArrayGetPnt( vList, i )
+				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m2["P"].data[i-4] )
+				n = arnold.AiArrayGetPnt( nList, i )
+				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m2["N"].data[i-4] )
+
+			a = arnold.AiNodeGetArray( node, "deform_time_samples" )
+			self.assertEqual( a.contents.nelements, 2 )
+			self.assertEqual( a.contents.nkeys, 1 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+
 if __name__ == "__main__":
     unittest.main()

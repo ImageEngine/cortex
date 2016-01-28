@@ -42,6 +42,7 @@
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
 #include "IECoreArnold/MeshAlgo.h"
+#include "IECoreArnold/ParameterAlgo.h"
 
 using namespace std;
 using namespace IECore;
@@ -65,18 +66,10 @@ AtArray *faceVaryingIndices( const IECore::MeshPrimitive *mesh )
 	return AiArrayConvert( ids.size(), 1, AI_TYPE_INT, (void *)&(ids[0]) );
 }
 
-NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert );
-
-} // namespace
-
-//////////////////////////////////////////////////////////////////////////
-// Implementation of public API
-//////////////////////////////////////////////////////////////////////////
-
-AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
+AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 {
 
-	// make the result mesh and add topology and points
+	// make the result mesh and add topology
 
 	AtNode *result = AiNode( "polymesh" );
 
@@ -93,8 +86,6 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 		"vidxs",
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
-
-	ShapeAlgo::convertP( mesh, result, "vlist" );
 
 	// set subdivision
 
@@ -162,51 +153,6 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 		msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
 	}
 
-	/// add normals
-
-	PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
-	if( nIt != mesh->variables.end() )
-	{
-		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
-		if( n )
-		{
-			PrimitiveVariable::Interpolation nInterpolation = nIt->second.interpolation;
-			if( nInterpolation == PrimitiveVariable::Varying || nInterpolation == PrimitiveVariable::Vertex || nInterpolation == PrimitiveVariable::FaceVarying )
-			{
-				AiNodeSetArray(
-					result,
-					"nlist",
-					AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( n->readable()[0] ) )
-				);
-				if( nInterpolation == PrimitiveVariable::FaceVarying )
-				{
-					AiNodeSetArray(
-						result,
-						"nidxs",
-						faceVaryingIndices( mesh )
-					);
-				}
-				else
-				{
-					AiNodeSetArray(
-						result,
-						"nidxs",
-						AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
-					);
-				}
-				AiNodeSetBool( result, "smoothing", true );
-			}
-			else
-			{
-				msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", "Variable \"N\" has unsupported interpolation type - not generating normals." );
-			}
-		}
-		else
-		{
-			msg( Msg::Warning, "ToArnoldMeshConverter::doConversion", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) );
-		}
-	}
-
 	// add arbitrary user parameters
 
 	const char *ignore[] = { "P", "s", "t", "N", 0 };
@@ -214,3 +160,130 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 
 	return result;
 }
+
+const V3fVectorData *normal( const IECore::MeshPrimitive *mesh, PrimitiveVariable::Interpolation &interpolation )
+{
+	PrimitiveVariableMap::const_iterator it = mesh->variables.find( "N" );
+	if( it == mesh->variables.end() )
+	{
+		return NULL;
+	}
+
+	const V3fVectorData *n = runTimeCast<const V3fVectorData>( it->second.data.get() );
+	if( !n )
+	{
+		msg( Msg::Warning, "MeshAlgo", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) % it->second.data->typeName() );
+		return NULL;
+	}
+
+	const PrimitiveVariable::Interpolation thisInterpolation = it->second.interpolation;
+	if( interpolation != PrimitiveVariable::Invalid && thisInterpolation != interpolation )
+	{
+		msg( Msg::Warning, "MeshAlgo", "Variable \"N\" has inconsistent interpolation types - not generating normals." );
+		return NULL;
+	}
+
+	if( thisInterpolation != PrimitiveVariable::Varying && thisInterpolation != PrimitiveVariable::Vertex && thisInterpolation != PrimitiveVariable::FaceVarying )
+	{
+		msg( Msg::Warning, "MeshAlgo", "Variable \"N\" has unsupported interpolation type - not generating normals." );
+		return NULL;
+	}
+
+	interpolation = thisInterpolation;
+	return n;
+}
+
+void convertNormalIndices( const IECore::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
+{
+	if( interpolation == PrimitiveVariable::FaceVarying )
+	{
+		AiNodeSetArray(
+			node,
+			"nidxs",
+			faceVaryingIndices( mesh )
+		);
+	}
+	else
+	{
+		const std::vector<int> vertexIds = mesh->vertexIds()->readable();
+		AiNodeSetArray(
+			node,
+			"nidxs",
+			AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
+		);
+	}
+}
+
+NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert, MeshAlgo::convert );
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API
+//////////////////////////////////////////////////////////////////////////
+
+AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
+{
+	AtNode *result = convertCommon( mesh );
+
+	ShapeAlgo::convertP( mesh, result, "vlist" );
+
+	// add normals
+
+	PrimitiveVariable::Interpolation nInterpolation = PrimitiveVariable::Invalid;
+	if( const V3fVectorData *n = normal( mesh, nInterpolation ) )
+	{
+		AiNodeSetArray(
+			result,
+			"nlist",
+			AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, &n->readable().front() )
+		);
+		convertNormalIndices( mesh, result, nInterpolation );
+		AiNodeSetBool( result, "smoothing", true );
+	}
+
+	return result;
+}
+
+AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	AtNode *result = convertCommon( samples.front() );
+
+	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	ShapeAlgo::convertP( primitiveSamples, result, "vlist" );
+
+	// add normals
+
+	vector<const Data *> nSamples;
+	nSamples.reserve( samples.size() );
+	PrimitiveVariable::Interpolation nInterpolation = PrimitiveVariable::Invalid;
+	for( vector<const MeshPrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		if( const V3fVectorData *n = normal( *it, nInterpolation ) )
+		{
+			nSamples.push_back( n );
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if( nSamples.size() == samples.size() )
+	{
+		AiNodeSetArray(
+			result,
+			"nlist",
+			ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR )
+		);
+		convertNormalIndices( samples.front(), result, nInterpolation );
+		AiNodeSetBool( result, "smoothing", true );
+	}
+
+	// add time sampling
+
+	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+
+	return result;
+}
+
