@@ -748,6 +748,34 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( "spot_light" in ass )
 		self.assertTrue( "point_light" not in ass )
 
+	def testDeformationMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 512, 512 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( 0, 0.5 ) ) )
+				mesh.render( r )
+
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
+				mesh.render( r )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.75, 2 )
+
 	def tearDown( self ) :
 
 		for f in [

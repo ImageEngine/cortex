@@ -532,12 +532,25 @@ void IECoreArnold::RendererImplementation::illuminate( const std::string &lightH
 
 void IECoreArnold::RendererImplementation::motionBegin( const std::set<float> &times )
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::motionBegin", "Not implemented" );
+	if( !m_motionTimes.empty() )
+	{
+		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionBegin", "Already in a motion block." );
+		return;
+	}
+
+	m_motionTimes.insert( m_motionTimes.end(), times.begin(), times.end() );
 }
 
 void IECoreArnold::RendererImplementation::motionEnd()
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::motionEnd", "Not implemented" );
+	if( m_motionTimes.empty() )
+	{
+		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionEnd", "Not in a motion block." );
+		return;
+	}
+
+	m_motionTimes.clear();
+	m_motionPrimitives.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -732,6 +745,17 @@ bool IECoreArnold::RendererImplementation::automaticInstancing() const
 
 void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
 {
+	if( !m_motionTimes.empty() )
+	{
+		// We're in a motion block. Just store samples
+		// until we have all of them.
+		m_motionPrimitives.push_back( primitive );
+		if( m_motionPrimitives.size() != m_motionTimes.size() )
+		{
+			return;
+		}
+	}
+
 	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
 
 	AtNode *shape = NULL;
@@ -746,11 +770,35 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 				it->second->hash( hash );
 			}
 		}
-		shape = m_instancingConverter->convert( primitive, hash );
+		if( !m_motionTimes.empty() )
+		{
+			vector<const Primitive *> prims;
+			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
+			{
+				prims.push_back( it->get() );
+			}
+			shape = m_instancingConverter->convert( prims, m_motionTimes, hash );
+		}
+		else
+		{
+			shape = m_instancingConverter->convert( primitive, hash );
+		}
 	}
 	else
 	{
-		shape = NodeAlgo::convert( primitive );
+		if( !m_motionTimes.empty() )
+		{
+			vector<const Object *> prims;
+			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
+			{
+				prims.push_back( it->get() );
+			}
+			shape = NodeAlgo::convert( prims, m_motionTimes );
+		}
+		else
+		{
+			shape = NodeAlgo::convert( primitive );
+		}
 	}
 
 	if( strcmp( AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ), "ginstance" ) )

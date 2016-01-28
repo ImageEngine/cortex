@@ -193,6 +193,10 @@ class RendererImplementation : public IECore::Renderer
 		typedef std::stack<AttributeState> AttributeStack;
 		AttributeStack m_attributeStack;
 
+		// motion blur stuff
+		std::vector<float> m_motionTimes;
+		std::vector<IECore::ConstPrimitivePtr> m_motionPrimitives;
+
 		// list of nodes that have been output so far. we have
 		// to collect this so we can support dripfeeding nodes to
 		// arnold one by one in procedurals.
