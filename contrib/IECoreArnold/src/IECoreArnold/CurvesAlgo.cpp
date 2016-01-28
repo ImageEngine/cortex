@@ -47,17 +47,17 @@ using namespace std;
 using namespace IECore;
 using namespace IECoreArnold;
 
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
 
-NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert );
+NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
 
-} // namespace
-
-AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
+AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 {
-
-	// make the result curves and add points
 
 	AtNode *result = AiNode( "curves" );
 
@@ -67,8 +67,6 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 		"num_points",
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
-
-	ShapeAlgo::convertP( curves, result, "points" );
 
 	// set basis
 
@@ -93,14 +91,36 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 		// just accept the default
 	}
 
-	// add radius
-
-	ShapeAlgo::convertRadius( curves, result );
-
 	// add arbitrary user parameters
 
 	const char *ignore[] = { "P", "width", "radius", 0 };
 	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
 
 	return result;
+
 }
+
+} // namespace
+
+AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
+{
+	AtNode *result = convertCommon( curves );
+	ShapeAlgo::convertP( curves, result, "points" );
+	ShapeAlgo::convertRadius( curves, result );
+
+	return result;
+}
+
+AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	AtNode *result = convertCommon( samples.front() );
+
+	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertRadius( primitiveSamples, result );
+
+	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+
+	return result;
+}
+

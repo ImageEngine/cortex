@@ -46,6 +46,7 @@ namespace CurvesAlgo
 {
 
 AtNode *convert( const IECore::CurvesPrimitive *curves );
+AtNode *convert( const std::vector<const IECore::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes );
 
 } // namespace CurvesAlgo
 

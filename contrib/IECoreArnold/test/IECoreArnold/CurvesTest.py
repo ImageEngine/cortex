@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,30 +32,48 @@
 #
 ##########################################################################
 
-import sys
 import unittest
 
+import arnold
+
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
-from PointsTest import PointsTest
-from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
-from CurvesTest import CurvesTest
+class CurvesTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testMotion( self ) :
+
+		c1 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
+		c2 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ) )
+
+		c1["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 4 ),
+		)
+
+		c2["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( 2 ) ] * 4 ),
+		)
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], [ -0.25, 0.25 ] )
+
+			a = arnold.AiNodeGetArray( n, "points" )
+			self.assertEqual( a.contents.nelements, 4 )
+			self.assertEqual( a.contents.nkeys, 2 )
+
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 1 ) )
+			for i in range( 4, 8 ) :
+				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 2 ) )
+
+			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
+			self.assertEqual( a.contents.nelements, 2 )
+			self.assertEqual( a.contents.nkeys, 1 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+
+if __name__ == "__main__":
+    unittest.main()
