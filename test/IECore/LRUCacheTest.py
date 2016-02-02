@@ -232,10 +232,10 @@ class LRUCacheTest( unittest.TestCase ) :
 		self.assertEqual( removed, [] )
 
 		self.assertEqual( c.get( 6 ), 12 )
-		self.assertEqual( removed, [ ( 1, 2 ) ] )
+		self.assertEqual( len( removed ), 1 )
 
 		self.assertEqual( c.get( 7 ), 14 )
-		self.assertEqual( removed, [ ( 1, 2 ), ( 2, 4 ) ] )
+		self.assertEqual( len( removed ), 2 )
 
 		c.clear()
 
