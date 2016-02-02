@@ -37,7 +37,6 @@
 #define IECORE_LRUCACHE_INL
 
 #include <cassert>
-#include <iostream>
 
 #include "tbb/tbb_thread.h"
 
@@ -186,9 +185,13 @@ template<typename Key, typename Value>
 bool LRUCache<Key, Value>::erase( const Key &key )
 {
 	Handle handle( this, key, /* createIfMissing = */ false );
-	const bool result = handle.valid();
-	handle.erase();
-	return result;
+	if( handle.valid() )
+	{
+		eraseInternal( *handle );
+		handle.erase();
+		return true;
+	}
+	return false;
 }
 
 template<typename Key, typename Value>

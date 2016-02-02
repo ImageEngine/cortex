@@ -287,11 +287,16 @@ class LRUCacheTest( unittest.TestCase ) :
 		c = IECore.LRUCache( getter, 1000 )
 
 		self.assertFalse( c.cached( 1 ) )
+		self.assertEqual( c.currentCost(), 0 )
 		c.get( 1 )
 		self.assertTrue( c.cached( 1 ) )
+		self.assertEqual( c.currentCost(), 1 )
 
-		c.erase( 1 )
+		self.assertTrue( c.erase( 1 ) )
+		self.assertEqual( c.currentCost(), 0 )
 		self.assertFalse( c.cached( 1 ) )
+		self.assertFalse( c.erase( 1 ) )
+		self.assertEqual( c.currentCost(), 0 )
 
 if __name__ == "__main__":
     unittest.main()
