@@ -74,16 +74,19 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 
-		# Here, the cache should throw away "o" (because there isn't enough room for it, and it was the least
-		# recently used) leaving us with just "oo"
-		pool.setMaxMemoryUsage( oo.memoryUsage() + ( o.memoryUsage() / 2 ) )
-		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
-		self.failIf( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
-		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		# Here, the cache should throw away something, but we allow the
+		# use of an approximate LRU strategy, so we can't guarantee which
+		# object will be discarded.
+		pool.setMaxMemoryUsage( o.memoryUsage() + oo.memoryUsage() - 1 )
+		self.assertLess( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
+		self.failIf(
+			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) and
+			r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		)
 
-		# Here, the cache should throw away "oo" (because there isn't enough room for it, and it was the least
-		# recently used) leaving us empty
-		pool.setMaxMemoryUsage( oo.memoryUsage() / 2 )
+		# Here, the cache should throw away the remaining item because there
+		# is no room for it.
+		pool.setMaxMemoryUsage( pool.memoryUsage() / 2  )
 		self.assertEqual( pool.memoryUsage(), 0 )
 		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
 

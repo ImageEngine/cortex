@@ -104,12 +104,13 @@ class ObjectPoolTest( unittest.TestCase ) :
 		self.assertEqual( p.memoryUsage(), a.memoryUsage() )
 		b = p.store( StringData("abc"), ObjectPool.StoreReference )
 		self.assertEqual( p.memoryUsage(), a.memoryUsage()+b.memoryUsage() )
-		
-		p.setMaxMemoryUsage( b.memoryUsage() )
-		self.assertEqual( p.getMaxMemoryUsage(), b.memoryUsage() )
-		self.assertEqual( p.memoryUsage(), b.memoryUsage() )
-		self.assertFalse( p.contains(a.hash()) )
-		self.assertTrue( p.contains(b.hash()) )
-		
+
+		p.setMaxMemoryUsage( p.memoryUsage() - 1 )
+		self.assertLess( p.getMaxMemoryUsage(), a.memoryUsage() + b.memoryUsage() )
+		self.assertFalse(
+			p.contains( a.hash() ) and
+			p.contains( b.hash() )
+		)
+
 if __name__ == "__main__":
     unittest.main()
