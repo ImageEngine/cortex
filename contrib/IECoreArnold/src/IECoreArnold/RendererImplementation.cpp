@@ -114,10 +114,10 @@ IECoreArnold::RendererImplementation::RendererImplementation( const std::string 
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const RendererImplementation &other )
+	:	m_transformStack( other.m_transformStack, /* flatten = */ true )
 {
 	constructCommon( Procedural );
 	m_instancingConverter = other.m_instancingConverter;
-	m_transformStack.push( other.m_transformStack.top() );
 	m_attributeStack.push( AttributeState( other.m_attributeStack.top() ) );
 }
 
@@ -126,7 +126,6 @@ IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proc
 	constructCommon( Procedural );
 	m_instancingConverter = new InstancingConverter;
 	/// \todo Initialise stacks properly!!
-	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
 	// the AttributeState constructor makes a surface shader node, and
 	// it's essential that we return that as one of the nodes created by
@@ -149,7 +148,6 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 		m_defaultFilter = AiNode( "gaussian_filter" );
 		AiNodeSetStr( m_defaultFilter, "name", "ieCoreArnold:defaultFilter" );
 
-		m_transformStack.push( M44f() );
 		m_attributeStack.push( AttributeState() );
 	}
 }
@@ -294,12 +292,8 @@ void IECoreArnold::RendererImplementation::worldBegin()
 	if( m_transformStack.size() > 1 )
 	{
 		msg( Msg::Warning, "IECoreArnold::RendererImplementation::worldBegin", "Missing transformEnd() call detected." );
-		while( m_transformStack.size() > 1 )
-		{
-			m_transformStack.pop();
-		}
-		m_transformStack.top() = M44f();
 	}
+	m_transformStack = TransformStack();
 
 	// specify default camera if none has been specified yet
 	AtNode *options = AiUniverseGetOptions();
@@ -338,23 +332,29 @@ void IECoreArnold::RendererImplementation::worldEnd()
 
 void IECoreArnold::RendererImplementation::transformBegin()
 {
-	m_transformStack.push( ( m_transformStack.top() ) );
+	m_transformStack.push();
 }
 
 void IECoreArnold::RendererImplementation::transformEnd()
 {
-	if( m_transformStack.size() <= 1 )
+	try
 	{
-		msg( Msg::Warning, "IECoreArnold::RendererImplementation::transformEnd", "No matching transformBegin() call." );
+		m_transformStack.pop();
+	}
+	catch( const std::exception &e )
+	{
+		msg( Msg::Warning, "IECoreArnold::RendererImplementation::transformEnd", e.what() );
 		return;
 	}
-
-	m_transformStack.pop();
 }
 
 void IECoreArnold::RendererImplementation::setTransform( const Imath::M44f &m )
 {
-	m_transformStack.top() = m;
+	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	{
+		m_transformStack.motionBegin( m_motionTimes );
+	}
+	m_transformStack.set( m );
 }
 
 void IECoreArnold::RendererImplementation::setTransform( const std::string &coordinateSystem )
@@ -364,19 +364,22 @@ void IECoreArnold::RendererImplementation::setTransform( const std::string &coor
 
 Imath::M44f IECoreArnold::RendererImplementation::getTransform() const
 {
-	return m_transformStack.top();
+	return m_transformStack.get();
 }
 
 Imath::M44f IECoreArnold::RendererImplementation::getTransform( const std::string &coordinateSystem ) const
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::getTransform", "Not implemented" );
-	M44f result;
-	return result;
+	return M44f();
 }
 
 void IECoreArnold::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	m_transformStack.top() = m * m_transformStack.top();
+	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	{
+		m_transformStack.motionBegin( m_motionTimes );
+	}
+	m_transformStack.concatenate( m );
 }
 
 void IECoreArnold::RendererImplementation::coordinateSystem( const std::string &name )
@@ -551,6 +554,10 @@ void IECoreArnold::RendererImplementation::motionEnd()
 
 	m_motionTimes.clear();
 	m_motionPrimitives.clear();
+	if( m_transformStack.inMotion() )
+	{
+		m_transformStack.motionEnd();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -695,7 +702,12 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		// generates.
 		if( bound != Procedural::noBound )
 		{
-			bound = transform( bound, m_transformStack.top() );
+			Box3f transformedBound;
+			for( size_t i = 0, e = m_transformStack.numSamples(); i < e; ++i )
+			{
+				transformedBound.extendBy( transform( bound, m_transformStack.sample( i ) ) );
+			}
+			bound = transformedBound;
 		}
 
 		AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
@@ -842,18 +854,30 @@ void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
 
 void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 {
-	/// \todo Make Convert.h
-	const Imath::M44f &m = m_transformStack.top();
-	AtMatrix mm;
-	for( unsigned int i=0; i<4; i++ )
+	const size_t numSamples = m_transformStack.numSamples();
+	if( numSamples == 1 )
 	{
-		for( unsigned int j=0; j<4; j++ )
+		AiNodeSetMatrix( node, "matrix", m_transformStack.get().x );
+	}
+	else
+	{
+		AtArray *times = AiArrayAllocate( numSamples, 1, AI_TYPE_FLOAT );
+		AtArray *matrices = AiArrayAllocate( 1, numSamples, AI_TYPE_MATRIX );
+		for( size_t i = 0; i < numSamples; ++i )
 		{
-			mm[i][j] = m[i][j];
+			AiArraySetFlt( times, i, m_transformStack.sampleTime( i ) );
+			AiArraySetMtx( matrices, i, m_transformStack.sample( i ).x );
+		}
+		AiNodeSetArray( node, "matrix", matrices );
+		if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), "transform_time_samples" ) )
+		{
+			AiNodeSetArray( node, "transform_time_samples", times );
+		}
+		else
+		{
+			AiNodeSetArray( node, "time_samples", times );
 		}
 	}
-
-	AiNodeSetMatrix( node, "matrix", mm );
 }
 
 void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )

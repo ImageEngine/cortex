@@ -753,9 +753,9 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
+		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
 
-		r.camera( "main", { "resolution" : IECore.V2i( 512, 512 ), "shutter" : IECore.V2f( 0, 1 ) } )
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
 		with IECore.WorldBlock( r ) :
 
@@ -763,7 +763,7 @@ class RendererTest( unittest.TestCase ) :
 
 			with IECore.MotionBlock( r, [ 0, 1 ] ) :
 
-				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( 0, 0.5 ) ) )
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( -0.5, 0.5 ) ) )
 				mesh.render( r )
 
 				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
@@ -774,7 +774,36 @@ class RendererTest( unittest.TestCase ) :
 		result = e.createResult()
 
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.75, 2 )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+
+	def testTransformationMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh.render( r )
+
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
 
 	def tearDown( self ) :
 

@@ -40,6 +40,8 @@
 
 #include "ai.h"
 
+#include "IECore/private/TransformStack.h"
+
 #include "IECoreArnold/Renderer.h"
 #include "IECoreArnold/UniverseBlock.h"
 #include "IECoreArnold/InstancingConverter.h"
@@ -165,9 +167,8 @@ class RendererImplementation : public IECore::Renderer
 		// built by the display() method, and passed to the arnold global options in worldBegin().
 		std::vector<std::string> m_outputDescriptions;
 
-		// transform stack stuff
-		typedef std::stack<Imath::M44f> TransformStack;
-		TransformStack m_transformStack;
+		// transform stack
+		IECore::TransformStack m_transformStack;
 
 		// attribute stack stuff
 		class AttributeState
