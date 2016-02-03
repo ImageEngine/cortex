@@ -32,57 +32,57 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORERI_TRANSFORMSTACK_H
-#define IECORERI_TRANSFORMSTACK_H
+#ifndef IECORE_TRANSFORMSTACK_H
+#define IECORE_TRANSFORMSTACK_H
 
 #include <vector>
 #include <stack>
 
 #include "OpenEXR/ImathMatrix.h"
 
-#include "IECoreRI/Export.h"
+#include "IECore/Export.h"
 
-namespace IECoreRI
+namespace IECore
 {
-		
-class IECORERI_API TransformStack
+
+class IECORE_API TransformStack
 {
 
 	public :
-			
+
 		TransformStack();
-	
+
 		void push();
 		void pop();
 		size_t size() const;
-	
+
 		void motionBegin( const std::vector<float> &times );
 		void motionEnd();
-	
+
 		void set( const Imath::M44f &matrix );
 		void concatenate( const Imath::M44f &matrix );
 
 		Imath::M44f get() const;
 		Imath::M44f get( float time ) const;
-		
+
 		size_t numSamples() const;
 		Imath::M44f sample( size_t sampleIndex ) const;
 		float sampleTime( size_t sampleIndex ) const;
-		
+
 	private :
-	
+
 		struct Sample
 		{
 			Sample( float t, const Imath::M44f &m )
 				:	time( t ), matrix( m )
 			{
 			}
-			
+
 			bool operator < ( float t ) const
 			{
 				return time < t;
 			}
-			
+
 			float time;
 			Imath::M44f matrix;
 		};
@@ -94,6 +94,6 @@ class IECORERI_API TransformStack
 
 };
 
-} // namespace IECoreRI
+} // namespace IECore
 
-#endif // IECORERI_TRANSFORMSTACK_H
+#endif // IECORE_TRANSFORMSTACK_H
