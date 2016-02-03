@@ -32,12 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/interprocess/smart_ptr/unique_ptr.hpp"
+
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/DespatchTypedData.h"
 
 #include "IECoreArnold/ParameterAlgo.h"
 
+using namespace std;
 using namespace IECore;
 using namespace IECoreArnold;
 
@@ -47,6 +50,8 @@ using namespace IECoreArnold;
 
 namespace
 {
+
+typedef boost::interprocess::unique_ptr<AtArray, void (*)( AtArray *)> ArrayPtr;
 
 template<typename T>
 inline const T *dataCast( const char *name, const IECore::Data *data )
@@ -313,18 +318,57 @@ int parameterType( IECore::TypeId dataType, bool &array )
 	}
 }
 
-AtArray *dataToArray( const IECore::Data *data )
+AtArray *dataToArray( const IECore::Data *data, int aiType )
 {
-	bool isArray = false;
-	int type = parameterType( data->typeId(), isArray );
-	if( type == AI_TYPE_NONE || !isArray )
+	if( aiType == AI_TYPE_NONE )
 	{
-		return NULL;
+		bool isArray = false;
+		aiType = parameterType( data->typeId(), isArray );
+		if( aiType == AI_TYPE_NONE || !isArray )
+		{
+			return NULL;
+		}
 	}
 
 	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
 	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
-	return AiArrayConvert( dataSize, 1, type, dataAddress );
+	return AiArrayConvert( dataSize, 1, aiType, dataAddress );
+}
+
+IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &samples, int aiType )
+{
+	if( aiType == AI_TYPE_NONE )
+	{
+		bool isArray = false;
+		aiType = parameterType( samples.front()->typeId(), isArray );
+		if( aiType == AI_TYPE_NONE || !isArray )
+		{
+			return NULL;
+		}
+	}
+
+	size_t arraySize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( samples.front() ) );
+	ArrayPtr array(
+		AiArrayAllocate( arraySize, samples.size(), aiType ),
+		AiArrayDestroy
+	);
+
+	for( vector<const IECore::Data *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		if( (*it)->typeId() != samples.front()->typeId() )
+		{
+			throw IECore::Exception( "ParameterAlgo::dataToArray() : Mismatched sample types." );
+		}
+		const size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( *it ) );
+		if( dataSize != arraySize )
+		{
+			throw IECore::Exception( "ParameterAlgo::dataToArray() : Mismatched sample lengths." );
+		}
+		const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( *it ) );
+		AiArraySetKey( array.get(), /* key = */ it - samples.begin(), dataAddress );
+	}
+
+	return array.release();
 }
 
 } // namespace ParameterAlgo

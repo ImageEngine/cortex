@@ -40,7 +40,6 @@
 #include "IECoreArnold/TypeIds.h"
 #include "IECoreArnold/Export.h"
 
-#include "IECore/FromCoreConverter.h"
 #include "IECore/CompoundData.h"
 
 namespace IECoreArnold
@@ -64,7 +63,10 @@ IECOREARNOLD_API void getParameters( AtNode *node, IECore::CompoundDataMap &valu
 /// array. Returns AI_TYPE_NONE if there is no suitable Arnold type.
 IECOREARNOLD_API int parameterType( IECore::TypeId dataType, bool &array );
 
-IECOREARNOLD_API AtArray *dataToArray( const IECore::Data *data );
+/// If the equivalent Arnold type for the data is already known, then it may be passed directly.
+/// If not it will be inferred using parameterType().
+IECOREARNOLD_API AtArray *dataToArray( const IECore::Data *data, int aiType = AI_TYPE_NONE );
+IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &samples, int aiType = AI_TYPE_NONE );
 
 } // namespace ParameterAlgo
 
