@@ -48,6 +48,19 @@ TransformStack::TransformStack()
 	m_stack.push( Samples( 1, Sample( 0.0f, Imath::M44f() ) ) );
 }
 
+TransformStack::TransformStack( const TransformStack &other, bool flatten )
+	:	m_motionIndex( other.m_motionIndex )
+{
+	if( flatten )
+	{
+		m_stack.push( other.m_stack.top() );
+	}
+	else
+	{
+		m_stack = other.m_stack;
+	}
+}
+
 void TransformStack::push()
 {
 	m_stack.push( m_stack.top() );
@@ -83,6 +96,11 @@ void TransformStack::motionBegin( const std::vector<float> &times )
 void TransformStack::motionEnd()
 {
 	m_motionIndex = -1;
+}
+
+bool TransformStack::inMotion() const
+{
+	return m_motionIndex >= 0;
 }
 
 void TransformStack::set( const Imath::M44f &matrix )

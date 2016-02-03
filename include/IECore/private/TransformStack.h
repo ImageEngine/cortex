@@ -51,6 +51,7 @@ class IECORE_API TransformStack
 	public :
 
 		TransformStack();
+		TransformStack( const TransformStack &other, bool flatten = false );
 
 		void push();
 		void pop();
@@ -58,6 +59,7 @@ class IECORE_API TransformStack
 
 		void motionBegin( const std::vector<float> &times );
 		void motionEnd();
+		bool inMotion() const;
 
 		void set( const Imath::M44f &matrix );
 		void concatenate( const Imath::M44f &matrix );
