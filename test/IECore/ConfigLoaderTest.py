@@ -215,7 +215,25 @@ class ConfigLoaderTest( unittest.TestCase ) :
 		
 		expectedFile = os.path.abspath( os.path.join( path, "config.py" ) )
 		self.assertEqual( contextDict["myFile"], expectedFile )
-		
+
+	def testDuplicatePathsIgnored( self ) :
+
+		contextDict = {}
+		IECore.loadConfig(
+
+			IECore.SearchPath(
+				os.path.dirname( __file__ ) + "/config/orderOne:" +
+				os.path.dirname( __file__ ) + "/config/orderTwo:" +
+				os.path.dirname( __file__ ) + "/config/orderOne",
+				":"
+			),
+
+			contextDict,
+
+		)
+
+		self.assertEqual( contextDict["a"], 2 )
+
 if __name__ == "__main__":
 	unittest.main()
 
