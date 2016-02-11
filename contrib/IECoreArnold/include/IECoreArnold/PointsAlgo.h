@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDPOINTSCONVERTERBINDING_H
-#define IECOREARNOLD_TOARNOLDPOINTSCONVERTERBINDING_H
+#ifndef IECOREARNOLD_POINTSALGO_H
+#define IECOREARNOLD_POINTSALGO_H
+
+#include "ai.h"
+
+#include "IECore/PointsPrimitive.h"
 
 namespace IECoreArnold
 {
 
-void bindToArnoldPointsConverter();
+namespace PointsAlgo
+{
+
+AtNode *convert( const IECore::PointsPrimitive *points );
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes );
+
+} // namespace PointsAlgo
 
 } // namespace IECoreArnold
 
-#endif //  IECOREARNOLD_TOARNOLDPOINTSCONVERTERBINDING_H
+#endif // IECOREARNOLD_POINTSALGO_H

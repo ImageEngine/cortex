@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREARNOLD_CURVESALGO_H
+#define IECOREARNOLD_CURVESALGO_H
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
-#include "IECoreArnold/ToArnoldMeshConverter.h"
-#include "IECoreArnold/bindings/ToArnoldMeshConverterBinding.h"
+#include "IECore/CurvesPrimitive.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECore/MeshPrimitive.h"
-
-using namespace boost::python;
-
-void IECoreArnold::bindToArnoldMeshConverter()
+namespace IECoreArnold
 {
-	IECorePython::RunTimeTypedClass<IECoreArnold::ToArnoldMeshConverter>()
-		.def( init<IECore::MeshPrimitivePtr>() )
-	;
-}
+
+namespace CurvesAlgo
+{
+
+AtNode *convert( const IECore::CurvesPrimitive *curves );
+AtNode *convert( const std::vector<const IECore::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes );
+
+} // namespace CurvesAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_CURVESALGO_H

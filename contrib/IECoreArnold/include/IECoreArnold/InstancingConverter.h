@@ -62,19 +62,19 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// UniverseBlock.
 		InstancingConverter();
 		virtual ~InstancingConverter();
-		
+
 		/// Returns the Primitive converted to an appropriate AtNode type, returning
-		/// a ginstance if an identical primitive has already been processed. This version
-		/// of the function simply calls the version below using primitive->hash()
-		/// for the hash.
+		/// a ginstance if an identical primitive has already been processed. Primitive
+		/// identity is determined by comparing hashes.
 		AtNode *convert( const IECore::Primitive *primitive );
-		/// As above, but allowing the user to explicitly pass a hash uniquely
-		/// identifying the primitive. This is useful for systems which intend to
-		/// manipulate the primary (non-instanced) AtNodes which are returned - they
-		/// can append to the primitive hash to represent the post-processing they intend
-		/// to do.
-		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &hash );
-		
+		/// As above, but allowing the user to pass an additional hash representing
+		/// modifications that will be made to the AtNode after conversion.
+		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash );
+
+		/// Motion blurred versions of the above conversion functions.
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes );
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes, const IECore::MurmurHash &additionalHash );
+
 	private :
 
 		struct MemberData;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,25 +32,70 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECORE_TRANSFORMSTACK_H
+#define IECORE_TRANSFORMSTACK_H
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
-#include "ai.h"
+#include <vector>
+#include <stack>
 
-#include "IECoreArnold/ToArnoldPointsConverter.h"
-#include "IECoreArnold/bindings/ToArnoldPointsConverterBinding.h"
+#include "OpenEXR/ImathMatrix.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECore/Export.h"
 
-#include "IECore/PointsPrimitive.h"
-
-using namespace IECoreArnold;
-using namespace boost::python;
-
-void IECoreArnold::bindToArnoldPointsConverter()
+namespace IECore
 {
-	IECorePython::RunTimeTypedClass<ToArnoldPointsConverter>()
-		.def( init<IECore::PointsPrimitivePtr>() )
-	;
-}
+
+class IECORE_API TransformStack
+{
+
+	public :
+
+		TransformStack();
+		TransformStack( const TransformStack &other, bool flatten = false );
+
+		void push();
+		void pop();
+		size_t size() const;
+
+		void motionBegin( const std::vector<float> &times );
+		void motionEnd();
+		bool inMotion() const;
+
+		void set( const Imath::M44f &matrix );
+		void concatenate( const Imath::M44f &matrix );
+
+		Imath::M44f get() const;
+		Imath::M44f get( float time ) const;
+
+		size_t numSamples() const;
+		Imath::M44f sample( size_t sampleIndex ) const;
+		float sampleTime( size_t sampleIndex ) const;
+
+	private :
+
+		struct Sample
+		{
+			Sample( float t, const Imath::M44f &m )
+				:	time( t ), matrix( m )
+			{
+			}
+
+			bool operator < ( float t ) const
+			{
+				return time < t;
+			}
+
+			float time;
+			Imath::M44f matrix;
+		};
+		typedef std::vector<Sample> Samples;
+
+		typedef std::stack<Samples> Stack;
+		Stack m_stack;
+		int m_motionIndex;
+
+};
+
+} // namespace IECore
+
+#endif // IECORE_TRANSFORMSTACK_H

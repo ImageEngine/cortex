@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREARNOLD_PARAMETERALGO_H
+#define IECOREARNOLD_PARAMETERALGO_H
 
-// This must come before the Cortex includes, because on OSX headers included
-// by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
-#include "IECoreArnold/bindings/ToArnoldShapeConverterBinding.h"
+#include "IECoreArnold/TypeIds.h"
+#include "IECoreArnold/Export.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECore/CompoundData.h"
 
-using namespace boost::python;
-
-void IECoreArnold::bindToArnoldShapeConverter()
+namespace IECoreArnold
 {
-	IECorePython::RunTimeTypedClass<IECoreArnold::ToArnoldShapeConverter>();
-}
+
+namespace ParameterAlgo
+{
+
+IECOREARNOLD_API void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value );
+IECOREARNOLD_API void setParameter( AtNode *node, const char *name, const IECore::Data *value );
+IECOREARNOLD_API void setParameters( AtNode *node, const IECore::CompoundDataMap &values );
+
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter );
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter );
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const char *name );
+IECOREARNOLD_API void getParameters( AtNode *node, IECore::CompoundDataMap &values );
+
+/// Returns the Arnold parameter type (AI_TYPE_INT etc) suitable for
+/// storing Cortex data of the specified type, setting array to true
+/// or false depending on whether or not the Arnold type will be an
+/// array. Returns AI_TYPE_NONE if there is no suitable Arnold type.
+IECOREARNOLD_API int parameterType( IECore::TypeId dataType, bool &array );
+
+/// If the equivalent Arnold type for the data is already known, then it may be passed directly.
+/// If not it will be inferred using parameterType().
+IECOREARNOLD_API AtArray *dataToArray( const IECore::Data *data, int aiType = AI_TYPE_NONE );
+IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &samples, int aiType = AI_TYPE_NONE );
+
+} // namespace ParameterAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_PARAMETERALGO_H

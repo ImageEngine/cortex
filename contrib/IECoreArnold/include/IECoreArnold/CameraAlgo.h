@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDCURVESCONVERTER_H
-#define IECOREARNOLD_TOARNOLDCURVESCONVERTER_H
+#ifndef IECOREARNOLD_CAMERAALGO_H
+#define IECOREARNOLD_CAMERAALGO_H
 
-#include "IECoreArnold/ToArnoldShapeConverter.h"
-#include "IECoreArnold/Export.h"
+#include "ai.h"
 
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( CurvesPrimitive );
-} // namespace IECore
+#include "IECore/Camera.h"
 
 namespace IECoreArnold
 {
 
-class IECOREARNOLD_API ToArnoldCurvesConverter : public ToArnoldShapeConverter
+namespace CameraAlgo
 {
 
-	public :
+AtNode *convert( const IECore::Camera *camera );
 
-		typedef IECore::CurvesPrimitive InputType;
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToArnoldCurvesConverter, ToArnoldCurvesConverterTypeId, ToArnoldShapeConverter );
-
-		ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert );
-		virtual ~ToArnoldCurvesConverter();
-
-	protected :
-
-		virtual AtNode *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-
-		static ConverterDescription<ToArnoldCurvesConverter> g_description;
-		
-};
-
-IE_CORE_DECLAREPTR( ToArnoldCurvesConverter );
+} // namespace CameraAlgo
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDCURVESCONVERTER_H
+#endif // IECOREARNOLD_CAMERAALGO_H

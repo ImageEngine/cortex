@@ -49,7 +49,7 @@ UniverseBlock::UniverseBlock()
 	}
 
 	AiBegin();
-	
+
 	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
 	if( pluginPaths )
 	{

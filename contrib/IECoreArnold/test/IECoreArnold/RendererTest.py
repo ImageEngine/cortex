@@ -47,7 +47,7 @@ class RendererTest( unittest.TestCase ) :
 
 	__displayFileName = "contrib/IECoreArnold/test/IECoreArnold/output.tif"
 	__assFileName = "contrib/IECoreArnold/test/IECoreArnold/output.ass"
-	
+
 	def testTypeId( self ) :
 
 		self.assertEqual( IECoreArnold.Renderer().typeId(), IECoreArnold.Renderer.staticTypeId() )
@@ -59,113 +59,113 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( r.typeName(), "IECoreArnold::Renderer" )
 
 	def testOptions( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		# check we can set an already existing int
 		self.assertEqual( r.getOption( "ai:AA_samples" ), IECore.IntData( 1 ) )
 		r.setOption( "ai:AA_samples", IECore.IntData( 11 ) )
 		self.assertEqual( r.getOption( "ai:AA_samples" ), IECore.IntData( 11 ) )
-		
+
 		# check we can set an already existing float
 		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .99 ) )
 		r.setOption( "ai:auto_transparency_threshold", IECore.FloatData( .9 ) )
 		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .9 ) )
-		
+
 		# check tbat trying to set nonexistent options yields a message
 		m = IECore.CapturingMessageHandler()
 		with m :
-		
+
 			r.setOption( "ai:thisIsNotAnArnoldOption", IECore.IntData( 10 ) )
 			self.assertEqual( len( m.messages ), 1 )
 			self.assertEqual( m.messages[-1].level, IECore.Msg.Level.Warning )
 			self.assertEqual( m.messages[-1].message, "Unknown option \"ai:thisIsNotAnArnoldOption\"." )
-			
+
 		# check that setting user options works
 		r.setOption( "user:myLovelyUserOption", IECore.StringData( "oooh!" ) )
 		self.assertEqual( r.getOption( "user:myLovelyUserOption" ), IECore.StringData( "oooh!" ) )
-		
+
 		# check that set/get for other renderers is ignored
 		r.setOption( "ri:pixelSamples", IECore.V2iData( IECore.V2i( 1, 1 ) ) )
 		self.assertEqual( r.getOption( "ri:pixelSamples" ), None )
 
 	def testDisplay( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		self.failIf( os.path.exists( self.__displayFileName ) )
 		r.display( self.__displayFileName, "driver_tiff", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-			
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		self.failUnless( os.path.exists( self.__displayFileName ) )
 
 	def testDisplayTypeMapping( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		self.failIf( os.path.exists( self.__displayFileName ) )
 		r.display( self.__displayFileName, "tiff", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-			
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		self.failUnless( os.path.exists( self.__displayFileName ) )
 
 	def testDisplayDriverIntegration( self ) :
-	
+
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		
+
 		with IECore.WorldBlock( r ) :
-			
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		self.failUnless( IECore.ImageDisplayDriver.removeStoredImage( "testHandle" ) )
 
 	def testASSOutput( self ) :
-	
+
 		r = IECoreArnold.Renderer( self.__assFileName )
 
 		self.failIf( os.path.exists( self.__assFileName ) )
 		with IECore.WorldBlock( r ) :
-		
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		self.failUnless( os.path.exists( self.__assFileName ) )
 
 	def testUserAttributes( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.setAttribute( "user:a", IECore.IntData( 10 ) )
 		self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 10 ) )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 10 ) )
-			
+
 			r.setAttribute( "user:a", IECore.IntData( 20 ) )
 			self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 20 ) )
-			
+
 			with IECore.AttributeBlock( r ) :
-			
+
 				r.setAttribute( "user:a", IECore.IntData( 30 ) )
 				self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 30 ) )
-				
+
 			self.assertEqual( r.getAttribute( "user:a" ), IECore.IntData( 20 ) )
 
 	def testShader( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -178,20 +178,20 @@ class RendererTest( unittest.TestCase ) :
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
-		
+
 	def testReferenceExistingShader( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			shader = arnold.AiNode( "standard" )
 			arnold.AiNodeSetStr( shader, "name", "red_shader" )
 			arnold.AiNodeSetFlt( shader, "emission", 1 )
 			arnold.AiNodeSetRGB( shader, "emission_color", 1, 0, 0 )
-			
+
 			r.shader( "surface", "reference:red_shader", {} )
 			r.sphere( 1, -1, 1, 360, {} )
 
@@ -203,124 +203,124 @@ class RendererTest( unittest.TestCase ) :
 		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 1, 5 )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )	
+		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
 
 	def testNonexistentReferencedShader( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			m = IECore.CapturingMessageHandler()
 			with m :
 				r.shader( "surface", "reference:doesntExist", {} )
-				
+
 			self.assertEqual( len( m.messages ), 1 )
 			self.failUnless( "Couldn't find shader" in m.messages[0].message )
 
 	def testUnloadableShader( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			m = IECore.CapturingMessageHandler()
 			with m :
 				r.shader( "surface", "thisShaderDoesNotExist", {} )
-				
+
 			self.assertEqual( len( m.messages ), 1 )
 
 	def testUnsupportedShaderType( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			m = IECore.CapturingMessageHandler()
 			with m :
 				r.shader( "thisShaderTypeDoesntExist", "utility", {} )
-				
+
 			self.assertEqual( len( m.messages ), 1 )
-	
+
 	def testOtherRendererShaderType( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			m = IECore.CapturingMessageHandler()
 			with m :
 				r.shader( "ri:surface", "something", {} )
-				
-			self.assertEqual( len( m.messages ), 0 )			
-		
+
+			self.assertEqual( len( m.messages ), 0 )
+
 	def testDefaultCamera( self ) :
-	
+
 		# render a plane at z==0 and check we can't see it with the default camera
-	
+
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
-	
+
 		with IECore.WorldBlock( r ) :
 			m.render( r )
-		
+
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
-		
+
 		e = IECore.PrimitiveEvaluator.create( image )
 		result = e.createResult()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.failUnless( result.floatPrimVar( image["A"] ) < 0.5 )
 
 		# move the plane back a touch and check we can see it with the default camera
-		
+
 		del r # must destroy the existing renderer before making a new one
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
-	
+
 		with IECore.WorldBlock( r ) :
 			with IECore.TransformBlock( r ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 				m.render( r )
-		
+
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
-		
+
 		e = IECore.PrimitiveEvaluator.create( image )
 		result = e.createResult()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.failUnless( result.floatPrimVar( image["A"] ) > 0.9 )
 
 		# move the camera back a touch and check we can see the plane at z==0
-		
+
 		del r # must destroy the existing renderer before making a new one
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
-	
+
 		with IECore.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 			r.camera( "main", {} )
-			
+
 		with IECore.WorldBlock( r ) :
 				m.render( r )
-		
+
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
-		
+
 		e = IECore.PrimitiveEvaluator.create( image )
 		result = e.createResult()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.failUnless( result.floatPrimVar( image["A"] ) > 0.9 )		
+		self.failUnless( result.floatPrimVar( image["A"] ) > 0.9 )
 
 	def testCameraXYOrientation( self ) :
 
@@ -335,10 +335,10 @@ class RendererTest( unittest.TestCase ) :
 			r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ) } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.shader( "surface", "utility", { "color" : IECore.Color3f( 1, 0, 0 ) } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
-			
+
 			r.shader( "surface", "utility", { "color" : IECore.Color3f( 0, 1, 0 ) } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
 
@@ -364,22 +364,22 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( result.floatPrimVar( b ), 0 )
 
 	def testCameraAspectRatio( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
-		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) } )	
+
+		r.camera( "main", { "resolution" : IECore.V2i( 640, 480 ), "screenWindow" : IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) } )
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-					
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.shader( "surface", "utility", { "shading_mode" : "flat", "color" : IECore.Color3f( 1, 0, 0 ) } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 2 ), IECore.V2f( 638, 478 ) ) ).render( r )
-			
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : IECore.Color3f( 0, 1, 0 ) } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
-	
+
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
 
@@ -387,89 +387,89 @@ class RendererTest( unittest.TestCase ) :
 		result = e.createResult()
 		r = e.R()
 		g = e.G()
-		
+
 		edges = [
 			IECore.V2i( 0 ),
 			IECore.V2i( 320, 0 ),
-			IECore.V2i( 639, 0 ),			 
-			IECore.V2i( 639, 240 ),			 
+			IECore.V2i( 639, 0 ),
+			IECore.V2i( 639, 240 ),
 			IECore.V2i( 639, 479 ),
 			IECore.V2i( 320, 479 ),
 			IECore.V2i( 0, 479 ),
 			IECore.V2i( 0, 240 ),
 		]
-		
-		for point in edges :							
+
+		for point in edges :
 			self.failUnless( e.pointAtPixel( point, result ) )
 			self.failUnless( result.floatPrimVar( r ) < 0.1 )
 			self.failUnless( result.floatPrimVar( g ) > 0.8 )
-		
+
 		innerEdges = [
 			IECore.V2i( 3, 3 ),
 			IECore.V2i( 320, 3 ),
-			IECore.V2i( 637, 3 ),			 
-			IECore.V2i( 636, 240 ),			 
+			IECore.V2i( 637, 3 ),
+			IECore.V2i( 636, 240 ),
 			IECore.V2i( 636, 477 ),
 			IECore.V2i( 320, 477 ),
 			IECore.V2i( 3, 477 ),
 			IECore.V2i( 3, 240 ),
 		]
-		
+
 		for point in innerEdges :
 			self.failUnless( e.pointAtPixel( point, result ) )
 			self.failUnless( result.floatPrimVar( r ) > 0.8 )
 			self.failUnless( result.floatPrimVar( g ) < 0.1 )
-				
+
 	def testProcedural( self ) :
-	
+
 		attributeValues = []
-	
+
 		class TestProcedural( IECore.Renderer.Procedural ) :
-		
+
 			def __init__( self ) :
-			
+
 				IECore.Renderer.Procedural.__init__( self )
-			
+
 			def bound( self ) :
-			
+
 				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
-				
+
 			def render( self, renderer ) :
-			
+
 				t = renderer.getAttribute( "user:test" ).value
 				attributeValues.append( t )
 				renderer.sphere( 1, -1, 1, 360, {} )
-			
+
 			def hash( self ):
-			
+
 				h = IECore.MurmurHash()
 				return h
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 			r.setAttribute( "user:test", IECore.IntData( 0 ) )
 			r.procedural( TestProcedural() )
 
 			r.setAttribute( "user:test", IECore.IntData( 1 ) )
 			r.procedural( TestProcedural() )
-		
+
 		self.assertEqual( len( attributeValues ), 2 )
 		self.failUnless( 1 in attributeValues )
 		self.failUnless( 0 in attributeValues )
-	
+
 	def performCurvesTest( self, curvesPrimitive, expectedImage ) :
-	
+
 		r = IECoreArnold.Renderer()
-				
+
 		r.setOption( "ai:AA_samples", IECore.IntData( 3 ) )
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		
+
 		with IECore.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 2 ) ) )
 			r.camera(
@@ -481,21 +481,21 @@ class RendererTest( unittest.TestCase ) :
 				}
 			)
 
-		with IECore.WorldBlock( r ) :			
+		with IECore.WorldBlock( r ) :
 			curvesPrimitive.render( r )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		del image["A"]
-		
+
 		# raise blackPoint massively to remove possible watermark
 		IECore.Grade()( input = image, copyInput = False, blackPoint = IECore.Color3f( 0.9 ) )
-				
+
 		expectedImage = IECore.Reader.create( expectedImage ).read()
-		
+
 		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-			
+
 	def testBezierCurves( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
@@ -514,9 +514,9 @@ class RendererTest( unittest.TestCase ) :
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performCurvesTest( c, "contrib/IECoreArnold/test/IECoreArnold/data/curveImages/bezier.exr" )
-	
+
 	def testBSplineCurves( self ) :
-	
+
 		c = IECore.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
@@ -535,9 +535,9 @@ class RendererTest( unittest.TestCase ) :
 		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performCurvesTest( c, "contrib/IECoreArnold/test/IECoreArnold/data/curveImages/bSpline.exr" )
-	
+
 	def testVisibilityAttributes( self ) :
-	
+
 		r = IECoreArnold.Renderer()
 		self.assertEqual( r.getAttribute( "ai:visibility:camera" ), IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( True ) )
@@ -545,139 +545,139 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( r.getAttribute( "ai:visibility:refracted" ), IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:diffuse" ), IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:glossy" ), IECore.BoolData( True ) )
-		
+
 		r.setAttribute( "ai:visibility:shadow", IECore.BoolData( False ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( False ) )
-		
+
 	def __displacementRender( self, doDisplacement ) :
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 5 ) )
-		
-			r.shader( "surface", "utility", { "color_mode" : IECore.StringData( "ng" ), "shade_mode" : IECore.StringData( "flat" ) } )	
+
+			r.shader( "surface", "utility", { "color_mode" : IECore.StringData( "ng" ), "shade_mode" : IECore.StringData( "flat" ) } )
 			if doDisplacement :
 				r.shader( "displacement", "noise", {} )
-			
+
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 			mesh.interpolation = "catmullClark"
 			mesh.render( r )
 
 		return IECore.ImageDisplayDriver.removeStoredImage( "test" )
-	
+
 	def testDisplacementShader( self ) :
-			
+
 		undisplaced1 = self.__displacementRender( doDisplacement = False )
 		undisplaced2 = self.__displacementRender( doDisplacement = False )
-		
+
 		displaced1 = self.__displacementRender( doDisplacement = True )
-		displaced2 = self.__displacementRender( doDisplacement = True )			
+		displaced2 = self.__displacementRender( doDisplacement = True )
 
 		self.assertEqual( IECore.ImageDiffOp()( imageA=undisplaced1, imageB=undisplaced2, maxError=0.001 ), IECore.BoolData( False ) )
 		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=displaced2, maxError=0.001 ), IECore.BoolData( False ) )
-		
+
 		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=undisplaced1, maxError=0.1 ), IECore.BoolData( True ) )
-	
+
 	def __allNodes( self, type = arnold.AI_NODE_ALL ) :
-	
+
 		result = []
 		i = arnold.AiUniverseGetNodeIterator( type )
 		while not arnold.AiNodeIteratorFinished( i ) :
 			result.append( arnold.AiNodeIteratorGetNext( i ) )
-	
+
 		return result
-		
+
 	def testShapeAttributes( self ) :
-		
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-		
+
 			r.setAttribute( "ai:polymesh:subdiv_iterations", IECore.IntData( 10 ) )
-			
+
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 			mesh.render( r )
-			
+
 			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 
 			self.assertEqual( len( shapes ), 1 )
 			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
-	
+
 	def testShaderConnections( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			
+
 			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )	
-			
+			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
+
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		e = IECore.PrimitiveEvaluator.create( image )
  		result = e.createResult()
-		
+
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
 		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
 		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
-	
+
 	def testMissingShaderConnectionWarnings( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			
+
 	 		m = IECore.CapturingMessageHandler()
  			with m :
 				r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-				r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )	
-		
+				r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
+
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
 		self.failUnless( "oopsWrongOne" in m.messages[0].message )
-	
+
 	def testLight( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.light( "point_light", "handle", { "intensity" : 1, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
-			
-			r.shader( "surface", "standard", {} )	
-			
+
+			r.shader( "surface", "standard", {} )
+
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
 		e = IECore.PrimitiveEvaluator.create( image )
  		result = e.createResult()
-				
+
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
 		self.assertTrue( result.floatPrimVar( e.R() ) > 0.2 )
 		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.5, result.floatPrimVar( e.G() ) )
@@ -688,7 +688,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer( self.__assFileName )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.procedural(
 				r.ExternalProcedural(
 					"test.so",
@@ -748,6 +748,63 @@ class RendererTest( unittest.TestCase ) :
 		self.assertTrue( "spot_light" in ass )
 		self.assertTrue( "point_light" not in ass )
 
+	def testDeformationMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1.5, -0.5 ), IECore.V2f( -0.5, 0.5 ) ) )
+				mesh.render( r )
+
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
+				mesh.render( r )
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+
+	def testTransformationMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh.render( r )
+
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+
 	def tearDown( self ) :
 
 		for f in [
@@ -756,6 +813,6 @@ class RendererTest( unittest.TestCase ) :
 		] :
 			if os.path.exists( f ) :
 				os.remove( f )
-		
+
 if __name__ == "__main__":
     unittest.main()

@@ -54,7 +54,7 @@ class ProceduralHolderTranslator : public CShapeTranslator
 {
 
 	public :
-	
+
 		virtual AtNode *CreateArnoldNodes()
 		{
                   m_isMasterDag =  IsMasterInstance(m_masterDag);
@@ -69,7 +69,7 @@ class ProceduralHolderTranslator : public CShapeTranslator
                         return AddArnoldNode( "ginstance" );
                   }
 		}
-		
+
 
 		virtual void Export( AtNode *node )
                 {
@@ -117,73 +117,73 @@ class ProceduralHolderTranslator : public CShapeTranslator
 		virtual void ExportProcedural( AtNode *node )
 		{
 			// do basic node export
-			
+
 			ExportMatrix( node, 0 );
-			
+
 			AtNode *shader = arnoldShader();
 			if( shader )
 			{
 				AiNodeSetPtr( node, "shader", shader );
 			}
-			
+
 			AiNodeSetInt( node, "visibility", ComputeVisibility() );
-			
+
 			MPlug plug = FindMayaObjectPlug( "receiveShadows" );
 			if( !plug.isNull() )
 			{
 				AiNodeSetBool( node, "receive_shadows", plug.asBool() );
 			}
-			
+
 			plug = FindMayaObjectPlug( "aiSelfShadows" );
 			if( !plug.isNull() )
 			{
 				AiNodeSetBool( node, "self_shadows", plug.asBool() );
 			}
-			
+
 			plug = FindMayaObjectPlug( "aiOpaque" );
 			if( !plug.isNull() )
 			{
 				AiNodeSetBool( node, "opaque", plug.asBool() );
 			}
-			
+
 			// export any shading groups or displacement shaders which look like they
 			// may be connected to procedural parameters. this ensures that maya shaders
 			// the procedural will expect to find at rendertime will be exported to the
 			// ass file (they otherwise might not be if they're not assigned to any objects).
-			
+
 			exportShadingInputs();
-			
+
 			// now set the procedural-specific parameters
-			
+
 			MFnDagNode fnDagNode( m_dagPath );
 			MBoundingBox bound = fnDagNode.boundingBox();
-			
+
 			AiNodeSetPnt( node, "min", bound.min().x, bound.min().y, bound.min().z );
 			AiNodeSetPnt( node, "max", bound.max().x, bound.max().y, bound.max().z );
-			
+
 			const char *dsoPath = getenv( "IECOREARNOLD_PROCEDURAL_PATH" );
 			AiNodeSetStr( node, "dso", dsoPath ? dsoPath : "ieProcedural.so" );
-			
+
 			AiNodeDeclare( node, "className", "constant STRING" );
 			AiNodeDeclare( node, "classVersion", "constant INT" );
 			AiNodeDeclare( node, "parameterValues", "constant ARRAY STRING" );
-			
+
 			// cast should be ok as we're registered to only work on procedural holders
 			IECoreMaya::ProceduralHolder *pHolder = static_cast<IECoreMaya::ProceduralHolder *>( fnDagNode.userNode() );
-			
+
 			std::string className;
 			int classVersion;
 			IECore::ParameterisedProceduralPtr procedural = pHolder->getProcedural( &className, &classVersion );
-			
+
 			AiNodeSetStr( node, "className", className.c_str() );
 			AiNodeSetInt( node, "classVersion", classVersion );
-			
+
 			IECorePython::ScopedGILLock gilLock;
 			try
 			{
 				boost::python::object parser = IECoreMaya::PythonCmd::globalContext()["IECore"].attr( "ParameterParser" )();
 				boost::python::object serialised = parser.attr( "serialise" )( procedural->parameters() );
-				
+
 				size_t numStrings = IECorePython::len( serialised );
 				AtArray *stringArray = AiArrayAllocate( numStrings, 1, AI_TYPE_STRING );
 				for( size_t i=0; i<numStrings; i++ )
@@ -200,36 +200,36 @@ class ProceduralHolderTranslator : public CShapeTranslator
 					}
 					AiArraySetStr( stringArray, i, s.c_str() );
 				}
-				
+
 				AiNodeSetArray( node, "parameterValues", stringArray );
 			}
 			catch( boost::python::error_already_set )
 			{
 				PyErr_Print();
 			}
-		
+
 		}
 
 		virtual bool RequiresMotionData()
 		{
 			return IsMotionBlurEnabled( MTOA_MBLUR_OBJECT ) && IsLocalMotionBlurEnabled();
 		}
-		
+
 		virtual void ExportMotion( AtNode *node, AtUInt step )
 		{
    			if( !IsMotionBlurEnabled() )
 			{
 				return;
 			}
-			
+
 			ExportMatrix( node, step );
 		}
-		
+
 		static void nodeInitialiser( CAbTranslator context )
 		{
 			CExtensionAttrHelper helper( context.maya, "procedural" );
 			MakeArnoldVisibilityFlags( helper );
-			
+
 			helper.MakeInput( "self_shadows" );
 			helper.MakeInput( "opaque" );
 
@@ -239,12 +239,12 @@ class ProceduralHolderTranslator : public CShapeTranslator
 		{
 			return new ProceduralHolderTranslator();
 		}
-	
+
 	protected :
-	
+
 		/// Returns the arnold shader to assign to the procedural.
 		AtNode *arnoldShader()
-		{	
+		{
 			bool overrideShaders = false;
 			MPlug plug = FindMayaObjectPlug( "overrideProceduralShaders" );
 			if( !plug.isNull() )
@@ -257,10 +257,10 @@ class ProceduralHolderTranslator : public CShapeTranslator
 					return 0;
 				}
 			}
-			
+
 			unsigned instNumber = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
 			MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instNumber);
-			
+
 			if( !overrideShaders )
 			{
 				// if we weren't explicitly told to override the shaders, then
@@ -273,7 +273,7 @@ class ProceduralHolderTranslator : public CShapeTranslator
 					overrideShaders = true;
 				}
 			}
-			
+
 			if( overrideShaders )
 			{
 				return ExportNode( shadingGroupPlug );
@@ -283,18 +283,18 @@ class ProceduralHolderTranslator : public CShapeTranslator
 				return 0;
 			}
 		}
-		
+
 		void exportShadingInputs()
 		{
 			MObject proceduralNode = m_dagPath.node();
 			MPlug nullPlug;
-			
+
 			MIteratorType filter;
 			MIntArray filterTypes;
 			filterTypes.append( MFn::kShadingEngine );
-			filterTypes.append( MFn::kDisplacementShader );			
+			filterTypes.append( MFn::kDisplacementShader );
 			filter.setFilterList( filterTypes );
-			
+
 			MItDependencyGraph itDG( proceduralNode, nullPlug, filter, MItDependencyGraph::kUpstream );
 			while( !itDG.isDone() )
 			{

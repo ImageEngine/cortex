@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,42 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreArnold/ToArnoldConverter.h"
-#include "IECoreArnold/bindings/ToArnoldConverterBinding.h"
+#ifndef IECOREARNOLD_SHAPEALGO_H
+#define IECOREARNOLD_SHAPEALGO_H
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "ai.h"
 
-#include "IECore/Object.h"
+#include "IECore/Primitive.h"
 
-using namespace IECoreArnold;
-using namespace boost::python;
-
-boost::python::object IECoreArnold::atNodeToPythonObject( AtNode *node )
+namespace IECoreArnold
 {
-	if( !node )
-	{
-		return object();
-	}
 
-	object ctypes = import( "ctypes" );
-	object arnold = import( "arnold" );
-	
-	object atNodeType = arnold.attr( "AtNode" );
-	object pointerType = ctypes.attr( "POINTER" )( atNodeType );
-	object converted = ctypes.attr( "cast" )( (size_t)node, pointerType );
-	return converted;
-}
-
-static object convertWrapper( ToArnoldConverter &converter )
+namespace ShapeAlgo
 {
-	return atNodeToPythonObject( converter.convert() );
-}
 
-void IECoreArnold::bindToArnoldConverter()
-{
-	IECorePython::RunTimeTypedClass<ToArnoldConverter>()
-		.def( "convert", &convertWrapper )
-		.def( "create", &ToArnoldConverter::create )
-		.staticmethod( "create" )
-	;
-}
+void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *name );
+void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const char *name );
+
+void convertRadius( const IECore::Primitive *primitive, AtNode *shape );
+void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNode *shape );
+
+void convertPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name );
+/// Converts primitive variables from primitive into user parameters on shape, ignoring any variables
+/// whose names are present in the ignore array.
+void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shape, const char **namesToIgnore=NULL );
+
+} // namespace ShapeAlgo
+
+} // namespace IECoreArnold
+
+#endif // IECOREARNOLD_SHAPEALGO_H

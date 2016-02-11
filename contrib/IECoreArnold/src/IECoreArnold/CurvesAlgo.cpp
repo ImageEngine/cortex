@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011-2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,39 +38,27 @@
 
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/Exception.h"
-#include "IECore/SimpleTypedData.h"
 
-#include "IECoreArnold/ToArnoldCurvesConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+#include "IECoreArnold/CurvesAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldCurvesConverter );
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
 
-ToArnoldCurvesConverter::ConverterDescription<ToArnoldCurvesConverter> ToArnoldCurvesConverter::g_description;
-
-ToArnoldCurvesConverter::ToArnoldCurvesConverter( IECore::CurvesPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::CurvesPrimitives to arnold curves nodes", IECore::CurvesPrimitive::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToArnoldCurvesConverter::~ToArnoldCurvesConverter()
-{
-}
+NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
 
-AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 {
-	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( from.get() );
-	const V3fVectorData *p = curves->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		throw Exception( "CurvesPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
-	
-	// make the result curves and add points
-	
+
 	AtNode *result = AiNode( "curves" );
 
 	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
@@ -80,10 +68,8 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
-	convertP( p, result, "points" );
-	
 	// set basis
-	
+
 	if( curves->basis() == CubicBasisf::bezier() )
 	{
 		AiNodeSetStr( result, "basis", "bezier" );
@@ -104,15 +90,37 @@ AtNode *ToArnoldCurvesConverter::doConversion( IECore::ConstObjectPtr from, IECo
 	{
 		// just accept the default
 	}
-	
-	// add radius
-	
-	convertRadius( curves, result );
 
 	// add arbitrary user parameters
-	
+
 	const char *ignore[] = { "P", "width", "radius", 0 };
-	convertPrimitiveVariables( curves, result, ignore );
-	
+	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
+
+	return result;
+
+}
+
+} // namespace
+
+AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
+{
+	AtNode *result = convertCommon( curves );
+	ShapeAlgo::convertP( curves, result, "points" );
+	ShapeAlgo::convertRadius( curves, result );
+
 	return result;
 }
+
+AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	AtNode *result = convertCommon( samples.front() );
+
+	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertRadius( primitiveSamples, result );
+
+	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+
+	return result;
+}
+

@@ -40,101 +40,101 @@ import unittest
 
 import IECore
 import IECoreArnold
-		
+
 class ProceduralTest( unittest.TestCase ) :
-	
+
 	class SphereProcedural( IECore.Renderer.Procedural ) :
-	
+
 		def __init__( self, radius=1 ) :
-		
+
 			IECore.Renderer.Procedural.__init__( self )
-		
+
 			self.__radius = radius
-		
+
 		def bound( self ) :
-		
+
 			return IECore.Box3f( IECore.V3f( -self.__radius ), IECore.V3f( self.__radius ) )
-		
+
 		def render( self, renderer ) :
-		
+
 			renderer.sphere( self.__radius, -1, 1, 360, {} )
-		
+
 		def hash( self ):
-		
+
 			h = IECore.MurmurHash()
 			return h
-		
+
 	class TransformingProcedural( IECore.Renderer.Procedural ) :
-	
+
 		def __init__( self, transform, child ) :
-		
+
 			IECore.Renderer.Procedural.__init__( self )
-		
+
 			self.__transform = transform
 			self.__child = child
-			
+
 		def bound( self ) :
-		
+
 			b = self.__child.bound()
 			b = b.transform( self.__transform )
 			return b
-			
+
 		def render( self, renderer ) :
-		
+
 			with IECore.TransformBlock( renderer ) :
-				
+
 				renderer.concatTransform( self.__transform )
 				if isinstance( self.__child, IECore.VisibleRenderable ) :
 					self.__child.render( renderer )
 				else :
 					renderer.procedural( self.__child )
-		
+
 		def hash( self ):
-		
+
 			h = IECore.MurmurHash()
 			return h
-		
+
 	class ShaderProcedural( IECore.Renderer.Procedural ) :
-		
+
 		def __init__( self, shader, child ) :
-		
+
 			IECore.Renderer.Procedural.__init__( self )
-			
+
 			self.__shader = shader
 			self.__child = child
-			
+
 		def bound( self ) :
-		
+
 			return self.__child.bound()
-			
+
 		def render( self, renderer ) :
-		
+
 			with IECore.AttributeBlock( renderer ) :
-			
+
 				self.__shader.render( renderer )
 				renderer.procedural( self.__child )
-		
+
 		def hash( self ):
-		
+
 			h = IECore.MurmurHash()
 			return h
-		
+
 	def arnoldMessageCallback( self, logMask, severity, msg, tabs ) :
-	
+
 		self.__arnoldMessages += msg
 
 	def testTransformingProceduralBounds( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		messageCallback = arnold.AtMsgCallBack( self.arnoldMessageCallback )
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = ""
-		
+
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		
-		with IECore.WorldBlock( r ) : 
-			
+
+		with IECore.WorldBlock( r ) :
+
 			r.procedural(
 				self.TransformingProcedural(
 					IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ),
@@ -143,18 +143,18 @@ class ProceduralTest( unittest.TestCase ) :
 			)
 
 		self.failIf( "incorrect user bounds" in self.__arnoldMessages )
-		
+
 	def testNestedTransformingProceduralBounds( self ) :
-	
+
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
 		messageCallback = arnold.AtMsgCallBack( self.arnoldMessageCallback )
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = ""
-		
-		with IECore.WorldBlock( r ) : 
-			
+
+		with IECore.WorldBlock( r ) :
+
 			r.procedural(
 				self.TransformingProcedural(
 					IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ),
@@ -164,16 +164,16 @@ class ProceduralTest( unittest.TestCase ) :
 					)
 				)
 			)
-		
-		self.failIf( "incorrect user bounds" in self.__arnoldMessages )		
+
+		self.failIf( "incorrect user bounds" in self.__arnoldMessages )
 
 	def testProceduralInheritsShader( self ) :
-	
+
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
 		with IECore.WorldBlock( r ) :
-				
+
 			r.procedural(
 				self.ShaderProcedural(
 					IECore.Shader( "flat", "surface", { "color" : IECore.Color3f( 0, 1, 0 ) } ),
@@ -182,28 +182,28 @@ class ProceduralTest( unittest.TestCase ) :
 			)
 
 		i = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		
+
 		e = IECore.ImagePrimitiveEvaluator( i )
 		r = e.createResult()
 		self.assertEqual( e.pointAtUV( IECore.V2f( 0.5 ), r ), True )
 		self.assertEqual( r.floatPrimVar( e.R() ), 0 )
 		self.assertEqual( r.floatPrimVar( e.G() ), 1 )
 		self.assertEqual( r.floatPrimVar( e.B() ), 0 )
-		
+
 	def testEmptyProceduralIsIgnored( self ) :
-	
+
 		class EmptyProcedural( IECore.Renderer.Procedural ) :
-		
+
 			def __init__( self ) :
-		
+
 				IECore.Renderer.Procedural.__init__( self )
-				
+
 			def bound( self ) :
-			
+
 				return IECore.Box3f()
-				
+
 			def render( self, renderer ) :
-			
+
 				pass
 
 			def hash( self ):
@@ -217,11 +217,11 @@ class ProceduralTest( unittest.TestCase ) :
 		messageCallback = arnold.AtMsgCallBack( self.arnoldMessageCallback )
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = ""
-		
-		with IECore.WorldBlock( r ) : 
-			
+
+		with IECore.WorldBlock( r ) :
+
 			r.procedural( EmptyProcedural() )
-		
+
 		self.failIf( "ignoring parameter max" in self.__arnoldMessages )
 
 	def testNoBound( self ) :

@@ -51,13 +51,23 @@
 #include "IECore/PointsPrimitive.h"
 
 #include "IECoreArnold/private/RendererImplementation.h"
-#include "IECoreArnold/ToArnoldCameraConverter.h"
+#include "IECoreArnold/ParameterAlgo.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/CameraAlgo.h"
 
 using namespace IECore;
 using namespace IECoreArnold;
 using namespace Imath;
 using namespace std;
 using namespace boost;
+
+namespace
+{
+
+InternedString g_aiAutomaticInstancingAttributeName( "ai:automaticInstancing" );
+InternedString g_automaticInstancingAttributeName( "automaticInstancing" );
+
+} // namespace
 
 ////////////////////////////////////////////////////////////////////////
 // AttributeState implementation
@@ -83,7 +93,7 @@ RendererImplementation::AttributeState::AttributeState( const AttributeState &ot
 	shaders = other.shaders;
 	attributes = other.attributes->copy();
 }
-				
+
 ////////////////////////////////////////////////////////////////////////
 // RendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
@@ -104,10 +114,10 @@ IECoreArnold::RendererImplementation::RendererImplementation( const std::string 
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const RendererImplementation &other )
+	:	m_transformStack( other.m_transformStack, /* flatten = */ true )
 {
 	constructCommon( Procedural );
 	m_instancingConverter = other.m_instancingConverter;
-	m_transformStack.push( other.m_transformStack.top() );
 	m_attributeStack.push( AttributeState( other.m_attributeStack.top() ) );
 }
 
@@ -116,7 +126,6 @@ IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proc
 	constructCommon( Procedural );
 	m_instancingConverter = new InstancingConverter;
 	/// \todo Initialise stacks properly!!
-	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
 	// the AttributeState constructor makes a surface shader node, and
 	// it's essential that we return that as one of the nodes created by
@@ -131,7 +140,7 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 	{
 		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock() );
 		m_instancingConverter = new InstancingConverter;
-		
+
 		/// \todo Control with an option
 		AiMsgSetConsoleFlags( AI_LOG_ALL );
 
@@ -139,7 +148,6 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 		m_defaultFilter = AiNode( "gaussian_filter" );
 		AiNodeSetStr( m_defaultFilter, "name", "ieCoreArnold:defaultFilter" );
 
-		m_transformStack.push( M44f() );
 		m_attributeStack.push( AttributeState() );
 	}
 }
@@ -164,14 +172,14 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), name.c_str() + 3 );
 		if( parameter )
 		{
-			ToArnoldConverter::setParameter( options, name.c_str() + 3, value.get() );
+			ParameterAlgo::setParameter( options, name.c_str() + 3, value.get() );
 			return;
 		}
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		ToArnoldConverter::setParameter( options, name.c_str(), value.get() );
+		ParameterAlgo::setParameter( options, name.c_str(), value.get() );
 		return;
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -179,8 +187,8 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 		// ignore options prefixed for some other renderer
 		return;
 	}
-	
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );	
+
+	msg( Msg::Warning, "IECoreArnold::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
 }
 
 IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std::string &name ) const
@@ -188,12 +196,12 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std:
 	if( 0 == name.compare( 0, 3, "ai:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		return ToArnoldConverter::getParameter( options, name.c_str() + 3 );
+		return ParameterAlgo::getParameter( options, name.c_str() + 3 );
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		return ToArnoldConverter::getParameter( options, name.c_str() );
+		return ParameterAlgo::getParameter( options, name.c_str() );
 	}
 	else if( name == "shutter" )
 	{
@@ -211,13 +219,12 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
 	cortexCamera->addStandardParameters();
 
-	ToArnoldCameraConverterPtr converter = new ToArnoldCameraConverter( cortexCamera );
-	AtNode *arnoldCamera = converter->convert();
+	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
 	AtNode *options = AiUniverseGetOptions();
 	AiNodeSetPtr( options, "camera", arnoldCamera );
-	
+
 	applyTransformToNode( arnoldCamera );
-	
+
 	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
 	AiNodeSetInt( options, "xres", resolution->readable().x );
 	AiNodeSetInt( options, "yres", resolution->readable().y );
@@ -243,24 +250,24 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 			driver = AiNode( prefixedType.c_str() );
 		}
 	}
-	
+
 	if( !driver )
 	{
 		msg( Msg::Error, "IECoreArnold::RendererImplementation::display", boost::format( "Unable to create display of type \"%s\"" ) % type );
 		return;
 	}
-		
+
 	string nodeName = boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() );
 	AiNodeSetStr( driver, "name", nodeName.c_str() );
-	
+
 	const AtParamEntry *fileNameParameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( driver ), "filename" );
 	if( fileNameParameter )
 	{
 		AiNodeSetStr( driver, AiParamGetName( fileNameParameter ), name.c_str() );
 	}
 
-	ToArnoldConverter::setParameters( driver, parameters );
-	
+	ParameterAlgo::setParameters( driver, parameters );
+
 	string d = data;
 	if( d=="rgb" )
 	{
@@ -270,7 +277,7 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 	{
 		d = "RGBA RGBA";
 	}
-	
+
 	std::string outputDescription = str( format( "%s %s %s" ) % d.c_str() % AiNodeGetName( m_defaultFilter ) % nodeName.c_str() );
 	m_outputDescriptions.push_back( outputDescription );
 }
@@ -285,13 +292,9 @@ void IECoreArnold::RendererImplementation::worldBegin()
 	if( m_transformStack.size() > 1 )
 	{
 		msg( Msg::Warning, "IECoreArnold::RendererImplementation::worldBegin", "Missing transformEnd() call detected." );
-		while( m_transformStack.size() > 1 )
-		{
-			m_transformStack.pop();
-		}
-		m_transformStack.top() = M44f();
 	}
-	
+	m_transformStack = TransformStack();
+
 	// specify default camera if none has been specified yet
 	AtNode *options = AiUniverseGetOptions();
 
@@ -307,7 +310,7 @@ void IECoreArnold::RendererImplementation::worldBegin()
 	{
 		AiArraySetStr( outputsArray, i, m_outputDescriptions[i].c_str() );
 	}
-	AiNodeSetArray( options, "outputs", outputsArray ); 
+	AiNodeSetArray( options, "outputs", outputsArray );
 
 }
 
@@ -329,23 +332,29 @@ void IECoreArnold::RendererImplementation::worldEnd()
 
 void IECoreArnold::RendererImplementation::transformBegin()
 {
-	m_transformStack.push( ( m_transformStack.top() ) );	
+	m_transformStack.push();
 }
 
 void IECoreArnold::RendererImplementation::transformEnd()
 {
-	if( m_transformStack.size() <= 1 )
+	try
 	{
-		msg( Msg::Warning, "IECoreArnold::RendererImplementation::transformEnd", "No matching transformBegin() call." );
+		m_transformStack.pop();
+	}
+	catch( const std::exception &e )
+	{
+		msg( Msg::Warning, "IECoreArnold::RendererImplementation::transformEnd", e.what() );
 		return;
 	}
-
-	m_transformStack.pop();
 }
 
 void IECoreArnold::RendererImplementation::setTransform( const Imath::M44f &m )
 {
-	m_transformStack.top() = m;
+	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	{
+		m_transformStack.motionBegin( m_motionTimes );
+	}
+	m_transformStack.set( m );
 }
 
 void IECoreArnold::RendererImplementation::setTransform( const std::string &coordinateSystem )
@@ -355,19 +364,22 @@ void IECoreArnold::RendererImplementation::setTransform( const std::string &coor
 
 Imath::M44f IECoreArnold::RendererImplementation::getTransform() const
 {
-	return m_transformStack.top();
+	return m_transformStack.get();
 }
 
 Imath::M44f IECoreArnold::RendererImplementation::getTransform( const std::string &coordinateSystem ) const
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::getTransform", "Not implemented" );
-	M44f result;
-	return result;
+	return M44f();
 }
 
 void IECoreArnold::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	m_transformStack.top() = m * m_transformStack.top();
+	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	{
+		m_transformStack.motionBegin( m_motionTimes );
+	}
+	m_transformStack.concatenate( m );
 }
 
 void IECoreArnold::RendererImplementation::coordinateSystem( const std::string &name )
@@ -406,7 +418,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 	if(
 		type=="shader" || type=="ai:shader" ||
 		type=="surface" || type=="ai:surface" ||
-		type=="displacement" || type=="ai:displacement"	
+		type=="displacement" || type=="ai:displacement"
 	)
 	{
 		AtNode *s = 0;
@@ -418,7 +430,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader \"%s\"" ) % name );
 				return;
 			}
-		}	
+		}
 		else
 		{
 			s = AiNode( name.c_str() );
@@ -442,16 +454,16 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 						}
 						else
 						{
-							msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader handle \"%s\" for linking" ) % linkHandle );	
+							msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader handle \"%s\" for linking" ) % linkHandle );
 						}
 						continue;
 					}
 				}
-				ToArnoldConverter::setParameter( s, parmIt->first.value().c_str(), parmIt->second.get() );
+				ParameterAlgo::setParameter( s, parmIt->first.value().c_str(), parmIt->second.get() );
 			}
 			addNode( s );
 		}
-		
+
 		if( type=="shader" || type == "ai:shader" )
 		{
 			CompoundDataMap::const_iterator handleIt = parameters.find( "__handle" );
@@ -462,7 +474,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 			}
 			else
 			{
-				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", "No __handle parameter specified." );			
+				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", "No __handle parameter specified." );
 			}
 		}
 		else if( type=="surface" || type == "ai:surface" )
@@ -506,7 +518,7 @@ void IECoreArnold::RendererImplementation::light( const std::string &name, const
 	}
 	for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
 	{
-		ToArnoldConverter::setParameter( l, parmIt->first.value().c_str(), parmIt->second.get() );
+		ParameterAlgo::setParameter( l, parmIt->first.value().c_str(), parmIt->second.get() );
 	}
 	applyTransformToNode( l );
 	addNode( l );
@@ -523,12 +535,29 @@ void IECoreArnold::RendererImplementation::illuminate( const std::string &lightH
 
 void IECoreArnold::RendererImplementation::motionBegin( const std::set<float> &times )
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::motionBegin", "Not implemented" );
+	if( !m_motionTimes.empty() )
+	{
+		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionBegin", "Already in a motion block." );
+		return;
+	}
+
+	m_motionTimes.insert( m_motionTimes.end(), times.begin(), times.end() );
 }
 
 void IECoreArnold::RendererImplementation::motionEnd()
 {
-	msg( Msg::Warning, "IECoreArnold::RendererImplementation::motionEnd", "Not implemented" );
+	if( m_motionTimes.empty() )
+	{
+		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionEnd", "Not in a motion block." );
+		return;
+	}
+
+	m_motionTimes.clear();
+	m_motionPrimitives.clear();
+	if( m_transformStack.inMotion() )
+	{
+		m_transformStack.motionEnd();
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -538,7 +567,7 @@ void IECoreArnold::RendererImplementation::motionEnd()
 void IECoreArnold::RendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
 {
 	PointsPrimitivePtr points = new IECore::PointsPrimitive( numPoints );
-	points->variables = primVars;	
+	points->variables = primVars;
 	addPrimitive( points.get(), "ai:points:" );
 }
 
@@ -573,10 +602,10 @@ void IECoreArnold::RendererImplementation::sphere( float radius, float zMin, flo
 	{
 		msg( Msg::Warning, "IECoreArnold::RendererImplementation::sphere", "thetaMax not supported" );
 	}
-	
+
 	AtNode *sphere = AiNode( "sphere" );
 	AiNodeSetFlt( sphere, "radius", radius );
-		
+
 	addShape( sphere );
 }
 
@@ -656,13 +685,13 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	{
 		return;
 	}
-	
+
 	AtNode *procedural = AiNode( "procedural" );
 
 	if( ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
 	{
 		AiNodeSetStr( procedural, "dso", externalProc->fileName().c_str() );
-		ToArnoldConverter::setParameters( procedural, externalProc->parameters() );
+		ParameterAlgo::setParameters( procedural, externalProc->parameters() );
 		applyTransformToNode( procedural );
 	}
 	else
@@ -673,15 +702,20 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		// generates.
 		if( bound != Procedural::noBound )
 		{
-			bound = transform( bound, m_transformStack.top() );
+			Box3f transformedBound;
+			for( size_t i = 0, e = m_transformStack.numSamples(); i < e; ++i )
+			{
+				transformedBound.extendBy( transform( bound, m_transformStack.sample( i ) ) );
+			}
+			bound = transformedBound;
 		}
 
 		AiNodeSetPtr( procedural, "funcptr", (void *)procLoader );
-	
+
 		ProceduralData *data = new ProceduralData;
 		data->procedural = proc;
 		data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
-		
+
 		AiNodeSetPtr( procedural, "userptr", data );
 	}
 
@@ -702,29 +736,44 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 	addNode( procedural );
 }
 
-void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
+bool IECoreArnold::RendererImplementation::automaticInstancing() const
 {
 	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
-
-	bool automaticInstancing = true;
-	CompoundDataMap::const_iterator it = attributes.find( "ai:automaticInstancing" );
+	CompoundDataMap::const_iterator it = attributes.find( g_aiAutomaticInstancingAttributeName );
 	if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
 	{
-		automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();
+		return static_cast<const IECore::BoolData *>( it->second.get() )->readable();
 	}
 	else
 	{
-		it = attributes.find( "automaticInstancing" );
+		it = attributes.find( g_automaticInstancingAttributeName );
 		if( it != attributes.end() && it->second->typeId() == IECore::BoolDataTypeId )
 		{
-			automaticInstancing = static_cast<const IECore::BoolData *>( it->second.get() )->readable();		
-		}	
+			return static_cast<const IECore::BoolData *>( it->second.get() )->readable();
+		}
 	}
-	
-	AtNode *shape = 0;
-	if( automaticInstancing )
+	return true;
+}
+
+void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
+{
+	if( !m_motionTimes.empty() )
 	{
-		IECore::MurmurHash hash = primitive->::IECore::Object::hash();
+		// We're in a motion block. Just store samples
+		// until we have all of them.
+		m_motionPrimitives.push_back( primitive );
+		if( m_motionPrimitives.size() != m_motionTimes.size() )
+		{
+			return;
+		}
+	}
+
+	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
+
+	AtNode *shape = NULL;
+	if( automaticInstancing() )
+	{
+		IECore::MurmurHash hash;
 		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
 		{
 			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
@@ -733,14 +782,37 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 				it->second->hash( hash );
 			}
 		}
-		shape = m_instancingConverter->convert( primitive, hash );
+		if( !m_motionTimes.empty() )
+		{
+			vector<const Primitive *> prims;
+			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
+			{
+				prims.push_back( it->get() );
+			}
+			shape = m_instancingConverter->convert( prims, m_motionTimes, hash );
+		}
+		else
+		{
+			shape = m_instancingConverter->convert( primitive, hash );
+		}
 	}
 	else
 	{
-		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
-		shape = converter->convert();
+		if( !m_motionTimes.empty() )
+		{
+			vector<const Object *> prims;
+			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
+			{
+				prims.push_back( it->get() );
+			}
+			shape = NodeAlgo::convert( prims, m_motionTimes );
+		}
+		else
+		{
+			shape = NodeAlgo::convert( primitive );
+		}
 	}
-	
+
 	if( strcmp( AiNodeEntryGetName( AiNodeGetNodeEntry( shape ) ), "ginstance" ) )
 	{
 		// it's not an instance, copy over attributes destined for this object type.
@@ -749,7 +821,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		{
 			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
 			{
-				ToArnoldConverter::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second.get() );
+				ParameterAlgo::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second.get() );
 			}
 		}
 	}
@@ -758,17 +830,17 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		// it's an instance - make sure we don't get double transformations.
 		AiNodeSetBool( shape, "inherit_xform", false );
 	}
-	
+
 	addShape( shape );
 }
 
 void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
 {
 	applyTransformToNode( shape );
-	applyVisibilityToNode( shape );	
-	
+	applyVisibilityToNode( shape );
+
 	AiNodeSetPtr( shape, "shader", m_attributeStack.top().surfaceShader );
-		
+
 	if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( shape ), "disp_map" ) )
 	{
 		if( m_attributeStack.top().displacementShader )
@@ -776,35 +848,47 @@ void IECoreArnold::RendererImplementation::addShape( AtNode *shape )
 			AiNodeSetPtr( shape, "disp_map", m_attributeStack.top().displacementShader );
 		}
 	}
-	
+
 	addNode( shape );
 }
 
 void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 {
-	/// \todo Make Convert.h
-	const Imath::M44f &m = m_transformStack.top();
-	AtMatrix mm;
-	for( unsigned int i=0; i<4; i++ )
+	const size_t numSamples = m_transformStack.numSamples();
+	if( numSamples == 1 )
 	{
-		for( unsigned int j=0; j<4; j++ )
+		AiNodeSetMatrix( node, "matrix", m_transformStack.get().x );
+	}
+	else
+	{
+		AtArray *times = AiArrayAllocate( numSamples, 1, AI_TYPE_FLOAT );
+		AtArray *matrices = AiArrayAllocate( 1, numSamples, AI_TYPE_MATRIX );
+		for( size_t i = 0; i < numSamples; ++i )
 		{
-			mm[i][j] = m[i][j];
+			AiArraySetFlt( times, i, m_transformStack.sampleTime( i ) );
+			AiArraySetMtx( matrices, i, m_transformStack.sample( i ).x );
+		}
+		AiNodeSetArray( node, "matrix", matrices );
+		if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), "transform_time_samples" ) )
+		{
+			AiNodeSetArray( node, "transform_time_samples", times );
+		}
+		else
+		{
+			AiNodeSetArray( node, "time_samples", times );
 		}
 	}
-	
-	AiNodeSetMatrix( node, "matrix", mm );
 }
 
 void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
-{	
-	int visibility = 0;
+{
+	AtByte visibility = 0;
 	const BoolData *visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:camera" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_CAMERA;
 	}
-	
+
 	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:shadow" );
 	if( visData->readable() )
 	{
@@ -816,26 +900,26 @@ void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 	{
 		visibility |= AI_RAY_REFLECTED;
 	}
-	
+
 	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:refracted" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_REFRACTED;
 	}
-	
+
 	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_DIFFUSE;
 	}
-	
+
 	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:glossy" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_GLOSSY;
 	}
-	
-	AiNodeSetInt( node, "visibility", visibility );
+
+	AiNodeSetByte( node, "visibility", visibility );
 }
 
 void IECoreArnold::RendererImplementation::addNode( AtNode *node )
@@ -884,4 +968,4 @@ void IECoreArnold::RendererImplementation::editBegin( const std::string &editTyp
 void IECoreArnold::RendererImplementation::editEnd()
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::editEnd", "Not implemented" );
-}		
+}

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,24 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDCONVERTER_INL
-#define IECOREARNOLD_TOARNOLDCONVERTER_INL
+#ifndef IECOREARNOLD_MESHALGO_H
+#define IECOREARNOLD_MESHALGO_H
+
+#include "ai.h"
+
+#include "IECore/MeshPrimitive.h"
 
 namespace IECoreArnold
 {
 
-template<class T>
-ToArnoldConverter::ConverterDescription<T>::ConverterDescription()
+namespace MeshAlgo
 {
-	creators()[T::InputType::staticTypeId()] = &creator;
-};
 
-template<class T>
-ToArnoldConverterPtr ToArnoldConverter::ConverterDescription<T>::creator( IECore::ObjectPtr object )
-{
-	return new T( boost::static_pointer_cast<typename T::InputType>( object ) );
-}
+AtNode *convert( const IECore::MeshPrimitive *mesh );
+AtNode *convert( const std::vector<const IECore::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes );
+
+} // namespace MeshAlgo
 
 } // namespace IECoreArnold
 
-#endif // IECOREARNOLD_TOARNOLDCONVERTER_INL
+#endif // IECOREARNOLD_MESHALGO_H

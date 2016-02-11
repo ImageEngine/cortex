@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012-2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -38,43 +38,30 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreArnold/ToArnoldPointsConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
+#include "IECoreArnold/ShapeAlgo.h"
+#include "IECoreArnold/PointsAlgo.h"
 
-using namespace IECoreArnold;
-using namespace IECore;
 using namespace std;
+using namespace IECore;
+using namespace IECoreArnold;
 
-IE_CORE_DEFINERUNTIMETYPED( ToArnoldPointsConverter );
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
 
-ToArnoldPointsConverter::ConverterDescription<ToArnoldPointsConverter> ToArnoldPointsConverter::g_description;
-
-ToArnoldPointsConverter::ToArnoldPointsConverter( IECore::PointsPrimitivePtr toConvert )
-	:	ToArnoldShapeConverter( "Converts IECore::PointsPrimitives to arnold points nodes", IECore::PointsPrimitive::staticTypeId() )
+namespace
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToArnoldPointsConverter::~ToArnoldPointsConverter()
-{
-}
+NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const
+AtNode *convertCommon( const IECore::PointsPrimitive *points )
 {
-	const PointsPrimitive *points = static_cast<const PointsPrimitive *>( from.get() );
-	const V3fVectorData *p = points->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
-	if( !p )
-	{
-		throw Exception( "PointsPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
-	}
-	
-	// make the result points and set the positions
-	
+
 	AtNode *result = AiNode( "points" );
-		
-	convertP( p, result, "points" );
-	
+
 	// mode
-	
+
 	const StringData *t = points->variableData<StringData>( "type", PrimitiveVariable::Constant );
 	if( t )
 	{
@@ -96,14 +83,55 @@ AtNode *ToArnoldPointsConverter::doConversion( IECore::ConstObjectPtr from, IECo
 		}
 	}
 
-	convertRadius( points, result );
+	// arbitrary user parameters
+
+	const char *ignore[] = { "P", "width", "radius", 0 };
+	ShapeAlgo::convertPrimitiveVariables( points, result, ignore );
+
+	return result;
+
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreArnold
+{
+
+namespace PointsAlgo
+{
+
+AtNode *convert( const IECore::PointsPrimitive *points )
+{
+	AtNode *result = convertCommon( points );
+
+	ShapeAlgo::convertP( points, result, "points" );
+	ShapeAlgo::convertRadius( points, result );
 
 	/// \todo Aspect, rotation
-	
-	// add arbitrary user parameters
-	
-	const char *ignore[] = { "P", "width", "radius", 0 };
-	convertPrimitiveVariables( points, result, ignore );
 
 	return result;
 }
+
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	AtNode *result = convertCommon( samples.front() );
+
+	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertRadius( primitiveSamples, result );
+
+	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+
+	/// \todo Aspect, rotation
+
+	return result;
+}
+
+} // namespace PointsAlgo
+
+} // namespace IECoreArnold
+

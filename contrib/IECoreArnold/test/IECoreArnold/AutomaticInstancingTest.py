@@ -45,109 +45,109 @@ import IECoreArnold
 class AutomaticInstancingTest( unittest.TestCase ) :
 
 	def __allNodes( self, type = arnold.AI_NODE_ALL ) :
-	
+
 		result = []
 		i = arnold.AiUniverseGetNodeIterator( type )
 		while not arnold.AiNodeIteratorFinished( i ) :
 			result.append( arnold.AiNodeIteratorGetNext( i ) )
-	
+
 		return result
 
 	def testOnByDefault( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			
+
 			m.render( r )
 			m.render( r )
-			
+
 			nodes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 			self.assertEqual( len( nodes ), 2 )
-			
+
 			nodeTypes = [ arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ) for n in nodes ]
 			mesh = nodes[nodeTypes.index( "polymesh" )]
 			instance = nodes[nodeTypes.index( "ginstance" )]
-			
+
 			self.assertEqual( arnold.AiNodeGetPtr( instance, "node" ), ctypes.addressof( mesh.contents ) )
 
 	def testEnabling( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( True ) )
 
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			
+
 			m.render( r )
 			m.render( r )
-			
+
 			nodes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 			self.assertEqual( len( nodes ), 2 )
-			
+
 			nodeTypes = [ arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ) for n in nodes ]
 			mesh = nodes[nodeTypes.index( "polymesh" )]
 			instance = nodes[nodeTypes.index( "ginstance" )]
-			
+
 			self.assertEqual( arnold.AiNodeGetPtr( instance, "node" ), ctypes.addressof( mesh.contents ) )
 
 	def testDisabling( self ) :
-	
+
 		r = IECoreArnold.Renderer()
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( False ) )
-			
+
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			
+
 			m.render( r )
 			m.render( r )
-			
+
 			nodes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 			self.assertEqual( len( nodes ), 2 )
-			
+
 			nodeTypes = [ arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ) for n in nodes ]
 			self.assertEqual( nodeTypes, [ "polymesh", "polymesh" ] )
-	
+
 	def testProceduralsShareInstances( self ) :
-	
+
 		class PlaneProcedural( IECore.Renderer.Procedural ) :
-		
+
 			def __init__( self ) :
-			
+
 				IECore.Renderer.Procedural.__init__( self )
-			
+
 			def bound( self ) :
-			
+
 				return IECore.Box3f( IECore.V3f( -10, -10, -0.01 ), IECore.V3f( 10, 10, 0.01 ) )
-				
+
 			def render( self, renderer ) :
-			
+
 				IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
 
 			def hash( self ):
-			
+
 				h = IECore.MurmurHash()
 				return h
-		
+
 		def arnoldMessageCallback( logMask, severity, msg, tabs ) :
-	
+
 			self.__arnoldMessages.append( msg )
-		
+
 		r = IECoreArnold.Renderer()
 		r.display( "test", "driver_null", "rgba", {} )
 
 		messageCallback = arnold.AtMsgCallBack( arnoldMessageCallback )
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = []
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			for i in range( 0, 100 ) :
@@ -157,13 +157,13 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 		# because it seems that after rendering, arnold reports the type of ginstances
 		# as being the type of the thing they point to, rather than "ginstance". so instead we
 		# check for evidence in the log.
-		
+
 		polyMeshStats = [ m for m in self.__arnoldMessages if m.startswith( "polymeshes" ) ][0]
 		self.failUnless( "99" in polyMeshStats )
-		
+
 		# check that there are no bounding box warnings
 		boundingBoxWarnings = [ m for m in self.__arnoldMessages if "bounding box" in m ]
 		self.assertEqual( len( boundingBoxWarnings ), 0 )
-		
+
 if __name__ == "__main__":
     unittest.main()

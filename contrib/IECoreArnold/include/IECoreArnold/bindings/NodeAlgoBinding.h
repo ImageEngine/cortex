@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H
-#define IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H
+#ifndef IECOREARNOLD_NODEALGOBINDING_H
+#define IECOREARNOLD_NODEALGOBINDING_H
 
-namespace IECoreArnold
+#include "boost/python.hpp"
+#include "ai.h"
+
+namespace IECoreArnoldBindings
 {
 
-void bindToArnoldMeshConverter();
+boost::python::object atNodeToPythonObject( AtNode *node );
+void bindNodeAlgo();
 
-} // namespace IECoreArnold
+} // namespace IECoreArnoldBindings
 
-#endif //  IECOREARNOLD_TOARNOLDMESHCONVERTERBINDING_H
+#endif //  IECOREARNOLD_NODEALGOBINDING_H

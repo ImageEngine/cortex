@@ -37,16 +37,28 @@
 #include "IECore/Exception.h"
 #include "IECore/Interpolator.h"
 
-#include "IECoreRI/private/TransformStack.h"
+#include "IECore/private/TransformStack.h"
 
 using namespace Imath;
 using namespace IECore;
-using namespace IECoreRI;
 
 TransformStack::TransformStack()
 	:	m_motionIndex( -1 ) // not in motion block
 {
 	m_stack.push( Samples( 1, Sample( 0.0f, Imath::M44f() ) ) );
+}
+
+TransformStack::TransformStack( const TransformStack &other, bool flatten )
+	:	m_motionIndex( other.m_motionIndex )
+{
+	if( flatten )
+	{
+		m_stack.push( other.m_stack.top() );
+	}
+	else
+	{
+		m_stack = other.m_stack;
+	}
 }
 
 void TransformStack::push()
@@ -77,13 +89,18 @@ void TransformStack::motionBegin( const std::vector<float> &times )
 		newSamples.push_back( Sample( *it, get( *it ) ) );
 	}
 	m_stack.top() = newSamples;
-	
+
 	m_motionIndex = 0;
 }
 
 void TransformStack::motionEnd()
 {
 	m_motionIndex = -1;
+}
+
+bool TransformStack::inMotion() const
+{
+	return m_motionIndex >= 0;
 }
 
 void TransformStack::set( const Imath::M44f &matrix )
@@ -93,7 +110,7 @@ void TransformStack::set( const Imath::M44f &matrix )
 	{
 		if( m_motionIndex >= (int)samples.size() )
 		{
-			throw Exception( "TransformStack::set() called too many times for motion block" );	
+			throw Exception( "TransformStack::set() called too many times for motion block" );
 		}
 		samples[m_motionIndex++].matrix = matrix;
 	}
@@ -113,7 +130,7 @@ void TransformStack::concatenate( const Imath::M44f &matrix )
 	{
 		if( m_motionIndex >= (int)samples.size() )
 		{
-			throw Exception( "TransformStack::concatenate() called too many times for motion block" );	
+			throw Exception( "TransformStack::concatenate() called too many times for motion block" );
 		}
 		samples[m_motionIndex].matrix = matrix * samples[m_motionIndex].matrix;
 		m_motionIndex++;
@@ -139,9 +156,9 @@ Imath::M44f TransformStack::get( float time ) const
 	{
 		return samples[0].matrix;
 	}
-	
+
 	// interpolate. find the first sample where sample.time >= time.
-	
+
 	Samples::const_iterator s1 = lower_bound( samples.begin(), samples.end(), time );
 	if( s1 == samples.begin() || s1->time == time )
 	{
@@ -158,7 +175,7 @@ Imath::M44f TransformStack::get( float time ) const
 		M44f result;
 		LinearInterpolator<M44f>()( s0->matrix, s1->matrix, l, result );
 		return result;
-	}	
+	}
 }
 
 size_t TransformStack::numSamples() const

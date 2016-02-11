@@ -39,7 +39,7 @@
 #include "tbb/concurrent_hash_map.h"
 
 #include "IECoreArnold/InstancingConverter.h"
-#include "IECoreArnold/ToArnoldConverter.h"
+#include "IECoreArnold/NodeAlgo.h"
 
 using namespace IECoreArnold;
 
@@ -61,21 +61,18 @@ InstancingConverter::~InstancingConverter()
 
 AtNode *InstancingConverter::convert( const IECore::Primitive *primitive )
 {
-	IECore::MurmurHash h = primitive->::IECore::Object::hash();
-	return convert( primitive, h );
+	return convert( primitive, IECore::MurmurHash() );
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &hash )
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash )
 {
+	IECore::MurmurHash h = primitive->::IECore::Object::hash();
+	h.append( additionalHash );
+
 	MemberData::Cache::accessor a;
-	if( m_data->cache.insert( a, hash ) )
+	if( m_data->cache.insert( a, h ) )
 	{
-		ToArnoldConverterPtr converter = ToArnoldConverter::create( const_cast<IECore::Primitive *>( primitive ) );
-		if( !converter )
-		{
-			return 0;
-		}
-		a->second = converter->convert();
+		a->second = NodeAlgo::convert( primitive );
 		return a->second;
 	}
 	else
@@ -87,8 +84,40 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 			return instance;
 		}
 	}
-		
-	return 0;
 
+	return NULL;
+}
 
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes )
+{
+	return convert( samples, sampleTimes, IECore::MurmurHash() );
+}
+
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes, const IECore::MurmurHash &additionalHash )
+{
+	IECore::MurmurHash h;
+	for( std::vector<const IECore::Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		(*it)->hash( h );
+	}
+	h.append( additionalHash );
+
+	MemberData::Cache::accessor a;
+	if( m_data->cache.insert( a, h ) )
+	{
+		std::vector<const IECore::Object *> objectSamples( samples.begin(), samples.end() );
+		a->second = NodeAlgo::convert( objectSamples, sampleTimes );
+		return a->second;
+	}
+	else
+	{
+		if( a->second )
+		{
+			AtNode *instance = AiNode( "ginstance" );
+			AiNodeSetPtr( instance, "node", a->second );
+			return instance;
+		}
+	}
+
+	return NULL;
 }
