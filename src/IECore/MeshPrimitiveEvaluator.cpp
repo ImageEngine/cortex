@@ -843,7 +843,7 @@ int MeshPrimitiveEvaluator::intersectionPoints( const Imath::V3f &origin, const 
 
 bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const
 {
-	if( triangleIndex > m_triangles.size() )
+	if( triangleIndex >= m_triangles.size() )
 	{
 		return false;
 	}
