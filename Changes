@@ -1,3 +1,20 @@
+# 9.7.0
+
+#### IECore
+
+- Fixed potential crash in MeshPrimitiveEvaluator::barycentricPosition() (#475).
+- Fixed ConfigLoader to ignore duplicate paths. Note that this may change configuration
+  behaviour for malformed paths with duplicates (#474).
+
+#### IECoreArnold
+
+- Added support for both deformation and transform blur (#473).
+- Refactored all Cortex->Arnold conversion functionality into new Algo.h headers,
+  removing the old FromCoreConverter based classes. This does represent a compatibilit
+  break, but IECoreArnold is in contrib, where no compatibility guarantees exist.
+- Fixed warnings relating to the data type of Arnold's visibility parameter, which
+  has been changed to AtByte from AtInt.
+
 # 9.6.1
 
 #### IECore
