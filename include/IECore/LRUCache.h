@@ -38,6 +38,7 @@
 #include <vector>
 
 #include "tbb/spin_mutex.h"
+#include "tbb/spin_rw_mutex.h"
 
 #include "boost/noncopyable.hpp"
 #include "boost/function.hpp"
@@ -165,7 +166,7 @@ class LRUCache : private boost::noncopyable
 		// values, they don't contend for a mutex at all.
 		struct Bin
 		{
-			typedef tbb::spin_mutex Mutex;
+			typedef tbb::spin_rw_mutex Mutex;
 			Map map;
 			Mutex mutex;
 		};
@@ -205,21 +206,33 @@ class LRUCache : private boost::noncopyable
 					whileAtEndMoveToNextBin();
 				}
 
-				bool acquire( LRUCache *cache, const Key &key, bool createIfMissing = false )
+				// If write == false and createIfMissing == true, then a read lock is acquired
+				// if the item exists already, otherwise a write lock is acquired on a newly
+				// created item. Returns true if an item was created, false otherwise.
+				bool acquire( LRUCache *cache, const Key &key, bool write = true, bool createIfMissing = false )
 				{
 					release();
 					m_cache = cache;
-					acquireBin( binIndex( key ) );
-					if( createIfMissing )
+					acquireBin( binIndex( key ), write );
+
+					if( write && createIfMissing )
 					{
-						m_it = map().insert( MapValue( key, CacheEntry() ) ).first;
-						return true;
+						const std::pair<Iterator, bool> i = map().insert( MapValue( key, CacheEntry() ) );
+						m_it = i.first;
+						return i.second;
 					}
 					else
 					{
 						m_it = map().find( key );
 						if( m_it != map().end() )
 						{
+							return false;
+						}
+						else if( createIfMissing )
+						{
+							assert( write == false );
+							m_binLock.upgrade_to_writer();
+							m_it = map().insert( MapValue( key, CacheEntry() ) ).first;
 							return true;
 						}
 						else
@@ -228,6 +241,11 @@ class LRUCache : private boost::noncopyable
 							return false;
 						}
 					}
+				}
+
+				void upgradeToWriter()
+				{
+					m_binLock.upgrade_to_writer();
 				}
 
 				void release()
@@ -297,10 +315,10 @@ class LRUCache : private boost::noncopyable
 					}
 				}
 
-				void acquireBin( size_t binIndex )
+				void acquireBin( size_t binIndex, bool write = true )
 				{
 					m_binIndex = binIndex;
-					m_binLock.acquire( m_cache->m_bins[binIndex]->mutex );
+					m_binLock.acquire( m_cache->m_bins[binIndex]->mutex, write );
 				}
 
 				void releaseBin()
