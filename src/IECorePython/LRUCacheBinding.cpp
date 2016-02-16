@@ -191,11 +191,6 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 	TestCache cache( get, maxCost );
 	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues, clearFrequency ) );
 
-	if( cache.currentCost() > cache.getMaxCost() )
-	{
-		throw Exception( "LRUCache exceeds maximum cost" );
-	}
-
 	cache.clear();
 	if( cache.currentCost() != 0 )
 	{
@@ -206,11 +201,6 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 
 	TestCache cache2( get, maxCost );
 	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache2, numValues, clearFrequency ) );
-
-	if( cache2.currentCost() > cache2.getMaxCost() )
-	{
-		throw Exception( "LRUCache exceeds maximum cost" );
-	}
 
 	cache2.setMaxCost( 0 );
 	if( cache2.currentCost() != 0 )
