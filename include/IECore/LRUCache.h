@@ -245,7 +245,22 @@ class LRUCache : private boost::noncopyable
 
 				void upgradeToWriter()
 				{
-					m_binLock.upgrade_to_writer();
+					const Key key = m_it->first;
+					if( m_binLock.upgrade_to_writer() )
+					{
+						// Clean upgrade to writer status
+						// without giving up read lock.
+						return;
+					}
+					else
+					{
+						// We have been upgraded to writer
+						// status, but we had to temporarily
+						// give up our lock to get there. Another
+						// thread may have invalidated our iterator,
+						// so get it again.
+						m_it = map().insert( MapValue( key, CacheEntry() ) ).first;
+					}
 				}
 
 				void release()
