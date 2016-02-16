@@ -125,15 +125,26 @@ class PythonLRUCache : public LRUCache<object, object>
 			Mutex::scoped_lock lock;
 			{
 				IECorePython::ScopedGILRelease gilRelease;
-				lock.acquire( m_getMutex );
+				lock.acquire( m_mutex );
 			}
 			return LRUCache<object, object>::get( key );
+		}
+
+		void clear()
+		{
+			// See above.
+			Mutex::scoped_lock lock;
+			{
+				IECorePython::ScopedGILRelease gilRelease;
+				lock.acquire( m_mutex );
+			}
+			return LRUCache<object, object>::clear();
 		}
 
 	private :
 
 		typedef tbb::mutex Mutex;
-		Mutex m_getMutex;
+		Mutex m_mutex;
 
 };
 
