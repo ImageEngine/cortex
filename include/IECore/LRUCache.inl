@@ -87,7 +87,8 @@ LRUCache<Key, Value>::~LRUCache()
 template<typename Key, typename Value>
 void LRUCache<Key, Value>::clear()
 {
-	Handle handle( this );
+	Handle handle;
+	handle.begin( this );
 	while( handle.valid() )
 	{
 		eraseInternal( *handle );
@@ -117,7 +118,8 @@ typename LRUCache<Key, Value>::Cost LRUCache<Key, Value>::currentCost() const
 template<typename Key, typename Value>
 Value LRUCache<Key, Value>::get( const Key& key )
 {
-	Handle handle( this, key, /* createIfMissing = */ true );
+	Handle handle;
+	handle.acquire( this, key, /* createIfMissing = */ true );
 	CacheEntry &cacheEntry = handle->second;
 
 	if( cacheEntry.status==New || cacheEntry.status==TooCostly )
@@ -164,7 +166,8 @@ Value LRUCache<Key, Value>::get( const Key& key )
 template<typename Key, typename Value>
 bool LRUCache<Key, Value>::set( const Key &key, const Value &value, Cost cost )
 {
-	Handle handle( this, key, /* createIfMissing = */ true );
+	Handle handle;
+	handle.acquire( this, key, /* createIfMissing = */ true );
 
 	const bool result = setInternal( *handle, value, cost );
 
@@ -177,14 +180,16 @@ bool LRUCache<Key, Value>::set( const Key &key, const Value &value, Cost cost )
 template<typename Key, typename Value>
 bool LRUCache<Key, Value>::cached( const Key &key ) const
 {
-	Handle handle( const_cast<LRUCache *>( this ), key, /* createIfMissing = */ false );
+	Handle handle;
+	handle.acquire( const_cast<LRUCache *>( this ), key, /* createIfMissing = */ false );
 	return handle.valid() && handle->second.status == Cached;
 }
 
 template<typename Key, typename Value>
 bool LRUCache<Key, Value>::erase( const Key &key )
 {
-	Handle handle( this, key, /* createIfMissing = */ false );
+	Handle handle;
+	handle.acquire( this, key, /* createIfMissing = */ false );
 	if( handle.valid() )
 	{
 		eraseInternal( *handle );
@@ -249,7 +254,8 @@ void LRUCache<Key, Value>::limitCost()
 		return;
 	}
 
-	Handle handle( this, m_limitCostSweepPosition, /* createIfMissing = */ false );
+	Handle handle;
+	handle.acquire( this, m_limitCostSweepPosition, /* createIfMissing = */ false );
 	if( !handle.valid() )
 	{
 		// This is our first sweep, or the entry

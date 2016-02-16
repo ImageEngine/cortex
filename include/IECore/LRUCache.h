@@ -177,7 +177,10 @@ class LRUCache : private boost::noncopyable
 		// storage strategy. Internally holds an iterator
 		// into one of the maps and holds the lock for
 		// that map. All access to the bins must be
-		// made through this class.
+		// made through this class. Similar to an iterator
+		// interface, but without any copy or assignment
+		// operations, since those would require transfer
+		// of the internal lock, which is problematic.
 		class Handle : public boost::noncopyable
 		{
 
@@ -188,56 +191,34 @@ class LRUCache : private boost::noncopyable
 				{
 				}
 
-				Handle( LRUCache *cache )
-					:	m_cache( NULL ), m_binIndex( 0 )
-				{
-					begin( cache );
-				}
-
-				Handle( LRUCache *cache, const Key &key, bool createIfMissing = false )
-					:	m_cache( NULL ), m_binIndex( 0 )
-				{
-					acquire( cache, key, createIfMissing );
-				}
-
 				~Handle()
 				{
 					release();
 				}
 
-				bool begin( LRUCache *cache )
+				void begin( LRUCache *cache )
 				{
-					for( size_t i = 0, e = cache->m_bins.size(); i < e; ++i )
-					{
-						release();
-						m_cache = cache;
-						m_binIndex = i;
-						m_cache->m_bins[m_binIndex]->mutex.lock();
-						m_it = m_cache->m_bins[m_binIndex]->map.begin();
-						if( m_it != m_cache->m_bins[m_binIndex]->map.end() )
-						{
-							return true;
-						}
-					}
 					release();
-					return false;
+					m_cache = cache;
+					acquireBin( 0 );
+					m_it = map().begin();
+					whileAtEndMoveToNextBin();
 				}
 
 				bool acquire( LRUCache *cache, const Key &key, bool createIfMissing = false )
 				{
 					release();
 					m_cache = cache;
-					m_binIndex = binIndex( key );
-					m_cache->m_bins[m_binIndex]->mutex.lock();
+					acquireBin( binIndex( key ) );
 					if( createIfMissing )
 					{
-						m_it = m_cache->m_bins[m_binIndex]->map.insert( MapValue( key, CacheEntry() ) ).first;
+						m_it = map().insert( MapValue( key, CacheEntry() ) ).first;
 						return true;
 					}
 					else
 					{
-						m_it = m_cache->m_bins[m_binIndex]->map.find( key );
-						if( m_it != m_cache->m_bins[m_binIndex]->map.end() )
+						m_it = map().find( key );
+						if( m_it != map().end() )
 						{
 							return true;
 						}
@@ -253,7 +234,7 @@ class LRUCache : private boost::noncopyable
 				{
 					if( m_cache )
 					{
-						m_cache->m_bins[m_binIndex]->mutex.unlock();
+						releaseBin();
 						m_cache = NULL;
 					}
 				}
@@ -261,49 +242,25 @@ class LRUCache : private boost::noncopyable
 				void increment()
 				{
 					m_it++;
-					while( m_it == m_cache->m_bins[m_binIndex]->map.end() && m_binIndex < m_cache->m_bins.size() - 1 )
-					{
-						m_cache->m_bins[m_binIndex]->mutex.unlock();
-						m_binIndex++;
-						m_cache->m_bins[m_binIndex]->mutex.lock();
-						m_it = m_cache->m_bins[m_binIndex]->map.begin();
-					}
+					whileAtEndMoveToNextBin();
 				}
 
 				void erase()
 				{
-					m_cache->m_bins[m_binIndex]->map.erase( m_it );
+					map().erase( m_it );
 				}
 
 				void eraseAndIncrement()
 				{
 					Iterator nextIt = m_it; nextIt++;
-					size_t nextBinIndex = m_binIndex;
-					while( nextIt == m_cache->m_bins[nextBinIndex]->map.end() && nextBinIndex < m_cache->m_bins.size() - 1 )
-					{
-						if( nextBinIndex != m_binIndex )
-						{
-							m_cache->m_bins[nextBinIndex]->mutex.unlock();
-						}
-						nextBinIndex++;
-						m_cache->m_bins[nextBinIndex]->mutex.lock();
-						nextIt = m_cache->m_bins[nextBinIndex]->map.begin();
-					}
-
-					m_cache->m_bins[m_binIndex]->map.erase( m_it );
-
-					if( nextBinIndex != m_binIndex )
-					{
-						m_cache->m_bins[m_binIndex]->mutex.unlock();
-						m_binIndex = nextBinIndex;
-					}
-
+					map().erase( m_it );
 					m_it = nextIt;
+					whileAtEndMoveToNextBin();
 				}
 
 				bool valid()
 				{
-					return m_cache && m_it != m_cache->m_bins[m_binIndex]->map.end();
+					return m_cache && m_it != map().end();
 				}
 
 				MapValue &operator*()
@@ -322,7 +279,34 @@ class LRUCache : private boost::noncopyable
 
 				LRUCache *m_cache;
 				size_t m_binIndex;
+				typename Bin::Mutex::scoped_lock m_binLock;
 				Iterator m_it;
+
+				Map &map()
+				{
+					return m_cache->m_bins[m_binIndex]->map;
+				}
+
+				void whileAtEndMoveToNextBin()
+				{
+					while( m_it == m_cache->m_bins[m_binIndex]->map.end() && m_binIndex < m_cache->m_bins.size() - 1 )
+					{
+						releaseBin();
+						acquireBin( m_binIndex + 1 );
+						m_it = map().begin();
+					}
+				}
+
+				void acquireBin( size_t binIndex )
+				{
+					m_binIndex = binIndex;
+					m_binLock.acquire( m_cache->m_bins[binIndex]->mutex );
+				}
+
+				void releaseBin()
+				{
+					m_binLock.release();
+				}
 
 				size_t binIndex( const Key &key ) const
 				{
