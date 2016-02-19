@@ -1760,8 +1760,17 @@ if doConfigure :
 			riSources.remove( "src/IECoreRI/SHWDeepImageWriter.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageReaderBinding.cpp" )
 			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageWriterBinding.cpp" )
-		
-		c.Finish()	
+
+		if haveDelight and c.CheckCXXHeader( "nsi.h" ) :
+
+			riSources.append( glob.glob( "src/IECoreRI/NSI/*.cpp" ) )
+			riEnv.Append( CPPFLAGS = [ "-DIECORERI_WITH_NSI" ] )
+
+		elif haveDelight :
+
+			sys.stderr.write( "WARNING : NSI API not found - not building NSI support.\n" )
+
+		c.Finish()
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
