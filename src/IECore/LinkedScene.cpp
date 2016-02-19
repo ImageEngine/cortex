@@ -701,7 +701,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			{
 				std::string pathStr;
 				SceneInterface::pathToString( sceneRoot->readable(), pathStr );
-				msg( Msg::Warning, "LinkedScene::writeAttribute", ( boost::format( "Detected ancestor tags while creating link to file %s at location %s." ) % fileName->readable() % pathStr ).str() );
+				msg( Msg::Debug, "LinkedScene::writeAttribute", ( boost::format( "Detected ancestor tags while creating link to file %s at location %s." ) % fileName->readable() % pathStr ).str() );
 			}
 			tags.clear();
 
