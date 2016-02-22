@@ -68,14 +68,14 @@ using namespace boost;
 // AttributeState implementation
 ////////////////////////////////////////////////////////////////////////
 
-IECoreRI::RendererImplementation::AttributeState::AttributeState()
+#ifdef IECORERI_WITH_NSI
+
+IECoreRI::RendererImplementation::AttributeState::AttributeState( const NSI::ShaderState &nsiShaderState )
+	:	nsiShaderState( nsiShaderState )
 {
 }
 
-IECoreRI::RendererImplementation::AttributeState::AttributeState( const AttributeState &other )
-{
-	primVarTypeHints = other.primVarTypeHints;
-}
+#endif
 
 ////////////////////////////////////////////////////////////////////////
 // IECoreRI::RendererImplementation implementation
@@ -92,7 +92,6 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 	:	m_sharedData( new SharedData ), m_inWorld( false ), m_inEdit( false )
 {
 	m_options = new CompoundData();
-	constructCommon();
 	if( name!="" )
 	{
 		RiBegin( (char *)name.c_str() );
@@ -115,6 +114,8 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 	m_contextToSharedDataMapKey = m_context;
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+
+	constructCommon();
 }
 
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
@@ -122,8 +123,6 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
 	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true ), m_inEdit( false )
 {
-	constructCommon();
-	
 	// Add a correspondance between the current context and this object's SharedData instance,
 	// in case RendererImplementation() gets called later on with no arguments. This creates a
 	// RendererImplementation in the current context, which must have access to this object's
@@ -132,6 +131,8 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 	m_contextToSharedDataMapKey = RiGetContext();
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+
+	constructCommon();
 }
 
 // This constructor creates a RendererImplementation using the current RtContext. The SharedData is acquired by 
@@ -146,8 +147,6 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 IECoreRI::RendererImplementation::RendererImplementation()
 	:	m_context( 0 ), m_options( 0 ), m_inWorld( true ), m_inEdit( false )
 {
-	constructCommon();
-	
 	m_contextToSharedDataMapKey = RiGetContext();
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 
@@ -169,13 +168,19 @@ IECoreRI::RendererImplementation::RendererImplementation()
 	{
 		m_sharedData = it->second;
 	}
-	
+
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
+
+	constructCommon();
 }
 
 void IECoreRI::RendererImplementation::constructCommon()
 {
+#ifdef IECORERI_WITH_NSI
+	m_attributeStack.push( AttributeState( NSI::ShaderState( m_sharedData->handleGenerator ) ) );
+#else
 	m_attributeStack.push( AttributeState() );
+#endif
 
 	const char *fontPath = getenv( "IECORE_FONT_PATHS" );
 	if( fontPath )
@@ -1294,6 +1299,13 @@ IECore::CachedReaderPtr IECoreRI::RendererImplementation::defaultShaderCache()
 void IECoreRI::RendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
+
+#ifdef IECORERI_WITH_NSI
+	if( m_attributeStack.top().nsiShaderState.shader( type, name, parameters ) )
+	{
+		return;
+	}
+#endif
 
 	ConstShaderPtr s = 0;
 	try
