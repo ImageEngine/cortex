@@ -3233,6 +3233,68 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( scene.hasAttribute( "test" ) )
 		self.assertEqual( scene.readAttribute( "test", 0 ), None )
 	
+	def testAttribWrangleName( self ) :
+		
+		geo = hou.node( "/obj" ).createNode( "geo" )
+		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
+		name = torus.createOutputNode( "name" )
+		name.parm( "name1" ).set( "/a" )
+		wrangle = name.createOutputNode( "attribwrangle" )
+		wrangle.parm( "class" ).set( 1 ) # primitive
+		wrangle.parm( "snippet" ).set( 's@name = "/b";' )
+		rop = self.rop( geo )
+		
+		# since the geo is named it doesn't count as a
+		# local object, but rather as a child scene.
+		
+		name.setRenderFlag( True )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "a" ] )
+		childScene = scene.child( "a" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		# this is still true after wrangling the name attrib,
+		# which we are testing because attribwrangle nodes
+		# do not clean up the mess they've made with the
+		# string table for attributes.
+		
+		wrangle.setRenderFlag( True )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "b" ] )
+		childScene = scene.child( "b" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		# it works for nested names too
+		
+		wrangle.parm( "snippet" ).set( 's@name = "/c/d/e";' )
+		rop.parm( "execute" ).pressButton()
+		self.assertEqual( rop.errors(), "" )
+		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "c" ] )
+		childScene = scene.child( "c" )
+		self.assertFalse( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [ "d" ] )
+		childScene = childScene.child( "d" )
+		self.assertFalse( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [ "e" ] )
+		childScene = childScene.child( "e" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :

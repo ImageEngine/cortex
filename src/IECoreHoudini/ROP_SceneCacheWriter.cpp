@@ -267,10 +267,20 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 				}
 				else if ( numShapes == 1 )
 				{
-					const char *name = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, 0 ) );
-					if( ( name == 0 ) || ( !strcmp( name, "" ) || !strcmp( name, "/" ) ) )
+					GA_Size numStrings = stats.getCapacity();
+					for ( GA_Size i=0; i < numStrings; ++i )
 					{
-						reRoot = true;
+						GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+						if ( validatedIndex < 0 )
+						{
+							continue;
+						}
+						
+						const char *name = tuple->getTableString( nameAttr, validatedIndex );
+						if( ( name == 0 ) || ( !strcmp( name, "" ) || !strcmp( name, "/" ) ) )
+						{
+							reRoot = true;
+						}
 					}
 				}
 			}

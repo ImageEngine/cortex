@@ -611,9 +611,16 @@ bool LiveScene::hasObject() const
 			return true;
 		}
 		
-		for ( GA_Size i=0; i < numShapes; ++i )
+		GA_Size numStrings = stats.getCapacity();
+		for ( GA_Size i=0; i < numStrings; ++i )
 		{
-			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+			if ( validatedIndex < 0 )
+			{
+				continue;
+			}
+			
+			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 			const char *match = matchPath( currentName );
 			if ( match && *match == *emptyString )
 			{
@@ -730,12 +737,16 @@ void LiveScene::childNames( NameList &childNames ) const
 		
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-		GA_StringTableStatistics stats;
-		tuple->getStatistics( nameAttr, stats );
-		GA_Size numShapes = stats.getEntries();
-		for ( GA_Size i=0; i < numShapes; ++i )
+		GA_Size numStrings = tuple->getTableEntries( nameAttr );
+		for ( GA_Size i=0; i < numStrings; ++i )
 		{
-			const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+			GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+			if ( validatedIndex < 0 )
+			{
+				continue;
+			}
+			
+			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 			const char *match = matchPath( currentName );
 			if ( match && *match != *emptyString )
 			{
@@ -904,12 +915,16 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 				{
 					const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 					const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
-					GA_StringTableStatistics stats;
-					tuple->getStatistics( nameAttr, stats );
-					GA_Size numShapes = stats.getEntries();
-					for ( GA_Size i=0; i < numShapes; ++i )
+					GA_Size numStrings = tuple->getTableEntries( nameAttr );
+					for ( GA_Size i=0; i < numStrings; ++i )
 					{
-						const char *currentName = tuple->getTableString( nameAttr, tuple->validateTableHandle( nameAttr, i ) );
+						GA_StringIndexType validatedIndex = tuple->validateTableHandle( nameAttr, i );
+						if ( validatedIndex < 0 )
+						{
+							continue;
+						}
+						
+						const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 						const char *match = matchPath( currentName );
 						if ( match && *match != *emptyString )
 						{

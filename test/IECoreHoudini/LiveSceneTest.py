@@ -1084,6 +1084,61 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertTrue( rop.name() not in scene.childNames() )
 		self.assertRaises( RuntimeError, scene.child, "ropnet" )
 		self.assertEqual( scene.child( "ropnet", IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+	
+	def testAttribWrangleName( self ) :
+		
+		geo = hou.node( "/obj" ).createNode( "geo" )
+		torus = geo.createNode( "torus" )
+		torus.parm( "rows" ).set( 10 )
+		torus.parm( "cols" ).set( 10 )
+		name = torus.createOutputNode( "name" )
+		name.parm( "name1" ).set( "/a" )
+		wrangle = name.createOutputNode( "attribwrangle" )
+		wrangle.parm( "class" ).set( 1 ) # primitive
+		wrangle.parm( "snippet" ).set( 's@name = "/b";' )
+		
+		# since the geo is named it doesn't count as a
+		# local object, but rather as a child scene.
+		
+		name.setRenderFlag( True )
+		scene = IECoreHoudini.LiveScene( geo.path() )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "a" ] )
+		childScene = scene.child( "a" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		# this is still true after wrangling the name attrib,
+		# which we are testing because attribwrangle nodes
+		# do not clean up the mess they've made with the
+		# string table for attributes.
+		
+		wrangle.setRenderFlag( True )
+		scene = IECoreHoudini.LiveScene( geo.path() )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "b" ] )
+		childScene = scene.child( "b" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		
+		# it works for nested names too
+		
+		wrangle.parm( "snippet" ).set( 's@name = "/c/d/e";' )
+		scene = IECoreHoudini.LiveScene( geo.path() )
+		self.assertFalse( scene.hasObject() )
+		self.assertEqual( scene.childNames(), [ "c" ] )
+		childScene = scene.child( "c" )
+		self.assertFalse( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [ "d" ] )
+		childScene = childScene.child( "d" )
+		self.assertFalse( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [ "e" ] )
+		childScene = childScene.child( "e" )
+		self.assertTrue( childScene.hasObject() )
+		self.assertEqual( childScene.childNames(), [] )
+		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
 if __name__ == "__main__":
 	unittest.main()
