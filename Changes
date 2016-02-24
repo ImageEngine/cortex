@@ -1,3 +1,13 @@
+# 9.7.1
+
+#### IECore
+
+- LinkedScene : The message for linked ancestor tags is now Debug level instead of Warning.
+
+#### IECoreHoudini
+
+- Fixed "name" attribute bug in IECoreHoudini::LiveScene, which was triggered by using an attribwrangle on the name attribute.
+
 # 9.7.0
 
 #### IECore
