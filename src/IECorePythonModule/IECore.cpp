@@ -609,6 +609,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withASIO", &IECore::withASIO );
+	def( "withBlosc", &IECore::withBlosc );
 	def( "withSignals", &IECore::withSignals );
 	def( "withTIFF", &IECore::withTIFF );
 	def( "withJPEG", &IECore::withJPEG );

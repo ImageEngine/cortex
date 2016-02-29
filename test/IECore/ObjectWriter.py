@@ -41,11 +41,22 @@ class TestObjectWriter( unittest.TestCase ) :
 
 	def testBasics( self ) :
 
+		# read an old file:
 		r = IECore.Reader.create( "test/IECore/data/cobFiles/compoundData.cob" )
 		p = r.read()
+		self.assertEqual(
+			p,
+			IECore.CompoundData({'banana':IECore.IntData( 2 ),'melon':IECore.FloatData( 2.5 ),'lemon':IECore.IntData( -3 ),'apple':IECore.IntData( 12 )})
+		)
 
 		w = IECore.Writer.create( p, "test/compoundData.cob" )
+		w["compressionType"].setTypedValue("none")
 		w.write()
+		
+		# check FileIndexedIO contents:
+		fio = IECore.FileIndexedIO( "test/compoundData.cob", IECore.IndexedIO.OpenMode.Read )
+		fio.subdirectory("header")
+		fio.subdirectory("object")
 
 		r = IECore.Reader.create( "test/compoundData.cob" )
 		p2 = r.read()
@@ -57,6 +68,7 @@ class TestObjectWriter( unittest.TestCase ) :
 		o = IECore.IntData()
 
 		w = IECore.Writer.create( o, "test/intData.cob" )
+		w["compressionType"].setTypedValue("none")
 		w["header"].getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
 		w["header"].getValue()["testHeaderData2"] = IECore.IntData( 100 )
 		w.write()
@@ -69,20 +81,85 @@ class TestObjectWriter( unittest.TestCase ) :
 		self.assertEqual( h["host"]["nodeName"].value, socket.gethostname() )
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
-	
+
 	def testBoundInHeader( self ) :
 
 		o = IECore.SpherePrimitive()
 		w = IECore.Writer.create( o, "test/spherePrimitive.cob" )
+		w["compressionType"].setTypedValue("none")
 		w.write()
 
 		h = IECore.Reader.create( "test/spherePrimitive.cob" ).readHeader()
 
 		self.assertEqual( h["bound"].value, o.bound() )
 
+	def testCompressed( self ) :
+		
+		if IECore.withBlosc():
+
+			floats = IECore.FloatVectorData( range(0,10000) )
+			w = IECore.Writer.create( floats, "test/compressed.cob" )
+			w["compressionType"].setTypedValue("blosc")
+
+			w.write()
+
+			# check FileIndexedIO contents:
+			fio = IECore.FileIndexedIO( "test/compressed.cob", IECore.IndexedIO.OpenMode.Read )
+			self.assertEqual( set( fio.entryIds() ), set( [ IECore.InternedString( s ) for s in ["header", "objectCompressed"] ] ) )
+			self.assertEqual( set( fio.subdirectory("objectCompressed").entryIds() ), set( [ IECore.InternedString( s ) for s in ["0", "numBlocks"] ] ) )
+			self.assertEqual( set( fio.subdirectory("objectCompressed").subdirectory("0").entryIds() ), set( [ IECore.InternedString( s ) for s in ["data", "compressedSize", "decompressedSize"] ] ) )
+			self.assertEqual( fio.subdirectory("objectCompressed").read("numBlocks").value, 1 )
+
+			# read back and check object:
+			self.assertEqual( IECore.Reader.create( "test/compressed.cob" ).read(), floats )
+
+	def testGiantCompressed( self ) :
+		
+		if IECore.withBlosc():
+
+			# create a 1.5gb mesh so multiple blocks get written into the file:
+			stupidMesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f(-1), IECore.V2f(1) ), IECore.V2i( 5000,5000 ) )
+
+			w = IECore.Writer.create( stupidMesh, "test/compressed.cob" )
+			w["compressionType"].setTypedValue("blosc")
+
+			w.write()
+
+			# check FileIndexedIO contents:
+			fio = IECore.FileIndexedIO( "test/compressed.cob", IECore.IndexedIO.OpenMode.Read )
+			self.assertEqual( set( fio.entryIds() ), set( [ IECore.InternedString( s ) for s in ["header", "objectCompressed"] ] ) )
+			self.assertEqual( set( fio.subdirectory("objectCompressed").entryIds() ), set( [ IECore.InternedString( s ) for s in ["0", "1", "numBlocks"] ] ) )
+			self.assertEqual( set( fio.subdirectory("objectCompressed").subdirectory("0").entryIds() ), set( [ IECore.InternedString( s ) for s in ["data", "compressedSize", "decompressedSize"] ] ) )
+			self.assertEqual( set( fio.subdirectory("objectCompressed").subdirectory("1").entryIds() ), set( [ IECore.InternedString( s ) for s in ["data", "compressedSize", "decompressedSize"] ] ) )
+			self.assertEqual( fio.subdirectory("objectCompressed").read("numBlocks").value, 2 )
+
+			# read back and check object:
+			self.assertEqual( IECore.Reader.create( "test/compressed.cob" ).read(), stupidMesh )
+
+	def testCompressedHeader( self ) :
+				
+		if IECore.withBlosc():
+
+			o = IECore.IntData()
+
+			w = IECore.Writer.create( o, "test/compressed.cob" )
+			w["compressionType"].setTypedValue("blosc")
+			w["header"].getValue()["testHeaderData"] = IECore.StringData( "i am part of a header" )
+			w["header"].getValue()["testHeaderData2"] = IECore.IntData( 100 )
+			w.write()
+
+			h = IECore.Reader.create( "test/compressed.cob" ).readHeader()
+
+			for k in w["header"].getValue().keys() :
+				self.assertEqual( w["header"].getValue()[k], h[k] )
+
+			self.assertEqual( h["host"]["nodeName"].value, socket.gethostname() )
+			self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
+			self.assertEqual( h["typeName"].value, "IntData" )
+
 	def tearDown( self ) :
 		
-		for f in ( "test/compoundData.cob", "test/intData.cob", "test/spherePrimitive.cob" ) :
+		for f in ( "test/compoundData.cob", "test/intData.cob", "test/compressed.cob" ) :
 			if os.path.isfile( f ) :
 				os.remove( f )
 

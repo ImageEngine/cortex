@@ -92,6 +92,15 @@ bool withBoostFactorial()
 #endif
 }
 
+bool withBlosc()
+{
+#ifdef IECORE_WITH_BLOSC
+	return true;
+#else
+	return false;
+#endif
+}
+
 bool withTIFF()
 {
 #ifdef IECORE_WITH_TIFF

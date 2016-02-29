@@ -495,6 +495,27 @@ o.Add(
 	"/usr/local/appleseed/lib",
 )
 
+# Blosc options
+
+o.Add(
+	"BLOSC_INCLUDE_PATH",
+	"The path to the blosc include directory.",
+	"/usr/local/include",
+)
+
+o.Add(
+	"BLOSC_LIB_PATH",
+	"The path to the blosc lib directory.",
+	"/usr/local/lib",
+)
+
+o.Add(
+	"BLOSC_LIB_SUFFIX",
+	"The suffix appended to the names of the blosc libraries. You can modify this "
+	"to link against libraries installed with non-default names",
+	"",
+)
+
 # Build options
 
 o.Add(
@@ -1051,7 +1072,8 @@ dependencyIncludes = [
 	"-isystem", "$PNG_INCLUDE_PATH",
 	"-isystem", "$JPEG_INCLUDE_PATH",
 	"-isystem", "$TIFF_INCLUDE_PATH",
-	"-isystem", "$FREETYPE_INCLUDE_PATH",		
+	"-isystem", "$FREETYPE_INCLUDE_PATH",
+	"-isystem", "$BLOSC_INCLUDE_PATH",
 ]
 
 env.Prepend(
@@ -1069,9 +1091,11 @@ env.Prepend(
 		"$JPEG_LIB_PATH",
 		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
+		"$BLOSC_LIB_PATH",
 	],
 	LIBS = [
 		"pthread",
+		"blosc" + env["BLOSC_LIB_SUFFIX"],
 	]
 )
 
@@ -1149,9 +1173,13 @@ if doConfigure :
 	if not c.CheckLibWithHeader( "tbb" + env["TBB_LIB_SUFFIX"], "tbb/tbb.h", "C++" ) :
 		sys.stderr.write( "ERROR : unable to find the TBB libraries - check TBB_INCLUDE_PATH and TBB_LIB_PATH.\n" )
 		Exit( 1 )	
-		
+	
+	if c.CheckLibWithHeader( env.subst( "blosc" + env["BLOSC_LIB_SUFFIX"] ), "blosc.h", "CXX" ) :
+
+		env.Append( CPPFLAGS = "-DIECORE_WITH_BLOSC" )
+
 	c.Finish()
-		
+
 env.Append( LIBS = [
 		"Half" + env["OPENEXR_LIB_SUFFIX"],
 		"Iex" + env["OPENEXR_LIB_SUFFIX"],

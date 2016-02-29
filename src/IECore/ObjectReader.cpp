@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,12 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/ObjectWriter.h"
 #include "IECore/ObjectReader.h"
 #include "IECore/FileIndexedIO.h"
+#include "IECore/MemoryIndexedIO.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundData.h"
 
+#include "boost/filesystem/convenience.hpp"
+#include "boost/iostreams/filter/gzip.hpp"
+
 #include <cassert>
+
+#ifdef IECORE_WITH_BLOSC
+#include "blosc.h"
+#endif // IECORE_WITH_BLOSC
 
 using namespace IECore;
 using namespace boost;
@@ -90,8 +99,73 @@ bool ObjectReader::canRead( const std::string &fileName )
 
 ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )
 {
+	CompoundObjectPtr header = readHeader();
+	std::string compressionType = "none";
+	StringData* compressionTypeData = header->member<StringData>( "compressionType" );
+	if( compressionTypeData )
+	{
+		compressionType = compressionTypeData->readable();
+	}
 	IndexedIOPtr io = open(fileName());
+
+#ifdef IECORE_WITH_BLOSC
+	// is this file compressed using blosc?
+	if( compressionType == "blosc" )
+	{
+		IndexedIOPtr objectCompressed = io->subdirectory( "objectCompressed" );
+
+		// we split the file up into 1gb blocks to avoid integer overflow in the
+		// blosc library. Read the number of compressed blocks:
+		size_t numBlocks;
+		objectCompressed->read( "numBlocks", numBlocks );
+
+		// calculate total decompressed size:
+		size_t totalDecompressedSize = 0;
+		for( size_t i=0; i < numBlocks; ++i )
+		{
+			size_t s;
+			objectCompressed->subdirectory( InternedString(i) )->read( "decompressedSize", s );
+			totalDecompressedSize += s;
+		}
+
+		// create buffer for decompression:
+		CharVectorDataPtr memBufferData = new CharVectorData;
+		memBufferData->writable().resize( totalDecompressedSize );
+		char* buffer = memBufferData->writable().data();
+
+		// loop through all the blocks (max size = 1gb), and decompress into memBufferData:
+		blosc_init();
+		for( size_t i=0; i < numBlocks; ++i )
+		{
+			IndexedIOPtr compressedBlock = objectCompressed->subdirectory( InternedString(i) );
+			size_t compressedSize, decompressedSize;
+			compressedBlock->read( "compressedSize", compressedSize );
+			compressedBlock->read( "decompressedSize", decompressedSize );
+
+			// read the actual data
+			std::vector<char> compressedData( compressedSize );
+			char* cd = compressedData.data();
+			compressedBlock->read( InternedString( "data" ), cd, compressedSize * sizeof(char) );
+
+			// decompress into a buffer for a MemoryIndexedIO:
+			blosc_decompress( compressedData.data(), buffer, decompressedSize );
+
+			buffer += decompressedSize;
+		}
+		blosc_destroy();
+
+		// create a MemoryIndexedIO from the buffer we've just read:
+		io = new MemoryIndexedIO( memBufferData, IndexedIO::rootPath, IndexedIO::Read );
+		return Object::load( io, "object" );
+	}
+#endif // IECORE_WITH_BLOSC
+	if( compressionType != "none" )
+	{
+		throw Exception( "ObjectReader::doOperation(): unsupported compression type '" + compressionType + "'" );
+	}
+	
 	return Object::load( io, "object" );
+	
 }
 
 CompoundObjectPtr ObjectReader::readHeader()
@@ -99,7 +173,32 @@ CompoundObjectPtr ObjectReader::readHeader()
 	CompoundObjectPtr header = Reader::readHeader();
 
 	IndexedIOPtr io = open(fileName());
-	CompoundDataPtr objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	IndexedIOPtr headerIO = io->subdirectory( "header", IndexedIO::NullIfMissing );
+	if( !headerIO )
+	{
+		throw Exception( "ObjectReader::readHeader(): couldn't find header io entry" );
+	}
+
+	// older .cob files store the header in "header/object" rather than "/header",
+	// so we need to check for that:
+	CompoundDataPtr objectHeader;
+	IndexedIO::EntryIDList names;
+	headerIO->entryIds( names );
+	if( names.size() == 1 && names[0] == "object" )
+	{
+		// load from "/header/object"
+		objectHeader = runTimeCast<CompoundData>( Object::load( headerIO, "object" ) );
+	}
+	else
+	{
+		// load from "/header"
+		objectHeader = runTimeCast<CompoundData>( Object::load( io, "header" ) );
+	}
+
+	if( !objectHeader )
+	{
+		throw Exception( "ObjectReader::readHeader(): header was not a CompoundData" );
+	}
 
 	for ( CompoundData::ValueType::const_iterator it = objectHeader->readable().begin(); it != objectHeader->readable().end(); ++it )
 	{
