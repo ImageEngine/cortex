@@ -38,10 +38,41 @@
 
 #include "IECore/VectorTypedData.h"
 
+#include "IECore/GeometricTypedData.h"
+
 using namespace IECore;
 
 namespace IECoreMaya
 {
+
+namespace
+{
+
+template<typename F, typename T>
+struct SetInterpolation
+{
+	static void set( T* resultData ){}
+};
+
+template<typename T>
+struct SetInterpolation<MPointArray, IECore::GeometricTypedData<T> >
+{
+	static void set( IECore::GeometricTypedData<T> *resultData )
+	{
+		resultData->setInterpretation( IECore::GeometricData::Point );
+	}
+};
+
+template<typename T>
+struct SetInterpolation<MVectorArray, IECore::GeometricTypedData<T> >
+{
+	static void set( IECore::GeometricTypedData<T> *resultData )
+	{
+		resultData->setInterpretation( IECore::GeometricData::Vector );
+	}
+};
+
+}
 
 template<typename F, typename T>
 FromMayaArrayDataConverter<F,T>::FromMayaArrayDataConverter( const MObject &object )
@@ -68,6 +99,8 @@ IECore::ObjectPtr FromMayaArrayDataConverter<F,T>::doConversion( const MObject &
 		resultArray[i] = IECore::convert<typename T::ValueType::value_type, typename MArrayTraits<F>::ValueType>( array[i] );
 	}
 
+	SetInterpolation<F, T>::set( resultData.get() );
+
 	return resultData;
 }
 
@@ -78,6 +111,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterdf, 
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterss, FromMayaArrayDataConverterssTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3f, FromMayaArrayDataConverterVV3fTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVV3d, FromMayaArrayDataConverterVV3dTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterPV3f, FromMayaArrayDataConverterPV3fTypeId )
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterPV3d, FromMayaArrayDataConverterPV3dTypeId )
 IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( FromMayaArrayDataConverterVC3f, FromMayaArrayDataConverterVC3fTypeId )
 
 // Registrations and instantiations
@@ -95,5 +130,7 @@ REGISTER_AND_INSTANTIATE( MStringArray, StringVectorData, true )
 REGISTER_AND_INSTANTIATE( MVectorArray, V3fVectorData, false )
 REGISTER_AND_INSTANTIATE( MVectorArray, V3dVectorData, true )
 REGISTER_AND_INSTANTIATE( MVectorArray, Color3fVectorData, false );
+REGISTER_AND_INSTANTIATE( MPointArray, V3fVectorData, false )
+REGISTER_AND_INSTANTIATE( MPointArray, V3dVectorData, true )
 
 } // namespace IECoreMaya

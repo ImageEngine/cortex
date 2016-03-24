@@ -124,6 +124,8 @@ void bindTypeId()
 		.value( "FromMayaProceduralHolderConverter", FromMayaProceduralHolderConverterTypeId )
 		.value( "FromMayaLocatorConverter", FromMayaLocatorConverterTypeId )
 		.value( "ToMayaLocatorConverter", ToMayaLocatorConverterTypeId )
+		.value( "FromMayaArrayDataConverterPV3f", FromMayaArrayDataConverterPV3fTypeId )
+		.value( "FromMayaArrayDataConverterPV3d", FromMayaArrayDataConverterPV3dTypeId )
 	;
 }
 
