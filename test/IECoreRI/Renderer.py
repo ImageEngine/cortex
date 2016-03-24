@@ -37,6 +37,7 @@ from __future__ import with_statement
 
 import unittest
 import os
+import re
 
 from IECore import *
 import IECore
@@ -92,6 +93,10 @@ class RendererTest( IECoreRI.TestCase ) :
 	def loadShader( self, shader ) :
 
 		return IECoreRI.SLOReader( os.path.join( os.environ["SHADER_PATH"], shader + ".sdl" ) ).read()
+
+	def nsiNodes( self, rib ) :
+
+		return re.findall( r'Create "([^"]+)" "([^"]+)"', rib )
 
 	def testTypeId( self ) :
 
@@ -769,6 +774,72 @@ class RendererTest( IECoreRI.TestCase ) :
 		result = e.createResult()
 		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
 		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+
+	def testOSLShader( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+		with WorldBlock( r ) :
+
+			r.shader(
+				"osl:surface",
+				"test",
+				{
+					"intParam" : 1,
+					"floatParam" : 2.5,
+					"stringParam" : "sp",
+					"vectorParam" : V3f( 1, 2, 3 ),
+					"colorParam" : Color3f( 4, 5, 6 ),
+				}
+			)
+
+		del r
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+
+		self.assertEqual( len( self.nsiNodes( rib ) ), 1 )
+		self.assertTrue( '"shaderfilename" "string" 1 "test"' in rib )
+		self.assertTrue( '"stringParam" "string" 1 "sp"' in rib )
+		self.assertTrue( '"intParam" "int" 1 1' in rib )
+		self.assertTrue( '"floatParam" "float" 1 2.5' in rib )
+		self.assertTrue( '"vectorParam" "vector" 1 [ 1 2 3 ]' in rib )
+		self.assertTrue( '"colorParam" "color" 1 [ 4 5 6 ]' in rib )
+		self.assertTrue( 'Attribute "nsi" "string oslsurface"' in rib )
+
+	def testTwoOSLShaders( self ) :
+
+		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+
+		with WorldBlock( r ) :
+
+			r.shader(
+				"osl:surface",
+				"test",
+				{
+					"intParam" : 1,
+				}
+			)
+
+			with AttributeBlock( r ) :
+
+				r.shader(
+					"osl:surface",
+					"test",
+					{
+						"intParam" : 2,
+					}
+				)
+
+		del r
+
+		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
+		nodes = self.nsiNodes( rib )
+
+		self.assertEqual( len( nodes ), 2 )
+		# Handles should be unique
+		self.assertEqual( len( set( x[0] for x in nodes ) ), 2 )
+		# Both node types should be shader
+		self.assertEqual( set( x[1] for x in nodes ), { "shader" } )
 
 	def tearDown( self ) :
 
