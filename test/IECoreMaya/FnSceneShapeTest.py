@@ -157,7 +157,111 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( result[0].fullPathName()+".drawGeometry"), 1 )
 		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTime", result[0].fullPathName()+".time" ) )
 		
+	def testExpandOnceNamespace( self ) :
 		
+		maya.cmds.file( new=True, f=True )
+
+		namespace = "INPUT"
+
+		if not maya.cmds.namespace( exists=namespace ):
+			maya.cmds.namespace( addNamespace=namespace )
+
+		def addnamespace( path ):
+			return path.replace( "|", "|" + namespace + ":" )
+
+		fn = IECoreMaya.FnSceneShape.create( namespace + ":" + "test" )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile, type='string' )
+		
+		result = fn.expandOnce( preserveNamespace=True )
+		self.assertTrue( len(result) == 1 )
+
+		childFn = result[ 0 ]
+		self.assertTrue( isinstance( childFn, IECoreMaya.FnSceneShape ) )
+		self.assertEqual( childFn.fullPathName(), addnamespace ( "|test|sceneShape_1|sceneShape_SceneShape1" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", addnamespace ( "|test|sceneShape_1.translate" ) ) )
+
+	def testExpandAll( self ) :
+		
+		maya.cmds.file( new=True, f=True )
+		fn = IECoreMaya.FnSceneShape.create( "test" )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+".drawGeometry", 1 )
+		
+		result = fn.expandAll()
+		
+		self.assertTrue( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".queryPaths[0]" ), "/1" )
+		
+		self.assertTrue( len(result) == 3 )
+		childFn = result[0]
+		self.assertTrue( isinstance( childFn, IECoreMaya.FnSceneShape ) )
+		self.assertEqual( childFn.fullPathName(), "|test|sceneShape_1|sceneShape_SceneShape1" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".root" ), "/1" )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1.translate" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1.rotate" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1.scale" ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTime", childFn.fullPathName()+".time" ) )
+				
+		self.assertTrue( maya.cmds.getAttr( childFn.fullPathName()+".objectOnly" ) )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".queryPaths[0]" ), "/child" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".drawGeometry"), 1 )
+		
+		self.assertTrue( isinstance( result[1], IECoreMaya.FnSceneShape ) )
+		self.assertEqual( result[1].fullPathName(), "|test|sceneShape_1|child|childSceneShape" )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".root" ), "/1/child" )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outTranslate", "|test|sceneShape_1|child.translate" ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outRotate", "|test|sceneShape_1|child.rotate" ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outScale", "|test|sceneShape_1|child.scale" ) )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".drawGeometry"), 1 )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTime", result[1].fullPathName()+".time" ) )
+
+	def testExpandAllNamespace( self ) :
+		
+		namespace = "INPUT"
+
+		if not maya.cmds.namespace( exists=namespace ):
+			maya.cmds.namespace( addNamespace=namespace )
+
+		def addnamespace( path ):
+			return path.replace( "|", "|" + namespace + ":" )
+
+		maya.cmds.file( new=True, f=True )
+		fn = IECoreMaya.FnSceneShape.create( namespace + ":" + "test" )
+		maya.cmds.setAttr( fn.fullPathName()+'.file', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( fn.fullPathName()+".drawGeometry", 1 )
+		
+		result = fn.expandAll( preserveNamespace=True )
+		
+		self.assertTrue( maya.cmds.getAttr( fn.fullPathName()+".objectOnly" ) )
+		self.assertEqual( maya.cmds.getAttr( fn.fullPathName()+".queryPaths[0]" ), "/1" )
+		
+		self.assertTrue( len(result) == 3 )
+		childFn = result[0]
+		self.assertTrue( isinstance( childFn, IECoreMaya.FnSceneShape ) )
+		self.assertEqual( childFn.fullPathName(), addnamespace( "|test|sceneShape_1|sceneShape_SceneShape1" ) )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".root" ), "/1" )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outTranslate", addnamespace( "|test|sceneShape_1.translate" ) ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outRotate", addnamespace( "|test|sceneShape_1.rotate" ) ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTransform[0].outScale", addnamespace( "|test|sceneShape_1.scale" ) ) )
+		self.assertTrue( maya.cmds.isConnected( fn.fullPathName()+".outTime", childFn.fullPathName()+".time" ) )
+				
+		self.assertTrue( maya.cmds.getAttr( childFn.fullPathName()+".objectOnly" ) )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".queryPaths[0]" ), "/child" )
+		self.assertEqual( maya.cmds.getAttr( childFn.fullPathName()+".drawGeometry"), 1 )
+		
+		self.assertTrue( isinstance( result[1], IECoreMaya.FnSceneShape ) )
+		self.assertEqual( result[1].fullPathName(), addnamespace( "|test|sceneShape_1|child|childSceneShape" ) )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".file" ), FnSceneShapeTest.__testFile )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".root" ), "/1/child" )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outTranslate", addnamespace( "|test|sceneShape_1|child.translate" ) ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outRotate", addnamespace( "|test|sceneShape_1|child.rotate" ) ) )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTransform[0].outScale", addnamespace( "|test|sceneShape_1|child.scale" ) ) )
+		self.assertEqual( maya.cmds.getAttr( result[1].fullPathName()+".drawGeometry"), 1 )
+		self.assertTrue( maya.cmds.isConnected( childFn.fullPathName()+".outTime", result[1].fullPathName()+".time" ) )
+
 	def testCollapse( self ) :
 		
 		maya.cmds.file( new=True, f=True )
