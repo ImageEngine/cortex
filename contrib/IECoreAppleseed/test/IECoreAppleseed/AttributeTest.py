@@ -119,7 +119,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
-	def testVolumePriorities( self ) :
+	def testMediumPriorities( self ) :
 
 		r = IECoreAppleseed.Renderer()
 		r.worldBegin()
@@ -130,13 +130,13 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane1" ) )
-		r.setAttribute( "as:volume_priority", IECore.IntData( 4 ) )
+		r.setAttribute( "as:medium_priority", IECore.IntData( 4 ) )
 		m.render( r )
 		r.attributeEnd()
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "plane2" ) )
-		r.setAttribute( "as:volume_priority", IECore.IntData( 2 ) )
+		r.setAttribute( "as:medium_priority", IECore.IntData( 2 ) )
 		m.render( r )
 		r.attributeEnd()
 
@@ -147,11 +147,11 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		objAss = ass.assemblies()["plane1_assembly"]
 		objInst = objAss.object_instances()[0]
-		self.failUnless( objInst.get_parameters()['volume_priority'] == 4 )
+		self.failUnless( objInst.get_parameters()['medium_priority'] == 4 )
 
 		objAss = ass.assemblies()["plane2_assembly"]
 		objInst = objAss.object_instances()[0]
-		self.failUnless( objInst.get_parameters()['volume_priority'] == 2 )
+		self.failUnless( objInst.get_parameters()['medium_priority'] == 2 )
 
 	def testNestedAttributeBlock( self ) :
 
@@ -160,11 +160,11 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		r.attributeBegin()
 		r.setAttribute( "name", IECore.StringData( "object_name" ) )
-		r.setAttribute( "as:volume_priority", IECore.IntData( 7 ) )
+		r.setAttribute( "as:medium_priority", IECore.IntData( 7 ) )
 		r.attributeBegin()
 
 		self.failUnless( r.getAttribute( "name" ) == IECore.StringData( "object_name" ) )
-		self.failUnless( r.getAttribute( "as:volume_priority" ) == IECore.IntData( 7 ) )
+		self.failUnless( r.getAttribute( "as:medium_priority" ) == IECore.IntData( 7 ) )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -47,7 +47,7 @@ IECoreAppleseed::AttributeState::AttributeState()
 {
 	m_attributes = new CompoundData;
 	m_photonTarget = false;
-	m_volumePriority = 0;
+	m_mediumPriority = 0;
 }
 
 IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
@@ -58,7 +58,7 @@ IECoreAppleseed::AttributeState::AttributeState( const AttributeState &other )
 	m_alphaMap = other.m_alphaMap;
 	m_photonTarget = other.m_photonTarget;
 	m_visibilityDictionary = other.m_visibilityDictionary;
-	m_volumePriority = other.m_volumePriority;
+	m_mediumPriority = other.m_mediumPriority;
 }
 
 void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDataPtr value )
@@ -109,15 +109,15 @@ void IECoreAppleseed::AttributeState::setAttribute( const string &name, ConstDat
 			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "photon_target attribute expect a BoolData value." );
 		}
 	}
-	else if( name == "as:volume_priority" )
+	else if( name == "as:medium_priority" )
 	{
 		if( const IntData *f = runTimeCast<const IntData>( value.get() ) )
 		{
-			m_volumePriority = f->readable();
+			m_mediumPriority = f->readable();
 		}
 		else
 		{
-			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:volume_priority attribute expects an IntData value." );
+			msg( Msg::Error, "IECoreAppleseed::RendererImplementation::setAttribute", "as:medium_priority attribute expects an IntData value." );
 		}
 	}
 	else if( 0 == name.compare( 0, 14, "as:visibility:" ) )
@@ -159,16 +159,16 @@ bool IECoreAppleseed::AttributeState::photonTarget() const
 	return m_photonTarget;
 }
 
-int IECoreAppleseed::AttributeState::volumePriority() const
+int IECoreAppleseed::AttributeState::mediumPriority() const
 {
-	return m_volumePriority;
+	return m_mediumPriority;
 }
 
 void IECoreAppleseed::AttributeState::attributesHash( MurmurHash &hash ) const
 {
 	hash.append( m_alphaMap );
 	hash.append( m_photonTarget );
-	hash.append( m_volumePriority );
+	hash.append( m_mediumPriority );
 }
 
 void IECoreAppleseed::AttributeState::addOSLShader( ConstShaderPtr shader )

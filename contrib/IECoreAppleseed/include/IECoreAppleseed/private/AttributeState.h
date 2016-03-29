@@ -63,7 +63,7 @@ class AttributeState
 
 		bool photonTarget() const;
 
-		int volumePriority() const;
+		int mediumPriority() const;
 
 		void attributesHash( IECore::MurmurHash &hash ) const;
 
@@ -88,7 +88,7 @@ class AttributeState
 		std::string m_alphaMap;
 		bool m_photonTarget;
 		foundation::Dictionary m_visibilityDictionary;
-		int m_volumePriority;
+		int m_mediumPriority;
 
 };
 
