@@ -639,8 +639,24 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	}
 
 	bool convertST = stParameter()->getTypedValue();
-	bool convertExtraST = extraSTParameter()->getTypedValue();
-	if ( convertST || convertExtraST )
+	if( convertST )
+	{
+		MString currentUVSet;
+		fnMesh.getCurrentUVSetName( currentUVSet );
+		if( currentUVSet.length() )
+		{
+			FloatVectorDataPtr sData = new FloatVectorData;
+			FloatVectorDataPtr tData = new FloatVectorData;
+			IntVectorDataPtr stIndicesData = getStIndices( currentUVSet, verticesPerFaceData );
+			sAndT( currentUVSet, stIndicesData, sData, tData );
+
+			result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+			result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+			result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+		}
+	}
+	
+	if( extraSTParameter()->getTypedValue() )
 	{
 		MString currentUVSet;
 		fnMesh.getCurrentUVSetName( currentUVSet );
@@ -648,32 +664,23 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 		fnMesh.getUVSetNames( uvSets );
 		for( unsigned int i=0; i<uvSets.length(); i++ )
 		{
-	
+			if( convertST && uvSets[i] == currentUVSet )
+			{
+				// we've already converted these UVs above
+				continue;
+			}
+			
 			FloatVectorDataPtr sData = new FloatVectorData;
 			FloatVectorDataPtr tData = new FloatVectorData;
-			
 			IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
-			
 			sAndT( uvSets[i], stIndicesData, sData, tData );
 			
-			if( uvSets[i]==currentUVSet )
-			{
-				if( m_st->getTypedValue() )
-				{
-					result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-					result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-					result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
-				}
-			}
-			else if( m_extraST->getTypedValue() )
-			{
-				MString sName = uvSets[i] + "_s";
-				MString tName = uvSets[i] + "_t";
-				MString indicesName = uvSets[i] + "Indices";
-				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-				result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-				result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
-			}
+			MString sName = uvSets[i] + "_s";
+			MString tName = uvSets[i] + "_t";
+			MString indicesName = uvSets[i] + "Indices";
+			result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+			result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+			result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 		}
 	}
 
