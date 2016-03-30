@@ -39,6 +39,7 @@
 #include "maya/MDoubleArray.h"
 #include "maya/MStringArray.h"
 #include "maya/MVectorArray.h"
+#include "maya/MPointArray.h"
 
 #include "IECore/VectorTypedData.h"
 
@@ -75,6 +76,8 @@ typedef FromMayaArrayDataConverter<MDoubleArray, IECore::FloatVectorData> FromMa
 typedef FromMayaArrayDataConverter<MStringArray, IECore::StringVectorData> FromMayaArrayDataConverterss;
 typedef FromMayaArrayDataConverter<MVectorArray, IECore::V3fVectorData> FromMayaArrayDataConverterVV3f;
 typedef FromMayaArrayDataConverter<MVectorArray, IECore::V3dVectorData> FromMayaArrayDataConverterVV3d;
+typedef FromMayaArrayDataConverter<MPointArray, IECore::V3fVectorData> FromMayaArrayDataConverterPV3f;
+typedef FromMayaArrayDataConverter<MPointArray, IECore::V3dVectorData> FromMayaArrayDataConverterPV3d;
 typedef FromMayaArrayDataConverter<MVectorArray, IECore::Color3fVectorData> FromMayaArrayDataConverterVC3f;
 
 } // namespace IECoreMaya

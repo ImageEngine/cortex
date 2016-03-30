@@ -57,5 +57,7 @@ void IECoreMaya::bindFromMayaArrayDataConverter()
 	bind<FromMayaArrayDataConverterss>();
 	bind<FromMayaArrayDataConverterVV3f>();
 	bind<FromMayaArrayDataConverterVV3d>();
+	bind<FromMayaArrayDataConverterPV3f>();
+	bind<FromMayaArrayDataConverterPV3d>();
 	bind<FromMayaArrayDataConverterVC3f>();
 }

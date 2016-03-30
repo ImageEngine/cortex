@@ -121,6 +121,8 @@ enum TypeId
 	FromMayaLocatorConverterTypeId = 109074,
 	ToMayaLocatorConverterTypeId = 109075,
 	ToMayaCurveConverterTypeId = 109076,
+	FromMayaArrayDataConverterPV3fTypeId = 109077,
+	FromMayaArrayDataConverterPV3dTypeId = 109078,
 	// Remember to update TypeIdBinding.cpp
 	LastTypeId = 109999
 };

@@ -95,5 +95,61 @@ class FromMayaPlugConverterTest( IECoreMaya.TestCase ) :
 		transform = converter.convert()
 		self.assert_( transform.isInstanceOf( IECore.TransformationMatrixdData.staticTypeId() ) )
 
+	def testPointArrayData( self ) :
+		import itertools
+		import maya.OpenMaya as om
+
+		data = [ [ 0.1, 0.2, 0.3, 1 ], [ 0.4, 0.5, 0.6, 1 ] ]
+
+		locator = maya.cmds.spaceLocator()[0]
+		maya.cmds.addAttr( locator, ln="myPoints", dt="pointArray" )
+		maya.cmds.setAttr( locator + "." + "myPoints", 2, *data, type="pointArray" )
+
+		sl = om.MSelectionList()
+		sl.add( locator )
+		o = om.MObject()
+		sl.getDependNode( 0, o )
+		fn = om.MFnDependencyNode( o )
+		plug = fn.findPlug( "myPoints" )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( plug )
+		self.assert_( converter )
+
+		converted = converter.convert()
+		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
+
+		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		    self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
+
+		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+
+	def testVectorArrayData( self ) :
+		import itertools
+		import maya.OpenMaya as om
+
+		data = [ [ 0.1, 0.2, 0.3 ], [ 0.4, 0.5, 0.6 ] ]
+
+		locator = maya.cmds.spaceLocator()[0]
+		maya.cmds.addAttr( locator, ln="myVectors", dt="vectorArray" )
+		maya.cmds.setAttr( locator + "." + "myVectors", 2, *data, type="vectorArray" )
+
+		sl = om.MSelectionList()
+		sl.add( locator )
+		o = om.MObject()
+		sl.getDependNode( 0, o )
+		fn = om.MFnDependencyNode( o )
+		plug = fn.findPlug( "myVectors" )
+
+		converter = IECoreMaya.FromMayaPlugConverter.create( plug )
+		self.assert_( converter )
+
+		converted = converter.convert()
+		self.assert_( converted.isInstanceOf( IECore.V3dVectorData.staticTypeId() ) )
+
+		for point, index in itertools.product( xrange( 2 ), xrange( 3 ) ):
+		    self.assertAlmostEqual( converted[ point ][ index ], data[ point ][ index ] )
+
+		self.assertEqual( converted.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()
