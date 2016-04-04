@@ -1,3 +1,20 @@
+# 9.8.0
+
+#### IECoreMaya
+
+- Added plug conversion for MPointArray to IECore::Vector3f/3d (3d default) with Point interpretation.
+- Updated plug conversion for VectorArray to use Vector interpretation (rather than Numeric).
+- Preventing primary UV Set from being exported twice.
+- ieSceneShape expansion functions can optionally preserve the original namespace of the parent.
+
+#### IECoreRI
+
+- Added initial support for 3delight OSL via NSI
+
+#### IECoreAppleseed
+
+- Renamed volume priority attribute to medium priority.
+
 # 9.7.1
 
 #### IECore
