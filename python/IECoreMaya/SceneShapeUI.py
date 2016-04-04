@@ -407,7 +407,7 @@ def __expandOnce( sceneShapes, *unused ) :
 	toSelect = []
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		new = fnS.expandOnce()
+		new = fnS.expandOnce( preserveNamespace=True )
 		toSelect.extend( map( lambda x: x.fullPathName(), new ) )
 	if toSelect:
 		maya.cmds.select( toSelect, replace=True )
@@ -418,7 +418,7 @@ def __expandAll( sceneShapes, *unused ) :
 	toSelect = []
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		newFn = fnS.expandAll()
+		newFn = fnS.expandAll( preserveNamespace=True )
 		
 		toSelect.extend( map( lambda x: x.fullPathName(), newFn ) )
 	if toSelect:

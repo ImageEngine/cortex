@@ -199,13 +199,16 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	
 	## create the given child for the scene shape
 	# Returns a the function set for the child scene shape.
-	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "" ) :
-		
+	def __createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "", namespace = "" ) :
+
+		if namespace:
+			namespace += ":"
+
 		dag = maya.OpenMaya.MDagPath()
 		self.getPath( dag )
 		dag.pop()
 		parentPath = dag.fullPathName()
-		childPath = parentPath+"|"+childName
+		childPath = parentPath+"|"+namespace+childName
 		try :
 			childDag = IECoreMaya.dagPathFromString( childPath )
 			childExists = True
@@ -277,10 +280,32 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		
 		return fnChild
 
+	## create the given child for the scene shape
+	# Returns a the function set for the child scene shape.
+	# If preserveNamespace is True, it creates the child with the same namespace as the one this sceneShape node has.
+	def createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "", preserveNamespace=False) :
+
+		if preserveNamespace:
+
+			selfNamespaceList = self.fullPathName().split("|")[-1].split( ":" )[:-1]
+			selfNamespace = ":".join(selfNamespaceList)
+			if selfNamespace:
+
+				originalNS = maya.cmds.namespaceInfo( cur=True, absoluteName=True )
+				maya.cmds.namespace( set=":" + selfNamespace )
+
+				try:
+					return self.__createChild(childName, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter, selfNamespace)
+				finally:
+					maya.cmds.namespace( set=originalNS )
+
+		return self.__createChild(childName, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter)
+
 	## Expands the scene shape one level down if possible.
 	# Returns a list of function sets for the child scene shapes.
 	# Missing child transforms and shapes will be created, missing connections and attribute values will be reset.
-	def expandOnce( self ) :
+	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
+	def expandOnce( self, preserveNamespace=False ) :
 
 		scene = self.sceneInterface()
 		if not scene:
@@ -311,19 +336,20 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		for i, child in enumerate( sceneChildren ):
 			
-			fnChild = self.createChild( child, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter )
+			fnChild = self.createChild( child, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter, preserveNamespace )
 			newSceneShapeFns.append( fnChild )
 			
 		return newSceneShapeFns
-	
+		
 	## Recursively expands all levels starting from the scene shape.
 	# Returns a list of function sets for all the child scene shapes.
-	def expandAll( self ):
+	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
+	def expandAll( self, preserveNamespace=False ):
 
 		newFn = []
 		def recursiveExpand( fnSceneShape ):
 			
-			new = fnSceneShape.expandOnce()
+			new = fnSceneShape.expandOnce( preserveNamespace )
 			newFn.extend( new )
 			for n in new:
 				recursiveExpand( n )
