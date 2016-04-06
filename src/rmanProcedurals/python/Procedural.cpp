@@ -62,18 +62,15 @@ struct PythonInitialiser
 				mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
 				mainModuleNamespace = mainModule.attr( "__dict__" );
 
-				// load the IECoreRI and IECore modules so people don't have to do that in the string
-				// they pass to be executed. this also means people don't have to worry about which
-				// version to load. also set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
-				// cross module rtti errors on linux, and get rid of the python signal handler that
-				// turns Ctrl-C into that annoying KeyboardInterrupt exception.
-				string toExecute =	"import sys\n"
-									"import ctypes\n"
-									"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
-									"import signal\n"
-									"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
-									"import IECore\n"
-									"import IECoreRI\n";
+				// Load the IECoreRI and IECore modules so people don't have to do that in the string
+				// they pass to be executed. This also means people don't have to worry about which
+				// version to load. Also get rid of the python signal handler that turns Ctrl-C into
+				// that annoying KeyboardInterrupt exception.
+				string toExecute =
+					"import signal\n"
+					"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
+					"import IECore\n"
+					"import IECoreRI\n";
 
 				handle<> ignored( PyRun_String( 
 					toExecute.c_str(),
