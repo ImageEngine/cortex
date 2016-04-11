@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,31 +32,40 @@
 #
 ##########################################################################
 
-import sys
 import unittest
 
+import arnold
+
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
-from PointsTest import PointsTest
-from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
-from CurvesTest import CurvesTest
-from SphereAlgoTest import SphereAlgoTest
+class SphereAlgoTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testConvert( self ) :
+
+		s = IECore.SpherePrimitive( 0.25 )
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( s )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "radius" ), 0.25 )
+
+	def testConvertWithMotion( self ) :
+
+		s = [ IECore.SpherePrimitive( 0.25 ), IECore.SpherePrimitive( 0.5 ) ]
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( s, [ 0, 1 ] )
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
+
+			a = arnold.AiNodeGetArray( n, "radius" )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0.25 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.5 )
+
+			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0 )
+			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 1 )
+
+if __name__ == "__main__":
+    unittest.main()
