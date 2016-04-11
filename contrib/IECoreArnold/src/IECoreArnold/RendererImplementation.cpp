@@ -763,7 +763,10 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		IECore::MurmurHash hash;
 		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
 		{
-			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
+			if(
+				boost::starts_with( it->first.value(), attributePrefix ) ||
+				boost::starts_with( it->first.c_str(), "ai:shape:" )
+			)
 			{
 				hash.append( it->first.value() );
 				it->second->hash( hash );
@@ -806,9 +809,13 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 		const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
 		for( CompoundDataMap::const_iterator it = attributes.begin(), eIt = attributes.end(); it != eIt; it++ )
 		{
-			if( it->first.value().compare( 0, attributePrefix.size(), attributePrefix )==0 )
+			if( boost::starts_with( it->first.value(), attributePrefix ) )
 			{
 				ParameterAlgo::setParameter( shape, it->first.value().c_str() + attributePrefix.size(), it->second.get() );
+			}
+			else if( boost::starts_with( it->first.c_str(), "ai:shape:" ) )
+			{
+				ParameterAlgo::setParameter( shape, it->first.value().c_str() + 9, it->second.get() );
 			}
 		}
 	}
