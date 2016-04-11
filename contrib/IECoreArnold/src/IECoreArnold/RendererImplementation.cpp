@@ -220,6 +220,10 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	cortexCamera->addStandardParameters();
 
 	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
+
+	string nodeName = boost::str( boost::format( "ieCoreArnold:camera:%s" ) % name );
+	AiNodeSetStr( arnoldCamera, "name", nodeName.c_str() );
+
 	AtNode *options = AiUniverseGetOptions();
 	AiNodeSetPtr( options, "camera", arnoldCamera );
 
@@ -301,7 +305,7 @@ void IECoreArnold::RendererImplementation::worldBegin()
 	if( !AiNodeGetPtr( options, "camera" ) )
 	{
 		// no camera has been specified - make a default one
-		camera( "ieCoreArnold:defaultCamera", CompoundDataMap() );
+		camera( "default", CompoundDataMap() );
 	}
 
 	// specify all the outputs
