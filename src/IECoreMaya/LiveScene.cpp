@@ -256,6 +256,14 @@ bool LiveScene::hasAttribute( const Name &name ) const
 	std::vector< CustomAttributeReader > &attributeReaders = customAttributeReaders();
 	for ( std::vector< CustomAttributeReader >::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
+		if ( it->m_mightHave )
+		{
+			if ( ! it->m_mightHave( m_dagPath, name ) )
+			{
+				continue;
+			}
+		}
+
 		NameList names;
 		{
 			// call it->m_names under a mutex, as it could be reading plug values,
@@ -839,9 +847,15 @@ void LiveScene::registerCustomObject( HasFn hasFn, ReadFn readFn )
 
 void LiveScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn )
 {
+	registerCustomAttributes( namesFn, readFn, 0 );
+}
+
+void LiveScene::registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn, MightHaveFn mightHaveFn )
+{
 	CustomAttributeReader r;
 	r.m_names = namesFn;
 	r.m_read = readFn;
+	r.m_mightHave = mightHaveFn;
 	customAttributeReaders().push_back(r);
 }
 

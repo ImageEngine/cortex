@@ -788,6 +788,59 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			# Disable custom attribute functions so they don't mess with other tests
 			doTest = False
 	
+	def testCustomAttributes( self ) :
+	
+		t = maya.cmds.createNode( "transform" )
+		maya.cmds.select( clear = True )
+		sphere = maya.cmds.polySphere( name="pSphere" )
+		maya.cmds.currentTime( "0sec" )
+
+		attrFnResult = []
+		mightHaveFnResult = []
+
+		doTest = True
+
+		def readMyAttribute( node, attr ) :
+			return None
+
+		def myAttributeNames( node ) :
+			if not doTest:
+				return []
+
+			attrFnResult.append( node )
+
+			return [ "mightHaveAttribute2" ]
+
+		def myAttributeMightHave( node, attr ) :
+			if not doTest:
+				return False
+
+			mightHaveFnResult.append( ( node, attr ) )
+
+			return attr in [ "mightHaveAttribute1", "mightHaveAttribute2" ]
+
+		try:
+			IECoreMaya.LiveScene.registerCustomAttributes( myAttributeNames, readMyAttribute, myAttributeMightHave )
+
+			scene = IECoreMaya.LiveScene()
+			transformScene = scene.child(str(t))
+
+			self.assertEqual( transformScene.hasAttribute("nonExistentCustomAttribute"), False )
+			self.assertEqual( mightHaveFnResult[0][1], "nonExistentCustomAttribute" ) # myAttributeMightHave() should always be called when specified.
+			self.assertEqual( len( attrFnResult ), 0 ) # myAttributeNames() should not have been called because myAttributeMightHave had returned False.
+
+			self.assertEqual( transformScene.hasAttribute("mightHaveAttribute1"), False )
+			self.assertEqual( mightHaveFnResult[1][1], "mightHaveAttribute1" )
+			self.assertEqual( len( attrFnResult ), 1 ) # myAttributeNames() should have been called because myAttributeMightHave had returned True.
+
+			self.assertEqual( transformScene.hasAttribute("mightHaveAttribute2"), True )
+			self.assertEqual( mightHaveFnResult[2][1], "mightHaveAttribute2" )
+			self.assertEqual( len( attrFnResult ), 2 )
+
+		finally:
+			# Disable custom attribute functions so they don't mess with other tests
+			doTest = False
+
 	def testNoDuplicateAttributeNames( self ) :
 
 		t = maya.cmds.createNode( "transform" )

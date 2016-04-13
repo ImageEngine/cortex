@@ -152,17 +152,54 @@ class CustomAttributeReader
 		object m_read;
 };
 
-void registerCustomAttributes( object namesFn, object readFn )
+class CustomAttributeReaderMightHave
+{
+	public :
+		CustomAttributeReaderMightHave( object mightHaveFn ) : m_mightHave( mightHaveFn )
+		{
+		}
+
+		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		{
+			// Use with care when registering a Python function.
+			// MDagPath::fullPathName() is a slow API. We allow registering the "might have" callback from Python
+			// for compatibility with IECoreMaya C++ API but registering a Python "might have" function may spoil the efficiency.
+			MString p = dagPath.fullPathName();
+			IECorePython::ScopedGILLock gilLock;
+			try
+			{
+				return m_mightHave( p.asChar(), attr );
+			}
+			catch ( error_already_set )
+			{
+				PyErr_Print();
+				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene attribute  " + attr.string() ) );
+			}
+		}
+
+		object m_mightHave;
+};
+
+void registerCustomAttributes( object namesFn, object readFn, object mightHaveFn )
 {
 	CustomAttributeReader reader( namesFn, readFn );
-	LiveScene::registerCustomAttributes( reader, reader );
+
+	if ( mightHaveFn == object() )
+	{
+		LiveScene::registerCustomAttributes( reader, reader );
+	}
+	else
+	{
+		CustomAttributeReaderMightHave readerm( mightHaveFn );
+		LiveScene::registerCustomAttributes( reader, reader, readerm );
+	}
 }
 
 void IECoreMaya::bindLiveScene()
 {
 	IECorePython::RunTimeTypedClass<LiveScene>()
 		.def( init<>() )
-		.def( "registerCustomTags", registerCustomTags ).staticmethod( "registerCustomTags" )
-		.def( "registerCustomAttributes", registerCustomAttributes ).staticmethod( "registerCustomAttributes" )
+		.def( "registerCustomTags", registerCustomTags, ( arg_( "hasFn" ), arg_( "readFn" ) ) ).staticmethod( "registerCustomTags" )
+		.def( "registerCustomAttributes", registerCustomAttributes, (  arg_( "namesFn" ), arg_( "readFn" ), arg_( "mightHaveFn" ) = object() ) ).staticmethod( "registerCustomAttributes" )
 	;
 }
