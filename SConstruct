@@ -2932,7 +2932,7 @@ if doConfigure :
 
 	c = Configure( arnoldEnv )
 
-	if not c.CheckLibWithHeader( "ai", "ai.h", "CXX" ) :
+	if not c.CheckCXXHeader( "ai.h" ) :
 	
 		sys.stderr.write( "WARNING : no ai library found, not building IECoreArnold - check ARNOLD_ROOT.\n" )
 		c.Finish()
@@ -3021,7 +3021,7 @@ if doConfigure :
 		
 		# tests
 		arnoldTestEnv = testEnv.Clone()
-		arnoldTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreArnold/python"
+		arnoldTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreArnold/python:" + arnoldEnv.subst( "$ARNOLD_ROOT/python" )
 		arnoldTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + arnoldEnv.subst( ":".join( arnoldPythonModuleEnv["LIBPATH"] ) )
 		arnoldTestEnv["ENV"]["PATH"] = arnoldEnv.subst( "$ARNOLD_ROOT/bin" ) + ":" + arnoldTestEnv["ENV"]["PATH"]
 		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"

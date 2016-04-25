@@ -44,12 +44,15 @@ import IECoreArnold
 
 class AutomaticInstancingTest( unittest.TestCase ) :
 
-	def __allNodes( self, type = arnold.AI_NODE_ALL ) :
+	def __allNodes( self, type = arnold.AI_NODE_ALL, ignoreRoot = True ) :
 
 		result = []
 		i = arnold.AiUniverseGetNodeIterator( type )
 		while not arnold.AiNodeIteratorFinished( i ) :
-			result.append( arnold.AiNodeIteratorGetNext( i ) )
+			node = arnold.AiNodeIteratorGetNext( i )
+			if ignoreRoot and arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( node ) ) == "list_aggregate" and arnold.AiNodeGetName( node ) == "root" :
+				continue
+			result.append( node )
 
 		return result
 

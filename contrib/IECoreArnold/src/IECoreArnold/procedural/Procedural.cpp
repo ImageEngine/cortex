@@ -69,15 +69,14 @@ static void initialisePython()
 			g_mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
 			g_mainModuleNamespace = g_mainModule.attr( "__dict__" );
 
-			// set the dlopen flags to include RTLD_GLOBAL to avoid the dreaded
-			// cross module rtti errors on linux, and get rid of the python signal handler that
-			// turns Ctrl-C into that annoying KeyboardInterrupt exception.
-			string toExecute =	"import sys\n"
-								"import ctypes\n"
-								"sys.setdlopenflags( sys.getdlopenflags() | ctypes.RTLD_GLOBAL )\n"
-								"import signal\n"
-								"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
-								"import IECore";
+			// Get rid of the python signal handler that
+			// turns Ctrl-C into that annoying KeyboardInterrupt
+			// exception, and import IECore ready for use in
+			// procInit().
+			string toExecute =
+				"import signal\n"
+				"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
+				"import IECore";
 
 			handle<> ignored( PyRun_String(
 				toExecute.c_str(),
