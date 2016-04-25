@@ -810,6 +810,31 @@ class RendererTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
 		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
 
+	def testProcedural( self ) :
+
+		r = IECoreArnold.Renderer( "/tmp/test.ass" )
+
+		with IECore.WorldBlock( r ) :
+
+			r.procedural(
+				r.ExternalProcedural(
+					"someVolumeThing.so",
+					IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 4, 5, 6 ) ),
+					{
+						"ai:nodeType" : "volume",
+						"testFloat" : 0.5
+					}
+				)
+			)
+
+			volume = self.__allNodes( type = arnold.AI_NODE_SHAPE )[-1]
+			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( volume ) ), "volume" )
+
+			self.assertEqual( arnold.AiNodeGetPnt( volume, "min" ), arnold.AtPoint( -1, -2, -3 ) )
+			self.assertEqual( arnold.AiNodeGetPnt( volume, "max" ), arnold.AtPoint( 4, 5, 6 ) )
+			self.assertEqual( arnold.AiNodeGetStr( volume, "dso" ), "someVolumeThing.so" )
+			self.assertEqual( arnold.AiNodeGetFlt( volume, "testFloat" ), 0.5 )
+
 	def tearDown( self ) :
 
 		for f in [
