@@ -176,6 +176,7 @@ class LiveScene : public IECore::SceneInterface
 		typedef boost::function<bool (const MDagPath &, const Name &, int )> HasTagFn;
 		typedef boost::function<void (const MDagPath &, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
+		typedef boost::function<bool (const MDagPath &, const Name &)> MightHaveFn;
 		
 		// Register callbacks for custom objects.
 		// The has function will be called during hasObject and it stops in the first one that returns true.
@@ -185,7 +186,9 @@ class LiveScene : public IECore::SceneInterface
 		// Register callbacks for custom attributes.
 		// The names function will be called during attributeNames and hasAttribute.
 		// The readAttr method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
+		// If the mightHave function is specified, it will be called before names function for early out, to see if the names function can return the expected attribute.
 		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn );
+		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn, MightHaveFn mightHaveFn);
 		
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
@@ -219,6 +222,7 @@ class LiveScene : public IECore::SceneInterface
 		{
 			NamesFn m_names;
 			ReadAttrFn m_read;
+			MightHaveFn m_mightHave;
 		};
 		
 		static std::vector< CustomReader > &customObjectReaders();
