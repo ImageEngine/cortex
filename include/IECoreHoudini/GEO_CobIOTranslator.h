@@ -40,6 +40,7 @@
 #include "GEO/GEO_IOTranslator.h"
 #include "GU/GU_Detail.h"
 #include "UT/UT_IStream.h"
+#include "GA/GA_Stat.h"
 
 namespace IECoreHoudini
 {
@@ -79,6 +80,11 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );		
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
 		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, std::ostream &os, const char *fileName );
+		//@}
+
+		//@{
+		/// Reads only header of the file, 
+		virtual bool fileStat( const char *fileName, GA_Stat &stat, uint level );
 		//@}
 
 };

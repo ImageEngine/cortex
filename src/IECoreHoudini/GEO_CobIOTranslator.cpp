@@ -40,6 +40,7 @@
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
+#include "IECoreHoudini/Convert.h"
 
 using namespace IECore;
 using namespace IECoreHoudini;
@@ -162,4 +163,28 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, 
 	((std::ofstream&)os).close();
 	
 	return fileSaveToFile( geo, fileName );
+}
+
+bool GEO_CobIOTranslator::fileStat( const char *fileName, GA_Stat &stat, uint level )
+{
+	try
+	{
+		ReaderPtr reader = Reader::create( fileName );
+		if ( !reader )
+		{
+			return false;
+		}
+		
+		ConstCompoundObjectPtr header = reader->readHeader();
+
+		UT_BoundingBox bbox = convert<UT_BoundingBox>( reader->readHeader()->member<const Box3fData>( "bound", true )->readable() );
+
+		stat.setBounds( bbox );
+	}
+	catch ( ... )
+	{
+		return false;
+	}
+
+	return true;
 }
