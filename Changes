@@ -1,5 +1,34 @@
 # 9.8.0
 
+#### IECore
+
+- Python Module
+  - Use RTLD_GLOBAL to load C++ modules.
+
+#### IECoreMaya
+
+- Added a MightHaveFn to IECoreMaya::LiveScene::registerCustomAttributes().
+  - If MightHaveFn is specified, it will be called before NamesFn to allow a cheap early out.
+
+#### IECoreHoudini
+
+- Implemented Cob GEOIO_Translator::fileStat to return the bounding box from the cob header.
+
+#### IECoreArnold
+
+- Renderer
+  - Apply name to camera nodes.
+  - Support "ai:shape:" attribute prefix.
+  - Add support for creating Arnold volume nodes.
+- Add SphereAlgo with conversion from IECore::SpherePrimitive.
+
+#### Build
+
+- Fixed PYTHONPATH for IECoreArnold tests
+- Updated SConstruct and tests for Arnold 4.2
+
+# 9.8.0
+
 #### IECoreMaya
 
 - Added plug conversion for MPointArray to IECore::Vector3f/3d (3d default) with Point interpretation.
