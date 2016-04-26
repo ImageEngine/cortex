@@ -2932,7 +2932,7 @@ if doConfigure :
 
 	c = Configure( arnoldEnv )
 
-	if not c.CheckCXXHeader( "ai.h" ) :
+	if not c.CheckLibWithHeader( "ai", "ai.h", "CXX" ) :
 	
 		sys.stderr.write( "WARNING : no ai library found, not building IECoreArnold - check ARNOLD_ROOT.\n" )
 		c.Finish()
