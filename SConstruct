@@ -2930,7 +2930,17 @@ haveArnold = False
 
 if doConfigure :
 
-	c = Configure( arnoldEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary for arnold, which uses
+	# a run-time compatible, but link-time incompatbile libstdc++
+	# in some obscure studio setups. This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	arnoldCheckEnv = arnoldEnv.Clone()
+	arnoldCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	arnoldCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( arnoldCheckEnv )
 
 	if not c.CheckLibWithHeader( "ai", "ai.h", "CXX" ) :
 	
