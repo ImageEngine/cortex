@@ -2960,7 +2960,12 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		arnoldEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		arnoldEnv.Append(
+			LIBS = [
+				"ai",
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) )
+			]
+		 )
 		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 		arnoldProceduralEnv.Append(
 			LIBS = [ 
