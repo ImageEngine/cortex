@@ -620,6 +620,12 @@ o.Add(
 )
 
 o.Add(
+	"INSTALL_ARNOLDPYTHON_DIR",
+	"The directory in which to install the Arnold python module.",
+	"$INSTALL_PYTHON_DIR",
+)
+
+o.Add(
 	"INSTALL_NUKEPYTHON_DIR",
 	"The directory in which to install the nuke python module.",
 	"$INSTALL_PREFIX/lib/python$PYTHON_VERSION/site-packages",
@@ -3009,8 +3015,8 @@ if doConfigure :
 		arnoldPythonModule = arnoldPythonModuleEnv.SharedLibrary( "contrib/IECoreArnold/python/IECoreArnold/_IECoreArnold", arnoldPythonSources )
 		arnoldPythonModuleEnv.Depends( arnoldPythonModule, arnoldLibrary )
 
-		arnoldPythonModuleInstall = arnoldPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreArnold", arnoldPythonScripts + arnoldPythonModule )
-		arnoldPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreArnold", lambda target, source, env : makeSymLinks( arnoldPythonModuleEnv, arnoldPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		arnoldPythonModuleInstall = arnoldPythonModuleEnv.Install( "$INSTALL_ARNOLDPYTHON_DIR/IECoreArnold", arnoldPythonScripts + arnoldPythonModule )
+		arnoldPythonModuleEnv.AddPostAction( "$INSTALL_ARNOLDPYTHON_DIR/IECoreArnold", lambda target, source, env : makeSymLinks( arnoldPythonModuleEnv, arnoldPythonModuleEnv["INSTALL_ARNOLDPYTHON_DIR"] ) )
 		arnoldPythonModuleEnv.Alias( "install", arnoldPythonModuleInstall )
 		arnoldPythonModuleEnv.Alias( "installArnold", arnoldPythonModuleInstall )
 
