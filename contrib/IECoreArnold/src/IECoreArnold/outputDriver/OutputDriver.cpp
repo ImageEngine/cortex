@@ -52,6 +52,36 @@ using namespace IECoreArnold;
 namespace
 {
 
+// Stores a Cortex DisplayDriver and the parameters
+// used to create it. This forms the private data
+// accessed via AiDriverGetLocalData.
+struct LocalData
+{
+	DisplayDriverPtr displayDriver;
+	ConstCompoundDataPtr displayDriverParameters;
+
+	void imageClose()
+	{
+		if( !displayDriver )
+		{
+			return;
+		}
+
+		try
+		{
+			displayDriver->imageClose();
+		}
+		catch( const std::exception &e )
+		{
+			// We have to catch and report exceptions because letting them out into pure c land
+			// just causes aborts.
+			msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
+		}
+		displayDriver = NULL;
+	}
+
+};
+
 void driverParameters( AtList *params, AtMetaDataStore *metaData )
 {
 	AiParameterSTR( "driverType", "" );
@@ -63,7 +93,7 @@ void driverParameters( AtList *params, AtMetaDataStore *metaData )
 
 void driverInitialize( AtNode *node, AtParamValue *parameters )
 {
-	AiDriverInitialize( node, true, new DisplayDriverPtr );
+	AiDriverInitialize( node, true, new LocalData );
 }
 
 void driverUpdate( AtNode *node, AtParamValue *parameters )
@@ -140,16 +170,41 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	CompoundDataPtr parameters = new CompoundData();
 	ParameterAlgo::getParameters( node, parameters->writable() );
 
-	const char *driverType = AiNodeGetStr( node, "driverType" );
+	const std::string driverType = AiNodeGetStr( node, "driverType" );
 
-	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
+	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+
+	// We reuse the previous driver if we can - this allows us to use
+	// the same driver for every stage of a progressive render.
+	if( localData->displayDriver )
+	{
+		if(
+			localData->displayDriver->typeName() == driverType &&
+			localData->displayDriver->displayWindow() == cortexDisplayWindow &&
+			localData->displayDriver->dataWindow() == cortexDataWindow &&
+			localData->displayDriver->channelNames() == channelNames &&
+			localData->displayDriverParameters->isEqualTo( parameters.get() )
+		)
+		{
+			// Can reuse
+			return;
+		}
+		else
+		{
+			// Can't reuse, so must close before making a new one.
+			localData->imageClose();
+		}
+	}
+
+	// Couldn't reuse a driver, so create one from scratch.
 	try
 	{
-		*driver = IECore::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
+		localData->displayDriver = IECore::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
+		localData->displayDriverParameters = parameters;
 	}
 	catch( const std::exception &e )
 	{
-		// we have to catch and report exceptions because letting them out into pure c land
+		// We have to catch and report exceptions because letting them out into pure c land
 		// just causes aborts.
 		msg( Msg::Error, "ieOutputDriver:driverOpen", e.what() );
 	}
@@ -170,13 +225,13 @@ void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struc
 
 void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx, int sy )
 {
-	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
-	if( !*driver )
+	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	if( !localData->displayDriver )
 	{
 		return;
 	}
 
-	const int numOutputChannels = (*driver)->channelNames().size();
+	const int numOutputChannels = localData->displayDriver->channelNames().size();
 
 	std::vector<float> interleavedData;
 	interleavedData.resize( sx * sy * numOutputChannels );
@@ -227,7 +282,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 	try
 	{
-		(*driver)->imageData( bucketBox, &(interleavedData[0]), interleavedData.size() );
+		localData->displayDriver->imageData( bucketBox, &(interleavedData[0]), interleavedData.size() );
 	}
 	catch( const std::exception &e )
 	{
@@ -239,26 +294,22 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 void driverClose( AtNode *node, struct AtOutputIterator *iterator )
 {
-	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
-	if( *driver )
+	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	// We only close the display immediately if it doesn't accept
+	// repeated data (progressive renders). This is so we can reuse it in
+	// driverOpen if it appears that a progressive render is taking place.
+	if( localData->displayDriver && !localData->displayDriver->acceptsRepeatedData() )
 	{
-		try
-		{
-			(*driver)->imageClose();
-		}
-		catch( const std::exception &e )
-		{
-			// we have to catch and report exceptions because letting them out into pure c land
-			// just causes aborts.
-			msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
-		}
+		localData->imageClose();
 	}
 }
 
 void driverFinish( AtNode *node )
 {
-	DisplayDriverPtr *driver = (DisplayDriverPtr *)AiDriverGetLocalData( node );
-	delete driver;
+	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	// Perform any pending close we may have deferred in driverClose().
+	localData->imageClose();
+	delete localData;
 	AiDriverDestroy( node );
 }
 
