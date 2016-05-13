@@ -139,6 +139,50 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 	}
 }
 
+template<typename T, typename F>
+IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
+{
+	typedef vector<T> VectorType;
+	typedef IECore::TypedData<vector<T> > DataType;
+	typename DataType::Ptr data = new DataType;
+	VectorType &v = data->writable();
+
+	v.reserve( array->nelements );
+	for( size_t i = 0; i < array->nelements; ++i )
+	{
+		v.push_back( f( array, i, __AI_FILE__, __AI_LINE__ ) );
+	}
+
+	return data;
+}
+
+/// \todo Flesh this out to support more types and then
+/// consider exposing it in the public API.
+IECore::DataPtr arrayToData( AtArray *array )
+{
+	if( array->nkeys > 1 )
+	{
+		/// \todo Decide how to deal with more
+		/// than one key - is it more useful to return multiple Data
+		/// objects or to put it all in one?
+		return NULL;
+	}
+
+	switch( array->type )
+	{
+		case AI_TYPE_BOOLEAN :
+			return arrayToDataInternal<bool>( array, AiArrayGetBoolFunc );
+		case AI_TYPE_INT :
+			return arrayToDataInternal<int>( array, AiArrayGetIntFunc );
+		case AI_TYPE_FLOAT :
+			return arrayToDataInternal<float>( array, AiArrayGetFltFunc );
+		case AI_TYPE_STRING :
+			return arrayToDataInternal<string>( array, AiArrayGetStrFunc );
+		default :
+			return NULL;
+	}
+}
+
 IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parameterType )
 {
 	switch( parameterType )
@@ -151,6 +195,8 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
 			return new StringData( AiNodeGetStr( node, name ) );
+		case AI_TYPE_ARRAY :
+			return arrayToData( AiNodeGetArray( node, name ) );
 	}
 	return NULL;
 }
