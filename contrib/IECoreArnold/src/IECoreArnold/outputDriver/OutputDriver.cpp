@@ -49,10 +49,6 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreArnold;
 
-#if ( ( AI_VERSION_ARCH_NUM * 100 ) + AI_VERSION_MAJOR_NUM ) >= 401
-#define ARNOLD_4_1
-#endif
-
 static void driverParameters( AtList *params, AtMetaDataStore *metaData )
 {
 	AiParameterSTR( "driverType", "" );
@@ -156,26 +152,18 @@ static void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2
 	}
 }
 
-#ifdef ARNOLD_4_1
-
 static bool driverNeedsBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
 {
 	return true;
 }
 
-#endif // ARNOLD_4_1
-
 static void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
 {
 }
 
-#ifdef ARNOLD_4_1
-
 static void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx, int sy, int tId )
 {
 }
-
-#endif // ARNOLD_4_1
 
 static void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx, int sy )
 {
@@ -285,13 +273,9 @@ AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 			driverSupportsPixelType,
 			driverExtension,
 			driverOpen,
-#ifdef ARNOLD_4_1
 			driverNeedsBucket,
-#endif
 			driverPrepareBucket,
-#ifdef ARNOLD_4_1
 			driverProcessBucket,
-#endif
 			driverWriteBucket,
 			driverClose
 		};
