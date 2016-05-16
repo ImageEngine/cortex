@@ -155,7 +155,7 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 
 	// add arbitrary user parameters
 
-	const char *ignore[] = { "P", "s", "t", "N", 0 };
+	const char *ignore[] = { "P", "s", "t", "stIndices", "N", 0 };
 	ShapeAlgo::convertPrimitiveVariables( mesh, result, ignore );
 
 	return result;
