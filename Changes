@@ -1,3 +1,15 @@
+#### IECoreArnold
+
+- Remove support for Arnold < 4.1.
+- Support for progressive renders.
+- ParameterAlgo
+  - Support for arrays in getParameter().
+  - Support for RGBA and Point2 parameters.
+  - Support for V3fVectorData.
+- Flipped t coordinate for mesh uvs.
+- Suppressed conversion of stIndices primvar.
+
+
 9.9.1
 =====
 
