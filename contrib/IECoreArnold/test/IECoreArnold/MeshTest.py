@@ -100,14 +100,20 @@ class MeshTest( unittest.TestCase ) :
 			IECore.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 0, 1, 2, 3 ] )
 		)
+		m["myV3fPrimVar"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( v ) for v in range( 0, 4 ) ] )
+		)
 
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			v = arnold.AiNodeGetArray( n, "user:myV3fPrimVar" )
 			self.assertEqual( a.contents.nelements, 4 )
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
+				self.assertEqual( arnold.AiArrayGetVec( v, i ), i )
 
 	def testMotion( self ) :
 

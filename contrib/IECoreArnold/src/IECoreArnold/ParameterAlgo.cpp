@@ -371,6 +371,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolVectorDataTypeId :
 			array = true;
 			return AI_TYPE_BOOLEAN;
+		case V3fVectorDataTypeId :
+			array = true;
+			return AI_TYPE_VECTOR;
 		default :
 			return AI_TYPE_NONE;
 	}
