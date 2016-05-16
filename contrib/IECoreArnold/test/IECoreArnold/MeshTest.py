@@ -47,19 +47,23 @@ class MeshTest( unittest.TestCase ) :
 
 	def testUVs( self ) :
 
-		r = IECoreArnold.Renderer()
-		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
-		with IECore.WorldBlock( r ) :
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			r.shader( "surface", "utility", { "shade_mode" : "flat", "color_mode" : "uv" } )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		s, t = m["s"].data, m["t"].data
 
-		del r
+		with IECoreArnold.UniverseBlock() :
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/meshImages/expectedMeshUVs.exr" ).read()
+			n = IECoreArnold.NodeAlgo.convert( m )
 
-		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
+			uvs = arnold.AiNodeGetArray( n, "uvlist" )
+			self.assertEqual( uvs.contents.nelements, 4 )
+
+			uvIndices = arnold.AiNodeGetArray( n, "uvidxs" )
+			self.assertEqual( uvIndices.contents.nelements, 4 )
+
+			for i in range( 0, 4 ) :
+				p = arnold.AiArrayGetPnt2( uvs, i )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], 1 - t[i] ) )
+				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
 	def testNormals( self ) :
 
@@ -96,14 +100,20 @@ class MeshTest( unittest.TestCase ) :
 			IECore.PrimitiveVariable.Interpolation.Vertex,
 			IECore.FloatVectorData( [ 0, 1, 2, 3 ] )
 		)
+		m["myV3fPrimVar"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( v ) for v in range( 0, 4 ) ] )
+		)
 
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			v = arnold.AiNodeGetArray( n, "user:myV3fPrimVar" )
 			self.assertEqual( a.contents.nelements, 4 )
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
+				self.assertEqual( arnold.AiArrayGetVec( v, i ), i )
 
 	def testMotion( self ) :
 

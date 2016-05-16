@@ -113,7 +113,7 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 				for( vector<float>::const_iterator sIt = s->readable().begin(), tIt = t->readable().begin(), eIt = s->readable().end(); sIt != eIt; sIt++, tIt++ )
 				{
 					st.push_back( *sIt );
-					st.push_back( *tIt );
+					st.push_back( 1.0f - *tIt );
 				}
 				AiNodeSetArray(
 					result,
@@ -155,7 +155,7 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 
 	// add arbitrary user parameters
 
-	const char *ignore[] = { "P", "s", "t", "N", 0 };
+	const char *ignore[] = { "P", "s", "t", "stIndices", "N", 0 };
 	ShapeAlgo::convertPrimitiveVariables( mesh, result, ignore );
 
 	return result;
