@@ -117,6 +117,13 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 					AiNodeSetRGB( node, name, c[0], c[1], c[2] );
 				}
 				break;
+			case AI_TYPE_RGBA :
+				if( const Color4fData *data = dataCast<Color4fData>( name, value ) )
+				{
+					const Imath::Color4f &c = data->readable();
+					AiNodeSetRGBA( node, name, c[0], c[1], c[2], c[3] );
+				}
+				break;
 			case AI_TYPE_ENUM :
 				if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
@@ -124,13 +131,18 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				}
 				break;
 			case AI_TYPE_BOOLEAN :
-			{
 				if( const BoolData *data = dataCast<BoolData>( name, value ) )
 				{
 					AiNodeSetBool( node, name, data->readable() );
 				}
 				break;
-			}
+			case AI_TYPE_POINT2 :
+				if( const V2fData *data = dataCast<V2fData>( name, value ) )
+				{
+					const Imath::V2f &v = data->readable();
+					AiNodeSetPnt2( node, name, v.x, v.y );
+				}
+				break;
 			default :
 			{
 				msg( Msg::Warning, "setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );
