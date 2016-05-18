@@ -236,6 +236,34 @@ o.Add(
 	"/usr/local/lib",
 )
 
+# OSL options
+
+o.Add(
+	"OSL_INCLUDE_PATH",
+	"The path to the OpenShadingLanguage include directory.",
+	"/usr/include",
+)
+
+o.Add(
+	"OSL_LIB_PATH",
+	"The path to the OpenShadingLanguage library directory.",
+	"/usr/lib",
+)
+
+# OIIO options
+
+o.Add(
+	"OIIO_INCLUDE_PATH",
+	"The path to the OpenImageIO include directory.",
+	"/usr/include",
+)
+
+o.Add(
+	"OIIO_LIB_PATH",
+	"The path to the OpenImageIO library directory.",
+	"/usr/lib",
+)
+
 # General path options
 
 o.Add(
@@ -3202,6 +3230,8 @@ appleseedEnv = coreEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
+		"-isystem", "$OSL_INCLUDE_PATH",
+		"-isystem", "$OIIO_INCLUDE_PATH",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",
@@ -3211,14 +3241,16 @@ appleseedEnv.Append(
 		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
 		"-DAPPLESEED_USE_SSE",
-	]
+	],
 )
-appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH" ] )
+appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH", "$OSL_LIB_PATH", "$OIIO_LIB_PATH" ] )
 
 appleseedPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedPythonModuleEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
+		"-isystem", "$OSL_INCLUDE_PATH",
+		"-isystem", "$OIIO_INCLUDE_PATH",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",
@@ -3232,6 +3264,8 @@ appleseedPythonModuleEnv.Append(
 	],
 	LIBPATH = [
 		"$APPLESEED_LIB_PATH",
+		"$OSL_LIB_PATH"
+		"$OIIO_LIB_PATH"
 	],
 )
 
