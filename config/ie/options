@@ -263,6 +263,7 @@ try :
 except :
 	pass
 
+appleseedReg = None
 appleseedVersion = getOption( "APPLESEED_VERSION", os.environ["APPLESEED_VERSION"] )
 try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
@@ -413,7 +414,7 @@ if targetApp :
 	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
-	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = "/tmp/unwantedAppleseedDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
