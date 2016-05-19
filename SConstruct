@@ -3278,7 +3278,17 @@ haveAppleseed = False
 
 if doConfigure :
 
-	c = Configure( appleseedEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary for appleseed, which uses
+	# a run-time compatible, but link-time incompatbile libstdc++
+	# in some obscure studio setups. This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	appleseedCheckEnv = appleseedEnv.Clone()
+	appleseedCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	appleseedCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( appleseedCheckEnv )
 
 	if not c.CheckLibWithHeader( "appleseed", "renderer/api/rendering.h", "CXX" ) :
 
