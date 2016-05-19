@@ -387,6 +387,8 @@ ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_W
 testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]
 if dlReg :
 	testLibs.append( dlReg["location"] + "/lib" )
+if appleseedReg :
+	testLibs.extend( [ APPLESEED_LIB_PATH, OSL_LIB_PATH, OIIO_LIB_PATH ] )
 TEST_LIBPATH = ":".join( testLibs )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
