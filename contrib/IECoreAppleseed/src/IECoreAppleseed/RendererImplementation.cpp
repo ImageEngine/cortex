@@ -924,10 +924,10 @@ void IECoreAppleseed::RendererImplementation::setCamera( const string &name, Cam
 	// crop window
 	const Box2fData *cropWindow = cortexCamera->parametersData()->member<Box2fData>( "cropWindow" );
 	asf::AABB2u crop;
-	crop.min[0] = cropWindow->readable().min.x * ( res[0] - 1 );
-	crop.min[1] = cropWindow->readable().min.y * ( res[1] - 1 );
-	crop.max[0] = cropWindow->readable().max.x * ( res[0] - 1 );
-	crop.max[1] = cropWindow->readable().max.y * ( res[1] - 1 );
+	crop.min[0] = (int)(cropWindow->readable().min.x * ( res[0] - 1 ));
+	crop.min[1] = (int)(cropWindow->readable().min.y * ( res[1] - 1 ));
+	crop.max[0] = (int)(cropWindow->readable().max.x * ( res[0] - 1 ));
+	crop.max[1] = (int)(cropWindow->readable().max.y * ( res[1] - 1 ));
 	m_project->get_frame()->set_crop_window( crop );
 }
 

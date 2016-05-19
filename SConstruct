@@ -236,6 +236,34 @@ o.Add(
 	"/usr/local/lib",
 )
 
+# OSL options
+
+o.Add(
+	"OSL_INCLUDE_PATH",
+	"The path to the OpenShadingLanguage include directory.",
+	"/usr/include",
+)
+
+o.Add(
+	"OSL_LIB_PATH",
+	"The path to the OpenShadingLanguage library directory.",
+	"/usr/lib",
+)
+
+# OIIO options
+
+o.Add(
+	"OIIO_INCLUDE_PATH",
+	"The path to the OpenImageIO include directory.",
+	"/usr/include",
+)
+
+o.Add(
+	"OIIO_LIB_PATH",
+	"The path to the OpenImageIO library directory.",
+	"/usr/lib",
+)
+
 # General path options
 
 o.Add(
@@ -3202,6 +3230,8 @@ appleseedEnv = coreEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
+		"-isystem", "$OSL_INCLUDE_PATH",
+		"-isystem", "$OIIO_INCLUDE_PATH",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",
@@ -3211,14 +3241,16 @@ appleseedEnv.Append(
 		"-DAPPLESEED_WITH_OIIO",
 		"-DAPPLESEED_WITH_OSL",
 		"-DAPPLESEED_USE_SSE",
-	]
+	],
 )
-appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH" ] )
+appleseedEnv.Append( LIBPATH = [ "$APPLESEED_LIB_PATH", "$OSL_LIB_PATH", "$OIIO_LIB_PATH" ] )
 
 appleseedPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreAppleseed" )
 appleseedPythonModuleEnv.Append(
 	CXXFLAGS = [
 		"-isystem", "$APPLESEED_INCLUDE_PATH",
+		"-isystem", "$OSL_INCLUDE_PATH",
+		"-isystem", "$OIIO_INCLUDE_PATH",
 	],
 	CPPPATH = [
 		"contrib/IECoreAppleseed/include",
@@ -3232,6 +3264,8 @@ appleseedPythonModuleEnv.Append(
 	],
 	LIBPATH = [
 		"$APPLESEED_LIB_PATH",
+		"$OSL_LIB_PATH"
+		"$OIIO_LIB_PATH"
 	],
 )
 
@@ -3244,7 +3278,17 @@ haveAppleseed = False
 
 if doConfigure :
 
-	c = Configure( appleseedEnv )
+	# Since we only build shared libraries and not exectuables,
+	# we only need to check that shared libs will link correctly.
+	# This is necessary for appleseed, which uses
+	# a run-time compatible, but link-time incompatbile libstdc++
+	# in some obscure studio setups. This approach succeeds because
+	# building a shared library doesn't require resolving the
+	# unresolved symbols of the libraries that it links to.
+	appleseedCheckEnv = appleseedEnv.Clone()
+	appleseedCheckEnv.Append( CXXFLAGS = [ "-fPIC" ] )
+	appleseedCheckEnv.Append( LINKFLAGS = [ "-shared" ] )
+	c = Configure( appleseedCheckEnv )
 
 	if not c.CheckLibWithHeader( "appleseed", "renderer/api/rendering.h", "CXX" ) :
 
@@ -3320,7 +3364,7 @@ if doConfigure :
 
 		# tests
 		appleseedTestEnv = testEnv.Clone()
-		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python"
+		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python" + ":" + appleseedEnv.subst( "$APPLESEED_LIB_PATH/python2.7" )
 		appleseedTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + appleseedEnv.subst( ":".join( appleseedPythonModuleEnv["LIBPATH"] ) )
 		appleseedTestEnv["ENV"]["PATH"] = appleseedEnv.subst( "$APPLESEED_ROOT/bin" ) + ":" + appleseedTestEnv["ENV"]["PATH"]
 		appleseedTestEnv["ENV"]["APPLESEED_PLUGIN_PATH"] = "contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"

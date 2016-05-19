@@ -29,4 +29,5 @@ test/IECoreMaya/resultsPython.txt
 test/IECoreNuke/resultsPython.txt
 test/IECoreHoudini/resultsPython.txt
 contrib/IECoreMantra/test/IECoreMantra/results.txt
+contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt
 /.ubuntu

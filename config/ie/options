@@ -263,6 +263,24 @@ try :
 except :
 	pass
 
+appleseedVersion = getOption( "APPLESEED_VERSION", os.environ["APPLESEED_VERSION"] )
+try :
+	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
+	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
+	APPLESEED_LIB_PATH = os.path.join( appleseedReg["location"], "lib" )
+	
+	oslVersion = appleseedReg["OpenShadingLanguage"]
+	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
+	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
+	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
+	
+	oiioVersion = appleseedReg["OpenImageIO"]
+	oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
+	OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
+	OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
+except :
+	pass
+
 # ask for opengl support
 WITH_GL=1
 
@@ -369,6 +387,8 @@ ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_W
 testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]
 if dlReg :
 	testLibs.append( dlReg["location"] + "/lib" )
+if appleseedReg :
+	testLibs.extend( [ APPLESEED_LIB_PATH, OSL_LIB_PATH, OIIO_LIB_PATH ] )
 TEST_LIBPATH = ":".join( testLibs )
 TEST_LIBRARY_PATH_ENV_VAR = "IEENV_LIBRARY_PREFIX_PATH"
 
@@ -383,6 +403,7 @@ if targetApp :
 	INSTALL_PYTHON_DIR = os.path.join( appPrefix, "python" )
 	INSTALL_RMANLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_APPLESEEDLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	# we don't want to build the renderman procedurals when we build apps, as otherwise they end
 	# up causing linking conflicts at rendertime. this is because the procedural would be linking to the
@@ -392,6 +413,7 @@ if targetApp :
 	INSTALL_RMANDISPLAY_NAME = "/tmp/unwantedRManDisplays/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDPROCEDURAL_NAME = "/tmp/unwantedArnoldProcedurals/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
+	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = "/tmp/unwantedArnoldDrivers/$IECORE_NAME-$IECORE_MAJOR_VERSION"
 else :
 	INSTALL_HEADER_DIR = os.path.join( basePrefix, "include" )
 	INSTALL_LIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -406,6 +428,9 @@ else :
 	INSTALL_ARNOLDPYTHON_DIR = os.path.join( basePrefix, "arnold", arnoldVersion, "python", pythonVersion, compiler, compilerVersion )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
+	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
+	INSTALL_APPLESEEDLIB_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_APPLESEEDOUTPUTDRIVER_NAME = os.path.join( basePrefix, "appleseed", appleseedVersion, "plugins", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ALEMBICLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 
 INSTALL_GLSL_HEADER_DIR =  os.path.join( basePrefix, "glsl" )
