@@ -48,7 +48,6 @@
 
 #include "IECoreAppleseed/Renderer.h"
 #include "IECoreAppleseed/private/AttributeState.h"
-#include "IECoreAppleseed/private/AppleseedUtil.h"
 #include "IECoreAppleseed/private/EditBlockHandler.h"
 #include "IECoreAppleseed/private/LightHandler.h"
 #include "IECoreAppleseed/private/MotionBlockHandler.h"

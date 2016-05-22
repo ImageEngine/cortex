@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,57 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <sstream>
+#include "IECoreAppleseed/CameraAlgo.h"
 
-#include "renderer/api/camera.h"
-
-#include "IECore/Camera.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreAppleseed/ToAppleseedCameraConverter.h"
-
-using namespace IECoreAppleseed;
 using namespace IECore;
 using namespace Imath;
 
 namespace asf = foundation;
 namespace asr = renderer;
 
-IE_CORE_DEFINERUNTIMETYPED( ToAppleseedCameraConverter );
-
-ToAppleseedCameraConverter::ConverterDescription<ToAppleseedCameraConverter> ToAppleseedCameraConverter::g_description;
-
-ToAppleseedCameraConverter::ToAppleseedCameraConverter( CameraPtr toConvert )
-	:	ToAppleseedConverter( "Converts IECore::Cameras to appleseed camera nodes", Camera::staticTypeId() )
+namespace IECoreAppleseed
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToAppleseedCameraConverter::~ToAppleseedCameraConverter()
+namespace CameraAlgo
 {
-}
 
-asr::Entity *ToAppleseedCameraConverter::doConversion( ConstObjectPtr from, ConstCompoundObjectPtr operands ) const
+renderer::Camera *convert( IECore::Camera *camera )
 {
-	CameraPtr camera = boost::static_pointer_cast<const Camera>( from )->copy();
-	camera->addStandardParameters();
+	CameraPtr cameraCopy = camera->copy();
+	cameraCopy->addStandardParameters();
 
 	asr::ParamArray cameraParams;
 
 	// set shutter
-	const V2f &shutter = camera->parametersData()->member<V2fData>( "shutter", true )->readable();
+	const V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
 	cameraParams.insert( "shutter_open_time", shutter.x );
 	cameraParams.insert( "shutter_close_time", shutter.y );
 
 	asr::CameraFactoryRegistrar cameraFactories;
 	const asr::ICameraFactory *cameraFactory = 0;
 
-	const std::string &projection = camera->parametersData()->member<StringData>( "projection", true )->readable();
+	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
 
 	if( projection=="perspective" )
 	{
-		const V2i &resolution = camera->parametersData()->member<V2iData>( "resolution", true )->readable();
+		const V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
 		{
 			foundation::Vector2d film_dims( resolution.x, resolution.y );
 			film_dims /= 10000.0;
@@ -91,7 +77,7 @@ asr::Entity *ToAppleseedCameraConverter::doConversion( ConstObjectPtr from, Cons
 			cameraParams.insert( "film_dimensions", ss.str().c_str() );
 		}
 
-		double horizontal_fov = camera->parametersData()->member<FloatData>( "projection:fov", true )->readable();
+		double horizontal_fov = cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable();
 
 		// adjust fov.
 		if( resolution.x > resolution.y )
@@ -105,7 +91,7 @@ asr::Entity *ToAppleseedCameraConverter::doConversion( ConstObjectPtr from, Cons
 	}
 	else if( projection=="orthographic" )
 	{
-		const Box2f &screenWindow = camera->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
+		const Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
 
 		foundation::Vector2d film_dims( screenWindow.size().x * 0.5f, screenWindow.size().y * 0.5f );
 		std::stringstream ss;
@@ -123,3 +109,7 @@ asr::Entity *ToAppleseedCameraConverter::doConversion( ConstObjectPtr from, Cons
 	asf::auto_release_ptr<asr::Camera> result( cameraFactory->create( "camera", cameraParams ) );
 	return result.release();
 }
+
+} // namespace CameraAlgo
+
+} // namespace IECoreAppleseed

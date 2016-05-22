@@ -43,9 +43,7 @@
 #include "IECore/ObjectInterpolator.h"
 
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
-
-#include "IECoreAppleseed/ToAppleseedConverter.h"
-#include "IECoreAppleseed/private/AppleseedUtil.h"
+#include "IECoreAppleseed/TextureAlgo.h"
 
 using namespace std;
 using namespace boost;
@@ -231,7 +229,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::addObjectToScene( asf:
 
 	if( !attrState.alphaMap().empty() )
 	{
-		string alphaMapTextureInstanceName = createAlphaMapTextureEntity( parentAssembly.textures(), parentAssembly.texture_instances(), m_searchPaths, objName + "_alpha_map", attrState.alphaMap() );
+		string alphaMapTextureInstanceName = TextureAlgo::createAlphaMapTextureEntity( parentAssembly.textures(), parentAssembly.texture_instances(), m_searchPaths, objName + "_alpha_map", attrState.alphaMap() );
 		obj->get_parameters().insert( "alpha_map", alphaMapTextureInstanceName.c_str() );
 	}
 

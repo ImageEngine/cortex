@@ -44,7 +44,6 @@ from MeshTest import MeshTest
 from MotionTest import MotionTest
 from PrimitiveConverterTest import PrimitiveConverterTest
 from RendererTest import RendererTest
-from ToAppleseedConverterTest import ToAppleseedConverterTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

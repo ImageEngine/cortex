@@ -40,7 +40,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
 
-#include "IECoreAppleseed/ToAppleseedConverter.h"
+#include "IECoreAppleseed/MeshAlgo.h"
 
 using namespace std;
 using namespace IECore;
@@ -55,23 +55,24 @@ IECoreAppleseed::InteractivePrimitiveConverter::InteractivePrimitiveConverter( c
 
 asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const string &name )
 {
-	asf::auto_release_ptr<asr::Object> obj;
-
-	if( ToAppleseedConverterPtr converter = ToAppleseedConverter::create( primitive.get() ) )
+	if( primitive->typeId() == MeshPrimitiveTypeId )
 	{
-		obj.reset( static_cast<asr::Object*>( converter->convert() ) );
+		MeshPrimitive *meshPrimitive = static_cast<MeshPrimitive *>( primitive.get() );
+		asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( meshPrimitive ) );
+
+		if( entity.get() )
+		{
+			entity->set_name( name.c_str() );
+		}
+		else
+		{
+			msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
+		}
+
+		return asf::auto_release_ptr<asr::Object>( entity.release() );
 	}
 
-	if( obj.get() )
-	{
-		obj->set_name( name.c_str() );
-	}
-	else
-	{
-		msg( Msg::Warning, "IECoreAppleseed::PrimitiveConverter", "Couldn't convert object" );
-	}
-
-	return obj;
+	return asf::auto_release_ptr<asr::Object>();
 }
 
 asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( const vector<PrimitivePtr> &primitives, const string &name )

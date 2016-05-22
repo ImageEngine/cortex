@@ -64,7 +64,9 @@
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 #include "IECoreAppleseed/private/RendererController.h"
-#include "IECoreAppleseed/ToAppleseedCameraConverter.h"
+#include "IECoreAppleseed/CameraAlgo.h"
+#include "IECoreAppleseed/EntityAlgo.h"
+#include "IECoreAppleseed/ParameterAlgo.h"
 
 using namespace IECore;
 using namespace IECoreAppleseed;
@@ -183,7 +185,7 @@ void IECoreAppleseed::RendererImplementation::setOption( const string &name, Con
 
 		string optName( name, 7, string::npos );
 		replace( optName.begin(), optName.end(), ':', '.' );
-		string valueStr = dataToString( value );
+		string valueStr = ParameterAlgo::dataToString( value );
 
 		if( !valueStr.empty() )
 		{
@@ -381,8 +383,7 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	CameraPtr cortexCamera = new Camera( name, 0, params );
 	cortexCamera->addStandardParameters();
 
-	ToAppleseedCameraConverterPtr converter = new ToAppleseedCameraConverter( cortexCamera );
-	asf::auto_release_ptr<asr::Camera> appleseedCamera( static_cast<asr::Camera*>( converter->convert() ) );
+	asf::auto_release_ptr<asr::Camera> appleseedCamera( CameraAlgo::convert( cortexCamera.get() ) );
 
 	if( !appleseedCamera.get() )
 	{
@@ -431,7 +432,7 @@ void IECoreAppleseed::RendererImplementation::display( const string &name, const
 	}
 	else
 	{
-		asr::ParamArray params = convertParams( parameters );
+		asr::ParamArray params = ParameterAlgo::convertParams( parameters );
 		params.insert( "displayName", name.c_str() );
 		params.insert( "type", type.c_str() );
 		params.insert( "data", data.c_str() );
@@ -483,8 +484,7 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 
 		cortexCamera->addStandardParameters();
 
-		ToAppleseedCameraConverterPtr converter = new ToAppleseedCameraConverter( cortexCamera );
-		asf::auto_release_ptr<asr::Camera> camera( static_cast<asr::Camera*>( converter->convert() ) );
+		asf::auto_release_ptr<asr::Camera> camera( CameraAlgo::convert( cortexCamera.get() ) );
 		assert( camera.get() );
 
 		setCamera( "camera", cortexCamera, camera );
@@ -966,7 +966,7 @@ void IECoreAppleseed::RendererImplementation::createAssemblyInstance( const stri
 	asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), params, assemblyName.c_str() );
 
 	assemblyInstance->transform_sequence() = m_transformStack.top();
-	insertEntityWithUniqueName( m_mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
+	EntityAlgo::insertEntityWithUniqueName( m_mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
 }
 
 bool RendererImplementation::insideMotionBlock() const

@@ -49,7 +49,6 @@
 #include "IECore/SimpleTypedData.h"
 
 #include "IECoreAppleseed/private/ShadingState.h"
-#include "IECoreAppleseed/private/AppleseedUtil.h"
 
 using namespace IECore;
 using namespace std;

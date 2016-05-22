@@ -32,11 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreAppleseed/private/MotionBlockHandler.h"
-
 #include "IECore/MessageHandler.h"
 
-#include "IECoreAppleseed/private/AppleseedUtil.h"
+#include "IECoreAppleseed/private/MotionBlockHandler.h"
+#include "IECoreAppleseed/EntityAlgo.h"
 
 using namespace std;
 using namespace Imath;
@@ -106,7 +105,7 @@ void IECoreAppleseed::MotionBlockHandler::motionEnd( const AttributeState &attrS
 
 				asf::auto_release_ptr<asr::AssemblyInstance> assemblyInstance = asr::AssemblyInstanceFactory::create( assemblyInstanceName.c_str(), params, assemblyName.c_str() );
 				assemblyInstance->transform_sequence() = m_transformStack.top();
-				insertEntityWithUniqueName( mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
+				EntityAlgo::insertEntityWithUniqueName( mainAssembly->assembly_instances(), assemblyInstance, assemblyInstanceName );
 			}
 		break;
 
