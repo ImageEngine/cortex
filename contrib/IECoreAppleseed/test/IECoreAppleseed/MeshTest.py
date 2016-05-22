@@ -45,21 +45,23 @@ class MeshTest( AppleseedTest.TestCase ):
 	def testUVs( self ) :
 
 		r = IECoreAppleseed.Renderer()
-		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
+		r.worldBegin()
+		r.setAttribute( "name", IECore.StringData( "plane" ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) )
+		s, t = m["s"].data, m["t"].data
+		m.render( r )
 
-		r.setOption( "as:cfg:shading_engine:override_shading:mode", IECore.StringData( "uv" ) )
+		mainAss = self._getMainAssembly( r )
+		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
+		obj = objAss.objects().get_by_name( "plane" )
+		self.assertEqual( obj.get_tex_coords_count(), 6 )
 
-		with IECore.WorldBlock( r ) :
-
-			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) ).render( r )
-
-		del r
-
-		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/referenceImages/expectedMeshUVs.exr" ).read()
-
-		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
+		quadTo2TrisIndices = [0, 1, 2, 0, 2, 3]
+		for i in range( 0, obj.get_tex_coords_count() ):
+			uv = obj.get_tex_coords( i )
+			j = quadTo2TrisIndices[i]
+			self.assertEqual( uv[0], s[j] )
+			self.assertEqual( uv[1], 1.0 - t[j] )
 
 if __name__ == "__main__":
 	unittest.main()
