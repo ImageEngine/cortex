@@ -126,7 +126,7 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 
 					for( size_t i = 0; i < numSTs; ++i)
 					{
-						meshObj->push_tex_coords( asr::GVector2( svec[i], tvec[i] ) );
+						meshObj->push_tex_coords( asr::GVector2( svec[i], 1.0f - tvec[i] ) );
 					}
 
 					if( sInterpolation == PrimitiveVariable::FaceVarying )
