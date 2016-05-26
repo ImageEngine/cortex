@@ -143,6 +143,16 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 					AiNodeSetPnt2( node, name, v.x, v.y );
 				}
 				break;
+			case AI_TYPE_MATRIX :
+				if( const M44fData *data = dataCast<M44fData>( name, value ) )
+				{
+					const Imath::M44f &v = data->readable();
+
+					// Can't see any reason why AiNodeSetMatrix couldn't have been declared const,
+					// this const_cast seems safe
+					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+				}
+				break;
 			default :
 			{
 				msg( Msg::Warning, "setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );
@@ -353,6 +363,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolDataTypeId :
 			array = false;
 			return AI_TYPE_BOOLEAN;
+		case M44fDataTypeId :
+			array = false;
+			return AI_TYPE_MATRIX;
 
 		// array types
 
@@ -374,6 +387,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case V3fVectorDataTypeId :
 			array = true;
 			return AI_TYPE_VECTOR;
+		case M44fVectorDataTypeId :
+			array = true;
+			return AI_TYPE_MATRIX;
 		default :
 			return AI_TYPE_NONE;
 	}
