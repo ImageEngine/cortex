@@ -35,10 +35,6 @@
 #include "boost/python.hpp"
 
 #include "IECoreAppleseed/bindings/RendererBinding.h"
-#include "IECoreAppleseed/bindings/ToAppleseedConverterBinding.h"
-#include "IECoreAppleseed/bindings/ToAppleseedCameraConverterBinding.h"
-#include "IECoreAppleseed/bindings/ToAppleseedShapeConverterBinding.h"
-#include "IECoreAppleseed/bindings/ToAppleseedMeshConverterBinding.h"
 
 using namespace boost::python;
 using namespace IECoreAppleseed;
@@ -46,8 +42,4 @@ using namespace IECoreAppleseed;
 BOOST_PYTHON_MODULE( _IECoreAppleseed )
 {
 	bindRenderer();
-	bindToAppleseedConverter();
-	bindToAppleseedCameraConverter();
-	bindToAppleseedShapeConverter();
-	bindToAppleseedMeshConverter();
 }

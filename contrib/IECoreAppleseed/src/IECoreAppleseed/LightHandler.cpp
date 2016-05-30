@@ -36,8 +36,10 @@
 
 #include "boost/format.hpp"
 
-#include "IECoreAppleseed/private/AppleseedUtil.h"
 #include "IECoreAppleseed/private/LightHandler.h"
+#include "IECoreAppleseed/ColorAlgo.h"
+#include "IECoreAppleseed/ParameterAlgo.h"
+#include "IECoreAppleseed/TextureAlgo.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
@@ -164,7 +166,7 @@ asr::ParamArray IECoreAppleseed::LightHandler::convertParams( const string &hand
 
 			const string &fileName = static_cast<const StringData*>( paramValue.get() )->readable();
 			string textureName = handle + "." + paramName;
-			string textureInstanceName = createTextureEntity( m_scene.textures(), m_scene.texture_instances(), m_searchPaths, textureName, fileName );
+			string textureInstanceName = TextureAlgo::createTextureEntity( m_scene.textures(), m_scene.texture_instances(), m_searchPaths, textureName, fileName );
 			params.insert( "radiance", textureInstanceName.c_str() );
 		}
 		else
@@ -173,12 +175,12 @@ asr::ParamArray IECoreAppleseed::LightHandler::convertParams( const string &hand
 			{
 				string colorName = handle + "." + paramName;
 				const Color3f &col = static_cast<const Color3fData*>( paramValue.get() )->readable();
-				colorName = createColorEntity( m_scene.colors(), col, colorName.c_str() );
+				colorName = ColorAlgo::createColorEntity( m_scene.colors(), col, colorName.c_str() );
 				params.insert( paramName.c_str(), colorName.c_str() );
 			}
 			else
 			{
-				params.insert( paramName.c_str(), dataToString( paramValue ) );
+				params.insert( paramName.c_str(), ParameterAlgo::dataToString( paramValue ) );
 			}
 		}
 	}

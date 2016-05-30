@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,39 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTER_H
-#define IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTER_H
+#ifndef IECOREAPPLESEED_PARAMETERALGO_H
+#define IECOREAPPLESEED_PARAMETERALGO_H
 
-#include "IECore/VectorTypedData.h"
+#include "renderer/api/utility.h"
 
-#include "IECoreAppleseed/ToAppleseedConverter.h"
-
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( Primitive )
-struct PrimitiveVariable;
-} // namespace IECore
+#include "IECore/CompoundData.h"
 
 namespace IECoreAppleseed
 {
 
-class ToAppleseedShapeConverter : public ToAppleseedConverter
+namespace ParameterAlgo
 {
 
-	public :
+std::string dataToString( IECore::ConstDataPtr value );
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedShapeConverter, ToAppleseedShapeConverterTypeId, ToAppleseedConverter );
+void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray& params );
 
-		virtual ~ToAppleseedShapeConverter();
+renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
 
-	protected :
-
-		ToAppleseedShapeConverter( const std::string &description, IECore::TypeId supportedType );
-
-};
-
-IE_CORE_DECLAREPTR( ToAppleseedShapeConverter );
+} // namespace ParameterAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTER_H
+#endif // IECOREAPPLESEED_PARAMETERALGO_H

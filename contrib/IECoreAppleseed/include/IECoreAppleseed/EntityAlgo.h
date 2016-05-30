@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,23 +32,48 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TOAPPLESEEDCONVERTERBINDING_H
-#define IECOREAPPLESEED_TOAPPLESEEDCONVERTERBINDING_H
+#ifndef IECOREAPPLESEED_ENTITYALGO_H
+#define IECOREAPPLESEED_ENTITYALGO_H
 
-#include "boost/python.hpp"
+#include <string>
 
-#include "renderer/api/entity.h"
+#include "boost/format.hpp"
+
+#include "renderer/api/scene.h"
 
 namespace IECoreAppleseed
 {
 
-/// Converts an appleseed entity to a python object that can be used
-/// with appleseed.python bindings.
-/// The python object takes ownership of the entity passed as argument.
-boost::python::object entityToPythonObject( renderer::Entity *entity );
+namespace EntityAlgo
+{
 
-void bindToAppleseedConverter();
+template<class Container, class T>
+std::string insertEntityWithUniqueName( Container &container, foundation::auto_release_ptr<T> entity, const std::string &name )
+{
+	if( container.get_by_name( name.c_str() ) == 0 )
+	{
+		entity->set_name( name.c_str() );
+		container.insert( entity );
+		return name;
+	}
+
+	boost::format fmt( name + "_%1%" );
+
+	int i = 2;
+	while( true )
+	{
+		std::string new_name = ( fmt % i++ ).str();
+		if( container.get_by_name( new_name.c_str() ) == 0 )
+		{
+			entity->set_name( new_name.c_str() );
+			container.insert( entity );
+			return new_name;
+		}
+	}
+}
+
+} // namespace EntityAlgo
 
 } // namespace IECoreAppleseed
 
-#endif //  IECOREAPPLESEED_TOAPPLESEEDCONVERTERBINDING_H
+#endif // IECOREAPPLESEED_ENTITYALGO_H

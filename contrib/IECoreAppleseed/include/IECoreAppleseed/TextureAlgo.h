@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTERBINDING_H
-#define IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTERBINDING_H
+#ifndef IECOREAPPLESEED_TEXTUREALGO_H
+#define IECOREAPPLESEED_TEXTUREALGO_H
+
+#include <string>
+
+#include "renderer/api/texture.h"
 
 namespace IECoreAppleseed
 {
 
-void bindToAppleseedShapeConverter();
+namespace TextureAlgo
+{
+
+std::string createTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
+std::string createAlphaMapTextureEntity( renderer::TextureContainer &textureContainer, renderer::TextureInstanceContainer &textureInstanceContainer, const foundation::SearchPaths &searchPaths, const std::string &textureName, const std::string &fileName );
+
+} // namespace TextureAlgo
 
 } // namespace IECoreAppleseed
 
-#endif //  IECOREAPPLESEED_TOAPPLESEEDSHAPECONVERTERBINDING_H
+#endif // IECOREAPPLESEED_TEXTUREALGO_H

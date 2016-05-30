@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreAppleseed/ParameterAlgo.h"
+
 #include "boost/lexical_cast.hpp"
 
 #include "renderer/api/color.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
-
-#include "IECoreAppleseed/private/AppleseedUtil.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -49,7 +49,26 @@ using namespace std;
 namespace asf = foundation;
 namespace asr = renderer;
 
-string IECoreAppleseed::dataToString( ConstDataPtr value )
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API.
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreAppleseed
+{
+
+namespace ParameterAlgo
+{
+
+string dataToString( ConstDataPtr value )
 {
 	stringstream ss;
 
@@ -104,7 +123,7 @@ string IECoreAppleseed::dataToString( ConstDataPtr value )
 	return ss.str();
 }
 
-void IECoreAppleseed::setParam( const string &name, const Data *value, asr::ParamArray &params )
+void setParam( const string &name, const Data *value, asr::ParamArray &params )
 {
 	switch( value->typeId() )
 	{
@@ -142,7 +161,7 @@ void IECoreAppleseed::setParam( const string &name, const Data *value, asr::Para
 	}
 }
 
-asr::ParamArray IECoreAppleseed::convertParams( const CompoundDataMap &parameters )
+asr::ParamArray convertParams( const CompoundDataMap &parameters )
 {
 	asr::ParamArray result;
 
@@ -152,49 +171,6 @@ asr::ParamArray IECoreAppleseed::convertParams( const CompoundDataMap &parameter
 	return result;
 }
 
-string IECoreAppleseed::createColorEntity( asr::ColorContainer &colorContainer, const C3f &color, const string &name )
-{
-	// for monochrome colors, we don't need to create a color entity at all.
-	if( color.x == color.y && color.x == color.z )
-	{
-		return lexical_cast<string>( color.x );
-	}
+} // namespace ParameterAlgo
 
-	asr::ColorValueArray values( 3, &color.x );
-	asr::ParamArray params;
-	params.insert( "color_space", "linear_rgb" );
-
-	asf::auto_release_ptr<asr::ColorEntity> c = asr::ColorEntityFactory::create( name.c_str(), params, values );
-	return insertEntityWithUniqueName( colorContainer, c, name.c_str() );
-}
-
-namespace
-{
-
-string doCreateTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName, const asr::ParamArray &txInstanceParams )
-{
-	asr::ParamArray params;
-	params.insert( "filename", fileName.c_str() );
-	params.insert( "color_space", "linear_rgb" );
-
-	asf::auto_release_ptr<asr::Texture> texture( asr::DiskTexture2dFactory().create( textureName.c_str(), params, searchPaths ) );
-	string txName = IECoreAppleseed::insertEntityWithUniqueName( textureContainer, texture, textureName );
-
-	string textureInstanceName = txName + "_instance";
-	asf::auto_release_ptr<asr::TextureInstance> textureInstance( asr::TextureInstanceFactory().create( textureInstanceName.c_str(), txInstanceParams, txName.c_str() ) );
-	return IECoreAppleseed::insertEntityWithUniqueName( textureInstanceContainer, textureInstance, textureInstanceName.c_str() );
-}
-
-}
-
-string IECoreAppleseed::createTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
-{
-	return doCreateTextureEntity( textureContainer, textureInstanceContainer, searchPaths, textureName, fileName, asr::ParamArray() );
-}
-
-string IECoreAppleseed::createAlphaMapTextureEntity( asr::TextureContainer &textureContainer, asr::TextureInstanceContainer &textureInstanceContainer, const asf::SearchPaths &searchPaths, const string &textureName, const string &fileName )
-{
-	asr::ParamArray params;
-	params.insert( "alpha_mode", "detect" );
-	return doCreateTextureEntity( textureContainer, textureInstanceContainer, searchPaths, textureName, fileName, params );
-}
+} // namespace IECoreAppleseed

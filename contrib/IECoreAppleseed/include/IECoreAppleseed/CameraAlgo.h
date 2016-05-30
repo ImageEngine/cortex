@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,20 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREAPPLESEED_CAMERAALGO_H
+#define IECOREAPPLESEED_CAMERAALGO_H
 
-#include "IECore/MeshPrimitive.h"
+#include "renderer/api/camera.h"
 
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECore/Camera.h"
 
-#include "IECoreAppleseed/ToAppleseedMeshConverter.h"
-#include "IECoreAppleseed/bindings/ToAppleseedMeshConverterBinding.h"
-
-using namespace boost::python;
-
-void IECoreAppleseed::bindToAppleseedMeshConverter()
+namespace IECoreAppleseed
 {
-	IECorePython::RunTimeTypedClass<IECoreAppleseed::ToAppleseedMeshConverter>()
-		.def( init<IECore::MeshPrimitivePtr>() )
-	;
-}
+
+namespace CameraAlgo
+{
+
+renderer::Camera *convert( IECore::Camera *camera );
+
+} // namespace CameraAlgo
+
+} // namespace IECoreAppleseed
+
+#endif // IECOREAPPLESEED_CAMERAALGO_H

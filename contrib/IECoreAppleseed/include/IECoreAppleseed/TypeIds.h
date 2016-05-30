@@ -42,11 +42,6 @@ namespace IECoreAppleseed
 enum TypeId
 {
 	RendererTypeId = 115000,
-	ToAppleseedConverterTypeId = 115001,
-	ToAppleseedMeshConverterTypeId = 115002,
-	ToAppleseedCameraConverterTypeId = 115003,
-	ToAppleseedShapeConverterTypeId = 115004,
-
 	LastCoreAppleseedTypeId = 115999,
 };
 

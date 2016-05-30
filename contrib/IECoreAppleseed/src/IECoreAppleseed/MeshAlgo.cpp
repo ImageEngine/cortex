@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "renderer/api/object.h"
-
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
@@ -41,9 +39,8 @@
 #include "IECore/TriangulateOp.h"
 #include "IECore/FaceVaryingPromotionOp.h"
 
-#include "IECoreAppleseed/ToAppleseedMeshConverter.h"
+#include "IECoreAppleseed/MeshAlgo.h"
 
-using namespace IECoreAppleseed;
 using namespace IECore;
 using namespace Imath;
 using namespace std;
@@ -51,57 +48,46 @@ using namespace std;
 namespace asf = foundation;
 namespace asr = renderer;
 
-IE_CORE_DEFINERUNTIMETYPED( ToAppleseedMeshConverter );
-
-ToAppleseedMeshConverter::ConverterDescription<ToAppleseedMeshConverter> ToAppleseedMeshConverter::g_description;
-
-ToAppleseedMeshConverter::ToAppleseedMeshConverter( MeshPrimitivePtr toConvert )
-	:	ToAppleseedShapeConverter( "Converts IECore::MeshPrimitives to appleseed mesh object entities", MeshPrimitive::staticTypeId() )
+namespace IECoreAppleseed
 {
-	srcParameter()->setValue( toConvert );
-}
 
-ToAppleseedMeshConverter::~ToAppleseedMeshConverter()
+namespace MeshAlgo
 {
-}
 
-asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstCompoundObjectPtr operands ) const
+renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
 {
-	MeshPrimitivePtr mesh = static_cast<const MeshPrimitive *>( from.get() )->copy();
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
 		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
 	}
 
-	asf::auto_release_ptr<asr::MeshObject> meshObj = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
-	const size_t materialSlot = meshObj->push_material_slot( "default" );
+	asf::auto_release_ptr<asr::MeshObject> meshEntity = asr::MeshObjectFactory::create( "mesh", asr::ParamArray() );
+	const size_t materialSlot = meshEntity->push_material_slot( "default" );
 
 	// vertices
 	{
 		size_t numVertices = p->readable().size();
-		meshObj->reserve_vertices( numVertices );
+		meshEntity->reserve_vertices( numVertices );
 		const std::vector<V3f> &points = p->readable();
 		for( size_t i = 0; i < numVertices; ++i )
 		{
-			meshObj->push_vertex( asr::GVector3( points[i].x, points[i].y, points[i].z ) );
+			meshEntity->push_vertex( asr::GVector3( points[i].x, points[i].y, points[i].z ) );
 		}
 	}
 
 	// triangulate primitive (this should be in appleseed at some point)
-	{
-		TriangulateOpPtr op = new TriangulateOp();
-		op->inputParameter()->setValue( mesh );
-		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-		op->copyParameter()->setTypedValue( false );
-		op->operate();
-	}
+	TriangulateOpPtr op = new TriangulateOp();
+	op->inputParameter()->setValue( MeshPrimitivePtr( mesh ) );
+	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
+	op->copyParameter()->setTypedValue( true );
+	MeshPrimitivePtr triangulatedMeshPrimPtr = runTimeCast<MeshPrimitive>( op->operate() );
 
 	// triangles
-	size_t numTriangles = mesh->numFaces();
+	size_t numTriangles = triangulatedMeshPrimPtr->numFaces();
 	std::vector<asr::Triangle> triangles;
 	triangles.reserve( numTriangles );
-	const std::vector<int> &vidx = mesh->vertexIds()->readable();
+	const std::vector<int> &vidx = triangulatedMeshPrimPtr->vertexIds()->readable();
 	for( size_t i = 0; i < vidx.size(); i += 3 )
 	{
 		triangles.push_back( asr::Triangle( vidx[i], vidx[i+1], vidx[i+2], materialSlot ) );
@@ -109,24 +95,24 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 
 	// texture coords
 	{
-		const FloatVectorData *s = mesh->variableData<FloatVectorData>( "s" );
-		const FloatVectorData *t = mesh->variableData<FloatVectorData>( "t" );
+		const FloatVectorData *s = triangulatedMeshPrimPtr->variableData<FloatVectorData>( "s" );
+		const FloatVectorData *t = triangulatedMeshPrimPtr->variableData<FloatVectorData>( "t" );
 		if( s && t )
 		{
-			PrimitiveVariable::Interpolation sInterpolation = mesh->variables.find( "s" )->second.interpolation;
-			PrimitiveVariable::Interpolation tInterpolation = mesh->variables.find( "t" )->second.interpolation;
+			PrimitiveVariable::Interpolation sInterpolation = triangulatedMeshPrimPtr->variables.find( "s" )->second.interpolation;
+			PrimitiveVariable::Interpolation tInterpolation = triangulatedMeshPrimPtr->variables.find( "t" )->second.interpolation;
 			if( sInterpolation == tInterpolation )
 			{
 				if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
 				{
 					size_t numSTs = s->readable().size();
-					meshObj->reserve_tex_coords( numSTs );
+					meshEntity->reserve_tex_coords( numSTs );
 					const std::vector<float> &svec = s->readable();
 					const std::vector<float> &tvec = t->readable();
 
 					for( size_t i = 0; i < numSTs; ++i)
 					{
-						meshObj->push_tex_coords( asr::GVector2( svec[i], 1.0f - tvec[i] ) );
+						meshEntity->push_tex_coords( asr::GVector2( svec[i], 1.0f - tvec[i] ) );
 					}
 
 					if( sInterpolation == PrimitiveVariable::FaceVarying )
@@ -168,8 +154,8 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 
 	// normals
 	{
-		PrimitiveVariableMap::const_iterator nIt = mesh->variables.find( "N" );
-		if( nIt != mesh->variables.end() )
+		PrimitiveVariableMap::const_iterator nIt = triangulatedMeshPrimPtr->variables.find( "N" );
+		if( nIt != triangulatedMeshPrimPtr->variables.end() )
 		{
 			const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
 			if( n )
@@ -178,13 +164,13 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 				if( nInterpolation == PrimitiveVariable::Varying || nInterpolation == PrimitiveVariable::Vertex || nInterpolation == PrimitiveVariable::FaceVarying )
 				{
 					size_t numNormals = n->readable().size();
-					meshObj->reserve_vertex_normals( numNormals );
+					meshEntity->reserve_vertex_normals( numNormals );
 					const std::vector<V3f> &normals = n->readable();
 					for( size_t i = 0; i < numNormals; ++i)
 					{
 						asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );
 						n = asf::normalize( n );
-						meshObj->push_vertex_normal( n );
+						meshEntity->push_vertex_normal( n );
 					}
 
 					if( nInterpolation == PrimitiveVariable::FaceVarying )
@@ -222,8 +208,8 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 
 	// tangents
 	{
-		PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( "uTangent" );
-		if( tIt != mesh->variables.end() )
+		PrimitiveVariableMap::const_iterator tIt = triangulatedMeshPrimPtr->variables.find( "uTangent" );
+		if( tIt != triangulatedMeshPrimPtr->variables.end() )
 		{
 			const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
 			if( t )
@@ -232,13 +218,13 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 				if( tInterpolation == PrimitiveVariable::Varying || tInterpolation == PrimitiveVariable::Vertex )
 				{
 					size_t numTangents = t->readable().size();
-					meshObj->reserve_vertex_tangents( numTangents );
+					meshEntity->reserve_vertex_tangents( numTangents );
 					const std::vector<V3f> &tangents = t->readable();
 					for( size_t i = 0; i < numTangents; ++i)
 					{
 						asr::GVector3 t( tangents[i].x, tangents[i].y, tangents[i].z );
 						t = asf::normalize( t );
-						meshObj->push_vertex_tangent( t );
+						meshEntity->push_vertex_tangent( t );
 					}
 				}
 				else
@@ -255,13 +241,17 @@ asr::Entity *ToAppleseedMeshConverter::doConversion( ConstObjectPtr from, ConstC
 
 	// copy triangles to mesh entity
 	{
-		meshObj->reserve_triangles( numTriangles );
+		meshEntity->reserve_triangles( numTriangles );
 
 		for( size_t i = 0; i < triangles.size(); ++i)
 		{
-			meshObj->push_triangle( triangles[i] );
+			meshEntity->push_triangle( triangles[i] );
 		}
 	}
 
-	return meshObj.release();
+	return meshEntity.release();
 }
+
+} // namespace MeshAlgo
+
+} // namespace IECoreAppleseed

@@ -39,8 +39,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
-#include "IECoreAppleseed/private/AppleseedUtil.h"
-
 using namespace IECore;
 using namespace boost;
 using namespace std;

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TOAPPLESEEDCAMERACONVERTER_H
-#define IECOREAPPLESEED_TOAPPLESEEDCAMERACONVERTER_H
+#ifndef IECOREAPPLESEED_COLORALGO_H
+#define IECOREAPPLESEED_COLORALGO_H
 
-#include "IECoreAppleseed/ToAppleseedConverter.h"
+#include <string>
 
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( Camera );
-} // namespace IECore
+#include "renderer/api/color.h"
 
 namespace IECoreAppleseed
 {
 
-class ToAppleseedCameraConverter : public ToAppleseedConverter
+namespace ColorAlgo
 {
 
-	public :
+std::string createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 
-		typedef IECore::Camera InputType;
-
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedCameraConverter, ToAppleseedCameraConverterTypeId, ToAppleseedConverter );
-
-		ToAppleseedCameraConverter( IECore::CameraPtr toConvert );
-		virtual ~ToAppleseedCameraConverter();
-
-	protected :
-
-		virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-
-		static ConverterDescription<ToAppleseedCameraConverter> g_description;
-
-};
-
-IE_CORE_DECLAREPTR( ToAppleseedCameraConverter );
+} // namespace ColorAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_TOAPPLESEEDCAMERACONVERTER_H
+#endif // IECOREAPPLESEED_COLORALGO_H

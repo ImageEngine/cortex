@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TOAPPLESEEDMESHCONVERTER_H
-#define IECOREAPPLESEED_TOAPPLESEEDMESHCONVERTER_H
+#include "boost/lexical_cast.hpp"
 
-#include "IECoreAppleseed/ToAppleseedShapeConverter.h"
+#include "OpenEXR/ImathColor.h"
 
-namespace IECore
-{
-IE_CORE_FORWARDDECLARE( MeshPrimitive );
-} // namespace IECore
+#include "IECoreAppleseed/EntityAlgo.h"
+#include "IECoreAppleseed/ColorAlgo.h"
+
+using namespace IECoreAppleseed;
+using namespace Imath;
+using namespace boost;
+using namespace std;
+
+namespace asf = foundation;
+namespace asr = renderer;
 
 namespace IECoreAppleseed
 {
 
-class ToAppleseedMeshConverter : public ToAppleseedShapeConverter
+namespace ColorAlgo
 {
 
-	public :
+string createColorEntity( asr::ColorContainer &colorContainer, const C3f &color, const string &name )
+{
+	// for monochrome colors, we don't need to create a color entity at all.
+	if( color.x == color.y && color.x == color.z )
+	{
+		return lexical_cast<string>( color.x );
+	}
 
-		typedef IECore::MeshPrimitive InputType;
+	asr::ColorValueArray values( 3, &color.x );
+	asr::ParamArray params;
+	params.insert( "color_space", "linear_rgb" );
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAppleseedMeshConverter, ToAppleseedMeshConverterTypeId, ToAppleseedShapeConverter );
+	asf::auto_release_ptr<asr::ColorEntity> c = asr::ColorEntityFactory::create( name.c_str(), params, values );
+	return EntityAlgo::insertEntityWithUniqueName( colorContainer, c, name.c_str() );
+}
 
-		ToAppleseedMeshConverter( IECore::MeshPrimitivePtr toConvert );
-		virtual ~ToAppleseedMeshConverter();
-
-	protected :
-
-		virtual renderer::Entity *doConversion( IECore::ConstObjectPtr from, IECore::ConstCompoundObjectPtr operands ) const;
-
-	private :
-
-		static ConverterDescription<ToAppleseedMeshConverter> g_description;
-
-};
-
-IE_CORE_DECLAREPTR( ToAppleseedMeshConverter );
+} // namespace ColorAlgo
 
 } // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_TOAPPLESEEDMESHCONVERTER_H
