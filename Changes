@@ -1,3 +1,24 @@
+9.10.1
+======
+
+#### IECoreArnold
+
+- Added support for matrix parameters
+
+#### IECoreAppleseed
+
+- Fliped t coordinate for mesh UVs.
+- Removed ToAppleseed converters. Moved code to Algo files.
+- Fixed compile issues for IECoreAppleseed on gcc 4.1.2
+- Fixing SConstruct configuration for Appleseed
+
+#### Build
+
+- Exposing OSL and OIIO build options
+
+9.10.0
+======
+
 #### IECoreArnold
 
 - Remove support for Arnold < 4.1.
@@ -8,7 +29,6 @@
   - Support for V3fVectorData.
 - Flipped t coordinate for mesh uvs.
 - Suppressed conversion of stIndices primvar.
-
 
 9.9.1
 =====
