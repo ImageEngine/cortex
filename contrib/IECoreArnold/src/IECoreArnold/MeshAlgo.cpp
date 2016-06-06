@@ -73,14 +73,14 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 
 	AtNode *result = AiNode( "polymesh" );
 
-	const std::vector<int> verticesPerFace = mesh->verticesPerFace()->readable();
+	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 	AiNodeSetArray(
 		result,
 		"nsides",
 		AiArrayConvert( verticesPerFace.size(), 1, AI_TYPE_INT, (void *)&( verticesPerFace[0] ) )
 	);
 
-	const std::vector<int> vertexIds = mesh->vertexIds()->readable();
+	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	AiNodeSetArray(
 		result,
 		"vidxs",
@@ -205,7 +205,7 @@ void convertNormalIndices( const IECore::MeshPrimitive *mesh, AtNode *node, Prim
 	}
 	else
 	{
-		const std::vector<int> vertexIds = mesh->vertexIds()->readable();
+		const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 		AiNodeSetArray(
 			node,
 			"nidxs",
