@@ -1,3 +1,12 @@
+9.11.0
+======
+
+#### IECoreArnold
+
+- Added support for AI_TYPE_VECTOR in `ParameterAlgo::setParameter()`.
+- Stopped making unnecessary copies of mesh topology in `MeshAlgo::convert()`.
+- Added support for point arrays in `ParameterAlgo::setParameter()`.
+
 9.10.1
 ======
 
