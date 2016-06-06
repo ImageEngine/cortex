@@ -69,7 +69,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 {
 	if( array )
 	{
-		AtArray *a = ParameterAlgo::dataToArray( value );
+		AtArray *a = ParameterAlgo::dataToArray( value, parameterType );
 		if( !a )
 		{
 			msg( Msg::Warning, "setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );
