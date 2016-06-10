@@ -65,6 +65,30 @@ class MeshTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], 1 - t[i] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
+	def testAdditionalUVs( self ) :
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["myMap_s"] = m["s"]
+		m["myMap_t"] = m["t"]
+		s, t = m["s"].data, m["t"].data
+
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( m )
+
+			uvs = arnold.AiNodeGetArray( n, "myMap" )
+			self.assertEqual( uvs.contents.nelements, 4 )
+
+			uvIndices = arnold.AiNodeGetArray( n, "myMapidxs" )
+			self.assertEqual( uvIndices.contents.nelements, 4 )
+
+			for i in range( 0, 4 ) :
+				p = arnold.AiArrayGetPnt2( uvs, i )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], 1 - t[i] ) )
+				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
+
+
 	def testNormals( self ) :
 
 		r = IECoreArnold.Renderer()
