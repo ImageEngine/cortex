@@ -115,6 +115,30 @@ class MeshTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
 				self.assertEqual( arnold.AiArrayGetVec( v, i ), i )
 
+	def testFaceVaryingPrimitiveVariables( self ) :
+
+		m = IECore.MeshPrimitive.createPlane(
+			IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ),
+			IECore.V2i( 2 ),
+		)
+		self.assertEqual( m.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 16 )
+
+		m["myPrimVar"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.FloatVectorData( range( 0, 16 ) )
+		)
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( m )
+			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			ia = arnold.AiNodeGetArray( n, "user:myPrimVaridxs" )
+			self.assertEqual( a.contents.nelements, 16 )
+			self.assertEqual( ia.contents.nelements, 16 )
+			for i in range( 0, 16 ) :
+				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
+				self.assertEqual( arnold.AiArrayGetUInt( ia, i ), i )
+
 	def testMotion( self ) :
 
 		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
