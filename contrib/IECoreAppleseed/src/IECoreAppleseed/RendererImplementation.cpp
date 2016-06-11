@@ -60,12 +60,12 @@
 #include "IECore/Transform.h"
 
 #include "IECoreAppleseed/private/RendererImplementation.h"
-#include "IECoreAppleseed/private/LogTarget.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
 #include "IECoreAppleseed/private/RendererController.h"
 #include "IECoreAppleseed/CameraAlgo.h"
 #include "IECoreAppleseed/EntityAlgo.h"
+#include "IECoreAppleseed/LogTarget.h"
 #include "IECoreAppleseed/ParameterAlgo.h"
 
 using namespace IECore;
