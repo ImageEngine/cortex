@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2014, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,12 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_TRANSFORMSTACK_H
-#define IECOREAPPLESEED_TRANSFORMSTACK_H
+#ifndef IECOREAPPLESEED_TRANSFORMALGO_H
+#define IECOREAPPLESEED_TRANSFORMALGO_H
 
-#include <set>
-#include <stack>
 #include <vector>
+#include <set>
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -46,39 +45,21 @@
 namespace IECoreAppleseed
 {
 
-/// A stack of possibly time varying transformations.
-class TransformStack
+namespace TransformAlgo
 {
 
-	public :
+void makeTransform( const Imath::M44f &m, foundation::Transformd &xform );
 
-		TransformStack();
+void makeTransformSequence( const Imath::M44f &m, renderer::TransformSequence &xformSeq );
 
-		void push( const renderer::TransformSequence &m );
-		void push_identity();
+void makeTransformSequence( const std::set<float> &times,
+	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
-		void pop();
+void makeTransformSequence( const std::vector<float> &times,
+	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
-		void clear();
-		std::size_t size() const;
-
-		const renderer::TransformSequence& top() const;
-		renderer::TransformSequence& top();
-
-		void setTransform( const Imath::M44f &m );
-		void setTransform( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms );
-
-		void concatTransform( const Imath::M44f &m );
-		void concatTransform( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms );
-
-	private :
-
-		std::stack<renderer::TransformSequence> m_stack;
-
-};
+} // namespace TransformAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_TRANSFORMSTACK_H
+#endif // IECOREAPPLESEED_TRANSFORMALGO_H

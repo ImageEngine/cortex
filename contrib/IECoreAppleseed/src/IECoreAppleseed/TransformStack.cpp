@@ -36,6 +36,8 @@
 
 #include <cassert>
 
+#include "IECoreAppleseed/TransformAlgo.h"
+
 using namespace Imath;
 
 namespace asf = foundation;
@@ -87,20 +89,20 @@ asr::TransformSequence& IECoreAppleseed::TransformStack::top()
 void IECoreAppleseed::TransformStack::setTransform( const M44f &m )
 {
 	asf::Transformd xform;
-	makeTransform( m, xform );
+	TransformAlgo::makeTransform( m, xform );
 	m_stack.top().set_transform( 0.0, xform );
 }
 
 void IECoreAppleseed::TransformStack::setTransform( const std::set<float> &times,
 	const std::vector<M44f> &transforms )
 {
-	makeTransformSequence( times, transforms, m_stack.top() );
+	TransformAlgo::makeTransformSequence( times, transforms, m_stack.top() );
 }
 
 void IECoreAppleseed::TransformStack::concatTransform( const M44f &m )
 {
 	asf::Transformd xform;
-	makeTransform( m, xform );
+	TransformAlgo::makeTransform( m, xform );
 	asr::TransformSequence seq;
 	seq.set_transform( 0.0, xform );
 	m_stack.top() = seq * m_stack.top();
@@ -110,30 +112,6 @@ void IECoreAppleseed::TransformStack::concatTransform( const std::set<float> &ti
 	const std::vector<M44f> &transforms )
 {
 	asr::TransformSequence seq;
-	makeTransformSequence( times, transforms, seq );
+	TransformAlgo::makeTransformSequence( times, transforms, seq );
 	m_stack.top() = seq * m_stack.top();
-}
-
-void IECoreAppleseed::TransformStack::makeTransform( const M44f &m, asf::Transformd &xform ) const
-{
-	M44d md( m );
-	xform.set_local_to_parent( asf::Matrix4d( md ) );
-	md.invert();
-	xform.set_parent_to_local( asf::Matrix4d( md ) );
-}
-
-void IECoreAppleseed::TransformStack::makeTransformSequence( const std::set<float> &times,
-	const std::vector<M44f> &transforms,
-	renderer::TransformSequence &xformSeq ) const
-{
-	assert( times.size() == transforms.size() );
-
-	asf::Transformd xform;
-
-	size_t j = 0;
-	for( std::set<float>::const_iterator it( times.begin() ), e( times.end() ); it != e; ++it )
-	{
-		makeTransform( transforms[j++], xform );
-		xformSeq.set_transform( *it, xform );
-	}
 }
