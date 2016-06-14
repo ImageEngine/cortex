@@ -68,49 +68,51 @@ namespace IECoreAppleseed
 namespace ParameterAlgo
 {
 
-string dataToString( ConstDataPtr value )
+string dataToString( const Data *value )
 {
+	assert( value );
+
 	stringstream ss;
 
 	switch( value->typeId() )
 	{
 		case IntDataTypeId :
 			{
-				int x = static_cast<const IntData*>( value.get() )->readable();
+				int x = static_cast<const IntData*>( value )->readable();
 				ss << x;
 			}
 			break;
 
 		case FloatDataTypeId :
 			{
-				float x = static_cast<const FloatData*>( value.get() )->readable();
+				float x = static_cast<const FloatData*>( value )->readable();
 				ss << x;
 			}
 			break;
 
 		case StringDataTypeId :
 			{
-				const string &x = static_cast<const StringData*>( value.get() )->readable();
+				const string &x = static_cast<const StringData*>( value )->readable();
 				ss << x;
 			}
 			break;
 
 		case V2iDataTypeId :
 			{
-				const V2i &x = static_cast<const V2iData*>( value.get() )->readable();
+				const V2i &x = static_cast<const V2iData*>( value )->readable();
 				ss << x.x << ", " << x.y;
 			}
 			break;
 
 		case Color3fDataTypeId :
 			{
-				const Color3f &x = static_cast<const Color3fData*>( value.get() )->readable();
+				const Color3f &x = static_cast<const Color3fData*>( value )->readable();
 				ss << x.x << ", " << x.y << ", " << x.z;
 			}
 			break;
 		case BoolDataTypeId :
 			{
-				bool x = static_cast<const BoolData*>( value.get() )->readable();
+				bool x = static_cast<const BoolData*>( value )->readable();
 				ss << x;
 			}
 			break;
@@ -121,6 +123,11 @@ string dataToString( ConstDataPtr value )
 	}
 
 	return ss.str();
+}
+
+string dataToString( ConstDataPtr value )
+{
+	return dataToString( value.get() );
 }
 
 void setParam( const string &name, const Data *value, asr::ParamArray &params )

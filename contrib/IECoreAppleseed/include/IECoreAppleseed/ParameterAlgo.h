@@ -45,6 +45,8 @@ namespace IECoreAppleseed
 namespace ParameterAlgo
 {
 
+std::string dataToString( const IECore::Data *value );
+
 std::string dataToString( IECore::ConstDataPtr value );
 
 void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray& params );
