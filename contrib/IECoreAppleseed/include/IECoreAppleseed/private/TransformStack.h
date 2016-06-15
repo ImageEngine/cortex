@@ -77,11 +77,6 @@ class TransformStack
 
 		std::stack<renderer::TransformSequence> m_stack;
 
-		void makeTransform( const Imath::M44f &m, foundation::Transformd &xform ) const;
-
-		void makeTransformSequence( const std::set<float> &times,
-			const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq ) const;
-
 };
 
 } // namespace IECoreAppleseed

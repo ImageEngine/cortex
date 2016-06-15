@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECoreAppleseed/private/LogTarget.h"
+#include "IECoreAppleseed/LogTarget.h"
 
 #include "IECore/MessageHandler.h"
 

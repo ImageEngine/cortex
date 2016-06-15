@@ -32,29 +32,34 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_PARAMETERALGO_H
-#define IECOREAPPLESEED_PARAMETERALGO_H
+#ifndef IECOREAPPLESEED_TRANSFORMALGO_H
+#define IECOREAPPLESEED_TRANSFORMALGO_H
+
+#include <vector>
+#include <set>
+
+#include "OpenEXR/ImathMatrix.h"
 
 #include "renderer/api/utility.h"
-
-#include "IECore/CompoundData.h"
 
 namespace IECoreAppleseed
 {
 
-namespace ParameterAlgo
+namespace TransformAlgo
 {
 
-std::string dataToString( const IECore::Data *value );
+void makeTransform( const Imath::M44f &m, foundation::Transformd &xform );
 
-std::string dataToString( IECore::ConstDataPtr value );
+void makeTransformSequence( const Imath::M44f &m, renderer::TransformSequence &xformSeq );
 
-void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray& params );
+void makeTransformSequence( const std::set<float> &times,
+	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
-renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
+void makeTransformSequence( const std::vector<float> &times,
+	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
-} // namespace ParameterAlgo
+} // namespace TransformAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_PARAMETERALGO_H
+#endif // IECOREAPPLESEED_TRANSFORMALGO_H
