@@ -53,6 +53,16 @@ using namespace IECoreArnold;
 namespace
 {
 
+AtArray *identityIndices( size_t size )
+{
+	AtArray *result = AiArrayAllocate( size, 1, AI_TYPE_UINT );
+	for( size_t i=0; i < size; ++i )
+	{
+		AiArraySetInt( result, i, i );
+	}
+	return result;
+}
+
 ConstFloatVectorDataPtr radius( const Primitive *primitive )
 {
 	if( ConstFloatVectorDataPtr radius = primitive->variableData<FloatVectorData>( "radius" ) )
@@ -196,6 +206,10 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 		{
 			typeString = "varying ";
 		}
+		else if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			typeString = "indexed ";
+		}
 
 		if( typeString == "" )
 		{
@@ -213,6 +227,14 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 		if( array )
 		{
 			AiNodeSetArray( shape, name, array );
+			if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
+			{
+				AiNodeSetArray(
+					shape,
+					(name + string("idxs")).c_str(),
+					identityIndices( array->nelements )
+				);
+			}
 		}
 		else
 		{
