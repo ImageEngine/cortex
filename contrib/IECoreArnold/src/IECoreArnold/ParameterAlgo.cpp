@@ -370,6 +370,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolDataTypeId :
 			array = false;
 			return AI_TYPE_BOOLEAN;
+		case V3fDataTypeId :
+			array = false;
+			return AI_TYPE_VECTOR;
 		case M44fDataTypeId :
 			array = false;
 			return AI_TYPE_MATRIX;
