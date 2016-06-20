@@ -76,6 +76,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 		s["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 11 )
 		s["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, True )
 		s["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.5 )
+		s["m"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
 
 		with IECoreArnold.UniverseBlock() :
 
@@ -86,6 +87,13 @@ class SphereAlgoTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiNodeGetInt( n, "user:i" ), 11 )
 			self.assertEqual( arnold.AiNodeGetBool( n, "user:b" ), True )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "user:f" ), 2.5 )
+
+			m = arnold.AtMatrix()
+			arnold.AiNodeGetMatrix( n, "user:m", m )
+			self.assertEqual(
+				[ getattr( m, f[0] ) for f in m._fields_ ],
+				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
+			)
 
 if __name__ == "__main__":
     unittest.main()
