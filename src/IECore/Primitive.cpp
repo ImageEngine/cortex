@@ -257,6 +257,8 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 	// SimpleTypedData should be accepted in the rare case that variableSize==1, but we're rejecting that
 	// argument on the grounds that it makes for a whole bunch of special cases with no gain - the general
 	// cases all require arrays so that's what we require.
+	/// \todo This is not correct in the case of CurvesPrimitives, where uniform interpolation should be
+	/// treated the same as constant.
 	size_t sz = variableSize( pv.interpolation );
 	ValidateArraySize func( sz );
 	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data.get(), func );
