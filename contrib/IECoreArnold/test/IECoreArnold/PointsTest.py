@@ -141,15 +141,29 @@ class PointsTest( unittest.TestCase ) :
 	def testUniformPrimitiveVariable( self ) :
 
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
-		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 0, 10 ) ) )
+		p["myPrimVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 10 ) )
 
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
-			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
-			self.assertEqual( a.contents.nelements, 10 )
-			for i in range( 0, 10 ) :
-				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
+			self.assertEqual( arnold.AiNodeGetInt( n, "user:myPrimVar" ), 10 )
+
+	def testVertexPrimitiveVariable( self ) :
+
+		for interpolation in ( "Vertex", "Varying", "FaceVarying" ) :
+
+			p = IECore.PointsPrimitive( IECore.V3fVectorData( 10 ) )
+			p["myPrimVar"] = IECore.PrimitiveVariable( getattr( IECore.PrimitiveVariable.Interpolation, interpolation ), IECore.IntVectorData( range( 0, 10 ) ) )
+
+			self.assertTrue( p.arePrimitiveVariablesValid() )
+
+			with IECoreArnold.UniverseBlock() :
+
+				n = IECoreArnold.NodeAlgo.convert( p )
+				a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+				self.assertEqual( a.contents.nelements, 10 )
+				for i in range( 0, 10 ) :
+					self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
 
 	def testBooleanPrimitiveVariable( self ) :
 
