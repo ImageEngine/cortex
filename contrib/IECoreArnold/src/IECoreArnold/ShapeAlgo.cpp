@@ -175,9 +175,72 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
+
+	// Arnold has "constant", "uniform", "varying" and "indexed" interpolation,
+	// whereas Cortex has Constant, Uniform, Varying, Vertex and FaceVarying.
+	// The conversion between the two depends on the type of the primitive.
+
+	std::string arnoldInterpolation;
+	switch( primitiveVariable.interpolation )
+	{
+		case PrimitiveVariable::Constant :
+			arnoldInterpolation = "constant";
+			break;
+		case PrimitiveVariable::Uniform :
+			arnoldInterpolation = "uniform";
+			break;
+		case PrimitiveVariable::Varying :
+			arnoldInterpolation = "varying";
+			break;
+		case PrimitiveVariable::FaceVarying :
+			if( primitive->isInstanceOf( MeshPrimitiveTypeId ) )
+			{
+				arnoldInterpolation = "indexed";
+				break;
+			}
+			// "indexed" data only makes sense for meshes - fall
+			// through to Vertex case,
+		case PrimitiveVariable::Vertex :
+			// Arnold doesn't appear to have vertex storage, but
+			// fortunately for many primitives it is equivalent to varying.
+			// Unfortunately that is not the case for cubic CurvesPrimitives, so
+			// we can not currently export per-vertex data for cubic curves.
+			if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Varying ) )
+			{
+				arnoldInterpolation = "varying";
+			}
+			break;
+		default :
+			break;
+	}
+
+	if( arnoldInterpolation == "" )
+	{
+		msg(
+			Msg::Warning,
+			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
+		);
+		return;
+	}
+
+	if( primitive->isInstanceOf( PointsPrimitiveTypeId ) )
+	{
+		// Cortex treats uniform as one-per-primitive
+		// but Arnold treats uniform as one-per-point.
+		if( arnoldInterpolation == "uniform" )
+		{
+			arnoldInterpolation = "constant";
+		}
+		else if( arnoldInterpolation == "varying" )
+		{
+			arnoldInterpolation = "uniform";
+		}
+	}
+
 	// Deal with the simple case of constant data.
 
-	if( primitiveVariable.interpolation == PrimitiveVariable::Constant )
+	if( arnoldInterpolation == "constant" )
 	{
 		ParameterAlgo::setParameter( shape, name, primitiveVariable.data.get() );
 		return;
@@ -197,41 +260,13 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 		return;
 	}
 
-	std::string typeString;
-	if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
-	{
-		typeString = "uniform ";
-	}
-	else if( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
-	{
-		typeString = "varying ";
-	}
-	else if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Vertex ) )
-	{
-		typeString = "varying ";
-	}
-	else if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
-	{
-		typeString = "indexed ";
-	}
-
-	if( typeString == "" )
-	{
-		msg(
-			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
-			boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
-		);
-		return;
-	}
-
-	typeString += AiParamGetTypeName( type );
+	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
 	AiNodeDeclare( shape, name, typeString.c_str() );
 	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
 	if( array )
 	{
 		AiNodeSetArray( shape, name, array );
-		if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
+		if( arnoldInterpolation == "indexed" )
 		{
 			AiNodeSetArray(
 				shape,
