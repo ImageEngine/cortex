@@ -1,3 +1,20 @@
+9.11.1
+======
+
+#### IECoreArnold
+
+- Improved UV set support.
+- Support for FaceVarying primitive variables.
+- Support for Constant V3f primitive variables.
+- Support for Vertex primitive variables on PointsPrimitives.
+- Fixed incorrect output of Vertex primitive variables on CurvesPrimitives (these are not yet valid in Arnold)
+
+#### IECoreAppleseed
+
+- Made LogTarget class public.
+- Added dataToString overload accepting a const Data*.
+- Refactored transform conversion code out of TransformStack.
+
 9.11.0
 ======
 
