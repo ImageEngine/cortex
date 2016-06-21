@@ -175,75 +175,78 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
+	// Deal with the simple case of constant data.
+
 	if( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
 		ParameterAlgo::setParameter( shape, name, primitiveVariable.data.get() );
+		return;
+	}
+
+	// Now deal with more complex cases with array data.
+
+	bool isArray = false;
+	int type = ParameterAlgo::parameterType( primitiveVariable.data->typeId(), isArray );
+	if( type == AI_TYPE_NONE || !isArray )
+	{
+		msg(
+			Msg::Warning,
+			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			boost::format( "Unable to create user parameter \"%s\" for primitive variable of type \"%s\"" ) % name % primitiveVariable.data->typeName()
+		);
+		return;
+	}
+
+	std::string typeString;
+	if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
+	{
+		typeString = "uniform ";
+	}
+	else if( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
+	{
+		typeString = "varying ";
+	}
+	else if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Vertex ) )
+	{
+		typeString = "varying ";
+	}
+	else if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
+	{
+		typeString = "indexed ";
+	}
+
+	if( typeString == "" )
+	{
+		msg(
+			Msg::Warning,
+			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
+		);
+		return;
+	}
+
+	typeString += AiParamGetTypeName( type );
+	AiNodeDeclare( shape, name, typeString.c_str() );
+	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
+	if( array )
+	{
+		AiNodeSetArray( shape, name, array );
+		if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			AiNodeSetArray(
+				shape,
+				(name + string("idxs")).c_str(),
+				identityIndices( array->nelements )
+			);
+		}
 	}
 	else
 	{
-		bool isArray = false;
-		int type = ParameterAlgo::parameterType( primitiveVariable.data->typeId(), isArray );
-		if( type == AI_TYPE_NONE || !isArray )
-		{
-			msg(
-				Msg::Warning,
-				"ToArnoldShapeConverter::convertPrimitiveVariable",
-				boost::format( "Unable to create user parameter \"%s\" for primitive variable of type \"%s\"" ) % name % primitiveVariable.data->typeName()
-			);
-			return;
-		}
-
-		std::string typeString;
-		if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
-		{
-			typeString = "uniform ";
-		}
-		else if( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
-		{
-			typeString = "varying ";
-		}
-		else if( primitive->variableSize( primitiveVariable.interpolation ) == primitive->variableSize( PrimitiveVariable::Vertex ) )
-		{
-			typeString = "varying ";
-		}
-		else if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
-		{
-			typeString = "indexed ";
-		}
-
-		if( typeString == "" )
-		{
-			msg(
-				Msg::Warning,
-				"ToArnoldShapeConverter::convertPrimitiveVariable",
-				boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
-			);
-			return;
-		}
-
-		typeString += AiParamGetTypeName( type );
-		AiNodeDeclare( shape, name, typeString.c_str() );
-		AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
-		if( array )
-		{
-			AiNodeSetArray( shape, name, array );
-			if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
-			{
-				AiNodeSetArray(
-					shape,
-					(name + string("idxs")).c_str(),
-					identityIndices( array->nelements )
-				);
-			}
-		}
-		else
-		{
-			msg(
-				Msg::Warning,
-				"ToArnoldShapeConverter::convertPrimitiveVariable",
-				boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
-			);
-		}
+		msg(
+			Msg::Warning,
+			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
+		);
 	}
 }
 
