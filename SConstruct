@@ -3306,9 +3306,15 @@ if doConfigure :
 
 		c.Finish()
 
-		# we can't append this before configuring, as then it gets built as
-		# part of the configure process
-		appleseedEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		appleseedEnv.Append(
+			LIBS = [
+				"appleseed",
+				# We can't append this before configuring, as then it gets built as
+				# part of the configure process
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+
 		appleseedPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		appleseedDriverEnv.Append(
