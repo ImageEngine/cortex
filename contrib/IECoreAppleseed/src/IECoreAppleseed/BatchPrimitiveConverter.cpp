@@ -100,8 +100,7 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::BatchPrimitiveConverter::doC
 
 		if( !filesystem::exists( p ) )
 		{
-			MeshPrimitive *meshPrimitive = static_cast<MeshPrimitive *>( primitive.get() );
-			asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( meshPrimitive ) );
+			asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( primitive.get() ) );
 			if( entity.get() == 0 )
 			{
 				msg( Msg::Warning, "IECoreAppleseed::BatchPrimitiveConverter", "Couldn't convert primitive." );

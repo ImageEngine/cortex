@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
-#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#ifndef IECOREAPPLESEED_OBJECTALGO_H
+#define IECOREAPPLESEED_OBJECTALGO_H
 
-#include <memory>
+#include "IECore/Object.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/thread/thread.hpp"
+#include "renderer/api/object.h"
 
-#include "renderer/api/project.h"
-#include "renderer/api/rendering.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/RendererController.h"
+#include <vector>
 
 namespace IECoreAppleseed
 {
 
-/// The EditBlockHandler class manages an interactive appleseed
-/// rendering session, starting, stopping and pausing rendering
-/// when edits are being made.
-class EditBlockHandler : boost::noncopyable
+namespace ObjectAlgo
 {
 
-	public :
+bool isPrimitiveSupported( const IECore::Object *primitive );
 
-		explicit EditBlockHandler( renderer::Project &project );
-		~EditBlockHandler();
+renderer::Object *convert( const IECore::Object *primitive );
+renderer::Object *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime );
 
-		void startRendering();
-
-		bool insideEditBlock() const;
-
-		const std::string &exactScopeName() const;
-
-		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
-		void editEnd();
-
-	private :
-
-		renderer::Project &m_project;
-		std::auto_ptr<RendererController> m_rendererController;
-		std::auto_ptr<renderer::MasterRenderer> m_renderer;
-		boost::thread m_renderingThread;
-		int m_editDepth;
-		std::string m_exactScopeName;
-
-		static void renderThreadFunc( EditBlockHandler *self );
-
-		void pauseRendering();
-		void stopRendering();
-
-};
+} // namespace ObjectAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#endif // IECOREAPPLESEED_OBJECTALGO_H

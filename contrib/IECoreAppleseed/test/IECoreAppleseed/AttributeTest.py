@@ -109,7 +109,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 			r.setAttribute( "name", IECore.StringData( "plane" ) )
 			r.setAttribute( "as:alpha_map", IECore.StringData( os.path.dirname( __file__ ) + "/data/textures/leaf.exr" ) )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) ).render( r )
+			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ) ).render( r )
 			r.attributeEnd()
 
 		del r

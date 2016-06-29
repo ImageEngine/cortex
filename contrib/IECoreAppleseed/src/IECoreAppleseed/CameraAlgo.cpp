@@ -37,6 +37,8 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "foundation/math/scalar.h"
+
 using namespace IECore;
 using namespace Imath;
 
@@ -77,15 +79,20 @@ renderer::Camera *convert( IECore::Camera *camera )
 			cameraParams.insert( "film_dimensions", ss.str().c_str() );
 		}
 
-		double horizontal_fov = cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable();
+		double fov = cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable();
 
-		// adjust fov.
 		if( resolution.x > resolution.y )
 		{
-			horizontal_fov *= static_cast<float>( resolution.x ) / resolution.y;
+			// compute horizontal fov.
+			// reference: http://paulbourke.net/miscellaneous/aperture
+			double aspect = static_cast<double>( resolution.x ) / resolution.y;
+			double horizontal_fov = asf::rad_to_deg( 2.0 * std::atan( aspect * std::tan( asf::deg_to_rad( fov ) * 0.5 ) ) );
+			cameraParams.insert( "horizontal_fov", horizontal_fov );
 		}
-
-		cameraParams.insert( "horizontal_fov", horizontal_fov );
+		else
+		{
+			cameraParams.insert( "horizontal_fov", fov );
+		}
 
 		cameraFactory = cameraFactories.lookup( "pinhole_camera" );
 	}
@@ -102,8 +109,7 @@ renderer::Camera *convert( IECore::Camera *camera )
 	}
 	else
 	{
-		 msg( Msg::Warning, "ToAppleseedCameraConverter", "unsupported projection type. Creating a default camera" );
-		 cameraFactory = cameraFactories.lookup( "pinhole_camera" );
+		throw Exception( "Unknown camera projection" );
 	}
 
 	asf::auto_release_ptr<asr::Camera> result( cameraFactory->create( "camera", cameraParams ) );

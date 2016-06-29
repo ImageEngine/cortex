@@ -88,8 +88,6 @@ class PrimitiveConverter : boost::noncopyable
 		void createObjectInstance( renderer::Assembly &assembly, const renderer::Object *obj,
 			const std::string &objSourceName, const AttributeState &attrState, const std::string &materialName );
 
-		bool checkTimeSamples( const std::set<float> &times ) const;
-
 		virtual std::string objectEntityName( const std::string& objectName ) const = 0;
 
 		typedef std::map<IECore::MurmurHash, const renderer::Assembly*> InstanceMapType;

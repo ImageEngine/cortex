@@ -62,11 +62,11 @@
 #include "IECoreAppleseed/private/RendererImplementation.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
-#include "IECoreAppleseed/private/RendererController.h"
 #include "IECoreAppleseed/CameraAlgo.h"
 #include "IECoreAppleseed/EntityAlgo.h"
 #include "IECoreAppleseed/LogTarget.h"
 #include "IECoreAppleseed/ParameterAlgo.h"
+#include "IECoreAppleseed/RendererController.h"
 
 using namespace IECore;
 using namespace IECoreAppleseed;
@@ -501,7 +501,8 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 	else if( isProjectGen() )
 	{
-		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles );
+		const int writeOptions = asr::ProjectFileWriter::OmitHandlingAssetFiles | asr::ProjectFileWriter::OmitWritingGeometryFiles;
+		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), writeOptions );
 	}
 	else
 	{

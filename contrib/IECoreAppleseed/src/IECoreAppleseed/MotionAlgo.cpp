@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,60 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
-#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#include "IECoreAppleseed/MotionAlgo.h"
 
-#include <memory>
+#include "IECore/Exception.h"
+#include "IECore/ObjectInterpolator.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/thread/thread.hpp"
+#include "foundation/math/scalar.h"
 
-#include "renderer/api/project.h"
-#include "renderer/api/rendering.h"
+#include <algorithm>
+#include <vector>
 
-#include "IECore/CompoundData.h"
+using namespace IECore;
 
-#include "IECoreAppleseed/RendererController.h"
+namespace asf = foundation;
 
 namespace IECoreAppleseed
 {
 
-/// The EditBlockHandler class manages an interactive appleseed
-/// rendering session, starting, stopping and pausing rendering
-/// when edits are being made.
-class EditBlockHandler : boost::noncopyable
+namespace MotionAlgo
 {
 
-	public :
+void resamplePrimitiveKeys( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime, std::vector<IECore::ObjectPtr> &resampledSamples )
+{
+	resampledSamples.clear();
 
-		explicit EditBlockHandler( renderer::Project &project );
-		~EditBlockHandler();
+	int numSamples = asf::is_pow2( times.size() ) ? times.size() : asf::next_pow2( times.size() );
+	assert( std::is_sorted( times.begin(), times.end() ) );
 
-		void startRendering();
+	for( int i = 0; i < numSamples; ++i)
+	{
+		const float time = static_cast<float>( i ) / ( numSamples - 1 ) * ( shutterCloseTime - shutterOpenTime ) + shutterOpenTime;
 
-		bool insideEditBlock() const;
+		if( time <= times.front() )
+		{
+			IECore::ObjectPtr o = samples.front()->copy();
+			resampledSamples.push_back( o );
+			continue;
+		}
 
-		const std::string &exactScopeName() const;
+		if( time >= times.back() )
+		{
+			IECore::ObjectPtr o = samples.back()->copy();
+			resampledSamples.push_back( o );
+			continue;
+		}
 
-		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
-		void editEnd();
+		std::vector<float>::const_iterator it = std::lower_bound( times.begin(), times.end(), time );
+		int index = it - times.begin() - 1;
 
-	private :
+		float t = ( time - times[index] ) / ( times[index + 1] - times[index] );
+		ObjectPtr obj = linearObjectInterpolation( samples[index], samples[index + 1], t );
+		resampledSamples.push_back( obj );
+	}
+}
 
-		renderer::Project &m_project;
-		std::auto_ptr<RendererController> m_rendererController;
-		std::auto_ptr<renderer::MasterRenderer> m_renderer;
-		boost::thread m_renderingThread;
-		int m_editDepth;
-		std::string m_exactScopeName;
-
-		static void renderThreadFunc( EditBlockHandler *self );
-
-		void pauseRendering();
-		void stopRendering();
-
-};
+} // namespace MotionAlgo
 
 } // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H
