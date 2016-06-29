@@ -51,12 +51,8 @@ namespace TransformAlgo
 void makeTransform( const Imath::M44f &m, foundation::Transformd &xform );
 
 void makeTransformSequence( const Imath::M44f &m, renderer::TransformSequence &xformSeq );
-
-void makeTransformSequence( const std::set<float> &times,
-	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
-
-void makeTransformSequence( const std::vector<float> &times,
-	const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
+void makeTransformSequence( const std::set<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
+void makeTransformSequence( const std::vector<float> &times, const std::vector<Imath::M44f> &transforms, renderer::TransformSequence &xformSeq );
 
 } // namespace TransformAlgo
 

@@ -37,8 +37,7 @@
 
 #include "renderer/api/object.h"
 
-#include "IECore/MeshPrimitive.h"
-
+#include "IECore/Object.h"
 
 namespace IECoreAppleseed
 {
@@ -46,7 +45,9 @@ namespace IECoreAppleseed
 namespace MeshAlgo
 {
 
-renderer::MeshObject *convert( IECore::MeshPrimitive *mesh );
+renderer::MeshObject *convert( const IECore::Object *primitive );
+renderer::MeshObject *convert( const std::vector<const IECore::Object *> &samples );
+renderer::MeshObject *convert( const std::vector<IECore::ObjectPtr> &samples );
 
 } // namespace MeshAlgo
 

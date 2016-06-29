@@ -43,6 +43,7 @@
 #include "IECore/ObjectInterpolator.h"
 
 #include "IECoreAppleseed/private/PrimitiveConverter.h"
+#include "IECoreAppleseed/MotionAlgo.h"
 #include "IECoreAppleseed/TextureAlgo.h"
 
 using namespace std;
@@ -134,7 +135,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( cons
 	const vector<PrimitivePtr> *primitivesPtr = &primitives;
 	vector<PrimitivePtr> resampledPrimitives;
 
-	if( !checkTimeSamples( times ) )
+	if( !MotionAlgo::checkTimeSamples( times, m_shutterOpenTime, m_shutterCloseTime ) )
 	{
 		// we need to resample the deformation samples.
 		msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::motionEnd", "Resampling primitive samples." );
@@ -278,44 +279,4 @@ void IECoreAppleseed::PrimitiveConverter::createObjectInstance( asr::Assembly &a
 	asf::auto_release_ptr<asr::ObjectInstance> objInstance = asr::ObjectInstanceFactory::create( instanceName.c_str(),
 		params, objectEntityName( objSourceName ).c_str(), asf::Transformd::make_identity(), materials, materials );
 	assembly.object_instances().insert( objInstance );
-}
-
-bool IECoreAppleseed::PrimitiveConverter::checkTimeSamples( const set<float> &times ) const
-{
-	// check that the number of samples is a power of 2.
-	if( !asf::is_pow2( times.size() ) )
-	{
-		return false;
-	}
-
-	const float eps = 0.01f;
-
-	// check that the first and last sample matches the shutter times.
-	if( !asf::feq( m_shutterOpenTime, *times.begin(), eps ) )
-	{
-		return false;
-	}
-
-	if( !asf::feq( m_shutterCloseTime, *times.rbegin(), eps ) )
-	{
-		return false;
-	}
-
-	// check that the samples are equally spaced.
-	set<float>::const_iterator next( times.begin() );
-	set<float>::const_iterator it( next++ );
-
-	float sampleInterval = *next - *it;
-
-	for( set<float>::const_iterator e( times.end() ) ; next != e; ++next )
-	{
-		if( !asf::feq( sampleInterval, *next - *it, eps ) )
-		{
-			return false;
-		}
-
-		it = next;
-	}
-
-	return true;
 }

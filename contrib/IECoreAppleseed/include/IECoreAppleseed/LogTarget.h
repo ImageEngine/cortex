@@ -48,8 +48,7 @@ class IECoreLogTarget : public foundation::ILogTarget
 
 		virtual void release();
 
-		virtual void write( const foundation::LogMessage::Category category,
-			const char* file, const size_t line, const char* header, const char* message);
+		virtual void write( const foundation::LogMessage::Category category, const char* file, const size_t line, const char* header, const char* message );
 
 };
 

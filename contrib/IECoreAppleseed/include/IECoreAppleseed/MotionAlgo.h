@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,69 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
-#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#ifndef IECOREAPPLESEED_MOTIONALGO_H
+#define IECOREAPPLESEED_MOTIONALGO_H
 
-#include <memory>
+#include "IECore/Object.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/thread/thread.hpp"
-
-#include "renderer/api/project.h"
-#include "renderer/api/rendering.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/RendererController.h"
+#include "foundation/math/scalar.h"
 
 namespace IECoreAppleseed
 {
 
-/// The EditBlockHandler class manages an interactive appleseed
-/// rendering session, starting, stopping and pausing rendering
-/// when edits are being made.
-class EditBlockHandler : boost::noncopyable
+namespace MotionAlgo
 {
 
-	public :
+// appleseed requires a power of two number of primitive deformation samples,
+// equally spaced between shutter open / close times.
+// check the time samples and return true if they satisfy the conditions.
+template< typename TimeContainer >
+bool checkTimeSamples( const TimeContainer &times, float shutterOpenTime, float shutterCloseTime )
+{
+	// check that the number of samples is a power of 2.
+	if( !foundation::is_pow2( times.size() ) )
+	{
+		return false;
+	}
 
-		explicit EditBlockHandler( renderer::Project &project );
-		~EditBlockHandler();
+	const float eps = 0.01f;
 
-		void startRendering();
+	// check that the first and last samples match the shutter times.
+	if( !foundation::feq( shutterOpenTime, *times.begin(), eps ) )
+	{
+		return false;
+	}
 
-		bool insideEditBlock() const;
+	if( !foundation::feq( shutterCloseTime, *times.rbegin(), eps ) )
+	{
+		return false;
+	}
 
-		const std::string &exactScopeName() const;
+	// check that the samples are equally spaced.
+	typename TimeContainer::const_iterator next( times.begin() );
+	typename TimeContainer::const_iterator it( next++ );
 
-		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
-		void editEnd();
+	float sampleInterval = *next - *it;
 
-	private :
+	for( typename TimeContainer::const_iterator e( times.end() ) ; next != e; ++next )
+	{
+		if( !foundation::feq( sampleInterval, *next - *it, eps ) )
+		{
+			return false;
+		}
 
-		renderer::Project &m_project;
-		std::auto_ptr<RendererController> m_rendererController;
-		std::auto_ptr<renderer::MasterRenderer> m_renderer;
-		boost::thread m_renderingThread;
-		int m_editDepth;
-		std::string m_exactScopeName;
+		it = next;
+	}
 
-		static void renderThreadFunc( EditBlockHandler *self );
+	return true;
+}
 
-		void pauseRendering();
-		void stopRendering();
+// Resample a set of primitive keys so that number of samples
+// is a power of 2, equally spaced between the shutter open and close times.
+void resamplePrimitiveKeys( const std::vector<const IECore::Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime, std::vector<IECore::ObjectPtr> &resampledKeys );
 
-};
+} // namespace MotionAlgo
 
 } // namespace IECoreAppleseed
 
-#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#endif // IECOREAPPLESEED_MOTIONALGO_H

@@ -35,9 +35,11 @@
 #ifndef IECOREAPPLESEED_PARAMETERALGO_H
 #define IECOREAPPLESEED_PARAMETERALGO_H
 
+#include "IECore/CompoundData.h"
+
 #include "renderer/api/utility.h"
 
-#include "IECore/CompoundData.h"
+#include <string>
 
 namespace IECoreAppleseed
 {
@@ -46,12 +48,13 @@ namespace ParameterAlgo
 {
 
 std::string dataToString( const IECore::Data *value );
-
 std::string dataToString( IECore::ConstDataPtr value );
 
-void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray& params );
+void setParam( const std::string &name, const IECore::Data *value, renderer::ParamArray &params );
 
 renderer::ParamArray convertParams( const IECore::CompoundDataMap &parameters );
+
+renderer::ParamArray convertShaderParameters( const IECore::CompoundDataMap &parameters, std::string &handle );
 
 } // namespace ParameterAlgo
 

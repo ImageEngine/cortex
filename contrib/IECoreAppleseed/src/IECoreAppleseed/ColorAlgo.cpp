@@ -32,14 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreAppleseed/ColorAlgo.h"
+#include "IECoreAppleseed/EntityAlgo.h"
+
 #include "boost/lexical_cast.hpp"
 
 #include "OpenEXR/ImathColor.h"
 
-#include "IECoreAppleseed/EntityAlgo.h"
-#include "IECoreAppleseed/ColorAlgo.h"
-
-using namespace IECoreAppleseed;
 using namespace Imath;
 using namespace boost;
 using namespace std;
@@ -53,12 +52,12 @@ namespace IECoreAppleseed
 namespace ColorAlgo
 {
 
-string createColorEntity( asr::ColorContainer &colorContainer, const C3f &color, const string &name )
+pair<string, asr::ColorEntity*> createColorEntity( asr::ColorContainer &colorContainer, const C3f &color, const string &name )
 {
 	// for monochrome colors, we don't need to create a color entity at all.
 	if( color.x == color.y && color.x == color.z )
 	{
-		return lexical_cast<string>( color.x );
+		return make_pair( lexical_cast<string>( color.x ), static_cast<asr::ColorEntity *>( 0 ) );
 	}
 
 	asr::ColorValueArray values( 3, &color.x );
@@ -66,7 +65,8 @@ string createColorEntity( asr::ColorContainer &colorContainer, const C3f &color,
 	params.insert( "color_space", "linear_rgb" );
 
 	asf::auto_release_ptr<asr::ColorEntity> c = asr::ColorEntityFactory::create( name.c_str(), params, values );
-	return EntityAlgo::insertEntityWithUniqueName( colorContainer, c, name.c_str() );
+	asr::ColorEntity *colorEntity = c.get();
+	return make_pair( EntityAlgo::insertEntityWithUniqueName( colorContainer, c, name.c_str() ), colorEntity );
 }
 
 } // namespace ColorAlgo
