@@ -265,28 +265,37 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 	variablesToConvert.erase( "P" ); // These will be converted
 	variablesToConvert.erase( "N" ); // outside of this function.
 
-	// Convert and remove indexed UVs first.
+	// Convert and remove indexed UVs first. We must perform
+	// the iteration to find the names separately to the iteration
+	// to convert them, because convertIndexedUVSet() removes items
+	// from variablesToConvert, and would therefore invalidate
+	// the interators we were using if we were to do it in one loop.
+	vector<string> uvSetNames;
 	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt; ++it )
 	{
 		if( boost::ends_with( it->first, "Indices" ) )
 		{
-			convertIndexedUVSet(
-				it->first == "stIndices" ? "" : it->first.substr( 0, it->first.size() - 7 ),
-				variablesToConvert, result
-			);
+			uvSetNames.push_back( it->first == "stIndices" ? "" : it->first.substr( 0, it->first.size() - 7 ) );
 		}
 	}
+	for( vector<string>::const_iterator it = uvSetNames.begin(), eIt = uvSetNames.end(); it != eIt; ++it )
+	{
+		convertIndexedUVSet( *it, variablesToConvert, result );
+	}
 
-	// Then convert and remove non-indexed uvs.
+	// Then convert and remove non-indexed uvs. As above, we must
+	// do this in two phases.
+	uvSetNames.clear();
 	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt; ++it )
 	{
 		if( it->first == "s" || boost::ends_with( it->first, "_s" ) )
 		{
-			convertUVSet(
-				it->first == "s" ? "" : it->first.substr( 0, it->first.size() - 2 ),
-				variablesToConvert, vertexIds, result
-			);
+			uvSetNames.push_back( it->first == "s" ? "" : it->first.substr( 0, it->first.size() - 2 ) );
 		}
+	}
+	for( vector<string>::const_iterator it = uvSetNames.begin(), eIt = uvSetNames.end(); it != eIt; ++it )
+	{
+		convertUVSet( *it, variablesToConvert, vertexIds, result );
 	}
 
 	// Finally, do a generic conversion of anything that remains.
