@@ -2140,8 +2140,6 @@ void StreamIndexedIO::open( StreamFilePtr file, const IndexedIO::EntryIDList &ro
 	newIndex->openStream();
 	m_node = new StreamIndexedIO::Node( newIndex.get(), newIndex->root() );
 	setRoot( root );
-	assert( m_node );
-	assert( m_node->dirNode() );
 
 	// \todo Currently in Append mode, the nodes lazily loaded will not be editable. 
 	// In order to fully support it, we should probably read all indexes in memory, 

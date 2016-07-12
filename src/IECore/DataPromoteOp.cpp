@@ -253,7 +253,7 @@ ObjectPtr DataPromoteOp::doOperation( const CompoundObject * operands )
 
 #ifndef NDEBUG
 	size_t srcSize = despatchTypedData< TypedDataSize >( srcData ) ;
-	size_t targetSize = despatchTypedData< TypedDataSize >( targetData ) ;
+	size_t targetSize = despatchTypedData< TypedDataSize >( targetData.get() ) ;
 
 	/// This post-condition is stated in the class documentation
 	assert( srcSize == targetSize );
