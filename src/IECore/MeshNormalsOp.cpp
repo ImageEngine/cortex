@@ -62,7 +62,8 @@ MeshNormalsOp::MeshNormalsOp() : MeshPrimitiveOp( "Calculates vertex normals for
 	IntParameter::PresetsContainer interpolationPresets;
 	interpolationPresets.push_back( IntParameter::Preset( "Vertex", PrimitiveVariable::Vertex ) );
 	interpolationPresets.push_back( IntParameter::Preset( "Uniform", PrimitiveVariable::Uniform ) );
-	IntParameterPtr interpolationParameter = new IntParameter(
+	IntParameterPtr interpolationParameter;
+	interpolationParameter = new IntParameter(
 		"interpolation",
 		"The primitive variable interpolation type for the calculated normals.",
 		PrimitiveVariable::Vertex,
