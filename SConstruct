@@ -82,7 +82,11 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Werror", "-O2", "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
+	[ "-pipe", "-Wall", "-Werror", "-O2" ]
+)
+
+o.Add(
+	BoolVariable( "DEBUG", "Make a debug build", False )
 )
 
 o.Add(
@@ -1117,6 +1121,11 @@ if env["PLATFORM"]=="darwin" :
 	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :	
 		env.Append( CXXFLAGS = "-Wno-long-double" )
 			
+if env["DEBUG"] :
+	env.Append( CXXFLAGS = [ "-g" ] )
+else :
+	env.Append( CXXFLAGS = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ] )
+
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
 
