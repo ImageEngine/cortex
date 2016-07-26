@@ -358,6 +358,13 @@ bool ToMayaSkinClusterConverter::doConversion( IECore::ConstObjectPtr from, MObj
 	
 	// loop through all the points of the geometry and set the weights
 	MItGeometry geoIt( outputGeoObjs[0] );
+
+	size_t pointCount = geoIt.exactCount();
+	if( pointCount != pointIndexOffsets.size() )
+	{
+		throw IECore::Exception( ( boost::format( "ToMayaSkinClusterConverter: topology of skinCluster \"%s\"'s output geometry has changed!" ) % fnSkinCluster.name() ).str() );
+	}
+
 	MPlug weightListArrayPlug = fnSkinClusterNode.findPlug( "weightList", true, &s );
 	for ( unsigned pIndex=0; !geoIt.isDone(); geoIt.next(), pIndex++ )
 	{
