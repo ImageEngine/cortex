@@ -267,8 +267,7 @@ void Camera::addStandardParameters()
 	{
 		cropWindow = boost::static_pointer_cast<Box2fData>( cropWindowIt->second )->readable();
 	}
-	if( cropWindow.isEmpty() || cropWindow.min.x < 0.0f || cropWindow.min.y < 0.0f ||
-		cropWindow.max.x > 1.0f || cropWindow.max.y > 1.0f )
+	if( cropWindow.isEmpty() )
 	{
 		cropWindow = Box2f( V2f( 0 ), V2f( 1 ) );
 		parameters()["cropWindow"] = new Box2fData( cropWindow );
