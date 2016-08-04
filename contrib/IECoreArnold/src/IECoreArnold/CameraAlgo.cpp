@@ -40,6 +40,7 @@
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/CameraAlgo.h"
+#include "IECoreArnold/ParameterAlgo.h"
 
 using namespace IECore;
 using namespace IECoreArnold;
@@ -56,7 +57,7 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();
 
-	// use projection to decide what sort of camera node to create
+	// Use projection to decide what sort of camera node to create
 	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
 	AtNode *result = 0;
 	if( projection=="perspective" )
@@ -73,23 +74,34 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 		result = AiNode( projection.c_str() );
 	}
 
-	// set clipping planes
+	// Set clipping planes
 	const Imath::V2f &clippingPlanes = cameraCopy->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
 	AiNodeSetFlt( result, "near_clip", clippingPlanes[0] );
 	AiNodeSetFlt( result, "far_clip", clippingPlanes[1] );
 
-	// set shutter
+	// Set shutter
 	const Imath::V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
 	AiNodeSetFlt( result, "shutter_start", shutter[0] );
 	AiNodeSetFlt( result, "shutter_end", shutter[1] );
 
-	// set screen window
+	// Set screen window
 	const Imath::Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
 	const Imath::V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
 	const float pixelAspectRatio = cameraCopy->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
 	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
 	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
 	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
+
+	// Set any Arnold-specific parameters
+
+	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
+	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
+	{
+		if( AiNodeEntryLookUpParameter( nodeEntry, it->first.c_str() ) )
+		{
+			ParameterAlgo::setParameter( result, it->first.c_str(), it->second.get() );
+		}
+	}
 
 	return result;
 }

@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,32 +32,53 @@
 #
 ##########################################################################
 
-import sys
 import unittest
 
+import arnold
+
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
-from PointsTest import PointsTest
-from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
-from CurvesTest import CurvesTest
-from SphereAlgoTest import SphereAlgoTest
-from CameraAlgoTest import CameraAlgoTest
+class CameraAlgoTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testConvertPerspective( self ) :
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert(
+				IECore.Camera(
+					parameters = {
+						"projection" : "perspective",
+						"projection:fov" : 45.0,
+						"resolution" : IECore.V2i( 512 ),
+						"screenWindow" : IECore.Box2f( IECore.V2f( -1, -0.5 ), IECore.V2f( 1, 0.5 ) )
+					}
+				)
+			)
+
+			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "persp_camera" )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "fov" ), 45.0 )
+
+			self.assertEqual( arnold.AiNodeGetPnt2( n, "screen_window_min" ), arnold.AtPoint2( -1, -0.5 ) )
+			self.assertEqual( arnold.AiNodeGetPnt2( n, "screen_window_max" ), arnold.AtPoint2( 1, 0.5 ) )
+
+	def testConvertCustomProjection( self ) :
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert(
+				IECore.Camera(
+					parameters = {
+						"projection" : "cyl_camera",
+						"horizontal_fov" : 45.0,
+						"vertical_fov" : 80.0,
+					}
+				)
+			)
+
+			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "cyl_camera" )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "horizontal_fov" ), 45.0 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "vertical_fov" ), 80.0 )
+
+if __name__ == "__main__":
+    unittest.main()
