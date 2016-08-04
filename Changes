@@ -1,3 +1,22 @@
+9.11.4
+======
+
+#### IECore
+
+- Removed code that discarded Camera crop windows outside 0-1
+
+#### IECoreMaya
+
+- Fixed crash in ToMayaSkinClusterConverter when updating topology
+
+#### IECoreArnold
+
+- Added support for arbitrary camera parameters
+
+#### Build
+
+- Added DEBUG option and fixed debug build errors
+
 9.11.3
 ======
 
