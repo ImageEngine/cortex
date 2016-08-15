@@ -42,20 +42,28 @@
 namespace IECoreArnold
 {
 
-/// The UniverseBlock provides a simple means of managing calls to AiBegin/AiEnd
-/// in a way which easily handles exceptions and multiple return statements from
-/// functions.
+/// Wraps Arnold universe creation and destruction. This is
+/// problematic because there can be only one instance at a time,
+/// but many applications have need for more than one.
 class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 {
 
 	public :
 
-		/// Calls AiBegin() and performs basic arnold initialisation
-		/// if AiUniverseIsActive()==false.
+		/// \deprecated
 		UniverseBlock();
-		/// Calls AiEnd() when the number of destructor calls
-		/// matches the number of constructor calls.
+		/// Ensures that the Arnold universe has been created and
+		/// that all plugins on the ARNOLD_PLUGIN_PATH have been
+		/// loaded. If writable is true, then throws if there is
+		/// already a writer.
+		UniverseBlock( bool writable );
+		/// Destroys the Arnold universe when the last active
+		/// UniverseBlock is destructed.
 		~UniverseBlock();
+
+	private :
+
+		void init( bool writable );
 
 };
 

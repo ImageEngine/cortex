@@ -34,14 +34,46 @@
 
 #include "ai.h"
 
+#include "IECore/ClassData.h"
+#include "IECore/Exception.h"
+
 #include "IECoreArnold/UniverseBlock.h"
 
+using namespace IECore;
 using namespace IECoreArnold;
 
 static int g_count = 0;
+static bool g_haveWriter = false;
+static ClassData<UniverseBlock, bool> g_writable;
 
 UniverseBlock::UniverseBlock()
 {
+	// Deprecated constructor existed before the
+	// writeable concept, so for backwards compatibility
+	// we register as read only.
+	init( /* writable = */ false );
+}
+
+UniverseBlock::UniverseBlock( bool writable )
+{
+	init( writable );
+}
+
+void UniverseBlock::init( bool writable )
+{
+	if( writable )
+	{
+		if( g_haveWriter )
+		{
+			throw IECore::Exception( "Arnold is already in use" );
+		}
+		else
+		{
+			g_haveWriter = true;
+		}
+	}
+	g_writable.create( this, writable );
+
 	g_count++;
 	if( AiUniverseIsActive() )
 	{
@@ -59,6 +91,12 @@ UniverseBlock::UniverseBlock()
 
 UniverseBlock::~UniverseBlock()
 {
+	if( g_writable[this] )
+	{
+		g_haveWriter = false;
+	}
+	g_writable.erase( this );
+
 	if( --g_count == 0 )
 	{
 		AiEnd();

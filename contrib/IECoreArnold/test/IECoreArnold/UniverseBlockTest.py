@@ -58,5 +58,29 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 		self.failIf( arnold.AiUniverseIsActive() )
 
+	def testWritable( self ) :
+
+		self.failIf( arnold.AiUniverseIsActive() )
+
+		def createBlock( writable ) :
+
+			with IECoreArnold.UniverseBlock( writable ) :
+
+				self.failUnless( arnold.AiUniverseIsActive() )
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			self.failUnless( arnold.AiUniverseIsActive() )
+
+			createBlock( False )
+			self.assertRaisesRegexp( RuntimeError, "Arnold is already in use", createBlock, True )
+
+		with IECoreArnold.UniverseBlock( writable = False ) :
+
+			self.failUnless( arnold.AiUniverseIsActive() )
+
+			createBlock( True )
+			createBlock( False )
+
 if __name__ == "__main__":
     unittest.main()
