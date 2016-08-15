@@ -34,7 +34,10 @@
 
 from __future__ import with_statement
 
+import os
 import unittest
+import ctypes
+
 import arnold
 
 import IECore
@@ -81,6 +84,29 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 			createBlock( True )
 			createBlock( False )
+
+	def testMetadataLoading( self ) :
+
+		os.environ["ARNOLD_PLUGIN_PATH"] = os.path.join( os.path.dirname( __file__ ), "metadata" )
+
+		with IECoreArnold.UniverseBlock( writable = False ) :
+
+			e = arnold.AiNodeEntryLookUp( "options" )
+
+			s = ctypes.c_char_p()
+			i = ctypes.c_int()
+
+			arnold.AiMetaDataGetStr( e, "", "cortex.testString", s )
+			self.assertEqual( s.value, "test" )
+
+			arnold.AiMetaDataGetInt( e, "", "cortex.testInt", i )
+			self.assertEqual( i.value, 25 )
+
+			arnold.AiMetaDataGetStr( e, "AA_samples", "cortex.testString", s )
+			self.assertEqual( s.value, "test2" )
+
+			arnold.AiMetaDataGetInt( e, "AA_samples", "cortex.testInt", i )
+			self.assertEqual( i.value, 12 )
 
 if __name__ == "__main__":
     unittest.main()

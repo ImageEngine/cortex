@@ -34,8 +34,12 @@
 
 #include "ai.h"
 
+#include "boost/tokenizer.hpp"
+#include "boost/filesystem/operations.hpp"
+
 #include "IECore/ClassData.h"
 #include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/UniverseBlock.h"
 
@@ -86,6 +90,7 @@ void UniverseBlock::init( bool writable )
 	if( pluginPaths )
 	{
 		AiLoadPlugins( pluginPaths );
+		loadMetadata( pluginPaths );
 	}
 }
 
@@ -103,3 +108,28 @@ UniverseBlock::~UniverseBlock()
 	}
 }
 
+void UniverseBlock::loadMetadata( const std::string &pluginPaths )
+{
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+	Tokenizer t( pluginPaths, boost::char_separator<char>( ":" ) );
+	for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; ++it )
+	{
+		try
+		{
+			for( boost::filesystem::recursive_directory_iterator dIt( *it ), deIt; dIt != deIt; ++dIt )
+			{
+				if( dIt->path().extension() == ".mtd" )
+				{
+					if( !AiMetaDataLoadFile( dIt->path().c_str() ) )
+					{
+						throw IECore::Exception( boost::str( boost::format( "Failed to load \"%s\"" ) % dIt->path().string() ) );
+					}
+				}
+			}
+		}
+		catch( const std::exception &e )
+		{
+			IECore::msg( IECore::Msg::Error, "UniverseBlock", e.what() );
+		}
+	}
+}

@@ -64,6 +64,7 @@ class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 	private :
 
 		void init( bool writable );
+		void loadMetadata( const std::string &pluginPaths );
 
 };
 
