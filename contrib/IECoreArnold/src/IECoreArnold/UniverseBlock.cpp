@@ -34,14 +34,50 @@
 
 #include "ai.h"
 
+#include "boost/tokenizer.hpp"
+#include "boost/filesystem/operations.hpp"
+
+#include "IECore/ClassData.h"
+#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
+
 #include "IECoreArnold/UniverseBlock.h"
 
+using namespace IECore;
 using namespace IECoreArnold;
 
 static int g_count = 0;
+static bool g_haveWriter = false;
+static ClassData<UniverseBlock, bool> g_writable;
 
 UniverseBlock::UniverseBlock()
 {
+	// Deprecated constructor existed before the
+	// writeable concept, so for backwards compatibility
+	// we register as read only.
+	init( /* writable = */ false );
+}
+
+UniverseBlock::UniverseBlock( bool writable )
+{
+	init( writable );
+}
+
+void UniverseBlock::init( bool writable )
+{
+	if( writable )
+	{
+		if( g_haveWriter )
+		{
+			throw IECore::Exception( "Arnold is already in use" );
+		}
+		else
+		{
+			g_haveWriter = true;
+		}
+	}
+	g_writable.create( this, writable );
+
 	g_count++;
 	if( AiUniverseIsActive() )
 	{
@@ -54,14 +90,46 @@ UniverseBlock::UniverseBlock()
 	if( pluginPaths )
 	{
 		AiLoadPlugins( pluginPaths );
+		loadMetadata( pluginPaths );
 	}
 }
 
 UniverseBlock::~UniverseBlock()
 {
+	if( g_writable[this] )
+	{
+		g_haveWriter = false;
+	}
+	g_writable.erase( this );
+
 	if( --g_count == 0 )
 	{
 		AiEnd();
 	}
 }
 
+void UniverseBlock::loadMetadata( const std::string &pluginPaths )
+{
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+	Tokenizer t( pluginPaths, boost::char_separator<char>( ":" ) );
+	for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; ++it )
+	{
+		try
+		{
+			for( boost::filesystem::recursive_directory_iterator dIt( *it ), deIt; dIt != deIt; ++dIt )
+			{
+				if( dIt->path().extension() == ".mtd" )
+				{
+					if( !AiMetaDataLoadFile( dIt->path().c_str() ) )
+					{
+						throw IECore::Exception( boost::str( boost::format( "Failed to load \"%s\"" ) % dIt->path().string() ) );
+					}
+				}
+			}
+		}
+		catch( const std::exception &e )
+		{
+			IECore::msg( IECore::Msg::Error, "UniverseBlock", e.what() );
+		}
+	}
+}

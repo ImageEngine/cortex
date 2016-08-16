@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,21 +32,12 @@
 #
 ##########################################################################
 
-import _IECoreArnold
+[node options]
 
-class UniverseBlock :
+	cortex.testString       STRING  "test"
+	cortex.testInt          INT     25
 
-	def __init__( self, writable = None ) :
+	[attr AA_samples]
 
-		self.__writable = writable
-
-	def __enter__( self ) :
-
-		if self.__writable is None :
-			self.__universeBlock = _IECoreArnold._UniverseBlock()
-		else :
-			self.__universeBlock = _IECoreArnold._UniverseBlock( self.__writable )
-
-	def __exit__( self, type, value, traceBack ) :
-
-		self.__universeBlock = None
+		cortex.testString       STRING  "test2"
+		cortex.testInt          INT     12
