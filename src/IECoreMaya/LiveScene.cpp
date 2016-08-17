@@ -38,6 +38,9 @@
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/Primitive.h"
 #include "IECore/NullObject.h"
+#include "IECore/CurvesMergeOp.h"
+#include "IECore/MeshMergeOp.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/FromMayaPlugConverter.h"
@@ -47,6 +50,8 @@
 #include "IECoreMaya/FromMayaCameraConverter.h"
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/SceneShape.h"
+#include "IECoreMaya/FromMayaCurveConverter.h"
+#include "IECoreMaya/FromMayaMeshConverter.h"
 
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
@@ -512,6 +517,175 @@ void LiveScene::writeTags( const NameList &tags )
 	throw Exception( "IECoreMaya::LiveScene::writeTags not supported" );
 }
 
+
+namespace
+{
+
+template<int MFnType>
+struct PrimMergerTraits;
+
+template<>
+struct PrimMergerTraits<MFn::kNurbsCurve>
+{
+	typedef FromMayaCurveConverter ConverterType;
+	typedef CurvesMergeOp MergeOpType;
+	static CurvesPrimitiveParameter * primParameter( MergeOpType* mop )
+	{
+		return mop->curvesParameter();
+	}
+};
+
+template<>
+struct PrimMergerTraits<MFn::kMesh>
+{
+	typedef FromMayaMeshConverter ConverterType;
+	typedef MeshMergeOp MergeOpType;
+	static MeshPrimitiveParameter * primParameter( MergeOpType* mop )
+	{
+		return mop->meshParameter();
+	}
+};
+
+template<int MFnType>
+class PrimMerger
+{
+		typedef typename PrimMergerTraits<MFnType>::ConverterType ConverterType;
+		typedef typename PrimMergerTraits<MFnType>::MergeOpType MergeOpType;
+		typedef typename MergeOpType::PrimitiveType PrimitiveType;
+
+	public:
+
+		static void createMergeOp( MDagPath &childDag, IECore::ModifyOpPtr &op )
+		{
+			typename ConverterType::Ptr converter = runTimeCast<ConverterType>( ConverterType::create( childDag ) );
+			if( ! converter )
+			{
+				throw Exception( ( boost::format( "Creating merge op failed! " ) % childDag.fullPathName().asChar() ).str() );
+			}
+			typename PrimitiveType::Ptr cprim = runTimeCast<PrimitiveType>( converter->convert() );
+			op = new MergeOpType;
+			op->copyParameter()->setTypedValue( false );
+			op->inputParameter()->setValue( cprim );
+		}
+
+		static void mergePrim( MDagPath &childDag, IECore::ModifyOpPtr &op )
+		{
+			typename ConverterType::Ptr converter = runTimeCast<ConverterType>( ConverterType::create( childDag ) );
+			if( ! converter )
+			{
+				throw Exception( ( boost::format( "Merging primitive failed! " ) % childDag.fullPathName().asChar() ).str() );
+			}
+			typename PrimitiveType::Ptr prim = runTimeCast<PrimitiveType>( converter->convert() );
+			MergeOpType *mop = runTimeCast<MergeOpType>( op.get() );
+			PrimMergerTraits<MFnType>::primParameter( mop )->setValue( const_cast<PrimitiveType*>( prim.get() ) );
+			op->operate();
+		}
+
+};
+
+bool hasMergeableObjects( const MDagPath &p )
+{
+	// When there are multiple child shapes that can be merged, readMergedObject() returns an object that has all the shapes merged in it.
+	// This is because multiple Maya shapes can be converted to one IECore primitive eg. nurbs curves -> IECore::CurvesPrimitive.
+	// We want to have multiple shape nodes in Maya, and want it to be one primitive if viewed through IECoreMaya::LiveScene.
+	unsigned int childCount = p.childCount();
+
+	// At least two shapes need to exist to merge.
+	if( childCount < 2 )
+	{
+		return false;
+	}
+
+	bool isMergeable = false;
+	MFn::Type foundType = MFn::kInvalid;
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MObject childObject = p.child( c );
+		MFn::Type type = childObject.apiType();
+
+		if( type == MFn::kMesh || type == MFn::kNurbsCurve )
+		{
+			if( MFnDagNode( childObject ).isIntermediateObject() )
+			{
+				continue;
+			}
+
+			if( foundType == MFn::kInvalid )
+			{
+				foundType = type;
+			}
+			else if( foundType == type )
+			{
+				isMergeable = true;
+			}
+			else
+			{
+				msg( Msg::Warning, p.fullPathName().asChar(), "Found multiple shape types under the same transform!" );
+				return false;
+			}
+		}
+	}
+
+	return isMergeable;
+
+}
+
+ConstObjectPtr readMergedObject( const MDagPath &p )
+{
+	unsigned int childCount = p.childCount();
+
+	IECore::ModifyOpPtr op = NULL;
+
+	for ( unsigned int c = 0; c < childCount; c++ )
+	{
+		MObject childObject = p.child( c );
+		MFn::Type type = childObject.apiType();
+
+		if( type != MFn::kNurbsCurve && type != MFn::kMesh )
+		{
+			continue;
+		}
+
+		MFnDagNode fnChildDag( childObject );
+		if( fnChildDag.isIntermediateObject() )
+		{
+			continue;
+		}
+
+		MDagPath childDag;
+		fnChildDag.getPath( childDag );
+
+		if( ! op )
+		{
+			if( type == MFn::kNurbsCurve )
+			{
+				PrimMerger<MFn::kNurbsCurve>::createMergeOp( childDag, op );
+			}
+			else
+			{
+				PrimMerger<MFn::kMesh>::createMergeOp( childDag, op );
+			}
+		}
+		else
+		{
+			if( type == MFn::kNurbsCurve )
+			{
+				PrimMerger<MFn::kNurbsCurve>::mergePrim( childDag, op );
+			}
+			else
+			{
+				PrimMerger<MFn::kMesh>::mergePrim( childDag, op );
+			}
+		}
+
+	}
+
+	assert( op );
+	return op->inputParameter()->getValue();
+}
+
+} // anonymous namespace.
+
 bool LiveScene::hasObject() const
 {
 	tbb::mutex::scoped_lock l( s_mutex );
@@ -523,6 +697,11 @@ bool LiveScene::hasObject() const
 	else if( m_dagPath.length() == 0 && !m_isRoot )
 	{
 		throw Exception( "IECoreMaya::LiveScene::hasObject: Dag path no longer exists!" );
+	}
+
+	if( hasMergeableObjects( m_dagPath ) )
+	{
+		return true;
 	}
 
 	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
@@ -577,6 +756,11 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
 		throw Exception( "IECoreMaya::LiveScene::readObject: time must be the same as on the maya timeline!" );
+	}
+
+	if ( hasMergeableObjects( m_dagPath ) )
+	{
+		return readMergedObject( m_dagPath );
 	}
 
 	for ( std::vector< CustomReader >::const_reverse_iterator it = customObjectReaders().rbegin(); it != customObjectReaders().rend(); it++ )
