@@ -386,14 +386,20 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		}
 		
 		// convert the object to Houdini
-		if ( !convertObject( object.get(), name, scene, params ) )
+		try
+		{
+			convertObject( object.get(), name, scene, params, myGdpHandle );
+		}
+		catch ( std::exception &e )
 		{
 			std::string fullName;
 			SceneInterface::Path path;
 			scene->path( path );
 			SceneInterface::pathToString( path, fullName );
-			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to Houdini" ).c_str() );
+			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to Houdini. " + e.what() ).c_str() );
+			return;
 		}
+
 	}
 	
 	if ( evalInt( pObjectOnly.getToken(), 0, 0 ) )
@@ -531,8 +537,15 @@ ConstObjectPtr SOP_SceneCacheSource::transformObject( const IECore::Object *obje
 	return object;
 }
 
-bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const std::string &name, const SceneInterface *scene, Parameters &params )
+void SOP_SceneCacheSource::convertObject( const IECore::Object *object, const std::string &name, const SceneInterface *scene, Parameters &params, GU_DetailHandle handle )
 {
+	if( handle.isNull() )
+	{
+		throw std::runtime_error( "Invalid geometry handle" );
+	}
+
+	GU_Detail *handleGdp = handle.writeLock();
+
 	ToHoudiniGeometryConverterPtr converter = 0;
 	if ( params.geometryType == Cortex )
 	{
@@ -543,7 +556,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		const VisibleRenderable *renderable = IECore::runTimeCast<const VisibleRenderable>( object );
 		if ( !renderable )
 		{
-			return false;
+			throw std::runtime_error( "Can't cast object to renderable" );
 		}
 		
 		converter = ToHoudiniGeometryConverter::create( renderable );
@@ -551,7 +564,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	
 	if ( !converter )
 	{
-		return false;
+		throw std::runtime_error( "Can't create ToHoudiniGeometryConverter" );
 	}
 	
 	// check the primitve range map to see if this shape exists already
@@ -565,10 +578,10 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			// this means constant topology and primitive variables, even though multiple samples were written
 			if ( params.animatedPrimVars.empty() )
 			{
-				return true;
+				return;
 			}
 			
-			GA_Range pointRange( *gdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
+			GA_Range pointRange( *handleGdp, primRange, GA_ATTRIB_POINT, GA_Range::primitiveref(), false );
 			
 			// update the animated primitive variables only
 			std::string animatedPrimVarStr = "";
@@ -581,24 +594,22 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			
 			try
 			{
-				converter->transferAttribs( gdp, pointRange, primRange );
-				return true;
+				converter->transferAttribs( handleGdp, pointRange, primRange );
+				return;
 			}
 			catch ( std::exception &e )
 			{
-				addWarning( SOP_MESSAGE, e.what() );
-				return false;
+				throw std::runtime_error( e.what() );
 			}
 			catch ( ... )
 			{
-				addWarning( SOP_MESSAGE, "Attribute transfer failed for unknown reasons" );
-				return false;
+				throw std::runtime_error( "Attribute transfer failed for unknown reasons" );
 			}
 		}
 		else
 		{
 			// topology is changing, so destroy the exisiting primitives
-			gdp->destroyPrimitives( primRange, true );
+			handleGdp->destroyPrimitives( primRange, true );
 		}
 	}
 	
@@ -608,14 +619,14 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	
 	try
 	{
-		GA_Offset firstNewPrim = gdp->getPrimitiveMap().lastOffset() + 1;
+		GA_Offset firstNewPrim = handleGdp->getPrimitiveMap().lastOffset() + 1;
 		
-		bool status = converter->convert( myGdpHandle );
+		bool status = converter->convert( handle );
 		
 		if ( params.fullPathName != "" )
 		{
 			// adds the full path in addition to the relative name
-			const GA_IndexMap &primMap = gdp->getPrimitiveMap();
+			const GA_IndexMap &primMap = handleGdp->getPrimitiveMap();
 			GA_Range newPrims( primMap, firstNewPrim, primMap.lastOffset() + 1 );
 			if ( newPrims.isValid() )
 			{
@@ -624,22 +635,23 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 				scene->path( path );
 				SceneInterface::pathToString( path, fullName );
 				
-				GA_RWAttributeRef pathAttribRef = ToHoudiniStringVectorAttribConverter::convertString( params.fullPathName, fullName, gdp, newPrims );
+				GA_RWAttributeRef pathAttribRef = ToHoudiniStringVectorAttribConverter::convertString( params.fullPathName, fullName, handleGdp, newPrims );
 				status = status && pathAttribRef.isValid();
 			}
 		}
-		
-		return status;
+
+		if( !status )
+		{
+			throw std::runtime_error( "Can't convert the object" );
+		}
 	}
 	catch ( std::exception &e )
 	{
-		addWarning( SOP_MESSAGE, e.what() );
-		return false;
+		throw std::runtime_error( e.what() );
 	}
 	catch ( ... )
 	{
-		addWarning( SOP_MESSAGE, "Conversion failed for unknown reasons" );
-		return false;
+		throw std::runtime_error( "Conversion failed for unknown reasons" );
 	}
 }
 

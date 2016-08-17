@@ -65,15 +65,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		void setObjectOnly( bool objectOnly );
 		
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
-	
-	protected :
-	
-		virtual OP_ERROR cookMySop( OP_Context &context );
-		
-		virtual void sceneChanged();
-	
-	private :
-		
+
 		struct Parameters
 		{
 			GeometryType geometryType;
@@ -88,14 +80,23 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			std::vector<IECore::InternedString> animatedPrimVars;
 			std::map<std::string, GA_Range> namedRanges;
 		};
+
+		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
+		static void convertObject( const IECore::Object *object, const std::string &name, const IECore::SceneInterface *scene, Parameters &params, GU_DetailHandle handle );
+
+	protected :
+	
+		virtual OP_ERROR cookMySop( OP_Context &context );
+		
+		virtual void sceneChanged();
+	
+	private :
 		
 		// Modify the object according the parameters, copying if neccessary.
 		IECore::ConstObjectPtr modifyObject( const IECore::Object *object, Parameters &params );
 		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
 		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
-		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( const IECore::Object *object, const std::string &name, const IECore::SceneInterface *scene, Parameters &params );
 		
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
