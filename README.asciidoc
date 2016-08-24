@@ -45,6 +45,11 @@ creating a reusable set of modules of use to TDs and programmers in a
 broad range of scenarios - allowing them to focus on the more
 interesting or innovative aspects of development.
 
+*Similar projects*
+
+* http://fabricengine.com/[Fabric Engine]
+* https://www.thefoundry.co.uk/products/katana/[Katana]
+
 *To learn more*
 
 * See the http://vimeo.com/cortex[Gaffer presentations from SIGGRAPH
