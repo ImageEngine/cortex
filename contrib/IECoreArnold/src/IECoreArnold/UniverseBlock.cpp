@@ -129,7 +129,7 @@ void UniverseBlock::loadMetadata( const std::string &pluginPaths )
 		}
 		catch( const std::exception &e )
 		{
-			IECore::msg( IECore::Msg::Error, "UniverseBlock", e.what() );
+			IECore::msg( IECore::Msg::Debug, "UniverseBlock", e.what() );
 		}
 	}
 }
