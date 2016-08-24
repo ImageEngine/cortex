@@ -62,6 +62,7 @@ IECOREARNOLD_API void getParameters( AtNode *node, IECore::CompoundDataMap &valu
 /// or false depending on whether or not the Arnold type will be an
 /// array. Returns AI_TYPE_NONE if there is no suitable Arnold type.
 IECOREARNOLD_API int parameterType( IECore::TypeId dataType, bool &array );
+IECOREARNOLD_API int parameterType( const IECore::Data *data, bool &array );
 
 /// If the equivalent Arnold type for the data is already known, then it may be passed directly.
 /// If not it will be inferred using parameterType().

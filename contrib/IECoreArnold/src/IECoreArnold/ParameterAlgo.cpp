@@ -37,7 +37,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/DespatchTypedData.h"
-
+#include "IECore/DataAlgo.h"
 #include "IECoreArnold/ParameterAlgo.h"
 
 using namespace std;
@@ -403,6 +403,23 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		default :
 			return AI_TYPE_NONE;
 	}
+}
+
+int parameterType( const IECore::Data *data, bool &array )
+{
+	int type = parameterType( data->typeId(), array );
+
+	// if we have data of type vector, its interpretation matters
+	if( type == AI_TYPE_VECTOR )
+	{
+		GeometricData::Interpretation interpretation = getGeometricInterpretation( data );
+		if( interpretation == GeometricData::Point )
+		{
+			type = AI_TYPE_POINT;
+		}
+	}
+
+	return type;
 }
 
 AtArray *dataToArray( const IECore::Data *data, int aiType )

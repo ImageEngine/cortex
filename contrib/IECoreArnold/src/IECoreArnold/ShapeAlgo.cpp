@@ -249,7 +249,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	// Now deal with more complex cases with array data.
 
 	bool isArray = false;
-	int type = ParameterAlgo::parameterType( primitiveVariable.data->typeId(), isArray );
+	int type = ParameterAlgo::parameterType( primitiveVariable.data.get(), isArray );
 	if( type == AI_TYPE_NONE || !isArray )
 	{
 		msg(
@@ -262,7 +262,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 
 	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
 	AiNodeDeclare( shape, name, typeString.c_str() );
-	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
+	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
 	if( array )
 	{
 		AiNodeSetArray( shape, name, array );
