@@ -301,7 +301,7 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 	// Finally, do a generic conversion of anything that remains.
 	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt; ++it )
 	{
-		ShapeAlgo::convertPrimitiveVariable( mesh, it->second, result, ( "user:" + it->first ).c_str() );
+		ShapeAlgo::convertPrimitiveVariable( mesh, it->second, result, it->first.c_str() );
 	}
 
 	return result;

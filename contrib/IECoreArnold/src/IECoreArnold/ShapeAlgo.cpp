@@ -306,11 +306,7 @@ void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shap
 			}
 		}
 
-		// we prefix all the names, as otherwise the chance of a conflict between
-		// an arbitrary primitive variable name and an existing arnold parameter name
-		// seems too great.
-		string prefixedName = "user:" + it->first;
-		convertPrimitiveVariable( primitive, it->second, shape, prefixedName.c_str() );
+		convertPrimitiveVariable( primitive, it->second, shape, it->first.c_str() );
 	}
 }
 
