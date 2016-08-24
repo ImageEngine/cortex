@@ -1,13 +1,64 @@
 == Cortex ==
 
-The Cortex project provides a set of high quality C++ libraries and Python modules tailored for software development in the visual effects industry. Rather than producing end user tools, the project focuses on creating a reusable set of modules of use to TDs and programmers in a broad range of scenarios - allowing them to focus on the more interesting or innovative aspects of development.
 
-To learn more, take a look at the http://vimeo.com/cortex[Cortex presentations from SIGGRAPH 2011], read a https://github.com/ImageEngine/cortex/wiki/pdfs/AnOpenSourceFrameworkForVisualEffectsSoftwareDevelopment.pdf[short introduction to Cortex], or dive straight into the https://github.com/ImageEngine/cortex/wiki/ExamplesIntroduction[code examples].
+An MIT-licensed, render-agnostic scene description framework for the
+visual effects industry, built upon the Imath and Boost C++ libraries.
 
-== Mailing Lists ==
+* See link:Gaffer[https://github.com/ImageEngine/gaffer] for what it
+does and how to use it.
 
-http://groups.google.com/group/cortexdev[Developer discussion]
+=== Hello World ===
 
-http://groups.google.com/group/cortexcommits[Commit notifications]
+Using the Cortex Python-bindings, here is how to generate a cube.
 
-http://groups.google.com/group/cortexissues[Issue tracker notifications]
+image:https://cloud.githubusercontent.com/assets/2152766/17919610/be7d3724-69c6-11e6-919f-a62e94b27b8e.png[image]
+
+[source,python]
+----
+from IECore import *
+
+ class simpleGeometry(ParameterisedProcedural) :
+
+    def __init__(self) :
+        ParameterisedProcedural.__init__( self, "Simple Geometry." )
+
+    def doBound(self, args) :
+        return Box3f( V3f(-1), V3f(1) )
+
+    def doRenderState(self, renderer, args) :
+        pass
+
+    def doRender(self, renderer, args) :
+        box = MeshPrimitive.createBox( Box3f( V3f(-1), V3f(1) ) )
+        box.render( renderer )
+
+ # register
+ registerRunTimeTyped( simpleGeometry )
+----
+
+=== Description ===
+
+The Cortex project provides a set of high quality C++ libraries and
+Python modules tailored for software development in the visual effects
+industry. Rather than producing end user tools, the project focuses on
+creating a reusable set of modules of use to TDs and programmers in a
+broad range of scenarios - allowing them to focus on the more
+interesting or innovative aspects of development.
+
+*To learn more*
+
+* See the http://vimeo.com/cortex[Gaffer presentations from SIGGRAPH
+2011]
+* Read the Cortex
+https://github.com/ImageEngine/cortex/wiki/pdfs/AnOpenSourceFrameworkForVisualEffectsSoftwareDevelopment.pdf[SIGGRAPH
+paper]
+* See Wiki for
+https://github.com/ImageEngine/cortex/wiki/ExamplesIntroduction[code
+examples]
+
+*Mailing Lists*
+
+* http://groups.google.com/group/cortexdev[Developer discussion]
+* http://groups.google.com/group/cortexcommits[Commit notifications]
+* http://groups.google.com/group/cortexissues[Issue tracker
+notifications]
