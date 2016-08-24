@@ -4,7 +4,7 @@
 An MIT-licensed, render-agnostic scene description framework for the
 visual effects industry, built upon the Imath and Boost C++ libraries.
 
-* See link:Gaffer[https://github.com/ImageEngine/gaffer] for what it
+* See Gaffer[https://github.com/ImageEngine/gaffer] for what it
 does and how to use it.
 
 === Hello World ===
