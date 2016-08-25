@@ -990,6 +990,43 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( envShape + ".visibility", False )
 		self.assertEqual( envScene.readAttribute( "scene:visible", 0 ), IECore.BoolData( False ) )
 	
+	def testMultiCurves( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		maya.cmds.curve( d=1, p=[ ( 0, 0, 0 ), ( 1, 0, 0 ) ], k=( 0, 1 ), n="curve1" )
+		maya.cmds.curve( d=1, p=[ ( 0, 0, 0 ), ( 0, 0, 1 ) ], k=( 0, 1 ), n="curve2" )
+		maya.cmds.curve( d=1, p=[ ( 0, 0, 0 ), ( 0, 0, 1 ) ], k=( 0, 1 ), n="curve2" )
+
+		maya.cmds.select( "curveShape1", "curveShape2", "curveShape3", "sharedParent")
+		maya.cmds.parent( s=True, r=True )
+
+		maya.cmds.setAttr( "curveShape3.intermediateObject", 1 )
+
+		scene = IECoreMaya.LiveScene()
+		scene = scene.child('sharedParent')
+		maya.cmds.currentTime( "0.0sec" )
+		mergedCurves = scene.readObject( 0 )
+		self.assertEqual( mergedCurves.numCurves(), 2 )
+
+	def testMultiMeshes( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		maya.cmds.polyPyramid()
+		maya.cmds.polyPyramid()
+		maya.cmds.polyPyramid()
+
+		maya.cmds.select( "pPyramidShape1", "pPyramidShape2", "pPyramidShape3", "sharedParent" )
+		maya.cmds.parent( s=True, r=True )
+
+		maya.cmds.setAttr( "pPyramidShape3.intermediateObject", 1 )
+
+		scene = IECoreMaya.LiveScene()
+		scene = scene.child('sharedParent')
+		maya.cmds.currentTime( "0.0sec" )
+		mergedMeshes = scene.readObject( 0 )
+		self.assertEqual( mergedMeshes.numFaces(), 10 )
 	
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
