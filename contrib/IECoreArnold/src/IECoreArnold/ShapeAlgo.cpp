@@ -176,6 +176,17 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
 
+	// make sure the primitive variable doesn't clash with built-ins
+	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
+	if ( AiNodeEntryLookUpParameter(	entry, name ) != NULL ){
+		msg(
+			Msg::Warning,
+			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			boost::format( "Primitive variable \"%s\" will be ignored because it clashes with Arnold's built-in parameters" ) % name
+		);
+		return;
+	}
+
 	// Arnold has "constant", "uniform", "varying" and "indexed" interpolation,
 	// whereas Cortex has Constant, Uniform, Varying, Vertex and FaceVarying.
 	// The conversion between the two depends on the type of the primitive.
