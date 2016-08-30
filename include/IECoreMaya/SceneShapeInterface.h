@@ -36,6 +36,7 @@
 #define IE_COREMAYA_SCENESHAPEINTERFACE_H
 
 #include "IECore/SceneInterface.h"
+#include "IECore/CompoundParameter.h"
 
 #include <map>
 #include "OpenEXR/ImathMatrix.h"
@@ -146,6 +147,14 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aQuerySpace;
 		static MObject aSceneQueries;
 		static MObject aAttributeQueries;
+		/// Read convert parameters.
+		/**
+		Some ToMaya*Converters have parameters to be used when converting objects.
+		In case of ToMayaCurveConverter, it takes an int parameter "index" that controls which one of curves it should convert to Maya nurbs curve.
+		queryConvertParameters lets you specify some of these paramters.
+		Converter parameters are updated with a string value held in aConvertParamQueries with IECore.ParameterParser.
+		**/
+		static MObject aConvertParamQueries;
 		
 		static MObject aAttributeValues;
 		
@@ -208,6 +217,8 @@ class SceneShapeInterface: public MPxComponentShape
 		Imath::Box3d componentBound( int idx );
 
 		void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix );
+
+		bool readConvertParam( IECore::CompoundParameterPtr parameters, int attrIndex ) const;
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;

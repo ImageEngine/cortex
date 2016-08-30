@@ -54,6 +54,7 @@
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaMeshConverter.h"
+#include "IECoreMaya/ToMayaCurveConverter.h"
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/PostLoadCallback.h"
 
@@ -111,6 +112,7 @@ MObject SceneShapeInterface::aTime;
 MObject SceneShapeInterface::aOutTime;
 MObject SceneShapeInterface::aSceneQueries;
 MObject SceneShapeInterface::aAttributeQueries;
+MObject SceneShapeInterface::aConvertParamQueries;
 MObject SceneShapeInterface::aOutputObjects;
 MObject SceneShapeInterface::aObjectDependency;
 MObject SceneShapeInterface::aAttributes;
@@ -292,6 +294,17 @@ MStatus SceneShapeInterface::initialize()
 	tAttr.setIndexMatters( true );
 
 	s = addAttribute( aAttributeQueries );
+
+	aConvertParamQueries = tAttr.create( "queryConvertParameters", "qcp", MFnData::kString, &s );
+	tAttr.setReadable( true );
+	tAttr.setWritable( true );
+	tAttr.setStorable( true );
+	tAttr.setConnectable( true );
+	tAttr.setHidden( false );
+	tAttr.setArray( true );
+	tAttr.setIndexMatters( true );
+
+	s = addAttribute( aConvertParamQueries );
 
 	// Output objects
 	aOutputObjects = gAttr.create( "outObjects", "oob", &s );
@@ -486,6 +499,8 @@ MStatus SceneShapeInterface::initialize()
 	
 	attributeAffects( aAttributeQueries, aAttributes );
 	
+	attributeAffects( aConvertParamQueries, aOutputObjects );
+
 	attributeAffects( aQuerySpace, aTransform );
 	attributeAffects( aQuerySpace, aBound );
 	attributeAffects( aQuerySpace, aOutputObjects );
@@ -797,6 +812,12 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 				if( converter )
 				{
+					bool isParamRead = readConvertParam( converter->parameters(), index );
+					if( ! isParamRead )
+					{
+						return MS::kFailure;
+					}
+
 					MObject data;
 					// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
 					// Won't be needed anymore when the related todo is addressed in the converter
@@ -810,6 +831,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 					{
 						MFnNurbsCurveData fnData;
 						data = fnData.create();
+
 					}
 
 					if( !data.isNull() )
@@ -820,12 +842,14 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 							MDataHandle h = outputBuilder.addElement( index, &s );
 							s = h.set( data );
 						}
+						else
+						{
+							MFnDagNode dag(thisMObject());
+							msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Convert object failed! index=" ) % index );
+						}
 					}
 				}
 			}
-
-			
-
 		}
 		else if( topLevelPlug == aBound )
 		{
@@ -1470,3 +1494,36 @@ SceneInterface::Path SceneShapeInterface::fullPathName( std::string relativeName
 	return fullPath;
 }
 
+bool SceneShapeInterface::readConvertParam( CompoundParameterPtr parameters, int attrIndex ) const
+{
+	IECorePython::ScopedGILLock gilLock;
+
+	boost::python::list parserArgList;
+	{
+		MPlug pConvertParamQueries( thisMObject(), aConvertParamQueries );
+		MPlug pConvertParamQuery = pConvertParamQueries.elementByLogicalIndex( attrIndex );
+		MString paramsStr;
+		pConvertParamQuery.getValue( paramsStr );
+
+		const std::string pstr = paramsStr.asChar();
+		boost::tokenizer<boost::char_separator<char> > t( pstr, boost::char_separator<char>( " " ) );
+		boost::tokenizer<boost::char_separator<char> >::const_iterator it, endIt;
+		for ( it = t.begin(), endIt = t.end(); it != endIt; ++it )
+		{
+			parserArgList.append( *it );
+		}
+	}
+
+	try
+	{
+		boost::python::import( "IECore" ).attr( "ParameterParser" )().attr( "parse" )( parserArgList, parameters );
+	}
+	catch( const std::exception& e )
+	{
+		MFnDagNode dag( thisMObject() );
+		msg( Msg::Error, dag.fullPathName().asChar(), boost::format( "Convert parameter parse error %s. %d" ) % e.what() % attrIndex );
+		return false;
+	}
+
+	return true;
+}

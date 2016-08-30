@@ -313,7 +313,49 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		
 		fn.selectComponentNames( ['/', '/1', '/1/child/3'] )
 		self.assertEqual( fn.selectedComponentNames(), set( ['/', '/1', '/1/child/3'] ) )
+
+	def testQuery( self ):
 		
+		maya.cmds.file( new=True, f=True )
+
+		def createSceneFile():
+		    scene = IECore.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+		    sc = scene.createChild( str(1) )
+		    curves = IECore.CurvesPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1))) # 6 curves.
+		    sc.writeObject( curves, 0.0 )
+		    matrix = IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) )
+		    sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
+
+		createSceneFile()
+
+		node = maya.cmds.createNode( "ieSceneShape" )
+		maya.cmds.setAttr( node+'.file', FnSceneShapeTest.__testFile,type='string' )
+		maya.cmds.setAttr( node+'.root', '/',type='string' )
+		fn = IECoreMaya.FnSceneShape( node )
+
+		self.assertEqual( maya.cmds.getAttr(fn.fullPathName()+".outObjects[0]", type=True), None )
+		self.assertEqual( maya.cmds.getAttr(fn.fullPathName()+".outObjects[1]", type=True), None )
+
+		maya.cmds.setAttr( fn.fullPathName()+".queryPaths[0]" , "/1", type="string")
+		maya.cmds.setAttr( fn.fullPathName()+".queryPaths[1]" , "/1", type="string")
+
+		maya.cmds.setAttr( fn.fullPathName()+".queryConvertParameters[0]", "-index 0", type="string" ) # Set it to output 0 th box curve.
+		maya.cmds.setAttr( fn.fullPathName()+".queryConvertParameters[1]", "-index 1", type="string" ) # Set it to output 1 th box curve.
+
+		self.assertEqual( maya.cmds.getAttr(fn.fullPathName()+".outObjects[0]", type=True), "nurbsCurve" )
+		self.assertEqual( maya.cmds.getAttr(fn.fullPathName()+".outObjects[1]", type=True), "nurbsCurve" )
+
+		curveShape0 = maya.cmds.createNode( "nurbsCurve" )
+		curveShape1 = maya.cmds.createNode( "nurbsCurve" )
+		maya.cmds.connectAttr( fn.fullPathName()+ ".outObjects[0]", curveShape0 + '.create' )
+		maya.cmds.connectAttr( fn.fullPathName()+ ".outObjects[1]", curveShape1 + '.create' )
+
+		self.assertNotEqual( maya.cmds.pointPosition(curveShape0 + '.cv[0]' ), maya.cmds.pointPosition(curveShape1 + '.cv[0]' ) )
+
+		maya.cmds.setAttr( fn.fullPathName()+".queryConvertParameters[1]", "-index 0", type="string" )
+
+		self.assertEqual( maya.cmds.pointPosition(curveShape0 + '.cv[0]' ), maya.cmds.pointPosition(curveShape1 + '.cv[0]' ) )
+
 	def tearDown( self ) :
 		
 		if os.path.exists( FnSceneShapeTest.__testFile ) :

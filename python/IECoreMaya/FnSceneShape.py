@@ -409,13 +409,169 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 			# turn the scene node an intermediateObject so it can't be seen by LiveScene
 			fn.findPlug( "intermediateObject" ).setBool( True )
-	
+
+	## Update parameters based on index'th element of queryConvertParameters.
+	def __readConvertParams( self, index, parameters ):
+
+		queryConvertParametersPlug = self.findPlug( "queryConvertParameters" )
+		convertParamIndices = maya.OpenMaya.MIntArray()
+		queryConvertParametersPlug.getExistingArrayAttributeIndices( convertParamIndices )
+		values = queryConvertParametersPlug.elementByLogicalIndex( index ).asString()
+		IECore.ParameterParser().parse( values, parameters )
+
+	## Set queryConvertParameters attribute from a parametrized object.
+	def __setConvertParams( self, index, parameters ):
+		paramsStr = " ".join( IECore.ParameterParser().serialise( parameters ) )
+		queryConvertParameters = self.findPlug( "queryConvertParameters" )
+		queryConvertParameters.elementByLogicalIndex( index ).setString( paramsStr )
+
+	@staticmethod
+	def __getFnShape( pathToShape ):
+
+		try :
+			return maya.OpenMaya.MFnDagNode( IECoreMaya.StringUtil.dagPathFromString( pathToShape ) )
+		except RuntimeError :
+			pass
+
+	def __findOrCreateShape( self, transformNode, shapeName, shapeType ):
+
+		pathToShape = transformNode + "|" + shapeName
+		fnShape = FnSceneShape.__getFnShape( pathToShape )
+
+		if fnShape and maya.cmds.nodeType( pathToShape ) != shapeType :
+			# Rename existing shape
+			newName = shapeName + "_orig"
+			maya.cmds.rename( pathToShape, newName )
+			IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.__findOrCreateShape", "Renaming incompatible shape %s to %s." % pathToShape, newName )
+			fnShape = None
+
+		if not fnShape :
+			dagMod = maya.OpenMaya.MDagModifier()
+			shapeNode = dagMod.createNode( shapeType, IECoreMaya.StringUtil.dependencyNodeFromString( transformNode ) )
+			dagMod.renameNode( shapeNode, shapeName )
+			dagMod.doIt()
+			
+			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
+
+			if shapeType == "mesh":
+				maya.cmds.sets( pathToShape, add="initialShadingGroup" )
+
+		if shapeType == "mesh":
+			object = self.sceneInterface().readObject(0.0)
+			interpolation = object.interpolation
+			shape = fnShape.fullPathName()
+			try:
+				IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( shape, interpolation )
+			except:
+				IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.__findOrCreateShape", "Failed to set interpolation on %s." % shape )
+
+		return fnShape
+
+	def __findOrCreateShapes( self, transformNode ):
+
+		shapeType, plugStr = self.__mayaCompatibleShapeAndPlug()
+		if not (shapeType and plugStr):
+			raise Exception, "Scene interface at %s cannot be converted to Maya geometry." % self.sceneInterface().pathAsString()
+
+		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
+
+		if shapeType == "nurbsCurve":
+			curvesPrimitive = self.sceneInterface().readObject( 0.0 )
+			numShapes = curvesPrimitive.numCurves()
+			for shapeId in range( numShapes ):
+				self.__findOrCreateShape( transformNode, shapeName + str( shapeId ), shapeType )
+
+		else:
+			self.__findOrCreateShape( transformNode, shapeName, shapeType )
+
+	def __connectShape( self, pathToShape, plugStr, arrayIndex ):
+
+			fnShape = FnSceneShape.__getFnShape( pathToShape )
+
+			plug = fnShape.findPlug( plugStr )
+			if plug.isLocked() :
+				return
+
+			connections = maya.OpenMaya.MPlugArray()
+			if plug.isConnected() :
+				plug.connectedTo( connections, True, False )
+			if connections.length():
+				return
+
+			# Connect this node to the shape.
+			dgMod = maya.OpenMaya.MDGModifier()
+			dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( arrayIndex ), plug )
+			dgMod.doIt()
+
+	def __connectShapes( self, transformNode = None ):
+
+		shapeType, plugStr = self.__mayaCompatibleShapeAndPlug()
+		if not (shapeType and plugStr):
+			return
+
+		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
+		pathToShape = transformNode + "|" + shapeName
+
+		if shapeType == "nurbsCurve":
+			curvesPrimitive = self.sceneInterface().readObject( 0.0 )
+			numShapes = curvesPrimitive.numCurves()
+
+			# Connect this node to shapes. Set query attributes.
+
+			queryPathsPlug = self.findPlug( "queryPaths" )
+			validIndices = maya.OpenMaya.MIntArray()
+			queryPathsPlug.getExistingArrayAttributeIndices( validIndices )
+
+			# Find an unused query attributes array index for the time we need to make one.
+			if validIndices:
+				nextArrayIndex = max( validIndices ) + 1
+			else:
+				nextArrayIndex = 0
+
+			parameters = IECoreMaya.ToMayaObjectConverter.create( curvesPrimitive ).parameters()
+
+			# { "index" convert param value : queryPaths array index}, to be used to check if we can reuse existing query attributes element.
+			existingQueryIndices = {}
+			for i in validIndices:
+				if queryPathsPlug.elementByLogicalIndex( i ).asString() == "/":
+					self.__readConvertParams( i, parameters )
+					existingQueryIndices[ parameters["index"].getTypedValue() ] = i
+
+			for shapeId in range( numShapes ):
+
+				# Set query attributes.
+				# We need multiple Maya shape nodes to fully convert a curvesPrimitive.
+				# To feed geometry data into multiple shapes, ieSceneShape node's "outObjects" attribute needs to output multiple geometries.
+				# This can be done using query attributes "queryConvertParameters".
+				# e.g. when you want outObjects[ i ] to output j's curve of the CurvesPrimitive,
+				#	maya.cmds.setAttr( "mySceneShape.queryConvertParameters[ i ]", "-index %d" % j, type="string" )
+				# You also need to set a valid path to the i'th queryPaths element.
+				attrIndex = existingQueryIndices.get( shapeId )
+				if attrIndex != None:
+					arrayIndex = attrIndex # Reuse an existing array element.
+				else:
+					arrayIndex = nextArrayIndex # Create a new array element.
+					nextArrayIndex += 1
+
+					queryPathsPlug.elementByLogicalIndex( arrayIndex ).setString( "/" )
+					parameters[ "index" ].setTypedValue( shapeId )
+					if "src" in parameters:
+						del parameters[ "src" ]
+					self.__setConvertParams( arrayIndex, parameters )
+
+				self.__connectShape( pathToShape + str( shapeId ), plugStr, arrayIndex )
+
+		else:
+			# Connect this node to one shape.
+			arrayIndex = self.__queryIndexForPath( "/" )
+			self.__connectShape( pathToShape, plugStr, arrayIndex )
+
 	## Converts the object (if any) in the scene interface into maya geometry.
 	# If a shape with the expected name but incompatible type is found under the transform, we rename it and create a new proper shape.
 	# The shape is connected to the scene shape object output only if it isn't already connected or locked.
 	# transformNode parameter can be used to specify the parent of the geometry. If None, uses the transform of the scene shape.
 	def convertObjectToGeometry( self, transformNode = None ):
-		
+
 		if not self.sceneInterface().hasObject():
 			return
 
@@ -426,57 +582,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			dag.pop()
 			transformNode = dag.fullPathName()
 
-		type, plug = self.__mayaCompatibleShapeAndPlug()
-		if not (type and plug):
-			raise Exception, "Scene interface at %s cannot be converted to Maya geometry." % self.sceneInterface().pathAsString()
-		
-		shapeName = IECoreMaya.FnDagNode.defaultShapeName( transformNode )
-		shape = transformNode + "|" + shapeName
-		
-		fnShape = None
-		try :
-			fnShape = maya.OpenMaya.MFnDagNode( IECoreMaya.StringUtil.dagPathFromString( shape ) )
-		except RuntimeError :
-			pass
-		
-		if fnShape and maya.cmds.nodeType( shape ) != type :
-			# Rename existing shape
-			newName = shapeName + "_orig"
-			maya.cmds.rename( shape, newName )
-			IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Renaming incompatible shape %s to %s." % shape, newName )
-			fnShape = None
-
-		if not fnShape :
-			dagMod = maya.OpenMaya.MDagModifier()
-			shapeNode = dagMod.createNode( type, IECoreMaya.StringUtil.dependencyNodeFromString( transformNode ) )
-			dagMod.renameNode( shapeNode, shapeName )
-			dagMod.doIt()
-			
-			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
-
-			if type == "mesh":
-				maya.cmds.sets(shape, add="initialShadingGroup" )
-
-		plug = fnShape.findPlug( plug )
-		if plug.isLocked() :
-			return
-		
-		connections = maya.OpenMaya.MPlugArray()
-		if plug.isConnected() :
-			plug.connectedTo( connections, True, False )
-		
-		if not connections.length() :
-			dgMod = maya.OpenMaya.MDGModifier()
-			dgMod.connect( self.findPlug( "outObjects" ).elementByLogicalIndex( self.__queryIndexForPath( "/" ) ), plug )
-			dgMod.doIt()
-			
-			if type == "mesh":
-				object = self.sceneInterface().readObject(0.0)
-				interpolation = object.interpolation
-				try:
-					IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( shape, interpolation )
-				except:
-					IECore.msg( IECore.Msg.Level.Warning, "FnSceneShape.convertObjectToGeometry", "Failed to set interpolation on %s." % shape )
+		self.__findOrCreateShapes( transformNode )
+		self.__connectShapes( transformNode )
 
 	def createLocatorAtTransform( self, path ) :
 		

@@ -39,6 +39,7 @@
 #include "maya/MDagPath.h"
 #include "maya/MFnMeshData.h"
 #include "maya/MFnMesh.h"
+#include "maya/MFnDependencyNode.h"
 #include "maya/MPointArray.h"
 #include "maya/MFloatPointArray.h"
 #include "maya/MFloatVectorArray.h"
@@ -486,7 +487,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::string interpolation )
 {
 	MStatus st;
-	MFnMesh fnMesh(object, &st);
+	MFnDependencyNode fnDep(object, &st);
 	if ( !st )
 	{
 		return false;
@@ -516,7 +517,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		}
 	}
 
-	MPlug interpPlug = fnMesh.findPlug( "ieMeshInterpolation", &st );
+	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
 	
 	if ( !st )
 	{
@@ -539,12 +540,12 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 		}
 
 		// looks like the attribute does not exist yet..
-		st = fnMesh.addAttribute( newAttr );
+		st = fnDep.addAttribute( newAttr );
 		if ( !st )
 		{
 			return false;
 		}
-		interpPlug = fnMesh.findPlug( "ieMeshInterpolation", &st );
+		interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
 		if ( !st )
 		{
 			return false;
