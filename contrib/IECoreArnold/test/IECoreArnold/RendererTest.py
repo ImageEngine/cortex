@@ -618,6 +618,34 @@ class RendererTest( unittest.TestCase ) :
 			self.assertEqual( len( shapes ), 1 )
 			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
 
+	def testEnumAttributes( self ) :
+
+		for source, result in [
+			( IECore.StringData( "catclark" ), 1 ),
+			( IECore.StringData( "linear" ), 2 ),
+			( IECore.IntData( 1 ), 1 ),
+			( IECore.IntData( 2 ), 2 ) ]:
+	
+			r = IECoreArnold.Renderer()
+
+			r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+
+			with IECore.WorldBlock( r ) :
+
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+				r.setAttribute( "ai:polymesh:subdiv_type", source )
+
+				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+				mesh.render( r )
+
+				shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
+
+				self.assertEqual( len( shapes ), 1 )
+				self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_type" ), result )
+
+			del r
+
 	def testShaderConnections( self ) :
 
 		r = IECoreArnold.Renderer()
