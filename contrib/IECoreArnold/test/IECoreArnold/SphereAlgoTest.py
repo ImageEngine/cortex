@@ -81,15 +81,15 @@ class SphereAlgoTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( s )
-			self.assertEqual( arnold.AiNodeGetVec( n, "user:v" ), arnold.AtVector( 1, 2, 3 ) )
-			self.assertEqual( arnold.AiNodeGetRGB( n, "user:c" ), arnold.AtColor( 1, 2, 3 ) )
-			self.assertEqual( arnold.AiNodeGetStr( n, "user:s" ), "test" )
-			self.assertEqual( arnold.AiNodeGetInt( n, "user:i" ), 11 )
-			self.assertEqual( arnold.AiNodeGetBool( n, "user:b" ), True )
-			self.assertEqual( arnold.AiNodeGetFlt( n, "user:f" ), 2.5 )
+			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )
+			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtColor( 1, 2, 3 ) )
+			self.assertEqual( arnold.AiNodeGetStr( n, "s" ), "test" )
+			self.assertEqual( arnold.AiNodeGetInt( n, "i" ), 11 )
+			self.assertEqual( arnold.AiNodeGetBool( n, "b" ), True )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "f" ), 2.5 )
 
 			m = arnold.AtMatrix()
-			arnold.AiNodeGetMatrix( n, "user:m", m )
+			arnold.AiNodeGetMatrix( n, "m", m )
 			self.assertEqual(
 				[ getattr( m, f[0] ) for f in m._fields_ ],
 				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],

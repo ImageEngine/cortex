@@ -132,8 +132,8 @@ class MeshTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
-			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
-			v = arnold.AiNodeGetArray( n, "user:myV3fPrimVar" )
+			a = arnold.AiNodeGetArray( n, "myPrimVar" )
+			v = arnold.AiNodeGetArray( n, "myV3fPrimVar" )
 			self.assertEqual( a.contents.nelements, 4 )
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetFlt( a, i ), i )
@@ -155,8 +155,8 @@ class MeshTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
-			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
-			ia = arnold.AiNodeGetArray( n, "user:myPrimVaridxs" )
+			a = arnold.AiNodeGetArray( n, "myPrimVar" )
+			ia = arnold.AiNodeGetArray( n, "myPrimVaridxs" )
 			self.assertEqual( a.contents.nelements, 16 )
 			self.assertEqual( ia.contents.nelements, 16 )
 			for i in range( 0, 16 ) :
@@ -202,6 +202,47 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nkeys, 1 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+
+	def testClashingPrimitiveVariables( self ) :
+		# make sure that names of arnold built-in's can't be used as names for primitive variables
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+
+		m["name"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Uniform,
+			IECore.StringData( "CannotRenameMe" )
+		)
+
+		expectedMsg = 'Primitive variable "name" will be ignored because it clashes with Arnold\'s built-in parameters'
+
+		with IECoreArnold.UniverseBlock() :
+			msg = IECore.CapturingMessageHandler()
+			with msg :
+				IECoreArnold.NodeAlgo.convert( m )
+
+			self.assertEqual( len(msg.messages), 1 )
+			self.assertEqual( msg.messages[-1].message, expectedMsg )
+			self.assertEqual( msg.messages[-1].level, IECore.Msg.Level.Warning )
+
+	def testPointTypePrimitiveVariables( self ) :
+		# make sure that we can add prim vars of both vector and point type, and differentiate between the two.
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+
+		points = IECore.V3fVectorData( [] )
+		IECore.setGeometricInterpretation( points, IECore.GeometricData.Interpretation.Point )
+		m["points"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, points )
+
+		vectors = IECore.V3fVectorData( [] )
+		IECore.setGeometricInterpretation( vectors, IECore.GeometricData.Interpretation.Vector )
+		m["vectors"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, vectors )
+
+		with IECoreArnold.UniverseBlock() :
+			node = IECoreArnold.NodeAlgo.convert( m )
+			p = arnold.AiNodeGetArray( node, "points" )
+			self.assertEqual( p.contents.type, arnold.AI_TYPE_POINT )
+
+			v = arnold.AiNodeGetArray( node, "vectors" )
+			self.assertEqual( v.contents.type, arnold.AI_TYPE_VECTOR )
+
 
 if __name__ == "__main__":
     unittest.main()
