@@ -181,7 +181,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	if ( AiNodeEntryLookUpParameter(	entry, name ) != NULL ){
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Primitive variable \"%s\" will be ignored because it clashes with Arnold's built-in parameters" ) % name
 		);
 		return;
@@ -229,7 +229,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
 		);
 		return;
@@ -265,7 +265,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Unable to create user parameter \"%s\" for primitive variable of type \"%s\"" ) % name % primitiveVariable.data->typeName()
 		);
 		return;
@@ -290,7 +290,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
 		);
 	}
