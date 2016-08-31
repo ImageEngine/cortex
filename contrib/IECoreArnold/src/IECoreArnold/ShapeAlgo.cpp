@@ -176,6 +176,17 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
 
+	// make sure the primitive variable doesn't clash with built-ins
+	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
+	if ( AiNodeEntryLookUpParameter(	entry, name ) != NULL ){
+		msg(
+			Msg::Warning,
+			"ShapeAlgo::convertPrimitiveVariable",
+			boost::format( "Primitive variable \"%s\" will be ignored because it clashes with Arnold's built-in parameters" ) % name
+		);
+		return;
+	}
+
 	// Arnold has "constant", "uniform", "varying" and "indexed" interpolation,
 	// whereas Cortex has Constant, Uniform, Varying, Vertex and FaceVarying.
 	// The conversion between the two depends on the type of the primitive.
@@ -218,7 +229,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Unable to create user parameter \"%s\" because primitive variable has unsupported interpolation" ) % name
 		);
 		return;
@@ -249,12 +260,12 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	// Now deal with more complex cases with array data.
 
 	bool isArray = false;
-	int type = ParameterAlgo::parameterType( primitiveVariable.data->typeId(), isArray );
+	int type = ParameterAlgo::parameterType( primitiveVariable.data.get(), isArray );
 	if( type == AI_TYPE_NONE || !isArray )
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Unable to create user parameter \"%s\" for primitive variable of type \"%s\"" ) % name % primitiveVariable.data->typeName()
 		);
 		return;
@@ -262,7 +273,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 
 	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
 	AiNodeDeclare( shape, name, typeString.c_str() );
-	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get() );
+	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
 	if( array )
 	{
 		AiNodeSetArray( shape, name, array );
@@ -279,7 +290,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	{
 		msg(
 			Msg::Warning,
-			"ToArnoldShapeConverter::convertPrimitiveVariable",
+			"ShapeAlgo::convertPrimitiveVariable",
 			boost::format( "Failed to create array for parameter \"%s\" from data of type \"%s\"" ) % name % primitiveVariable.data->typeName()
 		);
 	}
@@ -306,11 +317,7 @@ void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shap
 			}
 		}
 
-		// we prefix all the names, as otherwise the chance of a conflict between
-		// an arbitrary primitive variable name and an existing arnold parameter name
-		// seems too great.
-		string prefixedName = "user:" + it->first;
-		convertPrimitiveVariable( primitive, it->second, shape, prefixedName.c_str() );
+		convertPrimitiveVariable( primitive, it->second, shape, it->first.c_str() );
 	}
 }
 

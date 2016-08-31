@@ -123,7 +123,7 @@ class PointsTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
-			self.assertEqual( arnold.AiNodeGetInt( n, "user:myPrimVar" ), 10 )
+			self.assertEqual( arnold.AiNodeGetInt( n, "myPrimVar" ), 10 )
 
 	def testConstantArrayPrimitiveVariable( self ) :
 
@@ -133,7 +133,7 @@ class PointsTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
-			a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+			a = arnold.AiNodeGetArray( n, "myPrimVar" )
 			self.assertEqual( a.contents.nelements, 10 )
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
@@ -146,7 +146,7 @@ class PointsTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
-			self.assertEqual( arnold.AiNodeGetInt( n, "user:myPrimVar" ), 10 )
+			self.assertEqual( arnold.AiNodeGetInt( n, "myPrimVar" ), 10 )
 
 	def testVertexPrimitiveVariable( self ) :
 
@@ -160,7 +160,7 @@ class PointsTest( unittest.TestCase ) :
 			with IECoreArnold.UniverseBlock() :
 
 				n = IECoreArnold.NodeAlgo.convert( p )
-				a = arnold.AiNodeGetArray( n, "user:myPrimVar" )
+				a = arnold.AiNodeGetArray( n, "myPrimVar" )
 				self.assertEqual( a.contents.nelements, 10 )
 				for i in range( 0, 10 ) :
 					self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
@@ -174,8 +174,8 @@ class PointsTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock() :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
-			self.assertEqual( arnold.AiNodeGetBool( n, "user:truePrimVar" ), True )
-			self.assertEqual( arnold.AiNodeGetBool( n, "user:falsePrimVar" ), False )
+			self.assertEqual( arnold.AiNodeGetBool( n, "truePrimVar" ), True )
+			self.assertEqual( arnold.AiNodeGetBool( n, "falsePrimVar" ), False )
 
 	def testMotion( self ) :
 
