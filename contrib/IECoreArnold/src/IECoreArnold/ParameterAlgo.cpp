@@ -125,7 +125,15 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				}
 				break;
 			case AI_TYPE_ENUM :
-				if( const StringData *data = dataCast<StringData>( name, value ) )
+				// Arnold supports setting enums with either the integer index or the string name
+
+				// First try getting an integer, but don't warn if it fails
+				if( const IntData *data = runTimeCast<const IntData>( value ) )
+				{
+					AiNodeSetInt( node, name, data->readable() );
+				}
+				// Then try getting a string, with the usual warning if nothing has been found yet
+				else if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
 					AiNodeSetStr( node, name, data->readable().c_str() );
 				}
