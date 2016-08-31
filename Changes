@@ -1,3 +1,23 @@
+9.12.0
+======
+
+#### IECoreArnold
+
+- Added read/write access concept to UniverseBlock (#514).
+- Added automatic loading of metadata files to UniverseBlock (#514).
+- Stopped adding "user:" prefix to arbitrary primitive variables. Instead
+  variables which clash with built in parameters are ignored instead (#519).
+- Added support for GeometricTypedData interpretation in primitive variables (#519).
+
+#### IECoreMaya
+
+- LiveScene
+  - Added support for multiple shapes under a transform, by merging them
+    into a single Cortex object (#516).
+- SceneShapes
+  - Added support for converting CurvesPrimitives to multiple maya curves
+    under the same transform (#516).
+
 9.11.4
 ======
 
