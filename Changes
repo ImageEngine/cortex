@@ -8,6 +8,7 @@
 - Stopped adding "user:" prefix to arbitrary primitive variables. Instead
   variables which clash with built in parameters are ignored instead (#519).
 - Added support for GeometricTypedData interpretation in primitive variables (#519).
+- Support setting enum parameters using integer index
 
 #### IECoreMaya
 
