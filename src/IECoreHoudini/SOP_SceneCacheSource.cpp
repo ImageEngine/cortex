@@ -554,6 +554,12 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		return false;
 	}
 	
+	// we need to set the name regardless of whether
+	// we're reusing prims or doing the full conversion
+	// because this parameter can have an affect in
+	// transferAttribs() as well as convert()
+	converter->nameParameter()->setTypedValue( name );
+	
 	// check the primitve range map to see if this shape exists already
 	std::map<std::string, GA_Range>::iterator rIt = params.namedRanges.find( name );
 	if ( rIt != params.namedRanges.end() && !rIt->second.isEmpty() )
@@ -603,7 +609,6 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 	}
 	
 	// fallback to full conversion
-	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( params.attributeFilter );
 	
 	try

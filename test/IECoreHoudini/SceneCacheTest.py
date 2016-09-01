@@ -3295,6 +3295,38 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( childScene.childNames(), [] )
 		self.assertEqual( childScene.readObject( 0 ).variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
+	def testSceneNameTakesPrecedence( self ) :
+		
+		def write() :
+			
+			scene = self.writeSCC()
+			sc = scene.createChild( str( 4 ) )
+			mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+			mesh["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+			mesh.blindData()["name"] = IECore.StringData( "blindName" )
+			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
+			for time in ( 0, 1, 2 ) :
+				sc.writeObject( mesh, time )
+				sc.writeTransform( IECore.M44dData( matrix ), time )
+		
+		write()
+		
+		spf = 1.0 / hou.fps()
+		
+		sop = self.sop()
+		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
+		
+		for time in ( 0, 1, 2 ) :
+			
+			hou.setTime( time - spf )
+			geometry = sop.geometry()
+			prims = geometry.prims()
+			nameAttr = geometry.findPrimAttrib( "name" )
+			self.assertTrue( "blindName" not in nameAttr.strings() )
+			self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3', '/4' ] ) )
+			for name in nameAttr.strings() :
+				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
+	
 	def tearDown( self ) :
 		
 		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :
