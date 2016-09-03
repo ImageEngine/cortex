@@ -104,6 +104,12 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1, 1000 ) )
 		self.assertEqual( c.parameters()["shutter"].value, V2f( 1, 2 ) )
 
+		# Negative clip planes on ortho cameras should be supported
+		c = Camera()
+		c.parameters()["clippingPlanes"] = V2fData( V2f( -1000, 1000 ) )
+		c.addStandardParameters()
+		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( -1000, 1000 ) )
+
 	def testHash( self ) :
 	
 		c = Camera()
