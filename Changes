@@ -1,3 +1,15 @@
+9.12.1
+======
+
+#### IECore
+
+- Camera
+  - Added support for negative clipping planes ( useful on ortho cams )
+
+#### IECoreHoudini
+
+- Fixed CurvesPrimitive duplication in Houdini SceneCacheSource SOP
+
 9.12.0
 ======
 
