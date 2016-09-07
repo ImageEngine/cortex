@@ -303,16 +303,10 @@ void Camera::addStandardParameters()
 	}
 
 	// clipping planes
-	V2f clippingPlanes( -1.0f );
 	CompoundDataMap::const_iterator clippingIt=parameters().find( "clippingPlanes" );
-	if( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
+	if( !( clippingIt != parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) ) )
 	{
-		clippingPlanes = boost::static_pointer_cast<V2fData>( clippingIt->second )->readable();
-	}
-	if( clippingPlanes[0] < 0.0f || clippingPlanes[1] < 0.0f )
-	{
-		clippingPlanes = V2f( 0.01f, 100000.0f );
-		parameters()["clippingPlanes"] = new V2fData( clippingPlanes );
+		parameters()["clippingPlanes"] = new V2fData( V2f( 0.01f, 100000.0f ) );
 	}
 
 	// shutter
