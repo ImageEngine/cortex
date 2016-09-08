@@ -53,6 +53,7 @@
 #include "renderer/api/rendering.h"
 #include "renderer/api/surfaceshader.h"
 #include "renderer/api/utility.h"
+#include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
@@ -501,7 +502,11 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 	else if( isProjectGen() )
 	{
+#ifdef APPLESEED_VERSION > 10400
 		const int writeOptions = asr::ProjectFileWriter::OmitHandlingAssetFiles | asr::ProjectFileWriter::OmitWritingGeometryFiles;
+#else
+		const int writeOptions = asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles;
+#endif
 		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), writeOptions );
 	}
 	else
