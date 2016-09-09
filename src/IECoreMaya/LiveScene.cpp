@@ -69,6 +69,7 @@
 #include "maya/MPlug.h"
 #include "maya/MTransformationMatrix.h"
 #include "maya/MDagPathArray.h"
+#include "maya/MFnNurbsCurve.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
@@ -597,11 +598,44 @@ bool hasMergeableObjects( const MDagPath &p )
 	}
 
 	bool isMergeable = false;
+	MFnNurbsCurve::Form acceptableCurveForm = MFnNurbsCurve::kInvalid;
+	int acceptableCurveDegree = -1;
 	MFn::Type foundType = MFn::kInvalid;
 	for ( unsigned int c = 0; c < childCount; c++ )
 	{
 		MObject childObject = p.child( c );
 		MFn::Type type = childObject.apiType();
+
+		if( type == MFn::kNurbsCurve )
+		{
+			MFnNurbsCurve fnNCurve( childObject );
+
+			if( acceptableCurveForm == MFnNurbsCurve::kInvalid )
+			{
+				acceptableCurveForm = fnNCurve.form();
+			}
+			else if ( fnNCurve.form() != acceptableCurveForm )
+			{
+				msg( Msg::Warning, p.fullPathName().asChar(), "Found curves with different kind of forms under the same transform!" );
+				return false;
+			}
+
+			int degree = fnNCurve.degree();
+			if( degree == 0 )
+			{
+				msg( Msg::Warning, p.fullPathName().asChar(), "Could not get a curve degree!" );
+				return false;
+			}
+			if( acceptableCurveDegree == -1 )
+			{
+				acceptableCurveDegree = degree;
+			}
+			else if ( degree != acceptableCurveDegree )
+			{
+				msg( Msg::Warning, p.fullPathName().asChar(), "Found curves with different degrees under the same transform!" );
+				return false;
+			}
+		}
 
 		if( type == MFn::kMesh || type == MFn::kNurbsCurve )
 		{
