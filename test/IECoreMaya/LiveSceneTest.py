@@ -1008,6 +1008,40 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.currentTime( "0.0sec" )
 		mergedCurves = scene.readObject( 0 )
 		self.assertEqual( mergedCurves.numCurves(), 2 )
+	
+	def testMultiCurvesWithDifferentDegrees( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		maya.cmds.curve( d=3, p=[ ( 0, 0, 0 ), ( 1, 0, 0 ), ( 2, 0, 0 ), ( 3, 0, 0 ) ], k=( 0, 0, 0, 1, 1, 1 ), n="curve1" )
+		maya.cmds.curve( d=1, p=[ ( 0, 0, 0 ), ( 0, 0, 1 ) ], k=( 0, 1 ), n="curve2" )
+		maya.cmds.curve( d=1, p=[ ( 0, 0, 0 ), ( 0, 0, 1 ) ], k=( 0, 1 ), n="curve3" )
+
+		maya.cmds.select( "curveShape1", "curveShape2", "curveShape3", "sharedParent")
+		maya.cmds.parent( s=True, r=True )
+
+		scene = IECoreMaya.LiveScene()
+		scene = scene.child('sharedParent')
+		maya.cmds.currentTime( "0.0sec" )
+		curve = scene.readObject( 0 )
+		self.assertEqual( curve.numCurves(), 1 ) # Still has object but curves are not merged.
+
+	def testMultiCurvesWithDifferentForms( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		maya.cmds.curve( d=3, per=True, p=[(0, 0, 0), (3, 5, 6), (5, 6, 7), (9, 9, 9), (0, 0, 0), (3, 5, 6), (5, 6, 7)], k=[-2,-1,0,1,2,3,4,5,6], n="curve1" )
+		maya.cmds.curve( d=3, p=[ ( 0, 0, 0 ), ( 1, 0, 0 ), ( 2, 0, 0 ), ( 3, 0, 0 ) ], k=( 0, 0, 0, 1, 1, 1 ), n="curve2" )
+		maya.cmds.curve( d=3, p=[ ( 0, 0, 0 ), ( 1, 0, 0 ), ( 2, 0, 0 ), ( 3, 0, 0 ) ], k=( 0, 0, 0, 1, 1, 1 ), n="curve3" )
+
+		maya.cmds.select( "curveShape1", "curveShape2", "curveShape3", "sharedParent")
+		maya.cmds.parent( s=True, r=True )
+
+		scene = IECoreMaya.LiveScene()
+		scene = scene.child('sharedParent')
+		maya.cmds.currentTime( "0.0sec" )
+		curve = scene.readObject( 0 )
+		self.assertEqual( curve.numCurves(), 1 ) # Still has object but curves are not merged.
 
 	def testMultiMeshes( self ) :
 
