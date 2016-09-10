@@ -32,14 +32,13 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECoreAppleseed/MeshAlgo.h"
+
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Exception.h"
+#include "IECore/MeshPrimitive.h"
 #include "IECore/MessageHandler.h"
-
 #include "IECore/TriangulateOp.h"
-#include "IECore/FaceVaryingPromotionOp.h"
-
-#include "IECoreAppleseed/MeshAlgo.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -48,14 +47,103 @@ using namespace std;
 namespace asf = foundation;
 namespace asr = renderer;
 
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+void setMeshKey( renderer::MeshObject *mesh, size_t keyIndex, const Object *object )
+{
+	const MeshPrimitive *m = static_cast<const MeshPrimitive*>( object );
+	const V3fVectorData *p = m->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
+
+	if( !p )
+	{
+		throw Exception( "MeshPrimitive does not have \"P\" primitive variable of interpolation type Vertex." );
+	}
+
+	const std::vector<V3f> &points = p->readable();
+	for( size_t j = 0, numVertices = p->readable().size() ; j < numVertices; ++j )
+	{
+		mesh->set_vertex_pose( j, keyIndex, asr::GVector3( points[j].x, points[j].y, points[j].z ) );
+	}
+
+	if( mesh->get_vertex_normal_count() != 0 )
+	{
+		PrimitiveVariableMap::const_iterator nIt = m->variables.find( "N" );
+		if( nIt == m->variables.end() )
+		{
+			throw Exception( "MeshPrimitive missing normals in motion sample." );
+		}
+
+		const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
+		if( !n )
+		{
+			throw Exception( ( boost::format( "MeshPrimitive \"N\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % nIt->second.data->typeName() ).str() );
+		}
+
+		const std::vector<V3f> &normals = n->readable();
+		size_t numNormals = normals.size();
+		if( numNormals != mesh->get_vertex_normal_count() )
+		{
+			throw Exception( "MeshPrimitive \"N\" primitive variable has different interpolation than first deformation sample." );
+		}
+
+		for( size_t j = 0 ; j < numNormals; ++j )
+		{
+			const asr::GVector3 n( normals[j].x, normals[j].y, normals[j].z );
+			mesh->set_vertex_normal_pose( j, keyIndex, asf::normalize( n ) );
+		}
+	}
+
+	if( mesh->get_vertex_tangent_count() != 0 )
+	{
+		PrimitiveVariableMap::const_iterator tIt = m->variables.find( "uTangent" );
+		if( tIt == m->variables.end() )
+		{
+			throw Exception( "MeshPrimitive missing tangents in motion sample." );
+		}
+
+		const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
+		if( !t )
+		{
+			throw Exception( ( boost::format( "MeshPrimitive \"uTangent\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % tIt->second.data->typeName() ).str() );
+		}
+
+		const std::vector<V3f> &tangents = t->readable();
+		size_t numTangents = t->readable().size();
+		if( numTangents != mesh->get_vertex_tangent_count() )
+		{
+			throw Exception( "MeshPrimitive \"uTangent\" primitive variable has different interpolation than first deformation sample." );
+		}
+
+		for( size_t j = 0 ; j < numTangents; ++j )
+		{
+			const asr::GVector3 t( tangents[j].x, tangents[j].y, tangents[j].z );
+			mesh->set_vertex_tangent_pose( j, keyIndex, asf::normalize( t ) );
+		}
+	}
+}
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of public API.
+//////////////////////////////////////////////////////////////////////////
+
 namespace IECoreAppleseed
 {
 
 namespace MeshAlgo
 {
 
-renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
+renderer::MeshObject *convert( const IECore::Object *primitive )
 {
+	assert( primitive->typeId() == IECore::MeshPrimitiveTypeId );
+	const IECore::MeshPrimitive *mesh = static_cast<const IECore::MeshPrimitive *>( primitive );
+
 	const V3fVectorData *p = mesh->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
 	{
@@ -77,11 +165,14 @@ renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
 	}
 
 	// triangulate primitive (this should be in appleseed at some point)
-	TriangulateOpPtr op = new TriangulateOp();
-	op->inputParameter()->setValue( MeshPrimitivePtr( mesh ) );
-	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
-	op->copyParameter()->setTypedValue( true );
-	MeshPrimitivePtr triangulatedMeshPrimPtr = runTimeCast<MeshPrimitive>( op->operate() );
+	MeshPrimitivePtr triangulatedMeshPrimPtr = mesh->copy();
+	{
+		TriangulateOpPtr op = new TriangulateOp();
+		op->inputParameter()->setValue( triangulatedMeshPrimPtr );
+		op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
+		op->copyParameter()->setTypedValue( false );
+		op->operate();
+	}
 
 	// triangles
 	size_t numTriangles = triangulatedMeshPrimPtr->numFaces();
@@ -169,8 +260,7 @@ renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
 					for( size_t i = 0; i < numNormals; ++i)
 					{
 						asr::GVector3 n( normals[i].x, normals[i].y, normals[i].z );
-						n = asf::normalize( n );
-						meshEntity->push_vertex_normal( n );
+						meshEntity->push_vertex_normal( asf::normalize( n ) );
 					}
 
 					if( nInterpolation == PrimitiveVariable::FaceVarying )
@@ -223,8 +313,7 @@ renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
 					for( size_t i = 0; i < numTangents; ++i)
 					{
 						asr::GVector3 t( tangents[i].x, tangents[i].y, tangents[i].z );
-						t = asf::normalize( t );
-						meshEntity->push_vertex_tangent( t );
+						meshEntity->push_vertex_tangent( asf::normalize( t ) );
 					}
 				}
 				else
@@ -250,6 +339,47 @@ renderer::MeshObject *convert( IECore::MeshPrimitive *mesh )
 	}
 
 	return meshEntity.release();
+}
+
+renderer::MeshObject *convert( const std::vector<const IECore::Object *> &samples )
+{
+	if( !asf::is_pow2( samples.size() ) )
+	{
+		throw Exception( "Number of motion samples must be a power of 2." );
+	}
+
+	// convert the first sample.
+	renderer::MeshObject *mesh = convert( samples[0] );
+
+	// set the point, normal and tangent positions for all other time samples.
+	mesh->set_motion_segment_count( samples.size() - 1 );
+
+	for( size_t i = 1, e = samples.size(); i < e; ++i )
+	{
+		setMeshKey( mesh, i - 1, samples[i] );
+	}
+
+	return mesh;
+}
+
+renderer::MeshObject *convert( const std::vector<IECore::ObjectPtr> &samples )
+{
+	if( !asf::is_pow2( samples.size() ) )
+	{
+		throw Exception( "Number of motion samples must be a power of 2." );
+	}
+
+	// convert the first sample.
+	renderer::MeshObject *mesh = convert( samples[0].get() );
+
+	// set the point, normal and tangent positions for all other time samples.
+	mesh->set_motion_segment_count( samples.size() - 1 );
+	for( size_t i = 1, e = samples.size(); i < e; ++i )
+	{
+		setMeshKey( mesh, i - 1, samples[i].get() );
+	}
+
+	return mesh;
 }
 
 } // namespace MeshAlgo

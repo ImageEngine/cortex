@@ -57,8 +57,7 @@ void doMakeTransform( const Imath::M44f &m, asf::Transformd &xform )
 }
 
 template <class TimeContainer>
-void doMakeTransformSequence( const TimeContainer &times,
-	const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
+void doMakeTransformSequence( const TimeContainer &times, const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
 {
 	assert( times.size() == transforms.size() );
 
@@ -98,14 +97,12 @@ void makeTransformSequence( const Imath::M44f &m, asr::TransformSequence &xformS
 	xformSeq.set_transform( 0.0, xform );
 }
 
-void makeTransformSequence( const std::set<float> &times,
-	const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
+void makeTransformSequence( const std::set<float> &times, const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
 {
 	doMakeTransformSequence( times, transforms, xformSeq );
 }
 
-void makeTransformSequence( const std::vector<float> &times,
-	const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
+void makeTransformSequence( const std::vector<float> &times, const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
 {
 	doMakeTransformSequence( times, transforms, xformSeq );
 }

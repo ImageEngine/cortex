@@ -34,15 +34,18 @@
 
 #include "IECoreAppleseed/ParameterAlgo.h"
 
+#include "IECore/MessageHandler.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/SplineData.h"
+
+#include "boost/algorithm/string.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "renderer/api/color.h"
 
-#include "IECore/MessageHandler.h"
-#include "IECore/SimpleTypedData.h"
-
 using namespace IECore;
 using namespace Imath;
+
 using namespace boost;
 using namespace std;
 
@@ -56,7 +59,71 @@ namespace asr = renderer;
 namespace
 {
 
-} // namespace
+template<typename Spline>
+void declareSplineBasisAndPositions( const InternedString &name, const Spline &spline, asr::ParamArray &params )
+{
+	string basisParamName = name.string() + "Basis";
+
+	if( spline.basis == Spline::Basis::bezier() )
+	{
+		params.insert( basisParamName.c_str(), "string bezier" );
+	}
+	else if( spline.basis == Spline::Basis::bSpline() )
+	{
+		params.insert( basisParamName.c_str(), "string bspline" );
+	}
+	else if( spline.basis == Spline::Basis::linear() )
+	{
+		params.insert( basisParamName.c_str(), "string linear" );
+	}
+	else
+	{
+		params.insert( basisParamName.c_str(), "string catmull-rom" );
+	}
+
+	stringstream ss;
+	ss << "float[] ";
+	for( typename Spline::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
+	{
+		ss << it->first << " ";
+	}
+
+	string positionsParamName = name.string() + "Positions";
+	params.insert( positionsParamName.c_str(), ss.str().c_str() );
+}
+
+void declareSpline( const InternedString &name, const Splineff &spline, asr::ParamArray &params )
+{
+	declareSplineBasisAndPositions( name, spline, params );
+
+	stringstream ss;
+	ss << "float[] ";
+	for( Splineff::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
+	{
+		ss << it->second << " ";
+	}
+
+	string valuesParamName = name.string() + "Values";
+	params.insert( valuesParamName.c_str(), ss.str().c_str() );
+}
+
+void declareSpline( const InternedString &name, const SplinefColor3f &spline, asr::ParamArray &params )
+{
+	declareSplineBasisAndPositions( name, spline, params );
+
+	stringstream ss;
+	ss << "color[] ";
+	for( SplinefColor3f::PointContainer::const_iterator it = spline.points.begin(), eIt = spline.points.end(); it != eIt; ++it )
+	{
+		const Color3f &c = it->second;
+		ss << c.x << " " << c.y << " " << c.z << " ";
+	}
+
+	string valuesParamName = name.string() + "Values";
+	params.insert( valuesParamName.c_str(), ss.str().c_str() );
+}
+
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Implementation of public API.
@@ -176,6 +243,110 @@ asr::ParamArray convertParams( const CompoundDataMap &parameters )
 		setParam( it->first.value(), it->second.get(), result );
 
 	return result;
+}
+
+asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters, std::string &handle )
+{
+	asr::ParamArray params;
+
+	for( CompoundDataMap::const_iterator it = parameters.begin(), eIt = parameters.end(); it != eIt; ++it )
+	{
+		if( const StringData *stringData = runTimeCast<const StringData>( it->second.get() ) )
+		{
+			const std::string &value = stringData->readable();
+
+			if( boost::starts_with( value, "link:" ) )
+			{
+				// Skip links.
+				continue;
+			}
+			else if( it->first.value() == "__handle" )
+			{
+				// Save the handle.
+				handle = value;
+				continue;
+			}
+		}
+
+		std::stringstream ss;
+
+		const Data *data = it->second.get();
+		switch( data->typeId() )
+		{
+			case FloatDataTypeId :
+			{
+				const float *p = static_cast<const FloatData *>( data )->baseReadable();
+				ss << "float " << *p;
+			}
+			break;
+
+			case IntDataTypeId :
+			{
+				const int *p = static_cast<const IntData *>( data )->baseReadable();
+				ss << "int " << *p;
+			}
+			break;
+
+			case V3fDataTypeId :
+			{
+				const float *p = static_cast<const V3fData *>( data )->baseReadable();
+				ss << "vector " << p[0] << " " << p[1] << " " << p[2];
+			}
+			break;
+
+			case Color3fDataTypeId :
+			{
+				const float *p = static_cast<const Color3fData *>( data )->baseReadable();
+				ss << "color " << p[0] << " " << p[1] << " " << p[2];
+			}
+			break;
+
+			case StringDataTypeId :
+			{
+				const std::string *p = &(static_cast<const StringData *>( data )->readable() );
+				ss << "string " << *p;
+			}
+			break;
+
+			case M44fDataTypeId:
+			{
+				const float *p = static_cast<const M44fData *>( data )->baseReadable();
+				ss << "matrix ";
+				ss << p[ 0] << " " << p[ 1] << " " << p[ 2] << " " << p[ 3] << " ";
+				ss << p[ 4] << " " << p[ 5] << " " << p[ 6] << " " << p[ 7] << " ";
+				ss << p[ 8] << " " << p[ 9] << " " << p[10] << " " << p[11] << " ";
+				ss << p[12] << " " << p[13] << " " << p[14] << " " << p[15];
+			}
+			break;
+
+			case SplineffDataTypeId:
+			{
+				const SplineffData *splineData = static_cast<const SplineffData *>( data );
+				declareSpline( it->first, splineData->readable(), params );
+				continue;
+			}
+			break;
+
+			case SplinefColor3fDataTypeId:
+			{
+				const SplinefColor3fData *splineData = static_cast<const SplinefColor3fData *>( data );
+				declareSpline( it->first, splineData->readable(), params );
+				continue;
+			}
+			break;
+
+			default:
+				msg( Msg::Warning, "AppleseedRenderer", boost::format( "Parameter \"%s\" has unsupported type \"%s\"" ) % it->first.string() % it->second->typeName() );
+			break;
+		}
+
+		if( !ss.str().empty() )
+		{
+			params.insert( it->first.c_str(), ss.str() );
+		}
+	}
+
+	return params;
 }
 
 } // namespace ParameterAlgo

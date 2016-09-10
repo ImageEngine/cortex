@@ -57,8 +57,7 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 {
 	if( primitive->typeId() == MeshPrimitiveTypeId )
 	{
-		MeshPrimitive *meshPrimitive = static_cast<MeshPrimitive *>( primitive.get() );
-		asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( meshPrimitive ) );
+		asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( primitive.get() ) );
 
 		if( entity.get() )
 		{

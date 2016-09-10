@@ -175,7 +175,7 @@ asr::ParamArray IECoreAppleseed::LightHandler::convertParams( const string &hand
 			{
 				string colorName = handle + "." + paramName;
 				const Color3f &col = static_cast<const Color3fData*>( paramValue.get() )->readable();
-				colorName = ColorAlgo::createColorEntity( m_scene.colors(), col, colorName.c_str() );
+				colorName = ColorAlgo::createColorEntity( m_scene.colors(), col, colorName.c_str() ).first;
 				params.insert( paramName.c_str(), colorName.c_str() );
 			}
 			else

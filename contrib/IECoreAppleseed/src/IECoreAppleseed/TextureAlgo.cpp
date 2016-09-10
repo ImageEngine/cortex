@@ -33,8 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 
-#include "IECoreAppleseed/EntityAlgo.h"
 #include "IECoreAppleseed/TextureAlgo.h"
+#include "IECoreAppleseed/EntityAlgo.h"
 
 using namespace IECoreAppleseed;
 using namespace std;

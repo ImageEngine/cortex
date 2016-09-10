@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2015, Esteban Tovagliari. All rights reserved.
+//  Copyright (c) 2016, Esteban Tovagliari. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,60 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREAPPLESEED_EDITBLOCKHANDLER_H
-#define IECOREAPPLESEED_EDITBLOCKHANDLER_H
+#include "IECoreAppleseed/ObjectAlgo.h"
 
-#include <memory>
+#include "IECoreAppleseed/MeshAlgo.h"
+#include "IECoreAppleseed/MotionAlgo.h"
 
-#include "boost/noncopyable.hpp"
-#include "boost/thread/thread.hpp"
+#include "IECore/Exception.h"
+#include "IECore/MeshPrimitive.h"
 
-#include "renderer/api/project.h"
-#include "renderer/api/rendering.h"
-
-#include "IECore/CompoundData.h"
-
-#include "IECoreAppleseed/RendererController.h"
+using namespace IECore;
 
 namespace IECoreAppleseed
 {
 
-/// The EditBlockHandler class manages an interactive appleseed
-/// rendering session, starting, stopping and pausing rendering
-/// when edits are being made.
-class EditBlockHandler : boost::noncopyable
+namespace ObjectAlgo
 {
 
-	public :
+bool isPrimitiveSupported( const Object *primitive )
+{
+	return primitive->typeId() == MeshPrimitiveTypeId;
+}
 
-		explicit EditBlockHandler( renderer::Project &project );
-		~EditBlockHandler();
+renderer::Object *convert( const Object *primitive )
+{
+	if( !isPrimitiveSupported( primitive ) )
+	{
+		throw Exception( "AppleseedRenderer: Unsupported primitive" );
+	}
 
-		void startRendering();
+	return MeshAlgo::convert( primitive );
+}
 
-		bool insideEditBlock() const;
+renderer::Object *convert( const std::vector<const Object *> &samples, const std::vector<float> &times, float shutterOpenTime, float shutterCloseTime )
+{
+	if( !isPrimitiveSupported( samples[0] ) )
+	{
+		throw Exception( "Unsupported primitive" );
+	}
 
-		const std::string &exactScopeName() const;
+	const Object *firstSample = samples.front();
+	const TypeId firstSampleTypeId = firstSample->typeId();
+	for( std::vector<const Object *>::const_iterator it = samples.begin()+1, eIt = samples.end(); it != eIt; ++it )
+	{
+		if( (*it)->typeId() != firstSampleTypeId )
+		{
+			throw Exception( "Inconsistent object types." );
+		}
+	}
 
-		void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
-		void editEnd();
+	if( !MotionAlgo::checkTimeSamples( times, shutterOpenTime, shutterCloseTime ) )
+	{
+		std::vector<ObjectPtr> resampled;
+		MotionAlgo::resamplePrimitiveKeys( samples, times, shutterOpenTime, shutterCloseTime, resampled );
+		return MeshAlgo::convert( resampled );
+	}
+	else
+	{
+		return MeshAlgo::convert( samples );
+	}
+}
 
-	private :
-
-		renderer::Project &m_project;
-		std::auto_ptr<RendererController> m_rendererController;
-		std::auto_ptr<renderer::MasterRenderer> m_renderer;
-		boost::thread m_renderingThread;
-		int m_editDepth;
-		std::string m_exactScopeName;
-
-		static void renderThreadFunc( EditBlockHandler *self );
-
-		void pauseRendering();
-		void stopRendering();
-
-};
+} // namespace ObjectAlgo
 
 } // namespace IECoreAppleseed
-
-#endif // IECOREAPPLESEED_EDITBLOCKHANDLER_H
