@@ -45,8 +45,7 @@ void IECoreAppleseed::IECoreLogTarget::release()
 	delete this;
 }
 
-void IECoreAppleseed::IECoreLogTarget::write( const asf::LogMessage::Category category, const char* file,
-			const size_t line, const char* header, const char* message)
+void IECoreAppleseed::IECoreLogTarget::write( const asf::LogMessage::Category category, const char* file, const size_t line, const char* header, const char* message)
 {
 	switch( category )
 	{

@@ -53,6 +53,7 @@
 #include "renderer/api/rendering.h"
 #include "renderer/api/surfaceshader.h"
 #include "renderer/api/utility.h"
+#include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
 #include "IECore/MeshPrimitive.h"
@@ -62,11 +63,11 @@
 #include "IECoreAppleseed/private/RendererImplementation.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
 #include "IECoreAppleseed/private/InteractivePrimitiveConverter.h"
-#include "IECoreAppleseed/private/RendererController.h"
 #include "IECoreAppleseed/CameraAlgo.h"
 #include "IECoreAppleseed/EntityAlgo.h"
 #include "IECoreAppleseed/LogTarget.h"
 #include "IECoreAppleseed/ParameterAlgo.h"
+#include "IECoreAppleseed/RendererController.h"
 
 using namespace IECore;
 using namespace IECoreAppleseed;
@@ -501,7 +502,12 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 	else if( isProjectGen() )
 	{
-		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles );
+#if APPLESEED_VERSION > 10400
+		const int writeOptions = asr::ProjectFileWriter::OmitHandlingAssetFiles | asr::ProjectFileWriter::OmitWritingGeometryFiles;
+#else
+		const int writeOptions = asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles;
+#endif
+		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), writeOptions );
 	}
 	else
 	{

@@ -36,6 +36,7 @@
 #define IECOREAPPLESEED_COLORALGO_H
 
 #include <string>
+#include <utility>
 
 #include "renderer/api/color.h"
 
@@ -45,7 +46,7 @@ namespace IECoreAppleseed
 namespace ColorAlgo
 {
 
-std::string createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
+std::pair<std::string, renderer::ColorEntity*> createColorEntity( renderer::ColorContainer &colorContainer, const Imath::C3f &color, const std::string &name );
 
 } // namespace ColorAlgo
 

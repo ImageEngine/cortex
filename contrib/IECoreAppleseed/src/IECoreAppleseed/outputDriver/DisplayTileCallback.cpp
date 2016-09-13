@@ -41,6 +41,7 @@
 #include "foundation/utility/autoreleaseptr.h"
 
 #include "renderer/api/frame.h"
+#include "renderer/api/log.h"
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
 
@@ -48,6 +49,8 @@
 #include "IECore/BoxAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+
+#include "IECoreAppleseed/ProgressTileCallback.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -60,12 +63,14 @@ namespace asr = renderer;
 namespace IECoreAppleseed
 {
 
-class DisplayTileCallback : public asr::TileCallbackBase
+class DisplayTileCallback : public ProgressTileCallback
 {
 
 	public :
 
-		explicit DisplayTileCallback( const asr::ParamArray &params ) : m_params( params )
+		explicit DisplayTileCallback( const asr::ParamArray &params )
+			: ProgressTileCallback()
+			, m_params( params )
 		{
 			m_display_initialized = false;
 		}
@@ -89,8 +94,8 @@ class DisplayTileCallback : public asr::TileCallbackBase
 
 		virtual void release()
 		{
-			// we don't need to do anything here.
-			// the tile callback factory deletes this instance.
+			// We don't need to do anything here.
+			// The tile callback factory deletes this instance.
 		}
 
 		// This method is called before a region is rendered.
@@ -114,6 +119,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 				init_display( frame );
 			}
 
+			log_progress( frame, tileX, tileY );
 			write_tile( frame, tileX, tileY );
 		}
 
@@ -203,6 +209,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 				msg( Msg::Error, "ieOutputDriver:driverOpen", e.what() );
 			}
 
+			m_renderedPixels = 0;
 			m_display_initialized = true;
 		}
 
@@ -273,7 +280,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		{
 			try
 			{
-				// don't send anything to the Driver if there are no pixels.
+				// Don't send anything to the Driver if there are no pixels.
 				if( !m_buffer.empty() )
 				{
 					m_driver->imageData( bucketBox, &m_buffer.front(), m_buffer.size() );
@@ -281,8 +288,7 @@ class DisplayTileCallback : public asr::TileCallbackBase
 			}
 			catch( const std::exception &e )
 			{
-				// we have to catch and report exceptions because letting them out into pure c land
-				// just causes aborts.
+				// We have to catch and report exceptions because letting them out into pure c land just causes aborts.
 				msg( Msg::Error, "ieOutputDriver:driverWriteBucket", e.what() );
 			}
 		}
@@ -297,7 +303,6 @@ class DisplayTileCallback : public asr::TileCallbackBase
 		}
 
 		asr::ParamArray m_params;
-		mutex m_mutex;
 		bool m_display_initialized;
 		DisplayDriverPtr m_driver;
 		Box2i m_data_window;
