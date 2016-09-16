@@ -326,7 +326,7 @@ if targetApp=="nuke" :
 		PNG_INCLUDE_PATH = "/usr/local/include/"
 	
 	NUKE_ROOT = nukeReg["location"]
-	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_NUKEPYTHON_DIR = os.path.join( appPrefix, "python" )
 	INSTALL_NUKEPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
