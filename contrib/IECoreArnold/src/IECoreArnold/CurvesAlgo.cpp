@@ -37,11 +37,12 @@
 #include "ai.h"
 
 #include "IECore/CurvesPrimitive.h"
-#include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
 #include "IECoreArnold/CurvesAlgo.h"
+#include "IECoreArnold/ParameterAlgo.h"
 
 using namespace std;
 using namespace IECore;
@@ -93,7 +94,7 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 
 	// add arbitrary user parameters
 
-	const char *ignore[] = { "P", "width", "radius", 0 };
+	const char *ignore[] = { "P", "N", "width", "radius", 0 };
 	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
 
 	return result;
@@ -108,6 +109,18 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 	ShapeAlgo::convertP( curves, result, "points" );
 	ShapeAlgo::convertRadius( curves, result );
 
+	// Convert "N" to orientations
+
+	if( const V3fVectorData *n = curves->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
+	{
+		AiNodeSetStr( result, "mode", "oriented" );
+		AiNodeSetArray(
+			result,
+			"orientations",
+			AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( n->readable()[0] ) )
+		);
+	}
+
 	return result;
 }
 
@@ -118,6 +131,29 @@ AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, "points" );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
+
+	// Convert "N" to orientations
+
+	vector<const Data *> nSamples;
+	nSamples.reserve( samples.size() );
+	for( vector<const CurvesPrimitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	{
+		if( const V3fVectorData *n = (*it)->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
+		{
+			nSamples.push_back( n );
+		}
+	}
+
+	if( nSamples.size() == samples.size() )
+	{
+		AiNodeSetStr( result, "mode", "oriented" );
+		AtArray *array = ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR );
+		AiNodeSetArray( result, "orientations", array );
+	}
+	else if( nSamples.size() )
+	{
+		IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Missing sample for primitive variable \"N\" - not setting orientations." );
+	}
 
 	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
 

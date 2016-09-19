@@ -32,6 +32,7 @@
 #
 ##########################################################################
 
+import math
 import unittest
 
 import arnold
@@ -74,6 +75,56 @@ class CurvesTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nkeys, 1 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+
+	def testNPrimitiveVariable( self ) :
+
+		c = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom() )
+		c["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
+		)
+
+		with IECoreArnold.UniverseBlock() :
+
+			# No N - should be a ribbon
+
+			n = IECoreArnold.NodeAlgo.convert( c )
+			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "ribbon" )
+			self.assertEqual( arnold.AiNodeGetArray( n, "orientations" ).contents.nelements, 0 )
+
+			# N - should be oriented
+
+			c["N"] = IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
+			)
+
+			n = IECoreArnold.NodeAlgo.convert( c )
+			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
+			orientations = arnold.AiNodeGetArray( n, "orientations" )
+			self.assertEqual( orientations.contents.nelements, 4 )
+
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetVec( orientations, i ), arnold.AtVector( 0, math.sin( i ), math.cos( i ) ) )
+
+			# Motion blurred N - should be oriented and deforming
+
+			c2 = c.copy()
+			c2["N"] = IECore.PrimitiveVariable(
+				IECore.PrimitiveVariable.Interpolation.Vertex,
+				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
+			)
+
+			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], [ 0.0, 1.0 ] )
+			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
+
+			orientations = arnold.AiNodeGetArray( n, "orientations" )
+			self.assertEqual( orientations.contents.nelements, 4 )
+			self.assertEqual( orientations.contents.nkeys, 2 )
+
+			for i in range( 0, 4 ) :
+				self.assertEqual( arnold.AiArrayGetVec( orientations, i ), arnold.AtVector( 0, math.sin( i ), math.cos( i ) ) )
+				self.assertEqual( arnold.AiArrayGetVec( orientations, i + 4 ), arnold.AtVector( 0, math.sin( i + 0.2 ), math.cos( i + 0.2 ) ) )
 
 if __name__ == "__main__":
     unittest.main()
