@@ -64,7 +64,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( TIFFImageReader );
 
-const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif tdl");
+const Reader::ReaderDescription<TIFFImageReader> TIFFImageReader::m_readerDescription("tiff tif tdl tx");
 
 TIFFImageReader::TIFFImageReader()
 		:	ImageReader( "Reads Tagged Image File Format (TIFF) files" ),
