@@ -441,6 +441,19 @@ AtArray *dataToArray( const IECore::Data *data, int aiType )
 			return NULL;
 		}
 	}
+	// bools are a special case because of how the STL implements vector<bool>.
+	// Since the base for vector<bool> are not actual booleans, we need to manually
+	// convert to an AtArray here.
+	else if( aiType == AI_TYPE_BOOLEAN )
+	{
+		const vector<bool> &booleans = static_cast<const BoolVectorData *>( data )->readable();
+		vector<bool>::size_type booleansSize = booleans.size();
+		AtArray* array = AiArrayAllocate( booleansSize, 1, AI_TYPE_BOOLEAN );
+		for(vector<bool>::size_type i = 0; i < booleansSize; ++i){
+			AiArraySetBool(array, i, booleans[i]);
+		}
+		return array;
+	}
 
 	const void *dataAddress = despatchTypedData<TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
 	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data ) );
