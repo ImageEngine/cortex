@@ -51,7 +51,7 @@ namespace IECore
 
 /// Server class that receives images from ClientDisplayDriver connections and forwards the data to local display drivers.
 /// The type of the local display drivers is defined by the 'remoteDisplayType' parameter.
-/// 
+///
 /// The server object creates a thread to control the socket connection. The thread dies when the object is destroyed.
 /// \ingroup renderingGroup
 class IECORE_API DisplayDriverServer : public RunTimeTyped
@@ -60,8 +60,13 @@ class IECORE_API DisplayDriverServer : public RunTimeTyped
 
 		IE_CORE_DECLARERUNTIMETYPED( DisplayDriverServer, RunTimeTyped );
 
-		DisplayDriverServer( int portNumber );
+		/// A port number of 0 causes a free port to be chosen
+		/// automatically. Call `portNumber()` after construction
+		/// to retrieve the actual number.
+		DisplayDriverServer( int portNumber = 0 );
 		virtual ~DisplayDriverServer();
+
+		int portNumber();
 
 	private:
 

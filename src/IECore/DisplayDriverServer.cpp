@@ -78,9 +78,9 @@ class DisplayDriverServer::Session : public RefCounted
 
 class DisplayDriverServer::PrivateData : public RefCounted
 {
-	
+
 	public :
-	
+
 		bool m_success;
 		boost::asio::ip::tcp::endpoint m_endpoint;
 		boost::asio::io_service m_service;
@@ -141,6 +141,11 @@ DisplayDriverServer::~DisplayDriverServer()
 {
 }
 
+int DisplayDriverServer::portNumber()
+{
+	return m_data->m_acceptor.local_endpoint().port();
+}
+
 void DisplayDriverServer::serverThread()
 {
 	try
@@ -165,8 +170,8 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
 	}
 }
 
-/* 
- * DisplayDriverServer::Session functions 
+/*
+ * DisplayDriverServer::Session functions
  */
 
 DisplayDriverServer::Session::Session( boost::asio::io_service& io_service ) :
@@ -319,7 +324,7 @@ void DisplayDriverServer::Session::handleReadOpenParameters( const boost::system
 		// send the result back.
 		sendResult( DisplayDriverServerHeader::imageOpen, sizeof(scanLineOrder) );
 		m_socket.send( boost::asio::buffer( &scanLineOrder, sizeof(scanLineOrder) ) );
-		
+
 		sendResult( DisplayDriverServerHeader::imageOpen, sizeof(acceptsRepeatedData) );
 		m_socket.send( boost::asio::buffer( &acceptsRepeatedData, sizeof(acceptsRepeatedData) ) );
 
