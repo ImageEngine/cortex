@@ -51,7 +51,8 @@ void bindDisplayDriverServer()
 	using boost::python::arg;
 
 	RunTimeTypedClass<DisplayDriverServer>()
-		.def( init< int >( ( arg( "portNumber" ) ) ) )
+		.def( init< int >( ( arg( "portNumber" ) = 0 ) ) )
+		.def( "portNumber", &DisplayDriverServer::portNumber )
 	;
 
 }
