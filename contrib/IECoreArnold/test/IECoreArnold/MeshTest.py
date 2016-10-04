@@ -243,6 +243,24 @@ class MeshTest( unittest.TestCase ) :
 			v = arnold.AiNodeGetArray( node, "vectors" )
 			self.assertEqual( v.contents.type, arnold.AI_TYPE_VECTOR )
 
+	def testBoolVectorPrimitiveVariables( self ) :
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["myBoolPrimVar"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.BoolVectorData( [ True, False, True, False ] )
+		)
+
+		with IECoreArnold.UniverseBlock() :
+
+			n = IECoreArnold.NodeAlgo.convert( m )
+			a = arnold.AiNodeGetArray( n, "myBoolPrimVar" )
+
+			self.assertEqual( a.contents.nelements, 4 )
+			self.assertEqual( arnold.AiArrayGetBool( a, 0 ), True )
+			self.assertEqual( arnold.AiArrayGetBool( a, 1 ), False )
+			self.assertEqual( arnold.AiArrayGetBool( a, 2 ), True )
+			self.assertEqual( arnold.AiArrayGetBool( a, 3 ), False )
 
 if __name__ == "__main__":
     unittest.main()
