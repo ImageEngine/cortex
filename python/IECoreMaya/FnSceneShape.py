@@ -480,7 +480,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			curvesPrimitive = self.sceneInterface().readObject( 0.0 )
 			numShapes = curvesPrimitive.numCurves()
 			for shapeId in range( numShapes ):
-				self.__findOrCreateShape( transformNode, shapeName + str( shapeId ), shapeType )
+				nameId = '' if numShapes == 1 else str( shapeId ) # Do not add number to the name if there's only one curve, for backward compatibility.
+				self.__findOrCreateShape( transformNode, shapeName + nameId, shapeType )
 
 		else:
 			self.__findOrCreateShape( transformNode, shapeName, shapeType )
@@ -560,7 +561,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 						del parameters[ "src" ]
 					self.__setConvertParams( arrayIndex, parameters )
 
-				self.__connectShape( pathToShape + str( shapeId ), plugStr, arrayIndex )
+				nameId = '' if numShapes == 1 else str( shapeId )
+				self.__connectShape( pathToShape + nameId, plugStr, arrayIndex )
 
 		else:
 			# Connect this node to one shape.
