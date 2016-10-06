@@ -416,7 +416,8 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		queryConvertParametersPlug = self.findPlug( "queryConvertParameters" )
 		convertParamIndices = maya.OpenMaya.MIntArray()
 		queryConvertParametersPlug.getExistingArrayAttributeIndices( convertParamIndices )
-		values = queryConvertParametersPlug.elementByLogicalIndex( index ).asString()
+		values = queryConvertParametersPlug.elementByLogicalIndex( index ).asString().split()
+		values = [ str(x) for x in values ] # unicode to str
 		IECore.ParameterParser().parse( values, parameters )
 
 	## Set queryConvertParameters attribute from a parametrized object.
