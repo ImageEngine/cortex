@@ -429,7 +429,7 @@ def __expandAsGeometry( sceneShapes, *unused ) :
 	
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
-		fnS.convertAllToGeometry()
+		fnS.convertAllToGeometry( True )
 
 ## Expand the scene shape the minimal amount to reach the selected components
 def __expandToSelected( sceneShape, *unused ) :
