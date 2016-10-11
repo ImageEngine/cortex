@@ -1,3 +1,21 @@
+9.14.0
+======
+
+#### IECore
+
+- ParameterAlgo
+  - Added manual conversion from BoolVectorData to AtArray.
+- DisplayDriverServer
+  - Supporting automatic selection of a free port.
+
+#### IECoreMaya
+
+- SceneShape
+  - Added preserveNamespace argument to convertAllToGeometry().
+  - Recursive expandAsGeometry() now preserves namespace.
+  - Fixed bug converting multiple curves to geometry.
+  - Fixed naming backward compatibility when converting and connecting to curves.
+
 9.13.2
 ======
 
