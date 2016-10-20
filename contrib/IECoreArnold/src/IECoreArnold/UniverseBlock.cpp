@@ -34,6 +34,8 @@
 
 #include "ai.h"
 
+#include "tbb/spin_mutex.h"
+
 #include "boost/tokenizer.hpp"
 #include "boost/filesystem/operations.hpp"
 
@@ -46,6 +48,7 @@
 using namespace IECore;
 using namespace IECoreArnold;
 
+static tbb::spin_mutex g_mutex;
 static int g_count = 0;
 static bool g_haveWriter = false;
 static ClassData<UniverseBlock, bool> g_writable;
@@ -65,6 +68,8 @@ UniverseBlock::UniverseBlock( bool writable )
 
 void UniverseBlock::init( bool writable )
 {
+	tbb::spin_mutex::scoped_lock lock( g_mutex );
+
 	if( writable )
 	{
 		if( g_haveWriter )
@@ -96,6 +101,8 @@ void UniverseBlock::init( bool writable )
 
 UniverseBlock::~UniverseBlock()
 {
+	tbb::spin_mutex::scoped_lock lock( g_mutex );
+
 	if( g_writable[this] )
 	{
 		g_haveWriter = false;
