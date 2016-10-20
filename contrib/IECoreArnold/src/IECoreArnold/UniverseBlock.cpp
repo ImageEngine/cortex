@@ -77,6 +77,18 @@ void loadMetadata( const std::string &pluginPaths )
 	}
 }
 
+void begin()
+{
+	AiBegin();
+
+	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
+	if( pluginPaths )
+	{
+		AiLoadPlugins( pluginPaths );
+		loadMetadata( pluginPaths );
+	}
+}
+
 tbb::spin_mutex g_mutex;
 int g_count = 0;
 bool g_haveWriter = false;
@@ -120,28 +132,35 @@ void UniverseBlock::init( bool writable )
 		return;
 	}
 
-	AiBegin();
-
-	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
-	if( pluginPaths )
-	{
-		AiLoadPlugins( pluginPaths );
-		loadMetadata( pluginPaths );
-	}
+	begin();
 }
 
 UniverseBlock::~UniverseBlock()
 {
 	tbb::spin_mutex::scoped_lock lock( g_mutex );
 
+	g_count--;
 	if( g_writable[this] )
 	{
 		g_haveWriter = false;
+		// We _must_ call AiEnd() to clean up ready
+		// for the next writer, regardless of whether
+		// or not readers still exist.
+		AiEnd();
+		if( g_count )
+		{
+			// If readers do exist, restart the universe.
+			// This is not threadsafe, since a reader on
+			// another thread could be making Ai calls
+			// in between shutdown and startup. But it is
+			// the best we can do given that Arnold has
+			// only one universe. The alternative is to
+			// only shutdown when g_count reaches 0, but
+			// then a long-lived reader can cause Arnold
+			// state to be carried over from one writer
+			// to the next.
+			begin();
+		}
 	}
 	g_writable.erase( this );
-
-	if( --g_count == 0 )
-	{
-		AiEnd();
-	}
 }

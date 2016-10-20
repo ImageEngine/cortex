@@ -59,11 +59,7 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 			self.failUnless( arnold.AiUniverseIsActive() )
 
-		self.failIf( arnold.AiUniverseIsActive() )
-
 	def testWritable( self ) :
-
-		self.failIf( arnold.AiUniverseIsActive() )
 
 		def createBlock( writable ) :
 
@@ -88,6 +84,8 @@ class UniverseBlockTest( unittest.TestCase ) :
 	def testMetadataLoading( self ) :
 
 		os.environ["ARNOLD_PLUGIN_PATH"] = os.path.join( os.path.dirname( __file__ ), "metadata" )
+		with IECoreArnold.UniverseBlock( writable = True ) :
+			pass
 
 		with IECoreArnold.UniverseBlock( writable = False ) :
 
@@ -107,6 +105,17 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 			arnold.AiMetaDataGetInt( e, "AA_samples", "cortex.testInt", i )
 			self.assertEqual( i.value, 12 )
+
+	def testReadOnlyUniverseDoesntPreventWritableUniverseCleanup( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = False ) :
+
+			with IECoreArnold.UniverseBlock( writable = True ) :
+
+				node = arnold.AiNode( "polymesh" )
+				arnold.AiNodeSetStr( node, "name", "test" )
+
+			self.assertEqual( arnold.AiNodeLookUpByName( "test" ), None )
 
 if __name__ == "__main__":
     unittest.main()
