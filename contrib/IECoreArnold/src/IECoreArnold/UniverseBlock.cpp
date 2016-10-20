@@ -48,10 +48,41 @@
 using namespace IECore;
 using namespace IECoreArnold;
 
-static tbb::spin_mutex g_mutex;
-static int g_count = 0;
-static bool g_haveWriter = false;
-static ClassData<UniverseBlock, bool> g_writable;
+namespace
+{
+
+void loadMetadata( const std::string &pluginPaths )
+{
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+	Tokenizer t( pluginPaths, boost::char_separator<char>( ":" ) );
+	for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; ++it )
+	{
+		try
+		{
+			for( boost::filesystem::recursive_directory_iterator dIt( *it ), deIt; dIt != deIt; ++dIt )
+			{
+				if( dIt->path().extension() == ".mtd" )
+				{
+					if( !AiMetaDataLoadFile( dIt->path().c_str() ) )
+					{
+						throw IECore::Exception( boost::str( boost::format( "Failed to load \"%s\"" ) % dIt->path().string() ) );
+					}
+				}
+			}
+		}
+		catch( const std::exception &e )
+		{
+			IECore::msg( IECore::Msg::Debug, "UniverseBlock", e.what() );
+		}
+	}
+}
+
+tbb::spin_mutex g_mutex;
+int g_count = 0;
+bool g_haveWriter = false;
+ClassData<UniverseBlock, bool> g_writable;
+
+} // namespace
 
 UniverseBlock::UniverseBlock()
 {
@@ -112,31 +143,5 @@ UniverseBlock::~UniverseBlock()
 	if( --g_count == 0 )
 	{
 		AiEnd();
-	}
-}
-
-void UniverseBlock::loadMetadata( const std::string &pluginPaths )
-{
-	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
-	Tokenizer t( pluginPaths, boost::char_separator<char>( ":" ) );
-	for( Tokenizer::const_iterator it = t.begin(), eIt = t.end(); it != eIt; ++it )
-	{
-		try
-		{
-			for( boost::filesystem::recursive_directory_iterator dIt( *it ), deIt; dIt != deIt; ++dIt )
-			{
-				if( dIt->path().extension() == ".mtd" )
-				{
-					if( !AiMetaDataLoadFile( dIt->path().c_str() ) )
-					{
-						throw IECore::Exception( boost::str( boost::format( "Failed to load \"%s\"" ) % dIt->path().string() ) );
-					}
-				}
-			}
-		}
-		catch( const std::exception &e )
-		{
-			IECore::msg( IECore::Msg::Debug, "UniverseBlock", e.what() );
-		}
 	}
 }
