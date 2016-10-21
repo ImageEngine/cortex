@@ -139,7 +139,7 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 	m_mode = mode;
 	if( mode != Procedural )
 	{
-		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock() );
+		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock( /* writable = */ true ) );
 		m_instancingConverter = new InstancingConverter;
 
 		/// \todo Control with an option
