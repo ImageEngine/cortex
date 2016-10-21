@@ -43,7 +43,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertPerspective( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert(
 				IECore.Camera(
@@ -64,7 +64,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 
 	def testConvertCustomProjection( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert(
 				IECore.Camera(
