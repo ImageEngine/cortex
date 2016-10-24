@@ -83,11 +83,12 @@ class IECORE_API OStreamMessageHandler : public MessageHandler
 
 		virtual ~OStreamMessageHandler();
 
+		std::ostream *m_stream;
+
 
 	private :
 
 		bool m_ownStream;
-		std::ostream *m_stream;
 
 };
 
