@@ -315,9 +315,15 @@ class Selector::Implementation : public IECore::RefCounted
 			glGetIntegerv( GL_VIEWPORT, m_prevViewport );
 			glViewport( 0, 0, 128, 128 );
 			
+			GLfloat prevClearColor[4];
+			GLfloat prevClearDepth;
+			glGetFloatv( GL_COLOR_CLEAR_VALUE, prevClearColor );
+			glGetFloatv( GL_DEPTH_CLEAR_VALUE, &prevClearDepth );
 			glClearColor( 0.0, 0.0, 0.0, 1.0 );
 			glClearDepth( 1.0 );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+			glClearColor( prevClearColor[0], prevClearColor[1], prevClearColor[2], prevClearColor[3] );
+			glClearDepth( prevClearDepth );
 			
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
 			pushIDShader( defaultIDShader() );
@@ -419,9 +425,17 @@ class Selector::Implementation : public IECore::RefCounted
 		{
 			m_queries.resize( 0 );
 			m_queryNames.resize( 0 );
+
+			GLfloat prevClearColor[4];
+			GLfloat prevClearDepth;
+			glGetFloatv( GL_COLOR_CLEAR_VALUE, prevClearColor );
+			glGetFloatv( GL_DEPTH_CLEAR_VALUE, &prevClearDepth );
 			glClearColor( 0.0, 0.0, 0.0, 1.0 );
 			glClearDepth( 1.0 );
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+			glClearColor( prevClearColor[0], prevClearColor[1], prevClearColor[2], prevClearColor[3] );
+			glClearDepth( prevClearDepth );
+
 			m_baseState->add( depthTestStateComponent(), true /* override */ );
 		}
 
