@@ -50,7 +50,7 @@ class MeshTest( unittest.TestCase ) :
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		s, t = m["s"].data, m["t"].data
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 
@@ -73,7 +73,7 @@ class MeshTest( unittest.TestCase ) :
 		s, t = m["s"].data, m["t"].data
 
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 
@@ -129,7 +129,7 @@ class MeshTest( unittest.TestCase ) :
 			IECore.V3fVectorData( [ IECore.V3f( v ) for v in range( 0, 4 ) ] )
 		)
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
@@ -152,7 +152,7 @@ class MeshTest( unittest.TestCase ) :
 			IECore.FloatVectorData( range( 0, 16 ) )
 		)
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
@@ -173,7 +173,7 @@ class MeshTest( unittest.TestCase ) :
 		m2["P"].data[1] -= IECore.V3f( 0, 0, 1 )
 		IECore.MeshNormalsOp()( input = m2, copyInput = False )
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
 
@@ -214,7 +214,7 @@ class MeshTest( unittest.TestCase ) :
 
 		expectedMsg = 'Primitive variable "name" will be ignored because it clashes with Arnold\'s built-in parameters'
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 			msg = IECore.CapturingMessageHandler()
 			with msg :
 				IECoreArnold.NodeAlgo.convert( m )
@@ -235,7 +235,7 @@ class MeshTest( unittest.TestCase ) :
 		IECore.setGeometricInterpretation( vectors, IECore.GeometricData.Interpretation.Vector )
 		m["vectors"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, vectors )
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 			node = IECoreArnold.NodeAlgo.convert( m )
 			p = arnold.AiNodeGetArray( node, "points" )
 			self.assertEqual( p.contents.type, arnold.AI_TYPE_POINT )
@@ -251,7 +251,7 @@ class MeshTest( unittest.TestCase ) :
 			IECore.BoolVectorData( [ True, False, True, False ] )
 		)
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( m )
 			a = arnold.AiNodeGetArray( n, "myBoolPrimVar" )

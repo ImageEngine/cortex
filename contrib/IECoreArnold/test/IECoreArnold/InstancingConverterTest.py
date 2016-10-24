@@ -48,7 +48,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			c = IECoreArnold.InstancingConverter()
 
@@ -68,7 +68,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 	def testThreading( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			converter = IECoreArnold.InstancingConverter()
 
@@ -118,7 +118,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 	def testUserSuppliedHash( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			c = IECoreArnold.InstancingConverter()
 
@@ -145,7 +145,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 	def testMotion( self ) :
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			c = IECoreArnold.InstancingConverter()
 

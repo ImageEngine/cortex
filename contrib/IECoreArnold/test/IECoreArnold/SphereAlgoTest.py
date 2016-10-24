@@ -44,7 +44,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 	def testConvert( self ) :
 
 		s = IECore.SpherePrimitive( 0.25 )
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( s )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
@@ -54,7 +54,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		s = [ IECore.SpherePrimitive( 0.25 ), IECore.SpherePrimitive( 0.5 ) ]
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( s, [ 0, 1 ] )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
@@ -78,7 +78,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 		s["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.5 )
 		s["m"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) )
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( s )
 			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )

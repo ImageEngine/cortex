@@ -57,7 +57,7 @@ class CurvesTest( unittest.TestCase ) :
 			IECore.V3fVectorData( [ IECore.V3f( 2 ) ] * 4 ),
 		)
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], [ -0.25, 0.25 ] )
 
@@ -84,7 +84,7 @@ class CurvesTest( unittest.TestCase ) :
 			IECore.V3fVectorData( [ IECore.V3f( x, 0, 0 ) for x in range( 0, 4 ) ] )
 		)
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			# No N - should be a ribbon
 
