@@ -1,3 +1,15 @@
+9.14.1
+======
+
+Fixes
+-----
+
+- Arnold `UniverseBlock`
+  - Shutdown lazily to improve read-only access (e.g. shader loading on script open).
+  - Fixed threadsafety issues with construction/destruction.
+  - Fixed writability issues in `Renderer` and tests.
+- `IECoreGL::Selector`: Fixed leak of `glClearColor` and `glClearDepth`.
+
 9.14.0
 ======
 
