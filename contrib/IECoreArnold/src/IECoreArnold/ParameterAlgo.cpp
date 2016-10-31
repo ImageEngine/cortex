@@ -158,6 +158,13 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 					AiNodeSetVec( node, name, v.x, v.y, v.z );
 				}
 				break;
+			case AI_TYPE_POINT :
+				if( const V3fData *data = dataCast<V3fData>( name, value ) )
+				{
+					const Imath::V3f &v = data->readable();
+					AiNodeSetPnt( node, name, v.x, v.y, v.z );
+				}
+				break;
 			case AI_TYPE_MATRIX :
 				if( const M44fData *data = dataCast<M44fData>( name, value ) )
 				{
