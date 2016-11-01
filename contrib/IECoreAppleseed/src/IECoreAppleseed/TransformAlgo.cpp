@@ -94,7 +94,7 @@ void makeTransformSequence( const Imath::M44f &m, asr::TransformSequence &xformS
 	asf::Transformd xform;
 	makeTransform( m, xform );
 	xformSeq.clear();
-	xformSeq.set_transform( 0.0, xform );
+	xformSeq.set_transform( 0.0f, xform );
 }
 
 void makeTransformSequence( const std::set<float> &times, const std::vector<Imath::M44f> &transforms, asr::TransformSequence &xformSeq )
