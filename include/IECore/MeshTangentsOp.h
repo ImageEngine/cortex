@@ -72,6 +72,10 @@ class IECORE_API MeshTangentsOp : public MeshPrimitiveOp
 		StringParameter * vTangentPrimVarNameParameter();
 		const StringParameter * vTangentPrimVarNameParameter() const;
 
+		BoolParameter * normalVecDirCheckParameter();
+		const BoolParameter * normalVecDirCheckParameter() const;
+
+
 		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
 
 	protected:
