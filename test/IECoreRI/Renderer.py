@@ -841,6 +841,46 @@ class RendererTest( IECoreRI.TestCase ) :
 		# Both node types should be shader
 		self.assertEqual( set( x[1] for x in nodes ), { "shader" } )
 
+	def testSampleMotion( self ) :
+	
+		with CapturingMessageHandler() as mh :
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+		self.assertFalse( "sampleMotion" in  file( "test/IECoreRI/output/test.rib" ).read() )
+
+		with CapturingMessageHandler() as mh :
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+			r.setOption( "sampleMotion", False )
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+		self.assertTrue( "\"int samplemotion\" [ 0 ]" in  file( "test/IECoreRI/output/test.rib" ).read() )
+
+		with CapturingMessageHandler() as mh :
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+			r.setOption( "sampleMotion", False )
+			r.setOption( "ri:hider:samplemotion", True )
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+		self.assertTrue( "\"int samplemotion\" [ 1 ]" in  file( "test/IECoreRI/output/test.rib" ).read() )
+
+		with CapturingMessageHandler() as mh :
+			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
+			r.setOption( "ri:hider:samplemotion", True )
+			r.setOption( "sampleMotion", False )
+			with WorldBlock( r ) :
+				pass
+
+		self.assertEqual( len( mh.messages ), 0 )
+		self.assertTrue( "\"int samplemotion\" [ 1 ]" in  file( "test/IECoreRI/output/test.rib" ).read() )
+
+
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )
