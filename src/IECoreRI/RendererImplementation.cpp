@@ -278,6 +278,18 @@ void IECoreRI::RendererImplementation::setOption( const std::string &name, IECor
 		return;
 	}
 
+
+	if( name == "sampleMotion" )
+	{
+		if( m_options->readable().find( "ri:hider:samplemotion" ) == m_options->readable().end() )
+		{
+			// If we aren't specifying the specific RenderMan sample motion option, then drive it
+			// from the general setting ( if the specific setting comes after it will override )
+			m_options->writable()["ri:hider:samplemotion"] = value->copy();
+		}
+		return;
+	}
+	
 	// we need to group related options together into a single RiOption or RiHider call, so we
 	// just accumulate the options until worldBegin() where we'll emit them.
 	m_options->writable()[name] = value->copy();
