@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,23 +32,64 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#include "boost/python.hpp"
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-#include "IECoreArnold/bindings/NodeAlgoBinding.h"
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
+#include "IECoreArnold/ParameterAlgo.h"
 #include "IECoreArnold/bindings/ParameterAlgoBinding.h"
 
+using namespace boost::python;
 using namespace IECoreArnold;
 using namespace IECoreArnoldBindings;
-using namespace boost::python;
 
-BOOST_PYTHON_MODULE( _IECoreArnold )
+namespace
 {
-	bindRenderer();
-	bindUniverseBlock();
-	bindNodeAlgo();
-	bindInstancingConverter();
-	bindParameterAlgo();
+
+AtNode *atNodeFromPythonObject( object &o )
+{
+	object ctypes = import( "ctypes" );
+	object ctypesPointer = ctypes.attr( "POINTER" );
+	object arnoldAtNode = import( "arnold" ).attr( "AtNode" );
+	object atNodePtrType = ctypesPointer( arnoldAtNode );
+
+	if( !PyObject_IsInstance( o.ptr(), atNodePtrType.ptr() ) )
+	{
+		PyErr_SetString( PyExc_TypeError, "Expected an AtNode" );
+		throw_error_already_set();
+	}
+
+	object oContents = o.attr( "contents" );
+	object pythonAddress = ctypes.attr( "addressof" )( oContents );
+	const size_t address = extract<size_t>( pythonAddress );
+	return reinterpret_cast<AtNode *>( address );
 }
+
+void setParameter( object &pythonNode, const char *name, const IECore::Data *data )
+{
+	AtNode *node = atNodeFromPythonObject( pythonNode );
+	ParameterAlgo::setParameter( node, name, data );
+}
+
+IECore::DataPtr getParameter( object &pythonNode, const char *name )
+{
+	AtNode *node = atNodeFromPythonObject( pythonNode );
+	return ParameterAlgo::getParameter( node, name );
+}
+
+} // namespace
+
+namespace IECoreArnoldBindings
+{
+
+void bindParameterAlgo()
+{
+
+	object parameterAlgoModule( handle<>( borrowed( PyImport_AddModule( "IECoreArnold.ParameterAlgo" ) ) ) );
+	scope().attr( "ParameterAlgo" ) = parameterAlgoModule;
+	scope parameterAlgoModuleScope( parameterAlgoModule );
+
+	def( "setParameter", &setParameter );
+	def( "getParameter", &getParameter );
+
+}
+
+} // namespace IECoreArnoldBindings

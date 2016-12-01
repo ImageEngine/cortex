@@ -1,7 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-#  Copyright (c) 2012, John Haddon. All rights reserved.
+#  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,33 +32,50 @@
 #
 ##########################################################################
 
-import sys
 import unittest
 
+import arnold
+
 import IECore
+import IECoreArnold
 
-from RendererTest import RendererTest
-from ProceduralDSOTest import ProceduralDSOTest
-from UniverseBlockTest import UniverseBlockTest
-from MeshTest import MeshTest
-from ProceduralTest import ProceduralTest
-from OutputDriverTest import OutputDriverTest
-from PointsTest import PointsTest
-from InstancingConverterTest import InstancingConverterTest
-from AutomaticInstancingTest import AutomaticInstancingTest
-from CurvesTest import CurvesTest
-from SphereAlgoTest import SphereAlgoTest
-from CameraAlgoTest import CameraAlgoTest
-from ParameterAlgoTest import ParameterAlgoTest
+class ParameterAlgoTest( unittest.TestCase ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "contrib/IECoreArnold/test/IECoreArnold/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+	def testTypeErrors( self ) :
+
+		self.assertRaisesRegexp(
+			TypeError,
+			"Expected an AtNode",
+			IECoreArnold.ParameterAlgo.setParameter, None, "test", IECore.IntData( 10 )
+		)
+
+	def testSetParameter( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "standard" )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "Kd", IECore.FloatData( 0.25 ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "aov_emission", IECore.StringData( "test" ) )
+
+			self.assertEqual( arnold.AiNodeGetFlt( n, "Kd" ), 0.25 )
+			self.assertEqual( arnold.AiNodeGetStr( n, "aov_emission" ), "test" )
+
+	def testGetParameter( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "standard" )
+
+			self.assertEqual(
+				IECoreArnold.ParameterAlgo.getParameter( n, "Kd" ),
+				IECore.FloatData( arnold.AiNodeGetFlt( n, "Kd" ) )
+			)
+
+			self.assertEqual(
+				IECoreArnold.ParameterAlgo.getParameter( n, "aov_emission" ),
+				IECore.StringData( "emission" ),
+			)
+
+if __name__ == "__main__":
+    unittest.main()
