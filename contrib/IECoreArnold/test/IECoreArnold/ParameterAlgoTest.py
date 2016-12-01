@@ -77,5 +77,25 @@ class ParameterAlgoTest( unittest.TestCase ) :
 				IECore.StringData( "emission" ),
 			)
 
+	def testDoubleData( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "standard" )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "Kd", IECore.DoubleData( 0.25 ) )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "Kd" ), 0.25 )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "customFloat", IECore.DoubleData( 0.25 ) )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "customFloat" ), 0.25 )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "customMatrix", IECore.M44dData( IECore.M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) ) )
+			m = arnold.AtMatrix()
+			arnold.AiNodeGetMatrix( n, "customMatrix", m )
+			self.assertEqual(
+				[ getattr( m, f[0] ) for f in m._fields_ ],
+				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
+			)
+
 if __name__ == "__main__":
     unittest.main()
