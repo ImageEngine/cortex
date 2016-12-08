@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011-2012, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2016, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,23 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <boost/python.hpp>
+#ifndef IECOREARNOLD_PARAMETERALGOBINDING_H
+#define IECOREARNOLD_PARAMETERALGOBINDING_H
 
-#include "IECoreArnold/bindings/RendererBinding.h"
-#include "IECoreArnold/bindings/UniverseBlockBinding.h"
-#include "IECoreArnold/bindings/NodeAlgoBinding.h"
-#include "IECoreArnold/bindings/InstancingConverterBinding.h"
-#include "IECoreArnold/bindings/ParameterAlgoBinding.h"
-
-using namespace IECoreArnold;
-using namespace IECoreArnoldBindings;
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE( _IECoreArnold )
+namespace IECoreArnoldBindings
 {
-	bindRenderer();
-	bindUniverseBlock();
-	bindNodeAlgo();
-	bindInstancingConverter();
-	bindParameterAlgo();
-}
+
+void bindParameterAlgo();
+
+} // namespace IECoreArnoldBindings
+
+#endif //  IECOREARNOLD_PARAMETERALGOBINDING_H

@@ -99,7 +99,11 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				}
 				break;
 			case AI_TYPE_FLOAT :
-				if( const FloatData *data = dataCast<FloatData>( name, value ) )
+				if( const DoubleData *data = runTimeCast<const DoubleData>( value ) )
+				{
+					AiNodeSetFlt( node, name, data->readable() );
+				}
+				else if( const FloatData *data = dataCast<FloatData>( name, value ) )
 				{
 					AiNodeSetFlt( node, name, data->readable() );
 				}
@@ -166,7 +170,12 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				}
 				break;
 			case AI_TYPE_MATRIX :
-				if( const M44fData *data = dataCast<M44fData>( name, value ) )
+				if( const M44dData *data = runTimeCast<const M44dData>( value ) )
+				{
+					const Imath::M44f v( data->readable() );
+					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+				}
+				else if( const M44fData *data = dataCast<M44fData>( name, value ) )
 				{
 					const Imath::M44f &v = data->readable();
 
@@ -374,6 +383,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 			array = false;
 			return AI_TYPE_INT;
 		case FloatDataTypeId :
+		case DoubleDataTypeId :
 			array = false;
 			return AI_TYPE_FLOAT;
 		case StringDataTypeId :
@@ -389,6 +399,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 			array = false;
 			return AI_TYPE_VECTOR;
 		case M44fDataTypeId :
+		case M44dDataTypeId :
 			array = false;
 			return AI_TYPE_MATRIX;
 

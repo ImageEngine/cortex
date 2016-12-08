@@ -50,6 +50,7 @@ from AutomaticInstancingTest import AutomaticInstancingTest
 from CurvesTest import CurvesTest
 from SphereAlgoTest import SphereAlgoTest
 from CameraAlgoTest import CameraAlgoTest
+from ParameterAlgoTest import ParameterAlgoTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
