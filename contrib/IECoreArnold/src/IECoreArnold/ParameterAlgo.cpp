@@ -186,7 +186,13 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				break;
 			default :
 			{
-				msg( Msg::Warning, "setParameter", boost::format( "Arnold parameter \"%s\" has unsupported type \"%s\"." ) % name % AiParamGetTypeName( parameterType ) );
+				std::string nodeStr = AiNodeGetName( node );
+				if( nodeStr == "" )
+				{
+					nodeStr = AiNodeEntryGetName( AiNodeGetNodeEntry( node ) );
+				}
+
+				msg( Msg::Warning, "setParameter", boost::format( "Arnold parameter \"%s\" on node \"%s\" has unsupported type \"%s\"." ) % name % nodeStr % AiParamGetTypeName( parameterType ) );
 			}
 		}
 	}
