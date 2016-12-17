@@ -83,6 +83,7 @@ from SceneShapeTest import SceneShapeTest
 from FnSceneShapeTest import FnSceneShapeTest
 from FromMayaLocatorConverterTest import FromMayaLocatorConverterTest
 from ToMayaLocatorConverterTest import ToMayaLocatorConverterTest
+from UndoTest import UndoTest
 
 IECoreMaya.TestProgram(
 
