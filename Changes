@@ -1,3 +1,18 @@
+9.15.0
+======
+
+Improvements
+------------
+
+- IECoreArnold::ParameterAlgo :
+  - Added support for point parameters.
+  - Added support for DoubleData and M44dData
+  - Added node name to warnings.
+- IECoreRI : Added support for render:sampleMotion option.
+- IECoreMaya :
+  - Added UndoChunk `with` statement.
+  - Added RefreshDisabled `with` statement.
+
 9.14.1
 ======
 
