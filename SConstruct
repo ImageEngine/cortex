@@ -46,6 +46,7 @@ import sys
 import os
 import re
 import subprocess
+import platform
 
 EnsureSConsVersion( 0, 97 )
 SConsignFile()
@@ -1043,9 +1044,6 @@ env = Environment(
 	options = o
 )
 
-if env["PLATFORM"]=="darwin" :
-	env["ENV"]["MACOSX_DEPLOYMENT_TARGET"] = "10.4"
-
 if isinstance( env["LIBPATH"], basestring ) :
 	env["LIBPATH"] = env["LIBPATH"].split( ":" )
 
@@ -1120,6 +1118,11 @@ if env["PLATFORM"]=="darwin" :
 	compilerVersion = map( int, env["CXXVERSION"].split( "." ) )
 	if compilerVersion[0] < 4 or compilerVersion[0]==4 and compilerVersion[1] < 2 :
 		env.Append( CXXFLAGS = "-Wno-long-double" )
+	osxVersion = [ int( v ) for v in platform.mac_ver()[0].split( "." ) ]
+	# Work around problem with unused local typedefs in boost and
+	# deprecation of gluBuild2DMipmaps() in OSX 10.9.
+	if osxVersion[0] == 10 and osxVersion[1] > 7 :
+		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
