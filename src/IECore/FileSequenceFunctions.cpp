@@ -116,11 +116,11 @@ void IECore::findSequences( const std::vector< std::string > &names, std::vector
 	{
 		const SequenceMap::key_type &fixes = it->first;
 		const Frames &frames = it->second;
-		// todo: could be more efficient by writing a custom comparison function that uses indexes 
+		// todo: could be more efficient by writing a custom comparison function that uses indexes
 		//	 into the const Frames vector rather than duplicating the strings and sorting them directly
 		Frames sortedFrames = frames;
 		std::sort( sortedFrames.begin(), sortedFrames.end() );
-		
+
 		/// in diabolical cases the elements of frames may not all have the same padding
 		/// so we'll sort them out into padded and unpadded frame sequences here, by creating
 		/// a map of padding->list of frames. unpadded things will be considered to have a padding
@@ -262,7 +262,7 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 		if ( (*it)->getPadding() == 1 )
 		{
 			FrameList::Frame startFrame, endFrame;
-			
+
 			if( FrameRange *fr = runTimeCast<FrameRange>( (*it)->getFrameList() ) )
 			{
 				// Can do a quick validation if the range is a FrameRange, by looking at the start and end only
@@ -289,13 +289,13 @@ void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, siz
 					}
 				}
 			}
-			
+
 			// if goes through 0 then this is a no.
 			if ( !(startFrame < 0 && endFrame > 0) )
 			{
 				unsigned int startDigits = 1;
 				if ( startFrame > 0 )
-					startDigits = static_cast<unsigned int>(floor(log10( static_cast<double>(abs(startFrame)) ))) + 1;
+					startDigits = static_cast<unsigned int>(floor(log10( static_cast<double>(std::abs(startFrame)) ))) + 1;
 
 				if ( startDigits >= padding )
 				{
