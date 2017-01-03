@@ -3142,15 +3142,6 @@ alembicEnvAppends = {
 		"$ALEMBIC_LIB_PATH",
 		"$HDF5_LIB_PATH",
 	],
-	"LIBS" : [
-		"AlembicAbcGeom$ALEMBIC_LIB_SUFFIX",
-		"AlembicAbc$ALEMBIC_LIB_SUFFIX",
-		"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
-		"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
-		"AlembicUtil$ALEMBIC_LIB_SUFFIX",
-		"hdf5$HDF5_LIB_SUFFIX",
-		"hdf5_hl$HDF5_LIB_SUFFIX",
-	],
 }
 alembicEnv.Append( **alembicEnvAppends )
 
@@ -3161,12 +3152,29 @@ if doConfigure :
 
 	c = Configure( alembicEnv )
 
-	if not c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
+	haveAlembic = False
+	if c.CheckLibWithHeader( alembicEnv.subst( "Alembic" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
 
-		sys.stderr.write( "WARNING : no AlembicAbcGeom library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
-		c.Finish()
+		# Alembic 1.6 and later is provided as a single library
+		haveAlembic = True
+		alembicEnv.Prepend(
+			CPPFLAGS = "-DIECOREALEMBIC_WITH_OGAWA"
+		)
 
-	else :
+	elif c.CheckLibWithHeader( alembicEnv.subst( "AlembicAbcGeom" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcGeom/Foundation.h", "CXX" ) :
+
+		# Prior to 1.6, Alembic was provided as a bunch of individual libraries.
+		haveAlembic = True
+		alembicEnv.Append(
+			LIBS = [
+				"AlembicAbc$ALEMBIC_LIB_SUFFIX",
+				"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
+				"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
+				"AlembicUtil$ALEMBIC_LIB_SUFFIX",
+				"hdf5$HDF5_LIB_SUFFIX",
+				"hdf5_hl$HDF5_LIB_SUFFIX",
+			],
+		)
 
 		if c.CheckLibWithHeader( alembicEnv.subst( "AlembicOgawa" + env["ALEMBIC_LIB_SUFFIX"] ), "Alembic/AbcCoreOgawa/ReadWrite.h", "CXX" ) :
 			alembicEnv.Prepend(
@@ -3178,7 +3186,14 @@ if doConfigure :
 				]
 			)
 
-		c.Finish()
+
+	else :
+
+		sys.stderr.write( "WARNING : no Alembic library found, not building IECoreAlembic - check ALEMBIC_INCLUDE_PATH, ALEMBIC_LIB_PATH and config.log.\n" )
+
+	c.Finish()
+
+	if haveAlembic :
 
 		alembicSources = sorted( glob.glob( "contrib/IECoreAlembic/src/IECoreAlembic/*.cpp" ) )
 		alembicHeaders = glob.glob( "contrib/IECoreAlembic/include/IECoreAlembic/*.h" ) + glob.glob( "contrib/IECoreAlembic/include/IECoreAlembic/*.inl" )
