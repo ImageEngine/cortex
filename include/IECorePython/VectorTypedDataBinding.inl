@@ -81,7 +81,7 @@ class VectorTypedDataFunctions
 				return r;
 			}
 		}
-		
+
 		//
 		static iterator begin( ThisClass &x )
 		{
@@ -103,7 +103,7 @@ class VectorTypedDataFunctions
 
 			const Container &xData = x.readable();
 			index_type index = convertIndex( x, i );
-			return boost::python::object( xData[index] );
+			return boost::python::object( static_cast<typename Container::value_type>( xData[index] ) );
 		}
 
 		/// return a new object containing the given range of items
@@ -250,7 +250,7 @@ class VectorTypedDataFunctions
 		/// a.extend( b ) # "Invalid Parameter"
 		///
 		/// While....
-		/// 
+		///
 		/// a = []
 		/// b = V3f()
 		/// a.extend( b ) # a is now [ 0.0, 0.0, 0.0 ]
