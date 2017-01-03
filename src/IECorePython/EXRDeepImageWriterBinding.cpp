@@ -35,6 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECore/EXRDeepImageWriter.h"
+#include "IECore/FileNameParameter.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECorePython/EXRDeepImageWriterBinding.h"
