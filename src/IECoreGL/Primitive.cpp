@@ -95,7 +95,7 @@ struct FlatConstant
 	IECore::MurmurHash hash;
 	Shader::ConstSetupPtr shaderSetup;
 
-	bool operator < ( const FlatConstant &rhs )
+	bool operator < ( const FlatConstant &rhs ) const
 	{
 		return hash < rhs.hash;
 	}
@@ -188,7 +188,7 @@ void Primitive::render( State *state ) const
 		// if we're not selectable then we don't need to do anything
 		return;
 	}
-	
+
 	/// \todo Really we want to remove use of this deprecated push/pop functionality.
 	PushAttrib attributeBlock( GL_DEPTH_BUFFER_BIT | GL_POLYGON_BIT | GL_LINE_BIT | GL_POINT_BIT );
 
@@ -203,10 +203,10 @@ void Primitive::render( State *state ) const
 		render( state, Primitive::DrawSolid::staticTypeId() );
 		return;
 	}
-	
+
 	// render the shaded primitive if requested
 	///////////////////////////////////////////
-	
+
 	if( state->get<Primitive::DrawSolid>()->value() )
 	{
 		glDepthMask( !depthSortRequested( state ) );
@@ -240,10 +240,10 @@ void Primitive::render( State *state ) const
 		// then we defer to the derived class to perform the draw call.
 		render( state, Primitive::DrawSolid::staticTypeId() );
 	}
-	
+
 	// then perform wireframe shading etc as requested
 	//////////////////////////////////////////////////
-	
+
 	bool drawOutline = state->get<Primitive::DrawOutline>()->value();
 	bool drawWireframe = state->get<Primitive::DrawWireframe>()->value();
 	bool drawPoints = state->get<Primitive::DrawPoints>()->value();
@@ -252,7 +252,7 @@ void Primitive::render( State *state ) const
 	{
 		return;
 	}
-	
+
 	// get a constant shader suitable for drawing wireframes, points etc.
 	// we do this by taking the current shader from the state and overriding
 	// just the fragment shader within it - we want to keep any vertex or
@@ -269,9 +269,9 @@ void Primitive::render( State *state ) const
 	{
 		csIndex = csParameter->location;
 	}
-		
+
 	// wireframe
-	
+
 	if( drawWireframe )
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -285,9 +285,9 @@ void Primitive::render( State *state ) const
 		}
 		render( state, Primitive::DrawWireframe::staticTypeId() );
 	}
-	
+
 	// points
-	
+
 	if( drawPoints )
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_POINT );
@@ -301,9 +301,9 @@ void Primitive::render( State *state ) const
 		}
 		render( state, Primitive::DrawPoints::staticTypeId() );
 	}
-	
+
 	// outline
-	
+
 	if( drawOutline )
 	{
 		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
@@ -317,9 +317,9 @@ void Primitive::render( State *state ) const
 		}
 		render( state, Primitive::DrawOutline::staticTypeId() );
 	}
-	
+
 	// bound
-	
+
 	if( drawBound && ( !currentSelector || currentSelector->mode() != Selector::IDRender ) )
 	{
 		/// \todo Support IDRender selection mode.
@@ -331,7 +331,7 @@ void Primitive::render( State *state ) const
 		}
 		glDrawArrays( GL_LINES, 0, 24 );
 	}
-	
+
 }
 
 const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state ) const
@@ -343,10 +343,10 @@ const Shader::Setup *Primitive::shaderSetup( const Shader *shader, State *state 
 			return it->get();
 		}
 	}
-	
+
 	Shader::SetupPtr setup = new Shader::Setup( shader );
 	addPrimitiveVariablesToShaderSetup( setup.get() );
-		
+
 	m_shaderSetups.push_back( setup );
 	return setup.get();
 }
@@ -378,7 +378,7 @@ void Primitive::addVertexAttribute( const std::string &name, IECore::ConstDataPt
 {
 	m_vertexAttributes[name] = data->copy();
 }
-		
+
 bool Primitive::depthSortRequested( const State * state ) const
 {
 	return state->get<Primitive::TransparencySort>()->value() &&
@@ -391,49 +391,49 @@ const Shader::Setup *Primitive::boundSetup() const
 	{
 		return m_boundSetup.get();
 	}
-	
+
 	Box3f b = bound();
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData();
 	std::vector<V3f> &p = pData->writable();
-	
+
 	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
 	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
-	
+
 	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
 	p.push_back( V3f( b.max.x, b.max.y, b.min.z	) );
-	
+
 	p.push_back( V3f( b.max.x, b.max.y, b.min.z	) );
 	p.push_back( V3f( b.min.x, b.max.y, b.min.z	) );
-	
+
 	p.push_back( V3f( b.min.x, b.max.y, b.min.z	) );
 	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
-	
+
 	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
 	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
-	
+
 	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
 	p.push_back( V3f( b.max.x, b.max.y, b.max.z	) );
-	
+
 	p.push_back( V3f( b.max.x, b.max.y, b.max.z	) );
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z	) );
-	
+
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z	) );
 	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
-	
+
 	p.push_back( V3f( b.min.x, b.min.y, b.min.z ) );
 	p.push_back( V3f( b.min.x, b.min.y, b.max.z ) );
 
 	p.push_back( V3f( b.max.x, b.min.y, b.min.z ) );
 	p.push_back( V3f( b.max.x, b.min.y, b.max.z ) );
-	
+
 	p.push_back( V3f( b.max.x, b.max.y, b.min.z ) );
 	p.push_back( V3f( b.max.x, b.max.y, b.max.z ) );
-	
+
 	p.push_back( V3f( b.min.x, b.max.y, b.min.z ) );
 	p.push_back( V3f( b.min.x, b.max.y, b.max.z ) );
 
 	m_boundSetup = new Shader::Setup( Shader::constant() );
 	m_boundSetup->addVertexAttribute( "P", pData );
-	
+
 	return m_boundSetup.get();
 }

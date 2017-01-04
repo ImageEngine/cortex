@@ -246,7 +246,7 @@ void Triangulator<PointIterator, MeshBuilder>::triangulate( VertexList &vertices
 		{
 			CircularVertexIterator triIt = candidate;
 			unsigned int i0 = triIt->first; triIt++;
-			unsigned int i1 = triIt->first; triIt = vertices.erase( triIt );
+			unsigned int i1 = triIt->first; triIt = vertices.erase( static_cast<typename VertexList::iterator>( triIt ) );
 			unsigned int i2 = triIt->first;
 			m_builder->addTriangle( i0, i1, i2 );
 			failurePoint = candidate;

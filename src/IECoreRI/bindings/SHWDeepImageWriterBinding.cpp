@@ -34,6 +34,8 @@
 
 #include "boost/python.hpp"
 
+#include "IECore/FileNameParameter.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "IECoreRI/SHWDeepImageWriter.h"

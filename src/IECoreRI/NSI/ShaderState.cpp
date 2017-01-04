@@ -100,7 +100,7 @@ bool ShaderState::shader( const std::string &type, const std::string &name, cons
 		// to modify the handle map.
 		if( !m_handleMap.unique() )
 		{
-			m_handleMap = make_shared<HandleMap>( *m_handleMap );
+			m_handleMap = boost::make_shared<HandleMap>( *m_handleMap );
 		}
 		(*m_handleMap)[handleData->readable()] = nsiHandle;
 	}

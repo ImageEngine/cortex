@@ -52,9 +52,9 @@ using namespace std;
 class SXExecutor::Implementation : public IECore::RefCounted
 {
 	public :
-	
+
 		Implementation( const ShaderVector &shaders, SxContext context, const ShaderVector &coshaders, const ShaderVector &lights )
-			:	m_context( context ), m_shaders( shaders ), m_coshaders( coshaders ), m_lights( lights )
+			:	m_context( context ), m_shaders( shaders )
 		{
 			// build the map from parameter names to the expected type for that parameter
 			for( ShaderVector::const_iterator it=shaders.begin(); it!=shaders.end(); ++it )
@@ -70,7 +70,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				storeParameterInfo( *it );
 			}
 		}
-		
+
 		IECore::CompoundDataPtr execute( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
 		{
 			// decide how many points we're shading and validate the grid size
@@ -96,7 +96,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			// create parameter list for the grid and set topology if we can.
 
 			boost::shared_ptr<void> vars( SxCreateParameterList( m_context, numPoints, "current" ), SxDestroyParameterList );
-			
+
 			std::vector<unsigned> nu;
 			std::vector<unsigned> nv;
 			if( haveGrid )
@@ -105,7 +105,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				nv.resize( numGrids, gridSize.y );
 				SxSetParameterListGridTopology( vars.get(), numGrids, &nu.front(), &nv.front() );
 			}
-			
+
 			// fill the grid from our input data.
 
 			setVariables( vars.get(), points, numPoints );
@@ -115,7 +115,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			for( unsigned shaderIndex = 0; shaderIndex < m_shaders.size(); ++shaderIndex )
 			{
 
-				SxCallShader( 
+				SxCallShader(
 					m_shaders[shaderIndex],
 					vars.get()
 				);
@@ -127,7 +127,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			return getVariables( vars.get() );
 
 		}
-		
+
 	private :
 
 		struct ParameterInfo
@@ -156,7 +156,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			unsigned arraySize;
 			bool varying;
 		};
-		
+
 		void storeParameterInfo( SxShader shader, bool printWarnings = true )
 		{
 			unsigned numParameters = SxGetNumParameters( shader );
@@ -190,7 +190,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			{
 				return ParameterInfo( SxPoint, 0, true );
 			}
-			else if( 
+			else if(
 				strcmp( name, "N" )==0 ||
 				strcmp( name, "Ng" )==0
 			)
@@ -204,7 +204,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			)
 			{
 				return ParameterInfo( SxVector, 0, true );
-			}	
+			}
 			else if(
 				strcmp( name, "s" )==0 ||
 				strcmp( name, "t" )==0 ||
@@ -221,7 +221,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				strcmp( name, "Os" )==0 ||
 				strcmp( name, "Ci" )==0 ||
 				strcmp( name, "Oi" )==0 ||
-				strcmp( name, "Cl" )==0 
+				strcmp( name, "Cl" )==0
 			)
 			{
 				return ParameterInfo( SxColor, 0, true );
@@ -240,7 +240,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 					return ParameterInfo( SxVector, 0, true );
 				case Color3fVectorDataTypeId :
 					return ParameterInfo( SxColor, 0, true );
-				
+
 				case StringVectorDataTypeId :
 				case StringDataTypeId :
 					return ParameterInfo( SxString, 0, false );
@@ -250,7 +250,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 					return ParameterInfo( SxVector, 0, false );
 				case Color3fDataTypeId :
 					return ParameterInfo( SxColor, 0, false );
-				
+
 				default :
 					return ParameterInfo( SxInvalid, 0, true );
 			}
@@ -406,7 +406,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			}
 
 		}
-		
+
 		template<SxType sxType, typename DataType>
 		void setUniformVariable( SxParameterList parameterList, const char *name, const IECore::Data *data, unsigned arraySize ) const
 		{
@@ -415,12 +415,12 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			{
 				throw( Exception( boost::str( boost::format( "Input parameter \"%s\" has wrong type (%s but should be %s)." ) % name % data->typeName() % DataType::staticTypeName() ) ) );
 			}
-			
+
 			void *rawData = (void *)&(td->readable());
 			SxSetParameter( parameterList, name, sxType, rawData, false, arraySize );
 
 		}
-		
+
 		void setStringVariable( SxParameterList parameterList, const char *name, const IECore::Data *data ) const
 		{
 			if( const StringData *td = IECore::runTimeCast<const StringData>( data ) )
@@ -435,7 +435,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 				{
 					strings.push_back( td->readable()[i].c_str() );
 				}
-				
+
 				SxSetParameter( parameterList, name, SxString, &strings[0], false, strings.size() );
 			}
 			else
@@ -465,7 +465,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 						break;
 					case SxNormal :
 						getVariable<SxNormal>( parameterList, it->first.value().c_str(), result.get() );
-						break;				
+						break;
 					default :
 						throw Exception( boost::str( boost::format( "Output parameter \"%s\" has unsupported type." ) % it->first.value() ) );
 				}
@@ -476,7 +476,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 			getVariable<SxPoint>( parameterList, "P", result.get() );
 			getVariable<SxNormal>( parameterList, "N", result.get() );
 
-			return result;						
+			return result;
 		}
 
 		template<SxType sxType>
@@ -496,13 +496,11 @@ class SXExecutor::Implementation : public IECore::RefCounted
 
 		SxContext m_context;
 		const ShaderVector &m_shaders;
-		const ShaderVector &m_coshaders;
-		const ShaderVector &m_lights;
 
 		typedef std::map<IECore::InternedString, ParameterInfo> TypeMap;
 		TypeMap m_inputParameterTypes;
 		TypeMap m_outputParameterTypes;
-	
+
 }; // class SXExecutor::Implementation
 
 //////////////////////////////////////////////////////////////////////////
@@ -523,7 +521,7 @@ IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points 
 	V2i gridSize( 0 );
 	return m_implementation->execute( points, gridSize );
 }
-		
+
 IECore::CompoundDataPtr SXExecutor::execute( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const
 {
 	return m_implementation->execute( points, gridSize );
