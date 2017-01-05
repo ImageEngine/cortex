@@ -37,6 +37,7 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
+#include "IECore/VectorTypedData.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/lexical_cast.hpp"
@@ -316,6 +317,28 @@ asr::ParamArray convertShaderParameters( const CompoundDataMap &parameters, std:
 				ss << p[ 4] << " " << p[ 5] << " " << p[ 6] << " " << p[ 7] << " ";
 				ss << p[ 8] << " " << p[ 9] << " " << p[10] << " " << p[11] << " ";
 				ss << p[12] << " " << p[13] << " " << p[14] << " " << p[15];
+			}
+			break;
+
+			case IntVectorDataTypeId:
+			{
+				const std::vector<int> &p = static_cast<const IntVectorData *>( data )->readable();
+				ss << "int[] ";
+				for( size_t i = 0, e = p.size(); i < e; ++i )
+				{
+					ss << p[i] << " ";
+				}
+			}
+			break;
+
+			case FloatVectorDataTypeId:
+			{
+				const std::vector<float> &p = static_cast<const FloatVectorData *>( data )->readable();
+				ss << "float[] ";
+				for( size_t i = 0, e = p.size(); i < e; ++i )
+				{
+					ss << p[i] << " ";
+				}
 			}
 			break;
 

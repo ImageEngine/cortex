@@ -364,7 +364,7 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	}
 
 	// ignore extra cameras if we already have one.
-	if( !insideEditBlock() && m_project->get_scene()->get_camera() )
+	if( !insideEditBlock() && !m_project->get_scene()->cameras().empty() )
 	{
 		return;
 	}
@@ -372,9 +372,9 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	// ignore edits for extra cameras.
 	if( insideEditBlock() )
 	{
-		assert( m_project->get_scene()->get_camera() );
+		assert( !m_project->get_scene()->cameras().empty() );
 
-		if( name != m_project->get_scene()->get_camera()->get_name() )
+		if( name != m_project->get_scene()->cameras().get_by_index( 0 )->get_name() )
 		{
 			return;
 		}
@@ -395,7 +395,7 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	if( insideEditBlock() )
 	{
 		// Update the camera.
-		asr::Camera *camera = m_project->get_scene()->get_camera();
+		asr::Camera *camera = m_project->get_scene()->cameras().get_by_index( 0 );
 
 		// Update the transform if needed.
 		if( m_transformStack.size() )
@@ -473,7 +473,7 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 
 	// create a default camera if needed
-	if( !m_project->get_scene()->get_camera() )
+	if( m_project->get_scene()->cameras().empty() )
 	{
 		CameraPtr cortexCamera = new Camera();
 		cortexCamera->parameters()["projection"] = new StringData("perspective");
@@ -914,10 +914,11 @@ void IECoreAppleseed::RendererImplementation::setCamera( const string &name, Cam
 	asf::auto_release_ptr<asr::Camera> &appleseedCamera )
 {
 	appleseedCamera->set_name( name.c_str() );
-	m_project->get_scene()->set_camera( appleseedCamera );
+	m_project->get_scene()->cameras().clear();
+	m_project->get_scene()->cameras().insert( appleseedCamera );
+	m_project->get_frame()->get_parameters().insert( "camera", name.c_str() );
 
 	// resolution
-	m_project->get_frame()->get_parameters().insert( "camera", name.c_str() );
 	const V2iData *resolution = cortexCamera->parametersData()->member<V2iData>( "resolution" );
 	asf::Vector2i res( resolution->readable().x, resolution->readable().y );
 	m_project->get_frame()->get_parameters().insert( "resolution", res );

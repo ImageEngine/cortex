@@ -58,7 +58,7 @@ class TestCase( unittest.TestCase ):
 	def _getCamera( self, r ) :
 
 		scn = self._getScene( r )
-		return scn.get_camera()
+		return scn.cameras()[0]
 
 	def _getMainAssembly( self, r ) :
 

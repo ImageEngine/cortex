@@ -90,7 +90,7 @@ void IECoreAppleseed::TransformStack::setTransform( const M44f &m )
 {
 	asf::Transformd xform;
 	TransformAlgo::makeTransform( m, xform );
-	m_stack.top().set_transform( 0.0, xform );
+	m_stack.top().set_transform( 0.0f, xform );
 }
 
 void IECoreAppleseed::TransformStack::setTransform( const std::set<float> &times,
@@ -104,7 +104,7 @@ void IECoreAppleseed::TransformStack::concatTransform( const M44f &m )
 	asf::Transformd xform;
 	TransformAlgo::makeTransform( m, xform );
 	asr::TransformSequence seq;
-	seq.set_transform( 0.0, xform );
+	seq.set_transform( 0.0f, xform );
 	m_stack.top() = seq * m_stack.top();
 }
 
