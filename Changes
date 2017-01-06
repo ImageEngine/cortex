@@ -1,3 +1,15 @@
+9.16.0
+======
+
+Improvements
+------------
+
+- IECoreAppleseed : Added support for int[] and float[] OSL shader parameters.
+- Build :
+	- Added support for Alembic 1.6.
+	- Added support for Boost 1.61
+	- Added support for macOS Sierra
+
 9.15.0
 ======
 
