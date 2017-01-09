@@ -97,6 +97,12 @@
 #include "maya/MPlugArray.h"
 #include "maya/MFileIO.h"
 
+#if MAYA_API_VERSION >= 201600
+
+#include "maya/MEvaluationNode.h"
+
+#endif
+
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreMaya;
@@ -670,6 +676,33 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 	return MS::kSuccess;
 }
 
+#if MAYA_API_VERSION >= 201600
+
+MStatus SceneShapeInterface::preEvaluation( const MDGContext &context, const MEvaluationNode &evaluationNode )
+{
+	// this is in the Maya devkit simpleEvaluationNode example so
+	// I'm including it here, though I'm not sure when/why we'd
+	// be called with a non-normal context.
+	if( !context.isNormal() )
+	{
+		return MStatus::kFailure;
+	}
+
+	if(
+		( evaluationNode.dirtyPlugExists( aTime ) && animatedScene() ) ||
+		evaluationNode.dirtyPlugExists( aDrawGeometry ) ||
+		evaluationNode.dirtyPlugExists( aDrawChildBounds ) ||
+		evaluationNode.dirtyPlugExists( aObjectOnly ) ||
+		evaluationNode.dirtyPlugExists( aDrawTagsFilter )
+	)
+	{
+		m_previewSceneDirty = true;
+	}
+
+	return MS::kSuccess;
+}
+
+#endif
 
 MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 {

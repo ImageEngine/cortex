@@ -89,7 +89,13 @@ class SceneShapeInterface: public MPxComponentShape
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
-		
+
+#if MAYA_API_VERSION >= 201600
+
+		virtual MStatus preEvaluation( const MDGContext &context, const MEvaluationNode &evaluationNode );
+
+#endif
+
 		/// This method is overridden to supply a geometry iterator, which maya uses to work out
 		/// the bounding boxes of the components you've selected in the viewport
 		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
