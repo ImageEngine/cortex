@@ -599,10 +599,8 @@ MStatus SceneShapeInterface::setDependentsDirty( const MPlug &plug, MPlugArray &
 {
 	if( plug == aTime )
 	{
-		ConstSampledSceneInterfacePtr sceneInterface = runTimeCast< const SampledSceneInterface >(getSceneInterface());
-		
 		// Check if sceneInterface is animated. If not, plugs are not dependent on time
-		if( !sceneInterface || ( sceneInterface && sceneInterface -> numBoundSamples() > 1 ) )
+		if( animatedScene() )
 		{
 			m_previewSceneDirty = true;
 			childChanged( kBoundingBoxChanged ); // needed to tell maya the bounding box has changed
@@ -1526,4 +1524,10 @@ bool SceneShapeInterface::readConvertParam( CompoundParameterPtr parameters, int
 	}
 
 	return true;
+}
+
+bool SceneShapeInterface::animatedScene()
+{
+	ConstSampledSceneInterfacePtr scene = runTimeCast< const SampledSceneInterface >( getSceneInterface() );
+	return ( !scene || scene->numBoundSamples() > 1 );
 }

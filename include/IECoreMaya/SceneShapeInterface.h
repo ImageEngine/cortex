@@ -215,6 +215,7 @@ class SceneShapeInterface: public MPxComponentShape
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
 		/// Returns bound for the component matching the given index
 		Imath::Box3d componentBound( int idx );
+		bool animatedScene();
 
 		void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix );
 
