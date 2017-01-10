@@ -7,14 +7,26 @@ os:
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libboost-all-dev
-    - libopenexr-dev
-    - libtbb-dev
-    - libfreetype6-dev
+      - gcc-4.8
+      - g++-4.8
+      - libboost-all-dev
+      - libopenexr-dev
+      - libtbb-dev
+      - libfreetype6-dev
+
+install:
+    - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
 
 script:
-    - scons -j 2 testCore testCorePython CXX=$CXX ENV_VARS_TO_IMPORT="PATH TRAVIS" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
+    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
+
+# Default values for environment variables we use to
+# control the build.
+env:
+    - COMPILER_VERSION= CXXSTD=c++98 DEBUG=0
 
 compiler:
     ## \todo Enable clang here too. We can't with the default Ubuntu boost
@@ -22,3 +34,19 @@ compiler:
     #
     # https://svn.boost.org/trac/boost/ticket/6156
     - gcc
+
+matrix:
+    # Explicit list of all permutations of environment
+    # and compiler we want to test. These are on top
+    # of the defaults provided above.
+    include:
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION= CXXSTD=c++98 DEBUG=1
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=4.8 CXXSTD=c++98 DEBUG=0
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0
+
