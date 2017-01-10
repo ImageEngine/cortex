@@ -87,6 +87,12 @@ o.Add(
 )
 
 o.Add(
+	"CXXSTD",
+	"The C++ standard to build against.",
+	"c++98",
+)
+
+o.Add(
 	BoolVariable( "DEBUG", "Make a debug build", False )
 )
 
@@ -1123,6 +1129,8 @@ if env["PLATFORM"]=="darwin" :
 	# deprecation of gluBuild2DMipmaps() in OSX 10.9.
 	if osxVersion[0] == 10 and osxVersion[1] > 7 :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+
+env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
