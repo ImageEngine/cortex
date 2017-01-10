@@ -72,7 +72,7 @@ struct CachedReader::MemberData
 		ConstModifyOpPtr m_postProcessor;
 		tbb::mutex m_postProcessorMutex;
 		typedef tbb::concurrent_hash_map< std::string, std::string > FileErrors;
-		FileErrors m_fileErrors;		
+		FileErrors m_fileErrors;
 
 	private :
 
@@ -128,13 +128,13 @@ struct CachedReader::MemberData
 					}
 					throw Exception( "Could not find file '" + filePath + "' at the following paths: " + pathList );
 				}
-	
+
 				ReaderPtr r = Reader::create( resolvedPath.string() );
 				if( !r )
 				{
 					throw Exception( "Could not create reader for '" + resolvedPath.string() + "'" );
 				}
-		
+
 				result = r->read();
 				/// \todo Why would this ever be NULL? Wouldn't we have thrown an exception already if
 				/// we were unable to read the file?
@@ -142,7 +142,7 @@ struct CachedReader::MemberData
 				{
 					throw Exception( "Reader for '" + resolvedPath.string() + "' returned no data" );
 				}
-		
+
 				if( data->m_postProcessor )
 				{
 					/// \todo We need to allow arguments to be passed to Op::operate() directly
@@ -207,7 +207,7 @@ bool CachedReader::cached( const std::string &file ) const
 		}
 	}
 
-	return m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing );
+	return static_cast<bool>( m_data->m_cache.get( PARAM(file), MemberData::Cache::NullIfMissing ) );
 }
 
 void CachedReader::clear()

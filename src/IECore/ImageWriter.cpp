@@ -118,7 +118,7 @@ const BoolParameter * ImageWriter::rawChannelsParameter() const
 
 bool ImageWriter::canWrite( ConstObjectPtr image, const string &fileName )
 {
-	return runTimeCast<const ImagePrimitive>( image );
+	return runTimeCast<const ImagePrimitive>( image ).get();
 }
 
 /// get the user-requested channel names
@@ -192,7 +192,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 				channelNames.push_back( *it );
 			}
 		}
-		
+
 		image = image->copy();
 		// color convert the image from linear colorspace creating a temporary copy.
 		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
