@@ -22,7 +22,10 @@ install:
     - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
 
 script:
-    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
+    # Preload libSegFault when running tests, so we get stack
+    # traces from any crashes.
+    - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
+    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
 
 # Default values for environment variables we use to
 # control the build.
