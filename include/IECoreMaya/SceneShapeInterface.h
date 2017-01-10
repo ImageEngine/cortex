@@ -227,6 +227,8 @@ class SceneShapeInterface: public MPxComponentShape
 
 		bool readConvertParam( IECore::CompoundParameterPtr parameters, int attrIndex ) const;
 
+		MStatus computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECore::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time );
+
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
 		typedef std::map< IECore::MurmurHash, IECore::InternedString > HashToName;

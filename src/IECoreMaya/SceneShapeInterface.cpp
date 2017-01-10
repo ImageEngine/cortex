@@ -730,12 +730,18 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 	
 	if( topLevelPlug == aOutputObjects || topLevelPlug == aTransform || topLevelPlug == aBound || topLevelPlug == aAttributes )
 	{
+		MIntArray indices;
+		
 		if( index == -1 )
 		{
-			// Couldn't find input index
-			MFnDagNode dag(thisMObject());
-			msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Could not find queried index for '%s' " ) % plug.name().asChar() );
-			return MS::kFailure;
+			// in parallel evaluation mode, we may receive the top level plug
+			// directly, which means we need to compute all child plugs.
+			topLevelPlug.getExistingArrayAttributeIndices( indices );
+		}
+		else
+		{
+			// we still get the direct element if we're in DG mode.
+			indices.append( index );
 		}
 		
 		MDataHandle timeHandle = dataBlock.inputValue( aTime );
@@ -745,11 +751,10 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 		int querySpace;
 		pQuerySpace.getValue( querySpace );
 
-		MPlug pSceneQueries( thisMObject(), aSceneQueries );
-		MPlug pQuery = pSceneQueries.elementByLogicalIndex( index );
 		MString name;
-		pQuery.getValue( name );
-
+		SceneInterface::Path path;
+		MPlug pSceneQueries( thisMObject(), aSceneQueries );
+		
 		ConstSceneInterfacePtr sc = getSceneInterface();
 		if( !sc )
 		{
@@ -759,168 +764,196 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			return MS::kFailure;
 		}
 
-		SceneInterface::Path path;
-		path = fullPathName( name.asChar() );
-		// Get sceneInterface for query path
-		ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
-		
-		if( !scene )
+		unsigned numIndices = indices.length();
+		for( unsigned i = 0; i < numIndices; ++i )
 		{
-			// Queried element doesn't exist
-			MFnDagNode dag(thisMObject());
-			msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried element '%s' at index '%s' does not exist " ) % name.asChar() % index );
-			return MS::kFailure;
-		}
-		if( topLevelPlug == aTransform )
-		{
-			MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aTransform );
-			MArrayDataBuilder transformBuilder = transformHandle.builder();
-			
-			M44d transformd;
-			if( querySpace == World )
+			MPlug pQuery = pSceneQueries.elementByLogicalIndex( indices[i] );
+			pQuery.getValue( name );
+			path = fullPathName( name.asChar() );
+			ConstSceneInterfacePtr scene = sc->scene( path,  SceneInterface::NullIfMissing );
+			if( !scene )
 			{
-				// World Space (starting from scene root)
-				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
-			}
-			else if( querySpace == Local )
-			{
-				// Local space
-				transformd = scene->readTransformAsMatrix( time.as( MTime::kSeconds ) );
-			}
-			
-			V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
-			extractSHRT( convert<M44f>( transformd ), scale, shear, rotate, translate );
-
-			MDataHandle transformElementHandle = transformBuilder.addElement( index );
-			transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
-			transformElementHandle.child( aRotate ).child( aRotateX ).setMAngle( MAngle( rotate[0] ) );
-			transformElementHandle.child( aRotate ).child( aRotateY ).setMAngle( MAngle( rotate[1] ) );
-			transformElementHandle.child( aRotate ).child( aRotateZ ).setMAngle( MAngle( rotate[2] ) );
-			transformElementHandle.child( aScale ).set3Float( scale[0], scale[1], scale[2] );
-		}
-		else if( topLevelPlug == aOutputObjects && scene->hasObject() )
-		{
-			MArrayDataHandle outputDataHandle = dataBlock.outputArrayValue( aOutputObjects, &s );
-			MArrayDataBuilder outputBuilder = outputDataHandle.builder();
-
-			ConstObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
-
-			if( querySpace == World )
-			{
-				// If world space, need to transform the object using the concatenated matrix from the sceneInterface path to the query path
-				M44d transformd;
-				transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
-				
-				TransformOpPtr transformer = new TransformOp();
-				transformer->inputParameter()->setValue( const_cast< Object *>(object.get()) );		/// safe const_cast because the op will duplicate the Object.
-				transformer->copyParameter()->setTypedValue( true );
-				transformer->matrixParameter()->setValue( new M44dData( transformd ) );
-				object = transformer->operate();
-			}
-
-			IECore::TypeId type = object->typeId();
-			if( type == CoordinateSystemTypeId )
-			{
-				IECore::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
-				Imath::M44f m;
-				if( coordSys->getTransform() )
-				{
-					m = coordSys->getTransform()->transform();
-				}
-				Imath::V3f s(0), h(0), r(0), t(0);
-				Imath::extractSHRT(m, s, h, r, t);
-
-				MFnNumericData fnData;
-				MObject data = fnData.create( MFnNumericData::k3Double );
-				fnData.setData( (double)t[0], (double)t[1], (double)t[2] );
-
-				MDataHandle handle = outputBuilder.addElement( index );
-				handle.set( data );
-			}
-			else
-			{
-				ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( object );
-
-				if( converter )
-				{
-					bool isParamRead = readConvertParam( converter->parameters(), index );
-					if( ! isParamRead )
-					{
-						return MS::kFailure;
-					}
-
-					MObject data;
-					// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
-					// Won't be needed anymore when the related todo is addressed in the converter
-					
-					if( type == MeshPrimitiveTypeId )
-					{
-						MFnMeshData fnData;
-						data = fnData.create();
-					}
-					else if( type == CurvesPrimitiveTypeId )
-					{
-						MFnNurbsCurveData fnData;
-						data = fnData.create();
-
-					}
-
-					if( !data.isNull() )
-					{
-						bool conversionSuccess = converter->convert( data );
-						if ( conversionSuccess )
-						{
-							MDataHandle h = outputBuilder.addElement( index, &s );
-							s = h.set( data );
-						}
-						else
-						{
-							MFnDagNode dag(thisMObject());
-							msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Convert object failed! index=" ) % index );
-						}
-					}
-				}
-			}
-		}
-		else if( topLevelPlug == aBound )
-		{
-			MArrayDataHandle boundHandle = dataBlock.outputArrayValue( aBound );
-			MArrayDataBuilder boundBuilder = boundHandle.builder();
-			
-			Box3d bboxd = scene->readBound( time.as( MTime::kSeconds ) );
-			
-			if( querySpace == World )
-			{
-				// World Space (from root path)
-				M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
-				bboxd = transform( bboxd, transformd );
-			}
-			Box3f bound( bboxd.min, bboxd.max );
-
-			MDataHandle boundElementHandle = boundBuilder.addElement( index );
-			boundElementHandle.child( aBoundMin ).set3Float( bound.min[0],  bound.min[1],  bound.min[2] );
-			boundElementHandle.child( aBoundMax ).set3Float( bound.max[0],  bound.max[1],  bound.max[2] );
-			V3f boundCenter = bound.center();
-			boundElementHandle.child( aBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );
-		}
-		else if( topLevelPlug == aAttributes )
-		{
-
-			int attrIndex = -1;
-			// Look for attribute query index
-			if( plug.isElement() && !plug.isCompound() )
-			{
-				attrIndex = plug.logicalIndex();
-			}
-			else
-			{
+				// Queried element doesn't exist
 				MFnDagNode dag(thisMObject());
-				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Cannot find index for queried attribute '%s'" ) % plug.name() );
+				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried element '%s' at index '%s' does not exist " ) % name.asChar() % indices[i] );
 				return MS::kFailure;
 			}
+			
+			s = computeOutputPlug( plug, topLevelPlug, dataBlock, scene.get(), indices[i], querySpace, time );
+			if( !s )
+			{
+				return s;
+			}
+		}
+	}
+	else if( topLevelPlug == aOutTime )
+	{
+		MDataHandle timeHandle = dataBlock.inputValue( aTime );
+		MTime time = timeHandle.asTime();
+		
+		MDataHandle outTimeHandle = dataBlock.outputValue( aOutTime );
+		outTimeHandle.setMTime( time );
+	}
 
-			MPlug pAttributeQueries( thisMObject(), aAttributeQueries );
-			MPlug pAttributeQuery = pAttributeQueries.elementByLogicalIndex( attrIndex );
+	return MS::kSuccess;
+}
+
+MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECore::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time )
+{
+	MStatus s;
+	
+	if( topLevelPlug == aTransform )
+	{
+		MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aTransform );
+		MArrayDataBuilder transformBuilder = transformHandle.builder();
+
+		M44d transformd;
+		if( querySpace == World )
+		{
+			// World Space (starting from scene root)
+			transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+		}
+		else if( querySpace == Local )
+		{
+			// Local space
+			transformd = scene->readTransformAsMatrix( time.as( MTime::kSeconds ) );
+		}
+
+		V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
+		extractSHRT( convert<M44f>( transformd ), scale, shear, rotate, translate );
+
+		MDataHandle transformElementHandle = transformBuilder.addElement( topLevelIndex );
+		transformElementHandle.child( aTranslate ).set3Float( translate[0], translate[1], translate[2] );
+		transformElementHandle.child( aRotate ).child( aRotateX ).setMAngle( MAngle( rotate[0] ) );
+		transformElementHandle.child( aRotate ).child( aRotateY ).setMAngle( MAngle( rotate[1] ) );
+		transformElementHandle.child( aRotate ).child( aRotateZ ).setMAngle( MAngle( rotate[2] ) );
+		transformElementHandle.child( aScale ).set3Float( scale[0], scale[1], scale[2] );
+	}
+	else if( topLevelPlug == aOutputObjects && scene->hasObject() )
+	{
+		MArrayDataHandle outputDataHandle = dataBlock.outputArrayValue( aOutputObjects, &s );
+		MArrayDataBuilder outputBuilder = outputDataHandle.builder();
+
+		ConstObjectPtr object = scene->readObject( time.as( MTime::kSeconds ) );
+
+		if( querySpace == World )
+		{
+			// If world space, need to transform the object using the concatenated matrix from the sceneInterface path to the query path
+			M44d transformd;
+			transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+
+			TransformOpPtr transformer = new TransformOp();
+			transformer->inputParameter()->setValue( const_cast< Object *>(object.get()) );		/// safe const_cast because the op will duplicate the Object.
+			transformer->copyParameter()->setTypedValue( true );
+			transformer->matrixParameter()->setValue( new M44dData( transformd ) );
+			object = transformer->operate();
+		}
+
+		IECore::TypeId type = object->typeId();
+		if( type == CoordinateSystemTypeId )
+		{
+			IECore::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
+			Imath::M44f m;
+			if( coordSys->getTransform() )
+			{
+				m = coordSys->getTransform()->transform();
+			}
+			Imath::V3f s(0), h(0), r(0), t(0);
+			Imath::extractSHRT(m, s, h, r, t);
+
+			MFnNumericData fnData;
+			MObject data = fnData.create( MFnNumericData::k3Double );
+			fnData.setData( (double)t[0], (double)t[1], (double)t[2] );
+
+			MDataHandle handle = outputBuilder.addElement( topLevelIndex );
+			handle.set( data );
+		}
+		else
+		{
+			ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( object );
+
+			if( converter )
+			{
+				bool isParamRead = readConvertParam( converter->parameters(), topLevelIndex );
+				if( ! isParamRead )
+				{
+					return MS::kFailure;
+				}
+
+				MObject data;
+				// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
+				// Won't be needed anymore when the related todo is addressed in the converter
+
+				if( type == MeshPrimitiveTypeId )
+				{
+					MFnMeshData fnData;
+					data = fnData.create();
+				}
+				else if( type == CurvesPrimitiveTypeId )
+				{
+					MFnNurbsCurveData fnData;
+					data = fnData.create();
+
+				}
+
+				if( !data.isNull() )
+				{
+					bool conversionSuccess = converter->convert( data );
+					if ( conversionSuccess )
+					{
+						MDataHandle h = outputBuilder.addElement( topLevelIndex, &s );
+						s = h.set( data );
+					}
+					else
+					{
+						MFnDagNode dag(thisMObject());
+						msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Convert object failed! index=" ) % topLevelIndex );
+					}
+				}
+			}
+		}
+	}
+	else if( topLevelPlug == aBound )
+	{
+		MArrayDataHandle boundHandle = dataBlock.outputArrayValue( aBound );
+		MArrayDataBuilder boundBuilder = boundHandle.builder();
+
+		Box3d bboxd = scene->readBound( time.as( MTime::kSeconds ) );
+
+		if( querySpace == World )
+		{
+			// World Space (from root path)
+			M44d transformd = worldTransform( scene, time.as( MTime::kSeconds ) );
+			bboxd = transform( bboxd, transformd );
+		}
+		Box3f bound( bboxd.min, bboxd.max );
+
+		MDataHandle boundElementHandle = boundBuilder.addElement( topLevelIndex );
+		boundElementHandle.child( aBoundMin ).set3Float( bound.min[0],  bound.min[1],  bound.min[2] );
+		boundElementHandle.child( aBoundMax ).set3Float( bound.max[0],  bound.max[1],  bound.max[2] );
+		V3f boundCenter = bound.center();
+		boundElementHandle.child( aBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );
+	}
+	else if( topLevelPlug == aAttributes )
+	{
+		MIntArray attrIndices;
+		if( plug.isElement() && !plug.isCompound() )
+		{
+			attrIndices.append( plug.logicalIndex() );
+		}
+		else
+		{
+			// in parallel evaluation mode, we may receive the top level plug
+			// directly, which means we need to compute all child plugs.
+			topLevelPlug.elementByLogicalIndex( topLevelIndex ).getExistingArrayAttributeIndices( attrIndices );
+		}
+
+		MPlug pAttributeQueries( thisMObject(), aAttributeQueries );
+		
+		unsigned numAttrs = attrIndices.length();
+		for( unsigned i = 0; i < numAttrs; ++i )
+		{
+			MPlug pAttributeQuery = pAttributeQueries.elementByLogicalIndex( attrIndices[i] );
 			MString attrName;
 			pAttributeQuery.getValue( attrName );
 
@@ -928,23 +961,23 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			{
 				// Queried attribute doesn't exist
 				MFnDagNode dag(thisMObject());
-				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndex );
+				msg( Msg::Warning, dag.fullPathName().asChar(),  boost::format( "Queried attribute '%s' at index '%s' does not exist " ) % attrName.asChar() % attrIndices[i] );
 				return MS::kFailure;
 			}
-			
+
 			// Attribute query results are returned as attributes[ sceneQuery index ].attributeValues[ attributeQuery index ]
-			
+
 			MArrayDataHandle attributesHandle = dataBlock.outputArrayValue( aAttributes );
 			MArrayDataBuilder builder = attributesHandle.builder();
-			
-			MDataHandle elementHandle = builder.addElement( index );
-			
+
+			MDataHandle elementHandle = builder.addElement( topLevelIndex );
+
 			MDataHandle attributeValuesHandle = elementHandle.child( aAttributeValues );
-			
+
 			MArrayDataHandle arrayHandle( attributeValuesHandle );
-			arrayHandle.jumpToElement( attrIndex );
+			arrayHandle.jumpToElement( attrIndices[i] );
 			MDataHandle currentElement = arrayHandle.outputValue();
-			
+
 			ConstObjectPtr attrValue = scene->readAttribute( attrName.asChar(), time.as( MTime::kSeconds ) );
 			/// \todo Use a generic data converter that would be compatible with a generic attribute.
 			IECore::TypeId type = attrValue->typeId();
@@ -975,16 +1008,8 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 			}
 		}
 	}
-	else if( topLevelPlug == aOutTime )
-	{
-		MDataHandle timeHandle = dataBlock.inputValue( aTime );
-		MTime time = timeHandle.asTime();
-		
-		MDataHandle outTimeHandle = dataBlock.outputValue( aOutTime );
-		outTimeHandle.setMTime( time );
-	}
-
-	return MS::kSuccess;
+	
+	return s;
 }
 
 M44d SceneShapeInterface::worldTransform( ConstSceneInterfacePtr scene, double time )
