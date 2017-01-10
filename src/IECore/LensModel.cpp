@@ -37,8 +37,8 @@
 #include "IECore/LensModel.h"
 #include <iostream>
 #include <string>
+#include <math.h>
 
-using namespace std;
 using namespace IECore;
 
 IE_CORE_DEFINERUNTIMETYPED( LensModel );
@@ -56,17 +56,17 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 {
 	Imath::Box2i out( input );
 	bool init( false );
-	
+
 	for( int i = input.min.x; i <= input.max.x; ++i )
 	{
 		for( int pass = 0; pass < 2; ++pass )
 		{
 			double x = ( double(i) + 0.5 ) / width;
 			double y = ( double( pass == 0 ? input.min.y : input.max.y ) + 0.5 ) / height;
-			
+
 			Imath::V2d pIn( x, y );
 			Imath::V2d pOut( 0, 0 );
-			
+
 			if( mode == Distort )
 			{
 				pOut = distort( pIn );
@@ -75,7 +75,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 			{
 				pOut = undistort( pIn );
 			}
-			
+
 			if( !isinf( pOut.x ) && !isinf( pOut.y ) && !isnan( pOut.x ) && !isnan( pOut.y ) )
 			{
 				pOut.x = pOut.x*width-0.5;
@@ -90,27 +90,27 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 				}
 				else
 				{
-					out.min.x = min( int( floor( pOut.x ) ), out.min.x );
-					out.min.y = min( int( floor( pOut.y ) ), out.min.y );
-					out.max.x = max( int( floor( pOut.x ) ), out.max.x );
-					out.max.y = max( int( floor( pOut.y ) ), out.max.y );
+					out.min.x = std::min( int( floor( pOut.x ) ), out.min.x );
+					out.min.y = std::min( int( floor( pOut.y ) ), out.min.y );
+					out.max.x = std::max( int( floor( pOut.x ) ), out.max.x );
+					out.max.y = std::max( int( floor( pOut.y ) ), out.max.y );
 				}
 			}
 		}
 	}
-	
+
 	if ( !init ) return Imath::Box2i( Imath::V2i(0,0), Imath::V2i(0,0) );
-	
+
 	for( int j = input.min.y; j <= input.max.y; j++ )
 	{
 		for( int pass = 0; pass < 2; pass++ )
 		{
 			double x = ( double( pass == 0 ? input.min.x : input.max.x ) + 0.5 ) / width;
 			double y = ( double(j) + 0.5 ) / height;
-			
+
 			Imath::V2d pIn( x, y );
 			Imath::V2d pOut( 0, 0 );
-			
+
 			if( mode == Distort )
 			{
 				pOut = distort( pIn );
@@ -119,12 +119,12 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 			{
 				pOut = undistort( pIn );
 			}
-			
+
 			if( !isinf( pOut.x ) && !isinf( pOut.y ) && !isnan( pOut.x ) && !isnan( pOut.y ) )
 			{
 				pOut.x = pOut.x*width-0.5;
 				pOut.y = pOut.y*height-0.5;
-				
+
 				out.min.x = std::min( int( floor( pOut.x ) ), out.min.x );
 				out.min.y = std::min( int( floor( pOut.y ) ), out.min.y );
 				out.max.x = std::max( int( floor( pOut.x ) ), out.max.x );
@@ -132,7 +132,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 			}
 		}
 	}
-	
+
 	return out;
 }
 
