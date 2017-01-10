@@ -33,7 +33,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/algorithm/string/join.hpp"
-#include "boost/filesystem/convenience.hpp"
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/DeepImageConverter.h"
@@ -51,7 +50,7 @@ DeepImageConverter::DeepImageConverter()
 {
 	std::vector<std::string> extensions;
 	Reader::supportedExtensions( DeepImageReaderTypeId, extensions );
-	
+
 	m_inputFileParameter = new FileNameParameter(
 		"inputFile",
 		"The deep image file to read.",
@@ -60,10 +59,10 @@ DeepImageConverter::DeepImageConverter()
 		false,
 		PathParameter::MustExist
 	);
-	
+
 	extensions.clear();
 	DeepImageWriter::supportedExtensions( extensions );
-	
+
 	m_outputFileParameter = new FileNameParameter(
 		"outputFile",
 		"The deep image file to write.",
@@ -72,7 +71,7 @@ DeepImageConverter::DeepImageConverter()
 		false,
 		PathParameter::DontCare
 	);
-	
+
 	parameters()->addParameter( m_inputFileParameter );
 	parameters()->addParameter( m_outputFileParameter );
 }
@@ -93,27 +92,27 @@ ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 	{
 		throw InvalidArgumentException( "The input file does not have an associated DeepImageReader: " + m_inputFileParameter->getTypedValue() );
 	}
-	
+
 	DeepImageWriterPtr writer = DeepImageWriter::create( m_outputFileParameter->getTypedValue() );
-	
+
 	CompoundObjectPtr header = reader->readHeader();
 	writer->channelNamesParameter()->setValue( header->member<StringVectorData>( "channelNames" ) );
-	
+
 	const Imath::Box2i dataWindow = header->member<Box2iData>( "dataWindow" )->readable();
 	writer->resolutionParameter()->setTypedValue( dataWindow.size() + Imath::V2i( 1 ) );
-	
+
 	M44fData *worldToCamera = header->member<M44fData>( "worldToCameraMatrix" );
 	if ( worldToCamera )
 	{
 		writer->worldToCameraParameter()->setValue( worldToCamera );
 	}
-	
+
 	M44fData *worldToNDC = header->member<M44fData>( "worldToNDCMatrix" );
 	if ( worldToNDC )
 	{
 		writer->worldToNDCParameter()->setValue( worldToNDC );
 	}
-	
+
 	for ( int y=dataWindow.min.y; y <= dataWindow.max.y; ++y )
 	{
 		for ( int x=dataWindow.min.x; x <= dataWindow.max.x; ++x )
@@ -122,6 +121,6 @@ ObjectPtr DeepImageConverter::doOperation( const CompoundObject *operands )
 			writer->writePixel( x, y, pixel.get() );
 		}
 	}
-	
+
 	return new StringData( writer->fileName() );
 }
