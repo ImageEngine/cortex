@@ -55,7 +55,7 @@ static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wan
 	{
 		std::string reason;
 		bool v = that.channelValid( p, &reason );
-		return make_tuple( v, reason );
+		return boost::python::make_tuple( v, reason );
 	}
 	bool v = that.channelValid( p );
 	return object( v );
@@ -67,7 +67,7 @@ static object channelValid2( ImagePrimitive &that, const char * n, bool wantReas
 	{
 		std::string reason;
 		bool v = that.channelValid( n, &reason );
-		return make_tuple( v, reason );
+		return boost::python::make_tuple( v, reason );
 	}
 	bool v = that.channelValid( n );
 	return object( v );
@@ -113,7 +113,7 @@ void bindImagePrimitive()
 
 		.def( "objectToPixelMatrix", &ImagePrimitive::objectToPixelMatrix )
 		.def( "pixelToObjectMatrix", &ImagePrimitive::pixelToObjectMatrix )
-		
+
 		.def( "pixelToUVMatrix", &ImagePrimitive::pixelToUVMatrix )
 		.def( "uvToPixelMatrix", &ImagePrimitive::uvToPixelMatrix )
 
@@ -130,18 +130,18 @@ void bindImagePrimitive()
 
 		.def( "createRGBFloat", &ImagePrimitive::createRGB<float> )
 		.staticmethod( "createRGBFloat" )
-		
+
 		.def( "createGreyscaleFloat", &ImagePrimitive::createGreyscale<float> )
 		.staticmethod( "createGreyscaleFloat" )
-		
+
 	;
-	
+
 	enum_<ImagePrimitive::Space>( "Space" )
 		.value( "Invalid", ImagePrimitive::Invalid )
 		.value( "Pixel", ImagePrimitive::Pixel )
 		.value( "UV", ImagePrimitive::UV )
 		.value( "Object", ImagePrimitive::Object )
-	;		
+	;
 
 }
 

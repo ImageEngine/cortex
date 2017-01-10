@@ -63,27 +63,27 @@ REPR_SPECIALISATION( CubicBasisf )
 REPR_SPECIALISATION( CubicBasisd )
 
 template<typename T>
-static tuple coefficients( const T &b, typename T::BaseType t )
+static boost::python::tuple coefficients( const T &b, typename T::BaseType t )
 {
 	typename T::BaseType c0, c1, c2, c3;
 	b.coefficients( t, c0, c1, c2, c3 );
-	return make_tuple( c0, c1, c2, c3 );
+	return boost::python::make_tuple( c0, c1, c2, c3 );
 }
 
 template<typename T>
-static tuple derivativeCoefficients( const T &b, typename T::BaseType t )
+static boost::python::tuple derivativeCoefficients( const T &b, typename T::BaseType t )
 {
 	typename T::BaseType c0, c1, c2, c3;
 	b.derivativeCoefficients( t, c0, c1, c2, c3 );
-	return make_tuple( c0, c1, c2, c3 );
+	return boost::python::make_tuple( c0, c1, c2, c3 );
 }
 
 template<typename T>
-static tuple integralCoefficients( const T &b, typename T::BaseType t0, typename T::BaseType t1 )
+static boost::python::tuple integralCoefficients( const T &b, typename T::BaseType t0, typename T::BaseType t1 )
 {
 	typename T::BaseType c0, c1, c2, c3;
 	b.integralCoefficients( t0, t1, c0, c1, c2, c3 );
-	return make_tuple( c0, c1, c2, c3 );
+	return boost::python::make_tuple( c0, c1, c2, c3 );
 }
 
 template<typename T>
