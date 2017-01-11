@@ -89,7 +89,13 @@ class SceneShapeInterface: public MPxComponentShape
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
-		
+
+#if MAYA_API_VERSION >= 201600
+
+		virtual MStatus preEvaluation( const MDGContext &context, const MEvaluationNode &evaluationNode );
+
+#endif
+
 		/// This method is overridden to supply a geometry iterator, which maya uses to work out
 		/// the bounding boxes of the components you've selected in the viewport
 		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
@@ -215,10 +221,13 @@ class SceneShapeInterface: public MPxComponentShape
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
 		/// Returns bound for the component matching the given index
 		Imath::Box3d componentBound( int idx );
+		bool animatedScene();
 
 		void recurseCopyGroup( const IECoreGL::Group *srcGroup, IECoreGL::Group *trgGroup, const std::string &namePrefix );
 
 		bool readConvertParam( IECore::CompoundParameterPtr parameters, int attrIndex ) const;
+
+		MStatus computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECore::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time );
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;
