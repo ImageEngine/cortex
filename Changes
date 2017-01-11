@@ -1,3 +1,13 @@
+9.16.1
+======
+
+Fixes
+-----
+
+- `IECoreMaya::SceneShape` :
+  - Fixed redraw issue in Maya 2016 parallel mode.
+  - Fixes computation for expanded SceneShapes in Maya 2016 parallel mode.
+
 9.16.0
 ======
 
