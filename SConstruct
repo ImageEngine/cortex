@@ -3153,6 +3153,10 @@ alembicEnvAppends = {
 		"$ALEMBIC_LIB_PATH",
 		"$HDF5_LIB_PATH",
 	],
+	"LIBS" : [
+		"hdf5$HDF5_LIB_SUFFIX",
+		"hdf5_hl$HDF5_LIB_SUFFIX",
+	],
 }
 alembicEnv.Append( **alembicEnvAppends )
 
@@ -3182,8 +3186,6 @@ if doConfigure :
 				"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
 				"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
 				"AlembicUtil$ALEMBIC_LIB_SUFFIX",
-				"hdf5$HDF5_LIB_SUFFIX",
-				"hdf5_hl$HDF5_LIB_SUFFIX",
 			],
 		)
 
@@ -3196,7 +3198,6 @@ if doConfigure :
 					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 				]
 			)
-
 
 	else :
 
