@@ -279,7 +279,7 @@ class Font::Implementation : public IECore::RefCounted
 {
 
 	public :
-	
+
 		Implementation( const std::string &fontFile )
 			:	m_fileName( fontFile ), m_kerning( 1.0f ), m_curveTolerance( 0.01 ), m_pixelsPerEm( 0 )
 		{
@@ -297,12 +297,12 @@ class Font::Implementation : public IECore::RefCounted
 		{
 			FT_Done_Face( m_face );
 		}
-		
+
 		const std::string &fileName() const
 		{
 			return m_fileName;
 		}
-		
+
 		void setKerning( float kerning )
 		{
 			m_kerning = kerning;
@@ -346,7 +346,7 @@ class Font::Implementation : public IECore::RefCounted
 		{
 			return cachedMesh( c )->primitive.get();
 		}
-		
+
 		MeshPrimitivePtr mesh( const std::string &text ) const
 		{
 			MeshPrimitivePtr result = new MeshPrimitive;
@@ -438,7 +438,7 @@ class Font::Implementation : public IECore::RefCounted
 			return a;
 		}
 
-		
+
 		Imath::Box2f bound() const
 		{
 			float scale = 1.0f / (float)(m_face->units_per_EM);
@@ -480,9 +480,9 @@ class Font::Implementation : public IECore::RefCounted
 
 		const ImagePrimitive *image( char c ) const
 		{
-			return cachedImage( c );	
+			return cachedImage( c );
 		}
-		
+
 		ImagePrimitivePtr image() const
 		{
 			Box2i charDisplayWindow = boundingWindow();
@@ -610,11 +610,11 @@ class Font::Implementation : public IECore::RefCounted
 
 			FloatVectorDataPtr luminanceData = image->createChannel<float>( "Y" );
 			float *luminance = &*(luminanceData->writable().begin());
-			for( int y=0; y<bitmap.rows; y++ )
+			for( int y=0; y<(int)bitmap.rows; y++ )
 			{
 				unsigned char *row = bitmap.buffer + y * bitmap.pitch;
 				/// \todo Do we have to reverse gamma correction to get a linear image?
-				for( int x=0; x<bitmap.width; x++ )
+				for( int x=0; x<(int)bitmap.width; x++ )
 				{
 					*luminance++ = *row++ / 255.0f;
 				}
@@ -626,7 +626,7 @@ class Font::Implementation : public IECore::RefCounted
 			// return it
 			return image.get();
 		}
-		
+
 		Imath::Box2i boundingWindow() const
 		{
 			// display window is the maximum possible character bound. unfortunately the ImagePrimitive

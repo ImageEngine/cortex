@@ -103,20 +103,20 @@ struct EulerHelper
 {
 	typedef typename Euler<T>::Order OrderType;
 
-	static tuple angleOrder( Euler<T> &e )
+	static boost::python::tuple angleOrder( Euler<T> &e )
 	{
 		int i, j, k;
 		e.angleOrder( i, j, k );
 
-		return make_tuple( i, j, k );
+		return boost::python::make_tuple( i, j, k );
 	}
 
-	static tuple angleMapping( Euler<T> &e )
+	static boost::python::tuple angleMapping( Euler<T> &e )
 	{
 		int i, j, k;
 		e.angleMapping( i, j, k );
 
-		return make_tuple( i, j, k );
+		return boost::python::make_tuple( i, j, k );
 	}
 
 	static Vec3<T> simpleXYZRotation( Vec3<T> xyzRot, const Vec3<T> &targetXyzRot )

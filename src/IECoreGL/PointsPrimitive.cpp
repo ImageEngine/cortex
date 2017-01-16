@@ -76,7 +76,7 @@ class PointsPrimitive::MemberData : public IECore::RefCounted
 {
 
 	public :
-	
+
 		IECore::V3fVectorDataPtr points;
 
 		Type type;
@@ -95,7 +95,7 @@ class PointsPrimitive::MemberData : public IECore::RefCounted
 		mutable std::vector<unsigned int> depthOrder;
 		mutable std::vector<float> depths;
 		mutable Imath::V3f depthCameraDirection;
-	
+
 		struct InstancingSetup
 		{
 			InstancingSetup( ConstShaderPtr os, Type t, Shader::SetupPtr ss )
@@ -122,7 +122,7 @@ const float PointsPrimitive::MemberData::g_defaultRotation = 0;
 //////////////////////////////////////////////////////////////////////////
 // PointsPrimitive
 //////////////////////////////////////////////////////////////////////////
-		
+
 IE_CORE_DEFINERUNTIMETYPED( PointsPrimitive );
 
 PointsPrimitive::PointsPrimitive( Type type )
@@ -142,7 +142,7 @@ void PointsPrimitive::updateBounds() const
 	{
 		return;
 	}
-	
+
 	m_memberData->recomputeBound = false;
 
 	if( !m_memberData->points )
@@ -155,11 +155,11 @@ void PointsPrimitive::updateBounds() const
 	const float *cw = dataAndStride( m_memberData->constantWidth.get(), &MemberData::g_defaultWidth, cwStep );
 	const float *w = dataAndStride( m_memberData->widths.get(), &MemberData::g_defaultWidth, wStep );
 	const float *a = dataAndStride( m_memberData->patchAspectRatio.get(), &MemberData::g_defaultAspectRatio, aStep );
-	
+
 	m_memberData->bound.makeEmpty();
 	const vector<V3f> &pd = m_memberData->points->readable();
 	for( unsigned int i=0; i<pd.size(); i++ )
-	{	
+	{
 		float r = *cw * *w / 2.0f; cw += cwStep; w += wStep;
 		if( *a < 1.0f && *a > 0.0f )
 		{
@@ -218,7 +218,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 				return it->shaderSetup.get();
 			}
 		}
-				
+
 		ConstShaderPtr instancingShader = shader;
 		ShaderStateComponent *shaderStateComponent = state->get<ShaderStateComponent>();
 		if( instancingShader->vertexSource() == "" )
@@ -229,19 +229,19 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 			ShaderLoader *shaderLoader = shaderStateComponent->shaderLoader();
 			instancingShader = shaderLoader->create( instancingVertexSource(), "", shader->fragmentSource() );
 		}
-		
+
 		Shader::SetupPtr instancingShaderSetup = new Shader::Setup( instancingShader );
 		shaderStateComponent->addParametersToShaderSetup( instancingShaderSetup.get() );
 		addPrimitiveVariablesToShaderSetup( instancingShaderSetup.get(), "vertex", 1 );
-		
-		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( m_memberData->widths ) );
+
+		instancingShaderSetup->addUniformParameter( "useWidth", new BoolData( static_cast<bool>( m_memberData->widths ) ) );
 		if( !m_memberData->constantWidth )
 		{
 			instancingShaderSetup->addUniformParameter( "constantwidth", new FloatData( 1.0f ) );
 		}
-		instancingShaderSetup->addUniformParameter( "useAspectRatio", new BoolData( m_memberData->patchAspectRatio ) );
-		instancingShaderSetup->addUniformParameter( "useRotation", new BoolData( m_memberData->rotations ) );
-				
+		instancingShaderSetup->addUniformParameter( "useAspectRatio", new BoolData( static_cast<bool>( m_memberData->patchAspectRatio ) ) );
+		instancingShaderSetup->addUniformParameter( "useRotation", new BoolData( static_cast<bool>( m_memberData->rotations ) ) );
+
 		switch( type )
 		{
 			case Disk :
@@ -268,7 +268,7 @@ const Shader::Setup *PointsPrimitive::shaderSetup( const Shader *shader, State *
 			default :
 				break;
 		}
-				
+
 		m_memberData->instancingSetups.push_back( MemberData::InstancingSetup( shader, type, instancingShaderSetup ) );
 
 		return instancingShaderSetup.get();
@@ -282,7 +282,7 @@ void PointsPrimitive::render( const State *currentState, IECore::TypeId style ) 
 		// early out if no points - some drivers crash otherwise
 		return;
 	}
-	
+
 	/*if( depthSortRequested( state ) )
 	{
 		depthSort();
@@ -366,8 +366,8 @@ PointsPrimitive::Type PointsPrimitive::effectiveType( const State *state ) const
 
 std::string &PointsPrimitive::instancingVertexSource()
 {
-	static std::string s = 
-	
+	static std::string s =
+
 		"#version 120\n"
 		""
 		"#include \"IECoreGL/PointsPrimitive.h\"\n"
@@ -411,7 +411,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"	fragmentst = instancest;"
 		""
 		"}";
-		
+
 	return s;
 }
 

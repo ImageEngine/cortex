@@ -87,6 +87,12 @@ o.Add(
 )
 
 o.Add(
+	"CXXSTD",
+	"The C++ standard to build against.",
+	"c++98",
+)
+
+o.Add(
 	BoolVariable( "DEBUG", "Make a debug build", False )
 )
 
@@ -1123,6 +1129,8 @@ if env["PLATFORM"]=="darwin" :
 	# deprecation of gluBuild2DMipmaps() in OSX 10.9.
 	if osxVersion[0] == 10 and osxVersion[1] > 7 :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
+
+env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
@@ -3145,6 +3153,10 @@ alembicEnvAppends = {
 		"$ALEMBIC_LIB_PATH",
 		"$HDF5_LIB_PATH",
 	],
+	"LIBS" : [
+		"hdf5$HDF5_LIB_SUFFIX",
+		"hdf5_hl$HDF5_LIB_SUFFIX",
+	],
 }
 alembicEnv.Append( **alembicEnvAppends )
 
@@ -3174,8 +3186,6 @@ if doConfigure :
 				"AlembicAbcCoreHDF5$ALEMBIC_LIB_SUFFIX",
 				"AlembicAbcCoreAbstract$ALEMBIC_LIB_SUFFIX",
 				"AlembicUtil$ALEMBIC_LIB_SUFFIX",
-				"hdf5$HDF5_LIB_SUFFIX",
-				"hdf5_hl$HDF5_LIB_SUFFIX",
 			],
 		)
 
@@ -3188,7 +3198,6 @@ if doConfigure :
 					"AlembicOgawa$ALEMBIC_LIB_SUFFIX",
 				]
 			)
-
 
 	else :
 

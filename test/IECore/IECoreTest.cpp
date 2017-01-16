@@ -36,6 +36,8 @@
 
 #include "OpenEXR/ImathColor.h"
 
+#define BOOST_TEST_DYN_LINK
+
 #include "boost/test/test_tools.hpp"
 #include "boost/test/results_reporter.hpp"
 #include "boost/test/unit_test_suite.hpp"
@@ -59,7 +61,7 @@
 #include "InternedStringTest.h"
 
 #ifdef IECORE_WITH_BOOSTFACTORIAL
-	
+
 	#include "LevenbergMarquardtTest.h"
 
 #endif
@@ -78,13 +80,13 @@
 #include "SceneCacheThreadingTest.h"
 
 using namespace boost::unit_test;
-using boost::test_tools::output_test_stream;
 
 using namespace IECore;
 
-test_suite* init_unit_test_suite( int argc, char* argv[] )
+bool init()
 {
-	test_suite* test = BOOST_TEST_SUITE( "IECore unit test" );
+
+	test_suite *test = &framework::master_test_suite();
 
 	try
 	{
@@ -100,7 +102,7 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		addRadixSortTest(test);
 		addSweepAndPruneTest(test);
 		addColorTransformTest(test);
-		
+
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
 		addLevenbergMarquardtTest(test);
@@ -126,5 +128,10 @@ test_suite* init_unit_test_suite( int argc, char* argv[] )
 		throw;
 	}
 
-	return test;
+	return true;
+}
+
+int main( int argc, char *argv[] )
+{
+	return boost::unit_test::unit_test_main( &init, argc, argv );
 }

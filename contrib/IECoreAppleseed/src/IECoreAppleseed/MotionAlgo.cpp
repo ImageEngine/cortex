@@ -57,7 +57,6 @@ void resamplePrimitiveKeys( const std::vector<const IECore::Object *> &samples, 
 	resampledSamples.clear();
 
 	int numSamples = asf::is_pow2( times.size() ) ? times.size() : asf::next_pow2( times.size() );
-	assert( std::is_sorted( times.begin(), times.end() ) );
 
 	for( int i = 0; i < numSamples; ++i)
 	{

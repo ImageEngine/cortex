@@ -324,7 +324,6 @@ FrameListPtr IECore::frameListFromList( const std::vector< FrameList::Frame > &f
 	FrameList::Frame rangeStart = 0;
 	FrameList::Frame rangeEnd = 1;
 	FrameList::Frame rangeStep = frames[ rangeEnd ] - frames[ rangeStart ];
-	assert( rangeStep > 0 );
 
 	while ( rangeEnd <= (FrameList::Frame)frames.size() )
 	{

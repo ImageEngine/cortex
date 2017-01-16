@@ -91,7 +91,7 @@ void IECoreAppleseed::EditBlockHandler::startRendering()
 		}
 
 		m_rendererController->set_status( asr::IRendererController::ContinueRendering );
-		m_renderingThread = thread( &IECoreAppleseed::EditBlockHandler::renderThreadFunc, this );
+		m_renderingThread = boost::thread( &IECoreAppleseed::EditBlockHandler::renderThreadFunc, this );
 	}
 }
 

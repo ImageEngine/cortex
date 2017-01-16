@@ -134,7 +134,7 @@ DisplayDriverServer::DisplayDriverServer( int portNumber ) :
 			boost::asio::placeholders::error));
 	fixSocketFlags( m_data->m_acceptor.native() );
 	tbb::tbb_thread newThread( boost::bind(&DisplayDriverServer::serverThread, this) );
-	m_data->m_thread = newThread;
+	m_data->m_thread.swap( newThread );
 }
 
 DisplayDriverServer::~DisplayDriverServer()

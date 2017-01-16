@@ -87,13 +87,13 @@ void CoordinateSystem::setTransform( TransformPtr transform )
 
 void CoordinateSystem::render( Renderer *renderer ) const
 {
-	TransformBlock transformBlock( renderer, m_transform );
-	
+	TransformBlock transformBlock( renderer, static_cast<bool>( m_transform ) );
+
 	if( m_transform )
 	{
 		m_transform->render( renderer );
 	}
-	
+
 	renderer->coordinateSystem( m_name );
 }
 
