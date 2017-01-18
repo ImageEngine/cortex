@@ -254,6 +254,21 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
 			return new StringData( AiNodeGetStr( node, name ) );
+		case AI_TYPE_RGB :
+		{
+			AtRGB rgb = AiNodeGetRGB( node, name );
+			return new Color3fData( Imath::Color3f( rgb.r, rgb.g, rgb.b ) );
+		}
+		case AI_TYPE_RGBA :
+		{
+			AtRGBA rgba = AiNodeGetRGBA( node, name );
+			return new Color4fData( Imath::Color4f( rgba.r, rgba.g, rgba.b, rgba.a ) );
+		}
+		case AI_TYPE_VECTOR :
+		{
+			AtVector vector = AiNodeGetVec( node, name );
+			return new V3fData( Imath::V3f( vector.x, vector.y, vector.z ));
+		}
 		case AI_TYPE_ARRAY :
 			return arrayToData( AiNodeGetArray( node, name ) );
 	}
