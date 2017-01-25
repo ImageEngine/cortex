@@ -100,6 +100,10 @@ void EXRImageWriter::constructCommon()
 	compressionPresets.push_back( IntParameter::Preset( "pxr24", PXR24_COMPRESSION ) );
 	compressionPresets.push_back( IntParameter::Preset( "b44", B44_COMPRESSION ) );
 	compressionPresets.push_back( IntParameter::Preset( "b44a", B44A_COMPRESSION ) );
+#if OPENEXR_VERSION_HEX >= 0x02020000
+	compressionPresets.push_back( IntParameter::Preset( "dwaa", DWAA_COMPRESSION ) );
+	compressionPresets.push_back( IntParameter::Preset( "dwab", DWAB_COMPRESSION ) );
+#endif // OPENEXR_VERSION_HEX
 
 	IntParameterPtr compressionParameter = new IntParameter(
 	        "compression",
