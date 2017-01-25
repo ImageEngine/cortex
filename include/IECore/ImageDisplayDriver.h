@@ -67,7 +67,7 @@ class IECORE_API ImageDisplayDriver : public DisplayDriver
 		/// Access to the image being created. This should always be valid for reading, even
 		/// before imageClose() has been called.
 		ConstImagePrimitivePtr image() const;
-		
+
 		//! @name Image pool
 		/// It can be useful to store the images created by ImageDisplayDrivers for
 		/// later retrieval. Images can be stored by passing a StringData
@@ -83,13 +83,13 @@ class IECORE_API ImageDisplayDriver : public DisplayDriver
 		/// the image, or 0 if no such image existed.
 		static ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
 		//@}
-		
+
 	private:
 
 		static const DisplayDriverDescription<ImageDisplayDriver> g_description;
-		
+
 		ImagePrimitivePtr m_image;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ImageDisplayDriver )
