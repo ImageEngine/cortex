@@ -344,11 +344,15 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Recursively expands all levels starting from the scene shape.
 	# Returns a list of function sets for all the child scene shapes.
 	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
-	def expandAll( self, preserveNamespace=False ):
+	# If tagName is specfied, each scene in the hierarchy expands only if at least one child has the tag
+	def expandAll( self, preserveNamespace=False, tagName=None ):
 
 		newFn = []
 		def recursiveExpand( fnSceneShape ):
 			
+			if tagName and tagName not in fnSceneShape.sceneInterface().readTags( IECore.SceneInterface.DescendantTag ):
+				return
+
 			new = fnSceneShape.expandOnce( preserveNamespace )
 			newFn.extend( new )
 			for n in new:
