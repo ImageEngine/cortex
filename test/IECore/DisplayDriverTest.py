@@ -175,6 +175,7 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		params['displayPort'] = StringData( '1559' )
 		params["remoteDisplayType"] = StringData( "ImageDisplayDriver" )
 		params["handle"] = StringData( "myHandle" )
+		params["header:myMetadata"] = StringData( "Metadata!" )
 		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = FloatVectorData( width * 3 )
@@ -185,7 +186,10 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 		newImg = ImageDisplayDriver.removeStoredImage( "myHandle" )
 		params["clientPID"] = IntData( os.getpid() )
-		self.assertEqual( newImg.blindData(), params )
+
+		# only data prefixed by 'header:' will come through as blindData/metadata
+		self.assertEqual( newImg.blindData(), CompoundData({"myMetadata": StringData( "Metadata!" )}) )
+
 		# remove blindData for comparison
 		newImg.blindData().clear()
 		img.blindData().clear()
