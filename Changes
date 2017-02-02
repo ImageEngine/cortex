@@ -1,3 +1,13 @@
+9.16.2
+======
+
+- Build
+  - Added CXXSTD build argument.
+  - Made compatible with recent FreeType versions.
+  - Fixed C++11 incompatibilities.
+  - Fixed debug builds.
+  - Fixed linking for single-lib Alembic.
+
 9.16.1
 ======
 
