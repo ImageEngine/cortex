@@ -44,12 +44,12 @@ using namespace IECore;
 ///////////////////////////////////////////////////////////////////////////////////////
 
 OStreamMessageHandler::OStreamMessageHandler( std::ostream &stream )
-	:	m_ownStream( false ), m_stream( &stream )
+	:	m_stream( &stream ), m_ownStream( false )
 {
 }
 
 OStreamMessageHandler::OStreamMessageHandler( std::ostream *stream )
-	:	m_ownStream( true ), m_stream( stream )
+	:	m_stream( stream ), m_ownStream( true )
 {
 }
 
