@@ -34,6 +34,8 @@
 
 #include "tbb/mutex.h"
 
+#include "boost/algorithm/string/predicate.hpp"
+
 #include "IECore/ImageDisplayDriver.h"
 
 using namespace boost;
@@ -59,14 +61,19 @@ ImageDisplayDriver::ImageDisplayDriver( const Box2i &displayWindow, const Box2i 
 	}
 	if( parameters )
 	{
+		// Add all entries that follow our 'header:' metadata convention to the blindData.
+		// Other entries are omitted.
 		CompoundDataMap &xData = m_image->blindData()->writable();
 		const CompoundDataMap &yData = parameters->readable();
 		CompoundDataMap::const_iterator iterY = yData.begin();
 		for ( ; iterY != yData.end(); iterY++ )
 		{
-			xData[iterY->first] = iterY->second->copy();
+			if( starts_with( iterY->first.string(), "header:" ) )
+			{
+				xData[ iterY->first.string().substr( 7 ) ] = iterY->second->copy();
+			}
 		}
-	
+
 		ConstStringDataPtr handle = parameters->member<StringData>( "handle" );
 		if( handle )
 		{

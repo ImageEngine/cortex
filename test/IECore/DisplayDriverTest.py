@@ -87,11 +87,11 @@ class TestImageDisplayDriver(unittest.TestCase):
 		gc.collect()
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		
+
 	def testImagePool( self ) :
-	
+
 		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
-		
+
 		idd = DisplayDriver.create(
 			"ImageDisplayDriver",
 			img.displayWindow,
@@ -101,7 +101,7 @@ class TestImageDisplayDriver(unittest.TestCase):
 				"handle" : StringData( "myHandle" )
 			}
 		)
-		
+
 		red = img['R'].data
 		green = img['G'].data
 		blue = img['B'].data
@@ -116,25 +116,25 @@ class TestImageDisplayDriver(unittest.TestCase):
 		self.assertEqual( ImageDisplayDriver.storedImage( "myHandle" ), idd.image() )
 		self.assertEqual( ImageDisplayDriver.removeStoredImage( "myHandle" ), idd.image() )
 		self.assertEqual( ImageDisplayDriver.storedImage( "myHandle" ), None )
-		
+
 	def testAcceptsRepeatedData( self ) :
-	
+
 		window = Box2i( V2i( 0 ), V2i( 15 ) )
-	
+
 		dd = ImageDisplayDriver( window, window, [ "Y" ], CompoundData() )
 		self.assertEqual( dd.acceptsRepeatedData(), True )
-		
+
 		y = FloatVectorData( [ 1 ] * 16 * 16 )
 		dd.imageData( window, y )
-		
+
 		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
 		dd.imageData( window, y )
-		
+
 		dd.imageClose()
-		
+
 		i = dd.image()
 		self.assertEqual( i["Y"].data, y )
-		
+
 class TestClientServerDisplayDriver(unittest.TestCase):
 
 	def setUp( self ):
@@ -158,8 +158,8 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			buf[3*i+2] = red[i+offset]
 
 	def testUsedPortException( self ):
-		
-		self.assertRaises( RuntimeError, lambda : DisplayDriverServer( 1559 ) ) 
+
+		self.assertRaises( RuntimeError, lambda : DisplayDriverServer( 1559 ) )
 
 	def testTransfer( self ):
 
@@ -175,6 +175,7 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 		params['displayPort'] = StringData( '1559' )
 		params["remoteDisplayType"] = StringData( "ImageDisplayDriver" )
 		params["handle"] = StringData( "myHandle" )
+		params["header:myMetadata"] = StringData( "Metadata!" )
 		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = FloatVectorData( width * 3 )
@@ -182,17 +183,20 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
 			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
 		idd.imageClose()
-		
+
 		newImg = ImageDisplayDriver.removeStoredImage( "myHandle" )
 		params["clientPID"] = IntData( os.getpid() )
-		self.assertEqual( newImg.blindData(), params )
+
+		# only data prefixed by 'header:' will come through as blindData/metadata
+		self.assertEqual( newImg.blindData(), CompoundData({"myMetadata": StringData( "Metadata!" )}) )
+
 		# remove blindData for comparison
 		newImg.blindData().clear()
 		img.blindData().clear()
 		self.assertEqual( newImg, img )
 
 	def testWrongSocketException( self ) :
-	
+
 		parameters = CompoundData( {
 			"displayHost" : "localhost",
 			"displayPort" : "1560", # wrong port
@@ -206,11 +210,11 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
-	
+
 		self.failUnless( "Could not connect to remote display driver server : Connection refused" in str( e ) )
 
 	def testWrongHostException( self ) :
-	
+
 		parameters = CompoundData( {
 			"displayHost" : "thisHostDoesNotExist",
 			"displayPort" : "1559", # wrong port
@@ -224,13 +228,13 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
-			
+
 		self.failUnless( "Could not connect to remote display driver server : Host not found" in str( e ) )
 
 	def testAcceptsRepeatedData( self ) :
-	
+
 		window = Box2i( V2i( 0 ), V2i( 15 ) )
-	
+
 		dd = ClientDisplayDriver(
 			window, window,
 			[ "Y" ],
@@ -241,24 +245,24 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 				"handle" : "myHandle"
 			} )
 		)
-	
+
 		self.assertEqual( dd.acceptsRepeatedData(), True )
-		
+
 		y = FloatVectorData( [ 1 ] * 16 * 16 )
 		dd.imageData( window, y )
-		
+
 		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
 		dd.imageData( window, y )
-		
+
 		dd.imageClose()
-		
+
 		i = ImageDisplayDriver.removeStoredImage( "myHandle" )
 		self.assertEqual( i["Y"].data, y )
 
 	def tearDown( self ):
-		
+
 		self.server = None
-		
+
 		# test if all symbols are gone after the tests.
 		gc.collect()
 		RefCounted.collectGarbage()
@@ -266,4 +270,3 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 if __name__ == "__main__":
 	unittest.main()
-
