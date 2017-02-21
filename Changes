@@ -1,3 +1,17 @@
+9.17.0
+======
+
+Improvements
+============
+
+- `IECoreMaya::SceneShape` :
+  - Added tagName argument to `FnSceneShape.expandAll()`
+  - Added "Expand by Tag" option to SceneShape context menu.
+- `IECoreArnold::ParameterAlgo`: Support `AI_TYPE_RGB`, `AI_TYPE_RGBA`, and `AI_TYPE_VECTOR`.
+- `ImageDisplayDriver`: Support "header:" metadata convention
+- `EXRImageWriter`: Added DreamWorks compression options (if compiled with OpenExr 2.2+).
+- `OStreamMessageHandler`: Made m_stream protected to allow access from subclasses.
+
 9.16.2
 ======
 
