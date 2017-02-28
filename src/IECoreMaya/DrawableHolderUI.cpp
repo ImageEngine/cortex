@@ -258,7 +258,6 @@ bool DrawableHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectio
 		}
 	}
 	
-	assert( depthMinIndex >= 0 );
 
 	// figure out the world space location of the closest hit
 	
