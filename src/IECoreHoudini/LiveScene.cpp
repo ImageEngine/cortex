@@ -83,10 +83,10 @@ LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const 
 	constructCommon( nodePath, contentPath, rootPath, 0 );
 }
 
-LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter )
-	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( splitter ), m_defaultTime( defaultTime )
+LiveScene::LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, const LiveScene& parent )
+	: m_rootIndex( 0 ), m_contentIndex( 0 ), m_splitter( parent.m_splitter ), m_defaultTime( parent.m_defaultTime )
 {
-	constructCommon( nodePath, contentPath, rootPath, splitter );
+	constructCommon( nodePath, contentPath, rootPath, m_splitter.get() );
 }
 
 void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter )
@@ -784,7 +784,7 @@ SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBe
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	return new LiveScene( nodePath, contentPath, rootPath, m_defaultTime, m_splitter.get() );
+	return duplicate( nodePath, contentPath, rootPath);
 }
 
 ConstSceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -968,7 +968,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 	rootPath.resize( m_rootIndex );
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
 	
-	LiveScenePtr rootScene = new LiveScene();
+	LiveScenePtr rootScene = create();
 	rootScene->setDefaultTime( m_defaultTime );
 	for ( Path::const_iterator it = rootPath.begin(); it != rootPath.end(); ++it )
 	{
@@ -988,7 +988,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 	node->getFullPath( rootNodePath );
 	
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
-	SceneInterfacePtr scene = new LiveScene( rootNodePath, emptyPath, rootPath, m_defaultTime, m_splitter.get() );
+	SceneInterfacePtr scene = duplicate( rootNodePath, emptyPath, rootPath);
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
 	{
 		scene = scene->child( *it, missingBehaviour );
@@ -1164,4 +1164,14 @@ std::vector<LiveScene::CustomTagReader> &LiveScene::customTagReaders()
 {
 	static std::vector<LiveScene::CustomTagReader> readers;
 	return readers;
+}
+
+LiveScenePtr LiveScene::create() const
+{
+	return new LiveScene();
+}
+
+LiveScenePtr LiveScene::duplicate( const UT_String &nodePath, const Path &contentPath, const Path &rootPath) const
+{
+	return new LiveScene( nodePath, contentPath, rootPath, *this);
 }
