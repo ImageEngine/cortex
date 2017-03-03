@@ -1513,7 +1513,6 @@ std::string SceneShapeInterface::relativePathName( SceneInterface::Path path )
 {
 	SceneInterface::Path root;
 	getSceneInterface()->path( root );
-	assert( root );
 	assert( root.size() <= path.size() );
 	
 	if( root == path )
@@ -1539,7 +1538,6 @@ SceneInterface::Path SceneShapeInterface::fullPathName( std::string relativeName
 {
 	SceneInterface::Path root;
 	getSceneInterface()->path( root );
-	assert( root );
 
 	SceneInterface::Path relativePath;
 	SceneInterface::stringToPath( relativeName, relativePath );
