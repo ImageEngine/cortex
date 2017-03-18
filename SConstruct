@@ -1664,8 +1664,6 @@ coreTestEnv.Append(
 
 coreTestSources = glob.glob( "test/IECore/*.cpp" )
 if '-DIECORE_WITH_BOOSTFACTORIAL' not in coreTestEnv['CPPFLAGS'] :
-	coreTestSources.remove( "test/IECore/AssociatedLegendreTest.cpp" )
-	coreTestSources.remove( "test/IECore/SphericalHarmonicsTest.cpp" )
 	coreTestSources.remove( "test/IECore/LevenbergMarquardtTest.cpp" )
 
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
