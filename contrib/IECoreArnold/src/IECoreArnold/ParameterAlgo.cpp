@@ -319,7 +319,10 @@ void setParameter( AtNode *node, const char *name, const IECore::Data *value )
 				typeString += "ARRAY ";
 			}
 			typeString += AiParamGetTypeName( type );
-			AiNodeDeclare( node, name, typeString.c_str() );
+			if( !AiNodeLookUpUserParameter( node, name ) )
+			{
+				AiNodeDeclare( node, name, typeString.c_str() );
+			}
 			setParameterInternal( node, name, type, array, value );
 		}
 		else
