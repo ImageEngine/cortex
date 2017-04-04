@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,16 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
+#ifndef IECOREPYTHON_MESHALGOBINDING_H
+#define IECOREPYTHON_MESHALGOBINDING_H
 
-#include "IECore/Export.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+#include "IECorePython/Export.h"
 
-namespace IECore
+namespace IECorePython
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-/// \ingroup geometryProcessingGroup
-class IECORE_API MeshTangentsOp : public MeshPrimitiveOp
-{
-	public:
+IECOREPYTHON_API void bindMeshAlgo();
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
+} // namespace IECorePython
 
-		BoolParameter * orthogonalizeTangentsParameter();
-		const BoolParameter * orthogonalizeTangentsParameter() const;
-
-		StringParameter * pPrimVarNameParameter();
-		const StringParameter * pPrimVarNameParameter() const;
-
-		StringParameter * uPrimVarNameParameter();
-		const StringParameter * uPrimVarNameParameter() const;
-
-		StringParameter * vPrimVarNameParameter();
-		const StringParameter * vPrimVarNameParameter() const;
-		
-		StringParameter * uvIndicesPrimVarNameParameter();
-		const StringParameter * uvIndicesPrimVarNameParameter() const;
-
-		StringParameter * uTangentPrimVarNameParameter();
-		const StringParameter * uTangentPrimVarNameParameter() const;
-
-		StringParameter * vTangentPrimVarNameParameter();
-		const StringParameter * vTangentPrimVarNameParameter() const;
-
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
-
-	protected:
-
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
-
-	private :
-
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;
-};
-
-IE_CORE_DECLAREPTR( MeshTangentsOp );
-
-
-} // namespace IECore
-
-#endif // IECORE_MESHTANGENTSOP_H
-
-
-
+#endif // IECOREPYTHON_MESHALGOBINDING_H
