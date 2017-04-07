@@ -70,16 +70,61 @@
 #include "maya/MTransformationMatrix.h"
 #include "maya/MDagPathArray.h"
 #include "maya/MFnNurbsCurve.h"
+#include "maya/MGlobal.h"
+#include "maya/MFnSet.h"
 
 #include "OpenEXR/ImathBoxAlgo.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+#include "boost/algorithm/string.hpp"
+#include "boost/tokenizer.hpp"
+#include "boost/format.hpp"
 
 using namespace IECore;
 using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( LiveScene );
+
+namespace
+{
+
+void readExportableSets( std::set<SceneInterface::Name> &exportableSets, const MDagPath &dagPath )
+{
+	// convert maya sets to tags
+	MSelectionList selectionList;
+	selectionList.add( dagPath );
+
+	MObjectArray sets;
+	if( !MGlobal::getAssociatedSets( selectionList, sets ) )
+	{
+		return;
+	}
+
+	for( unsigned int i = 0, numSets = sets.length(); i < numSets; ++i )
+	{
+		MStatus s;
+		MFnSet set( sets[i], &s );
+
+		if( !s )
+		{
+			continue;
+		}
+
+		MPlug exportPlug = set.findPlug( "ieExport", false, &s );
+
+		if( !s )
+		{
+			continue;
+		}
+
+		if( exportPlug.asBool() )
+		{
+			exportableSets.insert( SceneInterface::Name( set.name().asChar() ) );
+		}
+
+	}
+}
+
+}
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 LiveScene::Mutex LiveScene::s_mutex;
@@ -454,7 +499,15 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 	{
 		throw Exception( "IECoreMaya::LiveScene::hasTag: Dag path no longer exists!" );
 	}
-	
+
+	std::set<Name> sets;
+	readExportableSets(sets, m_dagPath);
+
+	if( sets.find( name ) != sets.end() )
+	{
+		return true;
+	}
+
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
 	{
@@ -480,8 +533,9 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 	{
 		throw Exception( "IECoreMaya::LiveScene::attributeNames: Dag path no longer exists!" );
 	}
-	
+
 	std::set<Name> uniqueTags;
+	readExportableSets(uniqueTags, m_dagPath);
 
 	// read tags from ieTags attribute:
 	MStatus st;
