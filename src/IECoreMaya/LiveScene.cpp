@@ -866,23 +866,26 @@ void LiveScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) co
 	{
 		MDagPath childPath = dagPath;
 		childPath.push( dagPath.child( i ) );
-		
+
+		// Remove top level nodes which are not serializable
+		// examples include ground plane, manipulators, hypershade cameras & geometry.
+		// Perhaps there are cases where non serializable objects need to be exported but
+		// it might be easier to special case add them then special case remove all unwanted objects
 		if( dagPath.length() == 0 )
 		{
-			// bizarrely, this iterates through things like the translate manipulator and
-			// the view cube too, so lets skip them so they don't show up:
-			if( childPath.node().hasFn( MFn::kManipulator3D ) )
+			MStatus r;
+			MFnDependencyNode depNode( childPath.node(), &r );
+			if( !r )
 			{
 				continue;
 			}
 
-			// looks like it also gives us the ground plane, so again, lets skip that:
-			if( childPath.fullPathName() == "|groundPlane_transform" )
+			if( !depNode.canBeWritten() )
 			{
 				continue;
 			}
 		}
-		
+
 		paths.append( childPath );
 	}
 }
