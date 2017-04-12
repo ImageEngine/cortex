@@ -82,7 +82,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			std::string fullPathName;
 			UT_StringMMPattern shapeFilter;
 			UT_StringMMPattern tagFilter;
-			
+			bool tagGroups;
 			bool hasAnimatedTopology;
 			bool hasAnimatedPrimVars;
 			std::vector<IECore::InternedString> animatedPrimVars;

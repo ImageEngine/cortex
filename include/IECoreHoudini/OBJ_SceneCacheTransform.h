@@ -106,6 +106,7 @@ class OBJ_SceneCacheTransform : public OBJ_SceneCacheNode<OBJ_SubNet>
 			UT_String tagFilterStr;
 			UT_StringMMPattern tagFilter;
 			UT_String fullPathName;
+			bool tagGroups;
 		};
 		
 		/// Called by expandHierarchy() and doExpandChildren() when the SceneCache contains an object.

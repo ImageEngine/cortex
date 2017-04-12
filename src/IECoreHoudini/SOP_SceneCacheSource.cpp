@@ -194,7 +194,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	
 	UT_String attributeCopy;
 	getAttributeCopy( attributeCopy );
-	
+
 	UT_String fullPathName;
 	getFullPathName( fullPathName );
 	
@@ -211,6 +211,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	hash.append( path );
 	hash.append( space );
 	hash.append( tagFilterStr );
+	hash.append( getTagGroups() );
 	hash.append( shapeFilterStr );
 	hash.append( attributeFilter );
 	hash.append( attributeCopy );
@@ -244,6 +245,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	params.attributeCopy = attributeCopy.toStdString();
 	params.fullPathName = fullPathName.toStdString();
 	params.geometryType = getGeometryType();
+	params.tagGroups = getTagGroups();
 	getShapeFilter( params.shapeFilter );
 	getTagFilter( params.tagFilter );
 	
@@ -617,11 +619,12 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 		
 		bool status = converter->convert( myGdpHandle );
 		
+		// adds the full path in addition to the relative name
+		const GA_IndexMap &primMap = gdp->getPrimitiveMap();
+		GA_Range newPrims( primMap, firstNewPrim, primMap.lastOffset() + 1 );
+
 		if ( params.fullPathName != "" )
 		{
-			// adds the full path in addition to the relative name
-			const GA_IndexMap &primMap = gdp->getPrimitiveMap();
-			GA_Range newPrims( primMap, firstNewPrim, primMap.lastOffset() + 1 );
 			if ( newPrims.isValid() )
 			{
 				std::string fullName;
@@ -634,6 +637,41 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 			}
 		}
 		
+		if ( params.tagGroups )
+		{
+			static UT_StringMMPattern convertTagFilter;
+			if( convertTagFilter.isEmpty() )
+			{
+				convertTagFilter.compile( "ObjectType:*" );
+			}
+			SceneInterface::NameList tags;
+			scene->readTags( tags, IECore::SceneInterface::LocalTag );
+			for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
+			{
+				UT_String tag( *it );
+				if ( tag.multiMatch( params.tagFilter ) )
+				{
+					// skip this tag because it's used behind the scenes
+					if ( tag.multiMatch( convertTagFilter ) )
+					{
+						continue;
+					}
+
+					// replace this special character found in SCC tags that will prevent the group from being created
+					tag.substitute(":", "_");
+
+					tag.prepend("ieTag_");
+
+					GA_PrimitiveGroup *group = gdp->findPrimitiveGroup(tag);
+					if ( !group )
+					{
+						group = gdp->newPrimitiveGroup(tag);
+					}
+					group->addRange(newPrims);
+				}
+			}
+		}
+
 		return status;
 	}
 	catch ( std::exception &e )
