@@ -1061,6 +1061,98 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		maya.cmds.currentTime( "0.0sec" )
 		mergedMeshes = scene.readObject( 0 )
 		self.assertEqual( mergedMeshes.numFaces(), 10 )
+
+	def testSetsWithoutExportAttributeAreNotExported( self ) :
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		sphere = maya.cmds.polySphere( name="pSphere" )[0]
+
+		maya.cmds.select( sphere )
+		maya.cmds.sets(name="mySet")
+
+		root = IECoreMaya.LiveScene()
+		tags = root.child('pSphere').readTags()
+
+		self.assertEqual( len(tags), 0)
+
+
+	def testSetWithExportSetToFalseIsNotExported( self ) :
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		sphere = maya.cmds.polySphere( name="pSphere" )[0]
+
+		maya.cmds.select( sphere )
+		maya.cmds.sets(name="mySet")
+
+		maya.cmds.addAttr("mySet", longName="ieExport", at="bool")
+		maya.cmds.setAttr("mySet.ieExport", False)
+
+		root = IECoreMaya.LiveScene()
+		tags = root.child('pSphere').readTags()
+
+		self.assertEqual( len(tags), 0)
+
+	def testConvertsMayaSetsToTags( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		sphere = maya.cmds.polySphere( name="pSphere" )[0]
+
+		maya.cmds.select( sphere )
+		maya.cmds.sets(name="mySet")
+
+		maya.cmds.addAttr("mySet", longName="ieExport", at="bool")
+		maya.cmds.setAttr("mySet.ieExport", True)
+
+		root = IECoreMaya.LiveScene()
+		tags = root.child('pSphere').readTags()
+
+		self.assertEqual( len(tags), 1)
+		self.assertEqual( tags[0], "mySet")
+
+	def testConvertsMayaSetsOfSetsToTags( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		sphere = maya.cmds.polySphere( name="pSphere" )[0]
+
+		maya.cmds.select( sphere )
+		maya.cmds.sets(name="mySet")
+
+		maya.cmds.addAttr("mySet", longName="ieExport", at="bool")
+		maya.cmds.setAttr("mySet.ieExport", True)
+
+		maya.cmds.select( "mySet" )
+		maya.cmds.sets(name="mySet2")
+
+		maya.cmds.addAttr("mySet2", longName="ieExport", at="bool")
+		maya.cmds.setAttr("mySet2.ieExport", True)
+
+		root = IECoreMaya.LiveScene()
+		tags = root.child('pSphere').readTags()
+
+		self.assertEqual( len(tags), 2)
+		self.assertEqual( set(tags), set([IECore.InternedString("mySet"), IECore.InternedString("mySet2")]))
+
+
+	def testOnlyObjectInSetIsExported( self ) :
+
+		maya.cmds.createNode( "transform", name="sharedParent" )
+
+		s = maya.cmds.polySphere( name="pSphere" )[0]
+
+		maya.cmds.select( "{0}.f[1]".format(s) )
+		maya.cmds.sets(name="mySet")
+
+		maya.cmds.addAttr("mySet", longName="ieExport", at="bool")
+		maya.cmds.setAttr("mySet.ieExport", True)
+
+		root = IECoreMaya.LiveScene()
+		tags = root.child(IECore.InternedString(str(s))).readTags()
+
+		self.assertEqual( len(tags), 0)
+
+
 	
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )
