@@ -88,6 +88,9 @@ template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pTagFilter( "tagFilter", "Tag Filter" );
 
 template<typename BaseType>
+PRM_Name SceneCacheNode<BaseType>::pTagGroups( "tagGroups", "Convert Tags to Groups" );
+
+template<typename BaseType>
 PRM_Name SceneCacheNode<BaseType>::pShapeFilter( "shapeFilter", "Shape Filter" );
 
 template<typename BaseType>
@@ -194,7 +197,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 	static PRM_Template *thisTemplate = 0;
 	if ( !thisTemplate )
 	{
-		thisTemplate = new PRM_Template[7];
+		thisTemplate = new PRM_Template[8];
 		
 		thisTemplate[0] = PRM_Template(
 			PRM_INT, 1, &pGeometryType, &geometryTypeDefault, &geometryTypeList, 0, 0, 0, 0,
@@ -232,6 +235,11 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 		);
 		
 		thisTemplate[5] = PRM_Template(
+			PRM_TOGGLE, 1, &pTagGroups, 0, 0, 0, 0, 0, 0,
+			"Convert SCC tags into Houdini primitive groups."
+		);
+
+		thisTemplate[6] = PRM_Template(
 			PRM_STRING, 1, &pFullPathName, 0, 0, 0, 0, 0, 0,
 			"Load the full path of the object as a primitive attribute with this name. This is for user "
 			"convenience and has no meaning in terms of processing or exporting SceneCaches. If left empty, "
@@ -507,6 +515,18 @@ template<typename BaseType>
 void SceneCacheNode<BaseType>::setTagFilter( const UT_String &filter )
 {
 	this->setString( filter, CH_STRING_LITERAL, pTagFilter.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+bool SceneCacheNode<BaseType>::getTagGroups() const
+{
+	return this->evalInt( pTagGroups.getToken(), 0, 0 );
+}
+
+template<typename BaseType>
+void SceneCacheNode<BaseType>::setTagGroups( bool tagGroups )
+{
+	return this->setInt( pTagGroups.getToken(), 0, 0, tagGroups );
 }
 
 template<typename BaseType>

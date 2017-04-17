@@ -1432,6 +1432,93 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.EveryTag ) )
 		self.assertFalse( scene.hasTag( "notATag", IECore.SceneInterface.EveryTag ) )
 	
+	def testObjTagToGroups( self ) :
+		
+		self.writeDualTaggedSCC()
+		
+		xform = self.xform()
+
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "tagFilter" ).set( "*" )
+		xform.parm( "expand" ).pressButton()
+
+		# no groups set by default
+		for src in ( c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ):
+			self.assertEqual( src.geometry().primGroups(), () )
+			
+		# all groups enabled
+		xform.parm( "tagGroups" ).set(1)
+		xform.parm( "push" ).pressButton()
+	
+		for src in (c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource"):
+			if src.path() == ( xform.path() + "/1/geo/1" ):
+				for gr in src.geometry().primGroups():
+					self.assertIn( gr.name(), [ "ieTag_a" ] )
+			elif src.path() == ( xform.path() + "/1/2/geo/2" ):
+				for gr in src.geometry().primGroups():
+					self.assertIn( gr.name(), [ "ieTag_b" ] )
+			elif src.path() == ( xform.path() + "/1/2/3/geo/3" ):
+				for gr in src.geometry( ).primGroups( ):
+					self.assertIn( gr.name(), [ "ieTag_c" ] )
+			elif src.path() == ( xform.path() + "/1/4/5/geo/5" ):
+				self.assertEquals( src.geometry( ).primGroups( ), tuple() )
+
+		# group b filtered
+		xform.parm( "tagFilter" ).set( "b" )
+		xform.parm( "push" ).pressButton()
+
+		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), { "ieTag_b" } )
+
+		# check that all groups present when Hierarchy is set to parenting
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "tagFilter" ).set( "*" )
+		xform.parm( "expand" ).pressButton()
+		
+		srcs = [ c for c in xform.allSubChildren( ) if c.type( ).nameWithCategory( ) == "Sop/ieSceneCacheSource" ]
+		for src in srcs :
+			for pg in src.geometry().primGroups():
+				for prim in pg.prims():
+					if prim.attribValue( "name" ) == "/1" :
+						self.assertIn( pg.name(), [ "ieTag_a" ] )
+					elif prim.attribValue( "name" ) == "/1/2" :
+						self.assertIn( pg.name(), [ "ieTag_b" ] )
+					elif prim.attribValue( "name" ) == "/1/2/3" :
+						self.assertIn( pg.name(), [ "ieTag_c" ] )
+					elif prim.attribValue( "name" ) == "/1/4/5" :
+						self.assertItemsEqual( src.geometry( ).primGroups( ), tuple( ) )
+
+		# check that d (which has no geometry) is filtered correctly when Hierarchy is set to flat hierarchy
+		xform.parm( "collapse" ).pressButton()
+		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
+		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
+		xform.parm( "tagFilter" ).set( "*" )
+		xform.parm( "expand" ).pressButton()
+		
+		srcs = [ c for c in xform.allSubChildren( ) if c.type( ).nameWithCategory( ) == "Sop/ieSceneCacheSource" ]
+		for src in srcs:
+			for pg in src.geometry().primGroups():
+				for prim in pg.prims() :
+					if prim.attribValue( "name" ) == "/1" :
+						self.assertIn( pg.name(), [ "ieTag_a" ] )
+					elif prim.attribValue( "name" ) == "/1/2" :
+						self.assertIn( pg.name(), [ "ieTag_b" ] )
+					elif prim.attribValue( "name" ) == "/1/2/3" :
+						self.assertIn( pg.name(), [ "ieTag_c" ] )
+					elif prim.attribValue( "name" ) == "/1/4/5" :
+						self.assertItemsEqual( src.geometry( ).primGroups( ), tuple( ) )
+		
+		# group b filtered
+		xform.parm( "tagFilter" ).set( "b" )
+		xform.parm( "push" ).pressButton()
+		
+		srcs = [ c for c in xform.allSubChildren() if c.type().nameWithCategory() == "Sop/ieSceneCacheSource" ]
+		self.assertEqual( set( [ pg.name() for src in srcs for pg in src.geometry().primGroups() ] ), {  "ieTag_b" } )
+
+		
 	def writeAttributeSCC( self ) :
 		
 		scene = self.writeSCC()

@@ -98,6 +98,7 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 void OBJ_SceneCacheGeometry::pushToHierarchy()
 {
 	UT_String attribFilter, attribCopy, tagFilter, shapeFilter, fullPathName;
+	bool tagGroups = getTagGroups();
 	getAttributeFilter( attribFilter );
 	getAttributeCopy( attribCopy );
 	getTagFilter( tagFilter );
@@ -113,6 +114,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 		sop->setAttributeFilter( attribFilter );
 		sop->setAttributeCopy( attribCopy );
 		sop->setTagFilter( tagFilter );
+		sop->setTagGroups( tagGroups );
 		sop->setShapeFilter( shapeFilter );
 		sop->setFullPathName( fullPathName );
 		sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)geomType );
@@ -144,6 +146,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setAttributeCopy( attribCopy );
 	getTagFilter( tagFilter );
 	sop->setTagFilter( tagFilter );
+	sop->setTagGroups( getTagGroups() );
 	getShapeFilter( shapeFilter );
 	sop->setShapeFilter( shapeFilter );
 	getFullPathName( fullPathName );

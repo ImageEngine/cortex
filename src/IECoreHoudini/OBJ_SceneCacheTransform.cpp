@@ -138,6 +138,7 @@ void OBJ_SceneCacheTransform::expandHierarchy( const SceneInterface *scene )
 	params.geometryType = getGeometryType();
 	params.depth = (Depth)evalInt( pDepth.getToken(), 0, 0 );
 	params.hierarchy = (Hierarchy)evalInt( pHierarchy.getToken(), 0, 0 );
+	params.tagGroups = getTagGroups();
 	getAttributeFilter( params.attributeFilter );
 	getAttributeCopy( params.attributeCopy );
 	getShapeFilter( params.shapeFilter );
@@ -223,6 +224,7 @@ OBJ_Node *OBJ_SceneCacheTransform::doExpandObject( const SceneInterface *scene, 
 	if ( visible )
 	{
 		geo->setTagFilter( params.tagFilterStr );
+		geo->setTagGroups( params.tagGroups );
 	}
 	
 	geo->setDisplay( visible );
@@ -346,6 +348,7 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 void OBJ_SceneCacheTransform::pushToHierarchy()
 {
 	UT_String attribFilter, attribCopy, shapeFilter, fullPathName;
+	bool tagGroups = getTagGroups();
 	getAttributeFilter( attribFilter );
 	getAttributeCopy( attribCopy );
 	getShapeFilter( shapeFilter );
@@ -376,6 +379,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 			{
 				visible = true;
 				xform->setTagFilter( tagFilterStr );
+				xform->setTagGroups( tagGroups );
 			}
 		}
 		
@@ -403,6 +407,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 			if ( visible )
 			{
 				geo->setTagFilter( tagFilterStr );
+				geo->setTagGroups( tagGroups );
 			}
 		}
 		
@@ -426,6 +431,7 @@ OBJ_SceneCacheTransform::Parameters::Parameters( const Parameters &other )
 	shapeFilter = other.shapeFilter;
 	tagFilterStr = other.tagFilterStr;
 	tagFilter.compile( tagFilterStr );
+	tagGroups = other.tagGroups;
 	fullPathName = other.fullPathName;
 }
 

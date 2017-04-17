@@ -66,6 +66,7 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pAttributeFilter;
 		static PRM_Name pAttributeCopy;
 		static PRM_Name pTagFilter;
+		static PRM_Name pTagGroups;
 		static PRM_Name pShapeFilter;
 		static PRM_Name pFullPathName;
 		
@@ -80,7 +81,7 @@ class SceneCacheNode : public BaseType
 		static PRM_ChoiceList attributeCopyMenu;
 		static PRM_ChoiceList tagFilterMenu;
 		static PRM_ChoiceList shapeFilterMenu;
-		
+
 		static int sceneParmChangedCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static int reloadButtonCallback( void *data, int index, float time, const PRM_Template *tplate );
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
@@ -120,6 +121,8 @@ class SceneCacheNode : public BaseType
 		void getTagFilter( UT_String &filter ) const;
 		void getTagFilter( UT_StringMMPattern &filter ) const;
 		void setTagFilter( const UT_String &filter );
+		bool getTagGroups() const;
+		void setTagGroups( bool tagGroups );
 		void getShapeFilter( UT_String &filter ) const;
 		void getShapeFilter( UT_StringMMPattern &filter ) const;
 		void setShapeFilter( const UT_String &filter );
