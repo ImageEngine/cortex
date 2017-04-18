@@ -97,6 +97,12 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( "Calculates mesh tangents wi
 		false
 	);
 
+	BoolParameterPtr normalVecDirCheckParameter = new BoolParameter(
+		"normalVecDirCheck",
+		"Check if the normal vector direction is towards the cross product of uTangent and vTangent, flip uTangent if not",
+		true
+	);
+
 	parameters()->addParameter( orthogonalizeTangentsParameter );
 	parameters()->addParameter( pPrimVarNameParameter );
 	parameters()->addParameter( m_uPrimVarNameParameter );
@@ -104,6 +110,7 @@ MeshTangentsOp::MeshTangentsOp() : MeshPrimitiveOp( "Calculates mesh tangents wi
 	parameters()->addParameter( uvIndicesPrimVarNameParameter );
 	parameters()->addParameter( m_uTangentPrimVarNameParameter );
 	parameters()->addParameter( m_vTangentPrimVarNameParameter );
+	parameters()->addParameter( normalVecDirCheckParameter );
 }
 
 MeshTangentsOp::~MeshTangentsOp()
@@ -181,12 +188,22 @@ const StringParameter * MeshTangentsOp::vTangentPrimVarNameParameter() const
 	return m_vTangentPrimVarNameParameter.get();
 }
 
+BoolParameter * MeshTangentsOp::normalVecDirCheckParameter()
+{
+	return parameters()->parameter<BoolParameter>( "normalVecDirCheck" );
+}
+
+const BoolParameter * MeshTangentsOp::normalVecDirCheckParameter() const
+{
+	return parameters()->parameter<BoolParameter>( "normalVecDirCheck" );
+}
+
 struct MeshTangentsOp::CalculateTangents
 {
 	typedef void ReturnType;
 
-	CalculateTangents( const vector<int> &vertsPerFace, const vector<int> &vertIds, const vector<float> &u, const vector<float> &v, const vector<int> &uvIndices, bool orthoTangents )
-		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_u( u ), m_v( v ), m_uvIds( uvIndices ), m_orthoTangents( orthoTangents )
+	CalculateTangents( const vector<int> &vertsPerFace, const vector<int> &vertIds, const vector<float> &u, const vector<float> &v, const vector<int> &uvIndices, bool orthoTangents, bool normalVecDirCheck )
+		:	m_vertsPerFace( vertsPerFace ), m_vertIds( vertIds ), m_u( u ), m_v( v ), m_uvIds( uvIndices ), m_orthoTangents( orthoTangents ), m_normalVecDirCheck( normalVecDirCheck )
 	{
 
 	}
@@ -284,7 +301,7 @@ struct MeshTangentsOp::CalculateTangents
 			}
 		
 			// make things less sinister
-			if( uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
+			if( m_normalVecDirCheck && uTangents[i].cross( vTangents[i] ).dot( normals[i] ) < 0.0f )
 			{
 				uTangents[i] *= -1.0f;
 			}
@@ -321,6 +338,7 @@ struct MeshTangentsOp::CalculateTangents
 		const vector<float> &m_v;
 		const vector<int> &m_uvIds;
 		bool m_orthoTangents;
+		bool m_normalVecDirCheck;
 		
 };
 
@@ -392,8 +410,9 @@ void MeshTangentsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundO
 	dco->targetTypeParameter()->setNumericValue( FloatVectorDataTypeId );
 
 	bool orthoTangents = orthogonalizeTangentsParameter()->getTypedValue();
+	bool normalVecDirCheck = normalVecDirCheckParameter()->getTypedValue();
 
-	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable(), orthoTangents );
+	CalculateTangents f( vertsPerFace->readable(), mesh->vertexIds()->readable(), uData->readable(), vData->readable(), uvIndicesData->readable(), orthoTangents, normalVecDirCheck );
 
 	despatchTypedData<CalculateTangents, TypeTraits::IsFloatVec3VectorTypedData, HandleErrors>( pData, f );
 
