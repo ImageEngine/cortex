@@ -64,7 +64,7 @@ class MeshTangentsOpTest( unittest.TestCase ) :
 		self.assert_( mesh.arePrimitiveVariablesValid() )
 		
 		self.assertEqual( mesh["sTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )	
+		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		
 		for v in mesh["sTangent"].data :
 			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
@@ -91,7 +91,7 @@ class MeshTangentsOpTest( unittest.TestCase ) :
 		self.assert_( mesh.arePrimitiveVariablesValid() )
 		
 		self.assertEqual( mesh["sTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )	
+		self.assertEqual( mesh["tTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		
 		for v in mesh["sTangent"].data :
 			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
@@ -127,7 +127,7 @@ class MeshTangentsOpTest( unittest.TestCase ) :
 		for v in mesh["tTangent"].data[:3] :
 			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, 1 ), 0.000001 ) )
 		for v in mesh["tTangent"].data[3:] :
-			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )		
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 0, 0, -1 ), 0.000001 ) )
 		
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

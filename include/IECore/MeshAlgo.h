@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
+#ifndef IECORE_MESHALGO_H
+#define IECORE_MESHALGO_H
 
-#include "IECore/Export.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+#include <vector>
+#include <utility>
+
+#include "IECore/PrimitiveVariable.h"
+#include "IECore/MeshPrimitive.h"
 
 namespace IECore
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-/// \ingroup geometryProcessingGroup
-class IECORE_API MeshTangentsOp : public MeshPrimitiveOp
+namespace MeshAlgo
 {
-	public:
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
+/// Calculate the surface tangent vectors of a mesh primitive.
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh,
+	const std::string &uvSet = "st",
+	bool orthoTangents = true,
+	const std::string &position = "P"
+);
 
-		BoolParameter * orthogonalizeTangentsParameter();
-		const BoolParameter * orthogonalizeTangentsParameter() const;
-
-		StringParameter * pPrimVarNameParameter();
-		const StringParameter * pPrimVarNameParameter() const;
-
-		StringParameter * uPrimVarNameParameter();
-		const StringParameter * uPrimVarNameParameter() const;
-
-		StringParameter * vPrimVarNameParameter();
-		const StringParameter * vPrimVarNameParameter() const;
-		
-		StringParameter * uvIndicesPrimVarNameParameter();
-		const StringParameter * uvIndicesPrimVarNameParameter() const;
-
-		StringParameter * uTangentPrimVarNameParameter();
-		const StringParameter * uTangentPrimVarNameParameter() const;
-
-		StringParameter * vTangentPrimVarNameParameter();
-		const StringParameter * vTangentPrimVarNameParameter() const;
-
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
-
-	protected:
-
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
-
-	private :
-
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;
-};
-
-IE_CORE_DECLAREPTR( MeshTangentsOp );
-
-
+} // namespace MeshAlgo
 } // namespace IECore
 
-#endif // IECORE_MESHTANGENTSOP_H
 
-
-
+#endif // IECORE_MESHALGO_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,63 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MESHTANGENTSOP_H
-#define IECORE_MESHTANGENTSOP_H
+#include "boost/python.hpp"
 
-#include "IECore/Export.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/MeshAlgo.h"
+#include "IECorePython/MeshAlgoBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
-namespace IECore
+using namespace boost::python;
+using namespace IECore;
+
+// Avoid cluttering the global namespace.
+namespace
 {
 
-/// A MeshPrimitiveOp to calculate vertex tangents.
-/// \ingroup geometryProcessingGroup
-class IECORE_API MeshTangentsOp : public MeshPrimitiveOp
+// Converts a std::pair instance to a Python tuple.
+template<typename T1, typename T2>
+struct StdPairToTuple
 {
-	public:
+	static PyObject *convert( std::pair<T1, T2> const &p )
+	{
+		return boost::python::incref(
+			boost::python::make_tuple( p.first, p.second ).ptr()
+		);
+	}
 
-		MeshTangentsOp();
-		virtual ~MeshTangentsOp();
-
-		BoolParameter * orthogonalizeTangentsParameter();
-		const BoolParameter * orthogonalizeTangentsParameter() const;
-
-		StringParameter * pPrimVarNameParameter();
-		const StringParameter * pPrimVarNameParameter() const;
-
-		StringParameter * uPrimVarNameParameter();
-		const StringParameter * uPrimVarNameParameter() const;
-
-		StringParameter * vPrimVarNameParameter();
-		const StringParameter * vPrimVarNameParameter() const;
-		
-		StringParameter * uvIndicesPrimVarNameParameter();
-		const StringParameter * uvIndicesPrimVarNameParameter() const;
-
-		StringParameter * uTangentPrimVarNameParameter();
-		const StringParameter * uTangentPrimVarNameParameter() const;
-
-		StringParameter * vTangentPrimVarNameParameter();
-		const StringParameter * vTangentPrimVarNameParameter() const;
-
-		IE_CORE_DECLARERUNTIMETYPED( MeshTangentsOp, MeshPrimitiveOp );
-
-	protected:
-
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
-
-	private :
-
-		StringParameterPtr m_uPrimVarNameParameter;
-		StringParameterPtr m_vPrimVarNameParameter;
-		StringParameterPtr m_uTangentPrimVarNameParameter;
-		StringParameterPtr m_vTangentPrimVarNameParameter;
+	static PyTypeObject const *get_pytype()
+	{
+		return &PyTuple_Type;
+	}
 };
 
-IE_CORE_DECLAREPTR( MeshTangentsOp );
+// Helper for convenience.
+template<typename T1, typename T2>
+struct StdPairToTupleConverter
+{
+	StdPairToTupleConverter()
+	{
+		boost::python::to_python_converter<std::pair<T1, T2>, StdPairToTuple<T1, T2>, true //StdPairToTuple has get_pytype
+										  >();
+	}
+};
 
+} // namespace anonymous
 
-} // namespace IECore
+namespace IECorePython
+{
 
-#endif // IECORE_MESHTANGENTSOP_H
+void bindMeshAlgo()
+{
+	object meshAlgoModule( borrowed( PyImport_AddModule( "IECore.MeshAlgo" ) ) );
+	scope().attr( "MeshAlgo" ) = meshAlgoModule;
 
+	scope meshAlgoScope( meshAlgoModule );
 
+	StdPairToTupleConverter<IECore::PrimitiveVariable, IECore::PrimitiveVariable>();
+
+	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "uvSet" ) = "st", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
+}
+
+} // namespace IECorePython
 
