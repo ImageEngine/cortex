@@ -1,8 +1,39 @@
+9.18.0
+======
+
+Features
+--------
+
+- IECore::MeshAlgo : Added calculateTangents() function.
+  - MeshAlgo is a new namepsace for functions which operate on MeshPrimitives.
+  - MeshTangentOp has been updated to use `MeshAlgo::calculateTangents()` internally.
+- IECoreMaya:LiveScene : Convert Maya Sets to Scene Tags.
+  - Sets will be converted if they have a dynmaic bool attribute called "ieExport" which is set True.
+- IECoreHoudini SceneNodes : Added an option to load Scene Tags as Houdini PrimGroups.
+
+Improvements
+------------
+
+- IECoreArnold::ParameterAlgo : Avoid warnings when redeclaring attributes.
+- IECoreHoudini Op SOPs : Added "ie" prefix to the tab menu for Cortex Ops loaded as Houdini SOPs.
+  - This affects Image Engine only.
+
+Fixes
+-----
+
+- IECoreMaya::LiveScene : Ignore non-serializable objects introduced by Maya 2016 hypershade.
+
+Build
+-----
+
+- Removed stale asserts.
+- Removed references to dead test cases.
+
 9.17.0
 ======
 
 Improvements
-============
+------------
 
 - `IECoreMaya::SceneShape` :
   - Added tagName argument to `FnSceneShape.expandAll()`
