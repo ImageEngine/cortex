@@ -476,3 +476,46 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 
 	return result;
 }
+
+MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOuter, const Imath::V2i &divisions )
+{
+
+	IECore::IntVectorDataPtr verticesPerFace = new IECore::IntVectorData;
+	vector<int> &vpf = verticesPerFace->writable();
+
+	IECore::IntVectorDataPtr vertexIds = new IECore::IntVectorData;
+	vector<int> &vIds = vertexIds->writable();
+
+	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+	vector<V3f> &pVector = pData->writable();
+
+	for( int i = 0; i < divisions.x; ++i )
+	{
+		const float iAngle = 2 * M_PI * (float)i/(float)(divisions.x-1);
+		const V3f v( cos( iAngle ), 0, sin( iAngle ) );
+		const V3f circleCenter = v * radiusInner;
+
+		const int ii = i == divisions.x - 1 ? 0 : i + 1;
+
+		for( int j = 0; j < divisions.y; ++j )
+		{
+			const float jAngle = 2 * M_PI * (float)j/(float)(divisions.y-1);
+			pVector.push_back(
+				circleCenter + radiusOuter * ( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) )
+			);
+
+			const int jj = j == divisions.y - 1 ? 0 : j + 1;
+
+			vpf.push_back( 4 );
+
+			vIds.push_back( i * divisions.y + j );
+			vIds.push_back( i * divisions.y + jj );
+			vIds.push_back( ii * divisions.y + jj );
+			vIds.push_back( ii * divisions.y + j );
+		}
+	}
+
+	IECore::MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+
+	return result;
+}

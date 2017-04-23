@@ -97,7 +97,9 @@ class IECORE_API MeshPrimitive : public Primitive
 		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ) );
 		/// Creates a sphere
 		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ) );
-		
+		/// Creates a torus
+		static MeshPrimitivePtr createTorus( float radiusInner, float radiusOuter, const Imath::V2i &divisions = Imath::V2i( 40, 20 ) );
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:
