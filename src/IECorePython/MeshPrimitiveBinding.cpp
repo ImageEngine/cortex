@@ -72,6 +72,7 @@ namespace IECorePython
 			.def( "createBox", &MeshPrimitive::createBox, ( arg_( "bounds" ) ) ).staticmethod( "createBox" )
 			.def( "createPlane", &MeshPrimitive::createPlane, ( arg_( "bounds" ), arg_( "divisions" ) = Imath::V2i( 1 ) ) ).staticmethod( "createPlane" )
 			.def( "createSphere", &MeshPrimitive::createSphere, ( arg_( "radius" ), arg_( "zMin" ) = -1.0f, arg_( "zMax" ) = 1.0f, arg_( "thetaMax" ) = 360.0f, arg_( "divisions" ) = Imath::V2i( 20, 40 ) ) ).staticmethod( "createSphere" )
+			.def( "createTorus", &MeshPrimitive::createTorus, ( arg_( "innerRadius" ), arg_("outerRadius"), arg_( "divisions" ) = Imath::V2i( 40, 20 ) ) ).staticmethod( "createTorus" )
 		;
 	}
 
