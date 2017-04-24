@@ -487,7 +487,16 @@ MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOute
 	vector<int> &vIds = vertexIds->writable();
 
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
+	IECore::FloatVectorDataPtr sData = new IECore::FloatVectorData;
+	IECore::FloatVectorDataPtr tData = new IECore::FloatVectorData;
 	vector<V3f> &pVector = pData->writable();
+	vector<V3f> &nVector = nData->writable();
+	vector<float> &sVector = sData->writable();
+	vector<float> &tVector = tData->writable();
+
+	float sMultiplier = 1.0f / divisions.x;
+	float tMultiplier = 1.0f / divisions.y;
 
 	for( int i = 0; i < divisions.x; ++i )
 	{
@@ -500,9 +509,11 @@ MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOute
 		for( int j = 0; j < divisions.y; ++j )
 		{
 			const float jAngle = 2 * M_PI * (float)j/(float)(divisions.y-1);
-			pVector.push_back(
-				circleCenter + radiusOuter * ( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) )
-			);
+			Imath::V3f normal( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) );
+			pVector.push_back( circleCenter + radiusOuter * normal );
+			nVector.push_back( normal );
+			sVector.push_back( i * sMultiplier );
+			tVector.push_back( j * tMultiplier );
 
 			const int jj = j == divisions.y - 1 ? 0 : j + 1;
 
@@ -516,6 +527,9 @@ MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOute
 	}
 
 	IECore::MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
 
 	return result;
 }
