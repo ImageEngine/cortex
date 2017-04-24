@@ -479,7 +479,6 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 
 MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOuter, const Imath::V2i &divisions )
 {
-
 	IECore::IntVectorDataPtr verticesPerFace = new IECore::IntVectorData;
 	vector<int> &vpf = verticesPerFace->writable();
 
@@ -498,31 +497,34 @@ MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOute
 	float sMultiplier = 1.0f / divisions.x;
 	float tMultiplier = 1.0f / divisions.y;
 
-	for( int i = 0; i < divisions.x; ++i )
+	int vertexCountX = divisions.x + 1;
+	int vertexCountY = divisions.y + 1;
+
+	for( int i = 0; i < vertexCountX; ++i )
 	{
-		const float iAngle = 2 * M_PI * (float)i/(float)(divisions.x-1);
+		const float iAngle = 2 * M_PI * (float)i/(float)(divisions.x);
 		const V3f v( cos( iAngle ), 0, sin( iAngle ) );
 		const V3f circleCenter = v * radiusInner;
 
-		const int ii = i == divisions.x - 1 ? 0 : i + 1;
+		const int ii = i == divisions.x ? 0 : i + 1;
 
-		for( int j = 0; j < divisions.y; ++j )
+		for( int j = 0; j < vertexCountY; ++j )
 		{
-			const float jAngle = 2 * M_PI * (float)j/(float)(divisions.y-1);
+			const float jAngle = 2 * M_PI * (float)j/(float)(divisions.y);
 			Imath::V3f normal( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) );
 			pVector.push_back( circleCenter + radiusOuter * normal );
 			nVector.push_back( normal );
 			sVector.push_back( i * sMultiplier );
 			tVector.push_back( j * tMultiplier );
 
-			const int jj = j == divisions.y - 1 ? 0 : j + 1;
+			const int jj = j == divisions.y ? 0 : j + 1;
 
 			vpf.push_back( 4 );
 
-			vIds.push_back( i * divisions.y + j );
-			vIds.push_back( i * divisions.y + jj );
-			vIds.push_back( ii * divisions.y + jj );
-			vIds.push_back( ii * divisions.y + j );
+			vIds.push_back( i  * vertexCountY + j  );
+			vIds.push_back( i  * vertexCountY + jj );
+			vIds.push_back( ii * vertexCountY + jj );
+			vIds.push_back( ii * vertexCountY + j  );
 		}
 	}
 
