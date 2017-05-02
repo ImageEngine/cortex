@@ -61,6 +61,8 @@ class CubicBasis
 		template<class S>
 		inline void coefficients( S t, S c[4] ) const;
 
+		inline int numCoefficients() const;
+
 		template<class S>
 		inline S operator() ( S t, S p0, S p1, S p2, S p3 ) const;
 		template<class S>
