@@ -93,6 +93,20 @@ inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S &p0, const 
 }
 
 template<typename T>
+inline int CubicBasis<T>::numCoefficients() const
+{
+	int result = 0;
+	for( int i = 0; i < 4; ++i )
+	{
+		if( matrix[0][i] != 0 || matrix[1][i] != 0 || matrix[2][i] != 0 || matrix[3][i] != 0 )
+		{
+			result = i + 1;
+		}
+	}
+	return result;
+}
+
+template<typename T>
 template<class S>
 inline S CubicBasis<T>::operator() ( typename S::BaseType t, const S p[4] ) const
 {

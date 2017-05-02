@@ -35,6 +35,8 @@
 #ifndef IECORE_SPLINE_INL
 #define IECORE_SPLINE_INL
 
+#include "boost/format.hpp"
+
 #include "IECore/Exception.h"
 
 #include "OpenEXR/ImathLimits.h"
@@ -58,7 +60,8 @@ Spline<X,Y>::Spline( const Basis &b, const PointContainer &p )
 template<typename X, typename Y>
 typename Spline<X,Y>::PointContainer::const_iterator Spline<X,Y>::lastValidSegment() const
 {
-	int validBasis = ( points.size() - ( 4 - basis.step ) ) / basis.step;
+	const int coefficientsNeeded = basis.numCoefficients();
+	int validBasis = ( points.size() - ( coefficientsNeeded - basis.step ) ) / basis.step;
 	int lastBasisOffset = ( validBasis - 1 ) * basis.step;
 
 	typename PointContainer::const_iterator itEnd = points.end();
@@ -71,7 +74,8 @@ typename Spline<X,Y>::PointContainer::const_iterator Spline<X,Y>::lastValidSegme
 template<typename X, typename Y>
 typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 {
-	if( points.size() < 4 )
+	const int coefficientsNeeded = basis.numCoefficients();
+	if( points.size() < coefficientsNeeded )
 	{
 		return XInterval::empty();
 	}
@@ -79,11 +83,11 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 	{
 		typedef typename PointContainer::const_iterator It;
 		X cc[4];
-		X xp[4];
+		X xp[4] = { X(0), X(0), X(0), X(0) };
 
 		// collect first 4 control points
 		It xIt = points.begin();
-		for( unsigned i=0; i<4; i++, xIt++ )
+		for( unsigned i=0; i<coefficientsNeeded; i++, xIt++ )
 		{
 			xp[i] = xIt->first;
 		}
@@ -92,7 +96,7 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 
 		// collect last 4 control points (ignoring malformed basis)
 		xIt = lastValidSegment();
-		for( unsigned i=0; i<4; i++, xIt++ )
+		for( unsigned i=0; i<coefficientsNeeded; i++, xIt++ )
 		{
 			xp[i] = xIt->first;
 		}
@@ -106,12 +110,14 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segment ) const
 {
+	const int coefficientsNeeded = basis.numCoefficients();
+	
 	size_t numPoints = points.size();
-	if( numPoints < 4 )
+	if( numPoints < coefficientsNeeded )
 	{
-		throw( Exception( "Spline has less than 4 points." ) );
+		throw( Exception( boost::str( boost::format( "Spline has less than %i points." ) % coefficientsNeeded ) ) );
 	}
-	if( (numPoints - 4) % basis.step )
+	if( (numPoints - coefficientsNeeded) % basis.step )
 	{
 		throw( Exception( "Spline has excess points (but not enough for an extra segment)." ) );
 	}
@@ -123,7 +129,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	// to quickly find a better start point for the search.
 	X co[4];
 	basis.coefficients( X( 0 ), co );
-	X xp[4];
+	X xp[4] = { X(0), X(0), X(0), X(0) };
 
 	It testSegment = points.begin();
 	do
@@ -136,7 +142,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 
 		bool overrun = false;
 		It xIt( testSegment );
-		for( unsigned i=0; i<4; i++ )
+		for( unsigned i=0; i<coefficientsNeeded; i++ )
 		{
 			if( xIt==points.end() )
 			{
@@ -154,7 +160,7 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	} while( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] < x );
 	// get the x values of the control values for the segment in question
 	It xIt( segment );
-	for( unsigned i=0; i<4; i++ )
+	for( unsigned i=0; i<coefficientsNeeded; i++ )
 	{
 		xp[i] = (*xIt++).first;
 	}
@@ -228,7 +234,8 @@ inline Y Spline<X,Y>::integral( X t0, X t1, typename Spline<X,Y>::PointContainer
 	X xp[4] = { X(0), X(0), X(0), X(0) };
 	Y yp[4] = { Y(0), Y(0), Y(0), Y(0) };
 
-	for( unsigned i=0; i<4; i++ )
+	const int coefficientsNeeded = basis.numCoefficients();
+	for( unsigned i=0; i<coefficientsNeeded; i++ )
 	{
 		if( segment==points.end() )
 		{
@@ -313,7 +320,8 @@ inline Y Spline<X,Y>::integral( X x0, X x1 ) const
 template<typename X, typename Y>
 inline Y Spline<X,Y>::integral() const
 {
-	if ( points.size() < 4 )
+	const int coefficientsNeeded = basis.numCoefficients();
+	if ( points.size() < coefficientsNeeded )
 		return Y(0);
 
 	return integral( X(0), points.begin(), X(1), lastValidSegment() );
