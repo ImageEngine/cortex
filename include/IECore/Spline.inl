@@ -186,7 +186,7 @@ template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, Y segment[4] ) const
 {
 	typename PointContainer::const_iterator s;
-	float t = solve( x, s );
+	X t = solve( x, s );
 	segment[0] = (*s++).second;
 	segment[1] = (*s++).second;
 	segment[2] = (*s++).second;
