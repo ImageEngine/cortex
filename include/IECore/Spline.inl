@@ -171,6 +171,48 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	// working well. now we do a sort of bisection thing instead.
 	X tMin = 0;
 	X tMax = 1;
+
+	// Check if we have a pair of critical points in this section
+	X tCrit0, tCrit1;
+	if( basis.criticalPoints( xp, tCrit0, tCrit1 ) &&
+		tCrit0 > 0.0 && tCrit0 < 1.0 &&
+		tCrit1 > 0.0 && tCrit1 < 1.0 )
+	{
+		// This probably means the curve is non-monotonic in this segment, so we could have
+		// multiple possible results if we just let the iterative root finder loose on [0,1].
+		// Lets try to pick a section to search in that gives a "nice" result, by splitting
+		// which range we search based on where x lies relative to the midpoint of the two
+		// critical points.
+		
+		X xCrit0 = basis( tCrit0, xp );
+		X xCrit1 = basis( tCrit1, xp );
+
+		X xCritMidPoint = basis( X(0.5) * ( tCrit0 + tCrit1 ), xp );
+
+		// TODO - delete this weird hack to make the choice of segment line up more with OSL
+		//X xCritMidPoint = basis( std::max( X(0), std::min( X(1), x - basis( X(0), xp ) / ( basis( X(1),xp ) - basis( X(0), xp ) ) ) ), xp );
+
+
+
+		// If x is less than the midpoint, then check if we can search [tMin, tCrit0]
+		if( x < xCritMidPoint && x < xCrit0 )
+		{
+			tMax = tCrit0;
+		}
+		// If x is greater than the midpoint, then check if we can search [tCrit1, tMax]
+		else if( x > xCritMidPoint && x > xCrit1 ) 
+		{
+			tMin = tCrit1;
+		}
+
+		// If neither of these cases triggered, then the two regions we considered must not
+		// overlap the whole region.  This is possible because the critical points might
+		// not actually change direction when the derivative hits zero, in which case
+		// the function is monotonic after all, and we can search the whole region
+		// without worrying about the iterative solve getting stuck on the wrong solution
+
+	}
+
 	X tMid, xMid;
 	X epsilon = Imath::limits<X>::epsilon(); // might be nice to present this as a parameter
 	do

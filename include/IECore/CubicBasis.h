@@ -111,6 +111,15 @@ class CubicBasis
 		inline S integral( typename S::BaseType t0, typename S::BaseType t1, const S p[4] ) const;
 		//@}
 
+		//! @name Critical points
+		/// Methods for computing the critical points with respect to 't', which for a
+		/// curve are points where it may change direction
+		////////////////////////////////////////////////////////////////////////////////////////
+		//@{
+		template<class S>
+		inline bool criticalPoints( const S p[4], S &p0, S &p1 ) const;
+		//@}
+
 		bool operator==( const CubicBasis &rhs ) const;
 		bool operator!=( const CubicBasis &rhs ) const;
 
