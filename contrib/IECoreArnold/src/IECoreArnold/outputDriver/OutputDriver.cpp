@@ -170,6 +170,16 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	CompoundDataPtr parameters = new CompoundData();
 	ParameterAlgo::getParameters( node, parameters->writable() );
 
+	// IECore::DisplayDriver lacks any official mechanism for passing
+	// the pixel aspect ratio, so for now we just pass it via the
+	// parameters. We should probably move GafferImage::Format to
+	// IECoreImage::Format and then use that in place of the display
+	// window.
+	parameters->writable()["pixelAspect"] = new FloatData(
+		// Arnold is y/x, we're x/y
+		1.0f / AiNodeGetFlt( AiUniverseGetOptions(), "aspect_ratio" )
+	);
+
 	const std::string driverType = AiNodeGetStr( node, "driverType" );
 
 	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
