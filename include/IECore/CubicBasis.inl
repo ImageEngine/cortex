@@ -239,6 +239,25 @@ inline S CubicBasis<T>::integral( typename S::BaseType t0, typename S::BaseType 
 }
 
 template<typename T>
+template<class S>
+inline bool CubicBasis<T>::criticalPoints( const S p[4], S &out0, S &out1 ) const
+{
+	// Quadratic formula applied to derivatives
+	S a = S(3.0) * ( p[0] * matrix[0][0] + p[1] * matrix[0][1] + p[2] * matrix[0][2] + p[3] * matrix[0][3] );
+	S b = S(2.0) * ( p[0] * matrix[1][0] + p[1] * matrix[1][1] + p[2] * matrix[1][2] + p[3] * matrix[1][3] );
+	S c =            p[0] * matrix[2][0] + p[1] * matrix[2][1] + p[2] * matrix[2][2] + p[3] * matrix[2][3];
+
+	S determinant = b * b - S(4.0) * a * c;	
+	if( determinant < 0 ) return false;
+
+	S sqrtDet = sqrt( determinant );	
+	out0 = ( -b - ( a > S(0.0) ? S(1.0) : S(-1.0) ) * sqrtDet ) / ( S(2.0) * a );
+	out1 = ( -b + ( a > S(0.0) ? S(1.0) : S(-1.0) ) * sqrtDet ) / ( S(2.0) * a );
+
+	return true;
+}
+
+template<typename T>
 bool CubicBasis<T>::operator==( const CubicBasis &rhs ) const
 {
 	return step==rhs.step && matrix==rhs.matrix;
