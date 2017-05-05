@@ -35,7 +35,7 @@
 import unittest
 from IECore import *
 
-class MeshAlgoTest( unittest.TestCase ) :
+class MeshAlgoTangentTest( unittest.TestCase ) :
 
 	def makeSingleTriangleMesh( self ):
 
@@ -174,6 +174,153 @@ class MeshAlgoTest( unittest.TestCase ) :
 
 		for v in vTangent.data :
 			self.failUnless( v.equalWithAbsError( V3f( 1, 0, 0 ), 0.000001 ) )
+
+class MeshAlgoPrimitiveVariableTest( unittest.TestCase ) :
+
+	@classmethod
+	def makeMesh( cls ) :
+		testObject = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 10 ) ), V2i( 2 ) )
+
+		testObject["a"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0.5 ) )
+		testObject["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( range( 0, 9 ) ) )
+		testObject["c"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( range( 0, 4 ) ) )
+		testObject["d"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, FloatVectorData( range( 0, 9 ) ) )
+		testObject["e"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, FloatVectorData( range( 0, 16 ) ) )
+
+		return testObject
+
+	@classmethod
+	def setUpClass(cls):
+		cls.mesh = cls.makeMesh()
+
+	def testMeshConstantToVertex( self ) :
+
+		p = self.mesh["a"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p, PrimitiveVariable.Interpolation.Vertex );
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, FloatVectorData( [ 0.5 ] * 9 ) )
+
+	def testMeshConstantToUniform( self ) :
+
+		p = self.mesh["a"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, FloatVectorData( [ 0.5 ] * 4 ) )
+
+	def testMeshConstantToVarying( self ) :
+
+		p = self.mesh["a"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, FloatVectorData( [ 0.5 ] * 9 ) )
+
+	def testMeshConstantToFaceVarying( self ) :
+
+		p = self.mesh["a"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.FaceVarying )
+
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, FloatVectorData( [ 0.5 ] * 16 ) )
+
+
+	def testMeshVertexToConstant( self ) :
+		p = self.mesh["b"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.data, FloatData( sum(range(0,9))/9. ) )
+
+	def testMeshVertexToUniform( self ) :
+		p = self.mesh["b"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, FloatVectorData( [ 2, 3, 5, 6 ] ) )
+
+	def testMeshVertexToVarying( self ) :
+		p = self.mesh["b"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, FloatVectorData( range( 0, 9 ) ) )
+
+	def testMeshVertexToFaceVarying( self ) :
+		p = self.mesh["b"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.FaceVarying )
+		orig = range( 0, 9 )
+		self.assertEqual( p.data, FloatVectorData( [ orig[x] for x in self.mesh.vertexIds ] ) )
+
+	def testMeshUniformToConstant( self ) :
+		p = self.mesh["c"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.data, FloatData( sum(range(0,4))/4. ) )
+
+	def testMeshUniformToVertex( self ) :
+		p = self.mesh["c"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, FloatVectorData( [ 0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3 ] ) )
+
+	def testMeshUniformToVarying( self ) :
+		p = self.mesh["c"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, FloatVectorData( [ 0, 0.5, 1, 1, 1.5, 2, 2, 2.5, 3 ] ) )
+
+	def testMeshUniformToFaceVarying( self ) :
+		p = self.mesh["c"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, FloatVectorData( ( [ 0 ] * 4 ) + ( [ 1 ] * 4 ) + ( [ 2 ] * 4 ) + ( [ 3 ] * 4 ) ) )
+
+	def testMeshVaryingToConstant( self ) :
+		p = self.mesh["d"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.data, FloatData( sum(range(0,9))/9. ) )
+
+	def testMeshVaryingToVertex( self ) :
+		p = self.mesh["d"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, FloatVectorData( range( 0, 9 ) ) )
+
+	def testMeshVaryingToUniform( self ) :
+		p = self.mesh["d"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, FloatVectorData( [ 2, 3, 5, 6 ] ) )
+
+	def testMeshVaryingToFaceVarying( self ) :
+		p = self.mesh["d"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.FaceVarying )
+		orig = range( 0, 9 )
+		self.assertEqual( p.data, FloatVectorData( [ orig[x] for x in self.mesh.vertexIds ] ) )
+
+	def testMeshFaceVaryingToConstant( self ) :
+		p = self.mesh["e"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( p.data, FloatData( sum(range(0,16))/16. ) )
+
+	def testMeshFaceVaryingToVertex( self ) :
+		p = self.mesh["e"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
+
+	def testMeshFaceVaryingToUniform( self ) :
+		p = self.mesh["e"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, FloatVectorData( [ 1.5, 5.5, 9.5, 13.5 ] ) )
+
+	def testMeshFaceVaryingToVarying( self ) :
+		p = self.mesh["e"]
+		MeshAlgo.resamplePrimitiveVariable( self.mesh, p,  PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
+
 
 if __name__ == "__main__":
 	unittest.main()
