@@ -56,6 +56,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPri
 
 void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
+/// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToKeep uniform (int|float|bool) PrimitiveVariable
+MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToKeep );
+
 } // namespace MeshAlgo
 } // namespace IECore
 
