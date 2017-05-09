@@ -36,4 +36,3 @@
 from _IECoreAlembic import *
 
 from AlembicProcedural import AlembicProcedural
-from ABCToMDC import ABCToMDC
