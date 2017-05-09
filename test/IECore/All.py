@@ -255,6 +255,7 @@ from ExternalProceduralTest import ExternalProceduralTest
 from ClippingPlaneTest import ClippingPlaneTest
 from DataAlgoTest import DataAlgoTest
 from MeshAlgoTest import *
+from CurvesAlgoTest import *
 from DisplayDriverServerTest import DisplayDriverServerTest
 
 if IECore.withDeepEXR() :
