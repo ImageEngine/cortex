@@ -303,7 +303,7 @@
 #include "IECorePython/DataAlgoBinding.h"
 #include "IECorePython/MeshAlgoBinding.h"
 #include "IECorePython/CurvesAlgoBinding.h"
-
+#include "IECorePython/PointsAlgoBinding.h"
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -601,6 +601,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataAlgo();
 	bindMeshAlgo();
 	bindCurvesAlgo();
+	bindPointsAlgo();
 
 #ifdef IECORE_WITH_DEEPEXR
 
