@@ -371,73 +371,81 @@ namespace IECore
 namespace CurvesAlgo
 {
 
-PrimitiveVariable resamplePrimitiveVariable( const CurvesPrimitive &curves, const PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation )
 {
-	DataPtr result;
 
+	if ( interpolation == primitiveVariable.interpolation)
+	{
+		return;
+	}
+
+	DataPtr result;
 
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		AverageValueFromVector fn;
 		result = despatchTypedData<AverageValueFromVector, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+		primitiveVariable = PrimitiveVariable(interpolation, result);
+		return;
 	}
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		size_t len = curves.variableSize( interpolation );
+		size_t len = curves->variableSize( interpolation );
 		switch( primitiveVariable.data->typeId() )
 		{
 			case IntDataTypeId:
 			{
 				IntVectorDataPtr newData = new IntVectorData();
 				newData->writable().resize( len, static_cast< const IntData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				primitiveVariable = PrimitiveVariable(interpolation, newData);
 			}
 				break;
 			case FloatDataTypeId:
 			{
 				FloatVectorDataPtr newData = new FloatVectorData();
 				newData->writable().resize( len, static_cast< const FloatData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				primitiveVariable = PrimitiveVariable(interpolation, newData);
 			}
 				break;
 			case V2fDataTypeId:
 			{
 				V2fVectorDataPtr newData = new V2fVectorData();
 				newData->writable().resize( len, static_cast< const V2fData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				primitiveVariable = PrimitiveVariable(interpolation, newData);
 			}
 				break;
 			case V3fDataTypeId:
 			{
 				V3fVectorDataPtr newData = new V3fVectorData();
 				newData->writable().resize( len, static_cast< const V3fData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				primitiveVariable = PrimitiveVariable(interpolation, newData);
 			}
 				break;
 			case Color3fDataTypeId:
 			{
 				Color3fVectorDataPtr newData = new Color3fVectorData();
 				newData->writable().resize( len, static_cast< const Color3fData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				primitiveVariable = PrimitiveVariable(interpolation, newData);
 			}
 				break;
 			default:
-				// return 0 if it was constant and for all the other interpolation, like uniform it may still work on following primitive specific code.
-				break;
+				return;
 		}
+
+		return;
 	}
 
 	if ( interpolation == PrimitiveVariable::Uniform )
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
-			CurvesVertexToUniform fn( &curves );
+			CurvesVertexToUniform fn( curves );
 			result = despatchTypedData<CurvesVertexToUniform, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			CurvesVaryingToUniform fn( &curves );
+			CurvesVaryingToUniform fn( curves );
 			result = despatchTypedData<CurvesVaryingToUniform, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 	}
@@ -445,12 +453,12 @@ PrimitiveVariable resamplePrimitiveVariable( const CurvesPrimitive &curves, cons
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
-			CurvesUniformToVertex fn( curves.verticesPerCurve()->readable() );
+			CurvesUniformToVertex fn( curves->verticesPerCurve()->readable() );
 			result = despatchTypedData<CurvesUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			CurvesVaryingToVertex fn( &curves );
+			CurvesVaryingToVertex fn( curves );
 			result = despatchTypedData<CurvesVaryingToVertex, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 	}
@@ -458,12 +466,12 @@ PrimitiveVariable resamplePrimitiveVariable( const CurvesPrimitive &curves, cons
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
-			CurvesUniformToVarying fn( &curves );
+			CurvesUniformToVarying fn( curves );
 			result = despatchTypedData<CurvesUniformToVarying, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get()), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
-			CurvesVertexToVarying fn( &curves );
+			CurvesVertexToVarying fn( curves );
 			result = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
@@ -471,7 +479,7 @@ PrimitiveVariable resamplePrimitiveVariable( const CurvesPrimitive &curves, cons
 			result = primitiveVariable.data;
 		}
 	}
-	return PrimitiveVariable(interpolation, result);
+	primitiveVariable = PrimitiveVariable(interpolation, result);
 }
 
 } //namespace CurveAlgo

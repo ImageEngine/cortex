@@ -47,7 +47,7 @@ namespace IECore
 namespace CurvesAlgo
 {
 
-PrimitiveVariable resamplePrimitiveVariable( const CurvesPrimitive &curvesPrimitive, const PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+void resamplePrimitiveVariable( const CurvesPrimitive *curvesPrimitive, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 } // namespace CurveAlgo
 } // namespace IECore
