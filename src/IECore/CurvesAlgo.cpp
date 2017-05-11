@@ -37,6 +37,7 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/CurvesPrimitiveEvaluator.h"
 #include "IECore/CurvesAlgo.h"
+#include "IECore/private/PrimitiveAlgoUtils.h"
 
 using namespace IECore;
 using namespace Imath;
@@ -44,13 +45,6 @@ using namespace Imath;
 namespace
 {
 
-// we can't perform the numeric value averaging for Box and Quat data,
-// so we make our own TypeTrait to explicitly mark them as unsupported
-template< typename T > struct IsArithmeticVectorTypedData : boost::mpl::and_<
-	TypeTraits::IsNumericBasedVectorTypedData<T>,
-	boost::mpl::not_< TypeTraits::IsBox<typename TypeTraits::VectorValueType<T>::type > >,
-boost::mpl::not_< TypeTraits::IsQuat<typename TypeTraits::VectorValueType<T>::type > >
-> {};
 
 // PrimitiveEvaluator only supports certain types
 template< typename T > struct IsPrimitiveEvaluatableTypedData : boost::mpl::and_<
@@ -266,7 +260,6 @@ struct  CurvesVertexToVarying
 
 		IECore::ConstCurvesPrimitiveEvaluatorPtr evaluator =  runTimeCast<CurvesPrimitiveEvaluator>(IECore::PrimitiveEvaluator::create( m_curves )) ;
 
-//		ConstCurvesPrimitiveEvaluatorPtr evaluator = SharedPrimitiveEvaluators::getTyped< CurvesPrimitiveEvaluator >( m_curves );
 		if( !evaluator )
 		{
 			return NULL;
@@ -336,7 +329,7 @@ struct  CurvesVaryingToVertex
 		for( size_t i = 0; i < numCurves; ++i )
 		{
 			float step = 1.0f / verticesPerCurve[i];
-			for( size_t j = 0; j < verticesPerCurve[i]; ++j )
+			for( int j = 0; j < verticesPerCurve[i]; ++j )
 			{
 				evaluator->pointAtV( i, j * step, evaluatorResult.get() );
 				trg.push_back( evalPrimVar<typename From::ValueType::value_type>( evaluatorResult.get(), *primVar ) );
@@ -347,21 +340,6 @@ struct  CurvesVaryingToVertex
 	}
 
 	const CurvesPrimitive *m_curves;
-};
-
-struct  AverageValueFromVector
-{
-	typedef DataPtr ReturnType;
-
-	template<typename From> ReturnType operator()( typename From::ConstPtr data )
-	{
-		const typename From::ValueType &src = data->readable();
-		if ( src.size() )
-		{
-			return new TypedData< typename From::ValueType::value_type >( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
-		}
-		return NULL;
-	}
 };
 
 } //anonymous namespace
@@ -383,56 +361,19 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
-		AverageValueFromVector fn;
-		result = despatchTypedData<AverageValueFromVector, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+		Detail::AverageValueFromVector fn;
+		result = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		primitiveVariable = PrimitiveVariable(interpolation, result);
 		return;
 	}
 
 	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		size_t len = curves->variableSize( interpolation );
-		switch( primitiveVariable.data->typeId() )
+		DataPtr arrayData = Detail::createArrayData(primitiveVariable, curves, interpolation);
+		if (arrayData)
 		{
-			case IntDataTypeId:
-			{
-				IntVectorDataPtr newData = new IntVectorData();
-				newData->writable().resize( len, static_cast< const IntData * >( primitiveVariable.data.get() )->readable() );
-				primitiveVariable = PrimitiveVariable(interpolation, newData);
-			}
-				break;
-			case FloatDataTypeId:
-			{
-				FloatVectorDataPtr newData = new FloatVectorData();
-				newData->writable().resize( len, static_cast< const FloatData * >( primitiveVariable.data.get() )->readable() );
-				primitiveVariable = PrimitiveVariable(interpolation, newData);
-			}
-				break;
-			case V2fDataTypeId:
-			{
-				V2fVectorDataPtr newData = new V2fVectorData();
-				newData->writable().resize( len, static_cast< const V2fData * >( primitiveVariable.data.get() )->readable() );
-				primitiveVariable = PrimitiveVariable(interpolation, newData);
-			}
-				break;
-			case V3fDataTypeId:
-			{
-				V3fVectorDataPtr newData = new V3fVectorData();
-				newData->writable().resize( len, static_cast< const V3fData * >( primitiveVariable.data.get() )->readable() );
-				primitiveVariable = PrimitiveVariable(interpolation, newData);
-			}
-				break;
-			case Color3fDataTypeId:
-			{
-				Color3fVectorDataPtr newData = new Color3fVectorData();
-				newData->writable().resize( len, static_cast< const Color3fData * >( primitiveVariable.data.get() )->readable() );
-				primitiveVariable = PrimitiveVariable(interpolation, newData);
-			}
-				break;
-			default:
-				return;
+			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
 		}
-
 		return;
 	}
 
@@ -441,12 +382,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
 			CurvesVertexToUniform fn( curves );
-			result = despatchTypedData<CurvesVertexToUniform, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			result = despatchTypedData<CurvesVertexToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			CurvesVaryingToUniform fn( curves );
-			result = despatchTypedData<CurvesVaryingToUniform, IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			result = despatchTypedData<CurvesVaryingToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
 		}
 	}
 	else if ( interpolation == PrimitiveVariable::Vertex )
