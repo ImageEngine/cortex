@@ -1,15 +1,240 @@
 #include <assert.h>
 #include <algorithm>
 
+#include "boost/mpl/and.hpp"
 #include "OpenEXR/ImathVec.h"
 
 #include "IECore/MeshAlgo.h"
+#include "IECore/FaceVaryingPromotionOp.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
 using namespace IECore;
 using namespace Imath;
 
 namespace
 {
+
+template< typename T > struct IsArithmeticVectorTypedData : boost::mpl::and_<
+	IECore::TypeTraits::IsNumericBasedVectorTypedData<T>,
+	boost::mpl::not_< IECore::TypeTraits::IsBox<typename TypeTraits::VectorValueType<T>::type > >,
+	boost::mpl::not_< IECore::TypeTraits::IsQuat<typename TypeTraits::VectorValueType<T>::type > >
+> {};
+
+
+struct  AverageValueFromVector
+{
+	typedef DataPtr ReturnType;
+
+	template<typename From> ReturnType operator()( typename From::ConstPtr data )
+	{
+		const typename From::ValueType &src = data->readable();
+		if ( src.size() )
+		{
+			return new TypedData< typename From::ValueType::value_type >( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
+		}
+		return NULL;
+	}
+};
+
+
+struct MeshVertexToUniform
+{
+	typedef DataPtr ReturnType;
+
+	MeshVertexToUniform( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	{
+	}
+
+	template<typename From> ReturnType operator()( const From* data )
+	{
+		typename From::Ptr result = static_cast< From* >( Object::create( data->typeId() ).get() );
+		typename From::ValueType &trg = result->writable();
+		const typename From::ValueType &src = data->readable();
+
+		// TODO sipmlify this code by using polygon face & vertex iterators
+		trg.reserve( m_mesh->numFaces() );
+
+		std::vector<int>::const_iterator vId = m_mesh->vertexIds()->readable().begin();
+		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
+		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it )
+		{
+			// initialize with the first value to avoid
+			// ambiguitity during default construction
+			typename From::ValueType::value_type total = src[ *vId ];
+			++vId;
+
+			for( int j = 1; j < *it; ++j, ++vId )
+			{
+				total += src[ *vId ];
+			}
+
+			trg.push_back( total / *it );
+		}
+
+		return result;
+	}
+
+	const MeshPrimitive *m_mesh;
+};
+
+struct MeshUniformToVertex
+{
+	typedef DataPtr ReturnType;
+
+	MeshUniformToVertex( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	{
+	}
+
+	template<typename From> ReturnType operator()( const From* data )
+	{
+		typename From::Ptr result = static_cast< From* >( Object::create( data->typeId() ).get() );
+		typename From::ValueType &trg = result->writable();
+		const typename From::ValueType &src = data->readable();
+
+		size_t numVerts = m_mesh->variableSize( PrimitiveVariable::Vertex );
+		std::vector<int> count( numVerts, 0 );
+		trg.resize( numVerts );
+
+		typename From::ValueType::const_iterator srcIt = src.begin();
+		std::vector<int>::const_iterator vId = m_mesh->vertexIds()->readable().begin();
+		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
+		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it, ++srcIt )
+		{
+			for( int j = 0; j < *it; ++j, ++vId )
+			{
+				trg[ *vId ] += *srcIt;
+				++count[ *vId ];
+			}
+		}
+
+		std::vector<int>::const_iterator cIt = count.begin();
+		typename From::ValueType::iterator trgIt = trg.begin(), trgEnd = trg.end();
+		for( trgIt = trg.begin(); trgIt != trgEnd ; ++trgIt, ++cIt )
+		{
+			*trgIt /= *cIt;
+		}
+
+		return result;
+	}
+
+	const MeshPrimitive *m_mesh;
+};
+
+struct MeshFaceVaryingToVertex
+{
+	typedef DataPtr ReturnType;
+
+	MeshFaceVaryingToVertex( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	{
+	}
+
+	template<typename From> ReturnType operator()( const From* data )
+	{
+		typename From::Ptr result = static_cast< From* >( Object::create( data->typeId() ).get() );
+		typename From::ValueType &trg = result->writable();
+		const typename From::ValueType &src = data->readable();
+
+		size_t numVerts = m_mesh->variableSize( PrimitiveVariable::Vertex );
+		std::vector<int> count( numVerts, 0 );
+		trg.resize( numVerts );
+
+		const std::vector<int>& vertexIds = m_mesh->vertexIds()->readable();
+		std::vector<int>::const_iterator vertexIdIt = vertexIds.begin();
+		typename From::ValueType::const_iterator srcIt = src.begin(), srcEnd = src.end();
+
+		for( ; srcIt != srcEnd ; ++srcIt, ++vertexIdIt )
+		{
+			trg[ *vertexIdIt ] += *srcIt;
+			++count[ *vertexIdIt ];
+		}
+
+		std::vector<int>::const_iterator cIt = count.begin();
+		typename From::ValueType::iterator trgIt = trg.begin(), trgEnd = trg.end();
+		for( trgIt = trg.begin(); trgIt != trgEnd ; ++trgIt, ++cIt )
+		{
+			*trgIt /= *cIt;
+		}
+
+		return result;
+	}
+
+	const MeshPrimitive *m_mesh;
+};
+
+struct MeshFaceVaryingToUniform
+{
+	typedef DataPtr ReturnType;
+
+	MeshFaceVaryingToUniform( const MeshPrimitive *mesh )	:	m_mesh( mesh )
+	{
+	}
+
+	template<typename From> ReturnType operator()( const From* data )
+	{
+		typename From::Ptr result = static_cast< From* >( Object::create( data->typeId() ).get() );
+		typename From::ValueType &trg = result->writable();
+		const typename From::ValueType &src = data->readable();
+
+		trg.reserve( m_mesh->numFaces() );
+
+		typename From::ValueType::const_iterator srcIt = src.begin();
+
+		const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
+		for( std::vector<int>::const_iterator it = verticesPerFace.begin(); it < verticesPerFace.end(); ++it )
+		{
+			// initialize with the first value to avoid
+			// ambiguity during default construction
+			typename From::ValueType::value_type total = *srcIt;
+			++srcIt;
+
+			for( int j = 1; j < *it; ++j, ++srcIt )
+			{
+				total += *srcIt;
+			}
+
+			trg.push_back( total / *it );
+		}
+
+		return result;
+	}
+
+	const MeshPrimitive *m_mesh;
+};
+
+struct MeshAnythingToFaceVarying
+{
+	typedef DataPtr ReturnType;
+
+	MeshAnythingToFaceVarying( const MeshPrimitive *mesh, PrimitiveVariable::Interpolation srcInterpolation )
+		: m_mesh( mesh ), m_srcInterpolation( srcInterpolation )
+	{
+	}
+
+	template<typename From> ReturnType operator()( const From* data )
+	{
+
+		// TODO replace the call to the IECore::FaceVaryingPromotionOpPtr and include the logic in this file.
+
+		// we need to duplicate because the Op expects a primvar to manipulate..
+		IECore::MeshPrimitivePtr tmpMesh = m_mesh->copy();
+		// cast OK due to read-only access.
+		tmpMesh->variables["tmpPrimVar"] = IECore::PrimitiveVariable( m_srcInterpolation, const_cast< From * >(data) );
+		IECore::FaceVaryingPromotionOpPtr promoteOp = new IECore::FaceVaryingPromotionOp();
+		promoteOp->inputParameter()->setValue( tmpMesh );
+		IECore::StringVectorDataPtr names = new StringVectorData();
+		names->writable().push_back( "tmpPrimVar" );
+		promoteOp->primVarNamesParameter()->setValue( names );
+		ReturnType result = runTimeCast< MeshPrimitive >( promoteOp->operate() )->variables["tmpPrimVar"].data;
+
+
+		return result;
+	}
+
+	const MeshPrimitive *m_mesh;
+	PrimitiveVariable::Interpolation m_srcInterpolation;
+};
 
 class TexturePrimVarNames
 {
@@ -223,6 +448,114 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents(
 	PrimitiveVariable bitangentPrimVar( PrimitiveVariable::FaceVarying, fvVD );
 
 	return std::make_pair( tangentPrimVar, bitangentPrimVar );
+}
+
+void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+{
+	Data *srcData = primitiveVariable.data.get();
+	DataPtr dstData;
+
+	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
+
+	if ( srcInterpolation == interpolation )
+	{
+		return;
+	}
+
+	// average array to single value
+	if ( interpolation == PrimitiveVariable::Constant )
+	{
+		AverageValueFromVector fn;
+		dstData = despatchTypedData<AverageValueFromVector, IsArithmeticVectorTypedData>( srcData, fn );
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+	}
+
+	// splat single value into array
+	if ( srcInterpolation == PrimitiveVariable::Constant )
+	{
+		size_t len = mesh->variableSize( interpolation );
+		switch( srcData->typeId() )
+		{
+			case IntDataTypeId:
+			{
+				IntVectorDataPtr newData = new IntVectorData();
+				newData->writable().resize( len, static_cast< const IntData * >(srcData)->readable() );
+				primitiveVariable = PrimitiveVariable( interpolation, newData );
+			}
+			break;
+			case FloatDataTypeId:
+			{
+				FloatVectorDataPtr newData = new FloatVectorData();
+				newData->writable().resize( len, static_cast< const FloatData * >(srcData)->readable() );
+				primitiveVariable = PrimitiveVariable( interpolation, newData );
+
+			}
+			break;
+			case V2fDataTypeId:
+			{
+				V2fVectorDataPtr newData = new V2fVectorData();
+				newData->writable().resize( len, static_cast< const V2fData * >(srcData)->readable() );
+				primitiveVariable = PrimitiveVariable( interpolation, newData );
+			}
+			break;
+			case V3fDataTypeId:
+			{
+				V3fVectorDataPtr newData = new V3fVectorData();
+				newData->writable().resize( len, static_cast< const V3fData * >(srcData)->readable() );
+				primitiveVariable = PrimitiveVariable( interpolation, newData );
+			}
+			break;
+			case Color3fDataTypeId:
+			{
+				Color3fVectorDataPtr newData = new Color3fVectorData();
+				newData->writable().resize( len, static_cast< const Color3fData * >(srcData)->readable() );
+				primitiveVariable = PrimitiveVariable( interpolation, newData );
+			}
+			break;
+			default:
+				return ;
+		}
+
+		return;
+	}
+
+	if( interpolation == PrimitiveVariable::Uniform )
+	{
+		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			MeshVertexToUniform fn( mesh );
+			dstData = despatchTypedData<MeshVertexToUniform, IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToUniform fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, IsArithmeticVectorTypedData>( srcData, fn );
+		}
+	}
+	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
+	{
+		if( srcInterpolation == PrimitiveVariable::Uniform )
+		{
+			MeshUniformToVertex fn( mesh );
+			dstData = despatchTypedData<MeshUniformToVertex, IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToVertex fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			dstData = srcData;
+		}
+	}
+	else if( interpolation == PrimitiveVariable::FaceVarying )
+	{
+		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, IsArithmeticVectorTypedData>( srcData, fn );
+	}
+
+	primitiveVariable = PrimitiveVariable( interpolation, dstData );
 }
 
 } //namespace MeshAlgo

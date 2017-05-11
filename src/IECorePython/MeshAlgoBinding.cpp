@@ -88,6 +88,7 @@ void bindMeshAlgo()
 	StdPairToTupleConverter<IECore::PrimitiveVariable, IECore::PrimitiveVariable>();
 
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "uvSet" ) = "st", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
+	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 }
 
 } // namespace IECorePython

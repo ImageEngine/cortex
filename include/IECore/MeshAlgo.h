@@ -54,6 +54,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPri
 	const std::string &position = "P"
 );
 
+void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+
 } // namespace MeshAlgo
 } // namespace IECore
 
