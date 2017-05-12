@@ -124,46 +124,42 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 
 	typedef typename PointContainer::const_iterator It;
 
-	// find the first segment where seg( 0 ) > x. the segment before that is the one we're interested in.
+	// find the first segment where seg( 1 ) > x. this segment should contain x.
+	// If we hit the end of the points while searching, return the end point of the last valid segment
 	// this is just a linear search right now - it should be possible to optimise this using points.lower_bound
 	// to quickly find a better start point for the search.
 	X co[4];
-	basis.coefficients( X( 0 ), co );
+	basis.coefficients( X( 1 ), co );
 	X xp[4] = { X(0), X(0), X(0), X(0) };
 
-	It testSegment = points.begin();
-	do
+	segment = points.begin();
+	for( int pointNum = 0;; pointNum += basis.step )
 	{
-		segment = testSegment;
-		for( unsigned i=0; i<basis.step; i++ )
-		{
-			testSegment++;
-		}
-
-		bool overrun = false;
-		It xIt( testSegment );
+		It xIt( segment );
 		for( unsigned i=0; i<coefficientsNeeded; i++ )
 		{
-			if( xIt==points.end() )
-			{
-				overrun = true;
-				break;
-			}
 			xp[i] = xIt->first;
 			xIt++;
 		}
-		if( overrun )
+
+		if( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] > x )
 		{
 			break;
 		}
 
-	} while( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] < x );
-	// get the x values of the control values for the segment in question
-	It xIt( segment );
-	for( unsigned i=0; i<coefficientsNeeded; i++ )
-	{
-		xp[i] = (*xIt++).first;
+		if( pointNum + basis.step + coefficientsNeeded - 1 >= points.size() )
+		{
+			// We're on the last valid segment, but we haven't reached  x
+			// Just return the end of the last valid segment
+			return X( 1 );
+		}
+
+		for( unsigned i=0; i<basis.step; i++ )
+		{
+			segment++;
+		}
 	}
+
 	// find the appropriate parametric position within that segment. we tried
 	// doing this directly with ImathRoots.h but precision problems prevented this
 	// working well. now we do a sort of bisection thing instead.
