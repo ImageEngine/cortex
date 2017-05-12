@@ -237,6 +237,11 @@ if PYTHON_LINK_FLAGS=="" :
 # get the installation locations right
 INSTALL_PREFIX = getOption( "INSTALL_PREFIX", os.path.expanduser( "~" ) )
 installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "$IECORE_MAJORMINORPATCH_VERSION", platform )
+
+# add the dev suffix to local builds
+if getOption( "RELEASE", "0" )!="1" :
+	installPrefix = os.path.join( "$INSTALL_PREFIX", "apps", "cortex", "${IECORE_MAJORMINORPATCH_VERSION}dev", platform )
+
 basePrefix = os.path.join( installPrefix, "base" )
 if targetApp :
 	appPrefix = os.path.join( installPrefix, targetApp, targetAppMajorVersion )
