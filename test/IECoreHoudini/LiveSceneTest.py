@@ -271,15 +271,24 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		self.assertFalse( box1.hasTag( "yellow",IECore.SceneInterface.EveryTag ) )
 		
 		def addSopTags( node, tag, primRange ) :
-			
-			group = node.createOutputNode( "group" )
-			group.parm( "crname" ).set( tag )
-			group.parm( "groupop" ).set( 1 ) # by range
-			group.parm( "rangestart" ).set( primRange[0] )
-			group.parm( "rangeend" ).deleteAllKeyframes()
-			group.parm( "rangeend" ).set( primRange[1] )
-			group.parm( "select2" ).set( 1 )
-			group.setRenderFlag( True )
+
+			if hou.applicationVersion()[0] > 15:
+				group = node.createOutputNode( "grouprange" )
+				group.parm("groupname1").set(tag)
+				group.parm("start1").set(primRange[0])
+				group.parm("end1").set(primRange[1])
+				group.parm("selecttotal1").set(1)
+				group.parm("method1").set(0)
+				group.setRenderFlag(True)
+			else:
+				group = node.createOutputNode("group")
+				group.parm( "crname" ).set( tag )
+				group.parm( "groupop" ).set( 1 ) # by range
+				group.parm( "rangestart" ).set( primRange[0] )
+				group.parm( "rangeend" ).deleteAllKeyframes()
+				group.parm( "rangeend" ).set( primRange[1] )
+				group.parm( "select2" ).set( 1 )
+				group.setRenderFlag( True )
 		
 		# we can add tags to SOPs using groups, but they do not trickle up automatically
 		boxObj = hou.node( "/obj/box1" )

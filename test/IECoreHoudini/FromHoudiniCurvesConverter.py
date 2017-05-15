@@ -355,7 +355,10 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testAnimatingGeometry( self ) :
 		curves = self.createCurves( 4 )
 		mountain = curves.createOutputNode( "mountain" )
-		mountain.parm("offset1").setExpression( "$FF" )
+		if hou.applicationVersion()[0] >= 16:
+			mountain.parm("offsetx").setExpression( "$FF" )
+		else:
+			mountain.parm( "offset1" ).setExpression( "$FF" )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( mountain )
 		hou.setFrame( 1 )
 		result1 = converter.convert()

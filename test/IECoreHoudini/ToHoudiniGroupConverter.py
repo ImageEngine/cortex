@@ -41,6 +41,11 @@ import random
 
 class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	
+	if hou.applicationVersion()[0] >= 16:
+		PointPositionAttribs = ['P']
+	else:
+		PointPositionAttribs = ['P', 'Pw']
+	
 	__testOTL = "test/IECoreHoudini/data/otls/testHDAs.otl"
 	__testOTLBackups = os.path.join( os.path.dirname( __testOTL ), "backup" )
 	__testOTLCopy = os.path.join( __testOTLBackups, os.path.basename( __testOTL ) )
@@ -462,21 +467,21 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		
 		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'ieMeshInterpolation', 'intPrim', 'name', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'intVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'v3fPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]),  TestToHoudiniGroupConverter.PointPositionAttribs + ['color3fPoint', 'v3fPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'ieMeshInterpolation', 'name', 'v3fPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'v3fVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'v3fDetail'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'ieMeshInterpolation', 'name', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['color3fVert', 'floatVert', 'stringVert', 'v2fVert', 'v2iVert', 'v3fVert', 'v3iVert'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -496,7 +501,7 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
 		converter.parameters()["attributeFilter"].setTypedValue( "*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -504,21 +509,21 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		# have to filter the source attrs s, t and not uv
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw'] )
+		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^width ^Cs" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['N', 'P', 'Pw', 'rest'] )
+		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['t'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -544,7 +549,7 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		converter = IECoreHoudini.ToHoudiniGroupConverter( group )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['N', 'P', 'Pw', 'pscale', 'rest'] )
+		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
@@ -570,7 +575,7 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['N', 'P', 'Pref', 'Pw', 'width'] )
+		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'Pref', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 's', 't'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )

@@ -109,7 +109,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( converter.type().name(), "ieCortexConverter" )
 		self.assertEqual( len(converter.outputConnectors()[0]), 1 )
 		outputNode = converter.outputConnectors()[0][0].outputNode()
-		self.assertEqual( outputNode.type().name(), "mountain" )
+		self.assertEqual( outputNode.type().name(), "mountain::2.0" if hou.applicationVersion()[0] >= 16 else "mountain" )
 		self.assertEqual( outputNode, mountain )
 	
 	# test that a C++ op can be assigned using the function set
@@ -342,12 +342,12 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
 		op.cook()
 		result = cl.resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		op2 = op.createInputNode(0, "ieOpHolder")
 		fn2 = IECoreHoudini.FnOpHolder( op2 )
@@ -356,7 +356,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op2.parm("parm_filename").set( self.__torusTestFile )
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result2.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result2["P"].data, result["P"].data )
 		
@@ -405,12 +405,12 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		torus.parm( "cols" ).set( 10 )
 		op.cook()
 		result = cl.resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		torus.parm("type").set(1)
 		op.cook()
 		result = cl.resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		op2 = op.createInputNode(0, "ieOpHolder")
 		fn = IECoreHoudini.FnOpHolder( op2 )
@@ -419,7 +419,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		op2.parm("parm_filename").set( self.__torusTestFile )
 		op.cook()
 		result2 = fn.getParameterised().resultParameter().getValue()
-		self.assertEqual( op.errors(), "" )
+		self.assertEqual( len( op.errors() ), 0 )
 		self.assertEqual( result2.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result2["P"].data, result["P"].data )
 		
@@ -433,7 +433,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn2.setParameterised( cl )
 		cob.parm("parm_filename").set( self.__torusTestFile )
 		self.assertRaises( hou.OperationFailed, op.cook )
-		self.assertNotEqual( op.errors(), "" )
+		self.assertNotEqual( len( op.errors() ), 0 )
 		cob = op.createInputNode(0, "torus" )
 		op.cook() # should pass because torus will be converted to points
 		self.assertEqual( fn.getParameterised()['input'].getValue().typeId(), IECore.TypeId.PointsPrimitive )
@@ -461,7 +461,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( fn.getParameterised().resultParameter().getValue().typeId(), IECore.TypeId.PointsPrimitive )
 		op.setInput( 0, op2 )
 		self.assertRaises( hou.OperationFailed, op.cook )
-		self.assertNotEqual( op.errors(), "" )
+		self.assertNotEqual( len( op.errors() ), 0 )
 					
 	def testGroupParameterConversion( self ) :
 		( holder, fn ) = self.testOpHolder()
@@ -554,14 +554,14 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(op2)
 		fn.setParameterised(cl)
 		self.assertRaises( hou.OperationFailed, op2.cook )
-		self.assertNotEqual( op2.errors(), "" )
+		self.assertNotEqual( len( op2.errors() ), 0 )
 	
 	def testInvalidOp(self):
 		(op,fn)=self.testOpHolder()
 		cl = IECore.ClassLoader.defaultOpLoader().load("noiseDeformer", 1)()
 		fn.setParameterised( cl )
 		self.assertRaises( hou.OperationFailed, op.cook )
-		self.assertNotEqual( op.errors(), "" )
+		self.assertNotEqual( len( op.errors() ), 0 )
 		
 	def testMatchString(self):
 		(op,fn)=self.testOpHolder()
@@ -671,13 +671,16 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		parm.set( 1 )
 		holder.cook()
 		self.assertEqual( op["switch"].getTypedValue(), 30 )
-		parm.set( 2 )
-		self.assertRaises( hou.OperationFailed, holder.cook )
-		parm.set( -1 )
-		self.assertRaises( hou.OperationFailed, holder.cook )
-		parm.set( 0 )
-		holder.cook()
-		self.failUnless( not holder.errors() )
+		# Houdini 16 does not allow ordered menu parms to be set to non-menu items
+		# if the parm is set to an index, and the index doesn't exist, then the parm is set to the closest item menu
+		if hou.applicationVersion()[0] < 16:
+			parm.set( 2 )
+			self.assertRaises( hou.OperationFailed, holder.cook )
+			parm.set( -1 )
+			self.assertRaises( hou.OperationFailed, holder.cook )
+			parm.set( 0 )
+			holder.cook()
+			self.failUnless( not holder.errors() )
 		
 		newHolder = holder.parent().createNode( "ieOpHolder" )
 		newFn = IECoreHoudini.FnOpHolder( newHolder )
@@ -693,11 +696,11 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		fn.setOp( "noiseDeformer" )
 		
 		self.assertRaises( hou.OperationFailed, holder.cook )
-		self.failUnless( "Must have primvar 'N' in primitive!" in holder.errors() )
+		self.failUnless( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
 		
 		torus = holder.createInputNode( 0, "torus" )
 		self.assertRaises( hou.OperationFailed, holder.cook )
-		self.failUnless( "Must have primvar 'N' in primitive!" in holder.errors() )
+		self.failUnless( "Must have primvar 'N' in primitive!" in "".join( holder.errors() ) )
 		
 		holder2 = holder.createInputNode( 0, "ieOpHolder" )
 		fn2 = IECoreHoudini.FnOpHolder( holder2 )
@@ -705,22 +708,22 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		holder2.setInput( 0, torus )
 		
 		holder.cook()
-		self.assertEqual( holder.errors(), "" )
-		self.assertEqual( holder2.errors(), "" )
+		self.assertEqual( len( holder.errors() ), 0 )
+		self.assertEqual( len( holder2.errors() ), 0 )
 		
 		fn2.setOp( "objectDebug", 2 )
-		self.assertEqual( holder2.errors(), "" )
-		self.assertEqual( holder2.warnings(), "" )
+		self.assertEqual( len( holder2.errors() ), 0 )
+		self.assertEqual( len( holder2.warnings() ), 0 )
 		
 		holder2.parm( "parm_messageLevel" ).set( int(IECore.MessageHandler.Level.Warning) )
 		holder2.cook()
-		self.assertEqual( holder2.errors(), "" )
-		self.assertNotEqual( holder2.warnings(), "" )
+		self.assertEqual( len( holder2.errors() ), 0 )
+		self.assertNotEqual( len(holder2.warnings()), 0 )
 		
 		holder2.parm( "parm_messageLevel" ).set( int(IECore.MessageHandler.Level.Error) )
 		self.assertRaises( hou.OperationFailed, holder2.cook )
-		self.assertNotEqual( holder2.errors(), "" )
-		self.assertEqual( holder2.warnings(), "" )
+		self.assertNotEqual( len( holder2.errors() ), 0 )
+		self.assertEqual( len( holder2.warnings() ), 0 )
 	
 	def testAnimatedValues( self ) :
 		
@@ -777,8 +780,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		def verify( passThrough = [] ) :
 			
 			geo = holder.geometry()
-			self.assertEqual( holder.errors(), "" )
-			self.assertEqual( holder.warnings(), "" )
+			self.assertEqual( len( holder.errors() ), 0 )
+			self.assertEqual( len( holder.warnings() ), 0 )
 			self.assertEqual( len(geo.prims()), 3 )
 			names = [ "boxA", "boxB", "boxC" ]
 			for i in range( 0, len(geo.prims()) ) :
@@ -808,8 +811,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# still operates multiple times for normal houdini geo
 		holder.inputConnections()[0].inputNode().bypass( True )
 		geo = holder.geometry()
-		self.assertEqual( holder.errors(), "" )
-		self.assertEqual( holder.warnings(), "" )
+		self.assertEqual( len( holder.errors() ), 0 )
+		self.assertEqual( len( holder.warnings() ), 0 )
 		self.assertEqual( len(geo.prims()), 8 )
 		names = [ "boxA", "boxB", "boxC" ]
 		for i in range( 0, 6 ) :
@@ -837,8 +840,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# no nameFilter with normal geo compresses to one mesh
 		holder.parm( "parm_input_useNameFilter" ).set( False )
 		geo = holder.geometry()
-		self.assertEqual( holder.errors(), "" )
-		self.assertEqual( holder.warnings(), "" )
+		self.assertEqual( len( holder.errors() ), 0 )
+		self.assertEqual( len( holder.warnings() ), 0 )
 		self.assertEqual( len(geo.prims()), 1 )
 		prim = geo.prims()[0]
 		self.assertEqual( prim.type(), hou.primType.Custom )
@@ -851,8 +854,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# no nameFilter with CortexObjects may have unexpected results (because the input parameter wants a single mesh)
 		holder.inputConnections()[0].inputNode().bypass( False )
 		holder.cook()
-		self.assertEqual( holder.errors(), "" )
-		self.assertNotEqual( holder.warnings(), "" )
+		self.assertEqual( len( holder.errors() ), 0 )
+		self.assertNotEqual( len(holder.warnings()), 0 )
 	
 	def testNameFilterOnSecondaryInputs( self ) :
 		
@@ -865,8 +868,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		def verify( numMergedFaces, passThrough = [] ) :
 			
 			geo = holder.geometry()
-			self.assertEqual( holder.errors(), "" )
-			self.assertEqual( holder.warnings(), "" )
+			self.assertEqual( len( holder.errors() ), 0 )
+			self.assertEqual( len( holder.warnings() ), 0 )
 			self.assertEqual( len(geo.prims()), 3 )
 			names = [ "boxA", "boxB", "boxC" ]
 			for i in range( 0, len(geo.prims()) ) :
@@ -896,8 +899,8 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		# multiple meshes in the second parameter may have unexpected results (because it wants a single mesh)
 		holder.setInput( 1, holder.inputConnections()[0].inputNode() )
 		holder.cook()
-		self.assertEqual( holder.errors(), "" )
-		self.assertNotEqual( holder.warnings(), "" )
+		self.assertEqual( len( holder.errors() ), 0 )
+		self.assertNotEqual( len(holder.warnings()), 0 )
 		
 		# a single mesh will merge
 		holder.parm( "parm_mesh_nameFilter" ).set( "boxB" )
