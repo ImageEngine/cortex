@@ -384,6 +384,13 @@ void GEO_CortexPrimitive::setTypeDef( GA_PrimitiveDefinition *def )
 
 GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
 {
+	// m_definition is set by calling setTypeDef above & this is performed by the houdiniPlugin.
+	// setting the id to -1 defines the GA_PrimitiveTypeId as invalid
+	if( !m_definition )
+	{
+		return GA_PrimitiveTypeId( -1 );
+	}
+
 	return m_definition->getId();
 }
 
