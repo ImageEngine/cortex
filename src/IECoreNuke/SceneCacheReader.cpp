@@ -861,9 +861,6 @@ void SceneCacheReader::updateTagFilterKnob()
 /// This recursive method traverses the sceneInterface to build a list of item names and a mapping of the tags to the indices in the items.
 static void buildSceneView( std::vector< std::string > &list, TagMap &tagMap, const IECore::ConstSceneInterfacePtr sceneInterface, int rootPrefixLen )
 {
-
-	assert ( firstReader() == this );
-
 	if( sceneInterface )
 	{
 		if( sceneInterface->hasObject()  )
