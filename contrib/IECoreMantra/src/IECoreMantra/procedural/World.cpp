@@ -73,7 +73,11 @@ public:
 	virtual int	  initialize(const UT_BoundingBox *);
 	virtual void	 getBoundingBox(UT_BoundingBox &box);
 	virtual void	 render();
+#if UT_MAJOR_VERSION_INT >= 16
+	UT_StringHolder m_worldFileName;
+#else
 	UT_String m_worldFileName;
+#endif
 	int m_remove;
 };
 

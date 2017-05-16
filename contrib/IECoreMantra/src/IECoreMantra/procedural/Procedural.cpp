@@ -112,9 +112,16 @@ public:
 	virtual int	  initialize(const UT_BoundingBox *);
 	virtual void	 getBoundingBox(UT_BoundingBox &box);
 	virtual void	 render();
-	UT_String m_className; 
+#if UT_MAJOR_VERSION_INT >= 16
+	UT_StringHolder m_className;
+	int64 m_classVersion;
+	UT_StringHolder m_parameterString;
+#else 
+	UT_String m_className;
 	int m_classVersion;
 	UT_String m_parameterString;
+#endif
+
 };
 
 static VRAY_ProceduralArg theArgs[] = {
@@ -174,20 +181,28 @@ VRAY_ieProcedural::initialize(const UT_BoundingBox *box)
 	import("className", m_className);
 	import("classVersion", &m_classVersion, 1);
 	import("parameterString", m_parameterString);
+	
+#if UT_MAJOR_VERSION_INT >= 16
+	size_t size;
+	const UT_StringHolder * classNameValue = getSParm("className", size);
+	const int64 *classVersion = getIParm("classVersion", size);
+	const UT_StringHolder * parameterString = getSParm("parameterString", size);
+#else
 	const char **classNameValue = getSParm("className");
+	const int *classVersion = getIParm("classVersion");
+	const char **parameterString = getSParm("parameterString");
+#endif
 	if (classNameValue) 
     {
-		m_className = classNameValue[0];
+		m_className = UT_StringHolder(*classNameValue);
 	}
-	const int *classVersion = getIParm("classVersion");
 	if (classVersion) 
     {
 		m_classVersion = *classVersion;
 	}
-	const char **parameterString = getSParm("parameterString");
 	if (parameterString) 
     {
-		m_parameterString = parameterString[0];
+		m_parameterString = UT_StringHolder(*parameterString);
 	}
 	return 1;	
 }
@@ -215,7 +230,8 @@ VRAY_ieProcedural::render()
 		object procedural = classLoader.attr( "load" )( m_className.buffer(), m_classVersion )();
 		boost::python::list params;
 		UT_WorkArgs argv;
-		if (m_parameterString.tokenize(argv, ","))
+		UT_String parameterString = m_parameterString.c_str();
+		if (parameterString.tokenize(argv, ","))
 		{
             // The Cortex Mantra Inject otl parses the parameters of a 
             // SOP_ProceduralHolder and replaces empty values with a '!' 
