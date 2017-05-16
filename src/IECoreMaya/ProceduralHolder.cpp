@@ -74,6 +74,9 @@
 #include "maya/MFnStringData.h"
 #include "maya/MPlugArray.h"
 #include "maya/MObjectArray.h"
+#include "maya/MFnDependencyNode.h"
+#include "maya/MDGMessage.h"
+#include "maya/MGlobal.h"
 
 using namespace Imath;
 using namespace IECore;
@@ -124,10 +127,29 @@ ProceduralHolder::~ProceduralHolder()
 {
 }
 
+#ifdef IECORERI_WITH_PRMAN
+static int callbackID=0;
+void AddedCallback(MObject & node, void* clientData)
+{
+	// call python ieRMS.ieNodePreShape(nodename) to export the procedural holder correctly in Renderman for Maya
+	MString ieRMS;
+	ieRMS = "import IECoreMaya.ieRMS;IECoreMaya.ieRMS.ieNodeSetup('";
+	ieRMS += MFnDependencyNode( node ).name() + "')";
+	MGlobal::executePythonCommand( ieRMS );
+}
+#endif
 void ProceduralHolder::postConstructor()
 {
 	ParameterisedHolderComponentShape::postConstructor();
 	setRenderable( true );
+
+#ifdef IECORERI_WITH_PRMAN
+	// we use the static callbackID so we add only ONE callback to be called for all ieProceduralHolder nodes
+	if (!callbackID)
+	{
+		callbackID = MDGMessage::addNodeAddedCallback(&AddedCallback, "ieProceduralHolder");
+	}
+#endif
 }
 
 void *ProceduralHolder::creator()
