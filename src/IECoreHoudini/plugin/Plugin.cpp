@@ -204,8 +204,11 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 		std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
 		return;
 	}
-	
+
+// merge constructors removed in H16
+#if UT_MAJOR_VERSION_INT < 16
 	primDef->setMergeConstructor( CortexPrimitive::create );
+#endif
 	primDef->setHasLocalTransform( true );
 	
 	/// \todo: This method is silly. Should we just give up and do the whole registration in CortexPrimitive?

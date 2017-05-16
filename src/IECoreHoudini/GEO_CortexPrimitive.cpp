@@ -36,7 +36,9 @@
 #include "GA/GA_ElementWrangler.h"
 #include "GA/GA_IndexMap.h"
 #include "GA/GA_MergeMap.h"
+#include "GA/GA_Primitive.h"
 #include "GA/GA_PrimitiveJSON.h"
+#include "GA/GA_RangeMemberQuery.h"
 #include "GA/GA_SaveMap.h"
 #include "GEO/GEO_Detail.h"
 #include "GU/GU_RayIntersect.h"
@@ -72,12 +74,26 @@
 using namespace IECore;
 using namespace IECoreHoudini;
 
+GEO_CortexPrimitive::GEO_CortexPrimitive( GA_Detail *detail, GA_Offset offset )
+	: GEO_Primitive( detail, offset )
+{
+#if UT_MAJOR_VERSION_INT < 16
+	m_offset = allocateVertex();
+#endif
+
+}
+
+// \todo remove this in cortex 10
 GEO_CortexPrimitive::GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset )
 	: GEO_Primitive( detail, offset )
 {
+#if UT_MAJOR_VERSION_INT < 16
 	m_offset = allocateVertex();
+#endif
 }
 
+// in H16 and later vertex lists are managed by GA_Primitive, and merge constructor is no longer allowed, so these functions aren't necessary
+#if UT_MAJOR_VERSION_INT < 16
 GEO_CortexPrimitive::GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src )
 	: GEO_Primitive( static_cast<GEO_Detail *>( &detail ), offset )
 {
@@ -87,15 +103,19 @@ GEO_CortexPrimitive::GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &det
 	
 	m_object = orig->m_object->copy();
 }
+#endif
 
 GEO_CortexPrimitive::~GEO_CortexPrimitive()
 {
+#if UT_MAJOR_VERSION_INT < 16
 	if ( GAisValid( m_offset ) )
 	{
 		destroyVertex( m_offset );
 	}
+#endif
 }
 
+#if UT_MAJOR_VERSION_INT < 16
 void GEO_CortexPrimitive::swapVertexOffsets( const GA_Defragment &defrag )
 {
 	if ( defrag.hasOffsetChanged( m_offset ) )
@@ -113,6 +133,7 @@ GA_Offset GEO_CortexPrimitive::getVertexOffset( GA_Size index ) const
 {
 	return ( index == 0 ) ? m_offset : GA_INVALID_OFFSET;
 }
+#endif
 
 GA_Primitive::GA_DereferenceStatus GEO_CortexPrimitive::dereferencePoint( GA_Offset point, bool dry_run )
 {
@@ -139,41 +160,47 @@ GA_Primitive::GA_DereferenceStatus GEO_CortexPrimitive::dereferencePoints( const
 void GEO_CortexPrimitive::stashed( bool beingstashed, GA_Offset offset )
 {
 	GEO_Primitive::stashed( beingstashed, offset );
-	
-	if ( beingstashed )
+	// remove reference to the m_object when being stashed
+	m_object = 0;
+
+#if UT_MAJOR_VERSION_INT < 16
+	if( beingstashed )
 	{
-		m_object = 0;
 		m_offset = GA_INVALID_OFFSET;
 	}
 	else
 	{
-		m_object = 0;
 		m_offset = allocateVertex();
 	}	
+#endif
 }
 
 #endif
 
+// \todo remove in Cortex 10
 void GEO_CortexPrimitive::stashed( int onoff, GA_Offset offset )
 {
 	GEO_Primitive::stashed( onoff, offset );
 	
+	m_object = 0;
+#if UT_MAJOR_VERSION_INT < 16
 	if ( onoff )
 	{
-		m_object = 0;
 		m_offset = GA_INVALID_OFFSET;
 	}
 	else
 	{
-		m_object = 0;
 		m_offset = allocateVertex();
 	}
+#endif
 }
 
 void GEO_CortexPrimitive::clearForDeletion()
 {
 	m_object = 0;
+#if UT_MAJOR_VERSION_INT < 16
 	m_offset = GA_INVALID_OFFSET;
+#endif
 	GEO_Primitive::clearForDeletion();
 }
 
@@ -186,14 +213,18 @@ void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA
 {
 	const GEO_CortexPrimitive *orig = static_cast<const GEO_CortexPrimitive *>( src );
 	
+	m_object = orig->m_object->copy();
+	
+#if UT_MAJOR_VERSION_INT >= 16
+	GEO_Primitive::copyUnwiredForMerge(src, map);
+#else
 	if ( GAisValid( m_offset ) )
 	{
 		destroyVertex(  m_offset );
 	}
 	
 	m_offset = ( map.isIdentityMap( GA_ATTRIB_VERTEX ) ) ? orig->m_offset : map.mapDestFromSource( GA_ATTRIB_VERTEX, orig->m_offset );
-	
-	m_object = orig->m_object->copy();
+#endif
 }
 
 void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
@@ -270,7 +301,11 @@ UT_Vector3 GEO_CortexPrimitive::computeNormal() const
 
 int GEO_CortexPrimitive::detachPoints( GA_PointGroup &grp )
 {
+#if UT_MAJOR_VERSION_INT >= 16
+	if ( grp.containsOffset( getPointOffset( 0 ) ) )
+#else
 	if ( grp.containsOffset( getDetail().vertexPoint( 0 ) ) )
+#endif
 	{
 		return -2;
 	}
@@ -278,8 +313,10 @@ int GEO_CortexPrimitive::detachPoints( GA_PointGroup &grp )
 	return 0;
 }
 
+// \todo: remove this in Cortex 10, not used since H12
 void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src, GEO_Point **ptredirect )
 {
+#if UT_MAJOR_VERSION_INT < 16
 	if ( src == this )
 	{
 		return;
@@ -309,14 +346,19 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src, GEO_Point **p
 #endif
 
 	vertexWrangler.copyAttributeValues( v, orig->m_offset );
+
+#endif
 }
 
+// \todo: remove this in Cortex 10, not used since H12
 #if (UT_VERSION_INT >= 0x0c050132) // 12.5.306 or later
 void GEO_CortexPrimitive::copyOffsetPrimitive( const GEO_Primitive *src, GA_Index basept )
 #else
 void GEO_CortexPrimitive::copyOffsetPrimitive( const GEO_Primitive *src, int basept )
 #endif
 {
+#if UT_MAJOR_VERSION_INT < 16
+
 	if ( src == this )
 	{
 		return;
@@ -336,6 +378,8 @@ void GEO_CortexPrimitive::copyOffsetPrimitive( const GEO_Primitive *src, int bas
 	GA_Offset point = points.offsetFromIndex( srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) ) + basept );
 	wireVertex( v, point );
 	vertexWrangler.copyAttributeValues( v, orig->m_offset );
+
+#endif
 }
 
 bool GEO_CortexPrimitive::evaluatePointRefMap( GA_Offset result_vtx, GA_AttributeRefMap &map, fpreal u, fpreal v, uint du, uint dv ) const
@@ -387,7 +431,52 @@ GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
 	return m_definition->getId();
 }
 
-#if UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >= 16
+
+void GEO_CortexPrimitive::create(
+	    GA_Primitive **newPrims,
+	    GA_Size numPrimitives,
+	    GA_Detail &detail,
+	    GA_Offset startOffset,
+	    const GA_PrimitiveDefinition &def )
+{
+
+	// allocate all the points and vertices at the same time
+	GA_Offset pointBlock = detail.appendPointBlock( numPrimitives );
+
+	if ( numPrimitives >= 4*GA_PAGE_SIZE )
+	{
+		// Allocate them in parallel if we're allocating many.
+		// This is using the C++11 lambda syntax to make a functor.
+		UTparallelForLightItems(UT_BlockedRange<GA_Offset>( startOffset, startOffset + numPrimitives ),
+				[ newPrims, &detail, startOffset, &pointBlock ]( const UT_BlockedRange<GA_Offset> &r ){
+			GA_Offset primOffset( r.begin() );
+			GA_Primitive **pprims = newPrims + ( primOffset - startOffset );
+			GA_Offset endOffset( r.end() );
+			for ( ; primOffset != endOffset; ++primOffset, ++pprims, ++pointBlock )
+			{
+				GEO_CortexPrimitive * newPrim = new GEO_CortexPrimitive( &detail , primOffset );
+				GA_Offset vertex = newPrim->allocateVertex( pointBlock );
+				newPrim->myVertexList.setTrivial( vertex, 1 );
+				*pprims = newPrim;
+			}
+		});
+	}
+	else
+	{
+		// Allocate them serially if we're only allocating a few.
+		GA_Offset endOffset( startOffset + numPrimitives );
+		for ( GA_Offset primOffset( startOffset ); primOffset != endOffset; ++primOffset, ++newPrims, ++pointBlock )
+		{
+			GEO_CortexPrimitive * newPrim = new GEO_CortexPrimitive( &detail , primOffset );
+			GA_Offset vertex = newPrim->allocateVertex( pointBlock );
+			newPrim->myVertexList.setTrivial( vertex, 1 );
+			*newPrims = newPrim;
+		}
+	}
+}
+
+#elif UT_MAJOR_VERSION_INT >= 14
 
 GA_Primitive *GEO_CortexPrimitive::create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition )
 {
@@ -398,15 +487,19 @@ GA_Primitive *GEO_CortexPrimitive::create( const GA_MergeMap &map, GA_Detail &de
 {
 	return new GEO_CortexPrimitive( map, detail, offset, src );
 }
-
 #endif
 
 GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::Object *object )
 {
 	GEO_CortexPrimitive *result = (GEO_CortexPrimitive *)geo->appendPrimitive( m_definition->getId() );
 	
+#if UT_MAJOR_VERSION_INT >= 16
+	GA_Offset point = result->getPointOffset(0 );
+#else
 	GA_Offset point = geo->appendPointOffset();
 	result->wireVertex( result->m_offset, point );
+#endif
+
 	result->setObject( object );
 	
 	if ( const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object ) )
@@ -430,8 +523,12 @@ GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::O
 
 int64 GEO_CortexPrimitive::getMemoryUsage() const
 {
+#if UT_MAJOR_VERSION_INT >= 16
+	size_t total = GEO_Primitive::getMemoryUsage();
+#else
 	size_t total = sizeof( this );
-	
+#endif
+
 	if ( m_object )
 	{
 		total += m_object->memoryUsage();
@@ -455,10 +552,15 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src )
 	}
 	
 	const GEO_CortexPrimitive *orig = (const GEO_CortexPrimitive *)src;
-	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
-	
+
 	/// \todo: should we make a shallow or a deep copy?
 	m_object = orig->m_object;
+	
+#if UT_MAJOR_VERSION_INT >= 16
+	GEO_Primitive::copyPrimitive(src);
+#else
+	// this will also copy the attribute versions, but according to the header, it shouldn't
+	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
 	
 	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
 	
@@ -467,6 +569,21 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src )
 	
 	wireVertex( v, p );
 	vertexWrangler.copyAttributeValues( v, orig->m_offset );
+#endif
+}
+
+GEO_Primitive * GEO_CortexPrimitive::copy(int preserve_shared_pts) const
+{
+	GEO_CortexPrimitive *clone = static_cast<GEO_CortexPrimitive *>( GEO_Primitive::copy( preserve_shared_pts ) );
+	if( !clone )
+	{
+		return nullptr;
+	}
+
+	/// \todo: should we make a shallow or a deep copy?
+	clone->m_object = m_object;
+	
+	return clone;
 }
 
 GEO_Primitive *GEO_CortexPrimitive::convert( ConvertParms &parms, GA_PointGroup *usedpts )
@@ -528,6 +645,41 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 void GEO_CortexPrimitive::normal( NormalComp &output ) const
 {
 }
+
+#ifdef GA_PRIMITIVE_VERTEXLIST
+
+bool GEO_CortexPrimitive::saveVertexArray( UT_JSONWriter &w, const GA_SaveMap &map ) const
+{
+	return myVertexList.jsonVertexArray( w, map );
+}
+
+bool GEO_CortexPrimitive::loadVertexArray( UT_JSONParser &p, const GA_LoadMap &map )
+{
+	GA_Offset startVtxOff = map.getVertexOffset();
+
+	int64 vtxOffs[1];
+	int nVertex = p.parseUniformArray( vtxOffs, 1 );
+	if ( startVtxOff != GA_Offset( 0 ) )
+	{
+		for ( int i = 0; i < nVertex; i++ )
+		{
+			if ( vtxOffs[i] >= 0 )
+				vtxOffs[i] += GA_Size( startVtxOff );
+		}
+	}
+	for ( int i = nVertex; i < 1; ++i )
+	{
+		vtxOffs[i] = GA_INVALID_OFFSET;
+	}
+	myVertexList.set( vtxOffs, 1, GA_Offset( 0 ) );
+	if ( nVertex < 1 )
+	{
+		return false;
+	}
+	return true;
+}
+
+#endif
 
 /// \todo: build ray cache and intersect properly
 int GEO_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, float tmax, float tol, float *distance, UT_Vector3 *pos, UT_Vector3 *nml, int accurate, float *u, float *v, int ignoretrim ) const
@@ -672,8 +824,16 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 			{
 				case geo_TBJ_VERTEX :
 				{
+#ifdef GA_PRIMITIVE_VERTEXLIST
+
+					return object(pr)->saveVertexArray(w, map);
+					
+#else
+
 					GA_Offset offset = object( pr )->getVertexOffset( 0 );
 					return w.jsonInt( int64( map.getVertexIndex( offset ) ) );
+					
+#endif
 				}
 				case geo_TBJ_CORTEX :
 				{
@@ -729,6 +889,9 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 			{
 				case geo_TBJ_VERTEX :
 				{
+#ifdef GA_PRIMITIVE_VERTEXLIST
+					 return object(pr)->loadVertexArray(p, map);
+#else
 					int64 vId;
 					if ( !p.parseInt( vId ) )
 					{
@@ -744,6 +907,8 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					}
 					
 					return true;
+					
+#endif
 				}
 				case geo_TBJ_CORTEX :
 				{

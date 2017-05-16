@@ -38,10 +38,12 @@
 #include "GA/GA_Defines.h"
 #include "GEO/GEO_Primitive.h"
 #include "GU/GU_Detail.h"
+#include "GEO/GEO_Point.h"
 #include "OP/OP_Context.h"
 #include "OP/OP_NodeInfoParms.h"
 #include "UT/UT_Version.h"
-
+#include "UT/UT_ParallelUtil.h"
+#include "GA/GA_Primitive.h"
 #if UT_MAJOR_VERSION_INT >= 14
 
 typedef GEO_ConvertParms ConvertParms;
@@ -65,13 +67,18 @@ class GEO_CortexPrimitive : public GEO_Primitive
 {
 	public :
 		
+		GEO_CortexPrimitive( GA_Detail *detail, GA_Offset offset = GA_INVALID_OFFSET );
 		GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset = GA_INVALID_OFFSET );
+#if UT_MAJOR_VERSION_INT < 16
 		GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
+#endif
 		virtual ~GEO_CortexPrimitive();
 		
+#if UT_MAJOR_VERSION_INT < 16
 		virtual void swapVertexOffsets( const GA_Defragment &defrag );
 		virtual GA_Size getVertexCount() const;
 		virtual GA_Offset getVertexOffset( GA_Size index ) const;
+#endif
 		virtual GA_DereferenceStatus dereferencePoint( GA_Offset point, bool dry_run = false );
 		virtual GA_DereferenceStatus dereferencePoints( const GA_RangeMemberQuery &pt_q, bool dry_run = false );
 
@@ -90,15 +97,26 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual const GA_PrimitiveJSON* getJSON() const;
 		virtual void reverse();
 		
+		virtual GEO_Primitive * copy( int preserve_shared_pts ) const;
 		virtual void copyPrimitive( const GEO_Primitive *src, GEO_Point **ptredirect );
 		virtual int getBBox( UT_BoundingBox *bbox ) const;
 		virtual void enlargePointBounds( UT_BoundingBox &box ) const;
 		virtual UT_Vector3 computeNormal() const;
 		virtual int detachPoints( GA_PointGroup &grp );
+#if UT_MAJOR_VERSION_INT >= 16
+ 
+		bool saveVertexArray( UT_JSONWriter &w,	const GA_SaveMap &map ) const;
+		bool loadVertexArray( UT_JSONParser &p, const GA_LoadMap &map );
+
+#endif
 
 		static const char *typeName;
 
-#if UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >=16
+
+		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
+
+#elif UT_MAJOR_VERSION_INT >= 14
 		
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );		
 		// merge constructor
@@ -149,9 +167,11 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual bool evaluatePointRefMap( GA_Offset result_vtx, GA_AttributeRefMap &map, fpreal u, fpreal v=0, uint du=0, uint dv=0 ) const;
 		
 		IECore::ObjectPtr m_object;
+#if UT_MAJOR_VERSION_INT < 16
 		// offset for the representative vertex
 		GA_Offset m_offset;
-	
+#endif
+
 	private :
 		
 		class geo_CortexPrimitiveJSON;

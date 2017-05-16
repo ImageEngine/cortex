@@ -76,8 +76,18 @@ class GR_CortexPrimitive : public GR_Primitive
 	protected :
 
 		virtual void update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p );
-		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials );
-		virtual void renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials, int render_instance );
+
+#if UT_MAJOR_VERSION_INT >= 16
+
+		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms parms);
+		
+#else
+
+		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials );
+		
+#endif
+
+		virtual void renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials, int render_instance );
 		virtual int renderPick( RE_Render *r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map );
 	
 	private :
