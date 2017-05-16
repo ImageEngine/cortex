@@ -204,49 +204,49 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 		case FloatDataTypeId:
 			{
 				ConstFloatDataPtr f = runTimeCast<const FloatData>( value );
-				ifd = boost::str( format( "%g") % f->readable() );
+				ifd = boost::str( boost::format( "%g") % f->readable() );
 				type = "float";
 			}
 			break;
 		case BoolDataTypeId:
 			{
 				ConstBoolDataPtr b = runTimeCast<const BoolData>( value );
-				ifd = boost::str( format( "%i") % b->readable() );
+				ifd = boost::str( boost::format( "%i") % b->readable() );
 				type = "bool";
 			}
 			break;
 		case IntDataTypeId:
 			{
 				ConstIntDataPtr i = runTimeCast<const IntData>( value );
-				ifd =  boost::str( format( "%i") % i->readable() );
+				ifd =  boost::str( boost::format( "%i") % i->readable() );
 				type = "int";
 			}
 			break;
 		case V2fDataTypeId:
 			{
 				ConstV2fDataPtr v = runTimeCast<const V2fData>( value );
-				ifd = boost::str( format( "%g %g") % v->readable().x % v->readable().y );
+				ifd = boost::str( boost::format( "%g %g") % v->readable().x % v->readable().y );
 				type = "vector2";
 			}
 			break;
 		case V3fDataTypeId:
 			{
 				ConstV3fDataPtr v = runTimeCast<const V3fData>( value );
-				ifd = boost::str( format( "%g %g %g") % v->readable().x % v->readable().y % v->readable().z );
+				ifd = boost::str( boost::format( "%g %g %g") % v->readable().x % v->readable().y % v->readable().z );
 				type = "vector3";
 			}
 			break;
 		case Color3fDataTypeId:
 			{
 				ConstColor3fDataPtr v = runTimeCast<const Color3fData>( value );
-				ifd = boost::str( format( "%g %g %g") % v->readable().x % v->readable().y % v->readable().z );
+				ifd = boost::str( boost::format( "%g %g %g") % v->readable().x % v->readable().y % v->readable().z );
 				type = "color3";
 			}
 			break;
 		case M33fDataTypeId:
 			{
 				ConstM33fDataPtr m = runTimeCast<const M33fData>( value );
-				ifd = boost::str( format( "%g %g %g %g %g %g %g %g %g") %  
+				ifd = boost::str( boost::format( "%g %g %g %g %g %g %g %g %g") %
 									m->readable()[0][0] % m->readable()[0][1] % m->readable()[0][2] %
 									m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] %  
 									m->readable()[2][0] % m->readable()[2][1] % m->readable()[2][2] );
@@ -256,7 +256,7 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 		case M44fDataTypeId:
 			{
 				ConstM44fDataPtr m = runTimeCast<const M44fData>( value );
-				ifd = boost::str( format( "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g")  % 
+				ifd = boost::str( boost::format( "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g")  %
 								m->readable()[0][0] % m->readable()[0][1] % m->readable()[0][2] % m->readable()[0][3] % 
 								m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] % m->readable()[1][3] % 
 								m->readable()[2][0] % m->readable()[2][1] % m->readable()[2][2] % m->readable()[2][3] % 
@@ -267,7 +267,7 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 		case StringDataTypeId:
 			{
 				ConstStringDataPtr s = runTimeCast<const StringData>( value );
-				ifd = boost::str( format( "\"%s\"") % s->readable() );
+				ifd = boost::str( boost::format( "\"%s\"") % s->readable() );
 				type = "string";
 			}
 			break;
@@ -316,7 +316,7 @@ IECore::ConstDataPtr IECoreMantra::RendererImplementation::getOption( const std:
 		GetOptionHandlerMap::const_iterator it = m_getOptionHandlers.find( name );
 		if ( it!=m_getOptionHandlers.end() )
 		{
-			msg (Msg::Debug, "IECoreMantra::RendererImplementation::getOption", format("found: %s") % name);
+			msg (Msg::Debug, "IECoreMantra::RendererImplementation::getOption", boost::format("found: %s") % name);
 			return (this->*(it->second))( name );
 		}
 	}
@@ -487,7 +487,7 @@ void IECoreMantra::RendererImplementation::worldBegin()
 	if ( m_mode == Render )
 	{
 		// if rendering put it somewhere temporary
-		m_worldFileName = boost::str( format( "%s/ieworld_%d.cob" ) % P_tmpdir % getpid() );
+		m_worldFileName = boost::str( boost::format( "%s/ieworld_%d.cob" ) % P_tmpdir % getpid() );
 		// mark it for removal
 		fprintf( m_fpipe, "ray_declare global string ieworldremove %i\n", 1 );
 	}
@@ -693,7 +693,7 @@ IECore::ConstDataPtr IECoreMantra::RendererImplementation::getAttribute( const s
 	GetAttributeHandlerMap::const_iterator it = m_getAttributeHandlers.find( name );
 	if ( it!=m_getAttributeHandlers.end() )
 	{
-		msg (Msg::Debug, "IECoreMantra::RendererImplementation::getAttribute", format("found: %s") % name);
+		msg (Msg::Debug, "IECoreMantra::RendererImplementation::getAttribute", boost::format("found: %s") % name);
 		return (this->*(it->second))( name );
 	}
 	return m_attributeStack.top().attributes->member<Data>( name );
@@ -725,7 +725,7 @@ void IECoreMantra::RendererImplementation::shader( const std::string &type, cons
 		}
 		else
 		{
-			shader = new StringData( boost::str( format("%s %s") % name % parmstring ) );
+			shader = new StringData( boost::str( boost::format("%s %s") % name % parmstring ) );
 		}
 
 		if( type == "surface" )
@@ -745,7 +745,7 @@ void IECoreMantra::RendererImplementation::shader( const std::string &type, cons
 	}
 	else
 	{
-		msg (Msg::Warning, "IECoreMantra::RendererImplementation::shader", format("type not supported: %s") % type);
+		msg (Msg::Warning, "IECoreMantra::RendererImplementation::shader", boost::format("type not supported: %s") % type);
 	}
 }
 

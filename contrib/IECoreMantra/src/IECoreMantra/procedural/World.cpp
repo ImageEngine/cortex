@@ -105,7 +105,7 @@ VRAY_ieWorld::~VRAY_ieWorld()
 		{
 			if ( remove( m_worldFileName.buffer() ) != 0 )
 			{
-				msg( Msg::Warning, "VRAY_ieWorld", format("Failed to remove ieworld cache file: %s") % m_worldFileName.buffer() );
+				msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to remove ieworld cache file: %s") % m_worldFileName.buffer() );
 			}
 		}
 	}
@@ -142,7 +142,7 @@ VRAY_ieWorld::initialize(const UT_BoundingBox *box)
 	import( "ieworldremove", &m_remove, 1);
 	if( access( m_worldFileName.buffer(), R_OK|F_OK ) == -1 )
 	{
-		msg( Msg::Warning, "VRAY_ieWorld", format("Failed to find ieworld cache file: %s") % m_worldFileName.buffer() );
+		msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to find ieworld cache file: %s") % m_worldFileName.buffer() );
 		return 0;
 	}
 	return 1;	
@@ -169,11 +169,11 @@ VRAY_ieWorld::render()
 	}
 	catch ( IECore::Exception e )
 	{
-		msg( Msg::Warning, "VRAY_ieWorld", format("Failed to load ieworld cache file: %s") % m_worldFileName.buffer() );
+		msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to load ieworld cache file: %s") % m_worldFileName.buffer() );
 	}
 	if ( !renderable )
 	{
-		msg( Msg::Warning, "VRAY_ieWorld", format("Failed to read ieworld cache file: %s") % m_worldFileName.buffer() );
+		msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to read ieworld cache file: %s") % m_worldFileName.buffer() );
 	}
 	IECoreMantra::RendererPtr renderer = new IECoreMantra::Renderer( this );
 	renderable->render( renderer.get() );

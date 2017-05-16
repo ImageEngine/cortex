@@ -459,7 +459,7 @@ IECore::RunTimeTypedPtr ParameterisedHolder<BaseType>::loadParameterised( const 
 {
 	IECorePython::ScopedGILLock gilLock;
 
-	std::string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n" ) % searchPathEnvVar % className % classVersion );
+	std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).load( \"%s\", %d )()\n" ) % searchPathEnvVar % className % classVersion );
 
 	try
 	{
@@ -888,7 +888,7 @@ void ParameterisedHolder<BaseType>::classNames( const std::string searchPathEnvV
 	std::vector<std::string> classNames;
 	try
 	{
-		std::string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"\%s\")" ) % searchPathEnvVar % matchString );
+		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"\%s\")" ) % searchPathEnvVar % matchString );
 		object result = CoreHoudini::evalPython( pythonCmd );
 		boost::python::list extractedNames = extract<boost::python::list>( result )();
 		
@@ -910,7 +910,7 @@ void ParameterisedHolder<BaseType>::classVersions( const std::string className, 
 	IECorePython::ScopedGILLock lock;
 	try
 	{
-		std::string pythonCmd = boost::str( format( "IECore.ClassLoader.defaultLoader( \"%s\" ).versions( \"%s\" )" ) % searchPathEnvVar % className );
+		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).versions( \"%s\" )" ) % searchPathEnvVar % className );
 		object result = CoreHoudini::evalPython( pythonCmd );
 		boost::python::list extractedVersions = extract<boost::python::list>( result )();
 		
