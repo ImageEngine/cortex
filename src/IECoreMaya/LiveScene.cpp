@@ -79,6 +79,8 @@
 #include "boost/tokenizer.hpp"
 #include "boost/format.hpp"
 
+#include "tbb/recursive_mutex.h"
+
 using namespace IECore;
 using namespace IECoreMaya;
 
@@ -128,10 +130,11 @@ void readExportableSets( std::set<SceneInterface::Name> &exportableSets, const M
 
 // this stuff requires a mutex, as all them maya DG functions aint thread safe!
 LiveScene::Mutex LiveScene::s_mutex;
+tbb::recursive_mutex g_mutex;
 
 LiveScene::LiveScene() : m_isRoot( true )
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	// initialize to the root path:
 	MItDag it;
@@ -140,7 +143,7 @@ LiveScene::LiveScene() : m_isRoot( true )
 
 LiveScene::LiveScene( const MDagPath& p, bool isRoot ) : m_isRoot( isRoot )
 {
-	// this constructor is expected to be called when s_mutex is locked!
+	// this constructor is expected to be called when g_mutex is locked!
 	m_dagPath = p;
 }
 
@@ -160,7 +163,7 @@ LiveScenePtr LiveScene::duplicate( const MDagPath& p, bool isRoot ) const
 
 SceneInterface::Name LiveScene::name() const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -187,7 +190,7 @@ SceneInterface::Name LiveScene::name() const
 
 void LiveScene::path( Path &p ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -212,7 +215,7 @@ void LiveScene::path( Path &p ) const
 
 Imath::Box3d LiveScene::readBound( double time ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( fabs( MAnimControl::currentTime().as( MTime::kSeconds ) - time ) > 1.e-4 )
 	{
@@ -259,7 +262,7 @@ void LiveScene::writeBound( const Imath::Box3d &bound, double time )
 
 ConstDataPtr LiveScene::readTransform( double time ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -319,7 +322,7 @@ bool LiveScene::hasAttribute( const Name &name ) const
 		{
 			// call it->m_names under a mutex, as it could be reading plug values,
 			// which isn't thread safe:
-			tbb::mutex::scoped_lock l( s_mutex );
+			tbb::recursive_mutex::scoped_lock l( g_mutex );
 			it->m_names( m_dagPath, names );
 		}
 		
@@ -338,7 +341,7 @@ void LiveScene::attributeNames( NameList &attrs ) const
 		throw Exception( "IECoreMaya::LiveScene::attributeNames: Dag path no longer exists!" );
 	}
 
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	attrs.clear();
 	attrs.push_back( SceneInterface::visibilityName );
 
@@ -374,7 +377,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 		throw Exception( "IECoreMaya::LiveScene::readAttribute: Dag path no longer exists!" );
 	}
 	
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	if ( !m_isRoot )
 	{
 
@@ -776,7 +779,7 @@ ConstObjectPtr readMergedObject( const MDagPath &p )
 
 bool LiveScene::hasObject() const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_isRoot )
 	{
@@ -834,7 +837,7 @@ bool LiveScene::hasObject() const
 
 ConstObjectPtr LiveScene::readObject( double time ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -946,7 +949,7 @@ void LiveScene::getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) co
 
 void LiveScene::childNames( NameList &childNames ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -969,7 +972,7 @@ void LiveScene::childNames( NameList &childNames ) const
 
 bool LiveScene::hasChild( const Name &name ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -996,7 +999,7 @@ bool LiveScene::hasChild( const Name &name ) const
 
 IECore::SceneInterfacePtr LiveScene::retrieveChild( const Name &name, MissingBehaviour missingBehaviour ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( m_dagPath.length() == 0 && !m_isRoot )
 	{
@@ -1038,7 +1041,7 @@ SceneInterfacePtr LiveScene::createChild( const Name &name )
 
 SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour missingBehaviour ) const
 {
-	tbb::mutex::scoped_lock l( s_mutex );
+	tbb::recursive_mutex::scoped_lock l( g_mutex );
 	
 	if( path.size() == 0 )
 	{
