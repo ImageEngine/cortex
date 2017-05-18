@@ -146,6 +146,11 @@ void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompound
 			IM44fGeomParam p( params, header.getName() );
 			convertGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IBoolGeomParam::matches( header ) )
+		{
+			IBoolGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
+		}
 		else
 		{
 			msg( Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParams", boost::format( "Param \"%s\" has unsupported type" ) % header.getName() );
