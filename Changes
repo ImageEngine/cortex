@@ -1,3 +1,23 @@
+9.19.0
+======
+
+Features
+--------
+
+- MeshAlgo : Added function to resample primitive variables (#565)
+
+Improvements
+------------
+
+- Arnold output driver : Added pixel aspect ratio to driver parameters (#564)
+
+Fixes
+-----
+
+- Maya : Fixed deadlock issues with LiveScene (#562).
+- Houdini : Fixed crash when the library was loaded without the plugin (#570).
+- Nuke : Fixed debug builds (#567).
+
 9.18.0
 ======
 
