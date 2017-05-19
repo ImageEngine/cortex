@@ -52,6 +52,7 @@ void bindCurvesAlgo()
 	scope meshAlgoScope( curveAlgoModule );
 
 	def( "resamplePrimitiveVariable", &CurvesAlgo::resamplePrimitiveVariable );
+	def( "deleteCurves", &CurvesAlgo::deleteCurves );
 }
 
 } // namespace IECorePython

@@ -862,5 +862,109 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 	# endregion
 
+class CurvesAlgoDeleteCurvesTest ( unittest.TestCase ):
+
+	def createLinearCurves(self):
+
+		testObject = IECore.CurvesPrimitive(
+
+			IECore.IntVectorData( [ 2, 2 ] ),
+			IECore.CubicBasisf.linear(),
+			False,
+			IECore.V3fVectorData(
+				[
+					IECore.V3f( 0, 0, 0 ),
+					IECore.V3f( 0, 1, 0 ),
+					IECore.V3f( 0, 0, 0 ),
+					IECore.V3f( 1, 0, 0 )
+				]
+			)
+		)
+
+		testObject["a"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
+		testObject["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 4 ) ) )
+		testObject["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 2 ) ) )
+		testObject["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 4 ) ) )
+		testObject["e"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 4 ) ) )
+
+		self.assertTrue( testObject.arePrimitiveVariablesValid() )
+
+		return testObject
+
+	def testAllZeroArrayDoesNotDeleteCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [0, 0] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 2)
+
+	def testBoolFalseArrayDoesNotDeleteCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.BoolVectorData( [False, False] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 2)
+
+	def testFloatZeroArrayDoesNotDeleteCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [0.0, 0.0] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 2)
+
+	def testBasisAndPeriodicityIsCopied(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [0, 0] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.periodic(), False)
+		self.assertEqual(actualCurves.basis(), IECore.CubicBasisf.linear())
+
+	def testOneArrayDeletesAllCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [1, 1] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 0)
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+
+	def testCanUseBoolArrayToDeleteAllCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.BoolVectorData( [True, True] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 0)
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+
+	def testCanUseFloatArrayToDeleteAllCurves(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [0.1, 1.0] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 0)
+		self.assertEqual(actualCurves["P"].data, IECore.V3fVectorData([]) )
+
+	def testPrimvarsAreDeleted(self):
+		deletePrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [1, 0] ) ) )
+		curves = self.createLinearCurves()
+		actualCurves = IECore.CurvesAlgo.deleteCurves(curves, deletePrimVar)
+
+		self.assertEqual(actualCurves.numCurves(), 1)
+		self.assertEqual( actualCurves["P"].data, IECore.V3fVectorData( [IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 )] ) )
+		self.assertEqual( actualCurves["a"].data, IECore.FloatData( 0.5 ) )
+		self.assertEqual( actualCurves["a"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant)
+
+		self.assertEqual( actualCurves["b"].data, IECore.FloatVectorData([2, 3])  )
+		self.assertEqual( actualCurves["b"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex)
+
+		self.assertEqual( actualCurves["c"].data, IECore.FloatVectorData([1])  )
+		self.assertEqual( actualCurves["c"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( actualCurves["d"].data, IECore.FloatVectorData([2, 3])  )
+		self.assertEqual( actualCurves["d"].interpolation, IECore.PrimitiveVariable.Interpolation.Varying)
+
+		self.assertEqual( actualCurves["e"].data, IECore.FloatVectorData([2, 3])  )
+		self.assertEqual( actualCurves["e"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying)
+
 if __name__ == "__main__":
 	unittest.main()
