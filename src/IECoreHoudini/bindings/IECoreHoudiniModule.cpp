@@ -40,7 +40,11 @@
 
 #include "UT/UT_Version.h"
 
-#if UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >= 16
+
+#include "RE/RE_Visual.h"
+
+#elif UT_MAJOR_VERSION_INT >= 14
 
 #include "RE/RE_QtVisual.h"
 
@@ -106,8 +110,17 @@ static void *extractNodeFromHOM( PyObject *o )
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
-#if UT_MAJOR_VERSION_INT >= 14
+#if UT_MAJOR_VERSION_INT >= 16
+// This little function returns the address of Houdini's shared QGLWidget
+// This can be necessary when wanting to create your own OpenGL context
+// which shares resources (textures, vertex buffers etc) with Houdini's contexts.
+// See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
+static uint64_t sharedGLWidget()
+{
+	return (uint64_t)RE_Visual::getSharedGLWidget();	
+}
 
+#elif UT_MAJOR_VERSION_INT >= 14
 // This little function returns the address of Houdini's shared QGLWidget
 // This can be necessary when wanting to create your own OpenGL context
 // which shares resources (textures, vertex buffers etc) with Houdini's contexts.

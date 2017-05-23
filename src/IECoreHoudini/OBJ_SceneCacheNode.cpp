@@ -34,6 +34,7 @@
 
 #include "OBJ/OBJ_Geometry.h"
 #include "OBJ/OBJ_SubNet.h"
+#include "OBJ/OBJ_Node.h"
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"

@@ -149,14 +149,24 @@ void newObjectOperator( OP_OperatorTable *table )
 {
 	OP_Operator *sceneCacheTransform = new OP_Operator(
 		OBJ_SceneCacheTransform::typeName, "SceneCache Xform",
-		OBJ_SceneCacheTransform::create, OBJ_SceneCacheTransform::buildParameters(), 0, 1
+		OBJ_SceneCacheTransform::create,
+		OBJ_SceneCacheTransform::buildParameters(),
+#if UT_MAJOR_VERSION_INT >= 16
+		OBJ_SceneCacheTransform::theChildTableName,
+#endif
+		0, 1
 	);
 	/// \todo: get a new icon
 	sceneCacheTransform->setIconName( "SOP_ieCortexConverter" );
 	
 	OP_Operator *sceneCacheGeometry = new OP_Operator(
 		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
-		OBJ_SceneCacheGeometry::create, OBJ_SceneCacheGeometry::buildParameters(), 0, 1
+		OBJ_SceneCacheGeometry::create,
+		OBJ_SceneCacheGeometry::buildParameters(),
+#if UT_MAJOR_VERSION_INT >= 16
+		OBJ_SceneCacheGeometry::theChildTableName,
+#endif
+		0, 1, NULL
 	);
 	/// \todo: get a new icon
 	sceneCacheGeometry->setIconName( "SOP_ieProceduralHolder" );
@@ -172,7 +182,12 @@ void newDriverOperator( OP_OperatorTable *table )
 {
 	OP_Operator *sceneCacheWriter = new OP_Operator(
 		ROP_SceneCacheWriter::typeName, "SceneCache Writer",
-		ROP_SceneCacheWriter::create, ROP_SceneCacheWriter::buildParameters(), 0, 999, 0,
+		ROP_SceneCacheWriter::create,
+		ROP_SceneCacheWriter::buildParameters(),
+#if UT_MAJOR_VERSION_INT >= 16
+		ROP_SceneCacheWriter::theChildTableName,
+#endif
+		0, 999, NULL,
 		OP_FLAG_GENERATOR
 	);
 	sceneCacheWriter->setIconName( "CortexLogoMini" );

@@ -31,7 +31,7 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
+#include "UT/UT_Version.h"
 #include "OP/OP_Layout.h"
 
 #if UT_MAJOR_VERSION_INT >= 16

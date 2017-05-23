@@ -463,7 +463,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 							continue;
 						}
 						
-						const UT_String &groupName = group->getName();
+						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
 							UT_String tag;
@@ -546,7 +546,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 							continue;
 						}
 					
-						const UT_String &groupName = group->getName();
+						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
 							UT_String tag;
