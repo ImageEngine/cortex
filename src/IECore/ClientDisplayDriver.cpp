@@ -35,6 +35,7 @@
 
 #include "boost/asio.hpp"
 #include "boost/bind.hpp"
+#include "boost/array.hpp"
 
 #include "IECore/ClientDisplayDriver.h"
 #include "IECore/private/DisplayDriverServerHeader.h"
@@ -79,15 +80,15 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 	// expects three custom StringData parameters : displayHost, displayPort and displayType
 	const StringData *displayHostData = parameters->member<StringData>( "displayHost", true /* throw if missing */ );
 	const StringData *displayPortData = parameters->member<StringData>( "displayPort", true /* throw if missing */ );
-	
+
 	m_data->m_host = displayHostData->readable();
 	m_data->m_port = displayPortData->readable();
-	
+
 	tcp::resolver resolver(m_data->m_service);
 	tcp::resolver::query query(m_data->m_host, m_data->m_port);
 
 	boost::system::error_code error;
-	tcp::resolver::iterator iterator = resolver.resolve( query, error );	
+	tcp::resolver::iterator iterator = resolver.resolve( query, error );
 	if( !error )
 	{
 		error = boost::asio::error::host_not_found;
@@ -130,7 +131,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 		throw Exception( "Invalid returned scanLineOrder from display driver server!" );
 	}
 	m_data->m_socket.receive( boost::asio::buffer( &m_data->m_scanLineOrderOnly, sizeof(m_data->m_scanLineOrderOnly) ) );
-	
+
 	if ( receiveHeader( DisplayDriverServerHeader::imageOpen ) != sizeof(m_data->m_acceptsRepeatedData) )
 	{
 		throw Exception( "Invalid returned acceptsRepeatedData from display driver server!" );
@@ -194,22 +195,13 @@ size_t ClientDisplayDriver::receiveHeader( int msg )
 
 void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t dataSize )
 {
-	MemoryIndexedIOPtr io;
-	ConstCharVectorDataPtr buf;
+	sendHeader( DisplayDriverServerHeader::imageData, sizeof( box ) + dataSize * sizeof( float ) );
 
-	// build the data block
-	Box2iDataPtr boxData = new Box2iData( box );
-	FloatVectorDataPtr dataData = new FloatVectorData( std::vector<float>( data, data+dataSize ) );
-
-	io = new MemoryIndexedIO( ConstCharVectorDataPtr(), IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Write );
-	boost::static_pointer_cast<Object>(boxData)->save( io, "box" );
-	boost::static_pointer_cast<Object>(dataData)->save( io, "data" );
-	buf = io->buffer();
-	size_t blockSize = buf->readable().size();
-
-	sendHeader( DisplayDriverServerHeader::imageData, blockSize );
-
-	m_data->m_socket.send( boost::asio::buffer( &(buf->readable()[0]), blockSize) );
+	boost::array<boost::asio::const_buffer, 2> buffers = { {
+		boost::asio::buffer( &box, sizeof( box ) ),
+		boost::asio::buffer( data, dataSize * sizeof( float ) )
+	} };
+	m_data->m_socket.send( buffers );
 }
 
 void ClientDisplayDriver::imageClose()

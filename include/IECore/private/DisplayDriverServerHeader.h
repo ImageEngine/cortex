@@ -55,7 +55,7 @@ class DisplayDriverServerHeader
 
 		static const unsigned char headerLength = 7;
 		static const unsigned char magicNumber = 0x82;
-		static const unsigned char currentProtocolVersion = 1;
+		static const unsigned char currentProtocolVersion = 2;
 
 		DisplayDriverServerHeader();
 		DisplayDriverServerHeader( MessageType msg, size_t dataSize );
