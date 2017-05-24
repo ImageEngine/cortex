@@ -124,6 +124,9 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 {
 	std::vector<std::string> channelNames;
 
+	CompoundDataPtr parameters = new CompoundData();
+	ParameterAlgo::getParameters( node, parameters->writable() );
+
 	const char *name = 0;
 	int pixelType = 0;
 	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
@@ -132,6 +135,12 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 		if( strcmp( name, "RGB" ) && strcmp( name, "RGBA" ) )
 		{
 			namePrefix = std::string( name ) + ".";
+		}
+
+		const StringData *layerName = parameters->member< StringData >( "layerName" );
+		if( layerName && layerName->readable() != "" )
+		{
+			namePrefix = layerName->readable() + ".";
 		}
 
 		switch( pixelType )
@@ -166,9 +175,6 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 		V2i( dataWindow.minx, dataWindow.miny ),
 		V2i( dataWindow.maxx, dataWindow.maxy )
 	);
-
-	CompoundDataPtr parameters = new CompoundData();
-	ParameterAlgo::getParameters( node, parameters->writable() );
 
 	// IECore::DisplayDriver lacks any official mechanism for passing
 	// the pixel aspect ratio, so for now we just pass it via the
