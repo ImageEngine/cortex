@@ -124,7 +124,7 @@ ClientDisplayDriver::ClientDisplayDriver( const Imath::Box2i &displayWindow, con
 
 	sendHeader( DisplayDriverServerHeader::imageOpen, dataSize );
 
-	m_data->m_socket.send( boost::asio::buffer( &(buf->readable()[0]), dataSize ) );
+	boost::asio::write( m_data->m_socket, boost::asio::buffer( &(buf->readable()[0]), dataSize ) );
 
 	if ( receiveHeader( DisplayDriverServerHeader::imageOpen ) != sizeof(m_data->m_scanLineOrderOnly) )
 	{
@@ -166,7 +166,7 @@ bool ClientDisplayDriver::acceptsRepeatedData() const
 void ClientDisplayDriver::sendHeader( int msg, size_t dataSize )
 {
 	DisplayDriverServerHeader header( (DisplayDriverServerHeader::MessageType)msg, dataSize );
-	m_data->m_socket.send( boost::asio::buffer( header.buffer(), header.headerLength ) );
+	boost::asio::write( m_data->m_socket, boost::asio::buffer( header.buffer(), header.headerLength ) );
 }
 
 size_t ClientDisplayDriver::receiveHeader( int msg )
@@ -201,7 +201,7 @@ void ClientDisplayDriver::imageData( const Box2i &box, const float *data, size_t
 		boost::asio::buffer( &box, sizeof( box ) ),
 		boost::asio::buffer( data, dataSize * sizeof( float ) )
 	} };
-	m_data->m_socket.send( buffers );
+	boost::asio::write( m_data->m_socket, buffers );
 }
 
 void ClientDisplayDriver::imageClose()
