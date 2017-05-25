@@ -19,7 +19,6 @@ def build( extraArgs = [] ) :
 	release = False
 	if "RELEASE=1" in sysArgs :
 		release = True
-		sysArgs.remove( "RELEASE=1" )
 	
 	if "J=" in " ".join( sysArgs ) :
 		sysArgs = " ".join( sysArgs ).replace( "J=", "-j " ).split( " " )
