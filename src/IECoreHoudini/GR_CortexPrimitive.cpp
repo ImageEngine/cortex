@@ -188,7 +188,15 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 	m_scene->setCamera( 0 ); // houdini will be providing the camera
 }
 
-void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials )
+#if UT_MAJOR_VERSION_INT >= 16
+
+void GR_CortexPrimitive::render( RE_Render* r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms dp )
+
+#else
+
+void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials )
+
+#endif
 {
 	if ( !m_scene )
 	{
@@ -200,9 +208,17 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	
 	GLint currentProgram = 0;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &currentProgram );
+
+#if UT_MAJOR_VERSION_INT >= 16
+
+	IECoreGL::State *state = getState( render_mode, flags, dp.opts );
 	
+#else
+
 	IECoreGL::State *state = getState( render_mode, flags, opt );
 	
+#endif
+
 	if ( render_mode == GR_RENDER_OBJECT_PICK )
 	{
 		const IECoreGL::Shader *shader = state->get<IECoreGL::ShaderStateComponent>()->shaderSetup()->shader();
@@ -263,7 +279,7 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	}
 }
 
-void GR_CortexPrimitive::renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const RE_MaterialList *materials, int render_instance )
+void GR_CortexPrimitive::renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const  UT_Array<RE_MaterialPtr> *materials, int render_instance )
 {
 	/// \todo: implement this to support instanced rendering.
 	/// renderInstances() is for doing instanced drawing of

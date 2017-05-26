@@ -53,7 +53,10 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		facet = torus.createOutputNode( "facet" )
 		facet.parm( "postnml" ).set( True )
 		mountain = facet.createOutputNode( "mountain" )
-		mountain.parm("offset1").setExpression( "$FF" )
+		if hou.applicationVersion()[0] >= 16:
+			mountain.parm("offsetx").setExpression("$FF")
+		else:
+			mountain.parm("offset1").setExpression( "$FF" )
 		
 		return mountain
 		

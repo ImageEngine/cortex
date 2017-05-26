@@ -463,7 +463,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 							continue;
 						}
 						
-						const UT_String &groupName = group->getName();
+						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
 							UT_String tag;
@@ -546,7 +546,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 							continue;
 						}
 					
-						const UT_String &groupName = group->getName();
+						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
 							UT_String tag;
@@ -713,11 +713,26 @@ void LiveScene::childNames( NameList &childNames ) const
 		return;
 	}
 	
+#if UT_MAJOR_VERSION_INT >= 16
+
+	// add connected outputs
+	OP_NodeList childList;
+	contentNode->getOutputNodes(childList);
+	for ( OP_Node * child : childList)
+	{
+		childNames.push_back( Name( child->getName() ) );
+	}
+
+#else
+
 	// add connected outputs
 	for ( unsigned i=0; i < contentNode->nOutputs(); ++i )
 	{
 		childNames.push_back( Name( contentNode->getOutput( i )->getName() ) );
 	}
+
+#endif
+
 	
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
@@ -895,6 +910,17 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 	if ( contentNode )
 	{
 		// check connected outputs
+#if UT_MAJOR_VERSION_INT >= 16
+		OP_NodeList childList;
+		contentNode->getOutputNodes(childList);
+		for ( OP_Node * child : childList)
+		{
+			if ( child->getName().equal( name.c_str() ) )
+			{
+				return child;
+			}
+		}
+#else
 		for ( unsigned i=0; i < contentNode->nOutputs(); ++i )
 		{
 			OP_Node *child = contentNode->getOutput( i );
@@ -903,7 +929,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 				return child;
 			}
 		}
-		
+#endif	
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{

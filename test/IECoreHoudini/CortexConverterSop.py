@@ -42,7 +42,12 @@ import IECoreHoudini
 import unittest
 
 class TestCortexConverterSop( IECoreHoudini.TestCase ):
-	
+
+	if hou.applicationVersion()[0] >= 16:
+		PointPositionAttribs = ['P']
+	else:
+		PointPositionAttribs = ['P', 'Pw']
+
 	# make sure we can create the op
 	def testCreateCortexConverter(self)  :
 		obj = hou.node("/obj")
@@ -75,7 +80,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		geo = to_houdini.geometry()
 		attrNames = [ p.name() for p in geo.pointAttribs() ]
 		attrNames.sort()
-		self.assertEqual( attrNames, ["P", "Pw", "testAttribute"] )
+		self.assertEqual( attrNames, TestCortexConverterSop.PointPositionAttribs + ["testAttribute"] )
 		self.assertEqual( len(geo.points()), 5000 )
 		self.assertEqual( len(geo.prims()), 1 )
 	
@@ -88,7 +93,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.prims()), 100 )
 		attrNames = [ p.name() for p in geo.pointAttribs() ]
 		attrNames.sort()
-		self.assertEqual( attrNames, ["P", "Pw"] )
+		self.assertEqual( attrNames, TestCortexConverterSop.PointPositionAttribs )
 		for p in geo.prims():
 			self.assertEqual( p.numVertices(), 4 )
 			self.assertEqual( p.type(), hou.primType.Polygon )
@@ -118,7 +123,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		geo = converter.geometry()
 		self.assertEqual( len(geo.points()), 100 )
 		self.assertEqual( len(geo.prims()), 100 )
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N", "P", "Pw" ] )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N" ] + TestCortexConverterSop.PointPositionAttribs )
 		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
 	
 	def scene( self ) :
@@ -258,7 +263,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verify input
 		inGeo = uvunwrap.geometry()
-		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in inGeo.primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in inGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -268,7 +273,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verifty output
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -287,7 +292,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		# make sure P is forced
 		out.parm( "attributeFilter" ).set( "* ^P" )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -298,7 +303,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		# have to filter the source attrs s, t and not uv
 		out.parm( "attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -308,7 +313,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		out.parm( "attributeFilter" ).set( "* ^s ^t  ^width ^Pref" )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -325,7 +330,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "s", "t", "varmap", "width" ] )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]),  TestCortexConverterSop.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -343,7 +348,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]),  TestCortexConverterSop.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -354,7 +359,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		# since the vars never made it to the op, the never make it out
 		out.parm( "attributeFilter" ).set( "*" )
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]),  TestCortexConverterSop.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -380,7 +385,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verify input
 		inGeo = uvunwrap.geometry()
-		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in inGeo.primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in inGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -390,7 +395,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verifty output
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -439,7 +444,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verifty output
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest'] )
+		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cd', 'uv'] )
 		if hou.applicationVersion()[0] >= 15 :
@@ -487,7 +492,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		
 		# verifty output
 		outGeo = out.geometry()
-		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), ['P', 'Pref', 'Pw', 'width'] )
+		self.assertEqual( set([ x.name() for x in outGeo.pointAttribs() ]), set(TestCortexConverterSop.PointPositionAttribs + ['Pref', 'width']) )
 		self.assertEqual( sorted([ x.name() for x in outGeo.primAttribs() ]), ["ieMeshInterpolation"] )
 		self.assertEqual( sorted([ x.name() for x in outGeo.vertexAttribs() ]), ['Cs', 's', 't'] )
 		if hou.applicationVersion()[0] >= 15 :

@@ -792,7 +792,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		facet = geo.createNode( "facet" )
 		facet.parm("postnml").set(True)
 		mountain = geo.createNode( "mountain" )
-		mountain.parm("offset1").setExpression( "$FF" )
+		if hou.applicationVersion()[0] >= 16:
+			mountain.parm( "offsetx" ).setExpression( "$FF" )
+		else:
+			mountain.parm("offset1").setExpression( "$FF" )
 		points = geo.createNode( "scatter" )
 		facet.setInput( 0, torus )
 		mountain.setInput( 0, facet )

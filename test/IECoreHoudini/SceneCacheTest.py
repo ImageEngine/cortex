@@ -33,6 +33,7 @@
 ##########################################################################
 
 import os
+import uuid
 import hou
 import IECore
 import IECoreHoudini
@@ -40,33 +41,48 @@ import unittest
 
 class TestSceneCache( IECoreHoudini.TestCase ) :
 	
-	__testFile = "test/test.scc"
-	__testOutFile = "test/testOut.scc"
-	__testLinkedOutFile = "test/testOut.lscc"
-	__testHip = "test/test.hip"
-	__testBgeo = "test/test.bgeo"
-	__testBgeoGz = "test/test.bgeo.gz"
-	__testGeo = "test/test.geo"
+	if hou.applicationVersion()[0] >= 16:
+		PointPositionAttribs = ['P']
+	else:
+		PointPositionAttribs = ['P', 'Pw']
+		
+	def setUp(self):
+		hou.hipFile.clear()
+		
+		self._testFile = "test/test{testName}.scc".format(testName=self.id())
+		self._testOutFile = "test/testOut{testName}.scc".format(testName=self.id())
+		self._testLinkedOutFile = "test/testOut{testName}.lscc".format(testName=self.id())
+		self._testHip = "test/test{testName}.hip".format(testName=self.id())
+		self._testBgeo = "test/test{testName}.bgeo".format(testName=self.id())
+		self._testBgeoGz = "test/test{testName}.bgeo.gz".format(testName=self.id())
+		self._testGeo = "test/test{testName}.geo".format(testName=self.id())
+		self._badFile = "test/test{testName}bad.file".format(testName=self.id())
+		self._fake = "test/test{testName}fake.scc".format(testName=self.id())
+		
+	def tearDown(self):
+		for f in [self._testFile,self._testOutFile,self._testLinkedOutFile,self._testHip,self._testBgeo,self._testBgeoGz,self._testGeo]:
+			if os.path.exists(f):
+				os.remove(f)
 	
 	def sop( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		sop = parent.createNode( "ieSceneCacheSource" )
-		sop.parm( "file" ).set( TestSceneCache.__testFile )
+		sop.parm( "file" ).set( self._testFile )
 		return sop
 	
 	def xform( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
 		xform = parent.createNode( "ieSceneCacheTransform" )
-		xform.parm( "file" ).set( TestSceneCache.__testFile )
+		xform.parm( "file" ).set( self._testFile )
 		return xform
 	
 	def geometry( self, parent=None ) :
 		if not parent :
 			parent = hou.node( "/obj" )
 		geometry = parent.createNode( "ieSceneCacheGeometry" )
-		geometry.parm( "file" ).set( TestSceneCache.__testFile )
+		geometry.parm( "file" ).set( self._testFile )
 		return geometry
 	
 	def sopXform( self, parent=None ) :
@@ -85,20 +101,20 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		merge.setInput( 1, name2 )
 		merge.setInput( 2, name3 )
 		sop = merge.createOutputNode( "ieSceneCacheTransform" )
-		sop.parm( "file" ).set( TestSceneCache.__testFile )
+		sop.parm( "file" ).set( self._testFile )
 		return sop
 	
 	def rop( self, rootObject ) :
 		
 		rop = hou.node( "/out" ).createNode( "ieSceneCacheWriter" )
-		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		rop.parm( "file" ).set( self._testOutFile )
 		rop.parm( "rootObject" ).set( rootObject.path() )
 		rop.parmTuple( "f" ).deleteAllKeyframes()
 		return rop
 	
 	def writeSCC( self, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
 		
-		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
@@ -126,6 +142,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		return scene
 	
+	
 	def testBadFile( self ) :
 		
 		def testNode( node ) :
@@ -136,7 +153,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			node.parm( "file" ).set( "/tmp/fake" )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
-			node.parm( "file" ).set( TestSceneCache.__testFile )
+			node.parm( "file" ).set( self._testFile )
 			self.assertRaises( hou.OperationFailed, IECore.curry( node.cook, True ) )
 			self.failUnless( node.errors() )
 			self.writeSCC()
@@ -144,11 +161,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.failUnless( not node.errors() )
 		
 		testNode( self.sop() )
-		os.remove( TestSceneCache.__testFile )
+		os.remove( self._testFile )
 		testNode( self.xform() )
-		os.remove( TestSceneCache.__testFile )
+		os.remove( self._testFile )
 		testNode( self.geometry() )
-		os.remove( TestSceneCache.__testFile )
+		os.remove( self._testFile )
 		testNode( self.sopXform() )
 	
 	def testBadPath( self ) :
@@ -501,7 +518,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		def writeTestFile() :
 			
-			scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+			scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 			
 			sc = scene.createChild( str( 1 ) )
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
@@ -528,7 +545,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "space" ).set( IECoreHoudini.SceneCacheNode.Space.World )
 		prims = node.geometry().prims()
 		self.assertEqual( len(prims), 6 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["Cd", "P", "Pw", "otherP", "rest"] )
+		self.assertItemsEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["Cd", "otherP", "rest"] )
 		
 		# P is transformed
 		self.assertEqual( prims[0].vertex( 0 ).point().position(), hou.Vector3( 6, 0, 0 ) )
@@ -615,35 +632,35 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = self.sop()
 		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "P" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "* ^Cs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "Cs" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
 		
 		node.parm( "attributeFilter" ).set( "" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -654,7 +671,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node = self.sop()
 		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -662,7 +679,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# copying as expected, including automatic translation to rest
 		node.parm( "attributeCopy" ).set( "P:Pref" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw", "rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -676,7 +693,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# copying multiple prim vars
 		node.parm( "attributeCopy" ).set( "P:Pref Cs:Cspecial" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw", "rest"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs + ["rest"] )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "Cspecial", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -692,7 +709,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "attributeFilter" ).set( "* ^Cs" )
 		node.parm( "attributeCopy" ).set( "Cs:Cspecial" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cspecial", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -701,7 +718,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "attributeFilter" ).set( "*" )
 		node.parm( "attributeCopy" ).set( "fake:notThere" )
 		self.assertEqual( len(node.geometry().prims()), 18 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["Cd", "ieMeshInterpolation", "name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -710,7 +727,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		node.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Cortex )
 		node.parm( "attributeCopy" ).set( "P:Pref" )
 		self.assertEqual( len(node.geometry().prims()), 3 )
-		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), ["P", "Pw"] )
+		self.assertEqual( sorted( [ x.name() for x in node.geometry().pointAttribs() ] ), TestSceneCache.PointPositionAttribs )
 		self.assertEqual( sorted( [ x.name() for x in node.geometry().primAttribs() ] ), ["name"] )
 		self.assertEqual( node.geometry().vertexAttribs(), tuple() )
 		self.assertEqual( node.geometry().globalAttribs(), tuple() )
@@ -1307,7 +1324,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testEmptyTags( self ) :
 		
-		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		sc = scene.createChild( str( 1 ) )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
@@ -1330,7 +1347,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(hou.node( xform.path()+"/1/2" ).children()), 1 )
 		self.assertEqual( len(hou.node( xform.path()+"/1/2/3" ).children()), 0 )
 		
-		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( scene.readTags( IECore.SceneInterface.EveryTag ), [] )
 		
 		self.assertTrue( hou.node( xform.path()+"/1" ).isObjectDisplayed() )
@@ -1552,7 +1569,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			scene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ),
 			IECore.CompoundData( {
 				"time" : IECore.DoubleData( 0 ),
-				"fileName" : IECore.StringData( "test/test.scc" ),
+				"fileName" : IECore.StringData( self._testFile ),
 				"root" : IECore.InternedStringVectorData( [] )
 			} )
 		)
@@ -2034,7 +2051,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		source.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		source.parm( "attributeCopy" ).set( "P:Pref" )
 		xform = source.createOutputNode( "ieSceneCacheTransform" )
-		xform.parm( "file" ).set( TestSceneCache.__testFile )
+		xform.parm( "file" ).set( self._testFile )
 		
 		for time in times :
 			hou.setTime( time - spf )
@@ -2152,26 +2169,26 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.Parenting )
 		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		self.assertTrue( os.path.exists( self._testOutFile ) )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output )
 		
 		# test a subnet xform
-		os.remove( TestSceneCache.__testOutFile )
+		os.remove( self._testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output )
 		
 		# test a mixed subnet/parented xform
-		os.remove( TestSceneCache.__testOutFile )
+		os.remove( self._testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "collapse" ).pressButton()
@@ -2181,9 +2198,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		a.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		a.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output )
 	
 	def testRopFlattened( self ) :
@@ -2195,13 +2212,13 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		xform.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
 		
 		# test a mixed subnet/flat xform
-		os.remove( TestSceneCache.__testOutFile )
+		os.remove( self._testOutFile )
 		xform.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.SubNetworks )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "collapse" ).pressButton()
@@ -2213,25 +2230,25 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		b.parm( "expand" ).pressButton()
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "3" ] )
 		
 		# test a OBJ Geo
-		os.remove( TestSceneCache.__testOutFile )
+		os.remove( self._testOutFile )
 		geo = self.geometry()
 		geo.parm( "expand" ).pressButton()
 		rop.parm( "rootObject" ).set( geo.path() )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
 	
 	def testRopFlattenedWithGaps( self ) :
 		
-		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
@@ -2270,9 +2287,9 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop = self.rop( geo )
 		rop.parm( "rootObject" ).set( geo.path() )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, output, bakedObjects = [ "1", "2", "3" ] )
 	
 	def testRopTopLevelGeo( self ) :
@@ -2288,8 +2305,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( output.name(), "/" )
 		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
 		self.assertFalse( output.hasObject() )
@@ -2320,8 +2337,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( output.name(), "/" )
 		self.assertEqual( output.readTransformAsMatrix( 0 ), IECore.M44d() )
 		self.assertFalse( output.hasObject() )
@@ -2346,11 +2363,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "rootObject" ).set( geo.path() )
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 1, 10, 1 ) )
-		geo.renderNode().parm( "file" ).set( "fake.scc" )
+		geo.renderNode().parm( "file" ).set( self._fake )
 		rop.parm( "execute" ).pressButton()
-		self.assertNotEqual( rop.errors(), "" )
-		self.assertTrue( geo.renderNode().path() in rop.errors() )
-		self.assertTrue( geo.renderNode().errors() in rop.errors() )
+		self.assertNotEqual( len( rop.errors()) , 0 )
+		self.assertTrue(geo.renderNode().path() in "".join(rop.errors()))
+		self.assertTrue("".join(geo.renderNode().errors()) in "".join(rop.errors()))
 	
 	def testRopLinked( self ) :
 		
@@ -2364,17 +2381,17 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# leaving b and below as a link
 		
 		rop = self.rop( xform )
-		rop.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
-		self.assertFalse( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
+		rop.parm( "file" ).set( self._testLinkedOutFile )
+		self.assertFalse( os.path.exists( self._testLinkedOutFile ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		self.assertTrue( os.path.exists( self._testLinkedOutFile ) )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		linked = IECore.LinkedScene( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, linked )
 		
 		# make sure there really is a link
-		unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		unlinked = IECore.SceneCache( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 		a = unlinked.child( "1" )
 		self.assertFalse( a.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertFalse( a.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
@@ -2385,23 +2402,23 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
 		self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
-		self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
+		self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( self._testFile ) )
 		self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
 		self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 1.0 / hou.fps() ) )
 		
 		# make sure we can force link expansion
 		xform.parm( "collapse" ).pressButton()
-		xform.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
+		xform.parm( "file" ).set( self._testLinkedOutFile )
 		self.assertEqual( xform.children(), tuple() )
 		self.assertEqual( xform.parm( "expanded" ).eval(), False )
 		xform.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.Children )
 		xform.parm( "expand" ).pressButton()
-		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		rop.parm( "file" ).set( self._testOutFile )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
-		expanded = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		self.assertTrue( os.path.exists( self._testOutFile ) )
+		expanded = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, expanded )
 		self.compareScene( expanded, linked )
 		
@@ -2414,7 +2431,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		# make sure it doesn't crash if the linked scene doesn't exist anymore
 		xform.parm( "collapse" ).pressButton()
-		os.remove( TestSceneCache.__testFile )
+		os.remove( self._testFile )
 		IECore.SharedSceneInterfaces.clear()
 		xform.parm( "reload" ).pressButton()
 		xform.parm( "expand" ).pressButton()
@@ -2433,22 +2450,22 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		def testLinks( bakedObjects = None ) :
 			
-			if os.path.exists( TestSceneCache.__testLinkedOutFile ) :
-				os.remove( TestSceneCache.__testLinkedOutFile )
+			if os.path.exists( self._testLinkedOutFile ) :
+				os.remove( self._testLinkedOutFile )
 			
 			rop.parm( "execute" ).pressButton()
-			self.assertEqual( rop.errors(), "" )
-			self.assertTrue( os.path.exists( TestSceneCache.__testLinkedOutFile ) )
-			linked = IECore.LinkedScene( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+			self.assertEqual( len( rop.errors() ) , 0 )
+			self.assertTrue( os.path.exists( self._testLinkedOutFile ) )
+			linked = IECore.LinkedScene( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 			if bakedObjects :
 				live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 				self.compareScene( linked, live, bakedObjects = bakedObjects )
 			else :
-				orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+				orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 				self.compareScene( orig, linked )
 			
 			# make sure the links are where we expect
-			unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+			unlinked = IECore.SceneCache( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 			a = unlinked.child( "1" )
 			self.assertFalse( a.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 			self.assertFalse( a.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
@@ -2459,7 +2476,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertFalse( b.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 			self.assertTrue( b.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
 			self.assertTrue( b.hasAttribute( IECore.LinkedScene.rootLinkAttribute ) )
-			self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( TestSceneCache.__testFile ) )
+			self.assertEqual( b.readAttribute( IECore.LinkedScene.fileNameLinkAttribute, 0 ), IECore.StringData( self._testFile ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.rootLinkAttribute, 0 ), IECore.InternedStringVectorData( [ "1", "2" ] ) )
 			self.assertEqual( b.readAttribute( IECore.LinkedScene.timeLinkAttribute, 0 ), IECore.DoubleData( 0 ) )
 			d = a.child( "4" )
@@ -2473,7 +2490,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		xform = self.xform()
 		xform.parm( "expand" ).pressButton()
 		rop = self.rop( xform )
-		rop.parm( "file" ).set( TestSceneCache.__testLinkedOutFile )
+		rop.parm( "file" ).set( self._testLinkedOutFile )
 		rop.parm( "forceObjects" ).set( "*4*" )
 		testLinks()
 		
@@ -2485,7 +2502,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		geo = xform.createNode( "geo", "real" )
 		geo.createNode( "box" )
 		testLinks( bakedObjects = [ "real" ] )
-		unlinked = IECore.SceneCache( TestSceneCache.__testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
+		unlinked = IECore.SceneCache( self._testLinkedOutFile, IECore.IndexedIO.OpenMode.Read )
 		real = unlinked.child( "real" )
 		self.assertFalse( real.hasAttribute( IECore.LinkedScene.linkAttribute ) )
 		self.assertFalse( real.hasAttribute( IECore.LinkedScene.fileNameLinkAttribute ) )
@@ -2499,45 +2516,45 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		testLinks()
 		
 		# make sure normal SceneCaches aren't broken by forceObjects
-		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		rop.parm( "file" ).set( self._testOutFile )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		result = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		self.assertTrue( os.path.exists( self._testOutFile ) )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		result = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.compareScene( orig, result )
 	
 	def testRopErrors( self ) :
 		
 		xform = self.xform()
 		rop = self.rop( xform )
-		rop.parm( "file" ).set( "/tmp/bad.file" )
+		rop.parm( "file" ).set( self._badFile )
 		rop.parm( "execute" ).pressButton()
-		self.assertNotEqual( rop.errors(), "" )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertNotEqual( len( rop.errors()) , 0 )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		
-		rop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		rop.parm( "file" ).set( self._testOutFile )
 		rop.parm( "rootObject" ).set( "/obj/fake/object" )
-		self.assertNotEqual( rop.errors(), "" )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertNotEqual( len( rop.errors()) , 0 )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		
 		rop.parm( "rootObject" ).set( xform.path() )
 		xform.destroy()
-		self.assertNotEqual( rop.errors(), "" )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertNotEqual( len( rop.errors()) , 0 )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		
 		sop = self.sop()
 		rop.parm( "rootObject" ).set( sop.path() )
 		rop.parm( "execute" ).pressButton()
-		self.assertNotEqual( rop.errors(), "" )
-		self.assertFalse( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertNotEqual( len( rop.errors()) , 0 )
+		self.assertFalse( os.path.exists( self._testOutFile ) )
 		
 		newXform = self.xform()
 		rop.parm( "rootObject" ).set( newXform.path() )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		self.assertTrue( os.path.exists( TestSceneCache.__testOutFile ) )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		self.assertTrue( os.path.exists( self._testOutFile ) )
 	
 	def testAnimatedRop( self ) :
 		
@@ -2549,8 +2566,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "trange" ).set( 1 )
 		rop.parmTuple( "f" ).set( ( 0, 10 * hou.fps(), 1 ) )
 		rop.parm( "execute" ).pressButton()
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		
 		times = range( 0, 10 )
 		halves = [ x + 0.5 for x in times ]
@@ -2579,7 +2596,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# cook current frame
 		rop = self.rop( xform )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( len( rop.errors() ) , 0 )
 		self.assertEqual( a.cookCount(), 1 )
 		self.assertEqual( b.cookCount(), 1 )
 		self.assertEqual( c.cookCount(), 1 )
@@ -2590,7 +2607,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "f1" ).set( 10 )
 		rop.parm( "f2" ).set( 10 )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( len( rop.errors() ) , 0 )
 		self.assertEqual( a.cookCount(), 1 )
 		self.assertEqual( b.cookCount(), 2 )
 		self.assertEqual( c.cookCount(), 1 )
@@ -2599,7 +2616,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "f1" ).set( 1 )
 		rop.parm( "f2" ).set( 10 )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
+		self.assertEqual( len( rop.errors() ) , 0 )
 		self.assertEqual( a.cookCount(), 1 )
 		self.assertEqual( b.cookCount(), 12 )
 		self.assertEqual( c.cookCount(), 1 )
@@ -2634,7 +2651,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "f2" ).set( 20 )
 		rop.parm( "execute" ).pressButton()
 		
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		a = output.child( "1" )
 		b = a.child( "2" )
 		c = b.child( "3" )
@@ -2654,7 +2671,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		switch.parm( "input" ).setExpression( "if hou.frame() < 5 or hou.frame() >= 10 :\n\treturn 1\nelse :\n\treturn 0", hou.exprLanguage.Python )
 		rop.parm( "execute" ).pressButton()
 		hou.hipFile.save( "/tmp/bunk.hip" )
-		output = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		output = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		a = output.child( "1" )
 		b = a.child( "2" )
 		c = b.child( "3" )
@@ -2681,7 +2698,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		b.parm( "hierarchy" ).set( IECoreHoudini.SceneCacheNode.Hierarchy.FlatGeometry )
 		b.parm( "depth" ).set( IECoreHoudini.SceneCacheNode.Depth.AllDescendants )
 		b.parm( "expand" ).pressButton()
-		orig = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Read )
+		orig = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Read )
 		live = IECoreHoudini.LiveScene( xform.path(), rootPath = [ xform.name() ] )
 		self.compareScene( orig, live, bakedObjects = [ "3" ] )
 	
@@ -2693,7 +2710,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		box2 = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 2 ), IECore.V3f( 3 ) ) )
 		box2["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 0, 1, 0 ) ] * box.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) )
 		
-		s = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		s = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		a = s.createChild( "a" )
 		b = a.createChild( "b" )
 		c = a.createChild( "c" )
@@ -2795,8 +2812,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[i].vertices()[0].point().number(), i )
 		
 		# make sure they survive a scene save/load
-		hou.hipFile.save( TestSceneCache.__testHip )
-		hou.hipFile.load( TestSceneCache.__testHip )
+		hou.hipFile.save( self._testHip )
+		hou.hipFile.load( self._testHip )
 		null = hou.node( nullPath )
 		prims = null.geometry().prims()
 		self.assertEqual( len(prims), 3 )
@@ -2806,11 +2823,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		# make sure they survive bgeo caching
 		writer = null.createOutputNode( "file" )
-		writer.parm( "file" ).set( TestSceneCache.__testBgeo )
+		writer.parm( "file" ).set( self._testBgeo )
 		writer.parm( "filemode" ).set( 2 ) # write
 		writer.cook( force = True )
 		reader = null.parent().createNode( "file" )
-		reader.parm( "file" ).set( TestSceneCache.__testBgeo )
+		reader.parm( "file" ).set( self._testBgeo )
 		prims = reader.geometry().prims()
 		self.assertEqual( len(prims), 3 )
 		for i in range( 0, 3 ) :
@@ -2818,10 +2835,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[i].vertices()[0].point().number(), i )
 		
 		# make sure they survive bgeo.gz caching
-		writer.parm( "file" ).set( TestSceneCache.__testBgeoGz )
+		writer.parm( "file" ).set( self._testBgeoGz )
 		writer.cook( force = True )
 		reader = null.parent().createNode( "file" )
-		reader.parm( "file" ).set( TestSceneCache.__testBgeoGz )
+		reader.parm( "file" ).set( self._testBgeoGz )
 		prims = reader.geometry().prims()
 		self.assertEqual( len(prims), 3 )
 		for i in range( 0, 3 ) :
@@ -2829,10 +2846,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			self.assertEqual( prims[i].vertices()[0].point().number(), i )
 		
 		# make sure they survive geo caching
-		writer.parm( "file" ).set( TestSceneCache.__testGeo )
+		writer.parm( "file" ).set( self._testGeo )
 		writer.cook( force = True )
 		reader = null.parent().createNode( "file" )
-		reader.parm( "file" ).set( TestSceneCache.__testGeo )
+		reader.parm( "file" ).set( self._testGeo )
 		prims = reader.geometry().prims()
 		self.assertEqual( len(prims), 3 )
 		for i in range( 0, 3 ) :
@@ -2844,11 +2861,11 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.writeSCC()
 		sop = self.sop()
 		writer = sop.createOutputNode( "file" )
-		writer.parm( "file" ).set( TestSceneCache.__testBgeo )
+		writer.parm( "file" ).set( self._testBgeo )
 		writer.parm( "filemode" ).set( 2 ) # write
 		writer.cook( force = True )
 		reader = sop.parent().createNode( "file" )
-		reader.parm( "file" ).set( TestSceneCache.__testBgeo )
+		reader.parm( "file" ).set( self._testBgeo )
 		reader.cook( force = True )
 		reader.cook( force = True )
 	
@@ -2934,8 +2951,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		prims = sop.geometry().prims()
 		self.assertEqual( len(prims), 18 )
-		self.assertTrue( "/1/coord" in sop.warnings() )
-		self.assertTrue( "/ints" in sop.warnings() )
+		self.assertTrue( "/1/coord" in "".join(sop.warnings()) )
+		self.assertTrue( "/ints" in "".join(sop.warnings()) )
 		
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ '/1', '/1/2', '/1/2/3' ] ) )
@@ -2948,7 +2965,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 	
 	def testCoordinateSystemNoTransform( self ) :
 		
-		scene = IECore.SceneCache( TestSceneCache.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECore.SceneCache( self._testFile, IECore.IndexedIO.OpenMode.Write )
 		coordChild = scene.createChild( "coord")
 		coord = IECore.CoordinateSystem()
 		coord.setName( "testing" )
@@ -3040,7 +3057,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		rop.parm( "execute" ).pressButton()
 		
 		sop = self.sop()
-		sop.parm( "file" ).set( TestSceneCache.__testOutFile )
+		sop.parm( "file" ).set( self._testOutFile )
 		sop.parm( "geometryType" ).set( IECoreHoudini.SceneCacheNode.GeometryType.Houdini )
 		
 		for t in range( 0, 10 ) :
@@ -3126,7 +3143,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		def testNode( node ) :
 			
 			sceneNode = IECoreHoudini.SceneCacheNode( node )
-			shared = IECore.SharedSceneInterfaces.get( TestSceneCache.__testFile )
+			shared = IECore.SharedSceneInterfaces.get( self._testFile )
 			self.assertTrue( sceneNode.scene().isSame( shared ) )
 			node.parm( "root" ).set( "/1/fake" )
 			self.assertEqual( sceneNode.scene(), None )
@@ -3269,7 +3286,7 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		# re-write with rotation to prove point cloud basis vectors are accurate
 		self.writeAnimSCC( rotate = True )
 		
-		scene = IECore.SharedSceneInterfaces.get( TestSceneCache.__testFile )
+		scene = IECore.SharedSceneInterfaces.get( self._testFile )
 		a = scene.child( "1" )
 		b = a.child( "2" )
 		c = b.child( "3" )
@@ -3338,8 +3355,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		name.setRenderFlag( True )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		scene = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( scene.hasObject() )
 		self.assertEqual( scene.childNames(), [ "a" ] )
 		childScene = scene.child( "a" )
@@ -3354,8 +3371,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		wrangle.setRenderFlag( True )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		scene = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( scene.hasObject() )
 		self.assertEqual( scene.childNames(), [ "b" ] )
 		childScene = scene.child( "b" )
@@ -3367,8 +3384,8 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		
 		wrangle.parm( "snippet" ).set( 's@name = "/c/d/e";' )
 		rop.parm( "execute" ).pressButton()
-		self.assertEqual( rop.errors(), "" )
-		scene = IECore.SceneCache( TestSceneCache.__testOutFile, IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( len( rop.errors() ) , 0 )
+		scene = IECore.SceneCache( self._testOutFile, IECore.IndexedIO.OpenMode.Read )
 		self.assertFalse( scene.hasObject() )
 		self.assertEqual( scene.childNames(), [ "c" ] )
 		childScene = scene.child( "c" )
@@ -3414,11 +3431,6 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 			for name in nameAttr.strings() :
 				self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == name ]), 6 )
 	
-	def tearDown( self ) :
-		
-		for f in [ TestSceneCache.__testFile, TestSceneCache.__testOutFile, TestSceneCache.__testLinkedOutFile, TestSceneCache.__testHip, TestSceneCache.__testBgeo, TestSceneCache.__testBgeoGz, TestSceneCache.__testGeo ] :
-			if os.path.exists( f ) :
-				os.remove( f )
-
+	
 if __name__ == "__main__":
     unittest.main()

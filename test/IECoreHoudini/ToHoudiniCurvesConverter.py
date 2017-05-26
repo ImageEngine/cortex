@@ -40,6 +40,11 @@ import os
 
 class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	
+	if hou.applicationVersion()[0] >= 16:
+		PointPositionAttribs = ['P']
+	else:
+		PointPositionAttribs = ['P', 'Pw']
+	
 	__testScene = "test/converterTest.hip"
 	
 	__curveCoordinates = [
@@ -874,21 +879,21 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'intPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'intPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'v3fPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['color3fPoint', 'v3fPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'v3fPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'v3fDetail'] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int*" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -906,7 +911,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['pscale', 'rest', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -914,21 +919,21 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# have to filter the source attrs s, t and not uv
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]),TestToHoudiniCurvesConverter.PointPositionAttribs + ['pscale', 'rest', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^s  ^width ^Cs" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), ['P', 'Pw', 'rest', 't'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['rest', 't'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -952,7 +957,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['P', 'Pw', 'pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['pscale', 'rest', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
@@ -971,7 +976,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), ['P', 'Pref', 'Pw', 's', 't', 'width'] )
+		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['Pref', 's', 't', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cs'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )

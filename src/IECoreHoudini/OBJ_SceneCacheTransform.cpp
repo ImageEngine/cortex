@@ -31,8 +31,15 @@
 //  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 //////////////////////////////////////////////////////////////////////////
-
+#include "UT/UT_Version.h"
 #include "OP/OP_Layout.h"
+
+#if UT_MAJOR_VERSION_INT >= 16
+
+#include "OP/OP_SubnetIndirectInput.h"
+
+#endif
+
 #include "PRM/PRM_ChoiceList.h"
 #include "UT/UT_Interrupt.h"
 #include "UT/UT_PtrArray.h"
@@ -337,11 +344,26 @@ void OBJ_SceneCacheTransform::doExpandChildren( const SceneInterface *scene, OP_
 	}
 	
 	OP_Layout layout( parent );
+	
+#if UT_MAJOR_VERSION_INT >= 16
+
+	OP_SubnetIndirectInput *parentInput = parent->getParentInput( 0 );
+	layout.addLayoutItem( parentInput->getInputItem() );
+	for ( int i=0; i < parent->getNchildren(); ++i )
+	{
+		layout.addLayoutItem( parent->getChild( i ) );
+	}
+	
+#else
+
 	layout.addLayoutOp( parent->getParentInput( 0 ) );
 	for ( int i=0; i < parent->getNchildren(); ++i )
 	{
 		layout.addLayoutOp( parent->getChild( i ) );
 	}
+	
+#endif
+
 	layout.layoutOps( OP_LAYOUT_TOP_TO_BOT, parent, parent->getParentInput( 0 ) );
 }
 

@@ -35,6 +35,7 @@
 #ifndef IECOREHOUDINI_OBJSCENECACHENODE_H
 #define IECOREHOUDINI_OBJSCENECACHENODE_H
 
+#include "OP/OP_Node.h"
 #include "OBJ/OBJ_Node.h"
 
 #include "IECore/SceneCache.h"

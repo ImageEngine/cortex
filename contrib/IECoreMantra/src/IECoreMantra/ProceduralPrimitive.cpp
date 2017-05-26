@@ -110,8 +110,13 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		msg( Msg::Warning, "ProceduralPrimitive::addVisibleRenderable", "converter could not be found" );
 		return;
 	}
-	GU_Detail *gdp = allocateGeometry();
+	VRAY_ProceduralGeo proceduralGeo = createGeometry();
+	GU_Detail *gdp = proceduralGeo.get();
+#if UT_MAJOR_VERSION_INT >= 16
+	GU_DetailHandle handle = proceduralGeo.handle();
+#else
 	GU_DetailHandle handle;
+#endif
 	handle.allocateAndSet( (GU_Detail*)gdp, false );
 	bool converted = converter->convert( handle );
 	if ( !converted )
@@ -179,7 +184,8 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 			addGeometry(gdp, 0.0f);
 			while ( !m_renderer->m_motionTimes.empty() )
 			{
-				setPreTransform( convert< UT_Matrix4T<float> >(m_renderer->m_motionTransforms.front()),
+				UT_Matrix4T<float> frontTransform =  convert< UT_Matrix4T<float> >( m_renderer->m_motionTransforms.front() );
+				setPreTransform( UT_Matrix4T<double>( frontTransform ),
 								 m_renderer->m_motionTimes.front() );
 				m_renderer->m_motionTimes.pop_front();
 				m_renderer->m_motionTransforms.pop_front();
@@ -197,7 +203,7 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		m_postBlur = -m_cameraShutter[1] / m_fps;
 		openGeometryObject();
 			addGeometry(gdp, 0.0f);
-			addVelocityBlurGeometry(gdp, m_preBlur, m_postBlur);
+			proceduralGeo.addVelocityBlur(m_preBlur, m_postBlur);
 			applySettings();
 		closeObject();
 		m_renderer->m_motionType = RendererImplementation::Unknown;
@@ -207,7 +213,8 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:None" );
 		openGeometryObject();
 			addGeometry( gdp, 0.0f );
-			setPreTransform( convert< UT_Matrix4T<float> >(m_renderer->m_transformStack.top()), 0.0f);
+			UT_Matrix4T<float> topTransform = convert< UT_Matrix4T<float> >( m_renderer->m_transformStack.top() );
+			setPreTransform( UT_Matrix4T<double>( topTransform ), 0.0f);
 			applySettings();
 		closeObject();
 	}
