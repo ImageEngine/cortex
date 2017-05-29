@@ -302,6 +302,8 @@
 #include "IECorePython/ClippingPlaneBinding.h"
 #include "IECorePython/DataAlgoBinding.h"
 #include "IECorePython/MeshAlgoBinding.h"
+#include "IECorePython/CurvesAlgoBinding.h"
+
 #include "IECore/IECore.h"
 
 using namespace IECorePython;
@@ -598,6 +600,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindClippingPlane();
 	bindDataAlgo();
 	bindMeshAlgo();
+	bindCurvesAlgo();
 
 #ifdef IECORE_WITH_DEEPEXR
 

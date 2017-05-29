@@ -9,35 +9,13 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
+#include "IECore/private/PrimitiveAlgoUtils.h"
 
 using namespace IECore;
 using namespace Imath;
 
 namespace
 {
-
-template< typename T > struct IsArithmeticVectorTypedData : boost::mpl::and_<
-	IECore::TypeTraits::IsNumericBasedVectorTypedData<T>,
-	boost::mpl::not_< IECore::TypeTraits::IsBox<typename TypeTraits::VectorValueType<T>::type > >,
-	boost::mpl::not_< IECore::TypeTraits::IsQuat<typename TypeTraits::VectorValueType<T>::type > >
-> {};
-
-
-struct  AverageValueFromVector
-{
-	typedef DataPtr ReturnType;
-
-	template<typename From> ReturnType operator()( typename From::ConstPtr data )
-	{
-		const typename From::ValueType &src = data->readable();
-		if ( src.size() )
-		{
-			return new TypedData< typename From::ValueType::value_type >( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
-		}
-		return NULL;
-	}
-};
-
 
 struct MeshVertexToUniform
 {
@@ -465,57 +443,19 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 	// average array to single value
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
-		AverageValueFromVector fn;
-		dstData = despatchTypedData<AverageValueFromVector, IsArithmeticVectorTypedData>( srcData, fn );
+		Detail::AverageValueFromVector fn;
+		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+		return;
 	}
 
-	// splat single value into array
-	if ( srcInterpolation == PrimitiveVariable::Constant )
+	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
-		size_t len = mesh->variableSize( interpolation );
-		switch( srcData->typeId() )
+		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
+		if (arrayData)
 		{
-			case IntDataTypeId:
-			{
-				IntVectorDataPtr newData = new IntVectorData();
-				newData->writable().resize( len, static_cast< const IntData * >(srcData)->readable() );
-				primitiveVariable = PrimitiveVariable( interpolation, newData );
-			}
-			break;
-			case FloatDataTypeId:
-			{
-				FloatVectorDataPtr newData = new FloatVectorData();
-				newData->writable().resize( len, static_cast< const FloatData * >(srcData)->readable() );
-				primitiveVariable = PrimitiveVariable( interpolation, newData );
-
-			}
-			break;
-			case V2fDataTypeId:
-			{
-				V2fVectorDataPtr newData = new V2fVectorData();
-				newData->writable().resize( len, static_cast< const V2fData * >(srcData)->readable() );
-				primitiveVariable = PrimitiveVariable( interpolation, newData );
-			}
-			break;
-			case V3fDataTypeId:
-			{
-				V3fVectorDataPtr newData = new V3fVectorData();
-				newData->writable().resize( len, static_cast< const V3fData * >(srcData)->readable() );
-				primitiveVariable = PrimitiveVariable( interpolation, newData );
-			}
-			break;
-			case Color3fDataTypeId:
-			{
-				Color3fVectorDataPtr newData = new Color3fVectorData();
-				newData->writable().resize( len, static_cast< const Color3fData * >(srcData)->readable() );
-				primitiveVariable = PrimitiveVariable( interpolation, newData );
-			}
-			break;
-			default:
-				return ;
+			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
 		}
-
 		return;
 	}
 
@@ -524,12 +464,12 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
 			MeshVertexToUniform fn( mesh );
-			dstData = despatchTypedData<MeshVertexToUniform, IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToUniform fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToUniform, IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 		}
 	}
 	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
@@ -537,12 +477,12 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 		if( srcInterpolation == PrimitiveVariable::Uniform )
 		{
 			MeshUniformToVertex fn( mesh );
-			dstData = despatchTypedData<MeshUniformToVertex, IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToVertex fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToVertex, IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
@@ -552,7 +492,7 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 	else if( interpolation == PrimitiveVariable::FaceVarying )
 	{
 		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
-		dstData = despatchTypedData<MeshAnythingToFaceVarying, IsArithmeticVectorTypedData>( srcData, fn );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
 	}
 
 	primitiveVariable = PrimitiveVariable( interpolation, dstData );
