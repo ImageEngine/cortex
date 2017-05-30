@@ -1,3 +1,28 @@
+9.20.0
+======
+
+Features
+--------
+
+- MeshAlgo :
+  - Added `deleteFaces()` (#575).
+- CurvesAlgo :
+  - Added `resamplePrimitiveVariables()` (#566).
+  - Added `deleteCurves()` (#575).
+- PointsAlgo :
+  - Added `resamplePrimitiveVariables()` (#575).
+
+Improvements
+------------
+
+- IECoreHoudini : Added support for Houdini 16 (#569).
+- IECoreArnold::OutputDriver :
+  - Using output layerName to set channel names (#573).
+  - Improved performance (#574).
+- ClientDisplayDriver (#574) :
+  - Improved performance.
+  - Better error handling.
+
 9.19.0
 ======
 
