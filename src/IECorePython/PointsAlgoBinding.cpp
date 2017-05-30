@@ -54,6 +54,7 @@ void bindPointsAlgo()
 	scope pointsAlgoScope( pointsAlgoModule );
 
 	def( "resamplePrimitiveVariable", &PointsAlgo::resamplePrimitiveVariable );
+	def( "deletePoints", &PointsAlgo::deletePoints );
 }
 
 } // namespace IECorePython

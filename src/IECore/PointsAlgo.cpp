@@ -90,6 +90,83 @@ struct PointsUniformToVertex
 	const PointsPrimitive *m_points;
 };
 
+template<typename U>
+class DeleteFlaggedVertexFunctor
+{
+	public:
+		typedef DataPtr ReturnType;
+
+		DeleteFlaggedVertexFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData ) : m_flagData( flagData )
+		{
+		}
+
+		template<typename T>
+		ReturnType operator()( const T *data )
+		{
+			const typename T::ValueType &inputs = data->readable();
+			const std::vector<U> &flags = m_flagData->readable();
+
+			T *filteredResultData = new T();
+			ReturnType result( filteredResultData );
+
+			typename T::ValueType &filteredResult = filteredResultData->writable();
+
+			filteredResult.reserve( inputs.size() );
+
+			for( size_t i = 0; i < inputs.size(); ++i )
+			{
+				if( !flags[i] )
+				{
+					filteredResult.push_back( inputs[i] );
+				}
+			}
+
+			return result;
+		}
+
+	private:
+		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
+};
+
+template<typename T>
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const typename IECore::TypedData<std::vector<T> > *pointsToKeepData )
+{
+	PointsPrimitivePtr outPointsPrimitive = new PointsPrimitive( 0 );
+
+	DeleteFlaggedVertexFunctor<T> vertexFunctor( pointsToKeepData );
+
+	for( PrimitiveVariableMap::const_iterator it = pointsPrimitive->variables.begin(), e = pointsPrimitive->variables.end(); it != e; ++it )
+	{
+		switch( it->second.interpolation )
+		{
+			case PrimitiveVariable::Vertex:
+			case PrimitiveVariable::Varying:
+			case PrimitiveVariable::FaceVarying:
+			{
+				IECore::Data *inputData = const_cast< IECore::Data * >( it->second.data.get() );
+				IECore::DataPtr ouptputData = despatchTypedData<DeleteFlaggedVertexFunctor<T>, TypeTraits::IsVectorTypedData>( inputData, vertexFunctor );
+				outPointsPrimitive->variables[it->first] = PrimitiveVariable( it->second.interpolation, ouptputData );
+				break;
+			}
+			case PrimitiveVariable::Uniform:
+			case PrimitiveVariable::Constant:
+			case PrimitiveVariable::Invalid:
+			{
+				outPointsPrimitive->variables[it->first] = it->second;
+				break;
+			}
+		}
+	}
+
+	V3fVectorDataPtr positionData = outPointsPrimitive->variableData<V3fVectorData>( "P" );
+	if( positionData )
+	{
+		outPointsPrimitive->setNumPoints( positionData->readable().size() );
+	}
+
+	return outPointsPrimitive;
+}
+
 } // anonymous namespace
 
 namespace IECore
@@ -186,6 +263,40 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 
 	primitiveVariable = PrimitiveVariable( interpolation, result );
 }
+
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToKeep )
+{
+
+	if( pointsToKeep.interpolation != PrimitiveVariable::Vertex )
+	{
+		throw InvalidArgumentException( "PointsAlgo::deletePoints requires a Vertex [Int|Bool|Float]VectorData primitiveVariable " );
+	}
+
+	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( pointsToKeep.data.get() );
+
+	if( intDeleteFlagData )
+	{
+		return ::deletePoints( pointsPrimitive, intDeleteFlagData );
+	}
+
+	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( pointsToKeep.data.get() );
+
+	if( boolDeleteFlagData )
+	{
+		return ::deletePoints( pointsPrimitive, boolDeleteFlagData );
+	}
+
+	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( pointsToKeep.data.get() );
+
+	if( floatDeleteFlagData )
+	{
+		return ::deletePoints( pointsPrimitive, floatDeleteFlagData );
+	}
+
+	throw InvalidArgumentException( "PointsAlgo::deletePoints requires an Vertex [Int|Bool|Float]VectorData primitiveVariable " );
+
+}
+
 
 } //namespace PointsAlgo
 } //namespace IECore

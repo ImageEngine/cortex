@@ -212,6 +212,77 @@ class PointsAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 10 ) ) )
 
+class DeletePointsTest( unittest.TestCase ) :
+	def points( self ) :
+
+		testObject = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+
+		testObject["a"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.5 ) )
+		testObject["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 10 ) ) )
+		testObject["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 0 ] ) )
+		testObject["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 10 ) ) )
+		testObject["e"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 10 ) ) )
+
+		self.assertTrue( testObject.arePrimitiveVariablesValid() )
+
+		return testObject
+
+	def testRaisesExceptionIfPrimitiveVariableTypeIsInvalid(self):
+		points  = self.points()
+		points["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertRaises( RuntimeError, lambda : IECore.PointsAlgo.deletePoints(points, points["delete"]) )
+
+	def testRaisesExceptionIfPrimitiveVariableInterpolationIncorrect(self):
+		points  = self.points()
+		points["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 0 ]  ) )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertRaises( RuntimeError, lambda : IECore.PointsAlgo.deletePoints(points, points["delete"]) )
+
+	def testCanDeleteAllPoints(self):
+		points  = self.points()
+		points["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.BoolVectorData( [True] * 10 ) )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		points = IECore.PointsAlgo.deletePoints(points, points["delete"])
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertEqual( points.numPoints, 0 )
+		self.assertEqual( points["delete"].data, IECore.BoolVectorData() )
+
+	def testPrimitiveVariablesCorrectlyFiltered(self):
+		points  = self.points()
+		points["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [0.0, 1.0] * 5) )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+		points = IECore.PointsAlgo.deletePoints(points, points["delete"])
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertEqual( points.numPoints, 5 )
+		self.assertEqual( points["delete"].data, IECore.FloatVectorData( [0.0] * 5 ) )
+		self.assertEqual( points["delete"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( points["a"].data, IECore.FloatData( 0.5 ) )
+		self.assertEqual( points["a"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant)
+
+		self.assertEqual( points["b"].data, IECore.FloatVectorData( range( 0, 10, 2 ) ) )
+		self.assertEqual( points["b"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex)
+
+		self.assertEqual( points["c"].data, IECore.FloatVectorData( [0] ) )
+		self.assertEqual( points["c"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( points["d"].data, IECore.FloatVectorData( range( 0, 10, 2 ) ) )
+		self.assertEqual( points["d"].interpolation, IECore.PrimitiveVariable.Interpolation.Varying)
+
+		self.assertEqual( points["e"].data, IECore.FloatVectorData( range( 0, 10, 2 ) ) )
+		self.assertEqual( points["e"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying)
+
 
 if __name__ == "__main__":
 	unittest.main()

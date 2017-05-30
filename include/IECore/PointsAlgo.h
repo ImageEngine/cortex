@@ -45,6 +45,10 @@ namespace IECore
 namespace PointsAlgo
 {
 void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
+
+/// create a new PointsPrimitive deleting points from the input PointsPrimitive based on the pointsToDelete vertex (int|float|bool) PrimitiveVariable
+PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete);
+
 } // namespace PointsAlgo
 } // namespace IECore
 
