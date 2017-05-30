@@ -49,6 +49,9 @@ namespace CurvesAlgo
 
 void resamplePrimitiveVariable( const CurvesPrimitive *curvesPrimitive, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
+/// create a new curves primitive deleting curves from the input curves primitive based on the curvesToKeep uniform (int|float|bool) PrimitiveVariable
+CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToKeep);
+
 } // namespace CurveAlgo
 } // namespace IECore
 

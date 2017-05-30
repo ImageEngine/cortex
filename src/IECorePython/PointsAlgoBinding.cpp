@@ -32,65 +32,28 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+
 #include "boost/python.hpp"
 
-#include "IECore/MeshAlgo.h"
-#include "IECorePython/MeshAlgoBinding.h"
+#include "IECore/PointsAlgo.h"
+#include "IECorePython/PointsAlgoBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
+using namespace boost;
 using namespace boost::python;
 using namespace IECore;
-
-// Avoid cluttering the global namespace.
-namespace
-{
-
-// Converts a std::pair instance to a Python tuple.
-template<typename T1, typename T2>
-struct StdPairToTuple
-{
-	static PyObject *convert( std::pair<T1, T2> const &p )
-	{
-		return boost::python::incref(
-			boost::python::make_tuple( p.first, p.second ).ptr()
-		);
-	}
-
-	static PyTypeObject const *get_pytype()
-	{
-		return &PyTuple_Type;
-	}
-};
-
-// Helper for convenience.
-template<typename T1, typename T2>
-struct StdPairToTupleConverter
-{
-	StdPairToTupleConverter()
-	{
-		boost::python::to_python_converter<std::pair<T1, T2>, StdPairToTuple<T1, T2>, true //StdPairToTuple has get_pytype
-										  >();
-	}
-};
-
-} // namespace anonymous
 
 namespace IECorePython
 {
 
-void bindMeshAlgo()
+void bindPointsAlgo()
 {
-	object meshAlgoModule( borrowed( PyImport_AddModule( "IECore.MeshAlgo" ) ) );
-	scope().attr( "MeshAlgo" ) = meshAlgoModule;
+	object pointsAlgoModule( borrowed( PyImport_AddModule( "IECore.PointsAlgo" ) ) );
+	scope().attr( "PointsAlgo" ) = pointsAlgoModule;
 
-	scope meshAlgoScope( meshAlgoModule );
+	scope pointsAlgoScope( pointsAlgoModule );
 
-	StdPairToTupleConverter<IECore::PrimitiveVariable, IECore::PrimitiveVariable>();
-
-	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "uvSet" ) = "st", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
-	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
-	def( "deleteFaces", &MeshAlgo::deleteFaces );
+	def( "resamplePrimitiveVariable", &PointsAlgo::resamplePrimitiveVariable );
 }
 
 } // namespace IECorePython
-
