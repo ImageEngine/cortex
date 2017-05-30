@@ -362,18 +362,18 @@ void DisplayDriverServer::Session::handleReadDataParameters( const boost::system
 		return;
 	}
 
-	// get imageData parameters
-	Box2iDataPtr box;
-	FloatVectorDataPtr data;
-
 	try
 	{
-		MemoryIndexedIOPtr io = new MemoryIndexedIO( m_buffer, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
-		box = boost::static_pointer_cast<Box2iData>( Object::load( io, "box" ) );
-		data = boost::static_pointer_cast<FloatVectorData>( Object::load( io, "data" ) );
+		/// \todo Swap byte order if the sending host has a different order to us.
+		/// We used to send the data via MemoryIndexedIO which would take care of this
+		/// for us, but the overhead of this significantly affected interactive render
+		/// speeds.
+		const Imath::Box2i box = *reinterpret_cast<const Imath::Box2i *>( &m_buffer->readable()[0] );
+		const float *data = reinterpret_cast<const float *>( &m_buffer->readable()[0] + sizeof( box ) );
+		const size_t dataSize = ( m_buffer->readable().size() - sizeof( box ) ) / sizeof( float );
 
 		// call imageData passing the data
-		m_displayDriver->imageData( box->readable(), &(data->readable()[0]), data->readable().size() );
+		m_displayDriver->imageData( box, data, dataSize );
 
 		// prepare for getting more imageData packages or a imageClose.
 		boost::asio::async_read( m_socket,

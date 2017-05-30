@@ -57,8 +57,15 @@ namespace
 // accessed via AiDriverGetLocalData.
 struct LocalData
 {
+
+	LocalData()
+		:	numOutputs( 0 )
+	{
+	}
+
 	DisplayDriverPtr displayDriver;
 	ConstCompoundDataPtr displayDriverParameters;
+	int numOutputs;
 
 	void imageClose()
 	{
@@ -122,6 +129,9 @@ const char **driverExtension()
 
 void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
 {
+	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	localData->numOutputs = 0;
+
 	std::vector<std::string> channelNames;
 
 	CompoundDataPtr parameters = new CompoundData();
@@ -163,6 +173,7 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 				channelNames.push_back( name );
 				break;
 		}
+		localData->numOutputs += 1;
 	}
 
 	/// \todo Make Convert.h
@@ -187,8 +198,6 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	);
 
 	const std::string driverType = AiNodeGetStr( node, "driverType" );
-
-	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
 
 	// We reuse the previous driver if we can - this allows us to use
 	// the same driver for every stage of a progressive render.
@@ -249,46 +258,60 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 	const int numOutputChannels = localData->displayDriver->channelNames().size();
 
+	const float *imageData;
 	std::vector<float> interleavedData;
-	interleavedData.resize( sx * sy * numOutputChannels );
-
-	int pixelType = 0;
-	const void *bucketData;
-	int outChannelOffset = 0;
-	while( AiOutputIteratorGetNext( iterator, 0, &pixelType, &bucketData ) )
+	if( localData->numOutputs == 1 )
 	{
-		int numChannels = 0;
-		switch( pixelType )
-		{
-			case AI_TYPE_RGB :
-			case AI_TYPE_VECTOR :
-			case AI_TYPE_POINT :
-				numChannels = 3;
-				break;
-			case AI_TYPE_RGBA :
-				numChannels = 4;
-				break;
-			case AI_TYPE_FLOAT :
-				numChannels = 1;
-				break;
-		}
+		// Data already has the layout we need.
+		const void *bucketData;
+		AiOutputIteratorGetNext( iterator, NULL, NULL, &bucketData );
+		imageData = (float *)bucketData;
+	}
+	else
+	{
+		// We need to interleave multiple outputs
+		// into a single block for the display driver.
+		interleavedData.resize( sx * sy * numOutputChannels );
 
-		for( int c = 0; c < numChannels; c++ )
+		int pixelType = 0;
+		const void *bucketData;
+		int outChannelOffset = 0;
+		while( AiOutputIteratorGetNext( iterator, 0, &pixelType, &bucketData ) )
 		{
-			float *in = (float *)(bucketData) + c;
-			float *out = &(interleavedData[0]) + outChannelOffset;
-			for( int j = 0; j < sy; j++ )
+			int numChannels = 0;
+			switch( pixelType )
 			{
-				for( int i = 0; i < sx; i++ )
-				{
-					*out = *in;
-					out += numOutputChannels;
-					in += numChannels;
-				}
+				case AI_TYPE_RGB :
+				case AI_TYPE_VECTOR :
+				case AI_TYPE_POINT :
+					numChannels = 3;
+					break;
+				case AI_TYPE_RGBA :
+					numChannels = 4;
+					break;
+				case AI_TYPE_FLOAT :
+					numChannels = 1;
+					break;
 			}
-			outChannelOffset += 1;
+
+			for( int c = 0; c < numChannels; c++ )
+			{
+				float *in = (float *)(bucketData) + c;
+				float *out = &(interleavedData[0]) + outChannelOffset;
+				for( int j = 0; j < sy; j++ )
+				{
+					for( int i = 0; i < sx; i++ )
+					{
+						*out = *in;
+						out += numOutputChannels;
+						in += numChannels;
+					}
+				}
+				outChannelOffset += 1;
+			}
 		}
 
+		imageData = &interleavedData[0];
 	}
 
 	Box2i bucketBox(
@@ -298,7 +321,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 	try
 	{
-		localData->displayDriver->imageData( bucketBox, &(interleavedData[0]), interleavedData.size() );
+		localData->displayDriver->imageData( bucketBox, imageData, sx * sy * numOutputChannels );
 	}
 	catch( const std::exception &e )
 	{
