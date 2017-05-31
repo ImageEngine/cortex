@@ -95,13 +95,6 @@ void IECoreMantra::ProceduralPrimitive::render()
 	m_procedural->render( m_renderer.get() );
 }
 
-void IECoreMantra::ProceduralPrimitive::addChild( ProceduralPrimitive *proc )
-{
-	openProceduralObject();
-		addProcedural( proc );
-	closeObject(); 
-}
-
 void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderablePtr renderable )
 {
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable.get() );
@@ -161,16 +154,12 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:Geometry" );
 		if ( !m_renderer->m_motionTimes.empty() )
 		{
-			if ( (size_t)m_renderer->m_motionSize == m_renderer->m_motionTimes.size() )
-			{
-				openGeometryObject();
-			}
-			addGeometry(gdp, m_renderer->m_motionTimes.front());
+			VRAY_ProceduralChildPtr proceduralGeometryChild = createChild();
+			proceduralGeometryChild->addGeometry(proceduralGeo);
 			m_renderer->m_motionTimes.pop_front();
 			if ( m_renderer->m_motionTimes.empty() )
 			{
-				applySettings();
-				closeObject();
+				applySettings(proceduralGeometryChild);
 			}
 		}
 	}
@@ -180,18 +169,18 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		// It isn't clear that this will give correct results. 
 		// ConcatTransform may need to interpolate transform snapshots.
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:Transform" );
-		openGeometryObject();
-			addGeometry(gdp, 0.0f);
-			while ( !m_renderer->m_motionTimes.empty() )
-			{
-				UT_Matrix4T<float> frontTransform =  convert< UT_Matrix4T<float> >( m_renderer->m_motionTransforms.front() );
-				setPreTransform( UT_Matrix4T<double>( frontTransform ),
-								 m_renderer->m_motionTimes.front() );
-				m_renderer->m_motionTimes.pop_front();
-				m_renderer->m_motionTransforms.pop_front();
-			}
-			applySettings();
-		closeObject();
+		VRAY_ProceduralChildPtr proceduralGeometryChild = createChild();
+		proceduralGeometryChild->addGeometry(proceduralGeo);
+		while ( !m_renderer->m_motionTimes.empty() )
+		{
+			UT_Matrix4T<float> frontTransform =  convert< UT_Matrix4T<float> >( m_renderer->m_motionTransforms.front() );
+			proceduralGeometryChild->setPreTransform( UT_Matrix4T<double>( frontTransform ),
+							 m_renderer->m_motionTimes.front() );
+			m_renderer->m_motionTimes.pop_front();
+			m_renderer->m_motionTransforms.pop_front();
+		}
+		applySettings(proceduralGeometryChild);
+
 		m_renderer->m_motionType = RendererImplementation::Unknown;
 	}
 	else if ( m_renderer->m_motionType == RendererImplementation::Velocity )
@@ -201,26 +190,24 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		import("camera:shutter", m_cameraShutter, 2);
 		m_preBlur = -m_cameraShutter[0] / m_fps;
 		m_postBlur = -m_cameraShutter[1] / m_fps;
-		openGeometryObject();
-			addGeometry(gdp, 0.0f);
-			proceduralGeo.addVelocityBlur(m_preBlur, m_postBlur);
-			applySettings();
-		closeObject();
+		VRAY_ProceduralChildPtr proceduralGeometryChild = createChild();
+		proceduralGeometryChild->addGeometry(proceduralGeo);
+		proceduralGeo.addVelocityBlur(m_preBlur, m_postBlur);
+		applySettings(proceduralGeometryChild);
 		m_renderer->m_motionType = RendererImplementation::Unknown;
 	}
 	else
 	{
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:None" );
-		openGeometryObject();
-			addGeometry( gdp, 0.0f );
-			UT_Matrix4T<float> topTransform = convert< UT_Matrix4T<float> >( m_renderer->m_transformStack.top() );
-			setPreTransform( UT_Matrix4T<double>( topTransform ), 0.0f);
-			applySettings();
-		closeObject();
+		VRAY_ProceduralChildPtr proceduralGeometryChild = createChild();
+		proceduralGeometryChild->addGeometry(proceduralGeo);
+		UT_Matrix4T<float> topTransform = convert< UT_Matrix4T<float> >( m_renderer->m_transformStack.top() );
+		proceduralGeometryChild->setPreTransform( UT_Matrix4T<double>( topTransform ), 0.0f);
+		applySettings(proceduralGeometryChild);
 	}
 }
 
-void IECoreMantra::ProceduralPrimitive::applySettings()
+void IECoreMantra::ProceduralPrimitive::applySettings(VRAY_ProceduralChildPtr child)
 {
 	// Shaders are hidden in the attribute stack with a ':' prefix.
 	// The renderer method Shader() stores them as a full shader invocation string.
@@ -228,7 +215,7 @@ void IECoreMantra::ProceduralPrimitive::applySettings()
 	if ( s_it != m_renderer->m_attributeStack.top().attributes->readable().end() )
 	{
 		ConstStringDataPtr s = runTimeCast<const StringData>( s_it->second );
-		changeSetting("surface", s->readable().c_str(), "object");
+		child->changeSetting("surface", s->readable().c_str(), "object");
 	}
 	CompoundDataMap::const_iterator a_it;
 	for (a_it = m_renderer->m_attributeStack.top().attributes->readable().begin(); 
@@ -242,7 +229,7 @@ void IECoreMantra::ProceduralPrimitive::applySettings()
 		std::string ifd, type;
 		m_renderer->ifdString( a_it->second, ifd, type);
 		/// \todo there are more efficient changeSetting methods  that don't use string values
-		changeSetting( name.c_str(), ifd.c_str() );
+		child->changeSetting( name.c_str(), ifd.c_str() );
 	}
 }
 
