@@ -68,17 +68,23 @@ class ProceduralPrimitive : public VRAY_Procedural
 		virtual void getBoundingBox( UT_BoundingBox &box );
 		virtual void render();
 		// cortex types interface
-		virtual void addChild( ProceduralPrimitive *proc );
 		virtual void addVisibleRenderable ( IECore::VisibleRenderablePtr renderable );
 		
         // mantra data for procedurals
 		Imath::Box3f m_bound;
+#if UT_MAJOR_VERSION_INT >= 16
+		fpreal64 m_cameraShutter[2];
+		fpreal64 m_fps;
+		fpreal64 m_preBlur, m_postBlur;
+#else
 		fpreal m_cameraShutter[2];
 		fpreal m_fps;
 		fpreal m_preBlur, m_postBlur;
+#endif
+
 	
     private:
-		void applySettings();
+		void applySettings(VRAY_ProceduralChildPtr child);
 		// cortex data
 		RendererImplementationPtr m_renderer;
 		IECore::Renderer::ProceduralPtr m_procedural;

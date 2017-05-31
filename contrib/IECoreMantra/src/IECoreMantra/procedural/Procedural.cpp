@@ -114,7 +114,7 @@ public:
 	virtual void	 render();
 #if UT_MAJOR_VERSION_INT >= 16
 	UT_StringHolder m_className;
-	int64 m_classVersion;
+	int32 m_classVersion;
 	UT_StringHolder m_parameterString;
 #else 
 	UT_String m_className;
