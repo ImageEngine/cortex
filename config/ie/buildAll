@@ -42,10 +42,13 @@ def build( extraArgs = [] ) :
 
 def installDocs() :
 	
-	if "RELEASE=1" not in sys.argv :
+	sysArgs = sys.argv[1:]
+	
+	if "RELEASE=1" not in sysArgs :
 		return
 	
 	buildArgs = [ "INSTALL_PREFIX=/software" ]
+	buildArgs.extend( sysArgs )
 	
 	if subprocess.call( [ "scons", "installDoc" ] + buildArgs ) != 0 :
 	
