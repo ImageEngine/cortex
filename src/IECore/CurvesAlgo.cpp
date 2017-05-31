@@ -602,28 +602,28 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 	primitiveVariable = PrimitiveVariable(interpolation, result);
 }
 
-CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToKeep )
+CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete)
 {
-	if( curvesToKeep.interpolation != PrimitiveVariable::Uniform )
+	if( curvesToDelete.interpolation != PrimitiveVariable::Uniform )
 	{
 		throw InvalidArgumentException( "CurvesAlgo::deleteCurves requires an Uniform [Int | Bool | Float]VectorData primitiveVariable " );
 	}
 
-	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( curvesToKeep.data.get() );
+	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( curvesToDelete.data.get() );
 
 	if( intDeleteFlagData )
 	{
 		return ::deleteCurves( curvesPrimitive, intDeleteFlagData );
 	}
 
-	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( curvesToKeep.data.get() );
+	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( curvesToDelete.data.get() );
 
 	if( boolDeleteFlagData )
 	{
 		return ::deleteCurves( curvesPrimitive, boolDeleteFlagData );
 	}
 
-	const FloatVectorData *floatFlagData = runTimeCast<const FloatVectorData>( curvesToKeep.data.get() );
+	const FloatVectorData *floatFlagData = runTimeCast<const FloatVectorData>( curvesToDelete.data.get() );
 
 	if( floatFlagData )
 	{
