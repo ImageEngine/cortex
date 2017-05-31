@@ -75,10 +75,12 @@ public:
 	virtual void	 render();
 #if UT_MAJOR_VERSION_INT >= 16
 	UT_StringHolder m_worldFileName;
+	int32 m_remove;
 #else
 	UT_String m_worldFileName;
-#endif
 	int m_remove;
+#endif
+
 };
 
 static VRAY_ProceduralArg theArgs[] = {
