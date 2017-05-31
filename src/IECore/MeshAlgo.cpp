@@ -738,29 +738,29 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 }
 
 
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToKeep )
+MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
 {
 
-	if( facesToKeep.interpolation != PrimitiveVariable::Uniform )
+	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
 	{
 		throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
 	}
 
-	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToKeep.data.get() );
+	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToDelete.data.get() );
 
 	if( intDeleteFlagData )
 	{
 		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
 	}
 
-	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToKeep.data.get() );
+	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
 
 	if( boolDeleteFlagData )
 	{
 		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
 	}
 
-	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToKeep.data.get() );
+	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
 
 	if( floatDeleteFlagData )
 	{
