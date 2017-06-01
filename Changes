@@ -1,3 +1,24 @@
+9.21.0
+======
+
+Features
+--------
+
+- PointsAlgo :
+  - Added `deletePoints()` (#576).
+
+Fixes
+-----
+
+- MeshAlgo & CurvesAlgo :
+  - Improved argument names (#578).
+- IECoreMantra : Fixed World procedural crash in Houdini 16 (#577).
+
+Build
+-----
+
+- Fixed gcc 4.1 builds
+
 9.20.0
 ======
 
