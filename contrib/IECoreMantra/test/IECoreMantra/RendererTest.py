@@ -152,8 +152,8 @@ class RendererTest( unittest.TestCase ):
 		p = subprocess.Popen( ['mantra', '-V8'], stdin=open('/dev/null'), stdout=subprocess.PIPE )
 		out = p.communicate()[0]
 		self.assertTrue( out )
-		self.failUnless( "Registering procedural 'ieprocedural'" in out )
-		self.failUnless( "Registering procedural 'ieworld'" in out )
+		self.failUnless( "Registering procedural 'ieprocedural'" in out or "adding procedural 'ieprocedural'" in out )
+		self.failUnless( "Registering procedural 'ieworld'" in out or "adding procedural 'ieworld'" in out )
 
 	def testOptions( self ):
 		ifd = _dir + "/output/testOptions.ifd"
@@ -196,12 +196,13 @@ class RendererTest( unittest.TestCase ):
 		self.assertTrue( world )
 		self.assertEquals( world.typeId(), IECore.Group.staticTypeId() )
 		self.assertTrue( world.state() )
-		self.assertEquals( 
-			world.state()[0].attributes[':surface'], 
-			IECore.StringData( 'testshader p2 1.234 p3 "hello" p1 11 p4 1 2 3 p5 1 0 0 ')
+		self.assertItemsEqual(
+			world.state()[0].attributes[':surface'].value.split(" "),
+			IECore.StringData( 'testshader p2 1.234 p3 "hello" p1 11 p4 1 2 3 p5 1 0 0 ').value.split(" ")
 		)
 	
 	def tearDown( self ):
+
 		files = [
 				_dir + "/output/testGeometry.tif",
 				_dir + "/output/testWorldMesh.tif",
@@ -216,7 +217,7 @@ class RendererTest( unittest.TestCase ):
 		for f in files:
 			if os.path.exists( f ):
 				os.remove( f )
-
+	
 if __name__ == "__main__":
 	unittest.main()
 				

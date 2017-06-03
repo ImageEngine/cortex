@@ -65,32 +65,6 @@ static void initialisePython()
 	}
 	Py_Initialize();
 	PyEval_InitThreads();
-		try
-		{
-			g_mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
-			g_mainModuleNamespace = g_mainModule.attr( "__dict__" );
-			string toExecute =
-				"import signal\n"
-				"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
-				"import IECore";
-			
-			handle<> ignored( PyRun_String(
-				toExecute.c_str(),
-				Py_file_input, g_mainModuleNamespace.ptr(),
-				g_mainModuleNamespace.ptr() ) );
-		}
-		catch( const error_already_set &e )
-		{
-			PyErr_Print();
-		}
-		catch( const std::exception &e )
-		{
-			msg( Msg::Error, "ieProcedural initialiser", e.what() );
-		}
-		catch( ... )
-		{
-			msg( Msg::Error, "ieProcedural initialiser", "Caught unknown exception" );
-		}
 	PyEval_ReleaseThread( PyThreadState_Get() );
 }
 
@@ -225,7 +199,7 @@ VRAY_ieProcedural::render()
 	ScopedGILLock giLock;
 	try
 	{
-		object ieCore = g_mainModuleNamespace["IECore"];
+		object ieCore = object( handle<>( borrowed( PyImport_ImportModule("IECore") ) ) );
 		object classLoader = ieCore.attr( "ClassLoader" ).attr( "defaultProceduralLoader" )();
 		object procedural = classLoader.attr( "load" )( m_className.buffer(), m_classVersion )();
 		boost::python::list params;
