@@ -201,6 +201,7 @@ IECoreMantra::RendererImplementation::~RendererImplementation()
 			if ( pclose(m_fpipe) == -1 )
 			{
 				msg( Msg::Error, "IECoreMantra::RendererImplementation::~RendererImplementation()", "pclose error" );
+				m_fpipe = NULL;
 			}
 		}
 		else if ( m_mode == IfdGen )
@@ -208,6 +209,7 @@ IECoreMantra::RendererImplementation::~RendererImplementation()
 			if ( fclose(m_fpipe) != 0 )
 			{
 				msg( Msg::Error, "IECoreMantra::RendererImplementation::~RendererImplementation()", "fclose error" );
+				m_fpipe = NULL;
 			}
 		}
 	}
@@ -567,6 +569,7 @@ void IECoreMantra::RendererImplementation::worldEnd()
 	{	
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "pclose error" );
 	}
+	m_fpipe = NULL;
 }
 
 void IECoreMantra::RendererImplementation::transformBegin()
