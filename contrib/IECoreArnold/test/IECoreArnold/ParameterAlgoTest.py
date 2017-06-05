@@ -97,5 +97,17 @@ class ParameterAlgoTest( unittest.TestCase ) :
 				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
 			)
 
+	def testStringArray( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "polymesh" )
+			IECoreArnold.ParameterAlgo.setParameter( n, "trace_sets", IECore.StringVectorData( [ "a", "b" ] ) )
+
+			a = arnold.AiNodeGetArray( n, "trace_sets" )
+			self.assertEqual( a.contents.nelements, 2 )
+			self.assertEqual( arnold.AiArrayGetStr( a, 0 ), "a" )
+			self.assertEqual( arnold.AiArrayGetStr( a, 1 ), "b" )
+
 if __name__ == "__main__":
     unittest.main()
