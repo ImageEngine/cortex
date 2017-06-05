@@ -59,7 +59,7 @@ class LiveScene : public IECore::SceneInterface
 		
 		LiveScene();
 		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
-		
+
 		virtual ~LiveScene();
 		
 		virtual std::string fileName() const;
@@ -137,10 +137,17 @@ class LiveScene : public IECore::SceneInterface
 		// The functions will be called during hasTag and readTags.
 		// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
-		
+
+
+	protected :
+
+		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath,  const LiveScene& parent);
+
+		virtual LiveScenePtr create() const;
+		virtual LiveScenePtr duplicate( const UT_String &nodePath, const Path &contentPath, const Path &rootPath) const;
+
 	private :
-		
-		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime, DetailSplitter *splitter );
+
 		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
 		
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
