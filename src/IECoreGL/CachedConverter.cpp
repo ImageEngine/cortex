@@ -67,20 +67,20 @@ struct CacheKey
 		: object( o ), hash( o->hash() )
 	{
 	}
-	
+
 	bool operator == ( const CacheKey &other ) const
 	{
 		return hash == other.hash;
 	}
-	
+
 	mutable const IECore::Object *object;
 	IECore::MurmurHash hash;
-	
+
 };
 
-inline size_t tbb_hasher( const CacheKey &cacheKey )
+inline size_t hash_value( const CacheKey &cacheKey )
 {
-	return tbb_hasher( cacheKey.hash );
+	return hash_value( cacheKey.hash );
 }
 
 } // namespace
@@ -91,7 +91,7 @@ struct CachedConverter::MemberData
 		:	cache( getter, boost::bind( &MemberData::removalCallback, this, ::_1, ::_2 ), maxMemory )
 	{
 	}
-	
+
 	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
@@ -113,16 +113,16 @@ struct CachedConverter::MemberData
 		key.object = 0;
 		return converter->convert();
 	}
-	
+
 	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )
 	{
 		deferredRemovals.push_back( value );
 	}
-	
+
 	typedef IECore::LRUCache<CacheKey, IECore::RunTimeTypedPtr> Cache;
 	Cache cache;
 	std::vector<IECore::RunTimeTypedPtr> deferredRemovals;
-	
+
 };
 
 CachedConverter::CachedConverter( size_t maxMemory )
