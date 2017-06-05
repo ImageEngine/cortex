@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,28 +32,52 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_TOALEMBICMESHCONVERTER_H
+#define IECOREALEMBIC_TOALEMBICMESHCONVERTER_H
+
+#include "Alembic/AbcGeom/OPolyMesh.h"
+#include "Alembic/AbcGeom/OSubD.h"
+
+#include "IECoreAlembic/ToAlembicConverter.h"
+#include "IECoreAlembic/Export.h"
+
+namespace IECore
+{
+IE_CORE_FORWARDDECLARE( MeshPrimitive );
+} // namespace IECore
 
 namespace IECoreAlembic
 {
 
-enum TypeId
+class IECOREALEMBIC_API ToAlembicMeshConverter : public ToAlembicConverter
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	ToAlembicConverterTypeId = 112007,
-	ToAlembicMeshConverterTypeId = 112008,
-	ToAlembicCameraConverterTypeId = 112009,
-	
-	LastCoreAlembicTypeId = 112999,
+
+	public :
+
+		typedef IECore::MeshPrimitive InputType;
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToAlembicMeshConverter, ToAlembicMeshConverterTypeId, ToAlembicConverter );
+
+		ToAlembicMeshConverter( Alembic::Abc::OObject transform );
+		virtual ~ToAlembicMeshConverter();
+
+	protected :
+
+		virtual void ensureAlembicObject( Alembic::Abc::OObject &transform );
+		virtual void updateTimeSampling( Alembic::Abc::TimeSamplingPtr timeSampling );
+		virtual void writeAlembicObject();
+
+	private :
+
+		static ConverterDescription<ToAlembicMeshConverter> g_description;
+
+		Alembic::AbcGeom::OPolyMesh m_polyMesh;
+		Alembic::AbcGeom::OSubD m_subD;
+
 };
+
+IE_CORE_DECLAREPTR( ToAlembicMeshConverter );
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_TOALEMBICMESHCONVERTER_H

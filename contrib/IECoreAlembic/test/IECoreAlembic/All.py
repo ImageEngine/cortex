@@ -40,8 +40,7 @@ import IECore
 
 warnings.simplefilter( "error", DeprecationWarning )
 
-from AlembicInputTest import AlembicInputTest
-from ABCToMDCTest import ABCToMDCTest
+from AlembicSceneTest import AlembicSceneTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

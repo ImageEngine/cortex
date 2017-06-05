@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2015, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,28 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_TYPEIDS_H
-#define IECOREALEMBIC_TYPEIDS_H
+#ifndef IECOREALEMBIC_TOALEMBICCONVERTER_INL
+#define IECOREALEMBIC_TOALEMBICCONVERTER_INL
+
+#include "IECoreAlembic/ToAlembicConverter.h"
 
 namespace IECoreAlembic
 {
 
-enum TypeId
+template<class T>
+ToAlembicConverter::ConverterDescription<T>::ConverterDescription()
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-	AlembicSceneTypeId = 112006,
-	ToAlembicConverterTypeId = 112007,
-	ToAlembicMeshConverterTypeId = 112008,
-	ToAlembicCameraConverterTypeId = 112009,
-	
-	LastCoreAlembicTypeId = 112999,
-};
+	creators()[T::InputType::staticTypeId()] = &creator;
+}
+
+template<class T>
+ToAlembicConverterPtr ToAlembicConverter::ConverterDescription<T>::creator( Alembic::Abc::OObject object )
+{
+	return new T( object );
+}
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_TYPEIDS_H
+#endif // IECOREALEMBIC_TOALEMBICCONVERTER_INL
