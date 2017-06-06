@@ -36,16 +36,13 @@ import _IECoreArnold
 
 class UniverseBlock :
 
-	def __init__( self, writable = None ) :
+	def __init__( self, writable ) :
 
 		self.__writable = writable
 
 	def __enter__( self ) :
 
-		if self.__writable is None :
-			self.__universeBlock = _IECoreArnold._UniverseBlock()
-		else :
-			self.__universeBlock = _IECoreArnold._UniverseBlock( self.__writable )
+		self.__universeBlock = _IECoreArnold._UniverseBlock( self.__writable )
 
 	def __exit__( self, type, value, traceBack ) :
 

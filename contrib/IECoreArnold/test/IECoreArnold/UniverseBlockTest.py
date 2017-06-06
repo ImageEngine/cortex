@@ -49,11 +49,11 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 		self.failIf( arnold.AiUniverseIsActive() )
 
-		with IECoreArnold.UniverseBlock() :
+		with IECoreArnold.UniverseBlock( writable = False ) :
 
 			self.failUnless( arnold.AiUniverseIsActive() )
 
-			with IECoreArnold.UniverseBlock() :
+			with IECoreArnold.UniverseBlock( writable = False ) :
 
 				self.failUnless( arnold.AiUniverseIsActive() )
 

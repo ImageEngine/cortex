@@ -39,7 +39,6 @@
 #include "boost/tokenizer.hpp"
 #include "boost/filesystem/operations.hpp"
 
-#include "IECore/ClassData.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
 
@@ -92,24 +91,10 @@ void begin()
 tbb::spin_mutex g_mutex;
 int g_count = 0;
 bool g_haveWriter = false;
-ClassData<UniverseBlock, bool> g_writable;
 
 } // namespace
 
-UniverseBlock::UniverseBlock()
-{
-	// Deprecated constructor existed before the
-	// writeable concept, so for backwards compatibility
-	// we register as read only.
-	init( /* writable = */ false );
-}
-
 UniverseBlock::UniverseBlock( bool writable )
-{
-	init( writable );
-}
-
-void UniverseBlock::init( bool writable )
 {
 	tbb::spin_mutex::scoped_lock lock( g_mutex );
 
@@ -124,7 +109,7 @@ void UniverseBlock::init( bool writable )
 			g_haveWriter = true;
 		}
 	}
-	g_writable.create( this, writable );
+	m_writable = writable;
 
 	g_count++;
 	if( AiUniverseIsActive() )
@@ -140,7 +125,7 @@ UniverseBlock::~UniverseBlock()
 	tbb::spin_mutex::scoped_lock lock( g_mutex );
 
 	g_count--;
-	if( g_writable[this] )
+	if( m_writable )
 	{
 		g_haveWriter = false;
 		// We _must_ call AiEnd() to clean up ready
@@ -162,5 +147,4 @@ UniverseBlock::~UniverseBlock()
 			begin();
 		}
 	}
-	g_writable.erase( this );
 }
