@@ -72,8 +72,6 @@ class IECORE_API CompoundParameter : public Parameter
 		/// of all the child objects.
 		/// \threading It is not safe to call this from multiple concurrent threads.
 		virtual const Object *defaultValue() const;
-		/// \deprecated Use getPresets instead.
-		virtual const PresetsContainer &presets() const;
 		/// If true was passed to adoptChildPresets at construction, then update the presets
 		/// with the intersection of the presets of all the child parameters, otherwise returns
 		/// an empty container or the presets defined by setPresets(). 

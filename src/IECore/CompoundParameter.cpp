@@ -72,11 +72,6 @@ const Object *CompoundParameter::defaultValue() const
 	return value;
 }
 
-const Parameter::PresetsContainer &CompoundParameter::presets() const
-{
-	return getPresets();
-}
-
 const Parameter::PresetsContainer &CompoundParameter::getPresets() const
 {
 	if( !m_adoptChildPresets )

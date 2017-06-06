@@ -146,7 +146,7 @@ def __formatParameter( parm, formatter ) :
 
 	d = parm.defaultValue
 	defaultPresetName = None
-	for k, v in parm.presets().items() :
+	for k, v in parm.getPresets().items() :
 		if d == v :
 			defaultPresetName = k
 			break

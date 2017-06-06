@@ -91,11 +91,6 @@ const Object *Parameter::defaultValue() const
 	return m_defaultValue.get();
 }
 
-const Parameter::PresetsContainer &Parameter::presets() const
-{
-	return getPresets();
-}
-
 const Parameter::PresetsContainer &Parameter::getPresets() const
 {
 	return m_presets;
