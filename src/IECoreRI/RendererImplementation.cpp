@@ -202,11 +202,8 @@ void IECoreRI::RendererImplementation::constructCommon()
 
 	m_setAttributeHandlers["ri:shadingRate"] = &IECoreRI::RendererImplementation::setShadingRateAttribute;
 	m_setAttributeHandlers["ri:matte"] = &IECoreRI::RendererImplementation::setMatteAttribute;
-	m_setAttributeHandlers["ri:color"] = &IECoreRI::RendererImplementation::setColorAttribute;
 	m_setAttributeHandlers["color"] = &IECoreRI::RendererImplementation::setColorAttribute;
-	m_setAttributeHandlers["ri:opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
 	m_setAttributeHandlers["opacity"] = &IECoreRI::RendererImplementation::setOpacityAttribute;
-	m_setAttributeHandlers["ri:sides"] = &IECoreRI::RendererImplementation::setSidesAttribute;
 	m_setAttributeHandlers["doubleSided"] = &IECoreRI::RendererImplementation::setDoubleSidedAttribute;
 	m_setAttributeHandlers["rightHandedOrientation"] = &IECoreRI::RendererImplementation::setRightHandedOrientationAttribute;
 	m_setAttributeHandlers["ri:geometricApproximation:motionFactor"] = &IECoreRI::RendererImplementation::setGeometricApproximationAttribute;
@@ -229,7 +226,6 @@ void IECoreRI::RendererImplementation::constructCommon()
 	m_commandHandlers["clippingPlane"] = &IECoreRI::RendererImplementation::clippingPlaneCommand;
 	m_commandHandlers["ri:readArchive"] = &IECoreRI::RendererImplementation::readArchiveCommand;
 	m_commandHandlers["ri:archiveRecord"] = &IECoreRI::RendererImplementation::archiveRecordCommand;
-	m_commandHandlers["ri:illuminate"] = &IECoreRI::RendererImplementation::illuminateCommand;
 
 	m_motionType = None;
 	m_numDisplays = 0;
@@ -895,7 +891,7 @@ void IECoreRI::RendererImplementation::setColorAttribute( const std::string &nam
 	ConstColor3fDataPtr f = runTimeCast<const Color3fData>( d );
 	if( !f )
 	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:color attribute expects a Color3fData value." );
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "color attribute expects a Color3fData value." );
 		return;
 	}
 
@@ -907,23 +903,11 @@ void IECoreRI::RendererImplementation::setOpacityAttribute( const std::string &n
 	ConstColor3fDataPtr f = runTimeCast<const Color3fData>( d );
 	if( !f )
 	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:opacity attribute expects a Color3fData value." );
+		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "opacity attribute expects a Color3fData value." );
 		return;
 	}
 
 	RiOpacity( (RtFloat *)&(f->readable().x) );
-}
-
-void IECoreRI::RendererImplementation::setSidesAttribute( const std::string &name, IECore::ConstDataPtr d )
-{
-	ConstIntDataPtr f = runTimeCast<const IntData>( d );
-	if( !f )
-	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::setAttribute", "ri:sides attribute expects an IntData value." );
-		return;
-	}
-
-	RiSides( f->readable() );
 }
 
 void IECoreRI::RendererImplementation::setDoubleSidedAttribute( const std::string &name, IECore::ConstDataPtr d )
@@ -2267,33 +2251,6 @@ IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const st
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord \"record\" parameter appears to contain printf format specifiers." );
 	}
-	return 0;
-}
-
-IECore::DataPtr IECoreRI::RendererImplementation::illuminateCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
-{
-	ScopedContext scopedContext( m_context );
-
-	ConstStringDataPtr handleData = 0;
-	ConstBoolDataPtr stateData = 0;
-	CompoundDataMap::const_iterator handleIt = parameters.find( "handle" );
-	CompoundDataMap::const_iterator stateIt = parameters.find( "state" );
-	if( handleIt!=parameters.end() )
-	{
-		handleData = runTimeCast<StringData>( handleIt->second );
-	}
-	if( stateIt!=parameters.end() )
-	{
-		stateData = runTimeCast<BoolData>( stateIt->second );
-	}
-
-	if( !(handleData && stateData) )
-	{
-		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:illuminate command expects a StringData value called \"handle\" and a BoolData value called \"state\"." );
-		return 0;
-	}
-
-	RiIlluminate( (void *)handleData->readable().c_str(), stateData->readable() );
 	return 0;
 }
 

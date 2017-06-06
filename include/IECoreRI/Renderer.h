@@ -168,16 +168,6 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// \li <b>"ri:matte" BoolData</b><br>
 		/// Passed to RiMatte.
 		///
-		/// \li <b>"ri:color" Color3fData</b><br>
-		/// \deprecated Use "color" in preference to "ri:color"
-		///
-		/// \li <b>"ri:opacity" Color3fData</b><br>
-		/// \deprecated Use "opacity" in preference to "ri:opacity"
-		///
-		/// \li <b>"ri:sides" IntData</b><br>
-		/// Passed to RiSides
-		/// \deprecated Use "doubleSided" in preference to "ri:sides"
-		///
 		/// \li <b>"ri:geometricApproximation:motionFactor" and ri:geometricApproximation:focusFactor" FloatData</b><br>
 		///	Passed to RiGeometricApproximation.
 		///
@@ -288,11 +278,6 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
 		/// "record".
 		///
-		/// "ri:illuminate"
-		/// Calls RiIlluminate. Expects a StringData parameter called "handle" and a BoolData parameter
-		/// called "state" with the light state. This is provided as a stopgap until the Renderer base class specifies
-		/// an specific illuminate method.
-		/// \deprecated Use the illuminate method instead of the ri:illuminate command.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
 
 		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
