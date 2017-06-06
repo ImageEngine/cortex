@@ -84,20 +84,6 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		# We can't see the menu if its on the field...
 		self._addPopupMenu( parentUI=self.__label, attributeName = self.plugName() )
 		maya.cmds.connectControl( self.__textField, self.plugName() )
-
-	## \deprecated
-	def openDialog( self ) :
-		
-		warnings.warn( "PathParameterUI.openDialog() is deprecated, please implement _filePicker() instead if you need to customise the dialog/returned path.", DeprecationWarning, 2 )
-		
-		dialogPath = self._initialPath()
-		
-		dialogPath = os.path.expandvars( dialogPath )
-		dialogPath = os.path.join( dialogPath, '*' )
-		
-		selection = maya.cmds.fileDialog( directoryMask=dialogPath ).encode('ascii')
-		
-		return selection
 	
 	## This can be implemented in derived classes to show a customised file picker.
 	## Typically, you would call the base class passing additional kw arguments,
@@ -105,32 +91,23 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 	## "callback" will be set to appropriate values depending on the parameter.
 	def _fileDialog( self, **kw ) :
 		
-		if not kw:
-	
-			## \todo Remove at some suitable point, once we're happy no one is relying on
-			## a custom openDialog implementation to achieve their desired functionality.
-			warnings.warn( "PathParameterUI.openDialog() is deprecated, please implement _filePicker() instead if you need to customise the dialog/returned path.", DeprecationWarning, 2 )
-			self.openDialog()
-	
-		else:
-		
-			# Allow a class to enforce a path if the default behaviour for
-			# using existing paths or the default userData path is not desired.
-			if "path" not in kw:
-				kw["path"] = self._initialPath()
+		# Allow a class to enforce a path if the default behaviour for
+		# using existing paths or the default userData path is not desired.
+		if "path" not in kw:
+			kw["path"] = self._initialPath()
 
-			# Allow the parameter userData to override the key from the caller.
-			# This is a little different in concept to the path, but they key is
-			# never dynamic in terms of the parameter, so I think it makes sense.
-			uiUserData = self.parameter.userData().get( 'UI', {} )
-			key = uiUserData.get( 'fileDialogKey', IECore.StringData() ).value
-			if key:
-				kw["key"] = key
+		# Allow the parameter userData to override the key from the caller.
+		# This is a little different in concept to the path, but they key is
+		# never dynamic in terms of the parameter, so I think it makes sense.
+		uiUserData = self.parameter.userData().get( 'UI', {} )
+		key = uiUserData.get( 'fileDialogKey', IECore.StringData() ).value
+		if key:
+			kw["key"] = key
 
-			if "callback" not in kw:
-				kw["callback"] = self.__defaultFileDialogCallback
+		if "callback" not in kw:
+			kw["callback"] = self.__defaultFileDialogCallback
 
-			IECoreMaya.FileDialog( **kw )	
+		IECoreMaya.FileDialog( **kw )
 	
 	# Simply sets the parameter value
 	def __defaultFileDialogCallback( self, selection ) :
