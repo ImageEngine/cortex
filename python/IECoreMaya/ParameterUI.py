@@ -117,11 +117,11 @@ class ParameterUI( IECoreMaya.UIElement ) :
 				# Top-level parameter comes through into here without a name
 				n = self.nodeName() + ".parameters"
 
-			return IECoreMaya.mel( "interToUI(\"" + n + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + n + "\")" ).value
 
 		else :
 
-			return IECoreMaya.mel( "interToUI(\"" + self.parameter.name + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + self.parameter.name + "\")" ).value
 
 	## Computes a wrapped annotation/tooltip for the ui
 	def description( self ):
@@ -156,10 +156,10 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			for m in existingMenus :
 				maya.cmds.deleteUI( m, menu=True )
 
-		IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, useInterToUI=False )
+		IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI )
 		
 		if "button1" in kw and kw["button1"] :
-			IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1, useInterToUI=False )
+			IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1 )
 
 	## Returns an IECore.MenuDefinition used to create a popup menu for the ParameterUI. This may
 	# be overridden by derived classes to add their own menu items. In this case they should first

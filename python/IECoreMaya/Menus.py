@@ -68,7 +68,7 @@ def createCortexMenu() :
 	)
 	
 	global __cortexMenu
-	__cortexMenu = IECoreMaya.createMenu( m, "MayaWindow", "Cortex" )
+	__cortexMenu = IECoreMaya.Menu( m, "MayaWindow", "Cortex" )._topLevelUI()
 	
 def removeCortexMenu() :
 

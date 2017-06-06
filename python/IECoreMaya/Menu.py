@@ -60,17 +60,10 @@ class Menu( UIElement ) :
 	# specifies the mouse button which may be used to raise a popup menu, in the same format as
 	# expected by the maya.cmds.popupMenu() command.
 	#
-	# useInterToUI :
-	# determines whether or not the interToUI mel command is used when creating menu labels from the
-	# paths in the definition. default to True but may well be defaulted to False in a future version
-	# and then deprecated.
-	#
 	# replaceExistingMenu :
 	# determines whether we add the menu as a submenu, or overwrite the contents of the existing menu
 	# (if the parent is a menu)
-	#
-	# \todo Change useInterToUI default value to False and deprecate its use.
-	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, useInterToUI = True, replaceExistingMenu = False ) :
+	def __init__( self, definition, parent, label="", insertAfter=None, radialPosition=None, button = 3, replaceExistingMenu = False ) :
 
 		menu = None
 		if maya.cmds.window( parent, query=True, exists=True ) or maya.cmds.menuBarLayout( parent, query=True, exists=True ) :
@@ -80,7 +73,7 @@ class Menu( UIElement ) :
 			if replaceExistingMenu:
 				# parent is a menu - we're appending to it:
 				menu = parent
-				self.__postMenu( menu, definition, useInterToUI )
+				self.__postMenu( menu, definition )
 			else:
 				# parent is a menu - we're adding a submenu
 				kw = {}
@@ -93,7 +86,7 @@ class Menu( UIElement ) :
 			# assume parent is a control which can accept a popup menu
 			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
 
-		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition, useInterToUI ) )
+		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition ) )
 		
 		UIElement.__init__( self, menu )
 	
@@ -105,7 +98,7 @@ class Menu( UIElement ) :
 			# presumably a command in string form
 			return cb
 
-	def __postMenu( self, parent, definition, useInterToUI, *args ) :
+	def __postMenu( self, parent, definition, *args ) :
 
 		if callable( definition ) :
 			definition = definition()
@@ -118,17 +111,12 @@ class Menu( UIElement ) :
 			pathComponents = path.strip( "/" ).split( "/" )
 			name = pathComponents[0]
 
-			if useInterToUI :
-				label = maya.mel.eval( 'interToUI( "%s" )' % name )
-			else :
-				label = name
-				
 			if len( pathComponents ) > 1 :
 				# a submenu
 				if not name in done :
-					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, tearOff=True )
+					subMenu = maya.cmds.menuItem( label=name, subMenu=True, allowOptionBoxes=True, parent=parent, tearOff=True )
 					subMenuDefinition = definition.reRooted( "/" + name + "/" )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition, useInterToUI ) )
+					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition ) )
 					done.add( name )
 			else :
 			
@@ -146,8 +134,8 @@ class Menu( UIElement ) :
 
 				elif item.subMenu :
 
-					subMenu = maya.cmds.menuItem( label=label, subMenu=True, allowOptionBoxes=True, parent=parent, **kw )
-					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu, useInterToUI ) )
+					subMenu = maya.cmds.menuItem( label=name, subMenu=True, allowOptionBoxes=True, parent=parent, **kw )
+					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, item.subMenu ) )
 
 				else :
 
@@ -160,16 +148,8 @@ class Menu( UIElement ) :
 						checked = checked()
 						kw["checkBox"] = checked
 					
-					menuItem = maya.cmds.menuItem( label=label, parent=parent, enable=active, annotation=item.description, **kw )
+					menuItem = maya.cmds.menuItem( label=name, parent=parent, enable=active, annotation=item.description, **kw )
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )
 					if item.secondaryCommand :
 						optionBox = maya.cmds.menuItem( optionBox=True, enable=active, command=self.__wrapCallback( item.secondaryCommand ), parent=parent )
-
-
-# \deprecated Use IECoreMaya.Menu instead.
-# \todo Remove for next major version.
-def createMenu( *args, **kw ) :
-
-	return Menu( *args, **kw )._topLevelUI()
-
