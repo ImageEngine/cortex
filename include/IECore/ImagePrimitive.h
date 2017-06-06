@@ -93,9 +93,8 @@ class IECORE_API ImagePrimitive : public Primitive
 		IE_CORE_DECLAREOBJECT( ImagePrimitive, Primitive );
 
 		/// construct an ImagePrimitive with no area consumed
-		/// \deprecated There is no default display window which makes sense for an image primitive. We only need this so that we can
-		/// created an object during file reading, or for the default values of ImagePrimitiveParameters
-		/// \todo Try and make this constructor protected so that only the Object loading can call it.
+		/// Used to create an object during file reading and for the default values of ImagePrimitiveParameters
+		/// \todo Port FormatData from Gaffer and use the default format within this constructor.
 		ImagePrimitive();
 
 		/// Construct an ImagePrimitive with the given data and display window dimensions. The constructed image will have
