@@ -45,8 +45,6 @@ using namespace IECore;
 static IndexedIO::EntryID g_valueEntry("value");
 static IndexedIO::EntryID g_sizeEntry("size");
 
-LongVectorDataAlias::TypeDescription<IntVectorData> LongVectorDataAlias::m_typeDescription( LongVectorDataTypeId, "LongVectorData" );
-
 #define IE_CORE_DEFINEVECTORTYPEDDATAMEMUSAGESPECIALISATION( TNAME )										\
 	template<>																								\
 	void TNAME::memoryUsage( Object::MemoryAccumulator &accumulator ) const			\

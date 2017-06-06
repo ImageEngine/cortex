@@ -43,8 +43,6 @@ namespace IECore
 
 static IndexedIO::EntryID g_valueEntry("value");
 
-LongDataAlias::TypeDescription<IntData> LongDataAlias::m_typeDescription( LongDataTypeId, "LongData" );
-
 #define IE_CORE_DEFINEBASETYPEDDATAIOSPECIALISATION( TNAME, N, FALLBACKNAME )	\
 	template<> \
 	void TNAME::save( SaveContext *context ) const \

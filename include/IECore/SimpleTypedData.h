@@ -95,16 +95,6 @@ IECORE_DECLARE_TYPEDDATA( QuatdData, Imath::Quatd, double, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3fData, LineSegment3f, float, SimpleDataHolder )
 IECORE_DECLARE_TYPEDDATA( LineSegment3dData, LineSegment3d, double, SimpleDataHolder )
 
-/// \deprecated This class allows data of the obsolete typeId LongDataTypeId or typename "LongData" to register
-/// itself with an IntData constructor to the Object factory. This allows temporary backwards compatibility (since
-/// long and int were both 32-bits wide on 32-bit platforms)
-class IECORE_API LongDataAlias : private IntData
-{
-	protected:
-		static TypeDescription<IntData> m_typeDescription;
-		~LongDataAlias() {};
-};
-
 } // namespace IECore
 
 #endif // IECORE_SIMPLETYPEDDATA_H
