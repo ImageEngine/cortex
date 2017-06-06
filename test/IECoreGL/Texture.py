@@ -100,7 +100,7 @@ class TestTexture( unittest.TestCase ) :
 				}
 			)
 			
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 	def testEmptyStringShaderParameter( self ) :
 	

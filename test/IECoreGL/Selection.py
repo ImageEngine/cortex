@@ -55,15 +55,15 @@ class TestSelection( unittest.TestCase ) :
 
 			r.setAttribute( "name", IECore.StringData( "one" ) )
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "two" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "three" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
@@ -88,22 +88,22 @@ class TestSelection( unittest.TestCase ) :
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "red" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) } )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 4, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "green" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 4, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "blue" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 1, 1 ) ) } )
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, -4, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "white" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
@@ -135,19 +135,19 @@ class TestSelection( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 			
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
@@ -170,7 +170,7 @@ class TestSelection( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "ball" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 			
 		scene = r.scene()
 		scene.setCamera( IECoreGL.OrthographicCamera() )
@@ -196,19 +196,19 @@ class TestSelection( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 			
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
@@ -237,19 +237,19 @@ class TestSelection( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backLeft" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "frontRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 			
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
@@ -399,11 +399,11 @@ class TestSelection( unittest.TestCase ) :
 
 			r.setAttribute( "name", IECore.StringData( "one" ) )
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "two" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 		scene = r.scene()
 		scene.setCamera( None )
@@ -433,13 +433,13 @@ class TestSelection( unittest.TestCase ) :
 
 			r.setAttribute( "name", IECore.StringData( "selectableObj" ) )
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 			r.setAttribute( "name", IECore.StringData( "unselectableObj" ) )
 			r.setAttribute( "gl:primitive:selectable", IECore.BoolData( False ) )
 
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
@@ -492,7 +492,7 @@ class TestSelection( unittest.TestCase ) :
 			)
 
 			r.setAttribute( "name", IECore.StringData( "sphere" ) )
-			r.geometry( "sphere", {}, {} )
+			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )

@@ -265,15 +265,15 @@ class TestRenderer( unittest.TestCase ) :
 		r.attributeBegin()
 
 		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 1 ), "blue" : FloatData( 0 ) } )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 
 		r.attributeEnd()
 
 		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 
 		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 
 		r.worldEnd()
 
@@ -312,7 +312,9 @@ class TestRenderer( unittest.TestCase ) :
 		r.attributeBegin()
 
 		# should make red, green and blue spheres
-		r.geometry( "sphere", {}, {
+		r.sphere(
+			1, -1, 1, 360,
+			{
 				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
 				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
 				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
@@ -322,7 +324,9 @@ class TestRenderer( unittest.TestCase ) :
 		r.attributeEnd()
 
 		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {
+		r.sphere(
+			1, -1, 1, 360,
+			{
 				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
 				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
 				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
@@ -330,7 +334,9 @@ class TestRenderer( unittest.TestCase ) :
 		)
 
 		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {
+		r.sphere(
+			1, -1, 1, 360,
+			{
 				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
 				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
 				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
@@ -455,7 +461,7 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldBegin()
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 		r.worldEnd()
 
 		s = r.scene()
@@ -723,7 +729,7 @@ class TestRenderer( unittest.TestCase ) :
 			renderer.transformBegin()
 			renderer.concatTransform( M44f.createTranslated(V3f( 0, 0.5, 0 )) )
 			renderer.concatTransform( M44f.createScaled( V3f(0.5) ) )
-			renderer.geometry( "sphere", {}, {} )
+			renderer.sphere( 1, -1, 1, 360, {} )
 			renderer.transformEnd()
 			# end of recursion
 			if self.__level < self.maxLevel :
@@ -954,12 +960,12 @@ class TestRenderer( unittest.TestCase ) :
 		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
 		r.transformBegin()
 		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 		r.transformEnd()
 		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 		r.instanceEnd()
 
 		r.instanceBegin( "instanceB", {} )
