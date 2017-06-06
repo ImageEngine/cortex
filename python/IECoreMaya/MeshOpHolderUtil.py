@@ -326,7 +326,7 @@ def create( meshDagPath, className, classVersion, **kw):
 		sel.getDagPath( 0,  meshDagPath)
 		meshDagPath.extendToShape()
 
-	constructionHistoryEnabled = IECoreMaya.mel("constructionHistory -q -tgl").value
+	constructionHistoryEnabled = maya.mel.eval("constructionHistory -q -tgl").value
 
 	if not __hasHistory( meshDagPath ) and constructionHistoryEnabled == 0:
 

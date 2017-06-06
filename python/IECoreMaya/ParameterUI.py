@@ -276,7 +276,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		melCmd = 'showEditor "' + node + '"'
 
-		IECoreMaya.mel( melCmd.encode('ascii') )
+		maya.mel.eval( melCmd.encode('ascii') )
 
 	def __deleteNode( self, nodeName = None ) :
 
@@ -290,7 +290,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		melCmd = 'expressionEditor EE "' + node + '" "' + attr + '"'
 
-		IECoreMaya.mel( melCmd.encode('ascii') )
+		maya.mel.eval( melCmd.encode('ascii') )
 
 	def __connectionEditor( self ) :
 	
