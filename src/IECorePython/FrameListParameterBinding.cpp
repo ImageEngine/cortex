@@ -44,20 +44,16 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/FrameListBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameListParameter >
+class FrameListParameterWrapper : public ParameterWrapper<FrameListParameter>
 {
-	public:
-
-		IE_CORE_DECLAREMEMBERPTR( FrameListParameterWrap );
-
 	protected:
 
 		/// Allow construction from either a string, StringData, or a FrameList
@@ -92,12 +88,17 @@ class FrameListParameterWrap : public FrameListParameter, public Wrapper< FrameL
 
 	public :
 
-		FrameListParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
-			:	FrameListParameter( n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud ), Wrapper< FrameListParameter >( self, this ) {};
+		FrameListParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyList = true, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
+			: ParameterWrapper<FrameListParameter>( self, n, d, makeDefault( dv ), allowEmptyList, parameterPresets<FrameListParameter::ObjectPresetsContainer>( p ), po, ud )
+		{
+		};
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( FrameListParameter );
 };
 
+} // namespace
+
+namespace IECorePython
+{
 
 void bindFrameListParameter()
 {
@@ -106,7 +107,7 @@ void bindFrameListParameter()
 	FrameListPtr (FrameListParameter::*getFrameListValueInternalData)() const = &FrameListParameter::getFrameListValue;
 	FrameListPtr (FrameListParameter::*getFrameListValueStringData)( const StringData *value ) const = &FrameListParameter::getFrameListValue;
 	
-	RunTimeTypedClass<FrameListParameter, FrameListParameterWrap>()
+	ParameterClass<FrameListParameter, FrameListParameterWrapper>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, const dict &, bool, CompoundObjectPtr > >
 			(
@@ -124,9 +125,8 @@ void bindFrameListParameter()
 		.def( "getFrameListValue", getFrameListValueInternalData )
 		.def( "getFrameListValue", getFrameListValueStringData )
 		.def( "setFrameListValue", &FrameListParameter::setFrameListValue )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FrameListParameter )
 	;
 
 }
 
-}
+} // namespace IECorePython
