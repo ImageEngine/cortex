@@ -47,17 +47,30 @@ class TestWrapperToPython( unittest.TestCase ) :
 			]
 		)
 
-		self.assert_( c["f"].isSame( f ) )
-		self.assert_( c["f"] is f )
+		self.assertTrue( c["f"].isSame( f ) )
 		self.assertEqual( c["f"], f )
+
+	def testWrapped( self ) :
+
+		f = IECore.FileSequenceParameter( "f", "d" )
+		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
+		c2 = IECore.CompoundParameter( members = [ c ] )
+
+		self.assertTrue( c2["c"].isSame( c ) )
+		# since OptionalCompoundParameter is a python type,
+		# we can assert its the same PyObject
+		self.assertTrue( c2["c"] is c )
+		self.assertEqual( c2["c"], c )
+		self.assertTrue( c2["c"]["f"].isSame( f ) )
+		self.assertEqual( c2["c"]["f"], f )
 
 	def testReturningNonWrappedPtr( self ) :
 
 		r = IECore.ReadProcedural()
 		o = IECore.CompoundObject( { "c" : r } )
 
-		self.assert_( o["c"].isSame( r ) )
-		self.assert_( o["c"] is r )
+		self.assertTrue( o["c"].isSame( r ) )
+		self.assertTrue( o["c"] is r )
 
 if __name__ == "__main__":
 	unittest.main()

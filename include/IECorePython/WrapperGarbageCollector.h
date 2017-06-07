@@ -58,9 +58,6 @@ class IECOREPYTHON_API WrapperGarbageCollector
 
 	public :
 
-		/// \deprecated
-		/// \todo Remove for major version 9.
-		WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object );
 		virtual ~WrapperGarbageCollector();
 
 		/// Returns the number of wrapped instances currently
@@ -122,9 +119,6 @@ class IECOREPYTHON_API WrapperGarbageCollector
 		/// which provides an overload which automatically supplies wrappedType.
 		boost::python::object methodOverride( const char *name, PyTypeObject *wrappedType ) const;
 
-		/// \todo Make private for the next major version.
-		PyObject *m_pyObject;
-
 	private :
 
 		static size_t g_allocCount;
@@ -132,7 +126,9 @@ class IECOREPYTHON_API WrapperGarbageCollector
 
 		typedef std::map<IECore::RefCounted *, PyObject *> InstanceMap;
 		static InstanceMap g_refCountedToPyObject;
-		
+
+		PyObject *m_pyObject;
+
 };
 
 }

@@ -42,19 +42,6 @@ size_t WrapperGarbageCollector::g_allocCount = 0;
 size_t WrapperGarbageCollector::g_allocThreshold = 50;
 WrapperGarbageCollector::InstanceMap WrapperGarbageCollector::g_refCountedToPyObject;
 
-WrapperGarbageCollector::WrapperGarbageCollector( PyObject *pyObject, IECore::RefCounted *object )
-			:	m_pyObject( pyObject )
-{
-	g_allocCount++;
-
-	if (g_allocCount >= g_allocThreshold)
-	{
-		collect();
-	}
-
-	g_refCountedToPyObject[object] = pyObject;
-}
-
 WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
 	:	m_pyObject( NULL )
 {
@@ -117,15 +104,6 @@ void WrapperGarbageCollector::collect()
 		{
 			// decrement the reference count for the python object, which will trigger the destruction
 			// of the WrapperGarbageCollector object.
-			
-			// NOTE: Py_DECREF() also used to be called in Wrapper::~Wrapper(), which inherits from WrapperGarbageCollector,
-			// and is defined in IECorePython/Wrapper.h. This was conditional on the reference count being greater than
-			// zero, and so didn't usually happen.
-			// Occasionally, however, the python code that was run during Py_DECREF() would create a python object with
-			// exactly the same address as (*jt), before invoking the c++ destructors. This meant that Wrapper::~Wrapper()
-			// would think it was still holding on to a python object with a non zero reference count, when really it
-			// was holding onto someone else's object. This means the new object would get destroyed, leading to dangling
-			// pointers and crashes, and has since been removed.
 			Py_DECREF( *jt );
 		}
 	} while( toCollect.size() );

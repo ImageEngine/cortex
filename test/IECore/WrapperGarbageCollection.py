@@ -49,29 +49,34 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 		f = FileSequenceParameter( "f", "d" )
+		# FileSequenceParameter is not a python type, so there is no wrapped instance
+		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+
+		# OptionalCompoundParameter is a python type
+		c = OptionalCompoundParameter( "c", members = [ f ] )
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		del f
+		del c
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 
-		f = FileSequenceParameter( "f", "d" )
+		c = OptionalCompoundParameter( "c", members = [ f ] )
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		f2 = FileSequenceParameter( "f", "d" )
+		c2 = OptionalCompoundParameter( "c", members = [ f ] )
 		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
-		f3 = FileSequenceParameter( "f", "d" )
+		c3 = OptionalCompoundParameter( "c", members = [ f ] )
 		self.assertEqual( RefCounted.numWrappedInstances(), 3 )
-		del f
+		del c
 		self.assertEqual( RefCounted.numWrappedInstances(), 3 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
-		del f3
+		del c3
 		self.assertEqual( RefCounted.numWrappedInstances(), 2 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		del f2
+		del c2
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
@@ -79,16 +84,16 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		RefCounted.garbageCollectionThreshold = 10
 		self.assertEqual( RefCounted.garbageCollectionThreshold, 10 )
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
-		f = []
+		c = []
 		for i in range( 0, 9 ) :
-			f.append( FileSequenceParameter( "f", "d" ) )
+			c.append( OptionalCompoundParameter( "c", members = [ f ] ) )
 			self.assertEqual( RefCounted.numWrappedInstances(), i+1 )
-		del f
+		del c
 		# the creation of this last wrapped object should trigger a garbage collection
-		f = FileSequenceParameter( "f", "d" )
+		c = OptionalCompoundParameter( "c", members = [ f ] )
 		# leaving us with only it left
 		self.assertEqual( RefCounted.numWrappedInstances(), 1 )
-		del f
+		del c
 		RefCounted.collectGarbage()
 		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
 
