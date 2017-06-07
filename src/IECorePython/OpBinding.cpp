@@ -39,49 +39,18 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
+
 #include "IECorePython/OpBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILRelease.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
-
-class OpWrap : public Op, public Wrapper<Op>
-{
-	public :
-
-		OpWrap( PyObject *self, const std::string &description, ParameterPtr resultParameter ) : Op( description, resultParameter ), Wrapper<Op>( self, this ) {};
-
-		OpWrap( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter ) : Op( description, compoundParameter, resultParameter ), Wrapper<Op>( self, this ) {};
-
-		virtual ObjectPtr doOperation( const CompoundObject * operands )
-		{
-			ScopedGILLock gilLock;
-			override o = this->get_override( "doOperation" );
-			if( o )
-			{
-				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>(operands ) ) ).as<ObjectPtr>();
-				if( !r )
-				{
-					throw Exception( "doOperation() python method didn't return an Object." );
-				}
-				return r;
-			}
-			else
-			{
-				throw Exception( "doOperation() python method not defined" );
-			}
-		};
-
-		IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( Op );
-		
-};
 
 static ParameterPtr resultParameter( const Op &o )
 {
@@ -102,11 +71,16 @@ static ObjectPtr operateWithArgs( Op &op, const CompoundObject *args )
 	return result;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindOp()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Op, OpWrap>()
+	OpClass<Op, OpWrapper<Op> >()
 		.def( init< const std::string &, ParameterPtr >( ( arg( "description" ), arg( "resultParameter") ) ) )
 		.def( init< const std::string &, CompoundParameterPtr, ParameterPtr >( ( arg( "description" ), arg( "compoundParameter" ), arg( "resultParameter") ) ) )
 		.def( "resultParameter", &resultParameter )
