@@ -47,66 +47,128 @@
 namespace IECorePython
 {
 
-IECOREPYTHON_API void bindParameter();
-
 // Exposed so it can be used in the bindings for the other Parameter types.
 template<class T>
 IECOREPYTHON_API T parameterPresets( const boost::python::object &o );
 
-/// The following macros and functions provide a good example to follow in trying to
-/// wrap non trivial C++ objects so they can be derived from in Python, as they solve
-/// some issues the boost python documentation is silent about.
-///
-/// The first macro simply defines a virtual override for valueValid(), so that calls coming
-/// from the C++ side will be forwarded on to the python reimplementation in the python
-/// derived class. This is pretty standard and follows the boost documentation examples.
-/// The macro is provided as every class to be used as a base class for python subclassing
-/// must define the override, and we don't want to define the same code over and over in
-/// each of the wrapping classes.
-///
-/// The next bit is more interesting. We'd like to simply bind the virtual Parameter::valueValid()
-/// function in to python at the Parameter base class, and leave it at that. That works fine
-/// until it becomes necessary for a python subclass to call the base class implementation
-/// of valueValid() (this is part of the definition for how valueValid() should be implemented).
-/// At this point the binding would resolve to the virtual function, which would fall through
-/// to the most derived class implementation, which would forward it into python, creating
-/// an infinite loop of recursive calls to the python valueValid() implementation. So instead
-/// of binding the virtual valueValid() function at the base class level, we have to bind
-/// valueValid repeatedly in every derived class, this time binding a direct call to the appropriate
-/// derived class function (statically, not virtually). The second macro is used to achieve that.
+/// A class to simplify the binding of Parameter derived classes.
+template<typename T, typename TWrapper=T>
+class ParameterClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
+{
+	public :
 
-/// Use this within the definition of a Wrapper class for a Parameter derived class.
-/// It defines virtual overrides to forward calls into python as appropriate.
-/// See src/bindings/PathParameterBinding.cpp for an example of use, and the discussion above
-/// for a description of what is going on.
-#define IECOREPYTHON_PARAMETERWRAPPERFNS( CLASSNAME )													\
-	IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME );													\
-	virtual bool valueValid( const IECore::Object *value, std::string *reason = 0 ) const				\
-	{																									\
-		ScopedGILLock gilLock;																			\
-		if( boost::python::override f = this->get_override( "valueValid" ) )							\
-		{																								\
-			boost::python::tuple r = f( IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) );	\
-			if( reason )																				\
-			{																							\
-				*reason = boost::python::extract<std::string>( r[1] );									\
-			}																							\
-			return boost::python::extract<bool>( r[0] );												\
-		}																								\
-		return CLASSNAME::valueValid( value, reason );													\
-	}
+		ParameterClass( const char *docString = 0 );
 
-/// Use this within the class bindings to define the valueValid functions in python.
-/// See src/bindings/PathParameterBinding.cpp for an example of use, and the discussion above
-/// for a description of what is going on.
-#define IECOREPYTHON_DEFPARAMETERWRAPPERFNS( CLASSNAME )																								\
-	def( "valueValid", &valueValid<CLASSNAME>, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." )	\
-	.def( "valueValid", &valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." )			\
+};
 
+/// A class for wrapping Parameter objects to allow overriding in Python.
 template<typename T>
-IECOREPYTHON_API boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value );
+class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
+{
 
-IECOREPYTHON_API boost::python::tuple valueValid2( const IECore::Parameter &that );
+	public :
+
+		ParameterWrapper(
+			PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
+			const boost::python::object &presets = boost::python::tuple(), bool presetsOnly = false, IECore::CompoundObjectPtr userData = 0
+		)
+			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
+		{
+		};
+
+		ParameterWrapper( PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue, IECore::CompoundObjectPtr userData )
+			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, IECore::Parameter::PresetsContainer(), false, userData )
+		{
+		};
+
+		ParameterWrapper( PyObject *self )
+			:	IECorePython::RunTimeTypedWrapper<T>( self )
+		{
+		}
+
+		/// \todo Once we require c++11, replace all this with a single variadic template.
+		template<typename Arg1>
+		ParameterWrapper( PyObject *self, Arg1 arg1 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
+		{
+		}
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
+		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+		{
+		}
+
+		virtual bool valueValid( const IECore::Object *value, std::string *reason = NULL ) const
+		{
+			if( this->isSubclassed() )
+			{
+				ScopedGILLock gilLock;
+				if( boost::python::object f = this->methodOverride( "valueValid" ) )
+				{
+					boost::python::tuple r = boost::python::extract<boost::python::tuple>( f( IECore::ObjectPtr( const_cast<IECore::Object *>( value ) ) ) );
+					if( reason )
+					{
+						*reason = boost::python::extract<std::string>( r[1] );
+					}
+					return boost::python::extract<bool>( r[0] );
+				}
+			}
+
+			return T::valueValid( value, reason );
+		}
+
+};
+
+IECOREPYTHON_API void bindParameter();
 
 }
 

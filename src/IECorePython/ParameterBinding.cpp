@@ -35,25 +35,19 @@
 #include "boost/python.hpp"
 
 #include "IECore/Parameter.h"
-#include "IECorePython/ParameterBinding.h"
 #include "IECore/CompoundObject.h"
-#include "IECorePython/Wrapper.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
-
-boost::python::tuple valueValid2( const Parameter &that )
-{
-	std::string reason;
-	bool valid = that.valueValid( &reason );
-	return boost::python::make_tuple( valid, reason );
-}
 
 static ObjectPtr defaultValue( Parameter &that )
 {
@@ -118,26 +112,16 @@ static CompoundObjectPtr userData( Parameter &that )
 	return that.userData();
 }
 
-class ParameterWrap : public Parameter, public Wrapper<Parameter>
+} // namespace
+
+namespace IECorePython
 {
-	public:
-
-		ParameterWrap( PyObject *self, const std::string &name, const std::string &description, ObjectPtr defaultValue,
-						const object &presets = boost::python::tuple(), bool presetsOnly = false, CompoundObjectPtr userData = 0 ) :
-				Parameter( name, description, defaultValue, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData ), Wrapper< Parameter >( self, this ) {};
-
-		ParameterWrap( PyObject *self, const std::string &name, const std::string &description, ObjectPtr defaultValue, CompoundObjectPtr userData ) :
-				Parameter( name, description, defaultValue, Parameter::PresetsContainer(), false, userData ), Wrapper< Parameter >( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( Parameter );
-
-};
 
 void bindParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Parameter, ParameterWrap>()
+	ParameterClass<Parameter, ParameterWrapper<Parameter> >()
 		.def(
 			init< const std::string &, const std::string &, ObjectPtr, boost::python::optional<const boost::python::object &, bool, CompoundObjectPtr > >
 			(
@@ -160,7 +144,6 @@ void bindParameter()
 		.def( "getValue", &getValue )
 		.def( "getValidatedValue", &getValidatedValue )
 		.def( "getCurrentPresetName", &Parameter::getCurrentPresetName )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( Parameter )
 		.def( "validate", (void (Parameter::*)() const)&Parameter::validate )
 		.def( "validate", &validate )
 		.add_property( "presetsOnly", &Parameter::presetsOnly )

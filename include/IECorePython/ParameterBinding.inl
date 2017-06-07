@@ -37,7 +37,7 @@
 
 #include "IECorePython/IECoreBinding.h"
 
-namespace IECorePython
+namespace
 {
 
 template<typename T>
@@ -47,6 +47,18 @@ boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value )
 	bool valid = that.T::valueValid( value.get(), &reason );
 	return boost::python::make_tuple( valid, reason );
 }
+
+boost::python::tuple valueValid2( const IECore::Parameter &that )
+{
+	std::string reason;
+	bool valid = that.valueValid( &reason );
+	return boost::python::make_tuple( valid, reason );
+}
+
+} // namespace
+
+namespace IECorePython
+{
 
 template<typename T>
 T parameterPresets( const boost::python::object &o )
@@ -68,6 +80,14 @@ T parameterPresets( const boost::python::object &o )
 	return result;
 }
 
+template<typename T, typename TWrapper>
+ParameterClass<T, TWrapper>::ParameterClass( const char *docString )
+	:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
+{
+	this->def( "valueValid", &valueValid<T>, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
+	this->def( "valueValid", &valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
 }
+
+} // namespace IECorePython
 
 #endif // IECOREPYTHON_PARAMETERBINDING_INL
