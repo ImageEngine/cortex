@@ -129,8 +129,7 @@ class IECORE_API PrimitiveEvaluator : public RunTimeTyped
 		/// Computes the signed distance between the given point and the primitive. By default this is
 		/// just the signed distance between the point, and the plane specified by the closest point and normal,
 		/// but derived class are free to override it as they see fit. Returns true on success.
-		/// \todo: pass a result to this method in major version 6
-		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
+		virtual bool signedDistance( const Imath::V3f &p, float &distance, Result *result ) const;
 
 		/// Computes the surface area of the primitive
 		virtual float surfaceArea() const=0;

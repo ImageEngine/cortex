@@ -128,7 +128,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		/// A query specific to the MeshPrimitiveEvaluator, this just chooses a barycentric position on a specific triangle.
 		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool signedDistance( const Imath::V3f &p, float &distance ) const;
+		virtual bool signedDistance( const Imath::V3f &p, float &distance, PrimitiveEvaluator::Result *result ) const;
 
 		virtual float volume() const;
 

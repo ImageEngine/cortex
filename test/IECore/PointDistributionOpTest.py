@@ -52,8 +52,7 @@ class PointDistributionOpTest( unittest.TestCase ) :
 		
 		## test that the points are on the mesh
 		for p in positions :
-			self.assertAlmostEqual( meshEvaluator.signedDistance( p ), 0.0, 3 )
-			meshEvaluator.closestPoint( p, result )
+			self.assertAlmostEqual( meshEvaluator.signedDistance( p, result ), 0.0, 3 )
 			pointsPerFace[result.triangleIndex()] += 1
 		
 		## test that we have roughly the expected density per face

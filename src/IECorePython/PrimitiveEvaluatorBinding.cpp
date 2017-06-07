@@ -57,11 +57,11 @@ struct PrimitiveEvaluatorHelper
 		return PrimitiveEvaluator::create( primitive );
 	}
 
-	static float signedDistance( PrimitiveEvaluator &evaluator, const Imath::V3f &p )
+	static float signedDistance( PrimitiveEvaluator &evaluator, const Imath::V3f &p, PrimitiveEvaluator::Result *result )
 	{
 
 		float distance = 0.0;
-		bool success = evaluator.signedDistance( p, distance );
+		bool success = evaluator.signedDistance( p, distance, result );
 
 		if ( !success )
 		{

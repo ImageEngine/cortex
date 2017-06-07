@@ -647,7 +647,7 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 	m_haveAverageNormals = true;
 }
 
-bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance ) const
+bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance, PrimitiveEvaluator::Result *result ) const
 {
 	distance = 0.0f;
 
@@ -656,13 +656,13 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 		calculateAverageNormals();
 	}
 
-	ResultPtr result = new Result();
+	bool found = closestPoint( p, result );
 
-	bool found = closestPoint( p, result.get() );
+	Result *r = static_cast<Result *>( result );
 
 	if (found)
 	{
-		const Imath::V3f &bary = result->barycentricCoordinates();
+		const Imath::V3f &bary = r->barycentricCoordinates();
 
 		/// Is nearest feature an edge, or the triangle itself?
 
@@ -671,17 +671,17 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 		if ( region == 0  )
 		{
 			assert( region == 0 );
-			const Imath::V3f &n = result->normal();
-			float planeConstant = n.dot( result->point() );
+			const Imath::V3f &n = r->normal();
+			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 		else  if ( region % 2 == 1 )
 		{
 			// Closest feature is an edge, so we need to use the average normal of the adjoining triangles
 
-			const V3i &triangleVertexIds = result->vertexIds();
+			const V3i &triangleVertexIds = r->vertexIds();
 			Edge edge;
 
 			if ( region == 1 )
@@ -702,9 +702,9 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			assert (it != m_edgeAverageNormals.end() );
 
 			const Imath::V3f &n = it->second;
-			float planeConstant = n.dot( result->point() );
+			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 		else
@@ -712,7 +712,7 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			// Closest feature is a vertex, so we need to use the angle weighted normal of the adjoining triangles
 			assert( region % 2 == 0 );
 
-			const V3i &triangleVertexIds = result->vertexIds();
+			const V3i &triangleVertexIds = r->vertexIds();
 
 			int closestVertex = 1;
 			if ( region == 2 )
@@ -732,9 +732,9 @@ bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distanc
 			assert( triangleVertexIds[ closestVertex ] < (int)(m_vertexAngleWeightedNormals->readable().size()) );
 
 			const V3f &n = m_vertexAngleWeightedNormals->readable()[ triangleVertexIds[ closestVertex ] ];
-			float planeConstant = n.dot( result->point() );
+			float planeConstant = n.dot( r->point() );
 			float sign = n.dot( p ) - planeConstant;
-			distance = (result->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
+			distance = (r->point() - p ).length() * (sign < Imath::limits<float>::epsilon() ? -1.0 : 1.0 );
 			return true;
 		}
 	}
