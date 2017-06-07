@@ -41,33 +41,41 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/PrimitiveOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class PrimitiveOpWrap : public PrimitiveOp, public Wrapper<PrimitiveOp>
+class PrimitiveOpWrapper : public RunTimeTypedWrapper<PrimitiveOp>
 {
 	public :
 
-		PrimitiveOpWrap( PyObject *self, const std::string &description ) : PrimitiveOp( description ), Wrapper<PrimitiveOp>( self, this ) {};
+		PrimitiveOpWrapper( PyObject *self, const std::string &description )
+			: RunTimeTypedWrapper<PrimitiveOp>( self, description )
+		{
+		};
 
 		virtual void modifyPrimitive( Primitive * object, const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modifyPrimitive" )( PrimitivePtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+			this->methodOverride( "modifyPrimitive" )( PrimitivePtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 		}
 
 };
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindPrimitiveOp()
 {
-	RunTimeTypedClass<PrimitiveOp, PrimitiveOpWrap>()
+	RunTimeTypedClass<PrimitiveOp, PrimitiveOpWrapper>()
 		.def( init<const std::string &>() )
 	;
 }
