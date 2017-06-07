@@ -40,18 +40,13 @@
 
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 
 namespace IECorePython
 {
 
 template<typename T>
-class TypedParameterWrap : public IECore::TypedParameter<T>, public Wrapper< IECore::TypedParameter<T> >
+class TypedParameterWrapper : public ParameterWrapper< IECore::TypedParameter<T> >
 {
-	public:
-
-		IE_CORE_DECLAREMEMBERPTR( TypedParameterWrap<T> );
-
 	protected:
 
 		static typename IECore::TypedParameter<T>::ObjectType::Ptr makeDefault( boost::python::object defaultValue )
@@ -71,10 +66,11 @@ class TypedParameterWrap : public IECore::TypedParameter<T>, public Wrapper< IEC
 
 	public :
 
-		TypedParameterWrap( PyObject *self, const std::string &n, const std::string &d, boost::python::object dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0 )
-			:	IECore::TypedParameter<T>( n, d, makeDefault( dv ), parameterPresets<typename IECore::TypedParameter<T>::ObjectPresetsContainer>( p ), po, ud ), Wrapper< IECore::TypedParameter<T> >( self, this ) {};
+		TypedParameterWrapper( PyObject *self, const std::string &n, const std::string &d, boost::python::object dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0 )
+			: ParameterWrapper< IECore::TypedParameter<T> >( self, n, d, makeDefault( dv ), parameterPresets<typename IECore::TypedParameter<T>::ObjectPresetsContainer>( p ), po, ud )
+		{
+		};
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( IECore::TypedParameter<T> );
 };
 
 template<typename T>
@@ -82,7 +78,7 @@ void bindTypedParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<IECore::TypedParameter<T>, TypedParameterWrap<T> >()
+	ParameterClass<IECore::TypedParameter<T>, TypedParameterWrapper<T> >()
 		.def(
 			boost::python::init< const std::string &, const std::string &, boost::python::object, boost::python::optional<const boost::python::object &, bool, IECore::CompoundObjectPtr > >
 			(
@@ -100,7 +96,6 @@ void bindTypedParameter()
 		.add_property( "typedDefaultValue", boost::python::make_function( &IECore::TypedParameter<T>::typedDefaultValue, boost::python::return_value_policy<boost::python::copy_const_reference>() ) )
 		.def( "setTypedValue", &IECore::TypedParameter<T>::setTypedValue )
 		.def( "getTypedValue", (const T &(IECore::TypedParameter<T>::* )() const)&IECore::TypedParameter<T>::getTypedValue, boost::python::return_value_policy<boost::python::copy_const_reference>() )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( IECore::TypedParameter<T> )
 	;
 
 }
