@@ -76,18 +76,6 @@ class BasicPreset( IECore.Preset ) :
 		self.parameters().addParameters(
 		
 			[
-				# \todo Remove this parameter in next Cortex major version.
-				IECore.BoolParameter(
-					name = "overwriteMatchingComponents",
-					description = "When off, the preset will always append items to a " + \
-					"ClassVectorParameter, otherwise, it will replace the existing " + \
-					"classes with the same names, if they don't match the preset. " + \
-					"This does not affect and parameter values, these are always set " + \
-					"to match the preset. This parameter is deprecated. Use the other parameters " + \
-					"in this Preset to better specify the operation you want.",
-					defaultValue = False
-				),
-
 				IECore.BoolParameter(
 					name = "modifyValues",
 					description = "If On, it will apply value changes on non-compound parameters. This is usually the case.",
@@ -182,15 +170,6 @@ class BasicPreset( IECore.Preset ) :
 	# reach the child.
 	def __call__( self, parameterised, rootParameter, parameterList=[], parameterListExcludes=False ) :
 
-		if self["overwriteMatchingComponents"].getTypedValue() :
-			# tell the user about the deprecated parameter and set the new parameters to represent the previous behavior.
-			IECore.warning( "Deprecated parameter 'overwriteMatchingComponents' being used for BasicPreset object." )
-			self["forceAddingClasses"] = False
-			self["replaceClasses"] = True
-			self["modifyValues"] = True
-			self["removePreviousClasses"] = False
-			self["enforceClassesOrder"] = False
-			
 		self._ensureData()
 		
 		if not self.applicableTo( parameterised, rootParameter ) :
