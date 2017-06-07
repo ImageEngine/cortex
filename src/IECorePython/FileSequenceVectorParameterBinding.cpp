@@ -40,23 +40,18 @@
 #include "IECore/Exception.h"
 
 #include "IECorePython/IECoreBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/FileSequenceVectorParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
+#include "IECorePython/FileSequenceVectorParameterBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, public Wrapper< FileSequenceVectorParameter >
+class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequenceVectorParameter >
 {
-	public:
-
-		IE_CORE_DECLAREMEMBERPTR( FileSequenceVectorParameterWrap );
-
 	protected:
 
 		static FileSequenceVectorParameter::ExtensionList makeExtensions( object extensions )
@@ -169,8 +164,10 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 
 	public :
 
-		FileSequenceVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
-			:	FileSequenceVectorParameter( n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::ObjectPresetsContainer>( p ), po, ud, makeExtensions( extensions ) ), Wrapper< FileSequenceVectorParameter >( self, this ) {};
+		FileSequenceVectorParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = list(), bool allowEmptyList = true, FileSequenceVectorParameter::CheckType check = FileSequenceVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list() )
+			: ParameterWrapper< FileSequenceVectorParameter >( self, n, d, makeDefault( dv ), allowEmptyList, check, parameterPresets<FileSequenceVectorParameter::ObjectPresetsContainer>( p ), po, ud, makeExtensions( extensions ) )
+		{
+		};
 
 		list getExtensionsWrap() const
 		{
@@ -242,13 +239,17 @@ class FileSequenceVectorParameterWrap : public FileSequenceVectorParameter, publ
 			return r;
 		}
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( FileSequenceVectorParameter );
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindFileSequenceVectorParameter()
 {
 
-	RunTimeTypedClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrap>()
+	ParameterClass<FileSequenceVectorParameter, FileSequenceVectorParameterWrapper>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceVectorParameter::CheckType, const object &, bool, CompoundObjectPtr, object > >
 			(
@@ -265,13 +266,12 @@ void bindFileSequenceVectorParameter()
 				)
 			)
 		)
-		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrap::getFileSequenceValuesInternalDataWrap )
-		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrap::getFileSequenceValuesDataWrap )
-		.def( "setFileSequenceValues", &FileSequenceVectorParameterWrap::setFileSequenceValuesWrap )
-		.add_property( "extensions",&FileSequenceVectorParameterWrap::getExtensionsWrap, &FileSequenceVectorParameterWrap::setExtensionsWrap )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceVectorParameter )
+		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrapper::getFileSequenceValuesInternalDataWrap )
+		.def( "getFileSequenceValues", &FileSequenceVectorParameterWrapper::getFileSequenceValuesDataWrap )
+		.def( "setFileSequenceValues", &FileSequenceVectorParameterWrapper::setFileSequenceValuesWrap )
+		.add_property( "extensions",&FileSequenceVectorParameterWrapper::getExtensionsWrap, &FileSequenceVectorParameterWrapper::setExtensionsWrap )
 	;
 
 }
 
-}
+} // namespace IECorePython

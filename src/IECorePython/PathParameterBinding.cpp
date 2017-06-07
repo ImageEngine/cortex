@@ -34,10 +34,10 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/ParameterBinding.h"
 #include "IECore/PathParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECorePython/Wrapper.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/PathParameterBinding.h"
 
@@ -45,27 +45,35 @@ using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class PathParameterWrap : public PathParameter, public Wrapper<PathParameter>
+class PathParameterWrapper : public ParameterWrapper<PathParameter>
 {
 	public :
 
-		PathParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, object &p, bool po, CompoundObjectPtr ud )
-			:	PathParameter( n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<PathParameter>( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( PathParameter );
+		PathParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
+			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud
+		)
+			: ParameterWrapper<PathParameter>( self, n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud )
+		{
+		};
 
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindPathParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<PathParameter, PathParameterWrap> pathParamClass;
+	ParameterClass<PathParameter, PathParameterWrapper> pathParamClass;
 	{
 		// define enum before functions.
 		scope varScope = pathParamClass;
@@ -73,11 +81,11 @@ void bindPathParameter()
 			.value( "DontCare", PathParameter::DontCare )
 			.value( "MustExist", PathParameter::MustExist )
 			.value( "MustNotExist", PathParameter::MustNotExist )
-		;
+			;
 	}
 	pathParamClass
 		.def(
-			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, object &, bool, CompoundObjectPtr>
+			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(
 				(
 					arg( "name" ),
@@ -91,7 +99,6 @@ void bindPathParameter()
 				)
 			)
 		)
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( PathParameter )
 		.add_property( "mustExist", &PathParameter::mustExist )
 		.add_property( "mustNotExist", &PathParameter::mustNotExist )
 		.add_property( "allowEmptyString", &PathParameter::allowEmptyString )

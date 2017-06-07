@@ -40,22 +40,19 @@
 #include "IECore/Exception.h"
 
 #include "IECorePython/IECoreBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/FileSequenceParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
+#include "IECorePython/FileSequenceParameterBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< FileSequenceParameter >
+class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParameter>
 {
 	public:
-
-		IE_CORE_DECLAREMEMBERPTR( FileSequenceParameterWrap );
 
 		static FileSequenceParameter::ExtensionList makeExtensions( object extensions )
 		{
@@ -132,10 +129,11 @@ class FileSequenceParameterWrap : public FileSequenceParameter, public Wrapper< 
 
 	public :
 
-		FileSequenceParameterWrap( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list(), size_t minSequenceSize = 2 )
-			:	FileSequenceParameter( n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize ), Wrapper< FileSequenceParameter >( self, this ) {};
+		FileSequenceParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list(), size_t minSequenceSize = 2 )
+			: ParameterWrapper<FileSequenceParameter>( self, n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize )
+		{
+		};
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( FileSequenceParameter );
 };
 
 static list getFileSequenceExtensionsWrap( FileSequenceParameter &param )
@@ -155,17 +153,21 @@ static void setFileSequenceExtensionsWrap( FileSequenceParameter &param, object 
 {
 	for ( long i = 0; i < IECorePython::len( ext ); i++)
 	{
-		param.setExtensions( FileSequenceParameterWrap::makeExtensions( ext ) );
+		param.setExtensions( FileSequenceParameterWrapper::makeExtensions( ext ) );
 	}
 }
 
+} // namespace
+
+namespace IECorePython
+{
 
 void bindFileSequenceParameter()
 {
 	FileSequencePtr (FileSequenceParameter::*getFileSequenceValueInternalData)() const = &FileSequenceParameter::getFileSequenceValue;
 	FileSequencePtr (FileSequenceParameter::*getFileSequenceValueStringData)( const StringData *value ) const = &FileSequenceParameter::getFileSequenceValue;
 	
-	RunTimeTypedClass<FileSequenceParameter, FileSequenceParameterWrap>()
+	ParameterClass<FileSequenceParameter, FileSequenceParameterWrapper>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional< object, bool, FileSequenceParameter::CheckType, const object &, bool, CompoundObjectPtr, object, int > >
 			(
@@ -189,9 +191,8 @@ void bindFileSequenceParameter()
 		.def( "setMinSequenceSize", &FileSequenceParameter::setMinSequenceSize )
 		.def( "getMinSequenceSize", &FileSequenceParameter::getMinSequenceSize )
 		.add_property( "extensions",&getFileSequenceExtensionsWrap, &setFileSequenceExtensionsWrap )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FileSequenceParameter )
 	;
 
 }
 
-}
+} // namespace IECorePython

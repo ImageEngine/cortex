@@ -32,32 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <IECorePython/PathParameterBinding.h>
 #include "boost/python.hpp"
 
-#include "IECorePython/ParameterBinding.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundObject.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/FileNameParameterBinding.h"
-#include "IECorePython/Wrapper.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class FileNameParameterWrap : public FileNameParameter, public Wrapper<FileNameParameter>
+class FileNameParameterWrapper : public ParameterWrapper<FileNameParameter>
 {
 	public :
 
-		FileNameParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
-			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )
-			:	FileNameParameter( n, d, e, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<FileNameParameter>( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( FileNameParameter );
+		FileNameParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, const std::string &e, const std::string &dv, bool ae,
+			PathParameter::CheckType c, const boost::python::object &p, bool po, CompoundObjectPtr ud
+		)
+			: ParameterWrapper<FileNameParameter>( self, n, d, e, dv, ae, c, parameterPresets<FileNameParameter::PresetsContainer>( p ), po, ud )
+		{
+		};
 
 };
 
@@ -72,11 +75,16 @@ static boost::python::list fileNameParameterExtensions( const FileNameParameter 
 	return r;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindFileNameParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<FileNameParameter, FileNameParameterWrap>()
+	ParameterClass<FileNameParameter, FileNameParameterWrapper>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(
@@ -94,7 +102,6 @@ void bindFileNameParameter()
 			)
 		)
 		.add_property( "extensions", &fileNameParameterExtensions )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( FileNameParameter )
 	;
 
 }

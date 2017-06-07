@@ -34,40 +34,45 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/ParameterBinding.h"
 #include "IECore/PathVectorParameter.h"
 #include "IECore/CompoundObject.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
-#include "IECorePython/Wrapper.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class PathVectorParameterWrap : public PathVectorParameter, public Wrapper<PathVectorParameter>
+class PathVectorParameterWrapper : public ParameterWrapper<PathVectorParameter>
 {
 	public:
 
-		PathVectorParameterWrap( PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
-			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
-			:	PathVectorParameter( n, d, dv->copy(), ae, c, parameterPresets<PathVectorParameter::ObjectPresetsContainer>( p ), po, ud ), Wrapper<PathVectorParameter>( self, this )
+		PathVectorParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, ConstStringVectorDataPtr dv, bool ae = true,
+			PathVectorParameter::CheckType c = PathVectorParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0
+		)
+			: ParameterWrapper<PathVectorParameter>( self, n, d, dv->copy(), ae, c, parameterPresets<PathVectorParameter::ObjectPresetsContainer>( p ), po, ud )
 		{
 		}
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( PathVectorParameter );
-
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindPathVectorParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<PathVectorParameter, PathVectorParameterWrap> pathVectorParamClass;
+	ParameterClass<PathVectorParameter, PathVectorParameterWrapper> pathVectorParamClass;
 	{
 		// define enum before functions.
 		scope varScope = pathVectorParamClass;
@@ -93,7 +98,6 @@ void bindPathVectorParameter()
 				)
 			)
 		)
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( PathVectorParameter )
 		.add_property( "mustExist", &PathVectorParameter::mustExist )
 		.add_property( "mustNotExist", &PathVectorParameter::mustNotExist )
 		.add_property( "allowEmptyList", &PathVectorParameter::allowEmptyList )
