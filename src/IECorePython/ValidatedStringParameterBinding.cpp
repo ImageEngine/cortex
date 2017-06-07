@@ -39,36 +39,42 @@
 
 #include "IECorePython/ValidatedStringParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class ValidatedStringParameterWrap : public ValidatedStringParameter, public Wrapper<ValidatedStringParameter>
+class ValidatedStringParameterWrapper : public ParameterWrapper<ValidatedStringParameter>
 {
 
 	public :
 
-		ValidatedStringParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
-			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud )
-			:	ValidatedStringParameter( n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud ), Wrapper<ValidatedStringParameter>( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( ValidatedStringParameter );
+		ValidatedStringParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, const std::string &r, const std::string &rd,
+			const std::string &dv, bool ae, object &p, bool po, CompoundObjectPtr ud
+		)
+			: ParameterWrapper<ValidatedStringParameter>( self, n, d, r, rd, dv, ae, parameterPresets<ValidatedStringParameter::PresetsContainer>( p ), po, ud )
+		{
+		};
 
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindValidatedStringParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<ValidatedStringParameter, ValidatedStringParameterWrap>()
+	ParameterClass<ValidatedStringParameter, ValidatedStringParameterWrapper>()
 		.def(
 			init< const std::string &, const std::string &, const std::string &, const std::string &, const std::string &, bool, object &, bool, CompoundObjectPtr >
 			(
@@ -88,7 +94,6 @@ void bindValidatedStringParameter()
 		.add_property( "regex", make_function( &ValidatedStringParameter::regex, return_value_policy<copy_const_reference>() ) )
 		.add_property( "regexDescription", make_function( &ValidatedStringParameter::regexDescription, return_value_policy<copy_const_reference>() ) )
 		.add_property( "allowEmptyString", &ValidatedStringParameter::allowEmptyString )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( ValidatedStringParameter )
 	;
 }
 
