@@ -39,36 +39,43 @@
 #include "IECore/CompoundObject.h"
 
 #include "IECorePython/NumericParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
 template<typename T>
-class NumericParameterWrap : public NumericParameter<T>, public Wrapper<NumericParameter<T> >
+class NumericParameterWrapper : public ParameterWrapper<NumericParameter<T> >
 {
 	public :
 
-		NumericParameterWrap( PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
-			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0 )
-			:	NumericParameter<T>( n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud ), Wrapper<NumericParameter<T> >( self, this ) {};
+		NumericParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
+			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0
+		)
+			: ParameterWrapper<NumericParameter<T> >( self, n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud )
+		{
+		};
 
-		IECOREPYTHON_PARAMETERWRAPPERFNS( NumericParameter<T> );
-		IE_CORE_DECLAREMEMBERPTR( NumericParameterWrap<T> );
 };
+
+} //namespace
+
+namespace IECorePython
+{
 
 template<typename T>
 static void bindNumericParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<NumericParameter<T>, NumericParameterWrap<T> >()
+	ParameterClass<NumericParameter<T>, NumericParameterWrapper<T> >()
 		.def(
 			init<const std::string &, const std::string &, boost::python::optional< T, T, T, const object &, bool, CompoundObjectPtr> >
 			(
@@ -89,7 +96,6 @@ static void bindNumericParameter()
 		.def( "setNumericValue", &NumericParameter<T>::setNumericValue  )
 		.def( "getTypedValue", &NumericParameter<T>::getNumericValue )		// added for consistency
 		.def( "setTypedValue", &NumericParameter<T>::setNumericValue )		// added for consistency
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( NumericParameter<T> )
 		.def( "hasMinValue", &NumericParameter<T>::hasMinValue )
 		.def( "hasMaxValue", &NumericParameter<T>::hasMaxValue )
 		.add_property( "minValue", &NumericParameter<T>::minValue )
@@ -104,4 +110,4 @@ void bindNumericParameter()
 	bindNumericParameter<double>();
 }
 
-};
+} // namespace IECorePython
