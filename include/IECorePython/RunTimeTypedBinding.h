@@ -90,60 +90,6 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, TWrap
 
 };
 
-/// \deprecated
-/// \todo Remove for the next major version.
-#define IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
-	virtual IECore::TypeId typeId() const\
-	{\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "typeId" ) )\
-		{\
-			boost::python::object res = f(); \
-			return boost::python::extract<IECore::TypeId>( res );\
-		}\
-		return CLASSNAME::typeId();\
-	}\
-	virtual const char *typeName() const\
-	{\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "typeName" ) )\
-		{\
-			boost::python::object res = f(); \
-			return boost::python::extract<const char *>( res );\
-		}\
-		return CLASSNAME::typeName();\
-	}\
-	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
-	{\
-		if( CLASSNAME::isInstanceOf( typeId ) )\
-		{\
-			return true;\
-		}\
-		\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
-		{\
-			boost::python::object res = f( typeId ); \
-			return boost::python::extract<bool>( res );\
-		}\
-		return false;\
-	}\
-	virtual bool isInstanceOf( const char *typeName ) const\
-	{\
-		if( CLASSNAME::isInstanceOf( typeName ) )\
-		{\
-			return true;\
-		}\
-		\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
-		{\
-			boost::python::object res = f( typeName ); \
-			return boost::python::extract<bool>( res );\
-		}\
-		return false;\
-	}
-
 } // namespace IECorePython
 
 #include "IECorePython/RunTimeTypedBinding.inl"
