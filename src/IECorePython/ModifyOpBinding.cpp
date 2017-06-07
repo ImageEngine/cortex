@@ -40,36 +40,41 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/ModifyOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class ModifyOpWrap : public ModifyOp, public Wrapper<ModifyOp>
+class ModifyOpWrapper : public RunTimeTypedWrapper<ModifyOp>
 {
 	public :
 
-		ModifyOpWrap( PyObject *self, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
-			: ModifyOp( description, resultParameter, inputParameter ), Wrapper<ModifyOp>( self, this )
+		ModifyOpWrapper( PyObject *self, const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter )
+			: RunTimeTypedWrapper<ModifyOp>( self, description, resultParameter, inputParameter )
 		{
 		};
 
 		virtual void modify( Object * object, const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modify" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+			this->methodOverride( "modify" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 		};
 
 };
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindModifyOp()
 {
-	RunTimeTypedClass<ModifyOp, ModifyOpWrap>()
+	RunTimeTypedClass<ModifyOp, ModifyOpWrapper>()
 		.def( init< const std::string &, ParameterPtr, ParameterPtr >() )
 	;
 }
