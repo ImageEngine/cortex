@@ -38,8 +38,7 @@
 #include "IECore/Object.h"
 #include "IECore/FileNameParameter.h"
 #include "IECorePython/ReaderBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
+#include "IECorePython/OpBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
@@ -47,8 +46,9 @@ using std::string;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
 static list supportedExtensions()
@@ -122,75 +122,17 @@ static void registerReader( const std::string &extensions, object &canRead, obje
 	Reader::registerReader( extensions, ReaderCanRead( canRead ), ReaderCreator( creator ), typeId );
 }
 
-class ReaderWrap : public Reader, public Wrapper<Reader>
+} // namespace
+
+namespace IECorePython
 {
-	public :
-
-		ReaderWrap( PyObject *self, const std::string &description, ParameterPtr resultParameter = 0 ) : Reader( description, resultParameter ), Wrapper<Reader>( self, this ) {};
-
-		virtual CompoundObjectPtr readHeader()
-		{
-			ScopedGILLock gilLock;
-			override o = this->get_override( "readHeader" );
-			if( o )
-			{
-				CompoundObjectPtr r = o().as<CompoundObjectPtr>();
-				if( !r )
-				{
-					throw Exception( "readHeader() python method didn't return a CompoundObject." );
-				}
-				return r;
-			}
-			else
-			{
-				return Reader::readHeader();
-			}
-		}
-
-		virtual ObjectPtr doOperation( const CompoundObject * operands )
-		{
-			ScopedGILLock gilLock;
-			override o = this->get_override( "doOperation" );
-			if( o )
-			{
-#ifdef _MSC_VER
-				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) ).as<ObjectPtr>();
-#else
-				ObjectPtr r = o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
-#endif
-				if( !r )
-				{
-					throw Exception( "doOperation() python method didn't return an Object." );
-				}
-				return r;
-			}
-			else
-			{
-				throw Exception( "doOperation() python method not defined" );
-			}
-		};
-
-
-};
-IE_CORE_DECLAREPTR( ReaderWrap );
-
-static ObjectPtr read( Reader &reader )
-{
-	ScopedGILRelease gilRelease;
-	ObjectPtr result = reader.read();
-	return result;
-}
 
 void bindReader()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<Reader, ReaderWrap>()
-		.def( init<const std::string &>( ( arg( "description" ) ) ) )
-		.def( init<const std::string &, ParameterPtr>( ( arg( "description" ), arg( "resultParameter" ) ) ) )
-		.def( "readHeader", &Reader::readHeader )
-		.def( "read", &read )
-		.def( "readHeader", &Reader::readHeader )
+	ReaderClass<Reader, ReaderWrapper<Reader> >()
+		.def( init< const std::string &>( ( arg( "description" ) ) ) )
 		.def( "create", &Reader::create ).staticmethod( "create" )
 		.def( "supportedExtensions", ( list(*)( ) ) &supportedExtensions )
 		.def( "supportedExtensions", ( list(*)( IECore::TypeId ) ) &supportedExtensions )

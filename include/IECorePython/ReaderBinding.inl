@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,65 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_READERBINDING_H
-#define IECOREPYTHON_READERBINDING_H
+#ifndef IECOREPYTHON_READERBINDING_INL
+#define IECOREPYTHON_READERBINDING_INL
 
-#include "IECore/CompoundObject.h"
-#include "IECore/Reader.h"
+#include "IECorePython/IECoreBinding.h"
 
-#include "IECorePython/Export.h"
-#include "IECorePython/OpBinding.h"
+namespace
+{
+
+template<typename T>
+static IECore::CompoundObjectPtr readHeader( T &that )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return that.T::readHeader();
+}
+
+template<typename T>
+static IECore::ObjectPtr read( T &that )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return that.T::read();
+}
+
+
+} // namespace
 
 namespace IECorePython
 {
 
-/// A class to simplify the binding of Reader derived classes.
-template<typename T, typename TWrapper=T>
-class ReaderClass : public OpClass<T, TWrapper>
+template<typename T, typename TWrapper>
+ReaderClass<T, TWrapper>::ReaderClass( const char *docString )
+	:	OpClass<T, TWrapper>( docString )
 {
-	public :
-
-		ReaderClass( const char *docString = 0 );
-
-};
-
-/// A class for wrapping Reader to allow overriding in Python.
-template<typename T>
-class ReaderWrapper : public OpWrapper<IECore::Reader>
-{
-	public :
-
-		ReaderWrapper( PyObject *self, const std::string &description )
-			: OpWrapper<Reader>( self, description )
-		{
-		};
-
-		virtual IECore::CompoundObjectPtr readHeader()
-		{
-			if( this->isSubclassed() )
-			{
-				ScopedGILLock gilLock;
-				boost::python::object o = this->methodOverride( "readHeader" );
-				if( o )
-				{
-					IECore::CompoundObjectPtr r = boost::python::extract<IECore::CompoundObjectPtr>( o() );
-					if( !r )
-					{
-						throw IECore::Exception( "readHeader() python method didn't return a CompoundObject." );
-					}
-					return r;
-				}
-			}
-
-			return T::readHeader();
-		}
-
-};
-
-IECOREPYTHON_API void bindReader();
-
+	this->def( "readHeader", &readHeader<T> );
+	this->def( "read", &read<T> );
 }
 
-#include "IECorePython/ReaderBinding.inl"
+} // namespace IECorePython
 
-#endif // IECOREPYTHON_READERBINDING_H
+#endif // IECOREPYTHON_READERBINDING_INL
