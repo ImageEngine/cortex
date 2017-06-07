@@ -56,7 +56,7 @@ static void bindTypedPrimitiveParameter()
 {
 	using boost::python::arg;
 	
-	RunTimeTypedClass<TypedObjectParameter<T>, TypedObjectParameterWrap<T> >()
+	ParameterClass<TypedObjectParameter<T>, TypedObjectParameterWrapper<T> >()
 		.def(
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
 			(
@@ -70,7 +70,6 @@ static void bindTypedPrimitiveParameter()
 				)
 			)
 		)
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
 	;
 }
 
