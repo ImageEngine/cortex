@@ -38,40 +38,48 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/ColorTransformOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-
-namespace IECorePython
+namespace
 {
 
-class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransformOp>
+class ColorTransformOpWrapper : public RunTimeTypedWrapper<ColorTransformOp>
 {
 	public :
 
-		ColorTransformOpWrap( PyObject *self, const std::string &description ) : ColorTransformOp( description ), Wrapper<ColorTransformOp>( self, this ) {};
+		ColorTransformOpWrapper( PyObject *self, const std::string &description )
+			: RunTimeTypedWrapper<ColorTransformOp>( self, description )
+		{
+		};
 
 		virtual void begin( const CompoundObject * operands )
 		{
-			ScopedGILLock gilLock;
-			override o = this->get_override( "begin" );
-			if( o )
+			if( isSubclassed() )
 			{
-				o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+				ScopedGILLock gilLock;
+				object o = this->methodOverride( "begin" );
+				if( o )
+				{
+					o( CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+					return;
+				}
 			}
+
+			ColorTransformOp::begin( operands );
 		}
 
 		virtual void transform( Imath::Color3f &color ) const
 		{
 			ScopedGILLock gilLock;
-			override o = this->get_override( "transform" );
+			object o = this->methodOverride( "transform" );
 			if( o )
 			{
-				Imath::Color3f c = o( color );
+				Imath::Color3f c = extract<Imath::Color3f>( o( color ) );
 				color = c;
 			}
 			else
@@ -82,21 +90,32 @@ class ColorTransformOpWrap : public ColorTransformOp, public Wrapper<ColorTransf
 
 		virtual void end()
 		{
-			ScopedGILLock gilLock;
-			override o = this->get_override( "end" );
-			if( o )
+			if( isSubclassed() )
 			{
-				o();
+				ScopedGILLock gilLock;
+				object o = this->methodOverride( "end" );
+				if( o )
+				{
+					o();
+					return;
+				}
 			}
+
+			ColorTransformOp::end();
 		}
 
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindColorTransformOp()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrap>( "ColorTransformOp" )
+	RunTimeTypedClass<ColorTransformOp, ColorTransformOpWrapper>( "ColorTransformOp" )
 		.def( init<const std::string &>( ( arg( "description" ) ) ) )
 	;
 
