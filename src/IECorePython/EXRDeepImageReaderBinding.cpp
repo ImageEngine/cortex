@@ -33,12 +33,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <boost/python.hpp>
-#include "boost/python/make_constructor.hpp"
 
 #include "IECore/EXRDeepImageReader.h"
 #include "IECorePython/EXRDeepImageReaderBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
