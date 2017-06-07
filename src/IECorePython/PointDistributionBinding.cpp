@@ -107,9 +107,8 @@ void bindPointDistribution()
 {
 	class_<PointDistribution, boost::noncopyable>( "PointDistribution", no_init )
 		.def( init<const std::string &>() )
-		/// \todo Bind the second form of the call operator for next major version. We can't distinguish between the new form and the old form without
-		/// removing the defaultValue for densitySampler, so it needs to wait till we can break compatibility.
-		.def( "__call__", &call, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "densitySampler" )=object(), arg_( "pointEmitter" )=object() ) )
+		.def( "__call__", &call, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "densitySampler" ), arg_( "pointEmitter" )=object() ) )
+		.def( "__call__", &call, ( arg_( "self" ), arg_( "bounds" ), arg_( "density" ), arg_( "pointEmitter" )=object() ) )
 		.def( "defaultInstance", &PointDistribution::defaultInstance, return_value_policy<reference_existing_object>() )
 		.staticmethod( "defaultInstance" )
 	;

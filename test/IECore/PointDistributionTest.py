@@ -45,7 +45,7 @@ class PointDistributionTest( unittest.TestCase ) :
 		pd = IECore.PointDistribution.defaultInstance()
 		
 		bound = IECore.Box2f( IECore.V2f( 0.25 ), IECore.V2f( 0.75 ) )
-		points = pd( bound, 20000 )
+		points = pd( bound, 20000, None )
 	
 		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
 		self.assert_( abs( len( points ) - 5000 ) < 50 )
