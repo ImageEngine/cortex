@@ -38,22 +38,30 @@
 #include "IECore/CompoundParameter.h"
 #include "IECorePython/ParameterisedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class ParameterisedWrap : public Parameterised, public Wrapper<Parameterised>
+class ParameterisedWrapper : public RunTimeTypedWrapper<Parameterised>
 {
 	public :
-		ParameterisedWrap( PyObject *self, const std::string &description ) : Parameterised( description ), Wrapper<Parameterised>( self, this ) {};
-		ParameterisedWrap( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter ) : Parameterised( description, compoundParameter ), Wrapper<Parameterised>( self, this ) {};
+
+		ParameterisedWrapper( PyObject *self, const std::string &description )
+			: RunTimeTypedWrapper<Parameterised>( self, description )
+		{
+		};
+
+		ParameterisedWrapper( PyObject *self, const std::string &description, CompoundParameterPtr compoundParameter )
+			: RunTimeTypedWrapper<Parameterised>( self, description, compoundParameter )
+		{
+		};
+
 };
-IE_CORE_DECLAREPTR( ParameterisedWrap );
 
 /// \todo We should consider deprecating this accessor and forcing all parameter access to go through
 /// object.parameters()["name"]. Although it is convenient, it's also confusing that it only supports
@@ -69,6 +77,11 @@ static ParameterPtr parameterisedGetItem( Parameterised &o, const std::string &n
 	return p;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindParameterised()
 {
 	using boost::python::arg;
@@ -76,7 +89,7 @@ void bindParameterised()
 	CompoundParameter *(Parameterised::*parameters)() = &Parameterised::parameters;
 	CompoundObject *(Parameterised::*userData)() = &Parameterised::userData;
 
-	RunTimeTypedClass<Parameterised, ParameterisedWrap>()
+	RunTimeTypedClass<Parameterised, ParameterisedWrapper>()
 		.def( init< const std::string &>( ( arg( "description") ) ) )
 		.def( init< const std::string &, CompoundParameterPtr >( ( arg( "description") , arg( "compoundParameter") ) ) )
 		.add_property( "description", make_function( &Parameterised::description, return_value_policy<copy_const_reference>() ) )
