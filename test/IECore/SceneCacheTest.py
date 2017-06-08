@@ -875,6 +875,31 @@ class SceneCacheTest( unittest.TestCase ) :
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
 		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
 	
+	def testHashStability( self ) :
+		
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+
+		def collectHashes( scene, hashType, time, hashResults ) :
+			counter = 1
+			h = scene.hash( hashType, time ).toString()
+			hashResults.add( h )
+			for n in scene.childNames() :
+				counter += collectHashes( scene.child(n), hashType, time, hashResults )
+			return counter
+		
+		firstReadHashes = set()
+		collectHashes( m, IECore.SceneInterface.HashType.BoundHash, 0, firstReadHashes )
+		del m
+		
+		secondReadHashes = set()
+		m = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		collectHashes( m, IECore.SceneInterface.HashType.BoundHash, 0, secondReadHashes )
+		del m
+		
+		self.assertEqual( firstReadHashes, secondReadHashes )
+		
+		
+		
 	
 if __name__ == "__main__":
 	unittest.main()
