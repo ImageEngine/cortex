@@ -2017,7 +2017,12 @@ void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
 		const char *keyPtr = hashStr.c_str();
 		void *values[] = { &keyPtr };
 
-		RiProceduralV( data, riBound, procSubdivide, procFree, 1, tokens, values );
+		// prman 20.2 doesn't have RiProceduralV, only RiProcedural2V. So for now, just revert to RiProcedural as workaroud
+		#ifdef PRMANEXPORT
+		    RiProcedural( data, riBound, procSubdivide, procFree );
+		#else
+		    RiProceduralV( data, riBound, procSubdivide, procFree, 1, tokens, values );
+		#endif
 	}
 	
 #else
@@ -2084,7 +2089,11 @@ void IECoreRI::RendererImplementation::externalProcedural( ExternalProcedural *p
 
 	if( boost::algorithm::ends_with( proc->fileName(), ".rib" ) )
 	{
-		// RiProcDelayedReadArchive
+		// prman 20.2 doesn't have RiProcFree anymore, so just use c++ free in its place
+                #ifdef PRMANEXPORT
+		    #define RiProcFree free
+		#endif
+                // RiProcDelayedReadArchive
 		const char **data = (const char **)malloc( sizeof( char * ) );
 		data[0] = proc->fileName().c_str();
 		RiProcedural( data, riBound, RiProcDelayedReadArchive, RiProcFree );

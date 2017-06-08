@@ -2120,6 +2120,7 @@ if doConfigure :
 
 		if not haveRI or havePRMan :
 			mayaSources.remove( "src/IECoreMaya/DelightProceduralCacheCommand.cpp" )
+			mayaEnv.Append( CPPFLAGS = "-DIECORERI_WITH_PRMAN" )
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
