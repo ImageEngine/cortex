@@ -463,8 +463,8 @@ enum TypeId
 	FirstCoreNukeTypeId = 107000,
 	LastCoreNukeTypeId = 107999,
 
-	FirstCoreTruelightTypeId = 108000,
-	LastCoreTruelightTypeId = 108999,
+	FirstCoreTruelightTypeId = 108000, // Available for reuse
+	LastCoreTruelightTypeId = 108999, // Available for reuse
 
 	FirstCoreMayaTypeId = 109000,
 	LastCoreMayaTypeId = 109999,
