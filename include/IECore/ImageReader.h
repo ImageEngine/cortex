@@ -81,13 +81,8 @@ class IECORE_API ImageReader : public Reader
 		/// The parameter specifying the channels to load.
 		StringVectorParameter * channelNamesParameter();
 		const StringVectorParameter * channelNamesParameter() const;
-		/// The parameter specifying the colorspace that the loaded image was stored.
-		/// If autoDetect is chosen than it will use the colorspace returned by sourceColorSpace().
-		StringParameter * colorspaceParameter();
-		const StringParameter * colorspaceParameter() const;
-		/// The parameter specifying if the returned data channels should be 
+		/// The parameter specifying if the returned data channels should be
 		/// exactly or as close as possible to what's stored in the file. 
-		/// If True, then colorspace settings will not take effect.
 		BoolParameter * rawChannelsParameter();
 		const BoolParameter * rawChannelsParameter() const;
 		//@}
@@ -110,16 +105,10 @@ class IECORE_API ImageReader : public Reader
 		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
 		/// that a subsection of the channel will be loaded if requested.
 		/// If raw is false it should return a FloatVectorData, otherwise
-		/// it returns the raw data without color transformations. It must return a 
-		/// vector data type and each element corresponds to a pixel. If that does not 
-		/// correspond to the native file format, then it should return a FloatVectorData.
+		/// it returns the raw data. It must return a vector data type and
+		/// each element corresponds to a pixel. If that does not correspond
+		/// to the native file format, then it should return a FloatVectorData.
 		DataPtr readChannel( const std::string &name, bool raw = false );
-
-		/// Returns the name of the colorspace in which the image is probably stored. For example,
-		/// this would usually be "srgb" for a JPEG file or "linear" for an EXR file.
-		/// Note that this is a guess for most file formats.
-		virtual std::string sourceColorSpace() const = 0;
-
 		//@}
 
 	protected:
@@ -147,7 +136,6 @@ class IECORE_API ImageReader : public Reader
 		Box2iParameterPtr m_displayWindowParameter;
 		StringVectorParameterPtr m_channelNamesParameter;
 		BoolParameterPtr m_rawChannelsParameter;
-		StringParameterPtr m_colorspaceParameter;
 };
 
 IE_CORE_DECLAREPTR(ImageReader);

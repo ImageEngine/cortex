@@ -138,12 +138,6 @@ class TestPNGReader(unittest.TestCase):
 		self.assertEqual( len(red), len(blue) )
 		self.assertEqual( len(red), 32 * 32 )
 
-	def testSourceColorSpace( self ):
-
-		# Should always be srgb
-		self.assertEqual( Reader.create( "test/IECore/data/png/PngTestSuite/basn2c08.png" ).sourceColorSpace(), "srgb" )
-
-
 	def testDataWindowRead( self ):
 
 		r = Reader.create( "test/IECore/data/png/kodak_dx7590_test.png" )

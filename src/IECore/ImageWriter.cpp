@@ -39,7 +39,6 @@
 #include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/ColorSpaceTransformOp.h"
 
 using namespace std;
 using namespace IECore;
@@ -52,38 +51,7 @@ ImageWriter::ImageWriter( const std::string &description ) :
 {
 	m_channelsParameter = new StringVectorParameter("channels", "The list of channels to write.  No list causes all channels to be written." );
 
-	std::vector< std::string > colorSpaces;
-	ColorSpaceTransformOp::outputColorSpaces( colorSpaces );
-	StringParameter::PresetsContainer colorSpacesPresets;
-	colorSpacesPresets.push_back( StringParameter::Preset( "Auto Detect", "autoDetect" ) );
-	for ( std::vector< std::string >::const_iterator it = colorSpaces.begin(); it != colorSpaces.end(); it++ )
-	{
-		colorSpacesPresets.push_back( StringParameter::Preset( *it, *it ) );
-	}
-
-	m_colorspaceParameter = new StringParameter(
-		"colorSpace",
-		"Specifies color space that the given image will be when stored in the file. "
-		"The writer always assumes the input image is in linear color space and it will"
-		"convert the image to the target color space before saving it to a file. "
-		"So if you don't want color maniputation select 'linear'. "
-		"The Auto Detect option will make the appropriate conversions depending on the "
-		"choosen file format.",
-		"autoDetect",
-		colorSpacesPresets,
-		true
-	);
-
-	m_rawChannelsParameter = new BoolParameter(
-		"rawChannels",
-		"Specifies if the image channels should be written as is to the file, keeping the same data type if possible. "
-		"Color space settings will not take effect when this parameter is on.",
-		false
-	);
-
 	parameters()->addParameter( m_channelsParameter );
-	parameters()->addParameter( m_colorspaceParameter );
-	parameters()->addParameter( m_rawChannelsParameter );
 }
 
 StringVectorParameter * ImageWriter::channelNamesParameter()
@@ -94,26 +62,6 @@ StringVectorParameter * ImageWriter::channelNamesParameter()
 const StringVectorParameter * ImageWriter::channelNamesParameter() const
 {
 	return m_channelsParameter.get();
-}
-
-StringParameter * ImageWriter::colorspaceParameter()
-{
-	return m_colorspaceParameter.get();
-}
-
-const StringParameter * ImageWriter::colorspaceParameter() const
-{
-	return m_colorspaceParameter.get();
-}
-
-BoolParameter * ImageWriter::rawChannelsParameter()
-{
-	return m_rawChannelsParameter.get();
-}
-
-const BoolParameter * ImageWriter::rawChannelsParameter() const
-{
-	return m_rawChannelsParameter.get();
 }
 
 bool ImageWriter::canWrite( ConstObjectPtr image, const string &fileName )
@@ -172,37 +120,6 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	}
 
 	Box2i dataWindow = image->getDataWindow();
-
-	std::string colorspace = operands->member< StringData >( "colorSpace" )->readable();
-	if ( colorspace == "autoDetect" )
-	{
-		colorspace = destinationColorSpace();
-	}
-
-	bool rawChannels = operands->member< BoolData >( "rawChannels" )->readable();
-
-	if ( colorspace != "linear" && !rawChannels )
-	{
-		// Make sure A is not in the list of channels
-		vector<string> channelNames;
-		for( vector<string>::const_iterator it = channels.begin(); it != channels.end(); it++ )
-		{
-			if( *it != "A" )
-			{
-				channelNames.push_back( *it );
-			}
-		}
-
-		image = image->copy();
-		// color convert the image from linear colorspace creating a temporary copy.
-		ColorSpaceTransformOpPtr transformOp = new ColorSpaceTransformOp();
-		transformOp->inputColorSpaceParameter()->setTypedValue( "linear" );
-		transformOp->outputColorSpaceParameter()->setTypedValue( colorspace );
-		transformOp->inputParameter()->setValue( boost::const_pointer_cast< ImagePrimitive >(image) );
-		transformOp->copyParameter()->setTypedValue( false );
-		transformOp->channelsParameter()->setTypedValue( channelNames );
-		transformOp->operate();
- 	}
 
 	writeImage( channels, image.get(), dataWindow );
 }

@@ -63,24 +63,9 @@ class IECORE_API ImageWriter : public Writer
 		/// The parameter specifying the channels to write.
 		StringVectorParameter * channelNamesParameter();
 		const StringVectorParameter * channelNamesParameter() const;
-		/// The parameter specifying the colorspace that the given image will be when stored in the file.
-		/// If autoDetect is chosen than it will use the colorspace returned by destinationColorSpace().
-		/// The input image is assumed to be in linear colorspace.
-		StringParameter * colorspaceParameter();
-		const StringParameter * colorspaceParameter() const;
-		/// The parameter specifying if the image channels should be 
-		/// written as is to the file, keeping the same data type if possible. 
-		/// If True, then color space settings will not take effect.
-		/// Otherwise the 
-		BoolParameter * rawChannelsParameter();
-		const BoolParameter * rawChannelsParameter() const;
 
 		/// Convenience function to access the channels specified in parameters
 		void imageChannels( std::vector<std::string> &names ) const;
-
-		/// Returns the name of default colorspace in which the Writer expects to receive images.
-		/// The base class is responsible for making sure it will happen.
-		virtual std::string destinationColorSpace() const = 0;
 
 	protected:
 
@@ -100,8 +85,6 @@ class IECORE_API ImageWriter : public Writer
 		virtual void doWrite( const CompoundObject *operands );
 
 		StringVectorParameterPtr m_channelsParameter;
-		BoolParameterPtr m_rawChannelsParameter;
-		StringParameterPtr m_colorspaceParameter;
 
 };
 
