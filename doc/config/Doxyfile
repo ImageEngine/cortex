@@ -639,7 +639,6 @@ INPUT                  = include/IECore \
                          include/IECoreNuke \
                          include/IECoreGL \
                          doc/python/IECoreGL \
-                         include/IECoreTruelight \
                          include/IECoreMaya \
                          doc/python/IECoreMaya \
                          mel/IECoreMaya \
