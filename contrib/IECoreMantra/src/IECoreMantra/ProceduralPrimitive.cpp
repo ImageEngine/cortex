@@ -34,6 +34,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <UT/UT_DSOVersion.h>
+
 #include "IECore/MeshPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 #include "IECore/MessageHandler.h"
