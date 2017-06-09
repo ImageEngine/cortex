@@ -41,7 +41,6 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/TransformationMatrixData.h"
 #include "IECore/SplineData.h"
-#include "IECore/CubeColorLookupData.h"
 #include "IECore/DateTimeData.h"
 #include "IECore/TimePeriodData.h"
 #include "IECore/TimeDurationData.h"
@@ -275,14 +274,6 @@ typename Functor::ReturnType despatchTypedData( Data *data, Functor &functor, Er
 			return
 			typename Detail::DespatchTypedData< Functor, SplinefColor4fData, ErrorHandler >
 			::template Func<Enabler>()( static_cast<SplinefColor4fData *>( data ), functor, errorHandler );
-		case CubeColorLookupfDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, CubeColorLookupfData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<CubeColorLookupfData *>( data ), functor, errorHandler );
-		case CubeColorLookupdDataTypeId :
-			return
-			typename Detail::DespatchTypedData< Functor, CubeColorLookupdData, ErrorHandler >
-			::template Func<Enabler>()( static_cast<CubeColorLookupdData *>( data ), functor, errorHandler );
 		case DateTimeDataTypeId :
 			return
 			typename Detail::DespatchTypedData< Functor, DateTimeData, ErrorHandler >

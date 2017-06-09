@@ -77,7 +77,6 @@
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
-#include "IECorePython/CubeColorLookupParameterBinding.h"
 #include "IECorePython/TimePeriodParameterBinding.h"
 #include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/CompoundParameterBinding.h"
@@ -206,9 +205,6 @@
 #include "IECorePython/CineonToLinearOpBinding.h"
 #include "IECorePython/LinearToAlexaLogcOpBinding.h"
 #include "IECorePython/AlexaLogcToLinearOpBinding.h"
-#include "IECorePython/CubeColorLookupBinding.h"
-#include "IECorePython/CubeColorLookupDataBinding.h"
-#include "IECorePython/CubeColorTransformOpBinding.h"
 #include "IECorePython/LinearToRec709OpBinding.h"
 #include "IECorePython/Rec709ToLinearOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
@@ -358,7 +354,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLineTypedParameter();
 	bindVectorTypedParameter();
 	bindSplineParameter();
-	bindCubeColorLookupParameter();
 	bindDateTimeParameter();
 	bindTimePeriodParameter();
 	bindTimeDurationParameter();
@@ -506,9 +501,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinearToCineonOp();
 	bindAlexaLogcToLinearOp();
 	bindLinearToAlexaLogcOp();
-	bindCubeColorLookup();
-	bindCubeColorLookupData();
-	bindCubeColorTransformOp();
 	bindLinearToRec709Op();
 	bindRec709ToLinearOp();
 	bindObjectVector();

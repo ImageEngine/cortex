@@ -814,7 +814,6 @@ o.Add(
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
 		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
 		( "IECore.Grade", "common/colorSpace/grade" ),
-		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
 		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
 		( "IECore.AlexaLogcToLinearOp", "common/colorSpace/alexaLogcToLinear" ),

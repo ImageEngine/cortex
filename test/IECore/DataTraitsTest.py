@@ -62,7 +62,7 @@ class DataTraitsTest( unittest.TestCase ) :
 	##\ todo: it seems that transformation matrices should qualify as matrixData
 	__complexData = [ TransformationMatrixfData(), TransformationMatrixdData(), QuatfData(), QuatdData(),
 			  SplineffData(), SplineddData(), SplinefColor3fData(), SplinefColor4fData(),
-			  CubeColorLookupfData(), CubeColorLookupdData() ]
+	]
 
 	__compoundData = [ CompoundData() ]
 

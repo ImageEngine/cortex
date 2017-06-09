@@ -300,11 +300,11 @@ enum TypeId
 	SRGBToLinearOpTypeId = 252,
 	LinearToCineonOpTypeId = 253,
 	CineonToLinearOpTypeId = 254,
-	CubeColorTransformOpTypeId = 255,
-	CubeColorLookupfDataTypeId = 256,
-	CubeColorLookupdDataTypeId = 257,
-	CubeColorLookupfParameterTypeId = 258,
-	CubeColorLookupdParameterTypeId = 259,
+	CubeColorTransformOpTypeId = 255, // obsolete - available for reuse
+	CubeColorLookupfDataTypeId = 256, // obsolete - available for reuse
+	CubeColorLookupdDataTypeId = 257, // obsolete - available for reuse
+	CubeColorLookupfParameterTypeId = 258, // obsolete - available for reuse
+	CubeColorLookupdParameterTypeId = 259, // obsolete - available for reuse
 	BoolVectorParameterTypeId = 260,
 	LinearToRec709OpTypeId = 261,
 	Rec709ToLinearOpTypeId = 262,
