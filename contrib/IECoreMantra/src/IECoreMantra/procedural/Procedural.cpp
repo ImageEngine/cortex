@@ -34,9 +34,14 @@
 
 #include "boost/python.hpp"
 
+#include <UT/UT_Version.h>
+#include <UT/UT_DSOVersion.h>
 #include <UT/UT_WorkArgs.h>
 #include <UT/UT_String.h>
 #include <GU/GU_Detail.h>
+#if UT_MAJOR_VERSION_INT >= 16
+#include <VRAY/VRAY_ProceduralFactory.h>
+#endif
 
 #include "IECore/MessageHandler.h"
 #include "IECore/ParameterisedProcedural.h"
@@ -95,11 +100,13 @@ public:
 	int m_classVersion;
 	UT_String m_parameterString;
 #endif
-
+	static VRAY_ProceduralArg theArgs[];
+	static const UT_StringHolder ieProceduralName;
 };
 
-static VRAY_ProceduralArg theArgs[] = {
-	VRAY_ProceduralArg("className", "string", "read"), 
+const UT_StringHolder VRAY_ieProcedural::ieProceduralName("VRAY_ieProcedural");
+VRAY_ProceduralArg VRAY_ieProcedural::theArgs[] = {
+	VRAY_ProceduralArg("className", "string", "read"),
 	VRAY_ProceduralArg("classVersion", "int", "1"),
 	VRAY_ProceduralArg("parameterString", "string", ""),
 	VRAY_ProceduralArg()
@@ -114,7 +121,7 @@ allocProcedural(const char *)
 const VRAY_ProceduralArg *
 getProceduralArgs(const char *)
 {
-	return theArgs;
+	return VRAY_ieProcedural::theArgs;
 }
 
 VRAY_ieProcedural::VRAY_ieProcedural()
@@ -139,6 +146,13 @@ const char *VRAY_ieProcedural::getClassName()
 	return "VRAY_ieProcedural";
 }
 
+#endif
+
+#if UT_MAJOR_VERSION_INT >= 16
+void registerProcedural(VRAY_ProceduralFactory *factory)
+{
+    factory->insert(new IECoreMantra::VRAY_ieProcDefinition<VRAY_ieProcedural>());
+}
 #endif
 
 // The initialize method is called when the procedural is created. 

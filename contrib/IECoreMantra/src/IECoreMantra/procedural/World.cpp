@@ -36,9 +36,14 @@
 
 #include <iostream>
 
+#include <UT/UT_Version.h>
+#include <UT/UT_DSOVersion.h>
 #include <UT/UT_WorkArgs.h>
 #include <UT/UT_String.h>
 #include <GU/GU_Detail.h>
+#if UT_MAJOR_VERSION_INT >= 16
+#include <VRAY/VRAY_ProceduralFactory.h>
+#endif
 
 #include "IECore/MessageHandler.h"
 #include "IECore/Group.h"
@@ -80,10 +85,17 @@ public:
 	UT_String m_worldFileName;
 	int m_remove;
 #endif
+	static VRAY_ProceduralArg theArgs[];
+	static const UT_StringHolder ieProceduralName;
 
 };
 
-static VRAY_ProceduralArg theArgs[] = {
+const UT_StringHolder VRAY_ieWorld::ieProceduralName("VRAY_ieWorld");
+
+VRAY_ProceduralArg VRAY_ieWorld::theArgs[] = {
+		VRAY_ProceduralArg("ieworldfile", "string", ""),
+		VRAY_ProceduralArg("ieworldremove", "string", "1"),
+		VRAY_ProceduralArg()
 };
 
 VRAY_Procedural *
@@ -95,7 +107,7 @@ allocProcedural(const char *)
 const VRAY_ProceduralArg *
 getProceduralArgs(const char *)
 {
-	return theArgs;
+	return VRAY_ieWorld::theArgs;
 }
 
 VRAY_ieWorld::VRAY_ieWorld()
@@ -133,6 +145,13 @@ const char *VRAY_ieWorld::getClassName()
 
 #endif
 
+#if UT_MAJOR_VERSION_INT >= 16
+void registerProcedural(VRAY_ProceduralFactory *factory)
+{
+	factory->insert(new IECoreMantra::VRAY_ieProcDefinition<VRAY_ieWorld>());
+}
+#endif
+
 // The initialize method is called when the procedural is created. 
 // Returning zero (failure) will abort the rendering of this procedural.
 // The bounding box passed in is the user defined bounding box. 
@@ -144,8 +163,13 @@ VRAY_ieWorld::initialize(const UT_BoundingBox *box)
     {
 		m_bound = convert<Imath::Box3f> ( *box );
 	}
+#if UT_MAJOR_VERSION_INT >= 15
+	import( "global:ieworldfile", m_worldFileName);
+	import( "global:ieworldremove", &m_remove, 1);
+#else
 	import( "ieworldfile", m_worldFileName);
 	import( "ieworldremove", &m_remove, 1);
+#endif
 	if( access( m_worldFileName.buffer(), R_OK|F_OK ) == -1 )
 	{
 		msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to find ieworld cache file: %s") % m_worldFileName.buffer() );

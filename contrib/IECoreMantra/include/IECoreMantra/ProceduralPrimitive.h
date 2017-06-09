@@ -37,15 +37,31 @@
 #ifndef IECOREMANTRA_PROCEDURALPRIMITIVE_H
 #define IECOREMANTRA_PROCEDURALPRIMITIVE_H
 
-#include "VRAY/VRAY_Procedural.h"
 #include "UT/UT_Version.h"
+#include "VRAY/VRAY_Procedural.h"
+#if UT_MAJOR_VERSION_INT >=16
+#include "VRAY/VRAY_ProceduralFactory.h"
+#endif
 
 #include "IECore/VisibleRenderable.h"
 
 
 namespace IECoreMantra
 {
-	
+#if UT_MAJOR_VERSION_INT >= 16
+template <typename ProceduralType>
+class VRAY_ieProcDefinition : public VRAY_ProceduralFactory::ProcDefinition
+{
+public:
+	VRAY_ieProcDefinition()
+		: VRAY_ProceduralFactory::ProcDefinition(ProceduralType::ieProceduralName)
+	{
+	}
+	virtual VRAY_Procedural     *create() const { return new ProceduralType(); }
+	virtual VRAY_ProceduralArg  *arguments() const { return ProceduralType::theArgs; }
+};
+#endif
+
 IE_CORE_FORWARDDECLARE( RendererImplementation )
 
 class ProceduralPrimitive : public VRAY_Procedural
@@ -81,7 +97,7 @@ class ProceduralPrimitive : public VRAY_Procedural
 		fpreal m_fps;
 		fpreal m_preBlur, m_postBlur;
 #endif
-
+		static const UT_StringHolder ieProceduralName;
 	
     private:
 		void applySettings(VRAY_ProceduralChildPtr child);
