@@ -271,7 +271,7 @@ enum TypeId
 	ImagePrimitiveOpTypeId = 223,
 	ChannelOpTypeId = 224,
 	SummedAreaOpTypeId = 225,
-	GradeTypeId = 226,
+	GradeTypeId = 226, // obsolete - available for reuse
 	Box2iVectorDataTypeId = 227,
 	Box3iVectorDataTypeId = 228,
 	MedianCutSamplerTypeId = 229,

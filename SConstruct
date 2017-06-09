@@ -813,7 +813,6 @@ o.Add(
 		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
 		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
-		( "IECore.Grade", "common/colorSpace/grade" ),
 		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
 		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
 		( "IECore.AlexaLogcToLinearOp", "common/colorSpace/alexaLogcToLinear" ),

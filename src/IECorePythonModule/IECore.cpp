@@ -183,7 +183,6 @@
 #include "IECorePython/LuminanceOpBinding.h"
 #include "IECorePython/ChannelOpBinding.h"
 #include "IECorePython/SummedAreaOpBinding.h"
-#include "IECorePython/GradeBinding.h"
 #include "IECorePython/MedianCutSamplerBinding.h"
 #include "IECorePython/EnvMapSamplerBinding.h"
 #include "IECorePython/MeshVertexReorderOpBinding.h"
@@ -471,7 +470,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLuminanceOp();
 	bindChannelOp();
 	bindSummedAreaOp();
-	bindGrade();
 	bindMedianCutSampler();
 	bindEnvMapSampler();
 	bindMeshVertexReorderOp();
