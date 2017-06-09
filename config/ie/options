@@ -92,9 +92,9 @@ if targetApp :
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
-		compiler = platformReg.get( "toolsCompiler", platformReg["compiler"] )
+		compiler = platformReg["compiler"]
 	if not compilerVersion :
-		compilerVersion = platformReg.get( "toolsCompilerVersion", platformReg["compilerVersion"] )
+		compilerVersion = platformReg["compilerVersion"]
 	if not pythonVersion :
 		pythonVersion = cortexReg["preferredPythonVersion"]
 	openEXRVersion = cortexReg["OpenEXRVersion"]
@@ -131,11 +131,7 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-# adding "-Wno-write-strings" because gcc 4.4 complains about PyDateTime_IMPORT (python2.6) and gcc 4.1.2 doesn't accept pragmas
-## \todo: remove "-Wno-write-strings" if we ever drop support for older gcc versions or python2.6
-CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-Wno-write-strings" ]
-if not IEEnv.platformOS().startswith( "osx" ) :
-	CXXFLAGS += [ '-pthread' ]
+CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-pthread" ]
 
 if debug :
 
@@ -146,12 +142,6 @@ if debug :
 else :
 
 	withAsserts = False
-
-	# "-fvisibility-inlines-hidden" is only available on newer releases of gcc, but shows
-	# some issues with 64-bit builds.	
-	if compilerVersionInt >= 400 and IEEnv.platformHardware() != "x86_64" :
-
-		CXXFLAGS += [ "-fvisibility-inlines-hidden" ]
 
 withAsserts = getOption( "WITH_ASSERTS", withAsserts )
 if not withAsserts :
@@ -167,14 +157,6 @@ if not debug :
 	CXXFLAGS += [ "-O2" ]
 
 LINKFLAGS = []
-if compilerVersionInt < 350 :
-	##########################################################################################################
-	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
-	# form "X: referenced in section '.rodata' of Y: defined in discarded section" were changed to errors
-	# Only gcc-3.4 and earlier omits these warnings, so we don't need to do anything for later compiler
-	# versions.
-	##########################################################################################################
-	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
 
 # set the dependency paths
 TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
@@ -193,17 +175,9 @@ JPEG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, c
 TIFF_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
-# we use the /usr/lib64 versions of tiff, png, freetype and jpeg
-# with the exception of freetype on CentOS 6.
-if platform == "cent6.x86_64" :
-	FREETYPE_INCLUDE_PATH = "/usr/include/freetype2"
-
 # figure out the boost lib suffix
 compilerVersionSplit = compilerVersion.split( "." )
-if IEEnv.platformOS().startswith( "osx" ) :
-	BOOST_LIB_SUFFIX = "-xgcc" + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
-else:
-	BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
+BOOST_LIB_SUFFIX = "-" + compiler + compilerVersionSplit[0] + compilerVersionSplit[1] + boostVersionSuffix
 
 OPENEXR_LIB_SUFFIX = "-" + openEXRVersion
 
@@ -213,18 +187,14 @@ LIBPATH = ":".join( [
 	os.path.join( "/software", "apps", compiler, compilerVersion, platform, "lib64" ),
 ] )
 if targetApp :
-	## \todo: the final or in this statement is for Nuke. Remove once the Nuke registry has been updated to use libPaths
-	libPaths = [ os.path.join( targetAppReg["location"], x ) for x in targetAppReg.get( "libPaths", [] ) ] or [ targetAppReg["location"] ]
+	libPaths = [ os.path.join( targetAppReg["location"], x ) for x in targetAppReg.get( "libPaths", [] ) ]
 	libPaths.append( LIBPATH )
 	LIBPATH = ":".join( libPaths )
 
 # ignore python-config stuff and specify it all explicitly ourselves
-pythonReg = IEEnv.registry['apps']['python'][pythonVersion][IEEnv.platform()]
+pythonReg = IEEnv.registry['apps']['python'][pythonVersion][platform]
 
 pythonRoot = os.path.join( pythonReg["location"], compiler, compilerVersion )
-
-if IEEnv.platformOS().startswith( "osx" ):
-	pythonRoot = os.path.join( pythonRoot, "Python.framework", "Versions", pythonVersion )
 
 PYTHON = "/software/tools/wrappers/iePython%s" % pythonVersion
 PYTHON_INCLUDE_PATH = pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/" + pythonReg["include"] + "/python" + pythonVersion
@@ -295,7 +265,6 @@ if targetApp=="maya" :
 	mayaVersion = targetAppVersion
 
 	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
-	mayaMajorVersion = mayaReg["majorVersion"]
 	MAYA_ROOT = mayaReg["location"]
 	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
@@ -304,16 +273,6 @@ if targetApp=="maya" :
 	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
 	WITH_MAYA_PLUGIN_LOADER = 1
-
-	if mayaMajorVersion == "2012" :
-		mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
-		MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
-		MTOA_SOURCE_ROOT = "/home/john/opendev/mtoa" ## \todo Remove when this hack is no longer necessary
-		INSTALL_MTOAEXTENSION_NAME = os.path.join( appPrefix, "mtoa", mtoaVersion, "extensions/$IECORE_NAME" )
-
-else :
-
-	mayaMajorVersion = "0" # it needs a value just for the install setup below to execute			
 
 # find nuke if we're building for nuke
 if targetApp=="nuke" :
@@ -324,10 +283,6 @@ if targetApp=="nuke" :
 		pngVersion = nukeReg["pngVersion"]
 		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
 		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
-	else :
-		# we use the system libpng when building for Nuke 6 or below, as it links to an older
-		# version than we have installed centrally.
-		PNG_INCLUDE_PATH = "/usr/local/include/"
 
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
@@ -357,21 +312,9 @@ if targetApp=="houdini" :
 
 	INSTALL_COREHOUDINI_POST_COMMAND="scons -i -f config/ie/postCoreHoudiniInstall HOUDINI_VERSION='" + houdiniVersion + "' INSTALLPREFIX="+installPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION INSTALL_HOUDINITOOLBAR_DIR=$INSTALL_HOUDINITOOLBAR_DIR INSTALL_IECORE_OPS=\"$INSTALL_IECORE_OPS\" install"
 
-	# install IECoreMantra if we're using a recent Houdini
-	if houdiniReg.get( "compatibilityVersion", "12.0" ) >= "12.1" :
-		WITH_MANTRA = True
-		INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-		INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
-
-# find truelight, unless we're on osx, where we haven't got it to link yet
-if not IEEnv.platformOS().startswith("osx") :
-	try :
-		truelightReg = IEEnv.registry["apps"]["truelight"][getOption( "TRUELIGHT_VERSION", os.environ["TRUELIGHT_VERSION"] )][platform]
-		TRUELIGHT_ROOT = truelightReg["location"]
-	except :
-		pass
-else :
-	TRUELIGHT_ROOT=""
+	WITH_MANTRA = True
+	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
+	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )

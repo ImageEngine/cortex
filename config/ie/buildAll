@@ -1,4 +1,4 @@
-#!/usr/bin/env iePython2.6
+#!/usr/bin/env iePython2.7
 
 import IEEnv
 import subprocess
