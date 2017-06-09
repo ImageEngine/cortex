@@ -66,18 +66,18 @@ targetApp = getOption( "APP", None )
 cortexReg = IEEnv.registry["libraries"]["cortex"]["9"].get( platform, IEEnv.registry["libraries"]["cortex"]["9"] )
 
 if targetApp :
-	
+
 	if targetApp not in ( "nuke", "maya", "houdini" ) :
 		raise RuntimeError( "Check config logic applies to the new app and remove this exception." )
-	
+
 	if (compiler or compilerVersion) :
 		raise RuntimeError( "Must specify only one of COMPILER or APP" )
-		
+
 	if pythonVersion :
 		raise RuntimeError( "Must specify only one of PYTHON_VERSION or APP" )
-	
+
 	targetAppVersion = getOption( "APP_VERSION", os.environ.get( targetApp.upper() + "_VERSION" ) )
-		
+
 	targetAppReg = IEEnv.registry["apps"][targetApp][targetAppVersion][platform]
 	compiler = targetAppReg["compiler"]
 	compilerVersion = targetAppReg["compilerVersion"]
@@ -103,7 +103,7 @@ else :
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
-		
+
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
 
@@ -136,7 +136,7 @@ debug = getOption( "DEBUG", False )
 CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-Wno-write-strings" ]
 if not IEEnv.platformOS().startswith( "osx" ) :
 	CXXFLAGS += [ '-pthread' ]
-	
+
 if debug :
 
 	CXXFLAGS += [ "-g" ]
@@ -146,7 +146,7 @@ if debug :
 else :
 
 	withAsserts = False
-		
+
 	# "-fvisibility-inlines-hidden" is only available on newer releases of gcc, but shows
 	# some issues with 64-bit builds.	
 	if compilerVersionInt >= 400 and IEEnv.platformHardware() != "x86_64" :
@@ -158,15 +158,15 @@ if not withAsserts :
 	CXXFLAGS += [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 
 TESTCXXFLAGS = copy.copy( CXXFLAGS )
-	
+
 # Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
 TESTCXXFLAGS += [ "-O0" ]
-	
+
 if not debug :
 
 	CXXFLAGS += [ "-O2" ]
-				
-LINKFLAGS = []	
+
+LINKFLAGS = []
 if compilerVersionInt < 350 :
 	##########################################################################################################
 	# This is here to specifically address a problem in binutils-2.17 and later, when harmless warnings of the
@@ -175,7 +175,6 @@ if compilerVersionInt < 350 :
 	# versions.
 	##########################################################################################################
 	LINKFLAGS += [ "-Wl,--noinhibit-exec" ]
-
 
 # set the dependency paths
 TBB_INCLUDE_PATH = os.path.join( "/software/apps/tbb", tbbVersion, platform, compiler, compilerVersion, "include" )
@@ -254,12 +253,12 @@ try :
 	if dlReg["compiler"]==compiler :
 		RMAN_ROOT = dlReg["location"]
 		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
-	
+
 		# Add ribdepends location to path
 		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
 except :
 	pass
-	
+
 # find arnold. we only build the arnold stuff if the compiler we're building with is suitable.
 arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
 try :
@@ -274,12 +273,12 @@ try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
 	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
 	APPLESEED_LIB_PATH = os.path.join( appleseedReg["location"], "lib" )
-	
+
 	oslVersion = appleseedReg["OpenShadingLanguage"]
 	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
 	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
 	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-	
+
 	oiioVersion = appleseedReg["OpenImageIO"]
 	oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
 	OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
@@ -305,7 +304,7 @@ if targetApp=="maya" :
 	INSTALL_MAYAPLUGIN_NAME = os.path.join( appPrefix, "plugins", "$IECORE_NAME" )
 	INSTALL_MAYAICON_DIR = os.path.join( appPrefix, "icons" )
 	WITH_MAYA_PLUGIN_LOADER = 1
-	
+
 	if mayaMajorVersion == "2012" :
 		mtoaVersion = getOption( "MTOA_VERSION", os.environ["MTOA_VERSION"] )
 		MTOA_ROOT = "/software/apps/mtoa/" + mtoaVersion + "/" + platform + "/" + mayaMajorVersion
@@ -318,7 +317,7 @@ else :
 
 # find nuke if we're building for nuke
 if targetApp=="nuke" :
-	
+
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
 	if "pngVersion" in nukeReg :
@@ -329,7 +328,7 @@ if targetApp=="nuke" :
 		# we use the system libpng when building for Nuke 6 or below, as it links to an older
 		# version than we have installed centrally.
 		PNG_INCLUDE_PATH = "/usr/local/include/"
-	
+
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -343,10 +342,10 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-	
+
 	if "pngVersion" in houdiniReg :
 		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + houdiniReg["pngVersion"]
-	
+
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder -std=c++11'
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -355,9 +354,9 @@ if targetApp=="houdini" :
 	INSTALL_HOUDINIICON_DIR = os.path.join( appPrefix, "icons" )
 	INSTALL_HOUDINITOOLBAR_DIR = os.path.join( appPrefix, "toolbar" )
 	INSTALL_HOUDINIMENU_DIR = os.path.join( appPrefix, "generic" )
-	
+
 	INSTALL_COREHOUDINI_POST_COMMAND="scons -i -f config/ie/postCoreHoudiniInstall HOUDINI_VERSION='" + houdiniVersion + "' INSTALLPREFIX="+installPrefix+" MAJOR=$IECORE_MAJOR_VERSION MINOR=$IECORE_MINOR_VERSION PATCH=$IECORE_PATCH_VERSION INSTALL_HOUDINITOOLBAR_DIR=$INSTALL_HOUDINITOOLBAR_DIR INSTALL_IECORE_OPS=\"$INSTALL_IECORE_OPS\" install"
-	
+
 	# install IECoreMantra if we're using a recent Houdini
 	if houdiniReg.get( "compatibilityVersion", "12.0" ) >= "12.1" :
 		WITH_MANTRA = True
@@ -373,7 +372,6 @@ if not IEEnv.platformOS().startswith("osx") :
 		pass
 else :
 	TRUELIGHT_ROOT=""
-
 
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
