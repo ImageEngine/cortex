@@ -38,7 +38,7 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECorePython/ObjectReaderBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ReaderBinding.h"
 
 using std::string;
 using namespace boost;
@@ -50,7 +50,7 @@ namespace IECorePython
 
 void bindObjectReader()
 {
-	RunTimeTypedClass<ObjectReader>()
+	ReaderClass<ObjectReader>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &ObjectReader::canRead ).staticmethod( "canRead" )
