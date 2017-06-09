@@ -151,8 +151,8 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		IECoreGL::ScenePtr m_scene;
 		IECoreGL::RendererPtr m_lastRenderer;
 		
-		/// \todo Use a boost::multi_index jobby to replace both these and the ClassData. It could store a nice
-		/// struct with named fields instead of the hard to understand std::pairs.		
+		/// \todo Use a boost::multi_index jobby to replace both. It could store a nice
+		/// struct with named fields instead of the hard to understand std::pairs.
 		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
 		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;
 		typedef std::map< int, Imath::Box3f > ComponentToBoundMap;
