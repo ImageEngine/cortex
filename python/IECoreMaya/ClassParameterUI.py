@@ -85,8 +85,8 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 		)
 
 		# popup menu can be activated with either right or left buttons
-		IECoreMaya.createMenu( self.__menuDefinition, self.__menuParent )
-		IECoreMaya.createMenu( self.__menuDefinition, self.__menuParent, button = 1 )
+		IECoreMaya.Menu( self.__menuDefinition, self.__menuParent )
+		IECoreMaya.Menu( self.__menuDefinition, self.__menuParent, button = 1 )
 
 	def replace( self, node, parameter ) :
 

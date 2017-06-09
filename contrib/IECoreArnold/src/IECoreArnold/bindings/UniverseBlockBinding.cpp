@@ -47,9 +47,7 @@ void bindUniverseBlock()
 
 	// This is bound with a preceding _ and then turned into a context
 	// manager for the "with" statement in IECoreArnold/UniverseBlock.py
-	class_<UniverseBlock, boost::noncopyable>( "_UniverseBlock" )
-		.def( init<bool>() )
-	;
+	class_<UniverseBlock, boost::noncopyable>( "_UniverseBlock", init<bool>( ( arg( "writable" ) ) ) );
 
 }
 

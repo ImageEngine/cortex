@@ -56,50 +56,12 @@ class MeshPrimitive::MemberData : public IECore::RefCounted
 	
 	public :
 	
-		MemberData( IECore::ConstIntVectorDataPtr verts ) : vertIds( verts )
+		MemberData( unsigned numTriangles ) : numTriangles( numTriangles )
 		{
 		}
 
-		IECore::ConstIntVectorDataPtr vertIds;
+		unsigned numTriangles;
 		Imath::Box3f bound;
-
-		/// \todo This could be removed now the ToGLMeshConverter uses FaceVaryingPromotionOp
-		/// to convert everything to FaceVarying before being added. The only reason we're even
-		/// doing this still is in case client code is creating MeshPrimitives directly rather
-		/// than using the converter. We should actually be able to remove the code here, and
-		/// instead of accept vertIds in the MeshPrimitive constructor, just accept the number
-		/// of triangles instead.
-		class ToFaceVaryingConverter
-		{
-			public:
-
-			typedef IECore::DataPtr ReturnType;
-
-			ToFaceVaryingConverter( IECore::ConstIntVectorDataPtr vertIds ) : m_vertIds( vertIds )
-			{
-				assert( m_vertIds );
-			}
-
-			template<typename T>
-			IECore::DataPtr operator()( T *inData )
-			{
-				assert( inData );
-
-				const typename T::Ptr outData = new T();
-				outData->writable().resize( m_vertIds->readable().size() );
-
-				typename T::ValueType::iterator outIt = outData->writable().begin();
-
-				for ( typename T::ValueType::size_type i = 0; i <  m_vertIds->readable().size(); i++ )
-				{
-					*outIt++ = inData->readable()[ m_vertIds->readable()[ i ] ];
-				}
-
-				return outData;
-			}
-
-			IECore::ConstIntVectorDataPtr m_vertIds;
-		};
 
 };
 
@@ -109,18 +71,13 @@ class MeshPrimitive::MemberData : public IECore::RefCounted
 
 IE_CORE_DEFINERUNTIMETYPED( MeshPrimitive );
 
-MeshPrimitive::MeshPrimitive( IECore::ConstIntVectorDataPtr vertIds )
-	:	m_memberData( new MemberData( vertIds->copy() ) )
+MeshPrimitive::MeshPrimitive( unsigned numTriangles )
+	:	m_memberData( new MemberData( numTriangles ) )
 {
 }
 
 MeshPrimitive::~MeshPrimitive()
 {
-}
-
-IECore::ConstIntVectorDataPtr MeshPrimitive::vertexIds() const
-{
-	return m_memberData->vertIds;
 }
 
 void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
@@ -139,15 +96,8 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 			}
 		}
 	}
-	
-	if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
-	{
-		MemberData::ToFaceVaryingConverter primVarConverter( m_memberData->vertIds );
-		// convert to facevarying
-		IECore::DataPtr newData = IECore::despatchTypedData< MemberData::ToFaceVaryingConverter, IECore::TypeTraits::IsVectorTypedData >( primVar.data.get(), primVarConverter );
-		addVertexAttribute( name, newData );
-	}
-	else if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
+
+	if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
 	{
 		addVertexAttribute( name, primVar.data );
 	}
@@ -155,12 +105,15 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 	{
 		addUniformAttribute( name, primVar.data );
 	}
+	else if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	{
+		throw( "IECoreGL::MeshPrimitive : Invalid interpolation for \"" + name + "\". Must be FaceVarying or Constant." );
+	}
 }
 
 void MeshPrimitive::renderInstances( size_t numInstances ) const
 {
-	unsigned vertexCount = m_memberData->vertIds->readable().size();
-	glDrawArraysInstancedARB( GL_TRIANGLES, 0, vertexCount, numInstances );
+	glDrawArraysInstancedARB( GL_TRIANGLES, 0, m_memberData->numTriangles * 3, numInstances );
 }
 
 Imath::Box3f MeshPrimitive::bound() const

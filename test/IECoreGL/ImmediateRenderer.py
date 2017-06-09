@@ -65,11 +65,11 @@ class TestImmediateRenderer( unittest.TestCase ) :
 
 		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 
 		r.concatTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
 		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 1, 0 ) ) } )
-		r.geometry( "sphere", {}, {} )
+		r.sphere( 1, -1, 1, 360, {} )
 		r.worldEnd()
 
 		i = Reader.create( outputFileName ).read()

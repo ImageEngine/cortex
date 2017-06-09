@@ -42,21 +42,6 @@ class IlluminateTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/illuminate.rib"
 
-	def testDeprecated( self ) :
-
-		r = IECoreRI.Renderer( self.outputFileName )
-
-		r.worldBegin()
-
-		r.command( "ri:illuminate", { "handle" : IECore.StringData( "light1" ), "state" : IECore.BoolData( True ) } )
-		r.command( "ri:illuminate", { "handle" : IECore.StringData( "light2" ), "state" : IECore.BoolData( False ) } )
-
-		r.worldEnd()
-
-		l = "".join( file( self.outputFileName ).readlines() )
-		self.assert_( "Illuminate \"light1\" 1" in l )
-		self.assert_( "Illuminate \"light2\" 0" in l )
-
 	def test( self ) :
 	
 		r = IECoreRI.Renderer( self.outputFileName )

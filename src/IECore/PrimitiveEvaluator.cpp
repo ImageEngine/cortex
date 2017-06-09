@@ -84,12 +84,11 @@ PrimitiveEvaluator::Result::~Result()
 {
 }
 
-bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance ) const
+bool PrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance, Result *result ) const
 {
 	distance = 0.0f;
-	ResultPtr result = createResult();
 
-	bool success = closestPoint( p, result.get() );
+	bool success = closestPoint( p, result );
 	if ( !success )
 	{
 		return false;

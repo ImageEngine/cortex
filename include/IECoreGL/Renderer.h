@@ -449,17 +449,11 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// All meshes are treated as having interpolation=="linear".
 		/// \todo Support normals and st.
 		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
+		/// Not implemented
 		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
+		/// Not implemented
 		virtual void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars );
-		/// Supports the following geometry types with the specified topology data :
-		///
-		/// "sphere"
-		/// "radius"	FloatData	1
-		/// "zMin"		FloatData	-1
-		/// "zMax"		FloatData	1
-		///	"thetaMax"	FloatData	360
-		///
-		/// \deprecated Use the sphere() method instead.
+		/// Not implemented
 		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
 		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
 

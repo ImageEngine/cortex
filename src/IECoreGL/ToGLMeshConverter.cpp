@@ -96,7 +96,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 	faceVaryingOp->copyParameter()->setTypedValue( false );
 	faceVaryingOp->operate();
 
-	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->vertexIds() );
+	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->numFaces() );
 
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{

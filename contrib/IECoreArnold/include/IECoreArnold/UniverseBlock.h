@@ -50,8 +50,6 @@ class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 
 	public :
 
-		/// \deprecated
-		UniverseBlock();
 		/// Ensures that the Arnold universe has been created and
 		/// that all plugins and metadata files on the ARNOLD_PLUGIN_PATH
 		/// have been loaded. If writable is true, then throws if
@@ -66,7 +64,7 @@ class IECOREARNOLD_API UniverseBlock : public boost::noncopyable
 
 	private :
 
-		void init( bool writable );
+		bool m_writable;
 
 };
 

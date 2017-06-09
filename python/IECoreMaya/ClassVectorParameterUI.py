@@ -109,12 +109,12 @@ class ClassVectorParameterUI( IECoreMaya.ParameterUI ) :
 		self.__buttonRow = maya.cmds.rowLayout( nc=3, adj=3, cw3=( 25, 25, 40 ), parent=self.__formLayout )
 	
 		self.__addButton = maya.cmds.picture( image="ie_addIcon_grey.xpm", parent=self.__buttonRow, width=21 )
-		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False )
-		IECoreMaya.createMenu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, useInterToUI=False, button=1 )
+		IECoreMaya.Menu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton )
+		IECoreMaya.Menu( IECore.curry( self.__classMenuDefinition, None ), self.__addButton, button=1 )
 		
 		self.__toolsButton = maya.cmds.picture( image="ie_actionIcon_grey.xpm", parent=self.__buttonRow, width=21 )
-		IECoreMaya.createMenu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton, useInterToUI=False )
-		IECoreMaya.createMenu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton, useInterToUI=False, button=1 )
+		IECoreMaya.Menu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton )
+		IECoreMaya.Menu( IECore.curry( self.__toolsMenuDefinition, None ), self.__toolsButton, button=1 )
 
 		self.__classInfo = []
 		self.__childUIs = {} # mapping from parameter name to ui name
@@ -521,8 +521,8 @@ class ChildUI( IECoreMaya.UIElement ) :
 				48,
 			)
 		)
-		IECoreMaya.createMenu( self.__layerMenu, layerIcon, useInterToUI=False )
-		IECoreMaya.createMenu( self.__layerMenu, layerIcon, useInterToUI=False, button=1 )
+		IECoreMaya.Menu( self.__layerMenu, layerIcon )
+		IECoreMaya.Menu( self.__layerMenu, layerIcon, button=1 )
 		
 		attachControl += [
 			( layerIcon, "left", 0, lastControl ),
@@ -813,8 +813,8 @@ class ChildUI( IECoreMaya.UIElement ) :
 							( "Change label...", { "command" : self.__changeLabel } ),
 						]
 					)
-					IECoreMaya.createMenu( renameMenu, self.__label )
-					IECoreMaya.createMenu( renameMenu, self.__label, button = 1 )
+					IECoreMaya.Menu( renameMenu, self.__label )
+					IECoreMaya.Menu( renameMenu, self.__label, button = 1 )
 			
 			attachForm += [
 				( self.__label, "top", 0 ),
@@ -879,8 +879,8 @@ class ChildUI( IECoreMaya.UIElement ) :
 				width = 80,
 				annotation = annotation,
 			)
-			IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control )
-			IECoreMaya.createMenu( IECore.curry( self.__presetsMenu, parameter ), control, button=1 )
+			IECoreMaya.Menu( IECore.curry( self.__presetsMenu, parameter ), control )
+			IECoreMaya.Menu( IECore.curry( self.__presetsMenu, parameter ), control, button=1 )
 			self.__presetParameters.append( parameter )
 			self.__presetUIs.append( control )
 			if self.__attributeChangedCallbackId is None :

@@ -56,15 +56,6 @@ class TestHeaderGenerator(unittest.TestCase):
 		self.assertEqual( header["userName"].value, pwd.getpwuid( os.getuid() ).pw_name )
 		self.assert_( header.has_key( "timeStamp" ) )
 
-	def testBackwardsCompatibility(self ):
-
-		# Make sure we read the "userID" member (previously type LongData, now type IntData) correctly.
-		header = Reader.create( "test/IECore/data/cobFiles/header.cob" ).read()
-
-		self.assertEqual( header["userID"].value, 523 )
-
-
-
 if __name__ == "__main__":
 	unittest.main()
 

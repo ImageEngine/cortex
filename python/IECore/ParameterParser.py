@@ -102,7 +102,7 @@ class ParameterParser :
 
 				# see if the argument being specified is a preset name, in which case we
 				# don't need a special parser.
-				if args[0] in p.presets() :
+				if args[0] in p.getPresets() :
 
 					p.setValue( args[0] )
 					del args[0]

@@ -79,8 +79,6 @@ class IECORE_API Parameter : public RunTimeTyped
 		const std::string &description() const;
 		/// Returns the default value for this parameter.
 		virtual const Object *defaultValue() const;
-		/// \deprecated Use getPresets instead.
-		virtual const PresetsContainer &presets() const;
 		/// Returns the presets for this parameter.
 		virtual const PresetsContainer &getPresets() const;
 		/// Overrides the presets for this parameter.

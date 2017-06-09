@@ -117,11 +117,11 @@ class ParameterUI( IECoreMaya.UIElement ) :
 				# Top-level parameter comes through into here without a name
 				n = self.nodeName() + ".parameters"
 
-			return IECoreMaya.mel( "interToUI(\"" + n + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + n + "\")" ).value
 
 		else :
 
-			return IECoreMaya.mel( "interToUI(\"" + self.parameter.name + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + self.parameter.name + "\")" ).value
 
 	## Computes a wrapped annotation/tooltip for the ui
 	def description( self ):
@@ -156,10 +156,10 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			for m in existingMenus :
 				maya.cmds.deleteUI( m, menu=True )
 
-		IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, useInterToUI=False )
+		IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI )
 		
 		if "button1" in kw and kw["button1"] :
-			IECoreMaya.createMenu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1, useInterToUI=False )
+			IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1 )
 
 	## Returns an IECore.MenuDefinition used to create a popup menu for the ParameterUI. This may
 	# be overridden by derived classes to add their own menu items. In this case they should first
@@ -276,7 +276,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		melCmd = 'showEditor "' + node + '"'
 
-		IECoreMaya.mel( melCmd.encode('ascii') )
+		maya.mel.eval( melCmd.encode('ascii') )
 
 	def __deleteNode( self, nodeName = None ) :
 
@@ -290,7 +290,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 		melCmd = 'expressionEditor EE "' + node + '" "' + attr + '"'
 
-		IECoreMaya.mel( melCmd.encode('ascii') )
+		maya.mel.eval( melCmd.encode('ascii') )
 
 	def __connectionEditor( self ) :
 	
@@ -353,7 +353,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 		if not parameter.isInstanceOf( IECore.Parameter.staticTypeId() ) :
 			raise TypeError( "Parameter argument must derive from IECore.Parameter." )
 
-		if parameter.presetsOnly and len( parameter.presets() ) :
+		if parameter.presetsOnly and len( parameter.getPresets() ) :
 			return IECoreMaya.PresetsOnlyParameterUI( parameterisedHolderNode, parameter, **kw )
 
 		uiTypeHint = None

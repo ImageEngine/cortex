@@ -35,27 +35,6 @@
 #ifndef IECORERI_ARRAYALGO_H
 #define IECORERI_ARRAYALGO_H
 
-/// Returns the length of the array. This is simply arraylength(), but
-/// is provided so as to have a more complete set of functions with
-/// the same naming convention.
-/// \deprecated This function isn't useful in any way, serves only to
-/// rename an existing function, adds the potential for suboptimal 
-/// shader code and confuses the shader compiler in 3delight 10.0.7.
-float ieArrayLength( float a[] )
-{
-	return arraylength( a );
-}
-
-float ieArrayLength( string a[] )
-{
-	return arraylength( a );
-}
-
-float ieArrayLength( color a[] )
-{
-	return arraylength( a );
-}
-
 /// Returns the sum of all the values in the array.
 float ieArraySum( float a[] )
 {

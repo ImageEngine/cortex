@@ -58,7 +58,7 @@ class FnTransientParameterisedHolderNode( IECoreMaya.FnParameterisedHolder ) :
 
 			# Script jobs aren't available from maya.cmds. Maya Python bindings generate swig warnings
 			# such as "swig/python detected a memory leak of type 'MCallbackId *', no destructor found"
-			IECoreMaya.mel( 'scriptJob -uiDeleted "%s" "python( \\\"import IECoreMaya; IECoreMaya.FnTransientParameterisedHolderNode._deleteNode( \'%s\' )\\\" )" -protected' % ( layoutName, nodeName ) )
+			maya.mel.eval( 'scriptJob -uiDeleted "%s" "python( \\\"import IECoreMaya; IECoreMaya.FnTransientParameterisedHolderNode._deleteNode( \'%s\' )\\\" )" -protected' % ( layoutName, nodeName ) )
 
 			fnTPH = FnTransientParameterisedHolderNode( nodeName )
 

@@ -1763,18 +1763,7 @@ void IECoreGL::Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IEC
 
 void IECoreGL::Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )
 {
-	if( type=="sphere" )
-	{
-		float radius = parameterValue<float>( "radius", topology, 1 );
-		float zMin = parameterValue<float>( "zMin", topology, -1 );
-		float zMax = parameterValue<float>( "zMax", topology, 1 );
-		float thetaMax = parameterValue<float>( "thetaMax", topology, 360 );
-		sphere( radius, zMin, zMax, thetaMax, primVars );
-	}
-	else
-	{
-		msg( Msg::Warning, "Renderer::geometry", boost::format( "Geometry type \"%s\" not implemented." ) % type );
-	}
+	msg( Msg::Warning, "Renderer::geometry", boost::format( "Geometry type \"%s\" not implemented." ) % type );
 }
 
 void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )

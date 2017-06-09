@@ -45,7 +45,6 @@
 
 #include "IECoreMaya/IECoreMaya.h"
 #include "IECoreMaya/bindings/FnParameterisedHolderBinding.h"
-#include "IECoreMaya/bindings/MayaPythonUtilBinding.h"
 #include "IECoreMaya/bindings/FromMayaConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaPlugConverterBinding.h"
 #include "IECoreMaya/bindings/FromMayaObjectConverterBinding.h"
@@ -114,7 +113,6 @@ BOOST_STATIC_ASSERT(sizeof(Py_UNICODE) == 4);
 
 BOOST_PYTHON_MODULE(_IECoreMaya)
 {
-	bindMayaPythonUtil();
 	bindFnParameterisedHolder();
 	bindFromMayaConverter();
 	bindFromMayaPlugConverter();
