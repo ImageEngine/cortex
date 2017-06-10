@@ -35,6 +35,8 @@
 #ifndef IECORE_PRIMITIVEALGOUTILS_H
 #define IECORE_PRIMITIVEALGOUTILS_H
 
+#include <numeric>
+
 #include "boost/mpl/and.hpp"
 #include "IECore/TypeTraits.h"
 
