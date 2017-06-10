@@ -45,6 +45,7 @@
 #include "IECore/DespatchTypedData.h"
 
 #include "boost/format.hpp"
+#include "boost/multi_array.hpp"
 
 #include <fstream>
 

@@ -237,32 +237,6 @@ class ThreadingTest( unittest.TestCase ) :
 				
 		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
 
-	def testPythonColorConverterWithThread( self ) :
-
-		def NewSRGBToLinear( inputColorSpace, outputColorSpace ) :
-			converter = IECore.SRGBToLinearOp()
-			return converter
-	
-		IECore.ColorSpaceTransformOp.registerConversion( 
-			"newSRGB", "linear", NewSRGBToLinear
-		)
-
-		runThread = True
-
-		def test():
-			while runThread :
-				pass
-
-		newThread = threading.Thread(target=test)
-		newThread.start()
-
-		reader = IECore.Reader.create( "test/IECore/data/cinFiles/uvMap.512x256.cin" )
-		reader['colorSpace'] = 'newSRGB'
-		reader.read()
-
-		runThread = False
-		newThread.join()
-
 	def tearDown( self ) :
 		
 		for f in [

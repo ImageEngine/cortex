@@ -45,15 +45,7 @@
 #include "IECore/HalfTypeTraits.h"
 #include "IECore/IECore.h"
 #include "IECore/ScaledDataConversion.h"
-#include "IECore/CineonToLinearDataConversion.h"
-#include "IECore/LinearToCineonDataConversion.h"
-#include "IECore/SRGBToLinearDataConversion.h"
-#include "IECore/LinearToSRGBDataConversion.h"
-#include "IECore/Rec709ToLinearDataConversion.h"
-#include "IECore/LinearToRec709DataConversion.h"
 #include "IECore/CompoundDataConversion.h"
-
-using namespace Imath;
 
 namespace IECore
 {
@@ -62,51 +54,6 @@ void addDataConversionTest(boost::unit_test::test_suite* test);
 
 struct DataConversionTest
 {
-	template<typename F, typename T>
-	void testCineonLinear()
-	{
-		typedef CineonToLinearDataConversion< F, T > Func;
-
-		Func f;
-		CompoundDataConversion< Func, typename Func::InverseType > f_fi( f, f.inverse() );
-
-		/// Verify that f(f'(i)) == i
-		for ( F i = 0; i < 1024; i++ )
-		{
-			BOOST_CHECK_EQUAL( f_fi(i), i );
-		}
-	}
-
-	template<typename T>
-	void testSRGBLinear()
-	{
-		typedef SRGBToLinearDataConversion< T, T > Func;
-		CompoundDataConversion< Func, typename Func::InverseType > f;
-		typename CompoundDataConversion< Func, typename Func::InverseType >::InverseType fi = f.inverse();
-
-		/// Verify that f(f'(i)) ~ i
-		for ( T i = T(0); i < T(10); i += T(0.2) )
-		{
-			BOOST_CHECK_CLOSE( double( f(i) ), double( i ), 1.e-4 );
-			BOOST_CHECK_CLOSE( double( fi(i) ), double( i ), 1.e-4 );
-		}
-	}
-
-	template<typename T>
-	void testRec709Linear()
-	{
-		typedef Rec709ToLinearDataConversion< T, T > Func;
-		CompoundDataConversion< Func, typename Func::InverseType > f;
-		typename CompoundDataConversion< Func, typename Func::InverseType >::InverseType fi = f.inverse();
-
-		/// Verify that f(f'(i)) ~ i
-		for ( T i = T(0); i < T(10); i += T(0.2) )
-		{
-			BOOST_CHECK_CLOSE( double( f(i) ), double( i ), 1.e-4 );
-			BOOST_CHECK_CLOSE( double( fi(i) ), double( i ), 1.e-4 );
-		}
-	}
-
 	template<typename F, typename T>
 	void testSignedScaled()
 	{
@@ -140,38 +87,7 @@ struct DataConversionTestSuite : public boost::unit_test::test_suite
 	{
 		static boost::shared_ptr<DataConversionTest> instance( new DataConversionTest() );
 
-		testCineonLinear( instance );
-		testSRGBLinear( instance );
-		testRec709Linear( instance );
 		testSignedScaled( instance );
-	}
-
-	void testCineonLinear( boost::shared_ptr<DataConversionTest> instance )
-	{
-		void (DataConversionTest::*fn)() = 0;
-
-		fn = &DataConversionTest::testCineonLinear<unsigned, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testCineonLinear<unsigned, double>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testCineonLinear<short, float>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-		fn = &DataConversionTest::testCineonLinear<short, half>;
-		add( BOOST_CLASS_TEST_CASE( fn, instance ) );
-	}
-
-	void testSRGBLinear( boost::shared_ptr<DataConversionTest> instance )
-	{
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<float>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<double>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testSRGBLinear<half>, instance ) );
-	}
-
-	void testRec709Linear( boost::shared_ptr<DataConversionTest> instance )
-	{
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<float>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<double>, instance ) );
-		add( BOOST_CLASS_TEST_CASE( &DataConversionTest::testRec709Linear<half>, instance ) );
 	}
 
 	void testSignedScaled( boost::shared_ptr<DataConversionTest> instance )

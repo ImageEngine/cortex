@@ -161,7 +161,6 @@
 #include "IECorePython/CameraControllerBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
 #include "IECorePython/TriangleAlgoBinding.h"
-#include "IECorePython/ColorTransformOpBinding.h"
 #include "IECorePython/ConverterBinding.h"
 #include "IECorePython/FromCoreConverterBinding.h"
 #include "IECorePython/TransformOpBinding.h"
@@ -198,14 +197,6 @@
 #include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/WarpOpBinding.h"
 #include "IECorePython/UVDistortOpBinding.h"
-#include "IECorePython/LinearToSRGBOpBinding.h"
-#include "IECorePython/SRGBToLinearOpBinding.h"
-#include "IECorePython/LinearToCineonOpBinding.h"
-#include "IECorePython/CineonToLinearOpBinding.h"
-#include "IECorePython/LinearToAlexaLogcOpBinding.h"
-#include "IECorePython/AlexaLogcToLinearOpBinding.h"
-#include "IECorePython/LinearToRec709OpBinding.h"
-#include "IECorePython/Rec709ToLinearOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/YUVImageWriterBinding.h"
@@ -235,7 +226,6 @@
 #include "IECorePython/FileSequenceVectorParameterBinding.h"
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
-#include "IECorePython/ColorSpaceTransformOpBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
 #include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
@@ -442,7 +432,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCameraController();
 	bindPathVectorParameter();
 	bindTriangleAlgo();
-	bindColorTransformOp();
 	bindConverter();
 	bindFromCoreConverter();
 	bindTransformOp();
@@ -493,14 +482,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshTangentsOp();
 	bindWarpOp();
 	bindUVDistortOp();
-	bindSRGBToLinearOp();
-	bindLinearToSRGBOp();
-	bindCineonToLinearOp();
-	bindLinearToCineonOp();
-	bindAlexaLogcToLinearOp();
-	bindLinearToAlexaLogcOp();
-	bindLinearToRec709Op();
-	bindRec709ToLinearOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindYUVImageWriter();
@@ -529,7 +510,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFileSequenceVectorParameter();
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
-	bindColorSpaceTransformOp();
 	bindNParticleReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();

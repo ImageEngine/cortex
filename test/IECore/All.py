@@ -127,7 +127,6 @@ from CapturingMessageHandler import *
 from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
-from ColorTransformOpTest import *
 from TransformOpTest import *
 from LineSegmentTest import *
 from CubicBasisTest import *
@@ -179,7 +178,6 @@ from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
-from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
 from NParticleReader import *

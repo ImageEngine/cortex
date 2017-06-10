@@ -84,8 +84,8 @@ class CamelCaseTest( unittest.TestCase ) :
 	
 	def testNumericCharacters( self ) :
 	
-		self.assertEqual( IECore.CamelCase.split( "linearToRec709" ), [ "linear", "To", "Rec709" ] )
-		self.assertEqual( IECore.CamelCase.split( "Rec709ToLinear" ), [ "Rec709", "To", "Linear" ] )
+		self.assertEqual( IECore.CamelCase.split( "wordsThenNumbers2346" ), [ "words", "Then", "Numbers2346" ] )
+		self.assertEqual( IECore.CamelCase.split( "Numbers2346ThenWords" ), [ "Numbers2346", "Then", "Words" ] )
 	
 if __name__ == "__main__":
 	unittest.main()

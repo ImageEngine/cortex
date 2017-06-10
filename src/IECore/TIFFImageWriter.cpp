@@ -35,7 +35,7 @@
 #include "boost/static_assert.hpp"
 #include "boost/format.hpp"
 #include "boost/mpl/eval_if.hpp"
-
+#include "boost/multi_array.hpp"
 #include "boost/type_traits/is_same.hpp"
 
 #include "OpenEXR/half.h"

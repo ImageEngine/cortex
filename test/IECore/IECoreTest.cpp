@@ -49,7 +49,6 @@
 #include "CompilerTest.h"
 #include "RadixSortTest.h"
 #include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
 #include "InternedStringTest.h"
 
 #ifdef IECORE_WITH_BOOSTFACTORIAL
@@ -93,7 +92,6 @@ bool init()
 		addCompilerTest(test);
 		addRadixSortTest(test);
 		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
 
 #ifdef IECORE_WITH_BOOSTFACTORIAL
 
