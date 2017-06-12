@@ -2480,6 +2480,7 @@ houdiniEnvAppends = {
 	"CXXFLAGS" : [
 		"-isystem", "$GLEW_INCLUDE_PATH",
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
+		"-std=$CXXSTD",
 	],
 	"CPPPATH" : [
 		"contrib/IECoreMantra/include",
