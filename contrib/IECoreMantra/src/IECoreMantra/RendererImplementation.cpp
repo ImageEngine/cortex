@@ -70,7 +70,11 @@ IECoreMantra::RendererImplementation::AttributeState::AttributeState( const Attr
 
 IECore::ConstDataPtr IECoreMantra::RendererImplementation::getShutterOption( const std::string &name ) const
 {
-	float shutter[2];
+#if UT_MAJOR_VERSION_INT >= 16
+	fpreal64 shutter[2];
+#else
+	fpreal shutter[2];
+#endif
 	if ( m_vrayproc->import("camera:shutter", shutter, 2) )
 	{
 		return new V2fData( V2f(shutter[0], shutter[1]) );
@@ -80,7 +84,11 @@ IECore::ConstDataPtr IECoreMantra::RendererImplementation::getShutterOption( con
 
 IECore::ConstDataPtr IECoreMantra::RendererImplementation::getResolutionOption( const std::string &name ) const
 {
-	float res[2];
+#if UT_MAJOR_VERSION_INT >= 16
+	fpreal64 res[2];
+#else
+	fpreal res[2];
+#endif
 	if ( m_vrayproc->import("image:resolution", res, 2) )
 	{
 		return new V2fData( V2f(res[0], res[1]) );
@@ -90,10 +98,18 @@ IECore::ConstDataPtr IECoreMantra::RendererImplementation::getResolutionOption( 
 
 IECore::ConstDataPtr IECoreMantra::RendererImplementation::getVelocityBlurAttribute( const std::string &name ) const
 {
+#if UT_MAJOR_VERSION_INT >= 16
+	fpreal64 v;
+#else
 	int v;
+#endif
 	if ( m_vrayproc->import("object:velocityblur", &v, 1) )
 	{
+#if UT_MAJOR_VERSION_INT >= 16
+		return new FloatData( v );
+#else
 		return new IntData( v );
+#endif
 	}
 	return 0;
 }
@@ -185,6 +201,7 @@ IECoreMantra::RendererImplementation::~RendererImplementation()
 			if ( pclose(m_fpipe) == -1 )
 			{
 				msg( Msg::Error, "IECoreMantra::RendererImplementation::~RendererImplementation()", "pclose error" );
+				m_fpipe = NULL;
 			}
 		}
 		else if ( m_mode == IfdGen )
@@ -192,6 +209,7 @@ IECoreMantra::RendererImplementation::~RendererImplementation()
 			if ( fclose(m_fpipe) != 0 )
 			{
 				msg( Msg::Error, "IECoreMantra::RendererImplementation::~RendererImplementation()", "fclose error" );
+				m_fpipe = NULL;
 			}
 		}
 	}
@@ -551,6 +569,7 @@ void IECoreMantra::RendererImplementation::worldEnd()
 	{	
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "pclose error" );
 	}
+	m_fpipe = NULL;
 }
 
 void IECoreMantra::RendererImplementation::transformBegin()
@@ -988,7 +1007,8 @@ void IECoreMantra::RendererImplementation::procedural( IECore::Renderer::Procedu
 	bound = transform(bound, m_transformStack.top() );
 	renderer->m_vrayproc->m_bound = bound;
 	// add the new VRAY procedural to it's parent
-	m_vrayproc->addChild( renderer->m_vrayproc );
+	VRAY_ProceduralChildPtr child = m_vrayproc->createChild();
+	child->addProcedural( renderer->m_vrayproc );
 }
 
 void IECoreMantra::RendererImplementation::instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
