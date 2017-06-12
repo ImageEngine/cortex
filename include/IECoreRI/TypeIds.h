@@ -47,10 +47,10 @@ enum TypeId
 	RIBWriterTypeId = 106003,
 	SLOReaderTypeId = 106004,
 	SXRendererTypeId = 106005,
-	DTEXDeepImageReaderTypeId = 106006,
-	DTEXDeepImageWriterTypeId = 106007,
-	SHWDeepImageReaderTypeId = 106008,
-	SHWDeepImageWriterTypeId = 106009,
+	DTEXDeepImageReaderTypeId = 106006, // obsolete - available for reuse
+	DTEXDeepImageWriterTypeId = 106007, // obsolete - available for reuse
+	SHWDeepImageReaderTypeId = 106008, // obsolete - available for reuse
+	SHWDeepImageWriterTypeId = 106009, // obsolete - available for reuse
 
 	/// If we ever get here we should start over again
 	LastCoreRITypeId = 106999,

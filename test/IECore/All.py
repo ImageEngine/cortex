@@ -216,7 +216,6 @@ from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
-from DeepPixelTest import DeepPixelTest
 from ConfigLoaderTest import ConfigLoaderTest
 from MurmurHashTest import MurmurHashTest
 from BoolVectorData import BoolVectorDataTest
@@ -242,10 +241,6 @@ from MeshAlgoTest import *
 from CurvesAlgoTest import *
 from PointsAlgoTest import *
 from DisplayDriverServerTest import DisplayDriverServerTest
-
-if IECore.withDeepEXR() :
-	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
-	from EXRDeepImageWriterTest import EXRDeepImageWriterTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *

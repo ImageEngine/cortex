@@ -78,8 +78,6 @@
 #include "IECoreHoudini/bindings/ToHoudiniCurvesConverterBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniGroupConverterBinding.h"
 #include "IECoreHoudini/bindings/ToHoudiniGroupConverterBinding.h"
-#include "IECoreHoudini/bindings/RATDeepImageReaderBinding.h"
-#include "IECoreHoudini/bindings/RATDeepImageWriterBinding.h"
 #include "IECoreHoudini/bindings/SceneCacheNodeBinding.h"
 #include "IECoreHoudini/bindings/LiveSceneBinding.h"
 #include "IECoreHoudini/bindings/FromHoudiniCortexObjectConverterBinding.h"
@@ -176,14 +174,6 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniCurvesConverter();
 	bindFromHoudiniGroupConverter();
 	bindToHoudiniGroupConverter();
-
-#if UT_MAJOR_VERSION_INT < 15
-
-	bindRATDeepImageReader();
-	bindRATDeepImageWriter();
-
-#endif // UT_MAJOR_VERSION_INT
-
 	bindSceneCacheNode();
 	bindLiveScene();
 	bindFromHoudiniCortexObjectConverter();

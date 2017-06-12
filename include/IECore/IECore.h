@@ -61,8 +61,6 @@ IECORE_API bool withSignals();
 IECORE_API bool withBoostFactorial();
 /// Returns true if IECore was built with FreeType suppport
 IECORE_API bool withFreeType();
-/// Returns true if IECore was built with Deep EXR support
-IECORE_API bool withDeepEXR();
 
 }
 

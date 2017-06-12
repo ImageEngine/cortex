@@ -44,10 +44,6 @@
 #include "IECoreRI/bindings/RIBWriterBinding.h"
 #include "IECoreRI/bindings/SXRendererBinding.h"
 #include "IECoreRI/bindings/GXEvaluatorBinding.h"
-#include "IECoreRI/bindings/DTEXDeepImageReaderBinding.h"
-#include "IECoreRI/bindings/DTEXDeepImageWriterBinding.h"
-#include "IECoreRI/bindings/SHWDeepImageReaderBinding.h"
-#include "IECoreRI/bindings/SHWDeepImageWriterBinding.h"
 
 using namespace IECoreRI;
 using namespace boost::python;
@@ -67,14 +63,6 @@ BOOST_PYTHON_MODULE( _IECoreRI )
 #ifdef IECORERI_WITH_GX
 	bindGXEvaluator();	
 #endif // IECORERI_WITH_GX
-#ifdef IECORERI_WITH_RIXDEEP
-	bindDTEXDeepImageReader();
-	bindDTEXDeepImageWriter();
-#endif // IECORERI_WITH_RIXDEEP
-#ifdef IECORERI_WITH_DEEPSHW
-	bindSHWDeepImageReader();
-	bindSHWDeepImageWriter();
-#endif // IECORERI_WITH_DEEPSHW
 
 	def( "withRiProceduralV", &IECoreRI::withRiProceduralV );
 

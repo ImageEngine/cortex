@@ -84,7 +84,7 @@ class TestReader(unittest.TestCase):
 		
 		def isReader( x ) :
 		
-			abstractReaders = ( IECore.Reader, IECore.ImageReader, IECore.ParticleReader, IECore.DeepImageReader )
+			abstractReaders = ( IECore.Reader, IECore.ImageReader, IECore.ParticleReader )
 		
 			try :
 				return issubclass( x, IECore.Reader ) and x not in abstractReaders

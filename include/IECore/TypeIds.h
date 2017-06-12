@@ -396,9 +396,9 @@ enum TypeId
 	DataInterleaveOpTypeId = 348,
 	DataConvertOpTypeId = 349,
 	PNGImageReaderTypeId = 350, // obsolete - available for reuse
-	DeepImageReaderTypeId = 351,
-	DeepImageWriterTypeId = 352,
-	DeepImageConverterTypeId = 353,
+	DeepImageReaderTypeId = 351, // obsolete - available for reuse
+	DeepImageWriterTypeId = 352, // obsolete - available for reuse
+	DeepImageConverterTypeId = 353, // obsolete - available for reuse
 	V2iVectorParameterTypeId = 354,
 	V3iVectorParameterTypeId = 355,
 	DiskPrimitiveTypeId = 356,
@@ -436,8 +436,8 @@ enum TypeId
 	StandardRadialLensModelTypeId = 388,
 	LensDistortOpTypeId = 389,
 	TransferSmoothSkinningWeightsOpTypeId = 390,
-	EXRDeepImageReaderTypeId = 391,
-	EXRDeepImageWriterTypeId = 392,
+	EXRDeepImageReaderTypeId = 391, // obsolete - available for reuse
+	EXRDeepImageWriterTypeId = 392, // obsolete - available for reuse
 	ExternalProceduralTypeId = 393,
 
 	// Remember to update TypeIdBinding.cpp !!!

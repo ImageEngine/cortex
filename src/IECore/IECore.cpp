@@ -101,13 +101,4 @@ bool withFreeType()
 #endif
 }
 
-bool withDeepEXR()
-{
-#ifdef IECORE_WITH_DEEPEXR
-	return true;
-#else
-	return false;
-#endif
-}
-
 }

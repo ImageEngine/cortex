@@ -40,7 +40,6 @@ sys.path.append( "test/IECoreNuke" )
 
 from KnobAccessorsTest import *
 from FnAxisTest import *
-from DeepImageReaderTest import *
 from LensDistortTest import *
 from StringUtilTest import *
 from KnobConvertersTest import *

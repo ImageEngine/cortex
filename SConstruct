@@ -767,7 +767,6 @@ o.Add(
 		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
 		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
 		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),
-		( "IECore.DeepImageConverter", "common/2d/deepImage/convert" ),
 		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
 		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
 		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
@@ -1447,15 +1446,6 @@ if doConfigure :
 	else :
 		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
 
-	if c.CheckHeader( "OpenEXR/ImfDeepFrameBuffer.h", "\"\"", "C++" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_DEEPEXR' )
-	else :
-		coreSources.remove( "src/IECore/EXRDeepImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
-		coreSources.remove( "src/IECore/EXRDeepImageWriter.cpp" )
-		corePythonSources.remove( "src/IECorePython/EXRDeepImageWriterBinding.cpp" )
-
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
@@ -1663,34 +1653,6 @@ if doConfigure :
 			if haveDelight :
 
 				sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
-
-		if c.CheckCXXHeader( "RixDeepTexture.h" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/DTEXDeepImageReader.cpp" )
-			riSources.remove( "src/IECoreRI/DTEXDeepImageWriter.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageReaderBinding.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageWriterBinding.cpp" )
-
-			if havePRMan :
-
-				sys.stderr.write( "WARNING : RixDeepTexture API not found - not building IECoreRI::DTEXDeepTexture functionality. Use PRMan 16.1 or later.\n" )
-
-		if haveDelight and c.CheckCXXHeader( "dtex.h" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/SHWDeepImageReader.cpp" )
-			riSources.remove( "src/IECoreRI/SHWDeepImageWriter.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageReaderBinding.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageWriterBinding.cpp" )
 
 		if haveDelight and c.CheckCXXHeader( "nsi.h" ) :
 
@@ -2259,9 +2221,6 @@ if doConfigure :
     					"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
 					]
 				)
-
-				if "-DIECORE_WITH_DEEPEXR" in coreEnv["CPPFLAGS"] :
-					nukeEnv.Append( CPPFLAGS = [ "-DIECORE_WITH_DEEPEXR" ] )
 
 				nukePythonModuleEnv.Append( LIBS = [
 					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),

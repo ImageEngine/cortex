@@ -249,10 +249,6 @@
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
-#include "IECorePython/DeepPixelBinding.h"
-#include "IECorePython/DeepImageReaderBinding.h"
-#include "IECorePython/DeepImageWriterBinding.h"
-#include "IECorePython/DeepImageConverterBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
 #include "IECorePython/ClampOpBinding.h"
@@ -271,8 +267,6 @@
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
-#include "IECorePython/EXRDeepImageReaderBinding.h"
-#include "IECorePython/EXRDeepImageWriterBinding.h"
 #include "IECorePython/ExternalProceduralBinding.h"
 #include "IECorePython/ClippingPlaneBinding.h"
 #include "IECorePython/DataAlgoBinding.h"
@@ -509,10 +503,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLRUCache();
 	bindDataInterleaveOp();
 	bindDataConvertOp();
-	bindDeepPixel();
-	bindDeepImageReader();
-	bindDeepImageWriter();
-	bindDeepImageConverter();
 	bindMurmurHash();
 	bindDiskPrimitive();
 	bindClampOp();
@@ -538,20 +528,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesAlgo();
 	bindPointsAlgo();
 
-#ifdef IECORE_WITH_DEEPEXR
-
-	bindEXRDeepImageReader();
-	bindEXRDeepImageWriter();
-
-#endif
-
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withASIO", &IECore::withASIO );
 	def( "withSignals", &IECore::withSignals );
-	def( "withDeepEXR", &IECore::withDeepEXR );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
