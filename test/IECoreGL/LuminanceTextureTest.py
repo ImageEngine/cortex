@@ -44,7 +44,7 @@ class LuminanceTextureTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		i = IECore.TIFFImageReader( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
 		i["A"] = i["Y"]
 
 		t = IECoreGL.LuminanceTexture( i, False )

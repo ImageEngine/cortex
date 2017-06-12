@@ -46,7 +46,7 @@ class ProceduralDSOTest( unittest.TestCase ) :
 
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
 
-		image = IECore.EXRImageReader( "testProceduralDSO.exr" ).read()
+		image = IECore.Reader.create( "testProceduralDSO.exr" ).read()
 		evaluator = IECore.ImagePrimitiveEvaluator( image )
 		result = evaluator.createResult()
 		evaluator.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )

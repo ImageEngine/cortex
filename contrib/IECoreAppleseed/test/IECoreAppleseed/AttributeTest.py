@@ -115,7 +115,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 		del r
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/referenceImages/expectedAlphaMaps.exr" ).read()
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/referenceImages/expectedAlphaMaps.exr" ).read()
 
 		for channel in ( "R", "G", "B" ) :
 			# Appleseed's default shading appears to have changed since

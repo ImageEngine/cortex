@@ -46,7 +46,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testFromImage( self ) :
 		""" Test conversion from an ImagePrimitive """
 
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		t = ToGLTextureConverter( i ).convert()
 		self.failIf( not t.isInstanceOf( Texture.staticTypeId() ) ) 
@@ -65,7 +65,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testFromCompoundData( self ) :
 		""" Test conversion from a CompoundData representation of an ImagePrimitive """
 		
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		cd = CompoundData()
 		cd["displayWindow"] = Box2iData( i.displayWindow )
@@ -94,7 +94,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testMissingChannelCreation( self ) :
 		""" Test the creation of missing channels """
 		
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		cd = CompoundData()
 		cd["displayWindow"] = Box2iData( i.displayWindow )

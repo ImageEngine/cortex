@@ -60,12 +60,9 @@ class TestReader(unittest.TestCase):
 		for ee in e :
 			self.assert_( type( ee ) is str )
 		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tga" ]
-		if IECore.withTIFF() :
-			expectedImageReaderExtensions += [ "tif", "tiff" , "tdl", "tx"]
-		if IECore.withJPEG() :
-			expectedImageReaderExtensions += [ "jpg", "jpeg" ]
-		if IECore.withPNG() :
-			expectedImageReaderExtensions += [ "png" ]
+		expectedImageReaderExtensions += [ "tif", "tiff" , "tdl", "tx"]
+		expectedImageReaderExtensions += [ "jpg", "jpeg" ]
+		expectedImageReaderExtensions += [ "png" ]
 
 		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
 

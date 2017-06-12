@@ -45,7 +45,7 @@ class PNGReaderTest( IECoreNuke.TestCase ) :
 
 		# this raises an exception if cortex has been built with a libpng
 		# which is incompatible with Nuke's libpng.
-		r = IECore.PNGImageReader( "test/IECore/data/png/kodak_dx7590_test.png" )
+		r = IECore.Reader.create( "test/IECore/data/png/kodak_dx7590_test.png" )
 		r.read()
 
 if __name__ == "__main__":

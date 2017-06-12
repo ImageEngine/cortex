@@ -47,7 +47,7 @@ class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		i = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		t = IECoreGL.ColorTexture( i )
 

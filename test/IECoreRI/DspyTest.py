@@ -72,7 +72,7 @@ class DspyTest( IECoreRI.TestCase ) :
 		# check that they're the same
 		
 		i = IECore.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
-		i2 = IECore.TIFFImageReader( "test/IECoreRI/output/sphere.tif" ).read()
+		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
 		
 		i.blindData().clear()
 		i2.blindData().clear()
@@ -114,7 +114,7 @@ class DspyTest( IECoreRI.TestCase ) :
 		os.system( "renderdl test/IECoreRI/output/display.rib" )
 		
 		i = IECore.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
-		i2 = IECore.TIFFImageReader( "test/IECoreRI/output/sphere.tif" ).read()
+		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
 		
 		i.blindData().clear()
 		i2.blindData().clear()

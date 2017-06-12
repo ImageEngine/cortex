@@ -65,8 +65,6 @@ from SimpleTypedData import *
 from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
-from EXRImageReader import *
-from EXRImageWriter import *
 from PointsPrimitive import *
 from ImagePrimitive import *
 from PerlinNoise import *
@@ -115,10 +113,6 @@ from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
-from CINImageReader import *
-from CINImageWriter import *
-from DPXImageReader import *
-from DPXImageWriter import *
 from InverseDistanceWeightedInterpolation import *
 from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
@@ -164,12 +158,10 @@ from ImagePremultiplyOpTest import *
 from ImageUnpremultiplyOpTest import *
 from ImageCompositeOpTest import *
 from ImageSequenceCompositeOpTest import *
-from YUVImageWriter import *
 from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
-from SGIImageReaderTest import *
 from TimeDurationDataTest import *
 from TimePeriodDataTest import *
 from PatchMeshPrimitiveTest import *
@@ -178,8 +170,6 @@ from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
-from TGAImageReaderTest import *
-from TGAImageWriterTest import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
 from FaceAreaOpTest import FaceAreaOpTest
@@ -260,19 +250,8 @@ if IECore.withDeepEXR() :
 if IECore.withASIO() :
 	from DisplayDriverTest import *
 
-if IECore.withTIFF() :
-	from TIFFImageReader import *
-	from TIFFImageWriter import *
-
-if IECore.withJPEG() :
-	from JPEGImageReader import *
-	from JPEGImageWriter import *
-
 if IECore.withFreeType() :
 	from FontTest import *
-
-if IECore.withPNG() :
-	from PNGImageReader import TestPNGReader
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

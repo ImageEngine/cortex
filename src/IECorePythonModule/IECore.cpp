@@ -104,19 +104,7 @@
 #include "IECorePython/ImageReaderBinding.h"
 #include "IECorePython/ImageWriterBinding.h"
 #include "IECorePython/PerlinNoiseBinding.h"
-#include "IECorePython/EXRImageReaderBinding.h"
-#include "IECorePython/EXRImageWriterBinding.h"
 #include "IECorePython/HalfBinding.h"
-#include "IECorePython/TIFFImageReaderBinding.h"
-#include "IECorePython/TIFFImageWriterBinding.h"
-#include "IECorePython/CINImageReaderBinding.h"
-#include "IECorePython/CINImageWriterBinding.h"
-#include "IECorePython/DPXImageReaderBinding.h"
-#include "IECorePython/DPXImageWriterBinding.h"
-#include "IECorePython/JPEGImageReaderBinding.h"
-#include "IECorePython/JPEGImageWriterBinding.h"
-#include "IECorePython/TGAImageReaderBinding.h"
-#include "IECorePython/TGAImageWriterBinding.h"
 #include "IECorePython/MeshPrimitiveBinding.h"
 #include "IECorePython/MotionPrimitiveBinding.h"
 #include "IECorePython/TransformBinding.h"
@@ -199,13 +187,11 @@
 #include "IECorePython/UVDistortOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
-#include "IECorePython/YUVImageWriterBinding.h"
 #include "IECorePython/ImageCompositeOpBinding.h"
 #include "IECorePython/ImagePremultiplyOpBinding.h"
 #include "IECorePython/ImageUnpremultiplyOpBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
-#include "IECorePython/SGIImageReaderBinding.h"
 #include "IECorePython/TimeDurationDataBinding.h"
 #include "IECorePython/TimePeriodBinding.h"
 #include "IECorePython/TimePeriodDataBinding.h"
@@ -263,7 +249,6 @@
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
-#include "IECorePython/PNGImageReaderBinding.h"
 #include "IECorePython/DeepPixelBinding.h"
 #include "IECorePython/DeepImageReaderBinding.h"
 #include "IECorePython/DeepImageWriterBinding.h"
@@ -367,27 +352,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindImagePrimitive();
 	bindImageReader();
 	bindImageWriter();
-	bindEXRImageReader();
-	bindEXRImageWriter();
-
-#ifdef IECORE_WITH_TIFF
-	bindTIFFImageReader();
-	bindTIFFImageWriter();
-#endif
-
-	bindCINImageReader();
-	bindCINImageWriter();
-	bindDPXImageReader();
-	bindDPXImageWriter();
-
-#ifdef IECORE_WITH_JPEG
-	bindJPEGImageReader();
-	bindJPEGImageWriter();
-#endif
-
-	bindTGAImageReader();
-	bindTGAImageWriter();
-
 	bindMeshPrimitive();
 	bindMotionPrimitive();
 	bindTransform();
@@ -484,12 +448,10 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindUVDistortOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
-	bindYUVImageWriter();
 	bindImagePremultiplyOp();
 	bindImageUnpremultiplyOp();
 	bindImageCompositeOp();
 	bindDateTimeData();
-	bindSGIImageReader();
 	bindTimeDurationData();
 	bindTimePeriod();
 	bindTimePeriodData();
@@ -547,13 +509,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLRUCache();
 	bindDataInterleaveOp();
 	bindDataConvertOp();
-	
-#ifdef IECORE_WITH_PNG
-
-	bindPNGImageReader();
-	
-#endif
-	
 	bindDeepPixel();
 	bindDeepImageReader();
 	bindDeepImageWriter();
