@@ -1,3 +1,12 @@
+9.21.1
+======
+
+Fixes
+-----
+
+- IECoreMantra : Fixed procedural issues in Houdini 16 (#580).
+- IECoreArnold : ParameterAlgo : Fix `dataToArray()` boolean and string array conversion.
+
 9.21.0
 ======
 
