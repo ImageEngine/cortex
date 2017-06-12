@@ -33,15 +33,26 @@
 ##########################################################################
 
 import os
+import re
 import subprocess
 import unittest
 
-import IECore 
+import IECore
 import IECoreMantra
 
 _dir = os.path.dirname( __file__ )
 
 class RendererTest( unittest.TestCase ):
+	
+	@classmethod
+	def setUpClass(cls):
+		if os.path.exists( _dir + "/output/" ) is False:
+			os.makedirs( _dir + "/output/" )
+	
+	@classmethod
+	def tearDownClass(cls):
+		if os.path.exists( _dir + "/output/" ):
+			os.rmdir( _dir + "/output/" )
 	
 	def __greenSquare( self, r ):
 		r.shader( "surface", "constant", { "Cd": IECore.V3fData( IECore.V3f( 0, 1, 0 ) ) } )
@@ -152,8 +163,8 @@ class RendererTest( unittest.TestCase ):
 		p = subprocess.Popen( ['mantra', '-V8'], stdin=open('/dev/null'), stdout=subprocess.PIPE )
 		out = p.communicate()[0]
 		self.assertTrue( out )
-		self.failUnless( "Registering procedural 'ieprocedural'" in out )
-		self.failUnless( "Registering procedural 'ieworld'" in out )
+		self.failUnless( "Registering procedural 'ieprocedural'" in out or "adding procedural 'ieprocedural'" in out )
+		self.failUnless( "Registering procedural 'ieworld'" in out or "adding procedural 'ieworld'" in out )
 
 	def testOptions( self ):
 		ifd = _dir + "/output/testOptions.ifd"
@@ -196,11 +207,35 @@ class RendererTest( unittest.TestCase ):
 		self.assertTrue( world )
 		self.assertEquals( world.typeId(), IECore.Group.staticTypeId() )
 		self.assertTrue( world.state() )
-		self.assertEquals( 
-			world.state()[0].attributes[':surface'], 
-			IECore.StringData( 'testshader p2 1.234 p3 "hello" p1 11 p4 1 2 3 p5 1 0 0 ')
+		# check the shader parameters
+		expectedValues = {
+			'p1': '11',
+			'p2': '1.234',
+			'p3': '"hello"',
+			'p4': '1 2 3',
+			'p5': '1 0 0'
+		}
+		self.assertDictEqual(
+			RendererTest._parseShaderString( world.state()[0].attributes[':surface'].value, expectedValues.keys() ),
+			expectedValues
 		)
-	
+		
+	@staticmethod
+	def _parseShaderString( shaderString, keys ):
+		"""
+		parse a string and based on keys. This will work even if the parameters get set in different orders
+		@param shaderString string to parse
+		@param keys list of strings with the strings being what the parameter names are
+		@return dict, with the key being the parameter name, and the value being the value of this parameter
+		"""
+		# remove the initial shader name
+		shaderParams = " ".join( shaderString.split( " " )[1:] )
+		# split based on the keys, but capture the name of the key
+		flatParameters = filter( None, re.split( "(" + "|".join(keys) + ")", shaderParams ) )
+		# convert the result into a dictionary and remove the whitespace
+		return dict( [ ( key.strip(), val.strip() ) for key, val in zip( *( iter( flatParameters ), )*2 ) ] )
+			
+
 	def tearDown( self ):
 		files = [
 				_dir + "/output/testGeometry.tif",

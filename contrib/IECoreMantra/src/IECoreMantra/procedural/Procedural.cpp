@@ -34,9 +34,14 @@
 
 #include "boost/python.hpp"
 
+#include <UT/UT_Version.h>
+#include <UT/UT_DSOVersion.h>
 #include <UT/UT_WorkArgs.h>
 #include <UT/UT_String.h>
 #include <GU/GU_Detail.h>
+#if UT_MAJOR_VERSION_INT >= 16
+#include <VRAY/VRAY_ProceduralFactory.h>
+#endif
 
 #include "IECore/MessageHandler.h"
 #include "IECore/ParameterisedProcedural.h"
@@ -65,32 +70,6 @@ static void initialisePython()
 	}
 	Py_Initialize();
 	PyEval_InitThreads();
-		try
-		{
-			g_mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
-			g_mainModuleNamespace = g_mainModule.attr( "__dict__" );
-			string toExecute =
-				"import signal\n"
-				"signal.signal( signal.SIGINT, signal.SIG_DFL )\n"
-				"import IECore";
-			
-			handle<> ignored( PyRun_String(
-				toExecute.c_str(),
-				Py_file_input, g_mainModuleNamespace.ptr(),
-				g_mainModuleNamespace.ptr() ) );
-		}
-		catch( const error_already_set &e )
-		{
-			PyErr_Print();
-		}
-		catch( const std::exception &e )
-		{
-			msg( Msg::Error, "ieProcedural initialiser", e.what() );
-		}
-		catch( ... )
-		{
-			msg( Msg::Error, "ieProcedural initialiser", "Caught unknown exception" );
-		}
 	PyEval_ReleaseThread( PyThreadState_Get() );
 }
 
@@ -114,18 +93,20 @@ public:
 	virtual void	 render();
 #if UT_MAJOR_VERSION_INT >= 16
 	UT_StringHolder m_className;
-	int64 m_classVersion;
+	int32 m_classVersion;
 	UT_StringHolder m_parameterString;
 #else 
 	UT_String m_className;
 	int m_classVersion;
 	UT_String m_parameterString;
 #endif
-
+	static VRAY_ProceduralArg theArgs[];
+	static const UT_StringHolder ieProceduralName;
 };
 
-static VRAY_ProceduralArg theArgs[] = {
-	VRAY_ProceduralArg("className", "string", "read"), 
+const UT_StringHolder VRAY_ieProcedural::ieProceduralName("VRAY_ieProcedural");
+VRAY_ProceduralArg VRAY_ieProcedural::theArgs[] = {
+	VRAY_ProceduralArg("className", "string", "read"),
 	VRAY_ProceduralArg("classVersion", "int", "1"),
 	VRAY_ProceduralArg("parameterString", "string", ""),
 	VRAY_ProceduralArg()
@@ -140,7 +121,7 @@ allocProcedural(const char *)
 const VRAY_ProceduralArg *
 getProceduralArgs(const char *)
 {
-	return theArgs;
+	return VRAY_ieProcedural::theArgs;
 }
 
 VRAY_ieProcedural::VRAY_ieProcedural()
@@ -165,6 +146,13 @@ const char *VRAY_ieProcedural::getClassName()
 	return "VRAY_ieProcedural";
 }
 
+#endif
+
+#if UT_MAJOR_VERSION_INT >= 16
+void registerProcedural(VRAY_ProceduralFactory *factory)
+{
+    factory->insert(new IECoreMantra::VRAY_ieProcDefinition<VRAY_ieProcedural>());
+}
 #endif
 
 // The initialize method is called when the procedural is created. 
@@ -225,7 +213,7 @@ VRAY_ieProcedural::render()
 	ScopedGILLock giLock;
 	try
 	{
-		object ieCore = g_mainModuleNamespace["IECore"];
+		object ieCore = object( handle<>( borrowed( PyImport_ImportModule("IECore") ) ) );
 		object classLoader = ieCore.attr( "ClassLoader" ).attr( "defaultProceduralLoader" )();
 		object procedural = classLoader.attr( "load" )( m_className.buffer(), m_classVersion )();
 		boost::python::list params;
