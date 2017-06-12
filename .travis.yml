@@ -46,11 +46,8 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          env: COMPILER_VERSION= CXXSTD=c++98 DEBUG=1
-        - os: linux
-          compiler: gcc
-          env: COMPILER_VERSION=4.8 CXXSTD=c++98 DEBUG=0
-        - os: linux
-          compiler: gcc
           env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=1
 

@@ -89,7 +89,7 @@ o.Add(
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
-	"c++98",
+	"c++11",
 )
 
 o.Add(
