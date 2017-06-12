@@ -92,36 +92,9 @@ bool withBoostFactorial()
 #endif
 }
 
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif
-}
-
 bool withFreeType()
 {
 #ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withPNG()
-{
-#ifdef IECORE_WITH_PNG
 	return true;
 #else
 	return false;

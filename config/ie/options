@@ -165,9 +165,6 @@ GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersi
 GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_LIB_SUFFIX = "-" + glewVersion
 
-PNG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-JPEG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-TIFF_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
 # figure out the boost lib suffix
@@ -274,11 +271,6 @@ if targetApp=="nuke" :
 
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-	if "pngVersion" in nukeReg :
-		pngVersion = nukeReg["pngVersion"]
-		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
-		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
-
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -292,10 +284,6 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-
-	if "pngVersion" in houdiniReg :
-		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + houdiniReg["pngVersion"]
-
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )

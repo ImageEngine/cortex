@@ -182,55 +182,6 @@ o.Add(
 	"",
 )
 
-# JPEG options
-
-o.Add(
-	"JPEG_INCLUDE_PATH",
-	"The path to the JPEG include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"JPEG_LIB_PATH",
-	"The path to the JPEG lib directory.",
-	"/usr/local/lib",
-)
-
-# PNG options
-
-o.Add(
-	"PNG_INCLUDE_PATH",
-	"The path to the PNG include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"PNG_LIB_PATH",
-	"The path to the PNG lib directory.",
-	"/usr/local/lib",
-)
-
-o.Add(
-	"PNG_LIB_SUFFIX",
-	"The suffix appended to the names of libpng. You can modify this "
-	"to link against libraries installed with non-default names",
-	"",
-)
-
-# TIFF options
-
-o.Add(
-	"TIFF_INCLUDE_PATH",
-	"The path to the TIFF include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"TIFF_LIB_PATH",
-	"The path to the TIFF lib directory.",
-	"/usr/local/lib",
-)
-
 # Freetype options
 
 o.Add(
@@ -1052,9 +1003,6 @@ dependencyIncludes = [
 	# we use "OpenEXR/x.h" and they use "x.h"
 	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", "$PNG_INCLUDE_PATH",
-	"-isystem", "$JPEG_INCLUDE_PATH",
-	"-isystem", "$TIFF_INCLUDE_PATH",
 	"-isystem", "$FREETYPE_INCLUDE_PATH",
 ]
 
@@ -1069,9 +1017,6 @@ env.Prepend(
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
-		"$PNG_LIB_PATH",
-		"$JPEG_LIB_PATH",
-		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
 	],
 	LIBS = [
@@ -1510,35 +1455,6 @@ if doConfigure :
 		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
 		coreSources.remove( "src/IECore/EXRDeepImageWriter.cpp" )
 		corePythonSources.remove( "src/IECorePython/EXRDeepImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
-	else :
-		sys.stderr.write( "WARNING: no TIFF library found, no TIFF support, check TIFF_INCLUDE_PATH and TIFF_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
-		coreSources.remove( "src/IECore/TIFFImageReader.cpp" )
-		coreSources.remove( "src/IECore/ScopedTIFFErrorHandler.cpp" )
-		corePythonSources.remove( "src/IECorePython/TIFFImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/TIFFImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "jpeg", ["stdio.h", "jpeglib.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
-	else :
-		sys.stderr.write( "WARNING: no JPEG library found, no JPEG support, check JPEG_INCLUDE_PATH and JPEG_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/JPEGImageWriter.cpp" )
-		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "png" + env["PNG_LIB_SUFFIX"], ["stdio.h", "png.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_PNG' )
-	else :
-		sys.stderr.write( "WARNING: no PNG library found, no PNG support, check PNG_INCLUDE_PATH and PNG_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/PNGImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/PNGImageReaderBinding.cpp" )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :

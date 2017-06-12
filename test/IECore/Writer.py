@@ -45,10 +45,8 @@ class TestWriter( unittest.TestCase ) :
 			self.assert_( type( ee ) is str )
 
 		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "tga" ]
-		if IECore.withTIFF() :
-			expectedExtensions += [ "tif", "tiff" ]
-		if IECore.withJPEG() :
-			expectedExtensions += [ "jpg", "jpeg" ]
+		expectedExtensions += [ "tif", "tiff" ]
+		expectedExtensions += [ "jpg", "jpeg" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
@@ -59,10 +57,8 @@ class TestWriter( unittest.TestCase ) :
 		for ee in e :
 			self.assert_( type( ee ) is str )
 		expectedImageWriterExtensions = [ "exr", "cin", "dpx", "yuv", "tga" ]
-		if IECore.withTIFF() :
-			expectedImageWriterExtensions += [ "tif", "tiff" ]
-		if IECore.withJPEG() :
-			expectedImageWriterExtensions += [ "jpg", "jpeg" ]
+		expectedImageWriterExtensions += [ "tif", "tiff" ]
+		expectedImageWriterExtensions += [ "jpg", "jpeg" ]
 
 		self.assertEqual( set( expectedImageWriterExtensions ), set( e ) )
 

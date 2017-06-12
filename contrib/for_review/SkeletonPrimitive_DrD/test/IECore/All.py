@@ -240,14 +240,6 @@ from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
 if IECore.withASIO() :
 	from DisplayDriverTest import *
 
-if IECore.withTIFF() :
-	from TIFFImageReader import *
-	from TIFFImageWriter import *
-
-if IECore.withJPEG() :
-	from JPEGImageReader import *
-	from JPEGImageWriter import *
-
 if IECore.withFreeType() :
 	from FontTest import *
 

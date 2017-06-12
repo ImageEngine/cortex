@@ -44,14 +44,11 @@ class TestReader(unittest.TestCase):
 			self.assert_( type( ee ) is str )
 
 		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "sgi", "bw", "rgba", "rgb" ]
+		expectedExtensions += [ "tif", "tiff", "tdl", "tx" ]
+		expectedExtensions += [ "jpg", "jpeg" ]
+		expectedExtensions += [ "png" ]
 		if IECore.withASIO() :
 			expectedExtensions += [ "obj" ]
-		if IECore.withTIFF() :
-			expectedExtensions += [ "tif", "tiff", "tdl", "tx" ]
-		if IECore.withJPEG() :
-			expectedExtensions += [ "jpg", "jpeg" ]
-		if IECore.withPNG() :
-			expectedExtensions += [ "png" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )

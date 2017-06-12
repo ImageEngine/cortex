@@ -551,11 +551,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withASIO", &IECore::withASIO );
 	def( "withSignals", &IECore::withSignals );
-	def( "withTIFF", &IECore::withTIFF );
-	def( "withJPEG", &IECore::withJPEG );
 	def( "withDeepEXR", &IECore::withDeepEXR );
 	def( "withFreeType", &IECore::withFreeType );
-	def( "withPNG", &IECore::withPNG );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 
