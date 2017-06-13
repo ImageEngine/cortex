@@ -152,12 +152,7 @@ from SplineToImageTest import *
 from DisplayTest import *
 from MeshTangentsOpTest import *
 from CompoundVectorParameterTest import *
-from UVDistortOpTest import *
 from ObjectVectorTest import *
-from ImagePremultiplyOpTest import *
-from ImageUnpremultiplyOpTest import *
-from ImageCompositeOpTest import *
-from ImageSequenceCompositeOpTest import *
 from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *

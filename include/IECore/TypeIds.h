@@ -295,7 +295,7 @@ enum TypeId
 	DisplayTypeId = 247,
 	MeshTangentsOpTypeId = 248,
 	WarpOpTypeId = 249,
-	UVDistortOpTypeId = 250,
+	UVDistortOpTypeId = 250, // obsolete - available for reuse
 	LinearToSRGBOpTypeId = 251, // obsolete - available for reuse
 	SRGBToLinearOpTypeId = 252, // obsolete - available for reuse
 	LinearToCineonOpTypeId = 253, // obsolete - available for reuse
@@ -311,9 +311,9 @@ enum TypeId
 	ObjectVectorTypeId = 263,
 	ObjectVectorParameterTypeId = 264,
 	YUVImageWriterTypeId = 265,
-	ImageCompositeOpTypeId = 266,
-	ImagePremultiplyOpTypeId = 267,
-	ImageUnpremultiplyOpTypeId = 268,
+	ImageCompositeOpTypeId = 266, // obsolete - available for reuse
+	ImagePremultiplyOpTypeId = 267, // obsolete - available for reuse
+	ImageUnpremultiplyOpTypeId = 268, // obsolete - available for reuse
 	DateTimeDataTypeId = 269,
 	DateTimeParameterTypeId = 270,
 	SGIImageReaderTypeId = 271, // obsolete - available for reuse

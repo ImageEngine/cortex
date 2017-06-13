@@ -184,12 +184,8 @@
 #include "IECorePython/DisplayBinding.h"
 #include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/WarpOpBinding.h"
-#include "IECorePython/UVDistortOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
-#include "IECorePython/ImageCompositeOpBinding.h"
-#include "IECorePython/ImagePremultiplyOpBinding.h"
-#include "IECorePython/ImageUnpremultiplyOpBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
 #include "IECorePython/TimeDurationDataBinding.h"
@@ -439,12 +435,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDisplay();
 	bindMeshTangentsOp();
 	bindWarpOp();
-	bindUVDistortOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
-	bindImagePremultiplyOp();
-	bindImageUnpremultiplyOp();
-	bindImageCompositeOp();
 	bindDateTimeData();
 	bindTimeDurationData();
 	bindTimePeriod();

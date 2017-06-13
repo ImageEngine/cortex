@@ -98,7 +98,6 @@ from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
 from EditBlock import EditBlock
 from SequenceMergeOp import SequenceMergeOp
-from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *
 from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict
