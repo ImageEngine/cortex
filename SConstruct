@@ -224,6 +224,13 @@ o.Add(
 	"/usr/lib",
 )
 
+o.Add(
+	"OIIO_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenImageIO libraries. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
+)
+
 # General path options
 
 o.Add(
@@ -848,6 +855,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECore/All.py"
+)
+
+o.Add(
+	"TEST_IMAGE_SCRIPT",
+	"The python script to run for the image tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreImage/All.py"
 )
 
 o.Add(
@@ -1542,6 +1557,101 @@ corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePytho
 coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
 NoCache( corePythonTest )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
+
+###########################################################################################
+# Build, install and test the IECoreImage library and bindings
+###########################################################################################
+
+if doConfigure :
+
+	imageEnvSets = {
+		"IECORE_NAME" : "IECoreImage",
+	}
+
+	imageEnvAppends = {
+
+		"CXXFLAGS" : [
+			"-isystem", "$OIIO_INCLUDE_PATH",
+		],
+		"LIBPATH" : [
+			"$OIIO_LIB_PATH",
+		],
+	}
+
+	imageEnv = coreEnv.Clone( **imageEnvSets )
+	imageEnv.Append( **imageEnvAppends )
+
+	c = Configure( imageEnv )
+
+	if not c.CheckLibWithHeader( imageEnv.subst( "OpenImageIO$OIIO_LIB_SUFFIX" ), "OpenImageIO/imageio.h", "CXX" ) :
+
+		sys.stderr.write( "ERROR : unable to find the OpenImageIO libraries - check OIIO_INCLUDE_PATH and OIIO_LIB_PATH.\n" )
+		c.Finish()
+
+	else :
+
+		c.Finish()
+
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		imageEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+		# source list
+		imageSources = sorted( glob.glob( "src/IECoreImage/*.cpp" ) )
+		imageHeaders = sorted( glob.glob( "include/IECoreImage/*.h" ) + glob.glob( "include/IECoreImage/*.inl" ) )
+		imagePythonHeaders = sorted( glob.glob( "include/IECoreImageBindings/*.h" ) + glob.glob( "include/IECoreImageBindings/*.inl" ) )
+		imagePythonSources = sorted( glob.glob( "src/IECoreImageBindings/*.cpp" ) )
+		imagePythonModuleSources = sorted( glob.glob( "src/IECoreImageModule/*.cpp" ) )
+		imagePythonScripts = glob.glob( "python/IECoreImage/*.py" )
+
+		# library
+		imageLibrary = imageEnv.SharedLibrary( "lib/" + os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageSources )
+		imageLibraryInstall = imageEnv.Install( os.path.dirname( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageLibrary )
+		imageEnv.NoCache( imageLibraryInstall )
+		imageEnv.AddPostAction( imageLibraryInstall, lambda target, source, env : makeLibSymLinks( imageEnv ) )
+		imageEnv.Alias( "install", imageLibraryInstall )
+		imageEnv.Alias( "installImage", imageLibraryInstall )
+		imageEnv.Alias( "installLib", [ imageLibraryInstall ] )
+
+		# headers
+		imageHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImage", imageHeaders )
+		imageEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imageEnv, imageEnv["INSTALL_HEADER_DIR"] ) )
+		imageEnv.Alias( "install", imageHeaderInstall )
+		imageEnv.Alias( "installImage", imageHeaderInstall )
+
+		# python headers
+		imagePythonHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImageBindings", imagePythonHeaders )
+		imageEnv.Alias( "install", imagePythonHeaderInstall )
+		imageEnv.Alias( "installImage", imagePythonHeaderInstall )
+
+		# python module
+		imagePythonModuleEnv = corePythonModuleEnv.Clone( **imageEnvSets )
+		imagePythonModuleEnv.Append( **imageEnvAppends )
+		imagePythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
+		imagePythonModule = imagePythonModuleEnv.SharedLibrary( "python/IECoreImage/_IECoreImage", imagePythonSources + imagePythonModuleSources )
+		imagePythonModuleEnv.Depends( imagePythonModule, imageLibrary )
+
+		# python module install
+		imagePythonModuleInstall = imagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", imagePythonScripts + imagePythonModule )
+		imagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imagePythonModuleEnv, imagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		imagePythonModuleEnv.Alias( "install", imagePythonModuleInstall )
+		imagePythonModuleEnv.Alias( "installImage", imagePythonModuleInstall )
+
+		Default( [ imageLibrary, imagePythonModule ] )
+
+		imageTestEnv = testEnv.Clone()
+		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
+
+		imageTest = imageTestEnv.Command( "test/IECoreImage/results.txt", imagePythonModule, pythonExecutable + " $TEST_IMAGE_SCRIPT --verbose" )
+		NoCache( imageTest )
+		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )
+		imageTestEnv.Depends( imageTest, glob.glob( "test/IECoreImage/*.py" ) )
+		imageTestEnv.Alias( "testImage", imageTest )
 
 ###########################################################################################
 # Build, install and test the coreRI library and bindings
@@ -3041,7 +3151,7 @@ appleseedPythonModuleEnv.Append(
 	],
 	LIBPATH = [
 		"$APPLESEED_LIB_PATH",
-		"$OSL_LIB_PATH"
+		"$OSL_LIB_PATH",
 		"$OIIO_LIB_PATH"
 	],
 )

@@ -87,6 +87,7 @@ if targetApp :
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
+	oiioVersion = targetAppReg.get( "OpenImageIO", cortexReg["OpenImageIOVersion"] )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
@@ -103,6 +104,7 @@ else :
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
+	oiioVersion = cortexReg["OpenImageIOVersion"]
 
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -164,6 +166,11 @@ ILMBASE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler
 GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersion
 GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_LIB_SUFFIX = "-" + glewVersion
+
+oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
+OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
+OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
+OIIO_LIB_SUFFIX = "-" + oiioVersion
 
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
@@ -240,11 +247,6 @@ try :
 	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
 	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
 	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-
-	oiioVersion = appleseedReg["OpenImageIO"]
-	oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
-	OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
-	OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
 except :
 	pass
 
