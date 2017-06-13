@@ -341,14 +341,6 @@ o.Add(
 	"/usr/local/foundry/FLEXlm",
 )
 
-# Truelight options
-
-o.Add(
-	"TRUELIGHT_ROOT",
-	"The directory in which Truelight is installed.",
-	"/usr/fl/truelight"
-)
-
 # OpenGL options
 
 try :
@@ -915,14 +907,6 @@ o.Add(
 	""
 )
 
-o.Add(
-	"INSTALL_CORETRUELIGHT_POST_COMMAND",
-	"A command which is run following a successful installation of "
-	"the CoreTruelight library. This could be used to customise installation "
-	"further for a particular site.",
-	""
-)
-
 # Test options
 
 o.Add(
@@ -947,14 +931,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreGL/All.py"
-)
-
-o.Add(
-	"TEST_TRUELIGHT_SCRIPT",
-	"The python script to run for the Truelight tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"test/IECoreTruelight/All.py"
 )
 
 o.Add(
@@ -2849,99 +2825,6 @@ if doConfigure :
 			houdiniTestEnv.Depends( houdiniPythonTest, [ glLibrary, glPythonModule ] )
 		houdiniTestEnv.Alias( "testHoudini", houdiniPythonTest )
 		houdiniTestEnv.Alias( "testHoudiniPython", houdiniPythonTest )
-
-
-###########################################################################################
-# Build and install the coreTruelight library and headers
-###########################################################################################
-
-truelightEnv = env.Clone( IECORE_NAME = "IECoreTruelight" )
-truelightEnv.Append( LIBS = [ "truelight" ] )
-
-# Remove all the boost and OpenEXR libs for the configure state- if we don't do this then the configure test can fail for some compilers.
-# \todo Need to establish exactly what is going on here.
-oldTruelightLibs = list( truelightEnv["LIBS"] )
-truelightEnv["LIBS"] = [ x for x in truelightEnv["LIBS"] if ( x.find( "boost_" ) == -1 and x.find( "Ilm" ) == -1 and x.find( "Iex" ) == -1 and x.find( "Half" )==-1 and x.find( "Imath" )==-1 ) ]
-
-truelightEnv.Append( CXXFLAGS = [ "-isystem", "$TRUELIGHT_ROOT/include" ] )
-truelightEnv.Prepend( LIBPATH = [
-		"$TRUELIGHT_ROOT/lib"
-	]
-)
-
-truelightPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME="IECoreTruelight" )
-
-if doConfigure :
-
-	c = Configure( truelightEnv )
-
-	if not c.CheckLibWithHeader( "truelight", "truelight.h", "CXX" ) :
-
-		sys.stderr.write( "WARNING : no truelight devkit found, not building IECoreTruelight - check TRUELIGHT_ROOT.\n" )
-		c.Finish()
-
-	else :
-
-		c.Finish()
-
-		truelightEnv["LIBS"] = oldTruelightLibs
-
-		# we can't add this earlier as then it's built during the configure stage, and that's no good
-		truelightEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
-		truelightHeaders = glob.glob( "include/IECoreTruelight/*.h" ) + glob.glob( "include/IECoreTruelight/*.inl" )
-		truelightSources = sorted( glob.glob( "src/IECoreTruelight/*.cpp" ) )
-		truelightPythonSources = sorted( glob.glob( "src/IECoreTruelight/bindings/*.cpp" ) )
-		truelightPythonScripts = glob.glob( "python/IECoreTruelight/*.py" )
-
-		# library
-		truelightLibrary = truelightEnv.SharedLibrary( "lib/" + os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightSources )
-		truelightEnv.Depends( truelightLibrary, coreLibrary )
-		truelightLibraryInstall = truelightEnv.Install( os.path.dirname( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ), truelightLibrary )
-		truelightEnv.NoCache( truelightLibraryInstall )
-		truelightEnv.AddPostAction( truelightLibraryInstall, lambda target, source, env : makeLibSymLinks( truelightEnv ) )
-		truelightEnv.Alias( "install", truelightLibraryInstall )
-		truelightEnv.Alias( "installTruelight", truelightLibraryInstall )
-		truelightEnv.Alias( "installLib", [ truelightLibraryInstall ] )
-
-		# headers
-		truelightHeaderInstall = truelightEnv.Install( "$INSTALL_HEADER_DIR/IECoreTruelight", truelightHeaders )
-		truelightEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightEnv, truelightEnv["INSTALL_HEADER_DIR"] ) )
-		truelightEnv.Alias( "installTruelight", truelightHeaderInstall )
-		truelightEnv.Alias( "install", truelightHeaderInstall )
-
-		# python
-		truelightPythonModuleEnv.Append( LIBS = [
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( truelightEnv.subst( "$INSTALL_LIB_NAME" ) ),
-				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-			]
-		)
-
-		truelightPythonModule = truelightPythonModuleEnv.SharedLibrary( "python/IECoreTruelight/_IECoreTruelight", truelightPythonSources )
-		truelightPythonModuleEnv.Depends( truelightPythonModule, corePythonModule )
-		truelightPythonModuleEnv.Depends( truelightPythonModule, truelightLibrary )
-
-		truelightPythonModuleInstall = truelightPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreTruelight", truelightPythonScripts + truelightPythonModule )
-		truelightPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreTruelight", lambda target, source, env : makeSymLinks( truelightPythonModuleEnv, truelightPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-		truelightPythonModuleEnv.Alias( "install", truelightPythonModuleInstall )
-		truelightPythonModuleEnv.Alias( "installTruelight", truelightPythonModuleInstall )
-
-		if coreEnv["INSTALL_CORETRUELIGHT_POST_COMMAND"]!="" :
-			# this is the only way we could find to get a post action to run for an alias
-			truelightEnv.Alias( "install", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" )
-			truelightEnv.Alias( "installTruelight", truelightLibraryInstall, "$INSTALL_CORETRUELIGHT_POST_COMMAND" )
-
-		Default( [ truelightLibrary, truelightPythonModule ] )
-
-		# tests
-		truelightTestEnv = testEnv.Clone()
-		truelightTestEnv["ENV"]["TRUELIGHT_ROOT"] = truelightEnv.subst( "$TRUELIGHT_ROOT" )
-		truelightTest = truelightTestEnv.Command( "test/IECoreTruelight/results.txt", truelightPythonModule, pythonExecutable + " $TEST_TRUELIGHT_SCRIPT" )
-		NoCache( truelightTest )
-		truelightTestEnv.Depends( truelightTest, truelightPythonModule )
-		truelightTestEnv.Depends( truelightTest, glob.glob( "test/IECoreTruelight/*.py" ) )
-		truelightTestEnv.Alias( "testTruelight", truelightTest )
 
 ###########################################################################################
 # Build, install and test the IECoreArnold library and bindings

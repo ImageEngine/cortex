@@ -273,7 +273,7 @@ IECORE_API bool withDeepEXR();
 /// \section mainPageApplicationSupportSection Application support
 ///
 /// The generic functionality contained within IECore is interfaced with specific 3rd party applications and frameworks using additional
-/// libraries. These libraries include \ref IECoreMaya, IECoreNuke, IECoreGL and IECoreTruelight.
+/// libraries. These libraries include \ref IECoreMaya, IECoreHoudini, IECoreNuke, IECoreGL, IECoreRI, IECoreArnold, IECoreApplseed, and IECoreMantra.
 ///
 /// \section mainPageThreadingSection Threading
 ///
