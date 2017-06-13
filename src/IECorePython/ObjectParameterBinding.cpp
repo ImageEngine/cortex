@@ -48,23 +48,45 @@ using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-static ObjectParameterPtr objectParameterConstructor( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const object &presets, bool presetsOnly, CompoundObjectPtr userData )
+class ObjectParameterWrapper : public ParameterWrapper<ObjectParameter>
 {
-	return new ObjectParameter( name, description, defaultValue, type, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData );
-}
 
-static ObjectParameterPtr objectParameterConstructor2( const std::string &name, const std::string &description, ObjectPtr defaultValue, const boost::python::list &types, const object &presets, bool presetsOnly, CompoundObjectPtr userData )
-{
-	vector<TypeId> tv;
-	boost::python::container_utils::extend_container( tv, types );
-	ObjectParameter::TypeIdSet t;
-	copy( tv.begin(), tv.end(), insert_iterator<ObjectParameter::TypeIdSet>( t, t.begin() ) );
-	return new ObjectParameter( name, description, defaultValue, t, parameterPresets<Parameter::PresetsContainer>( presets ), presetsOnly, userData );
-}
+	protected:
+
+		/// Allow construction from either a string, StringData, or a FrameList
+		static ObjectParameter::TypeIdSet makeTypes( object types )
+		{
+			vector<TypeId> tv;
+			boost::python::container_utils::extend_container( tv, types );
+			ObjectParameter::TypeIdSet t;
+			copy( tv.begin(), tv.end(), insert_iterator<ObjectParameter::TypeIdSet>( t, t.begin() ) );
+			return t;
+		}
+
+	public :
+
+		ObjectParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, TypeId t,
+			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0
+		)
+			: ParameterWrapper<ObjectParameter>( self, n, d, dv, t, parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
+		{
+		};
+
+		ObjectParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, const boost::python::list &ts,
+			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0
+		)
+			: ParameterWrapper<ObjectParameter>( self, n, d, dv, makeTypes( ts ), parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
+		{
+		};
+
+};
 
 static boost::python::list validTypes( ObjectParameter &o )
 {
@@ -76,14 +98,45 @@ static boost::python::list validTypes( ObjectParameter &o )
 	return result;
 }
 
-void bindObjectParameter()
+} // namespace
+
+namespace IECorePython
 {
 
-	RunTimeTypedClass<ObjectParameter>()
-		.def( "__init__", make_constructor( &objectParameterConstructor, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "type" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
-		.def( "__init__", make_constructor( &objectParameterConstructor2, default_call_policies(), ( boost::python::arg_( "name" ), boost::python::arg_( "description" ), boost::python::arg_( "defaultValue" ), boost::python::arg_( "types" ), boost::python::arg_( "presets" ) = boost::python::tuple(), boost::python::arg_( "presetsOnly" ) = false, boost::python::arg_( "userData" ) = object() ) ) )
+void bindObjectParameter()
+{
+	using boost::python::arg;
+
+	ParameterClass<ObjectParameter, ObjectParameterWrapper>()
+		.def(
+			init< const std::string &, const std::string &, ObjectPtr, const TypeId &, boost::python::optional<const object &, bool, CompoundObjectPtr > >
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "defaultValue" ),
+					arg( "type" ),
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false ,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
+		.def(
+			init< const std::string &, const std::string &, ObjectPtr, const boost::python::list &, boost::python::optional<const object &, bool, CompoundObjectPtr > >
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "defaultValue" ),
+					arg( "types" ),
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false ,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
 		.def( "validTypes", &validTypes )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( ObjectParameter )
 	;
 
 }

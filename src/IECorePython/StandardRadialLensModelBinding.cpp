@@ -38,7 +38,6 @@
 #include "IECore/StandardRadialLensModel.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;

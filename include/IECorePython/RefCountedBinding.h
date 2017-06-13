@@ -63,12 +63,36 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 		template<typename Arg1, typename Arg2, typename Arg3>
 		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 );
 
+		/// \todo Once we require c++11, replace all this with a single variadic template.
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
+		RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 );
+
 		virtual ~RefCountedWrapper();
 	
 	protected :
 				
-		/// You must hold the GIL before calling this method, and should
-		/// first have used isSubclassed() to check that it is worth trying.
+		/// You must hold the GIL before calling this method. In most cases
+		/// you should use isSubclassed() to check that it is worth calling.
+		/// However, if the method is pure virtual, and therefor is required
+		/// to be overriden in python, there is no need to call isSubclassed().
 		boost::python::object methodOverride( const char *name ) const;
       
 	private :

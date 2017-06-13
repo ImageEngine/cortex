@@ -39,7 +39,9 @@
 
 namespace IECorePython
 {
+
 IECOREPYTHON_API void bindPathParameter();
+
 }
 
 #endif // IECOREPYTHON_PATHPARAMETERBINDING_H

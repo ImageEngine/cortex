@@ -35,11 +35,72 @@
 #ifndef IECOREPYTHON_OPBINDING_H
 #define IECOREPYTHON_OPBINDING_H
 
+#include "IECore/CompoundParameter.h"
+
 #include "IECorePython/Export.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
 namespace IECorePython
 {
+
+/// A class to simplify the binding of Op derived classes.
+template<typename T, typename TWrapper=T>
+class OpClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
+{
+	public :
+
+		OpClass( const char *docString = 0 )
+			:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
+		{
+		}
+
+};
+
+/// A class for wrapping Ops to allow overriding in Python.
+template<typename T>
+class OpWrapper : public IECorePython::RunTimeTypedWrapper<T>
+{
+
+	public :
+
+		OpWrapper( PyObject *self, const std::string &description )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, description )
+		{
+		}
+
+		OpWrapper( PyObject *self, const std::string &description, IECore::ParameterPtr resultParameter )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, description, resultParameter )
+		{
+		}
+
+		OpWrapper( PyObject *self, const std::string &description, IECore::CompoundParameterPtr compoundParameter, IECore::ParameterPtr resultParameter )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, description, compoundParameter, resultParameter )
+		{
+		}
+
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands )
+		{
+			ScopedGILLock gilLock;
+			boost::python::object o = this->methodOverride( "doOperation" );
+			if( o )
+			{
+				IECore::ObjectPtr r = boost::python::extract<IECore::ObjectPtr>( o( IECore::CompoundObjectPtr( const_cast<IECore::CompoundObject *>( operands ) ) ) );
+				if( !r )
+				{
+					throw IECore::Exception( "doOperation() python method didn't return an Object." );
+				}
+				return r;
+			}
+			else
+			{
+				throw IECore::Exception( "doOperation() python method not defined" );
+			}
+		}
+
+};
+
 IECOREPYTHON_API void bindOp();
+
 }
 
 #endif // IECOREPYTHON_OPBINDING_H

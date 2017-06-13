@@ -37,13 +37,8 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
-
 #include "IECore/Renderable.h"
 #include "IECore/StateRenderable.h"
 #include "IECore/AttributeState.h"
@@ -61,6 +56,9 @@
 #include "IECore/ObjectVector.h"
 #include "IECore/SmoothSkinningData.h"
 
+#include "IECorePython/TypedObjectParameterBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
 using namespace std;
 using namespace boost;
 using namespace boost::python;
@@ -74,7 +72,7 @@ static void bindTypedObjectParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<TypedObjectParameter<T>, TypedObjectParameterWrap<T> >()
+	ParameterClass<TypedObjectParameter<T>, TypedObjectParameterWrapper<T> >()
 		.def(
 			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
 			(
@@ -88,7 +86,6 @@ static void bindTypedObjectParameter()
 				)
 			)
 		)
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( TypedObjectParameter<T> )
 	;
 }
 

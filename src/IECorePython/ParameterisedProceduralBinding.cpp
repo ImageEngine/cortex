@@ -43,54 +43,59 @@
 #include "IECore/ParameterisedProcedural.h"
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapper<ParameterisedProcedural>
+class ParameterisedProceduralWrapper : public RunTimeTypedWrapper<ParameterisedProcedural>
 {
 
 	public :
 
-		ParameterisedProceduralWrap( PyObject *self, const std::string &description="" )
-			: ParameterisedProcedural( description ), Wrapper<ParameterisedProcedural>( self, this )
+		ParameterisedProceduralWrapper( PyObject *self, const std::string &description="" )
+			: RunTimeTypedWrapper<ParameterisedProcedural>( self, description )
 		{
 		}
 		
 		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
 		{
-			ScopedGILLock gilLock;
-			try
+			if( isSubclassed() )
 			{
-				override o = this->get_override( "doRenderState" );
-				if( o )
+				ScopedGILLock gilLock;
+				try
 				{
-					o( renderer, boost::const_pointer_cast<CompoundObject>( args ) );
+					object o = this->methodOverride( "doRenderState" );
+					if( o )
+					{
+						o( renderer, boost::const_pointer_cast<CompoundObject>( args ) );
+						return;
+					}
+					else
+					{
+						ParameterisedProcedural::doRenderState( renderer, args );
+					}
 				}
-				else
+				catch( error_already_set )
 				{
-					ParameterisedProcedural::doRenderState( renderer, args );
+					PyErr_Print();
 				}
-			}
-			catch( error_already_set )
-			{
-				PyErr_Print();
-			}
-			catch( const std::exception &e )
-			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doRenderState", e.what() );
-			}
-			catch( ... )
-			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doRenderState", "Caught unknown exception" );
+				catch( const std::exception &e )
+				{
+					msg( Msg::Error, "ParameterisedProceduralWrapper::doRenderState", e.what() );
+				}
+				catch( ... )
+				{
+					msg( Msg::Error, "ParameterisedProceduralWrapper::doRenderState", "Caught unknown exception" );
+				}
 			}
 
+			ParameterisedProcedural::doRenderState( renderer, args );
 		}
 
 		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
@@ -98,14 +103,14 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			ScopedGILLock gilLock;
 			try
 			{
-				override o = this->get_override( "doBound" );
+				object o = this->methodOverride( "doBound" );
 				if( o )
 				{
-					return o( boost::const_pointer_cast<CompoundObject>( args ) );
+					return extract<Imath::Box3f>( o( boost::const_pointer_cast<CompoundObject>( args ) ) );
 				}
 				else
 				{
-					msg( Msg::Error, "ParameterisedProceduralWrap::doBound", "doBound() python method not defined" );
+					msg( Msg::Error, "ParameterisedProceduralWrapper::doBound", "doBound() python method not defined" );
 				}
 			}
 			catch( error_already_set )
@@ -114,12 +119,13 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			}
 			catch( const std::exception &e )
 			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doBound", e.what() );
+				msg( Msg::Error, "ParameterisedProceduralWrapper::doBound", e.what() );
 			}
 			catch( ... )
 			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doBound", "Caught unknown exception" );
+				msg( Msg::Error, "ParameterisedProceduralWrapper::doBound", "Caught unknown exception" );
 			}
+
 			return Imath::Box3f(); // empty
 		}
 
@@ -130,14 +136,15 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try
 			{
-				override o = this->get_override( "doRender" );
+				object o = this->methodOverride( "doRender" );
 				if( o )
 				{
 					o( r, boost::const_pointer_cast<CompoundObject>( args ) );
+					return;
 				}
 				else
 				{
-					msg( Msg::Error, "ParameterisedProceduralWrap::doRender", "doRender() python method not defined" );
+					msg( Msg::Error, "ParameterisedProceduralWrapper::doRender", "doRender() python method not defined" );
 				}
 			}
 			catch( error_already_set )
@@ -146,15 +153,13 @@ class ParameterisedProceduralWrap : public ParameterisedProcedural, public Wrapp
 			}
 			catch( const std::exception &e )
 			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doRender", e.what() );
+				msg( Msg::Error, "ParameterisedProceduralWrapper::doRender", e.what() );
 			}
 			catch( ... )
 			{
-				msg( Msg::Error, "ParameterisedProceduralWrap::doRender", "Caught unknown exception" );
+				msg( Msg::Error, "ParameterisedProceduralWrapper::doRender", "Caught unknown exception" );
 			}
 		}
-
-		IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( ParameterisedProcedural );
 
 };
 
@@ -180,12 +185,17 @@ static ParameterPtr parameterisedProceduralGetItem( ParameterisedProcedural &o, 
 	return p;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindParameterisedProcedural()
 {
 
 	CompoundParameter *(ParameterisedProcedural::*parameters)() = &ParameterisedProcedural::parameters;
 
-	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrap>()
+	RunTimeTypedClass<ParameterisedProcedural, ParameterisedProceduralWrapper>()
 		.def( init<>() )
 		.def( init< const std::string >( arg( "description") ) )
 		.add_property( "description", make_function( &ParameterisedProcedural::description, return_value_policy<copy_const_reference>() ) )

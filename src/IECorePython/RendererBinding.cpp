@@ -42,7 +42,6 @@
 #include "IECore/MessageHandler.h"
 #include "IECorePython/RendererBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 #include "IECorePython/ScopedGILRelease.h"
 
@@ -50,23 +49,29 @@ using namespace boost::python;
 using namespace boost;
 using namespace std;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Procedural>
+class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 {
 	public :
-		ProceduralWrap( PyObject *self ) : Wrapper<Renderer::Procedural>( self, this ) {};
+
+		ProceduralWrapper( PyObject *self )
+			: RefCountedWrapper<Renderer::Procedural>( self )
+		{
+		};
+
 		virtual Imath::Box3f bound() const
 		{
 			ScopedGILLock gilLock;
 			try
 			{
-				override o = this->get_override( "bound" );
+				object o = this->methodOverride( "bound" );
 				if( o )
 				{
-					return o();
+					return extract<Imath::Box3f>( o() );
 				}
 				else
 				{
@@ -95,7 +100,7 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try
 			{
-				override o = this->get_override( "render" );
+				object o = this->methodOverride( "render" );
 				if( o )
 				{
 					o( RendererPtr( r ) );
@@ -126,10 +131,10 @@ class ProceduralWrap : public Renderer::Procedural, public Wrapper<Renderer::Pro
 			// but in our case the host is mainly 3delight and that does no exception handling at all.
 			try
 			{
-				override o = this->get_override( "hash" );
+				object o = this->methodOverride( "hash" );
 				if( o )
 				{
-					return o();
+					return extract<MurmurHash>( o() );
 				}
 				else
 				{
@@ -343,6 +348,11 @@ static Renderer::ExternalProceduralPtr externalProceduralConstructor( const char
 	return new Renderer::ExternalProcedural( fileName, bound, p );
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindRenderer()
 {
 	scope rendererScope =  RunTimeTypedClass<Renderer>( "An abstract class to define a renderer" )
@@ -399,7 +409,7 @@ void bindRenderer()
 		.def("editEnd", &Renderer::editEnd)
 	;
 
-	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrap>( "Procedural" )
+	RefCountedClass<Renderer::Procedural, RefCounted, ProceduralWrapper>( "Procedural" )
 		.def( init<>() )
 		.def( "bound", &Renderer::Procedural::bound )
 		.def( "render", &Renderer::Procedural::render )

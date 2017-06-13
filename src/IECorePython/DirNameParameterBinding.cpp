@@ -34,38 +34,45 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/ParameterBinding.h"
 #include "IECore/DirNameParameter.h"
 #include "IECore/CompoundObject.h"
+
+#include "IECorePython/ParameterBinding.h"
 #include "IECorePython/DirNameParameterBinding.h"
-#include "IECorePython/Wrapper.h"
-#include "IECorePython/RunTimeTypedBinding.h"
 
 using namespace std;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class DirNameParameterWrap : public DirNameParameter, public Wrapper<DirNameParameter>
+class DirNameParameterWrapper : public ParameterWrapper<DirNameParameter>
 {
 	public :
 
-		DirNameParameterWrap( PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
-			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud )
-			:	DirNameParameter( n, d, dv, ae, c, parameterPresets<PathParameter::PresetsContainer>( p ), po, ud ), Wrapper<DirNameParameter>( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( DirNameParameter );
+		DirNameParameterWrapper(
+			PyObject *self, const std::string &n, const std::string &d, const std::string &dv, bool ae,
+			PathParameter::CheckType c, const object &p, bool po, CompoundObjectPtr ud
+		)
+			: ParameterWrapper<DirNameParameter>( self, n, d, dv, ae, c, parameterPresets<DirNameParameter::PresetsContainer>( p ), po, ud )
+		{
+		};
 
 };
+
+} // namespace
+
+namespace IECorePython
+{
 
 void bindDirNameParameter()
 {
 	using boost::python::arg;
 
-	RunTimeTypedClass<DirNameParameter, DirNameParameterWrap>()
+	ParameterClass<DirNameParameter, DirNameParameterWrapper>()
 		.def(
 			init<const std::string &, const std::string &, const std::string &, bool, PathParameter::CheckType, const object &, bool, CompoundObjectPtr>
 			(
@@ -81,10 +88,8 @@ void bindDirNameParameter()
 				)
 			)
 		)
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( DirNameParameter )
 	;
 
 }
-
 
 } // namespace IECorePython

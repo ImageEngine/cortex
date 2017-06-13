@@ -34,7 +34,6 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
 
@@ -81,13 +80,14 @@ class LevenbergMarquardtErrorFn : public RefCounted
 };
 
 template<typename T>
-class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, public Wrapper< LevenbergMarquardtErrorFn<T> >
+class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarquardtErrorFn<T> >
 {
 	public:
 
 		IE_CORE_DECLAREMEMBERPTR( LevenbergMarquardtErrorFnWrapper<T> );
 
-		LevenbergMarquardtErrorFnWrapper(PyObject *self ) :  LevenbergMarquardtErrorFn<T>(), Wrapper< LevenbergMarquardtErrorFn<T> >( self, this )
+		LevenbergMarquardtErrorFnWrapper( PyObject *self )
+			: RefCountedWrapper< LevenbergMarquardtErrorFn<T> >( self )
 		{
 		}
 
@@ -98,14 +98,14 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 		virtual unsigned numErrors()
 		{
 			ScopedGILLock gilLock;
-			override o = this->get_override( "numErrors" );
+			object o = this->methodOverride( "numErrors" );
 			if( o )
 			{
 				try
 				{
-            		return o();
+					return extract<unsigned>( o() );
 				}
-				catch ( error_already_set )
+				catch( error_already_set )
 				{
 					PyErr_Print();
 					return 0;
@@ -113,7 +113,7 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 			}
 			else
 			{
-        		throw Exception( "LevenbergMarquardt: Error function does not define 'numErrors' instance method" );
+				throw Exception( "LevenbergMarquardt: Error function does not define 'numErrors' instance method" );
 			}
 		}
 
@@ -123,14 +123,14 @@ class LevenbergMarquardtErrorFnWrapper : public LevenbergMarquardtErrorFn<T>, pu
 		)
 		{
 			ScopedGILLock gilLock;
-			override o = this->get_override( "computeErrors" );
+			object o = this->methodOverride( "computeErrors" );
 			if( o )
 			{
 				try
 				{
-    				o( parameters, errors );
+					o( parameters, errors );
 				}
-				catch ( error_already_set )
+				catch( error_already_set )
 				{
 					PyErr_Print();
 					return;

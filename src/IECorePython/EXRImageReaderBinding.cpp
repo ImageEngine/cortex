@@ -36,7 +36,7 @@
 
 #include "IECore/EXRImageReader.h"
 #include "IECorePython/EXRImageReaderBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ReaderBinding.h"
 
 using std::string;
 using namespace boost;
@@ -49,7 +49,7 @@ namespace IECorePython
 void bindEXRImageReader()
 {
 
-	RunTimeTypedClass<EXRImageReader>()
+	ReaderClass<EXRImageReader>()
 		.def( init<>() )
 		.def( init<const std::string &>() )
 		.def( "canRead", &EXRImageReader::canRead ).staticmethod( "canRead" )

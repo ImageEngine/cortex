@@ -66,7 +66,29 @@ class RunTimeTypedWrapper : public RefCountedWrapper<T>
 		
 		template<typename Arg1, typename Arg2, typename Arg3>
 		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 );
-		
+
+		/// \todo Once we require c++11, replace all this with a single variadic template.
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 );
+
+		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
+		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 );
+
 		virtual IECore::TypeId typeId() const;
 		virtual const char *typeName() const;
 		virtual bool isInstanceOf( IECore::TypeId typeId ) const;
@@ -89,60 +111,6 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, TWrap
 		RunTimeTypedClass( const char *docString = 0 );
 
 };
-
-/// \deprecated
-/// \todo Remove for the next major version.
-#define IECOREPYTHON_RUNTIMETYPEDWRAPPERFNS( CLASSNAME )\
-	virtual IECore::TypeId typeId() const\
-	{\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "typeId" ) )\
-		{\
-			boost::python::object res = f(); \
-			return boost::python::extract<IECore::TypeId>( res );\
-		}\
-		return CLASSNAME::typeId();\
-	}\
-	virtual const char *typeName() const\
-	{\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "typeName" ) )\
-		{\
-			boost::python::object res = f(); \
-			return boost::python::extract<const char *>( res );\
-		}\
-		return CLASSNAME::typeName();\
-	}\
-	virtual bool isInstanceOf( IECore::TypeId typeId ) const\
-	{\
-		if( CLASSNAME::isInstanceOf( typeId ) )\
-		{\
-			return true;\
-		}\
-		\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
-		{\
-			boost::python::object res = f( typeId ); \
-			return boost::python::extract<bool>( res );\
-		}\
-		return false;\
-	}\
-	virtual bool isInstanceOf( const char *typeName ) const\
-	{\
-		if( CLASSNAME::isInstanceOf( typeName ) )\
-		{\
-			return true;\
-		}\
-		\
-		IECorePython::ScopedGILLock gilLock;\
-		if( boost::python::override f = this->get_override( "isInstanceOf" ) )\
-		{\
-			boost::python::object res = f( typeName ); \
-			return boost::python::extract<bool>( res );\
-		}\
-		return false;\
-	}
 
 } // namespace IECorePython
 

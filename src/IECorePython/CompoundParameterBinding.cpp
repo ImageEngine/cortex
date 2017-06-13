@@ -39,28 +39,26 @@
 #include "IECore/CompoundObject.h"
 #include "IECorePython/CompoundParameterBinding.h"
 #include "IECorePython/ParameterBinding.h"
-#include "IECorePython/Wrapper.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
 
-namespace IECorePython
+namespace
 {
 
-class CompoundParameterWrap : public CompoundParameter, public Wrapper< CompoundParameter >
+class CompoundParameterWrapper : public ParameterWrapper< CompoundParameter >
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrap );
+		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrapper );
 
-		CompoundParameterWrap( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0, bool adoptChildPresets = true )
-			:	CompoundParameter( name, description, userData, adoptChildPresets ), Wrapper< CompoundParameter >( self, this )
+		CompoundParameterWrapper( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0, bool adoptChildPresets = true )
+			: ParameterWrapper< CompoundParameter >( self, name, description, userData, adoptChildPresets )
 		{
 			addParametersFromMembers( members );
 		}
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( CompoundParameter );
 
 	protected:
 
@@ -161,11 +159,16 @@ static boost::python::list parameterPath( CompoundParameter &o, ConstParameterPt
 	return result;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindCompoundParameter()
 {
 	using boost::python::arg ;
 
-	RunTimeTypedClass<CompoundParameter, CompoundParameterWrap>()
+	ParameterClass<CompoundParameter, CompoundParameterWrapper>()
 		.def(
 			init< const std::string &, const std::string &, boost::python::optional<const list &, CompoundObjectPtr, bool > >
 			(
@@ -188,7 +191,6 @@ void bindCompoundParameter()
 		.def( "has_key", &compoundParameterContains )
 		.def( "addParameter", &CompoundParameter::addParameter )
 		.def( "addParameters", &compoundParameterAddParameters )
-		.IECOREPYTHON_DEFPARAMETERWRAPPERFNS( CompoundParameter )
 		.def( "insertParameter", &CompoundParameter::insertParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(ParameterPtr)) &CompoundParameter::removeParameter )
 		.def( "removeParameter", (void (CompoundParameter::*)(const std::string&)) &CompoundParameter::removeParameter )

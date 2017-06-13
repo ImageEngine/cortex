@@ -35,11 +35,62 @@
 #ifndef IECOREPYTHON_READERBINDING_H
 #define IECOREPYTHON_READERBINDING_H
 
+#include "IECore/CompoundObject.h"
+#include "IECore/Reader.h"
+
 #include "IECorePython/Export.h"
+#include "IECorePython/OpBinding.h"
 
 namespace IECorePython
 {
+
+/// A class to simplify the binding of Reader derived classes.
+template<typename T, typename TWrapper=T>
+class ReaderClass : public OpClass<T, TWrapper>
+{
+	public :
+
+		ReaderClass( const char *docString = 0 );
+
+};
+
+/// A class for wrapping Reader to allow overriding in Python.
+template<typename T>
+class ReaderWrapper : public OpWrapper<IECore::Reader>
+{
+	public :
+
+		ReaderWrapper( PyObject *self, const std::string &description )
+			: OpWrapper<Reader>( self, description )
+		{
+		};
+
+		virtual IECore::CompoundObjectPtr readHeader()
+		{
+			if( this->isSubclassed() )
+			{
+				ScopedGILLock gilLock;
+				boost::python::object o = this->methodOverride( "readHeader" );
+				if( o )
+				{
+					IECore::CompoundObjectPtr r = boost::python::extract<IECore::CompoundObjectPtr>( o() );
+					if( !r )
+					{
+						throw IECore::Exception( "readHeader() python method didn't return a CompoundObject." );
+					}
+					return r;
+				}
+			}
+
+			return T::readHeader();
+		}
+
+};
+
 IECOREPYTHON_API void bindReader();
+
 }
+
+#include "IECorePython/ReaderBinding.inl"
 
 #endif // IECOREPYTHON_READERBINDING_H

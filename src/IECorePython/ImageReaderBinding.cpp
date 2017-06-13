@@ -37,14 +37,14 @@
 #include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
 #include "IECorePython/ImageReaderBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ReaderBinding.h"
 
 using std::string;
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
 static StringVectorDataPtr channelNames( ImageReader &that )
@@ -54,10 +54,15 @@ static StringVectorDataPtr channelNames( ImageReader &that )
 	return result;
 }
 
+} // namespace
+
+namespace IECorePython
+{
+
 void bindImageReader()
 {
 
-	RunTimeTypedClass<ImageReader>()
+	ReaderClass<ImageReader>()
 		.def( "isComplete", &ImageReader::isComplete )
 		.def( "channelNames", &channelNames )
 		.def( "dataWindow", &ImageReader::dataWindow )

@@ -37,7 +37,6 @@
 
 #include <string>
 
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ParameterBinding.h"
 
 #include "IECore/TypedObjectParameter.h"
@@ -46,16 +45,15 @@ namespace IECorePython
 {
 
 template<typename T>
-class TypedObjectParameterWrap : public IECore::TypedObjectParameter<T>, public Wrapper< IECore::TypedObjectParameter<T> >
+class TypedObjectParameterWrapper : public ParameterWrapper< IECore::TypedObjectParameter<T> >
 {
 	public:
 
-		IE_CORE_DECLAREMEMBERPTR( TypedObjectParameterWrap<T> );
+		TypedObjectParameterWrapper( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0 )
+			: ParameterWrapper< IECore::TypedObjectParameter<T> >( self, n, d, dv, parameterPresets<typename IECore::TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud )
+		{
+		};
 
-		TypedObjectParameterWrap( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0 )
-			:	IECore::TypedObjectParameter<T>( n, d, dv, parameterPresets<typename IECore::TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud ), Wrapper< IECore::TypedObjectParameter<T> >( self, this ) {};
-
-		IECOREPYTHON_PARAMETERWRAPPERFNS( IECore::TypedObjectParameter<T> );
 };
 
 }

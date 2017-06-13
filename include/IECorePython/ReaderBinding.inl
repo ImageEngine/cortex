@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       documentation and/or other materials provided with the distribution.
 //
 //     * Neither the name of Image Engine Design nor the names of any
-//       other contributors to this software may be used to endorse or
+//	     other contributors to this software may be used to endorse or
 //       promote products derived from this software without specific prior
 //       written permission.
 //
@@ -32,50 +32,42 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREPYTHON_READERBINDING_INL
+#define IECOREPYTHON_READERBINDING_INL
 
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/TypedPrimitiveParameterBinding.h"
+#include "IECorePython/IECoreBinding.h"
 
-#include "IECore/TypedPrimitiveParameter.h"
-#include "IECore/CompoundObject.h"
+namespace
+{
 
-#include "IECore/ImagePrimitive.h"
+template<typename T>
+static IECore::CompoundObjectPtr readHeader( T &that )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return that.T::readHeader();
+}
 
-using namespace std;
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
+template<typename T>
+static IECore::ObjectPtr read( T &that )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return that.T::read();
+}
+
+
+} // namespace
 
 namespace IECorePython
 {
 
-template<typename T>
-static void bindTypedPrimitiveParameter()
+template<typename T, typename TWrapper>
+ReaderClass<T, TWrapper>::ReaderClass( const char *docString )
+	:	OpClass<T, TWrapper>( docString )
 {
-	using boost::python::arg;
-	
-	ParameterClass<TypedObjectParameter<T>, TypedObjectParameterWrapper<T> >()
-		.def(
-			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
-			(
-				(
-					arg( "name" ),
-					arg( "description" ),
-					arg( "defaultValue" ),
-					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				)
-			)
-		)
-	;
-}
-
-void bindTypedPrimitiveParameter()
-{
-	bindTypedPrimitiveParameter<ImagePrimitive>();
+	this->def( "readHeader", &readHeader<T> );
+	this->def( "read", &read<T> );
 }
 
 } // namespace IECorePython
+
+#endif // IECOREPYTHON_READERBINDING_INL

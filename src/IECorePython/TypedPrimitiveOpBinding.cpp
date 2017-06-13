@@ -38,9 +38,9 @@
 #include "IECore/Parameter.h"
 #include "IECore/Object.h"
 #include "IECore/CompoundObject.h"
+
 #include "IECorePython/TypedPrimitiveOpBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 using namespace boost;
@@ -51,20 +51,19 @@ namespace IECorePython
 {
 
 template<typename T>
-class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPrimitiveOpWrap<T> >
+class TypedPrimitiveOpWrapper : public RunTimeTypedWrapper<TypedPrimitiveOp<T> >
 {
 	public :
 
-		IE_CORE_DECLAREMEMBERPTR( TypedPrimitiveOpWrap<T> )
-
-		TypedPrimitiveOpWrap( PyObject *self, const std::string &description ) : TypedPrimitiveOp<T>( description ), Wrapper<TypedPrimitiveOpWrap<T> >( self, this )
+		TypedPrimitiveOpWrapper( PyObject *self, const std::string &description )
+			: RunTimeTypedWrapper<TypedPrimitiveOp<T> >( self, description )
 		{
 		}
 
 		virtual void modifyTypedPrimitive( T * object, const CompoundObject * operands )
 		{
 			ScopedGILLock gilLock;
-			this->get_override( "modifyTypedPrimitive" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
+			this->methodOverride( "modifyTypedPrimitive" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );
 		}
 
 };
@@ -72,7 +71,7 @@ class TypedPrimitiveOpWrap : public TypedPrimitiveOp<T>, public Wrapper<TypedPri
 template<typename T>
 static void bindTypedPrimitiveOp()
 {
-	RunTimeTypedClass<TypedPrimitiveOp<T>, TypedPrimitiveOpWrap<T> >()
+	RunTimeTypedClass<TypedPrimitiveOp<T>, TypedPrimitiveOpWrapper<T> >()
 		.def( init<const std::string &>() )
 	;
 }

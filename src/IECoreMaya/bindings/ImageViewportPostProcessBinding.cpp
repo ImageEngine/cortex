@@ -37,7 +37,6 @@
 #include "maya/MGlobal.h"
 
 #include "IECorePython/RefCountedBinding.h"
-#include "IECorePython/Wrapper.h"
 #include "IECorePython/ScopedGILLock.h"
 
 #include "IECore/Exception.h"
@@ -54,10 +53,11 @@ using namespace boost::python;
 namespace IECoreMaya
 {
 
-struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrapper< ImageViewportPostProcess >
+struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostProcess >
 {
 
-	ImageViewportPostProcessWrapper(PyObject *self ) : ImageViewportPostProcess(), Wrapper<ImageViewportPostProcess>( self, this )
+	ImageViewportPostProcessWrapper(PyObject *self )
+		: RefCountedWrapper<ImageViewportPostProcess>( self )
 	{
 	}
 
@@ -67,30 +67,31 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 
 	virtual bool needsDepth () const
 	{
-		ScopedGILLock gilLock;
-		override o = this->get_override( "needsDepth" );
-		if( o )
+		if( isSubclassed() )
 		{
-			try
+			ScopedGILLock gilLock;
+			object o = this->methodOverride( "needsDepth" );
+			if( o )
 			{
-    			return o();
-			}
-			catch ( error_already_set )
-			{
-				PyErr_Print();
-				return false;
+				try
+				{
+					return o();
+				}
+				catch( error_already_set )
+				{
+					PyErr_Print();
+					return false;
+				}
 			}
 		}
-		else
-		{
-			return ImageViewportPostProcess::needsDepth();
-		}
+
+		return ImageViewportPostProcess::needsDepth();
 	}
 
 	virtual void preRender( const std::string &panelName )
 	{
 		ScopedGILLock gilLock;
-		override o = this->get_override( "preRender" );
+		object o = this->methodOverride( "preRender" );
 		if( o )
 		{
 			try
@@ -111,7 +112,7 @@ struct ImageViewportPostProcessWrapper : public ImageViewportPostProcess, Wrappe
 	virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image )
 	{
 		ScopedGILLock gilLock;
-		override o = this->get_override( "postRender" );
+		object o = this->methodOverride( "postRender" );
 		if( o )
 		{
 			try
