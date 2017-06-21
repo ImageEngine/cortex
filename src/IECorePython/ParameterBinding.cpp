@@ -49,27 +49,27 @@ using namespace IECorePython;
 namespace
 {
 
-static ObjectPtr defaultValue( Parameter &that )
+ObjectPtr defaultValue( Parameter &that )
 {
 	return that.defaultValue()->copy();
 }
 
-static ObjectPtr getValue( Parameter &that )
+ObjectPtr getValue( Parameter &that )
 {
 	return that.getValue();
 }
 
-static ObjectPtr getValidatedValue( Parameter &that )
+ObjectPtr getValidatedValue( Parameter &that )
 {
 	return that.getValidatedValue();
 }
 
-static void validate( Parameter &that, ObjectPtr value )
+void validate( Parameter &that, ObjectPtr value )
 {
 	that.validate( value.get() );
 }
 
-static dict getPresets( Parameter &that )
+dict getPresets( Parameter &that )
 {
 	dict result;
 	const Parameter::PresetsContainer &p = that.getPresets();
@@ -80,12 +80,12 @@ static dict getPresets( Parameter &that )
 	return result;
 }
 
-static void setPresets( Parameter &p, const object &presets )
+void setPresets( Parameter &p, const object &presets )
 {
 	p.setPresets( parameterPresets<Parameter::PresetsContainer>( presets ) );
 }
 
-static boost::python::tuple presetNames( const Parameter &that )
+boost::python::tuple presetNames( const Parameter &that )
 {
 	boost::python::list result;
 	const Parameter::PresetsContainer &p = that.getPresets();
@@ -96,7 +96,7 @@ static boost::python::tuple presetNames( const Parameter &that )
 	return boost::python::tuple( result );
 }
 
-static boost::python::tuple presetValues( const Parameter &that )
+boost::python::tuple presetValues( const Parameter &that )
 {
 	boost::python::list result;
 	const Parameter::PresetsContainer &p = that.getPresets();
@@ -107,7 +107,7 @@ static boost::python::tuple presetValues( const Parameter &that )
 	return boost::python::tuple( result );
 }
 
-static CompoundObjectPtr userData( Parameter &that )
+CompoundObjectPtr userData( Parameter &that )
 {
 	return that.userData();
 }
