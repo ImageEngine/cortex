@@ -117,6 +117,18 @@ CompoundObjectPtr userData( Parameter &that )
 namespace IECorePython
 {
 
+namespace Detail
+{
+
+boost::python::tuple valueValid2( const IECore::Parameter &that )
+{
+	std::string reason;
+	bool valid = that.valueValid( &reason );
+	return boost::python::make_tuple( valid, reason );
+}
+
+} // namespace Detail
+
 void bindParameter()
 {
 	using boost::python::arg;
