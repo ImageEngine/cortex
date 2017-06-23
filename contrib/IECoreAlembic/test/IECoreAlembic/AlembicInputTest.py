@@ -229,8 +229,6 @@ class AlembicInputTest( unittest.TestCase ) :
 		a.objectAtSample(0)
 		a.transformAtSample(0)
 
-
-
 	def testOutOfRangeSamplesRaise( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
@@ -265,27 +263,16 @@ class AlembicInputTest( unittest.TestCase ) :
 				self.assertEqual( v[1], i )
 				self.assertEqual( v[2], i + 1 )
 
-	def testConverterAccess( self ) :
+	def testObjectAtSample( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
 		m = a.child( "pCube1" ).child( "pCubeShape1" )
-		c = m.converter()
 
-		mesh = c.convert()
-		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
-
-	def testConvertAtIndices( self ) :
-
-		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/animatedCube.abc" )
-		m = a.child( "pCube1" ).child( "pCubeShape1" )
-		c = m.converter()
-
-		mesh = c.convert()
+		mesh = m.objectAtSample( 0 )
 		self.failUnless( isinstance( mesh, IECore.MeshPrimitive ) )
 
 		for i in range( 1, m.numSamples() ) :
-			c["sampleIndex"].setNumericValue( i )
-			mesh2 = c.convert()
+			mesh2 = m.objectAtSample( i )
 			self.failUnless( isinstance( mesh2, IECore.MeshPrimitive ) )
 			self.assertEqual( mesh.verticesPerFace, mesh2.verticesPerFace )
 			self.assertNotEqual( mesh["P"], mesh2["P"] )

@@ -47,6 +47,7 @@
 #endif
 
 #include "IECoreAlembic/AlembicInput.h"
+#include "IECoreAlembic/ObjectAlgo.h"
 #include "IECoreAlembic/FromAlembicConverter.h"
 
 #include "IECore/SimpleTypedData.h"
@@ -359,44 +360,28 @@ Imath::M44d AlembicInput::transformAtTime( double time ) const
 	return result;
 }
 
-IECore::ToCoreConverterPtr AlembicInput::converter( IECore::TypeId resultType ) const
-{
-	return FromAlembicConverter::create( m_data->object, resultType );
-}
-
 IECore::ObjectPtr AlembicInput::objectAtSample( size_t sampleIndex, IECore::TypeId resultType ) const
 {
-	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
-	if( c )
-	{
-		c->sampleIndexParameter()->setNumericValue( sampleIndex );
-		return c->convert();
-	}
-	return 0;
+	return ObjectAlgo::convert( m_data->object, sampleIndex, resultType );
 }
 
 IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId resultType ) const
 {
-	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
-	if( !c )
-	{
-		return 0;
-	}
-
 	size_t index0, index1;
-	double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+	const double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
 	if( index0==index1 )
 	{
-		c->sampleIndexParameter()->setNumericValue( index0 );
-		return c->convert();
+		return objectAtSample( index0, resultType );
 	}
 	else
 	{
-		c->sampleIndexParameter()->setNumericValue( index0 );
-		ObjectPtr object0 = c->convert();
-		c->sampleIndexParameter()->setNumericValue( index1 );
-		ObjectPtr object1 = c->convert();
-		return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
+		ConstObjectPtr object0 = objectAtSample( index0, resultType );
+		ConstObjectPtr object1 = objectAtSample( index1, resultType );
+		if( object0 && object1 )
+		{
+			return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
+		}
+		return NULL;
 	}
 }
 

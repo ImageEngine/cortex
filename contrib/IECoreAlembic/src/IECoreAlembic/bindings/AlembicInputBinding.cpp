@@ -45,12 +45,12 @@ using namespace IECoreAlembic;
 static AlembicInputPtr getItem( AlembicInput *a, long index )
 {
 	long s = a->numChildren();
-	
+
 	if( index < 0 )
 	{
 		index += s;
 	}
-	
+
 	if( index >= s || index < 0 )
 	{
 		PyErr_SetString( PyExc_IndexError, "AlembicInput index out of range" );
@@ -82,7 +82,6 @@ void IECoreAlembicBindings::bindAlembicInput()
 		.def( "boundAtTime", &AlembicInput::boundAtTime )
 		.def( "transformAtSample", &AlembicInput::transformAtSample, ( boost::python::arg_( "sampleIndex" ) = 0 ) )
 		.def( "transformAtTime", &AlembicInput::transformAtTime, ( boost::python::arg_( "time" ) ) )
-		.def( "converter", &AlembicInput::converter, ( boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
 		.def( "objectAtSample", &AlembicInput::objectAtSample, ( boost::python::arg_( "sampleIndex" ) = 0, boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
 		.def( "objectAtTime", &AlembicInput::objectAtTime, ( boost::python::arg_( "time" ), boost::python::arg_( "resultType" ) = IECore::ObjectTypeId ) )
 		.def( "numChildren", &AlembicInput::numChildren )
