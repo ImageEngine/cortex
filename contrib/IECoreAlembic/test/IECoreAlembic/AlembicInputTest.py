@@ -433,5 +433,48 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( m.numChildren(), 0 )
 		self.assertEqual( m.childNames(), IECore.StringVectorData() )
 
+	def testLinearCurves( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/curves.abc" )
+		c = a.child( "linearLine" ).child( "linearLineShape" )
+		curves = c.objectAtSample( 0 )
+
+		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertEqual( curves.basis(), IECore.CubicBasisf.linear() )
+		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 2 ] ) )
+		self.assertEqual( curves.periodic(), False )
+		self.assertEqual(
+			curves["P"].data,
+			IECore.V3fVectorData(
+				[ IECore.V3f( 2, 0, 1 ), IECore.V3f( 2, 0, -1 ) ],
+				IECore.GeometricData.Interpretation.Point
+			)
+		)
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+
+	def testCurves( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/curves.abc" )
+		c = a.child( "curve" ).child( "curveShape" )
+		curves = c.objectAtSample( 0 )
+
+		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertEqual( curves.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 4 ] ) )
+		self.assertEqual( curves.periodic(), False )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+
+	def testNURBSCircle( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/curves.abc" )
+		c = a.child( "nurbsCircle" ).child( "nurbsCircleShape" )
+		curves = c.objectAtSample( 0 )
+
+		self.assertTrue( isinstance( curves, IECore.CurvesPrimitive ) )
+		self.assertEqual( curves.basis(), IECore.CubicBasisf.bSpline() )
+		self.assertEqual( curves.verticesPerCurve(), IECore.IntVectorData( [ 11 ] ) )
+		self.assertEqual( curves.periodic(), True )
+		self.assertTrue( curves.arePrimitiveVariablesValid() )
+
 if __name__ == "__main__":
     unittest.main()
