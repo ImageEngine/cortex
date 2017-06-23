@@ -37,7 +37,10 @@
 
 #include "IECorePython/IECoreBinding.h"
 
-namespace
+namespace IECorePython
+{
+
+namespace Detail
 {
 
 template<typename T>
@@ -54,18 +57,14 @@ static IECore::ObjectPtr read( T &that )
 	return that.T::read();
 }
 
-
-} // namespace
-
-namespace IECorePython
-{
+} // namespace Detail
 
 template<typename T, typename TWrapper>
 ReaderClass<T, TWrapper>::ReaderClass( const char *docString )
 	:	OpClass<T, TWrapper>( docString )
 {
-	this->def( "readHeader", &readHeader<T> );
-	this->def( "read", &read<T> );
+	this->def( "readHeader", &Detail::readHeader<T> );
+	this->def( "read", &Detail::read<T> );
 }
 
 } // namespace IECorePython

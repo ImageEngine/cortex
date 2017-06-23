@@ -37,7 +37,10 @@
 
 #include "IECorePython/IECoreBinding.h"
 
-namespace
+namespace IECorePython
+{
+
+namespace Detail
 {
 
 template<typename T>
@@ -48,17 +51,9 @@ boost::python::tuple valueValid( const T &that, IECore::ConstObjectPtr value )
 	return boost::python::make_tuple( valid, reason );
 }
 
-boost::python::tuple valueValid2( const IECore::Parameter &that )
-{
-	std::string reason;
-	bool valid = that.valueValid( &reason );
-	return boost::python::make_tuple( valid, reason );
-}
+boost::python::tuple valueValid2( const IECore::Parameter &that );
 
-} // namespace
-
-namespace IECorePython
-{
+} // namespace Detail
 
 template<typename T>
 T parameterPresets( const boost::python::object &o )
@@ -84,8 +79,8 @@ template<typename T, typename TWrapper>
 ParameterClass<T, TWrapper>::ParameterClass( const char *docString )
 	:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
 {
-	this->def( "valueValid", &valueValid<T>, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
-	this->def( "valueValid", &valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
+	this->def( "valueValid", &Detail::valueValid<T>, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
+	this->def( "valueValid", &Detail::valueValid2, "Returns a tuple containing a bool specifying validity and a string giving a reason for invalidity." );
 }
 
 } // namespace IECorePython
