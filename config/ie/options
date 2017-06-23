@@ -131,7 +131,7 @@ while boostVersionSuffix.endswith( "_0" ) :
 	boostVersionSuffix = boostVersionSuffix[:-2]
 
 debug = getOption( "DEBUG", False )
-CXXFLAGS = [ "-pipe", "-Wall", "-Werror", "-pthread" ]
+CXXFLAGS = [ "-pipe", "-Wall", "-pthread" ]
 
 if debug :
 

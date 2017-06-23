@@ -83,13 +83,17 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Werror", "-O2" ]
+	[ "-pipe", "-Wall", "-O2" ]
 )
 
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
 	"c++98",
+)
+
+o.Add(
+	BoolVariable( "WARNINGS_AS_ERRORS", "Treats compiler warnings as errors.", True )
 )
 
 o.Add(
@@ -1107,6 +1111,9 @@ if env["PLATFORM"]=="darwin" :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
 env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
+
+if env["WARNINGS_AS_ERRORS"] :
+	env.Append( CXXFLAGS = [ "-Werror" ] )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
