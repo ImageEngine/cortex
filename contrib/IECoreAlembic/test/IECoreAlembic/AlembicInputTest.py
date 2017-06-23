@@ -91,22 +91,6 @@ class AlembicInputTest( unittest.TestCase ) :
 
 		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
 
-	def testConvertTransform( self ) :
-
-		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
-
-		g = a.child( "group1" )
-		t = g.objectAtSample( 0, IECore.M44fData.staticTypeId() )
-		self.assertEqual( t, IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 2 ) ) * IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) ) )
-
-		c = a.child( "group1" ).child( "pCube1" )
-		t = c.objectAtSample( 0, IECore.M44fData.staticTypeId() )
-		self.assertEqual( t, IECore.M44fData( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) ) )
-
-		cs = c.child( "pCubeShape1" )
-		t = cs.objectAtSample( 0, IECore.M44fData.staticTypeId() )
-		self.assertEqual( t, None )
-
 	def testMetaData( self ) :
 
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/cube.abc" )
