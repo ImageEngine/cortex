@@ -52,7 +52,7 @@ class IECOREALEMBIC_API FromAlembicCameraConverter : public FromAlembicConverter
 
 		typedef Alembic::AbcGeom::ICamera InputType;
 		typedef IECore::Camera ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicCameraConverter, FromAlembicCameraConverterTypeId, FromAlembicConverter );
 
 		FromAlembicCameraConverter( Alembic::Abc::IObject iCamera );
@@ -62,9 +62,9 @@ class IECOREALEMBIC_API FromAlembicCameraConverter : public FromAlembicConverter
 		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<FromAlembicCameraConverter> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromAlembicCameraConverter )

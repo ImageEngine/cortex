@@ -44,7 +44,7 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		self.parameters().addParameters(
 
 			[
-				
+
 				IECore.FileNameParameter(
 					name = "fileName",
 					description = "The filename of an Alembic cache.",
@@ -53,7 +53,7 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 					check = IECore.PathParameter.CheckType.MustExist,
 					extensions = "abc",
 				),
-				
+
 				IECore.FloatParameter(
 					name = "time",
 					description = "The time at which to load from the Alembic cache",
@@ -64,11 +64,11 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 						},
 					},
 				),
-					
+
 			],
-			
+
 		)
-		
+
 		self.__input = None
 		self.__inputFileName = None
 
@@ -77,11 +77,11 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		a = self.__alembicInput( args )
 		if a is None :
 			return IECore.Box3f()
-		
+
 		return _ChildProcedural( a, args["time"].value ).bound()
 
 	def doRenderState( self, renderer, args ) :
-	
+
 		pass
 
 	def doRender( self, renderer, args ) :
@@ -89,45 +89,45 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 		a = self.__alembicInput( args )
 		if a is None :
 			return
-			
+
 		renderer.procedural( _ChildProcedural( a, args["time"].value ) )
-		
+
 	def __alembicInput( self, args ) :
-	
+
 		if self.__input is not None and self.__inputFileName == args["fileName"].value :
 			return self.__input
-		
-		self.__input = None	
+
+		self.__input = None
 		self.__inputFileName = args["fileName"].value
 		if args["fileName"].value :
 			try :
 				self.__input = IECoreAlembic.AlembicInput( args["fileName"].value )
 			except :
 				IECore.msg( IECore.Msg.Level.Error, "AlembicProcedural", "Unable to open file \"%s\"" % args["fileName"].value )
-		
+
 		return self.__input
 
 class _ChildProcedural( IECore.Renderer.Procedural ) :
 
 	def __init__( self, alembicInput, time ) :
-	
+
 		IECore.Renderer.Procedural.__init__( self )
-	
+
 		self.__alembicInput = alembicInput
 		self.__time = time
-		
+
 	def bound( self ) :
-	
+
 		b = self.__alembicInput.boundAtTime( self.__time )
 		b = b.transform( self.__alembicInput.transformAtTime( self.__time ) )
 		return IECore.Box3f( IECore.V3f( b.min ), IECore.V3f( b.max ) )
-		
+
 	def render( self, renderer ) :
-	
+
 		with IECore.AttributeBlock( renderer ) :
-		
+
 			renderer.setAttribute( "name", self.__alembicInput.fullName() )
-			
+
 			transform = self.__alembicInput.transformAtTime( self.__time )
 			if transform is not None :
 				transform = IECore.M44f(
@@ -137,11 +137,11 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 				    transform[3,0], transform[3,1], transform[3,2], transform[3,3]
 				)
 				renderer.concatTransform( transform )
-			
+
 			primitive = self.__alembicInput.objectAtTime( self.__time, IECore.Primitive.staticTypeId() )
 			if primitive is not None :
 				primitive.render( renderer )
-									
+
 			for childIndex in range( 0, self.__alembicInput.numChildren() ) :
 				child = self.__alembicInput.child( childIndex )
 				childProcedural = _ChildProcedural( child, self.__time )
@@ -149,5 +149,5 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 					renderer.procedural( childProcedural )
 				else :
 					childProcedural.render( renderer )
-				
+
 IECore.registerRunTimeTyped( AlembicProcedural )

@@ -46,7 +46,7 @@ enum TypeId
 	FromAlembicSubDConverterTypeId = 112003,
 	FromAlembicGeomBaseConverterTypeId = 112004,
 	FromAlembicCameraConverterTypeId = 112005,
-	
+
 	LastCoreAlembicTypeId = 112999,
 };
 

@@ -84,15 +84,15 @@ class IECOREALEMBIC_API FromAlembicConverter : public IECore::ToCoreConverter
 
 		/// Implemented to call doAlembicConversion. Derived classes should implement doAlembicConversion()
 		/// instead.
-		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;		
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const = 0;		
-		
+		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const = 0;
+
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.
 		template<class T>
 		class ConverterDescription
 		{
-			public :			
+			public :
 				ConverterDescription();
 			private :
 				static FromAlembicConverterPtr creator( Alembic::Abc::IObject &iObject );
@@ -117,7 +117,7 @@ class IECOREALEMBIC_API FromAlembicConverter : public IECore::ToCoreConverter
 		static RegistrationVector &registrations();
 
 		Alembic::Abc::IObject m_iObject;
-		
+
 };
 
 } // namespace IECoreAlembic

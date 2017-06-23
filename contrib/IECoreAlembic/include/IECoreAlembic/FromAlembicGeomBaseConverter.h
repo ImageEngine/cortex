@@ -52,13 +52,13 @@ class IECOREALEMBIC_API FromAlembicGeomBaseConverter : public FromAlembicConvert
 
 		typedef Alembic::AbcGeom::IPolyMesh InputType;
 		typedef IECore::MeshPrimitive ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicGeomBaseConverter, FromAlembicGeomBaseConverterTypeId, FromAlembicConverter );
 
 	protected :
 
 		FromAlembicGeomBaseConverter( const std::string &description, Alembic::Abc::IObject iGeom );
-		
+
 		/// Should be called by subclasses to convert uvs onto a Primitive.
 		void convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
 		/// Should be called by subclasses to convert Alembic's arbitrary geometry parameter into
@@ -67,11 +67,11 @@ class IECOREALEMBIC_API FromAlembicGeomBaseConverter : public FromAlembicConvert
 		/// May be called by subclasses to convert other geometry parameters into IECore::PrimitiveVariables.
 		template<typename T>
 		void convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
-				
+
 	private :
-	
+
 		IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope ) const;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromAlembicGeomBaseConverter )

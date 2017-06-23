@@ -53,40 +53,40 @@ IECore::ObjectPtr FromAlembicSubDConverter::doAlembicConversion( const Alembic::
 {
 	ISubD iSubD( iObject, kWrapExisting );
 	ISubDSchema &iSubDSchema = iSubD.getSchema();
-	
+
 	ISubDSchema::Sample sample = iSubDSchema.getValue( sampleSelector );
-	
+
 	IntVectorDataPtr verticesPerFace = new IntVectorData();
 	verticesPerFace->writable().insert(
 		verticesPerFace->writable().begin(),
 		sample.getFaceCounts()->get(),
 		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
 	);
-	
+
 	IntVectorDataPtr vertexIds = new IntVectorData();
 	vertexIds->writable().insert(
 		vertexIds->writable().begin(),
 		sample.getFaceIndices()->get(),
 		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
 	);
-	
+
 	V3fVectorDataPtr points = new V3fVectorData();
 	points->writable().resize( sample.getPositions()->size() );
 	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-	
+
 	std::string interpolation = sample.getSubdivisionScheme();
 	if( interpolation == "catmull-clark" )
 	{
 		interpolation = "catmullClark";
 	}
-	
+
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
-	
+
 	Alembic::AbcGeom::IV2fGeomParam uvs = iSubDSchema.getUVsParam();
 	convertUVs( uvs, sampleSelector, result.get() );
-	
+
 	ICompoundProperty arbGeomParams = iSubDSchema.getArbGeomParams();
 	convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
-	
+
 	return result;
 }

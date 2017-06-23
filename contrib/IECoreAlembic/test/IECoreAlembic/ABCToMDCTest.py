@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.  
+#  Copyright (c) 2012-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -46,27 +46,27 @@ class ABCToMDCTest( unittest.TestCase ) :
 			inputFile = os.path.dirname( __file__ ) + "/data/cube.abc",
 			outputFile = "/tmp/test.mdc"
 		)
-		
+
 		m = IECore.ModelCache( "/tmp/test.mdc", IECore.IndexedIO.OpenMode.Read )
 		self.assertEqual( m.childNames(), [ "group1" ] )
 		self.assertEqual( m.readBound(), IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) ) )
 		self.assertEqual( m.readObject(), None )
 		self.assertEqual( m.readTransform(), IECore.M44d() )
-			
+
 		g = m.readableChild( "group1" )
 		self.assertEqual( g.readTransform(), IECore.M44d.createScaled( IECore.V3d( 2 ) ) * IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) ) )
 		self.assertEqual( g.readObject(), None )
 		self.assertEqual( g.childNames(), [ "pCube1" ] )
-	
+
 		t = g.readableChild( "pCube1" )
 		self.assertEqual( t.readTransform(), IECore.M44d.createTranslated( IECore.V3d( -1, 0, 0 ) ) )
 		self.assertEqual( t.readObject(), None )
 		self.assertEqual( t.childNames(), [ "pCubeShape1" ] )
-		
+
 		s = t.readableChild( "pCubeShape1" )
 		self.assertEqual( s.readTransform(), IECore.M44d() )
 		self.assertEqual( s.readBound(), IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) ) )
 		self.assertEqual( s.childNames(), [] )
-	
+
 if __name__ == "__main__":
     unittest.main()

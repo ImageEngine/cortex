@@ -53,40 +53,40 @@ IECore::ObjectPtr FromAlembicPolyMeshConverter::doAlembicConversion( const Alemb
 {
 	IPolyMesh iPolyMesh( iObject, kWrapExisting );
 	IPolyMeshSchema &iPolyMeshSchema = iPolyMesh.getSchema();
-	
+
 	IPolyMeshSchema::Sample sample = iPolyMeshSchema.getValue( sampleSelector );
-	
+
 	IntVectorDataPtr verticesPerFace = new IntVectorData();
 	verticesPerFace->writable().insert(
 		verticesPerFace->writable().begin(),
 		sample.getFaceCounts()->get(),
 		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
 	);
-	
+
 	IntVectorDataPtr vertexIds = new IntVectorData();
 	vertexIds->writable().insert(
 		vertexIds->writable().begin(),
 		sample.getFaceIndices()->get(),
 		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
 	);
-	
+
 	V3fVectorDataPtr points = new V3fVectorData();
 	points->writable().resize( sample.getPositions()->size() );
 	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-	
+
 	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
-	
+
 	IN3fGeomParam normals = iPolyMeshSchema.getNormalsParam();
 	if( normals.valid() )
 	{
 		convertGeomParam( normals, sampleSelector, result.get() );
 	}
-	
+
 	Alembic::AbcGeom::IV2fGeomParam uvs = iPolyMeshSchema.getUVsParam();
 	convertUVs( uvs, sampleSelector, result.get() );
-	
+
 	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
 	convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
-	
+
 	return result;
 }

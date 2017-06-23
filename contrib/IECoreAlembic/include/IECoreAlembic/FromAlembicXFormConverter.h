@@ -53,7 +53,7 @@ class IECOREALEMBIC_API FromAlembicXFormConverter : public FromAlembicConverter
 
 		typedef Alembic::AbcGeom::IXform InputType;
 		typedef IECore::M44fData ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicXFormConverter, FromAlembicXFormConverterTypeId, FromAlembicConverter );
 
 		FromAlembicXFormConverter( Alembic::Abc::IObject iXForm );
@@ -63,9 +63,9 @@ class IECOREALEMBIC_API FromAlembicXFormConverter : public FromAlembicConverter
 		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<FromAlembicXFormConverter> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromAlembicXFormConverter )

@@ -51,18 +51,18 @@ FromAlembicGeomBaseConverter::FromAlembicGeomBaseConverter( const std::string &d
 }
 
 void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
-{	
+{
 	if( !uvs.valid() )
 	{
 		return;
 	}
-	
+
 	/// \todo It'd be nice if we stored uvs as a single primitive variable instead of having to split them in two.
 	/// It'd also be nice if we supported indexed data directly.
 	typedef IV2fArrayProperty::sample_ptr_type SamplePtr;
 	SamplePtr sample = uvs.getExpandedValue( sampleSelector ).getVals();
 	size_t size = sample->size();
-	
+
 	FloatVectorDataPtr sData = new FloatVectorData;
 	FloatVectorDataPtr tData = new FloatVectorData;
 	std::vector<float> &s = sData->writable();
@@ -72,25 +72,25 @@ void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &
 	for( size_t i=0; i<size; ++i )
 	{
 		s[i] = (*sample)[i][0];
-		t[i] = (*sample)[i][1];			
+		t[i] = (*sample)[i][1];
 	}
-	
+
 	PrimitiveVariable::Interpolation interpolation = interpolationFromScope( uvs.getScope() );
 	primitive->variables["s"] = PrimitiveVariable( interpolation, sData );
-	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );	
+	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );
 }
-		
+
 void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	if( !params.valid() )
 	{
 		return;
 	}
-	
+
 	for( size_t i = 0; i < params.getNumProperties(); ++i )
 	{
 		const PropertyHeader &header = params.getPropertyHeader( i );
-		
+
 		if( IFloatGeomParam::matches( header ) )
 		{
 			IFloatGeomParam p( params, header.getName() );
@@ -176,11 +176,11 @@ IECore::PrimitiveVariable::Interpolation FromAlembicGeomBaseConverter::interpola
 template<typename DataType, typename GeomParam>
 struct ApplyGeometricInterpretation
 {
-	
+
 	static void apply( DataType *data )
 	{
 	};
-	
+
 };
 
 template<typename T, typename GeomParam>
@@ -193,7 +193,7 @@ struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
 	};
 
 };
-	
+
 template<typename T>
 void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
@@ -205,19 +205,19 @@ void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Ab
 		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % param.getHeader().getName() );
 		return;
 	}
-		
+
 	SamplePtr sample = param.getExpandedValue( sampleSelector ).getVals();
-	
+
 	typename DataType::Ptr data = new DataType();
 	data->writable().resize( sample->size() );
 	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
- 
+
 	ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
-	
+
 	PrimitiveVariable pv;
 	pv.interpolation = interpolationFromScope( param.getScope() );
 	pv.data = data;
-	
+
 	primitive->variables[param.getHeader().getName()] = pv;
 }
 

@@ -49,14 +49,14 @@ struct IGeomParamTraits
 {
 
 	typedef typename T::prop_type::sample_type::value_vector ValueType;
-	
+
 	typedef IECore::TypedData<ValueType> DataType;
-	
+
 	static IECore::GeometricData::Interpretation geometricInterpretation()
 	{
 		return IECore::GeometricData::None;
 	}
-	
+
 };
 
 #define IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( GEOMPARAM, DATATYPE, GEOMETRICINTERPRETATION ) \

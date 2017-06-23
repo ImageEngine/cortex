@@ -52,7 +52,7 @@ class IECOREALEMBIC_API FromAlembicSubDConverter : public FromAlembicGeomBaseCon
 
 		typedef Alembic::AbcGeom::ISubD InputType;
 		typedef IECore::MeshPrimitive ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicSubDConverter, FromAlembicSubDConverterTypeId, FromAlembicGeomBaseConverter );
 
 		FromAlembicSubDConverter( Alembic::Abc::IObject iSubD );
@@ -62,9 +62,9 @@ class IECOREALEMBIC_API FromAlembicSubDConverter : public FromAlembicGeomBaseCon
 		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<FromAlembicSubDConverter> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromAlembicSubDConverter )

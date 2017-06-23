@@ -52,7 +52,7 @@ class IECOREALEMBIC_API FromAlembicPolyMeshConverter : public FromAlembicGeomBas
 
 		typedef Alembic::AbcGeom::IPolyMesh InputType;
 		typedef IECore::MeshPrimitive ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicPolyMeshConverter, FromAlembicPolyMeshConverterTypeId, FromAlembicGeomBaseConverter );
 
 		FromAlembicPolyMeshConverter( Alembic::Abc::IObject iPolyMesh );
@@ -60,11 +60,11 @@ class IECOREALEMBIC_API FromAlembicPolyMeshConverter : public FromAlembicGeomBas
 	protected :
 
 		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-		
+
 	private :
-	
+
 		static ConverterDescription<FromAlembicPolyMeshConverter> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( FromAlembicPolyMeshConverter )

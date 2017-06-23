@@ -62,7 +62,7 @@ IECore::IntParameter *FromAlembicConverter::sampleIndexParameter()
 const IECore::IntParameter *FromAlembicConverter::sampleIndexParameter() const
 {
 	return parameters()->parameter<IECore::IntParameter>( "sampleIndex" );
-}		
+}
 
 IECore::ObjectPtr FromAlembicConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {

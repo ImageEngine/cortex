@@ -57,14 +57,14 @@ IECore::ObjectPtr FromAlembicCameraConverter::doAlembicConversion( const Alembic
 	ICameraSchema &iCameraSchema = iCamera.getSchema();
 	CameraSample sample;
 	iCameraSchema.get( sample, sampleSelector );
-	
+
 	CameraPtr result = new Camera;
 	result->parameters()["projection"] = new StringData( "perspective" );
-	
+
 	double top, bottom, left, right;
 	sample.getScreenWindow( top, bottom, left, right );
 	result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
 	result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
-	
+
 	return result;
 }
