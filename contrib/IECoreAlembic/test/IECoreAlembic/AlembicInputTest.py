@@ -476,5 +476,32 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( curves.periodic(), True )
 		self.assertTrue( curves.arePrimitiveVariablesValid() )
 
+	def testPoints( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/points.abc" )
+		p = a.child( "particle1" ).child( "particleShape1" )
+		points = p.objectAtSample( 9 )
+
+		self.assertTrue( isinstance( points, IECore.PointsPrimitive ) )
+		self.assertEqual( points.numPoints, 9 )
+
+		self.assertTrue( points.arePrimitiveVariablesValid() )
+
+		self.assertTrue( isinstance( points["P"].data, IECore.V3fVectorData ) )
+		self.assertEqual( points["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+		self.assertEqual( points["velocity"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
+
+		self.assertTrue( isinstance( points["id"].data, IECore.UInt64VectorData) )
+
+		for i in range( 0, 9 ) :
+
+			self.assertTrue(
+				points["P"].data[i].normalized().equalWithAbsError(
+					points["velocity"].data[i].normalized(),
+					0.00001
+				),
+			)
+			self.assertEqual( points["id"].data[i], i )
+
 if __name__ == "__main__":
     unittest.main()
