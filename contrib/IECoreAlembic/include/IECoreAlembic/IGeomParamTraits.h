@@ -90,6 +90,8 @@ IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN2dGeomParam, IECore
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN3fGeomParam, IECore::V3fVectorData, IECore::GeometricData::Normal )
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN3dGeomParam, IECore::V3dVectorData, IECore::GeometricData::Normal )
 
+IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IBoolGeomParam, IECore::BoolVectorData, IECore::GeometricData::None )
+
 } // namespace IECoreAlembic
 
 #endif // IECOREALEMBIC_IGEOMPARAMTRAITS_H

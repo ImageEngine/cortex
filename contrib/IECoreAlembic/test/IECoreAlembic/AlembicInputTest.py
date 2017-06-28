@@ -503,5 +503,18 @@ class AlembicInputTest( unittest.TestCase ) :
 			)
 			self.assertEqual( points["id"].data[i], i )
 
+	def testBoolGeomParam( self ) :
+
+		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/bool.abc" )
+		p = a.child( "pPlane1" ).child( "pPlaneShape1" )
+		mesh = p.objectAtSample( 0 )
+
+		for n in ( "abc_testBoolTrue", "abc_testBoolFalse" ) :
+			self.assertIn( n, mesh )
+			self.assertEqual( mesh[n].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+
+		self.assertEqual( mesh["abc_testBoolTrue"].data, IECore.BoolVectorData( [ True ] ) )
+		self.assertEqual( mesh["abc_testBoolFalse"].data, IECore.BoolVectorData( [ False ] ) )
+
 if __name__ == "__main__":
     unittest.main()
