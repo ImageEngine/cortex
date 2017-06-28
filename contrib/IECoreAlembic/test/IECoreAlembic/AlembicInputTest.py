@@ -195,23 +195,18 @@ class AlembicInputTest( unittest.TestCase ) :
 		for i in range( 0, m.numSamples() ) :
 			self.assertAlmostEqual( m.timeAtSample( i ), (i + 1) / 24.0 )
 
+	def testMissingArchiveBounds( self ) :
+
 		a = IECoreAlembic.AlembicInput( os.path.dirname( __file__ ) + "/data/noTopLevelStoredBounds.abc" )
 
 		self.assertEqual( a.numSamples(), 0 )
 
-		# no time samples at the top level, so this should throw an exception:
-		self.assertRaises( Exception, a.timeAtSample, 0 )
+		# no time samples at the top level, so this should throw an exception
+		self.assertRaisesRegexp( Exception, "Invalid Argument : Sample index out of range", a.timeAtSample, 0 )
 
-		# should throw the RIGHT exceptions:
-		try:
-			a.timeAtSample(0)
-		except Exception, e:
-			self.assertEqual( str(e), "Invalid Argument : Sample index out of range" )
-
-		# should these throw exceptions?
-		a.boundAtSample(0)
-		a.objectAtSample(0)
-		a.transformAtSample(0)
+		# no stored bound at the top level
+		self.assertFalse( a.hasStoredBound() )
+		self.assertRaises( Exception, a.boundAtSample, 0 )
 
 	def testOutOfRangeSamplesRaise( self ) :
 
