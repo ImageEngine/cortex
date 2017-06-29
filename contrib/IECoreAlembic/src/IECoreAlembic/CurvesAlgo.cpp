@@ -42,6 +42,38 @@ using namespace IECore;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
+namespace
+{
+
+CubicBasisf convertBasis( const ICurvesSchema::Sample &sample )
+{
+	switch( sample.getType() )
+	{
+		case kLinear :
+			return CubicBasisf::linear();
+		case kCubic :
+			switch( sample.getBasis() )
+			{
+				case kNoBasis :
+					return CubicBasisf::linear();
+				case kBezierBasis :
+					return CubicBasisf::bezier();
+				case kCatmullromBasis :
+					return CubicBasisf::catmullRom();
+				case kBsplineBasis :
+					return CubicBasisf::bSpline();
+				case kHermiteBasis :
+				case kPowerBasis :
+					IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Unsupported basis" );
+					return CubicBasisf::bSpline();
+			}
+		default :
+			return CubicBasisf::bSpline();
+	}
+}
+
+} // namespace
+
 namespace IECoreAlembic
 {
 
@@ -60,46 +92,13 @@ IECOREALEMBIC_API IECore::CurvesPrimitivePtr convert( const Alembic::AbcGeom::IC
 		sample.getCurvesNumVertices()->get() + sample.getCurvesNumVertices()->size()
 	);
 
-	CubicBasisf basis = CubicBasisf::linear();
-	switch( sample.getType() )
-	{
-		case kLinear :
-			basis = CubicBasisf::linear();
-			break;
-		case kCubic :
-			switch( sample.getBasis() )
-			{
-				case kNoBasis :
-					basis = CubicBasisf::linear();
-					break;
-				case kBezierBasis :
-					basis = CubicBasisf::bezier();
-					break;
-				case kCatmullromBasis :
-					basis = CubicBasisf::catmullRom();
-					break;
-				case kBsplineBasis :
-					basis = CubicBasisf::bSpline();
-					break;
-				case kHermiteBasis :
-				case kPowerBasis :
-					IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Unsupported basis" );
-					basis = CubicBasisf::bSpline();
-					break;
-			}
-			break;
-		default :
-			basis = CubicBasisf::bSpline();
-			break;
-	}
-
 	V3fVectorDataPtr points = new V3fVectorData();
 	points->writable().resize( sample.getPositions()->size() );
 	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
 
 	CurvesPrimitivePtr result = new CurvesPrimitive(
 		vertsPerCurve,
-		basis,
+		convertBasis( sample ),
 		sample.getWrap() == kPeriodic,
 		points
 	);
