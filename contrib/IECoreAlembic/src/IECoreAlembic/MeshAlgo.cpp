@@ -41,6 +41,52 @@ using namespace IECore;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
+namespace
+{
+
+template<typename Schema>
+IECore::MeshPrimitivePtr convertCommon( const Schema &schema, const Alembic::Abc::ISampleSelector &sampleSelector )
+{
+	Abc::Int32ArraySamplePtr faceCountsSample;
+	schema.getFaceCountsProperty().get( faceCountsSample, sampleSelector );
+
+	IntVectorDataPtr verticesPerFace = new IntVectorData();
+	verticesPerFace->writable().insert(
+		verticesPerFace->writable().begin(),
+		faceCountsSample->get(),
+		faceCountsSample->get() + faceCountsSample->size()
+	);
+
+	Abc::Int32ArraySamplePtr faceIndicesSample;
+	schema.getFaceIndicesProperty().get( faceIndicesSample, sampleSelector );
+
+	IntVectorDataPtr vertexIds = new IntVectorData();
+	vertexIds->writable().insert(
+		vertexIds->writable().begin(),
+		faceIndicesSample->get(),
+		faceIndicesSample->get() + faceIndicesSample->size()
+	);
+
+	Abc::P3fArraySamplePtr positionsSample;
+	schema.getPositionsProperty().get( positionsSample, sampleSelector );
+
+	V3fVectorDataPtr points = new V3fVectorData();
+	points->writable().resize( positionsSample->size() );
+	memcpy( &(points->writable()[0]), positionsSample->get(), positionsSample->size() * sizeof( Imath::V3f ) );
+
+	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
+
+	Alembic::AbcGeom::IV2fGeomParam uvs = schema.getUVsParam();
+	GeomBaseAlgo::convertUVs( uvs, sampleSelector, result.get() );
+
+	ICompoundProperty arbGeomParams = schema.getArbGeomParams();
+	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+
+	return result;
+}
+
+} // namespace
+
 namespace IECoreAlembic
 {
 
@@ -50,28 +96,7 @@ namespace MeshAlgo
 IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::IPolyMesh &mesh, const Alembic::Abc::ISampleSelector &sampleSelector )
 {
 	const IPolyMeshSchema &iPolyMeshSchema = mesh.getSchema();
-
-	IPolyMeshSchema::Sample sample = iPolyMeshSchema.getValue( sampleSelector );
-
-	IntVectorDataPtr verticesPerFace = new IntVectorData();
-	verticesPerFace->writable().insert(
-		verticesPerFace->writable().begin(),
-		sample.getFaceCounts()->get(),
-		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
-	);
-
-	IntVectorDataPtr vertexIds = new IntVectorData();
-	vertexIds->writable().insert(
-		vertexIds->writable().begin(),
-		sample.getFaceIndices()->get(),
-		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
-	);
-
-	V3fVectorDataPtr points = new V3fVectorData();
-	points->writable().resize( sample.getPositions()->size() );
-	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-
-	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
+	MeshPrimitivePtr result = convertCommon( iPolyMeshSchema, sampleSelector );
 
 	IN3fGeomParam normals = iPolyMeshSchema.getNormalsParam();
 	if( normals.valid() )
@@ -79,53 +104,20 @@ IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::IPolyMesh &mesh, const
 		GeomBaseAlgo::convertGeomParam( normals, sampleSelector, result.get() );
 	}
 
-	Alembic::AbcGeom::IV2fGeomParam uvs = iPolyMeshSchema.getUVsParam();
-	GeomBaseAlgo::convertUVs( uvs, sampleSelector, result.get() );
-
-	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
-	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
-
 	return result;
 }
 
 IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::ISubD &mesh, const Alembic::Abc::ISampleSelector &sampleSelector )
 {
-	ISubD iSubD( mesh, kWrapExisting );
-	ISubDSchema &iSubDSchema = iSubD.getSchema();
+	const ISubDSchema &iSubDSchema = mesh.getSchema();
+	MeshPrimitivePtr result = convertCommon( iSubDSchema, sampleSelector );
 
-	ISubDSchema::Sample sample = iSubDSchema.getValue( sampleSelector );
-
-	IntVectorDataPtr verticesPerFace = new IntVectorData();
-	verticesPerFace->writable().insert(
-		verticesPerFace->writable().begin(),
-		sample.getFaceCounts()->get(),
-		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
-	);
-
-	IntVectorDataPtr vertexIds = new IntVectorData();
-	vertexIds->writable().insert(
-		vertexIds->writable().begin(),
-		sample.getFaceIndices()->get(),
-		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
-	);
-
-	V3fVectorDataPtr points = new V3fVectorData();
-	points->writable().resize( sample.getPositions()->size() );
-	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-
-	std::string interpolation = sample.getSubdivisionScheme();
+	std::string interpolation = iSubDSchema.getSubdivisionSchemeProperty().getValue();
 	if( interpolation == "catmull-clark" )
 	{
 		interpolation = "catmullClark";
 	}
-
-	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, interpolation, points );
-
-	Alembic::AbcGeom::IV2fGeomParam uvs = iSubDSchema.getUVsParam();
-	GeomBaseAlgo::convertUVs( uvs, sampleSelector, result.get() );
-
-	ICompoundProperty arbGeomParams = iSubDSchema.getArbGeomParams();
-	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+	result->setInterpolation( interpolation );
 
 	return result;
 }
