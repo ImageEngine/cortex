@@ -48,7 +48,6 @@
 
 #include "IECoreAlembic/AlembicInput.h"
 #include "IECoreAlembic/ObjectAlgo.h"
-#include "IECoreAlembic/FromAlembicConverter.h"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/ObjectInterpolator.h"
