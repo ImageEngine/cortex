@@ -48,7 +48,7 @@ namespace PointsAlgo
 
 IECOREALEMBIC_API IECore::PointsPrimitivePtr convert( const Alembic::AbcGeom::IPoints &points, const Alembic::Abc::ISampleSelector &sampleSelector )
 {
-	const IPointsSchema pointsSchema = points.getSchema();
+	const IPointsSchema &pointsSchema = points.getSchema();
 	const IPointsSchema::Sample sample = pointsSchema.getValue( sampleSelector );
 
 	V3fVectorDataPtr p = new V3fVectorData();
