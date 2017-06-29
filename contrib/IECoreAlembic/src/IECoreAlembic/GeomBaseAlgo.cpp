@@ -70,6 +70,16 @@ IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeo
 }
 
 
+// Functor for setting the geometric interpretation of
+// DataType based on the GeomParam type. The base version
+// does nothing because not all Data classes have a
+// `setInterpretation()` method. We then specialise this
+// below for the GeometricTypedData classes where the
+// method is available.
+//
+// Note that we could use `DataAlgo::setGeometricInterpretation()`
+// to do this for us, but by doing it ourselves we avoid the
+// overhead of the internal TypedDataDespatch that it would perform.
 template<typename DataType, typename GeomParam>
 struct ApplyGeometricInterpretation
 {
