@@ -46,7 +46,7 @@ namespace IECore
 
 template<typename Key, typename Value, typename GetterKey>
 LRUCache<Key, Value, GetterKey>::CacheEntry::CacheEntry()
-	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( New ), mutex()
+	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( Uncached ), mutex()
 {
 }
 
@@ -137,7 +137,7 @@ Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 	CacheEntry &cacheEntry = it->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
 
-	if( cacheEntry.status==New || cacheEntry.status==Erased || cacheEntry.status==TooCostly )
+	if( cacheEntry.status==Uncached )
 	{
 		assert( cacheEntry.value==Value() );
 		assert( cacheEntry.next == NULL && cacheEntry.previous == NULL );
@@ -158,8 +158,6 @@ Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
 
 		setInternal( &*it, value, cost );
-
-		assert( cacheEntry.status == Cached || cacheEntry.status == TooCostly );
 
 		lock.release();
 
@@ -223,7 +221,7 @@ bool LRUCache<Key, Value, GetterKey>::setInternal( MapValue *mapValue, const Val
 	}
 	else
 	{
-		cacheEntry.status = TooCostly;
+		cacheEntry.status = Uncached;
 		result = false;
 	}
 
@@ -264,7 +262,7 @@ bool LRUCache<Key, Value, GetterKey>::eraseInternal( MapValue *mapValue )
 	const Status originalStatus = (Status)cacheEntry.status;
 
 	listErase( mapValue );
-	cacheEntry.status = Erased;
+	cacheEntry.status = Uncached;
 
 	if( originalStatus != Cached )
 	{

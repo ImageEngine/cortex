@@ -131,10 +131,8 @@ class LRUCache : private boost::noncopyable
 		// Status of each item in the cache.
 		enum Status
 		{
-			New, // brand new unpopulated entry
-			Cached, // entry complete with value
-			Erased, // entry once had value but it was removed to meet cost limits
-			TooCostly, // entry cost exceeds m_maxCost and therefore isn't stored
+			Uncached, // entry without valid value
+			Cached, // entry with valid value
 			Failed // m_getter failed when computing entry
 		};
 
@@ -158,7 +156,7 @@ class LRUCache : private boost::noncopyable
 		// CacheEntry implementation - a single item of the cache.
 		struct CacheEntry
 		{
-			CacheEntry(); // status == New, previous == next == NULL
+			CacheEntry(); // status == Uncached, previous == next == NULL
 			CacheEntry( const CacheEntry &other );
 
 			Value value; // value for this item
@@ -220,7 +218,7 @@ class LRUCache : private boost::noncopyable
 		// the caller.
 		bool setInternal( MapValue *mapValue, const Value &value, Cost cost );
 
-		// Sets the status for the cache entry to Erased, removes any
+		// Sets the status for the cache entry to Uncached, removes any
 		// previously Cached value, updates m_currentCost and removes
 		// the entry from the LRU list. The caller must hold m_listMutex, and
 		// must _not_ hold the mutex for the cache entry.
