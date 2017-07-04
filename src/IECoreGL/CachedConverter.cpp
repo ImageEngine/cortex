@@ -49,39 +49,37 @@ namespace
 {
 
 // Conceptually the key for the cache is just the hash of
-// the object, but we also need the key to carry the object,
-// so that the getter can use it for the source of the conversion.
-// We therefore pass the object as well as the hash in the key,
-// but never access the object outside of the getter() - as there is
-// no guarantee that the object is alive outside of the
-// call to convert().
-struct CacheKey
+// the object, but the getter also needs the object to be
+// converted, so we take advantage of the LRUCache's GetterKey
+// feature which allows an augmented key to be passed to the
+// getter, while a simpler key is stored internally.
+struct CacheGetterKey
 {
 
-	CacheKey()
+	CacheGetterKey()
 		:	object( NULL )
 	{
 	}
 
-	CacheKey( const IECore::Object *o )
+	CacheGetterKey( const IECore::Object *o )
 		: object( o ), hash( o->hash() )
 	{
 	}
-	
-	bool operator == ( const CacheKey &other ) const
+
+	bool operator == ( const CacheGetterKey &other ) const
 	{
 		return hash == other.hash;
 	}
-	
-	mutable const IECore::Object *object;
-	IECore::MurmurHash hash;
-	
-};
 
-inline size_t tbb_hasher( const CacheKey &cacheKey )
-{
-	return tbb_hasher( cacheKey.hash );
-}
+	operator const IECore::MurmurHash & () const
+	{
+		return hash;
+	}
+
+	const IECore::Object *object;
+	const IECore::MurmurHash hash;
+
+};
 
 } // namespace
 
@@ -91,8 +89,8 @@ struct CachedConverter::MemberData
 		:	cache( getter, boost::bind( &MemberData::removalCallback, this, ::_1, ::_2 ), maxMemory )
 	{
 	}
-	
-	static IECore::RunTimeTypedPtr getter( const CacheKey &key, size_t &cost )
+
+	static IECore::RunTimeTypedPtr getter( const CacheGetterKey &key, size_t &cost )
 	{
 		cost = key.object->memoryUsage();
 		ToGLConverterPtr converter = ToGLConverter::create( key.object );
@@ -106,23 +104,18 @@ struct CachedConverter::MemberData
 				)
 			);
 		}
-		// It would be unsafe to access object from outside of this function,
-		// so we zero it out so that it will be obvious if anyone ever does.
-		// The only way I could see this happening is if the LRUCache implementation
-		// changed.
-		key.object = 0;
 		return converter->convert();
 	}
-	
-	void removalCallback( const CacheKey &key, const IECore::RunTimeTypedPtr &value )
+
+	void removalCallback( const IECore::MurmurHash &key, const IECore::RunTimeTypedPtr &value )
 	{
 		deferredRemovals.push_back( value );
 	}
-	
-	typedef IECore::LRUCache<CacheKey, IECore::RunTimeTypedPtr> Cache;
+
+	typedef IECore::LRUCache<IECore::MurmurHash, IECore::RunTimeTypedPtr, IECore::LRUCachePolicy::Parallel, CacheGetterKey> Cache;
 	Cache cache;
 	std::vector<IECore::RunTimeTypedPtr> deferredRemovals;
-	
+
 };
 
 CachedConverter::CachedConverter( size_t maxMemory )
@@ -137,7 +130,7 @@ CachedConverter::~CachedConverter()
 
 IECore::ConstRunTimeTypedPtr CachedConverter::convert( const IECore::Object *object )
 {
-	return m_data->cache.get( CacheKey( object ) );
+	return m_data->cache.get( CacheGetterKey( object ) );
 }
 
 size_t CachedConverter::getMaxMemory() const
