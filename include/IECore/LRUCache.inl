@@ -61,10 +61,10 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter )
 	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( 500 )
 {
 	m_currentCost = 0;
-	
+
 	m_listStart.second.previous = NULL;
 	m_listStart.second.next = &m_listEnd;
-	
+
 	m_listEnd.second.previous = &m_listStart;
 	m_listEnd.second.next = NULL;
 }
@@ -74,10 +74,10 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter, Cost maxCost )
 	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( maxCost )
 {
 	m_currentCost = 0;
-	
+
 	m_listStart.second.previous = NULL;
 	m_listStart.second.next = &m_listEnd;
-		
+
 	m_listEnd.second.previous = &m_listStart;
 	m_listEnd.second.next = NULL;
 }
@@ -87,10 +87,10 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter, RemovalCallback removalCa
 	:	m_getter( getter ), m_removalCallback( removalCallback ), m_maxCost( maxCost )
 {
 	m_currentCost = 0;
-	
+
 	m_listStart.second.previous = NULL;
 	m_listStart.second.next = &m_listEnd;
-	
+
 	m_listEnd.second.previous = &m_listStart;
 	m_listEnd.second.next = NULL;
 }
@@ -103,7 +103,7 @@ LRUCache<Key, Value>::~LRUCache()
 template<typename Key, typename Value>
 void LRUCache<Key, Value>::clear()
 {
-	ListMutex::scoped_lock listLock( m_listMutex );	
+	ListMutex::scoped_lock listLock( m_listMutex );
 	for( typename Map::iterator it = m_map.begin(); it != m_map.end(); ++it )
 	{
 		eraseInternal( &*it );
@@ -136,12 +136,12 @@ Value LRUCache<Key, Value>::get( const Key& key )
 	MapIterator it = m_map.insert( MapValue( key, CacheEntry() ) ).first;
 	CacheEntry &cacheEntry = it->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
-		
+
 	if( cacheEntry.status==New || cacheEntry.status==Erased || cacheEntry.status==TooCostly )
 	{
 		assert( cacheEntry.value==Value() );
 		assert( cacheEntry.next == NULL && cacheEntry.previous == NULL );
-		
+
 		Value value = Value();
 		Cost cost = 0;
 		try
@@ -153,23 +153,23 @@ Value LRUCache<Key, Value>::get( const Key& key )
 			cacheEntry.status = Failed;
 			throw;
 		}
-		
+
 		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
 		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
-		
+
 		setInternal( &*it, value, cost );
-		
+
 		assert( cacheEntry.status == Cached || cacheEntry.status == TooCostly );
-	
+
 		lock.release();
-		
+
 		/// \todo We might want to consider ways of avoiding having to manipulate the
 		/// list for cache hits, because we want this to be our fastest code path.
 		/// Adopting an approximate LRU heuristic like Second Chance would be one way
 		/// of doing this.
 		updateListPosition( &*it );
 		limitCost();
-	
+
 		return value;
 	}
 	else if( cacheEntry.status==Cached )
@@ -194,11 +194,11 @@ bool LRUCache<Key, Value>::set( const Key &key, const Value &value, Cost cost )
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
 
 	const bool result = setInternal( &*it, value, cost );
-	
+
 	lock.release();
 	updateListPosition( &*it );
 	limitCost();
-	
+
 	return result;
 }
 
@@ -226,7 +226,7 @@ bool LRUCache<Key, Value>::setInternal( MapValue *mapValue, const Value &value, 
 		cacheEntry.status = TooCostly;
 		result = false;
 	}
-	
+
 	return result;
 }
 
@@ -251,30 +251,30 @@ bool LRUCache<Key, Value>::erase( const Key &key )
 		return false;
 	}
 
-	ListMutex::scoped_lock listLock( m_listMutex );	
+	ListMutex::scoped_lock listLock( m_listMutex );
 	return eraseInternal( &*it );
 }
 
 template<typename Key, typename Value>
 bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
-{	
+{
 	CacheEntry &cacheEntry = mapValue->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
-		
+
 	const Status originalStatus = (Status)cacheEntry.status;
 
 	listErase( mapValue );
 	cacheEntry.status = Erased;
-	
-	if( originalStatus != Cached ) 
+
+	if( originalStatus != Cached )
 	{
 		return false;
 	}
-	
+
 	m_removalCallback( mapValue->first, cacheEntry.value );
 	m_currentCost -= cacheEntry.cost;
 	cacheEntry.value = Value();
-	
+
 	return true;
 }
 
@@ -299,9 +299,9 @@ template<typename Key, typename Value>
 void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
 {
 	ListMutex::scoped_lock lock( m_listMutex );
-	
+
 	listErase( mapValue );
-	
+
 	tbb::spin_mutex::scoped_lock mapValueMutex( mapValue->second.mutex );
 	if( mapValue->second.status == Cached )
 	{
@@ -311,8 +311,8 @@ void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
 
 template<typename Key, typename Value>
 void LRUCache<Key, Value>::listErase( MapValue *mapValue )
-{	
-	MapValue *previous = mapValue->second.previous;	
+{
+	MapValue *previous = mapValue->second.previous;
 	if( !previous )
 	{
 		return;
@@ -332,7 +332,7 @@ void LRUCache<Key, Value>::listInsertAtEnd( MapValue *mapValue )
 	MapValue *previous = m_listEnd.second.previous;
 	previous->second.next = mapValue;
 	mapValue->second.previous = previous;
-	
+
 	mapValue->second.next = &m_listEnd;
 	m_listEnd.second.previous = mapValue;
 }

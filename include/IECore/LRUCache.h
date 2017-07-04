@@ -47,7 +47,7 @@ namespace IECore
 /// A mapping from keys to values, where values are computed from keys using a user
 /// supplied function. Recently computed values are stored in the cache to accelerate
 /// subsequent lookups. Each value has a cost associated with it, and the cache has
-/// a maximum total cost above which it will remove the least recently accessed items. 
+/// a maximum total cost above which it will remove the least recently accessed items.
 ///
 /// The Key type must have a tbb_hasher implementation.
 ///
@@ -61,9 +61,9 @@ template<typename Key, typename Value>
 class LRUCache : private boost::noncopyable
 {
 	public:
-	
+
 		typedef size_t Cost;
-		
+
 		/// The GetterFunction is responsible for computing the value and cost for a cache entry
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
 		/// any reason. It is unsafe to access the LRUCache itself from the GetterFunction.
@@ -116,7 +116,7 @@ class LRUCache : private boost::noncopyable
 		Cost currentCost() const;
 
 	private :
-		
+
 		// Data
 		//////////////////////////////////////////////////////////////////////////
 
@@ -133,7 +133,7 @@ class LRUCache : private boost::noncopyable
 			TooCostly, // entry cost exceeds m_maxCost and therefore isn't stored
 			Failed // m_getter failed when computing entry
 		};
-		
+
 		// The type used to store a single cached item.
 		struct CacheEntry;
 
@@ -156,10 +156,10 @@ class LRUCache : private boost::noncopyable
 		{
 			CacheEntry(); // status == New, previous == next == NULL
 			CacheEntry( const CacheEntry &other );
-			
+
 			Value value; // value for this item
 			Cost cost; // the cost for this item
-			
+
 			// Pointers to previous and next items
 			// in the LRU list. We use the CacheEntries
 			// themselves to store the list because it is
@@ -173,7 +173,7 @@ class LRUCache : private boost::noncopyable
 			// at any given moment.
 			MapValue *previous;
 			MapValue *next;
-			
+
 			char status; // status of this item
 			// Mutex - must be held before accessing any
 			// fields other than the list fields (previous
@@ -187,13 +187,13 @@ class LRUCache : private boost::noncopyable
 		// from the start when we need to reduce costs.
 		MapValue m_listStart;
 		MapValue m_listEnd;
-	
+
 		// The list is inherently a serial data structure, so we must
 		// protect all accesses with this mutex. The mutex _must_ be held
 		// before the list fields of _any_ MapValue may be accessed.
 		typedef tbb::spin_mutex ListMutex;
 		ListMutex m_listMutex;
-		
+
 		// Total cost. We store the current cost atomically so it can be updated
 		// concurrently by multiple threads.
 		typedef tbb::atomic<Cost> AtomicCost;
@@ -215,7 +215,7 @@ class LRUCache : private boost::noncopyable
 		// exceeded the maximum cost. The mutex for the CacheEntry must be held by
 		// the caller.
 		bool setInternal( MapValue *mapValue, const Value &value, Cost cost );
-		
+
 		// Sets the status for the cache entry to Erased, removes any
 		// previously Cached value, updates m_currentCost and removes
 		// the entry from the LRU list. The caller must hold m_listMutex, and
