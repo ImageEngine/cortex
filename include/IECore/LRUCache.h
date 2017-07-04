@@ -55,9 +55,13 @@ namespace IECore
 /// Note that Values are returned by value, and erased by assigning a default constructed
 /// value. In practice this means that a smart pointer is the best choice of Value.
 ///
+///	The GetterKey may be used where the GetterFunction requires some auxiliary information
+/// in addition to the Key. It must be implicitly castable to Key, and all GetterKeys
+/// which yield the same Key must also yield the same results from the GetterFunction.
+///
 /// \threading It is safe to call the methods of LRUCache from concurrent threads.
 /// \ingroup utilityGroup
-template<typename Key, typename Value>
+template<typename Key, typename Value, typename GetterKey=Key>
 class LRUCache : private boost::noncopyable
 {
 	public:
@@ -67,7 +71,7 @@ class LRUCache : private boost::noncopyable
 		/// The GetterFunction is responsible for computing the value and cost for a cache entry
 		/// when given the key. It should throw a descriptive exception if it can't get the data for
 		/// any reason. It is unsafe to access the LRUCache itself from the GetterFunction.
-		typedef boost::function<Value ( const Key &key, Cost &cost )> GetterFunction;
+		typedef boost::function<Value ( const GetterKey &key, Cost &cost )> GetterFunction;
 		/// The optional RemovalCallback is called whenever an item is discarded from the cache.
 		///  It is unsafe to access the LRUCache itself from the RemovalCallback.
 		typedef boost::function<void ( const Key &key, const Value &data )> RemovalCallback;
@@ -82,7 +86,7 @@ class LRUCache : private boost::noncopyable
 		/// cache at any time by operations on another thread, or may not
 		/// even be stored in the cache if it exceeds the maximum cost.
 		/// Throws if the item can not be computed.
-		Value get( const Key &key );
+		Value get( const GetterKey &key );
 
 		/// Adds an item to the cache directly, bypassing the GetterFunction.
 		/// Returns true for success and false on failure - failure can occur

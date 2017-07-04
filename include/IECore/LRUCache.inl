@@ -44,20 +44,20 @@
 namespace IECore
 {
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::CacheEntry::CacheEntry()
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::CacheEntry::CacheEntry()
 	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( New ), mutex()
 {
 }
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::CacheEntry::CacheEntry( const CacheEntry &other )
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::CacheEntry::CacheEntry( const CacheEntry &other )
 	:	value( other.value ), cost( other.cost ), previous( other.previous ), next( other.next ), status( other.status ), mutex()
 {
 }
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::LRUCache( GetterFunction getter )
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::LRUCache( GetterFunction getter )
 	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( 500 )
 {
 	m_currentCost = 0;
@@ -69,8 +69,8 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter )
 	m_listEnd.second.next = NULL;
 }
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::LRUCache( GetterFunction getter, Cost maxCost )
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::LRUCache( GetterFunction getter, Cost maxCost )
 	:	m_getter( getter ), m_removalCallback( nullRemovalCallback ), m_maxCost( maxCost )
 {
 	m_currentCost = 0;
@@ -82,8 +82,8 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter, Cost maxCost )
 	m_listEnd.second.next = NULL;
 }
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost )
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::LRUCache( GetterFunction getter, RemovalCallback removalCallback, Cost maxCost )
 	:	m_getter( getter ), m_removalCallback( removalCallback ), m_maxCost( maxCost )
 {
 	m_currentCost = 0;
@@ -95,13 +95,13 @@ LRUCache<Key, Value>::LRUCache( GetterFunction getter, RemovalCallback removalCa
 	m_listEnd.second.next = NULL;
 }
 
-template<typename Key, typename Value>
-LRUCache<Key, Value>::~LRUCache()
+template<typename Key, typename Value, typename GetterKey>
+LRUCache<Key, Value, GetterKey>::~LRUCache()
 {
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::clear()
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::clear()
 {
 	ListMutex::scoped_lock listLock( m_listMutex );
 	for( typename Map::iterator it = m_map.begin(); it != m_map.end(); ++it )
@@ -110,27 +110,27 @@ void LRUCache<Key, Value>::clear()
 	}
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::setMaxCost( Cost maxCost )
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::setMaxCost( Cost maxCost )
 {
 	m_maxCost = maxCost;
 	limitCost();
 }
 
-template<typename Key, typename Value>
-typename LRUCache<Key, Value>::Cost LRUCache<Key, Value>::getMaxCost() const
+template<typename Key, typename Value, typename GetterKey>
+typename LRUCache<Key, Value, GetterKey>::Cost LRUCache<Key, Value, GetterKey>::getMaxCost() const
 {
 	return m_maxCost;
 }
 
-template<typename Key, typename Value>
-typename LRUCache<Key, Value>::Cost LRUCache<Key, Value>::currentCost() const
+template<typename Key, typename Value, typename GetterKey>
+typename LRUCache<Key, Value, GetterKey>::Cost LRUCache<Key, Value, GetterKey>::currentCost() const
 {
 	return m_currentCost;
 }
 
-template<typename Key, typename Value>
-Value LRUCache<Key, Value>::get( const Key& key )
+template<typename Key, typename Value, typename GetterKey>
+Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 {
 
 	MapIterator it = m_map.insert( MapValue( key, CacheEntry() ) ).first;
@@ -186,8 +186,8 @@ Value LRUCache<Key, Value>::get( const Key& key )
 	}
 }
 
-template<typename Key, typename Value>
-bool LRUCache<Key, Value>::set( const Key &key, const Value &value, Cost cost )
+template<typename Key, typename Value, typename GetterKey>
+bool LRUCache<Key, Value, GetterKey>::set( const Key &key, const Value &value, Cost cost )
 {
 	MapIterator it = m_map.insert( MapValue( key, CacheEntry() ) ).first;
 	CacheEntry &cacheEntry = it->second;
@@ -202,8 +202,8 @@ bool LRUCache<Key, Value>::set( const Key &key, const Value &value, Cost cost )
 	return result;
 }
 
-template<typename Key, typename Value>
-bool LRUCache<Key, Value>::setInternal( MapValue *mapValue, const Value &value, Cost cost )
+template<typename Key, typename Value, typename GetterKey>
+bool LRUCache<Key, Value, GetterKey>::setInternal( MapValue *mapValue, const Value &value, Cost cost )
 {
 	CacheEntry &cacheEntry = mapValue->second;
 	if( cacheEntry.status==Cached )
@@ -230,8 +230,8 @@ bool LRUCache<Key, Value>::setInternal( MapValue *mapValue, const Value &value, 
 	return result;
 }
 
-template<typename Key, typename Value>
-bool LRUCache<Key, Value>::cached( const Key &key ) const
+template<typename Key, typename Value, typename GetterKey>
+bool LRUCache<Key, Value, GetterKey>::cached( const Key &key ) const
 {
 	ConstMapIterator it = m_map.find( key );
 	if( it == m_map.end() )
@@ -242,8 +242,8 @@ bool LRUCache<Key, Value>::cached( const Key &key ) const
 	return it->second.status==Cached;
 }
 
-template<typename Key, typename Value>
-bool LRUCache<Key, Value>::erase( const Key &key )
+template<typename Key, typename Value, typename GetterKey>
+bool LRUCache<Key, Value, GetterKey>::erase( const Key &key )
 {
 	MapIterator it = m_map.find( key );
 	if( it == m_map.end() )
@@ -255,8 +255,8 @@ bool LRUCache<Key, Value>::erase( const Key &key )
 	return eraseInternal( &*it );
 }
 
-template<typename Key, typename Value>
-bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
+template<typename Key, typename Value, typename GetterKey>
+bool LRUCache<Key, Value, GetterKey>::eraseInternal( MapValue *mapValue )
 {
 	CacheEntry &cacheEntry = mapValue->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
@@ -278,8 +278,8 @@ bool LRUCache<Key, Value>::eraseInternal( MapValue *mapValue )
 	return true;
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::limitCost()
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::limitCost()
 {
 	ListMutex::scoped_lock lock( m_listMutex );
 
@@ -295,8 +295,8 @@ void LRUCache<Key, Value>::limitCost()
 	}
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::updateListPosition( MapValue *mapValue )
 {
 	ListMutex::scoped_lock lock( m_listMutex );
 
@@ -309,8 +309,8 @@ void LRUCache<Key, Value>::updateListPosition( MapValue *mapValue )
 	}
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::listErase( MapValue *mapValue )
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::listErase( MapValue *mapValue )
 {
 	MapValue *previous = mapValue->second.previous;
 	if( !previous )
@@ -323,8 +323,8 @@ void LRUCache<Key, Value>::listErase( MapValue *mapValue )
 	mapValue->second.next = mapValue->second.previous = NULL;
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::listInsertAtEnd( MapValue *mapValue )
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::listInsertAtEnd( MapValue *mapValue )
 {
 	assert( mapValue->second.previous == NULL );
 	assert( mapValue->second.next == NULL );
@@ -337,8 +337,8 @@ void LRUCache<Key, Value>::listInsertAtEnd( MapValue *mapValue )
 	m_listEnd.second.previous = mapValue;
 }
 
-template<typename Key, typename Value>
-void LRUCache<Key, Value>::nullRemovalCallback( const Key &key, const Value &value )
+template<typename Key, typename Value, typename GetterKey>
+void LRUCache<Key, Value, GetterKey>::nullRemovalCallback( const Key &key, const Value &value )
 {
 }
 
