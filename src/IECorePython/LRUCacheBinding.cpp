@@ -166,11 +166,9 @@ class PythonLRUCache : public LRUCache<object, object>
 
 };
 
-} // namespace
-
 typedef LRUCache<int, int> TestCache;
 
-static int get( int key, size_t &cost )
+int get( int key, size_t &cost )
 {
 	cost = 1;
 	return key;
@@ -252,6 +250,81 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 	}
 }
 
+typedef LRUCache<int, int, LRUCachePolicy::Serial> SerialTestCache;
+typedef LRUCache<int, int, LRUCachePolicy::Parallel> ParallelTestCache;
+
+template<typename Cache>
+Cache &recursiveCache();
+
+template<typename Cache>
+int getRecursive( int key, size_t &cost )
+{
+	cost = 1;
+	switch( key )
+	{
+		case 0 :
+			return 0;
+		case 1 :
+		case 2 :
+			return 1;
+		default :
+			Cache &c = recursiveCache<Cache>();
+			return c.get( key - 1 ) + c.get( key - 2 );
+	}
+}
+
+template<typename Cache>
+Cache &recursiveCache()
+{
+	static Cache c( getRecursive<Cache> );
+	return c;
+}
+
+struct GetFromParallelRecursiveCache
+{
+	public :
+
+		GetFromParallelRecursiveCache( ParallelTestCache &cache, size_t numValues )
+			:	m_cache( cache ), m_numValues( numValues )
+		{
+		}
+
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				m_cache.get( i % m_numValues );
+			}
+		}
+
+	private :
+
+		ParallelTestCache &m_cache;
+		size_t m_numValues;
+
+};
+
+void testSerialLRUCacheRecursion( int maxCost )
+{
+	SerialTestCache &cache = recursiveCache<SerialTestCache>();
+	cache.clear();
+	cache.setMaxCost( maxCost );
+	if( cache.get( 40 ) != 102334155 )
+	{
+		throw Exception( "Unexpected result" );
+	}
+}
+
+void testParallelLRUCacheRecursion( int numIterations, size_t numValues, int maxCost )
+{
+	ParallelTestCache &cache = recursiveCache<ParallelTestCache>();
+	cache.clear();
+	cache.setMaxCost( maxCost );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromParallelRecursiveCache( cache, numValues ) );
+}
+
+} // namespace
+
 void IECorePython::bindLRUCache()
 {
 
@@ -268,7 +341,7 @@ void IECorePython::bindLRUCache()
 		.def( "cached", &PythonLRUCache::cached )
 	;
 
-	/// \todo If we create an IECoreTest module, move this into it.
+	/// \todo If we create an IECoreTest module, move these into it.
 	def(
 		"testLRUCacheThreading",
 		testLRUCacheThreading,
@@ -279,5 +352,8 @@ void IECorePython::bindLRUCache()
 			boost::python::arg( "clearFrequency" ) = 0
 		)
 	);
+
+	def( "testSerialLRUCacheRecursion", testSerialLRUCacheRecursion );
+	def( "testParallelLRUCacheRecursion", testParallelLRUCacheRecursion );
 
 }

@@ -298,5 +298,19 @@ class LRUCacheTest( unittest.TestCase ) :
 		self.assertFalse( c.erase( 1 ) )
 		self.assertEqual( c.currentCost(), 0 )
 
+	def testSerialRecursion( self ) :
+
+		# Cache big enough that nothing will be evicted
+		IECore.testSerialLRUCacheRecursion( 100 )
+		# Cache small enough that evictions are necessary
+		IECore.testSerialLRUCacheRecursion( 10 )
+
+	def testParallelRecursion( self ) :
+
+		# Cache big enough that nothing will be evicted
+		IECore.testParallelLRUCacheRecursion( 100000, 10000, 10000 )
+		# Cache small enough that evictions are necessary
+		IECore.testParallelLRUCacheRecursion( 100000, 1000, 100 )
+
 if __name__ == "__main__":
     unittest.main()
