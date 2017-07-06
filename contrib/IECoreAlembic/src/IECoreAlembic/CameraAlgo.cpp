@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,62 +33,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECore/Transform.h"
 
-#include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/ObjectAlgo.h"
+#include "IECoreAlembic/CameraAlgo.h"
 
-using namespace Alembic::Abc;
+using namespace Imath;
+using namespace Alembic::AbcGeom;
+using namespace IECore;
 using namespace IECoreAlembic;
 
-IE_CORE_DEFINERUNTIMETYPED( FromAlembicConverter );
-
-FromAlembicConverter::FromAlembicConverter( const std::string &description, Alembic::Abc::IObject iObject )
-	:	ToCoreConverter( description ), m_iObject( iObject )
+IECore::CameraPtr IECoreAlembic::CameraAlgo::convert( const Alembic::AbcGeom::ICamera &camera, const Alembic::Abc::ISampleSelector &sampleSelector )
 {
-	parameters()->addParameter(
-		new IECore::IntParameter(
-			"sampleIndex",
-			"The sample to be converted.",
-			0
-		)
-	);
+	const ICameraSchema &cameraSchema = camera.getSchema();
+	CameraSample sample;
+	cameraSchema.get( sample, sampleSelector );
+
+	CameraPtr result = new Camera;
+	result->parameters()["projection"] = new StringData( "perspective" );
+
+	double top, bottom, left, right;
+	sample.getScreenWindow( top, bottom, left, right );
+	result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
+	result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
+
+	return result;
 }
 
-IECore::IntParameter *FromAlembicConverter::sampleIndexParameter()
-{
-	return parameters()->parameter<IECore::IntParameter>( "sampleIndex" );
-}
-
-const IECore::IntParameter *FromAlembicConverter::sampleIndexParameter() const
-{
-	return parameters()->parameter<IECore::IntParameter>( "sampleIndex" );
-}		
-
-IECore::ObjectPtr FromAlembicConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
-{
-	ISampleSelector sampleSelector( (index_t)operands->member<IECore::IntData>( "sampleIndex" )->readable() );
-
-	return doAlembicConversion( m_iObject, sampleSelector, operands.get() );
-}
-
-FromAlembicConverterPtr FromAlembicConverter::create( Alembic::Abc::IObject object, IECore::TypeId resultType )
-{
-	const MetaData &md = object.getMetaData();
-	const RegistrationVector &r = registrations();
-	for( RegistrationVector::const_reverse_iterator it = r.rbegin(), eIt = r.rend(); it!=eIt; it++ )
-	{
-		if( ( resultType == it->resultType || RunTimeTyped::inheritsFrom( it->resultType, resultType ) ) && it->matcher( md, kStrictMatching ) )
-		{
-			return it->creator( object );
-		}
-	}
-	return 0;
-}
-
-FromAlembicConverter::RegistrationVector &FromAlembicConverter::registrations()
-{
-	static RegistrationVector r;
-	return r;
-}
-
+static ObjectAlgo::ConverterDescription<ICamera, Camera> g_description( &IECoreAlembic::CameraAlgo::convert );

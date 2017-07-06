@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,61 +32,86 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MeshPrimitive.h"
+#include "IECore/MessageHandler.h"
 
-#include "IECoreAlembic/FromAlembicPolyMeshConverter.h"
+#include "IECoreAlembic/ObjectAlgo.h"
+#include "IECoreAlembic/CurvesAlgo.h"
+#include "IECoreAlembic/GeomBaseAlgo.h"
 
 using namespace IECore;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
-FromAlembicPolyMeshConverter::ConverterDescription<FromAlembicPolyMeshConverter> FromAlembicPolyMeshConverter::g_description;
-
-IE_CORE_DEFINERUNTIMETYPED( FromAlembicPolyMeshConverter );
-
-FromAlembicPolyMeshConverter::FromAlembicPolyMeshConverter( Alembic::Abc::IObject iPolyMesh )
-	:	FromAlembicGeomBaseConverter( "Converts AbcGeom::IPolyMesh objects to IECore::MeshPrimitive objects", iPolyMesh )
+namespace
 {
+
+CubicBasisf convertBasis( const ICurvesSchema::Sample &sample )
+{
+	switch( sample.getType() )
+	{
+		case kLinear :
+			return CubicBasisf::linear();
+		case kCubic :
+			switch( sample.getBasis() )
+			{
+				case kNoBasis :
+					return CubicBasisf::linear();
+				case kBezierBasis :
+					return CubicBasisf::bezier();
+				case kCatmullromBasis :
+					return CubicBasisf::catmullRom();
+				case kBsplineBasis :
+					return CubicBasisf::bSpline();
+				case kHermiteBasis :
+				case kPowerBasis :
+					IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Unsupported basis" );
+					return CubicBasisf::bSpline();
+			}
+		default :
+			return CubicBasisf::bSpline();
+	}
 }
 
-IECore::ObjectPtr FromAlembicPolyMeshConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
+} // namespace
+
+namespace IECoreAlembic
 {
-	IPolyMesh iPolyMesh( iObject, kWrapExisting );
-	IPolyMeshSchema &iPolyMeshSchema = iPolyMesh.getSchema();
-	
-	IPolyMeshSchema::Sample sample = iPolyMeshSchema.getValue( sampleSelector );
-	
-	IntVectorDataPtr verticesPerFace = new IntVectorData();
-	verticesPerFace->writable().insert(
-		verticesPerFace->writable().begin(),
-		sample.getFaceCounts()->get(),
-		sample.getFaceCounts()->get() + sample.getFaceCounts()->size()
+
+namespace CurvesAlgo
+{
+
+IECOREALEMBIC_API IECore::CurvesPrimitivePtr convert( const Alembic::AbcGeom::ICurves &curves, const Alembic::Abc::ISampleSelector &sampleSelector )
+{
+	const ICurvesSchema curvesSchema = curves.getSchema();
+	const ICurvesSchema::Sample sample = curvesSchema.getValue( sampleSelector );
+
+	IntVectorDataPtr vertsPerCurve = new IntVectorData;
+	vertsPerCurve->writable().insert(
+		vertsPerCurve->writable().end(),
+		sample.getCurvesNumVertices()->get(),
+		sample.getCurvesNumVertices()->get() + sample.getCurvesNumVertices()->size()
 	);
-	
-	IntVectorDataPtr vertexIds = new IntVectorData();
-	vertexIds->writable().insert(
-		vertexIds->writable().begin(),
-		sample.getFaceIndices()->get(),
-		sample.getFaceIndices()->get() + sample.getFaceIndices()->size()
-	);
-	
+
 	V3fVectorDataPtr points = new V3fVectorData();
 	points->writable().resize( sample.getPositions()->size() );
 	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-	
-	MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", points );
-	
-	IN3fGeomParam normals = iPolyMeshSchema.getNormalsParam();
-	if( normals.valid() )
-	{
-		convertGeomParam( normals, sampleSelector, result.get() );
-	}
-	
-	Alembic::AbcGeom::IV2fGeomParam uvs = iPolyMeshSchema.getUVsParam();
-	convertUVs( uvs, sampleSelector, result.get() );
-	
-	ICompoundProperty arbGeomParams = iPolyMeshSchema.getArbGeomParams();
-	convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
-	
+
+	CurvesPrimitivePtr result = new CurvesPrimitive(
+		vertsPerCurve,
+		convertBasis( sample ),
+		sample.getWrap() == kPeriodic,
+		points
+	);
+
+	ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
+	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+
 	return result;
 }
+
+} // namespace CurvesAlgo
+
+} // namespace IECoreAlembic
+
+static ObjectAlgo::ConverterDescription<ICurves, CurvesPrimitive> g_Description( &IECoreAlembic::CurvesAlgo::convert );
+

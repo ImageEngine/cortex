@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H
+#ifndef IECOREALEMBIC_POINTSALGO_H
+#define IECOREALEMBIC_POINTSALGO_H
 
-#include "Alembic/AbcGeom/IPolyMesh.h"
+#include "Alembic/AbcGeom/IPoints.h"
 
-#include "IECore/MeshPrimitive.h"
-
-#include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECore/PointsPrimitive.h"
 #include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-class IECOREALEMBIC_API FromAlembicGeomBaseConverter : public FromAlembicConverter
+namespace PointsAlgo
 {
 
-	public :
+IECOREALEMBIC_API IECore::PointsPrimitivePtr convert( const Alembic::AbcGeom::IPoints &points, const Alembic::Abc::ISampleSelector &sampleSelector );
 
-		typedef Alembic::AbcGeom::IPolyMesh InputType;
-		typedef IECore::MeshPrimitive ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicGeomBaseConverter, FromAlembicGeomBaseConverterTypeId, FromAlembicConverter );
-
-	protected :
-
-		FromAlembicGeomBaseConverter( const std::string &description, Alembic::Abc::IObject iGeom );
-		
-		/// Should be called by subclasses to convert uvs onto a Primitive.
-		void convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
-		/// Should be called by subclasses to convert Alembic's arbitrary geometry parameter into
-		/// IECore::PrimitiveVariables.
-		void convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
-		/// May be called by subclasses to convert other geometry parameters into IECore::PrimitiveVariables.
-		template<typename T>
-		void convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
-				
-	private :
-	
-		IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope ) const;
-		
-};
-
-IE_CORE_DECLAREPTR( FromAlembicGeomBaseConverter )
+} // namespace PointsAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICGEOMBASECONVERTER_H
+#endif // IECOREALEMBIC_POINTSALGO_H

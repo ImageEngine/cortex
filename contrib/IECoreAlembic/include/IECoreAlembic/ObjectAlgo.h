@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +33,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
+#ifndef IECOREALEMBIC_OBJECTALGO_H
+#define IECOREALEMBIC_OBJECTALGO_H
 
-#include "Alembic/AbcGeom/ISubD.h"
+#include "boost/noncopyable.hpp"
 
-#include "IECore/MeshPrimitive.h"
+#include "Alembic/Abc/IObject.h"
+#include "Alembic/Abc/ISampleSelector.h"
 
-#include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
+#include "IECore/Object.h"
+
 #include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-class IECOREALEMBIC_API FromAlembicSubDConverter : public FromAlembicGeomBaseConverter
+namespace ObjectAlgo
+{
+
+/// Converts the specified Alembic object into an equivalent Cortex object,
+/// returning NULL if no converter is available.
+IECOREALEMBIC_API IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::TypeId resultType = IECore::InvalidTypeId );
+
+/// Registers a converter from AlembicType to CortexType.
+template<typename AlembicType, typename CortexType>
+class ConverterDescription : public boost::noncopyable
 {
 
 	public :
 
-		typedef Alembic::AbcGeom::ISubD InputType;
-		typedef IECore::MeshPrimitive ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicSubDConverter, FromAlembicSubDConverterTypeId, FromAlembicGeomBaseConverter );
+		/// Type-safe conversion function
+		typedef typename CortexType::Ptr (*Converter)( const AlembicType &object, const Alembic::Abc::ISampleSelector &sampleSelector );
+		ConverterDescription( Converter converter );
 
-		FromAlembicSubDConverter( Alembic::Abc::IObject iSubD );
-
-	protected :
-
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-
-	private :
-	
-		static ConverterDescription<FromAlembicSubDConverter> g_description;
-		
 };
 
-IE_CORE_DECLAREPTR( FromAlembicSubDConverter )
+} // namespace ObjectAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICSUBDCONVERTER_H
+#include "IECoreAlembic/ObjectAlgo.inl"
+
+#endif // IECOREALEMBIC_OBJECTALGO_H

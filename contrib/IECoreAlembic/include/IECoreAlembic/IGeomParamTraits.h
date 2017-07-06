@@ -49,14 +49,14 @@ struct IGeomParamTraits
 {
 
 	typedef typename T::prop_type::sample_type::value_vector ValueType;
-	
+
 	typedef IECore::TypedData<ValueType> DataType;
-	
+
 	static IECore::GeometricData::Interpretation geometricInterpretation()
 	{
 		return IECore::GeometricData::None;
 	}
-	
+
 };
 
 #define IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( GEOMPARAM, DATATYPE, GEOMETRICINTERPRETATION ) \
@@ -89,6 +89,8 @@ IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN2fGeomParam, IECore
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN2dGeomParam, IECore::V2dVectorData, IECore::GeometricData::Normal )
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN3fGeomParam, IECore::V3fVectorData, IECore::GeometricData::Normal )
 IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IN3dGeomParam, IECore::V3dVectorData, IECore::GeometricData::Normal )
+
+IECOREALEMBIC_SPECIALISEGEOMPARAMTRAITS( Alembic::AbcGeom::IBoolGeomParam, IECore::BoolVectorData, IECore::GeometricData::None )
 
 } // namespace IECoreAlembic
 

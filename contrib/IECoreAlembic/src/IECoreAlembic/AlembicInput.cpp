@@ -47,7 +47,7 @@
 #endif
 
 #include "IECoreAlembic/AlembicInput.h"
-#include "IECoreAlembic/FromAlembicConverter.h"
+#include "IECoreAlembic/ObjectAlgo.h"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/ObjectInterpolator.h"
@@ -64,7 +64,7 @@ struct AlembicInput::DataMembers
 		: numSamples( -1 )
 	{
 	}
-	
+
 	boost::shared_ptr<IArchive> archive;
 	IObject object;
 	int numSamples;
@@ -74,7 +74,7 @@ struct AlembicInput::DataMembers
 AlembicInput::AlembicInput( const std::string &fileName )
 {
 	m_data = boost::shared_ptr<DataMembers>( new DataMembers );
-	
+
 #ifdef IECOREALEMBIC_WITH_OGAWA
 	Alembic::AbcCoreFactory::IFactory factory;
 	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( factory.getArchive( fileName ) ) );
@@ -87,7 +87,7 @@ AlembicInput::AlembicInput( const std::string &fileName )
 #else
 	m_data->archive = boost::shared_ptr<IArchive>( new IArchive( ::Alembic::AbcCoreHDF5::ReadArchive(), fileName ) );
 #endif
-	
+
 	m_data->object = m_data->archive->getTop();
 }
 
@@ -118,7 +118,7 @@ IECore::CompoundDataPtr AlembicInput::metaData() const
 	{
 		resultMap[it->first] = new StringData( it->second );
 	}
-	
+
 	return resultData;
 }
 
@@ -128,13 +128,13 @@ size_t AlembicInput::numSamples() const
 	{
 		return m_data->numSamples;
 	}
-	
+
 	// wouldn't it be grand if the different things we had to call getNumSamples()
 	// on had some sort of base class where getNumSamples() was defined?
 	/// \todo See todo in ensureTimeSampling().
-	
+
 	const MetaData &md = m_data->object.getMetaData();
-	
+
 	if( !m_data->object.getParent() )
 	{
 		// top of archive
@@ -156,14 +156,14 @@ size_t AlembicInput::numSamples() const
 	else if( ICamera::matches( md ) )
 	{
 		ICamera iCamera( m_data->object, kWrapExisting );
-		m_data->numSamples = iCamera.getSchema().getNumSamples();	
+		m_data->numSamples = iCamera.getSchema().getNumSamples();
 	}
 	else
 	{
 		IGeomBaseObject geomBase( m_data->object, kWrapExisting );
 		m_data->numSamples = geomBase.getSchema().getNumSamples();
 	}
-	
+
 	return m_data->numSamples;
 }
 
@@ -179,8 +179,8 @@ double AlembicInput::timeAtSample( size_t sampleIndex ) const
 
 double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const
 {
-	ensureTimeSampling();	
-	
+	ensureTimeSampling();
+
 	std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> f = m_data->timeSampling->getFloorIndex( time, numSamples() );
 	if( fabs( time - f.second ) < 0.0001 )
 	{
@@ -189,7 +189,7 @@ double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size
 		floorIndex = ceilIndex = f.first;
 		return 0.0;
 	}
-	
+
 	std::pair<Alembic::AbcCoreAbstract::index_t, chrono_t> c = m_data->timeSampling->getCeilIndex( time, numSamples() );
 	if( f.first == c.first || fabs( time - c.second ) < 0.0001 )
 	{
@@ -198,10 +198,10 @@ double AlembicInput::sampleIntervalAtTime( double time, size_t &floorIndex, size
 		floorIndex = ceilIndex = c.first;
 		return 0.0;
 	}
-	
+
 	floorIndex = f.first;
 	ceilIndex = c.first;
-	
+
 	return ( time - f.second ) / ( c.second - f.second );
 }
 
@@ -224,9 +224,9 @@ bool AlembicInput::hasStoredBound() const
 	}
 	return false;
 }
-		
+
 Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
-{	
+{
 	const MetaData &md = m_data->object.getMetaData();
 
 	if( !m_data->object.getParent() )
@@ -238,7 +238,7 @@ Imath::Box3d AlembicInput::boundAtSample( size_t sampleIndex ) const
 	{
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();
-		
+
 		if( !iXFormSchema.getChildBoundsProperty() )
 		{
 			throw IECore::Exception( "No stored bounds available" );
@@ -268,9 +268,9 @@ Imath::Box3d AlembicInput::boundAtTime( double time ) const
 		else
 		{
 			Box3d bound0 = boundAtSample( index0 );
-			Box3d bound1 = boundAtSample( index1 );		
+			Box3d bound1 = boundAtSample( index1 );
 			Box3d result;
-			result.min = lerp( bound0.min, bound1.min, lerpFactor );	
+			result.min = lerp( bound0.min, bound1.min, lerpFactor );
 			result.max = lerp( bound0.max, bound1.max, lerpFactor );
 			return result;
 		}
@@ -306,7 +306,7 @@ Imath::M44d AlembicInput::transformAtSample( size_t sampleIndex ) const
 Imath::M44d AlembicInput::transformAtTime( double time ) const
 {
 	M44d result;
-	
+
 	if( IXform::matches( m_data->object.getMetaData() ) )
 	{
 		size_t index0, index1;
@@ -314,7 +314,7 @@ Imath::M44d AlembicInput::transformAtTime( double time ) const
 
 		IXform iXForm( m_data->object, kWrapExisting );
 		IXformSchema &iXFormSchema = iXForm.getSchema();
-	
+
 		if( index0 == index1 )
 		{
 			XformSample sample;
@@ -327,19 +327,19 @@ Imath::M44d AlembicInput::transformAtTime( double time ) const
 			iXFormSchema.get( sample0, ISampleSelector( (index_t)index0 ) );
 			XformSample sample1;
 			iXFormSchema.get( sample1, ISampleSelector( (index_t)index1 ) );
-			
+
 			if( sample0.getNumOps() != sample1.getNumOps() ||
-				sample0.getNumOpChannels() != sample1.getNumOpChannels() 
+				sample0.getNumOpChannels() != sample1.getNumOpChannels()
 			)
 			{
 				throw IECore::Exception( "Unable to interpolate samples of different sizes" );
 			}
-					
+
 			XformSample interpolatedSample;
 			for( size_t opIndex = 0; opIndex < sample0.getNumOps(); opIndex++ )
 			{
 				XformOp op0 = sample0.getOp( opIndex );
-				XformOp op1 = sample1.getOp( opIndex );			
+				XformOp op1 = sample1.getOp( opIndex );
 				XformOp interpolatedOp( op0.getType(), op0.getHint() );
 				for( size_t channelIndex = 0; channelIndex < op0.getNumChannels(); channelIndex++ )
 				{
@@ -348,58 +348,42 @@ Imath::M44d AlembicInput::transformAtTime( double time ) const
 						lerp( op0.getChannelValue( channelIndex ), op1.getChannelValue( channelIndex ), lerpFactor )
 					);
 				}
-				
+
 				interpolatedSample.addOp( interpolatedOp );
 			}
-			
+
 			result = interpolatedSample.getMatrix();
 		}
 	}
-	
+
 	return result;
 }
-		
-IECore::ToCoreConverterPtr AlembicInput::converter( IECore::TypeId resultType ) const
-{
-	return FromAlembicConverter::create( m_data->object, resultType );
-}
-		
+
 IECore::ObjectPtr AlembicInput::objectAtSample( size_t sampleIndex, IECore::TypeId resultType ) const
 {
-	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
-	if( c )
-	{
-		c->sampleIndexParameter()->setNumericValue( sampleIndex );
-		return c->convert();
-	}
-	return 0;
+	return ObjectAlgo::convert( m_data->object, sampleIndex, resultType );
 }
 
 IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId resultType ) const
 {
-	FromAlembicConverterPtr c = FromAlembicConverter::create( m_data->object, resultType );
-	if( !c )
-	{
-		return 0;
-	}
-	
 	size_t index0, index1;
-	double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
+	const double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
 	if( index0==index1 )
 	{
-		c->sampleIndexParameter()->setNumericValue( index0 );
-		return c->convert();
+		return objectAtSample( index0, resultType );
 	}
 	else
 	{
-		c->sampleIndexParameter()->setNumericValue( index0 );
-		ObjectPtr object0 = c->convert();
-		c->sampleIndexParameter()->setNumericValue( index1 );
-		ObjectPtr object1 = c->convert();
-		return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
+		ConstObjectPtr object0 = objectAtSample( index0, resultType );
+		ConstObjectPtr object1 = objectAtSample( index1, resultType );
+		if( object0 && object1 )
+		{
+			return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
+		}
+		return NULL;
 	}
 }
-		
+
 size_t AlembicInput::numChildren() const
 {
 	if(
@@ -449,7 +433,7 @@ AlembicInputPtr AlembicInput::child( const std::string &name ) const
 	{
 		throw InvalidArgumentException( name );
 	}
-	
+
 	AlembicInputPtr result = new AlembicInput();
 	result->m_data = boost::shared_ptr<DataMembers>( new DataMembers );
 	result->m_data->archive = m_data->archive;
@@ -464,7 +448,7 @@ void AlembicInput::ensureTimeSampling() const
 		return;
 	}
 	const MetaData &md = m_data->object.getMetaData();
-	
+
 	/// \todo It's getting a bit daft having to cover all the
 	/// types in here. We either need to find a generic way of
 	/// doing it (seems like that might not be Alembic's style though)
@@ -484,7 +468,7 @@ void AlembicInput::ensureTimeSampling() const
 	else if( ICamera::matches( md ) )
 	{
 		ICamera iCamera( m_data->object, kWrapExisting );
-		m_data->timeSampling = iCamera.getSchema().getTimeSampling();	
+		m_data->timeSampling = iCamera.getSchema().getTimeSampling();
 	}
 	else
 	{

@@ -1,6 +1,7 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,10 +33,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
 
-#include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
+#include "IECoreAlembic/GeomBaseAlgo.h"
 #include "IECoreAlembic/IGeomParamTraits.h"
 
 using namespace Alembic::Abc;
@@ -43,26 +43,89 @@ using namespace Alembic::AbcGeom;
 using namespace IECore;
 using namespace IECoreAlembic;
 
-IE_CORE_DEFINERUNTIMETYPED( FromAlembicGeomBaseConverter );
+//////////////////////////////////////////////////////////////////////////
+// Internal utilities
+//////////////////////////////////////////////////////////////////////////
 
-FromAlembicGeomBaseConverter::FromAlembicGeomBaseConverter( const std::string &description, Alembic::Abc::IObject iGeom )
-	:	FromAlembicConverter( description, iGeom )
+namespace
 {
+
+IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope )
+{
+	switch( scope )
+	{
+		case kConstantScope :
+			return PrimitiveVariable::Constant;
+		case kUniformScope :
+			return PrimitiveVariable::Uniform;
+		case kVaryingScope :
+			return PrimitiveVariable::Varying;
+		case kVertexScope :
+			return PrimitiveVariable::Vertex;
+		case kFacevaryingScope :
+			return PrimitiveVariable::FaceVarying;
+		default :
+			return PrimitiveVariable::Invalid;
+	}
 }
 
-void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
-{	
+
+// Functor for setting the geometric interpretation of
+// DataType based on the GeomParam type. The base version
+// does nothing because not all Data classes have a
+// `setInterpretation()` method. We then specialise this
+// below for the GeometricTypedData classes where the
+// method is available.
+//
+// Note that we could use `DataAlgo::setGeometricInterpretation()`
+// to do this for us, but by doing it ourselves we avoid the
+// overhead of the internal TypedDataDespatch that it would perform.
+template<typename DataType, typename GeomParam>
+struct ApplyGeometricInterpretation
+{
+
+	static void apply( DataType *data )
+	{
+	};
+
+};
+
+template<typename T, typename GeomParam>
+struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
+{
+
+	static void apply( GeometricTypedData<T> *data )
+	{
+		data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
+	};
+
+};
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// GeomBaseAlgo implementation
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreAlembic
+{
+
+namespace GeomBaseAlgo
+{
+
+void convertUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
+{
 	if( !uvs.valid() )
 	{
 		return;
 	}
-	
+
 	/// \todo It'd be nice if we stored uvs as a single primitive variable instead of having to split them in two.
 	/// It'd also be nice if we supported indexed data directly.
 	typedef IV2fArrayProperty::sample_ptr_type SamplePtr;
 	SamplePtr sample = uvs.getExpandedValue( sampleSelector ).getVals();
 	size_t size = sample->size();
-	
+
 	FloatVectorDataPtr sData = new FloatVectorData;
 	FloatVectorDataPtr tData = new FloatVectorData;
 	std::vector<float> &s = sData->writable();
@@ -72,25 +135,25 @@ void FromAlembicGeomBaseConverter::convertUVs( Alembic::AbcGeom::IV2fGeomParam &
 	for( size_t i=0; i<size; ++i )
 	{
 		s[i] = (*sample)[i][0];
-		t[i] = (*sample)[i][1];			
+		t[i] = (*sample)[i][1];
 	}
-	
+
 	PrimitiveVariable::Interpolation interpolation = interpolationFromScope( uvs.getScope() );
 	primitive->variables["s"] = PrimitiveVariable( interpolation, sData );
-	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );	
+	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );
 }
-		
-void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+
+void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
 {
 	if( !params.valid() )
 	{
 		return;
 	}
-	
+
 	for( size_t i = 0; i < params.getNumProperties(); ++i )
 	{
 		const PropertyHeader &header = params.getPropertyHeader( i );
-		
+
 		if( IFloatGeomParam::matches( header ) )
 		{
 			IFloatGeomParam p( params, header.getName() );
@@ -146,6 +209,11 @@ void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompound
 			IM44fGeomParam p( params, header.getName() );
 			convertGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IBoolGeomParam::matches( header ) )
+		{
+			IBoolGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
+		}
 		else
 		{
 			msg( Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParams", boost::format( "Param \"%s\" has unsupported type" ) % header.getName() );
@@ -153,49 +221,8 @@ void FromAlembicGeomBaseConverter::convertArbGeomParams( Alembic::Abc::ICompound
 	}
 }
 
-IECore::PrimitiveVariable::Interpolation FromAlembicGeomBaseConverter::interpolationFromScope( Alembic::AbcGeom::GeometryScope scope ) const
-{
-	switch( scope )
-	{
-		case kConstantScope :
-			return PrimitiveVariable::Constant;
-		case kUniformScope :
-			return PrimitiveVariable::Uniform;
-		case kVaryingScope :
-			return PrimitiveVariable::Varying;
-		case kVertexScope :
-			return PrimitiveVariable::Vertex;
-		case kFacevaryingScope :
-			return PrimitiveVariable::FaceVarying;
-		default :
-			return PrimitiveVariable::Invalid;
-	}
-}
-
-
-template<typename DataType, typename GeomParam>
-struct ApplyGeometricInterpretation
-{
-	
-	static void apply( DataType *data )
-	{
-	};
-	
-};
-
-template<typename T, typename GeomParam>
-struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
-{
-
-	static void apply( GeometricTypedData<T> *data )
-	{
-		data->setInterpretation( IGeomParamTraits<GeomParam>::geometricInterpretation() );
-	};
-
-};
-	
 template<typename T>
-void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+void convertGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
 {
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename IGeomParamTraits<T>::DataType DataType;
@@ -205,19 +232,22 @@ void FromAlembicGeomBaseConverter::convertGeomParam( T &param, const Alembic::Ab
 		IECore::msg( IECore::Msg::Warning, "FromAlembicGeomBaseConverter::convertArbGeomParam", boost::format( "Param \"%s\" has unsupported array extent" ) % param.getHeader().getName() );
 		return;
 	}
-		
+
 	SamplePtr sample = param.getExpandedValue( sampleSelector ).getVals();
-	
+
 	typename DataType::Ptr data = new DataType();
 	data->writable().resize( sample->size() );
 	std::copy( sample->get(), sample->get() + sample->size(), data->writable().begin() );
- 
+
 	ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
-	
+
 	PrimitiveVariable pv;
 	pv.interpolation = interpolationFromScope( param.getScope() );
 	pv.data = data;
-	
+
 	primitive->variables[param.getHeader().getName()] = pv;
 }
 
+} // namespace GeomBaseAlgo
+
+} // namespace IECoreAlembic

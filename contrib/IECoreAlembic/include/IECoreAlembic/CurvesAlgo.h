@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
+#ifndef IECOREALEMBIC_CURVESALGO_H
+#define IECOREALEMBIC_CURVESALGO_H
 
-#include "Alembic/AbcGeom/IPolyMesh.h"
+#include "Alembic/AbcGeom/ICurves.h"
 
-#include "IECore/MeshPrimitive.h"
-
-#include "IECoreAlembic/FromAlembicGeomBaseConverter.h"
+#include "IECore/CurvesPrimitive.h"
 #include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-class IECOREALEMBIC_API FromAlembicPolyMeshConverter : public FromAlembicGeomBaseConverter
+namespace CurvesAlgo
 {
 
-	public :
+IECOREALEMBIC_API IECore::CurvesPrimitivePtr convert( const Alembic::AbcGeom::ICurves &curves, const Alembic::Abc::ISampleSelector &sampleSelector );
 
-		typedef Alembic::AbcGeom::IPolyMesh InputType;
-		typedef IECore::MeshPrimitive ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicPolyMeshConverter, FromAlembicPolyMeshConverterTypeId, FromAlembicGeomBaseConverter );
-
-		FromAlembicPolyMeshConverter( Alembic::Abc::IObject iPolyMesh );
-
-	protected :
-
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-		
-	private :
-	
-		static ConverterDescription<FromAlembicPolyMeshConverter> g_description;
-		
-};
-
-IE_CORE_DECLAREPTR( FromAlembicPolyMeshConverter )
+} // namespace CurvesAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICPOLYMESHCONVERTER_H
+#endif // IECOREALEMBIC_CURVESALGO_H

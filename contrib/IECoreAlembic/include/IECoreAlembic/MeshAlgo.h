@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,30 +32,26 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICCONVERTER_INL
-#define IECOREALEMBIC_FROMALEMBICCONVERTER_INL
+#ifndef IECOREALEMBIC_MESHALGO_H
+#define IECOREALEMBIC_MESHALGO_H
 
-#include "IECoreAlembic/FromAlembicConverter.h"
+#include "Alembic/AbcGeom/ISubD.h"
+#include "Alembic/AbcGeom/IPolyMesh.h"
+
+#include "IECore/MeshPrimitive.h"
+#include "IECoreAlembic/Export.h"
 
 namespace IECoreAlembic
 {
 
-template<class T>
-FromAlembicConverter::ConverterDescription<T>::ConverterDescription()
+namespace MeshAlgo
 {
-	Registration r;
-	r.resultType = T::ResultType::staticTypeId();
-	r.matcher = T::InputType::matches;
-	r.creator = creator;
-	registrations().push_back( r );
-};
 
-template<class T>
-FromAlembicConverterPtr FromAlembicConverter::ConverterDescription<T>::creator( Alembic::Abc::IObject &iObject )
-{
-	return new T( iObject );
-}
+IECOREALEMBIC_API IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::IPolyMesh &mesh, const Alembic::Abc::ISampleSelector &sampleSelector );
+IECOREALEMBIC_API IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::ISubD &mesh, const Alembic::Abc::ISampleSelector &sampleSelector );
+
+} // namespace MeshAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICCONVERTER_INL
+#endif // IECOREALEMBIC_MESHALGO_H

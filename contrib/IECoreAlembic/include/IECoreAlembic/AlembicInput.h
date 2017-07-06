@@ -64,7 +64,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 
 		AlembicInput( const std::string &fileName );
 		virtual ~AlembicInput();
-		
+
 		//! @name Metadata
 		////////////////////////////////////////////////////////////
 		//@{
@@ -72,7 +72,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		const std::string &fullName() const;
 		IECore::CompoundDataPtr metaData() const;
 		//@}
-		
+
 		//! @name Sampling and time
 		/// Each level of the hierarchy may be sampled at differing
 		/// points in time. These functions provide queries mapping
@@ -80,7 +80,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		/// then be used in the conversion functions below. Note that
 		/// the values returned for the top level input (constructed
 		/// via fileName) are only valid in the case of the whole
-		/// cache using the same sampling. 
+		/// cache using the same sampling.
 		////////////////////////////////////////////////////////////
 		//@{
 		/// Returns the number of samples.
@@ -94,7 +94,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		/// will hold.
 		double sampleIntervalAtTime( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		//@}
-		
+
 		//! @name Bounding box queries.
 		////////////////////////////////////////////////////////////
 		//@{
@@ -114,7 +114,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		/// all descendants of this node. Beware! This can be slow.
 		Imath::Box3d boundAtTime( double time ) const;
 		//@}
-		
+
 		//! @name Transform queries.
 		////////////////////////////////////////////////////////////
 		//@{
@@ -124,23 +124,17 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		/// As above, but interpolating between samples where necessary.
 		Imath::M44d transformAtTime( double time ) const;
 		//@}
-		
+
 		//! @name Conversion to IECore::Object
 		////////////////////////////////////////////////////////////
 		//@{
-		/// Returns a converter capable of converting the Alembic object into
-		/// the specified form, or 0 if no such converter exists. The converter
-		/// is returned as a ToCoreConverter rather than a FromAlembicConverter
-		/// as the latter exposes the underlying Alembic APIs, which we are
-		/// deliberately hiding with the AlembicInput class.
-		IECore::ToCoreConverterPtr converter( IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		/// Converts the alembic object into Cortex form, preferring conversions
 		/// yielding the specified result type.
 		IECore::ObjectPtr objectAtSample( size_t sampleIndex = 0, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		/// As above, but performing linear interpolation between samples where necessary.
 		IECore::ObjectPtr objectAtTime( double time, IECore::TypeId resultType = IECore::ObjectTypeId ) const;
 		//@}
-		
+
 		//! @name Child access
 		////////////////////////////////////////////////////////////
 		//@{
@@ -151,13 +145,13 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		//@}
 
 	private :
-	
+
 		AlembicInput();
-	
+
 		void ensureTimeSampling() const;
-	
+
 		struct DataMembers;
-		
+
 		boost::shared_ptr<DataMembers> m_data;
 
 };

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,39 +32,24 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Transform.h"
+#ifndef IECOREALEMBIC_CAMERAALGO_H
+#define IECOREALEMBIC_CAMERAALGO_H
 
-#include "IECoreAlembic/FromAlembicCameraConverter.h"
+#include "Alembic/AbcGeom/ICamera.h"
 
-using namespace Imath;
-using namespace Alembic::AbcGeom;
-using namespace IECore;
-using namespace IECoreAlembic;
+#include "IECore/Camera.h"
+#include "IECoreAlembic/Export.h"
 
-FromAlembicCameraConverter::ConverterDescription<FromAlembicCameraConverter> FromAlembicCameraConverter::g_description;
-
-IE_CORE_DEFINERUNTIMETYPED( FromAlembicCameraConverter );
-
-FromAlembicCameraConverter::FromAlembicCameraConverter( Alembic::Abc::IObject iCamera )
-	:	FromAlembicConverter( "Converts AbcGeom::ICamera objects to IECore::Camera objects", iCamera )
+namespace IECoreAlembic
 {
-}
 
-IECore::ObjectPtr FromAlembicCameraConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
+namespace CameraAlgo
 {
-	ICamera iCamera( iObject, kWrapExisting );
-	ICameraSchema &iCameraSchema = iCamera.getSchema();
-	CameraSample sample;
-	iCameraSchema.get( sample, sampleSelector );
-	
-	CameraPtr result = new Camera;
-	result->parameters()["projection"] = new StringData( "perspective" );
-	
-	double top, bottom, left, right;
-	sample.getScreenWindow( top, bottom, left, right );
-	result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
-	result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
-	
-	return result;
-}
+
+IECOREALEMBIC_API IECore::CameraPtr convert( const Alembic::AbcGeom::ICamera &camera, const Alembic::Abc::ISampleSelector &sampleSelector );
+
+} // namespace CameraAlgo
+
+} // namespace IECoreAlembic
+
+#endif // IECOREALEMBIC_CAMERAALGO_H

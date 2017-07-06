@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,43 +32,43 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H
+#include "IECoreAlembic/ObjectAlgo.h"
 
-#include "Alembic/AbcGeom/ICamera.h"
-
-#include "IECore/Camera.h"
-
-#include "IECoreAlembic/FromAlembicConverter.h"
-#include "IECoreAlembic/Export.h"
+using namespace Alembic;
+using namespace IECore;
+using namespace IECoreAlembic;
 
 namespace IECoreAlembic
 {
 
-class IECOREALEMBIC_API FromAlembicCameraConverter : public FromAlembicConverter
+namespace ObjectAlgo
 {
 
-	public :
+namespace Detail
+{
 
-		typedef Alembic::AbcGeom::ICamera InputType;
-		typedef IECore::Camera ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicCameraConverter, FromAlembicCameraConverterTypeId, FromAlembicConverter );
+RegistrationVector &registrations()
+{
+	static RegistrationVector r;
+	return r;
+}
 
-		FromAlembicCameraConverter( Alembic::Abc::IObject iCamera );
+} // namespace Detail
 
-	protected :
+IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::TypeId resultType )
+{
+	const Abc::MetaData &md = object.getMetaData();
+	const Detail::RegistrationVector &r = Detail::registrations();
+	for( Detail::RegistrationVector::const_reverse_iterator it = r.rbegin(), eIt = r.rend(); it!=eIt; it++ )
+	{
+		if( ( resultType == it->resultType || RunTimeTyped::inheritsFrom( it->resultType, resultType ) ) && it->matcher( md, Abc::kStrictMatching ) )
+		{
+			return it->converter( object, sampleSelector );
+		}
+	}
+	return NULL;
+}
 
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-
-	private :
-	
-		static ConverterDescription<FromAlembicCameraConverter> g_description;
-		
-};
-
-IE_CORE_DECLAREPTR( FromAlembicCameraConverter )
+} // namespace ObjectAlgo
 
 } // namespace IECoreAlembic
-
-#endif // IECOREALEMBIC_FROMALEMBICCAMERACONVERTER_H

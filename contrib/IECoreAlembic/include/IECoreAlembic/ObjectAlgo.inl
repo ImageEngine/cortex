@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
-#define IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
+#ifndef IECOREALEMBIC_OBJECTALGO_INL
+#define IECOREALEMBIC_OBJECTALGO_INL
 
-#include "Alembic/AbcGeom/IXform.h"
-
-#include "IECore/SimpleTypedData.h"
-
-#include "IECoreAlembic/FromAlembicConverter.h"
-#include "IECoreAlembic/Export.h"
+#include "boost/bind.hpp"
+#include "boost/function.hpp"
 
 namespace IECoreAlembic
 {
 
-/// \todo Maybe template this to also be able to return M44d?
-class IECOREALEMBIC_API FromAlembicXFormConverter : public FromAlembicConverter
+namespace ObjectAlgo
 {
 
-	public :
+namespace Detail
+{
 
-		typedef Alembic::AbcGeom::IXform InputType;
-		typedef IECore::M44fData ResultType;
-		
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FromAlembicXFormConverter, FromAlembicXFormConverterTypeId, FromAlembicConverter );
+struct Registration
+{
+	typedef bool (*MatchFn)( const Alembic::AbcCoreAbstract::MetaData &, Alembic::Abc::SchemaInterpMatching );
+	typedef boost::function<IECore::ObjectPtr ( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector )> Converter;
 
-		FromAlembicXFormConverter( Alembic::Abc::IObject iXForm );
-
-	protected :
-
-		virtual IECore::ObjectPtr doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const;
-
-	private :
-	
-		static ConverterDescription<FromAlembicXFormConverter> g_description;
-		
+	IECore::TypeId resultType;
+	MatchFn matcher;
+	Converter converter;
 };
 
-IE_CORE_DECLAREPTR( FromAlembicXFormConverter )
+typedef std::vector<Registration> RegistrationVector;
+RegistrationVector &registrations();
+
+template<typename AlembicType, typename CortexType, typename Converter>
+IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, Converter converter )
+{
+	AlembicType typedObject( object, Alembic::Abc::kWrapExisting );
+	return converter( typedObject, sampleSelector );
+}
+
+} // namespace Detail
+
+/// Registers a converter from AlembicType to CortexType.
+template<typename AlembicType, typename CortexType>
+ConverterDescription<AlembicType, CortexType>::ConverterDescription( Converter converter )
+{
+	Detail::Registration r;
+	r.resultType = CortexType::staticTypeId();
+	r.matcher = AlembicType::matches;
+	r.converter = boost::bind( Detail::convert<AlembicType, CortexType, Converter>, ::_1, ::_2, converter );
+	Detail::registrations().push_back( r );
+}
+
+} // namespace ObjectAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_FROMALEMBICTRANSFORMCONVERTER_H
+#endif // IECOREALEMBIC_OBJECTALGO_INL

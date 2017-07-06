@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,36 +32,27 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MeshPrimitive.h"
+#ifndef IECOREALEMBIC_GEOMBASEALGO_H
+#define IECOREALEMBIC_GEOMBASEALGO_H
 
-#include "IECoreAlembic/FromAlembicXFormConverter.h"
+#include "Alembic/AbcGeom/IGeomParam.h"
 
-using namespace IECore;
-using namespace IECoreAlembic;
-using namespace Alembic::AbcGeom;
+#include "IECore/Primitive.h"
+#include "IECoreAlembic/Export.h"
 
-FromAlembicXFormConverter::ConverterDescription<FromAlembicXFormConverter> FromAlembicXFormConverter::g_description;
-
-IE_CORE_DEFINERUNTIMETYPED( FromAlembicXFormConverter );
-
-FromAlembicXFormConverter::FromAlembicXFormConverter( Alembic::Abc::IObject iXForm )
-	:	FromAlembicConverter( "Converts AbcGeom::IXForm objects to IECore::M44f objects", iXForm )
+namespace IECoreAlembic
 {
-}
 
-IECore::ObjectPtr FromAlembicXFormConverter::doAlembicConversion( const Alembic::Abc::IObject &iObject, const Alembic::Abc::ISampleSelector &sampleSelector, const IECore::CompoundObject *operands ) const
+namespace GeomBaseAlgo
 {
-	IXform iXForm( iObject, kWrapExisting );
-	IXformSchema &iXFormSchema = iXForm.getSchema();
-	XformSample sample;
-	iXFormSchema.get( sample, sampleSelector );
-	M44d m = sample.getMatrix();
-	return new M44fData(
-		M44f( 
-			m[0][0], m[0][1], m[0][2], m[0][3],
-			m[1][0], m[1][1], m[1][2], m[1][3],
-			m[2][0], m[2][1], m[2][2], m[2][3],
-			m[3][0], m[3][1], m[3][2], m[3][3]
-		)
-	);
-}
+
+void convertUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
+void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
+template<typename T>
+void convertGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
+
+} // namespace GeomBaseAlgo
+
+} // namespace IECoreAlembic
+
+#endif // IECOREALEMBIC_GEOMBASEALGO_H
