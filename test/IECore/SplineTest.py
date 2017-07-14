@@ -255,6 +255,13 @@ class SplineTest( unittest.TestCase ) :
 		( integral, summedArea ) = computeIntegrals(s, [12,20])
 		self.assertAlmostEqual( integral, summedArea, 3 )
 
+		# testing linear basis integral with 4 control points
+		s = IECore.Splineff( IECore.CubicBasisf.linear(), ( ( 0, 1 ), ( 10, 2 ), ( 20, 0 ), ( 21, 2 ) ) )
+		( integral, summedArea ) = computeIntegrals(s)
+		self.assertAlmostEqual( integral, summedArea, 2 )
+		# Test against a quick analytic integration by hand
+		self.assertAlmostEqual( integral, 0.5 * ( ( 10 - 0 ) * ( 1 + 2 ) + ( 20 - 10 ) * ( 2 + 0 ) + ( 21 - 20 ) * ( 0 + 2 ) ), 7 )
+
 if __name__ == "__main__":
     unittest.main()
 
