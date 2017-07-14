@@ -35,6 +35,8 @@
 #ifndef IECORE_SPLINE_INL
 #define IECORE_SPLINE_INL
 
+#include "boost/format.hpp"
+
 #include "IECore/Exception.h"
 
 #include "OpenEXR/ImathLimits.h"
@@ -58,7 +60,8 @@ Spline<X,Y>::Spline( const Basis &b, const PointContainer &p )
 template<typename X, typename Y>
 typename Spline<X,Y>::PointContainer::const_iterator Spline<X,Y>::lastValidSegment() const
 {
-	int validBasis = ( points.size() - ( 4 - basis.step ) ) / basis.step;
+	const int coefficientsNeeded = basis.numCoefficients();
+	int validBasis = ( points.size() - ( coefficientsNeeded - basis.step ) ) / basis.step;
 	int lastBasisOffset = ( validBasis - 1 ) * basis.step;
 
 	typename PointContainer::const_iterator itEnd = points.end();
@@ -71,7 +74,8 @@ typename Spline<X,Y>::PointContainer::const_iterator Spline<X,Y>::lastValidSegme
 template<typename X, typename Y>
 typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 {
-	if( points.size() < 4 )
+	const int coefficientsNeeded = basis.numCoefficients();
+	if( points.size() < coefficientsNeeded )
 	{
 		return XInterval::empty();
 	}
@@ -79,11 +83,11 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 	{
 		typedef typename PointContainer::const_iterator It;
 		X cc[4];
-		X xp[4];
+		X xp[4] = { X(0), X(0), X(0), X(0) };
 
 		// collect first 4 control points
 		It xIt = points.begin();
-		for( unsigned i=0; i<4; i++, xIt++ )
+		for( unsigned i=0; i<coefficientsNeeded; i++, xIt++ )
 		{
 			xp[i] = xIt->first;
 		}
@@ -92,7 +96,7 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 
 		// collect last 4 control points (ignoring malformed basis)
 		xIt = lastValidSegment();
-		for( unsigned i=0; i<4; i++, xIt++ )
+		for( unsigned i=0; i<coefficientsNeeded; i++, xIt++ )
 		{
 			xp[i] = xIt->first;
 		}
@@ -106,55 +110,59 @@ typename Spline<X,Y>::XInterval Spline<X,Y>::interval() const
 template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segment ) const
 {
+	const int coefficientsNeeded = basis.numCoefficients();
+	
 	size_t numPoints = points.size();
-	if( numPoints < 4 )
+	if( numPoints < coefficientsNeeded )
 	{
-		throw( Exception( "Spline has less than 4 points." ) );
+		throw( Exception( boost::str( boost::format( "Spline has less than %i points." ) % coefficientsNeeded ) ) );
 	}
-	if( (numPoints - 4) % basis.step )
+	if( (numPoints - coefficientsNeeded) % basis.step )
 	{
 		throw( Exception( "Spline has excess points (but not enough for an extra segment)." ) );
 	}
 
 	typedef typename PointContainer::const_iterator It;
 
-	// find the first segment where seg( 0 ) > x. the segment before that is the one we're interested in.
+	// find the first segment where seg( 1 ) > x. this segment should contain x.
+	// If we hit the end of the points while searching, return the end point of the last valid segment
 	// this is just a linear search right now - it should be possible to optimise this using points.lower_bound
 	// to quickly find a better start point for the search.
 	X co[4];
-	basis.coefficients( X( 0 ), co );
-	X xp[4];
+	basis.coefficients( X( 1 ), co );
+	X xp[4] = { X(0), X(0), X(0), X(0) };
 
-	It testSegment = points.begin();
-	do
+	segment = points.begin();
+	for( int pointNum = 0;; pointNum += basis.step )
 	{
-		segment = testSegment;
-		for( unsigned i=0; i<basis.step; i++ )
+		It xIt( segment );
+		for( unsigned i=0; i<coefficientsNeeded; i++ )
 		{
-			testSegment++;
-		}
-
-		bool overrun = false;
-		It xIt( testSegment );
-		for( unsigned i=0; i<4; i++ )
-		{
-			if( xIt==points.end() )
-			{
-				overrun = true;
-				break;
-			}
 			xp[i] = xIt->first;
 			xIt++;
 		}
-		if( overrun )
+
+		if( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] > x )
 		{
 			break;
 		}
 
-	} while( xp[0] * co[0] + xp[1] * co[1] + xp[2] * co[2] + xp[3] * co[3] < x );
+		if( pointNum + basis.step  + coefficientsNeeded - 1 >= points.size() )
+		{
+			// We're on the last valid segment, but we haven't reached  x
+			// Just return the end of the last valid segment
+			return X( 1 );
+		}
+
+		for( unsigned i=0; i<basis.step; i++ )
+		{
+			segment++;
+		}
+	}
+
 	// get the x values of the control values for the segment in question
 	It xIt( segment );
-	for( unsigned i=0; i<4; i++ )
+	for( unsigned i=0; i<coefficientsNeeded; i++ )
 	{
 		xp[i] = (*xIt++).first;
 	}
@@ -163,6 +171,48 @@ inline X Spline<X,Y>::solve( X x, typename PointContainer::const_iterator &segme
 	// working well. now we do a sort of bisection thing instead.
 	X tMin = 0;
 	X tMax = 1;
+
+	// Check if we have a pair of critical points in this section
+	X tCrit0, tCrit1;
+	if( basis.criticalPoints( xp, tCrit0, tCrit1 ) &&
+		tCrit0 > 0.0 && tCrit0 < 1.0 &&
+		tCrit1 > 0.0 && tCrit1 < 1.0 )
+	{
+		// This probably means the curve is non-monotonic in this segment, so we could have
+		// multiple possible results if we just let the iterative root finder loose on [0,1].
+		// Lets try to pick a section to search in that gives a "nice" result, by splitting
+		// which range we search based on where x lies relative to the midpoint of the two
+		// critical points.
+		
+		X xCrit0 = basis( tCrit0, xp );
+		X xCrit1 = basis( tCrit1, xp );
+
+		X xCritMidPoint = basis( X(0.5) * ( tCrit0 + tCrit1 ), xp );
+
+		// TODO - delete this weird hack to make the choice of segment line up more with OSL
+		//X xCritMidPoint = basis( std::max( X(0), std::min( X(1), x - basis( X(0), xp ) / ( basis( X(1),xp ) - basis( X(0), xp ) ) ) ), xp );
+
+
+
+		// If x is less than the midpoint, then check if we can search [tMin, tCrit0]
+		if( x < xCritMidPoint && x < xCrit0 )
+		{
+			tMax = tCrit0;
+		}
+		// If x is greater than the midpoint, then check if we can search [tCrit1, tMax]
+		else if( x > xCritMidPoint && x > xCrit1 ) 
+		{
+			tMin = tCrit1;
+		}
+
+		// If neither of these cases triggered, then the two regions we considered must not
+		// overlap the whole region.  This is possible because the critical points might
+		// not actually change direction when the derivative hits zero, in which case
+		// the function is monotonic after all, and we can search the whole region
+		// without worrying about the iterative solve getting stuck on the wrong solution
+
+	}
+
 	X tMid, xMid;
 	X epsilon = Imath::limits<X>::epsilon(); // might be nice to present this as a parameter
 	do
@@ -186,7 +236,7 @@ template<typename X, typename Y>
 inline X Spline<X,Y>::solve( X x, Y segment[4] ) const
 {
 	typename PointContainer::const_iterator s;
-	float t = solve( x, s );
+	X t = solve( x, s );
 	segment[0] = (*s++).second;
 	segment[1] = (*s++).second;
 	segment[2] = (*s++).second;
@@ -228,7 +278,8 @@ inline Y Spline<X,Y>::integral( X t0, X t1, typename Spline<X,Y>::PointContainer
 	X xp[4] = { X(0), X(0), X(0), X(0) };
 	Y yp[4] = { Y(0), Y(0), Y(0), Y(0) };
 
-	for( unsigned i=0; i<4; i++ )
+	const int coefficientsNeeded = basis.numCoefficients();
+	for( unsigned i=0; i<coefficientsNeeded; i++ )
 	{
 		if( segment==points.end() )
 		{
@@ -313,7 +364,8 @@ inline Y Spline<X,Y>::integral( X x0, X x1 ) const
 template<typename X, typename Y>
 inline Y Spline<X,Y>::integral() const
 {
-	if ( points.size() < 4 )
+	const int coefficientsNeeded = basis.numCoefficients();
+	if ( points.size() < coefficientsNeeded )
 		return Y(0);
 
 	return integral( X(0), points.begin(), X(1), lastValidSegment() );
