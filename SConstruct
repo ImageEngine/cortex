@@ -83,13 +83,17 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-Werror", "-O2" ]
+	[ "-pipe", "-Wall", "-O2" ]
 )
 
 o.Add(
 	"CXXSTD",
 	"The C++ standard to build against.",
 	"c++98",
+)
+
+o.Add(
+	BoolVariable( "WARNINGS_AS_ERRORS", "Treats compiler warnings as errors.", True )
 )
 
 o.Add(
@@ -356,7 +360,7 @@ except NameError :
 o.Add(
 	"GLEW_INCLUDE_PATH",
 	"The path to the directory with glew.h in it.",
-	"/usr/local/include/GL",
+	"/usr/local/include",
 )
 
 o.Add(
@@ -1107,6 +1111,9 @@ if env["PLATFORM"]=="darwin" :
 		env.Append( CXXFLAGS = [ "-Wno-unused-local-typedef", "-Wno-deprecated-declarations" ] )
 
 env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
+
+if env["WARNINGS_AS_ERRORS"] :
+	env.Append( CXXFLAGS = [ "-Werror" ] )
 
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
@@ -1912,7 +1919,7 @@ if env["WITH_GL"] and doConfigure :
 
 	c = Configure( glEnv )
 
-	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "glew.h", "CXX" ) :
+	if not c.CheckLibWithHeader( env.subst( "GLEW$GLEW_LIB_SUFFIX" ), "GL/glew.h", "CXX" ) :
 
 		sys.stderr.write( "WARNING : GLEW library not found, not building IECoreGL - check GLEW_INCLUDE_PATH and GLEW_LIB_PATH.\n" )
 		c.Finish()
