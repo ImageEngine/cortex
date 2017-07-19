@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,21 +34,20 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/SimpleTypedParameterBinding.h"
+#include "IECorePython/ColorTypedParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/SimpleTypedData.h"
 
-using namespace std;
 using namespace Imath;
 
 namespace IECorePython
 {
 
-void bindSimpleTypedParameter()
+void bindColorTypedParameter()
 {
-	bindTypedParameter<bool>();
-	bindTypedParameter<string>();
+	bindTypedParameter<Color3f>();
+	bindTypedParameter<Color4f>();
 }
 
 } // namespace IECorePython
