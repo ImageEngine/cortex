@@ -83,7 +83,7 @@ o.Add(
 o.Add(
 	"CXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation.",
-	[ "-pipe", "-Wall", "-O2" ]
+	[ "-pipe", "-Wall" ]
 )
 
 o.Add(
@@ -1116,9 +1116,9 @@ if env["WARNINGS_AS_ERRORS"] :
 	env.Append( CXXFLAGS = [ "-Werror" ] )
 
 if env["DEBUG"] :
-	env.Append( CXXFLAGS = [ "-g" ] )
+	env.Append( CXXFLAGS = [ "-g", "-O0" ] )
 else :
-	env.Append( CXXFLAGS = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ] )
+	env.Append( CXXFLAGS = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O2" ] )
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
