@@ -69,6 +69,11 @@
 #include "IECorePython/ParameterBinding.h"
 #include "IECorePython/NumericParameterBinding.h"
 #include "IECorePython/SimpleTypedParameterBinding.h"
+#include "IECorePython/VecTypedParameterBinding.h"
+#include "IECorePython/ColorTypedParameterBinding.h"
+#include "IECorePython/BoxTypedParameterBinding.h"
+#include "IECorePython/MatrixTypedParameterBinding.h"
+#include "IECorePython/LineTypedParameterBinding.h"
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
@@ -346,6 +351,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameter();
 	bindNumericParameter();
 	bindSimpleTypedParameter();
+	bindVecTypedParameter();
+	bindColorTypedParameter();
+	bindBoxTypedParameter();
+	bindMatrixTypedParameter();
+	bindLineTypedParameter();
 	bindVectorTypedParameter();
 	bindSplineParameter();
 	bindCubeColorLookupParameter();

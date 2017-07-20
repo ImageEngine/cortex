@@ -68,7 +68,7 @@ MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 		stat = args.getFlagArgument( kModeFlag, 0, mode );
 		if( !stat )
 		{
-			stat.perror( "Invalid argument passed to "kModeFlagLong" flag. Valid options are: 'all', 'first' or 'targeted'." );
+			stat.perror( "Invalid argument passed to " kModeFlagLong " flag. Valid options are: 'all', 'first' or 'targeted'." );
 			return stat;
 		}
 		if( mode == "all" )
@@ -85,7 +85,7 @@ MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 		}
 		else
 		{
-			stat.perror( "Unknkown mode passed to "kModeFlagLong" flag. Valid options are: 'all', 'first' or 'targeted'." );
+			stat.perror( "Unknkown mode passed to " kModeFlagLong " flag. Valid options are: 'all', 'first' or 'targeted'." );
 			return stat;
 		}
 	 }
@@ -96,7 +96,7 @@ MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 		stat = args.getFlagArgument( kTargetFlag, 0, param );
 		if( !stat )
 		{
-			stat.perror( "Invalid argument passed to "kTargetFlagLong" flag." );
+			stat.perror( "Invalid argument passed to " kTargetFlagLong " flag." );
 			return stat;
 		}
 		m_context->setTarget( param );

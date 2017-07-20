@@ -18,6 +18,10 @@ addons:
       - libtbb-dev
       - libfreetype6-dev
 
+cache:
+    directories:
+      - sconsCache
+
 install:
     - if [ -n "$COMPILER_VERSION" ]; then export CXX="${CXX}-${COMPILER_VERSION}"; fi
 
@@ -25,7 +29,14 @@ script:
     # Preload libSegFault when running tests, so we get stack
     # traces from any crashes.
     - export LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
-    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX=""
+    - scons -j 2 testCore testCorePython CXX=$CXX CXXSTD=$CXXSTD DEBUG=$DEBUG ENV_VARS_TO_IMPORT="PATH TRAVIS LD_PRELOAD" RMAN_ROOT=$DELIGHT BOOST_LIB_SUFFIX="" BUILD_CACHEDIR=sconsCache
+
+before_cache:
+    # This is run just before uploading the cache for next time.
+    # SCons caches grow without bound so we want to remove old
+    # files to prevent our caches becoming too big.
+    - python ./config/travis/limitCacheSize.py
+    - du -sh sconsCache
 
 # Default values for environment variables we use to
 # control the build.
@@ -46,11 +57,8 @@ matrix:
     include:
         - os: linux
           compiler: gcc
-          env: COMPILER_VERSION= CXXSTD=c++98 DEBUG=1
-        - os: linux
-          compiler: gcc
-          env: COMPILER_VERSION=4.8 CXXSTD=c++98 DEBUG=0
-        - os: linux
-          compiler: gcc
           env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=0
+        - os: linux
+          compiler: gcc
+          env: COMPILER_VERSION=4.8 CXXSTD=c++11 DEBUG=1
 

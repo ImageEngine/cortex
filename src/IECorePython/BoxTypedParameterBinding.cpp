@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -34,21 +34,24 @@
 
 #include "boost/python.hpp"
 
-#include "IECorePython/SimpleTypedParameterBinding.h"
+#include "IECorePython/BoxTypedParameterBinding.h"
 #include "IECorePython/TypedParameterBinding.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/SimpleTypedData.h"
 
-using namespace std;
 using namespace Imath;
 
 namespace IECorePython
 {
 
-void bindSimpleTypedParameter()
+void bindBoxTypedParameter()
 {
-	bindTypedParameter<bool>();
-	bindTypedParameter<string>();
+	bindTypedParameter<Box2i>();
+	bindTypedParameter<Box3i>();
+	bindTypedParameter<Box2f>();
+	bindTypedParameter<Box3f>();
+	bindTypedParameter<Box2d>();
+	bindTypedParameter<Box3d>();
 }
 
 } // namespace IECorePython
