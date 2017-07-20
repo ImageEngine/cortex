@@ -38,19 +38,61 @@
 #include "OpenEXR/half.h"
 
 #include "boost/type_traits/is_arithmetic.hpp"
-#include "boost/type_traits/is_integral.hpp"
 #include "boost/type_traits/is_signed.hpp"
 #include "boost/type_traits/is_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
 
-#include "boost/type_traits/detail/bool_trait_def.hpp"
 namespace boost
 {
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1( is_arithmetic, half, true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1( is_floating_point, half, true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1( is_signed, half, true)
-BOOST_TT_AUX_BOOL_TRAIT_CV_SPEC1( is_unsigned, half, false)
+
+template<>
+struct is_arithmetic<half> : public true_type{};
+
+template<>
+struct is_arithmetic<const half> : public true_type{};
+
+template<>
+struct is_arithmetic<volatile half> : public true_type{};
+
+template<>
+struct is_arithmetic<const volatile half> : public true_type{};
+
+template<>
+struct is_floating_point<half> : public true_type{};
+
+template<>
+struct is_floating_point<const half> : public true_type{};
+
+template<>
+struct is_floating_point<volatile half> : public true_type{};
+
+template<>
+struct is_floating_point<const volatile half> : public true_type{};
+
+template<>
+struct is_signed<half> : public true_type{};
+
+template<>
+struct is_signed<const half> : public true_type{};
+
+template<>
+struct is_signed<volatile half> : public true_type{};
+
+template<>
+struct is_signed<const volatile half> : public true_type{};
+
+template<>
+struct is_unsigned<half> : public false_type{};
+
+template<>
+struct is_unsigned<const half> : public false_type{};
+
+template<>
+struct is_unsigned<volatile half> : public false_type{};
+
+template<>
+struct is_unsigned<const volatile half> : public false_type{};
+
 }
-#include "boost/type_traits/detail/bool_trait_undef.hpp"
 
 #endif // IE_CORE_HALFTYPETRAITS_H
