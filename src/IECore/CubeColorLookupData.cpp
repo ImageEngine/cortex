@@ -131,8 +131,8 @@ IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( CubeColorLookupdData, CubeColo
 SPECIALISE( CubeColorLookupfData )
 SPECIALISE( CubeColorLookupdData )
 
-}
-
 // Instantiations
 template class IECORE_API TypedData<CubeColorLookupf>;
 template class IECORE_API TypedData<CubeColorLookupd>;
+
+}

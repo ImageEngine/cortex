@@ -139,10 +139,10 @@ SPECIALISE( SplineddData, double, 1 )
 SPECIALISE( SplinefColor3fData, float, 3 )
 SPECIALISE( SplinefColor4fData, float, 4 )
 
-}
-
 // Instantiations
 template class IECORE_API TypedData<Splineff>;
 template class IECORE_API TypedData<Splinedd>;
 template class IECORE_API TypedData<SplinefColor3f>;
 template class IECORE_API TypedData<SplinefColor4f>;
+
+}
