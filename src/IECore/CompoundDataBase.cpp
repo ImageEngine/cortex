@@ -207,7 +207,7 @@ void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
 	}
 }
 
-} // namespace IECore
-
 // Instantiate that bad boy.
 template class IECORE_API TypedData<CompoundDataMap>;
+
+} // namespace IECore
