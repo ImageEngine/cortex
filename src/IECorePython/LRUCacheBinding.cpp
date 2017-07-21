@@ -38,6 +38,8 @@
 
 #include "tbb/tbb.h"
 
+#include "boost/format.hpp"
+
 #include "IECore/LRUCache.h"
 
 #include "IECorePython/ScopedGILRelease.h"
@@ -164,7 +166,11 @@ struct GetFromTestCache
 				const int v = m_cache.get( k );
 				if( k != v )
 				{
-					throw Exception( "Incorrect LRUCache value found" );
+					throw Exception(
+						boost::str(
+							boost::format( "Incorrect LRUCache value found (expected %d but got %d)" ) % k %v
+						)
+					);
 				}
 				
 				if( m_clearFrequency && (i % m_clearFrequency == 0) )
