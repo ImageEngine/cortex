@@ -312,5 +312,31 @@ class LRUCacheTest( unittest.TestCase ) :
 		# Cache small enough that evictions are necessary
 		IECore.testParallelLRUCacheRecursion( 100000, 1000, 100 )
 
+	def testExceptions( self ) :
+
+		calls = []
+		def getter( key ) :
+
+			calls.append( key )
+			raise ValueError( "Get failed for {0}".format( key ) )
+
+		c = IECore.LRUCache( getter, 1000 )
+
+		# Check that the exception thrown by the getter propagates back out to us.
+		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertEqual( calls, [ 10 ] )
+		# Check that calling a second time gives us the same error, but without
+		# calling the getter again.
+		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertEqual( calls, [ 10 ] )
+		# Check that clear erases exceptions, so that the getter will be called again.
+		c.clear()
+		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertEqual( calls, [ 10, 10 ] )
+		# And check that erase does the same.
+		c.erase( 10 )
+		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
+		self.assertEqual( calls, [ 10, 10, 10 ] )
+
 if __name__ == "__main__":
     unittest.main()

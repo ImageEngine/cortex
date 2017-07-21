@@ -493,6 +493,7 @@ class Parallel
 			{
 				// If we're at the end of this bin, advance to
 				// the next non-empty one.
+				const MapIterator emptySentinel = bin->map.end();
 				while( m_popIterator == bin->map.end() )
 				{
 					binLock.release();
@@ -500,6 +501,11 @@ class Parallel
 					bin = &m_bins[m_popBinIndex];
 					binLock.acquire( bin->mutex );
 					m_popIterator = bin->map.begin();
+					if( m_popIterator == emptySentinel )
+					{
+						// We've come full circle and all bins were empty.
+						return false;
+					}
 				}
 
 				if( itemLock.try_acquire( m_popIterator->mutex ) )
@@ -605,7 +611,12 @@ LRUCache<Key, Value, Policy, GetterKey>::~LRUCache()
 template<typename Key, typename Value, template <typename> class Policy, typename GetterKey>
 void LRUCache<Key, Value, Policy, GetterKey>::clear()
 {
-	limitCost( 0 );
+	Key key;
+	CacheEntry cacheEntry;
+	while( m_policy.pop( key, cacheEntry ) )
+	{
+		eraseInternal( key, cacheEntry );
+	}
 }
 
 template<typename Key, typename Value, template <typename> class Policy, typename GetterKey>
