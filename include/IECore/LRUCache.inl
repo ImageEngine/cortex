@@ -46,14 +46,20 @@ namespace IECore
 
 template<typename Key, typename Value, typename GetterKey>
 LRUCache<Key, Value, GetterKey>::CacheEntry::CacheEntry()
-	:	value(), cost( 0 ), previous( NULL ), next( NULL ), status( Uncached ), mutex()
+	:	state( boost::blank() ), cost( 0 ), previous( NULL ), next( NULL ), mutex()
 {
 }
 
 template<typename Key, typename Value, typename GetterKey>
 LRUCache<Key, Value, GetterKey>::CacheEntry::CacheEntry( const CacheEntry &other )
-	:	value( other.value ), cost( other.cost ), previous( other.previous ), next( other.next ), status( other.status ), mutex()
+	:	state( other.state ), cost( other.cost ), previous( other.previous ), next( other.next ), mutex()
 {
+}
+
+template<typename Key, typename Value, typename GetterKey>
+typename LRUCache<Key, Value, GetterKey>::Status LRUCache<Key, Value, GetterKey>::CacheEntry::status() const
+{
+	return static_cast<Status>( state.which() );
 }
 
 template<typename Key, typename Value, typename GetterKey>
@@ -136,8 +142,9 @@ Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 	MapIterator it = m_map.insert( MapValue( key, CacheEntry() ) ).first;
 	CacheEntry &cacheEntry = it->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
+	const Status status = cacheEntry.status();
 
-	if( cacheEntry.status==Uncached )
+	if( status==Uncached )
 	{
 		assert( cacheEntry.value==Value() );
 		assert( cacheEntry.next == NULL && cacheEntry.previous == NULL );
@@ -150,12 +157,12 @@ Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 		}
 		catch( ... )
 		{
-			cacheEntry.status = Failed;
+			cacheEntry.state = std::current_exception();
 			throw;
 		}
 
-		assert( cacheEntry.status != Cached ); // this would indicate that another thread somehow
-		assert( cacheEntry.status != Failed ); // loaded the same thing as us, which is not the intention.
+		assert( cacheEntry.status() != Cached ); // this would indicate that another thread somehow
+		assert( cacheEntry.status() != Failed ); // loaded the same thing as us, which is not the intention.
 
 		setInternal( &*it, value, cost );
 
@@ -170,17 +177,16 @@ Value LRUCache<Key, Value, GetterKey>::get( const GetterKey &key )
 
 		return value;
 	}
-	else if( cacheEntry.status==Cached )
+	else if( status==Cached )
 	{
-		Value result = cacheEntry.value;
+		Value result = boost::get<Value>( cacheEntry.state );
 		lock.release();
 		updateListPosition( &*it );
 		return result;
 	}
 	else
 	{
-		assert( cacheEntry.status==Failed );
-		throw Exception( "Previous attempt to get item failed." );
+		std::rethrow_exception( boost::get<std::exception_ptr>( cacheEntry.state ) );
 	}
 }
 
@@ -204,24 +210,23 @@ template<typename Key, typename Value, typename GetterKey>
 bool LRUCache<Key, Value, GetterKey>::setInternal( MapValue *mapValue, const Value &value, Cost cost )
 {
 	CacheEntry &cacheEntry = mapValue->second;
-	if( cacheEntry.status==Cached )
+	if( cacheEntry.status()==Cached )
 	{
-		m_removalCallback( mapValue->first, cacheEntry.value );
+		m_removalCallback( mapValue->first, boost::get<Value>( cacheEntry.state ) );
 		m_currentCost -= cacheEntry.cost;
-		cacheEntry.value = Value();
+		cacheEntry.state = boost::blank();
 	}
 
 	bool result = true;
 	if( cost <= m_maxCost )
 	{
-		cacheEntry.value = value;
+		cacheEntry.state = value;
 		cacheEntry.cost = cost;
-		cacheEntry.status = Cached;
 		m_currentCost += cost;
 	}
 	else
 	{
-		cacheEntry.status = Uncached;
+		cacheEntry.state = boost::blank();
 		result = false;
 	}
 
@@ -237,7 +242,7 @@ bool LRUCache<Key, Value, GetterKey>::cached( const Key &key ) const
 		return false;
 	}
 	tbb::spin_mutex::scoped_lock lock( it->second.mutex );
-	return it->second.status==Cached;
+	return it->second.status()==Cached;
 }
 
 template<typename Key, typename Value, typename GetterKey>
@@ -259,21 +264,18 @@ bool LRUCache<Key, Value, GetterKey>::eraseInternal( MapValue *mapValue )
 	CacheEntry &cacheEntry = mapValue->second;
 	tbb::spin_mutex::scoped_lock lock( cacheEntry.mutex );
 
-	const Status originalStatus = (Status)cacheEntry.status;
+	const Status originalStatus = cacheEntry.status();
 
 	listErase( mapValue );
-	cacheEntry.status = Uncached;
 
-	if( originalStatus != Cached )
+	if( originalStatus == Cached )
 	{
-		return false;
+		m_removalCallback( mapValue->first, boost::get<Value>( cacheEntry.state ) );
+		m_currentCost -= cacheEntry.cost;
 	}
 
-	m_removalCallback( mapValue->first, cacheEntry.value );
-	m_currentCost -= cacheEntry.cost;
-	cacheEntry.value = Value();
-
-	return true;
+	cacheEntry.state = boost::blank();
+	return originalStatus == Cached;
 }
 
 template<typename Key, typename Value, typename GetterKey>
@@ -301,7 +303,7 @@ void LRUCache<Key, Value, GetterKey>::updateListPosition( MapValue *mapValue )
 	listErase( mapValue );
 
 	tbb::spin_mutex::scoped_lock mapValueMutex( mapValue->second.mutex );
-	if( mapValue->second.status == Cached )
+	if( mapValue->second.status() == Cached )
 	{
 		listInsertAtEnd( mapValue );
 	}

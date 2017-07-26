@@ -74,9 +74,36 @@ struct LRUCacheGetter
 
 	object operator() ( object key, LRUCache<object, object>::Cost &cost )
 	{
-		tuple t = extract<tuple>( getter( key ) );
-		cost = extract<LRUCache<object, object>::Cost>( t[1] );
-		return t[0];
+		try
+		{
+			tuple t = extract<tuple>( getter( key ) );
+			cost = extract<LRUCache<object, object>::Cost>( t[1] );
+			return t[0];
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			/// \todo Bring GafferBindings::ExceptionAlgo over into
+			/// Cortex and use translatePythonException().
+			PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
+			PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+			PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+
+			object exception( ( handle<>( exceptionPyObject ) ) );
+
+			object value;
+			if( valuePyObject )
+			{
+				value = object( handle<>( valuePyObject ) );
+			}
+
+			object tracebackModule( import( "traceback" ) );
+			object formattedList = tracebackModule.attr( "format_exception_only" )( exception, value );
+
+			object formatted = str( "" ).join( formattedList );
+			std::string s = extract<std::string>( formatted );
+
+			throw IECore::Exception( s );
+		}
 	}
 
 	object getter;

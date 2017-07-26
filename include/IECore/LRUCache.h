@@ -40,6 +40,7 @@
 
 #include "boost/noncopyable.hpp"
 #include "boost/function.hpp"
+#include "boost/variant.hpp"
 
 namespace IECore
 {
@@ -159,7 +160,15 @@ class LRUCache : private boost::noncopyable
 			CacheEntry(); // status == Uncached, previous == next == NULL
 			CacheEntry( const CacheEntry &other );
 
-			Value value; // value for this item
+			// We use a boost::variant to compactly store
+			// a union of the data needed for each Status.
+			//
+			// - Uncached : A boost::blank instance
+			// - Cached : The Value itself
+			// - Failed ; The exception thrown by the GetterFn
+			typedef boost::variant<boost::blank, Value, std::exception_ptr> State;
+
+			State state;
 			Cost cost; // the cost for this item
 
 			// Pointers to previous and next items
@@ -176,12 +185,14 @@ class LRUCache : private boost::noncopyable
 			MapValue *previous;
 			MapValue *next;
 
-			char status; // status of this item
 			// Mutex - must be held before accessing any
 			// fields other than the list fields (previous
 			// and next). To access the list fields, m_listMutex
 			// must be held instead.
 			tbb::spin_mutex mutex;
+
+			Status status() const;
+
 		};
 
 		// Dummy MapValues to represent the start and end of our LRU list.
