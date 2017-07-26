@@ -54,7 +54,7 @@ namespace boost
 namespace python
 {
 
-inline size_t tbb_hasher( const boost::python::object &o )
+inline size_t hash_value( const boost::python::object &o )
 {
 	return PyObject_Hash( o.ptr() );
 }
