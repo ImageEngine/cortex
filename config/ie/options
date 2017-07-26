@@ -147,11 +147,6 @@ withAsserts = getOption( "WITH_ASSERTS", withAsserts )
 if not withAsserts :
 	CXXFLAGS += [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ]
 
-TESTCXXFLAGS = copy.copy( CXXFLAGS )
-
-# Special workaround for suspected gcc issue - see BoostUnitTestTest for more information
-TESTCXXFLAGS += [ "-O0" ]
-
 if not debug :
 
 	CXXFLAGS += [ "-O2" ]

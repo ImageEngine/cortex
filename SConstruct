@@ -101,12 +101,6 @@ o.Add(
 )
 
 o.Add(
-	"TESTCXXFLAGS",
-	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
-	[ "-pipe", "-Wall", "-O0" ]
-)
-
-o.Add(
 	"LINKFLAGS",
 	"The extra flags to pass to the linker.",
 	[]
@@ -1270,8 +1264,6 @@ if pythonModuleEnv["PLATFORM"]=="darwin" :
 ###########################################################################################
 
 testEnv = env.Clone()
-testEnv.Replace( CXXFLAGS = env.subst("$TESTCXXFLAGS") )
-testEnv.Prepend( CXXFLAGS = " ".join( dependencyIncludes ) )
 
 testEnvLibPath = ":".join( testEnv["LIBPATH"] )
 if testEnv["TEST_LIBPATH"] != "" :
