@@ -32,6 +32,10 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "Alembic/AbcGeom/IGeomBase.h"
+#include "Alembic/AbcGeom/ICamera.h"
+#include "Alembic/AbcGeom/IXForm.h"
+
 #include "IECoreAlembic/ObjectAlgo.h"
 
 using namespace Alembic;
@@ -68,6 +72,42 @@ IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::A
 		}
 	}
 	return NULL;
+}
+
+Alembic::AbcCoreAbstract::TimeSamplingPtr timeSampling( const Alembic::Abc::IObject &object, size_t &numSamples )
+{
+	const Abc::MetaData &md = object.getMetaData();
+
+	// \todo Is there really no generic way of querying this from
+	// Alembic generically, without trying every type one by one?
+
+	if( !object.getParent() )
+	{
+		// Top of archive
+		Alembic::Abc::IBox3dProperty boundsProperty( object.getProperties(), ".childBnds" );
+		numSamples = boundsProperty.getNumSamples();
+		return boundsProperty.getTimeSampling();
+	}
+	else if( AbcGeom::IXform::matches( md ) )
+	{
+		AbcGeom::IXform iXForm( object, Abc::kWrapExisting );
+		numSamples = iXForm.getSchema().getNumSamples();
+		return iXForm.getSchema().getTimeSampling();
+	}
+	else if( AbcGeom::ICamera::matches( md ) )
+	{
+		AbcGeom::ICamera iCamera( object, Abc::kWrapExisting );
+		numSamples = iCamera.getSchema().getNumSamples();
+		return iCamera.getSchema().getTimeSampling();
+	}
+	else
+	{
+		AbcGeom::IGeomBaseObject geomBase( object, Abc::kWrapExisting );
+		numSamples = geomBase.getSchema().getNumSamples();
+		return geomBase.getSchema().getTimeSampling();
+	}
+
+	return nullptr;
 }
 
 } // namespace ObjectAlgo

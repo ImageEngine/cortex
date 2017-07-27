@@ -40,6 +40,7 @@
 
 #include "Alembic/Abc/IObject.h"
 #include "Alembic/Abc/ISampleSelector.h"
+#include "Alembic/AbcCoreAbstract/TimeSampling.h"
 
 #include "IECore/Object.h"
 
@@ -54,6 +55,9 @@ namespace ObjectAlgo
 /// Converts the specified Alembic object into an equivalent Cortex object,
 /// returning NULL if no converter is available.
 IECOREALEMBIC_API IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::TypeId resultType = IECore::InvalidTypeId );
+
+/// Returns the TimeSampling for an object, and updates numSamples with the number of samples it contains.
+IECOREALEMBIC_API Alembic::AbcCoreAbstract::TimeSamplingPtr timeSampling( const Alembic::Abc::IObject &object, size_t &numSamples );
 
 /// Registers a converter from AlembicType to CortexType.
 template<typename AlembicType, typename CortexType>
