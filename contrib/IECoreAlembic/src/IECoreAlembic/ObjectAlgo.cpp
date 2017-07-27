@@ -61,7 +61,8 @@ IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::A
 	const Detail::RegistrationVector &r = Detail::registrations();
 	for( Detail::RegistrationVector::const_reverse_iterator it = r.rbegin(), eIt = r.rend(); it!=eIt; it++ )
 	{
-		if( ( resultType == it->resultType || RunTimeTyped::inheritsFrom( it->resultType, resultType ) ) && it->matcher( md, Abc::kStrictMatching ) )
+		const bool resultTypeMatches = resultType == IECore::InvalidTypeId || resultType == it->resultType || RunTimeTyped::inheritsFrom( it->resultType, resultType );
+		if( resultTypeMatches && it->matcher( md, Abc::kStrictMatching ) )
 		{
 			return it->converter( object, sampleSelector );
 		}
