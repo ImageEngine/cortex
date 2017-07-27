@@ -689,6 +689,8 @@ bool LRUCache<Key, Value, Policy, GetterKey>::set( const Key &key, const Value &
 	m_policy.acquire( key, handle, LRUCachePolicy::InsertWritable );
 	bool result = setInternal( key, handle.writable(), value, cost );
 	m_policy.push( handle );
+	handle.release();
+	limitCost( m_maxCost );
 	return result;
 }
 

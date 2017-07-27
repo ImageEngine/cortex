@@ -338,5 +338,18 @@ class LRUCacheTest( unittest.TestCase ) :
 		self.assertRaisesRegexp( RuntimeError, "Get failed for 10", c.get, 10 )
 		self.assertEqual( calls, [ 10, 10, 10 ] )
 
+	def testSetLimitsCost( self ) :
+
+		c = IECore.LRUCache( lambda key : key, 2 )
+
+		c.set( "a", "a", 1 )
+		self.assertEqual( c.currentCost(), 1 )
+		c.set( "b", "b", 1 )
+		self.assertEqual( c.currentCost(), 2 )
+		c.set( "c", "c", 1 )
+		self.assertEqual( c.currentCost(), 2 )
+		c.set( "d", "d", 1 )
+		self.assertEqual( c.currentCost(), 2 )
+
 if __name__ == "__main__":
     unittest.main()
