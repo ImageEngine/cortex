@@ -90,7 +90,6 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		virtual double boundSampleTime( size_t sampleIndex ) const;
 		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		virtual Imath::Box3d readBoundAtSample( size_t sampleIndex ) const;
-		virtual Imath::Box3d readBound( double time ) const;
 		virtual void writeBound( const Imath::Box3d &bound, double time );
 
 		virtual size_t numTransformSamples() const;
@@ -98,8 +97,6 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		virtual ConstDataPtr readTransformAtSample( size_t sampleIndex ) const;
 		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		virtual ConstDataPtr readTransform( double time ) const;
-		virtual Imath::M44d readTransformAsMatrix( double time ) const;
 		virtual void writeTransform( const Data *transform, double time );
 
 		virtual bool hasAttribute( const Name &name ) const;
@@ -108,7 +105,6 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
 		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		virtual ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
 		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
 
 		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
@@ -120,7 +116,6 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		virtual double objectSampleTime( size_t sampleIndex ) const;
 		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
 		virtual ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		virtual ConstObjectPtr readObject( double time ) const;
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const;
 		virtual void writeObject( const Object *object, double time );
 
