@@ -34,6 +34,10 @@
 
 #include <boost/python.hpp>
 
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECoreAlembic/AlembicScene.h"
+
 #include "IECoreAlembic/bindings/AlembicInputBinding.h"
 
 using namespace IECoreAlembicBindings;
@@ -43,5 +47,9 @@ BOOST_PYTHON_MODULE( _IECoreAlembic )
 {
 
 	bindAlembicInput();
+
+	IECorePython::RunTimeTypedClass<IECoreAlembic::AlembicScene>()
+		.def( init<const std::string &, IECore::IndexedIO::OpenMode>() )
+	;
 
 }
