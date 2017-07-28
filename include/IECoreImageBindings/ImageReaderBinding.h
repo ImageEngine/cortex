@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,64 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IMAGEWRITER_H
-#define IE_CORE_IMAGEWRITER_H
+#ifndef IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
+#define IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H
 
-#include <vector>
-#include <string>
-
-#include "IECore/Export.h"
-#include "IECore/Writer.h"
-#include "IECore/SimpleTypedParameter.h"
-#include "IECore/VectorTypedParameter.h"
-
-namespace IECore
+namespace IECoreImageBindings
 {
+void bindImageReader();
+}
 
-IE_CORE_FORWARDDECLARE( ImagePrimitive );
-
-/// Abstract base class for serializing images
-/// \ingroup ioGroup
-class IECORE_API ImageWriter : public Writer
-{
-
-	public:
-
-		IE_CORE_DECLARERUNTIMETYPED( ImageWriter, Writer )
-
-		/// Checks that object is an ImagePrimitive instance
-		static bool canWrite( ConstObjectPtr object, const std::string &fileName );
-
-		/// The parameter specifying the channels to write.
-		StringVectorParameter * channelNamesParameter();
-		const StringVectorParameter * channelNamesParameter() const;
-
-		/// Convenience function to access the channels specified in parameters
-		void imageChannels( std::vector<std::string> &names ) const;
-
-	protected:
-
-		ImageWriter( const std::string &description );
-
-		/// Return the image object to write
-		const ImagePrimitive *getImage() const;
-
-		/// Write the image. Subclasses implement this method.
-		virtual void writeImage( const std::vector<std::string> &names,
-		                         const ImagePrimitive * image,
-		                         const Imath::Box2i &dataWindow	) const = 0;
-
-	private :
-
-		/// Implementation of Writer::doWrite(). Calls through to writeImage()
-		virtual void doWrite( const CompoundObject *operands );
-
-		StringVectorParameterPtr m_channelsParameter;
-
-};
-
-IE_CORE_DECLAREPTR(ImageWriter);
-
-} // namespace IECore
-
-#endif // IE_CORE_IMAGEWRITER_H
+#endif // IECOREIMAGEBINDINGS_IMAGEREADERBINDING_H

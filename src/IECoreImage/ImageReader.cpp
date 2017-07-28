@@ -32,7 +32,6 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ImageReader.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/TypedParameter.h"
 #include "IECore/ImagePrimitive.h"
@@ -42,10 +41,13 @@
 #include "IECore/NullObject.h"
 #include "IECore/BoxOps.h"
 
+#include "IECoreImage/ImageReader.h"
+
 using namespace std;
-using namespace IECore;
 using namespace boost;
 using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 

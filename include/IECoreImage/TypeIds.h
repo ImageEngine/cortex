@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
-//  Copyright (c) 2011, John Haddon. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,25 +32,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_TYPEIDS_H
+#define IECOREIMAGE_TYPEIDS_H
 
-#include "IECore/ImageWriter.h"
-#include "IECorePython/ImageWriterBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using std::string;
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECoreImage
 {
 
-void bindImageWriter()
+enum TypeId
 {
-	RunTimeTypedClass<ImageWriter>()
-		.def( "canWrite", &ImageWriter::canWrite ).staticmethod( "canWrite" )
-	;
-}
+	FirstCoreImageTypeId = 104000,
+	ImageReaderTypeId = 104001,
+	ImageWriterTypeId = 104002,
+	LastCoreImageTypeId = 104999,
+};
 
-} // namespace IECorePython
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_TYPEIDS_H

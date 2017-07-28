@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2012, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,19 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_IMAGEREADER_H
-#define IE_CORE_IMAGEREADER_H
+#ifndef IECOREIMAGE_IMAGEREADER_H
+#define IECOREIMAGE_IMAGEREADER_H
 
-#include "IECore/Export.h"
 #include "IECore/Reader.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
+
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
 namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
 
+}
+
+namespace IECoreImage
+{
 
 /// The ImageReader class defines an abstract base class for reading sampled images.
 /// ImageReader's main purpose is to define a standard set of parameters
@@ -56,16 +62,16 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 /// possible to the original data type stored on the file. Note that most image Ops available on IECore
 /// will only work on float data channels.
 /// \ingroup ioGroup
-class IECORE_API ImageReader : public Reader
+class IECOREIMAGE_API ImageReader : public IECore::Reader
 {
 
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPED( ImageReader, Reader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageReader, ImageReaderTypeId, IECore::Reader );
 
 		ImageReader( const std::string &description );
 
-		virtual CompoundObjectPtr readHeader();
+		virtual IECore::CompoundObjectPtr readHeader();
 
 		//! @name Parameter accessors
 		/// These provide convenient access to the parameters controlling
@@ -73,18 +79,18 @@ class IECORE_API ImageReader : public Reader
 		///////////////////////////////////////////////////////////////
 		//@{
 		/// The parameter specifying the dataWindow of the loaded image.
-		Box2iParameter * dataWindowParameter();
-		const Box2iParameter * dataWindowParameter() const;
+		IECore::Box2iParameter *dataWindowParameter();
+		const IECore::Box2iParameter *dataWindowParameter() const;
 		/// The parameter specifying the displayWindow of the loaded image.
-		Box2iParameter * displayWindowParameter();
-		const Box2iParameter * displayWindowParameter() const;
+		IECore::Box2iParameter *displayWindowParameter();
+		const IECore::Box2iParameter *displayWindowParameter() const;
 		/// The parameter specifying the channels to load.
-		StringVectorParameter * channelNamesParameter();
-		const StringVectorParameter * channelNamesParameter() const;
+		IECore::StringVectorParameter *channelNamesParameter();
+		const IECore::StringVectorParameter *channelNamesParameter() const;
 		/// The parameter specifying if the returned data channels should be
 		/// exactly or as close as possible to what's stored in the file. 
-		BoolParameter * rawChannelsParameter();
-		const BoolParameter * rawChannelsParameter() const;
+		IECore::BoolParameter *rawChannelsParameter();
+		const IECore::BoolParameter *rawChannelsParameter() const;
 		//@}
 
 		//! @name Image specific reading functions
@@ -108,7 +114,7 @@ class IECORE_API ImageReader : public Reader
 		/// it returns the raw data. It must return a vector data type and
 		/// each element corresponds to a pixel. If that does not correspond
 		/// to the native file format, then it should return a FloatVectorData.
-		DataPtr readChannel( const std::string &name, bool raw = false );
+		IECore::DataPtr readChannel( const std::string &name, bool raw = false );
 		//@}
 
 	protected:
@@ -122,24 +128,24 @@ class IECORE_API ImageReader : public Reader
 
 		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
 		/// Derived classes should implement those methods rather than reimplement this function.
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
 
 		/// Read the specified area from the channel with the specified name - this is called
 		/// by the public readChannel() method and the doOperation() method, and must be implemented
 		/// in all derived classes. It is guaranteed that this function will not be called with 
 		/// invalid names or dataWindows which are not wholly within the dataWindow in the file.
-		virtual DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw ) = 0;
+		virtual IECore::DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw ) = 0;
 
 	private :
 
-		Box2iParameterPtr m_dataWindowParameter;
-		Box2iParameterPtr m_displayWindowParameter;
-		StringVectorParameterPtr m_channelNamesParameter;
-		BoolParameterPtr m_rawChannelsParameter;
+		IECore::Box2iParameterPtr m_dataWindowParameter;
+		IECore::Box2iParameterPtr m_displayWindowParameter;
+		IECore::StringVectorParameterPtr m_channelNamesParameter;
+		IECore::BoolParameterPtr m_rawChannelsParameter;
 };
 
 IE_CORE_DECLAREPTR(ImageReader);
 
-} // namespace IECore
+} // namespace IECoreImage
 
-#endif // IE_CORE_IMAGEREADER_H
+#endif // IECOREIMAGE_IMAGEREADER_H

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,14 +32,18 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMAGEREADERBINDING_H
-#define IECOREPYTHON_IMAGEREADERBINDING_H
+#ifndef IECOREIMAGE_EXPORT_H
+#define IECOREIMAGE_EXPORT_H
 
-#include "IECorePython/Export.h"
+#include "IECore/Export.h"
 
-namespace IECorePython
-{
-IECOREPYTHON_API void bindImageReader();
-}
+// define IECOREIMAGE_API macro based on whether or not we are compiling
+// IECoreImage, or including headers for linking to it. the IECOREIMAGE_API
+// macro is the one that is used in the class definitions.
+#ifdef IECOREIMAGE_EXPORTS
+  #define IECOREIMAGE_API IECORE_EXPORT
+#else
+  #define IECOREIMAGE_API IECORE_IMPORT
+#endif
 
-#endif // IECOREPYTHON_IMAGEREADERBINDING_H
+#endif // #ifndef IECOREIMAGE_EXPORT_H

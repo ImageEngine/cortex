@@ -32,44 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
+#define IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H
 
-#include "IECore/ImageReader.h"
-#include "IECore/VectorTypedData.h"
-#include "IECorePython/ImageReaderBinding.h"
-#include "IECorePython/ReaderBinding.h"
-
-using std::string;
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-
-namespace
+namespace IECoreImageBindings
 {
-
-static StringVectorDataPtr channelNames( ImageReader &that )
-{
-	StringVectorDataPtr result( new StringVectorData );
-	that.channelNames( result->writable() );
-	return result;
+void bindImageWriter();
 }
 
-} // namespace
-
-namespace IECorePython
-{
-
-void bindImageReader()
-{
-
-	ReaderClass<ImageReader>()
-		.def( "isComplete", &ImageReader::isComplete )
-		.def( "channelNames", &channelNames )
-		.def( "dataWindow", &ImageReader::dataWindow )
-		.def( "displayWindow", &ImageReader::displayWindow )
-		.def( "readChannel", (DataPtr (ImageReader::*)( const std::string &, bool ))&ImageReader::readChannel, ( arg_("name"), arg_( "raw" ) = false ) )
-	;
-
-}
-
-} // namespace IECorePython
+#endif // IECOREIMAGEBINDINGS_IMAGEWRITERBINDING_H

@@ -160,8 +160,8 @@ enum TypeId
 	OpTypeId = 112,
 	ReaderTypeId = 113,
 	WriterTypeId = 114,
-	ImageReaderTypeId = 115,
-	ImageWriterTypeId = 116,
+	ImageReaderTypeId = 115, // obsolete - available for reuse
+	ImageWriterTypeId = 116, // obsolete - available for reuse
 	CINImageReaderTypeId = 117, // obsolete - available for reuse
 	CINImageWriterTypeId = 118, // obsolete - available for reuse
 	EXRImageReaderTypeId = 119, // obsolete - available for reuse
@@ -451,8 +451,8 @@ enum TypeId
 	// TypeId into the python TypeId enum and check for conflicts.
 	FirstExtensionTypeId = 100000,
 
-	FirstCoreDynamicsTypeId = 104000,
-	LastCoreDynamicsTypeId = 104999,
+	FirstCoreImageTypeId = 104000,
+	LastCoreImageTypeId = 104999,
 
 	FirstCoreGLTypeId = 105000,
 	LastCoreGLTypeId = 105999,

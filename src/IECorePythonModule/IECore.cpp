@@ -101,8 +101,6 @@
 #include "IECorePython/ModifyOpBinding.h"
 #include "IECorePython/PrimitiveOpBinding.h"
 #include "IECorePython/ImagePrimitiveBinding.h"
-#include "IECorePython/ImageReaderBinding.h"
-#include "IECorePython/ImageWriterBinding.h"
 #include "IECorePython/PerlinNoiseBinding.h"
 #include "IECorePython/HalfBinding.h"
 #include "IECorePython/MeshPrimitiveBinding.h"
@@ -340,8 +338,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindModifyOp();
 	bindPrimitiveOp();
 	bindImagePrimitive();
-	bindImageReader();
-	bindImageWriter();
 	bindMeshPrimitive();
 	bindMotionPrimitive();
 	bindTransform();
