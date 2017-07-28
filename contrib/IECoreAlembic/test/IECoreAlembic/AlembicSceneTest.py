@@ -551,5 +551,13 @@ class AlembicSceneTest( unittest.TestCase ) :
 			ogawaCopy.child( "particle1" ).hash( IECore.SceneInterface.HashType.ObjectHash, 0 ),
 		)
 
+	def testSharedSceneInterfaces( self ) :
+
+		fileName = os.path.dirname( __file__ ) + "/data/points.abc"
+		s = IECore.SharedSceneInterfaces.get( fileName )
+
+		self.assertIsInstance( s, IECoreAlembic.AlembicScene )
+		self.assertEqual( s.fileName(), fileName )
+
 if __name__ == "__main__":
     unittest.main()

@@ -67,8 +67,8 @@ class Cache : public SceneLRUCache
 
 Cache &cache()
 {
-	static Cache cache( 200 );
-	return cache;
+	static Cache *cache = new Cache( 200 );
+	return *cache;
 }
 
 } // namespace
