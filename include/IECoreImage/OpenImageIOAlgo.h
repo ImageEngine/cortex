@@ -38,6 +38,7 @@
 #ifndef IECOREIMAGE_OIIOALGO_H
 #define IECOREIMAGE_OIIOALGO_H
 
+#include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
 
 #include "IECore/GeometricTypedData.h"
@@ -57,10 +58,12 @@ struct DataView
 	DataView();
 	/// If the data is StringData, `createUStrings` creates an
 	/// `OIIO::ustring` and refers to the storage from that instead.
-	DataView( const IECore::Data *data, bool createUStrings = false );
+	DataView( const IECore::Data *data, bool createUStrings = false, bool copyData = false );
+	DataView( const OIIO::ParamValue &param );
 
 	OIIO::TypeDesc type;
-	const void *data;
+	IECore::DataPtr data;
+	const void *rawData;
 
 	private :
 
