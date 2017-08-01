@@ -1,3 +1,15 @@
+9.22.0
+======
+
+Improvements
+------------
+
+- IECore::Spline (#592) :
+  - Added support for the final segment of curves that require less than 4 control points.
+  - Simplified segment selection in solve() to handle the last segment better.
+  - Improved handling of curve cutoff where the control point curve is non-monotonic.
+  - Fixed intermediate cast to float that could have affected double computation.
+
 9.21.1
 ======
 
