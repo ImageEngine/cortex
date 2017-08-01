@@ -203,8 +203,8 @@ class TimeCodeDataTest( unittest.TestCase ) :
 	
 	def testHasBase( self ) :
 		
-		self.failIf( IECore.TimeCodeData.hasBase() )
-	
+		self.assertTrue( IECore.TimeCodeData.hasBase() )
+
 	def setUp( self ) :
 		
 		if os.path.isfile( "test/IECore/TimeCodeData.cob" ) :
