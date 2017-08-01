@@ -52,6 +52,9 @@ namespace OpenImageIOAlgo
 OIIO::TypeDesc::VECSEMANTICS vecSemantics( IECore::GeometricData::Interpretation interpretation );
 IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::VECSEMANTICS );
 
+/// Returns a space separated string of supported file types
+std::string extensions();
+
 struct DataView
 {
 

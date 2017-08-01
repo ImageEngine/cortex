@@ -35,6 +35,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/tokenizer.hpp"
+
+#include "OpenImageIO/imageio.h"
 #include "OpenImageIO/ustring.h"
 
 #include "IECore/SimpleTypedData.h"
@@ -85,6 +88,36 @@ IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::V
 		default :
 			return GeometricData::Numeric;
 	}
+}
+
+std::string extensions()
+{
+	static std::string g_extensions;
+	if( !g_extensions.empty() )
+	{
+		return g_extensions;
+	}
+
+	std::string attr;
+	getattribute( "extension_list", attr );
+
+	typedef boost::tokenizer<boost::char_separator<char> > Tokenizer;
+	Tokenizer formats( attr, boost::char_separator<char>( ";" ) );
+	for( Tokenizer::const_iterator fIt = formats.begin(), eFIt = formats.end(); fIt != eFIt; ++fIt )
+	{
+		size_t colonPos = fIt->find( ':' );
+		if( colonPos != std::string::npos )
+		{
+			std::string formatExtensions = fIt->substr( colonPos + 1 );
+			Tokenizer extTok( formatExtensions, boost::char_separator<char>( "," ) );
+			for( Tokenizer::iterator token = extTok.begin(), tokEnd = extTok.end(); token != tokEnd; ++token )
+			{
+				g_extensions += " " + *token;
+			}
+		}
+	}
+
+	return g_extensions;
 }
 
 DataView::DataView()
