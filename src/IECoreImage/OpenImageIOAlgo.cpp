@@ -41,6 +41,7 @@
 #include "OpenImageIO/ustring.h"
 
 #include "IECore/SimpleTypedData.h"
+#include "IECore/TimeCodeData.h"
 #include "IECore/VectorTypedData.h"
 
 #include "IECoreImage/OpenImageIOAlgo.h"
@@ -214,6 +215,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			type = TypeDesc::TypeColor;
 			rawData = static_cast<const Color3fData *>( d )->baseReadable();
 			break;
+		case TimeCodeDataTypeId :
+			type = TypeDesc::TypeTimeCode;
+			rawData = static_cast<const TimeCodeData *>( d )->baseReadable();
+			break;
 
 		// Vector data
 
@@ -309,7 +314,15 @@ DataView::DataView( const OIIO::ParamValue &param )
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new UIntData( *static_cast<const unsigned *>( rawData ) );
+				const unsigned *typedData = static_cast<const unsigned *>( rawData );
+				if ( type.vecsemantics == TypeDesc::TIMECODE )
+				{
+					data = new TimeCodeData( Imf::TimeCode( typedData[0], typedData[1] ) );
+				}
+				else
+				{
+					data = new UIntData( *typedData );
+				}
 			}
 			break;
 		}
