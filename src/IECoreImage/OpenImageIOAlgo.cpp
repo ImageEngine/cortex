@@ -195,6 +195,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC3, vecSemantics( static_cast<const V3fData *>( d )->getInterpretation() ) );
 			rawData = static_cast<const V3fData *>( d )->baseReadable();
 			break;
+		case M33fDataTypeId :
+			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX33 );
+			rawData = static_cast<const M33fData *>( d )->baseReadable();
+			break;
 		case M44fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX44 );
 			rawData = static_cast<const M44fData *>( d )->baseReadable();
@@ -206,6 +210,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 		case V3dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC3, vecSemantics( static_cast<const V3dData *>( d )->getInterpretation() ) );
 			rawData = static_cast<const V3dData *>( d )->baseReadable();
+			break;
+		case M33dDataTypeId :
+			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX33 );
+			rawData = static_cast<const M33dData *>( d )->baseReadable();
 			break;
 		case M44dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX44 );
@@ -252,7 +260,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			type = TypeDesc(
 				TypeDesc::FLOAT,
 				TypeDesc::MATRIX44,
-				TypeDesc::COLOR,
+				TypeDesc::NOSEMANTICS,
 				static_cast<const M44fVectorData *>( d )->readable().size()
 			);
 			rawData = static_cast<const M44fVectorData *>( d )->baseReadable();
@@ -381,6 +389,11 @@ DataView::DataView( const OIIO::ParamValue &param )
 					data = new V3fData( Imath::V3f( typedData[0], typedData[1], typedData[2] ) );
 					break;
 				}
+				case TypeDesc::MATRIX33 :
+				{
+					data = new M33fData( Imath::M33f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
+					break;
+				}
 				case TypeDesc::MATRIX44 :
 				{
 					data = new M44fData( Imath::M44f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
@@ -411,6 +424,11 @@ DataView::DataView( const OIIO::ParamValue &param )
 				case TypeDesc::VEC3 :
 				{
 					data = new V3dData( Imath::V3d( typedData[0], typedData[1], typedData[2] ) );
+					break;
+				}
+				case TypeDesc::MATRIX33 :
+				{
+					data = new M33dData( Imath::M33d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
 					break;
 				}
 				case TypeDesc::MATRIX44 :
