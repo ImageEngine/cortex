@@ -230,12 +230,31 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 
 		// Vector data
 
+		case DoubleVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::DOUBLE,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const DoubleVectorData *>( d )->readable().size()
+			);
+			rawData = static_cast<const DoubleVectorData *>( d )->baseReadable();
+			break;
 		case FloatVectorDataTypeId :
-			type = TypeDesc( TypeDesc::FLOAT, static_cast<const FloatVectorData *>( d )->readable().size() );
+			type = TypeDesc(
+				TypeDesc::FLOAT,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const FloatVectorData *>( d )->readable().size()
+			);
 			rawData = static_cast<const FloatVectorData *>( d )->baseReadable();
 			break;
 		case IntVectorDataTypeId :
-			type = TypeDesc( TypeDesc::INT, static_cast<const IntVectorData *>( d )->readable().size() );
+			type = TypeDesc(
+				TypeDesc::INT,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const IntVectorData *>( d )->readable().size()
+			);
 			rawData = static_cast<const IntVectorData *>( d )->baseReadable();
 			break;
 		case V3fVectorDataTypeId :
@@ -341,7 +360,17 @@ DataView::DataView( const OIIO::ParamValue &param )
 			{
 				case TypeDesc::SCALAR :
 				{
-					data = new IntData( *typedData );
+					if( !type.arraylen )
+					{
+						data = new IntData( *typedData );
+					}
+					else
+					{
+						IntVectorDataPtr vectorData = new IntVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
+						data = vectorData;
+					}
 					break;
 				}
 				case TypeDesc::VEC2 :
@@ -376,7 +405,17 @@ DataView::DataView( const OIIO::ParamValue &param )
 			{
 				case TypeDesc::SCALAR :
 				{
-					data = new FloatData( *typedData );
+					if( !type.arraylen )
+					{
+						data = new FloatData( *typedData );
+					}
+					else
+					{
+						FloatVectorDataPtr vectorData = new FloatVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
+						data = vectorData;
+					}
 					break;
 				}
 				case TypeDesc::VEC2 :
@@ -413,7 +452,17 @@ DataView::DataView( const OIIO::ParamValue &param )
 			{
 				case TypeDesc::SCALAR :
 				{
-					data = new DoubleData( *typedData );
+					if( !type.arraylen )
+					{
+						data = new DoubleData( *typedData );
+					}
+					else
+					{
+						DoubleVectorDataPtr vectorData = new DoubleVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
+						data = vectorData;
+					}
 					break;
 				}
 				case TypeDesc::VEC2 :
