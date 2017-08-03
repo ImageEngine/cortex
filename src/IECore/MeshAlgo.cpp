@@ -44,6 +44,7 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
+#include "IECore/PolygonIterator.h"
 #include "IECore/private/PrimitiveAlgoUtils.h"
 
 using namespace IECore;
@@ -819,5 +820,65 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 	PrimitiveVariable bitangentPrimVar( PrimitiveVariable::FaceVarying, fvVD );
 
 	return std::make_pair( tangentPrimVar, bitangentPrimVar );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Reverse winding
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+template<typename T>
+void reverseWinding( MeshPrimitive *mesh, T &values )
+{
+	for( PolygonIterator it = mesh->faceBegin(), eIt = mesh->faceEnd(); it != eIt; ++it )
+	{
+		std::reverse( it.faceVaryingBegin( values.begin() ), it.faceVaryingEnd( values.begin() ) );
+	}
+}
+
+struct ReverseWindingFunctor
+{
+
+	typedef void ReturnType;
+
+	ReverseWindingFunctor( MeshPrimitive *mesh ) : m_mesh( mesh )
+	{
+	}
+
+	template<typename T>
+	void operator()( T *data )
+	{
+		reverseWinding( m_mesh, data->writable() );
+	}
+
+	private :
+
+		MeshPrimitive *m_mesh;
+
+};
+
+} // namespace
+
+void IECore::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
+{
+	IntVectorDataPtr vertexIds = mesh->vertexIds()->copy();
+	::reverseWinding( mesh, vertexIds->writable() );
+	mesh->setTopologyUnchecked(
+		mesh->verticesPerFace(),
+		vertexIds,
+		mesh->variableSize( PrimitiveVariable::Vertex ),
+		mesh->interpolation()
+	);
+
+	ReverseWindingFunctor reverseWindingFunctor( mesh );
+	for( auto &it : mesh->variables )
+	{
+		if( it.second.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+		}
+	}
 }
 
