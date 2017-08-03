@@ -35,7 +35,6 @@
 #ifndef IECORE_MESHALGO_H
 #define IECORE_MESHALGO_H
 
-#include <vector>
 #include <utility>
 
 #include "IECore/PrimitiveVariable.h"
