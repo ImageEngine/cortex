@@ -49,8 +49,13 @@
 using namespace IECore;
 using namespace Imath;
 
+//////////////////////////////////////////////////////////////////////////
+// Delete Faces
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
+
 template< typename U>
 class DeleteFlaggedUniformFunctor
 {
@@ -290,6 +295,48 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename
 	return outMeshPrimitive;
 }
 
+} // namespace
+
+MeshPrimitivePtr IECore::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
+{
+
+	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
+	{
+		throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
+	}
+
+	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToDelete.data.get() );
+
+	if( intDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
+	}
+
+	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
+
+	if( boolDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
+	}
+
+	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
+
+	if( floatDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, floatDeleteFlagData );
+	}
+
+	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Resample Primitive Variables
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
 struct MeshVertexToUniform
 {
 	typedef DataPtr ReturnType;
@@ -487,6 +534,85 @@ struct MeshAnythingToFaceVarying
 	PrimitiveVariable::Interpolation m_srcInterpolation;
 };
 
+} // namespace
+
+void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+{
+	Data *srcData = primitiveVariable.data.get();
+	DataPtr dstData;
+
+	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
+
+	if ( srcInterpolation == interpolation )
+	{
+		return;
+	}
+
+	// average array to single value
+	if ( interpolation == PrimitiveVariable::Constant )
+	{
+		Detail::AverageValueFromVector fn;
+		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+		return;
+	}
+
+	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
+	{
+		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
+		if (arrayData)
+		{
+			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
+		}
+		return;
+	}
+
+	if( interpolation == PrimitiveVariable::Uniform )
+	{
+		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			MeshVertexToUniform fn( mesh );
+			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToUniform fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+	}
+	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
+	{
+		if( srcInterpolation == PrimitiveVariable::Uniform )
+		{
+			MeshUniformToVertex fn( mesh );
+			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToVertex fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			dstData = srcData;
+		}
+	}
+	else if( interpolation == PrimitiveVariable::FaceVarying )
+	{
+		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+	}
+
+	primitiveVariable = PrimitiveVariable( interpolation, dstData );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Calculate tangents
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
 class TexturePrimVarNames
 {
 	public:
@@ -531,13 +657,7 @@ std::string TexturePrimVarNames::indicesName() const
 
 } // anonymous namespace
 
-namespace IECore
-{
-
-namespace MeshAlgo
-{
-
-std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents(
+std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTangents(
 	const MeshPrimitive *mesh,
 	const std::string &uvSet, /* = "st" */
 	bool orthoTangents, /* = true */
@@ -701,109 +821,3 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents(
 	return std::make_pair( tangentPrimVar, bitangentPrimVar );
 }
 
-void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
-{
-	Data *srcData = primitiveVariable.data.get();
-	DataPtr dstData;
-
-	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
-
-	if ( srcInterpolation == interpolation )
-	{
-		return;
-	}
-
-	// average array to single value
-	if ( interpolation == PrimitiveVariable::Constant )
-	{
-		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		primitiveVariable = PrimitiveVariable( interpolation, dstData );
-		return;
-	}
-
-	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
-	{
-		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
-		if (arrayData)
-		{
-			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
-		}
-		return;
-	}
-
-	if( interpolation == PrimitiveVariable::Uniform )
-	{
-		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
-		{
-			MeshVertexToUniform fn( mesh );
-			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
-		{
-			MeshFaceVaryingToUniform fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-	}
-	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
-	{
-		if( srcInterpolation == PrimitiveVariable::Uniform )
-		{
-			MeshUniformToVertex fn( mesh );
-			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
-		{
-			MeshFaceVaryingToVertex fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
-		{
-			dstData = srcData;
-		}
-	}
-	else if( interpolation == PrimitiveVariable::FaceVarying )
-	{
-		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
-		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-	}
-
-	primitiveVariable = PrimitiveVariable( interpolation, dstData );
-}
-
-
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
-{
-
-	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
-	{
-		throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
-	}
-
-	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToDelete.data.get() );
-
-	if( intDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
-	}
-
-	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
-
-	if( boolDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
-	}
-
-	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
-
-	if( floatDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, floatDeleteFlagData );
-	}
-
-	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
-
-}
-
-} //namespace MeshAlgo
-} //namespace IECore
