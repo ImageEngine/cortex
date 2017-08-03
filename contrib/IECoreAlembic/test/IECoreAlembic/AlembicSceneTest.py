@@ -215,10 +215,10 @@ class AlembicSceneTest( unittest.TestCase ) :
 		self.assertEqual(
 			m["colorSet1"].data,
 			IECore.Color4fVectorData( [
-				IECore.Color4f( 0, 1, 0, 1 ),
-				IECore.Color4f( 0, 0, 1, 1 ),
-				IECore.Color4f( 0, 0, 0, 1 ),
 				IECore.Color4f( 1, 0, 0, 1 ),
+				IECore.Color4f( 0, 0, 0, 1 ),
+				IECore.Color4f( 0, 0, 1, 1 ),
+				IECore.Color4f( 0, 1, 0, 1 ),
 			] )
 		)
 
@@ -558,6 +558,16 @@ class AlembicSceneTest( unittest.TestCase ) :
 
 		self.assertIsInstance( s, IECoreAlembic.AlembicScene )
 		self.assertEqual( s.fileName(), fileName )
+
+	def testWindingOrder( self ) :
+
+		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/subdPlane.abc", IECore.IndexedIO.OpenMode.Read )
+		c = a.child( "pPlane1" )
+		m = c.readObjectAtSample( 0 )
+
+		IECore.MeshNormalsOp()( input = m, copyInput = False )
+		for n in m["N"].data :
+			self.assertTrue( n.equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
     unittest.main()

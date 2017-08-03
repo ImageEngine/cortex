@@ -33,6 +33,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/MeshAlgo.h"
+
 #include "IECoreAlembic/ObjectAlgo.h"
 #include "IECoreAlembic/MeshAlgo.h"
 #include "IECoreAlembic/GeomBaseAlgo.h"
@@ -104,6 +106,7 @@ IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::IPolyMesh &mesh, const
 		GeomBaseAlgo::convertGeomParam( normals, sampleSelector, result.get() );
 	}
 
+	IECore::MeshAlgo::reverseWinding( result.get() );
 	return result;
 }
 
@@ -119,6 +122,7 @@ IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::ISubD &mesh, const Ale
 	}
 	result->setInterpolation( interpolation );
 
+	IECore::MeshAlgo::reverseWinding( result.get() );
 	return result;
 }
 
