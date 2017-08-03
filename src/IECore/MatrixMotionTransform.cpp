@@ -100,8 +100,9 @@ Imath::M44f MatrixMotionTransform::transform( float time ) const
 		return m_snapshots.rbegin()->second;
 	}
 	SnapshotMap::const_iterator uIt = m_snapshots.upper_bound( time );
-	SnapshotMap::const_reverse_iterator lIt( uIt );
-	lIt++;
+	SnapshotMap::const_iterator lIt = uIt;
+	lIt--;
+
 	/// \todo We should probably do something to interpolate rotations better.
 	return lerp( lIt->second, uIt->second, lerpfactor( time, lIt->first, uIt->first ) );
 }
