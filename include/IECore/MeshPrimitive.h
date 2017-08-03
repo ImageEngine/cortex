@@ -77,8 +77,7 @@ class IECORE_API MeshPrimitive : public Primitive
 		int maxVerticesPerFace() const;
 		const IntVectorData *vertexIds() const;
 		const std::string &interpolation() const;
-		/// \todo Remove virtual-ness for Cortex 9.
-		virtual void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
+		void setTopology( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, const std::string &interpolation = "linear" );
 		void setTopologyUnchecked( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds, size_t numVertices, const std::string &interpolation = "linear" );
 		void setInterpolation( const std::string &interpolation );
 		PolygonIterator faceBegin();
