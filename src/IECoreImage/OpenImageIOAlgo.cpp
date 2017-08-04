@@ -248,6 +248,15 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			);
 			rawData = static_cast<const FloatVectorData *>( d )->baseReadable();
 			break;
+		case HalfVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::HALF,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const HalfVectorData *>( d )->readable().size()
+			);
+			rawData = static_cast<const HalfVectorData *>( d )->baseReadable();
+			break;
 		case IntVectorDataTypeId :
 			type = TypeDesc(
 				TypeDesc::INT,
@@ -256,6 +265,33 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				static_cast<const IntVectorData *>( d )->readable().size()
 			);
 			rawData = static_cast<const IntVectorData *>( d )->baseReadable();
+			break;
+		case UIntVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::UINT,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const UIntVectorData *>( d )->readable().size()
+			);
+			rawData = static_cast<const UIntVectorData *>( d )->baseReadable();
+			break;
+		case CharVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::CHAR,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const CharVectorData *>( d )->readable().size()
+			);
+			rawData = static_cast<const CharVectorData *>( d )->baseReadable();
+			break;
+		case UCharVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::UCHAR,
+				TypeDesc::SCALAR,
+				TypeDesc::NOSEMANTICS,
+				static_cast<const UCharVectorData *>( d )->readable().size()
+			);
+			rawData = static_cast<const UCharVectorData *>( d )->baseReadable();
 			break;
 		case V3fVectorDataTypeId :
 			type = TypeDesc(
