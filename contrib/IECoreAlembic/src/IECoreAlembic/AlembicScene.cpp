@@ -37,17 +37,21 @@
 #include "boost/tokenizer.hpp"
 
 #include "Alembic/AbcCoreFactory/IFactory.h"
+#include "Alembic/AbcCoreOgawa/ReadWrite.h"
 #include "Alembic/AbcGeom/IXform.h"
 #include "Alembic/AbcGeom/ICamera.h"
 #include "Alembic/AbcGeom/IGeomBase.h"
 #include "Alembic/AbcGeom/ArchiveBounds.h"
+#include "Alembic/AbcGeom/OXform.h"
 
 #include "IECore/SampledSceneInterface.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Exception.h"
+#include "IECore/MessageHandler.h"
 
 #include "IECoreAlembic/AlembicScene.h"
 #include "IECoreAlembic/ObjectAlgo.h"
+#include "IECoreAlembic/ObjectWriter.h"
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcCoreFactory;
@@ -77,7 +81,7 @@ class AlembicScene::AlembicIO
 
 		virtual void path( SceneInterface::Path &path ) const = 0;
 		virtual void childNames( SceneInterface::NameList &childNames ) const = 0;
-		virtual AlembicIOPtr child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const = 0;
+		virtual AlembicIOPtr child( const SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) = 0;
 
 };
 
@@ -152,7 +156,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) const
+		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 		{
 			IObject c = m_xform ? m_xform.getChild( name ) : m_archive->getTop().getChild( name );
 			if( !c || !IXform::matches( c.getMetaData() ) )
@@ -542,6 +546,255 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 };
 
+class AlembicScene::AlembicWriter : public AlembicIO
+{
+
+	public :
+
+		AlembicWriter( const std::string &fileName )
+		{
+			m_root = std::make_shared<Root>();
+			m_root->archive = OArchive( ::Alembic::AbcCoreOgawa::WriteArchive(), fileName );
+		}
+
+		virtual ~AlembicWriter()
+		{
+			/// \todo Do better. We don't want to be storing huge sample times vectors
+			/// when a long animation is being written. We need to somehow detect uniform and
+			/// cyclic sampling patterns on the fly and create TimeSamplings to reflect that.
+			if( m_xformSampleTimes.size() )
+			{
+				TimeSamplingPtr ts( new TimeSampling( TimeSamplingType( TimeSamplingType::kAcyclic ), m_xformSampleTimes ) );
+				m_xform.getSchema().setTimeSampling( ts );
+			}
+			if( m_boundSampleTimes.size() )
+			{
+				TimeSamplingPtr ts( new TimeSampling( TimeSamplingType( TimeSamplingType::kAcyclic ), m_boundSampleTimes ) );
+				if( haveXform() )
+				{
+					m_xform.getSchema().getChildBoundsProperty().setTimeSampling( ts );
+				}
+				else
+				{
+					m_root->boundProperty().setTimeSampling( ts );
+				}
+			}
+			if( m_objectSampleTimes.size() && m_objectWriter )
+			{
+				TimeSamplingPtr ts( new TimeSampling( TimeSamplingType( TimeSamplingType::kAcyclic ), m_objectSampleTimes ) );
+				m_objectWriter->writeTimeSampling( ts );
+			}
+		}
+
+		// AlembicIO implementation
+		// ========================
+
+		virtual std::string fileName() const
+		{
+			return m_root->archive.getName();
+		}
+
+		virtual SceneInterface::Name name() const
+		{
+			return SceneInterface::Name( haveXform() ? m_xform.getName() : "" );
+		}
+
+		virtual AlembicIOPtr root() const
+		{
+			return AlembicIOPtr( new AlembicWriter( m_root ) );
+		}
+
+		virtual void path( SceneInterface::Path &path ) const
+		{
+			path.clear();
+			if( !haveXform() )
+			{
+				return;
+			}
+
+			typedef boost::tokenizer<boost::char_separator<char>> Tokenizer;
+			Tokenizer tokenizer( m_xform.getFullName(), boost::char_separator<char>( "/" ) );
+			for( const string &t : tokenizer )
+			{
+				path.push_back( t );
+			}
+		}
+
+		virtual void childNames( IECore::SceneInterface::NameList &childNames ) const
+		{
+			OObject p = m_xform;
+			if( !haveXform() )
+			{
+				p = m_root->archive.getTop();
+			}
+
+			for( size_t i = 0, s = p.getNumChildren(); i < s; ++i )
+			{
+				const AbcA::ObjectHeader &childHeader = p.getChildHeader( i );
+				if( OXform::matches( childHeader ) )
+				{
+					childNames.push_back( childHeader.getName() );
+				}
+			}
+		}
+
+		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
+		{
+			ChildMap::iterator it = m_children.find( name );
+			if( it != m_children.end() )
+			{
+				return AlembicIOPtr( new AlembicWriter( m_root, it->second ) );
+			}
+			switch( missingBehaviour )
+			{
+				case SceneInterface::NullIfMissing :
+					return nullptr;
+				case SceneInterface::ThrowIfMissing :
+					throw IOException( "Child \"" + name.string() + "\" does not exist" );
+				case SceneInterface::CreateIfMissing :
+					return AlembicIOPtr(
+						new AlembicWriter(
+							m_root,
+							OXform( haveXform() ? m_xform : m_root->archive.getTop(), name.string() )
+						)
+					);
+			}
+		}
+
+		// Transforms
+		// ==========
+
+		void writeTransform( const IECore::Data *transform, double time )
+		{
+			if( !haveXform() )
+			{
+				throw IECore::Exception( "Cannot write transform at root" );
+			}
+
+			XformSample sample;
+			if( const M44dData *matrixData = runTimeCast<const M44dData>( transform ) )
+			{
+				sample.setMatrix( matrixData->readable() );
+			}
+			else
+			{
+				throw IECore::Exception( "Unsupported data type" );
+			}
+
+			if( m_xformSampleTimes.size() && m_xformSampleTimes.back() >= time )
+			{
+				throw IECore::Exception( "Samples must be written in time-increasing order" );
+			}
+			m_xformSampleTimes.push_back( time );
+
+			OXformSchema &schema = m_xform.getSchema();
+			schema.set( sample );
+		}
+
+		// Bounds
+		// ======
+
+		void writeBound( const Box3d &bound, double time )
+		{
+			if( m_boundSampleTimes.size() && m_boundSampleTimes.back() >= time )
+			{
+				throw IECore::Exception( "Samples must be written in time-increasing order" );
+			}
+			m_boundSampleTimes.push_back( time );
+
+			if( haveXform() )
+			{
+				m_xform.getSchema().getChildBoundsProperty().set( bound );
+			}
+			else
+			{
+				m_root->boundProperty().set( bound );
+			}
+		}
+
+		// Object
+		// ======
+
+		void writeObject( const IECore::Object *object, double time )
+		{
+			if( !haveXform() )
+			{
+				throw IECore::Exception( "Cannot write object at root" );
+			}
+
+			if( m_objectSampleTimes.size() && m_objectSampleTimes.back() >= time )
+			{
+				throw IECore::Exception( "Samples must be written in time-increasing order" );
+			}
+			m_objectSampleTimes.push_back( time );
+
+			if( !m_objectWriter )
+			{
+				m_objectWriter = ObjectWriter::create( object->typeId(), m_xform, "object" );
+				if( !m_objectWriter )
+				{
+					IECore::msg(
+						IECore::Msg::Warning,
+						"AlembicScene::writeObject",
+						boost::format( "Unsupported object type \"%1%\"" ) % object->typeName()
+					);
+					return;
+				}
+			}
+			m_objectWriter->writeSample( object );
+		}
+
+	private :
+
+		struct Root;
+
+		AlembicWriter( const std::shared_ptr<Root> &root, const OXform &xform = OXform() )
+			:	m_root( root ), m_xform( xform )
+		{
+		}
+
+		// If we're at the root, m_xform is empty. Ideally we would just use
+		// the implicit `!m_xform` bool conversion to test for this, but
+		// OXform::valid returns false until a sample has been written, so we
+		// use this convenience function instead.
+		bool haveXform() const
+		{
+			return m_xform.OObject::valid();
+		}
+
+		struct Root
+		{
+
+			OArchive archive;
+
+			OBox3dProperty &boundProperty()
+			{
+				if( !m_boundProperty )
+				{
+					m_boundProperty = CreateOArchiveBounds( archive );
+				}
+				return m_boundProperty;
+			}
+
+			private :
+
+				OBox3dProperty m_boundProperty;
+
+		};
+
+		std::shared_ptr<Root> m_root;
+		OXform m_xform;
+		std::unique_ptr<ObjectWriter> m_objectWriter;
+
+		std::vector<chrono_t> m_xformSampleTimes;
+		std::vector<chrono_t> m_boundSampleTimes;
+		std::vector<chrono_t> m_objectSampleTimes;
+
+		typedef std::unordered_map<IECore::SceneInterface::Name, OXform> ChildMap;
+		ChildMap m_children;
+
+};
+
 //////////////////////////////////////////////////////////////////////////
 // AlembicScene
 //////////////////////////////////////////////////////////////////////////
@@ -554,6 +807,9 @@ AlembicScene::AlembicScene( const std::string &fileName, IECore::IndexedIO::Open
 	{
 		case IECore::IndexedIO::Read :
 			m_io.reset( new AlembicReader( fileName ) );
+			break;
+		case IECore::IndexedIO::Write :
+			m_io.reset( new AlembicWriter( fileName ) );
 			break;
 		default :
 			throw IECore::Exception( "Unsupported OpenMode" );
@@ -614,7 +870,7 @@ Imath::Box3d AlembicScene::readBoundAtSample( size_t sampleIndex ) const
 
 void AlembicScene::writeBound( const Imath::Box3d &bound, double time )
 {
-	throw IECore::NotImplementedException( "AlembicScene::writeBound" );
+	writer()->writeBound( bound, time );
 }
 
 // Transform
@@ -657,7 +913,7 @@ Imath::M44d AlembicScene::readTransformAsMatrix( double time ) const
 
 void AlembicScene::writeTransform( const IECore::Data *transform, double time )
 {
-	throw IECore::NotImplementedException( "AlembicScene::writeTransform" );
+	writer()->writeTransform( transform, time );
 }
 
 // Attributes
@@ -700,7 +956,7 @@ IECore::ConstObjectPtr AlembicScene::readAttribute( const Name &name, double tim
 
 void AlembicScene::writeAttribute( const Name &name, const IECore::Object *attribute, double time )
 {
-	throw IECore::NotImplementedException( "AlembicScene::writeAttribute" );
+	IECore::msg( IECore::Msg::Warning, "AlembicScene::writeAttribute", "Not implemented" );
 }
 
 // Tags
@@ -720,7 +976,7 @@ void AlembicScene::readTags( NameList &tags, int filter ) const
 
 void AlembicScene::writeTags( const NameList &tags )
 {
-	throw IECore::NotImplementedException( "AlembicScene::writeTags" );
+	IECore::msg( IECore::Msg::Warning, "AlembicScene::writeAttribute", "Not implemented" );
 }
 
 // Object
@@ -760,7 +1016,7 @@ IECore::PrimitiveVariableMap AlembicScene::readObjectPrimitiveVariables( const s
 
 void AlembicScene::writeObject( const IECore::Object *object, double time )
 {
-	throw IECore::NotImplementedException( "AlembicScene::writeObject" );
+	return writer()->writeObject( object, time );
 }
 
 // Hierarchy
@@ -788,6 +1044,11 @@ IECore::SceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneIn
 
 IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour ) const
 {
+	if( missingBehaviour == CreateIfMissing )
+	{
+		throw IECore::Exception( "Cannot create child from const method" );
+	}
+
 	AlembicIOPtr child = m_io->child( name, missingBehaviour );
 	if( !child )
 	{
@@ -798,7 +1059,12 @@ IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::Sc
 
 IECore::SceneInterfacePtr AlembicScene::createChild( const Name &name )
 {
-	throw IECore::NotImplementedException( "AlembicScene::createChild" );
+	AlembicWriter *writer = this->writer();
+	if( writer->child( name, NullIfMissing ) )
+	{
+		throw IECore::Exception( "Child already exists" );
+	}
+	return new AlembicScene( writer->child( name, CreateIfMissing ) );
 }
 
 IECore::SceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour )
@@ -857,9 +1123,19 @@ const AlembicScene::AlembicReader *AlembicScene::reader() const
 	return reader;
 }
 
+AlembicScene::AlembicWriter *AlembicScene::writer()
+{
+	AlembicWriter *writer = dynamic_cast<AlembicWriter *>( m_io.get() );
+	if( !writer )
+	{
+		throw IECore::Exception( "Function not available when reading" );
+	}
+	return writer;
+}
+
 namespace
 {
 
-IECore::SceneInterface::FileFormatDescription<AlembicScene> g_description( ".abc", IECore::IndexedIO::Read );
+IECore::SceneInterface::FileFormatDescription<AlembicScene> g_description( ".abc", IECore::IndexedIO::Read | IECore::IndexedIO::Write );
 
 } // namespace
