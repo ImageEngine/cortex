@@ -55,7 +55,7 @@ class ProgressTileCallback : public renderer::TileCallbackBase
 
 		void release() override;
 
-		void post_render_tile( const renderer::Frame *frame, const size_t tileX, const size_t tileY ) override;
+		void on_tile_end( const renderer::Frame *frame, const size_t tileX, const size_t tileY ) override;
 
 	protected :
 

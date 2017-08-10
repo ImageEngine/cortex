@@ -44,6 +44,7 @@
 #include "renderer/api/log.h"
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
+#include "renderer/api/version.h"
 
 #include "IECore/BoxAlgo.h"
 #include "IECore/SimpleTypedData.h"
@@ -100,19 +101,21 @@ class DisplayTileCallback : public ProgressTileCallback
 			// The tile callback factory deletes this instance.
 		}
 
-		// This method is called before a region is rendered.
-		void pre_render( const size_t x, const size_t y, const size_t width, const size_t height) override
+		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
+			const asf::CanvasProperties &props = frame->image().properties();
+			const size_t x = tileX * props.m_tile_width;
+			const size_t y = tileY * props.m_tile_height;
+
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
 			if( m_display_initialized )
 			{
-				hightlight_region( x, y, width, height );
+				hightlight_region( x, y, props.m_tile_width, props.m_tile_height );
 			}
 		}
 
-		// This method is called after a tile is rendered (final rendering).
-		void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY ) override
+		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -125,8 +128,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			write_tile( frame, tileX, tileY );
 		}
 
-		// This method is called after a whole frame is rendered (progressive rendering).
-		void post_render( const asr::Frame *frame ) override
+		void on_progressive_frame_end(const asr::Frame* frame) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -302,6 +304,7 @@ class DisplayTileCallback : public ProgressTileCallback
 		size_t m_tile_width;
 		size_t m_tile_height;
 		size_t m_channel_count;
+		size_t m_xxx;
 };
 
 class DisplayTileCallbackFactory : public asr::ITileCallbackFactory

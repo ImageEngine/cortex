@@ -55,7 +55,7 @@ void IECoreAppleseed::ProgressTileCallback::release()
 	// The tile callback factory deletes this instance.
 }
 
-void IECoreAppleseed::ProgressTileCallback::post_render_tile( const asr::Frame* frame, const size_t tileX, const size_t tileY )
+void IECoreAppleseed::ProgressTileCallback::on_tile_end( const asr::Frame* frame, const size_t tileX, const size_t tileY )
 {
 	boost::mutex::scoped_lock lock( m_mutex );
 	log_progress( frame, tileX, tileY );
