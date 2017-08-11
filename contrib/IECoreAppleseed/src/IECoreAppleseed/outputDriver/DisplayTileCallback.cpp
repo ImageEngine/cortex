@@ -146,14 +146,6 @@ class DisplayTileCallback : public ProgressTileCallback
 
 	private:
 
-		void copy_optional_param( const char *key, CompoundDataMap &dst ) const
-		{
-			if( m_params.strings().exist( key ) )
-			{
-				dst[key] = new StringData( m_params.get( key ) );
-			}
-		}
-
 		void init_display( const asr::Frame *frame )
 		{
 			assert( !m_display_initialized );
@@ -183,13 +175,11 @@ class DisplayTileCallback : public ProgressTileCallback
 
 			CompoundDataPtr parameters = new CompoundData();
 			CompoundDataMap &p = parameters->writable();
-			p["type"] = new StringData( m_params.get( "type" ) );
 
-			copy_optional_param( "displayHost", p );
-			copy_optional_param( "displayPort", p );
-			copy_optional_param( "driverType", p );
-			copy_optional_param( "remoteDisplayType", p );
-			copy_optional_param( "handle", p );
+			for( asf::StringDictionary::const_iterator it = m_params.strings().begin(), eIt = m_params.strings().end(); it != eIt; ++it )
+			{
+				p[it.key()] = new StringData( it.value() );
+			}
 
 			// reserve space for one tile
 			const asf::CanvasProperties &frameProps = frame->image().properties();
