@@ -222,8 +222,7 @@ OP_TemplatePair *SceneCacheNode<BaseType>::buildOptionParameters()
 		
 		thisTemplate[3] = PRM_Template(
 			PRM_STRING, 1, &pShapeFilter, &filterDefault, &shapeFilterMenu, 0, 0, 0, 0,
-			"A list of filters to decide which shapes to load. Only the shape basename is relevant, the path "
-			"is ignored. Uses Houdini matching syntax"
+			"A list of filters to decide which shapes to load. Uses Houdini matching syntax."
 		);
 		
 		thisTemplate[4] = PRM_Template(
@@ -351,6 +350,7 @@ void SceneCacheNode<BaseType>::buildShapeFilterMenu( void *data, PRM_Name *menu,
 	
 	std::vector<std::string> objects;
 	node->objectNames( scene.get(), objects );
+	std::sort( objects.begin(), objects.end() );
 	node->createMenu( menu, objects );
 }
 
@@ -608,7 +608,7 @@ void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene,
 	
 	if ( scene->hasObject() )
 	{
-		objects.push_back( scene->name() );
+		objects.push_back( getFullScenePath( scene ) );
 	}
 	
 	SceneInterface::NameList children;
@@ -617,6 +617,16 @@ void SceneCacheNode<BaseType>::objectNames( const IECore::SceneInterface *scene,
 	{
 		objectNames( scene->child( *it ).get(), objects );
 	}
+}
+
+template<typename BaseType>
+std::string SceneCacheNode<BaseType>::getFullScenePath( const SceneInterface *scene )
+{
+	std::string sPath;
+	SceneInterface::Path scenePath;
+	scene->path( scenePath );
+	SceneInterface::pathToString( scenePath, sPath );
+	return sPath;
 };
 
 template<typename BaseType>

@@ -282,8 +282,8 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 			params.namedRanges[oIt->first] = GA_Range( gdp->getPrimitiveMap(), oIt->second );
 		}
 	}
-	
-	loadObjects( scene.get(), transform, readTime, space, params, rootPath.size() );
+
+	loadObjects( scene.get(), transform, readTime, space, params, rootPath.size(), SceneInterface::rootName.string() );
 	
 	if ( progress->opInterrupt( 100 ) )
 	{
@@ -303,7 +303,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize )
+void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath )
 {
 	UT_Interrupt *progress = UTgetInterrupt();
 	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
@@ -311,8 +311,17 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 	{
 		return;
 	}
-	
-	if ( scene->hasObject() && UT_String( scene->name() ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
+
+	if ( currentPath != scene->name().string() )
+	{
+		if ( currentPath.back() != '/' )
+		{
+			currentPath += "/";
+		}
+		currentPath += scene->name().string();
+	}
+
+	if ( scene->hasObject() && UT_String( currentPath ).multiMatch( params.shapeFilter ) && tagged( scene, params.tagFilter ) )
 	{
 		std::string name = relativePath( scene, rootSize );
 		
@@ -390,11 +399,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		// convert the object to Houdini
 		if ( !convertObject( object.get(), name, scene, params ) )
 		{
-			std::string fullName;
-			SceneInterface::Path path;
-			scene->path( path );
-			SceneInterface::pathToString( path, fullName );
-			addWarning( SOP_MESSAGE, ( "Could not convert " + fullName + " to Houdini" ).c_str() );
+			addWarning( SOP_MESSAGE, ( "Could not convert " + currentPath + " to Houdini" ).c_str() );
 		}
 	}
 	
@@ -411,7 +416,7 @@ void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Ima
 		ConstSceneInterfacePtr child = scene->child( *it );
 		if ( tagged( child.get(), params.tagFilter ) )
 		{
-			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize );
+			loadObjects( child.get(), child->readTransformAsMatrix( time ) * transform, time, space, params, rootSize, currentPath );
 		}
 	}
 }
