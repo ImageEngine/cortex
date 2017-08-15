@@ -88,7 +88,10 @@ class CachedReaderTest( unittest.TestCase ) :
 		# is no room for it.
 		pool.setMaxMemoryUsage( pool.memoryUsage() / 2  )
 		self.assertEqual( pool.memoryUsage(), 0 )
-		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failIf(
+			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) or
+			r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		)
 
 		pool.setMaxMemoryUsage( oo.memoryUsage() * 2 )
 		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
