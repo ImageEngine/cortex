@@ -440,6 +440,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleTime(1), 1.0 )
 		self.assertEqual( m.boundSampleTime(2), 2.0 )
 		self.assertEqual( m.boundSampleTime(3), 3.0 )
+		self.assertTrue( m.hasBound() )
 		self.failUnless( SceneCacheTest.compareBBox( m.readBoundAtSample(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
 		self.failUnless( SceneCacheTest.compareBBox( m.readBound(0), IECore.Box3d( IECore.V3d( -1,-1,-1 ), IECore.V3d( 2,2,1 ) ) ) )
 		self.assertEqual( m.boundSampleInterval(0), (0,0,0) )
@@ -451,6 +452,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( m.boundSampleInterval(4), (0,3,3) )
 
 		A = m.child("A")
+		self.assertTrue( A.hasBound() )
 		self.assertEqual( A.numBoundSamples(), 3 )
 		self.assertEqual( A.boundSampleTime(0), 0.0 )
 		self.assertEqual( A.boundSampleTime(1), 1.0 )
@@ -462,6 +464,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.assertEqual( a.numBoundSamples(), 1 )
 		self.failUnless( SceneCacheTest.compareBBox( a.readBoundAtSample(0), IECore.Box3d(IECore.V3d( -1 ), IECore.V3d( 1 ) ) ) )
 		B = m.child("B")
+		self.assertTrue( B.hasBound() )
 		self.assertEqual( B.numBoundSamples(), 4 )
 		self.assertEqual( B.boundSampleTime(0), 0.0 )
 		self.assertEqual( B.boundSampleTime(1), 1.0 )
@@ -472,6 +475,7 @@ class SceneCacheTest( unittest.TestCase ) :
 		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(2), IECore.Box3d(IECore.V3d( -2,-1,-2 ), IECore.V3d( 2,3,2 ) ) ) )
 		self.failUnless( SceneCacheTest.compareBBox( B.readBoundAtSample(3), IECore.Box3d(IECore.V3d( -3,-2,-3 ), IECore.V3d( 3,4,3 ) ) ) )
 		b = B.child("b")
+		self.assertTrue( b.hasBound() )
 		self.assertEqual( b.numBoundSamples(), 4 )
 		self.assertEqual( b.boundSampleTime(0), 0.0 )
 		self.assertEqual( b.boundSampleTime(1), 1.0 )
@@ -874,8 +878,30 @@ class SceneCacheTest( unittest.TestCase ) :
 		t0 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 0 )
 		t1 = checkHash( IECore.SceneInterface.HashType.HierarchyHash, m, 1 )
 		self.assertEqual( t0[0] + t1[0], len(t0[1].union(t1[1])) )		# all locations differ
-	
-	
+
+	def testHashStability( self ) :
+
+		def collectHashesWalk( scene, hashType, time ) :
+
+			result = {}
+			result[scene.pathToString(scene.path())] = scene.hash( hashType, time )
+			for name in scene.childNames() :
+				result.update( collectHashesWalk( scene.child( name ), hashType, time ) )
+
+			return result
+
+		for hashType in IECore.SceneInterface.HashType.values.values() :
+
+			m1 = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+			h1 = collectHashesWalk( m1, hashType, 0 )
+			del m1
+
+			m2 = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+			h2 = collectHashesWalk( m2, hashType, 0 )
+			del m2
+
+			self.assertEqual( h1, h2 )
+
 if __name__ == "__main__":
 	unittest.main()
 

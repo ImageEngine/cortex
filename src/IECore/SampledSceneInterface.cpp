@@ -33,6 +33,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/SampledSceneInterface.h"
+#include "IECore/ObjectInterpolator.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/TransformationMatrixData.h"
 
 using namespace IECore;
 
@@ -40,4 +43,117 @@ IE_CORE_DEFINERUNTIMETYPEDDESCRIPTION( SampledSceneInterface )
 
 SampledSceneInterface::~SampledSceneInterface()
 {
+}
+
+Imath::Box3d SampledSceneInterface::readBound( double time ) const
+{
+	size_t sample1, sample2;
+	double x = boundSampleInterval( time, sample1, sample2 );
+
+	if( x == 0 )
+	{
+		return readBoundAtSample( sample1 );
+	}
+	if( x == 1 )
+	{
+		return readBoundAtSample( sample2 );
+	}
+
+	Imath::Box3d box1 = readBoundAtSample( sample1 );
+	Imath::Box3d box2 = readBoundAtSample( sample2 );
+	Imath::Box3d box;
+	LinearInterpolator<Imath::Box3d>()(box1, box2, x, box);
+	return box;
+}
+
+ConstDataPtr SampledSceneInterface::readTransform( double time ) const
+{
+	size_t sample1, sample2;
+	double x = transformSampleInterval( time, sample1, sample2 );
+
+	if( x == 0 )
+	{
+		return readTransformAtSample( sample1 );
+	}
+	if( x == 1 )
+	{
+		return readTransformAtSample( sample2 );
+	}
+
+	ConstDataPtr transformData1 = readTransformAtSample( sample1 );
+	ConstDataPtr transformData2 = readTransformAtSample( sample2 );
+	DataPtr transformData = runTimeCast< Data >( linearObjectInterpolation( transformData1.get(), transformData2.get(), x ) );
+	if( !transformData )
+	{
+		// failed to interpolate, return the closest one
+		return ( x >= 0.5 ? transformData2 : transformData1 );
+	}
+	return transformData;
+}
+
+Imath::M44d SampledSceneInterface::readTransformAsMatrix( double time ) const
+{
+	ConstDataPtr d = readTransform( time );
+	switch( d->typeId() )
+	{
+		case M44dDataTypeId :
+			return static_cast<const M44dData *>( d.get() )->readable();
+		case TransformationMatrixdDataTypeId :
+			return static_cast<const TransformationMatrixdData *>( d.get() )->readable().transform();
+		default :
+			throw Exception( "Unsupported transform data type" );
+	}
+}
+
+ConstObjectPtr SampledSceneInterface::readAttribute( const Name &name, double time ) const
+{
+	size_t sample1, sample2;
+	double x = attributeSampleInterval( name, time, sample1, sample2 );
+
+	if( x == 0 )
+	{
+		return readAttributeAtSample( name, sample1 );
+	}
+	if( x == 1 )
+	{
+		return readAttributeAtSample( name, sample2 );
+	}
+
+	ConstObjectPtr attributeObj1 = readAttributeAtSample( name, sample1 );
+	ConstObjectPtr attributeObj2 = readAttributeAtSample( name, sample2 );
+
+	ObjectPtr attributeObj = linearObjectInterpolation( attributeObj1.get(), attributeObj2.get(), x );
+	if( !attributeObj )
+	{
+		// failed to interpolate, return the closest one
+		return ( x >= 0.5 ? attributeObj2 : attributeObj1 );
+	}
+	return attributeObj;
+}
+
+ConstObjectPtr SampledSceneInterface::readObject( double time ) const
+{
+	size_t sample1, sample2;
+	double x = objectSampleInterval( time, sample1, sample2 );
+
+	if( x == 0 )
+	{
+		return readObjectAtSample( sample1 );
+	}
+	if( x == 1 )
+	{
+		return readObjectAtSample( sample2 );
+	}
+
+	ConstObjectPtr object1 = readObjectAtSample( sample1 );
+	ConstObjectPtr object2 = readObjectAtSample( sample2 );
+
+	ObjectPtr object = linearObjectInterpolation( object1.get(), object2.get(), x );
+	if( !object )
+	{
+		// failed to interpolate, return the closest one
+		return ( x >= 0.5 ? object2 : object1 );
+	}
+
+	return object;
 }

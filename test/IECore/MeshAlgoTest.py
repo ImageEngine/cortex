@@ -32,11 +32,15 @@
 #
 ##########################################################################
 
+import random
 import unittest
+
+import IECore
 from IECore import *
 
 class MeshAlgoTangentTest( unittest.TestCase ) :
 
+	@classmethod
 	def makeSingleTriangleMesh( self ):
 
 		verticesPerFace = IntVectorData( [ 3 ] )
@@ -423,5 +427,59 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 
 		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
 		self.assertEqual( facesDeletedMesh["delete"].data, FloatVectorData( [0.0] ) )
+
+class MeshAlgoReverseWindingTest( unittest.TestCase ) :
+
+	def testSingleTriangle( self ) :
+
+		mesh = MeshAlgoTangentTest.makeSingleTriangleMesh()
+		mesh.blindData()["test"] = IECore.IntData( 10 )
+
+		meshReversed = mesh.copy()
+		IECore.MeshAlgo.reverseWinding( meshReversed )
+
+		# Meshes should be identical
+
+		self.assertEqual( meshReversed.interpolation, mesh.interpolation )
+		for interpolation in IECore.PrimitiveVariable.Interpolation.values.values() :
+			self.assertEqual( meshReversed.variableSize( interpolation ), mesh.variableSize( interpolation ) )
+		self.assertEqual( mesh.keys(), meshReversed.keys() )
+		self.assertEqual( mesh["P"], meshReversed["P"] )
+		self.assertEqual( mesh["Pref"], meshReversed["Pref"] )
+		self.assertEqual( mesh.blindData(), meshReversed.blindData() )
+
+		# Except for vertex ids, and facevarying data
+
+		self.assertEqual( list( meshReversed.vertexIds ), list( reversed( mesh.vertexIds ) ) )
+		self.assertEqual( list( meshReversed["s"].data ), list( reversed( mesh["s"].data ) ) )
+
+	def testPlane( self ) :
+
+		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
+		IECore.TriangulateOp()( input = mesh, copyInput = False )
+
+		meshReversed = mesh.copy()
+		IECore.MeshAlgo.reverseWinding( meshReversed )
+
+		evaluator = IECore.MeshPrimitiveEvaluator( mesh )
+		evaluatorReversed = IECore.MeshPrimitiveEvaluator( meshReversed )
+
+		result = evaluator.createResult()
+		resultReversed = evaluatorReversed.createResult()
+
+		for i in range( 0, 1000 ) :
+
+			p = IECore.V3f( random.uniform( -1.0, 1.0 ), random.uniform( -1.0, 1.0 ), 0 )
+			evaluator.closestPoint( p, result )
+			evaluatorReversed.closestPoint( p, resultReversed )
+
+			self.assertEqual( resultReversed.normal(), -result.normal() )
+			for n in ( "s", "t" ) :
+				self.assertAlmostEqual(
+					resultReversed.floatPrimVar( meshReversed[n] ),
+					result.floatPrimVar( mesh[n] ),
+					delta = 0.0001
+				)
+
 if __name__ == "__main__":
 	unittest.main()

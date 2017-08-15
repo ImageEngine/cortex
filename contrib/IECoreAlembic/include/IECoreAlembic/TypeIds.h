@@ -40,13 +40,7 @@ namespace IECoreAlembic
 
 enum TypeId
 {
-	FromAlembicConverterTypeId = 112000,
-	FromAlembicPolyMeshConverterTypeId = 112001,
-	FromAlembicXFormConverterTypeId = 112002,
-	FromAlembicSubDConverterTypeId = 112003,
-	FromAlembicGeomBaseConverterTypeId = 112004,
-	FromAlembicCameraConverterTypeId = 112005,
-
+	AlembicSceneTypeId = 112000,
 	LastCoreAlembicTypeId = 112999,
 };
 

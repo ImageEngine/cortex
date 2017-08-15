@@ -41,19 +41,22 @@ using namespace IECore;
 // Cache implementation
 //////////////////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+
 typedef IECore::LRUCache< std::string, IECore::ConstSceneInterfacePtr > SceneLRUCache;
 
-class SharedSceneInterfaces::Cache : public SceneLRUCache
+class Cache : public SceneLRUCache
 {
 	public :
-		
+
 		Cache( SceneLRUCache::Cost maxCost )
 			: SceneLRUCache( fileCacheGetter, maxCost )
 		{
 		}
-	
+
 	private :
-		
+
 		static SceneInterfacePtr fileCacheGetter( const std::string &fileName, size_t &cost )
 		{
 			SceneInterfacePtr result = SceneInterface::create( fileName, IECore::IndexedIO::Read );
@@ -62,11 +65,13 @@ class SharedSceneInterfaces::Cache : public SceneLRUCache
 		}
 };
 
-SharedSceneInterfaces::Cache &SharedSceneInterfaces::cache()
+Cache &cache()
 {
-	static Cache cache( 200 );
-	return cache;
+	static Cache *cache = new Cache( 200 );
+	return *cache;
 }
+
+} // namespace
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // SharedSceneInterfaces implementation

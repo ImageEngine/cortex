@@ -148,10 +148,10 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual(
 			m["colorSet1"].data,
 			IECore.Color4fVectorData( [
-				IECore.Color4f( 0, 1, 0, 1 ),
-				IECore.Color4f( 0, 0, 1, 1 ),
-				IECore.Color4f( 0, 0, 0, 1 ),
 				IECore.Color4f( 1, 0, 0, 1 ),
+				IECore.Color4f( 0, 0, 0, 1 ),
+				IECore.Color4f( 0, 0, 1, 1 ),
+				IECore.Color4f( 0, 1, 0, 1 ),
 			] )
 		)
 

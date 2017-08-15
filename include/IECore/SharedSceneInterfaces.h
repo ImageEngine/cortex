@@ -44,22 +44,17 @@ namespace IECore
 class IECORE_API SharedSceneInterfaces
 {
 	public :
-		
+
 		/// Creates a SceneInterface using a cache, so you don't end up opening the same file multiple times
 		static ConstSceneInterfacePtr get( const std::string &fileName );
-		
+
 		/// Erase a single file from the cache
 		static void erase( const std::string &fileName );
-		
+
 		/// Clear the entire cache
 		static void clear();
-	
-	private :
-		
-		class Cache;
-		static Cache& cache();
 
-}; 
+};
 
 } // namespace IECore
 

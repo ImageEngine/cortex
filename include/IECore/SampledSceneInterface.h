@@ -103,6 +103,23 @@ class IECORE_API SampledSceneInterface : public SceneInterface
 		virtual double attributeSampleInterval( const SceneInterface::Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const = 0;
 		/// Computes a sample interval suitable for use in producing interpolated objects
 		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const = 0;
+
+		/// Implementations of base class methods
+		/// =====================================
+		///
+		/// These are implemented using the `read*AtSample()` and
+		/// `sample*Interval()` methods above. Derived classes may
+		/// reimplement them again, but typically this should not
+		/// be necessary.
+
+		virtual Imath::Box3d readBound( double time ) const;
+		virtual ConstDataPtr readTransform( double time ) const;
+		/// Implemented using readTransform() rather than readTransformMatrixAtSample(),
+		/// as it potentially provides improved interpolation.
+		virtual Imath::M44d readTransformAsMatrix( double time ) const;
+		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
+		virtual ConstObjectPtr readObject( double time ) const;
+
 };
 
 

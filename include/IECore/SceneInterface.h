@@ -147,6 +147,9 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		 * Bounding box
 		 */
 
+		/// Returns true if a bounding box is available for reading, false if not.
+		/// Default implementation returns true.
+		virtual bool hasBound() const;
 		/// Returns the bounding box for the entire scene contents from
 		/// path() down, inclusive of the object at this path, but
 		/// exclusive of the transform at this path.

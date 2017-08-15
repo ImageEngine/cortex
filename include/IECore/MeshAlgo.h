@@ -35,7 +35,6 @@
 #ifndef IECORE_MESHALGO_H
 #define IECORE_MESHALGO_H
 
-#include <vector>
 #include <utility>
 
 #include "IECore/PrimitiveVariable.h"
@@ -59,8 +58,12 @@ void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& pr
 /// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToDelete uniform (int|float|bool) PrimitiveVariable
 MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete );
 
-} // namespace MeshAlgo
-} // namespace IECore
+/// Reverses the winding order of each face by adjusting the vertex ids and updating all FaceVarying
+/// primitive variables to match.
+void reverseWinding( MeshPrimitive *meshPrimitive );
 
+} // namespace MeshAlgo
+
+} // namespace IECore
 
 #endif // IECORE_MESHALGO_H

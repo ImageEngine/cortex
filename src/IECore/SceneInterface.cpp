@@ -119,6 +119,11 @@ SceneInterface::~SceneInterface()
 {
 }
 
+bool SceneInterface::hasBound() const
+{
+	return true;
+}
+
 void SceneInterface::hash( HashType hashType, double time, MurmurHash &h ) const
 {
 	h.append( typeId() );

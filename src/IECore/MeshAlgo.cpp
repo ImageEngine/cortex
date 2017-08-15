@@ -1,3 +1,37 @@
+//////////////////////////////////////////////////////////////////////////
+//
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//
+//  Redistribution and use in source and binary forms, with or without
+//  modification, are permitted provided that the following conditions are
+//  met:
+//
+//     * Redistributions of source code must retain the above copyright
+//       notice, this list of conditions and the following disclaimer.
+//
+//     * Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+//     * Neither the name of Image Engine Design nor the names of any
+//       other contributors to this software may be used to endorse or
+//       promote products derived from this software without specific prior
+//       written permission.
+//
+//  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+//  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+//  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+//  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+//  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+//  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+//  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+//  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+//  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+//  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+//  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+//////////////////////////////////////////////////////////////////////////
+
 #include <assert.h>
 #include <algorithm>
 
@@ -10,13 +44,19 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
+#include "IECore/PolygonIterator.h"
 #include "IECore/private/PrimitiveAlgoUtils.h"
 
 using namespace IECore;
 using namespace Imath;
 
+//////////////////////////////////////////////////////////////////////////
+// Delete Faces
+//////////////////////////////////////////////////////////////////////////
+
 namespace
 {
+
 template< typename U>
 class DeleteFlaggedUniformFunctor
 {
@@ -256,6 +296,48 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename
 	return outMeshPrimitive;
 }
 
+} // namespace
+
+MeshPrimitivePtr IECore::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
+{
+
+	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
+	{
+		throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
+	}
+
+	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToDelete.data.get() );
+
+	if( intDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
+	}
+
+	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
+
+	if( boolDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
+	}
+
+	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
+
+	if( floatDeleteFlagData )
+	{
+		return ::deleteFaces( meshPrimitive, floatDeleteFlagData );
+	}
+
+	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
+
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Resample Primitive Variables
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
 struct MeshVertexToUniform
 {
 	typedef DataPtr ReturnType;
@@ -453,6 +535,85 @@ struct MeshAnythingToFaceVarying
 	PrimitiveVariable::Interpolation m_srcInterpolation;
 };
 
+} // namespace
+
+void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
+{
+	Data *srcData = primitiveVariable.data.get();
+	DataPtr dstData;
+
+	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
+
+	if ( srcInterpolation == interpolation )
+	{
+		return;
+	}
+
+	// average array to single value
+	if ( interpolation == PrimitiveVariable::Constant )
+	{
+		Detail::AverageValueFromVector fn;
+		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+		return;
+	}
+
+	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
+	{
+		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
+		if (arrayData)
+		{
+			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
+		}
+		return;
+	}
+
+	if( interpolation == PrimitiveVariable::Uniform )
+	{
+		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			MeshVertexToUniform fn( mesh );
+			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToUniform fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+	}
+	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
+	{
+		if( srcInterpolation == PrimitiveVariable::Uniform )
+		{
+			MeshUniformToVertex fn( mesh );
+			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
+		{
+			MeshFaceVaryingToVertex fn( mesh );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		}
+		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
+		{
+			dstData = srcData;
+		}
+	}
+	else if( interpolation == PrimitiveVariable::FaceVarying )
+	{
+		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+	}
+
+	primitiveVariable = PrimitiveVariable( interpolation, dstData );
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Calculate tangents
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
 class TexturePrimVarNames
 {
 	public:
@@ -497,13 +658,7 @@ std::string TexturePrimVarNames::indicesName() const
 
 } // anonymous namespace
 
-namespace IECore
-{
-
-namespace MeshAlgo
-{
-
-std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents(
+std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTangents(
 	const MeshPrimitive *mesh,
 	const std::string &uvSet, /* = "st" */
 	bool orthoTangents, /* = true */
@@ -667,109 +822,63 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents(
 	return std::make_pair( tangentPrimVar, bitangentPrimVar );
 }
 
-void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
-{
-	Data *srcData = primitiveVariable.data.get();
-	DataPtr dstData;
+//////////////////////////////////////////////////////////////////////////
+// Reverse winding
+//////////////////////////////////////////////////////////////////////////
 
-	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
-
-	if ( srcInterpolation == interpolation )
-	{
-		return;
-	}
-
-	// average array to single value
-	if ( interpolation == PrimitiveVariable::Constant )
-	{
-		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		primitiveVariable = PrimitiveVariable( interpolation, dstData );
-		return;
-	}
-
-	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
-	{
-		DataPtr arrayData = Detail::createArrayData(primitiveVariable, mesh, interpolation);
-		if (arrayData)
-		{
-			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
-		}
-		return;
-	}
-
-	if( interpolation == PrimitiveVariable::Uniform )
-	{
-		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
-		{
-			MeshVertexToUniform fn( mesh );
-			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
-		{
-			MeshFaceVaryingToUniform fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-	}
-	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
-	{
-		if( srcInterpolation == PrimitiveVariable::Uniform )
-		{
-			MeshUniformToVertex fn( mesh );
-			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
-		{
-			MeshFaceVaryingToVertex fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-		}
-		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
-		{
-			dstData = srcData;
-		}
-	}
-	else if( interpolation == PrimitiveVariable::FaceVarying )
-	{
-		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
-		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
-	}
-
-	primitiveVariable = PrimitiveVariable( interpolation, dstData );
-}
-
-
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
+namespace
 {
 
-	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
+template<typename T>
+void reverseWinding( MeshPrimitive *mesh, T &values )
+{
+	for( PolygonIterator it = mesh->faceBegin(), eIt = mesh->faceEnd(); it != eIt; ++it )
 	{
-		throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
+		std::reverse( it.faceVaryingBegin( values.begin() ), it.faceVaryingEnd( values.begin() ) );
 	}
-
-	const IntVectorData *intDeleteFlagData = runTimeCast<const IntVectorData>( facesToDelete.data.get() );
-
-	if( intDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
-	}
-
-	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
-
-	if( boolDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
-	}
-
-	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
-
-	if( floatDeleteFlagData )
-	{
-		return ::deleteFaces( meshPrimitive, floatDeleteFlagData );
-	}
-
-	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
-
 }
 
-} //namespace MeshAlgo
-} //namespace IECore
+struct ReverseWindingFunctor
+{
+
+	typedef void ReturnType;
+
+	ReverseWindingFunctor( MeshPrimitive *mesh ) : m_mesh( mesh )
+	{
+	}
+
+	template<typename T>
+	void operator()( T *data )
+	{
+		reverseWinding( m_mesh, data->writable() );
+	}
+
+	private :
+
+		MeshPrimitive *m_mesh;
+
+};
+
+} // namespace
+
+void IECore::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
+{
+	IntVectorDataPtr vertexIds = mesh->vertexIds()->copy();
+	::reverseWinding( mesh, vertexIds->writable() );
+	mesh->setTopologyUnchecked(
+		mesh->verticesPerFace(),
+		vertexIds,
+		mesh->variableSize( PrimitiveVariable::Vertex ),
+		mesh->interpolation()
+	);
+
+	ReverseWindingFunctor reverseWindingFunctor( mesh );
+	for( auto &it : mesh->variables )
+	{
+		if( it.second.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+		}
+	}
+}
+
