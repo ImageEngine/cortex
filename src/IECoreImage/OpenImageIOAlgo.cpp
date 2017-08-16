@@ -187,6 +187,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC3 );
 			rawData = static_cast<const V3iData *>( d )->baseReadable();
 			break;
+		case Box2iDataTypeId :
+			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
+			rawData = static_cast<const Box2iData *>( d )->baseReadable();
+			break;
 		case V2fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, vecSemantics( static_cast<const V2fData *>( d )->getInterpretation() ) );
 			rawData = static_cast<const V2fData *>( d )->baseReadable();
@@ -194,6 +198,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 		case V3fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC3, vecSemantics( static_cast<const V3fData *>( d )->getInterpretation() ) );
 			rawData = static_cast<const V3fData *>( d )->baseReadable();
+			break;
+		case Box2fDataTypeId :
+			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
+			rawData = static_cast<const Box2fData *>( d )->baseReadable();
 			break;
 		case M33fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX33 );
@@ -210,6 +218,10 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 		case V3dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC3, vecSemantics( static_cast<const V3dData *>( d )->getInterpretation() ) );
 			rawData = static_cast<const V3dData *>( d )->baseReadable();
+			break;
+		case Box2dDataTypeId :
+			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
+			rawData = static_cast<const Box2dData *>( d )->baseReadable();
 			break;
 		case M33dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX33 );
@@ -411,7 +423,22 @@ DataView::DataView( const OIIO::ParamValue &param )
 				}
 				case TypeDesc::VEC2 :
 				{
-					data = new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
+					if( !type.arraylen )
+					{
+						data = new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
+					}
+					else if( type.arraylen  == 2 )
+					{
+						data = new Box2iData( Imath::Box2i( Imath::V2i( typedData[0], typedData[1] ), Imath::V2i( typedData[2], typedData[3] ) ) );
+					}
+					else
+					{
+						V2iVectorDataPtr vectorData = new V2iVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
+						data = vectorData;
+					}
+
 					break;
 				}
 				case TypeDesc::VEC3 :
@@ -456,7 +483,21 @@ DataView::DataView( const OIIO::ParamValue &param )
 				}
 				case TypeDesc::VEC2 :
 				{
-					data = new V2fData( Imath::V2f( typedData[0], typedData[1] ) );
+					if( !type.arraylen )
+					{
+						data = new V2fData( Imath::V2f( typedData[0], typedData[1] ) );
+					}
+					else if( type.arraylen  == 2 )
+					{
+						data = new Box2fData( Imath::Box2f( Imath::V2f( typedData[0], typedData[1] ), Imath::V2f( typedData[2], typedData[3] ) ) );
+					}
+					else
+					{
+						V2fVectorDataPtr vectorData = new V2fVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
+						data = vectorData;
+					}
 					break;
 				}
 				case TypeDesc::VEC3 :
@@ -503,7 +544,21 @@ DataView::DataView( const OIIO::ParamValue &param )
 				}
 				case TypeDesc::VEC2 :
 				{
-					data = new V2dData( Imath::V2d( typedData[0], typedData[1] ) );
+					if( !type.arraylen )
+					{
+						data = new V2dData( Imath::V2d( typedData[0], typedData[1] ) );
+					}
+					else if( type.arraylen  == 2 )
+					{
+						data = new Box2dData( Imath::Box2d( Imath::V2d( typedData[0], typedData[1] ), Imath::V2d( typedData[2], typedData[3] ) ) );
+					}
+					else
+					{
+						V2dVectorDataPtr vectorData = new V2dVectorData();
+						vectorData->writable().resize( type.arraylen );
+						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
+						data = vectorData;
+					}
 					break;
 				}
 				case TypeDesc::VEC3 :
