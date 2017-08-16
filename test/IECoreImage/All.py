@@ -46,6 +46,7 @@ from ImageWriterTest import ImageWriterTest
 from ClampOpTest import ClampOpTest
 from CurveTracerTest import CurveTracerTest
 from EnvMapSamplerTest import EnvMapSamplerTest
+from FontTest import FontTest
 from ImageCropOpTest import ImageCropOpTest
 from ImageDiffOpTest import ImageDiffOpTest
 from ImageThinnerTest import ImageThinnerTest

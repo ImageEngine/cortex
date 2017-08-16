@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,56 +32,55 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+// This include needs to be the very first to prevent problems with warnings
+// regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageDisplayDriverBinding.h"
-#include "IECoreImageBindings/ImagePrimitiveParameterBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
+#include "IECore/ImagePrimitive.h"
+
+#include "IECoreImage/Font.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+
 #include "IECoreImageBindings/FontBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
 
+using namespace std;
 using namespace boost::python;
-using namespace IECoreImageBindings;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindImagePrimitiveParameter();
-	bindFont();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
 
-#ifdef IECORE_WITH_ASIO
+static ImagePrimitivePtr image( Font &f, char c )
+{
+	ConstImagePrimitivePtr i = f.image( c );
+	if( i )
+	{
+		return i->copy();
+	}
+	return 0;
+}
 
-	bindImageDisplayDriver();
+} // namespace
 
-#endif
+namespace IECoreImageBindings
+{
+
+void bindFont()
+{
+	RunTimeTypedClass<Font>()
+		.def(  init<const std::string &>() )
+		.def( "fileName", &Font::fileName, return_value_policy<copy_const_reference>() )
+		.def( "setResolution", &Font::setResolution )
+		.def( "getResolution", &Font::getResolution )
+		.def( "setKerning", &Font::setKerning )
+		.def( "getKerning", &Font::getKerning )
+		.def( "image", &image )
+		.def( "image", (ImagePrimitivePtr (Font::*)()const)&Font::image )
+	;
 
 }
+
+} // namespace IECoreImageBindings
