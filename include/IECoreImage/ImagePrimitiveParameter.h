@@ -37,17 +37,12 @@
 
 #include "IECore/TypedObjectParameter.h"
 
-namespace IECore
-{
-
-IE_CORE_FORWARDDECLARE( ImagePrimitive )
-
-}
-
 namespace IECoreImage
 {
 
-typedef IECore::TypedObjectParameter<IECore::ImagePrimitive> ImagePrimitiveParameter;
+IE_CORE_FORWARDDECLARE( ImagePrimitive );
+
+typedef IECore::TypedObjectParameter<ImagePrimitive> ImagePrimitiveParameter;
 
 IE_CORE_DECLAREPTR( ImagePrimitiveParameter );
 

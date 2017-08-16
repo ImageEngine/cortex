@@ -42,15 +42,10 @@
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 
-namespace IECore
+namespace IECoreImage
 {
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
-
-}
-
-namespace IECoreImage
-{
 
 /// The ImageReader will return an ImagePrimitive in linear colorspace with all channels
 /// converted to FloatVectorData. If 'rawChannels' is On, then it will return an

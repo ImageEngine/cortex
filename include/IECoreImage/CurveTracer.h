@@ -41,10 +41,10 @@
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/CurvesPrimitive.h"
-#include "IECore/ImagePrimitive.h"
 
-#include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
+#include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage

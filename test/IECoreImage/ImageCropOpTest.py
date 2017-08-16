@@ -90,7 +90,7 @@ class ImageCropOpTest(unittest.TestCase):
 	def __testCrop( self, inputfile, tests ):
 		r = IECore.Reader.create(inputfile)
 		img = r.read()
-		self.assertEqual(type(img), IECore.ImagePrimitive)
+		self.assertEqual(type(img), IECoreImage.ImagePrimitive)
 
 		cropOp = IECoreImage.ImageCropOp()
 		errors = []

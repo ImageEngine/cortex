@@ -51,7 +51,7 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 	def testSeparateRGB( self ) :
 
-		i = IECore.ImagePrimitive()
+		i = IECoreImage.ImagePrimitive()
 
 		r = IECore.FloatVectorData( [ 1, 2, 3 ] )
 		g = IECore.FloatVectorData( [ 4, 5, 6 ] )
@@ -76,7 +76,7 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 	def testCs( self ) :
 
-		i = IECore.ImagePrimitive()
+		i = IECoreImage.ImagePrimitive()
 
 		cs = IECore.Color3fVectorData( [ IECore.Color3f( 1, 2, 3 ), IECore.Color3f( 10, 11, 12 ) ] )
 		i["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, cs )

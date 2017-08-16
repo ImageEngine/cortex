@@ -36,10 +36,10 @@
 
 #include "IECore/CompoundParameter.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/TypeTraits.h"
 
 #include "IECoreImage/ChannelOp.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 
 using namespace IECore;

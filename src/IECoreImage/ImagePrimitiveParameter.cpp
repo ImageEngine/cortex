@@ -33,14 +33,14 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypedObjectParameter.inl"
-#include "IECore/ImagePrimitive.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECore
 {
 
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ImagePrimitive, IECoreImage::ImagePrimitiveParameter );
+IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( IECoreImage::ImagePrimitive, IECoreImage::ImagePrimitiveParameter );
 
 } // namespace IECore

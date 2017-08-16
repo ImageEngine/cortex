@@ -35,8 +35,8 @@
 #include "boost/python.hpp"
 
 #include "IECore/CompoundObject.h"
-#include "IECore/ImagePrimitive.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"

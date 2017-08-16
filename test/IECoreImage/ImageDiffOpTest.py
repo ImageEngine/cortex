@@ -144,8 +144,8 @@ class ImageDiffOpTest(unittest.TestCase):
 		f = IECore.FloatVectorData()
 		f.resize( 100 * 100, 0 )
 
-		imageA = IECore.ImagePrimitive( w, w )
-		imageB = IECore.ImagePrimitive( w, w )
+		imageA = IECoreImage.ImagePrimitive( w, w )
+		imageB = IECoreImage.ImagePrimitive( w, w )
 
 		# Both images have channel "R"
 		imageA["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )

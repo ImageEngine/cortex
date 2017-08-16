@@ -35,11 +35,11 @@
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 
-#include "IECoreImage/LuminanceOp.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
+#include "IECoreImage/LuminanceOp.h"
 
 using namespace Imath;
 using namespace IECore;

@@ -43,10 +43,10 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/BoxOps.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 
 #include "IECoreImage/ImageCropOp.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"
 
 using namespace std;

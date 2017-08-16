@@ -43,7 +43,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def __verifyImageRGB( self, imgNew, imgOrig, maxError = 0.002 ):
 
-		self.assertEqual( type(imgNew), IECore.ImagePrimitive )
+		self.assertEqual( type(imgNew), IECoreImage.ImagePrimitive )
 
 		if "R" in imgOrig :
 			self.assertTrue( "R" in imgNew )
@@ -73,7 +73,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def __makeFloatImage( self, dataWindow, displayWindow, withAlpha = False, dataType = IECore.FloatVectorData ) :
 
-		img = IECore.ImagePrimitive( dataWindow, displayWindow )
+		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
 		w = dataWindow.max.x - dataWindow.min.x + 1
 		h = dataWindow.max.y - dataWindow.min.y + 1
@@ -109,7 +109,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def __makeIntImage( self, dataWindow, displayWindow, dataType = IECore.UIntVectorData, maxInt = 2**32-1 ) :
 
-		img = IECore.ImagePrimitive( dataWindow, displayWindow )
+		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
 		w = dataWindow.max.x - dataWindow.min.x + 1
 		h = dataWindow.max.y - dataWindow.min.y + 1
@@ -137,7 +137,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def __makeGreyscaleImage( self, dataWindow, displayWindow ) :
 
-		img = IECore.ImagePrimitive( dataWindow, displayWindow )
+		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
 		w = dataWindow.max.x - dataWindow.min.x + 1
 		h = dataWindow.max.y - dataWindow.min.y + 1
@@ -159,7 +159,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		w = IECoreImage.ImageWriter( IECore.ImagePrimitive(), "test/IECore/data/exrFiles/AllHalfValues.exr" )
+		w = IECoreImage.ImageWriter( IECoreImage.ImagePrimitive(), "test/IECore/data/exrFiles/AllHalfValues.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		w = IECore.Writer.create( "test/IECore/data/exrFiles/AllHalfValues.exr" )

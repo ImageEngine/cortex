@@ -45,15 +45,10 @@
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 
-namespace IECore
+namespace IECoreImage
 {
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
-
-}
-
-namespace IECoreImage
-{
 
 /// The ImageWriter serializes images to any of the various file formats
 /// supported by OpenImageIO. A limited subset of format options are
@@ -99,7 +94,7 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 
 		void constructCommon();
 
-		const IECore::ImagePrimitive *getImage() const;
+		const ImagePrimitive *getImage() const;
 
 		IECore::StringVectorParameterPtr m_channelsParameter;
 		IECore::CompoundParameterPtr m_formatSettingsParameter;

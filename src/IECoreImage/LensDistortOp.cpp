@@ -43,8 +43,8 @@
 #include "IECore/Interpolator.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/ImagePrimitive.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/LensDistortOp.h"
 
 using namespace boost;
@@ -121,7 +121,7 @@ void LensDistortOp::begin( const CompoundObject * operands )
 	double displayOrigin[2] = { static_cast<double>( displayWindow.min[0] ), static_cast<double>( displayWindow.min[1] ) };
 	
 	// Get the distorted window.
-	// As the LensModel::bounds() method requires that the display window has it's origin at (0,0) in the bottom left of the image and the IECore::ImagePrimitive has it's origin in the top left,
+	// As the LensModel::bounds() method requires that the display window has it's origin at (0,0) in the bottom left of the image and the ImagePrimitive has it's origin in the top left,
 	// convert to the correct image space and offset if by the display window's origin if it is non-zero.
 	Imath::Box2i distortionSpaceBox(
 		Imath::V2i( dataWindow.min[0] - displayWindow.min[0], displayWindow.size().y - ( dataWindow.max[1] - displayWindow.min[1] ) ),
@@ -131,7 +131,7 @@ void LensDistortOp::begin( const CompoundObject * operands )
 	// Calculate the distorted data window.
 	Imath::Box2i distortedWindow = m_lensModel->bounds( m_mode, distortionSpaceBox, ( displayWindow.size().x + 1 ), ( displayWindow.size().y + 1 ) );
 
-	// Convert the distorted data window back to the same image space as IECore::ImagePrimitive.
+	// Convert the distorted data window back to the same image space as ImagePrimitive.
 	m_distortedDataWindow =  Imath::Box2i( 
 		Imath::V2i( distortedWindow.min[0] + displayWindow.min[0], ( displayWindow.size().y - distortedWindow.max[1] ) + displayWindow.min[1] ),
 		Imath::V2i( distortedWindow.max[0] + displayWindow.min[0], ( displayWindow.size().y - distortedWindow.min[1] ) + displayWindow.min[1] )

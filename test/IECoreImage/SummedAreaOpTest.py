@@ -43,7 +43,7 @@ class SummedAreaOpTest( unittest.TestCase ) :
 
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
 		y = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
-		i = IECore.ImagePrimitive( b, b )
+		i = IECoreImage.ImagePrimitive( b, b )
 		i["Y"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, y )
 
 		ii = IECoreImage.SummedAreaOp()( input=i, channels=IECore.StringVectorData( ["Y"] ) )

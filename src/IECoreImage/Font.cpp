@@ -38,10 +38,10 @@
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/BoxOps.h"
 
 #include "IECoreImage/Font.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 using namespace std;
 using namespace Imath;

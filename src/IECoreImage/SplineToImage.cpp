@@ -35,11 +35,11 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/VectorTraits.h"
 #include "IECore/Exception.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/SplineToImage.h"
 
 using namespace Imath;
@@ -49,7 +49,7 @@ using namespace IECoreImage;
 IE_CORE_DEFINERUNTIMETYPED( SplineToImage );
 
 SplineToImage::SplineToImage()
-	:	Op( "Creates ImagePrimitives from SplineData", new IECore::ObjectParameter( "result", "An image of the spline.", new IECore::NullObject(), ImagePrimitiveTypeId ) )
+	:	Op( "Creates ImagePrimitives from SplineData", new IECore::ObjectParameter( "result", "An image of the spline.", new IECore::NullObject(), (IECore::TypeId)ImagePrimitiveTypeId ) )
 {
 
 	static IECore::TypeId splineTypes[] = { SplineffDataTypeId, SplinefColor3fDataTypeId, InvalidTypeId };

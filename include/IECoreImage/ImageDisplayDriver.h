@@ -39,8 +39,8 @@
 #define IECOREIMAGE_IMAGEDISPLAYDRIVER
 
 #include "IECore/DisplayDriver.h"
-#include "IECore/ImagePrimitive.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 
@@ -68,7 +68,7 @@ class IECOREIMAGE_API ImageDisplayDriver : public IECore::DisplayDriver
 
 		/// Access to the image being created. This should always be valid for reading, even
 		/// before imageClose() has been called.
-		IECore::ConstImagePrimitivePtr image() const;
+		ConstImagePrimitivePtr image() const;
 
 		//! @name Image pool
 		/// It can be useful to store the images created by ImageDisplayDrivers for
@@ -80,17 +80,17 @@ class IECOREIMAGE_API ImageDisplayDriver : public IECore::DisplayDriver
 		//@{
 		/// Returns the image stored with the specified handle, or 0 if no
 		/// such image exists.
-		static IECore::ConstImagePrimitivePtr storedImage( const std::string &handle );
+		static ConstImagePrimitivePtr storedImage( const std::string &handle );
 		/// Removes the image stored with the specified handle from the pool. Returns
 		/// the image, or 0 if no such image existed.
-		static IECore::ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
+		static ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
 		//@}
 
 	private:
 
 		static const DisplayDriverDescription<ImageDisplayDriver> g_description;
 
-		IECore::ImagePrimitivePtr m_image;
+		ImagePrimitivePtr m_image;
 
 };
 

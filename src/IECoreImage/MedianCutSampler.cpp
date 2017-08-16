@@ -37,10 +37,10 @@
 
 #include "IECore/NullObject.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Math.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/MedianCutSampler.h"
 #include "IECoreImage/SummedAreaOp.h"
 

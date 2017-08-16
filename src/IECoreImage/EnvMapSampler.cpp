@@ -34,12 +34,12 @@
 
 #include "IECore/NullObject.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/AngleConversion.h"
 #include "IECore/Math.h"
 
 #include "IECoreImage/EnvMapSampler.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/LuminanceOp.h"
 #include "IECoreImage/MedianCutSampler.h"
 

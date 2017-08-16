@@ -36,8 +36,7 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
-#include "IECore/ImagePrimitive.h"
-
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/Font.h"
 
 #include "IECorePython/RunTimeTypedBinding.h"

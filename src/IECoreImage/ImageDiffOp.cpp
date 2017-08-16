@@ -46,13 +46,13 @@
 #include "IECore/Object.h"
 #include "IECore/Reader.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/MeanSquaredError.h"
 
 #include "IECoreImage/ImageCropOp.h"
 #include "IECoreImage/ImageDiffOp.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 using namespace std;
 using namespace Imath;

@@ -40,9 +40,9 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/Math.h"
 #include "IECore/Group.h"
-#include "IECore/ImagePrimitive.h"
 
 #include "IECoreImage/HdrMergeOp.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 using namespace std;
 using namespace boost;
@@ -59,7 +59,7 @@ HdrMergeOp::HdrMergeOp()
 			"result",
 			"HDR image.",
 			new ImagePrimitive(),
-			ImagePrimitiveTypeId
+			(IECore::TypeId)ImagePrimitiveTypeId
 		)
 	)
 {
@@ -217,7 +217,7 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 	const Group::ChildContainer &images = imageGroup->children();
 	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++ )
 	{
-		if ( (*it)->typeId() != ImagePrimitiveTypeId )
+		if ( (*it)->typeId() != (IECore::TypeId)ImagePrimitiveTypeId )
 		{
 			throw Exception( "Input group should contain images only!" );
 		}

@@ -55,10 +55,10 @@ OIIO_NAMESPACE_USING
 #include "IECore/MessageHandler.h"
 #include "IECore/ObjectVector.h"
 #include "IECore/TypedParameter.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImageWriter.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
 
@@ -238,13 +238,13 @@ void setImageSpecFormatOptions( const CompoundObject *operands, ImageSpec *spec,
 const Writer::WriterDescription<ImageWriter> ImageWriter::g_writerDescription( OpenImageIOAlgo::extensions() );
 
 ImageWriter::ImageWriter()
-	: Writer( "Serializes images to disk using OpenImageIO", ImagePrimitiveTypeId )
+	: Writer( "Serializes images to disk using OpenImageIO", (IECore::TypeId)ImagePrimitiveTypeId )
 {
 	constructCommon();
 }
 
 ImageWriter::ImageWriter( IECore::ObjectPtr object, const std::string &fileName )
-	: Writer( "Serializes images to disk using OpenImageIO", ImagePrimitiveTypeId )
+	: Writer( "Serializes images to disk using OpenImageIO", (IECore::TypeId)ImagePrimitiveTypeId )
 {
 	constructCommon();
 
@@ -398,7 +398,7 @@ void ImageWriter::channelsToWrite( vector<string> &channels, const CompoundObjec
 	ImageOutput::destroy( out );
 }
 
-const IECore::ImagePrimitive *ImageWriter::getImage() const
+const ImagePrimitive *ImageWriter::getImage() const
 {
 	return static_cast<const ImagePrimitive *>( object() );
 }

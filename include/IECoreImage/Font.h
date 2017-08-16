@@ -43,15 +43,10 @@
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
 
-namespace IECore
+namespace IECoreImage
 {
 
 IE_CORE_FORWARDDECLARE( ImagePrimitive );
-
-} // namepsace IECore
-
-namespace IECoreImage
-{
 
 /// The Font class allows the loading of fonts and their
 /// conversion to ImagePrimitives.
@@ -85,13 +80,13 @@ class IECOREIMAGE_API Font : public IECore::RunTimeTyped
 		/// origin of the character on the baseline - bear in mind that image coordinates
 		/// increase from top to bottom, so the top of the character will typically
 		/// have a negative y coordinate in pixel space.
-		const IECore::ImagePrimitive *image( char c ) const;
+		const ImagePrimitive *image( char c ) const;
 		/// Returns an image containing a grid of 16x8 characters containing
 		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
 		/// \todo These images currently return a straight conversion of the data
 		/// from FreeType, which is intended for direct display without colour conversion.
 		/// I think we should linearise the data before returning it.
-		IECore::ImagePrimitivePtr image() const;
+		ImagePrimitivePtr image() const;
 
 	private :
 

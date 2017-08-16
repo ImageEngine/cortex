@@ -143,7 +143,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		r = IECoreImage.ImageReader( "test/IECore/data/exrFiles/uvMap.256x256.exr" )
 
 		i = r.read()
-		self.assertEqual( i.typeId(), IECore.ImagePrimitive.staticTypeId() )
+		self.assertEqual( i.typeId(), IECoreImage.ImagePrimitive.staticTypeId() )
 
 		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
 		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
@@ -306,7 +306,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( type(r), IECoreImage.ImageReader )
 		r['rawChannels'] = True
 		img = r.read()
-		self.assertEqual( type(img), IECore.ImagePrimitive )
+		self.assertEqual( type(img), IECoreImage.ImagePrimitive )
 		self.assertEqual( type(img['R'].data), IECore.UShortVectorData )
 
 	def testJPG( self ) :

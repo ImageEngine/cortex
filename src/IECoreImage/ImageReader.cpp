@@ -37,13 +37,13 @@
 #include "OpenImageIO/imageio.h"
 OIIO_NAMESPACE_USING
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/ObjectParameter.h"
 #include "IECore/NullObject.h"
 #include "IECore/BoxOps.h"
 
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImageReader.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
 
