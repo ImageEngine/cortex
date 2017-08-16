@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreImage
 import IECoreMaya
 
 class ImageConverterTest( IECoreMaya.TestCase ) :
@@ -53,7 +54,7 @@ class ImageConverterTest( IECoreMaya.TestCase ) :
 		
 		self.failIf(
 		
-			IECore.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
+			IECoreImage.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
 			
 		)
 

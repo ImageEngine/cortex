@@ -43,16 +43,18 @@
 #include "maya/MImage.h"
 #include "maya/MImageFileInfo.h"
 
-#include "IECore/ImageReader.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/DataConvert.h"
 
+#include "IECoreImage/ImageReader.h"
+#include "IECoreImage/ImagePrimitive.h"
+
 #include "IECoreMaya/ImageFile.h"
 
 using namespace IECore;
+using namespace IECoreImage;
 using namespace IECoreMaya;
 
 ImageFile::ImageFile() : m_rData( 0 ), m_gData( 0 ), m_bData( 0 ), m_aData( 0 )
@@ -151,7 +153,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 		ChannelConverter converter;
 		converter.m_pathName = pathName.asChar();
 
-		DataPtr rData = image->variables["R"].data;
+		DataPtr rData = image->channels["R"];
 		if (! rData )
 		{
 			return MS::kFailure;
@@ -164,7 +166,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter::ErrorHandler
 			>( rData.get(), converter );
 
-		DataPtr gData = image->variables["G"].data;
+		DataPtr gData = image->channels["G"];
 		if (! gData )
 		{
 			return MS::kFailure;
@@ -177,7 +179,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 				ChannelConverter::ErrorHandler
 			>( gData.get(), converter );
 
-		DataPtr bData = image->variables["B"].data;
+		DataPtr bData = image->channels["B"];
 		if (! bData )
 		{
 			return MS::kFailure;
@@ -192,7 +194,7 @@ MStatus ImageFile::open( MString pathName, MImageFileInfo* info )
 
 		if ( m_numChannels == 4 )
 		{
-			DataPtr aData = image->variables["A"].data;
+			DataPtr aData = image->channels["A"];
 			if (! aData )
 			{
 				return MS::kFailure;

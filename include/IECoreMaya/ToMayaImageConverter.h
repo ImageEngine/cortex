@@ -39,9 +39,10 @@
 
 #include "IECoreMaya/ToMayaConverter.h"
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "maya/MImage.h"
 
@@ -57,7 +58,7 @@ class ToMayaImageConverter : public ToMayaConverter
 
 	public :
 
-		ToMayaImageConverter( IECore::ConstImagePrimitivePtr image );
+		ToMayaImageConverter( IECoreImage::ConstImagePrimitivePtr image );
 		
 		typedef enum
 		{

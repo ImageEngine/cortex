@@ -38,7 +38,6 @@
 #include <string>
 
 #include "IECore/RefCounted.h"
-#include "IECore/ImagePrimitive.h"
 
 #include "maya/MString.h"
 #include "maya/MImage.h"

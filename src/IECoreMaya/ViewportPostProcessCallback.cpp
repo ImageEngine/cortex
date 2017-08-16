@@ -32,14 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <vector>
+
 #include "maya/M3dView.h"
 #include "maya/MImage.h"
 #include "maya/MUiMessage.h"
 #undef None // must come after certain Maya includes which include X11/X.h
-
-#include "IECore/ImagePrimitive.h"
-#include "IECore/Writer.h"
-#include "IECore/ImagePremultiplyOp.h"
 
 #include "IECoreMaya/StatusException.h"
 #include "IECoreMaya/ViewportPostProcessCallback.h"

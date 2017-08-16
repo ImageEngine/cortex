@@ -2075,6 +2075,7 @@ if doConfigure :
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		mayaEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 

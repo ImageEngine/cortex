@@ -45,17 +45,19 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ToMayaImageConverter.h"
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/Object.h"
 #include "IECore/TypedParameter.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECorePython/ScopedGILLock.h"
 
 #include "IECore/Parameterised.h"
 
 using namespace IECore;
+using namespace IECoreImage;
 using namespace IECoreMaya;
 
 MTypeId ImagePlaneHolder::id( ImagePlaneHolderId );
