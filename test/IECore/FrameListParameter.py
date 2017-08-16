@@ -86,8 +86,7 @@ class TestFrameListParameter( unittest.TestCase ) :
 
 	def testOps( self ) :
 
-		o1 = IECore.CheckImagesOp()
-		o2 = IECore.FileSequenceGraphOp()
+		op = IECore.FileSequenceGraphOp()
 
 if __name__ == "__main__":
         unittest.main()

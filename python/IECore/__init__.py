@@ -89,7 +89,6 @@ from ParameterParser import ParameterParser
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
 from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
-from CheckImagesOp import CheckImagesOp
 from FileSequenceGraphOp import FileSequenceGraphOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
