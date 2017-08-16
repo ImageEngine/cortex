@@ -37,7 +37,6 @@
 
 #include "IECore/PrimitiveOp.h"
 #include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CurvesPrimitive.h"
 
 namespace IECore
@@ -75,7 +74,6 @@ class TypedPrimitiveOp : public ModifyOp
 	IE_CORE_DECLAREPTR( TNAME ## Op );
 
 IE_CORE_DEFINETYPEDPRIMITIVEOP( MeshPrimitive )
-IE_CORE_DEFINETYPEDPRIMITIVEOP( ImagePrimitive )
 IE_CORE_DEFINETYPEDPRIMITIVEOP( CurvesPrimitive )
 
 } // namespace IECore

@@ -79,6 +79,5 @@ const RunTimeTyped::TypeDescription< TypedPrimitiveOp<T> > TypedPrimitiveOp<T>::
 namespace IECore
 {
 IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( MeshPrimitive, MeshPrimitiveOp );
-IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( ImagePrimitive, ImagePrimitiveOp );
 IE_CORE_DEFINETYPEDPRIMITIVEOPSPECIALISATION( CurvesPrimitive, CurvesPrimitiveOp );
 }

@@ -268,7 +268,7 @@ enum TypeId
 	MappedRandomPointDistributionOpTypeId = 220,
 	PointRepulsionOpTypeId = 221,
 	LuminanceOpTypeId = 222, // obsolete - available for reuse
-	ImagePrimitiveOpTypeId = 223,
+	ImagePrimitiveOpTypeId = 223, // obsolete - available for reuse
 	ChannelOpTypeId = 224, // obsolete - available for reuse
 	SummedAreaOpTypeId = 225, // obsolete - available for reuse
 	GradeTypeId = 226, // obsolete - available for reuse
