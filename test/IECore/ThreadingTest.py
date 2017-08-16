@@ -37,6 +37,7 @@ import time
 import threading
 import random
 import os
+import functools
 
 import IECore
 
@@ -99,18 +100,18 @@ class ThreadingTest( unittest.TestCase ) :
 		# here as it forces a call to Reader::create when the GIL isn't held yet.
 	
 		args = [
-			( "test/IECore/data/exrFiles/ramp.exr", ),
+			( "test/IECore/data/cobFiles/ball.cob", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
-			( "test/IECore/data/exrFiles/checkerAnimated.0006.exr", ),
+			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
-			( "test/IECore/data/tiff/toTrace.tif", ),
-			( "test/IECore/data/tiff/toTraceThinned.tif", ),
+			( "test/IECore/data/cobFiles/filteredBall.cob", ),
+			( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
-			( "test/IECore/data/exrFiles/checkerAnimated.0006.exr", ),
-			( "test/IECore/data/exrFiles/checkerAnimated.0006.exr", ),
-			( "test/IECore/data/tiff/toTraceThinned.tif", ),
+			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
+			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
+			( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob", ),
 		]
 	
 		sp = IECore.SearchPath( "./", ":" )
@@ -145,13 +146,13 @@ class ThreadingTest( unittest.TestCase ) :
 		# that we get a speedup of some sort doing that.
 	
 		args = [
-			( "test/IECore/data/exrFiles/ramp.exr", ),
+			( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
 			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
 			( "test/IECore/data/cobFiles/ball.cob", ),
-			( "test/IECore/data/jpg/21mm.jpg", ),
-			( "test/IECore/data/jpg/exif.jpg", ),
-			( "test/IECore/data/dpx/ramp.dpx", ),
+			( "test/IECore/data/cobFiles/cylinder3Mesh.cob", ),
+			( "test/IECore/data/cobFiles/filteredBall.cob", ),
+			( "test/IECore/data/cobFiles/torusCurves.cob", ),
 		]
 
 		calls = [ lambda f : IECore.Reader.create( f ).read() ] * len( args )
@@ -169,7 +170,7 @@ class ThreadingTest( unittest.TestCase ) :
 	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testWritingGains( self ) :
 	
-		image = IECore.Reader.create( "test/IECore/data/jpg/21mm.jpg" ).read()
+		primitive = IECore.Reader.create( "test/IECore/data/cobFiles/ball.cob" ).read()
 		
 		def write( o, f ) :
 		
@@ -177,8 +178,8 @@ class ThreadingTest( unittest.TestCase ) :
 		
 		calls = []
 		for i in range( 0, 4 ) :
-			fileName = "test/IECore/test%d.jpg" % i
-			calls.append( IECore.curry( write, image, fileName ) )
+			fileName = "test/IECore/test%d.cob" % i
+			calls.append( functools.partial( write, primitive, fileName ) )
 
 		tStart = time.time()
 		self.callSomeThings( calls, threaded=False )
@@ -215,10 +216,10 @@ class ThreadingTest( unittest.TestCase ) :
 	def testCachedReaderGains( self ) :
 	
 		args = [
-			( "test/IECore/data/jpg/21mm.jpg", ),
-			( "test/IECore/data/jpg/exif.jpg", ),
-			( "test/IECore/data/jpg/greyscaleCheckerBoard.jpg", ),
-			( "test/IECore/data/dpx/ramp.dpx", ),
+			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
+			( "test/IECore/data/pdcFiles/particleShape1.250.pdc", ),
+			( "test/IECore/data/cobFiles/ball.cob", ),
+			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
 		] * 4
 	
 		cachedReader = IECore.CachedReader( IECore.SearchPath( "./", ":" ) )
@@ -240,12 +241,10 @@ class ThreadingTest( unittest.TestCase ) :
 	def tearDown( self ) :
 		
 		for f in [
-			"test/IECore/test0.jpg",
-			"test/IECore/test1.jpg",
-			"test/IECore/test2.jpg",
-			"test/IECore/test3.jpg",
-			"test/IECore/interpolatedCache.0250.fio",
-			"test/IECore/interpolatedCache.0500.fio",
+			"test/IECore/test0.cob",
+			"test/IECore/test1.cob",
+			"test/IECore/test2.cob",
+			"test/IECore/test3.cob",
 		] :
 			if os.path.exists( f ) :
 				os.remove( f )
