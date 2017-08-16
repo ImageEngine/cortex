@@ -43,7 +43,7 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
-			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
+			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )
 			image[n] = p
 
 		luminanceImage = IECoreImage.LuminanceOp()( input=image )
@@ -68,7 +68,7 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 			s = areas[i].size() + IECore.V2i( 1 )
 			areaSum += s.x * s.y
 
-		self.assertEqual( areaSum, luminanceImage.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( areaSum, luminanceImage.channelSize() )
 
 if __name__ == "__main__":
 	unittest.main()

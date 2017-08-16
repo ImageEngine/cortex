@@ -229,7 +229,7 @@ void ImageCropOp::modify( Object *object, const CompoundObject *operands )
 	ImagePrimitive *image = runTimeCast<ImagePrimitive>( object );
 
 	// Validate the input image
-	if ( !image->arePrimitiveVariablesValid() )
+	if ( !image->channelsValid() )
 	{
 		throw InvalidArgumentException( "ImageCropOp: Input image is not valid" );
 	}
@@ -269,30 +269,14 @@ void ImageCropOp::modify( Object *object, const CompoundObject *operands )
 		newDataWindow = croppedDataWindow;
 	}
 
-	for ( PrimitiveVariableMap::iterator varIt = image->variables.begin(); varIt != image->variables.end(); varIt++ )
+	for( auto &channel : image->channels )
 	{
-		PrimitiveVariable &channel = varIt->second;
+		ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
+		DataPtr data = channel.second;
+		assert( data );
 
-		switch ( channel.interpolation )
-		{
-			case PrimitiveVariable::Vertex:
-			case PrimitiveVariable::Varying:
-			case PrimitiveVariable::FaceVarying:
-				{
-					DataPtr data = channel.data;
-					assert( data );
-					ImageCropFn fn( dataWindow, croppedDataWindow, newDataWindow );
-
-					channel.data = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data.get(), fn );
-					assert( channel.data );
-				}
-				break;
-
-			default:
-				/// Nothing to do for these channel types
-				assert( channel.interpolation == PrimitiveVariable::Constant || channel.interpolation == PrimitiveVariable::Uniform );
-				break;
-		}
+		channel.second = despatchTypedData< ImageCropFn, TypeTraits::IsNumericVectorTypedData >( data.get(), fn );
+		assert( channel.second );
 	}
 
 	if ( resetOrigin )
@@ -316,6 +300,6 @@ void ImageCropOp::modify( Object *object, const CompoundObject *operands )
 		assert( image->getDisplayWindow() == image->getDataWindow() );
 	}
 
-	assert( image->arePrimitiveVariablesValid() );
+	assert( image->channelsValid() );
 }
 

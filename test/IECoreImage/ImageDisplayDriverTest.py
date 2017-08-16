@@ -63,9 +63,9 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		img.blindData().clear()
 		idd = IECoreImage.ImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), IECore.CompoundData() )
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
-		red = img['R'].data
-		green = img['G'].data
-		blue = img['B'].data
+		red = img['R']
+		green = img['G']
+		blue = img['B']
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
 		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
@@ -104,9 +104,9 @@ class ImageDisplayDriverTest(unittest.TestCase):
 			}
 		)
 
-		red = img['R'].data
-		green = img['G'].data
-		blue = img['B'].data
+		red = img['R']
+		green = img['G']
+		blue = img['B']
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
 		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
@@ -135,7 +135,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 		dd.imageClose()
 
 		i = dd.image()
-		self.assertEqual( i["Y"].data, y )
+		self.assertEqual( i["Y"], y )
 
 class ClientServerDisplayDriverTest(unittest.TestCase):
 
@@ -167,9 +167,9 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 
 		img = IECore.Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
-		red = img['R'].data
-		green = img['G'].data
-		blue = img['B'].data
+		red = img['R']
+		green = img['G']
+		blue = img['B']
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
 
 		params = IECore.CompoundData()
@@ -259,7 +259,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		dd.imageClose()
 
 		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle" )
-		self.assertEqual( i["Y"].data, y )
+		self.assertEqual( i["Y"], y )
 
 	def tearDown( self ):
 

@@ -227,20 +227,13 @@ void WarpOp::modify( Object *object, const CompoundObject *operands )
 	Imath::Box2i newDataWindow = warpedDataWindow( originalDataWindow );
 	std::string error;
 	Warp w( this, (FilterType)m_filterParameter->getNumericValue(), (BoundMode)m_boundModeParameter->getNumericValue(), newDataWindow, originalDataWindow );
-	for( PrimitiveVariableMap::iterator it = image->variables.begin(); it != image->variables.end(); it++ )
+	for( const auto &channel : image->channels )
 	{
-		if( it->second.interpolation!=PrimitiveVariable::Vertex &&
-			it->second.interpolation!=PrimitiveVariable::Varying &&
-			it->second.interpolation!=PrimitiveVariable::FaceVarying )
-		{
-			continue;
-		}
-
-		if ( !image->channelValid( it->second, &error ) )
+		if ( !image->channelValid( channel.second.get(), &error ) )
 		{
 			throw Exception( error );
 		}
-		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( it->second.data.get(), w );
+		despatchTypedData<Warp, TypeTraits::IsNumericVectorTypedData>( channel.second.get(), w );
 	}
 	end();
 	image->setDataWindow( newDataWindow );

@@ -100,7 +100,7 @@ class ImageReader::Implementation : public IECore::RefCounted
 				// so prefer a dodgy const_cast over replicating the functionality.
 				/// |todo: request a cheaper isComplete() mechanism in OpenImageIO
 				//  to match ImfInputFile::isComplete() from OpenEXR.
-				return runTimeCast<ImagePrimitive>( const_cast<ImageReader *>( m_reader )->read() )->arePrimitiveVariablesValid();
+				return runTimeCast<ImagePrimitive>( const_cast<ImageReader *>( m_reader )->read() )->channelsValid();
 			}
 			catch( ... )
 			{
@@ -447,10 +447,9 @@ ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 		assert( d  );
 		assert( rawChannels || d->typeId()==FloatVectorDataTypeId );
 
-		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
-		assert( image->isPrimitiveVariableValid( p ) );
+		assert( image->channelValid( d.get() ) );
 
-		image->variables[ channelNames[ci] ] = p;
+		image->channels[ channelNames[ci] ] = d;
 	}
 
 	m_implementation->updateMetadata( image->blindData() );

@@ -406,9 +406,9 @@ const ImagePrimitive *ImageWriter::getImage() const
 void ImageWriter::doWrite( const CompoundObject *operands )
 {
 	const ImagePrimitive *image = getImage();
-	if( !image->arePrimitiveVariablesValid() )
+	if( !image->channelsValid() )
 	{
-		throw InvalidArgumentException( "ImageWriter: Invalid primitive variables on image" );
+		throw InvalidArgumentException( "ImageWriter: Invalid channels on image" );
 	}
 
 	Box2i dataWindow = image->getDataWindow();
@@ -485,7 +485,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	spec.channelnames.clear();
 	spec.channelnames.reserve( channels.size() );
 
-	const Data *firstChannelData = image->variableData<Data>( *channels.begin() );
+	const Data *firstChannelData = image->channels.begin()->second.get();
 
 	for( auto it = channels.begin(), cEnd = channels.end(); it != cEnd; ++it )
 	{
@@ -494,7 +494,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		// OpenImageIO claims to handle non-matching types (if the format supports it)
 		// but when it comes time to write the scanlines, we must pass a single buffer
 		// of interleaved pixels, so we only support a single type for now.
-		if( image->variableData<Data>( *it )->typeId() != firstChannelData->typeId() )
+		if( image->channels.find( *it )->second->typeId() != firstChannelData->typeId() )
 		{
 			throw IECore::Exception( "IECoreImage::ImageWriter : Image must have channels of the same type." );
 		}
@@ -532,7 +532,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	vectors.reserve( (size_t)spec.nchannels );
 	for( const auto &channel : channels )
 	{
-		vectors.emplace_back( image->variables.find( channel )->second.data );
+		vectors.emplace_back( image->channels.find( channel )->second );
 	}
 
 	DataPtr buffer = static_pointer_cast<Data>( op->operate() );

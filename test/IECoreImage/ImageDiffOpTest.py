@@ -148,11 +148,11 @@ class ImageDiffOpTest(unittest.TestCase):
 		imageB = IECoreImage.ImagePrimitive( w, w )
 
 		# Both images have channel "R"
-		imageA["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		imageB["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
+		imageA["R"] = f
+		imageB["R"] = f
 
 		# Only imageA has channel "G"
-		imageA["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
+		imageA["G"] = f
 
 		res = op(
 			imageA = imageA,

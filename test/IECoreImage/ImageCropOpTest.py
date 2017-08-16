@@ -108,8 +108,8 @@ class ImageCropOpTest(unittest.TestCase):
 
 			croppedImg = cropOp()
 
-			if not croppedImg.arePrimitiveVariablesValid():
-				raise Exception, "Invalid cropped image in test case: " + str(testCase) + ". Image info (displayWindow, dataWindow,bufferSize): " + str( croppedImg.displayWindow) + ", " + str( croppedImg.dataWindow ) + ", " + str( len(croppedImg["R"].data) )
+			if not croppedImg.channelsValid():
+				raise Exception, "Invalid cropped image in test case: " + str(testCase) + ". Image info (displayWindow, dataWindow,bufferSize): " + str( croppedImg.displayWindow) + ", " + str( croppedImg.dataWindow ) + ", " + str( len(croppedImg["R"]) )
 
 
 			#Uncomment to generate missing expected result files

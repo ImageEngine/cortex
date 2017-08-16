@@ -98,12 +98,12 @@ class ImageWriterTest( unittest.TestCase ) :
 
 				offset = offset + 1
 
-		img["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, R )
-		img["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, G )
-		img["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, B )
+		img["R"] = R
+		img["G"] = G
+		img["B"] = B
 
 		if withAlpha:
-			img["A"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, A )
+			img["A"] = A
 
 		return img
 
@@ -129,9 +129,9 @@ class ImageWriterTest( unittest.TestCase ) :
 
 				offset = offset + 1
 
-		img["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, R )
-		img["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, G )
-		img["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, B )
+		img["R"] = R
+		img["G"] = G
+		img["B"] = B
 
 		return img
 
@@ -153,7 +153,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 				offset = offset + 1
 
-		img["Y"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, Y )
+		img["Y"] = Y
 
 		return img
 
@@ -206,7 +206,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			r = IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" )
 			imgNew = r.read()
 
-			self.assertEqual( type(imgNew['R'].data), IECore.FloatVectorData )
+			self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
 			self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
@@ -228,7 +228,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			IECore.V2i( 199, 199 )
 		)
 
-		self.failIf( imgOrig.arePrimitiveVariablesValid() )
+		self.failIf( imgOrig.channelsValid() )
 
 		w = IECore.Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
@@ -366,10 +366,10 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgNew = r.read()
 
 			if rawMode :
-				self.assertEqual( type(imgNew['R'].data), IECore.UCharVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.UCharVectorData )
 				self.__verifyImageRGB( rawImage, imgNew, 0.008 )
 			else :
-				self.assertEqual( type(imgNew['R'].data), IECore.FloatVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
 				self.__verifyImageRGB( imgOrig, imgNew, 0.008 )
 
 			self.tearDown()
@@ -450,10 +450,10 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgNew = r.read()
 
 			if rawMode :
-				self.assertEqual( type(imgNew['R'].data), IECore.UShortVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.UShortVectorData )
 				self.__verifyImageRGB( rawImage, imgNew )
 			else :
-				self.assertEqual( type(imgNew['R'].data), IECore.FloatVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
 				self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
@@ -508,10 +508,10 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgNew = r.read()
 
 			if rawMode :
-				self.assertEqual( type(imgNew['R'].data), IECore.UCharVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.UCharVectorData )
 				self.__verifyImageRGB( rawImage, imgNew, 0.003 )
 			else :
-				self.assertEqual( type(imgNew['R'].data), IECore.FloatVectorData )
+				self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
 				self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()

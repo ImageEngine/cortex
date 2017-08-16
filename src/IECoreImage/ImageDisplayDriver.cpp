@@ -114,19 +114,19 @@ void ImageDisplayDriver::imageData( const Box2i &box, const float *data, size_t 
 		throw Exception("Invalid dataSize value.");
 	}
 
-	int channel, targetX, targetY, sourceWidth, sourceHeight, targetWidth;
+	int channelId, targetX, targetY, sourceWidth, sourceHeight, targetWidth;
 	sourceWidth = box.max.x - box.min.x + 1;
 	sourceHeight = box.max.y - box.min.y + 1;
 	targetWidth = dataWindow.max.x - dataWindow.min.x + 1;
-	channel = 0;
+	channelId = 0;
 	targetX = box.min.x - dataWindow.min.x;
 	targetY = box.min.y - dataWindow.min.y;
 
-	for ( vector<string>::const_iterator it = channelNames().begin(); it != channelNames().end(); it++, channel++ )
+	for( const auto &name : channelNames() )
 	{
-		vector< float > &target = boost::static_pointer_cast< FloatVectorData >(m_image->variables[ *it ].data)->writable();
+		vector< float > &target = boost::static_pointer_cast< FloatVectorData >( m_image->channels[name] )->writable();
 		vector< float >::iterator targetIt;
-		const float *sourceIt = data+channel;
+		const float *sourceIt = data+channelId;
 		targetIt = target.begin()+targetWidth*targetY+targetX;
 
 		for ( int y = 0; y < sourceHeight; y++ )
@@ -139,6 +139,8 @@ void ImageDisplayDriver::imageData( const Box2i &box, const float *data, size_t 
 			}
 			targetIt += targetWidth - sourceWidth;
 		}
+
+		++channelId;
 	}
 }
 

@@ -148,19 +148,19 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
 		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) ) )
 
-		self.assertTrue( i.arePrimitiveVariablesValid() )
+		self.assertTrue( i.channelsValid() )
 
 		self.assertEqual( len( i ), 3 )
 		for c in ["R", "G", "B"] :
-			self.assertEqual( i[c].data.typeId(), IECore.FloatVectorData.staticTypeId() )
+			self.assertEqual( i[c].typeId(), IECore.FloatVectorData.staticTypeId() )
 
-		r = i["R"].data
+		r = i["R"]
 		self.assertEqual( r[0], 0 )
 		self.assertEqual( r[-1], 1 )
-		g = i["G"].data
-		self.assertEqual( r[0], 0 )
-		self.assertEqual( r[-1], 1 )
-		for b in i["B"].data :
+		g = i["G"]
+		self.assertEqual( g[0], 0 )
+		self.assertEqual( g[-1], 1 )
+		for b in i["B"] :
 			self.assertEqual( b, 0 )
 
 	def testReadIndividualChannels( self ) :
@@ -171,7 +171,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		for c in ["R", "G", "B"] :
 
 			cd = r.readChannel( c )
-			self.assertEqual( i[c].data, cd )
+			self.assertEqual( i[c], cd )
 
 	def testNonZeroDataWindowOrigin( self ) :
 
@@ -181,7 +181,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 25 ), IECore.V2i( 49 ) ) )
 		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 99 ) ) )
 
-		self.assertTrue( i.arePrimitiveVariablesValid() )
+		self.assertTrue( i.channelsValid() )
 
 	def testOrientation( self ) :
 
@@ -196,7 +196,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		for index, expectedColor in indexedColors.items() :
 
-			color = IECore.V3f( img["R"].data[index], img["G"].data[index], img["B"].data[index] )
+			color = IECore.V3f( img["R"][index], img["G"][index], img["B"][index] )
 
 			self.assertTrue( ( color - expectedColor).length() < 1.e-6 )
 
@@ -291,14 +291,14 @@ class ImageReaderTest( unittest.TestCase ) :
 			self.assertEqual( img.displayWindow, IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 199, 99 ) ) )
 			self.assertEqual( img.dataWindow, IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( 199, 99 ) ) )
 
-			self.assertTrue( img.arePrimitiveVariablesValid() )
-			self.assertTrue( imgRaw.arePrimitiveVariablesValid() )
+			self.assertTrue( img.channelsValid() )
+			self.assertTrue( imgRaw.channelsValid() )
 
 			self.assertEqual( img.keys(), imgRaw.keys() )
 
 			for c in img.keys() :
-				self.assertEqual( type(img[c].data), IECore.FloatVectorData )
-				self.assertEqual( type(imgRaw[c].data), rawType )
+				self.assertEqual( type(img[c]), IECore.FloatVectorData )
+				self.assertEqual( type(imgRaw[c]), rawType )
 
 	def testRawDPX( self ) :
 
@@ -307,7 +307,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		r['rawChannels'] = True
 		img = r.read()
 		self.assertEqual( type(img), IECoreImage.ImagePrimitive )
-		self.assertEqual( type(img['R'].data), IECore.UShortVectorData )
+		self.assertEqual( type(img['R']), IECore.UShortVectorData )
 
 	def testJPG( self ) :
 

@@ -51,7 +51,7 @@ class CurveTracerTest( unittest.TestCase ) :
 		r = e.createResult()
 
 		size = i.dataWindow.size() + IECore.V2i( 1 )
-		pixels = i["R"].data
+		pixels = i["R"]
 		pi = 0
 		for y in range( 0, size.y ) :
 			for x in range( 0, size.x ) :

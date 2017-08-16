@@ -42,13 +42,12 @@ class SummedAreaOpTest( unittest.TestCase ) :
 	def test( self ) :
 
 		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
-		y = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
 		i = IECoreImage.ImagePrimitive( b, b )
-		i["Y"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, y )
+		i["Y"] = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
 
 		ii = IECoreImage.SummedAreaOp()( input=i, channels=IECore.StringVectorData( ["Y"] ) )
 
-		yy = ii["Y"].data
+		yy = ii["Y"]
 		self.assertEqual( yy[0], 1 )
 		self.assertEqual( yy[1], 3 )
 		self.assertEqual( yy[2], 4 )

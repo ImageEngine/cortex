@@ -203,9 +203,9 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 	assert( imageA );
 	assert( imageB );
 
-	if ( !imageA->arePrimitiveVariablesValid() || !imageB->arePrimitiveVariablesValid() )
+	if ( !imageA->channelsValid() || !imageB->channelsValid() )
 	{
-		throw InvalidArgumentException( "ImageDiffOp: Image with invalid primitive variables specified as input parameter" );
+		throw InvalidArgumentException( "ImageDiffOp: Image with invalid channels specified as input parameter" );
 	}
 
 	const bool alignDisplayWindows = m_alignDisplayWindowsParameter->getTypedValue();
@@ -276,28 +276,20 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 		}
 	}
 
-	for ( std::vector< std::string >::const_iterator it = channelsA.begin(); it != channelsA.end(); ++it )
+	for( const auto &name : channelsA )
 	{
-		PrimitiveVariableMap::const_iterator aPrimVarIt = imageA->variables.find( *it );
-		assert( aPrimVarIt != imageA->variables.end() );
-		assert( aPrimVarIt->second.interpolation == PrimitiveVariable::Vertex );
+		const auto aIt = imageA->channels.find( name );
+		assert( aIt != imageA->channels.end() );
 
-		PrimitiveVariableMap::const_iterator bPrimVarIt = imageB->variables.find( *it );
-		if ( bPrimVarIt == imageB->variables.end() )
+		const auto bIt = imageB->channels.find( name );
+		if ( bIt == imageB->channels.end() )
 		{
 			assert( skipMissingChannels );
 			continue;
 		}
 
-		assert( bPrimVarIt->second.interpolation == PrimitiveVariable::Vertex );
-
-		DataPtr aData = aPrimVarIt->second.data;
-
-		DataPtr bData = 0;
-		if ( bPrimVarIt != imageB->variables.end() )
-		{
-			bData = bPrimVarIt->second.data;
-		}
+		DataPtr aData = aIt->second;
+		DataPtr bData = bIt->second;
 
 		if ( aData == bData )
 		{
@@ -324,7 +316,7 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 		}
 		catch ( Exception &e )
 		{
-			msg( Msg::Warning, "ImageDiffOp", boost::format( "Could not convert data for image channel '%s' to floating point" ) % *it );
+			msg( Msg::Warning, "ImageDiffOp", boost::format( "Could not convert data for image channel '%s' to floating point" ) % name );
 			return new BoolData( true );
 		}
 

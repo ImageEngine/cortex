@@ -43,7 +43,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
-			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
+			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )
 			image[n] = p
 
 		lights = IECoreImage.EnvMapSampler()( image=image, subdivisionDepth=5 )
@@ -70,7 +70,7 @@ class EnvMapSamplerTest( unittest.TestCase ) :
 		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
-			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
+			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )
 			image[n] = p
 
 		lastColorSum = None

@@ -92,44 +92,21 @@ void ChannelOp::modify( Object * primitive, const CompoundObject * operands )
 
 	ChannelVector channels;
 
-	/// \todo Just use ImagePrimitive::channelValid. We don't want to do that right now
-	/// as it imposes loose restrictions on the channel datatype - in the future it should perhaps
-	/// impose the restrictions we have here (float, int or half vector data).
-	/// Would be useful to add a TypeTraits class which can test compatiblity againt ImagePrimitive-supported channels, too.
-	size_t numPixels = image->variableSize( PrimitiveVariable::Vertex );
-	const vector<string> channelNames = channelNamesParameter()->getTypedValue();
-	for( unsigned i=0; i<channelNames.size(); i++ )
+	const vector<string> &channelNames = channelNamesParameter()->getTypedValue();
+	for( const auto &name : channelNames )
 	{
-		PrimitiveVariableMap::iterator it = image->variables.find( channelNames[i] );
-		if( it==image->variables.end() )
+		std::string reason;
+		if( !image->channelValid( name, &reason ) )
 		{
-			throw Exception( str( format( "Channel \"%s\" does not exist." ) % channelNames[i] ) );
+			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % name ) + reason );
 		}
 
-		if( it->second.interpolation!=PrimitiveVariable::Vertex &&
-			it->second.interpolation!=PrimitiveVariable::Varying &&
-			it->second.interpolation!=PrimitiveVariable::FaceVarying )
+		if( !image->channels[name]->isInstanceOf( FloatVectorData::staticTypeId() ) )
 		{
-			throw Exception( str( format( "Primitive variable \"%s\" has inappropriate interpolation." ) % channelNames[i] ) );
+			throw Exception( str( format( "Channel \"%s\" is invalid: not a float vector." ) % name ) );
 		}
 
-		if( !it->second.data )
-		{
-			throw Exception( str( format( "Primitive variable \"%s\" has no data." ) % channelNames[i] ) );
-		}
-
-		if( !it->second.data->isInstanceOf( FloatVectorData::staticTypeId() ) )
-		{
-			throw Exception( str( format( "Primitive variable \"%s\" is not a float vector." ) % channelNames[i] ) );
-		}
-
-		size_t size = despatchTypedData<TypedDataSize>( it->second.data.get() );
-		if( size!=numPixels )
-		{
-			throw Exception( str( format( "Primitive variable \"%s\" has wrong size (%d but should be %d)." ) % channelNames[i] % size % numPixels ) );
-		}
-
-		channels.push_back( boost::static_pointer_cast< FloatVectorData >( it->second.data ) );
+		channels.push_back( boost::static_pointer_cast< FloatVectorData >( image->channels[name] ) );
 	}
 
 	modifyChannels( image->getDisplayWindow(), image->getDataWindow(), channels );
