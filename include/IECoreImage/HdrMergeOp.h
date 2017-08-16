@@ -38,16 +38,10 @@
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/NumericParameter.h"
+#include "IECore/TypedObjectParameter.h"
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
-
-namespace IECore
-{
-
-IE_CORE_FORWARDDECLARE( ObjectParameter )
-
-} // namespace IECore
 
 namespace IECoreImage
 {
@@ -64,9 +58,9 @@ class IECOREIMAGE_API HdrMergeOp : public IECore::Op
 		HdrMergeOp();
 		virtual ~HdrMergeOp();
 
-		/// The Parameter for the group with input images.
-		IECore::ObjectParameter *inputGroupParameter();
-		const IECore::ObjectParameter *inputGroupParameter() const;
+		/// The Parameter for the vector of input images.
+		IECore::ObjectVectorParameter *inputImagesParameter();
+		const IECore::ObjectVectorParameter *inputImagesParameter() const;
 
 		IECore::FloatParameter *exposureStepParameter();
 		const IECore::FloatParameter *exposureStepParameter() const;
@@ -83,7 +77,7 @@ class IECOREIMAGE_API HdrMergeOp : public IECore::Op
 
 	private :
 
-		IECore::ObjectParameterPtr m_inputGroupParameter;
+		IECore::ObjectVectorParameterPtr m_inputImagesParameter;
 		IECore::FloatParameterPtr m_exposureStepParameter;
 		IECore::FloatParameterPtr m_exposureAdjustmentParameter;
 		IECore::Box2fParameterPtr m_windowingParameter;

@@ -37,9 +37,9 @@
 #include "boost/format.hpp"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/ObjectParameter.h"
 #include "IECore/Math.h"
-#include "IECore/Group.h"
+#include "IECore/ObjectVector.h"
+#include "IECore/TypedObjectParameter.h"
 
 #include "IECoreImage/HdrMergeOp.h"
 #include "IECoreImage/ImagePrimitive.h"
@@ -63,12 +63,12 @@ HdrMergeOp::HdrMergeOp()
 		)
 	)
 {
-	m_inputGroupParameter = new ObjectParameter(
-		"inputGroup",
-		"The Group of ImagePrimitive objects that will be merged. "
-		"The order of the images in the group is important and should be from the less exposed to the most exposed image.",
-		new Group(),
-		GroupTypeId
+	m_inputImagesParameter = new ObjectVectorParameter(
+		"inputImages",
+		"The ObjectVector of ImagePrimitive objects that will be merged. "
+		"The order of the images in the vector is important and should be "
+		"from the least exposed to the most exposed image.",
+		new ObjectVector()
 	);
 	m_exposureStepParameter = new FloatParameter(
 		"exposureStep",
@@ -101,7 +101,7 @@ HdrMergeOp::HdrMergeOp()
 		"zones are weighted with a smooth curve.",
 		new Box2fData( Box2f( V2f( 0.0, 0.05 ), V2f( 0.9, 1.0 ) ) )
 	);
-	parameters()->addParameter( m_inputGroupParameter );
+	parameters()->addParameter( m_inputImagesParameter );
 	parameters()->addParameter( m_exposureStepParameter );
 	parameters()->addParameter( m_exposureAdjustmentParameter );
 	parameters()->addParameter( m_windowingParameter );
@@ -111,14 +111,14 @@ HdrMergeOp::~HdrMergeOp()
 {
 }
 
-ObjectParameter * HdrMergeOp::inputGroupParameter()
+ObjectVectorParameter * HdrMergeOp::inputImagesParameter()
 {
-	return m_inputGroupParameter.get();
+	return m_inputImagesParameter.get();
 }
 
-const ObjectParameter * HdrMergeOp::inputGroupParameter() const
+const ObjectVectorParameter * HdrMergeOp::inputImagesParameter() const
 {
-	return m_inputGroupParameter.get();
+	return m_inputImagesParameter.get();
 }
 
 FloatParameter * HdrMergeOp::exposureStepParameter()
@@ -211,17 +211,17 @@ inline void merge( bool firstImage, size_t &pixelCount,
 
 ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 {
-	Group *imageGroup = static_cast<Group *>( m_inputGroupParameter->getValue() );
+	const ObjectVector *images = operands->member<const ObjectVector>( "inputImages" );
 
-	// first of all, check if the group contains ImagePrimitive objects with float or half vector data types and "R","G","B" channels.
-	const Group::ChildContainer &images = imageGroup->children();
-	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++ )
+	// Check if the input contains ImagePrimitives with float or
+	// half vector data types and "R","G","B" channels.
+	for( const auto &object : images->members() )
 	{
-		if ( (*it)->typeId() != (IECore::TypeId)ImagePrimitiveTypeId )
+		if ( object->typeId() != (IECore::TypeId)ImagePrimitiveTypeId )
 		{
-			throw Exception( "Input group should contain images only!" );
+			throw Exception( "Input should contain images only!" );
 		}
-		ImagePrimitivePtr img = boost::static_pointer_cast< ImagePrimitive >(*it);
+		ImagePrimitivePtr img = boost::static_pointer_cast< ImagePrimitive >( object );
 		if ( !((img->getChannel< float >( "R" ) &&
 				img->getChannel< float >( "G" ) &&
 				img->getChannel< float >( "B" )) ||
@@ -234,7 +234,8 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 			throw Exception( "Input images must have RGB channels of either half or float data types." );
 		}
 	}
-	if ( images.size() == 0 )
+
+	if( images->members().empty() )
 	{
 		throw Exception( "Input group has no images to merge!" );
 	}
@@ -249,20 +250,20 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 	FloatVectorDataPtr outA = new FloatVectorData();
 
 	ImagePrimitivePtr outImg = new ImagePrimitive();
-	outImg->variables["R"] = PrimitiveVariable( PrimitiveVariable::Vertex, outR );
-	outImg->variables["G"] = PrimitiveVariable( PrimitiveVariable::Vertex, outG );
-	outImg->variables["B"] = PrimitiveVariable( PrimitiveVariable::Vertex, outB );
-	outImg->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, outA );
+	outImg->channels["R"] = outR;
+	outImg->channels["G"] = outG;
+	outImg->channels["B"] = outB;
+	outImg->channels["A"] = outA;
 
 	// loop over inputs accumulating them into the buffer
-	int numInputs = images.size();
+	int numInputs = images->members().size();
 
 	float exposure = exposureStep * (numInputs-1)/2.0;
 	size_t pixelCount = 0;
 	bool firstImage = true;
-	for ( Group::ChildContainer::const_iterator it = images.begin(); it != images.end(); it++, firstImage = false )
+	for( const auto &object : images->members() )
 	{
-		const ImagePrimitive *img = static_cast<const ImagePrimitive *>( it->get() );
+		const ImagePrimitive *img = static_cast<const ImagePrimitive *>( object.get() );
 		float intensityMultiplier = pow( 2.0f, exposure );
 		if ( img->getChannel< float >( "R" ) )
 		{
@@ -272,9 +273,11 @@ ObjectPtr HdrMergeOp::doOperation( const CompoundObject * operands )
 		{
 			merge< half >( firstImage, pixelCount, img, outImg.get(), windowing, intensityMultiplier, outR.get(), outG.get(), outB.get(), outA.get() );
 		}
+
 		exposure -= exposureStep;
+		firstImage = false;
 	}
-	
+
 	// normalize the outputs
 	float adjustment = pow( 2.0f, -exposureAdjustment );
 	float *ptrOutR = &(outR->writable()[0]);
