@@ -204,6 +204,11 @@ void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const 
 			IN3fGeomParam p( params, header.getName() );
 			convertGeomParam( p, sampleSelector, primitive );
 		}
+		else if( IP3fGeomParam::matches( header ) )
+		{
+			IP3fGeomParam p( params, header.getName() );
+			convertGeomParam( p, sampleSelector, primitive );
+		}
 		else if( IM44fGeomParam::matches( header ) )
 		{
 			IM44fGeomParam p( params, header.getName() );
