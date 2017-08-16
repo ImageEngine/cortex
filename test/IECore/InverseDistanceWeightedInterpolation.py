@@ -79,33 +79,23 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
 
-		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )
-		
-		o = 0
-		f = FloatVectorData( size * size )
-		for i in range( 0, size ):
-
-			for j in range( 0, size ) :
-
-				r =  idw( V2f( i, j ) )
-
-				f[o] = r
-				o = o + 1
-
-		i = ImagePrimitive( b, b )
-		i["r"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
-		i["g"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
-		i["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
-
-		expectedImage = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationV2ff.exr" ).read()
-
-		op = ImageDiffOp()
-		res = op(
-			imageA = i,
-			imageB = expectedImage
+		expected = (
+			0.18944, 0.18686, 0.18517, 0.18489, 0.18669, 0.19138, 0.19995, 0.21342, 0.23276, 0.25867,
+			0.18253, 0.17896, 0.17615, 0.17465, 0.17522, 0.17881, 0.18661, 0.19994, 0.22011, 0.24815,
+			0.17659, 0.17212, 0.16824, 0.16554, 0.16485, 0.16725, 0.17415, 0.18721, 0.20818, 0.23848,
+			0.17190, 0.16668, 0.16188, 0.15811, 0.15626, 0.15751, 0.16350, 0.17625, 0.19802, 0.23077,
+			0.16867, 0.16297, 0.15751, 0.15294, 0.15018, 0.15051, 0.15574, 0.16832, 0.19104, 0.22641,
+			0.16704, 0.16120, 0.15547, 0.15050, 0.14726, 0.14709, 0.15198, 0.16478, 0.18876, 0.22699,
+			0.16697, 0.16144, 0.15593, 0.15109, 0.14791, 0.14787, 0.15313, 0.16680, 0.19254, 0.23382,
+			0.16821, 0.16350, 0.15880, 0.15473, 0.15234, 0.15321, 0.15969, 0.17500, 0.20298, 0.24726,
+			0.17022, 0.16681, 0.16351, 0.16094, 0.16014, 0.16277, 0.17126, 0.18882, 0.21923, 0.26605,
+			0.17207, 0.17031, 0.16891, 0.16843, 0.16990, 0.17497, 0.18600, 0.20605, 0.23867, 0.28713,
 		)
 
-		self.failIf( res.value )
+		for i in range( 0, 10 ):
+			for j in range( 0, 10 ) :
+				r =  idw( V2f( i, j ) )
+				self.assertAlmostEqual( r, expected[i*10 + j], 5 )
 
 	def testVectorQueries( self ):
 
@@ -123,7 +113,7 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 			v.append( random.uniform( 0, 1 ) )
 
 		idw = InverseDistanceWeightedInterpolationV2ff( p, v, 10 )
-		
+
 		queryPoints = V2fVectorData()
 		for i in range( 0, size ):
 			for j in range( 0, size ) :
@@ -131,21 +121,22 @@ class TestInverseDistanceWeightedInterpolation(unittest.TestCase):
 
 		f = idw( queryPoints )
 
-		b = Box2i( V2i(0, 0), V2i( size-1, size-1 ) )		
-		i = ImagePrimitive( b, b )
-		i["R"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, f )
-
-		Writer.create( i, "/tmp/t.exr" ).write()
-
-		expectedImage = Reader.create( "test/IECore/data/expectedResults/inverseDistanceWeightedInterpolationVectorV2ff.exr" ).read()
-
-		op = ImageDiffOp()
-		res = op(
-			imageA = i,
-			imageB = expectedImage
+		expected = (
+			0.19844, 0.19087, 0.18747, 0.18713, 0.18954, 0.19380, 0.19915, 0.20507, 0.21172, 0.22308,
+			0.19582, 0.18663, 0.18254, 0.18296, 0.18653, 0.19222, 0.19917, 0.20616, 0.21279, 0.22258,
+			0.19699, 0.18465, 0.17956, 0.18030, 0.18578, 0.19412, 0.20304, 0.21075, 0.21731, 0.22494,
+			0.20597, 0.18909, 0.18150, 0.18247, 0.18999, 0.20225, 0.21449, 0.22408, 0.22882, 0.23116,
+			0.23220, 0.20992, 0.19815, 0.19823, 0.20791, 0.22246, 0.23758, 0.24799, 0.25151, 0.24737,
+			0.29168, 0.26577, 0.25006, 0.24703, 0.25415, 0.26680, 0.27718, 0.28169, 0.27858, 0.26721,
+			0.39600, 0.37585, 0.35828, 0.34773, 0.34324, 0.34070, 0.33604, 0.32591, 0.30787, 0.28097,
+			0.52160, 0.52027, 0.50894, 0.48644, 0.45900, 0.43126, 0.40132, 0.36646, 0.32886, 0.28795,
+			0.62477, 0.63906, 0.63500, 0.61053, 0.56471, 0.50782, 0.45051, 0.38819, 0.32783, 0.27786,
+			0.68951, 0.71161, 0.71069, 0.68313, 0.63113, 0.55610, 0.46952, 0.38273, 0.30192, 0.24791,
 		)
 
-		self.failIf( res.value )
-		
+		for i in range( 0, 10 ) :
+			for j in range( 0, 10 ) :
+				self.assertAlmostEqual( f[i*size + j], expected[i*10 + j], 5 )
+
 if __name__ == "__main__":
 	unittest.main()
