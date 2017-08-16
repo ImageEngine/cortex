@@ -32,6 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "boost/format.hpp"
+
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
@@ -41,6 +43,7 @@
 #include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/LuminanceOp.h"
 
+using namespace boost;
 using namespace Imath;
 using namespace IECore;
 using namespace IECoreImage;
@@ -48,37 +51,37 @@ using namespace IECoreImage;
 IE_CORE_DEFINERUNTIMETYPED( LuminanceOp );
 
 LuminanceOp::LuminanceOp()
-	:	ModifyOp( "Calculates luminance and adds it as a primitive variable.", new ImagePrimitiveParameter( "result", "The result", new ImagePrimitive() ), new ImagePrimitiveParameter( "input", "The image to modify", new ImagePrimitive() ) )
+	:	ModifyOp( "Calculates luminance and adds it as a channel.", new ImagePrimitiveParameter( "result", "The result", new ImagePrimitive() ), new ImagePrimitiveParameter( "input", "The image to modify", new ImagePrimitive() ) )
 {
 
-	m_colorPrimVarParameter = new StringParameter(
-		"colorPrimVar",
-		"The name of the primitive variable which holds colour data. This "
+	m_colorChannelParameter = new StringParameter(
+		"colorChannel",
+		"The name of the channel which holds colour data. This "
 		"can have data of type Color3fData or Color3fVectorData.",
 		"Cs"
 	);
 
-	m_redPrimVarParameter = new StringParameter(
-		"redPrimVar",
-		"The name of the primitive variable which holds the red channel of the colour data. This "
+	m_redChannelParameter = new StringParameter(
+		"redChannel",
+		"The name of the channel which holds the red channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
-		"However, The type of this primvar must match the type of the other colour component primvars.",
+		"However, The type of this channel must match the type of the other colour component Channels.",
 		"R"
 	);
 
-	m_greenPrimVarParameter = new StringParameter(
-		"greenPrimVar",
-		"The name of the primitive variable which holds the green channel of the colour data. This "
+	m_greenChannelParameter = new StringParameter(
+		"greenChannel",
+		"The name of the channel which holds the green channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
-		"However, The type of this primvar must match the type of the other colour component primvars.",
+		"However, The type of this channel must match the type of the other colour component Channels.",
 		"G"
 	);
 
-	m_bluePrimVarParameter = new StringParameter(
-		"bluePrimVar",
-		"The name of the primitive variable which holds the blue channel of the colour data. This "
+	m_blueChannelParameter = new StringParameter(
+		"blueChannel",
+		"The name of the channel which holds the blue channel of the colour data. This "
 		"can have data of type HalfData, HalfVectorData, FloatData or FloatVectorData. "
-		"However, The type of this primvar must match the type of the other colour component primvars.",
+		"However, The type of this channel must match the type of the other colour component Channels.",
 		"B"
 	);
 
@@ -88,25 +91,25 @@ LuminanceOp::LuminanceOp()
 		Color3f( 0.2125, 0.7154, 0.0721 )
 	);
 
-	m_luminancePrimVarParameter = new StringParameter(
-		"luminancePrimVar",
-		"The name of the primitive variable to hold the resulting luminance data.",
+	m_luminanceChannelParameter = new StringParameter(
+		"luminanceChannel",
+		"The name of the channel to hold the resulting luminance data.",
 		"Y"
 	);
 
-	m_removeColorPrimVarsParameter = new BoolParameter(
-		"removeColorPrimVars",
-		"When this is true, the input primitive variables are removed after luminance is calculated.",
+	m_removeColorChannelsParameter = new BoolParameter(
+		"removeColorChannels",
+		"When this is true, the input channels are removed after luminance is calculated.",
 		true
 	);
 
-	parameters()->addParameter( m_colorPrimVarParameter );
-	parameters()->addParameter( m_redPrimVarParameter );
-	parameters()->addParameter( m_greenPrimVarParameter );
-	parameters()->addParameter( m_bluePrimVarParameter );
+	parameters()->addParameter( m_colorChannelParameter );
+	parameters()->addParameter( m_redChannelParameter );
+	parameters()->addParameter( m_greenChannelParameter );
+	parameters()->addParameter( m_blueChannelParameter );
 	parameters()->addParameter( m_weightsParameter );
-	parameters()->addParameter( m_luminancePrimVarParameter );
-	parameters()->addParameter( m_removeColorPrimVarsParameter );
+	parameters()->addParameter( m_luminanceChannelParameter );
+	parameters()->addParameter( m_removeColorChannelsParameter );
 
 }
 
@@ -114,44 +117,44 @@ LuminanceOp::~LuminanceOp()
 {
 }
 
-StringParameter * LuminanceOp::colorPrimVarParameter()
+StringParameter * LuminanceOp::colorChannelParameter()
 {
-	return m_colorPrimVarParameter.get();
+	return m_colorChannelParameter.get();
 }
 
-const StringParameter * LuminanceOp::colorPrimVarParameter() const
+const StringParameter * LuminanceOp::colorChannelParameter() const
 {
-	return m_colorPrimVarParameter.get();
+	return m_colorChannelParameter.get();
 }
 
-StringParameter * LuminanceOp::redPrimVarParameter()
+StringParameter * LuminanceOp::redChannelParameter()
 {
-	return m_redPrimVarParameter.get();
+	return m_redChannelParameter.get();
 }
 
-const StringParameter * LuminanceOp::redPrimVarParameter() const
+const StringParameter * LuminanceOp::redChannelParameter() const
 {
-	return m_redPrimVarParameter.get();
+	return m_redChannelParameter.get();
 }
 
-StringParameter * LuminanceOp::greenPrimVarParameter()
+StringParameter * LuminanceOp::greenChannelParameter()
 {
-	return m_greenPrimVarParameter.get();
+	return m_greenChannelParameter.get();
 }
 
-const StringParameter * LuminanceOp::greenPrimVarParameter() const
+const StringParameter * LuminanceOp::greenChannelParameter() const
 {
-	return m_greenPrimVarParameter.get();
+	return m_greenChannelParameter.get();
 }
 
-StringParameter * LuminanceOp::bluePrimVarParameter()
+StringParameter * LuminanceOp::blueChannelParameter()
 {
-	return m_bluePrimVarParameter.get();
+	return m_blueChannelParameter.get();
 }
 
-const StringParameter * LuminanceOp::bluePrimVarParameter() const
+const StringParameter * LuminanceOp::blueChannelParameter() const
 {
-	return m_bluePrimVarParameter.get();
+	return m_blueChannelParameter.get();
 }
 
 Color3fParameter * LuminanceOp::weightsParameter()
@@ -165,24 +168,24 @@ const Color3fParameter * LuminanceOp::weightsParameter() const
 }
 
 
-StringParameter * LuminanceOp::luminancePrimVarParameter()
+StringParameter * LuminanceOp::luminanceChannelParameter()
 {
-	return m_luminancePrimVarParameter.get();
+	return m_luminanceChannelParameter.get();
 }
 
-const StringParameter * LuminanceOp::luminancePrimVarParameter() const
+const StringParameter * LuminanceOp::luminanceChannelParameter() const
 {
-	return m_luminancePrimVarParameter.get();
+	return m_luminanceChannelParameter.get();
 }
 
-BoolParameter * LuminanceOp::removeColorPrimVarsParameter()
+BoolParameter * LuminanceOp::removeColorChannelsParameter()
 {
-	return m_removeColorPrimVarsParameter.get();
+	return m_removeColorChannelsParameter.get();
 }
 
-const BoolParameter * LuminanceOp::removeColorPrimVarsParameter() const
+const BoolParameter * LuminanceOp::removeColorChannelsParameter() const
 {
-	return m_removeColorPrimVarsParameter.get();
+	return m_removeColorChannelsParameter.get();
 }
 
 template<typename T>
@@ -201,22 +204,21 @@ void LuminanceOp::calculate( const T *r, const T *g, const T *b, int steps[3], i
 void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 {
 	ImagePrimitive *image = runTimeCast<ImagePrimitive>( object );
-	PrimitiveVariableMap &variables = image->variables;
+	ImagePrimitive::ChannelMap &channels = image->channels;
 
 	DataPtr luminanceData = 0;
-	PrimitiveVariable::Interpolation interpolation = PrimitiveVariable::Invalid;
 	int steps[3] = { 1, 1, 1 };
 
-	PrimitiveVariableMap::iterator colorIt = variables.find( m_colorPrimVarParameter->getTypedValue() );
-	if( colorIt!=variables.end() && colorIt->second.data )
+	const auto colorIt = channels.find( m_colorChannelParameter->getTypedValue() );
+	if( colorIt != channels.end() && colorIt->second )
 	{
 		// RGB in a single channel
-		switch( colorIt->second.data->typeId() )
+		switch( colorIt->second->typeId() )
 		{
 			case Color3fDataTypeId :
 				{
 					FloatDataPtr l = new FloatData;
-					const float *d = boost::static_pointer_cast<Color3fData>( colorIt->second.data )->baseReadable();
+					const float *d = boost::static_pointer_cast<Color3fData>( colorIt->second )->baseReadable();
 					calculate( d, d + 1, d + 2, steps, 1, l->baseWritable() );
 					luminanceData = l;
 				}
@@ -224,7 +226,7 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 			case Color3fVectorDataTypeId :
 				{
 					FloatVectorDataPtr l = new FloatVectorData;
-					Color3fVectorDataPtr d = boost::static_pointer_cast<Color3fVectorData>( colorIt->second.data );
+					Color3fVectorDataPtr d = boost::static_pointer_cast<Color3fVectorData>( colorIt->second );
 					l->writable().resize( d->readable().size() );
 					const float *dd = d->baseReadable();
 					steps[0] = steps[1] = steps[2] = 3;
@@ -233,44 +235,44 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 				}
 				break;
 			default :
-				throw Exception( "PrimitiveVariable has unsupported type." );
+				throw Exception( "Channel has unsupported type." );
 				break;
 		}
-		interpolation = colorIt->second.interpolation;
 	}
 	else
 	{
 		// separate RGB channels?
-		PrimitiveVariableMap::iterator rIt = variables.find( m_redPrimVarParameter->getTypedValue() );
-		PrimitiveVariableMap::iterator gIt = variables.find( m_greenPrimVarParameter->getTypedValue() );
-		PrimitiveVariableMap::iterator bIt = variables.find( m_bluePrimVarParameter->getTypedValue() );
-		if( rIt==variables.end() || gIt==variables.end() || bIt==variables.end() )
+		const auto rIt = channels.find( m_redChannelParameter->getTypedValue() );
+		const auto gIt = channels.find( m_greenChannelParameter->getTypedValue() );
+		const auto bIt = channels.find( m_blueChannelParameter->getTypedValue() );
+
+		std::string reason;
+		if( !image->channelValid( rIt->first, &reason ) )
 		{
-			throw Exception( "Primitive does not have appropriately named PrimitiveVariables." );
+			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % rIt->first ) + reason );
 		}
-		IECore::TypeId type = rIt->second.data->typeId();
-		if( gIt->second.data->typeId() != type || bIt->second.data->typeId() != type )
+		if( !image->channelValid( gIt->first, &reason ) )
 		{
-			throw Exception( "PrimitiveVariable types do not match." );
+			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % gIt->first ) + reason );
 		}
-		size_t rSize = despatchTypedData<TypedDataSize>( rIt->second.data.get() );
-		size_t gSize = despatchTypedData<TypedDataSize>( gIt->second.data.get() );
-		size_t bSize = despatchTypedData<TypedDataSize>( bIt->second.data.get() );
-		if( rSize!=gSize || rSize!=bSize )
+		if( !image->channelValid( bIt->first, &reason ) )
 		{
-			throw Exception( "PrimitiveVariable sizes do not match." );
+			throw Exception( str( format( "Channel \"%s\" is invalid: " ) % bIt->first ) + reason );
 		}
-		switch( type )
+
+		size_t channelSize = image->channelSize();
+
+		switch( rIt->second->typeId() )
 		{
 			case HalfDataTypeId :
 				{
 					HalfDataPtr l = new HalfData;
 					calculate(
-						boost::static_pointer_cast<HalfData>( rIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<HalfData>( gIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<HalfData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( rIt->second )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( gIt->second )->baseReadable(),
+						boost::static_pointer_cast<HalfData>( bIt->second )->baseReadable(),
 						steps,
-						rSize,
+						channelSize,
 						l->baseWritable()
 					);
 					luminanceData = l;
@@ -279,13 +281,13 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 			case HalfVectorDataTypeId :
 				{
 					HalfVectorDataPtr l = new HalfVectorData;
-					l->writable().resize( rSize );
+					l->writable().resize( channelSize );
 					calculate(
-						boost::static_pointer_cast<HalfVectorData>( rIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<HalfVectorData>( gIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<HalfVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( rIt->second )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( gIt->second )->baseReadable(),
+						boost::static_pointer_cast<HalfVectorData>( bIt->second )->baseReadable(),
 						steps,
-						rSize,
+						channelSize,
 						l->baseWritable()
 					);
 					luminanceData = l;
@@ -295,11 +297,11 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 				{
 					FloatDataPtr l = new FloatData;
 					calculate(
-						boost::static_pointer_cast<FloatData>( rIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<FloatData>( gIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<FloatData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( rIt->second )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( gIt->second )->baseReadable(),
+						boost::static_pointer_cast<FloatData>( bIt->second )->baseReadable(),
 						steps,
-						rSize,
+						channelSize,
 						l->baseWritable()
 					);
 					luminanceData = l;
@@ -308,35 +310,33 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 			case FloatVectorDataTypeId :
 				{
 					FloatVectorDataPtr l = new FloatVectorData;
-					l->writable().resize( rSize );
+					l->writable().resize( channelSize );
 					calculate(
-						boost::static_pointer_cast<FloatVectorData>( rIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<FloatVectorData>( gIt->second.data )->baseReadable(),
-						boost::static_pointer_cast<FloatVectorData>( bIt->second.data )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( rIt->second )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( gIt->second )->baseReadable(),
+						boost::static_pointer_cast<FloatVectorData>( bIt->second )->baseReadable(),
 						steps,
-						rSize,
+						channelSize,
 						l->baseWritable()
 					);
 					luminanceData = l;
 				}
 				break;
 			default :
-				throw Exception( "PrimitiveVariables have unsupported type." );
+				throw Exception( "Channels have unsupported type." );
 				break;
 		}
-		interpolation = rIt->second.interpolation;
 	}
 
-	assert( interpolation != PrimitiveVariable::Invalid );
 	assert( luminanceData );
 
-	variables[luminancePrimVarParameter()->getTypedValue()] = PrimitiveVariable( interpolation, luminanceData );
+	channels[luminanceChannelParameter()->getTypedValue()] = luminanceData;
 
-	if( removeColorPrimVarsParameter()->getTypedValue() )
+	if( removeColorChannelsParameter()->getTypedValue() )
 	{
-		variables.erase( colorPrimVarParameter()->getTypedValue() );
-		variables.erase( redPrimVarParameter()->getTypedValue() );
-		variables.erase( greenPrimVarParameter()->getTypedValue() );
-		variables.erase( bluePrimVarParameter()->getTypedValue() );
+		channels.erase( colorChannelParameter()->getTypedValue() );
+		channels.erase( redChannelParameter()->getTypedValue() );
+		channels.erase( greenChannelParameter()->getTypedValue() );
+		channels.erase( blueChannelParameter()->getTypedValue() );
 	}
 }

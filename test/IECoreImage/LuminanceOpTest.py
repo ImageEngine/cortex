@@ -42,24 +42,20 @@ class LuminanceOpTest( unittest.TestCase ) :
 
 		o = IECoreImage.LuminanceOp()
 
-		self.assertEqual( o["colorPrimVar"].getTypedValue(), "Cs" )
-		self.assertEqual( o["redPrimVar"].getTypedValue(), "R" )
-		self.assertEqual( o["greenPrimVar"].getTypedValue(), "G" )
-		self.assertEqual( o["bluePrimVar"].getTypedValue(), "B" )
-		self.assertEqual( o["luminancePrimVar"].getTypedValue(), "Y" )
-		self.assertEqual( o["removeColorPrimVars"].getTypedValue(), True )
+		self.assertEqual( o["colorChannel"].getTypedValue(), "Cs" )
+		self.assertEqual( o["redChannel"].getTypedValue(), "R" )
+		self.assertEqual( o["greenChannel"].getTypedValue(), "G" )
+		self.assertEqual( o["blueChannel"].getTypedValue(), "B" )
+		self.assertEqual( o["luminanceChannel"].getTypedValue(), "Y" )
+		self.assertEqual( o["removeColorChannels"].getTypedValue(), True )
 
 	def testSeparateRGB( self ) :
 
-		i = IECoreImage.ImagePrimitive()
-
-		r = IECore.FloatVectorData( [ 1, 2, 3 ] )
-		g = IECore.FloatVectorData( [ 4, 5, 6 ] )
-		b = IECore.FloatVectorData( [ 7, 8, 9 ] )
-
-		i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r )
-		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
-		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, b )
+		w = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 2, 0 ) )
+		i = IECoreImage.ImagePrimitive( w, w )
+		i["R"] = IECore.FloatVectorData( [ 1, 2, 3 ] )
+		i["G"] = IECore.FloatVectorData( [ 4, 5, 6 ] )
+		i["B"] = IECore.FloatVectorData( [ 7, 8, 9 ] )
 
 		ii = IECoreImage.LuminanceOp()( input=i, weights=IECore.Color3f( 1, 2, 3 ) )
 
@@ -68,27 +64,23 @@ class LuminanceOpTest( unittest.TestCase ) :
 		self.assert_( not "B" in ii )
 
 		self.assert_( "Y" in ii )
-		self.assertEqual( ii["Y"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
-		self.assertAlmostEqual( ii["Y"].data[0], 30 )
-		self.assertAlmostEqual( ii["Y"].data[1], 36 )
-		self.assertAlmostEqual( ii["Y"].data[2], 42 )
+		self.assertAlmostEqual( ii["Y"][0], 30 )
+		self.assertAlmostEqual( ii["Y"][1], 36 )
+		self.assertAlmostEqual( ii["Y"][2], 42 )
 
 	def testCs( self ) :
 
 		i = IECoreImage.ImagePrimitive()
+		i["Cs"] = IECore.Color3fVectorData( [ IECore.Color3f( 1, 2, 3 ), IECore.Color3f( 10, 11, 12 ) ] )
 
-		cs = IECore.Color3fVectorData( [ IECore.Color3f( 1, 2, 3 ), IECore.Color3f( 10, 11, 12 ) ] )
-		i["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, cs )
-
-		ii = IECoreImage.LuminanceOp()( input=i, weights=IECore.Color3f( 1, 2, 3 ), removeColorPrimVars=False )
+		ii = IECoreImage.LuminanceOp()( input=i, weights=IECore.Color3f( 1, 2, 3 ), removeColorChannels=False )
 
 		self.assert_( "Cs" in ii )
 		self.assert_( "Y" in ii )
-		self.assertEqual( ii["Y"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
-		self.assertAlmostEqual( ii["Y"].data[0], 14 )
-		self.assertAlmostEqual( ii["Y"].data[1], 68 )
+		self.assertAlmostEqual( ii["Y"][0], 14 )
+		self.assertAlmostEqual( ii["Y"][1], 68 )
 
 if __name__ == "__main__":
 	unittest.main()

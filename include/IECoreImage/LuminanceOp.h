@@ -43,7 +43,7 @@
 namespace IECoreImage
 {
 
-/// The LuminanceOp calculates a primvar representing luminance.
+/// The LuminanceOp calculates a channel representing luminance.
 /// \ingroup imageProcessingGroup
 class IECOREIMAGE_API LuminanceOp : public IECore::ModifyOp
 {
@@ -54,26 +54,26 @@ class IECOREIMAGE_API LuminanceOp : public IECore::ModifyOp
 		LuminanceOp();
 		virtual ~LuminanceOp();
 
-		IECore::StringParameter *colorPrimVarParameter();
-		const IECore::StringParameter *colorPrimVarParameter() const;
+		IECore::StringParameter *colorChannelParameter();
+		const IECore::StringParameter *colorChannelParameter() const;
 
-		IECore::StringParameter *redPrimVarParameter();
-		const IECore::StringParameter *redPrimVarParameter() const;
+		IECore::StringParameter *redChannelParameter();
+		const IECore::StringParameter *redChannelParameter() const;
 
-		IECore::StringParameter *greenPrimVarParameter();
-		const IECore::StringParameter *greenPrimVarParameter() const;
+		IECore::StringParameter *greenChannelParameter();
+		const IECore::StringParameter *greenChannelParameter() const;
 
-		IECore::StringParameter *bluePrimVarParameter();
-		const IECore::StringParameter *bluePrimVarParameter() const;
+		IECore::StringParameter *blueChannelParameter();
+		const IECore::StringParameter *blueChannelParameter() const;
 
 		IECore::Color3fParameter *weightsParameter();
 		const IECore::Color3fParameter *weightsParameter() const;
 
-		IECore::StringParameter *luminancePrimVarParameter();
-		const IECore::StringParameter *luminancePrimVarParameter() const;
+		IECore::StringParameter *luminanceChannelParameter();
+		const IECore::StringParameter *luminanceChannelParameter() const;
 
-		IECore::BoolParameter *removeColorPrimVarsParameter();
-		const IECore::BoolParameter *removeColorPrimVarsParameter() const;
+		IECore::BoolParameter *removeColorChannelsParameter();
+		const IECore::BoolParameter *removeColorChannelsParameter() const;
 
 	protected :
 
@@ -84,14 +84,14 @@ class IECOREIMAGE_API LuminanceOp : public IECore::ModifyOp
 		template <typename T>
 		void calculate( const T *r, const T *g, const T *b, int steps[3], int size, T *y );
 
-		IECore::StringParameterPtr m_colorPrimVarParameter;
-		IECore::StringParameterPtr m_redPrimVarParameter;
-		IECore::StringParameterPtr m_greenPrimVarParameter;
-		IECore::StringParameterPtr m_bluePrimVarParameter;
+		IECore::StringParameterPtr m_colorChannelParameter;
+		IECore::StringParameterPtr m_redChannelParameter;
+		IECore::StringParameterPtr m_greenChannelParameter;
+		IECore::StringParameterPtr m_blueChannelParameter;
 		IECore::Color3fParameterPtr m_weightsParameter;
-		IECore::BoolParameterPtr m_removeColorPrimVarsParameter;
+		IECore::BoolParameterPtr m_removeColorChannelsParameter;
 
-		IECore::StringParameterPtr m_luminancePrimVarParameter;
+		IECore::StringParameterPtr m_luminanceChannelParameter;
 
 };
 

@@ -126,7 +126,7 @@ ObjectPtr EnvMapSampler::doOperation( const CompoundObject * operands )
 	LuminanceOpPtr luminanceOp = new LuminanceOp();
 	luminanceOp->inputParameter()->setValue( image );
 	luminanceOp->copyParameter()->getTypedValue() = false;
-	luminanceOp->removeColorPrimVarsParameter()->getTypedValue() = false;
+	luminanceOp->removeColorChannelsParameter()->getTypedValue() = false;
 	luminanceOp->operate();
 
 	// do the median cut thing to get some samples
