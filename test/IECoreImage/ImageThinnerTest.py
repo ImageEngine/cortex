@@ -40,13 +40,13 @@ class ImageThinnerTest( unittest.TestCase ) :
 
 	def test( self ) :
 			
-		i = IECore.Reader.create( "test/IECore/data/tiff/toTrace.tif" ).read()
+		i = IECore.Reader.create( "test/IECoreImage/data/tiff/toTrace.tif" ).read()
 
 		IECoreImage.ImageThinner()( input=i, copyInput=False )
 
 		IECoreImage.ImageWriter( i, "/tmp/newThinning.tif" ).write()
 		
-		ii = IECore.Reader.create( "test/IECore/data/tiff/toTraceThinned.tif" ).read()
+		ii = IECore.Reader.create( "test/IECoreImage/data/tiff/toTraceThinned.tif" ).read()
 
 		i.blindData().clear()
 		ii.blindData().clear()

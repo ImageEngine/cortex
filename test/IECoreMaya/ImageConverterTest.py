@@ -42,7 +42,7 @@ class ImageConverterTest( IECoreMaya.TestCase ) :
 
 	def test( self ) :
 
-		imageA = IECore.Reader.create( "test/IECore/data/exrFiles/colorBarsWithAlpha.exr" ).read()
+		imageA = IECore.Reader.create( "test/IECoreImage/data/exr/colorBarsWithAlpha.exr" ).read()
 		
 		toMaya = IECoreMaya.ToMayaImageConverter( imageA )
 		

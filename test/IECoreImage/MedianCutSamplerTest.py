@@ -40,7 +40,7 @@ class MedianCutSamplerTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
+		image = IECore.Reader.create( "test/IECoreImage/data/exr/carPark.exr" ).read()
 		for n in ["R", "G", "B"] :
 			p = image[n]
 			p.data = IECore.DataCastOp()( object=image[n], targetType=IECore.FloatVectorData.staticTypeId() )

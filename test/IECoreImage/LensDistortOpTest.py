@@ -51,7 +51,7 @@ class LensDistortOpTest(unittest.TestCase):
 		o["quarticDistortion"] = IECore.DoubleData( .1 )
 		
 		# The input image to read.
-		r = IECore.Reader.create("test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr")
+		r = IECore.Reader.create("test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr")
 		img = r.read()
 		
 		# Create the Op and set it's parameters.
@@ -63,7 +63,7 @@ class LensDistortOpTest(unittest.TestCase):
 		# Run the Op.
 		out = op()
 		
-		r = IECore.Reader.create("test/IECore/data/exrFiles/uvMapWithDataWindowDistorted.100x100.exr")
+		r = IECore.Reader.create("test/IECoreImage/data/exr/uvMapWithDataWindowDistorted.100x100.exr")
 		img2 = r.read()		
 
 		self.assertEqual( img.displayWindow, img2.displayWindow )

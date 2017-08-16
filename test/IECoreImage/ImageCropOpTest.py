@@ -50,30 +50,30 @@ class ImageCropOpTest(unittest.TestCase):
 
 	def testCrop(self):
 
-		inputFile = "test/IECore/data/exrFiles/colorBarsWithDataWindow.exr"
+		inputFile = "test/IECoreImage/data/exr/colorBarsWithDataWindow.exr"
 
 		tests = [
 			{
 				"cropBox": IECore.Box2i( IECore.V2i( 855, 170 ), IECore.V2i( 1460, 1465 ) ),
-				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindow.exr",
+				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindow.exr",
 				"matchDataWindow" : False,
 				"resetOrigin" : True
 			},
 			{
 				"cropBox": IECore.Box2i( IECore.V2i( 855, 170 ), IECore.V2i( 1460, 1465 ) ),
-				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindowMatched.exr",
+				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindowMatched.exr",
 				"matchDataWindow" : True,
 				"resetOrigin" : True
 			},
 			{
 				"cropBox": self.__fromNukeCrop( 1125, 195, 1551, 681 ),
-				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindow2Matched.exr",
+				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindow2Matched.exr",
 				"matchDataWindow" : True,
 				"resetOrigin" : False
 			},
 			{
 				"cropBox": self.__fromNukeCrop( 1125, 195, 1551, 681 ),
-				"checkFile": "test/IECore/data/expectedResults/imageCropDataWindow2.exr",
+				"checkFile": "test/IECoreImage/data/exr/imageCropDataWindow2.exr",
 				"matchDataWindow" : False,
 				"resetOrigin" : False
 			},
@@ -142,7 +142,7 @@ class ImageCropOpTest(unittest.TestCase):
 
 	def testEmptyCropBox( self ) :
 
-		image = IECore.Reader.create( "test/IECore/data/exrFiles/colorBarsWithDataWindow.exr" ).read()
+		image = IECore.Reader.create( "test/IECoreImage/data/exr/colorBarsWithDataWindow.exr" ).read()
 
 		op = IECoreImage.ImageCropOp()
 		executeOp = IECore.curry( op, object = image )

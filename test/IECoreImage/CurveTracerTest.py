@@ -39,7 +39,7 @@ import IECoreImage
 class CurveTracerTest( unittest.TestCase ) :
 	def test( self ) :
 
-		i = IECore.Reader.create( "test/IECore/data/tiff/toTrace.tif" ).read()
+		i = IECore.Reader.create( "test/IECoreImage/data/tiff/toTrace.tif" ).read()
 
 		o = IECoreImage.ImageThinner()
 		o( input = i, copyInput = False, channels = IECore.StringVectorData( ["R"] ) )
@@ -63,7 +63,7 @@ class CurveTracerTest( unittest.TestCase ) :
 
 	def testPixelOutputSpace( self ) :
 
-		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
+		i = IECore.Reader.create( "test/IECoreImage/data/tiff/singlePixelT.tif" ).read()
 
 		o = IECoreImage.CurveTracer()
 		c = o( image = i, channelName = "R", minimumLength = 0 )
@@ -75,7 +75,7 @@ class CurveTracerTest( unittest.TestCase ) :
 
 	def testUVOutputSpace( self ) :
 
-		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
+		i = IECore.Reader.create( "test/IECoreImage/data/tiff/singlePixelT.tif" ).read()
 
 		o = IECoreImage.CurveTracer()
 		o["outputSpace"].setValue( "uv" )
@@ -86,7 +86,7 @@ class CurveTracerTest( unittest.TestCase ) :
 
 	def testObjectOutputSpace( self ) :
 
-		i = IECore.Reader.create( "test/IECore/data/tiff/singlePixelT.tif" ).read()
+		i = IECore.Reader.create( "test/IECoreImage/data/tiff/singlePixelT.tif" ).read()
 
 		o = IECoreImage.CurveTracer()
 		o["outputSpace"].setValue( "object" )

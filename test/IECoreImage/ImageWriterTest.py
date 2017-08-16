@@ -159,10 +159,10 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		w = IECoreImage.ImageWriter( IECoreImage.ImagePrimitive(), "test/IECore/data/exrFiles/AllHalfValues.exr" )
+		w = IECoreImage.ImageWriter( IECoreImage.ImagePrimitive(), "test/IECoreImage/data/exr/AllHalfValues.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
-		w = IECore.Writer.create( "test/IECore/data/exrFiles/AllHalfValues.exr" )
+		w = IECore.Writer.create( "test/IECoreImage/data/exr/AllHalfValues.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 	def testSupportedExtensions( self ) :
@@ -195,15 +195,15 @@ class ImageWriterTest( unittest.TestCase ) :
 			self.setUp()
 
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/exrFiles/output.exr" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
 
 			# Now we've written the image, verify the rgb
 
-			r = IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" )
+			r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 			imgNew = r.read()
 
 			self.assertEqual( type(imgNew['R']), IECore.FloatVectorData )
@@ -230,11 +230,11 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.failIf( imgOrig.channelsValid() )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		self.assertRaises( RuntimeError, w.write )
-		self.failIf( os.path.exists( "test/IECore/data/exrFiles/output.exr" ) )
+		self.failIf( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
 
 	def testWindowWrite( self ) :
 
@@ -250,30 +250,30 @@ class ImageWriterTest( unittest.TestCase ) :
 			IECore.V2i( 199, 199 )
 		)
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECore/data/exrFiles/output.exr" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
 
-		r = IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		imgNew = r.read()
 
 		self.__verifyImageRGB( imgNew, imgOrig )
 
 	def testOversizeDataWindow( self ) :
 
-		r = IECore.Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/oversizeDataWindow.exr" )
 		img = r.read()
 
-		w = IECore.Writer.create( img, "test/IECore/data/exrFiles/output.exr" )
+		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 		w.write()
 
-		r = IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		imgNew = r.read()
 
-		r = IECore.Reader.create( "test/IECore/data/expectedResults/oversizeDataWindow.tiff" )
+		r = IECore.Reader.create( "test/IECoreImage/data/tiff/oversizeDataWindow.tiff" )
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
@@ -312,13 +312,13 @@ class ImageWriterTest( unittest.TestCase ) :
 		imgOrig.blindData()['notSupported1'] = IECore.FloatVectorData( [ 0,1,2,3,4 ] )
 		imgOrig.blindData()['four']['notSupported2'] = IECore.DoubleVectorData( [ 0,1,2,3,4 ] )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/exrFiles/output.exr" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/exr/output.exr" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECore/data/exrFiles/output.exr" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/exr/output.exr" ) )
 
-		r = IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		imgNew = r.read()
 		imgBlindData = imgNew.blindData()
 		# eliminate default header info that comes from OIIO
@@ -353,15 +353,15 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
 			# Now we've written the image, verify the rgb
 
-			r = IECore.Reader.create( "test/IECore/data/jpg/output.jpg" )
+			r = IECore.Reader.create( "test/IECoreImage/data/jpg/output.jpg" )
 			r['rawChannels'].setTypedValue( rawMode )
 			imgNew = r.read()
 
@@ -379,14 +379,14 @@ class ImageWriterTest( unittest.TestCase ) :
 			self.setUp()
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
 			# Now we've written the image, verify the rgb
-			r = IECore.Reader.create( "test/IECore/data/jpg/output.jpg" )
+			r = IECore.Reader.create( "test/IECoreImage/data/jpg/output.jpg" )
 			r['rawChannels'].setTypedValue( True )
 			imgNew = r.read()
 			self.__verifyImageRGB( rawImage, imgNew, 0.008 )
@@ -404,14 +404,14 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig = self.__makeGreyscaleImage( dataWindow, displayWindow )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/jpg/output.jpg" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
-		r = IECore.Reader.create( "test/IECore/data/jpg/output.jpg" )
+		r = IECore.Reader.create( "test/IECoreImage/data/jpg/output.jpg" )
 		imgNew = r.read()
 
 		channelNames = r.channelNames()
@@ -437,15 +437,15 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/dpx/output.dpx" ) )
 
 			# Now we've written the image, verify the rgb
 
-			r = IECore.Reader.create( "test/IECore/data/dpx/output.dpx" )
+			r = IECore.Reader.create( "test/IECoreImage/data/dpx/output.dpx" )
 			r['rawChannels'].setTypedValue( rawMode )
 			imgNew = r.read()
 
@@ -463,14 +463,14 @@ class ImageWriterTest( unittest.TestCase ) :
 			self.setUp()
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/dpx/output.dpx" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/dpx/output.dpx" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/dpx/output.dpx" ) )
 
 			# Now we've written the image, verify the rgb
-			r = IECore.Reader.create( "test/IECore/data/dpx/output.dpx" )
+			r = IECore.Reader.create( "test/IECoreImage/data/dpx/output.dpx" )
 			r['rawChannels'].setTypedValue( True )
 			imgNew = r.read()
 
@@ -496,14 +496,14 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			rawMode = ( dataType != IECore.FloatVectorData )
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
 			# Now we've written the image, verify the rgb
-			r = IECore.Reader.create( "test/IECore/data/tiff/output.tif" )
+			r = IECore.Reader.create( "test/IECoreImage/data/tiff/output.tif" )
 			r['rawChannels'].setTypedValue( rawMode )
 			imgNew = r.read()
 
@@ -521,14 +521,14 @@ class ImageWriterTest( unittest.TestCase ) :
 			self.setUp()
 
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
-			w = IECore.Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
 			# Now we've written the image, verify the rgb
-			r = IECore.Reader.create( "test/IECore/data/tiff/output.tif" )
+			r = IECore.Reader.create( "test/IECoreImage/data/tiff/output.tif" )
 			r['rawChannels'].setTypedValue( True )
 			imgNew = r.read()
 			self.__verifyImageRGB( rawImage, imgNew, 0.003 )
@@ -546,13 +546,13 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow, withAlpha = True )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 		w.write()
-		self.assertTrue( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
 		# Now we've written the image, verify the rgb
-		imgNew = IECore.Reader.create( "test/IECore/data/tiff/output.tif" ).read()
+		imgNew = IECore.Reader.create( "test/IECoreImage/data/tiff/output.tif" ).read()
 		self.__verifyImageRGB( imgOrig, imgNew )
 
 		self.assertTrue( "A" in imgNew )
@@ -568,14 +568,14 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig = self.__makeGreyscaleImage( dataWindow, displayWindow )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		w.write()
 
-		self.assertTrue( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
-		r = IECore.Reader.create( "test/IECore/data/tiff/output.tif" )
+		r = IECore.Reader.create( "test/IECoreImage/data/tiff/output.tif" )
 		imgNew = r.read()
 
 		channelNames = r.channelNames()
@@ -583,21 +583,21 @@ class ImageWriterTest( unittest.TestCase ) :
 
 	def testEXRCompressionParameter( self ):
 
-		r = IECore.Reader.create( "test/IECore/data/exrFiles/oversizeDataWindow.exr" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/oversizeDataWindow.exr" )
 		img = r.read()
 
-		w = IECore.Writer.create( img, "test/IECore/data/exrFiles/output.exr" )
+		w = IECore.Writer.create( img, "test/IECoreImage/data/exr/output.exr" )
 		w['formatSettings']['openexr']['compression'].setValue( 'zip' )
 		w.write()
 
-		self.assertEqual( IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" ).readHeader()["compression"].value, "zip" )
+		self.assertEqual( IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" ).readHeader()["compression"].value, "zip" )
 
 		w = IECoreImage.ImageWriter()
 		w['object'].setValue( img )
-		w['fileName'].setTypedValue( "test/IECore/data/exrFiles/output.exr" )
+		w['fileName'].setTypedValue( "test/IECoreImage/data/exr/output.exr" )
 		w['formatSettings']['openexr']['compression'].setValue( 'zips' )
 		w.write()
-		self.assertEqual( IECore.Reader.create( "test/IECore/data/exrFiles/output.exr" ).readHeader()["compression"].value, "zips" )
+		self.assertEqual( IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" ).readHeader()["compression"].value, "zips" )
 
 	def testJPGQualityParameter( self ) :
 
@@ -607,7 +607,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		)
 
 		img = self.__makeFloatImage( w, w )
-		w = IECore.Writer.create( img, "test/IECore/data/jpg/output.jpg" )
+		w = IECore.Writer.create( img, "test/IECoreImage/data/jpg/output.jpg" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		qualitySizeMap = {}
@@ -616,13 +616,13 @@ class ImageWriterTest( unittest.TestCase ) :
 
 			w['formatSettings']['jpeg']["quality"].setTypedValue( q )
 
-			if os.path.exists( "test/IECore/data/jpg/output.jpg" ) :
-				os.remove( "test/IECore/data/jpg/output.jpg" )
+			if os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) :
+				os.remove( "test/IECoreImage/data/jpg/output.jpg" )
 
 			w.write()
-			self.assertTrue( os.path.exists( "test/IECore/data/jpg/output.jpg" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
 
-			size = os.path.getsize( "test/IECore/data/jpg/output.jpg" )
+			size = os.path.getsize( "test/IECoreImage/data/jpg/output.jpg" )
 			qualitySizeMap[q] = size
 
 			if lastSize :
@@ -643,7 +643,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		imgOrig = self.__makeFloatImage( dataWindow, displayWindow )
 
-		w = IECore.Writer.create( imgOrig, "test/IECore/data/tiff/output.tif" )
+		w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 		self.assertEqual( type(w), IECoreImage.ImageWriter )
 
 		for b in w['formatSettings']['tiff']["dataType"].getPresets().keys() :
@@ -653,9 +653,9 @@ class ImageWriterTest( unittest.TestCase ) :
 			w['formatSettings']['tiff']["dataType"].setValue( b )
 			w.write()
 
-			self.assertTrue( os.path.exists( "test/IECore/data/tiff/output.tif" ) )
+			self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
 
-			imgNew = IECore.Reader.create( "test/IECore/data/tiff/output.tif" ).read()
+			imgNew = IECore.Reader.create( "test/IECoreImage/data/tiff/output.tif" ).read()
 			self.__verifyImageRGB( imgOrig, imgNew )
 
 			self.tearDown()
@@ -663,10 +663,10 @@ class ImageWriterTest( unittest.TestCase ) :
 	def setUp( self ) :
 
 		for f in (
-			"test/IECore/data/exrFiles/output.exr",
-			"test/IECore/data/jpg/output.jpg",
-			"test/IECore/data/dpx/output.dpx",
-			"test/IECore/data/tiff/output.tif",
+			"test/IECoreImage/data/exr/output.exr",
+			"test/IECoreImage/data/jpg/output.jpg",
+			"test/IECoreImage/data/dpx/output.dpx",
+			"test/IECoreImage/data/tiff/output.tif",
 		) :
 			if os.path.isfile( f ) :
 				os.remove( f )
@@ -674,10 +674,10 @@ class ImageWriterTest( unittest.TestCase ) :
 	def tearDown( self ) :
 
 		for f in (
-			"test/IECore/data/exrFiles/output.exr",
-			"test/IECore/data/jpg/output.jpg",
-			"test/IECore/data/dpx/output.dpx",
-			"test/IECore/data/tiff/output.tif",
+			"test/IECoreImage/data/exr/output.exr",
+			"test/IECoreImage/data/jpg/output.jpg",
+			"test/IECoreImage/data/dpx/output.dpx",
+			"test/IECoreImage/data/tiff/output.tif",
 		) :
 			if os.path.isfile( f ) :
 				os.remove( f )
