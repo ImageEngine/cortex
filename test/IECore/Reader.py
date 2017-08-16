@@ -43,29 +43,20 @@ class TestReader(unittest.TestCase):
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "sgi", "bw", "rgba", "rgb" ]
-		expectedExtensions += [ "tif", "tiff", "tdl", "tx" ]
-		expectedExtensions += [ "jpg", "jpeg" ]
-		expectedExtensions += [ "png" ]
+		expectedExtensions = [ "pdc", "cob" ]
 		if IECore.withASIO() :
 			expectedExtensions += [ "obj" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
-		e = IECore.Reader.supportedExtensions( IECore.TypeId.ImageReader )
+		e = IECore.Reader.supportedExtensions( IECore.TypeId.ParticleReader )
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tga" ]
-		expectedImageReaderExtensions += [ "tif", "tiff" , "tdl", "tx"]
-		expectedImageReaderExtensions += [ "jpg", "jpeg" ]
-		expectedImageReaderExtensions += [ "png" ]
 
-		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
+		self.assertEqual( set( [ "pdc", "mc" ] ), set( e ) )
 
-		self.assert_( not "pdc" in expectedImageReaderExtensions )
-		self.assert_( not "cob" in expectedImageReaderExtensions )
-		self.assert_( not "obj" in expectedImageReaderExtensions )
+		self.assert_( not "obj" in e )
 
 	def test( self ) :
 

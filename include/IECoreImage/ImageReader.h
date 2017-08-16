@@ -52,15 +52,10 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 namespace IECoreImage
 {
 
-/// The ImageReader class defines an abstract base class for reading sampled images.
-/// ImageReader's main purpose is to define a standard set of parameters
-/// which all concrete ImageReader implementations obey.  It also defines some pure virtual functions
-/// which allow interface implementors to focus on image-specific code for loading channels.
-/// The ImageReader will return by default an ImagePrimitive in linear colorspace with all channels
-/// converted to FloatVectorData.
-/// If 'rawChannels' is On, then it will return an ImagePrimitive with channels that are the close as 
-/// possible to the original data type stored on the file. Note that most image Ops available on IECore
-/// will only work on float data channels.
+/// The ImageReader will return an ImagePrimitive in linear colorspace with all channels
+/// converted to FloatVectorData. If 'rawChannels' is On, then it will return an
+/// ImagePrimitive with channels that are the close as possible to the original data
+/// type stored on the file.
 /// \ingroup ioGroup
 class IECOREIMAGE_API ImageReader : public IECore::Reader
 {
@@ -69,7 +64,12 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageReader, ImageReaderTypeId, IECore::Reader );
 
-		ImageReader( const std::string &description );
+		ImageReader();
+		ImageReader( const std::string &filename );
+
+		virtual ~ImageReader();
+
+		static bool canRead( const std::string &filename );
 
 		virtual IECore::CompoundObjectPtr readHeader();
 
@@ -78,17 +78,11 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		/// image loading.
 		///////////////////////////////////////////////////////////////
 		//@{
-		/// The parameter specifying the dataWindow of the loaded image.
-		IECore::Box2iParameter *dataWindowParameter();
-		const IECore::Box2iParameter *dataWindowParameter() const;
-		/// The parameter specifying the displayWindow of the loaded image.
-		IECore::Box2iParameter *displayWindowParameter();
-		const IECore::Box2iParameter *displayWindowParameter() const;
 		/// The parameter specifying the channels to load.
 		IECore::StringVectorParameter *channelNamesParameter();
 		const IECore::StringVectorParameter *channelNamesParameter() const;
 		/// The parameter specifying if the returned data channels should be
-		/// exactly or as close as possible to what's stored in the file. 
+		/// exactly or as close as possible to what's stored in the file.
 		IECore::BoolParameter *rawChannelsParameter();
 		const IECore::BoolParameter *rawChannelsParameter() const;
 		//@}
@@ -97,17 +91,13 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		///////////////////////////////////////////////////////////////
 		//@{
 		/// Fills the passed vector with the names of all channels within the file.
-		virtual void channelNames( std::vector<std::string> &names ) = 0;
-		/// Returns true if the file is complete. Implementations of this function should
-		/// be quick - it's intended as a cheaper alternative to loading the
-		/// whole file to determine completeness.
-		virtual bool isComplete() = 0;
-		/// Returns the dataWindow contained in the file. This is the dataWindow that
-		/// will be loaded if the dataWindowParameter() is left at its default value.
-		virtual Imath::Box2i dataWindow() = 0;
-		/// Returns the displayWindow contained in the file. This is the displayWindow
-		/// that will be loaded if the displayWindowParameter() is left at its default value.
-		virtual Imath::Box2i displayWindow() = 0;
+		void channelNames( std::vector<std::string> &names );
+		/// Returns true if the file contains a valid image.
+		bool isComplete();
+		/// Returns the dataWindow contained in the file.
+		Imath::Box2i dataWindow();
+		/// Returns the displayWindow contained in the file.
+		Imath::Box2i displayWindow();
 		/// Reads the specified channel. This function obeys the dataWindowParameter(), so
 		/// that a subsection of the channel will be loaded if requested.
 		/// If raw is false it should return a FloatVectorData, otherwise
@@ -117,31 +107,27 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		IECore::DataPtr readChannel( const std::string &name, bool raw = false );
 		//@}
 
-	protected:
+	protected :
+
+		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+
+	private :
 
 		/// Fills the passed vector with the intersection of channelNames() and
 		/// the channels requested by the user in channelNamesParameter().
 		void channelsToRead( std::vector<std::string> &names );
-		/// Returns the data window that should be loaded, throwing an Exception if it
-		/// isn't wholly inside the available dataWindow().
-		Imath::Box2i dataWindowToRead();
 
-		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
-		/// Derived classes should implement those methods rather than reimplement this function.
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		static const ReaderDescription<ImageReader> g_readerDescription;
 
-		/// Read the specified area from the channel with the specified name - this is called
-		/// by the public readChannel() method and the doOperation() method, and must be implemented
-		/// in all derived classes. It is guaranteed that this function will not be called with 
-		/// invalid names or dataWindows which are not wholly within the dataWindow in the file.
-		virtual IECore::DataPtr readChannel( const std::string &name, const Imath::Box2i &dataWindow, bool raw ) = 0;
+		void constructCommon();
 
-	private :
-
-		IECore::Box2iParameterPtr m_dataWindowParameter;
-		IECore::Box2iParameterPtr m_displayWindowParameter;
 		IECore::StringVectorParameterPtr m_channelNamesParameter;
 		IECore::BoolParameterPtr m_rawChannelsParameter;
+
+		IE_CORE_FORWARDDECLARE( Implementation );
+		ImplementationPtr m_implementation;
+
 };
 
 IE_CORE_DECLAREPTR(ImageReader);

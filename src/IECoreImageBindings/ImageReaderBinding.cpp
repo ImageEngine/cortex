@@ -66,6 +66,9 @@ void bindImageReader()
 {
 
 	ReaderClass<ImageReader>()
+		.def( init<>() )
+		.def( init<const std::string &>() )
+		.def( "canRead", &ImageReader::canRead ).staticmethod( "canRead" )
 		.def( "isComplete", &ImageReader::isComplete )
 		.def( "channelNames", &channelNames )
 		.def( "dataWindow", &ImageReader::dataWindow )

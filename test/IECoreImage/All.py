@@ -41,6 +41,8 @@ import IECoreImage
 
 warnings.simplefilter( "error", DeprecationWarning )
 
+from ImageReaderTest import *
+
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
 		stream = IECore.CompoundStream(

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,8 +32,11 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/VectorTypedData.h"
-#include "IECore/TypedParameter.h"
+#include "boost/tokenizer.hpp"
+
+#include "OpenImageIO/imageio.h"
+OIIO_NAMESPACE_USING
+
 #include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
@@ -42,6 +45,7 @@
 #include "IECore/BoxOps.h"
 
 #include "IECoreImage/ImageReader.h"
+#include "IECoreImage/OpenImageIOAlgo.h"
 
 using namespace std;
 using namespace boost;
@@ -51,23 +55,336 @@ using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 
-ImageReader::ImageReader( const std::string &description ) :
-		Reader( description, new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) )
-{
-	m_dataWindowParameter = new Box2iParameter(
-		"dataWindow",
-		"The area for which data should be loaded. The default value (an empty box) "
-		"is used to specify that the full data window should be loaded. Other values may be specified "
-		"to load just a section of the image."
-	);
+////////////////////////////////////////////////////////////////////////////////
+// ImageReader::Implementation
+////////////////////////////////////////////////////////////////////////////////
 
-	m_displayWindowParameter = new Box2iParameter(
-		"displayWindow",
-		"The displayWindow for the ImagePrimitive created during loading. The default value (an empty box) "
-		"is used to specify that the displayWindow should be inferred from the file itself. On rare occasions "
-		"it may be useful to specify an alternative using this parameter. Note that this parameter is completely "
-		"independent of the dataWindow parameter."
-	);
+class ImageReader::Implementation : public IECore::RefCounted
+{
+
+	public :
+
+		Implementation( const ImageReader *reader ) : m_reader( reader ), m_inputFile( nullptr ), m_inputFileName( "" )
+		{
+		}
+
+		virtual ~Implementation()
+		{
+			ImageInput::destroy( m_inputFile );
+			m_reader = nullptr;
+		}
+
+		static bool canRead( const std::string &filename )
+		{
+			bool result = false;
+
+			if( ImageInput *input = ImageInput::open( filename ) )
+			{
+				result = !input->spec().deep;
+				ImageInput::destroy( input );
+			}
+
+			return result;
+		}
+
+		bool isComplete()
+		{
+			if( !open( /* throwOnFailure */ false ) )
+			{
+				return false;
+			}
+
+			try
+			{
+				// Reader::read() isn't const, but we know ours doesn't modify anything,
+				// so prefer a dodgy const_cast over replicating the functionality.
+				/// |todo: request a cheaper isComplete() mechanism in OpenImageIO
+				//  to match ImfInputFile::isComplete() from OpenEXR.
+				return runTimeCast<ImagePrimitive>( const_cast<ImageReader *>( m_reader )->read() )->arePrimitiveVariablesValid();
+			}
+			catch( ... )
+			{
+				return false;
+			}
+		}
+
+		void channelNames( std::vector<std::string> &names )
+		{
+			open( /* throwOnFailure */ true );
+
+			const ImageSpec &spec = m_inputFile->spec();
+
+			names.clear();
+			names.resize( spec.nchannels );
+			std::copy( spec.channelnames.begin(), spec.channelnames.end(), names.begin() );
+		}
+
+		Imath::Box2i dataWindow()
+		{
+			open( /* throwOnFailure */ true );
+
+			const ImageSpec &spec = m_inputFile->spec();
+
+			return Imath::Box2i(
+				Imath::V2i( spec.x, spec.y ),
+				Imath::V2i( spec.width + spec.x - 1, spec.height + spec.y - 1 )
+			);
+		}
+
+		Imath::Box2i displayWindow()
+		{
+			open( /* throwOnFailure */ true );
+
+			const ImageSpec &spec = m_inputFile->spec();
+
+			return Imath::Box2i(
+				Imath::V2i( spec.full_x, spec.full_y ),
+				Imath::V2i( spec.full_x + spec.full_width - 1, spec.full_y + spec.full_height - 1 )
+			);
+		}
+
+		void updateHeader( CompoundObject *header )
+		{
+			open( /* throwOnFailure */ true );
+
+			CompoundDataPtr metadata = new CompoundData();
+			updateMetadata( metadata.get() );
+			auto &members = header->members();
+			for( const auto &item : metadata->writable() )
+			{
+				members[item.first] = item.second;
+			}
+		}
+
+		void updateMetadata( CompoundData *metadata )
+		{
+			const ImageSpec &spec = m_inputFile->spec();
+
+			auto &members = metadata->writable();
+			for ( const auto &param : spec.extra_attribs )
+			{
+				const OpenImageIOAlgo::DataView dataView( param );
+				if( dataView.data )
+				{
+					addMetadata( param.name().string(), dataView.data, metadata );
+				}
+			}
+
+			members["displayWindow"] = new Box2iData( displayWindow() );
+			members["dataWindow"] = new Box2iData( dataWindow() );
+		}
+
+		DataPtr readChannel( const std::string &name, bool raw )
+		{
+			open( /* throwOnFailure */ true );
+
+			const ImageSpec &spec = m_inputFile->spec();
+
+			const auto channelIt = find( spec.channelnames.begin(), spec.channelnames.end(), name );
+			if( channelIt == spec.channelnames.end() )
+			{
+				throw InvalidArgumentException( "Image Reader : Non-existent image channel \"" + name + "\" requested." );
+			}
+
+			size_t channelIndex = channelIt - spec.channelnames.begin();
+
+			if( raw )
+			{
+				switch( spec.format.basetype )
+				{
+					case TypeDesc::UCHAR :
+					{
+						return readTypedChannel<unsigned char>( channelIndex, spec.format );
+					}
+					case TypeDesc::CHAR :
+					{
+						return readTypedChannel<char>( channelIndex, spec.format );
+					}
+					case TypeDesc::USHORT :
+					{
+						return readTypedChannel<unsigned short>( channelIndex, spec.format );
+					}
+					case TypeDesc::SHORT :
+					{
+						return readTypedChannel<short>( channelIndex, spec.format );
+					}
+					case TypeDesc::UINT :
+					{
+						return readTypedChannel<unsigned int>( channelIndex, spec.format );
+					}
+					case TypeDesc::INT :
+					{
+						return readTypedChannel<int>( channelIndex, spec.format );
+					}
+					case TypeDesc::HALF :
+					{
+						return readTypedChannel<half>( channelIndex, spec.format );
+					}
+					case TypeDesc::FLOAT :
+					{
+						return readTypedChannel<float>( channelIndex, spec.format );
+					}
+					case TypeDesc::DOUBLE :
+					{
+						return readTypedChannel<double>( channelIndex, spec.format );
+					}
+					default :
+					{
+						throw IECore::IOException( ( boost::format( "ImageReader : Unsupported data type \"%d\"" ) % spec.format ).str() );
+					}
+				}
+			}
+			else
+			{
+				return readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
+			}
+		}
+
+	private :
+
+		template<class T>
+		DataPtr readTypedChannel( size_t channelIndex, TypeDesc dataType )
+		{
+			typedef TypedData<vector<T> > DataType;
+			typename DataType::Ptr data = new DataType;
+
+			bool status;
+
+			const ImageSpec &spec = m_inputFile->spec();
+
+			data->writable().resize( spec.width * spec.height );
+
+			if( spec.tile_width )
+			{
+				status = m_inputFile->read_tiles(
+					/* xbegin */ spec.x, /* xend */ spec.width + spec.x,
+					/* ybegin */ spec.y, /* yend */ spec.height + spec.y,
+					/* zbegin */ 0, /* zend */ 1,
+					/* chbegin */ channelIndex, /* chend */ channelIndex + 1,
+					/* format */ dataType,
+					/* data */ &( data->writable()[0] )
+				);
+			}
+			else
+			{
+				status = m_inputFile->read_scanlines(
+					/* ybegin */ spec.y, /* yend */spec.height + spec.y,
+					/* z */ 0,
+					/* chbegin */ channelIndex, /* chend */ channelIndex + 1,
+					/* format */ dataType,
+					/* data */ &( data->writable()[0] )
+				);
+			}
+
+			if( !status )
+			{
+				throw IOException( string( "ImageReader : Failed to read channel \"" ) + m_inputFile->spec().channelnames[channelIndex] + "\". " + m_inputFile->geterror() );
+			}
+
+			return data;
+		}
+
+		void addMetadata( const std::string &name, DataPtr data, CompoundData *metadata )
+		{
+			// search for '.'
+			std::string::size_type pos = name.find_first_of( "." );
+
+			auto &members = metadata->writable();
+
+			if ( std::string::npos != pos )
+			{
+				std::string thisName = name.substr( 0, pos );
+				std::string newName = name.substr( pos+1, name.size() );
+
+				auto cIt = members.find( thisName );
+
+				// create compound data
+				CompoundDataPtr newMetaData = nullptr;
+				if( cIt != members.end() && cIt->second->typeId() == CompoundDataTypeId )
+				{
+					newMetaData = boost::static_pointer_cast< CompoundData >( cIt->second );
+				}
+
+				if( !newMetaData )
+				{
+					// create compound data
+					newMetaData = new CompoundData();
+					// add to current blind data
+					members[thisName] = newMetaData;
+				}
+
+				addMetadata( newName, data, newMetaData.get() );
+				return;
+			}
+
+			members[name] = data;
+		}
+
+		// Tries to open the file, returning true on success and false on failure. On success,
+		// m_inputFile will be valid. If throwOnFailure is true then a descriptive
+		// Exception is thrown rather than false being returned.
+		bool open( bool throwOnFailure = false )
+		{
+			if( m_inputFile && m_reader->fileName() == m_inputFileName )
+			{
+				// we already opened the right file successfully
+				return true;
+			}
+
+			ImageInput::destroy( m_inputFile );
+			m_inputFileName = "";
+
+			m_inputFile = ImageInput::open( m_reader->fileName() );
+			if( !m_inputFile )
+			{
+				ImageInput::destroy( m_inputFile );
+				if( !throwOnFailure )
+				{
+					return false;
+				}
+				else
+				{
+					throw IOException( string( "Failed to open file \"" ) + m_reader->fileName() + "\". " + geterror() );
+				}
+			}
+
+			m_inputFileName = m_reader->fileName();
+
+			return true;
+		}
+
+		const ImageReader *m_reader;
+		ImageInput *m_inputFile;
+		std::string m_inputFileName;
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// ImageReader
+////////////////////////////////////////////////////////////////////////////////
+
+const Reader::ReaderDescription<ImageReader> ImageReader::g_readerDescription( OpenImageIOAlgo::extensions() );
+
+ImageReader::ImageReader() :
+	Reader( "Reads image files using OpenImageIO.", new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) ),
+	m_implementation( nullptr )
+{
+	constructCommon();
+}
+
+ImageReader::ImageReader( const string &fileName ) :
+	Reader( "Reads image files using OpenImageIO.", new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) ),
+	m_implementation( nullptr )
+{
+	constructCommon();
+
+	m_fileNameParameter->setTypedValue( fileName );
+}
+
+void ImageReader::constructCommon()
+{
+	m_implementation = new ImageReader::Implementation( this );
 
 	m_channelNamesParameter = new StringVectorParameter(
 		"channels",
@@ -82,62 +399,68 @@ ImageReader::ImageReader( const std::string &description ) :
 		false
 	);
 
-	parameters()->addParameter( m_dataWindowParameter );
-	parameters()->addParameter( m_displayWindowParameter );
 	parameters()->addParameter( m_channelNamesParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
 }
 
+ImageReader::~ImageReader()
+{
+}
+
+bool ImageReader::canRead( const std::string &filename )
+{
+	return Implementation::canRead( filename );
+}
+
+void ImageReader::channelNames( std::vector<std::string> &names )
+{
+	m_implementation->channelNames( names );
+}
+
+bool ImageReader::isComplete()
+{
+	return m_implementation->isComplete();
+}
+
+Imath::Box2i ImageReader::dataWindow()
+{
+	return m_implementation->dataWindow();
+}
+
+Imath::Box2i ImageReader::displayWindow()
+{
+	return m_implementation->displayWindow();
+}
+
 ObjectPtr ImageReader::doOperation( const CompoundObject *operands )
 {
-	Box2i displayWind = displayWindowParameter()->getTypedValue();
-	if( displayWind.isEmpty() )
-	{
-		displayWind = displayWindow();
-	}
-	Box2i dataWind = dataWindowToRead();
-
 	bool rawChannels = operands->member< BoolData >( "rawChannels" )->readable();
 
-	// create our ImagePrimitive
-	ImagePrimitivePtr image = new ImagePrimitive( dataWind, displayWind );
-
-	// fetch all the user-desired channels with
-
-	// the derived class' readChannel() implementation
+	ImagePrimitivePtr image = new ImagePrimitive( dataWindow(), displayWindow() );
 
 	vector<string> channelNames;
 	channelsToRead( channelNames );
 
-	vector<string>::const_iterator ci = channelNames.begin();
-	while( ci != channelNames.end() )
+	for( size_t ci = 0, cend = channelNames.size(); ci != cend; ++ci )
 	{
-		DataPtr d = readChannel( *ci, dataWind, rawChannels );
+		DataPtr d = m_implementation->readChannel( channelNames[ci], rawChannels );
 		assert( d  );
 		assert( rawChannels || d->typeId()==FloatVectorDataTypeId );
 
 		PrimitiveVariable p( PrimitiveVariable::Vertex, d );
 		assert( image->isPrimitiveVariableValid( p ) );
 
-		image->variables[*ci] = p;
-		ci++;
+		image->variables[ channelNames[ci] ] = p;
 	}
+
+	m_implementation->updateMetadata( image->blindData() );
 
 	return image;
 }
 
 DataPtr ImageReader::readChannel( const std::string &name, bool raw )
 {
-	vector<string> allNames;
-	channelNames( allNames );
-
-	if ( find( allNames.begin(), allNames.end(), name ) == allNames.end() )
-	{
-		throw InvalidArgumentException( "Non-existent image channel requested" );
-	}
-
-	Box2i d = dataWindowToRead();
-	return readChannel( name, d, raw );
+	return m_implementation->readChannel( name, raw );
 }
 
 void ImageReader::channelsToRead( vector<string> &names )
@@ -167,61 +490,22 @@ void ImageReader::channelsToRead( vector<string> &names )
 	}
 }
 
-Imath::Box2i ImageReader::dataWindowToRead()
-{
-	Box2i d = dataWindowParameter()->getTypedValue();
-	if( d.isEmpty() )
-	{
-		d = dataWindow();
-	}
-	else
-	{
-		// validate that requested data window is
-		// inside the available data window
-		if( boxIntersection( d, dataWindow() )!=d )
-		{
-			throw Exception( "Requested data window exceeds available data window." );
-		}
-	}
-	return d;
-}
-
-Box2iParameter * ImageReader::dataWindowParameter()
-{
-	return m_dataWindowParameter.get();
-}
-
-const Box2iParameter * ImageReader::dataWindowParameter() const
-{
-	return m_dataWindowParameter.get();
-}
-
-Box2iParameter * ImageReader::displayWindowParameter()
-{
-	return m_displayWindowParameter.get();
-}
-
-const Box2iParameter * ImageReader::displayWindowParameter() const
-{
-	return m_displayWindowParameter.get();
-}
-
-StringVectorParameter * ImageReader::channelNamesParameter()
+StringVectorParameter *ImageReader::channelNamesParameter()
 {
 	return m_channelNamesParameter.get();
 }
 
-const StringVectorParameter * ImageReader::channelNamesParameter() const
+const StringVectorParameter *ImageReader::channelNamesParameter() const
 {
 	return m_channelNamesParameter.get();
 }
 
-BoolParameter * ImageReader::rawChannelsParameter()
+BoolParameter *ImageReader::rawChannelsParameter()
 {
 	return m_rawChannelsParameter.get();
 }
 
-const BoolParameter * ImageReader::rawChannelsParameter() const
+const BoolParameter *ImageReader::rawChannelsParameter() const
 {
 	return m_rawChannelsParameter.get();
 }
@@ -230,9 +514,12 @@ CompoundObjectPtr ImageReader::readHeader()
 {
 	std::vector<std::string> cn;
 	channelNames( cn );
+
 	CompoundObjectPtr header = Reader::readHeader();
-	header->members()["displayWindow"] = new Box2iData( displayWindow() );
-	header->members()["dataWindow"] = new Box2iData( dataWindow() );
+
+	m_implementation->updateHeader( header.get() );
+
 	header->members()["channelNames"] = new StringVectorData( cn );
+
 	return header;
 }
