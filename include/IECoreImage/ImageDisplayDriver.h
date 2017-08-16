@@ -35,28 +35,30 @@
 //! \file ImageDisplayDriver.h
 /// Defines the ImageDisplayDriver class.
 
-#ifndef IE_CORE_IMAGEDISPLAYDRIVER
-#define IE_CORE_IMAGEDISPLAYDRIVER
+#ifndef IECOREIMAGE_IMAGEDISPLAYDRIVER
+#define IECOREIMAGE_IMAGEDISPLAYDRIVER
 
-#include "IECore/Export.h"
 #include "IECore/DisplayDriver.h"
 #include "IECore/ImagePrimitive.h"
 
-namespace IECore
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
+
+namespace IECoreImage
 {
 
 /// Display driver that creates an ImagePrimitive object held
 /// in memory.
 /// \ingroup renderingGroup
-class IECORE_API ImageDisplayDriver : public DisplayDriver
+class IECOREIMAGE_API ImageDisplayDriver : public IECore::DisplayDriver
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPED( ImageDisplayDriver, DisplayDriver );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageDisplayDriver, ImageDisplayDriverTypeId, IECore::DisplayDriver );
 
 		/// Initializes the internal ImagePrimitive.
 		/// The image's blindData will keep the values given on the parameters CompoundData.
-		ImageDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+		ImageDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 		virtual ~ImageDisplayDriver();
 
 		virtual bool scanLineOrderOnly() const;
@@ -66,7 +68,7 @@ class IECORE_API ImageDisplayDriver : public DisplayDriver
 
 		/// Access to the image being created. This should always be valid for reading, even
 		/// before imageClose() has been called.
-		ConstImagePrimitivePtr image() const;
+		IECore::ConstImagePrimitivePtr image() const;
 
 		//! @name Image pool
 		/// It can be useful to store the images created by ImageDisplayDrivers for
@@ -78,17 +80,17 @@ class IECORE_API ImageDisplayDriver : public DisplayDriver
 		//@{
 		/// Returns the image stored with the specified handle, or 0 if no
 		/// such image exists.
-		static ConstImagePrimitivePtr storedImage( const std::string &handle );
+		static IECore::ConstImagePrimitivePtr storedImage( const std::string &handle );
 		/// Removes the image stored with the specified handle from the pool. Returns
 		/// the image, or 0 if no such image existed.
-		static ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
+		static IECore::ConstImagePrimitivePtr removeStoredImage( const std::string &handle );
 		//@}
 
 	private:
 
 		static const DisplayDriverDescription<ImageDisplayDriver> g_description;
 
-		ImagePrimitivePtr m_image;
+		IECore::ImagePrimitivePtr m_image;
 
 };
 

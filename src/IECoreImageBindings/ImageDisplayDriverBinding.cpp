@@ -35,23 +35,27 @@
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/ImageDisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECorePython/ImageDisplayDriverBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECoreImage/ImageDisplayDriver.h"
+#include "IECoreImageBindings/ImageDisplayDriverBinding.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
 
-namespace IECorePython
+namespace
 {
 
-template< typename T >
-std::vector< T > listToVector( const boost::python::list &names )
+template<typename T>
+std::vector<T> listToVector( const boost::python::list &names )
 {
-	std::vector< T > n;
+	std::vector<T> n;
 	boost::python::container_utils::extend_container( n, names );
 	return n;
 }
@@ -86,6 +90,11 @@ static ImagePrimitivePtr removeStoredImage( const std::string &handle )
 	return 0;
 }
 
+} // namespace
+
+namespace IECoreImageBindings
+{
+
 void bindImageDisplayDriver()
 {
 	RunTimeTypedClass<ImageDisplayDriver>()
@@ -96,4 +105,4 @@ void bindImageDisplayDriver()
 	;
 }
 
-} // namespace IECorePython
+} // namespace IECoreImageBindings

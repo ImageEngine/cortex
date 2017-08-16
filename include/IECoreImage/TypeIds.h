@@ -57,6 +57,7 @@ enum TypeId
 	SplineToImageTypeId = 104014,
 	SummedAreaOpTypeId = 104015,
 	WarpOpTypeId = 104016,
+	ImageDisplayDriverTypeId = 104017,
 	LastCoreImageTypeId = 104999,
 };
 

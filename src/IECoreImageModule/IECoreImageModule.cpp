@@ -41,6 +41,7 @@
 #include "IECoreImageBindings/HdrMergeOpBinding.h"
 #include "IECoreImageBindings/ImageCropOpBinding.h"
 #include "IECoreImageBindings/ImageDiffOpBinding.h"
+#include "IECoreImageBindings/ImageDisplayDriverBinding.h"
 #include "IECoreImageBindings/ImageThinnerBinding.h"
 #include "IECoreImageBindings/ImageReaderBinding.h"
 #include "IECoreImageBindings/ImageWriterBinding.h"
@@ -72,4 +73,11 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 	bindMedianCutSampler();
 	bindSummedAreaOp();
 	bindSplineToImage();
+
+#ifdef IECORE_WITH_ASIO
+
+	bindImageDisplayDriver();
+
+#endif
+
 }

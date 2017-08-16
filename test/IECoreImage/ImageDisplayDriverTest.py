@@ -39,15 +39,16 @@ import gc
 import glob
 import sys
 import time
-from IECore import *
+import IECore
+import IECoreImage
 
-class TestImageDisplayDriver(unittest.TestCase):
+class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testConstruction( self ):
-		idd = ImageDisplayDriver( Box2i( V2i(0,0), V2i(100,100) ), Box2i( V2i(10,10), V2i(40,40) ), [ 'r','g','b' ], CompoundData() )
+		idd = IECoreImage.ImageDisplayDriver( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ), [ 'r','g','b' ], IECore.CompoundData() )
 		self.assertEqual( idd.scanLineOrderOnly(), False )
-		self.assertEqual( idd.displayWindow(), Box2i( V2i(0,0), V2i(100,100) ) )
-		self.assertEqual( idd.dataWindow(), Box2i( V2i(10,10), V2i(40,40) ) )
+		self.assertEqual( idd.displayWindow(), IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ) )
+		self.assertEqual( idd.dataWindow(), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ) )
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
@@ -58,47 +59,48 @@ class TestImageDisplayDriver(unittest.TestCase):
 
 	def testComplete( self ):
 
-		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
-		idd = ImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), CompoundData() )
+		img = IECore.Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
+		img.blindData().clear()
+		idd = IECoreImage.ImageDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), IECore.CompoundData() )
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
 		red = img['R'].data
 		green = img['G'].data
 		blue = img['B'].data
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
-		buf = FloatVectorData( width * 3 )
+		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
-			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
+			idd.imageData( IECore.Box2i( IECore.V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), IECore.V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
 		idd.imageClose()
 		self.assertEqual( idd.image(), img )
 
 	def testFactory( self ):
 
-		idd = DisplayDriver.create( "ImageDisplayDriver", Box2i( V2i(0,0), V2i(100,100) ), Box2i( V2i(10,10), V2i(40,40) ), [ 'r', 'g', 'b' ], CompoundData() )
-		self.failUnless( isinstance( idd, ImageDisplayDriver ) )
+		idd = IECore.DisplayDriver.create( "ImageDisplayDriver", IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ), [ 'r', 'g', 'b' ], IECore.CompoundData() )
+		self.failUnless( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
 		self.assertEqual( idd.scanLineOrderOnly(), False )
-		self.assertEqual( idd.displayWindow(), Box2i( V2i(0,0), V2i(100,100) ) )
-		self.assertEqual( idd.dataWindow(), Box2i( V2i(10,10), V2i(40,40) ) )
+		self.assertEqual( idd.displayWindow(), IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ) )
+		self.assertEqual( idd.dataWindow(), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ) )
 		self.assertEqual( idd.channelNames(), [ 'r', 'g', 'b' ] )
 
 		# test if all symbols are gone after the tests.
 		creator = None
 		idd = None
 		gc.collect()
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 	def testImagePool( self ) :
 
-		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
 
-		idd = DisplayDriver.create(
+		idd = IECore.DisplayDriver.create(
 			"ImageDisplayDriver",
 			img.displayWindow,
 			img.dataWindow,
 			list( img.channelNames() ),
 			{
-				"handle" : StringData( "myHandle" )
+				"handle" : IECore.StringData( "myHandle" )
 			}
 		)
 
@@ -106,28 +108,28 @@ class TestImageDisplayDriver(unittest.TestCase):
 		green = img['G'].data
 		blue = img['B'].data
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
-		buf = FloatVectorData( width * 3 )
+		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
-			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
+			idd.imageData( IECore.Box2i( IECore.V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), IECore.V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
 
 		idd.imageClose()
 
-		self.assertEqual( ImageDisplayDriver.storedImage( "myHandle" ), idd.image() )
-		self.assertEqual( ImageDisplayDriver.removeStoredImage( "myHandle" ), idd.image() )
-		self.assertEqual( ImageDisplayDriver.storedImage( "myHandle" ), None )
+		self.assertEqual( IECoreImage.ImageDisplayDriver.storedImage( "myHandle" ), idd.image() )
+		self.assertEqual( IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle" ), idd.image() )
+		self.assertEqual( IECoreImage.ImageDisplayDriver.storedImage( "myHandle" ), None )
 
 	def testAcceptsRepeatedData( self ) :
 
-		window = Box2i( V2i( 0 ), V2i( 15 ) )
+		window = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
 
-		dd = ImageDisplayDriver( window, window, [ "Y" ], CompoundData() )
+		dd = IECoreImage.ImageDisplayDriver( window, window, [ "Y" ], IECore.CompoundData() )
 		self.assertEqual( dd.acceptsRepeatedData(), True )
 
-		y = FloatVectorData( [ 1 ] * 16 * 16 )
+		y = IECore.FloatVectorData( [ 1 ] * 16 * 16 )
 		dd.imageData( window, y )
 
-		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
+		y = IECore.FloatVectorData( [ 0.5 ] * 16 * 16 )
 		dd.imageData( window, y )
 
 		dd.imageClose()
@@ -135,20 +137,20 @@ class TestImageDisplayDriver(unittest.TestCase):
 		i = dd.image()
 		self.assertEqual( i["Y"].data, y )
 
-class TestClientServerDisplayDriver(unittest.TestCase):
+class ClientServerDisplayDriverTest(unittest.TestCase):
 
 	def setUp( self ):
 
 		gc.collect()
-		RefCounted.collectGarbage()
+		IECore.RefCounted.collectGarbage()
 		# make sure we don't have symbols from previous tests
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 		# this is necessary so python will allow threads created by the display driver server
 		# to enter into python when those threads execute procedurals.
-		initThreads()
+		IECore.initThreads()
 
-		self.server = DisplayDriverServer( 1559 )
+		self.server = IECore.DisplayDriverServer( 1559 )
 		time.sleep(2)
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
@@ -159,36 +161,36 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 	def testUsedPortException( self ):
 
-		self.assertRaises( RuntimeError, lambda : DisplayDriverServer( 1559 ) )
+		self.assertRaises( RuntimeError, lambda : IECore.DisplayDriverServer( 1559 ) )
 
 	def testTransfer( self ):
 
-		img = Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
+		img = IECore.Reader.create( "test/IECore/data/tiff/bluegreen_noise.400x300.tif" )()
 		self.assertEqual( img.keys(), [ 'B', 'G', 'R' ] )
 		red = img['R'].data
 		green = img['G'].data
 		blue = img['B'].data
 		width = img.dataWindow.max.x - img.dataWindow.min.x + 1
 
-		params = CompoundData()
-		params['displayHost'] = StringData('localhost')
-		params['displayPort'] = StringData( '1559' )
-		params["remoteDisplayType"] = StringData( "ImageDisplayDriver" )
-		params["handle"] = StringData( "myHandle" )
-		params["header:myMetadata"] = StringData( "Metadata!" )
-		idd = ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+		params = IECore.CompoundData()
+		params['displayHost'] = IECore.StringData('localhost')
+		params['displayPort'] = IECore.StringData( '1559' )
+		params["remoteDisplayType"] = IECore.StringData( "ImageDisplayDriver" )
+		params["handle"] = IECore.StringData( "myHandle" )
+		params["header:myMetadata"] = IECore.StringData( "Metadata!" )
+		idd = IECore.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
-		buf = FloatVectorData( width * 3 )
+		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
 			self.__prepareBuf( buf, width, i*width, red, green, blue )
-			idd.imageData( Box2i( V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
+			idd.imageData( IECore.Box2i( IECore.V2i( img.dataWindow.min.x, i + img.dataWindow.min.y ), IECore.V2i( img.dataWindow.max.x, i + img.dataWindow.min.y) ), buf )
 		idd.imageClose()
 
-		newImg = ImageDisplayDriver.removeStoredImage( "myHandle" )
-		params["clientPID"] = IntData( os.getpid() )
+		newImg = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle" )
+		params["clientPID"] = IECore.IntData( os.getpid() )
 
 		# only data prefixed by 'header:' will come through as blindData/metadata
-		self.assertEqual( newImg.blindData(), CompoundData({"myMetadata": StringData( "Metadata!" )}) )
+		self.assertEqual( newImg.blindData(), IECore.CompoundData({"myMetadata": IECore.StringData( "Metadata!" )}) )
 
 		# remove blindData for comparison
 		newImg.blindData().clear()
@@ -197,17 +199,17 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 	def testWrongSocketException( self ) :
 
-		parameters = CompoundData( {
+		parameters = IECore.CompoundData( {
 			"displayHost" : "localhost",
 			"displayPort" : "1560", # wrong port
 			"remoteDisplayType" : "ImageDisplayDriver",
 		} )
 
-		dw = Box2i( V2i( 0 ), V2i( 255 ) )
-		self.assertRaises( RuntimeError, ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+		dw = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) )
+		self.assertRaises( RuntimeError, IECore.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
 		try :
-			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+			IECore.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
 
@@ -215,17 +217,17 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 	def testWrongHostException( self ) :
 
-		parameters = CompoundData( {
+		parameters = IECore.CompoundData( {
 			"displayHost" : "thisHostDoesNotExist",
 			"displayPort" : "1559", # wrong port
 			"remoteDisplayType" : "ImageDisplayDriver",
 		} )
 
-		dw = Box2i( V2i( 0 ), V2i( 255 ) )
-		self.assertRaises( RuntimeError, ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+		dw = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) )
+		self.assertRaises( RuntimeError, IECore.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
 		try :
-			ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+			IECore.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
 
@@ -233,12 +235,12 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 	def testAcceptsRepeatedData( self ) :
 
-		window = Box2i( V2i( 0 ), V2i( 15 ) )
+		window = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
 
-		dd = ClientDisplayDriver(
+		dd = IECore.ClientDisplayDriver(
 			window, window,
 			[ "Y" ],
-			CompoundData( {
+			IECore.CompoundData( {
 				"displayHost" : "localhost",
 				"displayPort" : "1559",
 				"remoteDisplayType" : "ImageDisplayDriver",
@@ -248,15 +250,15 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 		self.assertEqual( dd.acceptsRepeatedData(), True )
 
-		y = FloatVectorData( [ 1 ] * 16 * 16 )
+		y = IECore.FloatVectorData( [ 1 ] * 16 * 16 )
 		dd.imageData( window, y )
 
-		y = FloatVectorData( [ 0.5 ] * 16 * 16 )
+		y = IECore.FloatVectorData( [ 0.5 ] * 16 * 16 )
 		dd.imageData( window, y )
 
 		dd.imageClose()
 
-		i = ImageDisplayDriver.removeStoredImage( "myHandle" )
+		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myHandle" )
 		self.assertEqual( i["Y"].data, y )
 
 	def tearDown( self ):
@@ -265,8 +267,8 @@ class TestClientServerDisplayDriver(unittest.TestCase):
 
 		# test if all symbols are gone after the tests.
 		gc.collect()
-		RefCounted.collectGarbage()
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		IECore.RefCounted.collectGarbage()
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 if __name__ == "__main__":
 	unittest.main()

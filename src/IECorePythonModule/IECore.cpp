@@ -167,7 +167,6 @@
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
 #include "IECorePython/DisplayDriverBinding.h"
-#include "IECorePython/ImageDisplayDriverBinding.h"
 #include "IECorePython/CoordinateSystemBinding.h"
 #include "IECorePython/ClientDisplayDriverBinding.h"
 #include "IECorePython/DisplayDriverServerBinding.h"
@@ -398,7 +397,6 @@ BOOST_PYTHON_MODULE(_IECore)
 #ifdef IECORE_WITH_ASIO
 
 	bindDisplayDriver();
-	bindImageDisplayDriver();
 	bindClientDisplayDriver();
 	bindDisplayDriverServer();
 	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader

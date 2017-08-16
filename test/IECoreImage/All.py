@@ -55,6 +55,9 @@ from MedianCutSamplerTest import MedianCutSamplerTest
 from SplineToImageTest import SplineToImageTest
 from SummedAreaOpTest import SummedAreaOpTest
 
+if IECore.withASIO() :
+	from ImageDisplayDriverTest import *
+
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
 		stream = IECore.CompoundStream(

@@ -226,9 +226,6 @@ from CurvesAlgoTest import *
 from PointsAlgoTest import *
 from DisplayDriverServerTest import DisplayDriverServerTest
 
-if IECore.withASIO() :
-	from DisplayDriverTest import *
-
 if IECore.withFreeType() :
 	from FontTest import *
 

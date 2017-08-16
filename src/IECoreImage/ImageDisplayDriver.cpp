@@ -36,12 +36,13 @@
 
 #include "boost/algorithm/string/predicate.hpp"
 
-#include "IECore/ImageDisplayDriver.h"
+#include "IECoreImage/ImageDisplayDriver.h"
 
-using namespace boost;
 using namespace std;
+using namespace boost;
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( ImageDisplayDriver );
 

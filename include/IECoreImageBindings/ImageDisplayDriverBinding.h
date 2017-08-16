@@ -32,16 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMAGEDISPLAYDRIVERBINDING_H
-#define IECOREPYTHON_IMAGEDISPLAYDRIVERBINDING_H
+#ifndef IECOREIMAGEBINDINGS_IMAGEDISPLAYDRIVERBINDING_H
+#define IECOREIMAGEBINDINGS_IMAGEDISPLAYDRIVERBINDING_H
 
-#include "IECorePython/Export.h"
-
-namespace IECorePython
+namespace IECoreImageBindings
 {
 
-IECOREPYTHON_API void bindImageDisplayDriver();
+void bindImageDisplayDriver();
 
-}
+} // namespace IECoreImageBindings
 
-#endif // IECOREPYTHON_IMAGEDISPLAYDRIVERBINDING_H
+#endif // IECOREIMAGEBINDINGS_IMAGEDISPLAYDRIVERBINDING_H
