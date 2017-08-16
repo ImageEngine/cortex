@@ -115,10 +115,14 @@ IECore::MeshPrimitivePtr convert( const Alembic::AbcGeom::ISubD &mesh, const Ale
 	const ISubDSchema &iSubDSchema = mesh.getSchema();
 	MeshPrimitivePtr result = convertCommon( iSubDSchema, sampleSelector );
 
-	std::string interpolation = iSubDSchema.getSubdivisionSchemeProperty().getValue();
-	if( interpolation == "catmull-clark" )
+	std::string interpolation = "catmullClark";
+	if( IStringProperty p = iSubDSchema.getSubdivisionSchemeProperty() )
 	{
-		interpolation = "catmullClark";
+		interpolation = p.getValue();
+		if( interpolation == "catmull-clark" )
+		{
+			interpolation = "catmullClark";
+		}
 	}
 	result->setInterpolation( interpolation );
 
