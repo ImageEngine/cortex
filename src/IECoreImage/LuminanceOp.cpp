@@ -37,9 +37,9 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/TypedPrimitiveParameter.h"
 
 #include "IECoreImage/LuminanceOp.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 using namespace Imath;
 using namespace IECore;

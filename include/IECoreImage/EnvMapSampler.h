@@ -40,6 +40,7 @@
 #include "IECore/NumericParameter.h"
 
 #include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage
@@ -60,8 +61,8 @@ class IECOREIMAGE_API EnvMapSampler : public IECore::Op
 		EnvMapSampler();
 		virtual ~EnvMapSampler();
 
-		IECore::ImagePrimitiveParameter *imageParameter();
-		const IECore::ImagePrimitiveParameter *imageParameter() const;
+		ImagePrimitiveParameter *imageParameter();
+		const ImagePrimitiveParameter *imageParameter() const;
 
 		IECore::IntParameter *subdivisionDepthParameter();
 		const IECore::IntParameter *subdivisionDepthParameter() const;
@@ -72,7 +73,7 @@ class IECOREIMAGE_API EnvMapSampler : public IECore::Op
 
 	private :
 
-		IECore::ImagePrimitiveParameterPtr m_imageParameter;
+		ImagePrimitiveParameterPtr m_imageParameter;
 		IECore::IntParameterPtr m_subdivisionDepthParameter;
 
 };

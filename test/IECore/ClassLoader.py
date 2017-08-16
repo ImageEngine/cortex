@@ -41,7 +41,7 @@ class TestClassLoader( unittest.TestCase ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "imagePrimitiveInOut", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
 		self.assertEqual( l.classNames( "p*" ), ["parameterTypes", "path.With.Dot/multiply", "presetParsing"] )
 		self.assertEqual( l.getDefaultVersion( "maths/multiply" ), 2 )
 		self.assertEqual( l.getDefaultVersion( "presetParsing" ), 1 )
@@ -56,7 +56,7 @@ class TestClassLoader( unittest.TestCase ) :
 	def testFinalSlash( self ) :
 
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops/", ":" ) )
-		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "imagePrimitiveInOut", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
+		self.assertEqual( l.classNames(), ["bad", "classParameterTest", "classVectorParameterTest", "colorSplineInput", "compoundObjectInOut", "floatParameter", "maths/multiply", "matrixParameter", "mayaUserData", "meshMerge", "objectVectorInOut", "parameterTypes", "path.With.Dot/multiply", "presetParsing", "splineInput", 'stringParsing', "unstorable" ] )
 
 	def testStaticLoaders( self ) :
 

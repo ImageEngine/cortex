@@ -218,7 +218,7 @@ enum TypeId
 	GroupParameterTypeId = 170,
 	MotionPrimitiveParameterTypeId = 171,
 	PrimitiveParameterTypeId = 172,
-	ImagePrimitiveParameterTypeId = 173,
+	ImagePrimitiveParameterTypeId = 173, // obsolete - available for reuse
 	MeshPrimitiveParameterTypeId = 174,
 	PointsPrimitiveParameterTypeId = 175,
 	PreWorldRenderableTypeId = 176,

@@ -41,6 +41,7 @@
 #include "IECore/SimpleTypedParameter.h"
 
 #include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage
@@ -63,8 +64,8 @@ class IECOREIMAGE_API MedianCutSampler : public IECore::Op
 		MedianCutSampler();
 		virtual ~MedianCutSampler();
 
-		IECore::ImagePrimitiveParameter *imageParameter();
-		const IECore::ImagePrimitiveParameter *imageParameter() const;
+		ImagePrimitiveParameter *imageParameter();
+		const ImagePrimitiveParameter *imageParameter() const;
 
 		IECore::StringParameter *channelNameParameter();
 		const IECore::StringParameter *channelNameParameter() const;
@@ -88,7 +89,7 @@ class IECOREIMAGE_API MedianCutSampler : public IECore::Op
 
 	private :
 
-		IECore::ImagePrimitiveParameterPtr m_imageParameter;
+		ImagePrimitiveParameterPtr m_imageParameter;
 		IECore::StringParameterPtr m_channelNameParameter;
 		IECore::IntParameterPtr m_subdivisionDepthParameter;
 		IECore::IntParameterPtr m_projectionParameter;

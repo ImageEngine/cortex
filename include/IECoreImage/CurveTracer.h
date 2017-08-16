@@ -38,13 +38,13 @@
 #include "boost/graph/adjacency_list.hpp"
 
 #include "IECore/Op.h"
-#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/ImagePrimitive.h"
 
 #include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECoreImage
@@ -62,8 +62,8 @@ class IECOREIMAGE_API CurveTracer : public IECore::Op
 		CurveTracer();
 		virtual ~CurveTracer();
 
-		IECore::ImagePrimitiveParameter *imageParameter();
-		const IECore::ImagePrimitiveParameter *imageParameter() const;
+		ImagePrimitiveParameter *imageParameter();
+		const ImagePrimitiveParameter *imageParameter() const;
 
 		IECore::StringParameter *channelNameParameter();
 		const IECore::StringParameter *channelNameParameter() const;

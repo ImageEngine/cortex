@@ -39,7 +39,6 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/TransformationMatrixData.h"
-#include "IECore/TypedPrimitiveParameter.h"
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/CompoundObject.h"
@@ -48,6 +47,7 @@
 #include "IECore/DespatchTypedData.h"
 
 #include "IECoreImage/ImageCropOp.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 using namespace std;
 using namespace boost;

@@ -120,7 +120,6 @@
 #include "IECorePython/BoundedKDTreeBinding.h"
 #include "IECorePython/VectorDataFilterOpBinding.h"
 #include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/TypedPrimitiveParameterBinding.h"
 #include "IECorePython/HeaderGeneratorBinding.h"
 #include "IECorePython/PreWorldRenderableBinding.h"
 #include "IECorePython/CameraBinding.h"
@@ -338,7 +337,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
 	bindTypedObjectParameter();
-	bindTypedPrimitiveParameter();
 	bindHeaderGenerator();
 	bindPreWorldRenderable();
 	bindCamera();

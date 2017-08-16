@@ -32,14 +32,53 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H
-#define IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H
+#include "boost/python.hpp"
 
-#include "IECorePython/Export.h"
+#include "IECore/CompoundObject.h"
+#include "IECore/ImagePrimitive.h"
 
-namespace IECorePython
+#include "IECoreImage/ImagePrimitiveParameter.h"
+
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/TypedObjectParameterBinding.h"
+
+#include "IECoreImageBindings/ImagePrimitiveParameterBinding.h"
+
+using namespace std;
+using namespace boost;
+using namespace boost::python;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
+
+namespace IECoreImageBindings
 {
-IECOREPYTHON_API void bindTypedPrimitiveParameter();
+
+template<typename T>
+static void bindImagePrimitiveParameter()
+{
+	using boost::python::arg;
+
+	ParameterClass<TypedObjectParameter<T>, TypedObjectParameterWrapper<T> >()
+		.def(
+			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
+			(
+				(
+					arg( "name" ),
+					arg( "description" ),
+					arg( "defaultValue" ),
+					arg( "presets" ) = boost::python::tuple(),
+					arg( "presetsOnly" ) = false ,
+					arg( "userData" ) = CompoundObject::Ptr( 0 )
+				)
+			)
+		)
+	;
 }
 
-#endif // IECOREPYTHON_TYPEDPRIMITIVEPARAMETERBINDING_H
+void bindImagePrimitiveParameter()
+{
+	bindImagePrimitiveParameter<ImagePrimitive>();
+}
+
+} // namespace IECorePython

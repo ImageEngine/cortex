@@ -138,7 +138,7 @@ class testParameterParser( unittest.TestCase ) :
 		a()
 
 		# remove some parameters that don't have serializing/parsing methods yet.
-		for name in [ 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7' ] :
+		for name in [ 'p1', 'p2', 'p3', 'p4', 'p5', 'p6' ] :
 			a.parameters().removeParameter( name )
 
 		s = IECore.ParameterParser().serialise( a.parameters() )

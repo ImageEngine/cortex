@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,50 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/TypedPrimitiveParameterBinding.h"
-
-#include "IECore/TypedPrimitiveParameter.h"
-#include "IECore/CompoundObject.h"
-
+#include "IECore/TypedObjectParameter.inl"
 #include "IECore/ImagePrimitive.h"
 
-using namespace std;
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
+#include "IECoreImage/ImagePrimitiveParameter.h"
+#include "IECoreImage/TypeIds.h"
 
-namespace IECorePython
+namespace IECore
 {
 
-template<typename T>
-static void bindTypedPrimitiveParameter()
-{
-	using boost::python::arg;
-	
-	ParameterClass<TypedObjectParameter<T>, TypedObjectParameterWrapper<T> >()
-		.def(
-			init< const std::string &, const std::string &, typename T::Ptr, boost::python::optional<const object &, bool, CompoundObjectPtr > >
-			(
-				(
-					arg( "name" ),
-					arg( "description" ),
-					arg( "defaultValue" ),
-					arg( "presets" ) = boost::python::tuple(),
-					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
-				)
-			)
-		)
-	;
-}
+IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ImagePrimitive, IECoreImage::ImagePrimitiveParameter );
 
-void bindTypedPrimitiveParameter()
-{
-	bindTypedPrimitiveParameter<ImagePrimitive>();
-}
-
-} // namespace IECorePython
+} // namespace IECore

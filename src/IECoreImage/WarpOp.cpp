@@ -37,9 +37,9 @@
 #include "IECore/DespatchTypedData.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/TypedPrimitiveParameter.h"
 
 #include "IECoreImage/WarpOp.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 using namespace boost;
 using namespace Imath;

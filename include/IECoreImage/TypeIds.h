@@ -58,6 +58,7 @@ enum TypeId
 	SummedAreaOpTypeId = 104015,
 	WarpOpTypeId = 104016,
 	ImageDisplayDriverTypeId = 104017,
+	ImagePrimitiveParameterTypeId = 104018,
 	LastCoreImageTypeId = 104999,
 };
 

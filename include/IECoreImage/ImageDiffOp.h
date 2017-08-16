@@ -42,6 +42,7 @@
 #include "IECore/TypedPrimitiveParameter.h"
 
 #include "IECoreImage/Export.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 #include "IECoreImage/TypeIds.h"
 
 namespace IECore
@@ -68,11 +69,11 @@ class IECOREIMAGE_API ImageDiffOp : public IECore::Op
 		ImageDiffOp();
 		virtual ~ImageDiffOp();
 
-		IECore::ImagePrimitiveParameter *imageAParameter();
-		const IECore::ImagePrimitiveParameter *imageAParameter() const;
+		ImagePrimitiveParameter *imageAParameter();
+		const ImagePrimitiveParameter *imageAParameter() const;
 
-		IECore::ImagePrimitiveParameter *imageBParameter();
-		const IECore::ImagePrimitiveParameter *imageBParameter() const;
+		ImagePrimitiveParameter *imageBParameter();
+		const ImagePrimitiveParameter *imageBParameter() const;
 
 		IECore::FloatParameter *maxErrorParameter();
 		const IECore::FloatParameter *maxErrorParameter() const;
@@ -89,8 +90,8 @@ class IECOREIMAGE_API ImageDiffOp : public IECore::Op
 
 	private :
 
-		IECore::ImagePrimitiveParameterPtr m_imageAParameter;
-		IECore::ImagePrimitiveParameterPtr m_imageBParameter;
+		ImagePrimitiveParameterPtr m_imageAParameter;
+		ImagePrimitiveParameterPtr m_imageBParameter;
 		IECore::FloatParameterPtr m_maxErrorParameter;
 		IECore::BoolParameterPtr m_skipMissingChannelsParameter;
 		IECore::BoolParameterPtr m_alignDisplayWindowsParameter;
