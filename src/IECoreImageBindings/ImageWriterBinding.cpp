@@ -53,6 +53,8 @@ namespace IECoreImageBindings
 void bindImageWriter()
 {
 	RunTimeTypedClass<ImageWriter>()
+		.def( init<>() )
+		.def( init<IECore::ObjectPtr, const std::string &>() )
 		.def( "canWrite", &ImageWriter::canWrite ).staticmethod( "canWrite" )
 	;
 }

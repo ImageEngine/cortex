@@ -44,26 +44,20 @@ class TestWriter( unittest.TestCase ) :
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "tga" ]
-		expectedExtensions += [ "tif", "tiff" ]
-		expectedExtensions += [ "jpg", "jpeg" ]
+		expectedExtensions = [ "pdc", "cob" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
 		self.assert_( not "obj" in expectedExtensions )
 
-		e = IECore.Writer.supportedExtensions( IECore.TypeId.ImageWriter )
+		e = IECore.Writer.supportedExtensions( IECore.TypeId.ParticleWriter )
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		expectedImageWriterExtensions = [ "exr", "cin", "dpx", "yuv", "tga" ]
-		expectedImageWriterExtensions += [ "tif", "tiff" ]
-		expectedImageWriterExtensions += [ "jpg", "jpeg" ]
 
-		self.assertEqual( set( expectedImageWriterExtensions ), set( e ) )
+		self.assertEqual( set( [ "pdc" ] ), set( e ) )
 
-		self.assert_( not "pdc" in expectedImageWriterExtensions )
-		self.assert_( not "cob" in expectedImageWriterExtensions )
+		self.assert_( not "obj" in e )
 
 	def testCanWriter( self ) :
 	

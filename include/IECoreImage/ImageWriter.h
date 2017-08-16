@@ -55,7 +55,9 @@ IE_CORE_FORWARDDECLARE( ImagePrimitive );
 namespace IECoreImage
 {
 
-/// Abstract base class for serializing images
+/// The ImageWriter serializes images to any of the various file formats
+/// supported by OpenImageIO. A limited subset of format options are
+/// expossed as parameters.
 /// \ingroup ioGroup
 class IECOREIMAGE_API ImageWriter : public IECore::Writer
 {
@@ -64,32 +66,43 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageWriter, ImageWriterTypeId, IECore::Writer );
 
-		/// Checks that object is an ImagePrimitive instance
+		ImageWriter();
+		ImageWriter( IECore::ObjectPtr object, const std::string &fileName );
+
+		virtual ~ImageWriter();
+
+		/// Checks that object is an ImagePrimitive with consistent PrimitiveVariables
 		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );
 
 		/// The parameter specifying the channels to write.
-		IECore::StringVectorParameter * channelNamesParameter();
-		const IECore::StringVectorParameter * channelNamesParameter() const;
+		IECore::StringVectorParameter *channelNamesParameter();
+		const IECore::StringVectorParameter *channelNamesParameter() const;
 
-		/// Convenience function to access the channels specified in parameters
-		void imageChannels( std::vector<std::string> &names ) const;
+		/// The parameter specifying the format specific settings.
+		IECore::CompoundParameter *formatSettingsParameter();
+		const IECore::CompoundParameter *formatSettingsParameter() const;
 
-	protected:
+		/// Convenience function to access the channels that will be written
+		/// to disk. This is calculated based on the requested channelNames,
+		/// the channels existing in the ImagePrimitive, and the capabilities
+		/// of the file format. If "operands" are provided they will override
+		/// the parameter values.
+		void channelsToWrite( std::vector<std::string> &channels, const IECore::CompoundObject *operands = nullptr ) const;
 
-		ImageWriter( const std::string &description );
+	protected :
 
-		/// Return the image object to write
-		const IECore::ImagePrimitive *getImage() const;
-
-		/// Write the image. Subclasses implement this method.
-		virtual void writeImage( const std::vector<std::string> &names, const IECore::ImagePrimitive *image, const Imath::Box2i &dataWindow ) const = 0;
+		virtual void doWrite( const IECore::CompoundObject *operands );
 
 	private :
 
-		/// Implementation of Writer::doWrite(). Calls through to writeImage()
-		virtual void doWrite( const IECore::CompoundObject *operands );
+		static const WriterDescription<ImageWriter> g_writerDescription;
+
+		void constructCommon();
+
+		const IECore::ImagePrimitive *getImage() const;
 
 		IECore::StringVectorParameterPtr m_channelsParameter;
+		IECore::CompoundParameterPtr m_formatSettingsParameter;
 
 };
 
