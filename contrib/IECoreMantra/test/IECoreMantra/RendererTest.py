@@ -38,6 +38,7 @@ import subprocess
 import unittest
 
 import IECore
+import IECoreImage
 import IECoreMantra
 
 _dir = os.path.dirname( __file__ )
@@ -82,8 +83,8 @@ class RendererTest( unittest.TestCase ):
 		# test that the ieworld procedural picks up the cache file written by worldEnd() and renders correctly
 		r = IECoreMantra.Renderer()
 		r.display( 
-			_dir + "/output/testWorldMesh.tif" , 
-			"tiff", 
+			_dir + "/output/testWorldMesh.exr" ,
+			"exr",
 			"rgba", 
 			{ "variable": "Cf+Af", "vextype": "vector4", "channel": "C" } 
 		)
@@ -94,10 +95,10 @@ class RendererTest( unittest.TestCase ):
 		r.worldEnd()
 		del r
 
-		imageCreated = IECore.Reader.create( _dir + "/output/testWorldMesh.tif" ).read()
-		expectedImage = IECore.Reader.create( _dir + "/data/testWorldMesh.tif" ).read()
-		self.assertEqual( 
-			IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), 
+		imageCreated = IECore.Reader.create( _dir + "/output/testWorldMesh.exr" ).read()
+		expectedImage = IECore.Reader.create( _dir + "/data/testWorldMesh.exr" ).read()
+		self.assertEqual(
+			IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ),
 			IECore.BoolData( False ) 
 		)
 	
@@ -106,8 +107,8 @@ class RendererTest( unittest.TestCase ):
 		ifd = _dir + "/output/testIfdGen.ifd"	
 		r = IECoreMantra.Renderer( ifd )
 		r. display( 
-			_dir + "/output/testIfdGen.tif", 
-			"tiff", 
+			_dir + "/output/testIfdGen.exr",
+			"exr",
 			"rgba", 
 			{ "variable": "Cf+Af", "vextype": "vector4", "channel": "C" } 
 		)
@@ -123,18 +124,18 @@ class RendererTest( unittest.TestCase ):
 		p = subprocess.Popen( ['mantra'], stdin=open( ifd ), stdout=subprocess.PIPE)
 		p.communicate()
 
-		imageCreated = IECore.Reader.create( _dir + "/output/testIfdGen.tif" ).read()
-		expectedImage = IECore.Reader.create( _dir + "/data/testWorldMesh.tif" ).read()
-		self.assertEqual( 
-			IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), 
+		imageCreated = IECore.Reader.create( _dir + "/output/testIfdGen.exr" ).read()
+		expectedImage = IECore.Reader.create( _dir + "/data/testWorldMesh.exr" ).read()
+		self.assertEqual(
+			IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ),
 			IECore.BoolData( False ) 
 		)
 
 	def __renderGeometry( self ):
 		r = IECoreMantra.Renderer()
 		r.display( 
-			_dir + "/output/testGeometry.tif", 
-			"tiff", 
+			_dir + "/output/testGeometry.exr",
+			"exr",
 			"rgba",
 			{ "variable": "Cf+Af", "vextype": "vector4", "channel": "C" } 
 		)
@@ -151,10 +152,10 @@ class RendererTest( unittest.TestCase ):
 	
 	def testGeometry( self ):
 		self.__renderGeometry()
-		imageCreated = IECore.Reader.create( _dir + "/output/testGeometry.tif" ).read()
-		expectedImage = IECore.Reader.create( _dir + "/data/testGeometry.tif" ).read()
-		self.assertEqual( 
-			IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), 
+		imageCreated = IECore.Reader.create( _dir + "/output/testGeometry.exr" ).read()
+		expectedImage = IECore.Reader.create( _dir + "/data/testGeometry.exr" ).read()
+		self.assertEqual(
+			IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ),
 			IECore.BoolData( False ) 
 		)
 	
@@ -238,9 +239,9 @@ class RendererTest( unittest.TestCase ):
 
 	def tearDown( self ):
 		files = [
-				_dir + "/output/testGeometry.tif",
-				_dir + "/output/testWorldMesh.tif",
-				_dir + "/output/testIfdGen.tif",
+				_dir + "/output/testGeometry.exr",
+				_dir + "/output/testWorldMesh.exr",
+				_dir + "/output/testIfdGen.exr",
 				_dir + "/output/testIfdGen.ifd",
 				_dir + "/output/testIfdGen.ifd.ieworld.cob",
 				_dir + "/output/testOptions.ifd",
