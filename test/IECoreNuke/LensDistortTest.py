@@ -32,12 +32,15 @@
 #
 ##########################################################################
 
+import os
 import math
 import unittest
-import IECoreNuke
-import IECore
+
 import nuke
-import os
+
+import IECore
+import IECoreImage
+import IECoreNuke
 
 class LensDisortTest( IECoreNuke.TestCase ) :
 
@@ -107,7 +110,7 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 
 	def __testLens( self ) :
 		# Create a nice asymetric lens distortion.
-		o = IECore.Reader.create("test/IECore/data/StandardRadialLens.cob").read() 
+		o = IECore.Reader.create("test/IECoreImage/data/lens/StandardRadialLens.cob").read()
 		return o
 
 	def testLensDistortAgainstLensDistortOp( self ) :
@@ -132,7 +135,7 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 		l.setInput( 0, r )
 		
 		# Set the parameters of the lens distort node.
-		l['lensFileSequence'].fromScript( os.path.abspath( "test/IECore/data/StandardRadialLens.cob" ) )
+		l['lensFileSequence'].fromScript( os.path.abspath( "test/IECoreImage/data/lens/StandardRadialLens.cob" ) )
 
 		# Create a write node.
 		w = nuke.createNode("Write")
@@ -140,7 +143,7 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 		w["file"].setText( outputPath )
 	
 		# Create the op that we will compare the result of the nuke LensDistort node with.
-		lensDistortOp = IECore.LensDistortOp()
+		lensDistortOp = IECoreImage.LensDistortOp()
 		lensDistortOp["mode"].setValue( IECore.LensModel.Undistort )
 		lensDistortOp['lensModel'].setValue( self.__testLens() )
 		
@@ -151,9 +154,9 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 			if path == 'path' :
 				# When the format is the same as the data window, nuke doesn't create a black border around the image.
 				# As a result, we shouldn't create one using our LensDistortOp either.
-				lensDistortOp["boundMode"].setValue( IECore.WarpOp.BoundMode.Clamp )
+				lensDistortOp["boundMode"].setValue( IECoreImage.WarpOp.BoundMode.Clamp )
 			else :
-				lensDistortOp["boundMode"].setValue( IECore.WarpOp.BoundMode.SetToBlack )
+				lensDistortOp["boundMode"].setValue( IECoreImage.WarpOp.BoundMode.SetToBlack )
 
 			# Write out the result of the LensDistort so that we can compare it to the output of the cortex op.	
 			nuke.execute( w, 1, 1 )
@@ -166,7 +169,7 @@ class LensDisortTest( IECoreNuke.TestCase ) :
 		
 			# Assert that the two images are almost identical. 
 			# We expect a little bit of error as the cortex op uses a different sampling filter to the nuke node.
-			imageDiffOp = IECore.ImageDiffOp()
+			imageDiffOp = IECoreImage.ImageDiffOp()
 			imageDiffOp["alignDisplayWindows"].setValue( True )
 			res = imageDiffOp(
 				imageA = cortexImg,

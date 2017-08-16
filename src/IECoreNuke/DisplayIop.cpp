@@ -42,12 +42,14 @@
 #include "boost/lexical_cast.hpp"
 
 #include "IECore/LRUCache.h"
-#include "IECore/ImageDisplayDriver.h"
+
+#include "IECoreImage/ImageDisplayDriver.h"
 
 #include "IECoreNuke/DisplayIop.h"
 #include "IECoreNuke/TypeIds.h"
 
 using namespace IECore;
+using namespace IECoreImage;
 using namespace IECoreNuke;
 using namespace DD::Image;
 using namespace Imath;
@@ -77,12 +79,12 @@ static ServerCache g_servers( serverCacheGetter, 4 );
 namespace IECoreNuke
 {
 
-class NukeDisplayDriver : public IECore::ImageDisplayDriver
+class NukeDisplayDriver : public IECoreImage::ImageDisplayDriver
 {
 
 	public :
 	
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NukeDisplayDriver, NukeDisplayDriverTypeId, ImageDisplayDriver );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NukeDisplayDriver, NukeDisplayDriverTypeId, IECoreImage::ImageDisplayDriver );
 		
 		NukeDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters )
 			:	ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
@@ -229,9 +231,9 @@ void DisplayIop::_validate( bool forReal )
 void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &channels, DD::Image::Row &row )
 {
 	Channel outputChannels[4] = { Chan_Red, Chan_Green, Chan_Blue, Chan_Alpha };
-	const char *inputChannels[] = { "R", "G", "B", "A", 0 };
+	const char *inputChannels[] = { "R", "G", "B", "A", nullptr };
 	
-	const ImagePrimitive *image = 0;
+	const ImagePrimitive *image = nullptr;
 	Box2i inputDataWindow;
 	Box2i inputDisplayWindow;
 	if( firstDisplayIop()->m_driver )
@@ -244,7 +246,7 @@ void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &chann
 	int i = 0;
 	while( inputChannels[i] )
 	{
-		const FloatVectorData *inputData = image ? image->variableData<FloatVectorData>( inputChannels[i] ) : 0;
+		const FloatVectorData *inputData = image ? image->getChannel<float>( inputChannels[i] ) : nullptr;
 		if( inputData )
 		{
 			float *output = row.writable( outputChannels[i] ) + x;

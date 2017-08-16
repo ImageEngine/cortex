@@ -2258,6 +2258,7 @@ nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
 
 nukeTestEnv = testEnv.Clone()
 nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
+nukeTestEnv["ENV"]["foundry_LICENSE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
 nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
 
@@ -2320,6 +2321,7 @@ if doConfigure :
 				# we can't add this earlier as then it's built during the configure stage, and that's no good
 				nukeEnv.Append( LIBS = [
 					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				]	)

@@ -32,15 +32,15 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ImagePrimitive.h"
-#include "IECore/TypedPrimitiveParameter.h"
+#include "IECoreImage/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitiveParameter.h"
 
 #include "IECoreNuke/ImagePrimitiveParameterHandler.h"
 #include "IECoreNuke/FromNukeTileConverter.h"
 
 using namespace IECoreNuke;
 
-ParameterHandler::Description<ImagePrimitiveParameterHandler> ImagePrimitiveParameterHandler::g_description( IECore::ImagePrimitiveParameter::staticTypeId() );
+ParameterHandler::Description<ImagePrimitiveParameterHandler> ImagePrimitiveParameterHandler::g_description( (IECore::TypeId)IECoreImage::ImagePrimitiveParameter::staticTypeId() );
 
 ImagePrimitiveParameterHandler::ImagePrimitiveParameterHandler()
 {
@@ -73,7 +73,7 @@ void ImagePrimitiveParameterHandler::setParameterValue( IECore::Parameter *param
 		DD::Image::Tile tile( *iOp, iOp->requested_channels(), true );
 		
 		FromNukeTileConverterPtr converter = new FromNukeTileConverter( &tile );
-		IECore::ImagePrimitivePtr image = boost::static_pointer_cast<IECore::ImagePrimitive>( converter->convert() );
+		IECoreImage::ImagePrimitivePtr image = boost::static_pointer_cast<IECoreImage::ImagePrimitive>( converter->convert() );
 		
 		/// \todo Sort out data window vs display window and suchlike.
 		

@@ -47,9 +47,7 @@ from ParameterisedHolderTest import ParameterisedHolderTest
 from ObjectKnobTest import ObjectKnobTest
 from OpHolderTest import OpHolderTest
 from SceneCacheReaderTest import SceneCacheReaderTest
-
-if IECore.withPNG() :
-	from PNGReaderTest import PNGReaderTest
+from PNGReaderTest import PNGReaderTest
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(
