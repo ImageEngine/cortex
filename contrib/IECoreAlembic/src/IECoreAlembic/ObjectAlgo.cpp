@@ -34,7 +34,7 @@
 
 #include "Alembic/AbcGeom/IGeomBase.h"
 #include "Alembic/AbcGeom/ICamera.h"
-#include "Alembic/AbcGeom/IXForm.h"
+#include "Alembic/AbcGeom/IXform.h"
 
 #include "IECoreAlembic/ObjectAlgo.h"
 
