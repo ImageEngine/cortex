@@ -77,7 +77,7 @@ class IDXReaderTest( unittest.TestCase ) :
 	def testCanRead( self ) :
 	
 		self.failUnless( IECore.IDXReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
-		self.failIf( IECore.IDXReader.canRead( "test/IECore/data/exrFiles/carPark.exr" ) )
+		self.failIf( IECore.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
 		
 	def testRegistration( self ) :
 	

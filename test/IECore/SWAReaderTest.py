@@ -93,7 +93,7 @@ class SWAReaderTest( unittest.TestCase ) :
 	def testCanRead( self ) :
 	
 		self.failUnless( IECore.SWAReader.canRead( "test/IECore/data/swaFiles/test.swa" ) )
-		self.failIf( IECore.IDXReader.canRead( "test/IECore/data/exrFiles/carPark.exr" ) )
+		self.failIf( IECore.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
 		self.failIf( IECore.SWAReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
 		self.failIf( IECore.SWAReader.canRead( "test/IECore/data/empty" ) )
 				
