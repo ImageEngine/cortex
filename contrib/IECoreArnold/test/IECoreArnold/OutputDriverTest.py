@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import time
 import unittest
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class OutputDriverTest( unittest.TestCase ) :
@@ -50,7 +49,7 @@ class OutputDriverTest( unittest.TestCase ) :
 
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/mergedDisplays.ass" )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "mergedImage" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "mergedImage" )
 		channelNames = image.keys()
 
 		self.assertEqual( len( channelNames ), 7 )
@@ -69,7 +68,7 @@ class OutputDriverTest( unittest.TestCase ) :
 
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "vectorAndPointImage" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "vectorAndPointImage" )
 		channelNames = image.keys()
 
 		self.assertEqual( len( channelNames ), 10 )
@@ -83,8 +82,6 @@ class OutputDriverTest( unittest.TestCase ) :
 		self.failUnless( "N.R" in channelNames )
 		self.failUnless( "N.G" in channelNames )
 		self.failUnless( "N.B" in channelNames )
-
-		IECore.EXRImageWriter( image, "/tmp/test.exr" ).write()
 
 if __name__ == "__main__":
     unittest.main()

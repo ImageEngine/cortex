@@ -33,14 +33,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import unittest
 
 import arnold
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class RendererTest( unittest.TestCase ) :
@@ -124,7 +123,7 @@ class RendererTest( unittest.TestCase ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
-		self.failUnless( IECore.ImageDisplayDriver.removeStoredImage( "testHandle" ) )
+		self.failUnless( IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" ) )
 
 	def testASSOutput( self ) :
 
@@ -169,15 +168,14 @@ class RendererTest( unittest.TestCase ) :
 			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 1, 5 )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 1, 5 )
+		self.assertAlmostEqual( image["R"][index], 1, 5 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 0 )
 
 	def testReferenceExistingShader( self ) :
 
@@ -195,15 +193,14 @@ class RendererTest( unittest.TestCase ) :
 			r.shader( "surface", "reference:red_shader", {} )
 			r.sphere( 1, -1, 1, 360, {} )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 1, 5 )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 1, 5 )
+		self.assertAlmostEqual( image["R"][index], 1, 5 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 0 )
 
 	def testNonexistentReferencedShader( self ) :
 
@@ -268,13 +265,12 @@ class RendererTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 			m.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.failUnless( result.floatPrimVar( image["A"] ) < 0.5 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.failUnless( image["A"][index] < 0.5 )
 
 		# move the plane back a touch and check we can see it with the default camera
 
@@ -290,13 +286,12 @@ class RendererTest( unittest.TestCase ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 				m.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.failUnless( result.floatPrimVar( image["A"] ) > 0.9 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.failUnless( image["A"][index] > 0.9 )
 
 		# move the camera back a touch and check we can see the plane at z==0
 
@@ -314,13 +309,12 @@ class RendererTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 				m.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.assertEqual( image.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 639, 479 ) ) )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.failUnless( result.floatPrimVar( image["A"] ) > 0.9 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.failUnless( image["A"][index] > 0.9 )
 
 	def testCameraXYOrientation( self ) :
 
@@ -343,25 +337,21 @@ class RendererTest( unittest.TestCase ) :
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
 
 		# check we get the colors we'd expect where we expect them
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		a = e.A()
-		r = e.R()
-		g = e.G()
-		b = e.B()
-		e.pointAtUV( IECore.V2f( 1, 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( a ), 1, 5 )
-		self.assertAlmostEqual( result.floatPrimVar( r ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( IECore.V2f( 0.5, 0 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( a ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertAlmostEqual( result.floatPrimVar( g ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
+		self.assertAlmostEqual( image["A"][index], 1, 5 )
+		self.assertAlmostEqual( image["R"][index], 1, 5 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 0 )
+
+		index = int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 1, 5 )
+		self.assertEqual( image["R"][index], 0 )
+		self.assertAlmostEqual( image["G"][index], 1, 5 )
+		self.assertEqual( image["B"][index], 0 )
 
 	def testCameraAspectRatio( self ) :
 
@@ -380,13 +370,10 @@ class RendererTest( unittest.TestCase ) :
 			r.shader( "surface", "utility", { "shade_mode" : "flat", "color" : IECore.Color3f( 0, 1, 0 ) } )
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 640, 480 ) ) ).render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		self.failUnless( image is not None )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		r = e.R()
-		g = e.G()
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
 
 		edges = [
 			IECore.V2i( 0 ),
@@ -400,9 +387,9 @@ class RendererTest( unittest.TestCase ) :
 		]
 
 		for point in edges :
-			self.failUnless( e.pointAtPixel( point, result ) )
-			self.failUnless( result.floatPrimVar( r ) < 0.1 )
-			self.failUnless( result.floatPrimVar( g ) > 0.8 )
+			index = dimensions.x * point.y + point.x
+			self.failUnless( image["R"][index] < 0.1 )
+			self.failUnless( image["G"][index] > 0.8 )
 
 		innerEdges = [
 			IECore.V2i( 3, 3 ),
@@ -416,9 +403,9 @@ class RendererTest( unittest.TestCase ) :
 		]
 
 		for point in innerEdges :
-			self.failUnless( e.pointAtPixel( point, result ) )
-			self.failUnless( result.floatPrimVar( r ) > 0.8 )
-			self.failUnless( result.floatPrimVar( g ) < 0.1 )
+			index = dimensions.x * point.y + point.x
+			self.failUnless( image["R"][index] > 0.8 )
+			self.failUnless( image["G"][index] < 0.1 )
 
 	def testProcedural( self ) :
 
@@ -484,12 +471,12 @@ class RendererTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 			curvesPrimitive.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 		del image["A"]
 
 		expectedImage = IECore.Reader.create( expectedImage ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 
 	def testBezierCurves( self ) :
 
@@ -566,7 +553,7 @@ class RendererTest( unittest.TestCase ) :
 			mesh.interpolation = "catmullClark"
 			mesh.render( r )
 
-		return IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		return IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
 	def testDisplacementShader( self ) :
 
@@ -576,10 +563,10 @@ class RendererTest( unittest.TestCase ) :
 		displaced1 = self.__displacementRender( doDisplacement = True )
 		displaced2 = self.__displacementRender( doDisplacement = True )
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=undisplaced1, imageB=undisplaced2, maxError=0.001 ), IECore.BoolData( False ) )
-		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=displaced2, maxError=0.001 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=undisplaced1, imageB=undisplaced2, maxError=0.001 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=displaced1, imageB=displaced2, maxError=0.001 ), IECore.BoolData( False ) )
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=displaced1, imageB=undisplaced1, maxError=0.1 ), IECore.BoolData( True ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=displaced1, imageB=undisplaced1, maxError=0.1 ), IECore.BoolData( True ) )
 
 	## \todo This is a duplicate of AutomaticInstancingTest.__allNodes - consider
 	# where we might be able to consolidate them to.
@@ -659,14 +646,13 @@ class RendererTest( unittest.TestCase ) :
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
-		e = IECore.PrimitiveEvaluator.create( image )
- 		result = e.createResult()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 5 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["R"][index], 1, 5 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 0 )
 
 	def testMissingShaderConnectionWarnings( self ) :
 
@@ -704,14 +690,13 @@ class RendererTest( unittest.TestCase ) :
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
-		e = IECore.PrimitiveEvaluator.create( image )
- 		result = e.createResult()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertTrue( result.floatPrimVar( e.R() ) > 0.2 )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.5, result.floatPrimVar( e.G() ) )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ) * 0.25, result.floatPrimVar( e.B() ) )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertTrue( image["R"][index] > 0.2 )
+		self.assertAlmostEqual( image["R"][index] * 0.5, image["G"][index] )
+		self.assertAlmostEqual( image["R"][index] * 0.25, image["B"][index] )
 
 	def testExternalProcedural( self ) :
 
@@ -799,12 +784,11 @@ class RendererTest( unittest.TestCase ) :
 				mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.5, -0.5 ), IECore.V2f( 1.5, 0.5 ) ) )
 				mesh.render( r )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
 	def testTransformationMotionBlur( self ) :
 
@@ -828,12 +812,11 @@ class RendererTest( unittest.TestCase ) :
 			mesh.render( r )
 
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
 	def testProcedural( self ) :
 

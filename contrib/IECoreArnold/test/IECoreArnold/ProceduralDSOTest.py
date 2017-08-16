@@ -32,12 +32,11 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import unittest
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class ProceduralDSOTest( unittest.TestCase ) :
@@ -47,10 +46,9 @@ class ProceduralDSOTest( unittest.TestCase ) :
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
 
 		image = IECore.Reader.create( "testProceduralDSO.exr" ).read()
-		evaluator = IECore.ImagePrimitiveEvaluator( image )
-		result = evaluator.createResult()
-		evaluator.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.failUnless( result.floatPrimVar( image["A"] ) > 0.99 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.failUnless( image["A"][index] > 0.99 )
 
 	def tearDown( self ) :
 
@@ -59,4 +57,4 @@ class ProceduralDSOTest( unittest.TestCase ) :
 				os.remove( f )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

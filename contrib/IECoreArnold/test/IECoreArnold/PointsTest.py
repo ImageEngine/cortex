@@ -39,6 +39,7 @@ import random
 import arnold
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class PointsTest( unittest.TestCase ) :
@@ -103,14 +104,12 @@ class PointsTest( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
 			r.points( numPoints, { "P" : p } )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
 		del image["A"]
 
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/pointsImages/points.tif" ).read()
 
-		IECore.ImageWriter.create( image, "/tmp/test.tif" ).write()
-
-		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 
 	def testConstantPrimitiveVariable( self ) :
 
