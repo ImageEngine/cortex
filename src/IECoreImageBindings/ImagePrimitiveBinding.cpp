@@ -34,22 +34,26 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/ImagePrimitive.h"
-#include "IECorePython/ImagePrimitiveBinding.h"
+#include "OpenEXR/half.h"
+
+#include "IECoreImage/ImagePrimitive.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 
-#include "OpenEXR/half.h"
+#include "IECoreImageBindings/ImagePrimitiveBinding.h"
 
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
 
-namespace IECorePython
+namespace
 {
 
 /// \todo Rewrite the Parameter::valueValid bindings to follow this form? They currently always
 /// return a tuple, which is causing lots of coding errors (the tuple is always true, and it's
 /// easy to forget a tuple is being returned and expect a bool instead).
-static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wantReason=false )
+static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wantReason = false )
 {
 	if( wantReason )
 	{
@@ -61,7 +65,7 @@ static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wan
 	return object( v );
 }
 
-static object channelValid2( ImagePrimitive &that, const char * n, bool wantReason=false )
+static object channelValid2( ImagePrimitive &that, const char *n, bool wantReason = false )
 {
 	if( wantReason )
 	{
@@ -95,6 +99,11 @@ static DataPtr createChannel( ImagePrimitive &i, const std::string &name )
 {
 	return i.createChannel<T>( name );
 }
+
+} // namespace
+
+namespace IECoreImageBindings
+{
 
 void bindImagePrimitive()
 {

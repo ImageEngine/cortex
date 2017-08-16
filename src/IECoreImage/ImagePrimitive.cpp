@@ -36,17 +36,19 @@
 
 #include "boost/static_assert.hpp"
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/Renderer.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MurmurHash.h"
 
+#include "IECoreImage/ImagePrimitive.h"
+
 using namespace std;
-using namespace IECore;
-using namespace Imath;
 using namespace boost;
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
 
 static IndexedIO::EntryID g_displayWindowMinXEntry("displayWindowMinX");
 static IndexedIO::EntryID g_displayWindowMinYEntry("displayWindowMinY");

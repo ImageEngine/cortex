@@ -42,6 +42,7 @@
 #include "IECoreImageBindings/ImageCropOpBinding.h"
 #include "IECoreImageBindings/ImageDiffOpBinding.h"
 #include "IECoreImageBindings/ImageDisplayDriverBinding.h"
+#include "IECoreImageBindings/ImagePrimitiveBinding.h"
 #include "IECoreImageBindings/ImagePrimitiveParameterBinding.h"
 #include "IECoreImageBindings/ImageThinnerBinding.h"
 #include "IECoreImageBindings/ImageReaderBinding.h"
@@ -70,6 +71,7 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 	bindImageCropOp();
 	bindImageDiffOp();
 	bindImageThinner();
+	bindImagePrimitive();
 	bindImagePrimitiveParameter();
 	bindFont();
 	bindLensDistortOp();

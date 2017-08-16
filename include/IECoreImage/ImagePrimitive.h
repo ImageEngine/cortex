@@ -32,20 +32,21 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_IMAGEPRIMITIVE_H
-#define IECORE_IMAGEPRIMITIVE_H
+#ifndef IECOREIMAGE_IMAGEPRIMITIVE_H
+#define IECOREIMAGE_IMAGEPRIMITIVE_H
 
 #include <string>
 #include <vector>
 
-#include "IECore/Export.h"
 #include "IECore/Primitive.h"
 #include "IECore/Data.h"
 #include "IECore/VectorTypedData.h"
+#include "IECore/CompoundData.h"
 
-#include "CompoundData.h"
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-namespace IECore
+namespace IECoreImage
 {
 
 /// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as primitive variables.
@@ -85,12 +86,12 @@ namespace IECore
 /// \todo I think we should perhaps rethink the centering of the object space. It seems odd that rendering two images
 /// where one has an offset display window should result in them rendering over the top of each other.
 /// \ingroup imageProcessingGroup
-class IECORE_API ImagePrimitive : public Primitive
+class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 {
 
 	public:
 
-		IE_CORE_DECLAREOBJECT( ImagePrimitive, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( ImagePrimitive, ImagePrimitiveTypeId, IECore::Primitive );
 
 		/// construct an ImagePrimitive with no area consumed
 		/// Used to create an object during file reading and for the default values of ImagePrimitiveParameters
@@ -118,9 +119,9 @@ class IECORE_API ImagePrimitive : public Primitive
 		void setDisplayWindow( const Imath::Box2i &displayWindow );
 
 		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		virtual size_t variableSize( IECore::PrimitiveVariable::Interpolation interpolation ) const;
 
-		virtual void render( Renderer *renderer ) const;
+		virtual void render( IECore::Renderer *renderer ) const;
 
 		//! @name Spaces
 		/// Functions to help with conversions between pixel, uv, and object spaces.
@@ -168,7 +169,7 @@ class IECORE_API ImagePrimitive : public Primitive
 		/// Returns true if the PrimitiveVariable is a valid channel for this
 		/// image - returns false otherwise. If false is returned and reason is
 		/// passed, then a reason for invalidity is places in reason.
-		bool channelValid( const PrimitiveVariable &pv, std::string *reason=0 ) const;
+		bool channelValid( const IECore::PrimitiveVariable &pv, std::string *reason=0 ) const;
 		/// As above but passes the name of a PrimitiveVariable.
 		bool channelValid( const std::string &name, std::string *reason=0 ) const;
 		/// Places the names of all valid channel into the given vector.
@@ -176,13 +177,13 @@ class IECORE_API ImagePrimitive : public Primitive
 		/// Returns the data for the named channel, or 0 if it
 		/// doesn't exist or is invalid.
 		template<typename T>
-		TypedData<std::vector<T> > *getChannel( const std::string &name );
+		IECore::TypedData<std::vector<T> > *getChannel( const std::string &name );
 		template<typename T>
-		const TypedData<std::vector<T> > *getChannel( const std::string &name ) const;
+		const IECore::TypedData<std::vector<T> > *getChannel( const std::string &name ) const;
 		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
 		/// size and returns a pointer to the data within it. The data is not initialized.
 		template<typename T>
-		TypedData<std::vector<T> > *createChannel( const std::string &name );
+		IECore::TypedData<std::vector<T> > *createChannel( const std::string &name );
 		//@}
 		
 		//! @name Creation
@@ -193,7 +194,7 @@ class IECORE_API ImagePrimitive : public Primitive
 		static Ptr createGreyscale( const T fillValue, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 		//@}
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		virtual void topologyHash( IECore::MurmurHash &h ) const;
 	
 	private:
 
@@ -211,6 +212,6 @@ IE_CORE_DECLAREPTR(ImagePrimitive);
 
 }
 
-#include "IECore/ImagePrimitive.inl"
+#include "IECoreImage/ImagePrimitive.inl"
 
-#endif
+#endif // IECOREIMAGE_IMAGEPRIMITIVE_H

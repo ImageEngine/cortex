@@ -108,7 +108,7 @@ enum TypeId
 	BoolDataTypeId = 60,
 	PrimitiveTypeId = 61,
 	PointsPrimitiveTypeId = 62,
-	ImagePrimitiveTypeId = 63,
+	ImagePrimitiveTypeId = 63, // obsolete - available for reuse
 	Box2iDataTypeId = 64,
 	HalfVectorDataTypeId = 65,
 	V2iDataTypeId = 66,

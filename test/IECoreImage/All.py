@@ -41,6 +41,7 @@ import IECoreImage
 
 warnings.simplefilter( "error", DeprecationWarning )
 
+from ImagePrimitiveTest import ImagePrimitiveTest
 from ImageReaderTest import ImageReaderTest
 from ImageWriterTest import ImageWriterTest
 from ClampOpTest import ClampOpTest

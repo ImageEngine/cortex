@@ -32,8 +32,8 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_IMAGEPRIMITIVE_INL
-#define IECORE_IMAGEPRIMITIVE_INL
+#ifndef IECOREIMAGE_IMAGEPRIMITIVE_INL
+#define IECOREIMAGE_IMAGEPRIMITIVE_INL
 
 #include "boost/format.hpp"
 #include "boost/static_assert.hpp"
@@ -44,33 +44,33 @@
 #include "IECore/Exception.h"
 #include "IECore/TypeTraits.h"
 
-namespace IECore
+namespace IECoreImage
 {
 
 template<typename T>
-TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name )
+IECore::TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name )
 {
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
+		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
 	}
 	return 0;
 }
 
 template<typename T>
-const TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name ) const
+const IECore::TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::string &name ) const
 {
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return runTimeCast<TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
+		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
 	}
 	return 0;
 }
 
 template<typename T>
-TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::string &name )
+IECore::TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::string &name )
 {
 	/// This assert enforces the comments regarding permissible channel types in ImagePrimitive.h
 	BOOST_STATIC_ASSERT( (
@@ -80,13 +80,13 @@ TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::string &na
 			boost::is_same< T, half >
 		>::value
 	) );
-	typename TypedData<std::vector<T> >::Ptr channel = new TypedData<std::vector<T> >;
+	typename IECore::TypedData<std::vector<T> >::Ptr channel = new IECore::TypedData<std::vector<T> >;
 
 	typename std::vector<T>::size_type area = ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
 
 	channel->writable().resize( area );
 
-	variables.insert( PrimitiveVariableMap::value_type( name, PrimitiveVariable( PrimitiveVariable::Vertex, channel ) ) );
+	variables.insert( IECore::PrimitiveVariableMap::value_type( name, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, channel ) ) );
 
 	return channel.get();
 }
@@ -97,13 +97,13 @@ TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::string &na
 template<typename T>
 ImagePrimitivePtr ImagePrimitive::createRGB( const Imath::Color3<T> &fillColor, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow )
 {
-	
+
 	ImagePrimitivePtr result = new ImagePrimitive( dataWindow, displayWindow );
 
-	typename TypedData<std::vector<T> >::Ptr rData = result->createChannel<T>( "R" );
-	typename TypedData<std::vector<T> >::Ptr gData = result->createChannel<T>( "G" );
-	typename TypedData<std::vector<T> >::Ptr bData = result->createChannel<T>( "B" );
-	
+	typename IECore::TypedData<std::vector<T> >::Ptr rData = result->createChannel<T>( "R" );
+	typename IECore::TypedData<std::vector<T> >::Ptr gData = result->createChannel<T>( "G" );
+	typename IECore::TypedData<std::vector<T> >::Ptr bData = result->createChannel<T>( "B" );
+
 	std::fill( rData->writable().begin(), rData->writable().end(), fillColor[0] );
 	std::fill( gData->writable().begin(), gData->writable().end(), fillColor[1] );
 	std::fill( bData->writable().begin(), bData->writable().end(), fillColor[2] );
@@ -116,7 +116,7 @@ ImagePrimitivePtr ImagePrimitive::createGreyscale( const T fillValue, const Imat
 {
 	ImagePrimitivePtr result = new ImagePrimitive( dataWindow, displayWindow );
 
-	typename TypedData<std::vector<T> >::Ptr yData = result->createChannel<T>( "Y" );
+	typename IECore::TypedData<std::vector<T> >::Ptr yData = result->createChannel<T>( "Y" );
 
 	std::fill( yData->writable().begin(), yData->writable().end(), fillValue );
 
@@ -126,4 +126,4 @@ ImagePrimitivePtr ImagePrimitive::createGreyscale( const T fillValue, const Imat
 
 }
 
-#endif
+#endif // IECOREIMAGE_IMAGEPRIMITIVE_INL

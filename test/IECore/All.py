@@ -66,7 +66,6 @@ from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
 from PointsPrimitive import *
-from ImagePrimitive import *
 from PerlinNoise import *
 from Turbulence import *
 from MeshPrimitive import *

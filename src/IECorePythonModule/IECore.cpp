@@ -100,7 +100,6 @@
 #include "IECorePython/ObjectParameterBinding.h"
 #include "IECorePython/ModifyOpBinding.h"
 #include "IECorePython/PrimitiveOpBinding.h"
-#include "IECorePython/ImagePrimitiveBinding.h"
 #include "IECorePython/PerlinNoiseBinding.h"
 #include "IECorePython/HalfBinding.h"
 #include "IECorePython/MeshPrimitiveBinding.h"
@@ -319,7 +318,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectParameter();
 	bindModifyOp();
 	bindPrimitiveOp();
-	bindImagePrimitive();
 	bindMeshPrimitive();
 	bindMotionPrimitive();
 	bindTransform();

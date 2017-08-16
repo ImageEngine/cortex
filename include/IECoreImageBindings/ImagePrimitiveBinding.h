@@ -32,14 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_IMAGEPRIMITIVEBINDING_H
-#define IECOREPYTHON_IMAGEPRIMITIVEBINDING_H
+#ifndef IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
+#define IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
 
-#include "IECorePython/Export.h"
-
-namespace IECorePython
+namespace IECoreImageBindings
 {
-IECOREPYTHON_API void bindImagePrimitive();
+void bindImagePrimitive();
 }
 
-#endif // IECOREPYTHON_IMAGEPRIMITIVEBINDING_H
+#endif // IECOREIMAGEBINDINGS_IMAGEPRIMITIVEBINDING_H
