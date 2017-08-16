@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreImage
 import IECoreRI
 import os.path
 import os
@@ -67,11 +68,9 @@ class OrientationTest( IECoreRI.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testOrientation.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 		del r
 
 		# render a plane that should be backface culled
@@ -86,11 +85,9 @@ class OrientationTest( IECoreRI.TestCase ) :
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testOrientation.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 0 )
 
 	def testFlippingTransforms( self ) :
 
@@ -112,11 +109,9 @@ class OrientationTest( IECoreRI.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 
 if __name__ == "__main__":
     unittest.main()

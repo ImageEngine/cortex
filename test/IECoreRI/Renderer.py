@@ -33,14 +33,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 import re
 
 from IECore import *
 import IECore
+import IECoreImage
 import IECoreRI
 
 class SimpleProcedural( Renderer.Procedural ) :
@@ -766,12 +765,11 @@ class RendererTest( IECoreRI.TestCase ) :
 
 		self.assertEqual( procedural.numRenderCalls, 1 )
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
 
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( image["A"][index], 1 )
 
 	def testOSLShader( self ) :
 

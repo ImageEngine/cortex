@@ -263,7 +263,7 @@ IECore::CompoundDataPtr SXRenderer::shadePlane( const Imath::V2i &resolution ) c
 	return m_implementation->shadePlane( resolution );
 }
 
-IECore::ImagePrimitivePtr SXRenderer::shadePlaneToImage( const Imath::V2i &resolution ) const
+IECoreImage::ImagePrimitivePtr SXRenderer::shadePlaneToImage( const Imath::V2i &resolution ) const
 {
 	return m_implementation->shadePlaneToImage( resolution );
 }

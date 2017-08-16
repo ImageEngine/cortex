@@ -64,7 +64,7 @@ static IECore::CompoundDataPtr shadePlane( SXRendererPtr r, const Imath::V2i &re
 	return r->shadePlane( resolution );
 }
 
-static IECore::ImagePrimitivePtr shadePlaneToImage( SXRendererPtr r, const Imath::V2i &resolution )
+static IECoreImage::ImagePrimitivePtr shadePlaneToImage( SXRendererPtr r, const Imath::V2i &resolution )
 {
 	IECorePython::ScopedGILRelease gilRelease;
 	return r->shadePlaneToImage( resolution );

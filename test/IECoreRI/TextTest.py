@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreImage
 import IECoreRI
 
 class TextTest( IECoreRI.TestCase ) :
@@ -74,7 +75,7 @@ class TextTest( IECoreRI.TestCase ) :
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/textImages/helloWorld.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 
 if __name__ == "__main__":
     unittest.main()

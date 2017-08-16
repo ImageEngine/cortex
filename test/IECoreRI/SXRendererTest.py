@@ -32,14 +32,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 import sys
 import threading
 
 import IECore
+import IECoreImage
 import IECoreRI
 
 class SXRendererTest( unittest.TestCase ) :
@@ -48,9 +47,9 @@ class SXRendererTest( unittest.TestCase ) :
 	
 		i = IECore.Reader.create( fileName ).read()
 		
-		r = i["R"].data
-		g = i["G"].data
-		b = i["B"].data
+		r = i["R"]
+		g = i["G"]
+		b = i["B"]
 		
 		result = IECore.V3fVectorData()
 		v = IECore.V3f
@@ -61,7 +60,7 @@ class SXRendererTest( unittest.TestCase ) :
 		
 	def __saveImage( self, data, dataWindow, fileName ) :
 	
-		image = IECore.ImagePrimitive( dataWindow, dataWindow )
+		image = IECoreImage.ImagePrimitive( dataWindow, dataWindow )
 		if isinstance( data, IECore.FloatVectorData ) :
 			
 			image["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, data )
@@ -80,9 +79,9 @@ class SXRendererTest( unittest.TestCase ) :
 				g.append( c[1] )
 				b.append( c[2] )
 			
-			image["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r )
-			image["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
-			image["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, b )
+			image["R"] = r
+			image["G"] = g
+			image["B"] = b
 			
 		IECore.Writer.create( image, fileName ).write()
 	
@@ -437,7 +436,7 @@ class SXRendererTest( unittest.TestCase ) :
 		image = r.shadePlaneToImage( IECore.V2i( 64, 64 ) )
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/sxOutput/shadePlaneImage.exr" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0 ), IECore.BoolData( False ) )
 	
 	def testVVector( self ) :
 

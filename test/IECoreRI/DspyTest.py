@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import unittest
 import time
 
 import IECore
+import IECoreImage
 import IECoreRI
 				
 class DspyTest( IECoreRI.TestCase ) :
@@ -71,13 +70,13 @@ class DspyTest( IECoreRI.TestCase ) :
 			
 		# check that they're the same
 		
-		i = IECore.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
+		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
 		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
 		
 		i.blindData().clear()
 		i2.blindData().clear()
 		
-		self.failIf( IECore.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
+		self.failIf( IECoreImage.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
 	
 	def testDisplayDriver( self ) :
 	
@@ -113,13 +112,13 @@ class DspyTest( IECoreRI.TestCase ) :
 		
 		os.system( "renderdl test/IECoreRI/output/display.rib" )
 		
-		i = IECore.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
+		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
 		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
 		
 		i.blindData().clear()
 		i2.blindData().clear()
 		
-		self.failIf( IECore.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
+		self.failIf( IECoreImage.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
 				
 if __name__ == "__main__":
     unittest.main()

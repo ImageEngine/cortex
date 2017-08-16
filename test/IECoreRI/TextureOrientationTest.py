@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreImage
 import IECoreRI
 import os.path
 import os
@@ -63,11 +64,11 @@ class TextureOrientationTest( IECoreRI.TestCase ) :
 		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ).render( r )
 		r.worldEnd()
 
-		ie = IECore.ImageReader.create( "test/IECoreRI/data/textureOrientationImages/expected.tif" ).read()
-		i1 = IECore.ImageReader.create( "test/IECoreRI/output/testTextureOrientation1.tif" ).read()
-		i2 = IECore.ImageReader.create( "test/IECoreRI/output/testTextureOrientation2.tif" ).read()
+		ie = IECore.Reader.create( "test/IECoreRI/data/textureOrientationImages/expected.tif" ).read()
+		i1 = IECore.Reader.create( "test/IECoreRI/output/testTextureOrientation1.tif" ).read()
+		i2 = IECore.Reader.create( "test/IECoreRI/output/testTextureOrientation2.tif" ).read()
 
-		testOp = IECore.ImageDiffOp()
+		testOp = IECoreImage.ImageDiffOp()
 
 		self.assert_( not testOp( imageA=ie, imageB=i1, maxError=0.003 ).value )
 		self.assert_( not testOp( imageA=ie, imageB=i2, maxError=0.003 ).value )

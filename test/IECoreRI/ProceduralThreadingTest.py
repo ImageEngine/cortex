@@ -32,8 +32,6 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 import random
@@ -41,6 +39,7 @@ import thread
 import gc
 
 import IECore
+import IECoreImage
 import IECoreRI
 
 class TeapotProcedural( IECore.Renderer.Procedural ) :
@@ -135,7 +134,7 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 		imageCreated = IECore.Reader.create( "test/IECoreRI/output/testProceduralThreading.tif" ).read()
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/testProceduralThreading.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 	
 	def test( self ) :
 		
