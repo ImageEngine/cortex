@@ -71,7 +71,7 @@ TexturePtr TextureLoader::load( const std::string &name )
 	}
 
 	IECore::ObjectPtr o = r->read();
-	IECore::ImagePrimitivePtr i = IECore::runTimeCast<IECore::ImagePrimitive>( o );
+	IECoreImage::ImagePrimitivePtr i = IECore::runTimeCast<IECoreImage::ImagePrimitive>( o );
 	if( !i )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "\"%s\" is not an image." ) % path.string() );

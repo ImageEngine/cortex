@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os.path
 import shutil
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -71,17 +70,16 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		i = IECore.Reader.create( self.outputFileName ).read()
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" )
-		reader['colorSpace'] = 'linear'
 		i2 = reader.read()
 
 		# blue where there must be an object
 		# red where we don't mind
 		# black where there must be nothing
 
-		a = i["A"].data
+		a = i["A"]
 
-		r2 = i2["R"].data
-		b2 = i2["B"].data
+		r2 = i2["R"]
+		b2 = i2["B"]
 		for i in range( r2.size() ) :
 
 			if b2[i] > 0.5 :
@@ -115,10 +113,9 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			r.disk( 1, 0, 360, {} )
 			
 		image = IECore.Reader.create( self.outputFileName ).read()
-		evaluator = IECore.ImagePrimitiveEvaluator( image )
-		result = evaluator.createResult()
-		evaluator.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( evaluator.A() ), 1 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		self.assertEqual( image["A"][index], 1 )
 		
 		# back facing single sided - should be invisible
 		
@@ -145,10 +142,9 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			r.disk( 1, 0, 360, {} )
 			
 		image = IECore.Reader.create( self.outputFileName ).read()
-		evaluator = IECore.ImagePrimitiveEvaluator( image )
-		result = evaluator.createResult()
-		evaluator.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( evaluator.A() ), 0 )	
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		self.assertEqual( image["A"][index], 0 )
 
 	def setUp( self ) :
 		

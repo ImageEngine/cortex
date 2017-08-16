@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreImage
 import IECoreGL
 IECoreGL.init( False )
 import os.path
@@ -83,11 +84,9 @@ class OrientationTest( unittest.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 
 		# render a plane that should be backface culled
 		r = IECoreGL.Renderer()
@@ -103,11 +102,9 @@ class OrientationTest( unittest.TestCase ) :
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 0 )
 
 	def testFlippingTransforms( self ) :
 
@@ -132,11 +129,9 @@ class OrientationTest( unittest.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 
 	def testFlippingTransformsAndTransformEnd( self ) :
 
@@ -172,11 +167,9 @@ class OrientationTest( unittest.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 
 	def setUp( self ) :
 		

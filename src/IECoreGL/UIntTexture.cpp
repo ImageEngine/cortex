@@ -37,6 +37,7 @@
 
 using namespace IECoreGL;
 using namespace IECore;
+using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( UIntTexture );
 
@@ -57,7 +58,7 @@ UIntTexture::~UIntTexture()
 {
 }
 
-IECore::ImagePrimitivePtr UIntTexture::imagePrimitive() const
+ImagePrimitivePtr UIntTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
 	GLint width = 0;
@@ -84,7 +85,7 @@ IECore::ImagePrimitivePtr UIntTexture::imagePrimitive() const
 	
 	Imath::Box2i imageExtents( Imath::V2i( 0, 0 ), Imath::V2i( width-1, height-1 ) );
 	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-	image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, uiData );
+	image->channels["Y"] = uiData;
 
 	IECoreGL::Exception::throwIfError();
 	return image;

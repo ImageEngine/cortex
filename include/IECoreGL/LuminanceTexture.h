@@ -58,11 +58,11 @@ class IECOREGL_API LuminanceTexture : public Texture
 		/// "Y" and "A". Currently ignores the display window and uses only
 		/// the data window. Image must have at least the "Y" channel and if specified the
 		/// "A" channel must be of the same type.
-		LuminanceTexture( const IECore::ImagePrimitive *image, bool mipMap=true );
+		LuminanceTexture( const IECoreImage::ImagePrimitive *image, bool mipMap=true );
 
 		virtual ~LuminanceTexture();
 
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
 

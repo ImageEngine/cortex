@@ -36,10 +36,11 @@ import unittest
 import os.path
 import shutil
 
-from IECore import *
+import IECore
+import IECoreImage
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
 class TestImmediateRenderer( unittest.TestCase ) :
 
@@ -47,54 +48,48 @@ class TestImmediateRenderer( unittest.TestCase ) :
 
 		outputFileName = os.path.dirname( __file__ ) + "/output/testImmediate.tif"
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
 		r.camera( "main", {
-				"projection" : StringData( "perspective" ),
-				"projection:fov" : FloatData( 45 ),
-				"resolution" : V2iData( V2i( 256 ) ),
-				"clippingPlanes" : V2fData( V2f( 1, 1000 ) ),
-				"screenWindow" : Box2fData( Box2f( V2f( -0.5 ), V2f( 0.5 ) ) )
+				"projection" : IECore.StringData( "perspective" ),
+				"projection:fov" : IECore.FloatData( 45 ),
+				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
+				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
 			}
 		)
 		r.display( outputFileName, "tif", "rgba", {} )
 
 		r.worldBegin()
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 0, 0, 1 ) ) } )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 		r.sphere( 1, -1, 1, 360, {} )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 1, 0 ) ) } )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ) )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 1, 0 ) ) } )
 		r.sphere( 1, -1, 1, 360, {} )
 		r.worldEnd()
 
-		i = Reader.create( outputFileName ).read()
-		e = PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		r = e.R()
-		g = e.G()
-		b = e.B()
-
-		e.pointAtUV( V2f( 0.5, 0 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 1 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 1 )
-		e.pointAtUV( V2f( 0, 0 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 0 )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
+		i = IECore.Reader.create( outputFileName ).read()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 1 )
+		index = 0
+		self.assertEqual( i["A"][index], 0 )
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :
 		

@@ -33,7 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/MessageHandler.h"
-#include "IECore/ImagePrimitive.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECoreGL/DepthTexture.h"
 #include "IECoreGL/Exception.h"
@@ -73,7 +74,7 @@ DepthTexture::~DepthTexture()
 {
 }
 
-IECore::ImagePrimitivePtr DepthTexture::imagePrimitive() const
+IECoreImage::ImagePrimitivePtr DepthTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
 	
@@ -101,8 +102,8 @@ IECore::ImagePrimitivePtr DepthTexture::imagePrimitive() const
 	}
 
 	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
-	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-	image->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, zd );
+	IECoreImage::ImagePrimitivePtr image = new IECoreImage::ImagePrimitive( imageExtents, imageExtents );
+	image->channels["Z"] = zd;
 
 	return image;
 }

@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -112,21 +113,18 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			curvesPrimitive.render( r )
 
 		i = IECore.Reader.create( self.outputFileName ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		r = e.R()
-		g = e.G()
-		b = e.B()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
 
 		for t in testPixels :
 
-			e.pointAtUV( t[0], result )
+			xOffset = 1 if t[0].x == 1 else 0
+			yOffset = 1 if t[0].y == 1 else 0
+			index = dimensions.x * int(dimensions.y * t[0].y - yOffset) + int(dimensions.x * t[0].x) - xOffset
 			c = IECore.Color4f(
-				result.floatPrimVar( r ),
-				result.floatPrimVar( g ),
-				result.floatPrimVar( b ),
-				result.floatPrimVar( a )
+				i["R"][index],
+				i["G"][index],
+				i["B"][index],
+				i["A"][index],
 			)
 
 			self.assertEqual( c, t[1] )
@@ -137,11 +135,11 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			# red where we don't mind
 			# black where there must be nothing
 
-			a = i["A"].data
+			a = i["A"]
 
 			i2 = IECore.Reader.create( testImage ).read()
-			r2 = i2["R"].data
-			b2 = i2["B"].data
+			r2 = i2["R"]
+			b2 = i2["B"]
 			for i in range( r2.size() ) :
 
 				if b2[i] > 0.5 :
@@ -153,7 +151,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 			expectedImage = IECore.Reader.create( diffImage ).read()
 
-			self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = i, maxError = 0.05 ).value, False )
+			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = i, maxError = 0.05 ).value, False )
 		
 
 	def testAttributes( self ) :

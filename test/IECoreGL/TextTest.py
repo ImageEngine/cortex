@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -80,7 +81,7 @@ class TextTest( unittest.TestCase ) :
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorld.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
 
 	def testSprites( self ) :
 	
@@ -116,7 +117,7 @@ class TextTest( unittest.TestCase ) :
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
 	
 	def setUp( self ) :
 		

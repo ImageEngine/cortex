@@ -36,6 +36,7 @@ import unittest
 import threading
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -144,8 +145,8 @@ class CachedConverterTest( unittest.TestCase ) :
 	
 		dataWindow = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
 	
-		i1 = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
-		i2 = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
+		i1 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
+		i2 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 10 ) )
 	
 		for i in range( 0, 1 ) :

@@ -38,6 +38,7 @@ import shutil
 import inspect
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -272,20 +273,20 @@ class ShadingTest( unittest.TestCase ) :
 		return IECore.Reader.create( self.__imageFileName ).read()
 
 	def assertImageValues( self, image, tests ) :
-	
-		evaluator = IECore.ImagePrimitiveEvaluator( image )
-		result = evaluator.createResult()
-		
+
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+
 		for t in tests :
-		
-			evaluator.pointAtUV( t[0], result )
+
+			index = dimensions.x * int(dimensions.y * t[0].y) + int(dimensions.x * t[0].x)
+
 			c = IECore.Color4f(
-				result.floatPrimVar( evaluator.R() ),
-				result.floatPrimVar( evaluator.G() ),
-				result.floatPrimVar( evaluator.B() ),
-				result.floatPrimVar( evaluator.A() )
+				image["R"][index],
+				image["G"][index],
+				image["B"][index],
+				image["A"][index],
 			)
-			
+
 			for i in range( 4 ):
 				if abs( c[i] - t[1][i] ) > 0.01:
 					raise AssertionError( repr( c ) + " != " + repr( t[1] ) )
@@ -596,9 +597,9 @@ class ShadingTest( unittest.TestCase ) :
 			"dataWindow" : IECore.Box2iData( yellowImage.dataWindow ),
 			"displayWindow" : IECore.Box2iData( yellowImage.displayWindow ),
 			"channels" : {
-				"R" : yellowImage["R"].data,
-				"G" : yellowImage["G"].data,
-				"B" : yellowImage["B"].data,
+				"R" : yellowImage["R"],
+				"G" : yellowImage["G"],
+				"B" : yellowImage["B"],
 			}
 		} )
 		
@@ -821,11 +822,11 @@ class ShadingTest( unittest.TestCase ) :
 		# wireframe is green, and vertex Cs is black,
 		# so there should be no contribution from 
 		# wireframe or solid shading in the red channel.
-		self.assertEqual( sum( image["R"].data ), 0 )
+		self.assertEqual( sum( image["R"] ), 0 )
 		# black vertex colour should have no effect on
 		# green wireframe, so we should have some wireframe
 		# contribution in the green channel.
-		self.assertTrue( sum( image["G"].data ) > 0 )
+		self.assertTrue( sum( image["G"] ) > 0 )
 
 	def testUniformFloatArrayParameters( self ) :
 	

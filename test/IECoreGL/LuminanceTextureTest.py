@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -51,7 +52,7 @@ class LuminanceTextureTest( unittest.TestCase ) :
 
 		ii = t.imagePrimitive()
 
-		res = IECore.ImageDiffOp()(
+		res = IECoreImage.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.1,

@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os.path
 import shutil
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -68,7 +67,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		i = IECore.Reader.create( self.__outputFileName ).read()
 
-		a = i["A"].data
+		a = i["A"]
 		for i in range( a.size() ) :
 			self.assertEqual( a[i], 0 )
 			
@@ -95,7 +94,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 
 		i = IECore.Reader.create( self.__outputFileName ).read()
 
-		a = i["A"].data
+		a = i["A"]
 		self.failUnless( a[127*256 + 127] > 0 )
 		self.failUnless( a[127*256 + 255] > 0 )
 		self.failUnless( a[127] > 0 )

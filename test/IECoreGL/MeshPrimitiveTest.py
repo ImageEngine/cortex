@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 import shutil
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -100,11 +99,10 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 			m.render( r )
 
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" )
-		reader['colorSpace'] = 'linear'
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def testUniformCs( self ) :
 		
@@ -151,28 +149,26 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 			m.render( r )
 		
 		image = IECore.Reader.create( self.outputFileName ).read()
-		e = IECore.ImagePrimitiveEvaluator( image )
-		r = e.createResult()
-		
-		e.pointAtUV( IECore.V2f( 0.25, 0.75 ), r )
-		self.assertEqual( r.floatPrimVar( image["R"] ), 1 )
-		self.assertEqual( r.floatPrimVar( image["G"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["B"] ), 0 )
-		
-		e.pointAtUV( IECore.V2f( 0.75, 0.75 ), r )
-		self.assertEqual( r.floatPrimVar( image["R"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["G"] ), 1 )
-		self.assertEqual( r.floatPrimVar( image["B"] ), 0 )
-		
-		e.pointAtUV( IECore.V2f( 0.75, 0.25 ), r )
-		self.assertEqual( r.floatPrimVar( image["R"] ), 1 )
-		self.assertEqual( r.floatPrimVar( image["G"] ), 1 )
-		self.assertEqual( r.floatPrimVar( image["B"] ), 1 )
-		
-		e.pointAtUV( IECore.V2f( 0.25, 0.25 ), r )
-		self.assertEqual( r.floatPrimVar( image["R"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["G"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["B"] ), 1 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
+		self.assertEqual( image["R"][index], 1 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 0 )
+
+		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.75)
+		self.assertEqual( image["R"][index], 0 )
+		self.assertEqual( image["G"][index], 1 )
+		self.assertEqual( image["B"][index], 0 )
+
+		index = dimensions.x * int(dimensions.y * 0.25) + int(dimensions.x * 0.75)
+		self.assertEqual( image["R"][index], 1 )
+		self.assertEqual( image["G"][index], 1 )
+		self.assertEqual( image["B"][index], 1 )
+
+		index = dimensions.x * int(dimensions.y * 0.25) + int(dimensions.x * 0.25)
+		self.assertEqual( image["R"][index], 0 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 1 )
 		
 	def testBound( self ) :
 	
@@ -219,13 +215,11 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 			m.render( r )
 
 		image = IECore.Reader.create( self.outputFileName ).read()
-		e = IECore.ImagePrimitiveEvaluator( image )
-		r = e.createResult()
-		
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), r )
-		self.assertEqual( r.floatPrimVar( image["R"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["G"] ), 0 )
-		self.assertEqual( r.floatPrimVar( image["B"] ), 1 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * dimensions.y/2 + dimensions.x/2
+		self.assertEqual( image["R"][index], 0 )
+		self.assertEqual( image["G"][index], 0 )
+		self.assertEqual( image["B"][index], 1 )
 		 
 	def setUp( self ) :
 		

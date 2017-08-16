@@ -54,7 +54,7 @@ class IECOREGL_API DepthTexture : public Texture
 
 		virtual ~DepthTexture();
 
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 };
 

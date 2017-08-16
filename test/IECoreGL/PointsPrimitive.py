@@ -32,14 +32,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import random
 import os
 import shutil
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -130,11 +129,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/pointVertexAttributes.tif" )
-		reader['colorSpace'] = 'linear'
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def testEmptyPointsPrimitive( self ):
 
@@ -207,7 +205,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/" + expectedImage ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
 
 	def testPerspectiveAimedPoints( self ) :
 	
@@ -277,7 +275,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/glPoints.tif" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 	
 	def testTexturing( self ) :
 	
@@ -322,7 +320,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		expectedImage = IECore.Reader.create( "test/IECoreGL/images/numbers.exr" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 	
 	def testWindingOrder( self ) :
 
@@ -350,14 +348,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 				} )
 
-			e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
-			result = e.createResult()
-			e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-			self.assertEqual( result.floatPrimVar( e.A() ), expectedAlpha )
-		
+			i = IECore.Reader.create( self.outputFileName ).read()
+			dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+			index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+			self.assertEqual( i["A"][index], expectedAlpha )
+
 		performTest( True, 1 )
 		performTest( False, 0 )
-	
+
 	def testAspectAndRotation( self ) :
 	
 		fragmentSource = """
@@ -410,7 +408,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/rotatedPointPatches.exr" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		
-		self.assertEqual( IECore.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
 	
 	def testBound( self ) :
 
@@ -490,14 +488,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
 
-		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
-	
+		i = IECore.Reader.create( self.outputFileName ).read()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
+
 	def testWireframeShading( self ) :
 	
 		r = IECoreGL.Renderer()
@@ -526,14 +524,14 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.points( 1, {
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
-		
-		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+
+		i = IECore.Reader.create( self.outputFileName ).read()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def testVertexCs( self ) :
 	
@@ -560,21 +558,20 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
 				"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
 			} )
-		
-		e = IECore.PrimitiveEvaluator.create( IECore.Reader.create( self.outputFileName ).read() )
-		result = e.createResult()
-		
-		e.pointAtUV( IECore.V2f( 0.25, 0.75 ), result )
-		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.R() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
-		
-		e.pointAtUV( IECore.V2f( 0.75, 0.25 ), result )
-		self.assertEqual( result.floatPrimVar( e.A() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.R() ), 0 )
-		self.assertEqual( result.floatPrimVar( e.G() ), 1 )
-		self.assertEqual( result.floatPrimVar( e.B() ), 0 )
+
+		i = IECore.Reader.create( self.outputFileName ).read()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
+
+		index = dimensions.x * int(dimensions.y * 0.25) + int(dimensions.x * 0.75)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :
 		

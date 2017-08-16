@@ -49,7 +49,7 @@ void bindLuminanceTexture()
 {
 	IECorePython::RunTimeTypedClass<LuminanceTexture>()
 		.def( init<unsigned int, unsigned int, const IECore::Data *, const IECore::Data *, bool>() )
-		.def( init<const IECore::ImagePrimitive *, bool>() )
+		.def( init<const IECoreImage::ImagePrimitive *, bool>() )
 	;
 }
 

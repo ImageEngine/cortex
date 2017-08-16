@@ -78,7 +78,7 @@ class UserAtributesTest( unittest.TestCase ) :
 				s.__level = level
 
 			def doBound( s, args ) :
-				return Box3f( V3f( -1 ), V3f( 1 ) )
+				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 			def doRender( s, renderer, args ):
 

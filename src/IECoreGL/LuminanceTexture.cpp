@@ -54,10 +54,10 @@ LuminanceTexture::LuminanceTexture( unsigned int width, unsigned int height, con
 	construct( width, height, y, a, mipMap );
 }
 
-LuminanceTexture::LuminanceTexture( const IECore::ImagePrimitive *image, bool mipMap )
+LuminanceTexture::LuminanceTexture( const IECoreImage::ImagePrimitive *image, bool mipMap )
 {
-	const IECore::Data *y = image->channelValid( "Y" ) ? image->variables.find( "Y" )->second.data.get() : NULL;
-	const IECore::Data *a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data.get() : NULL;
+	const IECore::Data *y = image->channelValid( "Y" ) ? image->channels.find( "Y" )->second.get() : nullptr;
+	const IECore::Data *a = image->channelValid( "A" ) ? image->channels.find( "A" )->second.get() : nullptr;
 
 	if( !y )
 	{
@@ -151,7 +151,7 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, const
 	IECore::despatchTypedData<Constructor, IECore::TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( y ), c );
 }
 
-ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
+IECoreImage::ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
 
@@ -196,11 +196,11 @@ ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
 	}
 
 	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
-	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-	image->variables["Y"] = PrimitiveVariable( PrimitiveVariable::Vertex, yd );
+	IECoreImage::ImagePrimitivePtr image = new IECoreImage::ImagePrimitive( imageExtents, imageExtents );
+	image->channels["Y"] = yd;
 	if( a )
 	{
-		image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
+		image->channels["A"] = ad;
 	}
 
 	IECoreGL::Exception::throwIfError();

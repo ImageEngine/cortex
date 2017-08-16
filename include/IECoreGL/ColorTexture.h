@@ -63,19 +63,19 @@ class IECOREGL_API ColorTexture : public Texture
 		/// Currently ignores the display window and uses only the data window.
 		/// Image must have at least RGB channels and all channels
 		/// must be of the same type.
-		ColorTexture( const IECore::ImagePrimitive *image );
+		ColorTexture( const IECoreImage::ImagePrimitive *image );
 		/// \todo Make all constructors take a mipMap argument with a useful default
 		/// value, then remove this version.
-		ColorTexture( const IECore::ImagePrimitive *image, bool mipMap );
+		ColorTexture( const IECoreImage::ImagePrimitive *image, bool mipMap );
 
 		virtual ~ColorTexture();
 
 		/// Creates an ImagePrimitive using the texture contents.
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
 
-		void construct( const IECore::ImagePrimitive *image, bool mipMap );
+		void construct( const IECoreImage::ImagePrimitive *image, bool mipMap );
 
 		void construct( unsigned int width, unsigned int height, const IECore::Data *r,
 			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a, bool mipMap );

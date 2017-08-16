@@ -40,8 +40,9 @@
 #include "IECore/Writer.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/CompoundParameter.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 using namespace IECoreGL;
 
@@ -56,7 +57,7 @@ Display::Display( const std::string &name, const std::string &type, const std::s
 
 void Display::display( ConstFrameBufferPtr frameBuffer ) const
 {
-	IECore::ImagePrimitivePtr image = 0;
+	IECoreImage::ImagePrimitivePtr image = 0;
 	if( m_data=="rgba" )
 	{
 		image = frameBuffer->getColor()->imagePrimitive();
@@ -64,7 +65,7 @@ void Display::display( ConstFrameBufferPtr frameBuffer ) const
 	else if( m_data=="rgb" )
 	{
 		image = frameBuffer->getColor()->imagePrimitive();
-		image->variables.erase( "A" );
+		image->channels.erase( "A" );
 	}
 	else if( m_data=="z" )
 	{

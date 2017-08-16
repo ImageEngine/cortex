@@ -82,7 +82,7 @@ const AlphaTexture *Font::texture() const
 		return m_texture.get();
 	}
 
-	IECore::ConstImagePrimitivePtr image = m_imageFont->image();
+	IECoreImage::ConstImagePrimitivePtr image = m_imageFont->image();
 
 	IECore::ConstFloatVectorDataPtr y = image->getChannel<float>( "Y" );
 	Imath::V2i s = image->getDataWindow().size() + Imath::V2i( 1 );

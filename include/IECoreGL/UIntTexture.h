@@ -52,7 +52,7 @@ class IECOREGL_API UIntTexture : public Texture
 		virtual ~UIntTexture();
 
 		/// Creates an ImagePrimitive using the texture contents.
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 };
 
