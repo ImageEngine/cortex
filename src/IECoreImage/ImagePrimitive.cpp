@@ -37,7 +37,6 @@
 #include "boost/static_assert.hpp"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/Renderer.h"
 #include "IECore/TypeTraits.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MurmurHash.h"
@@ -50,6 +49,11 @@ using namespace Imath;
 using namespace IECore;
 using namespace IECoreImage;
 
+static IndexedIO::EntryID g_channelsEntry("channels");
+static IndexedIO::EntryID g_dataEntry("data");
+// for backwards compatibility with m_ioVersion 1
+static IndexedIO::EntryID g_variablesEntry("variables");
+
 static IndexedIO::EntryID g_displayWindowMinXEntry("displayWindowMinX");
 static IndexedIO::EntryID g_displayWindowMinYEntry("displayWindowMinY");
 static IndexedIO::EntryID g_displayWindowMaxXEntry("displayWindowMaxX");
@@ -59,7 +63,7 @@ static IndexedIO::EntryID g_dataWindowMinYEntry("dataWindowMinY");
 static IndexedIO::EntryID g_dataWindowMaxXEntry("dataWindowMaxX");
 static IndexedIO::EntryID g_dataWindowMaxYEntry("dataWindowMaxY");
 
-const unsigned int ImagePrimitive::m_ioVersion = 1;
+const unsigned int ImagePrimitive::m_ioVersion = 2;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION(ImagePrimitive);
 
 ImagePrimitive::ImagePrimitive()
@@ -72,22 +76,8 @@ ImagePrimitive::ImagePrimitive( const Box2i &dataWindow, const Box2i &displayWin
 	setDisplayWindow( displayWindow );
 }
 
-Box3f ImagePrimitive::bound() const
+ImagePrimitive::~ImagePrimitive()
 {
-	assert( ! m_displayWindow.isEmpty() );
-
-	/// \todo We might need to include any pixel aspect ratio in this bound
-
-	V3f boxMin( m_displayWindow.min.x, m_displayWindow.min.y, 0.0 );
-
-	/// We add one here because the displayWindow is measured in pixels, and is inclusive. That is, an image
-	/// which has a displayWindow of (0,0)->(0,0) contains exactly one pixel.
-
-	V3f boxMax( 1.0f + m_displayWindow.max.x, 1.0f + m_displayWindow.max.y, 0.0 );
-
-	V3f center = (boxMin + boxMax) / 2.0;
-
-	return Box3f( boxMin - center, boxMax - center );
 }
 
 const Box2i &ImagePrimitive::getDataWindow() const
@@ -115,30 +105,6 @@ void ImagePrimitive::setDisplayWindow( const Box2i &displayWindow )
 	m_displayWindow = displayWindow;
 }
 
-// give the size of the image
-size_t ImagePrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
-{
-	switch (interpolation)
-	{
-
-	case PrimitiveVariable::Vertex:
-	case PrimitiveVariable::Varying:
-	case PrimitiveVariable::FaceVarying:
-		return ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
-
-	default:
-		return 1;
-
-	}
-}
-
-void ImagePrimitive::render( Renderer *renderer ) const
-{
-	assert( renderer );
-
-	renderer->image(m_dataWindow, m_displayWindow, variables);
-}
-
 //
 // handling for serialization
 //
@@ -147,8 +113,14 @@ void ImagePrimitive::copyFrom( const IECore::Object *rhs, IECore::Object::CopyCo
 	assert( rhs );
 	assert( context );
 
-	Primitive::copyFrom(rhs, context);
+	BlindDataHolder::copyFrom(rhs, context);
 	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs);
+
+	channels.clear();
+	for( const auto &item : p_rhs->channels )
+	{
+		channels.insert( ChannelMap::value_type( item.first, context->copy<Data>( item.second.get() ) ) );
+	}
 
 	m_displayWindow = p_rhs->getDisplayWindow();
 	m_dataWindow = p_rhs->getDataWindow();
@@ -158,8 +130,14 @@ void ImagePrimitive::save(IECore::Object::SaveContext *context) const
 {
 	assert( context );
 
-	Primitive::save(context);
+	BlindDataHolder::save(context);
 	IndexedIOPtr container = context->container(staticTypeName(), m_ioVersion);
+	IndexedIOPtr ioChannels = container->subdirectory( g_channelsEntry, IndexedIO::CreateIfMissing );
+	for( const auto &item : channels )
+	{
+		IndexedIOPtr ioChannel = ioChannels->subdirectory( item.first, IndexedIO::CreateIfMissing );
+		context->save( item.second.get(), ioChannel.get(), g_dataEntry );
+	}
 
 	container->write(g_displayWindowMinXEntry, m_displayWindow.min.x);
 	container->write(g_displayWindowMinYEntry, m_displayWindow.min.y);
@@ -176,10 +154,24 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 {
 	assert( context );
 
-	Primitive::load(context);
 	unsigned int v = m_ioVersion;
-
 	ConstIndexedIOPtr container = context->container(staticTypeName(), v);
+
+	BlindDataHolder::load( context );
+
+	// we changed the inheritance hierarchy at io version 2
+	ConstIndexedIOPtr ioChannels = ( v < 2 ) ? container->subdirectory( g_variablesEntry ) : container->subdirectory( g_channelsEntry );
+
+	channels.clear();
+	IndexedIO::EntryIDList names;
+	ioChannels->entryIds( names, IndexedIO::Directory );
+	for( const auto &name : names )
+	{
+		ConstIndexedIOPtr ioChannel = ioChannels->subdirectory( name );
+		channels.insert(
+			ChannelMap::value_type( name, context->load<Data>( ioChannel.get(), g_dataEntry ) )
+		);
+	}
 
 	container->read(g_displayWindowMinXEntry, m_displayWindow.min.x);
 	container->read(g_displayWindowMinYEntry, m_displayWindow.min.y);
@@ -199,36 +191,65 @@ void ImagePrimitive::load(IECore::Object::LoadContextPtr context)
 	}
 }
 
-bool ImagePrimitive::isEqualTo(const IECore::Object *rhs) const
+bool ImagePrimitive::isEqualTo( const IECore::Object *other ) const
 {
-	assert( rhs );
-
-	if (!Primitive::isEqualTo(rhs))
+	if( !BlindDataHolder::isEqualTo( other ) )
 	{
 		return false;
 	}
 
-	const ImagePrimitive *p_rhs = static_cast<const ImagePrimitive *>(rhs);
+	const ImagePrimitive *tOther = static_cast<const ImagePrimitive *>( other );
 
-	// return true iff we have the same data window.
-	// this is not complete
-	return m_dataWindow == p_rhs->getDataWindow() && m_displayWindow == p_rhs->getDisplayWindow();
+	if( m_dataWindow != tOther->getDataWindow() || m_displayWindow != tOther->getDisplayWindow() )
+	{
+		return false;
+	}
+
+	for( const auto &channel : channels )
+	{
+		const auto otherIt = tOther->channels.find( channel.first );
+		if( otherIt == tOther->channels.end() )
+		{
+			return false;
+		}
+
+		if( ( channel.second && !otherIt->second ) || ( !channel.second && otherIt->second ) )
+		{
+			return false;
+		}
+
+		if( channel.second && otherIt->second && !channel.second->isEqualTo( otherIt->second.get() ) )
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void ImagePrimitive::memoryUsage( Object::MemoryAccumulator &a ) const
 {
-	Primitive::memoryUsage( a );
+	BlindDataHolder::memoryUsage( a );
+
+	for( const auto &channel : channels )
+	{
+		a.accumulate( channel.second.get() );
+	}
+
 	a.accumulate( sizeof(m_displayWindow) );
 	a.accumulate( sizeof(m_dataWindow) );
 }
 
 void ImagePrimitive::hash( MurmurHash &h ) const
 {
-	Primitive::hash( h );
-}
+	BlindDataHolder::hash( h );
 
-void ImagePrimitive::topologyHash( MurmurHash &h ) const
-{
+	for( const auto &channel : channels )
+	{
+		h.append( channel.first );
+		channel.second->hash( h );
+	}
+
 	h.append( m_dataWindow );
 	h.append( m_displayWindow );
 }
@@ -354,43 +375,38 @@ Imath::M33f ImagePrimitive::matrix( Space inputSpace, Space outputSpace ) const
 // Channel methods
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *reason ) const
+size_t ImagePrimitive::channelSize() const
 {
-	if( pv.interpolation!=PrimitiveVariable::Vertex &&
-		pv.interpolation!=PrimitiveVariable::Varying &&
-		pv.interpolation!=PrimitiveVariable::FaceVarying )
+	return ( 1 + m_dataWindow.max.x - m_dataWindow.min.x ) * ( 1 + m_dataWindow.max.y - m_dataWindow.min.y );
+}
+
+bool ImagePrimitive::channelValid( const IECore::Data *data, std::string *reason ) const
+{
+	if( !data )
 	{
 		if( reason )
 		{
-			*reason = "Primitive variable has inappropriate interpolation.";
-		}
-		return false;
-	}
-	if( !pv.data )
-	{
-		if( reason )
-		{
-			*reason = "Primitive variable has no data.";
+			*reason = "Channel has no data.";
 		}
 		return false;
 	}
 
-	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( pv.data.get() ) )
+	if( !despatchTraitsTest<TypeTraits::IsNumericVectorTypedData>( data ) )
 	{
 		if( reason )
 		{
-			*reason = "Primitive variable has inappropriate type.";
+			*reason = "Channel data has inappropriate type.";
 		}
 		return false;
 	}
 
-	size_t size = despatchTypedData<TypedDataSize>( pv.data.get() );
-	size_t numPixels = variableSize( PrimitiveVariable::Vertex );
+	size_t size = despatchTypedData<TypedDataSize>( const_cast<Data *>( data ) );
+	size_t numPixels = channelSize();
 	if( size!=numPixels )
 	{
 		if( reason )
 		{
-			*reason = str( format( "Primitive variable has wrong size (%d but should be %d)." ) % size % numPixels );
+			*reason = str( format( "Channel has wrong size (%d but should be %d)." ) % size % numPixels );
 		}
 		return false;
 	}
@@ -400,16 +416,29 @@ bool ImagePrimitive::channelValid( const PrimitiveVariable &pv, std::string *rea
 
 bool ImagePrimitive::channelValid( const std::string &name, std::string *reason ) const
 {
-	PrimitiveVariableMap::const_iterator it = variables.find( name );
-	if( it==variables.end() )
+	ChannelMap::const_iterator it = channels.find( name );
+	if( it==channels.end() )
 	{
 		if( reason )
 		{
-			*reason = str( format( "Primitive variable \"%s\" does not exist." ) % name );
+			*reason = str( format( "Channel \"%s\" does not exist." ) % name );
 		}
 		return false;
 	}
-	return channelValid( it->second, reason );
+	return channelValid( it->second.get(), reason );
+}
+
+bool ImagePrimitive::channelsValid( std::string *reason ) const
+{
+	for( const auto &channel : channels )
+	{
+		if( !channelValid( channel.second.get(), reason ) )
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void ImagePrimitive::channelNames( vector<string> &names ) const
@@ -417,11 +446,11 @@ void ImagePrimitive::channelNames( vector<string> &names ) const
 	// copy in the names of channels from the map
 	names.clear();
 
-	for ( PrimitiveVariableMap::const_iterator i = variables.begin(); i != variables.end(); ++i )
+	for( const auto &channel : channels )
 	{
-		if( channelValid( i->second ) )
+		if( channelValid( channel.second.get() ) )
 		{
-			names.push_back( i->first );
+			names.push_back( channel.first );
 		}
 	}
 }

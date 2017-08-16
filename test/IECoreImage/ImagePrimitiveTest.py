@@ -64,23 +64,6 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		dataWindow = IECore.Box2i( IECore.V2i( 50, 50 ), IECore.V2i( 99, 99 ) )
 		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
-	def testBound( self ) :
-		""" Test IECoreImage.ImagePrimitive bound """
-
-		windowMin = IECore.V2i( 0, 0 )
-		windowMax = IECore.V2i( 99, 99 )
-		w = IECore.Box2i( windowMin, windowMax )
-		i = IECoreImage.ImagePrimitive( w, w )
-
-		self.assertEqual( i.bound(), IECore.Box3f( IECore.V3f( -50, -50, 0 ), IECore.V3f( 50, 50, 0 ) ) )
-
-		windowMin = IECore.V2i( 50, 50 )
-		windowMax = IECore.V2i( 99, 99 )
-		w = IECore.Box2i( windowMin, windowMax )
-		i = IECoreImage.ImagePrimitive( w, w )
-
-		self.assertEqual( i.bound(), IECore.Box3f( IECore.V3f( -25, -25, 0 ), IECore.V3f( 25, 25, 0 ) ) )
-
 	def testDataWindow( self ) :
 		""" Test IECoreImage.ImagePrimitive data window """
 
@@ -89,15 +72,12 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		img = IECoreImage.ImagePrimitive( dataWindow, displayWindow )
 
 		dataWindowArea = 50 * 50
-		R = IECore.FloatVectorData( dataWindowArea )
-		G = IECore.FloatVectorData( dataWindowArea )
-		B = IECore.FloatVectorData( dataWindowArea )
 
-		img["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, R )
-		img["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, G )
-		img["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, B )
+		img["R"] = IECore.FloatVectorData( dataWindowArea )
+		img["G"] = IECore.FloatVectorData( dataWindowArea )
+		img["B"] = IECore.FloatVectorData( dataWindowArea )
 
-		self.assert_( img.arePrimitiveVariablesValid() )
+		self.assertTrue( img.channelsValid() )
 
 	# \todo Verify behaviour when dataWindow and displayWindow are contradictory or inconsistent
 
@@ -108,6 +88,10 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		windowMax = IECore.V2i( 100, 100 )
 		w = IECore.Box2i( windowMin, windowMax )
 		i = IECoreImage.ImagePrimitive( w, w )
+		i["R"] = IECore.FloatVectorData( 101 * 101 )
+		i["G"] = IECore.FloatVectorData( 101 * 101 )
+		i["B"] = IECore.FloatVectorData( 101 * 101 )
+		self.assertTrue( i.channelsValid() )
 
 		IECore.Writer.create( i, "test/IECore/data/output.cob" ).write()
 
@@ -116,6 +100,8 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 
 		self.assertEqual( i.displayWindow, i2.displayWindow )
 		self.assertEqual( i.dataWindow, i2.dataWindow )
+		self.assertEqual( i.channelNames(), i2.channelNames() )
+		self.assertTrue( i2.channelsValid() )
 
 	def testChannelNames( self ) :
 
@@ -129,26 +115,33 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		r = IECore.FloatVectorData()
 		r.resize( 100 * 100 )
 
-		i["R"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, r )
+		i["R"] = r
 
-		self.assert_( "R" in i.channelNames() )
+		self.assertTrue( "R" in i.channelNames() )
+		self.assertTrue( i.channelsValid() )
 
 		b = IECore.FloatData()
 
-		i["B"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, b )
+		i["B"] = b
 
 		self.failIf( "B" in i.channelNames() )
-
-		self.assert_( i.arePrimitiveVariablesValid() )
+		self.failIf( i.channelsValid() )
 
 		# Deliberately make a primvar too small!
 		g = IECore.FloatVectorData()
 		g.resize( 50 * 100 )
 
-		i["G"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, g )
+		i["G"] = g
 
 		self.failIf( "G" in i.channelNames() )
-		self.failIf( i.arePrimitiveVariablesValid() )
+		self.failIf( i.channelsValid() )
+
+		i["B"] = i["R"]
+		i["G"].resize( 100 * 100 )
+		self.assertTrue( "R" in i.channelNames() )
+		self.assertTrue( "G" in i.channelNames() )
+		self.assertTrue( "B" in i.channelNames() )
+		self.assertTrue( i.channelsValid() )
 
 	def testCreateChannel( self ) :
 
@@ -161,9 +154,9 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		i.createHalfChannel( "G" )
 		i.createUIntChannel( "B" )
 
-		self.assert_( "R" in i )
-		self.assert_( "G" in i )
-		self.assert_( "B" in i )
+		self.assertTrue( "R" in i )
+		self.assertTrue( "G" in i )
+		self.assertTrue( "B" in i )
 
 	def testErrors( self ) :
 
@@ -185,41 +178,26 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 
 		d = IECore.FloatVectorData( [1] )
 
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, d )
-		i["Y"] = p
+		i["Y"] = d
 
-		self.assertEqual( i.channelValid( p ), False )
+		self.assertEqual( i.channelValid( d ), False )
 		self.assertEqual( i.channelValid( "Y" ), False )
 		self.assertEqual( i.getChannel( "Y" ), None )
 
-		t = i.channelValid( p, True )
+		t = i.channelValid( d, True )
 		self.assert_( isinstance( t, tuple ) )
 		self.assertEqual( t[0], False )
 		self.assert_( isinstance( t[1], str ) )
 
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, d )
-		i["Y"] = p
-
-		self.assertEqual( i.channelValid( p ), False )
-		self.assertEqual( i.channelValid( "Y" ), False )
-		self.assertEqual( i.getChannel( "Y" ), None )
-
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, d )
-		i["Y"] = p
-
-		self.assertEqual( i.channelValid( p ), False )
-		self.assertEqual( i.channelValid( "Y" ), False )
-		self.assertEqual( i.getChannel( "Y" ), None )
-
 		d.resize( 100 )
 
-		self.assertEqual( i.channelValid( p ), True )
+		self.assertEqual( i.channelValid( d ), True )
 		self.assertEqual( i.channelValid( "Y" ), True )
-		self.assert_( d.isSame( i.getChannel( "Y" ) ) )
+		self.assertTrue( d.isSame( i.getChannel( "Y" ) ) )
 
-		pp = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatData( 1 ) )
-		self.assertEqual( i.channelValid( pp ), False )
-		i["PP"] = pp
+		dd = IECore.FloatData( 1 )
+		self.assertEqual( i.channelValid( dd ), False )
+		i["PP"] = dd
 		self.assertEqual( i.channelValid( "PP" ), False )
 		self.assertEqual( i.getChannel( "PP" ), None )
 
@@ -248,18 +226,18 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( i.dataWindow, w1 )
 		self.assertEqual( i.displayWindow, w2 )
 
-		self.assert_( i["R"].data.isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
-		self.assert_( i["G"].data.isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
-		self.assert_( i["B"].data.isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assert_( i["R"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assert_( i["G"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assert_( i["B"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
 
-		self.assertEqual( i["R"].data.size(), 256 )
-		self.assertEqual( i["G"].data.size(), 256 )
-		self.assertEqual( i["B"].data.size(), 256 )
+		self.assertEqual( i["R"].size(), 256 )
+		self.assertEqual( i["G"].size(), 256 )
+		self.assertEqual( i["B"].size(), 256 )
 
 		for p in (0, 63, 127, 255) :
-			self.assertEqual( i["R"].data[p], fill[0] )
-			self.assertEqual( i["G"].data[p], fill[1] )
-			self.assertEqual( i["B"].data[p], fill[2] )
+			self.assertEqual( i["R"][p], fill[0] )
+			self.assertEqual( i["G"][p], fill[1] )
+			self.assertEqual( i["B"][p], fill[2] )
 
 		fill = 0.5
 		i = IECoreImage.ImagePrimitive.createGreyscaleFloat( fill, w1, w2 )
@@ -274,11 +252,11 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( i.dataWindow, w1 )
 		self.assertEqual( i.displayWindow, w2 )
 
-		self.assert_( i["Y"].data.isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
-		self.assertEqual( i["Y"].data.size(), 256 )
+		self.assert_( i["Y"].isInstanceOf( IECore.FloatVectorData.staticTypeId() ) )
+		self.assertEqual( i["Y"].size(), 256 )
 
 		for p in (0, 63, 127, 255) :
-			self.assertEqual( i["Y"].data[p], fill )
+			self.assertEqual( i["Y"][p], fill )
 
 	def testSpaces( self ) :
 
@@ -384,23 +362,26 @@ class ImagePrimitiveTest( unittest.TestCase ) :
 		w = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 10 ) )
 		i = IECoreImage.ImagePrimitive( w, w )
 		h = i.hash()
-		t = i.topologyHash()
 
 		i.displayWindow = IECore.Box2i( IECore.V2i( 10 ), IECore.V2i( 20 ) )
 		self.assertNotEqual( i.hash(), h )
-		self.assertNotEqual( i.topologyHash(), h )
 		h = i.hash()
-		t = i.topologyHash()
 
 		i.dataWindow = IECore.Box2i( IECore.V2i( 10 ), IECore.V2i( 20 ) )
 		self.assertNotEqual( i.hash(), h )
-		self.assertNotEqual( i.topologyHash(), h )
 		h = i.hash()
-		t = i.topologyHash()
 
-		i["primVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
+		i["R"] = IECore.IntData( 10 )
 		self.assertNotEqual( i.hash(), h )
-		self.assertEqual( i.topologyHash(), t )
+		h = i.hash()
+
+		i["R"] = IECore.FloatData( 10 )
+		self.assertNotEqual( i.hash(), h )
+		h = i.hash()
+
+		i["G"] = IECore.IntData( 10 )
+		self.assertNotEqual( i.hash(), h )
+		h = i.hash()
 
 	def tearDown( self ) :
 

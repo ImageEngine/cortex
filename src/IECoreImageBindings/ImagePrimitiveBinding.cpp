@@ -50,18 +50,74 @@ using namespace IECoreImage;
 namespace
 {
 
+size_t numChannels( ImagePrimitive &i )
+{
+	return i.channels.size();
+}
+
+static DataPtr getItem( ImagePrimitive &i, const std::string &n )
+{
+	auto channel = i.channels.find( n );
+	if( channel == i.channels.end() )
+	{
+		throw std::out_of_range( "Bad index" );
+	}
+
+	return channel->second;
+}
+
+static void setItem( ImagePrimitive &i, const std::string &n, const DataPtr &d )
+{
+	i.channels[n] = d;
+}
+
+static bool contains( ImagePrimitive &i, const std::string &n )
+{
+	return i.channels.find( n ) != i.channels.end();
+}
+
+static boost::python::list keys( ImagePrimitive &i )
+{
+	boost::python::list result;
+	for( const auto &channel : i.channels )
+	{
+		result.append( channel.first );
+	}
+	return result;
+}
+
+static boost::python::list values( ImagePrimitive &i )
+{
+	boost::python::list result;
+	for( const auto &channel : i.channels )
+	{
+		result.append( channel.second );
+	}
+	return result;
+}
+
+static void delItem( ImagePrimitive &i, const std::string &n )
+{
+	const auto it = i.channels.find( n );
+	if( it==i.channels.end() )
+	{
+		throw std::out_of_range( "Bad index" );
+	}
+	i.channels.erase( it );
+}
+
 /// \todo Rewrite the Parameter::valueValid bindings to follow this form? They currently always
 /// return a tuple, which is causing lots of coding errors (the tuple is always true, and it's
 /// easy to forget a tuple is being returned and expect a bool instead).
-static object channelValid( ImagePrimitive &that, PrimitiveVariable &p, bool wantReason = false )
+static object channelValid( ImagePrimitive &that, Data &d, bool wantReason = false )
 {
 	if( wantReason )
 	{
 		std::string reason;
-		bool v = that.channelValid( p, &reason );
+		bool v = that.channelValid( &d, &reason );
 		return boost::python::make_tuple( v, reason );
 	}
-	bool v = that.channelValid( p );
+	bool v = that.channelValid( &d );
 	return object( v );
 }
 
@@ -77,14 +133,16 @@ static object channelValid2( ImagePrimitive &that, const char *n, bool wantReaso
 	return object( v );
 }
 
-static DataPtr getChannel( ImagePrimitive &that, const char *name )
+static object channelsValid( ImagePrimitive &that, bool wantReason = false )
 {
-	std::string reason;
-	if( that.channelValid( name, &reason ) )
+	if( wantReason )
 	{
-		return that.variables[name].data;
+		std::string reason;
+		bool v = that.channelsValid( &reason );
+		return boost::python::make_tuple( v, reason );
 	}
-	return 0;
+	bool v = that.channelsValid();
+	return object( v );
 }
 
 static StringVectorDataPtr channelNames( ImagePrimitive &that )
@@ -92,6 +150,16 @@ static StringVectorDataPtr channelNames( ImagePrimitive &that )
 	StringVectorDataPtr result( new StringVectorData );
 	that.channelNames( result->writable() );
 	return result;
+}
+
+static DataPtr getChannel( ImagePrimitive &that, const char *name )
+{
+	std::string reason;
+	if( that.channelValid( name, &reason ) )
+	{
+		return that.channels[name];
+	}
+	return nullptr;
 }
 
 template<typename T>
@@ -110,6 +178,13 @@ void bindImagePrimitive()
 	scope s = RunTimeTypedClass<ImagePrimitive>()
 		.def( init<>() )
 		.def( init<Imath::Box2i, Imath::Box2i>() )
+		.def( "__len__", &numChannels )
+		.def( "__getitem__", &getItem, "Returns a shallow copy of the requested channel data." )
+		.def( "__setitem__", &setItem )
+		.def( "__delitem__", &delItem )
+		.def( "__contains__", &contains )
+		.def( "keys", &keys )
+		.def( "values", &values, "Returns a list containing shallow copies of all channel data." )
 
 		.add_property("dataWindow", make_function( &ImagePrimitive::getDataWindow,
 	                	return_value_policy<copy_const_reference>() ), &ImagePrimitive::setDataWindow )
@@ -128,8 +203,10 @@ void bindImagePrimitive()
 
 		.def( "matrix", &ImagePrimitive::matrix )
 
-		.def( "channelValid", &channelValid, ( arg_( "image" ), arg_( "primVar" ), arg_( "wantReason" ) = false ) )
-		.def( "channelValid", &channelValid2, ( arg_( "image" ), arg_( "primVarName" ), arg_( "wantReason" ) = false ) )
+		.def( "channelSize", &ImagePrimitive::channelSize )
+		.def( "channelValid", &channelValid, ( arg_( "image" ), arg_( "channel" ), arg_( "wantReason" ) = false ) )
+		.def( "channelValid", &channelValid2, ( arg_( "image" ), arg_( "channelName" ), arg_( "wantReason" ) = false ) )
+		.def( "channelsValid", &channelsValid, ( arg_( "image" ), arg_( "wantReason" ) = false ) )
 		.def( "getChannel", &getChannel )
 		.def( "channelNames", &channelNames)
 

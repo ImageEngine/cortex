@@ -38,7 +38,7 @@
 #include <string>
 #include <vector>
 
-#include "IECore/Primitive.h"
+#include "IECore/BlindDataHolder.h"
 #include "IECore/Data.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/CompoundData.h"
@@ -49,7 +49,7 @@
 namespace IECoreImage
 {
 
-/// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as primitive variables.
+/// ImagePrimitive represents a 2D bitmap in the form of individual channels, which are stored as channels.
 /// A channel may contain any data vector type, but the Ops that manipulate images implemented in Cortex are specific for
 /// float ( 32-bit ) type. The interpretation of these channels broadly matches the EXR
 /// specification - the following channel names have the specified special meanings, but arbitrary channel names
@@ -86,12 +86,12 @@ namespace IECoreImage
 /// \todo I think we should perhaps rethink the centering of the object space. It seems odd that rendering two images
 /// where one has an offset display window should result in them rendering over the top of each other.
 /// \ingroup imageProcessingGroup
-class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
+class IECOREIMAGE_API ImagePrimitive : public IECore::BlindDataHolder
 {
 
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( ImagePrimitive, ImagePrimitiveTypeId, IECore::Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( ImagePrimitive, ImagePrimitiveTypeId, IECore::BlindDataHolder );
 
 		/// construct an ImagePrimitive with no area consumed
 		/// Used to create an object during file reading and for the default values of ImagePrimitiveParameters
@@ -102,8 +102,7 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 		/// no primitive variables.
 		ImagePrimitive( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 
-		/// Returns the display window of the image, centered on the origin of the XY-plane.
-		virtual Imath::Box3f bound() const;
+		virtual ~ImagePrimitive();
 
 		/// Returns the data window.
 		const Imath::Box2i &getDataWindow() const;
@@ -118,16 +117,11 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 		/// Sets the display window. Throws if an empty window is passed.
 		void setDisplayWindow( const Imath::Box2i &displayWindow );
 
-		/// Returns 2-d image size for Vertex, Varying, and FaceVarying Interpolation, otherwise 1.
-		virtual size_t variableSize( IECore::PrimitiveVariable::Interpolation interpolation ) const;
-
-		virtual void render( IECore::Renderer *renderer ) const;
-
 		//! @name Spaces
 		/// Functions to help with conversions between pixel, uv, and object spaces.
 		//////////////////////////////////////////////////////////////////////////////
 		//@{
-		
+
 		/// The different coordinate systems that can be used to specify a point within
 		/// the image.
 		enum Space
@@ -137,22 +131,21 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 			UV,
 			Object
 		};
-		
+
 		Imath::M33f objectToUVMatrix() const;
 		Imath::M33f uvToObjectMatrix() const;
-		
+
 		Imath::M33f objectToPixelMatrix() const;
 		Imath::M33f pixelToObjectMatrix() const;
-		
+
 		Imath::M33f pixelToUVMatrix() const;
 		Imath::M33f uvToPixelMatrix() const;
-		
+
 		Imath::M33f matrix( Space inputSpace, Space outputSpace ) const;
 		//@}
 
 		//! @name Channels
-		/// Channels of the image are just primitive variables with the following
-		/// constraints :
+		/// Channels of the image have the following constraints :
 		///
 		///		* Data type must satisfy TypeTraits::IsNumericVectorTypedData - this
 		///		  may well be restricted even further in the future, to accept only
@@ -160,32 +153,36 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 		///		  restrictions are currently somewhat relaxed as some ImageReaders
 		///		  load the data from file without converting to float - this too may
 		///		  change at some point.
-		///		* Interpolation type must be Vertex, Varying or FaceVarying - these
-		///		  all mean the same thing (that there are the same number of elements
-		///		  as there are pixels).
 		///		* Data must contain the same number of elements as there are pixels.
 		//////////////////////////////////////////////////////////////////////////////
 		//@{
-		/// Returns true if the PrimitiveVariable is a valid channel for this
-		/// image - returns false otherwise. If false is returned and reason is
-		/// passed, then a reason for invalidity is places in reason.
-		bool channelValid( const IECore::PrimitiveVariable &pv, std::string *reason=0 ) const;
-		/// As above but passes the name of a PrimitiveVariable.
-		bool channelValid( const std::string &name, std::string *reason=0 ) const;
-		/// Places the names of all valid channel into the given vector.
+		/// Returns the number of elements in a valid channel for this image.
+		size_t channelSize() const;
+		/// Returns true if the data is a valid channel for this image
+		/// If false is returned and reason is passed, then a reason
+		/// for invalidity is places in reason.
+		bool channelValid( const IECore::Data *data, std::string *reason=nullptr ) const;
+		/// As above but passes the name of a channel.
+		bool channelValid( const std::string &name, std::string *reason=nullptr ) const;
+		/// Convenience method to determine if all channels are valid
+		bool channelsValid( std::string *reason=nullptr ) const;
+		/// Places the names of all valid channels into the given vector.
 		void channelNames( std::vector<std::string> &names ) const;
-		/// Returns the data for the named channel, or 0 if it
+		/// Returns the data for the named channel, or nullptr if it
 		/// doesn't exist or is invalid.
 		template<typename T>
 		IECore::TypedData<std::vector<T> > *getChannel( const std::string &name );
 		template<typename T>
 		const IECore::TypedData<std::vector<T> > *getChannel( const std::string &name ) const;
-		/// Convenience function to create a channel - this simply creates and adds a PrimitiveVariable of the appropriate
+		/// Convenience function to create a channel - this simply creates and adds a channel of the appropriate
 		/// size and returns a pointer to the data within it. The data is not initialized.
 		template<typename T>
 		IECore::TypedData<std::vector<T> > *createChannel( const std::string &name );
+		typedef std::map<std::string, IECore::DataPtr> ChannelMap;
+		/// Direct access to the channel storage;
+		ChannelMap channels;
 		//@}
-		
+
 		//! @name Creation
 		/// Convenience functions to create ImagePrimitives pre-filled with a default value
 		template<typename T>
@@ -194,8 +191,6 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::Primitive
 		static Ptr createGreyscale( const T fillValue, const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 		//@}
 
-		virtual void topologyHash( IECore::MurmurHash &h ) const;
-	
 	private:
 
 		/// the full parameters for image position and dimension

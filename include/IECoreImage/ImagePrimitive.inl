@@ -40,7 +40,6 @@
 
 #include "OpenEXR/half.h"
 
-#include "IECore/Primitive.h"
 #include "IECore/Exception.h"
 #include "IECore/TypeTraits.h"
 
@@ -53,9 +52,9 @@ IECore::TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std::strin
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
+		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( channels.find( name )->second.get() );
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T>
@@ -64,9 +63,9 @@ const IECore::TypedData<std::vector<T> > *ImagePrimitive::getChannel( const std:
 	std::string reason = "";
 	if( channelValid( name, &reason ) )
 	{
-		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( variables.find( name )->second.data.get() );
+		return IECore::runTimeCast<IECore::TypedData<std::vector<T> > >( channels.find( name )->second.get() );
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T>
@@ -86,7 +85,7 @@ IECore::TypedData<std::vector<T> > *ImagePrimitive::createChannel( const std::st
 
 	channel->writable().resize( area );
 
-	variables.insert( IECore::PrimitiveVariableMap::value_type( name, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, channel ) ) );
+	channels.insert( ChannelMap::value_type( name, channel ) );
 
 	return channel.get();
 }
