@@ -38,6 +38,8 @@
 
 #include "tbb/tbb.h"
 
+#include "boost/format.hpp"
+
 #include "IECore/LRUCache.h"
 
 #include "IECorePython/ScopedGILRelease.h"
@@ -52,7 +54,7 @@ namespace boost
 namespace python
 {
 
-inline size_t tbb_hasher( const boost::python::object &o )
+inline size_t hash_value( const boost::python::object &o )
 {
 	return PyObject_Hash( o.ptr() );
 }
@@ -69,32 +71,59 @@ struct LRUCacheGetter
 		:	getter( g )
 	{
 	}
-	
+
 	object operator() ( object key, LRUCache<object, object>::Cost &cost )
 	{
-		tuple t = extract<tuple>( getter( key ) );
-		cost = extract<LRUCache<object, object>::Cost>( t[1] );
-		return t[0];
+		try
+		{
+			tuple t = extract<tuple>( getter( key ) );
+			cost = extract<LRUCache<object, object>::Cost>( t[1] );
+			return t[0];
+		}
+		catch( const boost::python::error_already_set &e )
+		{
+			/// \todo Bring GafferBindings::ExceptionAlgo over into
+			/// Cortex and use translatePythonException().
+			PyObject *exceptionPyObject, *valuePyObject, *tracebackPyObject;
+			PyErr_Fetch( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+			PyErr_NormalizeException( &exceptionPyObject, &valuePyObject, &tracebackPyObject );
+
+			object exception( ( handle<>( exceptionPyObject ) ) );
+
+			object value;
+			if( valuePyObject )
+			{
+				value = object( handle<>( valuePyObject ) );
+			}
+
+			object tracebackModule( import( "traceback" ) );
+			object formattedList = tracebackModule.attr( "format_exception_only" )( exception, value );
+
+			object formatted = str( "" ).join( formattedList );
+			std::string s = extract<std::string>( formatted );
+
+			throw IECore::Exception( s );
+		}
 	}
-	
+
 	object getter;
 };
 
 class PythonLRUCache : public LRUCache<object, object>
 {
-	
+
 	public :
-	
+
 		PythonLRUCache( object getter, LRUCache<object, object>::Cost maxCost )
 			:	LRUCache<object, object>( LRUCacheGetter( getter ), maxCost )
 		{
 		}
-		
+
 		PythonLRUCache( object getter, object removalCallback, LRUCache<object, object>::Cost maxCost )
 			:	LRUCache<object, object>( LRUCacheGetter( getter ), removalCallback, maxCost )
 		{
 		}
-		
+
 		object get( const object &key )
 		{
 			// we must hold the GIL when entering LRUCache<object, object>::get()
@@ -121,7 +150,7 @@ class PythonLRUCache : public LRUCache<object, object>
 			// deal because all python execution is serialised anyway.
 			//
 			// see test/IECore/LRUCache.py, in particular testYieldGILInGetter().
-			
+
 			Mutex::scoped_lock lock;
 			{
 				IECorePython::ScopedGILRelease gilRelease;
@@ -131,17 +160,15 @@ class PythonLRUCache : public LRUCache<object, object>
 		}
 
 	private :
-	
+
 		typedef tbb::mutex Mutex;
 		Mutex m_getMutex;
 
 };
 
-} // namespace
-
 typedef LRUCache<int, int> TestCache;
 
-static int get( int key, size_t &cost )
+int get( int key, size_t &cost )
 {
 	cost = 1;
 	return key;
@@ -150,12 +177,12 @@ static int get( int key, size_t &cost )
 struct GetFromTestCache
 {
 	public :
-	
+
 		GetFromTestCache( TestCache &cache, size_t numValues, size_t clearFrequency )
 			:	m_cache( cache ), m_numValues( numValues ), m_clearFrequency( clearFrequency )
 		{
 		}
-		
+
 		void operator()( const blocked_range<size_t> &r ) const
 		{
 			for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -164,24 +191,28 @@ struct GetFromTestCache
 				const int v = m_cache.get( k );
 				if( k != v )
 				{
-					throw Exception( "Incorrect LRUCache value found" );
+					throw Exception(
+						boost::str(
+							boost::format( "Incorrect LRUCache value found (expected %d but got %d)" ) % k %v
+						)
+					);
 				}
-				
+
 				if( m_clearFrequency && (i % m_clearFrequency == 0) )
 				{
 					m_cache.clear();
 				}
 			}
 		}
-		
+
 	private :
-	
+
 		TestCache &m_cache;
 		size_t m_numValues;
 		size_t m_clearFrequency;
-		
+
 };
-	
+
 void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int clearFrequency = 0 )
 {
 	// do lots of parallel cache accesses. then clear the cache in the main
@@ -190,18 +221,18 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 
 	TestCache cache( get, maxCost );
 	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromTestCache( cache, numValues, clearFrequency ) );
-	
+
 	if( cache.currentCost() > cache.getMaxCost() )
 	{
 		throw Exception( "LRUCache exceeds maximum cost" );
 	}
-	
+
 	cache.clear();
 	if( cache.currentCost() != 0 )
 	{
 		throw Exception( "Cost not 0 after LRUCache::clear()" );
 	}
-	
+
 	// as above, but using setMaxCost( 0 ) to clear the cache.
 
 	TestCache cache2( get, maxCost );
@@ -211,7 +242,7 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 	{
 		throw Exception( "LRUCache exceeds maximum cost" );
 	}
-	
+
 	cache2.setMaxCost( 0 );
 	if( cache2.currentCost() != 0 )
 	{
@@ -219,9 +250,84 @@ void testLRUCacheThreading( int numIterations, int numValues, int maxCost, int c
 	}
 }
 
+typedef LRUCache<int, int, LRUCachePolicy::Serial> SerialTestCache;
+typedef LRUCache<int, int, LRUCachePolicy::Parallel> ParallelTestCache;
+
+template<typename Cache>
+Cache &recursiveCache();
+
+template<typename Cache>
+int getRecursive( int key, size_t &cost )
+{
+	cost = 1;
+	switch( key )
+	{
+		case 0 :
+			return 0;
+		case 1 :
+		case 2 :
+			return 1;
+		default :
+			Cache &c = recursiveCache<Cache>();
+			return c.get( key - 1 ) + c.get( key - 2 );
+	}
+}
+
+template<typename Cache>
+Cache &recursiveCache()
+{
+	static Cache c( getRecursive<Cache> );
+	return c;
+}
+
+struct GetFromParallelRecursiveCache
+{
+	public :
+
+		GetFromParallelRecursiveCache( ParallelTestCache &cache, size_t numValues )
+			:	m_cache( cache ), m_numValues( numValues )
+		{
+		}
+
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				m_cache.get( i % m_numValues );
+			}
+		}
+
+	private :
+
+		ParallelTestCache &m_cache;
+		size_t m_numValues;
+
+};
+
+void testSerialLRUCacheRecursion( int maxCost )
+{
+	SerialTestCache &cache = recursiveCache<SerialTestCache>();
+	cache.clear();
+	cache.setMaxCost( maxCost );
+	if( cache.get( 40 ) != 102334155 )
+	{
+		throw Exception( "Unexpected result" );
+	}
+}
+
+void testParallelLRUCacheRecursion( int numIterations, size_t numValues, int maxCost )
+{
+	ParallelTestCache &cache = recursiveCache<ParallelTestCache>();
+	cache.clear();
+	cache.setMaxCost( maxCost );
+	parallel_for( blocked_range<size_t>( 0, numIterations ), GetFromParallelRecursiveCache( cache, numValues ) );
+}
+
+} // namespace
+
 void IECorePython::bindLRUCache()
 {
-	
+
 	class_<PythonLRUCache, boost::noncopyable>( "LRUCache", no_init )
 		.def( init<object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "maxCost" )=500  ) ) )
 		.def( init<object, object, PythonLRUCache::Cost>( ( boost::python::arg_( "getter" ), boost::python::arg_( "removalCallback" ), boost::python::arg_( "maxCost" )  ) ) )
@@ -234,8 +340,8 @@ void IECorePython::bindLRUCache()
 		.def( "set", &PythonLRUCache::set )
 		.def( "cached", &PythonLRUCache::cached )
 	;
-	
-	/// \todo If we create an IECoreTest module, move this into it.
+
+	/// \todo If we create an IECoreTest module, move these into it.
 	def(
 		"testLRUCacheThreading",
 		testLRUCacheThreading,
@@ -246,5 +352,8 @@ void IECorePython::bindLRUCache()
 			boost::python::arg( "clearFrequency" ) = 0
 		)
 	);
-	
+
+	def( "testSerialLRUCacheRecursion", testSerialLRUCacheRecursion );
+	def( "testParallelLRUCacheRecursion", testParallelLRUCacheRecursion );
+
 }

@@ -104,25 +104,13 @@ struct ComputationCacheTest
 		BOOST_CHECK( res );
 		BOOST_CHECK_EQUAL( size_t(2), cache.cachedComputations() );
 
-		/// cache should not contain the value 2 due to memory limit (object not in ObjectPool)
-		res = cache.get( ComputationParams(2), Cache::NullIfMissing );
-		BOOST_CHECK( !res );
-		
-		// but should have the latest computed still
-		res = cache.get( ComputationParams(3), Cache::NullIfMissing );
-		BOOST_CHECK( res );
-		BOOST_CHECK_EQUAL( size_t(2), cache.cachedComputations() );
-		
-		// erase the latest result
-		cache.erase( ComputationParams(3) );
-		BOOST_CHECK_EQUAL( size_t(1), cache.cachedComputations() );
+		/// Cache should have evicted one value due to the memory limit
+		/// of the ObjectPool.
+		ConstObjectPtr res2 = cache.get( ComputationParams( 2 ), Cache::NullIfMissing );
+		ConstObjectPtr res3 = cache.get( ComputationParams( 3 ), Cache::NullIfMissing );
+		BOOST_CHECK( !(res2 && res3) );
+		BOOST_CHECK( res2 || res3 );
 
-		// confirm it's gone...
-		res = cache.get( ComputationParams(3), Cache::NullIfMissing );
-		BOOST_CHECK( !res );
-		/// again... will count as cached unfortunately...
-		BOOST_CHECK_EQUAL( size_t(2), cache.cachedComputations() );
-		
 		/// now increase memory limit to two IntData objects
 		pool->setMaxMemoryUsage( v->Object::memoryUsage() * 2 );
 
@@ -132,9 +120,10 @@ struct ComputationCacheTest
 		BOOST_CHECK_EQUAL( size_t(4), cache.cachedComputations() );
 		BOOST_CHECK( cache.get( ComputationParams(4), Cache::NullIfMissing ) );
 		BOOST_CHECK( cache.get( ComputationParams(5), Cache::NullIfMissing ) );
-		
+
 		/// clears the all values
 		cache.clear();
+		pool->clear();
 		BOOST_CHECK_EQUAL( size_t(0), cache.cachedComputations() );
 
 		// set some values on the cache
