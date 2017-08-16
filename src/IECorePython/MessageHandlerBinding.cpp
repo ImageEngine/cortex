@@ -43,6 +43,7 @@
 #include "IECorePython/MessageHandlerBinding.h"
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
+#include "IECorePython/ExceptionAlgo.h"
 
 using namespace boost::python;
 using namespace IECore;
@@ -68,8 +69,7 @@ class MessageHandlerWrapper : public RefCountedWrapper<MessageHandler>
 			}
 			catch( const error_already_set &e )
 			{
-				/// \todo Move GafferBindings::ExceptionAlgo to Cortex and use it here?
-				PyErr_Print();
+				IECorePython::ExceptionAlgo::translatePythonException();
 			}
 		}
 
