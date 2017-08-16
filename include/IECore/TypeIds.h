@@ -266,7 +266,7 @@ enum TypeId
 	Int64VectorDataTypeId = 218,
 	UInt64VectorDataTypeId = 219,
 	MappedRandomPointDistributionOpTypeId = 220,
-	PointRepulsionOpTypeId = 221,
+	PointRepulsionOpTypeId = 221, // obsolete - available for reuse
 	LuminanceOpTypeId = 222, // obsolete - available for reuse
 	ImagePrimitiveOpTypeId = 223, // obsolete - available for reuse
 	ChannelOpTypeId = 224, // obsolete - available for reuse

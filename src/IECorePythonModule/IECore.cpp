@@ -161,7 +161,6 @@
 #include "IECorePython/FontBinding.h"
 #include "IECorePython/UnicodeToStringBinding.h"
 #include "IECorePython/RadixSortBinding.h"
-#include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
 #include "IECorePython/MeshVertexReorderOpBinding.h"
 #include "IECorePython/SplineBinding.h"
@@ -387,7 +386,6 @@ BOOST_PYTHON_MODULE(_IECore)
 
 	bindUnicodeToString();
 	bindRadixSort();
-	bindPointRepulsionOp();
 	bindAngleConversion();
 	bindMeshVertexReorderOp();
 	bindSpline();
