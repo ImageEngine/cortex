@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_CLAMPOP_H
+#define IECOREIMAGE_CLAMPOP_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/NumericParameter.h"
+#include "IECore/TypedParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/ChannelOp.h"
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+class IECOREIMAGE_API ClampOp : public ChannelOp
+{
+
+	public:
+
+		ClampOp();
+		virtual ~ClampOp();
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ClampOp, ClampOpTypeId, ChannelOp );
+
+		IECore::FloatParameter *minParameter();
+		const IECore::FloatParameter *minParameter() const;
+
+		IECore::FloatParameter *maxParameter();
+		const IECore::FloatParameter *maxParameter() const;
+
+		IECore::BoolParameter *enableMinToParameter();
+		const IECore::BoolParameter *enableMinToParameter() const;
+
+		IECore::FloatParameter *minToParameter();
+		const IECore::FloatParameter *minToParameter() const;
+
+		IECore::BoolParameter *enableMaxToParameter();
+		const IECore::BoolParameter *enableMaxToParameter() const;
+
+		IECore::FloatParameter *maxToParameter();
+		const IECore::FloatParameter *maxToParameter() const;
+
+	protected :
+
+		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+
+};
+
+IE_CORE_DECLAREPTR( ClampOp );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_CLAMPOP_H
+

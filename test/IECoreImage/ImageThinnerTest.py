@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,36 +33,26 @@
 ##########################################################################
 
 import unittest
-import warnings
-import sys
-
 import IECore
 import IECoreImage
 
-warnings.simplefilter( "error", DeprecationWarning )
+class ImageThinnerTest( unittest.TestCase ) :
 
-from ImageReaderTest import ImageReaderTest
-from ImageWriterTest import ImageWriterTest
-from ClampOpTest import ClampOpTest
-from CurveTracerTest import CurveTracerTest
-from EnvMapSamplerTest import EnvMapSamplerTest
-from ImageCropOpTest import ImageCropOpTest
-from ImageDiffOpTest import ImageDiffOpTest
-from ImageThinnerTest import ImageThinnerTest
-from LensDistortOpTest import LensDistortOpTest
-from LuminanceOpTest import LuminanceOpTest
-from MedianCutSamplerTest import MedianCutSamplerTest
-from SplineToImageTest import SplineToImageTest
-from SummedAreaOpTest import SummedAreaOpTest
+	def test( self ) :
+			
+		i = IECore.Reader.create( "test/IECore/data/tiff/toTrace.tif" ).read()
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		IECoreImage.ImageThinner()( input=i, copyInput=False )
+
+		IECoreImage.ImageWriter( i, "/tmp/newThinning.tif" ).write()
+		
+		ii = IECore.Reader.create( "test/IECore/data/tiff/toTraceThinned.tif" ).read()
+
+		i.blindData().clear()
+		ii.blindData().clear()
+
+		self.failUnless( i==ii )
+		
+if __name__ == "__main__":
+	unittest.main()
+

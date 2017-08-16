@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,61 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_LENSDISTORT_H
+#define IECOREIMAGE_LENSDISTORT_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/ObjectParameter.h"
+#include "IECore/RunTimeTyped.h"
+#include "IECore/LensModel.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
+#include "IECoreImage/WarpOp.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+/// Distorts an ImagePrimitive using a parametric lens model.
+/// This Op expects a CompoundObject which contains the lens model's parameters.
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API LensDistortOp : public WarpOp
+{
+	public:
+
+		LensDistortOp();
+		virtual ~LensDistortOp();
+
+		IECore::ObjectParameter * lensParameter();
+		const IECore::ObjectParameter * lensParameter() const;
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LensDistortOp, LensDistortOpTypeId, WarpOp );
+
+	protected :
+
+		virtual void begin( const IECore::CompoundObject * operands );
+		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
+		virtual Imath::V2f warp( const Imath::V2f &p ) const;
+		virtual void end();
+
+	private :
+
+		enum Mode
+		{
+			kUndistort = 0,
+			kDistort = 1
+		};
+
+		int m_mode;
+		IECore::LensModelPtr m_lensModel;
+		IECore::ObjectParameterPtr m_lensParameter;
+		IECore::IntParameterPtr m_modeParameter;
+		Imath::Box2i m_distortedDataWindow;
+		IECore::FloatVectorDataPtr m_cachePtr;
+};
+
+IE_CORE_DECLAREPTR( LensDistortOp );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_LENSDISTORT_H
+

@@ -60,7 +60,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		if "Y" in imgOrig :
 			self.assertTrue( "Y" in imgNew )
 
-		op = IECore.ImageDiffOp()
+		op = IECoreImage.ImageDiffOp()
 
 		res = op(
 			imageA = imgNew,

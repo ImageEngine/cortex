@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,58 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_IMAGETHINNER_H
+#define IECOREIMAGE_IMAGETHINNER_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/NumericParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/ChannelOp.h"
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+/// The ImageThinner class performs thinning of binary images. The code is
+/// derived from the example code accompanying the following article :
+///
+/// "Efficient Binary Image Thinning using Neighborhood Maps"
+/// by Joseph M. Cychosz, 3ksnn64@ecn.purdue.edu
+/// in "Graphics Gems IV", Academic Press, 1994
+///
+/// The original code can be found here :
+///
+/// http://tog.acm.org/resources/GraphicsGems/gemsiv/thin_image.c
+///
+/// And this page indicates that it can be used without restriction :
+///
+/// http://tog.acm.org/resources/GraphicsGems/
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API ImageThinner : public ChannelOp
+{
+	public:
+
+		ImageThinner();
+		virtual ~ImageThinner();
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageThinner, ImageThinnerTypeId, ChannelOp );
+
+		/// The transform considers images to be binary, whereby each pixel is
+		/// either a member of the foreground or background. Pixels with a value
+		/// below the threshold are considered to be background, and those above
+		/// the threshold are considered to be foreground.
+		IECore::FloatParameter * thresholdParameter();
+		const IECore::FloatParameter * thresholdParameter() const;
+
+	protected :
+
+		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+
+};
+
+IE_CORE_DECLAREPTR( ImageThinner );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_IMAGETHINNER_H
+

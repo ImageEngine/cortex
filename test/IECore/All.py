@@ -114,7 +114,6 @@ from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
 from InverseDistanceWeightedInterpolation import *
-from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
 from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
@@ -125,7 +124,6 @@ from TransformOpTest import *
 from LineSegmentTest import *
 from CubicBasisTest import *
 from CurvesPrimitiveTest import *
-from ImageDiffOp import *
 from TriangulatorTest import *
 from BezierAlgoTest import *
 from MeshNormalsOpTest import *
@@ -135,10 +133,6 @@ from UnicodeToStringTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
-from LuminanceOpTest import *
-from SummedAreaOpTest import *
-from MedianCutSamplerTest import *
-from EnvMapSamplerTest import *
 from RandomTest import *
 from MeshVertexReorderOpTest import *
 from SplineTest import *
@@ -148,7 +142,6 @@ from LayeredDictTest import *
 from SplineParameterTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
-from SplineToImageTest import *
 from DisplayTest import *
 from MeshTangentsOpTest import *
 from CompoundVectorParameterTest import *
@@ -172,8 +165,6 @@ from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
 from PointDistributionTest import PointDistributionTest
-from CurveTracerTest import CurveTracerTest
-from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
@@ -216,7 +207,6 @@ from MurmurHashTest import MurmurHashTest
 from BoolVectorData import BoolVectorDataTest
 from CompoundParameterTest import CompoundParameterTest
 from DiskPrimitiveTest import DiskPrimitiveTest
-from ClampOpTest import ClampOpTest
 from SWAReaderTest import SWAReaderTest
 from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
@@ -226,7 +216,6 @@ from NullObjectTest import NullObjectTest
 from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from StandardRadialLensModelTest import StandardRadialLensModelTest
-from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from ExternalProceduralTest import ExternalProceduralTest

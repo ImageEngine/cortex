@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2009-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,66 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_HDRMERGEOP_H
+#define IECOREIMAGE_HDRMERGEOP_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/NumericParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECore
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+IE_CORE_FORWARDDECLARE( ObjectParameter )
+
+} // namespace IECore
+
+namespace IECoreImage
+{
+
+/// The HdrMergeOp merges a set of images with different exposures into a single HDR image.
+/// \todo Take in consideration Alpha channel from input images.
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API HdrMergeOp : public IECore::Op
+{
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HdrMergeOp, HdrMergeOpTypeId, IECore::Op );
+
+		HdrMergeOp();
+		virtual ~HdrMergeOp();
+
+		/// The Parameter for the group with input images.
+		IECore::ObjectParameter *inputGroupParameter();
+		const IECore::ObjectParameter *inputGroupParameter() const;
+
+		IECore::FloatParameter *exposureStepParameter();
+		const IECore::FloatParameter *exposureStepParameter() const;
+
+		IECore::FloatParameter *exposureAdjustmentParameter();
+		const IECore::FloatParameter *exposureAdjustmentParameter() const;
+
+		IECore::Box2fParameter *windowingParameter();
+		const IECore::Box2fParameter *windowingParameter() const;
+
+	protected :
+
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+
+	private :
+
+		IECore::ObjectParameterPtr m_inputGroupParameter;
+		IECore::FloatParameterPtr m_exposureStepParameter;
+		IECore::FloatParameterPtr m_exposureAdjustmentParameter;
+		IECore::Box2fParameterPtr m_windowingParameter;
+
+};
+
+IE_CORE_DECLAREPTR( HdrMergeOp );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_HDRMERGEOP_H

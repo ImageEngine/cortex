@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,36 +33,31 @@
 ##########################################################################
 
 import unittest
-import warnings
+import os
 import sys
-
 import IECore
 import IECoreImage
 
-warnings.simplefilter( "error", DeprecationWarning )
+class SplineToImageTest(unittest.TestCase):
 
-from ImageReaderTest import ImageReaderTest
-from ImageWriterTest import ImageWriterTest
-from ClampOpTest import ClampOpTest
-from CurveTracerTest import CurveTracerTest
-from EnvMapSamplerTest import EnvMapSamplerTest
-from ImageCropOpTest import ImageCropOpTest
-from ImageDiffOpTest import ImageDiffOpTest
-from ImageThinnerTest import ImageThinnerTest
-from LensDistortOpTest import LensDistortOpTest
-from LuminanceOpTest import LuminanceOpTest
-from MedianCutSamplerTest import MedianCutSamplerTest
-from SplineToImageTest import SplineToImageTest
-from SummedAreaOpTest import SummedAreaOpTest
+	def test( self ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		s = IECore.Splineff()
+
+		s[0] = 1
+		s[0] = 1
+		s[1] = 0
+		s[1] = 0
+
+		sd = IECore.SplineffData( s )
+
+		i = IECoreImage.SplineToImage()( spline=sd, resolution=IECore.V2i( 10, 256 ) )
+
+		self.assertEqual( i.dataWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
+		self.assertEqual( i.displayWindow, IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 9, 255 ) ) )
+		self.assertEqual( len( i ), 1 )
+		self.assert_( "Y" in i )
+
+if __name__ == "__main__":
+	unittest.main()
+

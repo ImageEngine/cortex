@@ -267,7 +267,7 @@ class ImageReaderTest( unittest.TestCase ) :
 		i = r.read()
 		i2 = IECoreImage.ImageReader( "test/IECore/data/exrFiles/tiffTileTestExpectedResults.exr" ).read()
 
-		op = IECore.ImageDiffOp()
+		op = IECoreImage.ImageDiffOp()
 		res = op(
 			imageA = i,
 			imageB = i2,

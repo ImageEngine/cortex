@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_IMAGECROPOP_H
+#define IECOREIMAGE_IMAGECROPOP_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/TypedPrimitiveOp.h"
+#include "IECore/SimpleTypedParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+/// The ImageCropOp performs cropping over ImagePrimitive objects.
+/// The operation results on an ImagePrimitive with displayWindow equal to the given crop box.
+/// If matchDataWindow if On then the dataWindow will match displayWindow. Otherwise it will be intersected against the given crop box.
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API ImageCropOp : public IECore::ModifyOp
+{
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageCropOp, ImageCropOpTypeId, IECore::ModifyOp );
+
+		ImageCropOp();
+		virtual ~ImageCropOp();
+
+		IECore::Box2iParameter *cropBoxParameter();
+		const IECore::Box2iParameter *cropBoxParameter() const;
+
+		IECore::BoolParameter *matchDataWindowParameter();
+		const IECore::BoolParameter *matchDataWindowParameter() const;
+
+		IECore::BoolParameter *resetOriginParameter();
+		const IECore::BoolParameter *resetOriginParameter() const;
+
+		IECore::BoolParameter *intersectParameter();
+		const IECore::BoolParameter *intersectParameter() const;
+
+	protected :
+
+		virtual void modify( IECore::Object *object, const IECore::CompoundObject *operands );
+
+	private :
+
+		struct ImageCropFn;
+
+		IECore::Box2iParameterPtr m_cropBoxParameter;
+		IECore::BoolParameterPtr m_matchDataWindowParameter;
+		IECore::BoolParameterPtr m_resetOriginParameter;
+		IECore::BoolParameterPtr m_intersectParameter;
+};
+
+IE_CORE_DECLAREPTR( ImageCropOp );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_IMAGECROPOP_H

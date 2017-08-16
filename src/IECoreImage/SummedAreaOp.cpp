@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,34 +32,78 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREIMAGE_TYPEIDS_H
-#define IECOREIMAGE_TYPEIDS_H
+#include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
 
-namespace IECoreImage
-{
+#include "IECoreImage/SummedAreaOp.h"
 
-enum TypeId
+using namespace std;
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
+
+IE_CORE_DEFINERUNTIMETYPED( SummedAreaOp );
+
+SummedAreaOp::SummedAreaOp()
+	:	ChannelOp( "Calculates summed area table for image channels." )
 {
-	FirstCoreImageTypeId = 104000,
-	ImageReaderTypeId = 104001,
-	ImageWriterTypeId = 104002,
-	ChannelOpTypeId = 104003,
-	ClampOpTypeId = 104004,
-	CurveTracerTypeId = 104005,
-	EnvMapSamplerTypeId = 104006,
-	HdrMergeOpTypeId = 104007,
-	ImageCropOpTypeId = 104008,
-	ImageDiffOpTypeId = 104009,
-	ImageThinnerTypeId = 104010,
-	LensDistortOpTypeId = 104011,
-	LuminanceOpTypeId = 104012,
-	MedianCutSamplerTypeId = 104013,
-	SplineToImageTypeId = 104014,
-	SummedAreaOpTypeId = 104015,
-	WarpOpTypeId = 104016,
-	LastCoreImageTypeId = 104999,
+}
+
+SummedAreaOp::~SummedAreaOp()
+{
+}
+
+struct SummedAreaOp::SumArea
+{
+	typedef void ReturnType;
+
+	SumArea( const Imath::Box2i &dataWindow )
+		:	m_dataWindow( dataWindow )
+	{
+	}
+
+	template<typename T>
+	ReturnType operator()( T * data )
+	{
+		typedef typename T::ValueType Container;
+		typedef typename Container::value_type V;
+
+		Container &buffer = data->writable();
+
+		// deal with first row alone, as it doesn't have values above it
+		unsigned pixelIndex=0;
+		V rowSum = 0;
+		for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++, pixelIndex++ )
+		{
+			rowSum += buffer[pixelIndex];
+			buffer[pixelIndex] = rowSum;
+		}
+		// now do the other rows
+		unsigned upperPixelIndex = 0;
+		pixelIndex = m_dataWindow.size().x + 1;
+		for( int y=m_dataWindow.min.y + 1; y<=m_dataWindow.max.y; y++ )
+		{
+			rowSum = 0;
+			for( int x=m_dataWindow.min.x; x<=m_dataWindow.max.x; x++ )
+			{
+				rowSum += buffer[pixelIndex];
+				buffer[pixelIndex++] = rowSum + buffer[upperPixelIndex++];
+			}
+		}
+	}
+
+	private :
+
+		Box2i m_dataWindow;
+
 };
 
-} // namespace IECoreImage
+void SummedAreaOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels )
+{
+	SumArea summer( dataWindow );
+	for( unsigned i=0; i<channels.size(); i++ )
+	{
+		despatchTypedData<SumArea, TypeTraits::IsNumericVectorTypedData>( channels[i].get(), summer );
+	}
+}
 
-#endif // IECOREIMAGE_TYPEIDS_H

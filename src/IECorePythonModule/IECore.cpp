@@ -140,7 +140,6 @@
 #include "IECorePython/SpherePrimitiveBinding.h"
 #include "IECorePython/SpherePrimitiveEvaluatorBinding.h"
 #include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
-#include "IECorePython/ImageCropOpBinding.h"
 #include "IECorePython/MeshPrimitiveShrinkWrapOpBinding.h"
 #include "IECorePython/ImagePrimitiveEvaluatorBinding.h"
 #include "IECorePython/MathBinding.h"
@@ -153,7 +152,6 @@
 #include "IECorePython/LineSegmentBinding.h"
 #include "IECorePython/CubicBasisBinding.h"
 #include "IECorePython/CurvesPrimitiveBinding.h"
-#include "IECorePython/ImageDiffOpBinding.h"
 #include "IECorePython/TriangulatorBinding.h"
 #include "IECorePython/BezierAlgoBinding.h"
 #include "IECorePython/ToCoreConverterBinding.h"
@@ -165,11 +163,6 @@
 #include "IECorePython/RadixSortBinding.h"
 #include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
-#include "IECorePython/LuminanceOpBinding.h"
-#include "IECorePython/ChannelOpBinding.h"
-#include "IECorePython/SummedAreaOpBinding.h"
-#include "IECorePython/MedianCutSamplerBinding.h"
-#include "IECorePython/EnvMapSamplerBinding.h"
 #include "IECorePython/MeshVertexReorderOpBinding.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
@@ -178,10 +171,8 @@
 #include "IECorePython/CoordinateSystemBinding.h"
 #include "IECorePython/ClientDisplayDriverBinding.h"
 #include "IECorePython/DisplayDriverServerBinding.h"
-#include "IECorePython/SplineToImageBinding.h"
 #include "IECorePython/DisplayBinding.h"
 #include "IECorePython/MeshTangentsOpBinding.h"
-#include "IECorePython/WarpOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
@@ -210,10 +201,7 @@
 #include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
-#include "IECorePython/HdrMergeOpBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
-#include "IECorePython/CurveTracerBinding.h"
-#include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
@@ -245,7 +233,6 @@
 #include "IECorePython/DataConvertOpBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
-#include "IECorePython/ClampOpBinding.h"
 #include "IECorePython/MeshFaceFilterOpBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
@@ -259,7 +246,6 @@
 #include "IECorePython/LinkedSceneBinding.h"
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
-#include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
 #include "IECorePython/ExternalProceduralBinding.h"
 #include "IECorePython/ClippingPlaneBinding.h"
@@ -375,7 +361,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();
-	bindImageCropOp();
 	bindMeshPrimitiveShrinkWrapOp();
 	bindImagePrimitiveEvaluator();
 	bindMath();
@@ -388,7 +373,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLineSegment();
 	bindCubicBasis();
 	bindCurvesPrimitive();
-	bindImageDiffOp();
 	bindTriangulator();
 	bindBezierAlgo();
 	bindToCoreConverter();
@@ -406,11 +390,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRadixSort();
 	bindPointRepulsionOp();
 	bindAngleConversion();
-	bindLuminanceOp();
-	bindChannelOp();
-	bindSummedAreaOp();
-	bindMedianCutSampler();
-	bindEnvMapSampler();
 	bindMeshVertexReorderOp();
 	bindSpline();
 	bindSplineData();
@@ -427,10 +406,8 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #endif
 
-	bindSplineToImage();
 	bindDisplay();
 	bindMeshTangentsOp();
-	bindWarpOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindDateTimeData();
@@ -458,10 +435,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
-	bindHdrMergeOp();
 	bindPointDistribution();
-	bindCurveTracer();
-	bindImageThinner();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
@@ -493,7 +467,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataConvertOp();
 	bindMurmurHash();
 	bindDiskPrimitive();
-	bindClampOp();
 	bindMeshFaceFilterOp();
 	bindImf();
 	bindTimeCodeData();
@@ -507,7 +480,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinkedScene();
 	bindLensModel();
 	bindStandardRadialLensModel();
-	bindLensDistortOp();
 	bindObjectPool();
 	bindExternalProcedural();
 	bindClippingPlane();

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_SPLINETOIMAGE_H
+#define IECOREIMAGE_SPLINETOIMAGE_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/Op.h"
+#include "IECore/SimpleTypedParameter.h"
+#include "IECore/ObjectParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECore
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
+
+IE_CORE_FORWARDDECLARE( ObjectParameter )
+
 }
+
+namespace IECoreImage
+{
+
+/// This Op creates ImagePrimitives from SplineData.
+/// \todo Different projections would be nice.
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API SplineToImage : public IECore::Op
+{
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SplineToImage, SplineToImageTypeId, IECore::Op );
+
+		SplineToImage();
+		virtual ~SplineToImage();
+
+		IECore::ObjectParameter *splineParameter();
+		const IECore::ObjectParameter *splineParameter() const;
+
+		IECore::V2iParameter *resolutionParameter();
+		const IECore::V2iParameter *resolutionParameter() const;
+
+	protected :
+
+		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+
+	private :
+
+		struct CreateImage;
+
+		IECore::ObjectParameterPtr m_splineParameter;
+		IECore::V2iParameterPtr m_resolutionParameter;
+
+};
+
+IE_CORE_DECLAREPTR( SplineToImage );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_SPLINETOIMAGE_H

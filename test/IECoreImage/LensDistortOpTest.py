@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,37 +32,39 @@
 #
 ##########################################################################
 
-import unittest
-import warnings
 import sys
-
+import unittest
 import IECore
 import IECoreImage
 
-warnings.simplefilter( "error", DeprecationWarning )
+class LensDistortOpTest(unittest.TestCase):
+	
+	def testDistortOpWithStandardLensModel(self):
+		
+		# The lens model and parameters to use.
+		o = IECore.CompoundObject()
+		o["lensModel"] = IECore.StringData( "StandardRadialLensModel" )
+		o["distortion"] = IECore.DoubleData( 0.2 )
+		o["anamorphicSqueeze"] = IECore.DoubleData( 1. )
+		o["curvatureX"] = IECore.DoubleData( 0.2 )
+		o["curvatureY"] = IECore.DoubleData( 0.5 )
+		o["quarticDistortion"] = IECore.DoubleData( .1 )
+		
+		# The input image to read.
+		r = IECore.Reader.create("test/IECore/data/exrFiles/uvMapWithDataWindow.100x100.exr")
+		img = r.read()
+		
+		# Create the Op and set it's parameters.
+		op = IECoreImage.LensDistortOp()
+		op["input"] = img
+		op["mode"] = IECore.LensModel.Undistort
+		op['lensModel'].setValue(o)
+		
+		# Run the Op.
+		out = op()
+		
+		r = IECore.Reader.create("test/IECore/data/exrFiles/uvMapWithDataWindowDistorted.100x100.exr")
+		img2 = r.read()		
 
-from ImageReaderTest import ImageReaderTest
-from ImageWriterTest import ImageWriterTest
-from ClampOpTest import ClampOpTest
-from CurveTracerTest import CurveTracerTest
-from EnvMapSamplerTest import EnvMapSamplerTest
-from ImageCropOpTest import ImageCropOpTest
-from ImageDiffOpTest import ImageDiffOpTest
-from ImageThinnerTest import ImageThinnerTest
-from LensDistortOpTest import LensDistortOpTest
-from LuminanceOpTest import LuminanceOpTest
-from MedianCutSamplerTest import MedianCutSamplerTest
-from SplineToImageTest import SplineToImageTest
-from SummedAreaOpTest import SummedAreaOpTest
-
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		self.assertEqual( img.displayWindow, img2.displayWindow )
+		

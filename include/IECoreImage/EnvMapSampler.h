@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,44 +32,53 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_ENVMAPSAMPLER_H
+#define IECOREIMAGE_ENVMAPSAMPLER_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/Op.h"
+#include "IECore/TypedPrimitiveParameter.h"
+#include "IECore/NumericParameter.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
-}
+
+/// This class uses the MedianCutSampler to calculate a distribution
+/// of light positions and orientations based on a lat-long environment
+/// map image.
+/// \todo: use SphericalToEuclideanTransform that is based on right-hand coordinate system. Currently it is left-hand to match 3delight environment light mapping. But maya and nuke and the spherical harmonics implementation in IECore are right-handed.
+/// \ingroup renderingGroup
+/// \ingroup imageProcessingGroup
+class IECOREIMAGE_API EnvMapSampler : public IECore::Op
+{
+	public :
+
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( EnvMapSampler, EnvMapSamplerTypeId, IECore::Op );
+
+		EnvMapSampler();
+		virtual ~EnvMapSampler();
+
+		IECore::ImagePrimitiveParameter *imageParameter();
+		const IECore::ImagePrimitiveParameter *imageParameter() const;
+
+		IECore::IntParameter *subdivisionDepthParameter();
+		const IECore::IntParameter *subdivisionDepthParameter() const;
+
+	protected :
+
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+
+	private :
+
+		IECore::ImagePrimitiveParameterPtr m_imageParameter;
+		IECore::IntParameterPtr m_subdivisionDepthParameter;
+
+};
+
+IE_CORE_DECLAREPTR( EnvMapSampler );
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_ENVMAPSAMPLER_H

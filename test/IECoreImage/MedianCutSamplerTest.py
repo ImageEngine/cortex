@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,36 +33,43 @@
 ##########################################################################
 
 import unittest
-import warnings
-import sys
-
 import IECore
 import IECoreImage
 
-warnings.simplefilter( "error", DeprecationWarning )
+class MedianCutSamplerTest( unittest.TestCase ) :
 
-from ImageReaderTest import ImageReaderTest
-from ImageWriterTest import ImageWriterTest
-from ClampOpTest import ClampOpTest
-from CurveTracerTest import CurveTracerTest
-from EnvMapSamplerTest import EnvMapSamplerTest
-from ImageCropOpTest import ImageCropOpTest
-from ImageDiffOpTest import ImageDiffOpTest
-from ImageThinnerTest import ImageThinnerTest
-from LensDistortOpTest import LensDistortOpTest
-from LuminanceOpTest import LuminanceOpTest
-from MedianCutSamplerTest import MedianCutSamplerTest
-from SplineToImageTest import SplineToImageTest
-from SummedAreaOpTest import SummedAreaOpTest
+	def test( self ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		image = IECore.Reader.create( "test/IECore/data/exrFiles/carPark.exr" ).read()
+		for n in ["R", "G", "B"] :
+			p = image[n]
+			p.data = IECore.DataCastOp()( object=image[n].data, targetType=IECore.FloatVectorData.staticTypeId() )
+			image[n] = p
+
+		luminanceImage = IECoreImage.LuminanceOp()( input=image )
+
+		s = IECoreImage.MedianCutSampler()( image=luminanceImage, subdivisionDepth=4, projection=IECoreImage.MedianCutSampler.Projection.LatLong )
+		centroids = s["centroids"]
+		areas = s["areas"]
+
+		self.assertEqual( len( s ), 2 )
+		self.assertEqual( len( centroids ), len( areas ) )
+		self.assertEqual( len( centroids ), 16 )
+		self.assert_( centroids.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
+		self.assert_( areas.isInstanceOf( IECore.Box2iVectorData.staticTypeId() ) )
+
+		dataWindow = luminanceImage.dataWindow
+		areaSum = 0
+		for i in range( 0, len( centroids ) ) :
+			c = centroids[i]
+			c = IECore.V2i( int(c.x), int(c.y) )
+			self.assert_( dataWindow.intersects( c ) )
+			self.assert_( areas[i].intersects( c ) )
+			s = areas[i].size() + IECore.V2i( 1 )
+			areaSum += s.x * s.y
+
+		self.assertEqual( areaSum, luminanceImage.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+
+if __name__ == "__main__":
+	unittest.main()
+

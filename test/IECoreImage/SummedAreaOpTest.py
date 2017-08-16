@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,36 +33,26 @@
 ##########################################################################
 
 import unittest
-import warnings
-import sys
-
+import math
 import IECore
 import IECoreImage
 
-warnings.simplefilter( "error", DeprecationWarning )
+class SummedAreaOpTest( unittest.TestCase ) :
 
-from ImageReaderTest import ImageReaderTest
-from ImageWriterTest import ImageWriterTest
-from ClampOpTest import ClampOpTest
-from CurveTracerTest import CurveTracerTest
-from EnvMapSamplerTest import EnvMapSamplerTest
-from ImageCropOpTest import ImageCropOpTest
-from ImageDiffOpTest import ImageDiffOpTest
-from ImageThinnerTest import ImageThinnerTest
-from LensDistortOpTest import LensDistortOpTest
-from LuminanceOpTest import LuminanceOpTest
-from MedianCutSamplerTest import MedianCutSamplerTest
-from SplineToImageTest import SplineToImageTest
-from SummedAreaOpTest import SummedAreaOpTest
+	def test( self ) :
 
-unittest.TestProgram(
-	testRunner = unittest.TextTestRunner(
-		stream = IECore.CompoundStream(
-			[
-				sys.stderr,
-				open( "test/IECoreImage/results.txt", "w" )
-			]
-		),
-		verbosity = 2
-	)
-)
+		b = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 1 ) )
+		y = IECore.FloatVectorData( [ 1, 2, 3, 4 ] )
+		i = IECore.ImagePrimitive( b, b )
+		i["Y"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, y )
+
+		ii = IECoreImage.SummedAreaOp()( input=i, channels=IECore.StringVectorData( ["Y"] ) )
+
+		yy = ii["Y"].data
+		self.assertEqual( yy[0], 1 )
+		self.assertEqual( yy[1], 3 )
+		self.assertEqual( yy[2], 4 )
+		self.assertEqual( yy[3], 10 )
+
+if __name__ == "__main__":
+    unittest.main()
