@@ -57,16 +57,20 @@ IECOREALEMBIC_API IECore::PointsPrimitivePtr convert( const Alembic::AbcGeom::IP
 
 	PointsPrimitivePtr result = new PointsPrimitive( p );
 
-	V3fVectorDataPtr velocity = new V3fVectorData;
-	velocity->writable().resize( sample.getVelocities()->size() );
-	memcpy( &(velocity->writable()[0]), sample.getVelocities()->get(), sample.getVelocities()->size() * sizeof( Imath::V3f ) );
-	velocity->setInterpretation( GeometricData::Vector );
-	result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocity );
-
 	UInt64VectorDataPtr id = new UInt64VectorData;
 	id->writable().resize( sample.getIds()->size() );
 	memcpy( &(id->writable()[0]), sample.getIds()->get(), sample.getIds()->size() * sizeof( uint64_t ) );
 	result->variables["id"] = PrimitiveVariable( PrimitiveVariable::Vertex, id );
+
+	if( Alembic::Abc::V3fArraySamplePtr velocities = sample.getVelocities() )
+	{
+		V3fVectorDataPtr velocityData = new V3fVectorData;
+		velocityData->writable().resize( velocities->size() );
+		memcpy( &(velocityData->writable()[0]), velocities->get(), velocities->size() * sizeof( Imath::V3f ) );
+
+		velocityData->setInterpretation( GeometricData::Vector );
+		result->variables["velocity"] = PrimitiveVariable( PrimitiveVariable::Vertex, velocityData );
+	}
 
 	ICompoundProperty arbGeomParams = pointsSchema.getArbGeomParams();
 	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
