@@ -245,7 +245,7 @@ enum TypeId
 	ToCoreConverterTypeId = 197,
 	ImageCropOpTypeId = 198, // obsolete - available for reuse
 	MeshPrimitiveShrinkWrapOpTypeId = 199,
-	ImagePrimitiveEvaluatorTypeId = 200,
+	ImagePrimitiveEvaluatorTypeId = 200, // obsolete - available for reuse
 	FromCoreConverterTypeId = 201,
 	ShortDataTypeId = 202,
 	UShortDataTypeId = 203,

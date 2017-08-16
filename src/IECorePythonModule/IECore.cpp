@@ -141,7 +141,6 @@
 #include "IECorePython/SpherePrimitiveEvaluatorBinding.h"
 #include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
 #include "IECorePython/MeshPrimitiveShrinkWrapOpBinding.h"
-#include "IECorePython/ImagePrimitiveEvaluatorBinding.h"
 #include "IECorePython/MathBinding.h"
 #include "IECorePython/CameraControllerBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
@@ -360,7 +359,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();
 	bindMeshPrimitiveShrinkWrapOp();
-	bindImagePrimitiveEvaluator();
 	bindMath();
 	bindCameraController();
 	bindPathVectorParameter();

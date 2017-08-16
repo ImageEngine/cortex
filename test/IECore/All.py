@@ -115,7 +115,6 @@ from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
 from InverseDistanceWeightedInterpolation import *
 from MeshPrimitiveShrinkWrapOp import *
-from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
 from Math import *
 from FileSequenceVectorParameter import *

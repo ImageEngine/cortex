@@ -186,21 +186,17 @@ class ImageReaderTest( unittest.TestCase ) :
 	def testOrientation( self ) :
 
 		img = IECore.Reader.create( "test/IECore/data/exrFiles/uvMap.512x256.exr" ).read()
-		ipe = IECore.PrimitiveEvaluator.create( img )
-		r = ipe.createResult()
 
-		pointColors = {
-			IECore.V2i(0, 0) : IECore.V3f( 0, 0, 0 ),
-			IECore.V2i(511, 0) : IECore.V3f( 1, 0, 0 ),
-			IECore.V2i(0, 255) : IECore.V3f( 0, 1, 0 ),
-			IECore.V2i(511, 255) : IECore.V3f( 1, 1, 0 ),
+		indexedColors = {
+			0 : IECore.V3f( 0, 0, 0 ),
+			511 : IECore.V3f( 1, 0, 0 ),
+			512 * 255 : IECore.V3f( 0, 1, 0 ),
+			512 * 255 + 511 : IECore.V3f( 1, 1, 0 ),
 		}
 
-		for point, expectedColor in pointColors.items() :
+		for index, expectedColor in indexedColors.items() :
 
-			ipe.pointAtPixel( point, r )
-
-			color = IECore.V3f( r.floatPrimVar( ipe.R() ), r.floatPrimVar( ipe.G() ), r.floatPrimVar( ipe.B() ) )
+			color = IECore.V3f( img["R"].data[index], img["G"].data[index], img["B"].data[index] )
 
 			self.assertTrue( ( color - expectedColor).length() < 1.e-6 )
 

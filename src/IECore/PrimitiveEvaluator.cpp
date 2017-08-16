@@ -36,7 +36,6 @@
 
 #include "IECore/MeshPrimitiveEvaluator.h"
 #include "IECore/SpherePrimitiveEvaluator.h"
-#include "IECore/ImagePrimitiveEvaluator.h"
 
 using namespace IECore;
 
