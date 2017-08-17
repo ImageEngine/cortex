@@ -765,5 +765,29 @@ class AlembicSceneTest( unittest.TestCase ) :
 		c = a.child( "o" )
 		self.assertEqual( c.readObjectAtSample( 0 ), o )
 
+	def testReacquireChildDuringWriting( self ) :
+
+		plane0 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		plane1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+
+		def writeHierarchy( a, plane, time ) :
+
+			c = a.child( "c", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+			d = c.child( "d", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+
+			d.writeObject( plane, time )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		writeHierarchy( a, plane0, 0 )
+		writeHierarchy( a, plane1, 1 )
+
+		del a
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		d = a.child( "c" ).child( "d" )
+		self.assertEqual( d.numObjectSamples(), 2 )
+		self.assertEqual( d.readObjectAtSample( 0 ), plane0 )
+		self.assertEqual( d.readObjectAtSample( 1 ), plane1 )
+
 if __name__ == "__main__":
     unittest.main()

@@ -107,16 +107,16 @@ class IECOREALEMBIC_API AlembicScene : public IECore::SampledSceneInterface
 
 	private :
 
-		class AlembicIO;
-		class AlembicReader;
-		class AlembicWriter;
-		typedef std::unique_ptr<AlembicIO> AlembicIOPtr;
+		IE_CORE_FORWARDDECLARE( AlembicIO );
+		IE_CORE_FORWARDDECLARE( AlembicReader );
+		IE_CORE_FORWARDDECLARE( AlembicWriter );
 
-		AlembicScene( AlembicIOPtr io );
+		AlembicScene( const AlembicIOPtr &root, const AlembicIOPtr &io );
 
 		const AlembicReader *reader() const;
 		AlembicWriter *writer();
 
+		AlembicIOPtr m_root;
 		AlembicIOPtr m_io;
 
 };

@@ -68,7 +68,7 @@ using namespace IECoreAlembic;
 // on behalf of AlembicScene. The base class provides methods useful
 // with all OpenModes, and derived classes provide methods
 // specific to reading and writing.
-class AlembicScene::AlembicIO
+class AlembicScene::AlembicIO : public IECore::RefCounted
 {
 
 	public :
@@ -77,7 +77,6 @@ class AlembicScene::AlembicIO
 
 		virtual std::string fileName() const = 0;
 		virtual SceneInterface::Name name() const = 0;
-		virtual AlembicIOPtr root() const = 0;
 
 		virtual void path( SceneInterface::Path &path ) const = 0;
 		virtual void childNames( SceneInterface::NameList &childNames ) const = 0;
@@ -117,11 +116,6 @@ class AlembicScene::AlembicReader : public AlembicIO
 			return SceneInterface::Name( m_xform ? m_xform.getName() : "" );
 		}
 
-		virtual AlembicIOPtr root() const
-		{
-			return AlembicIOPtr( new AlembicReader( m_archive ) );
-		}
-
 		virtual void path( SceneInterface::Path &path ) const
 		{
 			path.clear();
@@ -158,6 +152,12 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
 		{
+			ChildMap::iterator it = m_children.find( name );
+			if( it != m_children.end() )
+			{
+				return it->second;
+			}
+
 			IObject c = m_xform ? m_xform.getChild( name ) : m_archive->getTop().getChild( name );
 			if( !c || !IXform::matches( c.getMetaData() ) )
 			{
@@ -171,7 +171,10 @@ class AlembicScene::AlembicReader : public AlembicIO
 						throw InvalidArgumentException( "Child creation not supported" );
 				}
 			}
-			return AlembicIOPtr( new AlembicReader( m_archive, IXform( c, kWrapExisting ) ) );
+
+			AlembicReaderPtr child = new AlembicReader( m_archive, IXform( c, kWrapExisting ) );
+			m_children[name] = child;
+			return child;
 		}
 
 		// Bounds
@@ -544,6 +547,9 @@ class AlembicScene::AlembicReader : public AlembicIO
 		IXform m_xform; // Empty when we're at the root
 		IObject m_object; // Empty when there's no object
 
+		typedef std::unordered_map<IECore::SceneInterface::Name, AlembicReaderPtr> ChildMap;
+		ChildMap m_children;
+
 };
 
 class AlembicScene::AlembicWriter : public AlembicIO
@@ -599,11 +605,6 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			return SceneInterface::Name( haveXform() ? m_xform.getName() : "" );
 		}
 
-		virtual AlembicIOPtr root() const
-		{
-			return AlembicIOPtr( new AlembicWriter( m_root ) );
-		}
-
 		virtual void path( SceneInterface::Path &path ) const
 		{
 			path.clear();
@@ -643,7 +644,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			ChildMap::iterator it = m_children.find( name );
 			if( it != m_children.end() )
 			{
-				return AlembicIOPtr( new AlembicWriter( m_root, it->second ) );
+				return it->second;
 			}
 			switch( missingBehaviour )
 			{
@@ -652,12 +653,14 @@ class AlembicScene::AlembicWriter : public AlembicIO
 				case SceneInterface::ThrowIfMissing :
 					throw IOException( "Child \"" + name.string() + "\" does not exist" );
 				case SceneInterface::CreateIfMissing :
-					return AlembicIOPtr(
-						new AlembicWriter(
-							m_root,
-							OXform( haveXform() ? m_xform : m_root->archive.getTop(), name.string() )
-						)
+				{
+					AlembicWriterPtr child = new AlembicWriter(
+						m_root,
+						OXform( haveXform() ? m_xform : m_root->archive.getTop(), name.string() )
 					);
+					m_children[name] = child;
+					return child;
+				}
 			}
 		}
 
@@ -790,7 +793,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		std::vector<chrono_t> m_boundSampleTimes;
 		std::vector<chrono_t> m_objectSampleTimes;
 
-		typedef std::unordered_map<IECore::SceneInterface::Name, OXform> ChildMap;
+		typedef std::unordered_map<IECore::SceneInterface::Name, AlembicWriterPtr> ChildMap;
 		ChildMap m_children;
 
 };
@@ -806,18 +809,18 @@ AlembicScene::AlembicScene( const std::string &fileName, IECore::IndexedIO::Open
 	switch( mode )
 	{
 		case IECore::IndexedIO::Read :
-			m_io.reset( new AlembicReader( fileName ) );
+			m_io = m_root = new AlembicReader( fileName );
 			break;
 		case IECore::IndexedIO::Write :
-			m_io.reset( new AlembicWriter( fileName ) );
+			m_io = m_root = new AlembicWriter( fileName );
 			break;
 		default :
 			throw IECore::Exception( "Unsupported OpenMode" );
 	}
 }
 
-AlembicScene::AlembicScene( AlembicIOPtr io )
-	:	m_io( std::move( io ) )
+AlembicScene::AlembicScene( const AlembicIOPtr &root, const AlembicIOPtr &io )
+	:	m_root( root ), m_io( io )
 {
 }
 
@@ -1039,7 +1042,7 @@ IECore::SceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneIn
 	{
 		return nullptr;
 	}
-	return new AlembicScene( std::move( child ) );
+	return new AlembicScene( m_root, child );
 }
 
 IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour ) const
@@ -1054,7 +1057,7 @@ IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::Sc
 	{
 		return nullptr;
 	}
-	return new AlembicScene( std::move( child ) );
+	return new AlembicScene( m_root, child );
 }
 
 IECore::SceneInterfacePtr AlembicScene::createChild( const Name &name )
@@ -1064,12 +1067,12 @@ IECore::SceneInterfacePtr AlembicScene::createChild( const Name &name )
 	{
 		throw IECore::Exception( "Child already exists" );
 	}
-	return new AlembicScene( writer->child( name, CreateIfMissing ) );
+	return new AlembicScene( m_root, writer->child( name, CreateIfMissing ) );
 }
 
 IECore::SceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour )
 {
-	AlembicIOPtr io = m_io->root();
+	AlembicIOPtr io = m_root;
 	for( const Name &name : path )
 	{
 		io = io->child( name, missingBehaviour );
@@ -1078,7 +1081,7 @@ IECore::SceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneIn
 			return nullptr;
 		}
 	}
-	return new AlembicScene( std::move( io ) );
+	return new AlembicScene( m_root, io );
 }
 
 IECore::ConstSceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour ) const
