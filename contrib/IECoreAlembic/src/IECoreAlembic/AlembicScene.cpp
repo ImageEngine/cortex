@@ -50,8 +50,8 @@
 #include "IECore/MessageHandler.h"
 
 #include "IECoreAlembic/AlembicScene.h"
-#include "IECoreAlembic/ObjectAlgo.h"
 #include "IECoreAlembic/ObjectWriter.h"
+#include "IECoreAlembic/ObjectReader.h"
 
 using namespace Alembic::Abc;
 using namespace Alembic::AbcCoreFactory;
@@ -361,53 +361,45 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		bool hasObject() const
 		{
-			return m_object;
+			return static_cast<bool>( m_objectReader );
 		}
 
 		size_t numObjectSamples() const
 		{
-			const MetaData &md = m_object.getMetaData();
-			if( ICamera::matches( md ) )
-			{
-				ICamera camera( m_object, kWrapExisting );
-				return camera.getSchema().getNumSamples();
-			}
-			else
-			{
-				IGeomBaseObject geomBase( m_object, kWrapExisting );
-				return geomBase.getSchema().getNumSamples();
-			}
+			return m_objectReader ? m_objectReader->readNumSamples() : 0;
 		}
 
 		double objectSampleTime( size_t sampleIndex ) const
 		{
-			if( !m_object )
+			if( !m_objectReader )
 			{
 				return 0.0;
 			}
-			size_t numSamples;
-			TimeSamplingPtr timeSampling = ObjectAlgo::timeSampling( m_object, numSamples );
-			return timeSampling->getSampleTime( sampleIndex );
+			return m_objectReader->readTimeSampling()->getSampleTime( sampleIndex );
 		}
 
 		IECore::ConstObjectPtr objectAtSample( size_t sampleIndex ) const
 		{
-			return ObjectAlgo::convert( m_object, sampleIndex );
+			return m_objectReader ? m_objectReader->readSample( sampleIndex ) : nullptr;
 		}
 
 		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const
 		{
-			size_t numSamples;
-			TimeSamplingPtr timeSampling = ObjectAlgo::timeSampling( m_object, numSamples );
+			if( !m_objectReader )
+			{
+				return 0.0;
+			}
+			const size_t numSamples = m_objectReader->readNumSamples();
+			TimeSamplingPtr timeSampling = m_objectReader->readTimeSampling();
 			return sampleInterval( timeSampling.get(), numSamples, time, floorIndex, ceilIndex );
 		}
 
 		void objectHash( double time, IECore::MurmurHash &h ) const
 		{
-			if( m_object )
+			if( m_objectReader )
 			{
 				Alembic::Util::Digest digest;
-				if( const_cast<IObject &>( m_object ).getPropertiesHash( digest ) )
+				if( const_cast<IObject &>( m_objectReader->object() ).getPropertiesHash( digest ) )
 				{
 					h.append( digest.words, 2 );
 				}
@@ -417,9 +409,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 					h.append( m_xform.getFullName() );
 				}
 
-				size_t numSamples;
-				TimeSamplingPtr timeSampling = ObjectAlgo::timeSampling( m_object, numSamples );
-				if( numSamples > 1 )
+				if( m_objectReader->readNumSamples() > 1 )
 				{
 					h.append( time );
 				}
@@ -431,7 +421,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		void childNamesHash( IECore::MurmurHash &h ) const
 		{
-			if( m_object && m_xform.getNumChildren() == 1 )
+			if( m_objectReader && m_xform.getNumChildren() == 1 )
 			{
 				// Leaf. There are no children so we
 				// can use the same hash as all other leaves.
@@ -484,7 +474,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 				const AbcA::ObjectHeader &childHeader = m_xform.getChildHeader( i );
 				if( !IXform::matches( childHeader ) )
 				{
-					m_object = m_xform.getChild( i );
+					m_objectReader = ObjectReader::create( m_xform.getChild( i ) );
 					return;
 				}
 			}
@@ -497,11 +487,10 @@ class AlembicScene::AlembicReader : public AlembicIO
 				// Top of archive
 				return GetIArchiveBounds( *m_archive, Abc::ErrorHandler::kQuietNoopPolicy );
 			}
-			else if( m_object && m_xform.getNumChildren() == 1 )
+			else if( m_objectReader && m_xform.getNumChildren() == 1 )
 			{
 				// Leaf object
-				IGeomBaseObject geomBase( m_object, kWrapExisting, Abc::ErrorHandler::kQuietNoopPolicy );
-				return geomBase.getSchema().getSelfBoundsProperty();
+				return m_objectReader->readBoundProperty();
 			}
 			else
 			{
@@ -545,7 +534,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		std::shared_ptr<IArchive> m_archive;
 		IXform m_xform; // Empty when we're at the root
-		IObject m_object; // Empty when there's no object
+		std::unique_ptr<IECoreAlembic::ObjectReader> m_objectReader; // Null when there's no object
 
 		typedef std::unordered_map<IECore::SceneInterface::Name, AlembicReaderPtr> ChildMap;
 		ChildMap m_children;
