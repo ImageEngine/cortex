@@ -97,6 +97,10 @@ o.Add(
 )
 
 o.Add(
+	BoolVariable( "DEBUGINFO", "Make debug info for release builds", False )
+)
+
+o.Add(
 	"TESTCXXFLAGS",
 	"The extra flags to pass to the C++ compiler during compilation of unit tests.",
 	[ "-pipe", "-Wall", "-O0" ]
@@ -1135,7 +1139,10 @@ env.Append( CXXFLAGS = [ "-std=$CXXSTD" ] )
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g" ] )
 else :
-	env.Append( CXXFLAGS = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS" ] )
+	cxxFlags  =[ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS"]
+	if env["DEBUGINFO"] :
+		cxxFlags.append( "-g" )
+	env.Append( CXXFLAGS = cxxFlags )
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.
