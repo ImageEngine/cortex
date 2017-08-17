@@ -92,8 +92,19 @@ class AlembicScene::AlembicReader : public AlembicIO
 
 		AlembicReader( const std::string &fileName )
 		{
-			/// \todo Experiment with setting the number of Ogawa streams
 			IFactory factory;
+			// Increasing the number of streams gives better
+			// multithreaded performance, because Ogawa locks
+			// around the stream. But each stream consumes an
+			// additional file handle, so we choose a fairly
+			// conservative number of streams, rather than simply
+			// matching the core count.
+			//
+			// I believe that Alembic 1.7.2 removes the locking
+			// entirely at which point the number of streams is
+			// irrelevant - see https://github.com/alembic/alembic/issues/124
+			// for more details.
+			factory.setOgawaNumStreams( 4 );
 			m_archive = std::make_shared<IArchive>( factory.getArchive( fileName ) );
 			if( !m_archive->valid() )
 			{
