@@ -163,6 +163,8 @@ class SceneCacheNode : public BaseType
 		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
 		void objectNames( const IECore::SceneInterface *scene, std::vector<std::string> &objects );
+		/// get the full path to a scene including the name
+		static std::string getFullScenePath( const IECore::SceneInterface *scene );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
 		
