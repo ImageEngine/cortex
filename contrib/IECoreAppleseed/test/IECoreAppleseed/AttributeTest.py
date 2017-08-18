@@ -117,6 +117,15 @@ class AttributeTest( AppleseedTest.TestCase ):
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
 		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/referenceImages/expectedAlphaMaps.exr" ).read()
 
+		for channel in ( "R", "G", "B" ) :
+			# Appleseed's default shading appears to have changed since
+			# expectedAlphaMaps.exr was created, so since we're only interested
+			# in the alpha channel, we delete the other channels before comparing
+			# the images.
+			del image[channel]
+			del expectedImage[channel]
+		self.assertIn( "A", image )
+
 		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
 	def testMediumPriorities( self ) :

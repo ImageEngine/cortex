@@ -3281,7 +3281,7 @@ if doConfigure :
 		appleseedDriverEnv.AddPostAction( appleseedDriverInstall, lambda target, source, env : makeLibSymLinks( appleseedDriverEnv, libNameVar="INSTALL_APPLESEEDOUTPUTDRIVER_NAME" ) )
 		appleseedDriverEnv.Alias( "install", appleseedDriverInstall )
 		appleseedDriverEnv.Alias( "installAppleseed", appleseedDriverInstall )
-		appleseedDriverForTest = appleseedDriverEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/plugins/ieOutputDriver.so", appleseedDriver, Copy( "$TARGET", "$SOURCE" ) )
+		appleseedDriverForTest = appleseedDriverEnv.Install( "contrib/IECoreAppleseed/test/IECoreAppleseed/plugins", appleseedDriver )
 
 		Default( [ appleseedLibrary, appleseedPythonModule, appleseedDriver, appleseedDriverForTest ] )
 
@@ -3290,10 +3290,10 @@ if doConfigure :
 		appleseedTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreAppleseed/python" + ":" + appleseedEnv.subst( "$APPLESEED_LIB_PATH/python2.7" )
 		appleseedTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + appleseedEnv.subst( ":".join( appleseedPythonModuleEnv["LIBPATH"] ) )
 		appleseedTestEnv["ENV"]["PATH"] = appleseedEnv.subst( "$APPLESEED_ROOT/bin" ) + ":" + appleseedTestEnv["ENV"]["PATH"]
-		appleseedTestEnv["ENV"]["APPLESEED_PLUGIN_PATH"] = "contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
+		appleseedTestEnv["ENV"]["APPLESEED_SEARCHPATH"] = os.getcwd() + "/contrib/IECoreAppleseed/test/IECoreAppleseed/plugins"
 		appleseedTest = appleseedTestEnv.Command( "contrib/IECoreAppleseed/test/IECoreAppleseed/results.txt", appleseedPythonModule, pythonExecutable + " $TEST_APPLESEED_SCRIPT" )
 		NoCache( appleseedTest )
-		appleseedTestEnv.Depends( appleseedTest, [ appleseedPythonModule + appleseedDriverForTest ] )
+		appleseedTestEnv.Depends( appleseedTest, [ corePythonModule, appleseedPythonModule, appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
 		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
 
