@@ -32,11 +32,12 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MessageHandler.h"
+#include "Alembic/AbcGeom/ICurves.h"
 
-#include "IECoreAlembic/ObjectAlgo.h"
-#include "IECoreAlembic/CurvesAlgo.h"
-#include "IECoreAlembic/GeomBaseAlgo.h"
+#include "IECore/MessageHandler.h"
+#include "IECore/CurvesPrimitive.h"
+
+#include "IECoreAlembic/PrimitiveReader.h"
 
 using namespace IECore;
 using namespace IECoreAlembic;
@@ -72,46 +73,72 @@ CubicBasisf convertBasis( const ICurvesSchema::Sample &sample )
 	}
 }
 
+class CurvesReader : public PrimitiveReader
+{
+
+	public :
+
+		CurvesReader( const ICurves &curves )
+			:	m_curves( curves )
+		{
+		}
+
+		const Alembic::Abc::IObject &object() const override
+		{
+			return m_curves;
+		}
+
+		Alembic::Abc::IBox3dProperty readBoundProperty() const override
+		{
+			return m_curves.getSchema().getSelfBoundsProperty();
+		}
+
+		size_t readNumSamples() const override
+		{
+			return m_curves.getSchema().getNumSamples();
+		}
+
+		Alembic::AbcCoreAbstract::TimeSamplingPtr readTimeSampling() const override
+		{
+			return m_curves.getSchema().getTimeSampling();
+		}
+
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		{
+			const ICurvesSchema curvesSchema = m_curves.getSchema();
+			const ICurvesSchema::Sample sample = curvesSchema.getValue( sampleSelector );
+
+			IntVectorDataPtr vertsPerCurve = new IntVectorData;
+			vertsPerCurve->writable().insert(
+				vertsPerCurve->writable().end(),
+				sample.getCurvesNumVertices()->get(),
+				sample.getCurvesNumVertices()->get() + sample.getCurvesNumVertices()->size()
+			);
+
+			V3fVectorDataPtr points = new V3fVectorData();
+			points->writable().resize( sample.getPositions()->size() );
+			memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
+
+			CurvesPrimitivePtr result = new CurvesPrimitive(
+				vertsPerCurve,
+				convertBasis( sample ),
+				sample.getWrap() == kPeriodic,
+				points
+			);
+
+			ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
+			readArbGeomParams( arbGeomParams, sampleSelector, result.get() );
+
+			return result;
+		}
+
+	private :
+
+		const ICurves m_curves;
+
+		static Description<CurvesReader, ICurves> g_description;
+};
+
+IECoreAlembic::ObjectReader::Description<CurvesReader, ICurves> CurvesReader::g_description( CurvesPrimitive::staticTypeId() );
+
 } // namespace
-
-namespace IECoreAlembic
-{
-
-namespace CurvesAlgo
-{
-
-IECOREALEMBIC_API IECore::CurvesPrimitivePtr convert( const Alembic::AbcGeom::ICurves &curves, const Alembic::Abc::ISampleSelector &sampleSelector )
-{
-	const ICurvesSchema curvesSchema = curves.getSchema();
-	const ICurvesSchema::Sample sample = curvesSchema.getValue( sampleSelector );
-
-	IntVectorDataPtr vertsPerCurve = new IntVectorData;
-	vertsPerCurve->writable().insert(
-		vertsPerCurve->writable().end(),
-		sample.getCurvesNumVertices()->get(),
-		sample.getCurvesNumVertices()->get() + sample.getCurvesNumVertices()->size()
-	);
-
-	V3fVectorDataPtr points = new V3fVectorData();
-	points->writable().resize( sample.getPositions()->size() );
-	memcpy( &(points->writable()[0]), sample.getPositions()->get(), sample.getPositions()->size() * sizeof( Imath::V3f ) );
-
-	CurvesPrimitivePtr result = new CurvesPrimitive(
-		vertsPerCurve,
-		convertBasis( sample ),
-		sample.getWrap() == kPeriodic,
-		points
-	);
-
-	ICompoundProperty arbGeomParams = curvesSchema.getArbGeomParams();
-	GeomBaseAlgo::convertArbGeomParams( arbGeomParams, sampleSelector, result.get() );
-
-	return result;
-}
-
-} // namespace CurvesAlgo
-
-} // namespace IECoreAlembic
-
-static ObjectAlgo::ConverterDescription<ICurves, CurvesPrimitive> g_Description( &IECoreAlembic::CurvesAlgo::convert );
-

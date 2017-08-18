@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -32,27 +33,75 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_GEOMBASEALGO_H
-#define IECOREALEMBIC_GEOMBASEALGO_H
+#include "Alembic/AbcGeom/ICamera.h"
 
-#include "Alembic/AbcGeom/IGeomParam.h"
+#include "IECore/Camera.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/Transform.h"
 
-#include "IECore/Primitive.h"
-#include "IECoreAlembic/Export.h"
+#include "IECoreAlembic/ObjectReader.h"
 
-namespace IECoreAlembic
+using namespace IECore;
+using namespace IECoreAlembic;
+using namespace Alembic::AbcGeom;
+
+namespace
 {
 
-namespace GeomBaseAlgo
+class CameraReader : public IECoreAlembic::ObjectReader
 {
 
-void convertUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
-void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
-template<typename T>
-void convertGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive );
+	public :
 
-} // namespace GeomBaseAlgo
+		CameraReader( const ICamera &camera )
+			:	m_camera( camera )
+		{
+		}
 
-} // namespace IECoreAlembic
+		const Alembic::Abc::IObject &object() const override
+		{
+			return m_camera;
+		}
 
-#endif // IECOREALEMBIC_GEOMBASEALGO_H
+		Alembic::Abc::IBox3dProperty readBoundProperty() const override
+		{
+			return IBox3dProperty();
+		}
+
+		size_t readNumSamples() const override
+		{
+			return m_camera.getSchema().getNumSamples();
+		}
+
+		Alembic::AbcCoreAbstract::TimeSamplingPtr readTimeSampling() const override
+		{
+			return m_camera.getSchema().getTimeSampling();
+		}
+
+		IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const override
+		{
+			const ICameraSchema &cameraSchema = m_camera.getSchema();
+			CameraSample sample;
+			cameraSchema.get( sample, sampleSelector );
+
+			CameraPtr result = new Camera;
+			result->parameters()["projection"] = new StringData( "perspective" );
+
+			double top, bottom, left, right;
+			sample.getScreenWindow( top, bottom, left, right );
+			result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
+			result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
+
+			return result;
+		}
+
+	private :
+
+		const ICamera m_camera;
+
+		static Description<CameraReader, ICamera> g_description;
+};
+
+IECoreAlembic::ObjectReader::Description<CameraReader, ICamera> CameraReader::g_description( Camera::staticTypeId() );
+
+} // namespace

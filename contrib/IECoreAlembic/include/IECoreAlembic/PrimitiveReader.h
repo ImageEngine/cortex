@@ -32,56 +32,32 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_OBJECTALGO_INL
-#define IECOREALEMBIC_OBJECTALGO_INL
+#ifndef IECOREALEMBIC_PRIMITIVEREADER_H
+#define IECOREALEMBIC_PRIMITIVEREADER_H
 
-#include "boost/bind.hpp"
-#include "boost/function.hpp"
+#include "Alembic/AbcGeom/GeometryScope.h"
+
+#include "IECore/Primitive.h"
+
+#include "IECoreAlembic/ObjectReader.h"
 
 namespace IECoreAlembic
 {
 
-namespace ObjectAlgo
+class PrimitiveReader : public ObjectReader
 {
 
-namespace Detail
-{
+	protected :
 
-struct Registration
-{
-	typedef bool (*MatchFn)( const Alembic::AbcCoreAbstract::MetaData &, Alembic::Abc::SchemaInterpMatching );
-	typedef boost::function<IECore::ObjectPtr ( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector )> Converter;
+		void readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
 
-	IECore::TypeId resultType;
-	MatchFn matcher;
-	Converter converter;
+		template<typename T>
+		void readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const;
+
+		IECore::PrimitiveVariable::Interpolation interpolation( Alembic::AbcGeom::GeometryScope scope ) const;
+
 };
-
-typedef std::vector<Registration> RegistrationVector;
-RegistrationVector &registrations();
-
-template<typename AlembicType, typename CortexType, typename Converter>
-IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, Converter converter )
-{
-	AlembicType typedObject( object, Alembic::Abc::kWrapExisting );
-	return converter( typedObject, sampleSelector );
-}
-
-} // namespace Detail
-
-/// Registers a converter from AlembicType to CortexType.
-template<typename AlembicType, typename CortexType>
-ConverterDescription<AlembicType, CortexType>::ConverterDescription( Converter converter )
-{
-	Detail::Registration r;
-	r.resultType = CortexType::staticTypeId();
-	r.matcher = AlembicType::matches;
-	r.converter = boost::bind( Detail::convert<AlembicType, CortexType, Converter>, ::_1, ::_2, converter );
-	Detail::registrations().push_back( r );
-}
-
-} // namespace ObjectAlgo
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_OBJECTALGO_INL
+#endif // IECOREALEMBIC_PRIMITIVEREADER_H

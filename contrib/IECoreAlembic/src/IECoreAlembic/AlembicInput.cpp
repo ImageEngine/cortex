@@ -47,7 +47,7 @@
 #endif
 
 #include "IECoreAlembic/AlembicInput.h"
-#include "IECoreAlembic/ObjectAlgo.h"
+#include "IECoreAlembic/ObjectReader.h"
 
 #include "IECore/SimpleTypedData.h"
 #include "IECore/ObjectInterpolator.h"
@@ -361,21 +361,28 @@ Imath::M44d AlembicInput::transformAtTime( double time ) const
 
 IECore::ObjectPtr AlembicInput::objectAtSample( size_t sampleIndex, IECore::TypeId resultType ) const
 {
-	return ObjectAlgo::convert( m_data->object, sampleIndex, resultType );
+	std::unique_ptr<ObjectReader> r = ObjectReader::create( m_data->object, resultType );
+	return r ? r->readSample( sampleIndex ) : nullptr;
 }
 
 IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId resultType ) const
 {
+	std::unique_ptr<ObjectReader> r = ObjectReader::create( m_data->object, resultType );
+	if( !r )
+	{
+		return nullptr;
+	}
+
 	size_t index0, index1;
 	const double lerpFactor = sampleIntervalAtTime( time, index0, index1 );
 	if( index0==index1 )
 	{
-		return objectAtSample( index0, resultType );
+		return r->readSample( index0 );
 	}
 	else
 	{
-		ConstObjectPtr object0 = objectAtSample( index0, resultType );
-		ConstObjectPtr object1 = objectAtSample( index1, resultType );
+		ConstObjectPtr object0 = r->readSample( index0 );
+		ConstObjectPtr object1 = r->readSample( index1 );
 		if( object0 && object1 )
 		{
 			return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );

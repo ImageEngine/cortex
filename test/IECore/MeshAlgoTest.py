@@ -481,5 +481,15 @@ class MeshAlgoReverseWindingTest( unittest.TestCase ) :
 					delta = 0.0001
 				)
 
+	def testRoundTrip( self ) :
+
+		mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
+		meshReversed = mesh.copy()
+		IECore.MeshAlgo.reverseWinding( meshReversed )
+		meshReversedAgain = meshReversed.copy()
+		IECore.MeshAlgo.reverseWinding( meshReversedAgain )
+
+		self.assertEqual( mesh, meshReversedAgain )
+
 if __name__ == "__main__":
 	unittest.main()

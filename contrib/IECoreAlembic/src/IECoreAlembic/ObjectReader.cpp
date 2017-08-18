@@ -32,24 +32,45 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_POINTSALGO_H
-#define IECOREALEMBIC_POINTSALGO_H
+#include "IECoreAlembic/ObjectReader.h"
 
-#include "Alembic/AbcGeom/IPoints.h"
+using namespace IECore;
+using namespace IECoreAlembic;
 
-#include "IECore/PointsPrimitive.h"
-#include "IECoreAlembic/Export.h"
-
-namespace IECoreAlembic
+struct ObjectReader::Registration
 {
+	IECore::TypeId resultType;
+	MatchFn matcher;
+	Creator creator;
+};
 
-namespace PointsAlgo
+ObjectReader::~ObjectReader()
 {
+}
 
-IECOREALEMBIC_API IECore::PointsPrimitivePtr convert( const Alembic::AbcGeom::IPoints &points, const Alembic::Abc::ISampleSelector &sampleSelector );
+std::unique_ptr<ObjectReader> ObjectReader::create( const Alembic::Abc::IObject &object, IECore::TypeId cortexType )
+{
+	const Alembic::Abc::MetaData &md = object.getMetaData();
+	for( const auto &r : registrations() )
+	{
+		const bool resultTypeMatches = cortexType == IECore::InvalidTypeId || cortexType == r.resultType || RunTimeTyped::inheritsFrom( r.resultType, cortexType );
+		if( resultTypeMatches && r.matcher( md, Alembic::Abc::kStrictMatching ) )
+		{
+			return r.creator( object );
+		}
+	}
+	return nullptr;
+}
 
-} // namespace PointsAlgo
 
-} // namespace IECoreAlembic
+void ObjectReader::registerReader( MatchFn matcher, IECore::TypeId resultType, Creator creator )
+{
+	registrations().push_back( { resultType, matcher, creator } );
+}
 
-#endif // IECOREALEMBIC_POINTSALGO_H
+ObjectReader::Registrations &ObjectReader::registrations()
+{
+	static Registrations r;
+	return r;
+}
+

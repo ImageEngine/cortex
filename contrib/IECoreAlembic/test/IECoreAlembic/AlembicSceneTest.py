@@ -569,5 +569,225 @@ class AlembicSceneTest( unittest.TestCase ) :
 		for n in m["N"].data :
 			self.assertTrue( n.equalWithAbsError( IECore.V3f( 0, 1, 0 ), 0.000001 ) )
 
+	def testWriteConstruction( self ) :
+
+		s = IECore.SceneInterface.create( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertEqual( s.fileName(), "/tmp/test.abc" )
+
+		self.assertRaises( RuntimeError, IECore.SceneInterface.create, "/tmp/nonexistentDirectory/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+	def testWriteHierarchy( self ) :
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.createChild( "b" )
+		c = a.child( "c", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+		self.assertEqual( a.childNames(), [ "b", "c" ] )
+		self.assertEqual( c.path(), [ "c" ] )
+		self.assertEqual( c.name(), "c" )
+
+		d = c.createChild( "d" )
+		self.assertEqual( a.childNames(), [ "b", "c" ] )
+		self.assertEqual( c.childNames(), [ "d" ] )
+		self.assertEqual( d.childNames(), [] )
+
+		del a, c, d
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.childNames(), [ "b", "c" ] )
+		self.assertEqual( a.child( "b").childNames(), [] )
+		self.assertEqual( a.child( "c" ).childNames(), [ "d" ] )
+		self.assertEqual( a.child( "c" ).child( "d" ).childNames(), [] )
+
+	def testWriteStaticTransform( self ) :
+
+		matrix = IECore.M44d().translate( IECore.V3d( 1 ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		self.assertRaises( RuntimeError, a.writeTransform, IECore.M44dData( matrix ), 0 )
+
+		b = a.createChild( "b" )
+		b.writeTransform( IECore.M44dData( matrix ), 0 )
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.numTransformSamples(), 0 )
+		self.assertEqual( a.readTransformAsMatrix( 0 ), IECore.M44d() )
+
+		b = a.child( "b" )
+		self.assertEqual( b.numTransformSamples(), 1 )
+		self.assertEqual( b.readTransformAsMatrixAtSample( 0 ), matrix )
+		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix )
+		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix )
+
+	def testWriteAnimatedTransform( self ) :
+
+		matrix1 = IECore.M44d().translate( IECore.V3d( 1 ) )
+		matrix2 = IECore.M44d().translate( IECore.V3d( 2 ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		b = a.createChild( "b" )
+		b.writeTransform( IECore.M44dData( matrix1 ), 0 )
+		b.writeTransform( IECore.M44dData( matrix2 ), 1 )
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+
+		b = a.child( "b" )
+		self.assertEqual( b.numTransformSamples(), 2 )
+		self.assertEqual( b.readTransformAsMatrixAtSample( 0 ), matrix1 )
+		self.assertEqual( b.readTransformAsMatrixAtSample( 1 ), matrix2 )
+		self.assertEqual( b.readTransformAsMatrix( 0 ), matrix1 )
+		self.assertEqual( b.readTransformAsMatrix( 1 ), matrix2 )
+		self.assertEqual( b.readTransformAsMatrix( 0.5 ), IECore.M44d().translate( IECore.V3d( 1.5 ) ) )
+
+	def testWriteStaticBounds( self ) :
+
+		aBound = IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) )
+		bBound = IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.writeBound( aBound, 0 )
+
+		b = a.createChild( "b" )
+		b.writeBound( bBound, 0 )
+
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.numBoundSamples(), 1 )
+		self.assertEqual( a.readBoundAtSample( 0 ), aBound )
+		self.assertEqual( a.readBound( 0 ), aBound )
+
+		b = a.child( "b" )
+		self.assertEqual( b.numBoundSamples(), 1 )
+		self.assertEqual( b.readBoundAtSample( 0 ), bBound )
+		self.assertEqual( b.readBound( 0 ), bBound )
+
+	def testWriteAnimatedBounds( self ) :
+
+		aBound1 = IECore.Box3d( IECore.V3d( -2 ), IECore.V3d( 2 ) )
+		aBound2 = IECore.Box3d( IECore.V3d( 0 ), IECore.V3d( 4 ) )
+
+		bBound1 = IECore.Box3d( IECore.V3d( -1 ), IECore.V3d( 1 ) )
+		bBound2 = IECore.Box3d( IECore.V3d( 1 ), IECore.V3d( 3 ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a.writeBound( aBound1, 0 )
+		a.writeBound( aBound2, 1 )
+
+		b = a.createChild( "b" )
+		b.writeBound( bBound1, 0 )
+		b.writeBound( bBound2, 1 )
+
+		del a, b
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		self.assertEqual( a.numBoundSamples(), 2 )
+		self.assertEqual( a.readBoundAtSample( 0 ), aBound1 )
+		self.assertEqual( a.readBoundAtSample( 1 ), aBound2 )
+		self.assertEqual( a.readBound( 0 ), aBound1 )
+		self.assertEqual( a.readBound( 1 ), aBound2 )
+
+		b = a.child( "b" )
+		self.assertEqual( b.numBoundSamples(), 2 )
+		self.assertEqual( b.readBoundAtSample( 0 ), bBound1 )
+		self.assertEqual( b.readBoundAtSample( 1 ), bBound2 )
+		self.assertEqual( b.readBound( 0 ), bBound1 )
+		self.assertEqual( b.readBound( 1 ), bBound2 )
+
+	def __testWriteObject( self, sourceFile, sourcePath ) :
+
+		a1 = IECoreAlembic.AlembicScene( sourceFile, IECore.IndexedIO.OpenMode.Read )
+		o1 = a1.scene( sourcePath ).readObject( 0 )
+
+		a2 = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		a2.createChild( "o" ).writeObject( o1, 0 )
+		del a2
+
+		a3 = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		o2 = a3.child( "o" ).readObject( 0 )
+
+		self.assertEqual( o2, o1 )
+
+	def testWriteMesh( self ) :
+
+		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/cube.abc", [ "group1", "pCube1" ] )
+
+	def testWriteMeshUVsAndArbGeomParams( self ) :
+
+		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", [ "pPlane1" ] )
+
+	def testWriteCurves( self ) :
+
+		self.__testWriteObject( os.path.dirname( __file__ ) + "/data/curves.abc", [ "curve" ] )
+
+	def testWriteAnimatedObject( self ) :
+
+		o1 = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		o1["id"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
+		o1["test"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 1 ] ) )
+
+		o2 = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
+		o2["id"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
+		o2["test"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.IntVectorData( [ 2 ] ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		c = a.createChild( "o" )
+		c.writeObject( o1, 0 )
+		c.writeObject( o2, 1 )
+		del a, c
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		c = a.child( "o" )
+
+		self.assertEqual( c.numObjectSamples(), 2 )
+
+		o1r = c.readObjectAtSample( 0 )
+
+		self.assertEqual( c.readObjectAtSample( 0 ), o1 )
+		self.assertEqual( c.readObjectAtSample( 1 ), o2 )
+
+	def testWriteGeometricTypedData( self ) :
+
+		o = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		o["id"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.UInt64VectorData( [ 0 ] ) )
+		o["v3f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Vector ) )
+		o["n3f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
+		o["p3f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+		c = a.createChild( "o" )
+		c.writeObject( o, 0 )
+		del a, c
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		c = a.child( "o" )
+		self.assertEqual( c.readObjectAtSample( 0 ), o )
+
+	def testReacquireChildDuringWriting( self ) :
+
+		plane0 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		plane1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+
+		def writeHierarchy( a, plane, time ) :
+
+			c = a.child( "c", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+			d = c.child( "d", IECore.SceneInterface.MissingBehaviour.CreateIfMissing )
+
+			d.writeObject( plane, time )
+
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Write )
+
+		writeHierarchy( a, plane0, 0 )
+		writeHierarchy( a, plane1, 1 )
+
+		del a
+		a = IECoreAlembic.AlembicScene( "/tmp/test.abc", IECore.IndexedIO.OpenMode.Read )
+		d = a.child( "c" ).child( "d" )
+		self.assertEqual( d.numObjectSamples(), 2 )
+		self.assertEqual( d.readObjectAtSample( 0 ), plane0 )
+		self.assertEqual( d.readObjectAtSample( 1 ), plane1 )
+
 if __name__ == "__main__":
     unittest.main()

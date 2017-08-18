@@ -49,12 +49,7 @@ namespace IECoreAlembic
 
 IE_CORE_FORWARDDECLARE( AlembicInput )
 
-/// This class provides very high level access to the contents
-/// of an Alembic cache. It deliberately hides all Alembic
-/// data types and provides an interface tailored to the
-/// reading of 3D scene data only. Finer control and lower level
-/// access can be obtained by using a combination of the Alembic
-/// APIs and the FromAlembicConverters.
+/// \todo Remove
 class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 {
 

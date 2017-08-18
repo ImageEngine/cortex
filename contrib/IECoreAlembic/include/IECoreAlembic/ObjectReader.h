@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
 //  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,13 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_OBJECTALGO_H
-#define IECOREALEMBIC_OBJECTALGO_H
+#ifndef IECOREALEMBIC_OBJECTREADER_H
+#define IECOREALEMBIC_OBJECTREADER_H
+
+#include <memory>
+#include <vector>
 
 #include "boost/noncopyable.hpp"
 
 #include "Alembic/Abc/IObject.h"
 #include "Alembic/Abc/ISampleSelector.h"
+#include "Alembic/Abc/ITypedScalarProperty.h"
 #include "Alembic/AbcCoreAbstract/TimeSampling.h"
 
 #include "IECore/Object.h"
@@ -49,33 +52,59 @@
 namespace IECoreAlembic
 {
 
-namespace ObjectAlgo
-{
-
-/// Converts the specified Alembic object into an equivalent Cortex object,
-/// returning NULL if no converter is available.
-IECOREALEMBIC_API IECore::ObjectPtr convert( const Alembic::Abc::IObject &object, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::TypeId resultType = IECore::InvalidTypeId );
-
-/// Returns the TimeSampling for an object, and updates numSamples with the number of samples it contains.
-IECOREALEMBIC_API Alembic::AbcCoreAbstract::TimeSamplingPtr timeSampling( const Alembic::Abc::IObject &object, size_t &numSamples );
-
-/// Registers a converter from AlembicType to CortexType.
-template<typename AlembicType, typename CortexType>
-class ConverterDescription : public boost::noncopyable
+/// Base class for reading IECore::Objects from Alembic files.
+class ObjectReader : private boost::noncopyable
 {
 
 	public :
 
-		/// Type-safe conversion function
-		typedef typename CortexType::Ptr (*Converter)( const AlembicType &object, const Alembic::Abc::ISampleSelector &sampleSelector );
-		ConverterDescription( Converter converter );
+		virtual ~ObjectReader();
+
+		virtual const Alembic::Abc::IObject &object() const = 0;
+		virtual Alembic::Abc::IBox3dProperty readBoundProperty() const = 0;
+		virtual size_t readNumSamples() const = 0;
+		virtual Alembic::AbcCoreAbstract::TimeSamplingPtr readTimeSampling() const = 0;
+		virtual IECore::ObjectPtr readSample( const Alembic::Abc::ISampleSelector &sampleSelector ) const = 0;
+
+		/// Factory function. Creates an ObjectReader for reading the specified
+		/// IObject and converting it to the specified cortex type. Returns null
+		/// if no reader is available.
+		static std::unique_ptr<ObjectReader> create( const Alembic::Abc::IObject &object, IECore::TypeId cortexType = IECore::InvalidTypeId );
+
+	protected :
+
+		/// Derived classes should create a static instance of this to register
+		/// themselves with the factory mechanism.
+		template<typename ReaderType, typename AlembicType>
+		struct Description : private boost::noncopyable
+		{
+			Description( const IECore::TypeId resultType )
+			{
+				registerReader(
+					AlembicType::matches,
+					resultType,
+					[]( const Alembic::Abc::IObject &object ) {
+						return std::unique_ptr<ObjectReader>(
+							new ReaderType( AlembicType( object, Alembic::Abc::kWrapExisting ) )
+						);
+					}
+				);
+			}
+		};
+
+	private :
+
+		typedef bool (*MatchFn)( const Alembic::AbcCoreAbstract::MetaData &, Alembic::Abc::SchemaInterpMatching );
+		typedef std::function<std::unique_ptr<ObjectReader>( const Alembic::Abc::IObject &object )> Creator;
+
+		static void registerReader( MatchFn matchFn, IECore::TypeId resultType, Creator creator );
+
+		struct Registration;
+		typedef std::vector<Registration> Registrations;
+		static Registrations &registrations();
 
 };
 
-} // namespace ObjectAlgo
-
 } // namespace IECoreAlembic
 
-#include "IECoreAlembic/ObjectAlgo.inl"
-
-#endif // IECOREALEMBIC_OBJECTALGO_H
+#endif // IECOREALEMBIC_OBJECTREADER_H

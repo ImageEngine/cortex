@@ -1,6 +1,5 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
 //  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -33,32 +32,35 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/SimpleTypedData.h"
-#include "IECore/Transform.h"
+#include "IECoreAlembic/ObjectWriter.h"
 
-#include "IECoreAlembic/ObjectAlgo.h"
-#include "IECoreAlembic/CameraAlgo.h"
-
-using namespace Imath;
-using namespace Alembic::AbcGeom;
+using namespace Alembic;
 using namespace IECore;
 using namespace IECoreAlembic;
 
-IECore::CameraPtr IECoreAlembic::CameraAlgo::convert( const Alembic::AbcGeom::ICamera &camera, const Alembic::Abc::ISampleSelector &sampleSelector )
+ObjectWriter::~ObjectWriter()
 {
-	const ICameraSchema &cameraSchema = camera.getSchema();
-	CameraSample sample;
-	cameraSchema.get( sample, sampleSelector );
-
-	CameraPtr result = new Camera;
-	result->parameters()["projection"] = new StringData( "perspective" );
-
-	double top, bottom, left, right;
-	sample.getScreenWindow( top, bottom, left, right );
-	result->parameters()["screenWindow"] = new Box2fData( Box2f( V2f( left, bottom ), V2f( right, top ) ) );
-	result->parameters()["projection:fov"] = new FloatData( sample.getFieldOfView() );
-
-	return result;
 }
 
-static ObjectAlgo::ConverterDescription<ICamera, Camera> g_description( &IECoreAlembic::CameraAlgo::convert );
+std::unique_ptr<ObjectWriter> ObjectWriter::create( IECore::TypeId cortexType, Alembic::Abc::OObject &parent, const std::string &name )
+{
+	const Creators &c = creators();
+	Creators::const_iterator it = c.find( cortexType );
+	if( it != c.end() )
+	{
+		return it->second( parent, name );
+	}
+	return nullptr;
+}
+
+ObjectWriter::Creators &ObjectWriter::creators()
+{
+	static Creators g_creators;
+	return g_creators;
+}
+
+void ObjectWriter::registerWriter( IECore::TypeId objectType, Creator creator )
+{
+	creators()[objectType] = creator;
+}
+

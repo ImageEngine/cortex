@@ -35,7 +35,7 @@
 
 #include "IECore/MessageHandler.h"
 
-#include "IECoreAlembic/GeomBaseAlgo.h"
+#include "IECoreAlembic/PrimitiveReader.h"
 #include "IECoreAlembic/IGeomParamTraits.h"
 
 using namespace Alembic::Abc;
@@ -49,26 +49,6 @@ using namespace IECoreAlembic;
 
 namespace
 {
-
-IECore::PrimitiveVariable::Interpolation interpolationFromScope( Alembic::AbcGeom::GeometryScope scope )
-{
-	switch( scope )
-	{
-		case kConstantScope :
-			return PrimitiveVariable::Constant;
-		case kUniformScope :
-			return PrimitiveVariable::Uniform;
-		case kVaryingScope :
-			return PrimitiveVariable::Varying;
-		case kVertexScope :
-			return PrimitiveVariable::Vertex;
-		case kFacevaryingScope :
-			return PrimitiveVariable::FaceVarying;
-		default :
-			return PrimitiveVariable::Invalid;
-	}
-}
-
 
 // Functor for setting the geometric interpretation of
 // DataType based on the GeomParam type. The base version
@@ -104,46 +84,10 @@ struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
-// GeomBaseAlgo implementation
+// PrimitiveReader implementation
 //////////////////////////////////////////////////////////////////////////
 
-namespace IECoreAlembic
-{
-
-namespace GeomBaseAlgo
-{
-
-void convertUVs( const Alembic::AbcGeom::IV2fGeomParam &uvs, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
-{
-	if( !uvs.valid() )
-	{
-		return;
-	}
-
-	/// \todo It'd be nice if we stored uvs as a single primitive variable instead of having to split them in two.
-	/// It'd also be nice if we supported indexed data directly.
-	typedef IV2fArrayProperty::sample_ptr_type SamplePtr;
-	SamplePtr sample = uvs.getExpandedValue( sampleSelector ).getVals();
-	size_t size = sample->size();
-
-	FloatVectorDataPtr sData = new FloatVectorData;
-	FloatVectorDataPtr tData = new FloatVectorData;
-	std::vector<float> &s = sData->writable();
-	std::vector<float> &t = tData->writable();
-	s.resize( size );
-	t.resize( size );
-	for( size_t i=0; i<size; ++i )
-	{
-		s[i] = (*sample)[i][0];
-		t[i] = (*sample)[i][1];
-	}
-
-	PrimitiveVariable::Interpolation interpolation = interpolationFromScope( uvs.getScope() );
-	primitive->variables["s"] = PrimitiveVariable( interpolation, sData );
-	primitive->variables["t"] = PrimitiveVariable( interpolation, tData );
-}
-
-void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
+void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
 	if( !params.valid() )
 	{
@@ -157,62 +101,67 @@ void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const 
 		if( IFloatGeomParam::matches( header ) )
 		{
 			IFloatGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IDoubleGeomParam::matches( header ) )
 		{
 			IDoubleGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV3dGeomParam::matches( header ) )
 		{
 			IV3dGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IInt32GeomParam::matches( header ) )
 		{
 			IInt32GeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IStringGeomParam::matches( header ) )
 		{
 			IStringGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV2fGeomParam::matches( header ) )
 		{
 			IV2fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IV3fGeomParam::matches( header ) )
 		{
 			IV3fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IC3fGeomParam::matches( header ) )
 		{
 			IC3fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IC4fGeomParam::matches( header ) )
 		{
 			IC4fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IN3fGeomParam::matches( header ) )
 		{
 			IN3fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
+		}
+		else if( IP3fGeomParam::matches( header ) )
+		{
+			IP3fGeomParam p( params, header.getName() );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IM44fGeomParam::matches( header ) )
 		{
 			IM44fGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else if( IBoolGeomParam::matches( header ) )
 		{
 			IBoolGeomParam p( params, header.getName() );
-			convertGeomParam( p, sampleSelector, primitive );
+			readGeomParam( p, sampleSelector, primitive );
 		}
 		else
 		{
@@ -222,8 +171,9 @@ void convertArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const 
 }
 
 template<typename T>
-void convertGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive )
+void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
 {
+
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename IGeomParamTraits<T>::DataType DataType;
 
@@ -242,12 +192,27 @@ void convertGeomParam( const T &param, const Alembic::Abc::ISampleSelector &samp
 	ApplyGeometricInterpretation<DataType, T>::apply( data.get() );
 
 	PrimitiveVariable pv;
-	pv.interpolation = interpolationFromScope( param.getScope() );
+	pv.interpolation = interpolation( param.getScope() );
 	pv.data = data;
 
 	primitive->variables[param.getHeader().getName()] = pv;
 }
 
-} // namespace GeomBaseAlgo
-
-} // namespace IECoreAlembic
+IECore::PrimitiveVariable::Interpolation PrimitiveReader::interpolation( Alembic::AbcGeom::GeometryScope scope ) const
+{
+	switch( scope )
+	{
+		case kConstantScope :
+			return PrimitiveVariable::Constant;
+		case kUniformScope :
+			return PrimitiveVariable::Uniform;
+		case kVaryingScope :
+			return PrimitiveVariable::Varying;
+		case kVertexScope :
+			return PrimitiveVariable::Vertex;
+		case kFacevaryingScope :
+			return PrimitiveVariable::FaceVarying;
+		default :
+			return PrimitiveVariable::Invalid;
+	}
+}

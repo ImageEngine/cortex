@@ -109,4 +109,20 @@ inline const char *InternedString::c_str() const
 
 } // namespace IECore
 
+namespace std
+{
+
+template <>
+struct hash<IECore::InternedString>
+{
+
+	size_t operator()( const IECore::InternedString &s ) const
+	{
+		return std::hash<std::string>()( s.string() );
+	}
+
+};
+
+} // namespace std
+
 #endif // IECORE_INTERNEDSTRING_INL

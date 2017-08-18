@@ -32,24 +32,39 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREALEMBIC_CAMERAALGO_H
-#define IECOREALEMBIC_CAMERAALGO_H
+#ifndef IECOREALEMBIC_PRIMITIVEWRITER_H
+#define IECOREALEMBIC_PRIMITIVEWRITER_H
 
-#include "Alembic/AbcGeom/ICamera.h"
+#include "boost/container/flat_map.hpp"
 
-#include "IECore/Camera.h"
-#include "IECoreAlembic/Export.h"
+#include "Alembic/Abc/OArrayProperty.h"
+
+#include "IECore/Primitive.h"
+
+#include "IECoreAlembic/ObjectWriter.h"
 
 namespace IECoreAlembic
 {
 
-namespace CameraAlgo
+class PrimitiveWriter : public ObjectWriter
 {
 
-IECOREALEMBIC_API IECore::CameraPtr convert( const Alembic::AbcGeom::ICamera &camera, const Alembic::Abc::ISampleSelector &sampleSelector );
+	protected :
 
-} // namespace CameraAlgo
+		void writeArbGeomParams( const IECore::Primitive *primitive, Alembic::Abc::OCompoundProperty &params, const char **namesToIgnore = nullptr );
+
+		static Alembic::AbcGeom::GeometryScope geometryScope( IECore::PrimitiveVariable::Interpolation interpolation );
+
+	private :
+
+		template<typename DataType, typename GeomParamType>
+		void writeArbGeomParam( const std::string &name, const IECore::PrimitiveVariable &primitiveVariable, Alembic::Abc::OCompoundProperty &arbGeomParams );
+
+		typedef boost::container::flat_map<std::string, Alembic::Abc::OArrayProperty> GeomParamMap;
+		GeomParamMap m_geomParams;
+
+};
 
 } // namespace IECoreAlembic
 
-#endif // IECOREALEMBIC_CAMERAALGO_H
+#endif // IECOREALEMBIC_PRIMITIVEWRITER_H
