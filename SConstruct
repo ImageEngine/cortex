@@ -1955,6 +1955,7 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
