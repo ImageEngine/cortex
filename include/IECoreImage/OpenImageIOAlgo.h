@@ -38,6 +38,7 @@
 #ifndef IECOREIMAGE_OIIOALGO_H
 #define IECOREIMAGE_OIIOALGO_H
 
+#include "OpenImageIO/color.h"
 #include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
 
@@ -54,6 +55,9 @@ IECore::GeometricData::Interpretation geometricInterpretation( OIIO::TypeDesc::V
 
 /// Returns a space separated string of supported file types
 std::string extensions();
+
+/// Returns the global ColorConfig for OpenImageIO
+OIIO::ColorConfig *colorConfig();
 
 struct DataView
 {

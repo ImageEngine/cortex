@@ -121,6 +121,17 @@ std::string extensions()
 	return g_extensions;
 }
 
+ColorConfig *colorConfig()
+{
+	static ColorConfig *g_colorConfig;
+	if( !g_colorConfig )
+	{
+		g_colorConfig = new ColorConfig();
+	}
+
+	return g_colorConfig;
+}
+
 DataView::DataView()
 	:	data( nullptr ), rawData( nullptr ), m_charPointer( nullptr )
 {
