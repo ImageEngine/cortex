@@ -41,7 +41,7 @@ import IECoreImage
 
 class ImageWriterTest( unittest.TestCase ) :
 
-	def __verifyImageRGB( self, imgNew, imgOrig, maxError = 0.002 ):
+	def __verifyImageRGB( self, imgNew, imgOrig, maxError = 0.002, same=True ):
 
 		self.assertEqual( type(imgNew), IECoreImage.ImagePrimitive )
 
@@ -69,7 +69,10 @@ class ImageWriterTest( unittest.TestCase ) :
 			skipMissingChannels = True
 		)
 
-		self.failIf( res.value )
+		if same :
+			self.assertFalse( res.value )
+		else :
+			self.assertTrue( res.value )
 
 	def __makeFloatImage( self, dataWindow, displayWindow, withAlpha = False, dataType = IECore.FloatVectorData ) :
 
@@ -355,6 +358,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
@@ -381,6 +385,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/jpg/output.jpg" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( True )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/jpg/output.jpg" ) )
@@ -439,6 +444,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/dpx/output.dpx" ) )
@@ -465,6 +471,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/dpx/output.dpx" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( True )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/dpx/output.dpx" ) )
@@ -498,6 +505,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeFloatImage( dataWindow, displayWindow, dataType = dataType )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( rawMode )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
@@ -523,6 +531,7 @@ class ImageWriterTest( unittest.TestCase ) :
 			imgOrig = self.__makeIntImage( dataWindow, displayWindow, dataType = dataType[0], maxInt = dataType[1] )
 			w = IECore.Writer.create( imgOrig, "test/IECoreImage/data/tiff/output.tif" )
 			self.assertEqual( type(w), IECoreImage.ImageWriter )
+			w['rawChannels'].setTypedValue( True )
 			w.write()
 
 			self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
@@ -580,6 +589,43 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		channelNames = r.channelNames()
 		self.assertEqual( len(channelNames), 1 )
+
+	def testRoundTripTIF( self ) :
+
+		imgOrig = IECoreImage.ImageReader( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" ).read()
+		self.assertTrue( imgOrig.channelsValid() )
+		self.assertTrue( isinstance( imgOrig["R"], IECore.FloatVectorData ) )
+
+		IECoreImage.ImageWriter( imgOrig, "test/IECoreImage/data/tiff/output.tif" ).write()
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
+
+		reader = IECoreImage.ImageReader( "test/IECoreImage/data/tiff/output.tif" )
+		imgNew = reader.read()
+		self.assertTrue( imgNew.channelsValid() )
+		self.assertTrue( isinstance( imgNew["R"], IECore.FloatVectorData ) )
+		self.__verifyImageRGB( imgOrig, imgNew, same=True )
+
+		reader["rawChannels"].setTypedValue( True )
+		imgRaw = reader.read()
+		self.assertTrue( imgRaw.channelsValid() )
+		self.assertTrue( isinstance( imgRaw["R"], IECore.UCharVectorData ) )
+		self.__verifyImageRGB( imgRaw, imgNew, same=False )
+		self.__verifyImageRGB( imgRaw, imgOrig, same=False )
+
+		self.tearDown()
+		self.assertFalse( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
+		w = IECoreImage.ImageWriter( imgRaw, "test/IECoreImage/data/tiff/output.tif" )
+		w['rawChannels'].setTypedValue( True )
+		w.write()
+		self.assertTrue( os.path.exists( "test/IECoreImage/data/tiff/output.tif" ) )
+
+		reader = IECoreImage.ImageReader( "test/IECoreImage/data/tiff/output.tif" )
+		reader["rawChannels"].setTypedValue( True )
+		imgRawNew = reader.read()
+		self.assertTrue( isinstance( imgRawNew["R"], IECore.UCharVectorData ) )
+		self.__verifyImageRGB( imgRawNew, imgNew, same=False )
+		self.__verifyImageRGB( imgRawNew, imgOrig, same=False )
+		self.__verifyImageRGB( imgRawNew, imgRaw, same=True )
 
 	def testEXRCompressionParameter( self ):
 

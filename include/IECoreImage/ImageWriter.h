@@ -73,6 +73,14 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 		IECore::StringVectorParameter *channelNamesParameter();
 		const IECore::StringVectorParameter *channelNamesParameter() const;
 
+		/// The parameter specifying if the input channels are exactly
+		/// or as close as possible to what will stored in the file.
+		/// If true, the values will be assumed to be in the expected
+		/// colorspace for the file format. Note that type changes may
+		/// still be performed based on the format settings.
+		IECore::BoolParameter *rawChannelsParameter();
+		const IECore::BoolParameter *rawChannelsParameter() const;
+
 		/// The parameter specifying the format specific settings.
 		IECore::CompoundParameter *formatSettingsParameter();
 		const IECore::CompoundParameter *formatSettingsParameter() const;
@@ -97,6 +105,7 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 		const ImagePrimitive *getImage() const;
 
 		IECore::StringVectorParameterPtr m_channelsParameter;
+		IECore::BoolParameterPtr m_rawChannelsParameter;
 		IECore::CompoundParameterPtr m_formatSettingsParameter;
 
 };

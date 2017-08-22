@@ -58,6 +58,7 @@ OIIO_NAMESPACE_USING
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 
+#include "IECoreImage/ColorAlgo.h"
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImageWriter.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
@@ -256,6 +257,13 @@ void ImageWriter::constructCommon()
 {
 	m_channelsParameter = new StringVectorParameter( "channels", "The list of channels to write. No list causes all channels to be written." );
 
+	m_rawChannelsParameter = new BoolParameter(
+		"rawChannels",
+		"Specifies if the input data channels should be stored in the file without further processing. "
+		"Note that the formatSettings still take precedence.",
+		false
+	);
+
 	m_formatSettingsParameter = new CompoundParameter( "formatSettings", "Settings specific to various file formats" );
 
 	CompoundParameterPtr exrSettings = new CompoundParameter( "openexr", "OpenEXR specific settings" );
@@ -356,6 +364,7 @@ void ImageWriter::constructCommon()
 	);
 
 	parameters()->addParameter( m_channelsParameter );
+	parameters()->addParameter( m_rawChannelsParameter );
 	parameters()->addParameter( m_formatSettingsParameter );
 }
 
@@ -369,6 +378,16 @@ StringVectorParameter *ImageWriter::channelNamesParameter()
 const StringVectorParameter *ImageWriter::channelNamesParameter() const
 {
 	return m_channelsParameter.get();
+}
+
+BoolParameter *ImageWriter::rawChannelsParameter()
+{
+	return m_rawChannelsParameter.get();
+}
+
+const BoolParameter *ImageWriter::rawChannelsParameter() const
+{
+	return m_rawChannelsParameter.get();
 }
 
 CompoundParameter *ImageWriter::formatSettingsParameter()
@@ -526,13 +545,27 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		throw IECore::Exception( boost::str( boost::format( "IECoreImage::ImageWriter : Could not open \"%s\", error = %s" ) % fileName() % out->geterror() ) );
 	}
 
+	ImagePrimitivePtr correctedImage = nullptr;
+	if( !operands->member<const BoolData>( "rawChannels" )->readable() )
+	{
+		std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", spec );
+		std::string targetColorSpace = OpenImageIOAlgo::colorSpace( out->format_name(), spec );
+		if( linearColorSpace != targetColorSpace )
+		{
+			correctedImage = image->copy();
+			ColorAlgo::transformImage( correctedImage.get(), linearColorSpace, targetColorSpace );
+		}
+	}
+
+	const auto &channelMap = ( correctedImage ) ? correctedImage->channels : image->channels;
+
 	DataInterleaveOpPtr op = new DataInterleaveOp();
 	op->targetTypeParameter()->setNumericValue( firstChannelData->typeId() );
 	auto &vectors = static_cast<ObjectVector *>( op->dataParameter()->getValue() )->members();
 	vectors.reserve( (size_t)spec.nchannels );
 	for( const auto &channel : channels )
 	{
-		vectors.emplace_back( image->channels.find( channel )->second );
+		vectors.push_back( channelMap.find( channel )->second );
 	}
 
 	DataPtr buffer = static_pointer_cast<Data>( op->operate() );
