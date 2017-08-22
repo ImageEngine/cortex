@@ -276,7 +276,7 @@ class ImageWriterTest( unittest.TestCase ) :
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/output.exr" )
 		imgNew = r.read()
 
-		r = IECore.Reader.create( "test/IECoreImage/data/tiff/oversizeDataWindow.tiff" )
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/oversizeDataWindow.exr" )
 		imgExpected = r.read()
 
 		self.__verifyImageRGB( imgNew, imgExpected )
