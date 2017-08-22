@@ -39,6 +39,7 @@
 #define IECOREIMAGE_OIIOALGO_H
 
 #include "OpenImageIO/color.h"
+#include "OpenImageIO/imageio.h"
 #include "OpenImageIO/paramlist.h"
 #include "OpenImageIO/typedesc.h"
 
@@ -58,6 +59,13 @@ std::string extensions();
 
 /// Returns the global ColorConfig for OpenImageIO
 OIIO::ColorConfig *colorConfig();
+
+/// Returns the expected colorspace of data based only
+/// on the file format (e.g. "openexr", "jpeg", "tiff")
+/// and the OIIO::ImageSpec. Note that this is a naive
+/// approach to color management and should only be used
+/// for rudimentary operations on "normally" encoded files.
+std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &spec );
 
 struct DataView
 {

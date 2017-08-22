@@ -132,6 +132,74 @@ ColorConfig *colorConfig()
 	return g_colorConfig;
 }
 
+std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &spec )
+{
+	const char *linear = colorConfig()->getColorSpaceNameByRole( "scene_linear" );
+	if( linear == nullptr )
+	{
+		linear = "Linear";
+	}
+
+	const char *log = colorConfig()->getColorSpaceNameByRole( "compositing_log" );
+	if( log == nullptr )
+	{
+		log = "Cineon";
+	}
+
+	const char *display = colorConfig()->getColorSpaceNameByRole( "color_picking" );
+	if( display == nullptr )
+	{
+		display = "sRGB";
+	}
+
+	if( fileFormat == "bmp" )
+	{
+		return display;
+	}
+	else if( fileFormat == "cineon" )
+	{
+		return log;
+	}
+	else if( fileFormat == "dpx" )
+	{
+		if( spec.format.basetype == TypeDesc::UINT16 )
+		{
+			int bps = spec.get_int_attribute( "oiio:BitsPerSample", 0 );
+			if( bps == 10 || bps == 12 )
+			{
+				return log;
+			}
+		}
+
+		return display;
+	}
+	else if( fileFormat == "jpeg" || fileFormat == "jpeg2000" )
+	{
+		// greyscale jpegs shouldn't get color conversion
+		if( spec.nchannels == 1 && spec.channelnames[0] == "Y" )
+		{
+			return linear;
+		}
+
+		return display;
+	}
+	else if( fileFormat == "png" )
+	{
+		return display;
+	}
+	else if( fileFormat == "tiff" )
+	{
+		if( spec.format.basetype == TypeDesc::UINT8 || spec.format.basetype == TypeDesc::UINT16 )
+		{
+			return display;
+		}
+
+		return linear;
+	}
+
+	return linear;
+}
+
 DataView::DataView()
 	:	data( nullptr ), rawData( nullptr ), m_charPointer( nullptr )
 {
