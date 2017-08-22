@@ -424,6 +424,7 @@ class ImageWriterTest( unittest.TestCase ) :
 
 		self.__verifyImageRGB( imgNew, imgOrig )
 
+	@unittest.skipIf( not os.path.exists( os.environ.get( "OCIO", "" ) ), "Insufficient color specification. Linear -> Cineon conversion is not possible with an OCIO config" )
 	def testDPX( self ) :
 
 		displayWindow = IECore.Box2i(
