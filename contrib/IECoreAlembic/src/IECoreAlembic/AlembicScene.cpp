@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include <memory>
+#include <unordered_map>
 
 #include "boost/tokenizer.hpp"
 
@@ -660,6 +661,12 @@ class AlembicScene::AlembicWriter : public AlembicIO
 					);
 					m_children[name] = child;
 					return child;
+				}
+				default :
+				{
+					// should never get here
+					assert( nullptr );
+					return nullptr;
 				}
 			}
 		}
