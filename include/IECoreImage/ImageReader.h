@@ -78,6 +78,7 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		const IECore::StringVectorParameter *channelNamesParameter() const;
 		/// The parameter specifying if the returned data channels should be
 		/// exactly or as close as possible to what's stored in the file.
+		/// If true, the values will not be linearized nor converted to float.
 		IECore::BoolParameter *rawChannelsParameter();
 		const IECore::BoolParameter *rawChannelsParameter() const;
 		//@}

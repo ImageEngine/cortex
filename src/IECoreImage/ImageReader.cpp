@@ -43,6 +43,7 @@ OIIO_NAMESPACE_USING
 #include "IECore/NullObject.h"
 #include "IECore/BoxOps.h"
 
+#include "IECoreImage/ColorAlgo.h"
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/ImageReader.h"
 #include "IECoreImage/OpenImageIOAlgo.h"
@@ -236,7 +237,15 @@ class ImageReader::Implementation : public IECore::RefCounted
 			}
 			else
 			{
-				return readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
+				DataPtr data = readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
+				if( (int)channelIndex != spec.alpha_channel && (int)channelIndex != spec.z_channel )
+				{
+					std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", spec );
+					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( m_inputFile->format_name(), spec );
+					ColorAlgo::transformChannel( data.get(), currentColorSpace, linearColorSpace );
+				}
+
+				return data;
 			}
 		}
 
