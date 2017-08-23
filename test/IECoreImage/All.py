@@ -45,6 +45,7 @@ from ImagePrimitiveTest import ImagePrimitiveTest
 from ImageReaderTest import ImageReaderTest
 from ImageWriterTest import ImageWriterTest
 from ClampOpTest import ClampOpTest
+from ColorAlgoTest import ColorAlgoTest
 from CurveTracerTest import CurveTracerTest
 from EnvMapSamplerTest import EnvMapSamplerTest
 from FontTest import FontTest

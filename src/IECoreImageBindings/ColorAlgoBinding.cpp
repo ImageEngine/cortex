@@ -34,58 +34,29 @@
 
 #include "boost/python.hpp"
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
+#include "IECorePython/RunTimeTypedBinding.h"
+
+#include "IECoreImage/ColorAlgo.h"
+#include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImageBindings/ColorAlgoBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageDisplayDriverBinding.h"
-#include "IECoreImageBindings/ImagePrimitiveBinding.h"
-#include "IECoreImageBindings/ImagePrimitiveParameterBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/FontBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
 
 using namespace boost::python;
-using namespace IECoreImageBindings;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
 
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImageBindings
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindColorAlgo();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindImagePrimitive();
-	bindImagePrimitiveParameter();
-	bindFont();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
 
-#ifdef IECORE_WITH_ASIO
+void bindColorAlgo()
+{
+	object module( borrowed( PyImport_AddModule( "IECoreImage.ColorAlgo" ) ) );
+	scope().attr( "ColorAlgo" ) = module;
 
-	bindImageDisplayDriver();
+	scope moduleScope( module );
 
-#endif
-
+	def( "transformImage", &ColorAlgo::transformImage, ( arg_( "image" ), arg_( "inputSpace" ), arg_( "outputSpace" ) ) );
+	def( "transformChannel", &ColorAlgo::transformChannel, ( arg_( "channel" ), arg_( "inputSpace" ), arg_( "outputSpace" ) ) );
 }
+
+} // namespace IECoreImageBindings

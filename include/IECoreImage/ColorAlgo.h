@@ -32,60 +32,30 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
+#ifndef IECOREIMAGE_COLORALGO_H
+#define IECOREIMAGE_COLORALGO_H
 
-#include "IECoreImageBindings/ChannelOpBinding.h"
-#include "IECoreImageBindings/ClampOpBinding.h"
-#include "IECoreImageBindings/ColorAlgoBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
-#include "IECoreImageBindings/EnvMapSamplerBinding.h"
-#include "IECoreImageBindings/HdrMergeOpBinding.h"
-#include "IECoreImageBindings/ImageCropOpBinding.h"
-#include "IECoreImageBindings/ImageDiffOpBinding.h"
-#include "IECoreImageBindings/ImageDisplayDriverBinding.h"
-#include "IECoreImageBindings/ImagePrimitiveBinding.h"
-#include "IECoreImageBindings/ImagePrimitiveParameterBinding.h"
-#include "IECoreImageBindings/ImageThinnerBinding.h"
-#include "IECoreImageBindings/ImageReaderBinding.h"
-#include "IECoreImageBindings/ImageWriterBinding.h"
-#include "IECoreImageBindings/FontBinding.h"
-#include "IECoreImageBindings/LensDistortOpBinding.h"
-#include "IECoreImageBindings/LuminanceOpBinding.h"
-#include "IECoreImageBindings/MedianCutSamplerBinding.h"
-#include "IECoreImageBindings/SplineToImageBinding.h"
-#include "IECoreImageBindings/SummedAreaOpBinding.h"
-#include "IECoreImageBindings/WarpOpBinding.h"
+#include "IECore/Data.h"
 
-using namespace boost::python;
-using namespace IECoreImageBindings;
-
-BOOST_PYTHON_MODULE( _IECoreImage )
+namespace IECoreImage
 {
-	bindImageReader();
-	bindImageWriter();
-	bindChannelOp();
-	bindWarpOp();
-	bindClampOp();
-	bindColorAlgo();
-	bindCurveTracer();
-	bindEnvMapSampler();
-	bindHdrMergeOp();
-	bindImageCropOp();
-	bindImageDiffOp();
-	bindImageThinner();
-	bindImagePrimitive();
-	bindImagePrimitiveParameter();
-	bindFont();
-	bindLensDistortOp();
-	bindLuminanceOp();
-	bindMedianCutSampler();
-	bindSummedAreaOp();
-	bindSplineToImage();
 
-#ifdef IECORE_WITH_ASIO
+IE_CORE_FORWARDDECLARE( ImagePrimitive );
 
-	bindImageDisplayDriver();
+namespace ColorAlgo
+{
 
-#endif
+/// Apply a simple color space transformation to the specified channel data,
+/// using color management provided via OpenImageIO.
+void transformChannel( IECore::Data *channel, const std::string &inputSpace, const std::string &outputSpace );
 
-}
+/// Apply a simple color space transformation to the specified channels
+/// of the input image, using color management provided via OpenImageIO.
+/// Note that "A" and "Z" are special cases that will not be transformed.
+void transformImage( ImagePrimitive *image, const std::string &inputSpace, const std::string &outputSpace );
+
+} // namespace ColorAlgo
+
+} // namespace IECoreImage
+
+#endif // IECOREIMAGE_COLORALGO_H
