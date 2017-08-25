@@ -457,7 +457,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	std::unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)> out( ImageOutput::create( fileName() ), &ImageOutput::destroy );
 	if( !out )
 	{
-		throw IECore::Exception( OpenImageIO::geterror() );
+		throw IECore::Exception( OIIO::geterror() );
 	}
 
 	const std::string fileFormatName = out->format_name();
