@@ -34,6 +34,7 @@
 
 #include "boost/tokenizer.hpp"
 
+#include "OpenImageIO/imagecache.h"
 #include "OpenImageIO/imageio.h"
 OIIO_NAMESPACE_USING
 
@@ -65,7 +66,7 @@ class ImageReader::Implementation
 
 	public :
 
-		Implementation( const ImageReader *reader ) : m_reader( reader ), m_inputFile( nullptr, &ImageInput::destroy )
+		Implementation( const ImageReader *reader ) : m_reader( reader ), m_cache( nullptr, &destroyImageCache )
 		{
 		}
 
@@ -106,27 +107,20 @@ class ImageReader::Implementation
 
 			try
 			{
-				const ImageSpec &spec = m_inputFile->spec();
+				const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
-				std::vector<float> data;
+				std::vector<float> data( spec->nchannels );
 
-				if( spec.tile_width )
-				{
-					// if the last tile is there, its complete
-					data.resize( spec.tile_width * spec.tile_height * spec.nchannels );
-					return m_inputFile->read_tile(
-						spec.width + spec.x - spec.tile_width,
-						spec.height + spec.y - spec.tile_height,
-						/* z */ 0,
-						&data[0]
-					);
-				}
-				else
-				{
-					// if the last scanline is there, its complete
-					data.resize( spec.width * spec.nchannels );
-					return m_inputFile->read_scanline( spec.height + spec.y - 1, /* z */ 0, &data[0] );
-				}
+				// if the last pixel is there, its complete
+				return m_cache->get_pixels(
+					m_inputFileName,
+					0, 0, // subimage, miplevel
+					spec->width + spec->x - 1, spec->width + spec->x,
+					spec->height + spec->y - 1, spec->height + spec->y,
+					0, 1, // z
+					TypeDesc::FLOAT,
+					&data[0]
+				);
 			}
 			catch( ... )
 			{
@@ -138,22 +132,22 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
 			names.clear();
-			names.resize( spec.nchannels );
-			std::copy( spec.channelnames.begin(), spec.channelnames.end(), names.begin() );
+			names.resize( spec->nchannels );
+			std::copy( spec->channelnames.begin(), spec->channelnames.end(), names.begin() );
 		}
 
 		Imath::Box2i dataWindow()
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
 			return Imath::Box2i(
-				Imath::V2i( spec.x, spec.y ),
-				Imath::V2i( spec.width + spec.x - 1, spec.height + spec.y - 1 )
+				Imath::V2i( spec->x, spec->y ),
+				Imath::V2i( spec->width + spec->x - 1, spec->height + spec->y - 1 )
 			);
 		}
 
@@ -161,11 +155,11 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
 			return Imath::Box2i(
-				Imath::V2i( spec.full_x, spec.full_y ),
-				Imath::V2i( spec.full_x + spec.full_width - 1, spec.full_y + spec.full_height - 1 )
+				Imath::V2i( spec->full_x, spec->full_y ),
+				Imath::V2i( spec->full_x + spec->full_width - 1, spec->full_y + spec->full_height - 1 )
 			);
 		}
 
@@ -184,10 +178,10 @@ class ImageReader::Implementation
 
 		void updateMetadata( CompoundData *metadata )
 		{
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
 			auto &members = metadata->writable();
-			for ( const auto &param : spec.extra_attribs )
+			for ( const auto &param : spec->extra_attribs )
 			{
 				const OpenImageIOAlgo::DataView dataView( param );
 				if( dataView.data )
@@ -204,69 +198,69 @@ class ImageReader::Implementation
 		{
 			open( /* throwOnFailure */ true );
 
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
-			const auto channelIt = find( spec.channelnames.begin(), spec.channelnames.end(), name );
-			if( channelIt == spec.channelnames.end() )
+			const auto channelIt = find( spec->channelnames.begin(), spec->channelnames.end(), name );
+			if( channelIt == spec->channelnames.end() )
 			{
 				throw InvalidArgumentException( "Image Reader : Non-existent image channel \"" + name + "\" requested." );
 			}
 
-			size_t channelIndex = channelIt - spec.channelnames.begin();
+			size_t channelIndex = channelIt - spec->channelnames.begin();
 
 			if( raw )
 			{
-				switch( spec.format.basetype )
+				switch( spec->format.basetype )
 				{
 					case TypeDesc::UCHAR :
 					{
-						return readTypedChannel<unsigned char>( channelIndex, spec.format );
+						return readTypedChannel<unsigned char>( channelIndex, spec->format );
 					}
 					case TypeDesc::CHAR :
 					{
-						return readTypedChannel<char>( channelIndex, spec.format );
+						return readTypedChannel<char>( channelIndex, spec->format );
 					}
 					case TypeDesc::USHORT :
 					{
-						return readTypedChannel<unsigned short>( channelIndex, spec.format );
+						return readTypedChannel<unsigned short>( channelIndex, spec->format );
 					}
 					case TypeDesc::SHORT :
 					{
-						return readTypedChannel<short>( channelIndex, spec.format );
+						return readTypedChannel<short>( channelIndex, spec->format );
 					}
 					case TypeDesc::UINT :
 					{
-						return readTypedChannel<unsigned int>( channelIndex, spec.format );
+						return readTypedChannel<unsigned int>( channelIndex, spec->format );
 					}
 					case TypeDesc::INT :
 					{
-						return readTypedChannel<int>( channelIndex, spec.format );
+						return readTypedChannel<int>( channelIndex, spec->format );
 					}
 					case TypeDesc::HALF :
 					{
-						return readTypedChannel<half>( channelIndex, spec.format );
+						return readTypedChannel<half>( channelIndex, spec->format );
 					}
 					case TypeDesc::FLOAT :
 					{
-						return readTypedChannel<float>( channelIndex, spec.format );
+						return readTypedChannel<float>( channelIndex, spec->format );
 					}
 					case TypeDesc::DOUBLE :
 					{
-						return readTypedChannel<double>( channelIndex, spec.format );
+						return readTypedChannel<double>( channelIndex, spec->format );
 					}
 					default :
 					{
-						throw IECore::IOException( ( boost::format( "ImageReader : Unsupported data type \"%d\"" ) % spec.format ).str() );
+						throw IECore::IOException( ( boost::format( "ImageReader : Unsupported data type \"%d\"" ) % spec->format ).str() );
 					}
 				}
 			}
 			else
 			{
 				DataPtr data = readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
-				if( (int)channelIndex != spec.alpha_channel && (int)channelIndex != spec.z_channel )
+				if( (int)channelIndex != spec->alpha_channel && (int)channelIndex != spec->z_channel )
 				{
-					std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", spec );
-					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( m_inputFile->format_name(), spec );
+					std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
+					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( m_fileFormat, *spec );
 					ColorAlgo::transformChannel( data.get(), currentColorSpace, linearColorSpace );
 				}
 
@@ -284,35 +278,24 @@ class ImageReader::Implementation
 
 			bool status;
 
-			const ImageSpec &spec = m_inputFile->spec();
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
-			data->writable().resize( spec.width * spec.height );
+			data->writable().resize( spec->width * spec->height );
 
-			if( spec.tile_width )
-			{
-				status = m_inputFile->read_tiles(
-					/* xbegin */ spec.x, /* xend */ spec.width + spec.x,
-					/* ybegin */ spec.y, /* yend */ spec.height + spec.y,
-					/* zbegin */ 0, /* zend */ 1,
-					/* chbegin */ channelIndex, /* chend */ channelIndex + 1,
-					/* format */ dataType,
-					/* data */ &( data->writable()[0] )
-				);
-			}
-			else
-			{
-				status = m_inputFile->read_scanlines(
-					/* ybegin */ spec.y, /* yend */spec.height + spec.y,
-					/* z */ 0,
-					/* chbegin */ channelIndex, /* chend */ channelIndex + 1,
-					/* format */ dataType,
-					/* data */ &( data->writable()[0] )
-				);
-			}
+			status = m_cache->get_pixels(
+				m_inputFileName,
+				0, 0, // subimage, miplevel
+				spec->x, spec->width + spec->x,
+				spec->y, spec->height + spec->y,
+				0, 1, // z begin, z end
+				channelIndex, channelIndex + 1,
+				/* format */ dataType,
+				/* data */ &( data->writable()[0] )
+			);
 
 			if( !status )
 			{
-				throw IOException( string( "ImageReader : Failed to read channel \"" ) + m_inputFile->spec().channelnames[channelIndex] + "\". " + m_inputFile->geterror() );
+				throw IOException( string( "ImageReader : Failed to read channel \"" ) + spec->channelnames[channelIndex] + "\". " + m_cache->geterror() );
 			}
 
 			return data;
@@ -343,34 +326,44 @@ class ImageReader::Implementation
 		// Exception is thrown rather than false being returned.
 		bool open( bool throwOnFailure = false )
 		{
-			if( m_inputFile && m_reader->fileName() == m_inputFileName )
+			if( m_cache && m_reader->fileName() == m_inputFileName )
 			{
 				// we already opened the right file successfully
 				return true;
 			}
 
 			m_inputFileName = "";
-			m_inputFile.reset( ImageInput::open( m_reader->fileName() ) );
-			if( !m_inputFile )
+			m_cache.reset( ImageCache::create( /* shared */ false ) );
+
+			if( ImageInput *input = ImageInput::create( m_reader->fileName() ) )
 			{
-				if( !throwOnFailure )
-				{
-					return false;
-				}
-				else
-				{
-					throw IOException( string( "Failed to open file \"" ) + m_reader->fileName() + "\". " + geterror() );
-				}
+				m_cache->add_file( m_inputFileName );
+				m_inputFileName = m_reader->fileName();
+				m_fileFormat = input->format_name();
+				ImageInput::destroy( input );
+
+				return true;
 			}
 
-			m_inputFileName = m_reader->fileName();
+			if( !throwOnFailure )
+			{
+				return false;
+			}
+			else
+			{
+				throw IOException( string( "Failed to open file \"" ) + m_reader->fileName() + "\". " + geterror() );
+			}
+		}
 
-			return true;
+		static void destroyImageCache( ImageCache *cache )
+		{
+			ImageCache::destroy( cache, /* teardown */ true );
 		}
 
 		const ImageReader *m_reader;
-		std::unique_ptr<ImageInput, decltype(&ImageInput::destroy) > m_inputFile;
-		std::string m_inputFileName;
+		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
+		ustring m_inputFileName;
+		std::string m_fileFormat;
 
 };
 
