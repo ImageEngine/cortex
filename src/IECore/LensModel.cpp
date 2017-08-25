@@ -35,9 +35,9 @@
 #include "IECore/Object.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/LensModel.h"
+#include <cmath>
 #include <iostream>
 #include <string>
-#include <math.h>
 
 using namespace IECore;
 
@@ -76,7 +76,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 				pOut = undistort( pIn );
 			}
 
-			if( !isinf( pOut.x ) && !isinf( pOut.y ) && !isnan( pOut.x ) && !isnan( pOut.y ) )
+			if( !std::isinf( pOut.x ) && !std::isinf( pOut.y ) && !std::isnan( pOut.x ) && !std::isnan( pOut.y ) )
 			{
 				pOut.x = pOut.x*width-0.5;
 				pOut.y = pOut.y*height-0.5;
@@ -120,7 +120,7 @@ Imath::Box2i LensModel::bounds( int mode, const Imath::Box2i &input, int width, 
 				pOut = undistort( pIn );
 			}
 
-			if( !isinf( pOut.x ) && !isinf( pOut.y ) && !isnan( pOut.x ) && !isnan( pOut.y ) )
+			if( !std::isinf( pOut.x ) && !std::isinf( pOut.y ) && !std::isnan( pOut.x ) && !std::isnan( pOut.y ) )
 			{
 				pOut.x = pOut.x*width-0.5;
 				pOut.y = pOut.y*height-0.5;
