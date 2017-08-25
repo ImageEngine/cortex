@@ -331,24 +331,8 @@ class ImageReader::Implementation : public IECore::RefCounted
 				std::string thisName = name.substr( 0, pos );
 				std::string newName = name.substr( pos+1, name.size() );
 
-				auto cIt = members.find( thisName );
-
-				// create compound data
-				CompoundDataPtr newMetaData = nullptr;
-				if( cIt != members.end() && cIt->second->typeId() == CompoundDataTypeId )
-				{
-					newMetaData = boost::static_pointer_cast< CompoundData >( cIt->second );
-				}
-
-				if( !newMetaData )
-				{
-					// create compound data
-					newMetaData = new CompoundData();
-					// add to current blind data
-					members[thisName] = newMetaData;
-				}
-
-				addMetadata( newName, data, newMetaData.get() );
+				CompoundData *newMetaData = metadata->member<CompoundData>( thisName, /* throwExceptions = */ true, /* createIfMissing = */ true );
+				addMetadata( newName, data, newMetaData );
 				return;
 			}
 
