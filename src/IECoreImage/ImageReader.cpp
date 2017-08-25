@@ -79,9 +79,19 @@ class ImageReader::Implementation : public IECore::RefCounted
 		{
 			bool result = false;
 
-			if( ImageInput *input = ImageInput::open( filename ) )
+			if( ImageInput *input = ImageInput::create( filename ) )
 			{
-				result = !input->spec().deep;
+				if( !input->valid_file( filename ) )
+				{
+					result = false;
+				}
+				else
+				{
+					ImageSpec spec;
+					input->open( filename, spec );
+					result = !spec.deep;
+				}
+
 				ImageInput::destroy( input );
 			}
 
