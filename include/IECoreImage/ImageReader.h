@@ -116,13 +116,11 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 
 		static const ReaderDescription<ImageReader> g_readerDescription;
 
-		void constructCommon();
-
 		IECore::StringVectorParameterPtr m_channelNamesParameter;
 		IECore::BoolParameterPtr m_rawChannelsParameter;
 
-		IE_CORE_FORWARDDECLARE( Implementation );
-		ImplementationPtr m_implementation;
+		class Implementation;
+		std::unique_ptr<Implementation> m_implementation;
 
 };
 

@@ -60,18 +60,17 @@ IE_CORE_DEFINERUNTIMETYPED( ImageReader );
 // ImageReader::Implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-class ImageReader::Implementation : public IECore::RefCounted
+class ImageReader::Implementation
 {
 
 	public :
 
-		Implementation( const ImageReader *reader ) : m_reader( reader ), m_inputFile( nullptr ), m_inputFileName( "" )
+		Implementation( const ImageReader *reader ) : m_reader( reader ), m_inputFile( nullptr, &ImageInput::destroy )
 		{
 		}
 
 		virtual ~Implementation()
 		{
-			ImageInput::destroy( m_inputFile );
 			m_reader = nullptr;
 		}
 
@@ -350,13 +349,10 @@ class ImageReader::Implementation : public IECore::RefCounted
 				return true;
 			}
 
-			ImageInput::destroy( m_inputFile );
 			m_inputFileName = "";
-
-			m_inputFile = ImageInput::open( m_reader->fileName() );
+			m_inputFile.reset( ImageInput::open( m_reader->fileName() ) );
 			if( !m_inputFile )
 			{
-				ImageInput::destroy( m_inputFile );
 				if( !throwOnFailure )
 				{
 					return false;
@@ -373,7 +369,7 @@ class ImageReader::Implementation : public IECore::RefCounted
 		}
 
 		const ImageReader *m_reader;
-		ImageInput *m_inputFile;
+		std::unique_ptr<ImageInput, decltype(&ImageInput::destroy) > m_inputFile;
 		std::string m_inputFileName;
 
 };
@@ -387,24 +383,8 @@ const Reader::ReaderDescription<ImageReader> ImageReader::g_readerDescription( O
 
 ImageReader::ImageReader() :
 	Reader( "Reads image files using OpenImageIO.", new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) ),
-	m_implementation( nullptr )
+	m_implementation( new ImageReader::Implementation( this ) )
 {
-	constructCommon();
-}
-
-ImageReader::ImageReader( const string &fileName ) :
-	Reader( "Reads image files using OpenImageIO.", new ObjectParameter( "result", "The loaded object", new NullObject, ImagePrimitive::staticTypeId() ) ),
-	m_implementation( nullptr )
-{
-	constructCommon();
-
-	m_fileNameParameter->setTypedValue( fileName );
-}
-
-void ImageReader::constructCommon()
-{
-	m_implementation = new ImageReader::Implementation( this );
-
 	m_channelNamesParameter = new StringVectorParameter(
 		"channels",
 		"The names of all channels to load from the file. If the list is empty (the default value) "
@@ -420,6 +400,11 @@ void ImageReader::constructCommon()
 
 	parameters()->addParameter( m_channelNamesParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
+}
+
+ImageReader::ImageReader( const string &fileName ) : ImageReader()
+{
+	m_fileNameParameter->setTypedValue( fileName );
 }
 
 ImageReader::~ImageReader()
