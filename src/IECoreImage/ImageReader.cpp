@@ -97,11 +97,27 @@ class ImageReader::Implementation : public IECore::RefCounted
 
 			try
 			{
-				// Reader::read() isn't const, but we know ours doesn't modify anything,
-				// so prefer a dodgy const_cast over replicating the functionality.
-				/// |todo: request a cheaper isComplete() mechanism in OpenImageIO
-				//  to match ImfInputFile::isComplete() from OpenEXR.
-				return runTimeCast<ImagePrimitive>( const_cast<ImageReader *>( m_reader )->read() )->channelsValid();
+				const ImageSpec &spec = m_inputFile->spec();
+
+				std::vector<float> data;
+
+				if( spec.tile_width )
+				{
+					// if the last tile is there, its complete
+					data.resize( spec.tile_width * spec.tile_height * spec.nchannels );
+					return m_inputFile->read_tile(
+						spec.width + spec.x - spec.tile_width,
+						spec.height + spec.y - spec.tile_height,
+						/* z */ 0,
+						&data[0]
+					);
+				}
+				else
+				{
+					// if the last scanline is there, its complete
+					data.resize( spec.width * spec.nchannels );
+					return m_inputFile->read_scanline( spec.height + spec.y - 1, /* z */ 0, &data[0] );
+				}
 			}
 			catch( ... )
 			{
