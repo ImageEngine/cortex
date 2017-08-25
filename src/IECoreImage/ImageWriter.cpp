@@ -241,20 +241,6 @@ const Writer::WriterDescription<ImageWriter> ImageWriter::g_writerDescription( O
 ImageWriter::ImageWriter()
 	: Writer( "Serializes images to disk using OpenImageIO", (IECore::TypeId)ImagePrimitiveTypeId )
 {
-	constructCommon();
-}
-
-ImageWriter::ImageWriter( IECore::ObjectPtr object, const std::string &fileName )
-	: Writer( "Serializes images to disk using OpenImageIO", (IECore::TypeId)ImagePrimitiveTypeId )
-{
-	constructCommon();
-
-	m_objectParameter->setValue( object );
-	m_fileNameParameter->setTypedValue( fileName );
-}
-
-void ImageWriter::constructCommon()
-{
 	m_channelsParameter = new StringVectorParameter( "channels", "The list of channels to write. No list causes all channels to be written." );
 
 	m_rawChannelsParameter = new BoolParameter(
@@ -268,85 +254,87 @@ void ImageWriter::constructCommon()
 
 	CompoundParameterPtr exrSettings = new CompoundParameter( "openexr", "OpenEXR specific settings" );
 	m_formatSettingsParameter->addParameter( exrSettings );
-	StringParameter::PresetsContainer exrCompressionPresets;
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "none", "none" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "rle", "rle" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "zips", "zips" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "zip", "zip" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "piz", "piz" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "pxr24", "pxr24" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "b44", "b44" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "b44a", "b44a" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "dwaa", "dwaa" ) );
-	exrCompressionPresets.emplace_back( StringParameter::Preset( "dwab", "dwab" ) );
 	exrSettings->addParameter(
 		new StringParameter(
 			"compression",
 			"OpenEXR compression",
 			"zips",
-			exrCompressionPresets,
+			/* presets = */ {
+				{ "none", "none" },
+				{ "rle", "rle" },
+				{ "zips", "zips" },
+				{ "zip", "zip" },
+				{ "piz", "piz" },
+				{ "pxr24", "pxr24" },
+				{ "b44", "b44" },
+				{ "b44a", "b44a" },
+				{ "dwaa", "dwaa" },
+				{ "dwab", "dwab" }
+			},
 			/* presetsOnly */ true
 		)
 	);
-	StringParameter::PresetsContainer exrDataTypePresets;
-	exrDataTypePresets.emplace_back( StringParameter::Preset( "half", "half" ) );
-	exrDataTypePresets.emplace_back( StringParameter::Preset( "float", "float" ) );
-	exrDataTypePresets.emplace_back( StringParameter::Preset( "double", "double" ) );
+
 	exrSettings->addParameter(
 		new StringParameter(
 			"dataType",
 			"Format of the data to write. OpenImageIO will convert the PrimitiveVariables to this format automatically",
 			"half",
-			exrDataTypePresets,
+			/* presets = */ {
+				{ "half", "half" },
+				{ "float", "float" },
+				{ "double", "double" }
+			},
 			/* presetsOnly */ true
 		)
 	);
 
 	CompoundParameterPtr dpxSettings = new CompoundParameter( "dpx", "dpx specific settings" );
 	m_formatSettingsParameter->addParameter( dpxSettings );
-	StringParameter::PresetsContainer dpxDataTypePresets;
-	dpxDataTypePresets.emplace_back( StringParameter::Preset( "8-bit", "uint8" ) );
-	dpxDataTypePresets.emplace_back( StringParameter::Preset( "10-bit", "uint10" ) );
-	dpxDataTypePresets.emplace_back( StringParameter::Preset( "12-bit", "uint12" ) );
-	dpxDataTypePresets.emplace_back( StringParameter::Preset( "16-bit", "uint16" ) );
 	dpxSettings->addParameter(
 		new StringParameter(
 			"dataType",
 			"Format of the data to write. OpenImageIO will convert the PrimitiveVariables to this format automatically",
 			"uint10",
-			dpxDataTypePresets,
+			/* presets = */ {
+				{ "8-bit", "uint8" },
+				{ "10-bit", "uint10" },
+				{ "12-bit", "uint12" },
+				{ "16-bit", "uint16" }
+			},
 			/* presetsOnly */ true
 		)
 	);
 
 	CompoundParameterPtr tifSettings = new CompoundParameter( "tiff", "tiff specific settings" );
 	m_formatSettingsParameter->addParameter( tifSettings );
-	StringParameter::PresetsContainer tifCompressionPresets;
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "none", "none" ) );
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "lzw", "lzw" ) );
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "jpeg", "jpeg" ) );
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "zip", "zip" ) );
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "deflate", "deflate" ) );
-	tifCompressionPresets.emplace_back( StringParameter::Preset( "packbits", "packbits" ) );
 	tifSettings->addParameter(
 		new StringParameter(
 			"compression",
 			"tif compression",
 			"zip",
-			tifCompressionPresets,
+			/* presets = */ {
+				{ "none", "none" },
+				{ "lzw", "lzw" },
+				{ "jpeg", "jpeg" },
+				{ "zip", "zip" },
+				{ "deflate", "deflate" },
+				{ "packbits", "packbits" }
+			},
 			/* presetsOnly */ true
 		)
 	);
-	StringParameter::PresetsContainer tifDataTypePresets;
-	tifDataTypePresets.emplace_back( StringParameter::Preset( "8-bit", "uint8" ) );
-	tifDataTypePresets.emplace_back( StringParameter::Preset( "16-bit", "uint16" ) );
-	tifDataTypePresets.emplace_back( StringParameter::Preset( "float", "float" ) );
+
 	tifSettings->addParameter(
 		new StringParameter(
 			"dataType",
 			"Format of the data to write. OpenImageIO will convert the PrimitiveVariables to this format automatically",
 			"uint8",
-			tifDataTypePresets,
+			/* presets = */ {
+				{ "8-bit", "uint8" },
+				{ "16-bit", "uint16" },
+				{ "float", "float" }
+			},
 			/* presetsOnly */ true
 		)
 	);
@@ -366,6 +354,12 @@ void ImageWriter::constructCommon()
 	parameters()->addParameter( m_channelsParameter );
 	parameters()->addParameter( m_rawChannelsParameter );
 	parameters()->addParameter( m_formatSettingsParameter );
+}
+
+ImageWriter::ImageWriter( IECore::ObjectPtr object, const std::string &fileName ) : ImageWriter()
+{
+	m_objectParameter->setValue( object );
+	m_fileNameParameter->setTypedValue( fileName );
 }
 
 ImageWriter::~ImageWriter() = default;
@@ -432,14 +426,13 @@ bool ImageWriter::canWrite( ConstObjectPtr object, const string &fileName )
 
 void ImageWriter::channelsToWrite( vector<string> &channels, const CompoundObject *operands ) const
 {
-	ImageOutput *out = ImageOutput::create( fileName() );
+	std::unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)> out( ImageOutput::create( fileName() ), &ImageOutput::destroy );
 
 	const CompoundObject *args = (bool)operands ? operands : parameters()->getTypedValue<CompoundObject>();
 
-	::channelsToWrite( getImage(), out, args, channels );
+	::channelsToWrite( getImage(), out.get(), args, channels );
 
 	out->close();
-	ImageOutput::destroy( out );
 }
 
 const ImagePrimitive *ImageWriter::getImage() const
@@ -461,7 +454,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	/// \todo: nearly everything below this point is copied from GafferImage::ImageWriter
 	/// Can we consolidate some of this into IECoreImage::OpenImageIOAlgo?
 
-	ImageOutput *out = ImageOutput::create( fileName() );
+	std::unique_ptr<ImageOutput, decltype(&ImageOutput::destroy)> out( ImageOutput::create( fileName() ), &ImageOutput::destroy );
 	if( !out )
 	{
 		throw IECore::Exception( OpenImageIO::geterror() );
@@ -519,7 +512,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	}
 
 	std::vector<std::string> channels;
-	::channelsToWrite( image, out, operands, channels );
+	::channelsToWrite( image, out.get(), operands, channels );
 	if( channels.empty() )
 	{
 		throw IECore::Exception( std::string( "IECoreImage::ImageWriter : No valid channels were specified for the file format \"" ) + out->format_name() + "\"." );
@@ -619,5 +612,4 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 	}
 
 	out->close();
-	ImageOutput::destroy( out );
 }

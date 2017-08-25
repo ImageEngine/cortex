@@ -100,8 +100,6 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 
 		static const WriterDescription<ImageWriter> g_writerDescription;
 
-		void constructCommon();
-
 		const ImagePrimitive *getImage() const;
 
 		IECore::StringVectorParameterPtr m_channelsParameter;
