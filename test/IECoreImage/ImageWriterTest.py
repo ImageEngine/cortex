@@ -184,6 +184,31 @@ class ImageWriterTest( unittest.TestCase ) :
 		self.assertTrue( not "cob" in e )
 		self.assertTrue( not "obj" in e )
 
+	def testCanWrite( self ) :
+
+		displayWindow = IECore.Box2i(
+			IECore.V2i( 0, 0 ),
+			IECore.V2i( 99, 99 )
+		)
+
+		dataWindow = displayWindow
+
+		image = self.__makeFloatImage( dataWindow, displayWindow, dataType = IECore.FloatVectorData )
+		self.assertTrue( IECoreImage.ImageWriter.canWrite( image, "test/IECoreImage/data/exr/output.exr" ) )
+
+		# we dont support writing images of different channel types
+		image["R"] = IECore.DoubleVectorData( [ x for x in image["R"] ] )
+		self.assertFalse( IECoreImage.ImageWriter.canWrite( image, "test/IECoreImage/data/exr/output.exr" ) )
+
+		# we dont support writing images if OIIO doesn't know how to use the channels
+		image["R"] = IECore.StringVectorData( [ str(x) for x in image["R"] ] )
+		image["G"] = IECore.StringVectorData( [ str(x) for x in image["G"] ] )
+		image["B"] = IECore.StringVectorData( [ str(x) for x in image["B"] ] )
+		self.assertFalse( IECoreImage.ImageWriter.canWrite( image, "test/IECoreImage/data/exr/output.exr" ) )
+
+		# we dont support writing non-images
+		self.assertFalse( IECoreImage.ImageWriter.canWrite( IECore.CompoundObject(), "test/IECoreImage/data/exr/output.exr" ) )
+
 	def testWrite( self ) :
 
 		displayWindow = IECore.Box2i(

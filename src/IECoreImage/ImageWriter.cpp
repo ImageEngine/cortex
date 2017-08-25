@@ -402,7 +402,32 @@ const CompoundParameter *ImageWriter::formatSettingsParameter() const
 
 bool ImageWriter::canWrite( ConstObjectPtr object, const string &fileName )
 {
-	return (bool)runTimeCast<const ImagePrimitive>( object ).get();
+	const ImagePrimitive *image = runTimeCast<const ImagePrimitive>( object.get() );
+	if( !image )
+	{
+		return false;
+	}
+
+	const Data *firstChannelData = image->channels.begin()->second.get();
+
+	const OpenImageIOAlgo::DataView dataView( firstChannelData );
+	if( dataView.type == TypeDesc::UNKNOWN )
+	{
+		return false;
+	}
+
+	for( const auto &channel : image->channels )
+	{
+		// OpenImageIO claims to handle non-matching types (if the format supports it)
+		// but when it comes time to write the scanlines, we must pass a single buffer
+		// of interleaved pixels, so we only support a single type for now.
+		if( channel.second->typeId() != firstChannelData->typeId() )
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void ImageWriter::channelsToWrite( vector<string> &channels, const CompoundObject *operands ) const

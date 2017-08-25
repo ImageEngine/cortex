@@ -66,7 +66,7 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 
 		virtual ~ImageWriter();
 
-		/// Checks that object is an ImagePrimitive with consistent PrimitiveVariables
+		/// Checks that object is an ImagePrimitive with consistent channels
 		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );
 
 		/// The parameter specifying the channels to write.
