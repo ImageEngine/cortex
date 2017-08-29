@@ -129,9 +129,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
 
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/pointVertexAttributes.tif" )
+		reader["rawChannels"].setTypedValue( True )
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		
+
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def testEmptyPointsPrimitive( self ):

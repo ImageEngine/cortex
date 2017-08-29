@@ -99,9 +99,10 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 			m.render( r )
 
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshST.tif" )
+		reader["rawChannels"].setTypedValue( True )
 		expectedImage = reader.read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		
+
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def testUniformCs( self ) :

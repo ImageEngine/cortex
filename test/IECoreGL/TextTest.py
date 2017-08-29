@@ -115,7 +115,9 @@ class TextTest( unittest.TestCase ) :
 			r.text( "Vera.ttf", "hello world", 1, {} )
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" ).read()
+		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" )
+		reader["rawChannels"].setTypedValue( True )
+		expectedImage = reader.read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.0575 ), IECore.BoolData( False ) )
 	

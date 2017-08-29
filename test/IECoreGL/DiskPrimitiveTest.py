@@ -70,6 +70,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 		i = IECore.Reader.create( self.outputFileName ).read()
 		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/disk.tif" )
+		reader["rawChannels"].setTypedValue( True )
 		i2 = reader.read()
 
 		# blue where there must be an object
