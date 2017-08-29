@@ -259,8 +259,16 @@ class ImageReader::Implementation
 				DataPtr data = readTypedChannel<float>( channelIndex, TypeDesc::FLOAT );
 				if( (int)channelIndex != spec->alpha_channel && (int)channelIndex != spec->z_channel )
 				{
+					const char *fileFormat = nullptr;
+					m_cache->get_image_info(
+						m_inputFileName,
+						0, 0, // subimage, miplevel
+						ustring( "fileformat" ),
+						TypeDesc::TypeString, &fileFormat
+					);
+
 					std::string linearColorSpace = OpenImageIOAlgo::colorSpace( "", *spec );
-					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( m_fileFormat, *spec );
+					std::string currentColorSpace = OpenImageIOAlgo::colorSpace( fileFormat, *spec );
 					ColorAlgo::transformChannel( data.get(), currentColorSpace, linearColorSpace );
 				}
 
@@ -335,13 +343,10 @@ class ImageReader::Implementation
 			m_inputFileName = "";
 			m_cache.reset( ImageCache::create( /* shared */ false ) );
 
-			if( ImageInput *input = ImageInput::create( m_reader->fileName() ) )
+			// a non-null spec indicates the image was opened successfully
+			if( m_cache->imagespec( ustring( m_reader->fileName() ) ) )
 			{
-				m_cache->add_file( m_inputFileName );
 				m_inputFileName = m_reader->fileName();
-				m_fileFormat = input->format_name();
-				ImageInput::destroy( input );
-
 				return true;
 			}
 
@@ -363,7 +368,6 @@ class ImageReader::Implementation
 		const ImageReader *m_reader;
 		std::unique_ptr<ImageCache, decltype(&destroyImageCache) > m_cache;
 		ustring m_inputFileName;
-		std::string m_fileFormat;
 
 };
 
