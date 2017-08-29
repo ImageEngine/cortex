@@ -52,7 +52,7 @@ using namespace Imath;
 static IndexedIO::EntryID g_variablesEntry("variables");
 static IndexedIO::EntryID g_interpolationEntry("interpolation");
 static IndexedIO::EntryID g_dataEntry("data");
-const unsigned int Primitive::m_ioVersion = 1;
+const unsigned int Primitive::m_ioVersion = 2;
 IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Primitive );
 
 Primitive::Primitive()
@@ -107,6 +107,54 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 	}
 }
 
+namespace
+{
+
+void convertUVs( PrimitiveVariableMap &variables )
+{
+	std::set<Data *> visited;
+
+	auto tIt = variables.find( "t" );
+	if( tIt != variables.end() )
+	{
+		if( FloatVectorData *values = runTimeCast<FloatVectorData>( tIt->second.data.get() ) )
+		{
+			for( auto &value : values->writable() )
+			{
+				value = 1.0f - value;
+			}
+		}
+
+		visited.insert( tIt->second.data.get() );
+	}
+
+	// by convention, PrimitiveVariables ending with "_t"
+	// represent the second component of a UV set.
+	for( auto it = variables.begin(), eIt = variables.end(); it != eIt; ++it )
+	{
+		if( visited.find( it->second.data.get() ) != visited.end() )
+		{
+			continue;
+		}
+
+		size_t suffixOffset = it->first.rfind( "_t" );
+		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == it->first.length() - 2 ) )
+		{
+			if( FloatVectorData *values = runTimeCast<FloatVectorData>( it->second.data.get() ) )
+			{
+				for( auto &value : values->writable() )
+				{
+					value = 1.0f - value;
+				}
+			}
+		}
+
+		visited.insert( it->second.data.get() );
+	}
+}
+
+} // namespace
+
 void Primitive::load( IECore::Object::LoadContextPtr context )
 {
 	unsigned int v = m_ioVersion;
@@ -137,6 +185,13 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) ) 
 		);
 	}
+
+	// we unflipped the t values in version 2, so we must unflip
+	// them for older files as well.
+	if( v < 2 )
+	{
+		::convertUVs( variables );
+	}
 }
 
 PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInterface, const IndexedIO::EntryID &name, const IndexedIO::EntryIDList &primVarNames )
@@ -165,6 +220,13 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 		variables.insert( 
 			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) ) 
 		);
+	}
+
+	// we unflipped the t values in version 2, so we must unflip
+	// them for older files as well.
+	if( v < 2 )
+	{
+		::convertUVs( variables );
 	}
 
 	return variables;
