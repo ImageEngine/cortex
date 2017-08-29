@@ -203,7 +203,7 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 
 					for( size_t i = 0; i < numSTs; ++i)
 					{
-						meshEntity->push_tex_coords( asr::GVector2( svec[i], 1.0f - tvec[i] ) );
+						meshEntity->push_tex_coords( asr::GVector2( svec[i], tvec[i] ) );
 					}
 
 					if( sInterpolation == PrimitiveVariable::FaceVarying )

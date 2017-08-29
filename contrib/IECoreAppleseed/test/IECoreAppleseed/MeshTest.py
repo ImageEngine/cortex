@@ -61,7 +61,7 @@ class MeshTest( AppleseedTest.TestCase ):
 			uv = obj.get_tex_coords( i )
 			j = quadTo2TrisIndices[i]
 			self.assertEqual( uv[0], s[j] )
-			self.assertEqual( uv[1], 1.0 - t[j] )
+			self.assertEqual( uv[1], t[j] )
 
 if __name__ == "__main__":
 	unittest.main()
