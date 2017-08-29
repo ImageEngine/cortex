@@ -62,7 +62,7 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], 1 - t[i] ) )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], t[i] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
 	def testAdditionalUVs( self ) :
@@ -85,7 +85,7 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], 1 - t[i] ) )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], t[i] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
 
