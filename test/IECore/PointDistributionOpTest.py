@@ -72,7 +72,8 @@ class PointDistributionOpTest( unittest.TestCase ) :
 	def testHighDensity( self ) :
 		
 		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		p = PointDistributionOp()( mesh = m, density = 50000 )
+		p = PointDistributionOp()( mesh = m, density = 50000, offset = V2f( 0.0001, 0.0001 ) )
+
 		self.pointTest( m, p, 50000 )
 	
 	def testDensityMaskPrimVar( self ) :

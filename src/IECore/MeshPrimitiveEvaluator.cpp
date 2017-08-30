@@ -647,6 +647,7 @@ void MeshPrimitiveEvaluator::calculateAverageNormals() const
 	m_haveAverageNormals = true;
 }
 
+/// \todo: add tests
 bool MeshPrimitiveEvaluator::signedDistance( const Imath::V3f &p, float &distance, PrimitiveEvaluator::Result *result ) const
 {
 	distance = 0.0f;
