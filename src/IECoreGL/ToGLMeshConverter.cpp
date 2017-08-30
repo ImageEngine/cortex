@@ -131,7 +131,10 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 
 				for ( unsigned i = 0; i < s->readable().size(); i++ )
 				{
-					stData->writable()[i] = Imath::V2f( s->readable()[i], t->readable()[i] );
+					// as of Cortex 10, we take a UDIM centric approach
+					// to UVs, which clashes with OpenGL, so we must flip
+					// the v values during conversion.
+					stData->writable()[i] = Imath::V2f( s->readable()[i], 1.0 - t->readable()[i] );
 				}
 				glMesh->addPrimitiveVariable( "st", IECore::PrimitiveVariable( sIt->second.interpolation, stData ) );
 			}
