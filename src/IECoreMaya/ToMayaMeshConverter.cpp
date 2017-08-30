@@ -200,8 +200,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 			for ( int i = 0; i < numUVs; i++ )
 			{
 				uArray[ uvIds[i] ] = uAll[i];
-				// FromMayaMeshConverter does the opposite of this
-				vArray[ uvIds[i] ] = 1 - vAll[i];
+				vArray[ uvIds[i] ] = vAll[i];
 			}
 		}
 		else
@@ -214,8 +213,7 @@ void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCou
 			for ( int i = 0; i < numUVs; i++)
 			{
 				uArray[i] = u->readable()[i];
-				// FromMayaMeshConverter does the opposite of this
-				vArray[i] = 1 - v->readable()[i];
+				vArray[i] = v->readable()[i];
 			}
 			
 			for ( int i = 0; i < numUVs; i++)

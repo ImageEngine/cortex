@@ -105,7 +105,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( v.length(), 2280 )
 		
 		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
 		
 		fnMesh.getUVs( u, v, "testUVSet" )
 
@@ -113,7 +113,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( v.length(), 2280 )
 	
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
-		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
+		self.assertEqual( v[12], coreMesh[ "testUVSet_t" ].data[12] )
 
 	def testUVConversionFromPlug( self ) :
 		
@@ -160,7 +160,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( v.length(), 2280 )
 		
 		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
 		
 		fnMesh.getUVs( u, v, "testUVSet" )
 		
@@ -168,7 +168,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( v.length(), 2280 )
 		
 		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
-		self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet_t" ].data[12] )
+		self.assertEqual( v[12], coreMesh[ "testUVSet_t" ].data[12] )
 	
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Invisible meshes with 6+ UV sets cause seg faults prior to Maya 2016" )
 	def testManyUVConversionsFromPlug( self ) :
@@ -217,7 +217,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], 1.0 - coreMesh[ "t" ].data[0] )
+		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
 		
 		for i in range( 0, 7 ) :
 			
@@ -225,7 +225,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 			self.assertEqual( u.length(), 2280 )
 			self.assertEqual( v.length(), 2280 )
 			self.assertEqual( u[12], coreMesh[ "testUVSet%d_s" % i ].data[12] )
-			self.assertEqual( v[12], 1.0 - coreMesh[ "testUVSet%d_t" % i ].data[12] )
+			self.assertEqual( v[12], coreMesh[ "testUVSet%d_t" % i ].data[12] )
 	
 	def testUVConversionFromMayaMesh( self ) :
 		
