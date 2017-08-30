@@ -487,7 +487,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			for vert in prim.vertices() :
 				uvValues = vert.attribValue( uvs )
 				self.assertAlmostEqual( sData[i], uvValues[0] )
-				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				self.assertAlmostEqual( tData[i], uvValues[1] )
 				i += 1
 		
 		converter["convertStandardAttributes"].setTypedValue( False )

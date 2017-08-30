@@ -426,7 +426,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			for vert in verts :
 				uvValues = vert.attribValue( inUvs )
 				self.assertAlmostEqual( sData[i], uvValues[0] )
-				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				self.assertAlmostEqual( tData[i], uvValues[1] )
 				i += 1
 		
 		i = 0
@@ -436,7 +436,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			for vert in verts :
 				uvValues = vert.attribValue( outUvs )
 				self.assertAlmostEqual( sData[i], uvValues[0] )
-				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				self.assertAlmostEqual( tData[i], uvValues[1] )
 				i += 1		
 		
 		# turn off half the conversion
@@ -523,7 +523,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			for vert in verts :
 				uvValues = vert.attribValue( inUvs )
 				self.assertAlmostEqual( sData[i], uvValues[0] )
-				self.assertAlmostEqual( tData[i], 1 - uvValues[1] )
+				self.assertAlmostEqual( tData[i], uvValues[1] )
 				i += 1
 		
 		i = 0
