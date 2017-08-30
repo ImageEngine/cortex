@@ -105,7 +105,10 @@ void MeshToNukeGeometryConverter::doConversion( const IECore::Object *from, Geom
 		std::vector< float >::const_iterator tIt = meshT->readable().begin();
 		for ( ; sIt < meshS->readable().end(); sIt++, tIt++, v++)
 		{
-			uv->vector4(v).set( *sIt, *tIt, 0.0f, 1.0f);
+			// as of Cortex 10, we take a UDIM centric approach
+			// to UVs, which clashes with Nuke, so we must flip
+			// the v values during conversion.
+			uv->vector4(v).set( *sIt, 1.0 - *tIt, 0.0f, 1.0f);
 		}
 	}
 
