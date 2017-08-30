@@ -119,37 +119,6 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 		msg( Msg::Warning, "ProceduralPrimitive::addVisibleRenderable", "converter failed" );
 		return;
 	}
-	/// \todo ToHoudiniGeometryConverter does not create a Houdini style uv attribute.
-	/// We make one from s and t. This code should probably live in a converter or in an Op that
-	/// remaps IECore conventions to common Houdini ones.
-	MeshPrimitivePtr mesh = runTimeCast<MeshPrimitive> (renderable);
-	if ( mesh )
-	{
-		gdp->addTextureAttribute( GA_ATTRIB_VERTEX );
-		GEO_AttributeHandle auv = gdp->getAttribute( GA_ATTRIB_VERTEX, "uv" );
-		GEO_AttributeHandle as = gdp->getAttribute( GA_ATTRIB_VERTEX, "s" );
-		GEO_AttributeHandle at = gdp->getAttribute( GA_ATTRIB_VERTEX, "t" );
-		if ( auv.isAttributeValid() && as.isAttributeValid() && at.isAttributeValid() )
-		{
-			GA_GBPrimitiveIterator it( *gdp );
-			GA_Primitive *p = it.getPrimitive();
-			while ( p )
-			{
-				for (int i = 0; i < p->getVertexCount(); ++i)
-				{
-					GA_Offset v = p->getVertexOffset(i);
-					as.setVertex(v);
-					at.setVertex(v);
-					auv.setVertex(v);
-					auv.setF( as.getF(0), 0 );
-					auv.setF( ((at.getF(0) * -1.0f) + 1.0f), 1 ); // wat, t arrives upside down for some reason.
-					auv.setF( 0.0f, 2 );
-				}
-				++it;
-				p = it.getPrimitive();
-			}
-		}
-	}
 
 	if ( m_renderer->m_motionType == RendererImplementation::Geometry )
 	{
