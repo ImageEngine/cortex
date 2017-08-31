@@ -222,7 +222,6 @@ from DataAlgoTest import DataAlgoTest
 from MeshAlgoTest import *
 from CurvesAlgoTest import *
 from PointsAlgoTest import *
-from DisplayDriverServerTest import DisplayDriverServerTest
 
 if IECore.withFreeType() :
 	from FontTest import *

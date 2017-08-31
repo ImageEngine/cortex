@@ -61,6 +61,10 @@ enum TypeId
 	ImageDisplayDriverTypeId = 104018,
 	ImagePrimitiveParameterTypeId = 104019,
 	FontTypeId = 104020,
+	DisplayDriverTypeId = 104021,
+	DisplayDriverServerTypeId = 104022,
+	ClientDisplayDriverTypeId = 104023,
+	MPlayDisplayDriverTypeId = 104024,
 	LastCoreImageTypeId = 104999,
 };
 

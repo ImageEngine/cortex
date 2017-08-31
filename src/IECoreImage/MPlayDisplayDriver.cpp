@@ -35,13 +35,15 @@
 #include <stdio.h>
 #include "boost/format.hpp"
 
-#include "IECore/MPlayDisplayDriver.h"
 #include "IECore/Exception.h"
 #include "IECore/SimpleTypedData.h"
 
+#include "IECoreImage/MPlayDisplayDriver.h"
+
 using namespace std;
-using namespace IECore;
 using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
 
 //////////////////////////////////////////////////////////////////////////
 // Header definitions required by imdisplay

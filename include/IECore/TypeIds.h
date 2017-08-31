@@ -286,11 +286,11 @@ enum TypeId
 	SplinefColor3fParameterTypeId = 238,
 	SplinefColor4fParameterTypeId = 239,
 	CompoundObjectParameterTypeId = 240,
-	DisplayDriverTypeId = 241,
-	DisplayDriverCreatorTypeId = 242,
-	ImageDisplayDriverTypeId = 243,
-	DisplayDriverServerTypeId = 244,
-	ClientDisplayDriverTypeId = 245,
+	DisplayDriverTypeId = 241, // obsolete - available for reuse
+	DisplayDriverCreatorTypeId = 242, // obsolete - available for reuse
+	ImageDisplayDriverTypeId = 243, // obsolete - available for reuse
+	DisplayDriverServerTypeId = 244, // obsolete - available for reuse
+	ClientDisplayDriverTypeId = 245, // obsolete - available for reuse
 	SplineToImageTypeId = 246, // obsolete - available for reuse
 	DisplayTypeId = 247,
 	MeshTangentsOpTypeId = 248,
@@ -409,7 +409,7 @@ enum TypeId
 	TimeCodeDataTypeId = 361,
 	TimeCodeParameterTypeId = 362,
 	OptionsTypeId = 363,
-	MPlayDisplayDriverTypeId = 364,
+	MPlayDisplayDriverTypeId = 364, // obsolete - available for reuse
 	SceneInterfaceTypeId = 365,
 	SampledSceneInterfaceTypeId = 366,
 	SceneCacheTypeId = 367,

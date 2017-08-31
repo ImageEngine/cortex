@@ -38,8 +38,7 @@
 #ifndef IECOREIMAGE_IMAGEDISPLAYDRIVER
 #define IECOREIMAGE_IMAGEDISPLAYDRIVER
 
-#include "IECore/DisplayDriver.h"
-
+#include "IECoreImage/DisplayDriver.h"
 #include "IECoreImage/ImagePrimitive.h"
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
@@ -50,11 +49,11 @@ namespace IECoreImage
 /// Display driver that creates an ImagePrimitive object held
 /// in memory.
 /// \ingroup renderingGroup
-class IECOREIMAGE_API ImageDisplayDriver : public IECore::DisplayDriver
+class IECOREIMAGE_API ImageDisplayDriver : public DisplayDriver
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageDisplayDriver, ImageDisplayDriverTypeId, IECore::DisplayDriver );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageDisplayDriver, ImageDisplayDriverTypeId, DisplayDriver );
 
 		/// Initializes the internal ImagePrimitive.
 		/// The image's blindData will keep the values given on the parameters CompoundData.

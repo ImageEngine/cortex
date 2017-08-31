@@ -39,15 +39,17 @@
 #include "boost/bind.hpp"
 #include "tbb/tbb_thread.h"
 
-#include "IECore/DisplayDriverServer.h"
-#include "IECore/private/DisplayDriverServerHeader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MemoryIndexedIO.h"
 #include "IECore/MessageHandler.h"
 
-using namespace IECore;
+#include "IECoreImage/DisplayDriverServer.h"
+#include "IECoreImage/Private/DisplayDriverServerHeader.h"
+
 using boost::asio::ip::tcp;
 using namespace boost;
+using namespace IECore;
+using namespace IECoreImage;
 
 IE_CORE_DEFINERUNTIMETYPED( DisplayDriverServer );
 

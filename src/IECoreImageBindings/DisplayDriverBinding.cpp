@@ -35,18 +35,23 @@
 #include "boost/python.hpp"
 #include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/DisplayDriver.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
-#include "IECorePython/DisplayDriverBinding.h"
+
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILRelease.h"
+
+#include "IECoreImage/DisplayDriver.h"
+
+#include "IECoreImageBindings/DisplayDriverBinding.h"
 
 using namespace boost;
 using namespace boost::python;
 using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
 
-namespace IECorePython
+namespace
 {
 
 static boost::python::list channelNames( DisplayDriverPtr dd )
@@ -89,6 +94,11 @@ static DisplayDriverPtr displayDriverCreate( const std::string &typeName, const 
 	return res;
 }
 
+} // namespace
+
+namespace IECoreImageBindings
+{
+
 void bindDisplayDriver()
 {
 	RunTimeTypedClass<DisplayDriver>()
@@ -103,4 +113,4 @@ void bindDisplayDriver()
 	;
 }
 
-} // namespace IECorePython
+} // namespace IECoreImageBindings

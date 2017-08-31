@@ -36,8 +36,11 @@
 
 #include "IECoreImageBindings/ChannelOpBinding.h"
 #include "IECoreImageBindings/ClampOpBinding.h"
+#include "IECoreImageBindings/ClientDisplayDriverBinding.h"
 #include "IECoreImageBindings/ColorAlgoBinding.h"
 #include "IECoreImageBindings/CurveTracerBinding.h"
+#include "IECoreImageBindings/DisplayDriverBinding.h"
+#include "IECoreImageBindings/DisplayDriverServerBinding.h"
 #include "IECoreImageBindings/EnvMapSamplerBinding.h"
 #include "IECoreImageBindings/HdrMergeOpBinding.h"
 #include "IECoreImageBindings/ImageCropOpBinding.h"
@@ -52,6 +55,7 @@
 #include "IECoreImageBindings/LensDistortOpBinding.h"
 #include "IECoreImageBindings/LuminanceOpBinding.h"
 #include "IECoreImageBindings/MedianCutSamplerBinding.h"
+#include "IECoreImageBindings/MPlayDisplayDriverBinding.h"
 #include "IECoreImageBindings/SplineToImageBinding.h"
 #include "IECoreImageBindings/SummedAreaOpBinding.h"
 #include "IECoreImageBindings/WarpOpBinding.h"
@@ -84,7 +88,11 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 
 #ifdef IECORE_WITH_ASIO
 
+	bindDisplayDriver();
+	bindDisplayDriverServer();
+	bindClientDisplayDriver();
 	bindImageDisplayDriver();
+	bindMPlayDisplayDriver();
 
 #endif
 

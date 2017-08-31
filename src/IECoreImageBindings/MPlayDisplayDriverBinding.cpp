@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,54 +32,41 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IE_CORE_DISPLAYDRIVERSERVERHEADER
-#define IE_CORE_DISPLAYDRIVERSERVERHEADER
+#include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECore/DisplayDriverServer.h"
+#include "IECorePython/RunTimeTypedBinding.h"
 
-namespace IECore
+#include "IECoreImage/MPlayDisplayDriver.h"
+
+#include "IECoreImageBindings/MPlayDisplayDriverBinding.h"
+
+using namespace boost;
+using namespace boost::python;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
+
+namespace
 {
 
-/* Header block used by back and forth messages with the server.
-* 7 bytes long:
-* [0] - magic number ( 0x82 )
-* [1] - protocol version ( 1 )
-* [2] - message type ( imageOpen, imageData, imageClose )
-* [3-6] - length of following data block.
-*/
-class DisplayDriverServerHeader
+static MPlayDisplayDriverPtr constructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
 {
-	public:
+	std::vector<std::string> names;
+	boost::python::container_utils::extend_container( names, channelNames );
+	return new MPlayDisplayDriver( displayWindow, dataWindow, names, parameters );
+}
 
-		enum MessageType { imageOpen = 1, imageData = 2, imageClose = 3, exception = 4 };
+} // namespace
 
-		static const unsigned char headerLength = 7;
-		static const unsigned char magicNumber = 0x82;
-		static const unsigned char currentProtocolVersion = 2;
+namespace IECoreImageBindings
+{
 
-		DisplayDriverServerHeader();
-		DisplayDriverServerHeader( MessageType msg, size_t dataSize );
+void bindMPlayDisplayDriver()
+{
+	RunTimeTypedClass<MPlayDisplayDriver>()
+		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
+	;
+}
 
-		// returns internal buffer ( length = headerLength constant )
-		unsigned char *buffer();
-
-		// checks if the header is valid.
-		bool valid();
-
-		// returns the number of bytes is expected to follow the current header down from the socket connection.
-		size_t getDataSize();
-
-		// sets the number of bytes that will follow this header on the socket connection.
-		void setDataSize( size_t dataSize );
-
-		// returns the message type defined in the header.
-		MessageType messageType();
-
-	private:
-
-		unsigned char m_header[ headerLength ];
-};
-
-} // namespace IECore
-
-#endif // IE_CORE_DISPLAYDRIVERSERVERHEADER
+} // namespace IECoreImageBindings

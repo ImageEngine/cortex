@@ -162,10 +162,7 @@
 #include "IECorePython/MeshVertexReorderOpBinding.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
-#include "IECorePython/DisplayDriverBinding.h"
 #include "IECorePython/CoordinateSystemBinding.h"
-#include "IECorePython/ClientDisplayDriverBinding.h"
-#include "IECorePython/DisplayDriverServerBinding.h"
 #include "IECorePython/DisplayBinding.h"
 #include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
@@ -233,7 +230,6 @@
 #include "IECorePython/TimeCodeDataBinding.h"
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
-#include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
@@ -388,9 +384,6 @@ BOOST_PYTHON_MODULE(_IECore)
 
 #ifdef IECORE_WITH_ASIO
 
-	bindDisplayDriver();
-	bindClientDisplayDriver();
-	bindDisplayDriverServer();
 	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader
 	bindOBJReader();
 
@@ -462,7 +455,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindTimeCodeData();
 	bindTimeCodeParameter();
 	bindOptions();
-	bindMPlayDisplayDriver();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();

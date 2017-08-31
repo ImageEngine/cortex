@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2012, John Haddon. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,29 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+#ifndef IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H
+#define IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H
 
-#include "IECore/DisplayDriverServer.h"
-#include "IECorePython/DisplayDriverServerBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECoreImageBindings
 {
 
-void bindDisplayDriverServer()
-{
-	using boost::python::arg;
-
-	RunTimeTypedClass<DisplayDriverServer>()
-		.def( init< int >( ( arg( "portNumber" ) = 0 ) ) )
-		.def( "portNumber", &DisplayDriverServer::portNumber )
-	;
+void bindMPlayDisplayDriver();
 
 }
 
-} // namespace IECorePython
+#endif // IECOREIMAGEBINDINGS_MPLAYDISPLAYDRIVERBINDING_H

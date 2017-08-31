@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
+//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,33 +32,14 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+#ifndef IECOREIMAGEBINDINGS_DISPLAYDRIVERBINDING_H
+#define IECOREIMAGEBINDINGS_DISPLAYDRIVERBINDING_H
 
-#include "IECore/MPlayDisplayDriver.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-
-#include "IECorePython/MPlayDisplayDriverBinding.h"
-
-using namespace boost;
-using namespace boost::python;
-using namespace IECore;
-
-namespace IECorePython
+namespace IECoreImageBindings
 {
 
-static MPlayDisplayDriverPtr constructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
-{
-	std::vector<std::string> names;
-	boost::python::container_utils::extend_container( names, channelNames );
-	return new MPlayDisplayDriver( displayWindow, dataWindow, names, parameters );
+void bindDisplayDriver();
+
 }
 
-void bindMPlayDisplayDriver()
-{
-	RunTimeTypedClass<MPlayDisplayDriver>()
-		.def( "__init__", make_constructor( &constructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
-	;
-}
-
-} // namespace IECorePython
+#endif // IECOREIMAGEBINDINGS_DISPLAYDRIVERBINDING_H

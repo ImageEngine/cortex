@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,67 +32,25 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/private/DisplayDriverServerHeader.h"
+#ifndef IECOREIMAGE_DISPLAYDRIVER_INL
+#define IECOREIMAGE_DISPLAYDRIVER_INL
 
-using namespace IECore;
-
-enum byteOrder {
-	orderMagicNumber = 0,
-	orderProtocolVersion,
-	orderMessageType,
-	orderDataSize1,
-	orderDataSize2,
-	orderDataSize3,
-	orderDataSize4
-};
-
-DisplayDriverServerHeader::DisplayDriverServerHeader()
+namespace IECoreImage
 {
-	memset( &m_header[0], 0, sizeof(m_header) );
+
+template<typename T>
+DisplayDriver::DisplayDriverDescription<T>::DisplayDriverDescription()
+{
+	registerType( T::staticTypeName(), creator );
 }
 
-DisplayDriverServerHeader::DisplayDriverServerHeader( MessageType msg, size_t dataSize )
+template<typename T>
+DisplayDriverPtr DisplayDriver::DisplayDriverDescription<T>::creator( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )
 {
-	m_header[orderMagicNumber] = magicNumber;
-	m_header[orderProtocolVersion] = currentProtocolVersion;
-	m_header[orderMessageType] = msg;
-	setDataSize( dataSize );
+	return new T( displayWindow, dataWindow, channelNames, parameters );
 }
 
-unsigned char *DisplayDriverServerHeader::buffer()
-{
-	return &m_header[0];
-}
+}  // namespace IECoreImage
 
-bool DisplayDriverServerHeader::valid()
-{
-	if ( m_header[orderMagicNumber] != magicNumber || 
-		 m_header[orderProtocolVersion] != currentProtocolVersion ||
-		( m_header[orderMessageType] != imageOpen && 
-			m_header[orderMessageType] != imageData &&
-			m_header[orderMessageType] != imageClose && 
-			m_header[orderMessageType] != exception ) )
-	{
-		return false;
-	}
-	return true;
-}
 
-size_t DisplayDriverServerHeader::getDataSize()
-{
-	return (unsigned int)m_header[orderDataSize1] | ((unsigned int)m_header[orderDataSize2] << 8) |
-				((unsigned int)m_header[orderDataSize3] << 16) | ((unsigned int)m_header[orderDataSize4] << 24);
-}
-
-void DisplayDriverServerHeader::setDataSize( size_t dataSize )
-{
-	m_header[orderDataSize1] = dataSize & 0xff;
-	m_header[orderDataSize2] = ( dataSize >> 8 ) & 0xff;
-	m_header[orderDataSize3] = ( dataSize >> 16 ) & 0xff;
-	m_header[orderDataSize4] = ( dataSize >> 24 ) & 0xff;
-}
-
-DisplayDriverServerHeader::MessageType DisplayDriverServerHeader::messageType()
-{
-	return (MessageType)m_header[2];
-}
+#endif // IECOREIMAGE_DISPLAYDRIVER_INL

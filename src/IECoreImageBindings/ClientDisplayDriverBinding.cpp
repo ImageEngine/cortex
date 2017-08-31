@@ -32,16 +32,54 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECOREPYTHON_DISPLAYDRIVERSERVERBINDING_H
-#define IECOREPYTHON_DISPLAYDRIVERSERVERBINDING_H
+#include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
-#include "IECorePython/Export.h"
+#include "IECore/SimpleTypedData.h"
+#include "IECore/VectorTypedData.h"
 
-namespace IECorePython
+#include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
+
+#include "IECoreImage/ClientDisplayDriver.h"
+#include "IECoreImageBindings/ClientDisplayDriverBinding.h"
+
+using namespace boost;
+using namespace boost::python;
+using namespace IECore;
+using namespace IECorePython;
+using namespace IECoreImage;
+
+namespace
 {
 
-IECOREPYTHON_API void bindDisplayDriverServer();
-
+template< typename T >
+std::vector< T > listToVector( const boost::python::list &names )
+{
+	std::vector< T > n;
+	boost::python::container_utils::extend_container( n, names );
+	return n;
 }
 
-#endif // IECOREPYTHON_DISPLAYDRIVERSERVERBINDING_H
+static ClientDisplayDriverPtr clientDisplayDriverConstructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
+{
+	std::vector<std::string> names = listToVector<std::string>( channelNames );
+	ScopedGILRelease gilRelease;
+	return new ClientDisplayDriver( displayWindow, dataWindow, names, parameters );
+}
+
+} // namespace
+
+namespace IECoreImageBindings
+{
+
+void bindClientDisplayDriver()
+{
+	RunTimeTypedClass<ClientDisplayDriver>()
+		.def( "__init__", make_constructor( &clientDisplayDriverConstructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
+		.def( "host", &ClientDisplayDriver::host )
+		.def( "port", &ClientDisplayDriver::port )
+	;
+}
+
+} // namespace IECoreImageBindings

@@ -35,8 +35,8 @@
 //! \file DisplayDriver.h
 /// Defines the DisplayDriver abstract base class.
 
-#ifndef IE_CORE_DISPLAYDRIVER_H
-#define IE_CORE_DISPLAYDRIVER_H
+#ifndef IECOREIMAGE_DISPLAYDRIVER_H
+#define IECOREIMAGE_DISPLAYDRIVER_H
 
 #include <vector>
 
@@ -44,28 +44,28 @@
 
 #include "OpenEXR/ImathBox.h"
 
-#include "IECore/Export.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/CompoundData.h"
 
-namespace IECore
+#include "IECoreImage/Export.h"
+#include "IECoreImage/TypeIds.h"
+
+namespace IECoreImage
 {
 
-
 IE_CORE_FORWARDDECLARE( DisplayDriver );
-
 
 /// Abstract base class for generic image display drivers.
 /// Derived classes should implement the virtual methods that are used as callbacks for opening a new pass, updating an image block and closing the image.
 /// \ingroup renderingGroup
-class IECORE_API DisplayDriver : public RunTimeTyped
+class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPED( DisplayDriver, RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DisplayDriver, DisplayDriverTypeId, IECore::RunTimeTyped );
 
 		/// Initializes the display driver for showing a new image according to the given parameters.
-		DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+		DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 
 		virtual ~DisplayDriver();
 
@@ -102,9 +102,9 @@ class IECORE_API DisplayDriver : public RunTimeTyped
 		//@{
 		/// Factory function for creating display drivers. Returns a new display driver
 		/// of the specified type, constructed using the specified parameters.
-		static DisplayDriverPtr create( const std::string &typeName, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+		static DisplayDriverPtr create( const std::string &typeName, const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 		/// Definition of a function which can create a display driver.
-		typedef boost::function<DisplayDriverPtr ( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters )> CreatorFn;
+		typedef boost::function<DisplayDriverPtr ( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters )> CreatorFn;
 		/// Registers a new display driver type.
 		static void registerType( const std::string &typeName, CreatorFn creator );
 		//@}
@@ -119,7 +119,7 @@ class IECORE_API DisplayDriver : public RunTimeTyped
 			public :
 				DisplayDriverDescription();
 			private :			
-				static DisplayDriverPtr creator( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+				static DisplayDriverPtr creator( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 		};
 
 	private :
@@ -133,8 +133,8 @@ class IECORE_API DisplayDriver : public RunTimeTyped
 		
 };
 
-}  // namespace IECore
+}  // namespace IECoreImage
 
-#include "IECore/DisplayDriver.inl"
+#include "IECoreImage/DisplayDriver.inl"
 
-#endif // IE_CORE_DISPLAYDRIVER_H
+#endif // IECOREIMAGE_DISPLAYDRIVER_H

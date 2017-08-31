@@ -76,7 +76,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 	def testFactory( self ):
 
-		idd = IECore.DisplayDriver.create( "ImageDisplayDriver", IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ), [ 'r', 'g', 'b' ], IECore.CompoundData() )
+		idd = IECoreImage.DisplayDriver.create( "ImageDisplayDriver", IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ), IECore.Box2i( IECore.V2i(10,10), IECore.V2i(40,40) ), [ 'r', 'g', 'b' ], IECore.CompoundData() )
 		self.failUnless( isinstance( idd, IECoreImage.ImageDisplayDriver ) )
 		self.assertEqual( idd.scanLineOrderOnly(), False )
 		self.assertEqual( idd.displayWindow(), IECore.Box2i( IECore.V2i(0,0), IECore.V2i(100,100) ) )
@@ -94,7 +94,7 @@ class ImageDisplayDriverTest(unittest.TestCase):
 
 		img = IECore.Reader.create( "test/IECoreImage/data/tiff/bluegreen_noise.400x300.tif" )()
 
-		idd = IECore.DisplayDriver.create(
+		idd = IECoreImage.DisplayDriver.create(
 			"ImageDisplayDriver",
 			img.displayWindow,
 			img.dataWindow,
@@ -150,7 +150,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		# to enter into python when those threads execute procedurals.
 		IECore.initThreads()
 
-		self.server = IECore.DisplayDriverServer( 1559 )
+		self.server = IECoreImage.DisplayDriverServer( 1559 )
 		time.sleep(2)
 
 	def __prepareBuf( self, buf, width, offset, red, green, blue ):
@@ -161,7 +161,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 
 	def testUsedPortException( self ):
 
-		self.assertRaises( RuntimeError, lambda : IECore.DisplayDriverServer( 1559 ) )
+		self.assertRaises( RuntimeError, lambda : IECoreImage.DisplayDriverServer( 1559 ) )
 
 	def testTransfer( self ):
 
@@ -178,7 +178,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		params["remoteDisplayType"] = IECore.StringData( "ImageDisplayDriver" )
 		params["handle"] = IECore.StringData( "myHandle" )
 		params["header:myMetadata"] = IECore.StringData( "Metadata!" )
-		idd = IECore.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
+		idd = IECoreImage.ClientDisplayDriver( img.displayWindow, img.dataWindow, list( img.channelNames() ), params )
 
 		buf = IECore.FloatVectorData( width * 3 )
 		for i in xrange( 0, img.dataWindow.max.y - img.dataWindow.min.y + 1 ):
@@ -206,10 +206,10 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		} )
 
 		dw = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) )
-		self.assertRaises( RuntimeError, IECore.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
 		try :
-			IECore.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
 
@@ -224,10 +224,10 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 		} )
 
 		dw = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 255 ) )
-		self.assertRaises( RuntimeError, IECore.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
+		self.assertRaises( RuntimeError, IECoreImage.ClientDisplayDriver, dw, dw, [ "R", "G", "B" ], parameters )
 
 		try :
-			IECore.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
+			IECoreImage.ClientDisplayDriver( dw, dw, [ "R", "G", "B" ], parameters )
 		except Exception, e :
 			pass
 
@@ -237,7 +237,7 @@ class ClientServerDisplayDriverTest(unittest.TestCase):
 
 		window = IECore.Box2i( IECore.V2i( 0 ), IECore.V2i( 15 ) )
 
-		dd = IECore.ClientDisplayDriver(
+		dd = IECoreImage.ClientDisplayDriver(
 			window, window,
 			[ "Y" ],
 			IECore.CompoundData( {

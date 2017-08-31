@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2012, John Haddon. All rights reserved.
-//  Copyright (c) 2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -33,54 +32,65 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef IECORE_MPLAYDISPLAYDRIVER_H
-#define IECORE_MPLAYDISPLAYDRIVER_H
+//! \file ClientDisplayDriver.h
+/// Defines the ClientDisplayDriver class.
 
-#include "IECore/Export.h"
-#include "IECore/DisplayDriver.h"
+#ifndef IECOREIMAGE_CLIENTDISPLAYDRIVER
+#define IECOREIMAGE_CLIENTDISPLAYDRIVER
 
-namespace IECore
+#include "IECoreImage/Export.h"
+#include "IECoreImage/DisplayDriver.h"
+
+namespace IECoreImage
 {
 
-class IECORE_API MPlayDisplayDriver : public DisplayDriver
+
+/// Connects to a DisplayDriverServer and forwards the image to the server using socket messages.
+/// This client class works synchronously.
+/// It forwards all parameters to the server and also includes one called "clientPID" to help grouping AOVs from the same render.
+/// You must set the parameter 'remoteDisplayType' with a registered display driver to be instantiated in the server side.
+/// \ingroup renderingGroup
+class IECOREIMAGE_API ClientDisplayDriver : public DisplayDriver
 {
-	public :
+	public:
 
-		IE_CORE_DECLARERUNTIMETYPED( MPlayDisplayDriver, DisplayDriver );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ClientDisplayDriver, ClientDisplayDriverTypeId, DisplayDriver );
 
-		MPlayDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
-		virtual ~MPlayDisplayDriver();
+		// Constructor.
+		// Expects two StringData parameters: displayHost and displayPort.
+		ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-		virtual void imageClose();
+		virtual ~ClientDisplayDriver();
+
+		// Get the target host name
+		std::string host() const;
+
+		// Get the port number or service name
+		std::string port() const;
+
 		virtual bool scanLineOrderOnly() const;
+		
 		virtual bool acceptsRepeatedData() const;
 
-	private :
+		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
 
-		static const DisplayDriverDescription<MPlayDisplayDriver> g_description;
+		virtual void imageClose();
 
-		struct ImageHeader;
-		struct PlaneHeader;
-		struct TileHeader;
+	private:
 
-		struct Plane
-		{
-			Plane( const std::string &n ) : name( n ) {}
-			std::string name;
-			std::vector<std::string> channelNames;
-			std::vector<size_t> channelIndices;
-		};
+		static const DisplayDriverDescription<ClientDisplayDriver> g_description;
 
-		typedef std::vector<Plane> PlaneVector;
-		
-		FILE *m_imDisplayStdIn;
-		PlaneVector m_planes;
-		
+		void sendHeader( int msg, size_t dataSize );
+		size_t receiveHeader( int msg );
+
+		class PrivateData;
+		IE_CORE_DECLAREPTR( PrivateData );
+		PrivateDataPtr m_data;
+
 };
 
-IE_CORE_DECLAREPTR( MPlayDisplayDriver )
+IE_CORE_DECLAREPTR( ClientDisplayDriver )
 
-}  // namespace IECore
+}  // namespace IECoreImage
 
-#endif // IECORE_MPLAYDISPLAYDRIVER_H
+#endif // IECOREIMAGE_CLIENTDISPLAYDRIVER

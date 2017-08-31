@@ -35,25 +35,26 @@
 import unittest
 
 import IECore
+import IECoreImage
 
 class DisplayDriverServerTest( unittest.TestCase ) :
 
 	def testPortNumber( self ) :
 
-		s1 = IECore.DisplayDriverServer( 1559 )
+		s1 = IECoreImage.DisplayDriverServer( 1559 )
 		self.assertEqual( s1.portNumber(), 1559 )
 
-		self.assertRaises( RuntimeError, IECore.DisplayDriverServer, 1559 )
+		self.assertRaises( RuntimeError, IECoreImage.DisplayDriverServer, 1559 )
 
-		s2 = IECore.DisplayDriverServer( 0 )
+		s2 = IECoreImage.DisplayDriverServer( 0 )
 		self.assertNotEqual( s2.portNumber(), 0 )
 		self.assertNotEqual( s2.portNumber(), s1.portNumber() )
 
-		s3 = IECore.DisplayDriverServer( 0 )
+		s3 = IECoreImage.DisplayDriverServer( 0 )
 		self.assertNotEqual( s3.portNumber(), 0 )
 		self.assertNotEqual( s3.portNumber(), s2.portNumber() )
 
-		s4 = IECore.DisplayDriverServer()
+		s4 = IECoreImage.DisplayDriverServer()
 		self.assertNotEqual( s4.portNumber(), 0 )
 		self.assertNotEqual( s4.portNumber(), s3.portNumber() )
 

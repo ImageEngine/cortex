@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2008-2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,45 +32,68 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+#include "IECoreImage/Private/DisplayDriverServerHeader.h"
 
-#include "IECore/ClientDisplayDriver.h"
-#include "IECore/SimpleTypedData.h"
-#include "IECore/VectorTypedData.h"
-#include "IECorePython/ClientDisplayDriverBinding.h"
-#include "IECorePython/RunTimeTypedBinding.h"
-#include "IECorePython/ScopedGILRelease.h"
-
-using namespace boost;
-using namespace boost::python;
 using namespace IECore;
+using namespace IECoreImage;
 
-namespace IECorePython
-{
+enum byteOrder {
+	orderMagicNumber = 0,
+	orderProtocolVersion,
+	orderMessageType,
+	orderDataSize1,
+	orderDataSize2,
+	orderDataSize3,
+	orderDataSize4
+};
 
-template< typename T >
-std::vector< T > listToVector( const boost::python::list &names )
+DisplayDriverServerHeader::DisplayDriverServerHeader()
 {
-	std::vector< T > n;
-	boost::python::container_utils::extend_container( n, names );
-	return n;
+	memset( &m_header[0], 0, sizeof(m_header) );
 }
 
-static ClientDisplayDriverPtr clientDisplayDriverConstructor( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const list &channelNames, CompoundDataPtr parameters )
+DisplayDriverServerHeader::DisplayDriverServerHeader( MessageType msg, size_t dataSize )
 {
-	std::vector<std::string> names = listToVector<std::string>( channelNames );
-	ScopedGILRelease gilRelease;
-	return new ClientDisplayDriver( displayWindow, dataWindow, names, parameters );
+	m_header[orderMagicNumber] = magicNumber;
+	m_header[orderProtocolVersion] = currentProtocolVersion;
+	m_header[orderMessageType] = msg;
+	setDataSize( dataSize );
 }
 
-void bindClientDisplayDriver()
+unsigned char *DisplayDriverServerHeader::buffer()
 {
-	RunTimeTypedClass<ClientDisplayDriver>()
-		.def( "__init__", make_constructor( &clientDisplayDriverConstructor, default_call_policies(), ( boost::python::arg_( "displayWindow" ), boost::python::arg_( "dataWindow" ), boost::python::arg_( "channelNames" ), boost::python::arg_( "parameters" ) ) ) )
-		.def( "host", &ClientDisplayDriver::host )
-		.def( "port", &ClientDisplayDriver::port )
-	;
+	return &m_header[0];
 }
 
-} // namespace IECorePython
+bool DisplayDriverServerHeader::valid()
+{
+	if ( m_header[orderMagicNumber] != magicNumber || 
+		 m_header[orderProtocolVersion] != currentProtocolVersion ||
+		( m_header[orderMessageType] != imageOpen && 
+			m_header[orderMessageType] != imageData &&
+			m_header[orderMessageType] != imageClose && 
+			m_header[orderMessageType] != exception ) )
+	{
+		return false;
+	}
+	return true;
+}
+
+size_t DisplayDriverServerHeader::getDataSize()
+{
+	return (unsigned int)m_header[orderDataSize1] | ((unsigned int)m_header[orderDataSize2] << 8) |
+				((unsigned int)m_header[orderDataSize3] << 16) | ((unsigned int)m_header[orderDataSize4] << 24);
+}
+
+void DisplayDriverServerHeader::setDataSize( size_t dataSize )
+{
+	m_header[orderDataSize1] = dataSize & 0xff;
+	m_header[orderDataSize2] = ( dataSize >> 8 ) & 0xff;
+	m_header[orderDataSize3] = ( dataSize >> 16 ) & 0xff;
+	m_header[orderDataSize4] = ( dataSize >> 24 ) & 0xff;
+}
+
+DisplayDriverServerHeader::MessageType DisplayDriverServerHeader::messageType()
+{
+	return (MessageType)m_header[2];
+}

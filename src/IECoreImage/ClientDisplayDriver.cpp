@@ -37,16 +37,18 @@
 #include "boost/bind.hpp"
 #include "boost/array.hpp"
 
-#include "IECore/ClientDisplayDriver.h"
-#include "IECore/private/DisplayDriverServerHeader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MemoryIndexedIO.h"
 
-using namespace boost;
+#include "IECoreImage/ClientDisplayDriver.h"
+#include "IECoreImage/Private/DisplayDriverServerHeader.h"
+
 using namespace std;
+using boost::asio::ip::tcp;
+using namespace boost;
 using namespace Imath;
 using namespace IECore;
-using boost::asio::ip::tcp;
+using namespace IECoreImage;
 
 class ClientDisplayDriver::PrivateData : public RefCounted
 {

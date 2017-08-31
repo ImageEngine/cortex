@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,66 +32,59 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-//! \file ClientDisplayDriver.h
-/// Defines the ClientDisplayDriver class.
+//! \file DisplayDriverServer.h
+/// Defines the DisplayDriverServer class.
 
-#ifndef IE_CORE_CLIENTDISPLAYDRIVER
-#define IE_CORE_CLIENTDISPLAYDRIVER
+#ifndef IECOREIMAGE_DISPLAYDRIVERSERVER
+#define IECOREIMAGE_DISPLAYDRIVERSERVER
 
-#include "IECore/Export.h"
-#include "IECore/DisplayDriver.h"
+#include "boost/system/error_code.hpp"
 
-namespace IECore
+#include "IECore/RunTimeTyped.h"
+#include "IECore/VectorTypedData.h"
+
+#include "IECoreImage/Export.h"
+#include "IECoreImage/DisplayDriver.h"
+
+namespace IECoreImage
 {
 
-
-/// Connects to a DisplayDriverServer and forwards the image to the server using socket messages.
-/// This client class works synchronously.
-/// It forwards all parameters to the server and also includes one called "clientPID" to help grouping AOVs from the same render.
-/// You must set the parameter 'remoteDisplayType' with a registered display driver to be instantiated in the server side.
+/// Server class that receives images from ClientDisplayDriver connections and forwards the data to local display drivers.
+/// The type of the local display drivers is defined by the 'remoteDisplayType' parameter.
+///
+/// The server object creates a thread to control the socket connection. The thread dies when the object is destroyed.
 /// \ingroup renderingGroup
-class IECORE_API ClientDisplayDriver : public DisplayDriver
+class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPED( ClientDisplayDriver, DisplayDriver );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DisplayDriverServer, DisplayDriverServerTypeId, IECore::RunTimeTyped );
 
-		// Constructor.
-		// Expects two StringData parameters: displayHost and displayPort.
-		ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters );
+		/// A port number of 0 causes a free port to be chosen
+		/// automatically. Call `portNumber()` after construction
+		/// to retrieve the actual number.
+		DisplayDriverServer( int portNumber = 0 );
+		virtual ~DisplayDriverServer();
 
-		virtual ~ClientDisplayDriver();
-
-		// Get the target host name
-		std::string host() const;
-
-		// Get the port number or service name
-		std::string port() const;
-
-		virtual bool scanLineOrderOnly() const;
-		
-		virtual bool acceptsRepeatedData() const;
-
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-
-		virtual void imageClose();
+		int portNumber();
 
 	private:
 
-		static const DisplayDriverDescription<ClientDisplayDriver> g_description;
+		// Session class
+		// Takes care of one client connection.
+		class Session;
+		IE_CORE_DECLAREPTR( Session );
 
-		void sendHeader( int msg, size_t dataSize );
-		size_t receiveHeader( int msg );
+		void serverThread();
+		void handleAccept( DisplayDriverServer::SessionPtr session, const boost::system::error_code& error);
 
 		class PrivateData;
 		IE_CORE_DECLAREPTR( PrivateData );
 		PrivateDataPtr m_data;
-
 };
 
-IE_CORE_DECLAREPTR( ClientDisplayDriver )
+IE_CORE_DECLAREPTR( DisplayDriverServer )
 
+} // namespace IECoreImage
 
-}  // namespace IECore
-
-#endif // IE_CORE_CLIENTDISPLAYDRIVER
+#endif // IECOREIMAGE_DISPLAYDRIVERSERVER
