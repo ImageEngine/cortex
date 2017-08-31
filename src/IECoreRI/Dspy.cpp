@@ -198,11 +198,6 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 				}
 				break;
 			case 's':
-				if ( parameters[p].nbytes / parameters[p].UP_VALUECOUNT != sizeof(char*) )
-				{
-					msg( Msg::Error, "Dspy::imageOpen", "Invalid string data size" );
-					continue;
-				}
 				pChar = (const char **)(parameters[p].value);
 				if ( parameters[p].UP_VALUECOUNT == 1 )
 				{
