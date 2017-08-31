@@ -106,7 +106,7 @@ void MeshPrimitive::computeMinMaxVertsPerFace() const
 	m_minVerticesPerFace = ( m_verticesPerFace->readable().size() ? minVertsPerFace : 0 );
 	m_maxVerticesPerFace = maxVertsPerFace;
 }
-		
+
 int MeshPrimitive::minVerticesPerFace() const
 {
 	if( m_maxVerticesPerFace == 0 )
@@ -150,12 +150,12 @@ void MeshPrimitive::setTopology( ConstIntVectorDataPtr verticesPerFace, ConstInt
 		}
 		maxVertexId = std::max( maxVertexId, id );
 	}
-	
+
 	m_verticesPerFace = verticesPerFace->copy();
 	m_vertexIds = vertexIds->copy();
-	
+
 	computeMinMaxVertsPerFace();
-	
+
 	if( m_vertexIds->readable().size() )
 	{
 		m_numVertices = 1 + maxVertexId;
@@ -191,7 +191,7 @@ PolygonIterator MeshPrimitive::faceEnd()
 {
 	return PolygonIterator( m_verticesPerFace->readable().end(), m_vertexIds->readable().end(), m_vertexIds->readable().size() );
 }
-		
+
 size_t MeshPrimitive::variableSize( PrimitiveVariable::Interpolation interpolation ) const
 {
 	switch(interpolation)
@@ -350,7 +350,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 {
 	V3fVectorDataPtr pData = new V3fVectorData;
 	std::vector<V3f> &p = pData->writable();
-	
+
 	// add vertices
 	float xStep = b.size().x / (float)divisions.x;
 	float yStep = b.size().y / (float)divisions.y;
@@ -361,20 +361,20 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 			p.push_back( V3f( b.min.x + j * xStep, b.min.y + i * yStep, 0 ) );
 		}
 	}
-	
+
 	IntVectorDataPtr vertexIds = new IntVectorData;
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
 	std::vector<int> &vpf = verticesPerFace->writable();
 	std::vector<int> &vIds = vertexIds->writable();
-	
+
 	FloatVectorDataPtr sData = new FloatVectorData;
 	FloatVectorDataPtr tData = new FloatVectorData;
 	std::vector<float> &s = sData->writable();
 	std::vector<float> &t = tData->writable();
-	
+
 	float sStep = 1.0f / (float)divisions.x;
 	float tStep = 1.0f / (float)divisions.y;
-	
+
 	// add faces
 	int v0, v1, v2, v3;
 	for ( int i = 0; i < divisions.y; ++i )
@@ -385,18 +385,18 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 			v1 = j + 1 + (divisions.x+1) * i;;
 			v2 = j + 1 + (divisions.x+1) * (i+1);
 			v3 = j + (divisions.x+1) * (i+1);
-			
+
 			vpf.push_back( 4 );
 			vIds.push_back( v0 );
 			vIds.push_back( v1 );
 			vIds.push_back( v2 );
 			vIds.push_back( v3 );
-			
+
 			s.push_back( j * sStep );
 			s.push_back( (j+1) * sStep );
 			s.push_back( (j+1) * sStep );
 			s.push_back( j * sStep );
-			
+
 			t.push_back( 1 - i * tStep );
 			t.push_back( 1 - i * tStep );
 			t.push_back( 1 - (i+1) * tStep );
@@ -417,17 +417,17 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
 	std::vector<int> &vpf = verticesPerFace->writable();
 	std::vector<int> &vIds = vertexIds->writable();
-	
+
 	V3fVectorDataPtr pData = new V3fVectorData;
 	V3fVectorDataPtr nData = new V3fVectorData;
 	std::vector<V3f> &pVector = pData->writable();
 	std::vector<V3f> &nVector = nData->writable();
-	
+
 	FloatVectorDataPtr sData = new FloatVectorData;
 	FloatVectorDataPtr tData = new FloatVectorData;
 	std::vector<float> &sVector = sData->writable();
 	std::vector<float> &tVector = tData->writable();
-	
+
 	float oMin = Math<float>::asin( zMin );
 	float oMax = Math<float>::asin( zMax );
 	const unsigned int nO = max( 4u, (unsigned int)( ( divisions.x + 1 ) * (oMax - oMin) / M_PI ) );
@@ -441,7 +441,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 		float o = lerp( oMin, oMax, v );
 		float z = radius * Math<float>::sin( o );
 		float r = radius * Math<float>::cos( o );
-		
+
 		for ( unsigned int j=0; j<nT; j++ )
 		{
 			float u = (float)j/(float)(nT-1);
@@ -468,8 +468,67 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 			}
 		}
 	}
-	
+
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
+	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
+	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
+	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
+
+	return result;
+}
+
+MeshPrimitivePtr MeshPrimitive::createTorus( float radiusInner, float radiusOuter, const Imath::V2i &divisions )
+{
+	IECore::IntVectorDataPtr verticesPerFace = new IECore::IntVectorData;
+	vector<int> &vpf = verticesPerFace->writable();
+
+	IECore::IntVectorDataPtr vertexIds = new IECore::IntVectorData;
+	vector<int> &vIds = vertexIds->writable();
+
+	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
+	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
+	IECore::FloatVectorDataPtr sData = new IECore::FloatVectorData;
+	IECore::FloatVectorDataPtr tData = new IECore::FloatVectorData;
+	vector<V3f> &pVector = pData->writable();
+	vector<V3f> &nVector = nData->writable();
+	vector<float> &sVector = sData->writable();
+	vector<float> &tVector = tData->writable();
+
+	float sMultiplier = 1.0f / divisions.x;
+	float tMultiplier = 1.0f / divisions.y;
+
+	int vertexCountX = divisions.x + 1;
+	int vertexCountY = divisions.y + 1;
+
+	for( int i = 0; i < vertexCountX; ++i )
+	{
+		const float iAngle = 2 * M_PI * (float)i/(float)(divisions.x);
+		const V3f v( cos( iAngle ), 0, sin( iAngle ) );
+		const V3f circleCenter = v * radiusInner;
+
+		const int ii = i == divisions.x ? 0 : i + 1;
+
+		for( int j = 0; j < vertexCountY; ++j )
+		{
+			const float jAngle = 2 * M_PI * (float)j/(float)(divisions.y);
+			Imath::V3f normal( cos( jAngle ) * v + V3f( 0, sin( jAngle ), 0 ) );
+			pVector.push_back( circleCenter + radiusOuter * normal );
+			nVector.push_back( normal );
+			sVector.push_back( i * sMultiplier );
+			tVector.push_back( j * tMultiplier );
+
+			const int jj = j == divisions.y ? 0 : j + 1;
+
+			vpf.push_back( 4 );
+
+			vIds.push_back( i  * vertexCountY + j  );
+			vIds.push_back( i  * vertexCountY + jj );
+			vIds.push_back( ii * vertexCountY + jj );
+			vIds.push_back( ii * vertexCountY + j  );
+		}
+	}
+
+	IECore::MeshPrimitivePtr result = new IECore::MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
 	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
 	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
 	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
