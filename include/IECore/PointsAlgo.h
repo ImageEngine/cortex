@@ -49,6 +49,11 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 /// create a new PointsPrimitive deleting points from the input PointsPrimitive based on the pointsToDelete vertex (int|float|bool) PrimitiveVariable
 PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete);
 
+/// merge points primitives - when conflicting primitive variables are encountered earlier elements in the input vector take priority.
+/// constant interpolated primitive variables: first occurance of the primitive variable is used and others ignored.
+/// vertex interpolated primitive variables: type conversion is attempted where later primitives variables in the list are cast to earlier ones.
+PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives );
+
 } // namespace PointsAlgo
 } // namespace IECore
 

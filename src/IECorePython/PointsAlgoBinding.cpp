@@ -43,6 +43,25 @@ using namespace boost;
 using namespace boost::python;
 using namespace IECore;
 
+namespace
+{
+
+PointsPrimitivePtr mergePointsList( boost::python::list &pointsPrimitiveList )
+{
+	int numPointsPrimitives = boost::python::len( pointsPrimitiveList );
+	std::vector<const PointsPrimitive *> pointsPrimitiveVec( numPointsPrimitives );
+
+	for( int i = 0; i < numPointsPrimitives; ++i )
+	{
+		PointsPrimitivePtr ptr = boost::python::extract<PointsPrimitivePtr>( pointsPrimitiveList[i] );
+		pointsPrimitiveVec[i] = ptr.get();
+	}
+
+	return PointsAlgo::mergePoints( pointsPrimitiveVec );
+}
+
+} // namepsace
+
 namespace IECorePython
 {
 
@@ -55,6 +74,7 @@ void bindPointsAlgo()
 
 	def( "resamplePrimitiveVariable", &PointsAlgo::resamplePrimitiveVariable );
 	def( "deletePoints", &PointsAlgo::deletePoints );
+	def( "mergePoints", &::mergePointsList );
 }
 
 } // namespace IECorePython
