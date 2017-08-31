@@ -65,7 +65,12 @@ void CoreHoudini::initPython()
 		import( "hou" );
 		import( "IECore" );
 		import( "IECoreHoudini" );
+
+#ifdef IECOREHOUDINI_WITH_GL
+
 		import( "IECoreGL" );
+
+#endif
 
 		g_initialized = true;
 	}

@@ -301,6 +301,13 @@ if targetApp=="houdini" :
 	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
+	# Temporarily disable IECoreGL until we sort out our dependency trauma
+	#	Houdini 16.0 requires Boost 1.55.0
+	#	IECoreGL requires IECoreImage requires OpenImageIO 1.8.4dev requires Boost 1.61.0
+	# We need to sort this out before Cortex 10 is officially released,
+	# but chances are by that points Houdini 16.5 will be released.
+	WITH_GL = False
+
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion

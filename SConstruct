@@ -2485,6 +2485,11 @@ houdiniEnvAppends = {
 	]
 }
 
+if env["WITH_GL"] :
+	houdiniEnvAppends["CXXFLAGS"].extend( [ "-isystem", "$GLEW_INCLUDE_PATH" ] )
+	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
+	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
+
 if env["PLATFORM"]=="posix" :
 	houdiniEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 elif env["PLATFORM"]=="darwin" :
@@ -2540,6 +2545,11 @@ if doConfigure :
 		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
 		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
 		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
+		if not env['WITH_GL'] :
+			houdiniSources.remove( "src/IECoreHoudini/GR_Cortex.cpp" )
+			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
+			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
+			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
 		if env['WITH_MANTRA']:
 			mantraSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/*.cpp") )
 			mantraHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.inl" )
@@ -2553,11 +2563,13 @@ if doConfigure :
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		if env['WITH_GL'] :
+			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		mantraEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		if env['WITH_GL'] :
+			mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mantraEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		#=====
