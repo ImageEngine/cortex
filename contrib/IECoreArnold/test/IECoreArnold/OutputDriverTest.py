@@ -44,7 +44,7 @@ class OutputDriverTest( unittest.TestCase ) :
 
 	def testMergedDisplays( self ) :
 
-		server = IECore.DisplayDriverServer( 1559 )
+		server = IECoreImage.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
 
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/mergedDisplays.ass" )
@@ -63,7 +63,7 @@ class OutputDriverTest( unittest.TestCase ) :
 
 	def testVectorAndPointDisplays( self ) :
 
-		server = IECore.DisplayDriverServer( 1559 )
+		server = IECoreImage.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
 
 		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )
