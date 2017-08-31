@@ -65,9 +65,9 @@ using namespace Imath;
 
 class Dspy::Registration
 {
-	
+
 	public :
-		
+
 		Registration()
 		{
 			PtDspyDriverFunctionTable table;
@@ -93,9 +93,9 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 {
 
 	*image = 0;
-	
+
 	// get channel names
-	
+
 	vector<string> channels;
 
 	if( formatCount == 1 )
@@ -133,9 +133,9 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 	V2i origin( 0 );
 
 	CompoundDataPtr convertedParameters = new CompoundData;
-	
+
 	for( int p = 0; p < paramcount; p++ )
-	{		
+	{
 		if ( !strcmp( parameters[p].name, "OriginalSize" ) && parameters[p].UP_VALUETYPE == (char)'i' && parameters[p].UP_VALUECOUNT == (char)2 && parameters[p].nbytes == (int) (parameters[p].UP_VALUECOUNT * sizeof(int)) )
 		{
 			originalSize.x = static_cast<const int *>(parameters[p].value)[0];
@@ -237,12 +237,12 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 		V2i( 0 ),
 		originalSize - V2i( 1 )
 	);
-	
+
 	Box2i dataWindow(
 		origin,
 		origin + V2i( width - 1, height - 1)
 	);
-	
+
 	// create the display driver
 
 	IECore::DisplayDriverPtr dd = 0;
@@ -269,7 +269,7 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 	{
 		flags->flags |= PkDspyFlagsWantsScanLineOrder;
 	}
-	
+
 	dd->addRef(); // this will be removed in imageClose()
 	*image = (PtDspyImageHandle)dd.get();
 	return PkDspyErrorNone;
@@ -280,9 +280,9 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
 {
 	DisplayDriver *dd = static_cast<DisplayDriver *>( image );
-#ifdef PRMANEXPORT			
+#ifdef PRMANEXPORT
 	return PkDspyErrorUnsupported;
-#else				
+#else
 	if( type == PkProgressiveQuery )
 	{
 		if( (!dd->scanLineOrderOnly()) && dd->acceptsRepeatedData() )
@@ -296,7 +296,7 @@ PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int
 		return PkDspyErrorNone;
 	}
 	return PkDspyErrorUnsupported;
-#endif				
+#endif
 }
 
 PtDspyError Dspy::imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
@@ -327,14 +327,14 @@ PtDspyError Dspy::imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne,
 			if( strcmp( e.what(), "stop" ) == 0 )
 			{
 				/// \todo I would prefer DisplayDriver::imageData to have a return
-				/// value which could be used to request stop/continue behaviour. 
+				/// value which could be used to request stop/continue behaviour.
 				/// prman doesn't seem to support PkDspyErrorStop, which should
 				/// also be resolved at some point.
-#ifdef PRMANEXPORT			
+#ifdef PRMANEXPORT
 				return PkDspyErrorUndefined;
-#else				
+#else
 				return PkDspyErrorStop;
-#endif				
+#endif
 			}
 			else
 			{
@@ -367,7 +367,7 @@ PtDspyError Dspy::imageClose( PtDspyImageHandle image )
 	{
 		msg( Msg::Error, "Dspy::imageClose", e.what() );
 	}
-	
+
 	try
 	{
 		dd->removeRef();
@@ -377,6 +377,6 @@ PtDspyError Dspy::imageClose( PtDspyImageHandle image )
 		msg( Msg::Error, "DspyImageData", e.what() );
 		return PkDspyErrorBadParams;
 	}
-	
+
 	return PkDspyErrorNone;
 }
