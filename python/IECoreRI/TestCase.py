@@ -47,4 +47,4 @@ class TestCase( unittest.TestCase ) :
 	def tearDown( self ) :
 		
 		if os.path.isdir( "test/IECoreRI/output" ) :
-			shutil.rmtree( "test/IECoreRI/output", True )
+			shutil.rmtree( "test/IECoreRI/output", ignore_errors = True )
