@@ -569,7 +569,7 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 			for vert in verts :
 				uvValues = vert.attribValue( uvs )
 				self.assertAlmostEqual( uvValues[0], sData[i] )
-				self.assertAlmostEqual( uvValues[1], 1 - tData[i] )
+				self.assertAlmostEqual( uvValues[1], tData[i] )
 				i += 1
 		
 		converter["convertStandardAttributes"].setTypedValue( False )

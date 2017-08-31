@@ -262,7 +262,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 					uvw.reserve( s.size() );
 					for ( size_t i=0; i < s.size(); ++i )
 					{
-						uvw.push_back( Imath::V3f( s[i], 1 - t[i], 0 ) );
+						uvw.emplace_back( s[i], t[i], 0 );
 					}
 					
 					GA_Range range = vertRange;

@@ -397,10 +397,10 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 			s.push_back( (j+1) * sStep );
 			s.push_back( j * sStep );
 			
-			t.push_back( 1 - i * tStep );
-			t.push_back( 1 - i * tStep );
-			t.push_back( 1 - (i+1) * tStep );
-			t.push_back( 1 - (i+1) * tStep );
+			t.push_back( i * tStep );
+			t.push_back( i * tStep );
+			t.push_back( (i+1) * tStep );
+			t.push_back( (i+1) * tStep );
 		}
 	}
 
@@ -427,7 +427,14 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	FloatVectorDataPtr tData = new FloatVectorData;
 	std::vector<float> &sVector = sData->writable();
 	std::vector<float> &tVector = tData->writable();
-	
+
+	/// \todo: Rewrite this such that the poles are aligned to Y rather than Z.
+	/// The centroid should remain at origin, uv(0,0) should be at the south
+	/// pole (e.g -Y), uv(1,1) should be at the north pole (e.g. +Y). The stable
+	/// seam (i.e. the edge that doesn't move when theta < 360) should remain
+	/// aligned to +X with uv(0,0.5), and the moving edge should be uv(1,0.5).
+	/// Remember to update SpherePrimitive at the same time.
+
 	float oMin = Math<float>::asin( zMin );
 	float oMax = Math<float>::asin( zMax );
 	const unsigned int nO = max( 4u, (unsigned int)( ( divisions.x + 1 ) * (oMax - oMin) / M_PI ) );

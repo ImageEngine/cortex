@@ -1645,6 +1645,7 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 		
 	mesh->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 	mesh->variables = primVars;
+
 	addPrimitive( mesh );
 }
 
@@ -1823,12 +1824,52 @@ void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECore::Curves
 				(char *)( primitive->periodic() ? "periodic" : "nonperiodic" ),
 				pv.n(), pv.tokens(), pv.values() );
 }
-	
+
+namespace
+{
+
+/// \todo: perhaps this should be made public in MeshAlgo or PrimitiveAlgo
+void convertUVs( PrimitiveVariableMap &variables )
+{
+	std::set<Data *> visited;
+
+	for( auto it = variables.begin(), eIt = variables.end(); it != eIt; ++it )
+	{
+		if( visited.find( it->second.data.get() ) != visited.end() )
+		{
+			continue;
+		}
+
+		// by convention, PrimitiveVariables named "t" or ending
+		// with "_t" represent the second component of a UV set.
+		if ( it->first == "t" || boost::ends_with( it->first, "_t" ) )
+		{
+			if( FloatVectorData *values = runTimeCast<FloatVectorData>( it->second.data.get() ) )
+			{
+				for( auto &value : values->writable() )
+				{
+					value = 1.0f - value;
+				}
+			}
+		}
+
+		visited.insert( it->second.data.get() );
+	}
+}
+
+} // namespace
+
 void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrimitive *primitive )
 {
-	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
-	const std::vector<int> &vertsPerFace = primitive->verticesPerFace()->readable();
-	const std::vector<int> &vertIds = primitive->vertexIds()->readable();
+	// as of Cortex 10, we take a UDIM centric approach
+	// to UVs, which clashes with RenderMan, so we must
+	// flip the t values before sending to the renderer
+	MeshPrimitivePtr mesh = primitive->copy();
+	::convertUVs( mesh->variables );
+
+	PrimitiveVariableList pv( mesh->variables, &( m_attributeStack.top().primVarTypeHints ) );
+	const std::vector<int> &vertsPerFace = mesh->verticesPerFace()->readable();
+	const std::vector<int> &vertIds = mesh->vertexIds()->readable();
 
 	if( primitive->interpolation()=="catmullClark" )
 	{
@@ -1839,7 +1880,7 @@ void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrim
 		const float *floats = 0;
 		const int *integers = 0;
 		
-		IECore::PrimitiveVariableMap::const_iterator tagIt = primitive->variables.find( "tags" );
+		IECore::PrimitiveVariableMap::const_iterator tagIt = mesh->variables.find( "tags" );
 		if( tagIt != primitive->variables.end() )
 		{
 			const CompoundData *tagsData = runTimeCast<const CompoundData>( tagIt->second.data.get() );

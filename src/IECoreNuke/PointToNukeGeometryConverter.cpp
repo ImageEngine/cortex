@@ -126,7 +126,10 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 		std::vector< float >::const_iterator tIt = pointT->readable().begin();
 		for ( ; sIt < pointS->readable().end(); sIt++, tIt++, v++)
 		{
-			uv->vector4(v).set( *sIt, *tIt, 0.0f, 1.0f);
+			// as of Cortex 10, we take a UDIM centric approach
+			// to UVs, which clashes with Nuke, so we must flip
+			// the v values during conversion.
+			uv->vector4(v).set( *sIt, 1.0 - *tIt, 0.0f, 1.0f);
 		}
 	}
 

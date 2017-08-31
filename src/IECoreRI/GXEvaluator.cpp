@@ -206,7 +206,7 @@ IECore::CompoundDataPtr GXEvaluator::evaluate( const IECore::FloatVectorData *s,
 	const PrimitiveVariable &vPrimVar = m_stEvaluator->primitive()->variables.find( "v" )->second;
 	for( size_t i=0; i<numPoints; i++ )
 	{
-		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], tReadable[i] ), evaluatorResult.get() );
+		bool success = m_stEvaluator->pointAtUV( Imath::V2f( sReadable[i], 1.0f - tReadable[i] ), evaluatorResult.get() );
 		// dividing by 2 maps from the triangle index to the original face index of the mesh before it
 		// was triangulated - we can guarantee this because the original mesh was all quads.
 		fWritable[i] = success ? evaluatorResult->triangleIndex() / 2 : 0;

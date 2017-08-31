@@ -343,12 +343,7 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		{
 			FloatVectorDataPtr sData = extractData<FloatVectorData>( attr, range, 0 );
 			FloatVectorDataPtr tData = extractData<FloatVectorData>( attr, range, 1 );
-			std::vector<float> &tValues = tData->writable();
-			for ( size_t i=0; i < tValues.size(); ++i )
-			{
-				tValues[i] = 1 - tValues[i];
-			}
-			
+
 			result->variables["s"] = PrimitiveVariable( interpolation, sData );
 			result->variables["t"] = PrimitiveVariable( interpolation, tData );
 			

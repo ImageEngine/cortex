@@ -83,10 +83,61 @@ class TestMeshPrimitive( unittest.TestCase ) :
 
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
-
 		mm = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		self.assert_( mm.arePrimitiveVariablesValid() )
 
-		self.assert_( mm.arePrimitiveVariablesValid() );
+	def testUVsFromFile( self ) :
+
+		# get the original values from a legacy cob file
+		f = FileIndexedIO("test/IECore/data/cobFiles/pSphereShape1.cob", [], IndexedIO.OpenMode.Read )
+		ff = f.directory( [ "object", "data", "Primitive" ] )
+		# make sure its a legacy file
+		self.assertEqual( ff.read( "ioVersion" ).value, 1 )
+		ff = f.directory( [ "object", "data", "Primitive", "data", "variables", "t", "data", "data", "FloatVectorData", "data" ] )
+		rawValues = ff.read( "value" )
+		self.assertAlmostEqual( rawValues[0], 0.95 )
+		self.assertEqual( rawValues[-1], 0 )
+
+		# read legacy file and confirm values are unflipped
+		sphere = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		self.assertTrue( sphere.arePrimitiveVariablesValid() )
+		self.assertAlmostEqual( sphere["t"].data[0], 0.05 )
+		self.assertEqual( sphere["t"].data[-1], 1 )
+
+		# write a new file and confirm values remain unflipped
+		Writer.create( sphere, "test/IECore/mesh.cob" ).write()
+		newSphere = Reader.create( "test/IECore/mesh.cob" ).read()
+		self.assertTrue( newSphere.arePrimitiveVariablesValid() )
+		self.assertAlmostEqual( newSphere["t"].data[0], 0.05 )
+		self.assertEqual( newSphere["t"].data[-1], 1 )
+		# make sure it matches the original
+		self.assertEqual( newSphere, sphere )
+
+		# get the original values from a legacy SceneCache file
+		f = FileIndexedIO("test/IECore/data/sccFiles/animatedSpheres.scc", [], IndexedIO.OpenMode.Read )
+		ff = f.directory( [ "root", "children", "A", "children", "a", "object", "0", "data", "Primitive" ] )
+		# make sure its a legacy file
+		self.assertEqual( ff.read( "ioVersion" ).value, 1 )
+		# note this mesh has duplicate UVs pointing to the same
+		# raw data, so we only need to verify the true values
+		ff = f.directory( [ "root", "children", "A", "children", "a", "object", "0", "data", "Primitive", "data", "variables", "map1_t", "data", "data" ] )
+		rawMap1Values = ff.read( "value" )
+		self.assertAlmostEqual( rawMap1Values[0], 0.95 )
+		self.assertEqual( rawMap1Values[-1], 0 )
+
+		# read legacy file and confirm values are unflipped
+		s = SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IndexedIO.OpenMode.Read )
+		ss = s.scene( [ "A", "a" ] )
+		animSphere = ss.readObject( 0 )
+		self.assertAlmostEqual( animSphere["t"].data[0], 0.05 )
+		self.assertEqual( animSphere["t"].data[-1], 1 )
+		self.assertAlmostEqual( animSphere["map1_t"].data[0], 0.05 )
+		self.assertEqual( animSphere["map1_t"].data[-1], 1 )
+
+		# even for lower level loading from a SceneCache
+		justPrimVars = ss.readObjectPrimitiveVariables( [ "t", "map1_t" ], 0 )
+		self.assertEqual( animSphere["t"], justPrimVars["t"] )
+		self.assertEqual( animSphere["t"], justPrimVars["map1_t"] )
 
 	def testSetInterpolation( self ) :
 
@@ -181,16 +232,16 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		# verify uvs
 		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
 		r = e.createResult()
-		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[0] )
 		self.assertEqual( r.point(), V3f( 0, 0, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[1] )
 		self.assertEqual( r.point(), V3f( 1, 0, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[3] )
 		self.assertEqual( r.point(), V3f( 1, 1, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[2] )
 		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
 		
@@ -210,16 +261,16 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		# corners still have correct uvs
 		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
 		r = e.createResult()
-		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[0] )
 		self.assertEqual( r.point(), V3f( 0, 0, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[2] )
 		self.assertEqual( r.point(), V3f( 1, 0, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 1, 0 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 1, 1 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[11] )
 		self.assertEqual( r.point(), V3f( 1, 1, 0 ) )
-		self.assertTrue( e.pointAtUV( V2f( 0, 0 ), r ) )
+		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[9] )
 		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
 
@@ -282,8 +333,12 @@ class TestMeshPrimitive( unittest.TestCase ) :
 	
 	def tearDown( self ) :
 
-		if os.path.isfile("test/IECore/mesh.fio"):
-			os.remove("test/IECore/mesh.fio")
+		for f in (
+			"test/IECore/mesh.fio",
+			"test/IECore/mesh.cob",
+		) :
+			if os.path.isfile( f ) :
+				os.remove( f )
 
 if __name__ == "__main__":
     unittest.main()

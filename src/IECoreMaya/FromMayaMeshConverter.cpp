@@ -397,7 +397,7 @@ void FromMayaMeshConverter::sAndT( const MString &uvSet, IECore::ConstIntVectorD
 			tValues.reserve( numIndices );
 			for( size_t i=0; i < numIndices; ++i )
 			{
-				tValues.push_back( 1 - vArray[ stIndices[i] ] );
+				tValues.push_back( vArray[ stIndices[i] ] );
 			}
 		}
 	}
