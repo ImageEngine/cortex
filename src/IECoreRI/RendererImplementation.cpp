@@ -1828,29 +1828,11 @@ void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECore::Curves
 namespace
 {
 
-// note this is duplicated from src/IECore/Primitive.cpp
-// perhaps it should be centralized, either publicly, or
-// via the private headers (e.g. PrimitiveAlgoUtils.h)
+/// \todo: perhaps this should be made public in MeshAlgo or PrimitiveAlgo
 void convertUVs( PrimitiveVariableMap &variables )
 {
 	std::set<Data *> visited;
 
-	auto tIt = variables.find( "t" );
-	if( tIt != variables.end() )
-	{
-		if( FloatVectorData *values = runTimeCast<FloatVectorData>( tIt->second.data.get() ) )
-		{
-			for( auto &value : values->writable() )
-			{
-				value = 1.0f - value;
-			}
-		}
-
-		visited.insert( tIt->second.data.get() );
-	}
-
-	// by convention, PrimitiveVariables ending with "_t"
-	// represent the second component of a UV set.
 	for( auto it = variables.begin(), eIt = variables.end(); it != eIt; ++it )
 	{
 		if( visited.find( it->second.data.get() ) != visited.end() )
@@ -1858,8 +1840,9 @@ void convertUVs( PrimitiveVariableMap &variables )
 			continue;
 		}
 
-		size_t suffixOffset = it->first.rfind( "_t" );
-		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == it->first.length() - 2 ) )
+		// by convention, PrimitiveVariables named "t" or ending
+		// with "_t" represent the second component of a UV set.
+		if ( it->first == "t" || boost::ends_with( it->first, "_t" ) )
 		{
 			if( FloatVectorData *values = runTimeCast<FloatVectorData>( it->second.data.get() ) )
 			{
