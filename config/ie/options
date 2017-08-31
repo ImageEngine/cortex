@@ -87,7 +87,7 @@ if targetApp :
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
-	oiioVersion = targetAppReg.get( "OpenImageIO", cortexReg["OpenImageIOVersion"] )
+	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
