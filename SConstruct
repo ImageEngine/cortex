@@ -1670,8 +1670,13 @@ riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
 
 riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
+riDisplayDriverEnv.Append(
+	LIBS = (
+		os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
+	)
+)
 
 haveRI = False
 riLibs = []

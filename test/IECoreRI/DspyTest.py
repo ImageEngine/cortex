@@ -80,7 +80,7 @@ class DspyTest( IECoreRI.TestCase ) :
 	
 	def testDisplayDriver( self ) :
 	
-		server = IECore.DisplayDriverServer( 1559 )
+		server = IECoreImage.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
 		
 		rib = """
