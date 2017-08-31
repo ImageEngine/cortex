@@ -3223,6 +3223,7 @@ if doConfigure :
 			LIBS = [
 				"appleseed",
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( appleseedEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)

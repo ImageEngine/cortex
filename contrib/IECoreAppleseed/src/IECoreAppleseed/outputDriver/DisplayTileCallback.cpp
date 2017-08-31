@@ -45,17 +45,19 @@
 #include "renderer/api/rendering.h"
 #include "renderer/api/utility.h"
 
-#include "IECore/DisplayDriver.h"
 #include "IECore/BoxAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 
+#include "IECoreImage/DisplayDriver.h"
+
 #include "IECoreAppleseed/ProgressTileCallback.h"
 
-using namespace IECore;
-using namespace Imath;
-using namespace boost;
 using namespace std;
+using namespace boost;
+using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
 
 namespace asf = foundation;
 namespace asr = renderer;
@@ -190,7 +192,7 @@ class DisplayTileCallback : public ProgressTileCallback
 
 			try
 			{
-				m_driver = IECore::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
+				m_driver = IECoreImage::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
 			}
 			catch( const std::exception &e )
 			{
