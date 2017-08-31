@@ -40,7 +40,7 @@
 using namespace boost::python;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
 static DataPtr dataGetter( PrimitiveVariable &p )
@@ -53,17 +53,34 @@ static void dataSetter( PrimitiveVariable &p, DataPtr d )
 	p.data = d;
 }
 
+static IntVectorDataPtr indicesGetter( PrimitiveVariable &p )
+{
+	return p.indices;
+}
+
+static void indicesSetter( PrimitiveVariable &p, IntVectorDataPtr i )
+{
+	p.indices = i;
+}
+
+} // namespace
+
+namespace IECorePython
+{
+
 void bindPrimitiveVariable()
 {
 
 	scope varScope = class_<PrimitiveVariable>( "PrimitiveVariable", no_init )
 		.def( init<PrimitiveVariable::Interpolation, DataPtr>() )
+		.def( init<PrimitiveVariable::Interpolation, DataPtr, IntVectorDataPtr>() )
 		.def( init<const PrimitiveVariable &>() )
 		.def( init<const PrimitiveVariable &, bool>() )
 		.def_readwrite( "interpolation", &PrimitiveVariable::interpolation )
 		.add_property( "data", &dataGetter, &dataSetter )
+		.add_property( "indices", &indicesGetter, &indicesSetter )
 		.def( self == self )
-		.def( self != self )		
+		.def( self != self )
 	;
 	enum_<PrimitiveVariable::Interpolation>( "Interpolation" )
 		.value( "Invalid", PrimitiveVariable::Invalid )

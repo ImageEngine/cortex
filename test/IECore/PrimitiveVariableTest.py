@@ -44,59 +44,106 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 10 ) )
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.IntData( 10 ) )
+		self.assertEqual( p.indices, None )
 
 		p2 = IECore.PrimitiveVariable( p )
 		self.assertEqual( p2.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p2.data, IECore.IntData( 10 ) )
+		self.assertEqual( p2.indices, None )
 		self.failUnless( p2.data.isSame( p.data ) )
-		
+
 		p.data.value = 20
 		self.assertEqual( p.data, IECore.IntData( 20 ) )
 		self.assertEqual( p2.data, IECore.IntData( 20 ) )
-		
+
+		p.indices = IECore.IntVectorData( [ 0, 1 ] )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1 ] ) )
+		self.assertEqual( p2.indices, None )
+
 		p3 = IECore.PrimitiveVariable( p, True ) # deep copy
 		self.assertEqual( p3.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p3.data, IECore.IntData( 20 ) )
+		self.assertEqual( p3.indices, IECore.IntVectorData( [ 0, 1 ] ) )
 		self.failIf( p3.data.isSame( p.data ) )
-		
+		self.failIf( p3.indices.isSame( p.indices ) )
+
 		p3.data.value = 30
+		p3.indices = IECore.IntVectorData( [ 2, 3 ] )
 		self.assertEqual( p3.data, IECore.IntData( 30 ) )
 		self.assertEqual( p.data, IECore.IntData( 20 ) )
 		self.assertEqual( p2.data, IECore.IntData( 20 ) )
-		
+		self.assertEqual( p3.indices, IECore.IntVectorData( [ 2, 3 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1 ] ) )
+		self.assertEqual( p2.indices, None )
+
+		p4 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 40 ), IECore.IntVectorData( [ 4, 5 ] ) )
+		self.assertEqual( p4.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p4.data, IECore.IntData( 40 ) )
+		self.assertEqual( p4.indices, IECore.IntVectorData( [ 4, 5 ] ) )
+
+		p5 = IECore.PrimitiveVariable( p4 )
+		self.assertEqual( p5.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p5.data, IECore.IntData( 40 ) )
+		self.assertEqual( p5.indices, IECore.IntVectorData( [ 4, 5 ] ) )
+		self.failUnless( p5.data.isSame( p4.data ) )
+		self.failUnless( p5.indices.isSame( p4.indices ) )
+
+		p5.indices[-1] = 6
+		self.assertEqual( p5.indices, IECore.IntVectorData( [ 4, 6 ] ) )
+		self.assertEqual( p4.indices, IECore.IntVectorData( [ 4, 6 ] ) )
+
+		p5.indices.append( 7 )
+		self.assertEqual( p5.indices, IECore.IntVectorData( [ 4, 6, 7 ] ) )
+		self.assertEqual( p4.indices, IECore.IntVectorData( [ 4, 6, 7 ] ) )
+
 	def testEquality( self ) :
-	
+
 		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
 		p2 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
 		self.assertEqual( p, p2 )
 		self.failIf( p != p2 )
-		
+
 		p.interpolation = IECore.PrimitiveVariable.Interpolation.Varying
 		self.assertNotEqual( p, p2 )
 		self.failIf( p == p2 )
-		
+
 		p2.interpolation = IECore.PrimitiveVariable.Interpolation.Varying
 		self.assertEqual( p, p2 )
 		self.failIf( p != p2 )
-		
+
 		p.data = IECore.IntData( 2 )
 		self.assertNotEqual( p, p2 )
 		self.failIf( p == p2 )
-		
+
 		p2.data = IECore.IntData( 2 )
 		self.assertEqual( p, p2 )
 		self.failIf( p != p2 )
-		
-	def testEqualityWithNullData( self ) :
-	
-		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
-		p2 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, None )	
-		
+
+		p.indices = IECore.IntVectorData( [ 0, 1 ] )
 		self.assertNotEqual( p, p2 )
-		self.assertNotEqual( p2, p )		
-		
+		self.failIf( p == p2 )
+
+		p2.indices = IECore.IntVectorData( [ 0, 1 ] )
+		self.assertEqual( p, p2 )
+		self.failIf( p != p2 )
+
+	def testEqualityWithNullData( self ) :
+
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntData( 1 ) )
+		p2 = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, None )
+
+		self.assertNotEqual( p, p2 )
+		self.assertNotEqual( p2, p )
+
 		self.assertEqual( p, p )
 		self.assertEqual( p2, p2 )
-				
+
+		p.indices = IECore.IntVectorData( [ 0, 1 ] )
+		self.assertNotEqual( p, p2 )
+		self.assertNotEqual( p2, p )
+
+		self.assertEqual( p, p )
+		self.assertEqual( p2, p2 )
+
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()

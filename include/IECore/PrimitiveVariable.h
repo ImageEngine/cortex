@@ -36,7 +36,7 @@
 #define IE_CORE_PRIMITIVEVARIABLE_H
 
 #include "IECore/Export.h"
-#include "IECore/Data.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECore
 {
@@ -67,6 +67,8 @@ struct IECORE_API PrimitiveVariable {
 	PrimitiveVariable();
 	/// Constructor - Data is not copied but referenced directly.
 	PrimitiveVariable( Interpolation i, DataPtr d );
+	/// Constructor - Data is not copied but referenced directly.
+	PrimitiveVariable( Interpolation i, DataPtr d, IntVectorDataPtr indices );
 	/// Shallow copy constructor - data is not copied just rereferenced
 	PrimitiveVariable( const PrimitiveVariable &other );
 	/// Copy constructor which optionally allows a deep copy of data
@@ -80,6 +82,12 @@ struct IECORE_API PrimitiveVariable {
 	/// Variable data is expected to be one of the types defined in VectorTypedData.h.
 	/// Constant interpolated data can be represented by any type of Data.
 	DataPtr data;
+	/// Optional indices array into the primary Data. This can be used
+	/// to store a more compact representation of the data, for example
+	/// a constant list of strings which are mapped to Vertex, Uniform,
+	/// or FaceVarying via the indices. Similarly, UV sets can be stored
+	/// as Vertex data and mapped to FaceVarying using the indices.
+	IntVectorDataPtr indices;
 };
 
 /// A simple type to hold named PrimitiveVariables.

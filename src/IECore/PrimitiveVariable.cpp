@@ -38,12 +38,17 @@
 using namespace IECore;
 
 PrimitiveVariable::PrimitiveVariable()
-	: interpolation( Invalid ), data( 0 )
+	: interpolation( Invalid ), data( nullptr ), indices( nullptr )
 {
 }
 
 PrimitiveVariable::PrimitiveVariable( Interpolation i, DataPtr d )
-	: interpolation( i ), data( d )
+	: interpolation( i ), data( d ), indices( nullptr )
+{
+}
+
+PrimitiveVariable::PrimitiveVariable( Interpolation i, DataPtr d, IntVectorDataPtr indices )
+	: interpolation( i ), data( d ), indices( indices )
 {
 }
 
@@ -51,6 +56,7 @@ PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other )
 {
 	interpolation = other.interpolation;
 	data = other.data;
+	indices = other.indices;
 }
 
 PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy )
@@ -58,11 +64,13 @@ PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepC
 	interpolation = other.interpolation;
 	if( deepCopy )
 	{
-		data = other.data ? other.data->copy() : 0;
+		data = other.data ? other.data->copy() : nullptr;
+		indices = other.indices ? other.indices->copy() : nullptr;
 	}
 	else
 	{
 		data = other.data;
+		indices = other.indices;
 	}
 }
 
@@ -72,11 +80,22 @@ bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
 	{
 		return false;
 	}
+
+	// if they're both null then they're both equal
+	bool dataEqual = !data && !other.data;
+	bool indicesEqual = !indices && !other.indices;
+
 	if( data && other.data )
 	{
-		return data->isEqualTo( other.data.get() );
+		dataEqual = data->isEqualTo( other.data.get() );
 	}
-	return !data && !other.data;
+
+	if( indices && other.indices )
+	{
+		indicesEqual = indices->isEqualTo( other.indices.get() );
+	}
+
+	return dataEqual && indicesEqual;
 }
 
 bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
