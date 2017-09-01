@@ -85,15 +85,10 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 	bindMedianCutSampler();
 	bindSummedAreaOp();
 	bindSplineToImage();
-
-#ifdef IECORE_WITH_ASIO
-
 	bindDisplayDriver();
 	bindDisplayDriverServer();
 	bindClientDisplayDriver();
 	bindImageDisplayDriver();
 	bindMPlayDisplayDriver();
-
-#endif
 
 }

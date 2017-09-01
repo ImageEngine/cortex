@@ -1428,38 +1428,6 @@ if doConfigure :
 
 	c = Configure( coreEnv )
 
-	if c.CheckCXXHeader( "boost/asio.hpp" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
-	else :
-		sys.stderr.write( "WARNING: boost/asio.hpp not found, some functionality will be disabled.\n" )
-		coreSources.remove( "src/IECoreImage/ClientDisplayDriver.cpp" )
-		coreSources.remove( "src/IECoreImage/DisplayDriver.cpp" )
-		coreSources.remove( "src/IECoreImage/ImageDisplayDriver.cpp" )
-		coreSources.remove( "src/IECoreImage/DisplayDriverServer.cpp" )
-		coreSources.remove( "src/IECoreImage/MPlayDisplayDriver.cpp" )
-		corePythonSources.remove( "src/IECoreImageBindings/ClientDisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECoreImageBindings/DisplayDriverServerBinding.cpp" )
-		corePythonSources.remove( "src/IECoreImageBindings/DisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECoreImageBindings/ImageDisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECoreImageBindings/MPlayDisplayDriverBinding.cpp" )
-		## \todo: OBJReader needs a version of boost::bind that doesn't give warnings when some
-		## placeholders aren't bound (which is true of any boost version that includes asio.hpp)
-		coreSources.remove( "src/IECore/OBJReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/OBJReaderBinding.cpp" )
-
-	if c.CheckLibWithHeader( coreEnv.subst( "boost_signals" + env["BOOST_LIB_SUFFIX"] ), "boost/signal.hpp", "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_SIGNALS' )
-	else :
-		sys.stderr.write( "ERROR : unable to find boost signal library - some functionality will be disabled.\n" )
-
-	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
-	else :
-		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
-
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
@@ -1546,9 +1514,6 @@ coreTestEnv.Append(
 )
 
 coreTestSources = glob.glob( "test/IECore/*.cpp" )
-if '-DIECORE_WITH_BOOSTFACTORIAL' not in coreTestEnv['CPPFLAGS'] :
-	coreTestSources.remove( "test/IECore/LevenbergMarquardtTest.cpp" )
-
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
 coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest > test/IECore/results.txt 2>&1" )
@@ -1577,6 +1542,9 @@ if doConfigure :
 		],
 		"LIBPATH" : [
 			"$OIIO_LIB_PATH",
+		],
+		"LIBS" : [
+			"boost_signals" + env["BOOST_LIB_SUFFIX"],
 		],
 	}
 
@@ -2356,18 +2324,8 @@ if doConfigure :
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
  				nukeNodeNames = [ "ieProcedural", "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
 
-				if "-DIECORE_WITH_ASIO" in coreEnv["CPPFLAGS"] and "-DIECORE_WITH_SIGNALS" in coreEnv["CPPFLAGS"] :
-					nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] ),
-				else :
-					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )
-					nukeNodeNames.remove( "ieDisplay" )
-
-				if nukeMajorVersion < 7 :
-					nukeSources.remove( "src/IECoreNuke/SceneCacheReader.cpp" )
-					nukeHeaders.remove( "include/IECoreNuke/SceneCacheReader.h" )
-
 				# nuke library
-
+				nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] )
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
 				nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )

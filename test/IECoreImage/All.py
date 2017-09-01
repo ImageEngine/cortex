@@ -58,9 +58,7 @@ from LuminanceOpTest import LuminanceOpTest
 from MedianCutSamplerTest import MedianCutSamplerTest
 from SplineToImageTest import SplineToImageTest
 from SummedAreaOpTest import SummedAreaOpTest
-
-if IECore.withASIO() :
-	from ImageDisplayDriverTest import *
+from ImageDisplayDriverTest import *
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

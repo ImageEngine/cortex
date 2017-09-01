@@ -381,14 +381,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSpline();
 	bindSplineData();
 	bindCoordinateSystem();
-
-#ifdef IECORE_WITH_ASIO
-
-	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader
 	bindOBJReader();
-
-#endif
-
 	bindDisplay();
 	bindMeshTangentsOp();
 	bindObjectVector();
@@ -474,11 +467,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
-	def( "withASIO", &IECore::withASIO );
-	def( "withSignals", &IECore::withSignals );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 
 }
-

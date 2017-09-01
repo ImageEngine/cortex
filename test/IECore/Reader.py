@@ -43,9 +43,7 @@ class TestReader(unittest.TestCase):
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "pdc", "cob" ]
-		if IECore.withASIO() :
-			expectedExtensions += [ "obj" ]
+		expectedExtensions = [ "pdc", "cob", "obj" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )

@@ -65,33 +65,6 @@ const std::string &versionString()
 	return v;
 }
 
-bool withASIO()
-{
-#ifdef IECORE_WITH_ASIO
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withSignals()
-{
-#ifdef IECORE_WITH_SIGNALS
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withBoostFactorial()
-{
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-	return true;
-#else
-	return false;
-#endif
-}
-
 bool withFreeType()
 {
 #ifdef IECORE_WITH_FREETYPE
