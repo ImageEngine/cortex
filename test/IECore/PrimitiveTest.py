@@ -57,18 +57,107 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ) ), PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( m.inferInterpolation( IntVectorData( [ 1, 2, 3, 4, 5, 6, 7 ] ) ), PrimitiveVariable.Interpolation.Invalid )
 
-	def testPrimitiveVariableValidity( self ) :
+	def testCopyFrom( self ) :
+
+		m = MeshPrimitive( IntVectorData( [ 3, 3 ] ), IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		m["a"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, FloatVectorData( [ 1, 2 ] ), IntVectorData( [ 1, 0, 1, 0, 1, 0 ] ) )
+		m2 = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 3, 2, 1 ] ) )
+		m2["a"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
+		self.assertNotEqual( m, m2 )
+
+		m2.copyFrom( m )
+		self.assertEqual( m, m2 )
+
+	def testLoad( self ) :
+
+		m = MeshPrimitive( IntVectorData( [ 3, 3 ] ), IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(1), V3f(2), V3f(3), V3f(4) ] ) )
+		m["a"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, FloatVectorData( [ 1, 2 ] ), IntVectorData( [ 1, 0, 1, 0, 1, 0 ] ) )
+		self.assertTrue( m.arePrimitiveVariablesValid() )
+
+		Writer.create( m, "/tmp/testPrimitiveLoad.cob" ).write()
+		m2 = Reader.create( "/tmp/testPrimitiveLoad.cob" ).read()
+		self.assertTrue( m2.arePrimitiveVariablesValid() )
+		self.assertEqual( m, m2 )
+
+	def testHash( self ) :
+
+		hashes = []
+
+		m = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ) )
+		hashes.append( m.hash() )
+
+		m["a"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ) )
+		for h in hashes :
+			self.assertNotEqual( h, m.hash() )
+		hashes.append( m.hash() )
+
+		m["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ) )
+		for h in hashes :
+			self.assertNotEqual( h, m.hash() )
+		hashes.append( m.hash() )
+
+		m["a"].data[0] = 2
+		for h in hashes :
+			self.assertNotEqual( h, m.hash() )
+		hashes.append( m.hash() )
+
+		m["b"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ), IntVectorData( [ 0 ] ) )
+		for h in hashes :
+			self.assertNotEqual( h, m.hash() )
+		hashes.append( m.hash() )
+
+		m["b"].indices[0] = 1
+		for h in hashes :
+			self.assertNotEqual( h, m.hash() )
+		hashes.append( m.hash() )
+
+	def testPrimitiveVariableDataValidity( self ) :
 
 		m = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ) )
 
+		# only vector data
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatData( 1 ) ) ) )
 
+		# constant can be anything
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ) ) )
+
+		# data size matches interpolation
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) ) ) )
 
+		# data size (not base size) matches interpolation
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(1), V3f(2), V3f(3) ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( [ V3f(1), V3f(2), V3f(3), V3f(4) ] ) ) ) )
+
+	def testPrimitiveVariableIndicesValidity( self ) :
+
+		m = MeshPrimitive( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ) )
+
+		# only vector data
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatData( 1 ), IntVectorData( [ 0 ] ) ) ) )
+
+		# constant needs to be vector data if there are indices
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
+
+		# indices must be in range
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ 1 ] ), IntVectorData( [ 1 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 1 ] ) ) ) )
+
+		# indices size matches interpolation, regardless of data size
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0, 0 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0, 0, 0 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0, 1, 2 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
+		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0, 1, 2 ] ) ) ) )
 
 if __name__ == "__main__":
     unittest.main()

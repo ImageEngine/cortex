@@ -54,6 +54,7 @@ using namespace Imath;
 static IndexedIO::EntryID g_variablesEntry("variables");
 static IndexedIO::EntryID g_interpolationEntry("interpolation");
 static IndexedIO::EntryID g_dataEntry("data");
+static IndexedIO::EntryID g_indicesEntry("indices");
 const unsigned int Primitive::m_ioVersion = 2;
 IE_CORE_DEFINEABSTRACTOBJECTTYPEDESCRIPTION( Primitive );
 
@@ -91,7 +92,8 @@ void Primitive::copyFrom( const Object *other, IECore::Object::CopyContext *cont
 	variables.clear();
 	for( PrimitiveVariableMap::const_iterator it=tOther->variables.begin(); it!=tOther->variables.end(); it++ )
 	{
-		variables.insert( PrimitiveVariableMap::value_type( it->first, PrimitiveVariable( it->second.interpolation, context->copy<Data>( it->second.data.get() ) ) ) );
+		IntVectorDataPtr indices = ( it->second.indices ) ? context->copy<IntVectorData>( it->second.indices.get() ) : nullptr;
+		variables.insert( PrimitiveVariableMap::value_type( it->first, PrimitiveVariable( it->second.interpolation, context->copy<Data>( it->second.data.get() ), indices ) ) );
 	}
 }
 
@@ -106,6 +108,10 @@ void Primitive::save( IECore::Object::SaveContext *context ) const
 		const int i = it->second.interpolation;
 		ioPrimVar->write( g_interpolationEntry, i );
 		context->save( it->second.data.get(), ioPrimVar.get(), g_dataEntry );
+		if( it->second.indices )
+		{
+			context->save( it->second.indices.get(), ioPrimVar.get(), g_indicesEntry );
+		}
 	}
 }
 
@@ -304,8 +310,15 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
 		int i; 
 		ioPrimVar->read( g_interpolationEntry, i );
+
+		IntVectorDataPtr indices = nullptr;
+		if( ioPrimVar->hasEntry( g_indicesEntry ) )
+		{
+			indices = context->load<IntVectorData>( ioPrimVar.get(), g_indicesEntry );
+		}
+
 		variables.insert( 
-			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) ) 
+			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);
 	}
 
@@ -349,8 +362,15 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 		}
 		int i; 
 		ioPrimVar->read( g_interpolationEntry, i );
-		variables.insert( 
-			PrimitiveVariableMap::value_type( name, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ) ) )
+
+		IntVectorDataPtr indices = nullptr;
+		if( ioPrimVar->hasEntry( g_indicesEntry ) )
+		{
+			indices = context->load<IntVectorData>( ioPrimVar.get(), g_indicesEntry );
+		}
+
+		variables.insert(
+			PrimitiveVariableMap::value_type( name, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);
 	}
 
@@ -391,69 +411,88 @@ void Primitive::hash( MurmurHash &h ) const
 	for( PrimitiveVariableMap::const_iterator it=variables.begin(); it!=variables.end(); it++ )
 	{
 		h.append( it->first );
+		/// \todo: should we define PrimitiveVariable::hash()
+		/// and call that here?
 		h.append( it->second.interpolation );
 		it->second.data->hash( h );
+		if( it->second.indices )
+		{
+			it->second.indices->hash( h );
+		}
 	}
 	
 	topologyHash( h );
 }
 
-struct ValidateArraySize
+namespace
 {
-	typedef bool ReturnType;
 
-	ValidateArraySize( size_t sz ) : m_variableSize( sz )
-	{
-	}
-
-	template<typename T>
-	bool operator() ( const T *data )
-	{
-		assert( data );
-
-		const typename T::ValueType &v = data->readable();
-
-		return v.size() == m_variableSize;
-	}
-
-	private:
-
-	size_t m_variableSize;
-};
-
-struct ReturnFalseErrorHandler
+struct ReturnZeroErrorHandler
 {
-	typedef bool ReturnType;
+	typedef size_t ReturnType;
 
 	template<typename T, typename F>
-	bool operator() ( const T *data, const F &f )
+	size_t operator() ( const T *data, const F &f )
 	{
-		return false;
+		return 0;
 	}
 };
+
+} // namespace
 
 bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 {
-	if (! pv.data || pv.interpolation==PrimitiveVariable::Invalid)
+	if( !pv.data || pv.interpolation==PrimitiveVariable::Invalid )
 	{
 		return false;
 	}
 
-	if( pv.interpolation==PrimitiveVariable::Constant )
+	if( !pv.indices && pv.interpolation == PrimitiveVariable::Constant )
 	{
 		// any data is reasonable for constant interpolation
+		// provided there are no indices.
 		return true;
 	}
 
-	// all other interpolations require an array of data of the correct length. it could be argued tha
-	// SimpleTypedData should be accepted in the rare case that variableSize==1, but we're rejecting that
-	// argument on the grounds that it makes for a whole bunch of special cases with no gain - the general
-	// cases all require arrays so that's what we require.
-	/// \todo This is not correct in the case of CurvesPrimitives, where uniform interpolation should be
-	/// treated the same as constant.
+	// All other interpolations require an array of data or an array of indices
+	// of the correct length. It could be argued that SimpleTypedData should be
+	// accepted in the rare case that variableSize==1, but we're rejecting that
+	// argument on the grounds that it makes for a whole bunch of special cases
+	// with no gain - the general cases require arrays. Note that variableSize
+	// of 0 is a special case for empty data, which we must allow to pass here.
 	size_t sz = variableSize( pv.interpolation );
-	ValidateArraySize func( sz );
-	return despatchTypedData<ValidateArraySize, TypeTraits::IsVectorTypedData, ReturnFalseErrorHandler>( pv.data.get(), func );
+	size_t dataSize = despatchTypedData<TypedDataSize, TypeTraits::IsVectorTypedData, ReturnZeroErrorHandler>( pv.data.get() );
+	if( !dataSize && sz )
+	{
+		return false;
+	}
+
+	/// without indices, the data must match exactly
+	/// \todo This is not correct in the case of CurvesPrimitives, where uniform
+	/// interpolation should be treated the same as constant.
+	if( !pv.indices )
+	{
+		return dataSize == sz;
+	}
+
+	/// if there are indices, we must ensure they're within the range of data
+	/// and that they match the expected variable size.
+	if( pv.indices->readable().size() != sz )
+	{
+		return false;
+	}
+
+	for( const auto &index : pv.indices->readable() )
+	{
+		if( index >= (int)dataSize )
+		{
+			return false;
+		}
+	}
+
+	// the data doesn't need further validation since we know its
+	// VectorTypedData and the indices are in the correct range.
+	return true;
 }
 
 bool Primitive::arePrimitiveVariablesValid() const
