@@ -1,3 +1,66 @@
+10.0.0-a2
+=========
+
+Breaking Changes
+----------------
+
+- Flipped interpretation of UVs, so that increasing values of V are up, not down #611.
+- Refactored image and colour functionality significantly (#605)
+  - ImageReader and ImageWriter are now implemented via OpenImageIO behind the scenes.
+    There are no longer any format-specific derived classes. As a consequence many more
+    file formats are now supported.
+  - Colour management is deferred to OpenColorIO.
+  - Many classes are now unnecessary and have been removed.
+  - All image related functionality has been moved to a new IECoreImage module.
+  - ImagePrimitive is no longer directly renderable via IECore::Renderer.
+  - Image related functionality of IECore::Font is now moved to IECoreImage::Font.
+  - Removed unnecessary functionality. We recommend using Gaffer or OpenImageIO instead :
+    - ImagePrimitiveEvaluator
+    - PointRepulsionOp
+    - CheckImagesOp
+    - ImagePrimitiveOp
+    - CompositeAlgo/ImageCompositeOp/ImageSequenceCompositeOp
+    - ImagePremultiplyOp
+    - ImageUnpremultiplyOp
+    - UVDistortOp
+    - DeepPixel/DeepImageReader/DeepImageWriter
+    - Grade
+    - ColorSpaceTransformOp, CubeColorLookup and all color transforms
+
+Additions
+---------
+
+- Added IECoreImage::OpenImageIOAlgo namespace, with various support for interoperability
+  with OpenImageIO (#605).
+- Added IECoreImage::ColorAlgo namespace for applying colour transforms.
+
+Improvements
+------------
+
+- Flipped interpretation of UVs, so that increasing values of V are up, not down (#611).
+  This provides improved interoperability with Maya and Houdini when UVs are subsequently
+  edited in Cortex (for instance, in Gaffer). This also simplifies UDIM management.
+
+Fixes
+-----
+
+- Fixed RenderMan display driver for breaking changes introduced between 3delight
+  versions 12.0.88 and 12.0.113 (#612).
+- UVs loaded from Alembic files now have the correct orientation. Note that this is
+  because Cortex's interpretation of V direction has changed, rather than because
+  IECoreAlembic::MeshReader has changed (#611).
+
+Build
+-----
+
+- Fixed compilation with GCC 4.8.3 (#607, #610)
+- Fixed missing include in IECorePython/ExceptionAlgo.h (#608)
+- Boost asio, signals and factorial libraries are now required
+  dependencies (#605).
+- OpenImageIO and OpenColorIO are now required dependencies (#605).
+- IECoreHoudini can now be built without IECoreGL (#605).
+- Removed direct dependencies on libTIFF, libJPEG and libPNG (#605).
+
 10.0.0-a1
 =========
 
