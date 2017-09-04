@@ -32,14 +32,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 
 import nuke
 
 import IECore
+import IECoreImage
 import IECoreNuke
 
 class OpHolderTest( IECoreNuke.TestCase ) :
@@ -125,8 +124,8 @@ class OpHolderTest( IECoreNuke.TestCase ) :
 		# check that they are the same in terms of size and channel data.
 		# allow a slight difference due to one having been saved as half float and reloaded.
 		
-		image2 = IECore.EXRImageReader( "test/IECoreNuke/check.exr" ).read()
-		self.assertEqual( IECore.ImageDiffOp()( imageA = image, imageB = image2, maxError = 0.001 ).value, False )
+		image2 = IECore.Reader.create( "test/IECoreNuke/check.exr" ).read()
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = image, imageB = image2, maxError = 0.001 ).value, False )
 
 	def tearDown( self ) :
 		

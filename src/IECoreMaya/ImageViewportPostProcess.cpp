@@ -41,6 +41,7 @@
 #include "IECoreMaya/ToMayaImageConverter.h"
 
 using namespace IECore;
+using namespace IECoreImage;
 using namespace IECoreMaya;
 
 ImageViewportPostProcess::ImageViewportPostProcess()
@@ -57,11 +58,11 @@ void ImageViewportPostProcess::postRender( const std::string &panelName, MImage 
 	fromMaya->depthParameter()->setTypedValue( needsDepth() );
 	ImagePrimitivePtr image = runTimeCast< ImagePrimitive >( fromMaya->convert() );
 
-	assert( image->arePrimitiveVariablesValid() );
+	assert( image->channelsValid() );
 
 	postRender( panelName, image );
 
-	if ( !image->arePrimitiveVariablesValid() )
+	if ( !image->channelsValid() )
 	{
 		MGlobal::displayError( "ImageViewportPostProcess: Image primvars invalid after postprocess" );
 	}

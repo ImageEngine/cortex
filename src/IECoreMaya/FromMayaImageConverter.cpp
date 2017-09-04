@@ -40,7 +40,6 @@
 #include "boost/multi_array.hpp"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/Exception.h"
 #include "IECore/ScaledDataConversion.h"
 
@@ -49,8 +48,9 @@
 
 #include "OpenEXR/ImathBox.h"
 
-using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreImage;
+using namespace IECoreMaya;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaImageConverter );
 
@@ -94,7 +94,7 @@ void FromMayaImageConverter::writeChannels( ImagePrimitivePtr target, const std:
 
 	for ( std::vector< std::string >::const_iterator it = channelNames.begin(); it != channelNames.end(); ++it )
 	{
-		float *dataArray = &runTimeCast<FloatVectorData>( target->variables[*it].data )->writable()[0];
+		float *dataArray = &runTimeCast<FloatVectorData>( target->channels[*it] )->writable()[0];
 		assert( dataArray );
 		channelArrays.push_back( boost::multi_array_ref< float, 2 >( dataArray, boost::extents[height][width] ) );
 	}
@@ -139,7 +139,7 @@ void FromMayaImageConverter::writeDepth( ImagePrimitivePtr target, const float *
 		}
 	}
 
-	target->variables["Z"] = PrimitiveVariable( PrimitiveVariable::Vertex, targetDepth );
+	target->channels["Z"] = targetDepth;
 }
 
 ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands ) const
@@ -195,7 +195,7 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 
 		data->writable().resize( width * height );
 
-		img->variables[ *it ] = PrimitiveVariable( PrimitiveVariable::Vertex, data ) ;
+		img->channels[ *it ] = data;
 	}
 
 	switch ( m_image.pixelType() )
@@ -230,7 +230,7 @@ ObjectPtr FromMayaImageConverter::doConversion( ConstCompoundObjectPtr operands 
 		}
 	}
 
-	assert( img->arePrimitiveVariablesValid() );
+	assert( img->channelsValid() );
 
 	return img;
 }

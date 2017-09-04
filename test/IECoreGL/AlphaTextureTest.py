@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -44,7 +45,7 @@ class AlphaTextureTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		i = IECore.TIFFImageReader( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/a.tif" ).read()
 		i["A"] = i["Y"]
 		del i["Y"]
 
@@ -52,7 +53,7 @@ class AlphaTextureTest( unittest.TestCase ) :
 
 		ii = t.imagePrimitive()
 
-		res = IECore.ImageDiffOp()(
+		res = IECoreImage.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.001,

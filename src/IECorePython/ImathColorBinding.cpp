@@ -37,14 +37,11 @@
 #include "OpenEXR/ImathColor.h"
 #include "OpenEXR/ImathColorAlgo.h"
 
-#include "IECore/ColorAlgo.h"
-
 #include "IECorePython/ImathColorBinding.h"
 #include "IECorePython/IECoreBinding.h"
 
 using namespace boost::python;
 using namespace Imath;
-using namespace IECore;
 
 namespace IECorePython
 {
@@ -127,12 +124,6 @@ DEFINECOLSTRSPECIALISATION( Color3d );
 DEFINECOLSTRSPECIALISATION( Color4d );
 
 template<typename T>
-void adjustSaturationInPlace( T &c, typename T::BaseType s )
-{
-	c = adjustSaturation<T>( c, s );
-}
-
-template<typename T>
 T hsvToRGB( const T &c )
 {
 	return hsv2rgb( c );
@@ -183,14 +174,6 @@ void bindColorCommon( class_<T> &c )
 	c.def( "baseTypeMax", &T::baseTypeMax ).staticmethod( "baseTypeMax" );
 	c.def( "baseTypeSmallest", &T::baseTypeSmallest ).staticmethod( "baseTypeSmallest" );
 	c.def( "baseTypeEpsilon", &T::baseTypeEpsilon ).staticmethod( "baseTypeEpsilon" );
-
-	c.def( "luminance", &luminance<T, Vec3<typename T::BaseType> > );
-	c.def( "luminance", (typename T::BaseType (*)( const T & ))&luminance<T> );
-
-	c.def( "adjustSaturation", &adjustSaturationInPlace<T>, "Adjusts the saturation of the color in place"  );
-
-	c.def( "linearToSRGB", &linearToSRGB<T> );
-	c.def( "sRGBToLinear", &sRGBToLinear<T> );
 
 	c.def( "hsvToRGB", &hsvToRGB<T> );
 	c.def( "rgbToHSV", &rgbToHSV<T> );

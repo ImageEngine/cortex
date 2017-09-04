@@ -37,7 +37,8 @@
 #include "boost/format.hpp"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/SplineToImage.h"
+
+#include "IECoreImage/SplineToImage.h"
 
 #include "IECoreGL/SplineToGLTextureConverter.h"
 #include "IECoreGL/ColorTexture.h"
@@ -72,10 +73,10 @@ IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstO
 {
 	
 	TexturePtr t = 0;
-	IECore::SplineToImagePtr op = new IECore::SplineToImage();
+	IECoreImage::SplineToImagePtr op = new IECoreImage::SplineToImage();
 	op->splineParameter()->setValue( boost::const_pointer_cast< IECore::Object >(src) );
 	op->resolutionParameter()->setValue( m_resolutionParameter->getValue() );
-	IECore::ImagePrimitivePtr image = boost::static_pointer_cast<IECore::ImagePrimitive>( op->operate() );
+	IECoreImage::ImagePrimitivePtr image = boost::static_pointer_cast<IECoreImage::ImagePrimitive>( op->operate() );
 
 	bool r = image->channelValid( "R" );
 	bool g = image->channelValid( "G" );

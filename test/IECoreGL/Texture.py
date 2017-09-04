@@ -39,6 +39,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -47,13 +48,15 @@ class TestTexture( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		i = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		t = IECoreGL.ColorTexture( i )
+		self.assertTrue( isinstance( t, IECoreGL.ColorTexture ) )
 
 		ii = t.imagePrimitive()
-
-		IECore.EXRImageWriter( ii, "/tmp/t.exr" ).write()
+		self.assertTrue( isinstance( ii, IECoreImage.ImagePrimitive ) )
+		self.assertEqual( sorted( ii.keys() ), [ "A", "B", "G", "R" ] )
+		self.assertTrue( ii.channelsValid() )
 
 	def performShaderParameterTest( self, shaderParameter ) :
 

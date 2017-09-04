@@ -35,10 +35,10 @@
 import unittest
 import os.path
 
-from IECore import *
-
-from IECoreGL import *
-init( False )
+import IECore
+import IECoreImage
+import IECoreGL
+IECoreGL.init( False )
 
 class TestToGLTexureConverter( unittest.TestCase ) :
 
@@ -46,14 +46,14 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testFromImage( self ) :
 		""" Test conversion from an ImagePrimitive """
 
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
-		t = ToGLTextureConverter( i ).convert()
-		self.failIf( not t.isInstanceOf( Texture.staticTypeId() ) ) 
+		t = IECoreGL.ToGLTextureConverter( i ).convert()
+		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
 		
 		ii = t.imagePrimitive()
 
-		res = ImageDiffOp()(
+		res = IECoreImage.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.01,
@@ -65,24 +65,24 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testFromCompoundData( self ) :
 		""" Test conversion from a CompoundData representation of an ImagePrimitive """
 		
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
-		cd = CompoundData()
-		cd["displayWindow"] = Box2iData( i.displayWindow )
-		cd["dataWindow"] = Box2iData( i.dataWindow )
+		cd = IECore.CompoundData()
+		cd["displayWindow"] = IECore.Box2iData( i.displayWindow )
+		cd["dataWindow"] = IECore.Box2iData( i.dataWindow )
 
-		cnd = CompoundData()
+		cnd = IECore.CompoundData()
 		for channel in i.channelNames() :
-			cnd[ channel ] = i[ channel ].data
+			cnd[ channel ] = i[ channel ]
 
 		cd["channels"] = cnd
 
-		t = ToGLTextureConverter( cd ).convert()
-		self.failIf( not t.isInstanceOf( Texture.staticTypeId() ) ) 
+		t = IECoreGL.ToGLTextureConverter( cd ).convert()
+		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
 		
 		ii = t.imagePrimitive()
 
-		res = ImageDiffOp()(
+		res = IECoreImage.ImageDiffOp()(
 			imageA = i,
 			imageB = ii,
 			maxError = 0.01,
@@ -94,21 +94,21 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 	def testMissingChannelCreation( self ) :
 		""" Test the creation of missing channels """
 		
-		i = EXRImageReader( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
-		cd = CompoundData()
-		cd["displayWindow"] = Box2iData( i.displayWindow )
-		cd["dataWindow"] = Box2iData( i.dataWindow )
+		cd = IECore.CompoundData()
+		cd["displayWindow"] = IECore.Box2iData( i.displayWindow )
+		cd["dataWindow"] = IECore.Box2iData( i.dataWindow )
 
-		cnd = CompoundData()
-		cnd[ "R" ] = i[ "R" ].data
+		cnd = IECore.CompoundData()
+		cnd[ "R" ] = i[ "R" ]
 
 		cd["channels"] = cnd
 
 		# We are missing a channel and so an exception should be thrown if we try to convert it with the default arguments.	
-		self.assertRaises( RuntimeError, ToGLTextureConverter( cd ).convert )
+		self.assertRaises( RuntimeError, IECoreGL.ToGLTextureConverter( cd ).convert )
 
-		t = ToGLTextureConverter( cd, True ).convert()
+		t = IECoreGL.ToGLTextureConverter( cd, True ).convert()
 
 		ii = t.imagePrimitive()
 		self.assertTrue( "R" in ii.channelNames() )

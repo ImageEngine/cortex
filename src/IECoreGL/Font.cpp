@@ -47,7 +47,7 @@ using namespace Imath;
 IE_CORE_DEFINERUNTIMETYPED( Font );
 
 Font::Font( IECore::FontPtr font )
-	:	m_font( font ), m_texture( 0 )
+	:	m_font( font ), m_imageFont( new IECoreImage::Font( font->fileName() ) ), m_texture( 0 )
 {
 	m_meshes.resize( 128 );
 }
@@ -82,7 +82,7 @@ const AlphaTexture *Font::texture() const
 		return m_texture.get();
 	}
 
-	IECore::ConstImagePrimitivePtr image = m_font->image();
+	IECoreImage::ConstImagePrimitivePtr image = m_imageFont->image();
 
 	IECore::ConstFloatVectorDataPtr y = image->getChannel<float>( "Y" );
 	Imath::V2i s = image->getDataWindow().size() + Imath::V2i( 1 );

@@ -38,6 +38,7 @@ import unittest
 import appleseed
 
 import IECore
+import IECoreImage
 import IECoreAppleseed
 
 import AppleseedTest
@@ -114,8 +115,8 @@ class AttributeTest( AppleseedTest.TestCase ):
 
 		del r
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-		expectedImage = IECore.EXRImageReader( os.path.dirname( __file__ ) + "/data/referenceImages/expectedAlphaMaps.exr" ).read()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/referenceImages/expectedAlphaMaps.exr" ).read()
 
 		for channel in ( "R", "G", "B" ) :
 			# Appleseed's default shading appears to have changed since
@@ -126,7 +127,7 @@ class AttributeTest( AppleseedTest.TestCase ):
 			del expectedImage[channel]
 		self.assertIn( "A", image )
 
-		self.failIf( IECore.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
+		self.failIf( IECoreImage.ImageDiffOp()( imageA=image, imageB=expectedImage, maxError=0.003 ).value )
 
 	def testMediumPriorities( self ) :
 

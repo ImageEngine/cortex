@@ -87,6 +87,7 @@ if targetApp :
 	glewVersion = targetAppReg.get( "glewVersion", cortexReg["glewVersion"] )
 	pythonVersion = targetAppReg["pythonVersion"]
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
+	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
@@ -103,6 +104,7 @@ else :
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
 	boostVersion = cortexReg["boostVersion"]
+	oiioVersion = cortexReg["OpenImageIOVersion"]
 
 # get the compiler location using the registry
 compilerReg = IEEnv.registry["compilers"][compiler][compilerVersion][platform]
@@ -165,9 +167,11 @@ GLEW_INCLUDE_PATH = "/software/tools/include/" + platform + "/glew/" + glewVersi
 GLEW_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 GLEW_LIB_SUFFIX = "-" + glewVersion
 
-PNG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-JPEG_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
-TIFF_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
+oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
+OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
+OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
+OIIO_LIB_SUFFIX = "-" + oiioVersion
+
 FREETYPE_LIB_PATH = os.path.join( "/software", "tools", "lib", platform, compiler, compilerVersion )
 
 # figure out the boost lib suffix
@@ -243,11 +247,6 @@ try :
 	oslRoot = os.path.join( "/software", "apps", "OpenShadingLanguage", oslVersion, platform, compiler, compilerVersion )
 	OSL_INCLUDE_PATH = os.path.join( oslRoot, "include" )
 	OSL_LIB_PATH = os.path.join( oslRoot, "lib" )
-
-	oiioVersion = appleseedReg["OpenImageIO"]
-	oiioRoot = os.path.join( "/software", "apps", "OpenImageIO", oiioVersion, platform, compiler, compilerVersion )
-	OIIO_INCLUDE_PATH = os.path.join( oiioRoot, "include" )
-	OIIO_LIB_PATH = os.path.join( oiioRoot, "lib" )
 except :
 	pass
 
@@ -261,7 +260,7 @@ if targetApp=="maya" :
 
 	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
 	MAYA_ROOT = mayaReg["location"]
-	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"].get( "LM_LICENSE_FILE", "" )
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
 	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
@@ -274,11 +273,6 @@ if targetApp=="nuke" :
 
 	nukeVersion = targetAppVersion
 	nukeReg = IEEnv.registry["apps"]["nuke"][nukeVersion][platform]
-	if "pngVersion" in nukeReg :
-		pngVersion = nukeReg["pngVersion"]
-		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + pngVersion
-		PNG_LIB_SUFFIX = "".join( pngVersion.split( "." )[:-1] )
-
 	NUKE_ROOT = nukeReg["location"]
 	NUKE_LICENSE_FILE = nukeReg["wrapperEnvVars"]["foundry_LICENSE"]
 	INSTALL_NUKELIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -292,10 +286,6 @@ if targetApp=="houdini" :
 
 	houdiniReg = IEEnv.registry["apps"]["houdini"][houdiniVersion][platform]
 	BOOST_INCLUDE_PATH = "/software/tools/include/" + platform + "/boost/" + boostVersion
-
-	if "pngVersion" in houdiniReg :
-		PNG_INCLUDE_PATH = "/software/tools/include/" + platform + "/png/" + houdiniReg["pngVersion"]
-
 	HOUDINI_ROOT = houdiniReg['location']
 	HOUDINI_CXX_FLAGS = " ".join( CXXFLAGS ) + ' -DVERSION=\"'+houdiniVersion+'\" -DDLLEXPORT=  -D_GNU_SOURCE -DLINUX -DAMD64 -m64 -fPIC -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -Wno-deprecated -Wno-reorder'
 	INSTALL_HOUDINILIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
@@ -311,6 +301,13 @@ if targetApp=="houdini" :
 	INSTALL_MANTRALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MANTRAPROCEDURAL_NAME = os.path.join( appPrefix, "plugins", "mantra", "$IECORE_NAME" )
 
+	# Temporarily disable IECoreGL until we sort out our dependency trauma
+	#	Houdini 16.0 requires Boost 1.55.0
+	#	IECoreGL requires IECoreImage requires OpenImageIO 1.8.4dev requires Boost 1.61.0
+	# We need to sort this out before Cortex 10 is officially released,
+	# but chances are by that points Houdini 16.5 will be released.
+	WITH_GL = False
+
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
@@ -322,8 +319,11 @@ HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, comp
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 
+# we need this so IECoreImage tests use a standard color conversion config
+os.environ["OCIO"] = "/software/config/openColorIO/nuke-default/config.ocio"
+
 # import vars we need to get our doxygen and python wrappers working
-ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION DL_VERSION DL_SHADERS_PATH DL_DISPLAYS_PATH solidangle_LICENSE"
+ENV_VARS_TO_IMPORT="PATH COMPILER COMPILER_VERSION PYTHONPATH IEENV_ROOT IEENV_WORKING_PATH IEENV_LIBRARY_PREFIX_PATH DOXYGEN_VERSION IEENV_DEBUG IEENV_DEBUG_PYTHON IEENV_DEBUGGER IEENV_DEBUGGER_ARGS DELIGHT_CONF SCONS_VERSION DL_VERSION DL_SHADERS_PATH DL_DISPLAYS_PATH solidangle_LICENSE CORTEX_POINTDISTRIBUTION_TILESET OCIO"
 
 # make sure the tests can run
 testLibs = [ pythonReg["location"] + "/" + compiler + "/" + compilerVersion + "/lib", compilerReg["location"] + "/lib" ]

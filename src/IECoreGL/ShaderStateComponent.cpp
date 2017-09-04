@@ -117,7 +117,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 				{
 					ConstTexturePtr texture = 0;
 					if(
-						it->second->typeId() == IECore::ImagePrimitiveTypeId ||
+						it->second->typeId() == (IECore::TypeId)IECoreImage::ImagePrimitiveTypeId ||
 						it->second->typeId() == IECore::CompoundDataTypeId ||
 						it->second->typeId() == IECore::SplineffData::staticTypeId() ||
 						it->second->typeId() == IECore::SplinefColor3fData::staticTypeId()

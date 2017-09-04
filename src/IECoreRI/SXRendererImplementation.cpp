@@ -736,13 +736,13 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2
 	return shade( points.get(), resolution );
 }
 
-IECore::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const
+IECoreImage::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const
 {
 	IECore::CompoundDataPtr result = shadePlane( resolution );
 	
 	Box2i window =  Box2i( V2i( 0, 0 ), V2i( resolution[0] - 1, resolution[1] - 1 ) );
-	
-	IECore::ImagePrimitivePtr img = new IECore::ImagePrimitive( window, window );
+
+	IECoreImage::ImagePrimitivePtr img = new IECoreImage::ImagePrimitive( window, window );
 	IECore::FloatVectorDataPtr rData = img->createChannel<float>( "R" );
 	IECore::FloatVectorDataPtr gData = img->createChannel<float>( "G" );
 	IECore::FloatVectorDataPtr bData = img->createChannel<float>( "B" );

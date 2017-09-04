@@ -45,11 +45,10 @@ namespace IECore
 {
 
 IE_CORE_FORWARDDECLARE( MeshPrimitive );
-IE_CORE_FORWARDDECLARE( ImagePrimitive );
 IE_CORE_FORWARDDECLARE( Group );
 
 /// The Font class allows the loading of fonts and their
-/// conversion to MeshPrimitives and ImagePrimitives.
+/// conversion to MeshPrimitives.
 /// \ingroup renderingGroup
 class IECORE_API Font : public RunTimeTyped
 {
@@ -75,11 +74,6 @@ class IECORE_API Font : public RunTimeTyped
 		/// equal to one em.
 		void setCurveTolerance( float tolerance );
 		float getCurveTolerance() const;
-
-		/// Sets the resolution used in converting
-		/// glyphs into images.
-		void setResolution( float pixelsPerEm );
-		float getResolution() const;
 
 		/// Returns a mesh for the specified character, using
 		/// the current curve tolerance. This returns a reference
@@ -107,22 +101,6 @@ class IECORE_API Font : public RunTimeTyped
 		/// into account the current kerning settings - units are as
 		/// above.
 		Imath::Box2f bound( const std::string &text ) const;
-		/// Returns an ImagePrimitive to represent the specified
-		/// character, using the current resolution. The image will have
-		/// a single channel named "Y". The display window is the same for all
-		/// characters, and will bound any character in the font. The data window
-		/// will differ for each character and covers the bounding box of the
-		/// individual character. 0,0 in pixel coordinates corresponds to the
-		/// origin of the character on the baseline - bear in mind that image coordinates
-		/// increase from top to bottom, so the top of the character will typically
-		/// have a negative y coordinate in pixel space.
-		const ImagePrimitive *image( char c ) const;
-		/// Returns an image containing a grid of 16x8 characters containing
-		/// all the chars from 0-127 inclusive. This too has a single "Y" channel.
-		/// \todo These images currently return a straight conversion of the data
-		/// from FreeType, which is intended for direct display without colour conversion.
-		/// I think we should linearise the data before returning it.
-		ImagePrimitivePtr image() const;
 
 	private :
 

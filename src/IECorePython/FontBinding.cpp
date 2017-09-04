@@ -40,7 +40,6 @@
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECore/Font.h"
 #include "IECore/MeshPrimitive.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/Group.h"
 
 using namespace boost::python;
@@ -48,7 +47,7 @@ using namespace boost;
 using namespace std;
 using namespace IECore;
 
-namespace IECorePython
+namespace
 {
 
 static MeshPrimitivePtr mesh( Font &f, char c )
@@ -61,15 +60,10 @@ static MeshPrimitivePtr mesh( Font &f, char c )
 	return 0;
 }
 
-static ImagePrimitivePtr image( Font &f, char c )
+} // namespace
+
+namespace IECorePython
 {
-	ConstImagePrimitivePtr i = f.image( c );
-	if( i )
-	{
-		return i->copy();
-	}
-	return 0;
-}
 
 void bindFont()
 {
@@ -78,8 +72,6 @@ void bindFont()
 		.def( "fileName", &Font::fileName, return_value_policy<copy_const_reference>() )
 		.def( "setCurveTolerance", &Font::setCurveTolerance )
 		.def( "getCurveTolerance", &Font::getCurveTolerance )
-		.def( "setResolution", &Font::setResolution )
-		.def( "getResolution", &Font::getResolution )
 		.def( "setKerning", &Font::setKerning )
 		.def( "getKerning", &Font::getKerning )
 		.def( "mesh", &mesh )
@@ -89,8 +81,6 @@ void bindFont()
 		.def( "bound", (Imath::Box2f (Font::*)( )const)&Font::bound )
 		.def( "bound", (Imath::Box2f (Font::*)( char )const)&Font::bound )
 		.def( "bound", (Imath::Box2f (Font::*)( const std::string &)const)&Font::bound )
-		.def( "image", &image )
-		.def( "image", (ImagePrimitivePtr (Font::*)()const)&Font::image )
 	;
 
 }

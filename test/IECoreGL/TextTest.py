@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreImage
 
 import IECoreGL
 IECoreGL.init( False )
@@ -80,7 +81,7 @@ class TextTest( unittest.TestCase ) :
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorld.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
 
 	def testSprites( self ) :
 	
@@ -114,9 +115,11 @@ class TextTest( unittest.TestCase ) :
 			r.text( "Vera.ttf", "hello world", 1, {} )
 
 		imageCreated = IECore.Reader.create( self.outputFileName ).read()
-		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" ).read()
+		reader = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/helloWorldSprites.tif" )
+		reader["rawChannels"].setTypedValue( True )
+		expectedImage = reader.read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.0575 ), IECore.BoolData( False ) )
 	
 	def setUp( self ) :
 		

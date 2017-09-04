@@ -138,7 +138,6 @@ from FileExaminer import *
 from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
-from ColorTransformOpTest import *
 from TransformOpTest import *
 from LineSegmentTest import *
 from CubicBasisTest import *
@@ -157,7 +156,6 @@ from ImathRootsTest import *
 from AngleConversionTest import *
 from LuminanceOpTest import *
 from SummedAreaOpTest import *
-from GradeTest import *
 from MedianCutSamplerTest import *
 from EnvMapSamplerTest import *
 from RandomTest import *
@@ -172,9 +170,6 @@ from CoordinateSystemTest import *
 from SplineToImageTest import *
 from DisplayTest import *
 from MeshTangentsOpTest import *
-from CubeColorLookupTest import *
-from CubeColorLookupDataTest import *
-from CubeColorTransformOpTest import *
 from CompoundVectorParameterTest import *
 from UVDistortOpTest import *
 from ObjectVectorTest import *
@@ -196,7 +191,6 @@ from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
-from ColorSpaceTransformOpTest import *
 from TGAImageReaderTest import *
 from TGAImageWriterTest import *
 from BINParticleWriterTest import *
@@ -245,14 +239,6 @@ from PointsPrimitiveEvaluatorTest import PointsPrimitiveEvaluatorTest
 
 if IECore.withASIO() :
 	from DisplayDriverTest import *
-
-if IECore.withTIFF() :
-	from TIFFImageReader import *
-	from TIFFImageWriter import *
-
-if IECore.withJPEG() :
-	from JPEGImageReader import *
-	from JPEGImageWriter import *
 
 if IECore.withFreeType() :
 	from FontTest import *

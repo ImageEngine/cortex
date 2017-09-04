@@ -214,9 +214,6 @@ __dataTypesConversionDict = {
 	IECore.SplinefColor3fData: ( IECore.SplinefColor3f, True ),
 	IECore.SplinefColor4fData: ( IECore.SplinefColor4f, True ),
 
-	IECore.CubeColorLookupfData: ( IECore.CubeColorLookupf, True ),
-	IECore.CubeColorLookupdData: ( IECore.CubeColorLookupd, True ),
-
 	IECore.DateTimeData: ( datetime.datetime, True ),
 	IECore.TimeDurationData: ( datetime.timedelta, True ),
 	IECore.TimePeriodData: ( IECore.TimePeriod, True ),

@@ -48,7 +48,6 @@
 #include "IECore/MeshPrimitive.h"
 #include "IECore/MeshNormalsOp.h"
 #include "IECore/SplineData.h"
-#include "IECore/SplineToImage.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 
@@ -203,7 +202,7 @@ struct IECoreGL::Renderer::MemberData
 		{
 			addCurrentInstanceChild( glPrimitive );
 		}
-		else if( checkCulling<IECoreGL::Primitive>( glPrimitive.get() ) )
+		else if( checkCulling( glPrimitive->bound() ) )
 		{
 			implementation->addPrimitive( glPrimitive );
 		}
@@ -218,8 +217,7 @@ struct IECoreGL::Renderer::MemberData
 		currentInstance->addChild( childGroup );
 	}
 	
-	template< typename T >
-	bool checkCulling( const T *p )
+	bool checkCulling( const Imath::Box3f &bound )
 	{
 		const Imath::Box3f &cullBox = implementation->getState<CullingBoxStateComponent>()->value();
 		if( cullBox.isEmpty() )
@@ -228,12 +226,12 @@ struct IECoreGL::Renderer::MemberData
 			return true;
 		}
 	
-		Imath::Box3f b = p->bound();
-		if( b == Procedural::noBound )
+		if( bound == Procedural::noBound )
 		{
 			return true;
 		}
 
+		Imath::Box3f b = bound;
 		switch( implementation->getState<CullingSpaceStateComponent>()->value() )
 		{
 			case ObjectSpace :
@@ -1685,14 +1683,28 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 		return;
 	}
 
-	ImagePrimitivePtr image = new ImagePrimitive( dataWindow, displayWindow );
+	IECoreImage::ImagePrimitivePtr image = new IECoreImage::ImagePrimitive( dataWindow, displayWindow );
+	Imath::V3f boxMin( displayWindow.min.x, displayWindow.min.y, 0.0 );
+	Imath::V3f boxMax( 1.0f + displayWindow.max.x, 1.0f + displayWindow.max.y, 0.0 );
+	Imath::V3f center = (boxMin + boxMax) / 2.0;
+	Imath::Box3f bound( boxMin - center, boxMax - center );
 
-	if ( !m_data->checkCulling<IECore::Primitive>( image.get() ) )
+	if( !m_data->checkCulling( bound ) )
 	{
 		return;
 	}
 
-	image->variables = primVars;
+	for( const auto &primVar : primVars )
+	{
+		if(
+			primVar.second.interpolation == PrimitiveVariable::Vertex ||
+			primVar.second.interpolation == PrimitiveVariable::Varying ||
+			primVar.second.interpolation == PrimitiveVariable::FaceVarying
+		)
+		{
+			image->channels[primVar.first] = primVar.second.data;
+		}
+	}
 
 	IECore::CompoundObjectPtr params = new IECore::CompoundObject();
 	params->members()[ "texture" ] = image;
@@ -1700,9 +1712,6 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 	ShaderStateComponentPtr shaderState = new ShaderStateComponent( m_data->shaderLoader, m_data->textureLoader, "", "", imageFragmentShader(), params );
 
 	m_data->implementation->transformBegin();
-
-		Box3f bound = image->bound();
-		V3f center = bound.center();
 
 		M44f xform;
 		xform[3][0] = center.x;
@@ -1773,7 +1782,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 		IECore::msg( IECore::Msg::Warning, "Renderer::procedural", "Procedurals currently not supported inside instances." );
 		return;
 	}
-	if ( m_data->checkCulling<IECore::Renderer::Procedural>( proc.get() ) )
+	if ( m_data->checkCulling( proc->bound() ) )
 	{
 		if( ExternalProcedural *externalProcedural = dynamic_cast<ExternalProcedural *>( proc.get() ) )
 		{

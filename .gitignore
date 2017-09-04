@@ -24,6 +24,7 @@ projects
 test/IECore/IECoreTest
 test/IECore/results.txt
 test/IECore/resultsPython.txt
+test/IECoreImage/results.txt
 test/IECoreRI/resultsPython.txt
 test/IECoreMaya/resultsPython.txt
 test/IECoreNuke/resultsPython.txt

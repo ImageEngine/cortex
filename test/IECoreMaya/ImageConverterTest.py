@@ -35,13 +35,14 @@
 import maya.cmds
 
 import IECore
+import IECoreImage
 import IECoreMaya
 
 class ImageConverterTest( IECoreMaya.TestCase ) :
 
 	def test( self ) :
 
-		imageA = IECore.Reader.create( "test/IECore/data/exrFiles/colorBarsWithAlpha.exr" ).read()
+		imageA = IECore.Reader.create( "test/IECoreImage/data/exr/colorBarsWithAlpha.exr" ).read()
 		
 		toMaya = IECoreMaya.ToMayaImageConverter( imageA )
 		
@@ -53,7 +54,7 @@ class ImageConverterTest( IECoreMaya.TestCase ) :
 		
 		self.failIf(
 		
-			IECore.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
+			IECoreImage.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
 			
 		)
 

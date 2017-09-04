@@ -57,6 +57,7 @@ class InstancingTest( unittest.TestCase ) :
 			b = IECore.Box3f()
 			for m in self.__meshes :
 				b.extendBy( m.bound() )
+			return b
 				
 		def render( self, renderer ) :
 		

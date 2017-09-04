@@ -42,7 +42,7 @@
 
 #include "IECore/IECore.h"
 #include "IECore/DataConvert.h"
-#include "IECore/CineonToLinearDataConversion.h"
+#include "IECore/DataConversion.h"
 
 namespace IECore
 {
@@ -51,6 +51,17 @@ void addDataConvertTest( boost::unit_test::test_suite* test );
 
 struct DataConvertTest
 {
+	template<typename F, typename T>
+	class DoubleItDataConversion : public DataConversion< F, T >
+	{
+		public :
+
+			T operator()( F f ) const
+			{
+				return f * 2;
+			}
+	};
+
 	template<typename F, typename T>
 	void testVectorData()
 	{
@@ -63,12 +74,12 @@ struct DataConvertTest
 			from->writable()[i] = i;
 		}
 
-		typedef CineonToLinearDataConversion< typename F::ValueType::value_type, typename T::ValueType::value_type > Conv;
+		typedef DoubleItDataConversion< typename F::ValueType::value_type, typename T::ValueType::value_type > Conv;
 
 		typename T::Ptr to = DataConvert< F, T, Conv >()( from );
 		BOOST_CHECK( to );
 		BOOST_CHECK_EQUAL( (int)to->readable().size(), 1024 );
-		BOOST_CHECK_CLOSE( (float)to->readable()[512], 0.257f, 0.05f );
+		BOOST_CHECK_EQUAL( (float)to->readable()[512], 1024.f );
 	}
 
 	template<typename F, typename T>
@@ -78,11 +89,11 @@ struct DataConvertTest
 
 		from->writable() = 512;
 
-		typedef CineonToLinearDataConversion< typename F::ValueType, typename T::ValueType > Conv;
+		typedef DoubleItDataConversion< typename F::ValueType, typename T::ValueType > Conv;
 
 		typename T::Ptr to = DataConvert< F, T, Conv >()( from );
 		BOOST_CHECK( to );
-		BOOST_CHECK_CLOSE( (float)to->readable(), 0.257f, 0.05f );
+		BOOST_CHECK_EQUAL( (float)to->readable(), 1024.f );
 	}
 };
 

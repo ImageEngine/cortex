@@ -32,12 +32,15 @@
 #
 ##########################################################################
 
-import unittest
-import IECoreNuke
-import IECore
 import os
+import glob
+import unittest
+
 import nuke
-from glob import glob
+
+import IECore
+import IECoreImage
+import IECoreNuke
 
 class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 
@@ -46,7 +49,7 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 
 	def tearDown( self ) :
 		nuke.scriptClear()
-		for f in glob( "test/IECoreNuke/scripts/data/sceneCacheTestResults*.exr" ) :
+		for f in glob.glob( "test/IECoreNuke/scripts/data/sceneCacheTestResults*.exr" ) :
 			try:
 				os.remove(f)
 			except:
@@ -61,8 +64,8 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		for f in frames :
 			imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResults.%04d.exr" % f )()
 			imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.%04d.exr" % f )()
-			self.assertEqual( IECore.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
-		
+			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
+
 		n = nuke.toNode("ieSceneCacheReader4")
 		v = n.knob('sceneView')
 		self.assertEqual( set(v.getSelectedItems()), set(['/root/A/a']) )
@@ -73,8 +76,8 @@ class SceneCacheReaderTest( IECoreNuke.TestCase ) :
 		nuke.executeMultiple( [ w ], [(20,20,1)] )
 		imageA = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheExpectedResultsB.0020.exr" )()
 		imageB = IECore.Reader.create( "test/IECoreNuke/scripts/data/sceneCacheTestResults.0020.exr" )()
-		self.assertEqual( IECore.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = imageA, imageB = imageB, maxError = 0.05 ).value, False )
 
 if __name__ == "__main__":
-    unittest.main()
+	unittest.main()
 

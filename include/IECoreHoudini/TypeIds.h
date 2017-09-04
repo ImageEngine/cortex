@@ -73,8 +73,8 @@ namespace IECoreHoudini
 		ToHoudiniGroupConverterTypeId = 111026,
 		ToHoudiniStringDetailAttribConverterTypeId = 111027,
 		ToHoudiniStringVectorAttribConverterTypeId = 111028,
-		RATDeepImageReaderTypeId = 111029,
-		RATDeepImageWriterTypeId = 111030,
+		RATDeepImageReaderTypeId = 111029, // obsolete - available for reuse
+		RATDeepImageWriterTypeId = 111030, // obsolete - available for reuse
 		LiveSceneTypeId = 111031,
 		FromHoudiniCortexObjectConverterTypeId = 111032,
 		ToHoudiniCortexObjectConverterTypeId = 111033,

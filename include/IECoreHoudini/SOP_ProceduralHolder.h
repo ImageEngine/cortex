@@ -38,7 +38,11 @@
 #ifndef IECOREHOUDINI_SOPPROCEDURALHOLDER_H
 #define IECOREHOUDINI_SOPPROCEDURALHOLDER_H
 
-#include "IECoreGL/Scene.h"
+#ifdef IECOREHOUDINI_WITH_GL
+
+	#include "IECoreGL/Scene.h"
+
+#endif
 
 #include "IECoreHoudini/SOP_ParameterisedHolder.h"
 
@@ -53,8 +57,12 @@ class SOP_ProceduralHolder : public SOP_ParameterisedHolder
 		/// standard houdini ctor and parameter variables
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 
+#ifdef IECOREHOUDINI_WITH_GL
+
 		/// returns a GL scene, rendering it if necessary
 		IECoreGL::ConstScenePtr scene();
+
+#endif
 
 	protected :
 
@@ -65,8 +73,12 @@ class SOP_ProceduralHolder : public SOP_ParameterisedHolder
 
 	private :
 
+#ifdef IECOREHOUDINI_WITH_GL
+
 		// our cache GL scene
 		IECoreGL::ScenePtr m_scene;
+
+#endif
 
 };
 

@@ -65,10 +65,7 @@ from SimpleTypedData import *
 from TypedDataAsObject import *
 from VectorData import *
 from FileSequence import *
-from EXRImageReader import *
-from EXRImageWriter import *
 from PointsPrimitive import *
-from ImagePrimitive import *
 from PerlinNoise import *
 from Turbulence import *
 from MeshPrimitive import *
@@ -115,24 +112,16 @@ from Writer import *
 from TriangulateOp import *
 from SpherePrimitiveEvaluator import *
 from SearchReplaceOp import *
-from CINImageReader import *
-from CINImageWriter import *
-from DPXImageReader import *
-from DPXImageWriter import *
 from InverseDistanceWeightedInterpolation import *
-from ImageCropOp import *
 from MeshPrimitiveShrinkWrapOp import *
-from ImagePrimitiveEvaluator import *
 from CapturingMessageHandler import *
 from Math import *
 from FileSequenceVectorParameter import *
 from TriangleAlgoTest import *
-from ColorTransformOpTest import *
 from TransformOpTest import *
 from LineSegmentTest import *
 from CubicBasisTest import *
 from CurvesPrimitiveTest import *
-from ImageDiffOp import *
 from TriangulatorTest import *
 from BezierAlgoTest import *
 from MeshNormalsOpTest import *
@@ -142,11 +131,6 @@ from UnicodeToStringTest import *
 from RadixSortTest import *
 from ImathRootsTest import *
 from AngleConversionTest import *
-from LuminanceOpTest import *
-from SummedAreaOpTest import *
-from GradeTest import *
-from MedianCutSamplerTest import *
-from EnvMapSamplerTest import *
 from RandomTest import *
 from MeshVertexReorderOpTest import *
 from SplineTest import *
@@ -156,25 +140,14 @@ from LayeredDictTest import *
 from SplineParameterTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
-from SplineToImageTest import *
 from DisplayTest import *
 from MeshTangentsOpTest import *
-from CubeColorLookupTest import *
-from CubeColorLookupDataTest import *
-from CubeColorTransformOpTest import *
 from CompoundVectorParameterTest import *
-from UVDistortOpTest import *
 from ObjectVectorTest import *
-from ImagePremultiplyOpTest import *
-from ImageUnpremultiplyOpTest import *
-from ImageCompositeOpTest import *
-from ImageSequenceCompositeOpTest import *
-from YUVImageWriter import *
 from OversamplesCalculatorTest import *
 from DateTimeDataTest import *
 from DateTimeParameterTest import *
 from SequenceLsOpTest import *
-from SGIImageReaderTest import *
 from TimeDurationDataTest import *
 from TimePeriodDataTest import *
 from PatchMeshPrimitiveTest import *
@@ -183,9 +156,6 @@ from ParameterisedProceduralTest import *
 from LevenbergMarquardtTest import *
 from TypedDataTest import *
 from DataTraitsTest import *
-from ColorSpaceTransformOpTest import *
-from TGAImageReaderTest import *
-from TGAImageWriterTest import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
 from FaceAreaOpTest import FaceAreaOpTest
@@ -193,8 +163,6 @@ from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
 from PointDistributionTest import PointDistributionTest
-from CurveTracerTest import CurveTracerTest
-from ImageThinnerTest import ImageThinnerTest
 from CurveLineariserTest import CurveLineariserTest
 from IDXReaderTest import IDXReaderTest
 from ThreadingTest import ThreadingTest
@@ -232,13 +200,11 @@ from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
-from DeepPixelTest import DeepPixelTest
 from ConfigLoaderTest import ConfigLoaderTest
 from MurmurHashTest import MurmurHashTest
 from BoolVectorData import BoolVectorDataTest
 from CompoundParameterTest import CompoundParameterTest
 from DiskPrimitiveTest import DiskPrimitiveTest
-from ClampOpTest import ClampOpTest
 from SWAReaderTest import SWAReaderTest
 from ImfTest import *
 from TimeCodeDataTest import TimeCodeDataTest
@@ -248,7 +214,6 @@ from NullObjectTest import NullObjectTest
 from SceneCacheTest import SceneCacheTest
 from LinkedSceneTest import LinkedSceneTest
 from StandardRadialLensModelTest import StandardRadialLensModelTest
-from LensDistortOpTest import LensDistortOpTest
 from ObjectPoolTest import ObjectPoolTest
 from RefCountedTest import RefCountedTest
 from ExternalProceduralTest import ExternalProceduralTest
@@ -257,28 +222,9 @@ from DataAlgoTest import DataAlgoTest
 from MeshAlgoTest import *
 from CurvesAlgoTest import *
 from PointsAlgoTest import *
-from DisplayDriverServerTest import DisplayDriverServerTest
-
-if IECore.withDeepEXR() :
-	from EXRDeepImageReaderTest import EXRDeepImageReaderTest
-	from EXRDeepImageWriterTest import EXRDeepImageWriterTest
-
-if IECore.withASIO() :
-	from DisplayDriverTest import *
-
-if IECore.withTIFF() :
-	from TIFFImageReader import *
-	from TIFFImageWriter import *
-
-if IECore.withJPEG() :
-	from JPEGImageReader import *
-	from JPEGImageWriter import *
 
 if IECore.withFreeType() :
 	from FontTest import *
-
-if IECore.withPNG() :
-	from PNGImageReader import TestPNGReader
 
 unittest.TestProgram(
 	testRunner = unittest.TextTestRunner(

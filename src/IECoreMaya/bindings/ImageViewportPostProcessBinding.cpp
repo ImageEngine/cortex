@@ -109,7 +109,7 @@ struct ImageViewportPostProcessWrapper : RefCountedWrapper< ImageViewportPostPro
 		}
 	}
 
-	virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image )
+	virtual void postRender( const std::string &panelName, IECoreImage::ImagePrimitivePtr image )
 	{
 		ScopedGILLock gilLock;
 		object o = this->methodOverride( "postRender" );

@@ -71,7 +71,6 @@ class TestPythonOp( unittest.TestCase ) :
 	def testDefaultConstructor( self ):
 		import IECore
 		exceptionList = [	IECore.Reader, IECore.Writer,
-							IECore.ImageReader, IECore.ImageWriter,
 							IECore.ParticleReader, IECore.ParticleWriter
 						]
 		def test(c):

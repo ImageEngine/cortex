@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os.path
 import os
 import time
 import IECore
+import IECoreImage
 import IECoreRI
 
 class PythonProceduralTest( IECoreRI.TestCase ) :
@@ -71,7 +70,7 @@ class PythonProceduralTest( IECoreRI.TestCase ) :
 		imageCreated = IECore.Reader.create( "test/IECoreRI/output/testPythonProcedural.tif" ).read()
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/testPythonProcedural.tif" ).read()
 
-		self.assertEqual( IECore.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
 	
 	def testThreading( self ) :
 	

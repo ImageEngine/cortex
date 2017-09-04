@@ -33,14 +33,13 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import unittest
 
 import arnold
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class MeshTest( unittest.TestCase ) :
@@ -105,17 +104,15 @@ class MeshTest( unittest.TestCase ) :
 
 		del r
 
-		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
-
-		e = IECore.PrimitiveEvaluator.create( image )
-		result = e.createResult()
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
 
 		# the utility shader encodes the normals in the range 0-1 rather than -1-1,
 		# which is why we're checking G and B against .5 rather than 0.
-		e.pointAtUV( IECore.V2f( 0.5 ), result )
-		self.assertAlmostEqual( result.floatPrimVar( e.R() ), 1, 4 )
-		self.assertAlmostEqual( result.floatPrimVar( e.G() ), 0.5, 4 )
-		self.assertAlmostEqual( result.floatPrimVar( e.B() ), 0.5, 4 )
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["R"][index], 1, 4 )
+		self.assertAlmostEqual( image["G"][index], 0.5, 4 )
+		self.assertAlmostEqual( image["B"][index], 0.5, 4 )
 
 	def testVertexPrimitiveVariables( self ) :
 

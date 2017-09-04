@@ -32,16 +32,17 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECoreNuke/FromNukeTileConverter.h"
 
-using namespace IECoreNuke;
-using namespace IECore;
 using namespace Imath;
+using namespace IECore;
+using namespace IECoreImage;
+using namespace IECoreNuke;
 
 FromNukeTileConverter::FromNukeTileConverter( const DD::Image::Tile *tile )
-	:	FromNukeConverter( "Converts nuke Tiles to IECore ImagePrimitives." ), m_tile( tile )
+	:	FromNukeConverter( "Converts nuke Tiles to IECoreImage ImagePrimitives." ), m_tile( tile )
 {
 }
 

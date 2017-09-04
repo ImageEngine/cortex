@@ -38,15 +38,17 @@
 #include "ai_drivers.h"
 #include "ai_version.h"
 
-#include "IECore/DisplayDriver.h"
 #include "IECore/BoxAlgo.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+
+#include "IECoreImage/DisplayDriver.h"
 
 #include "IECoreArnold/ParameterAlgo.h"
 
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreImage;
 using namespace IECoreArnold;
 
 namespace
@@ -224,7 +226,7 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	// Couldn't reuse a driver, so create one from scratch.
 	try
 	{
-		localData->displayDriver = IECore::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
+		localData->displayDriver = IECoreImage::DisplayDriver::create( driverType, cortexDisplayWindow, cortexDataWindow, channelNames, parameters );
 		localData->displayDriverParameters = parameters;
 	}
 	catch( const std::exception &e )

@@ -77,7 +77,6 @@
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
-#include "IECorePython/CubeColorLookupParameterBinding.h"
 #include "IECorePython/TimePeriodParameterBinding.h"
 #include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/CompoundParameterBinding.h"
@@ -101,23 +100,8 @@
 #include "IECorePython/ObjectParameterBinding.h"
 #include "IECorePython/ModifyOpBinding.h"
 #include "IECorePython/PrimitiveOpBinding.h"
-#include "IECorePython/ImagePrimitiveBinding.h"
-#include "IECorePython/ImageReaderBinding.h"
-#include "IECorePython/ImageWriterBinding.h"
 #include "IECorePython/PerlinNoiseBinding.h"
-#include "IECorePython/EXRImageReaderBinding.h"
-#include "IECorePython/EXRImageWriterBinding.h"
 #include "IECorePython/HalfBinding.h"
-#include "IECorePython/TIFFImageReaderBinding.h"
-#include "IECorePython/TIFFImageWriterBinding.h"
-#include "IECorePython/CINImageReaderBinding.h"
-#include "IECorePython/CINImageWriterBinding.h"
-#include "IECorePython/DPXImageReaderBinding.h"
-#include "IECorePython/DPXImageWriterBinding.h"
-#include "IECorePython/JPEGImageReaderBinding.h"
-#include "IECorePython/JPEGImageWriterBinding.h"
-#include "IECorePython/TGAImageReaderBinding.h"
-#include "IECorePython/TGAImageWriterBinding.h"
 #include "IECorePython/MeshPrimitiveBinding.h"
 #include "IECorePython/MotionPrimitiveBinding.h"
 #include "IECorePython/TransformBinding.h"
@@ -135,7 +119,6 @@
 #include "IECorePython/BoundedKDTreeBinding.h"
 #include "IECorePython/VectorDataFilterOpBinding.h"
 #include "IECorePython/TypedObjectParameterBinding.h"
-#include "IECorePython/TypedPrimitiveParameterBinding.h"
 #include "IECorePython/HeaderGeneratorBinding.h"
 #include "IECorePython/PreWorldRenderableBinding.h"
 #include "IECorePython/CameraBinding.h"
@@ -155,21 +138,17 @@
 #include "IECorePython/SpherePrimitiveBinding.h"
 #include "IECorePython/SpherePrimitiveEvaluatorBinding.h"
 #include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
-#include "IECorePython/ImageCropOpBinding.h"
 #include "IECorePython/MeshPrimitiveShrinkWrapOpBinding.h"
-#include "IECorePython/ImagePrimitiveEvaluatorBinding.h"
 #include "IECorePython/MathBinding.h"
 #include "IECorePython/CameraControllerBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
 #include "IECorePython/TriangleAlgoBinding.h"
-#include "IECorePython/ColorTransformOpBinding.h"
 #include "IECorePython/ConverterBinding.h"
 #include "IECorePython/FromCoreConverterBinding.h"
 #include "IECorePython/TransformOpBinding.h"
 #include "IECorePython/LineSegmentBinding.h"
 #include "IECorePython/CubicBasisBinding.h"
 #include "IECorePython/CurvesPrimitiveBinding.h"
-#include "IECorePython/ImageDiffOpBinding.h"
 #include "IECorePython/TriangulatorBinding.h"
 #include "IECorePython/BezierAlgoBinding.h"
 #include "IECorePython/ToCoreConverterBinding.h"
@@ -179,47 +158,17 @@
 #include "IECorePython/FontBinding.h"
 #include "IECorePython/UnicodeToStringBinding.h"
 #include "IECorePython/RadixSortBinding.h"
-#include "IECorePython/PointRepulsionOpBinding.h"
 #include "IECorePython/AngleConversionBinding.h"
-#include "IECorePython/LuminanceOpBinding.h"
-#include "IECorePython/ChannelOpBinding.h"
-#include "IECorePython/SummedAreaOpBinding.h"
-#include "IECorePython/GradeBinding.h"
-#include "IECorePython/MedianCutSamplerBinding.h"
-#include "IECorePython/EnvMapSamplerBinding.h"
 #include "IECorePython/MeshVertexReorderOpBinding.h"
 #include "IECorePython/SplineBinding.h"
 #include "IECorePython/SplineDataBinding.h"
-#include "IECorePython/DisplayDriverBinding.h"
-#include "IECorePython/ImageDisplayDriverBinding.h"
 #include "IECorePython/CoordinateSystemBinding.h"
-#include "IECorePython/ClientDisplayDriverBinding.h"
-#include "IECorePython/DisplayDriverServerBinding.h"
-#include "IECorePython/SplineToImageBinding.h"
 #include "IECorePython/DisplayBinding.h"
 #include "IECorePython/MeshTangentsOpBinding.h"
-#include "IECorePython/WarpOpBinding.h"
-#include "IECorePython/UVDistortOpBinding.h"
-#include "IECorePython/LinearToSRGBOpBinding.h"
-#include "IECorePython/SRGBToLinearOpBinding.h"
-#include "IECorePython/LinearToCineonOpBinding.h"
-#include "IECorePython/CineonToLinearOpBinding.h"
-#include "IECorePython/LinearToAlexaLogcOpBinding.h"
-#include "IECorePython/AlexaLogcToLinearOpBinding.h"
-#include "IECorePython/CubeColorLookupBinding.h"
-#include "IECorePython/CubeColorLookupDataBinding.h"
-#include "IECorePython/CubeColorTransformOpBinding.h"
-#include "IECorePython/LinearToRec709OpBinding.h"
-#include "IECorePython/Rec709ToLinearOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
-#include "IECorePython/YUVImageWriterBinding.h"
-#include "IECorePython/ImageCompositeOpBinding.h"
-#include "IECorePython/ImagePremultiplyOpBinding.h"
-#include "IECorePython/ImageUnpremultiplyOpBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
 #include "IECorePython/DateTimeDataBinding.h"
-#include "IECorePython/SGIImageReaderBinding.h"
 #include "IECorePython/TimeDurationDataBinding.h"
 #include "IECorePython/TimePeriodBinding.h"
 #include "IECorePython/TimePeriodDataBinding.h"
@@ -240,15 +189,11 @@
 #include "IECorePython/FileSequenceVectorParameterBinding.h"
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
-#include "IECorePython/ColorSpaceTransformOpBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
 #include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
-#include "IECorePython/HdrMergeOpBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
-#include "IECorePython/CurveTracerBinding.h"
-#include "IECorePython/ImageThinnerBinding.h"
 #include "IECorePython/CurveLineariserBinding.h"
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
@@ -278,20 +223,13 @@
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
-#include "IECorePython/PNGImageReaderBinding.h"
-#include "IECorePython/DeepPixelBinding.h"
-#include "IECorePython/DeepImageReaderBinding.h"
-#include "IECorePython/DeepImageWriterBinding.h"
-#include "IECorePython/DeepImageConverterBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
-#include "IECorePython/ClampOpBinding.h"
 #include "IECorePython/MeshFaceFilterOpBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
 #include "IECorePython/TimeCodeParameterBinding.h"
 #include "IECorePython/OptionsBinding.h"
-#include "IECorePython/MPlayDisplayDriverBinding.h"
 #include "IECorePython/SceneInterfaceBinding.h"
 #include "IECorePython/SharedSceneInterfacesBinding.h"
 #include "IECorePython/SampledSceneInterfaceBinding.h"
@@ -299,10 +237,7 @@
 #include "IECorePython/LinkedSceneBinding.h"
 #include "IECorePython/LensModelBinding.h"
 #include "IECorePython/StandardRadialLensModelBinding.h"
-#include "IECorePython/LensDistortOpBinding.h"
 #include "IECorePython/ObjectPoolBinding.h"
-#include "IECorePython/EXRDeepImageReaderBinding.h"
-#include "IECorePython/EXRDeepImageWriterBinding.h"
 #include "IECorePython/ExternalProceduralBinding.h"
 #include "IECorePython/ClippingPlaneBinding.h"
 #include "IECorePython/DataAlgoBinding.h"
@@ -358,7 +293,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLineTypedParameter();
 	bindVectorTypedParameter();
 	bindSplineParameter();
-	bindCubeColorLookupParameter();
 	bindDateTimeParameter();
 	bindTimePeriodParameter();
 	bindTimeDurationParameter();
@@ -380,30 +314,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindObjectParameter();
 	bindModifyOp();
 	bindPrimitiveOp();
-	bindImagePrimitive();
-	bindImageReader();
-	bindImageWriter();
-	bindEXRImageReader();
-	bindEXRImageWriter();
-
-#ifdef IECORE_WITH_TIFF
-	bindTIFFImageReader();
-	bindTIFFImageWriter();
-#endif
-
-	bindCINImageReader();
-	bindCINImageWriter();
-	bindDPXImageReader();
-	bindDPXImageWriter();
-
-#ifdef IECORE_WITH_JPEG
-	bindJPEGImageReader();
-	bindJPEGImageWriter();
-#endif
-
-	bindTGAImageReader();
-	bindTGAImageWriter();
-
 	bindMeshPrimitive();
 	bindMotionPrimitive();
 	bindTransform();
@@ -421,7 +331,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindBoundedKDTree();
 	bindVectorDataFilterOp();
 	bindTypedObjectParameter();
-	bindTypedPrimitiveParameter();
 	bindHeaderGenerator();
 	bindPreWorldRenderable();
 	bindCamera();
@@ -441,21 +350,17 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSpherePrimitive();
 	bindSpherePrimitiveEvaluator();
 	bindInverseDistanceWeightedInterpolation();
-	bindImageCropOp();
 	bindMeshPrimitiveShrinkWrapOp();
-	bindImagePrimitiveEvaluator();
 	bindMath();
 	bindCameraController();
 	bindPathVectorParameter();
 	bindTriangleAlgo();
-	bindColorTransformOp();
 	bindConverter();
 	bindFromCoreConverter();
 	bindTransformOp();
 	bindLineSegment();
 	bindCubicBasis();
 	bindCurvesPrimitive();
-	bindImageDiffOp();
 	bindTriangulator();
 	bindBezierAlgo();
 	bindToCoreConverter();
@@ -471,54 +376,17 @@ BOOST_PYTHON_MODULE(_IECore)
 
 	bindUnicodeToString();
 	bindRadixSort();
-	bindPointRepulsionOp();
 	bindAngleConversion();
-	bindLuminanceOp();
-	bindChannelOp();
-	bindSummedAreaOp();
-	bindGrade();
-	bindMedianCutSampler();
-	bindEnvMapSampler();
 	bindMeshVertexReorderOp();
 	bindSpline();
 	bindSplineData();
 	bindCoordinateSystem();
-
-#ifdef IECORE_WITH_ASIO
-
-	bindDisplayDriver();
-	bindImageDisplayDriver();
-	bindClientDisplayDriver();
-	bindDisplayDriverServer();
-	// see note in Sconstruct re IECORE_WITH_ASIO and OBJReader
 	bindOBJReader();
-
-#endif
-
-	bindSplineToImage();
 	bindDisplay();
 	bindMeshTangentsOp();
-	bindWarpOp();
-	bindUVDistortOp();
-	bindSRGBToLinearOp();
-	bindLinearToSRGBOp();
-	bindCineonToLinearOp();
-	bindLinearToCineonOp();
-	bindAlexaLogcToLinearOp();
-	bindLinearToAlexaLogcOp();
-	bindCubeColorLookup();
-	bindCubeColorLookupData();
-	bindCubeColorTransformOp();
-	bindLinearToRec709Op();
-	bindRec709ToLinearOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
-	bindYUVImageWriter();
-	bindImagePremultiplyOp();
-	bindImageUnpremultiplyOp();
-	bindImageCompositeOp();
 	bindDateTimeData();
-	bindSGIImageReader();
 	bindTimeDurationData();
 	bindTimePeriod();
 	bindTimePeriodData();
@@ -539,15 +407,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFileSequenceVectorParameter();
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
-	bindColorSpaceTransformOp();
 	bindNParticleReader();
 	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
-	bindHdrMergeOp();
 	bindPointDistribution();
-	bindCurveTracer();
-	bindImageThinner();
 	bindCurveLineariser();
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
@@ -577,26 +441,13 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLRUCache();
 	bindDataInterleaveOp();
 	bindDataConvertOp();
-	
-#ifdef IECORE_WITH_PNG
-
-	bindPNGImageReader();
-	
-#endif
-	
-	bindDeepPixel();
-	bindDeepImageReader();
-	bindDeepImageWriter();
-	bindDeepImageConverter();
 	bindMurmurHash();
 	bindDiskPrimitive();
-	bindClampOp();
 	bindMeshFaceFilterOp();
 	bindImf();
 	bindTimeCodeData();
 	bindTimeCodeParameter();
 	bindOptions();
-	bindMPlayDisplayDriver();
 	bindSceneInterface();
 	bindSharedSceneInterfaces();
 	bindSampledSceneInterface();
@@ -604,7 +455,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLinkedScene();
 	bindLensModel();
 	bindStandardRadialLensModel();
-	bindLensDistortOp();
 	bindObjectPool();
 	bindExternalProcedural();
 	bindClippingPlane();
@@ -613,26 +463,12 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurvesAlgo();
 	bindPointsAlgo();
 
-#ifdef IECORE_WITH_DEEPEXR
-
-	bindEXRDeepImageReader();
-	bindEXRDeepImageWriter();
-
-#endif
-
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
-	def( "withASIO", &IECore::withASIO );
-	def( "withSignals", &IECore::withSignals );
-	def( "withTIFF", &IECore::withTIFF );
-	def( "withJPEG", &IECore::withJPEG );
-	def( "withDeepEXR", &IECore::withDeepEXR );
 	def( "withFreeType", &IECore::withFreeType );
-	def( "withPNG", &IECore::withPNG );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
 
 }
-

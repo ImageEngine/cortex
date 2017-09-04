@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreImage
 import IECoreRI
 import os.path
 import os
@@ -78,11 +79,9 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 0 )
 		del r
 
 		# render a plane at z = 0 with the camera moved back a touch to see it
@@ -100,11 +99,9 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 
 	def testXYOrientation( self ) :
 
@@ -126,22 +123,17 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		# check we get the colors we'd expect where we expect them
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		r = e.R()
-		g = e.G()
-		b = e.B()
-		e.pointAtUV( IECore.V2f( 1, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( IECore.V2f( 0.5, 0 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 1 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
+		index = int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def testMultipleCameraRIB( self ) :
 
@@ -194,11 +186,9 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["A"][index], 1 )
 	
 	def testMotionBlurCameraRender( self ) :
 	
@@ -217,11 +207,10 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertTrue( result.floatPrimVar( e.A() ) > 0 ) # something should be there
-		self.assertTrue( result.floatPrimVar( e.A() ) < 1 ) # but it should be blurry
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertTrue( i["A"][index] > 0 ) # something should be there
+		self.assertTrue( i["A"][index] < 1 ) # but it should be blurry
 	
 	def testMotionBlurCameraRib( self ) :
 	

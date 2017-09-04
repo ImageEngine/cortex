@@ -66,6 +66,19 @@ class TestTurbulence( unittest.TestCase ) :
 
 	def test2d( self ) :
 
+		expected = (
+			0.50000, 0.51876, 0.53219, 0.53978, 0.54359, 0.54603, 0.54817, 0.54947, 0.55075, 0.55015,
+			0.52756, 0.54607, 0.55913, 0.56621, 0.56943, 0.57121, 0.57268, 0.57323, 0.57335, 0.57130,
+			0.55703, 0.57450, 0.58716, 0.59444, 0.59796, 0.59962, 0.60027, 0.59953, 0.59753, 0.59314,
+			0.58574, 0.60132, 0.61350, 0.62163, 0.62640, 0.62853, 0.62838, 0.62607, 0.62148, 0.61452,
+			0.61106, 0.62433, 0.63581, 0.64489, 0.65119, 0.65417, 0.65355, 0.65003, 0.64343, 0.63479,
+			0.63288, 0.64391, 0.65440, 0.66383, 0.67115, 0.67494, 0.67442, 0.67063, 0.66344, 0.65462,
+			0.65284, 0.66195, 0.67109, 0.67993, 0.68734, 0.69165, 0.69182, 0.68881, 0.68250, 0.67475,
+			0.67045, 0.67779, 0.68540, 0.69318, 0.70017, 0.70478, 0.70589, 0.70414, 0.69938, 0.69326,
+			0.68390, 0.68996, 0.69614, 0.70254, 0.70864, 0.71326, 0.71543, 0.71530, 0.71266, 0.70885,
+			0.69565, 0.70112, 0.70616, 0.71097, 0.71569, 0.71997, 0.72320, 0.72493, 0.72457, 0.72302,
+		)
+
 		t = IECore.TurbulenceV2ff(
 			octaves = 4,
 			gain = 0.35,
@@ -73,33 +86,13 @@ class TestTurbulence( unittest.TestCase ) :
 			turbulent = False
 		)
 
-		width = 400
-		height = 400
+		width = 10
+		height = 10
 
-		f = IECore.FloatVectorData( width * height )
-		o = 0
 		for i in range( 0, height ) :
 			for j in range( 0, width ) :
-				f[o] = 0.5 + t.turbulence( IECore.V2f( i/50.0, j/50.0 ) )
-				o += 1
-
-		b = IECore.Box2i( IECore.V2i( 0, 0 ), IECore.V2i( width-1, height-1 ) )
-		i = IECore.ImagePrimitive( b, b )
-		i["r"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		i["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		i["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, f )
-		
-		e = IECore.Reader.create( "test/IECore/data/expectedResults/turbulence2d.exr" ).read()
-
-		op = IECore.ImageDiffOp()
-
-		res = op(
-			imageA = i,
-			imageB = e,
-			maxError = 0.0005
-		)
-
-		self.failIf( res.value )
+				f = 0.5 + t.turbulence( IECore.V2f( i/50.0, j/50.0 ) )
+				self.assertAlmostEqual( f, expected[i*height + j], 5 )
 
 	def testNaN( self ) :
 

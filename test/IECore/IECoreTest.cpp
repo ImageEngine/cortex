@@ -49,15 +49,8 @@
 #include "CompilerTest.h"
 #include "RadixSortTest.h"
 #include "SweepAndPruneTest.h"
-#include "ColorTransformTest.h"
 #include "InternedStringTest.h"
-
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
-	#include "LevenbergMarquardtTest.h"
-
-#endif
-
+#include "LevenbergMarquardtTest.h"
 #include "SpaceTransformTest.h"
 #include "LookupTest.h"
 #include "StringAlgoTest.h"
@@ -93,14 +86,7 @@ bool init()
 		addCompilerTest(test);
 		addRadixSortTest(test);
 		addSweepAndPruneTest(test);
-		addColorTransformTest(test);
-
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-
 		addLevenbergMarquardtTest(test);
-
-#endif
-
 		addSpaceTransformTest(test);
 		addLookupTest(test);
 		addStringAlgoTest(test);

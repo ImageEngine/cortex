@@ -83,7 +83,7 @@ void Texture::bind() const
 	glBindTexture( GL_TEXTURE_2D, m_texture );
 }
 
-IECore::ImagePrimitivePtr Texture::imagePrimitive() const
+IECoreImage::ImagePrimitivePtr Texture::imagePrimitive() const
 {
 	return 0;
 }

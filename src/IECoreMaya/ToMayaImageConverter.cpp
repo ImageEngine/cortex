@@ -39,18 +39,20 @@
 #include "boost/multi_array.hpp"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/DataConvert.h"
 #include "IECore/ScaledDataConversion.h"
 #include "IECore/TypedData.h"
 #include "IECore/VectorTypedData.h"
 
+#include "IECoreImage/ImagePrimitive.h"
+
 #include "IECoreMaya/ToMayaImageConverter.h"
 #include "IECoreMaya/MImageAccessor.h"
 
-using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreImage;
+using namespace IECoreMaya;
 
 using std::string;
 using std::vector;
@@ -58,7 +60,7 @@ using std::vector;
 IE_CORE_DEFINERUNTIMETYPED( ToMayaImageConverter );
 
 ToMayaImageConverter::ToMayaImageConverter( ConstImagePrimitivePtr image )
-	:	ToMayaConverter( "Converts image types.", IECore::ImagePrimitiveTypeId )
+	:	ToMayaConverter( "Converts image types.", (IECore::TypeId)IECoreImage::ImagePrimitiveTypeId )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<ImagePrimitive>( image ) );
 
@@ -246,9 +248,9 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	desiredChannelOrder.push_back( "A" );
 
 	vector<string> channelNames;
-	for  ( PrimitiveVariableMap::const_iterator it = toConvert->variables.begin(); it != toConvert->variables.end(); ++it )
+	for( const auto &channel : toConvert->channels )
 	{
-		channelNames.push_back( it->first );
+		channelNames.push_back( channel.first );
 	}
 
 	vector<string> filteredNames;
@@ -293,7 +295,7 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 	unsigned channelOffset = 0;
 	for ( vector<string>::const_iterator it = channelNames.begin(); it != channelNames.end(); ++it, ++channelOffset )
 	{
-		DataPtr dataContainer = toConvert->variables.find( *it )->second.data;
+		DataPtr dataContainer = toConvert->channels.find( *it )->second;
 		assert( dataContainer );
 
 		switch( pixelType )
@@ -350,10 +352,10 @@ MStatus ToMayaImageConverter::convert( MImage &image ) const
 		}
 	}
 
-	PrimitiveVariableMap::const_iterator it = toConvert->variables.find( "Z" );
-	if ( it != toConvert->variables.end() )
+	const auto it = toConvert->channels.find( "Z" );
+	if ( it != toConvert->channels.end() )
 	{
-			DataPtr dataContainer = it->second.data;
+			DataPtr dataContainer = it->second;
 			assert( dataContainer );
 
 			ChannelConverter<float> converter( "Z" );

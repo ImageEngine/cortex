@@ -32,8 +32,6 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import os
 import unittest
 import time
@@ -42,6 +40,7 @@ import gc
 import weakref
 
 import IECore
+import IECoreImage
 import IECoreRI
 				
 class RerenderingTest( unittest.TestCase ) :
@@ -83,12 +82,10 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# check we get the colour we expected
 		
-		i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		e = IECore.ImagePrimitiveEvaluator( i )
-		er = e.createResult()
-
-		e.pointAtUV( IECore.V2f( 0.5 ), er )
-		c = IECore.Color3f( er.floatPrimVar( i["R"] ), er.floatPrimVar( i["G"] ), er.floatPrimVar( i["B"] ) )
+		i = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		c = IECore.Color3f( i["R"][index], i["G"][index], i["B"][index] )
 		self.assertEqual( c / c[0], IECore.Color3f( 1, 0.5, 0.25 ) )
 		
 		# make an edit to the light color and check the colour has changed
@@ -105,11 +102,10 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		time.sleep( 1 )
 		
-		i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		e = IECore.ImagePrimitiveEvaluator( i )
-		er = e.createResult()
-		
-		c = IECore.Color3f( er.floatPrimVar( i["R"] ), er.floatPrimVar( i["G"] ), er.floatPrimVar( i["B"] ) )
+		i = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		c = IECore.Color3f( i["R"][index], i["G"][index], i["B"][index] )
 		self.assertEqual( c / c[2], IECore.Color3f( 0.25, 0.5, 1 ) )
 	
 	def testEditShader( self ) :
@@ -148,11 +144,10 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# record the colour produced by the first render
 		
-		i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		e = IECore.ImagePrimitiveEvaluator( i )
-		er = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5 ), er )
-		initialColor = IECore.Color3f( er.floatPrimVar( i["R"] ), er.floatPrimVar( i["G"] ), er.floatPrimVar( i["B"] ) )
+		i = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		initialColor = IECore.Color3f( i["R"][index], i["G"][index], i["B"][index] )
 		
 		# make an edit to the shader and wait for it to take hold
 		
@@ -163,11 +158,10 @@ class RerenderingTest( unittest.TestCase ) :
 		
 		# check the ratio of the two colours is as expected.
 		
-		i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
-		e = IECore.ImagePrimitiveEvaluator( i )
-		er = e.createResult()
-		e.pointAtUV( IECore.V2f( 0.5 ), er )
-		newColor = IECore.Color3f( er.floatPrimVar( i["R"] ), er.floatPrimVar( i["G"] ), er.floatPrimVar( i["B"] ) )
+		i = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		newColor = IECore.Color3f( i["R"][index], i["G"][index], i["B"][index] )
 		
 		self.assertEqual( newColor / initialColor, IECore.Color3f( .5 ) )
 	
@@ -288,14 +282,13 @@ class RerenderingTest( unittest.TestCase ) :
 
 		def checkResults( results ) :
 		
-			i = IECore.ImageDisplayDriver.storedImage( "myLovelySphere" )
-			
-			e = IECore.ImagePrimitiveEvaluator( i )
-			er = e.createResult()
-			
+			i = IECoreImage.ImageDisplayDriver.storedImage( "myLovelySphere" )
+
+			dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+
 			for position, value in results :
-				e.pointAtUV( position, er )
-				self.assertEqual( er.floatPrimVar( i["A"] ), value )
+				index = dimensions.x * int(dimensions.y * position.y) + int(dimensions.x * position.x)
+				self.assertEqual( i["A"][index], value )
 		
 		checkResults( [
 			( IECore.V2f( 0.5, 0.5 ), 1 ),

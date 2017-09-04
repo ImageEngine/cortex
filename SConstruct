@@ -182,55 +182,6 @@ o.Add(
 	"",
 )
 
-# JPEG options
-
-o.Add(
-	"JPEG_INCLUDE_PATH",
-	"The path to the JPEG include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"JPEG_LIB_PATH",
-	"The path to the JPEG lib directory.",
-	"/usr/local/lib",
-)
-
-# PNG options
-
-o.Add(
-	"PNG_INCLUDE_PATH",
-	"The path to the PNG include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"PNG_LIB_PATH",
-	"The path to the PNG lib directory.",
-	"/usr/local/lib",
-)
-
-o.Add(
-	"PNG_LIB_SUFFIX",
-	"The suffix appended to the names of libpng. You can modify this "
-	"to link against libraries installed with non-default names",
-	"",
-)
-
-# TIFF options
-
-o.Add(
-	"TIFF_INCLUDE_PATH",
-	"The path to the TIFF include directory.",
-	"/usr/local/include/",
-)
-
-o.Add(
-	"TIFF_LIB_PATH",
-	"The path to the TIFF lib directory.",
-	"/usr/local/lib",
-)
-
 # Freetype options
 
 o.Add(
@@ -271,6 +222,13 @@ o.Add(
 	"OIIO_LIB_PATH",
 	"The path to the OpenImageIO library directory.",
 	"/usr/lib",
+)
+
+o.Add(
+	"OIIO_LIB_SUFFIX",
+	"The suffix appended to the names of the OpenImageIO libraries. You can modify this "
+	"to link against libraries installed with non-defalt names.",
+	"",
 )
 
 # General path options
@@ -813,22 +771,6 @@ o.Add(
 		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
 		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
 		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
-		( "IECore.Grade", "common/colorSpace/grade" ),
-		( "IECore.CubeColorTransformOp", "common/colorSpace/cubeColorTransform" ),
-		( "IECore.CineonToLinearOp", "common/colorSpace/cineonToLinear" ),
-		( "IECore.LinearToCineonOp", "common/colorSpace/linearToCineon" ),
-		( "IECore.AlexaLogcToLinearOp", "common/colorSpace/alexaLogcToLinear" ),
-		( "IECore.LinearToAlexaLogcOp", "common/colorSpace/linearToAlexaLogc" ),
-		( "IECore.SRGBToLinearOp", "common/colorSpace/SRGBToLinear" ),
-		( "IECore.LinearToSRGBOp", "common/colorSpace/linearToSRGB" ),
-		( "IECore.Rec709ToLinearOp", "common/colorSpace/Rec709ToLinear" ),
-		( "IECore.LinearToRec709Op", "common/colorSpace/linearToRec709" ),
-		( "IECore.PanalogToLinearOp", "common/colorSpace/PanalogToLinear" ),
-		( "IECore.LinearToPanalogOp", "common/colorSpace/linearToPanalog" ),
-		( "IECore.UVDistortOp", "common/2d/image/uvDistort" ),
-		( "IECore.ImageCompositeOp", "common/2d/image/imageComposite" ),
-		( "IECore.ImageConvolveOp", "common/2d/image/imageConvolve" ),
-		( "IECore.DeepImageConverter", "common/2d/deepImage/convert" ),
 		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
 		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
 		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
@@ -913,6 +855,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECore/All.py"
+)
+
+o.Add(
+	"TEST_IMAGE_SCRIPT",
+	"The python script to run for the image tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreImage/All.py"
 )
 
 o.Add(
@@ -1064,9 +1014,6 @@ dependencyIncludes = [
 	# we use "OpenEXR/x.h" and they use "x.h"
 	"-isystem", os.path.join( "$OPENEXR_INCLUDE_PATH","OpenEXR" ),
 	"-isystem", os.path.join( "$ILMBASE_INCLUDE_PATH","OpenEXR" ),
-	"-isystem", "$PNG_INCLUDE_PATH",
-	"-isystem", "$JPEG_INCLUDE_PATH",
-	"-isystem", "$TIFF_INCLUDE_PATH",
 	"-isystem", "$FREETYPE_INCLUDE_PATH",
 ]
 
@@ -1081,9 +1028,6 @@ env.Prepend(
 		"$BOOST_LIB_PATH",
 		"$OPENEXR_LIB_PATH",
 		"$ILMBASE_LIB_PATH",
-		"$PNG_LIB_PATH",
-		"$JPEG_LIB_PATH",
-		"$TIFF_LIB_PATH",
 		"$FREETYPE_LIB_PATH",
 	],
 	LIBS = [
@@ -1484,74 +1428,6 @@ if doConfigure :
 
 	c = Configure( coreEnv )
 
-	if c.CheckCXXHeader( "boost/asio.hpp" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_ASIO' )
-	else :
-		sys.stderr.write( "WARNING: boost/asio.hpp not found, some functionality will be disabled.\n" )
-		coreSources.remove( "src/IECore/ClientDisplayDriver.cpp" )
-		coreSources.remove( "src/IECore/DisplayDriver.cpp" )
-		coreSources.remove( "src/IECore/ImageDisplayDriver.cpp" )
-		coreSources.remove( "src/IECore/DisplayDriverServer.cpp" )
-		corePythonSources.remove( "src/IECorePython/ClientDisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/DisplayDriverServerBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/DisplayDriverBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/ImageDisplayDriverBinding.cpp" )
-		## \todo: OBJReader needs a version of boost::bind that doesn't give warnings when some
-		## placeholders aren't bound (which is true of any boost version that includes asio.hpp)
-		coreSources.remove( "src/IECore/OBJReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/OBJReaderBinding.cpp" )
-
-	if c.CheckLibWithHeader( coreEnv.subst( "boost_signals" + env["BOOST_LIB_SUFFIX"] ), "boost/signal.hpp", "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_SIGNALS' )
-	else :
-		sys.stderr.write( "ERROR : unable to find boost signal library - some functionality will be disabled.\n" )
-
-	if c.CheckCXXHeader( "boost/math/special_functions/factorials.hpp" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_BOOSTFACTORIAL' )
-	else :
-		sys.stderr.write( "WARNING: boost/math/special_functions/factorials.hpp not found, some functionality will be disabled.\n" )
-
-	if c.CheckHeader( "OpenEXR/ImfDeepFrameBuffer.h", "\"\"", "C++" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_DEEPEXR' )
-	else :
-		coreSources.remove( "src/IECore/EXRDeepImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/EXRDeepImageReaderBinding.cpp" )
-		coreSources.remove( "src/IECore/EXRDeepImageWriter.cpp" )
-		corePythonSources.remove( "src/IECorePython/EXRDeepImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "tiff", "tiff.h", "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_TIFF' )
-	else :
-		sys.stderr.write( "WARNING: no TIFF library found, no TIFF support, check TIFF_INCLUDE_PATH and TIFF_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/TIFFImageWriter.cpp" )
-		coreSources.remove( "src/IECore/TIFFImageReader.cpp" )
-		coreSources.remove( "src/IECore/ScopedTIFFErrorHandler.cpp" )
-		corePythonSources.remove( "src/IECorePython/TIFFImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/TIFFImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "jpeg", ["stdio.h", "jpeglib.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_JPEG' )
-	else :
-		sys.stderr.write( "WARNING: no JPEG library found, no JPEG support, check JPEG_INCLUDE_PATH and JPEG_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/JPEGImageWriter.cpp" )
-		coreSources.remove( "src/IECore/JPEGImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/JPEGImageReaderBinding.cpp" )
-		corePythonSources.remove( "src/IECorePython/JPEGImageWriterBinding.cpp" )
-
-	if c.CheckLibWithHeader( "png" + env["PNG_LIB_SUFFIX"], ["stdio.h", "png.h"], "CXX" ) :
-		for e in allCoreEnvs :
-			e.Append( CPPFLAGS = '-DIECORE_WITH_PNG' )
-	else :
-		sys.stderr.write( "WARNING: no PNG library found, no PNG support, check PNG_INCLUDE_PATH and PNG_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/PNGImageReader.cpp" )
-		corePythonSources.remove( "src/IECorePython/PNGImageReaderBinding.cpp" )
-
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
@@ -1638,9 +1514,6 @@ coreTestEnv.Append(
 )
 
 coreTestSources = glob.glob( "test/IECore/*.cpp" )
-if '-DIECORE_WITH_BOOSTFACTORIAL' not in coreTestEnv['CPPFLAGS'] :
-	coreTestSources.remove( "test/IECore/LevenbergMarquardtTest.cpp" )
-
 coreTestProgram = coreTestEnv.Program( "test/IECore/IECoreTest", coreTestSources )
 
 coreTest = coreTestEnv.Command( "test/IECore/results.txt", coreTestProgram, "test/IECore/IECoreTest > test/IECore/results.txt 2>&1" )
@@ -1651,6 +1524,104 @@ corePythonTest = coreTestEnv.Command( "test/IECore/resultsPython.txt", corePytho
 coreTestEnv.Depends( corePythonTest, glob.glob( "test/IECore/*.py" ) )
 NoCache( corePythonTest )
 coreTestEnv.Alias( "testCorePython", corePythonTest )
+
+###########################################################################################
+# Build, install and test the IECoreImage library and bindings
+###########################################################################################
+
+if doConfigure :
+
+	imageEnvSets = {
+		"IECORE_NAME" : "IECoreImage",
+	}
+
+	imageEnvAppends = {
+
+		"CXXFLAGS" : [
+			"-isystem", "$OIIO_INCLUDE_PATH",
+		],
+		"LIBPATH" : [
+			"$OIIO_LIB_PATH",
+		],
+		"LIBS" : [
+			"boost_signals" + env["BOOST_LIB_SUFFIX"],
+		],
+	}
+
+	imageEnv = coreEnv.Clone( **imageEnvSets )
+	imageEnv.Append( **imageEnvAppends )
+
+	c = Configure( imageEnv )
+
+	if not c.CheckLibWithHeader( imageEnv.subst( "OpenImageIO$OIIO_LIB_SUFFIX" ), "OpenImageIO/imageio.h", "CXX" ) :
+
+		sys.stderr.write( "ERROR : unable to find the OpenImageIO libraries - check OIIO_INCLUDE_PATH and OIIO_LIB_PATH.\n" )
+		c.Finish()
+
+	else :
+
+		c.Finish()
+
+		# we can't add this earlier as then it's built during the configure stage, and that's no good
+		imageEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+		# source list
+		imageSources = sorted( glob.glob( "src/IECoreImage/*.cpp" ) )
+		imageHeaders = sorted( glob.glob( "include/IECoreImage/*.h" ) + glob.glob( "include/IECoreImage/*.inl" ) )
+		imagePythonHeaders = sorted( glob.glob( "include/IECoreImageBindings/*.h" ) + glob.glob( "include/IECoreImageBindings/*.inl" ) )
+		imagePythonSources = sorted( glob.glob( "src/IECoreImageBindings/*.cpp" ) )
+		imagePythonModuleSources = sorted( glob.glob( "src/IECoreImageModule/*.cpp" ) )
+		imagePythonScripts = glob.glob( "python/IECoreImage/*.py" )
+
+		# library
+		imageLibrary = imageEnv.SharedLibrary( "lib/" + os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageSources )
+		imageLibraryInstall = imageEnv.Install( os.path.dirname( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageLibrary )
+		imageEnv.NoCache( imageLibraryInstall )
+		imageEnv.AddPostAction( imageLibraryInstall, lambda target, source, env : makeLibSymLinks( imageEnv ) )
+		imageEnv.Alias( "install", imageLibraryInstall )
+		imageEnv.Alias( "installImage", imageLibraryInstall )
+		imageEnv.Alias( "installLib", [ imageLibraryInstall ] )
+
+		# headers
+		imageHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImage", imageHeaders )
+		imageEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imageEnv, imageEnv["INSTALL_HEADER_DIR"] ) )
+		imageEnv.Alias( "install", imageHeaderInstall )
+		imageEnv.Alias( "installImage", imageHeaderInstall )
+
+		# python headers
+		imagePythonHeaderInstall = imageEnv.Install( "$INSTALL_HEADER_DIR/IECoreImageBindings", imagePythonHeaders )
+		imageEnv.Alias( "install", imagePythonHeaderInstall )
+		imageEnv.Alias( "installImage", imagePythonHeaderInstall )
+
+		# python module
+		imagePythonModuleEnv = corePythonModuleEnv.Clone( **imageEnvSets )
+		imagePythonModuleEnv.Append( **imageEnvAppends )
+		imagePythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
+		imagePythonModule = imagePythonModuleEnv.SharedLibrary( "python/IECoreImage/_IECoreImage", imagePythonSources + imagePythonModuleSources )
+		imagePythonModuleEnv.Depends( imagePythonModule, imageLibrary )
+
+		# python module install
+		imagePythonModuleInstall = imagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", imagePythonScripts + imagePythonModule )
+		imagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( imagePythonModuleEnv, imagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		imagePythonModuleEnv.Alias( "install", imagePythonModuleInstall )
+		imagePythonModuleEnv.Alias( "installImage", imagePythonModuleInstall )
+
+		Default( [ imageLibrary, imagePythonModule ] )
+
+		imageTestEnv = testEnv.Clone()
+		imageTestEnv["ENV"]["PYTHONPATH"] = imageTestEnv["ENV"]["PYTHONPATH"] + ":python"
+
+		imageTest = imageTestEnv.Command( "test/IECoreImage/results.txt", imagePythonModule, pythonExecutable + " $TEST_IMAGE_SCRIPT --verbose" )
+		NoCache( imageTest )
+		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )
+		imageTestEnv.Depends( imageTest, glob.glob( "test/IECoreImage/*.py" ) )
+		imageTestEnv.Alias( "testImage", imageTest )
 
 ###########################################################################################
 # Build, install and test the coreRI library and bindings
@@ -1667,8 +1638,13 @@ riPythonModuleEnv.Append( LIBPATH = [ "$RMAN_ROOT/lib" ] )
 riPythonProceduralEnv = riPythonModuleEnv.Clone( IECORE_NAME = "iePython", SHLIBSUFFIX=env["SHLIBSUFFIX"] )
 
 riDisplayDriverEnv = riEnv.Clone( IECORE_NAME = "ieDisplay", SHLIBPREFIX="" )
-riDisplayDriverEnv.Append( LIBS = os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-
+riDisplayDriverEnv.Append(
+	LIBS = (
+		os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+		os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
+	)
+)
 
 haveRI = False
 riLibs = []
@@ -1734,6 +1710,8 @@ if doConfigure :
 
 			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
 			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_SX" )
+			# SXRenderer depends on IECoreImage
+			riEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		else :
 
@@ -1759,34 +1737,6 @@ if doConfigure :
 			if haveDelight :
 
 				sys.stderr.write( "WARNING : Gx API not found - not building GXEvaluator. Use 3delight 9.0.39 or later.\n" )
-
-		if c.CheckCXXHeader( "RixDeepTexture.h" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_RIXDEEP" )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/DTEXDeepImageReader.cpp" )
-			riSources.remove( "src/IECoreRI/DTEXDeepImageWriter.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageReaderBinding.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/DTEXDeepImageWriterBinding.cpp" )
-
-			if havePRMan :
-
-				sys.stderr.write( "WARNING : RixDeepTexture API not found - not building IECoreRI::DTEXDeepTexture functionality. Use PRMan 16.1 or later.\n" )
-
-		if haveDelight and c.CheckCXXHeader( "dtex.h" ) :
-
-			riEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
-			riPythonModuleEnv.Append( CPPFLAGS = "-DIECORERI_WITH_DEEPSHW" )
-
-		else :
-
-			riSources.remove( "src/IECoreRI/SHWDeepImageReader.cpp" )
-			riSources.remove( "src/IECoreRI/SHWDeepImageWriter.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageReaderBinding.cpp" )
-			riPythonSources.remove( "src/IECoreRI/bindings/SHWDeepImageWriterBinding.cpp" )
 
 		if haveDelight and c.CheckCXXHeader( "nsi.h" ) :
 
@@ -1873,7 +1823,7 @@ if doConfigure :
 		riTestEnv["ENV"]["SHADER_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" )
 		riTestEnv["ENV"]["DELIGHT"] = riEnv.subst( "$RMAN_ROOT" )
 		riTestEnv["ENV"]["DL_SHADERS_PATH"] = riEnv.subst( "$RMAN_ROOT/shaders" ) + ":./"
-		riTestEnv["ENV"]["DL_DISPLAYS_PATH"] = riEnv.subst( "$RMAN_ROOT/displays" )
+		riTestEnv["ENV"]["DL_DISPLAYS_PATH"] = riEnv.subst( "$RMAN_ROOT/displays" ) + ":./src/rmanDisplays/ieDisplay"
 		riTestEnv["ENV"]["PATH"] = riEnv.subst( "$RMAN_ROOT/bin" ) + ":" + riTestEnv["ENV"]["PATH"]
 
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
@@ -1922,6 +1872,7 @@ if env["WITH_GL"] and doConfigure :
 
 		# we can't add this earlier as then it's built during the configure stage, and that's no good
 		glEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		glEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
@@ -1979,6 +1930,7 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
@@ -2099,6 +2051,7 @@ if doConfigure :
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		mayaEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		mayaEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mayaEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
@@ -2281,6 +2234,7 @@ nukePluginEnv = nukeEnv.Clone( IECORE_NAME="ieCore" )
 
 nukeTestEnv = testEnv.Clone()
 nukeTestEnv["ENV"]["LM_LICENSE_FILE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
+nukeTestEnv["ENV"]["foundry_LICENSE"] = nukeTestEnv["NUKE_LICENSE_FILE"]
 nukeTestEnv["ENV"]["NUKE_PATH"] = "plugins/nuke"
 nukeTestEnv["ENV"]["IECORE_OP_PATHS"] = "test/IECoreNuke/ops:test/IECore/ops"
 
@@ -2343,6 +2297,7 @@ if doConfigure :
 				# we can't add this earlier as then it's built during the configure stage, and that's no good
 				nukeEnv.Append( LIBS = [
 					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+					os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 					os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				]	)
@@ -2355,9 +2310,6 @@ if doConfigure :
     					"-DIECORENUKE_NUKE_MINOR_VERSION=$NUKE_MINOR_VERSION",
 					]
 				)
-
-				if "-DIECORE_WITH_DEEPEXR" in coreEnv["CPPFLAGS"] :
-					nukeEnv.Append( CPPFLAGS = [ "-DIECORE_WITH_DEEPEXR" ] )
 
 				nukePythonModuleEnv.Append( LIBS = [
 					os.path.basename( nukeEnv.subst( "$INSTALL_LIB_NAME" ) ),
@@ -2372,18 +2324,8 @@ if doConfigure :
 				nukePluginSources = sorted( glob.glob( "src/IECoreNuke/plugin/*.cpp" ) )
  				nukeNodeNames = [ "ieProcedural", "ieObject", "ieOp", "ieDrawable", "ieDisplay" ]
 
-				if "-DIECORE_WITH_ASIO" in coreEnv["CPPFLAGS"] and "-DIECORE_WITH_SIGNALS" in coreEnv["CPPFLAGS"] :
-					nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] ),
-				else :
-					nukeSources.remove( "src/IECoreNuke/DisplayIop.cpp" )
-					nukeNodeNames.remove( "ieDisplay" )
-
-				if nukeMajorVersion < 7 :
-					nukeSources.remove( "src/IECoreNuke/SceneCacheReader.cpp" )
-					nukeHeaders.remove( "include/IECoreNuke/SceneCacheReader.h" )
-
 				# nuke library
-
+				nukeEnv.Append( LIBS = [ "boost_signals" + env["BOOST_LIB_SUFFIX"] ] )
 				nukeLibrary = nukeEnv.SharedLibrary( "lib/" + os.path.basename( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeSources )
 				nukeLibraryInstall = nukeEnv.Install( os.path.dirname( nukeEnv.subst( "$INSTALL_NUKELIB_NAME" ) ), nukeLibrary )
 				nukeEnv.AddPostAction( nukeLibraryInstall, lambda target, source, env : makeLibSymLinks( nukeEnv, "INSTALL_NUKELIB_NAME" ) )
@@ -2501,6 +2443,11 @@ houdiniEnvAppends = {
 	]
 }
 
+if env["WITH_GL"] :
+	houdiniEnvAppends["CXXFLAGS"].extend( [ "-isystem", "$GLEW_INCLUDE_PATH" ] )
+	houdiniEnvAppends["LIBPATH"].append( "$GLEW_LIB_PATH" )
+	houdiniEnvAppends["LIBS"].append( "GLEW$GLEW_LIB_SUFFIX" )
+
 if env["PLATFORM"]=="posix" :
 	houdiniEnvAppends["CPPFLAGS"] += ["-DLINUX"]
 elif env["PLATFORM"]=="darwin" :
@@ -2556,6 +2503,11 @@ if doConfigure :
 		houdiniPythonSources = sorted( glob.glob( "src/IECoreHoudini/bindings/*.cpp" ) )
 		houdiniPythonScripts = glob.glob( "python/IECoreHoudini/*.py" )
 		houdiniPluginSources = [ "src/IECoreHoudini/plugin/Plugin.cpp" ]
+		if not env['WITH_GL'] :
+			houdiniSources.remove( "src/IECoreHoudini/GR_Cortex.cpp" )
+			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
+			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
+			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
 		if env['WITH_MANTRA']:
 			mantraSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/*.cpp") )
 			mantraHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.inl" )
@@ -2569,11 +2521,13 @@ if doConfigure :
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
 		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		if env['WITH_GL'] :
+			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		mantraEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		if env['WITH_GL'] :
+			mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		mantraEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		#=====
@@ -2915,6 +2869,7 @@ if doConfigure :
 			LIBS = [
 				"ai",
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
@@ -3181,7 +3136,7 @@ appleseedPythonModuleEnv.Append(
 	],
 	LIBPATH = [
 		"$APPLESEED_LIB_PATH",
-		"$OSL_LIB_PATH"
+		"$OSL_LIB_PATH",
 		"$OIIO_LIB_PATH"
 	],
 )
@@ -3238,6 +3193,7 @@ if doConfigure :
 			LIBS = [
 				"appleseed",
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( appleseedEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)

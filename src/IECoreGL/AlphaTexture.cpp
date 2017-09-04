@@ -54,9 +54,9 @@ AlphaTexture::AlphaTexture( unsigned int width, unsigned int height, const IECor
 	construct( width, height, a, mipMap );
 }
 
-AlphaTexture::AlphaTexture( const IECore::ImagePrimitive *image, bool mipMap )
+AlphaTexture::AlphaTexture( const IECoreImage::ImagePrimitive *image, bool mipMap )
 {
-	const IECore::Data *a = image->channelValid( "A" ) ? image->variables.find( "A" )->second.data.get() : NULL;
+	const IECore::Data *a = image->channelValid( "A" ) ? image->channels.find( "A" )->second.get() : nullptr;
 
 	if( !a )
 	{
@@ -137,7 +137,7 @@ void AlphaTexture::construct( unsigned int width, unsigned int height, const IEC
 }
 
 
-ImagePrimitivePtr AlphaTexture::imagePrimitive() const
+IECoreImage::ImagePrimitivePtr AlphaTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
 	
@@ -164,8 +164,8 @@ ImagePrimitivePtr AlphaTexture::imagePrimitive() const
 	}
 
 	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
-	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-	image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
+	IECoreImage::ImagePrimitivePtr image = new IECoreImage::ImagePrimitive( imageExtents, imageExtents );
+	image->channels["A"] = ad;
 
 	return image;
 }

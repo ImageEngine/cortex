@@ -53,22 +53,8 @@ IECORE_API int patchVersion();
 /// Returns a string of the form "major.minor.patch"
 IECORE_API const std::string &versionString();
 
-/// Returns true if IECore was built with boost::asio support
-IECORE_API bool withASIO();
-/// Returns true if IECore was built with boost::signals support
-IECORE_API bool withSignals();
-/// Returns true if IECore was built with boost::math::factorial support
-IECORE_API bool withBoostFactorial();
-/// Returns true if IECore was built with TIFF support
-IECORE_API bool withTIFF();
-/// Returns true if IECore was built with JPEG support
-IECORE_API bool withJPEG();
 /// Returns true if IECore was built with FreeType suppport
 IECORE_API bool withFreeType();
-/// Returns true if IECore was built with PNG suppport
-IECORE_API bool withPNG();
-/// Returns true if IECore was built with Deep EXR support
-IECORE_API bool withDeepEXR();
 
 }
 

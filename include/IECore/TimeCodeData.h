@@ -43,8 +43,7 @@ namespace IECore
 {
 
 /// TimeCodeData wraps Imf::TimeCode as TypedData, allowing us to store time codes
-/// on the blindData of an IECore::ImagePrimitive.
-IECORE_DECLARE_TYPEDDATA( TimeCodeData, Imf::TimeCode, void, SimpleDataHolder )
+IECORE_DECLARE_TYPEDDATA( TimeCodeData, Imf::TimeCode, unsigned int, SimpleDataHolder )
 
 } // namespace IECore
 

@@ -37,6 +37,8 @@
 
 #include "IECore/Font.h"
 
+#include "IECoreImage/Font.h"
+
 #include "IECoreGL/Export.h"
 #include "IECoreGL/TypeIds.h"
 #include "IECoreGL/AlphaTexture.h"
@@ -70,6 +72,7 @@ class IECOREGL_API Font : public IECore::RunTimeTyped
 	private :
 
 		IECore::FontPtr m_font;
+		IECoreImage::FontPtr m_imageFont;
 
 		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;
 		mutable MeshVector m_meshes;

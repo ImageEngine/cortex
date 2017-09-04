@@ -40,7 +40,7 @@
 #include "maya/MString.h"
 #include "maya/MImage.h"
 
-#include "IECore/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECoreMaya/ViewportPostProcess.h"
 
@@ -61,7 +61,7 @@ class ImageViewportPostProcess : public ViewportPostProcess
 	protected:
 
 		/// Performs in-place modification of the given ImagePrimitive. Derived classes need to implement this.
-		virtual void postRender( const std::string &panelName, IECore::ImagePrimitivePtr image ) = 0;
+		virtual void postRender( const std::string &panelName, IECoreImage::ImagePrimitivePtr image ) = 0;
 
 	private :
 

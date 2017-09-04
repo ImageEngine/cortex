@@ -68,7 +68,6 @@
 #include "IECorePython/VectorTypedParameterBinding.h"
 #include "IECorePython/SplineParameterBinding.h"
 #include "IECorePython/DateTimeParameterBinding.h"
-#include "IECorePython/CubeColorLookupParameterBinding.h"
 #include "IECorePython/TimePeriodParameterBinding.h"
 #include "IECorePython/TimeDurationParameterBinding.h"
 #include "IECorePython/CompoundParameterBinding.h"
@@ -170,7 +169,6 @@
 #include "IECorePython/CameraControllerBinding.h"
 #include "IECorePython/PathVectorParameterBinding.h"
 #include "IECorePython/TriangleAlgoBinding.h"
-#include "IECorePython/ColorTransformOpBinding.h"
 #include "IECorePython/ConverterBinding.h"
 #include "IECorePython/FromCoreConverterBinding.h"
 #include "IECorePython/TransformOpBinding.h"
@@ -194,7 +192,6 @@
 #include "IECorePython/LuminanceOpBinding.h"
 #include "IECorePython/ChannelOpBinding.h"
 #include "IECorePython/SummedAreaOpBinding.h"
-#include "IECorePython/GradeBinding.h"
 #include "IECorePython/MedianCutSamplerBinding.h"
 #include "IECorePython/EnvMapSamplerBinding.h"
 #include "IECorePython/MeshVertexReorderOpBinding.h"
@@ -210,15 +207,6 @@
 #include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/WarpOpBinding.h"
 #include "IECorePython/UVDistortOpBinding.h"
-#include "IECorePython/LinearToSRGBOpBinding.h"
-#include "IECorePython/SRGBToLinearOpBinding.h"
-#include "IECorePython/LinearToCineonOpBinding.h"
-#include "IECorePython/CineonToLinearOpBinding.h"
-#include "IECorePython/CubeColorLookupBinding.h"
-#include "IECorePython/CubeColorLookupDataBinding.h"
-#include "IECorePython/CubeColorTransformOpBinding.h"
-#include "IECorePython/LinearToRec709OpBinding.h"
-#include "IECorePython/Rec709ToLinearOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/YUVImageWriterBinding.h"
@@ -248,7 +236,6 @@
 #include "IECorePython/FileSequenceVectorParameterBinding.h"
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
-#include "IECorePython/ColorSpaceTransformOpBinding.h"
 #include "IECorePython/BINParticleWriterBinding.h"
 #include "IECorePython/BINMeshReaderBinding.h"
 #include "IECorePython/BGEOParticleReaderBinding.h"
@@ -331,7 +318,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindSimpleTypedParameter();
 	bindVectorTypedParameter();
 	bindSplineParameter();
-	bindCubeColorLookupParameter();
 	bindDateTimeParameter();
 	bindTimePeriodParameter();
 	bindTimeDurationParameter();
@@ -437,7 +423,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCameraController();
 	bindPathVectorParameter();
 	bindTriangleAlgo();
-	bindColorTransformOp();
 	bindConverter();
 	bindFromCoreConverter();
 	bindTransformOp();
@@ -467,7 +452,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLuminanceOp();
 	bindChannelOp();
 	bindSummedAreaOp();
-	bindGrade();
 	bindMedianCutSampler();
 	bindEnvMapSampler();
 	bindMeshVertexReorderOp();
@@ -491,15 +475,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindMeshTangentsOp();
 	bindWarpOp();
 	bindUVDistortOp();
-	bindSRGBToLinearOp();
-	bindLinearToSRGBOp();
-	bindCineonToLinearOp();
-	bindLinearToCineonOp();
-	bindCubeColorLookup();
-	bindCubeColorLookupData();
-	bindCubeColorTransformOp();
-	bindLinearToRec709Op();
-	bindRec709ToLinearOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindYUVImageWriter();
@@ -528,7 +503,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindFileSequenceVectorParameter();
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
-	bindColorSpaceTransformOp();
 	bindBINParticleWriter();
 	bindBINMeshReader();
 	bindBGEOParticleReader();
@@ -580,8 +554,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
 	def( "withASIO", &IECore::withASIO );
-	def( "withTIFF", &IECore::withTIFF );
-	def( "withJPEG", &IECore::withJPEG );
 	def( "withFreeType", &IECore::withFreeType );
 
 }

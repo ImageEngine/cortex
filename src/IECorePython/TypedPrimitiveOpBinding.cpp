@@ -79,7 +79,6 @@ static void bindTypedPrimitiveOp()
 void bindTypedPrimitiveOp()
 {
 	bindTypedPrimitiveOp< MeshPrimitive >();
-	bindTypedPrimitiveOp< ImagePrimitive >();
 	bindTypedPrimitiveOp< CurvesPrimitive >();
 }
 

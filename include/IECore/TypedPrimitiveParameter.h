@@ -42,19 +42,16 @@ namespace IECore
 
 IE_CORE_FORWARDDECLARE( MotionPrimitive )
 IE_CORE_FORWARDDECLARE( Primitive )
-IE_CORE_FORWARDDECLARE( ImagePrimitive )
 IE_CORE_FORWARDDECLARE( MeshPrimitive )
 IE_CORE_FORWARDDECLARE( CurvesPrimitive )
 IE_CORE_FORWARDDECLARE( PointsPrimitive )
 
-typedef TypedObjectParameter<ImagePrimitive> ImagePrimitiveParameter;
 typedef TypedObjectParameter<MotionPrimitive> MotionPrimitiveParameter;
 typedef TypedObjectParameter<Primitive> PrimitiveParameter;
 typedef TypedObjectParameter<MeshPrimitive> MeshPrimitiveParameter;
 typedef TypedObjectParameter<CurvesPrimitive> CurvesPrimitiveParameter;
 typedef TypedObjectParameter<PointsPrimitive> PointsPrimitiveParameter;
 
-IE_CORE_DECLAREPTR( ImagePrimitiveParameter );
 IE_CORE_DECLAREPTR( MotionPrimitiveParameter );
 IE_CORE_DECLAREPTR( PrimitiveParameter );
 IE_CORE_DECLAREPTR( MeshPrimitiveParameter );

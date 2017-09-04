@@ -64,11 +64,6 @@ from LiveSceneTest import *
 from ToHoudiniCortexObjectConverter import *
 from ToHoudiniCompoundObjectConverter import *
 
-if hou.applicationVersion()[0] < 15 :
-	from RATDeepImageReaderTest import *
-	from RATDeepImageWriterTest import *
-	from DeepImageConverter import *
-
 IECoreHoudini.TestProgram(
 	testRunner = unittest.TextTestRunner(
 		stream = IECore.CompoundStream(

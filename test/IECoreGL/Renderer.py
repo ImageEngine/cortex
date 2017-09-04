@@ -33,8 +33,6 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import unittest
 import os
 import os.path
@@ -44,6 +42,7 @@ import shutil
 
 from IECore import *
 import IECore
+import IECoreImage
 
 from IECoreGL import *
 init( False )
@@ -278,24 +277,21 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldEnd()
 
 		i = Reader.create( os.path.dirname( __file__ ) + "/output/testStackBug.tif" ).read()
-		e = PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		r = e.R()
-		g = e.G()
-		b = e.B()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
 
-		e.pointAtUV( V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 1 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( V2f( 0, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( V2f( 1, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
+		index = dimensions.x * int(dimensions.y * 0.5)
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
+
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def testPrimVars( self ) :
 
@@ -346,83 +342,21 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldEnd()
 
 		i = Reader.create( os.path.dirname( __file__ ) + "/output/testPrimVars.tif" ).read()
-		e = PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		r = e.R()
-		g = e.G()
-		b = e.B()
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5)
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
 
-		e.pointAtUV( V2f( 0, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 1 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( V2f( 1, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
 
-	def testImagePrimitive( self ) :
-
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.display( os.path.dirname( __file__ ) + "/output/testImage.exr", "exr", "rgba", {} )
-
-		r.camera(
-			"main",
-			{
-				"projection" : IECore.StringData( "orthographic" ),
-				"resolution" : IECore.V2iData( IECore.V2i( 1024 ) ),
-				"clippingPlanes" : IECore.V2fData( IECore.V2f( 1, 1000 ) ),
-				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			}
-		)
-			
-		i = Reader.create( os.path.dirname( __file__ ) + "/images/numbers.exr" ).read()
-		
-		with IECore.WorldBlock( r ) :
-
-			# the shader should be ignored.
-			r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-			
-			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-			r.concatTransform( M44f.createScaled( V3f( 2. / i.bound().size().x ) ) )
-
-			i.render( r )
-
-		i2 = Reader.create( os.path.dirname( __file__ ) + "/output/testImage.exr" ).read()
-		
-		self.assertEqual( ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.05 ).value, False )
-		
-
-	## \todo Make this assert something
-	def testAlphaBlending( self ) :
-
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-
-		r.worldBegin()
-
-		r.setAttribute( "gl:blend:srcFactor", StringData( "one" ) )
-		r.setAttribute( "gl:blend:dstFactor", StringData( "one" ) )
-		r.setAttribute( "gl:blend:equation", StringData( "add" ) )
-
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.concatTransform( M44f.createScaled( V3f( 0.004 ) ) )
-
-		r.concatTransform( M44f.createTranslated( V3f( -150, -200, 0 ) ) )
-		i = Reader.create( os.path.dirname( __file__ ) + "/images/numberWithAlpha.exr" ).read()
-		i.render( r )
-
-		r.concatTransform( M44f.createTranslated( V3f( 300, 300, 1 ) ) )
-		i.render( r )
-
-		r.worldEnd()
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 1) - 1
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 1 )
 
 	def testProcedural( self ) :
 
@@ -445,10 +379,10 @@ class TestRenderer( unittest.TestCase ) :
 
 		r.worldEnd()
 
-		expectedImage = Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/proceduralTest.tif" )()
-		actualImage = Reader.create( os.path.dirname( __file__ ) + "/output/proceduralTest.tif" )()
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/proceduralTest.tif" )()
+		actualImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/proceduralTest.tif" )()
 
-		self.assertEqual( ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	## \todo Make this assert something
 	def testShader( self ) :
@@ -1052,11 +986,11 @@ class TestRenderer( unittest.TestCase ) :
 				m.render( renderer )
 
 			i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/depthTest.tif" ).read()
-			for p in i["R"].data :
+			for p in i["R"] :
 				self.assertEqual( p, r )
-			for p in i["G"].data :
+			for p in i["G"] :
 				self.assertEqual( p, g )
-			for p in i["B"].data :
+			for p in i["B"] :
 				self.assertEqual( p, b )
 			
 		doTest( True, 1, 0, 0 )
@@ -1094,11 +1028,11 @@ class TestRenderer( unittest.TestCase ) :
 			
 		doRender( "immediate", True )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
-		self.failUnless( i["A"].data[256 * 128 + 128] > .99 )
+		self.failUnless( i["A"][256 * 128 + 128] > .99 )
 		
 		doRender( "immediate", False )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
-		self.assertEqual( i["A"].data, IECore.FloatVectorData( [ 0 ] * 256 * 256 ) )
+		self.assertEqual( i["A"], IECore.FloatVectorData( [ 0 ] * 256 * 256 ) )
 		
 		# test deferred renderer by checking scene
 		

@@ -44,8 +44,12 @@
 
 #include "IECorePython/ScopedGILLock.h"
 
-#include "IECoreGL/Renderer.h"
-#include "IECoreGL/Camera.h"
+#ifdef IECOREHOUDINI_WITH_GL
+
+	#include "IECoreGL/Renderer.h"
+	#include "IECoreGL/Camera.h"
+
+#endif
 
 #include "IECoreHoudini/SOP_ProceduralHolder.h"
 #include "IECoreHoudini/ToHoudiniCortexObjectConverter.h"
@@ -58,7 +62,15 @@ OP_Node *SOP_ProceduralHolder::create( OP_Network *net, const char *name, OP_Ope
 	return new SOP_ProceduralHolder( net, name, op );
 }
 
-SOP_ProceduralHolder::SOP_ProceduralHolder( OP_Network *net, const char *name, OP_Operator *op ) : SOP_ParameterisedHolder( net, name, op ), m_scene( 0 )
+SOP_ProceduralHolder::SOP_ProceduralHolder( OP_Network *net, const char *name, OP_Operator *op )
+	: SOP_ParameterisedHolder( net, name, op ),
+
+#ifdef IECOREHOUDINI_WITH_GL
+
+	m_scene( 0 )
+
+#endif
+
 {
 	getParm( pParameterisedSearchPathEnvVar.getToken() ).setValue( 0, "IECORE_PROCEDURAL_PATHS", CH_STRING_LITERAL );
 }
@@ -66,6 +78,8 @@ SOP_ProceduralHolder::SOP_ProceduralHolder( OP_Network *net, const char *name, O
 SOP_ProceduralHolder::~SOP_ProceduralHolder()
 {
 }
+
+#ifdef IECOREHOUDINI_WITH_GL
 
 /// Redraws the OpenGL Scene if the procedural is marked as having changed (aka dirty)
 IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
@@ -103,6 +117,8 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 	
 	return m_scene;
 }
+
+#endif
 
 /// Cook the SOP! This method does all the work
 OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )

@@ -67,32 +67,26 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height, const IECor
 	construct( width, height, r, g, b, a, true );
 }
 
-static const Data *findChannel( const IECore::PrimitiveVariableMap &variables, const char **names )
+static const Data *findChannel( const IECoreImage::ImagePrimitive::ChannelMap &channels, const char **names )
 {
-	while( *names!=0 )
+	while( *names != nullptr )
 	{
-		IECore::PrimitiveVariableMap::const_iterator it = variables.find( *names );
-		if( it!=variables.end() )
+		const auto it = channels.find( *names );
+		if( it != channels.end() )
 		{
-			PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
-			if( interpolation==PrimitiveVariable::Vertex ||
-				interpolation==PrimitiveVariable::Varying ||
-				interpolation==PrimitiveVariable::FaceVarying )
-			{
-				return it->second.data.get();
-			}
+			return it->second.get();
 		}
 		names++;
 	}
-	return 0;
+	return nullptr;
 }
 
-ColorTexture::ColorTexture( const IECore::ImagePrimitive *image )
+ColorTexture::ColorTexture( const IECoreImage::ImagePrimitive *image )
 {
 	construct( image, true );
 }
 
-ColorTexture::ColorTexture( const IECore::ImagePrimitive *image, bool mipMap )
+ColorTexture::ColorTexture( const IECoreImage::ImagePrimitive *image, bool mipMap )
 {
 	construct( image, mipMap );
 }
@@ -101,17 +95,17 @@ ColorTexture::~ColorTexture()
 {
 }
 
-void ColorTexture::construct( const IECore::ImagePrimitive *image, bool mipMap )
+void ColorTexture::construct( const IECoreImage::ImagePrimitive *image, bool mipMap )
 {
-	static const char *redNames[] = { "r", "R", "red", 0 };
-	static const char *greenNames[] = { "g", "G", "green", 0 };
-	static const char *blueNames[] = { "b", "B", "blue", 0 };
-	static const char *alphaNames[] = { "a", "A", "alpha", 0 };
+	static const char *redNames[] = { "r", "R", "red", nullptr };
+	static const char *greenNames[] = { "g", "G", "green", nullptr };
+	static const char *blueNames[] = { "b", "B", "blue", nullptr };
+	static const char *alphaNames[] = { "a", "A", "alpha", nullptr };
 
-	const IECore::Data *r = findChannel( image->variables, redNames );
-	const IECore::Data *g = findChannel( image->variables, greenNames );
-	const IECore::Data *b = findChannel( image->variables, blueNames );
-	const IECore::Data *a = findChannel( image->variables, alphaNames );
+	const IECore::Data *r = findChannel( image->channels, redNames );
+	const IECore::Data *g = findChannel( image->channels, greenNames );
+	const IECore::Data *b = findChannel( image->channels, blueNames );
+	const IECore::Data *a = findChannel( image->channels, alphaNames );
 
 	if( !(r && g && b) )
 	{
@@ -246,7 +240,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 	Exception::throwIfError();
 }
 
-ImagePrimitivePtr ColorTexture::imagePrimitive() const
+IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
 
@@ -303,13 +297,13 @@ ImagePrimitivePtr ColorTexture::imagePrimitive() const
 	}
 
 	Box2i imageExtents( V2i( 0, 0 ), V2i( width-1, height-1 ) );
-	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
-	image->variables["R"] = PrimitiveVariable( PrimitiveVariable::Vertex, rd );
-	image->variables["G"] = PrimitiveVariable( PrimitiveVariable::Vertex, gd );
-	image->variables["B"] = PrimitiveVariable( PrimitiveVariable::Vertex, bd );
+	IECoreImage::ImagePrimitivePtr image = new IECoreImage::ImagePrimitive( imageExtents, imageExtents );
+	image->channels["R"] = rd;
+	image->channels["G"] = gd;
+	image->channels["B"] = bd;
 	if( a )
 	{
-		image->variables["A"] = PrimitiveVariable( PrimitiveVariable::Vertex, ad );
+		image->channels["A"] = ad;
 	}
 
 	Exception::throwIfError();

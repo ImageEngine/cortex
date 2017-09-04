@@ -65,72 +65,9 @@ const std::string &versionString()
 	return v;
 }
 
-bool withASIO()
-{
-#ifdef IECORE_WITH_ASIO
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withSignals()
-{
-#ifdef IECORE_WITH_SIGNALS
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withBoostFactorial()
-{
-#ifdef IECORE_WITH_BOOSTFACTORIAL
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withTIFF()
-{
-#ifdef IECORE_WITH_TIFF
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withJPEG()
-{
-#ifdef IECORE_WITH_JPEG
-	return true;
-#else
-	return false;
-#endif
-}
-
 bool withFreeType()
 {
 #ifdef IECORE_WITH_FREETYPE
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withPNG()
-{
-#ifdef IECORE_WITH_PNG
-	return true;
-#else
-	return false;
-#endif
-}
-
-bool withDeepEXR()
-{
-#ifdef IECORE_WITH_DEEPEXR
 	return true;
 #else
 	return false;

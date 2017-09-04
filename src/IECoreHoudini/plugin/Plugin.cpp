@@ -60,8 +60,13 @@
 #include "IECoreHoudini/ROP_SceneCacheWriter.h"
 #include "IECoreHoudini/GEO_CobIOTranslator.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
-#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
 #include "IECoreHoudini/UT_ObjectPoolCache.h"
+
+#ifdef IECOREHOUDINI_WITH_GL
+
+	#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+
+#endif
 
 #if UT_MAJOR_VERSION_INT == 12 && UT_MINOR_VERSION_INT <= 1
 
@@ -232,8 +237,8 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 	/// Create the default ObjectPool cache
 	UT_ObjectPoolCache::defaultObjectPoolCache();
 
-/// Declare our new Render Hook for Houdini 12.5 and later
-#if UT_MAJOR_VERSION_INT > 12 || UT_MINOR_VERSION_INT >= 5
+/// Declare our new Render Hook if IECoreGL is enabled.
+#ifdef IECOREHOUDINI_WITH_GL
 
 	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
 

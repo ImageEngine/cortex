@@ -341,12 +341,12 @@ class Selector::Implementation : public IECore::RefCounted
 			glViewport( m_prevViewport[0], m_prevViewport[1], m_prevViewport[2], m_prevViewport[3] );
 			m_frameBufferBinding.reset();
 
-			IECore::ImagePrimitivePtr idsImage = m_frameBuffer->getColor()->imagePrimitive();
-			const IECore::UIntVectorData *idsData = static_cast<const IECore::UIntVectorData *>( idsImage->variables["Y"].data.get() );
+			IECoreImage::ImagePrimitivePtr idsImage = m_frameBuffer->getColor()->imagePrimitive();
+			const IECore::UIntVectorData *idsData = static_cast<const IECore::UIntVectorData *>( idsImage->channels["Y"].get() );
 			const std::vector<unsigned int> ids = idsData->readable();
 
-			IECore::ImagePrimitivePtr zImage = m_frameBuffer->getDepth()->imagePrimitive();
-			const IECore::FloatVectorData *zData = static_cast<const IECore::FloatVectorData *>( zImage->variables["Z"].data.get() );
+			IECoreImage::ImagePrimitivePtr zImage = m_frameBuffer->getDepth()->imagePrimitive();
+			const IECore::FloatVectorData *zData = static_cast<const IECore::FloatVectorData *>( zImage->channels["Z"].get() );
 			const std::vector<float> z = zData->readable();
 
 			std::map<unsigned int, HitRecord> idRecords;	

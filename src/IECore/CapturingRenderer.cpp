@@ -46,7 +46,6 @@
 #include "IECore/PointsPrimitive.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/SpherePrimitive.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/NURBSPrimitive.h"
 #include "IECore/PatchMeshPrimitive.h"
@@ -56,6 +55,7 @@
 #include "IECore/Shader.h"
 #include "IECore/MatrixTransform.h"
 #include "IECore/Light.h"
+#include "IECore/SimpleTypedData.h"
 
 using namespace std;
 using namespace tbb;
@@ -850,7 +850,7 @@ void CapturingRenderer::sphere( float radius, float zMin, float zMax, float thet
 
 void CapturingRenderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars )
 {
-	m_implementation->primitive( new ImagePrimitive( dataWindow, displayWindow ), primVars );
+	msg( Msg::Warning, "CapturingRenderer::text", "Not implemented" );
 }
 
 void CapturingRenderer::mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars )

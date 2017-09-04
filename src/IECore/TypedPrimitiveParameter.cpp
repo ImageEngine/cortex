@@ -36,14 +36,12 @@
 #include "IECore/TypedObjectParameter.inl"
 #include "IECore/MotionPrimitive.h"
 #include "IECore/Primitive.h"
-#include "IECore/ImagePrimitive.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/CurvesPrimitive.h"
 #include "IECore/PointsPrimitive.h"
 
 namespace IECore
 {
-IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( ImagePrimitive, ImagePrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MotionPrimitive, MotionPrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( Primitive, PrimitiveParameter );
 IE_CORE_DEFINETYPEDOBJECTPARAMETERSPECIALISATION( MeshPrimitive, MeshPrimitiveParameter );

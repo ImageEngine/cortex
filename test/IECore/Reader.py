@@ -43,35 +43,18 @@ class TestReader(unittest.TestCase):
 		for ee in e :
 			self.assert_( type( ee ) is str )
 
-		expectedExtensions = [ "exr", "pdc", "cin", "dpx", "cob", "sgi", "bw", "rgba", "rgb" ]
-		if IECore.withASIO() :
-			expectedExtensions += [ "obj" ]
-		if IECore.withTIFF() :
-			expectedExtensions += [ "tif", "tiff", "tdl", "tx" ]
-		if IECore.withJPEG() :
-			expectedExtensions += [ "jpg", "jpeg" ]
-		if IECore.withPNG() :
-			expectedExtensions += [ "png" ]
+		expectedExtensions = [ "pdc", "cob", "obj" ]
 
 		for ee in expectedExtensions :
 			self.assert_( ee in e )
 
-		e = IECore.Reader.supportedExtensions( IECore.TypeId.ImageReader )
+		e = IECore.Reader.supportedExtensions( IECore.TypeId.ParticleReader )
 		for ee in e :
 			self.assert_( type( ee ) is str )
-		expectedImageReaderExtensions = [ "exr", "cin", "dpx", "sgi", "bw", "rgba", "rgb", "tga" ]
-		if IECore.withTIFF() :
-			expectedImageReaderExtensions += [ "tif", "tiff" , "tdl", "tx"]
-		if IECore.withJPEG() :
-			expectedImageReaderExtensions += [ "jpg", "jpeg" ]
-		if IECore.withPNG() :
-			expectedImageReaderExtensions += [ "png" ]
 
-		self.assertEqual( set( expectedImageReaderExtensions ), set( e ) )
+		self.assertEqual( set( [ "pdc", "mc" ] ), set( e ) )
 
-		self.assert_( not "pdc" in expectedImageReaderExtensions )
-		self.assert_( not "cob" in expectedImageReaderExtensions )
-		self.assert_( not "obj" in expectedImageReaderExtensions )
+		self.assert_( not "obj" in e )
 
 	def test( self ) :
 
@@ -90,7 +73,7 @@ class TestReader(unittest.TestCase):
 		
 		def isReader( x ) :
 		
-			abstractReaders = ( IECore.Reader, IECore.ImageReader, IECore.ParticleReader, IECore.DeepImageReader )
+			abstractReaders = ( IECore.Reader, IECore.ParticleReader )
 		
 			try :
 				return issubclass( x, IECore.Reader ) and x not in abstractReaders

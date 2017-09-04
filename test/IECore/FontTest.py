@@ -76,33 +76,5 @@ class FontTest( unittest.TestCase ) :
 			bb = f.bound( chr( c ) )
 			self.assert_( b.contains( bb ) )
 
-	def testImages( self ) :
-
-		f = Font( "test/IECore/data/fonts/Vera.ttf" )
-		f.setResolution( 300 )
-
-		for c in range( 0, 128 ) :
-
-			i = f.image( chr( c ) )
-			self.assert_( i.displayWindow.contains( i.dataWindow ) )
-			self.assert_( len( i ), 1 )
-			self.assert_( "Y" in i )
-			self.assert_( i.channelValid( "Y" ) )
-
-	def testWholeImage( self ) :
-
-		f = Font( "test/IECore/data/fonts/Vera.ttf" )
-		f.setResolution( 50 )
-
-		a = f.image( 'a' )
-		i = f.image()
-
-		self.assertEqual( (a.displayWindow.size().x + 1) * 16, i.displayWindow.size().x + 1 )
-		self.assertEqual( (a.displayWindow.size().y + 1) * 8, i.displayWindow.size().y + 1 )
-
-		self.assert_( len( i ), 1 )
-		self.assert_( "Y" in i )
-		self.assert_( i.channelValid( "Y" ) )
-
 if __name__ == "__main__":
     unittest.main()

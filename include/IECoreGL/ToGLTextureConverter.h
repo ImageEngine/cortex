@@ -40,7 +40,7 @@
 
 #include "IECore/CompoundData.h"
 
-namespace IECore
+namespace IECoreImage
 {
 	IE_CORE_FORWARDDECLARE( ImagePrimitive );
 }
@@ -50,7 +50,7 @@ namespace IECoreGL
 
 IE_CORE_FORWARDDECLARE( Texture )
 
-/// Converts IECore::ImagePrimitive objects (or their CompoundData representation) into IECoreGL::Texture objects.
+/// Converts IECoreImage::ImagePrimitive objects (or their CompoundData representation) into IECoreGL::Texture objects.
 /// Because its not possible to pass ImagePrimitives through calls that only accept types derived from IECore::Data.
 /// The converter also supports an IECore::CompoundData object as a representation of the image. This should have, at
 /// minimum:
@@ -82,7 +82,7 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::ImagePrimitive InputType;
+		typedef IECoreImage::ImagePrimitive InputType;
 		typedef IECoreGL::Texture ResultType;
 		
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLTextureConverter, ToGLTextureConverterTypeId, ToGLConverter );
@@ -96,8 +96,8 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 	
 	private :
 
-		IECore::ImagePrimitivePtr createMissingChannels( const IECore::ImagePrimitive *image ) const;
-		IECore::ImagePrimitivePtr imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const;
+		IECoreImage::ImagePrimitivePtr createMissingChannels( const IECoreImage::ImagePrimitive *image ) const;
+		IECoreImage::ImagePrimitivePtr imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const;
 		bool m_createMissingRGBChannels;
 
 		static ConverterDescription<ToGLTextureConverter> g_description;

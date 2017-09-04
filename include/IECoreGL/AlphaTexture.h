@@ -52,11 +52,11 @@ class IECOREGL_API AlphaTexture : public Texture
 
 		/// Creates an AlphaTexture from the specified image. Currently ignores the display window and uses only
 		/// the data window. Image must have an "A" channel.
-		AlphaTexture( const IECore::ImagePrimitive *image, bool mipMap=true );
+		AlphaTexture( const IECoreImage::ImagePrimitive *image, bool mipMap=true );
 
 		virtual ~AlphaTexture();
 
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 	private :
 

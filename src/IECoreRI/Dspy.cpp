@@ -34,10 +34,11 @@
 
 #include <vector>
 
-#include "IECore/DisplayDriver.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
+
+#include "IECoreImage/DisplayDriver.h"
 
 #include "IECoreRI/Dspy.h"
 
@@ -240,11 +241,11 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 
 	// create the display driver
 
-	IECore::DisplayDriverPtr dd = 0;
+	IECoreImage::DisplayDriverPtr dd = nullptr;
 	try
 	{
 		const StringData *driverType = convertedParameters->member<StringData>( "driverType", true /* throw if missing */ );
-		dd = DisplayDriver::create( driverType->readable(), displayWindow, dataWindow, channels, convertedParameters );
+		dd = IECoreImage::DisplayDriver::create( driverType->readable(), displayWindow, dataWindow, channels, convertedParameters );
 	}
 	catch( std::exception &e )
 	{
@@ -274,7 +275,7 @@ PtDspyError Dspy::imageOpen( PtDspyImageHandle *image, const char *driverName, c
 
 PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int size, void *data )
 {
-	DisplayDriver *dd = static_cast<DisplayDriver *>( image );
+	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver *>( image );
 #ifdef PRMANEXPORT
 	return PkDspyErrorUnsupported;
 #else
@@ -296,7 +297,7 @@ PtDspyError Dspy::imageQuery( PtDspyImageHandle image, PtDspyQueryType type, int
 
 PtDspyError Dspy::imageData( PtDspyImageHandle image, int xMin, int xMaxPlusOne, int yMin, int yMaxPlusOne, int entrySize, const unsigned char *data )
 {
-	DisplayDriver *dd = static_cast<DisplayDriver *>( image );
+	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver *>( image );
 	Box2i dataWindow = dd->dataWindow();
 
 	// convert coordinates from cropped image to original image coordinates.
@@ -353,7 +354,7 @@ PtDspyError Dspy::imageClose( PtDspyImageHandle image )
 		return PkDspyErrorNone;
 	}
 
-	DisplayDriver *dd = static_cast<DisplayDriver*>( image );
+	IECoreImage::DisplayDriver *dd = static_cast<IECoreImage::DisplayDriver*>( image );
 	try
 	{
 		dd->imageClose();

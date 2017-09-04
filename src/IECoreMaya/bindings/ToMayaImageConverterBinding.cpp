@@ -54,7 +54,7 @@ void IECoreMaya::bindToMayaImageConverter()
 {
 	
 	IECorePython::RunTimeTypedClass<ToMayaImageConverter>()
-		.def( init<IECore::ConstImagePrimitivePtr>() )
+		.def( init<IECoreImage::ConstImagePrimitivePtr>() )
 		.def( "convert", &convert )
 	;
 	

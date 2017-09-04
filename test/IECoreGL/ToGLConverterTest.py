@@ -35,6 +35,7 @@
 import unittest
 
 import IECore
+import IECoreImage
 import IECoreGL
 
 IECoreGL.init( False )
@@ -131,7 +132,7 @@ class ToGLConverterTest( unittest.TestCase ) :
 		
 		# images
 		
-		image = IECore.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0, 0 ), IECore.Box2i( IECore.V2i( 256 ), ), IECore.Box2i( IECore.V2i( 256 ) ) )
+		image = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0, 0 ), IECore.Box2i( IECore.V2i( 256 ), ), IECore.Box2i( IECore.V2i( 256 ) ) )
 		c = IECoreGL.ToGLConverter.create( image )
 		self.failUnless( isinstance( c, IECoreGL.ToGLTextureConverter ) )
 
@@ -141,9 +142,9 @@ class ToGLConverterTest( unittest.TestCase ) :
 			"dataWindow" : IECore.Box2iData( image.dataWindow ),
 			"displayWindow" : IECore.Box2iData( image.displayWindow ),
 			"channels" : {
-				"R" : image["R"].data,
-				"G" : image["G"].data,
-				"B" : image["B"].data,
+				"R" : image["R"],
+				"G" : image["G"],
+				"B" : image["B"],
 			}
 		} )
 		

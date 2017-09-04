@@ -34,6 +34,7 @@
 
 import unittest
 from IECore import *
+import IECoreImage
 import IECoreRI
 import os
 
@@ -154,12 +155,11 @@ class InstancingTest( IECoreRI.TestCase ) :
 			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -10 ) ) )
 			r.procedural( InstanceInheritingProcedural() )
 
-		image = ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
-		e = ImagePrimitiveEvaluator( image )
-		r = e.createResult()
-		e.pointAtUV( V2f( 0.5 ), r )
-		self.failUnless( r.floatPrimVar( image["R"] ) > 0.95 )
-		
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
+		dimensions = image.dataWindow.size() + V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.failUnless( image["R"][index] > 0.95 )
+
 	def testInstancingWithThreadedProcedurals( self ) :
 			
 		class InstanceMakingProcedural( Renderer.Procedural ) :

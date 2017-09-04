@@ -37,7 +37,7 @@
 
 #include "DDImage/Iop.h"
 
-#include "IECore/DisplayDriverServer.h"
+#include "IECoreImage/DisplayDriverServer.h"
 
 namespace IECoreNuke
 {
@@ -75,8 +75,8 @@ class DisplayIop : public DD::Image::Iop
 		
 		DD::Image::Format m_format;
 		DD::Image::Format m_fullSizeFormat;
-				
-		IECore::DisplayDriverServerPtr m_server;
+
+		IECoreImage::DisplayDriverServerPtr m_server;
 		// we only bother updating these for firstDisplayIop(),
 		// and then refer to them from all other instances. this
 		// avoids problems where nuke might make new ops mid render

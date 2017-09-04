@@ -89,7 +89,6 @@ from ParameterParser import ParameterParser
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
 from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
-from CheckImagesOp import CheckImagesOp
 from FileSequenceGraphOp import FileSequenceGraphOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
@@ -98,7 +97,6 @@ from TransformBlock import TransformBlock
 from WorldBlock import WorldBlock
 from EditBlock import EditBlock
 from SequenceMergeOp import SequenceMergeOp
-from ImageSequenceCompositeOp import ImageSequenceCompositeOp
 from DateTimeParameterParser import *
 from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict

@@ -138,7 +138,7 @@ class testParameterParser( unittest.TestCase ) :
 		a()
 
 		# remove some parameters that don't have serializing/parsing methods yet.
-		for name in [ 'p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7' ] :
+		for name in [ 'p1', 'p2', 'p3', 'p4', 'p5', 'p6' ] :
 			a.parameters().removeParameter( name )
 
 		s = IECore.ParameterParser().serialise( a.parameters() )
@@ -158,7 +158,7 @@ class testParameterParser( unittest.TestCase ) :
 		p = IECore.FileNameParameter(
 			name = "f",
 			description = "d",
-			extensions = "tif tiff jpg cin",
+			extensions = "cob scc fio pdc",
 			check = IECore.FileNameParameter.CheckType.MustExist,
 		)
 
@@ -168,7 +168,7 @@ class testParameterParser( unittest.TestCase ) :
 		s = IECore.ParameterParser().serialise( p, values = p.getValue() )
 		self.assertRaises( SyntaxError, IECore.curry( IECore.ParameterParser().parse, s, p ) )
 		
-		realImage = IECore.StringData( "test/IECore/data/tiff/thinned.tif" )
+		realImage = IECore.StringData( "test/IECore/data/cobFiles/ball.cob" )
 		s = IECore.ParameterParser().serialise( p, values = realImage )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
 		IECore.ParameterParser().parse( s, p )

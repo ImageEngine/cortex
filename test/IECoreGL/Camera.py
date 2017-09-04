@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreImage
 import IECoreGL
 IECoreGL.init( False )
 import os.path
@@ -59,11 +60,9 @@ class CameraTest( unittest.TestCase ) :
 
 		# check that nothing appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.G()
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
+		self.assertEqual( i["G"][midpoint], 0 )
 
 		# render a plane at z = 0 with the camera moved back a touch to see it
 		r = IECoreGL.Renderer()
@@ -84,12 +83,9 @@ class CameraTest( unittest.TestCase ) :
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-
-		e.pointAtUV( IECore.V2f( 0.5, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		midpoint = dimensions.x * dimensions.y/2 + dimensions.x/2
+		self.assertEqual( i["A"][midpoint], 1 )
 
 	def testXYOrientation( self ) :
 
@@ -113,22 +109,17 @@ class CameraTest( unittest.TestCase ) :
 
 		# check we get the colors we'd expect where we expect them
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCamera.tif" ).read()
-		e = IECore.PrimitiveEvaluator.create( i )
-		result = e.createResult()
-		a = e.A()
-		r = e.R()
-		g = e.G()
-		b = e.B()
-		e.pointAtUV( IECore.V2f( 1, 0.5 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 1 )
-		self.assertEqual( result.floatPrimVar( g ), 0 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
-		e.pointAtUV( IECore.V2f( 0.5, 0 ), result )
-		self.assertEqual( result.floatPrimVar( a ), 1 )
-		self.assertEqual( result.floatPrimVar( r ), 0 )
-		self.assertEqual( result.floatPrimVar( g ), 1 )
-		self.assertEqual( result.floatPrimVar( b ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * dimensions.y/2 + dimensions.x - 1
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 1 )
+		self.assertEqual( i["G"][index], 0 )
+		self.assertEqual( i["B"][index], 0 )
+		index = dimensions.x/2
+		self.assertEqual( i["A"][index], 1 )
+		self.assertEqual( i["R"][index], 0 )
+		self.assertEqual( i["G"][index], 1 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :
 		

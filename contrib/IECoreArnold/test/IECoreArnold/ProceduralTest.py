@@ -32,13 +32,12 @@
 #
 ##########################################################################
 
-from __future__ import with_statement
-
 import re
 import arnold
 import unittest
 
 import IECore
+import IECoreImage
 import IECoreArnold
 
 class ProceduralTest( unittest.TestCase ) :
@@ -181,14 +180,13 @@ class ProceduralTest( unittest.TestCase ) :
 				)
 			)
 
-		i = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
+		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "testHandle" )
 
-		e = IECore.ImagePrimitiveEvaluator( i )
-		r = e.createResult()
-		self.assertEqual( e.pointAtUV( IECore.V2f( 0.5 ), r ), True )
-		self.assertEqual( r.floatPrimVar( e.R() ), 0 )
-		self.assertEqual( r.floatPrimVar( e.G() ), 1 )
-		self.assertEqual( r.floatPrimVar( e.B() ), 0 )
+		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertEqual( i["R"][index], 0 )
+		self.assertAlmostEqual( i["G"][index], 1, 6 )
+		self.assertEqual( i["B"][index], 0 )
 
 	def testEmptyProceduralIsIgnored( self ) :
 

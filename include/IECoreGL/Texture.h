@@ -39,7 +39,7 @@
 #include "IECoreGL/GL.h"
 #include "IECoreGL/Bindable.h"
 
-#include "IECore/ImagePrimitive.h"
+#include "IECoreImage/ImagePrimitive.h"
 
 namespace IECoreGL
 {
@@ -87,7 +87,7 @@ class IECOREGL_API Texture : public Bindable
 		};
 
 		/// Creates an ImagePrimitive using the texture contents.
-		virtual IECore::ImagePrimitivePtr imagePrimitive() const;
+		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
 
 	protected :
 

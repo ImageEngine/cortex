@@ -42,9 +42,10 @@
 #include "IECore/CompoundData.h"
 #include "IECore/PrimitiveVariable.h"
 
-#include "IECore/ImagePrimitive.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
+
+#include "IECoreImage/ImagePrimitive.h"
 
 #include "IECoreGL/ToGLTextureConverter.h"
 #include "IECoreGL/ColorTexture.h"
@@ -58,7 +59,7 @@ ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConv
 ToGLTextureConverter::ConverterDescription<ToGLTextureConverter> ToGLTextureConverter::g_compoundDataDescription( IECore::CompoundData::staticTypeId(), IECoreGL::Texture::staticTypeId() );
 
 ToGLTextureConverter::ToGLTextureConverter( IECore::ConstObjectPtr toConvert, bool createMissingRGBChannels )
-	:	ToGLConverter( "Converts IECore::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId ),
+	:	ToGLConverter( "Converts IECoreImage::ImagePrimitive objects to IECoreGL::Texture objects.", IECore::ObjectTypeId ),
 	m_createMissingRGBChannels( createMissingRGBChannels )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECore::Object>( toConvert ) );
@@ -72,9 +73,9 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 {
 	
 	TexturePtr t = 0;
-	IECore::ImagePrimitive::ConstPtr image;
+	IECoreImage::ImagePrimitive::ConstPtr image;
 	
-	image = IECore::runTimeCast<const IECore::ImagePrimitive>( src );
+	image = IECore::runTimeCast<const IECoreImage::ImagePrimitive>( src );
 	
 	if ( ! image )
 	{
@@ -123,9 +124,9 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	return t;
 }
 
-IECore::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IECore::ImagePrimitive *image ) const
+IECoreImage::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IECoreImage::ImagePrimitive *image ) const
 {
-	IECore::ImagePrimitivePtr newImage = image->copy();
+	IECoreImage::ImagePrimitivePtr newImage = image->copy();
 	if( newImage->getChannel<float>( "R" ) == 0)
 	{
 		newImage->createChannel<float>( "R" );
@@ -141,7 +142,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IEC
 	return newImage;
 }
 
-IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const
+IECoreImage::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::CompoundData::ConstPtr data ) const
 {
 
 	if ( ! data )
@@ -181,7 +182,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 	}
 
 
-	IECore::ImagePrimitivePtr newImage = new IECore::ImagePrimitive( dataWindow->readable(), screenWindow->readable() );
+	IECoreImage::ImagePrimitivePtr newImage = new IECoreImage::ImagePrimitive( dataWindow->readable(), screenWindow->readable() );
 	for (
 			IECore::CompoundDataMap::const_iterator itChannels = channels->readable().begin();
 			itChannels != channels->readable().end();
@@ -194,7 +195,7 @@ IECore::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECore::C
 			throw IECore::Exception( "Invalid channel data found in ImagePrimitive representation, only 32bit float data is supported. Please check texture.");
 		}
 
-		newImage->variables.insert( IECore::PrimitiveVariableMap::value_type( itChannels->first, IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, channelData ) ) );
+		newImage->channels.insert( IECoreImage::ImagePrimitive::ChannelMap::value_type( itChannels->first, channelData ) );
 
 	}
 
