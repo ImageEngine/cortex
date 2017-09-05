@@ -1,3 +1,28 @@
+9.23.0
+======
+
+Features
+--------
+
+- PointsAlgo : Added mergePoints to combine a series of PointsPrimitives.
+
+Improvements
+------------
+
+- IECoreHoudini : SceneCache nodes use the full path in the shapeFilter
+    - Note that this change will break existing Houdini setups which were
+      using shapeFilters targetting path basenames.
+
+Fixes
+-----
+
+- IECoreNuke : CurveLookup: Fixed memory corruption.
+
+Build
+-----
+
+- Added DEBUGINFO option to make debug info for release builds.
+
 9.22.0
 ======
 
