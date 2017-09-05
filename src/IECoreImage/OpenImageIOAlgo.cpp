@@ -201,12 +201,12 @@ std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &sp
 }
 
 DataView::DataView()
-	:	data( nullptr ), rawData( nullptr ), m_charPointer( nullptr )
+	:	data( nullptr ), m_charPointer( nullptr )
 {
 }
 
-DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
-	:	data( copyData ? data->copy() : nullptr ), rawData( nullptr ), m_charPointer( nullptr )
+DataView::DataView( const IECore::Data *d, bool createUStrings )
+	:	data( nullptr ), m_charPointer( nullptr )
 {
 	switch( d ? d->typeId() : IECore::InvalidTypeId )
 	{
@@ -215,11 +215,11 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 
 		case CharDataTypeId :
 			type = TypeDesc::CHAR;
-			rawData = static_cast<const CharData *>( d )->baseReadable();
+			data = static_cast<const CharData *>( d )->baseReadable();
 			break;
 		case UCharDataTypeId :
 			type = TypeDesc::UCHAR;
-			rawData = static_cast<const UCharData *>( d )->baseReadable();
+			data = static_cast<const UCharData *>( d )->baseReadable();
 			break;
 		case StringDataTypeId :
 			type = TypeDesc::TypeString;
@@ -228,95 +228,95 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 			{
 				m_charPointer = ustring( m_charPointer ).c_str();
 			}
-			rawData = &m_charPointer;
+			data = &m_charPointer;
 			break;
 		case UShortDataTypeId :
 			type = TypeDesc::USHORT;
-			rawData = static_cast<const UShortData *>( d )->baseReadable();
+			data = static_cast<const UShortData *>( d )->baseReadable();
 			break;
 		case ShortDataTypeId :
 			type = TypeDesc::SHORT;
-			rawData = static_cast<const ShortData *>( d )->baseReadable();
+			data = static_cast<const ShortData *>( d )->baseReadable();
 			break;
 		case UIntDataTypeId :
 			type = TypeDesc::UINT;
-			rawData = static_cast<const UIntData *>( d )->baseReadable();
+			data = static_cast<const UIntData *>( d )->baseReadable();
 			break;
 		case HalfDataTypeId :
 			type = TypeDesc::HALF;
-			rawData = static_cast<const HalfData *>( d )->baseReadable();
+			data = static_cast<const HalfData *>( d )->baseReadable();
 			break;
 		case IntDataTypeId :
 			type = TypeDesc::TypeInt;
-			rawData = static_cast<const IntData *>( d )->baseReadable();
+			data = static_cast<const IntData *>( d )->baseReadable();
 			break;
 		case FloatDataTypeId :
 			type = TypeDesc::TypeFloat;
-			rawData = static_cast<const FloatData *>( d )->baseReadable();
+			data = static_cast<const FloatData *>( d )->baseReadable();
 			break;
 		case DoubleDataTypeId :
 			type = TypeDesc::DOUBLE;
-			rawData = static_cast<const DoubleData *>( d )->baseReadable();
+			data = static_cast<const DoubleData *>( d )->baseReadable();
 			break;
 		case V2iDataTypeId :
 			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2 );
-			rawData = static_cast<const V2iData *>( d )->baseReadable();
+			data = static_cast<const V2iData *>( d )->baseReadable();
 			break;
 		case V3iDataTypeId :
 			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC3 );
-			rawData = static_cast<const V3iData *>( d )->baseReadable();
+			data = static_cast<const V3iData *>( d )->baseReadable();
 			break;
 		case Box2iDataTypeId :
 			type = TypeDesc( TypeDesc::INT, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
-			rawData = static_cast<const Box2iData *>( d )->baseReadable();
+			data = static_cast<const Box2iData *>( d )->baseReadable();
 			break;
 		case V2fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, vecSemantics( static_cast<const V2fData *>( d )->getInterpretation() ) );
-			rawData = static_cast<const V2fData *>( d )->baseReadable();
+			data = static_cast<const V2fData *>( d )->baseReadable();
 			break;
 		case V3fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC3, vecSemantics( static_cast<const V3fData *>( d )->getInterpretation() ) );
-			rawData = static_cast<const V3fData *>( d )->baseReadable();
+			data = static_cast<const V3fData *>( d )->baseReadable();
 			break;
 		case Box2fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
-			rawData = static_cast<const Box2fData *>( d )->baseReadable();
+			data = static_cast<const Box2fData *>( d )->baseReadable();
 			break;
 		case M33fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX33 );
-			rawData = static_cast<const M33fData *>( d )->baseReadable();
+			data = static_cast<const M33fData *>( d )->baseReadable();
 			break;
 		case M44fDataTypeId :
 			type = TypeDesc( TypeDesc::FLOAT, TypeDesc::MATRIX44 );
-			rawData = static_cast<const M44fData *>( d )->baseReadable();
+			data = static_cast<const M44fData *>( d )->baseReadable();
 			break;
 		case V2dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC2, vecSemantics( static_cast<const V2dData *>( d )->getInterpretation() ) );
-			rawData = static_cast<const V2dData *>( d )->baseReadable();
+			data = static_cast<const V2dData *>( d )->baseReadable();
 			break;
 		case V3dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC3, vecSemantics( static_cast<const V3dData *>( d )->getInterpretation() ) );
-			rawData = static_cast<const V3dData *>( d )->baseReadable();
+			data = static_cast<const V3dData *>( d )->baseReadable();
 			break;
 		case Box2dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::VEC2, TypeDesc::NOXFORM, 2 );
-			rawData = static_cast<const Box2dData *>( d )->baseReadable();
+			data = static_cast<const Box2dData *>( d )->baseReadable();
 			break;
 		case M33dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX33 );
-			rawData = static_cast<const M33dData *>( d )->baseReadable();
+			data = static_cast<const M33dData *>( d )->baseReadable();
 			break;
 		case M44dDataTypeId :
 			type = TypeDesc( TypeDesc::DOUBLE, TypeDesc::MATRIX44 );
-			rawData = static_cast<const M44dData *>( d )->baseReadable();
+			data = static_cast<const M44dData *>( d )->baseReadable();
 			break;
 		case Color3fDataTypeId :
 			type = TypeDesc::TypeColor;
-			rawData = static_cast<const Color3fData *>( d )->baseReadable();
+			data = static_cast<const Color3fData *>( d )->baseReadable();
 			break;
 		case TimeCodeDataTypeId :
 			type = TypeDesc::TypeTimeCode;
-			rawData = static_cast<const TimeCodeData *>( d )->baseReadable();
+			data = static_cast<const TimeCodeData *>( d )->baseReadable();
 			break;
 
 		// Vector data
@@ -328,7 +328,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const DoubleVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const DoubleVectorData *>( d )->baseReadable();
+			data = static_cast<const DoubleVectorData *>( d )->baseReadable();
 			break;
 		case FloatVectorDataTypeId :
 			type = TypeDesc(
@@ -337,7 +337,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const FloatVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const FloatVectorData *>( d )->baseReadable();
+			data = static_cast<const FloatVectorData *>( d )->baseReadable();
 			break;
 		case HalfVectorDataTypeId :
 			type = TypeDesc(
@@ -346,7 +346,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const HalfVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const HalfVectorData *>( d )->baseReadable();
+			data = static_cast<const HalfVectorData *>( d )->baseReadable();
 			break;
 		case IntVectorDataTypeId :
 			type = TypeDesc(
@@ -355,7 +355,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const IntVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const IntVectorData *>( d )->baseReadable();
+			data = static_cast<const IntVectorData *>( d )->baseReadable();
 			break;
 		case UIntVectorDataTypeId :
 			type = TypeDesc(
@@ -364,7 +364,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const UIntVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const UIntVectorData *>( d )->baseReadable();
+			data = static_cast<const UIntVectorData *>( d )->baseReadable();
 			break;
 		case CharVectorDataTypeId :
 			type = TypeDesc(
@@ -373,7 +373,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const CharVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const CharVectorData *>( d )->baseReadable();
+			data = static_cast<const CharVectorData *>( d )->baseReadable();
 			break;
 		case UCharVectorDataTypeId :
 			type = TypeDesc(
@@ -382,7 +382,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const UCharVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const UCharVectorData *>( d )->baseReadable();
+			data = static_cast<const UCharVectorData *>( d )->baseReadable();
 			break;
 		case V3fVectorDataTypeId :
 			type = TypeDesc(
@@ -391,7 +391,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				vecSemantics( static_cast<const V3fVectorData *>( d )->getInterpretation() ),
 				static_cast<const V3fVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const V3fVectorData *>( d )->baseReadable();
+			data = static_cast<const V3fVectorData *>( d )->baseReadable();
 			break;
 		case Color3fVectorDataTypeId :
 			type = TypeDesc(
@@ -400,7 +400,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::COLOR,
 				static_cast<const Color3fVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const Color3fVectorData *>( d )->baseReadable();
+			data = static_cast<const Color3fVectorData *>( d )->baseReadable();
 			break;
 		case M44fVectorDataTypeId :
 			type = TypeDesc(
@@ -409,7 +409,7 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 				TypeDesc::NOSEMANTICS,
 				static_cast<const M44fVectorData *>( d )->readable().size()
 			);
-			rawData = static_cast<const M44fVectorData *>( d )->baseReadable();
+			data = static_cast<const M44fVectorData *>( d )->baseReadable();
 			break;
 
 		default :
@@ -419,252 +419,235 @@ DataView::DataView( const IECore::Data *d, bool createUStrings, bool copyData )
 	}
 }
 
-DataView::DataView( const OIIO::ParamValue &param )
-	:	type( param.type() ), data( nullptr ), rawData( param.data() ), m_charPointer( nullptr )
+IECore::DataPtr data( const OIIO::ParamValue &value )
 {
-	switch ( type.basetype )
+	OIIO::TypeDesc type = value.type();
+	switch( type.basetype )
 	{
 		case TypeDesc::CHAR :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new CharData( *static_cast<const char *>( rawData ) );
+				return new CharData( *static_cast<const char *>( value.data() ) );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::UCHAR :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new UCharData( *static_cast<const unsigned char *>( rawData ) );
+				return new UCharData( *static_cast<const unsigned char *>( value.data() ) );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::STRING :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new StringData( static_cast<const ustring *>( rawData )->c_str() );
+				return new StringData( static_cast<const ustring *>( value.data() )->c_str() );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::USHORT :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new UShortData( *static_cast<const unsigned short *>( rawData ) );
+				return new UShortData( *static_cast<const unsigned short *>( value.data() ) );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::SHORT :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new ShortData( *static_cast<const short *>( rawData ) );
+				return new ShortData( *static_cast<const short *>( value.data() ) );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::UINT :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				const unsigned *typedData = static_cast<const unsigned *>( rawData );
+				const unsigned *typedData = static_cast<const unsigned *>( value.data() );
 				if ( type.vecsemantics == TypeDesc::TIMECODE )
 				{
-					data = new TimeCodeData( Imf::TimeCode( typedData[0], typedData[1] ) );
+					return new TimeCodeData( Imf::TimeCode( typedData[0], typedData[1] ) );
 				}
 				else
 				{
-					data = new UIntData( *typedData );
+					return new UIntData( *typedData );
 				}
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::INT :
 		{
-			const int *typedData = static_cast<const int *>( rawData );
+			const int *typedData = static_cast<const int *>( value.data() );
 			switch ( type.aggregate )
 			{
 				case TypeDesc::SCALAR :
 				{
 					if( !type.arraylen )
 					{
-						data = new IntData( *typedData );
+						return new IntData( *typedData );
 					}
 					else
 					{
 						IntVectorDataPtr vectorData = new IntVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						data = vectorData;
+						return vectorData;
 					}
-					break;
 				}
 				case TypeDesc::VEC2 :
 				{
 					if( !type.arraylen )
 					{
-						data = new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
+						return new V2iData( Imath::V2i( typedData[0], typedData[1] ) );
 					}
 					else if( type.arraylen  == 2 )
 					{
-						data = new Box2iData( Imath::Box2i( Imath::V2i( typedData[0], typedData[1] ), Imath::V2i( typedData[2], typedData[3] ) ) );
+						return new Box2iData( Imath::Box2i( Imath::V2i( typedData[0], typedData[1] ), Imath::V2i( typedData[2], typedData[3] ) ) );
 					}
 					else
 					{
 						V2iVectorDataPtr vectorData = new V2iVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
-						data = vectorData;
+						return vectorData;
 					}
-
-					break;
 				}
 				case TypeDesc::VEC3 :
 				{
-					data = new V3iData( Imath::V3i( typedData[0], typedData[1], typedData[2] ) );
-					break;
+					return new V3iData( Imath::V3i( typedData[0], typedData[1], typedData[2] ) );
 				}
 				default :
 				{
-					break;
+					return nullptr;
 				}
 			}
-			break;
 		}
 		case TypeDesc::HALF :
 		{
 			if ( type.aggregate == TypeDesc::SCALAR )
 			{
-				data = new HalfData( *static_cast<const half *>( rawData ) );
+				return new HalfData( *static_cast<const half *>( value.data() ) );
 			}
-			break;
+			return nullptr;
 		}
 		case TypeDesc::FLOAT :
 		{
-			const float *typedData = static_cast<const float *>( rawData );
+			const float *typedData = static_cast<const float *>( value.data() );
 			switch ( type.aggregate )
 			{
 				case TypeDesc::SCALAR :
 				{
 					if( !type.arraylen )
 					{
-						data = new FloatData( *typedData );
+						return new FloatData( *typedData );
 					}
 					else
 					{
 						FloatVectorDataPtr vectorData = new FloatVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						data = vectorData;
+						return vectorData;
 					}
-					break;
 				}
 				case TypeDesc::VEC2 :
 				{
 					if( !type.arraylen )
 					{
-						data = new V2fData( Imath::V2f( typedData[0], typedData[1] ) );
+						return new V2fData( Imath::V2f( typedData[0], typedData[1] ) );
 					}
 					else if( type.arraylen  == 2 )
 					{
-						data = new Box2fData( Imath::Box2f( Imath::V2f( typedData[0], typedData[1] ), Imath::V2f( typedData[2], typedData[3] ) ) );
+						return new Box2fData( Imath::Box2f( Imath::V2f( typedData[0], typedData[1] ), Imath::V2f( typedData[2], typedData[3] ) ) );
 					}
 					else
 					{
 						V2fVectorDataPtr vectorData = new V2fVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
-						data = vectorData;
+						return vectorData;
 					}
-					break;
 				}
 				case TypeDesc::VEC3 :
 				{
-					data = new V3fData( Imath::V3f( typedData[0], typedData[1], typedData[2] ) );
-					break;
+					return new V3fData( Imath::V3f( typedData[0], typedData[1], typedData[2] ) );
 				}
 				case TypeDesc::MATRIX33 :
 				{
-					data = new M33fData( Imath::M33f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
-					break;
+					return new M33fData( Imath::M33f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
 				}
 				case TypeDesc::MATRIX44 :
 				{
-					data = new M44fData( Imath::M44f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
-					break;
+					return new M44fData( Imath::M44f( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
 				}
 				default :
 				{
-					break;
+					return nullptr;
 				}
 			}
-			break;
 		}
 		case TypeDesc::DOUBLE :
 		{
-			const double *typedData = static_cast<const double *>( rawData );
+			const double *typedData = static_cast<const double *>( value.data() );
 			switch ( type.aggregate )
 			{
 				case TypeDesc::SCALAR :
 				{
 					if( !type.arraylen )
 					{
-						data = new DoubleData( *typedData );
+						return new DoubleData( *typedData );
 					}
 					else
 					{
 						DoubleVectorDataPtr vectorData = new DoubleVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], vectorData->writable().begin() );
-						data = vectorData;
+						return vectorData;
 					}
-					break;
 				}
 				case TypeDesc::VEC2 :
 				{
 					if( !type.arraylen )
 					{
-						data = new V2dData( Imath::V2d( typedData[0], typedData[1] ) );
+						return new V2dData( Imath::V2d( typedData[0], typedData[1] ) );
 					}
 					else if( type.arraylen  == 2 )
 					{
-						data = new Box2dData( Imath::Box2d( Imath::V2d( typedData[0], typedData[1] ), Imath::V2d( typedData[2], typedData[3] ) ) );
+						return new Box2dData( Imath::Box2d( Imath::V2d( typedData[0], typedData[1] ), Imath::V2d( typedData[2], typedData[3] ) ) );
 					}
 					else
 					{
 						V2dVectorDataPtr vectorData = new V2dVectorData();
 						vectorData->writable().resize( type.arraylen );
 						std::copy( &typedData[0], &typedData[type.arraylen], &vectorData->baseWritable()[0] );
-						data = vectorData;
+						return vectorData;
 					}
-					break;
 				}
 				case TypeDesc::VEC3 :
 				{
-					data = new V3dData( Imath::V3d( typedData[0], typedData[1], typedData[2] ) );
-					break;
+					return new V3dData( Imath::V3d( typedData[0], typedData[1], typedData[2] ) );
 				}
 				case TypeDesc::MATRIX33 :
 				{
-					data = new M33dData( Imath::M33d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
-					break;
+					return new M33dData( Imath::M33d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8] ) );
 				}
 				case TypeDesc::MATRIX44 :
 				{
-					data = new M44dData( Imath::M44d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
-					break;
+					return new M44dData( Imath::M44d( typedData[0], typedData[1], typedData[2], typedData[3], typedData[4], typedData[5], typedData[6], typedData[7], typedData[8], typedData[9], typedData[10], typedData[11], typedData[12], typedData[13], typedData[14], typedData[15] ) );
 				}
 				default :
 				{
-					break;
+					return nullptr;
 				}
 			}
-			break;
 		}
 		default :
 		{
-			break;
+			return nullptr;
 		}
 	}
 }

@@ -183,10 +183,9 @@ class ImageReader::Implementation
 			auto &members = metadata->writable();
 			for ( const auto &param : spec->extra_attribs )
 			{
-				const OpenImageIOAlgo::DataView dataView( param );
-				if( dataView.data )
+				if( DataPtr d = OpenImageIOAlgo::data( param ) )
 				{
-					addMetadata( param.name().string(), dataView.data, metadata );
+					addMetadata( param.name().string(), d, metadata );
 				}
 			}
 

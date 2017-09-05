@@ -67,24 +67,28 @@ OIIO::ColorConfig *colorConfig();
 /// for rudimentary operations on "normally" encoded files.
 std::string colorSpace( const std::string &fileFormat, const OIIO::ImageSpec &spec );
 
+/// Provides a non-owning view onto an IECore::Data object, suitable
+/// for passing to OpenImageIO in the form of a TypeDesc and pointer.
 struct DataView
 {
 
 	DataView();
 	/// If the data is StringData, `createUStrings` creates an
 	/// `OIIO::ustring` and refers to the storage from that instead.
-	DataView( const IECore::Data *data, bool createUStrings = false, bool copyData = false );
-	DataView( const OIIO::ParamValue &param );
+	DataView( const IECore::Data *data, bool createUStrings = false );
 
 	OIIO::TypeDesc type;
-	IECore::DataPtr data;
-	const void *rawData;
+	const void *data;
 
 	private :
 
 		const char *m_charPointer;
 
 };
+
+/// Returns a new Data object containing a copy of the data
+/// from the provided ParamValue.
+IECore::DataPtr data( const OIIO::ParamValue &value );
 
 } // namespace OpenImageIOAlgo
 
