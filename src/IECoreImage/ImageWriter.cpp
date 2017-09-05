@@ -137,9 +137,9 @@ void metadataToImageSpecAttributes( const CompoundData *metadata, ImageSpec *spe
 		else
 		{
 			const OpenImageIOAlgo::DataView dataView( item.second.get() );
-			if( (bool)dataView.rawData )
+			if( dataView.data )
 			{
-				spec->attribute( thisName, dataView.type, dataView.rawData );
+				spec->attribute( thisName, dataView.type, dataView.data );
 			}
 		}
 	}
@@ -593,7 +593,7 @@ void ImageWriter::doWrite( const CompoundObject *operands )
 		throw IECore::Exception( boost::str( boost::format( "IECoreImage::ImageWriter : Failed to write \"%s\". Unsupported dataType %s." ) % fileName() % buffer->typeName() ) );
 	}
 
-	const unsigned char *rawBuffer = (const unsigned char *)dataView.rawData;
+	const unsigned char *rawBuffer = (const unsigned char *)dataView.data;
 	size_t stride = spec.nchannels * spec.width * dataView.type.elementsize();
 
 	for( int y = 0; y < spec.height; ++y )
