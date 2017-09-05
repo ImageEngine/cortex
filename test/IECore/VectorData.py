@@ -374,7 +374,7 @@ class BaseVectorDataTest:
 		self.assert_(a[0], _c(9))
 
 	def testHasBase( self ) :
-	
+
 		self.failUnless( self.vectorFactory.hasBase() )
 
 class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
@@ -1197,11 +1197,11 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 class TestVectorDataToString( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = UCharVectorData()
 		for i in range( 0, 255 ) :
 			d.append( i )
-			
+
 		s = d.toString()
 		for i in range( 0, 255 ) :
 			self.assertEqual( s[i], chr( i ) )
@@ -1209,30 +1209,30 @@ class TestVectorDataToString( unittest.TestCase ) :
 class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
 	def test( self ) :
-			
+
 		d = IntVectorData( 100 * 1024 * 1024 )
-		
+
 		t = Timer()
 		h = d.hash()
 		firstTime = t.stop()
-		
+
 		t = Timer()
 		h2 = d.hash()
 		secondTime = t.stop()
-		
+
 		self.assertEqual( h, h2 )
 		# hash computation should be cached the second time, so should be much faster
-		self.failUnless( secondTime < 0.0001 * firstTime )
-		
+		self.assertLess( secondTime, 0.001 * firstTime )
+
 		d2 = d.copy()
 		t = Timer()
 		h2 = d.hash()
 		secondTime = t.stop()
-		
+
 		self.assertEqual( h, h2 )
 		# cached hash should have been transferred to the copy, so also should be much faster
-		self.failUnless( secondTime < 0.0001 * firstTime )
-		
+		self.assertLess( secondTime, 0.001 * firstTime )
+
 		d[0] = 10
 		t = Timer()
 		hm = d.hash()
@@ -1240,46 +1240,46 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
 		self.assertNotEqual( h, hm )
 		# should be slow this time, as the hash is being recomputed
-		self.failIf( secondTime < 0.8 * firstTime )
-		
+		self.assertGreaterEqual( secondTime, 0.8 * firstTime )
+
 		t = Timer()
 		h2 = d2.hash()
 		secondTime = t.stop()
-		
+
 		self.assertEqual( h, h2 )
 		# cached hash should remain in the copy, so should still be much faster
-		self.failUnless( secondTime < 0.0001 * firstTime )
-		
+		self.assertLess( secondTime, 0.001 * firstTime )
+
 		d2[0] = 10
 		t = Timer()
 		hm2 = d2.hash()
 		secondTime = t.stop()
-		
+
 		self.assertEqual( hm, hm2 )
 		# should be slow this time, as the hash is being recomputed
-		self.failIf( secondTime < 0.8 * firstTime )
+		self.assertGreaterEqual( secondTime, 0.8 * firstTime )
 
 class TestInternedStringVectorData( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = InternedStringVectorData( [ "1", "2", "3", "4" ] )
-		
+
 		self.assertEqual( d[0], InternedString( "1" ) )
 		d[0] = "20"
 		self.assertEqual( d[0], InternedString( "20" ) )
-		
+
 		d2 = d.copy()
 		self.assertEqual( d, d2 )
-		
+
 		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
 		d.save( m, "o" )
-		
+
 		d2 = Object.load( m, "o" )
-		
+
 		self.assertEqual( d2, d )
-		
+
 if __name__ == "__main__":
     unittest.main()
-	
+
 
