@@ -249,6 +249,21 @@
 using namespace IECorePython;
 using namespace boost::python;
 
+
+namespace
+{
+
+bool isDebug()
+{
+#ifdef NDEBUG
+	return false;
+#else
+	return true;
+#endif
+}
+
+} // namespace
+
 // Module declaration
 
 BOOST_PYTHON_MODULE(_IECore)
@@ -467,8 +482,8 @@ BOOST_PYTHON_MODULE(_IECore)
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );
 	def( "versionString", &IECore::versionString, return_value_policy<copy_const_reference>() );
+	def( "isDebug", &::isDebug );
 	def( "withFreeType", &IECore::withFreeType );
 	def( "initThreads", &PyEval_InitThreads );
 	def( "hardwareConcurrency", &tbb::tbb_thread::hardware_concurrency );
-
 }
