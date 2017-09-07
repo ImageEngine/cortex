@@ -44,12 +44,17 @@ T *Primitive::variableData( const std::string &name, PrimitiveVariable::Interpol
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it==variables.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	if( requiredInterpolation!=PrimitiveVariable::Invalid && it->second.interpolation!=requiredInterpolation )
 	{
-		return 0;
+		return nullptr;
 	}
+	if( it->second.indices )
+	{
+		throw Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+	}
+
 	return runTimeCast<T>( it->second.data.get() );
 }
 
@@ -59,13 +64,51 @@ const T *Primitive::variableData( const std::string &name, PrimitiveVariable::In
 	PrimitiveVariableMap::const_iterator it = variables.find( name );
 	if( it==variables.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	if( requiredInterpolation!=PrimitiveVariable::Invalid && it->second.interpolation!=requiredInterpolation )
 	{
-		return 0;
+		return nullptr;
 	}
+	if( it->second.indices )
+	{
+		throw Exception( "Primitive::variableData() can only be used for non-indexed variables. Use Primitive::expandedVariableData() or access Primitive::variables directly." );
+	}
+
 	return runTimeCast<const T>( it->second.data.get() );
+}
+
+template<typename T>
+typename T::Ptr Primitive::expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation ) const
+{
+	PrimitiveVariableMap::const_iterator it = variables.find( name );
+	if( it==variables.end() )
+	{
+		return nullptr;
+	}
+	if( requiredInterpolation!=PrimitiveVariable::Invalid && it->second.interpolation!=requiredInterpolation )
+	{
+		return nullptr;
+	}
+
+	T *data = runTimeCast<T>( it->second.data.get() );
+	if( !it->second.indices )
+	{
+		return data->copy();
+	}
+
+	const typename T::ValueType &compactValues = data->readable();
+	const std::vector<int> &indices = it->second.indices->readable();
+
+	typename T::Ptr result = new T();
+	typename T::ValueType &expandedValues = result->writable();
+	expandedValues.reserve( indices.size() );
+	for( const auto &index : indices )
+	{
+		expandedValues.push_back( compactValues[index] );
+	}
+
+	return result;
 }
 
 } // namespace IECore
