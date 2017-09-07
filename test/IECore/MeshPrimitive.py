@@ -98,18 +98,22 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertAlmostEqual( rawValues[0], 0.95 )
 		self.assertEqual( rawValues[-1], 0 )
 
-		# read legacy file and confirm values are unflipped
+		# read legacy file and confirm values are packed into V2f and unflipped
 		sphere = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		self.assertTrue( sphere.arePrimitiveVariablesValid() )
-		self.assertAlmostEqual( sphere["t"].data[0], 0.05 )
-		self.assertEqual( sphere["t"].data[-1], 1 )
+		self.assertEqual( sphere["uv"].data[0][0], 0 )
+		self.assertAlmostEqual( sphere["uv"].data[0][1], 0.05 )
+		self.assertAlmostEqual( sphere["uv"].data[-1][0], 0.975 )
+		self.assertEqual( sphere["uv"].data[-1][1], 1 )
 
-		# write a new file and confirm values remain unflipped
+		# write a new file and confirm values remain consistent
 		Writer.create( sphere, "test/IECore/mesh.cob" ).write()
 		newSphere = Reader.create( "test/IECore/mesh.cob" ).read()
 		self.assertTrue( newSphere.arePrimitiveVariablesValid() )
-		self.assertAlmostEqual( newSphere["t"].data[0], 0.05 )
-		self.assertEqual( newSphere["t"].data[-1], 1 )
+		self.assertEqual( newSphere["uv"].data[0][0], 0 )
+		self.assertAlmostEqual( newSphere["uv"].data[0][1], 0.05 )
+		self.assertAlmostEqual( newSphere["uv"].data[-1][0], 0.975 )
+		self.assertEqual( newSphere["uv"].data[-1][1], 1 )
 		# make sure it matches the original
 		self.assertEqual( newSphere, sphere )
 
@@ -125,19 +129,25 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertAlmostEqual( rawMap1Values[0], 0.95 )
 		self.assertEqual( rawMap1Values[-1], 0 )
 
-		# read legacy file and confirm values are unflipped
+		# read legacy file and confirm values are packed into V2f and unflipped
 		s = SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IndexedIO.OpenMode.Read )
 		ss = s.scene( [ "A", "a" ] )
 		animSphere = ss.readObject( 0 )
-		self.assertAlmostEqual( animSphere["t"].data[0], 0.05 )
-		self.assertEqual( animSphere["t"].data[-1], 1 )
-		self.assertAlmostEqual( animSphere["map1_t"].data[0], 0.05 )
-		self.assertEqual( animSphere["map1_t"].data[-1], 1 )
+		self.assertEqual( animSphere["uv"].data[0][0], 0 )
+		self.assertAlmostEqual( animSphere["uv"].data[0][1], 0.05 )
+		self.assertAlmostEqual( animSphere["uv"].data[-1][0], 0.975 )
+		self.assertEqual( animSphere["uv"].data[-1][1], 1 )
+		self.assertEqual( animSphere["map1"].data[0][0], 0 )
+		self.assertAlmostEqual( animSphere["map1"].data[0][1], 0.05 )
+		self.assertAlmostEqual( animSphere["map1"].data[-1][0], 0.975 )
+		self.assertEqual( animSphere["map1"].data[-1][1], 1 )
 
 		# even for lower level loading from a SceneCache
-		justPrimVars = ss.readObjectPrimitiveVariables( [ "t", "map1_t" ], 0 )
-		self.assertEqual( animSphere["t"], justPrimVars["t"] )
-		self.assertEqual( animSphere["t"], justPrimVars["map1_t"] )
+		# note that the new uvSet names must be specified.
+		justPrimVars = ss.readObjectPrimitiveVariables( [ "uv", "map1" ], 0 )
+		self.assertEqual( animSphere["uv"], justPrimVars["uv"] )
+		self.assertEqual( animSphere["map1"], justPrimVars["map1"] )
+		self.assertEqual( animSphere["uv"], justPrimVars["map1"] )
 
 	def testSetInterpolation( self ) :
 
