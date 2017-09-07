@@ -34,9 +34,13 @@
 
 
 #include <numeric>
+#include "boost/format.hpp"
 
 #include "IECore/PointsAlgo.h"
 #include "IECore/DespatchTypedData.h"
+#include "IECore/TypeTraits.h"
+
+#include "IECore/DataCastOp.h"
 
 #include "IECore/private/PrimitiveAlgoUtils.h"
 
@@ -167,6 +171,58 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const t
 	return outPointsPrimitive;
 }
 
+struct CollectDataFn
+{
+	CollectDataFn( size_t size ) : offset( 0 ), m_size( size )
+	{
+	}
+
+	typedef void ReturnType;
+
+	template<typename T>
+	ReturnType operator()( const T *data )
+	{
+		T *container = NULL;
+		if( !outputData )
+		{
+			container = new T();
+			outputData = container;
+
+			container->writable().resize( m_size );
+		}
+		else
+		{
+			container = runTimeCast<T>( outputData.get() );
+		}
+
+		std::copy( data->readable().begin(), data->readable().end(), container->writable().begin() + offset );
+	}
+
+	DataPtr outputData;
+	size_t offset;
+	size_t m_size;
+};
+
+DataPtr mergePrimVars( const std::vector<PointsPrimitivePtr> &pointsPrimitives, const std::string &primVarName, size_t totalCount )
+{
+	CollectDataFn fn( totalCount );
+
+	for( size_t i = 0; i < pointsPrimitives.size(); ++i )
+	{
+		PrimitiveVariableMap::const_iterator it = pointsPrimitives[i]->variables.find( primVarName );
+
+		if( it != pointsPrimitives[i]->variables.end() )
+		{
+			PrimitiveVariable primVar = it->second;
+			despatchTypedData<CollectDataFn, TypeTraits::IsVectorTypedData>( const_cast< Data * >( primVar.data.get() ), fn );
+		}
+
+		fn.offset += pointsPrimitives[i]->getNumPoints();
+	}
+
+	return fn.outputData;
+}
+
 } // anonymous namespace
 
 namespace IECore
@@ -295,6 +351,106 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 
 	throw InvalidArgumentException( "PointsAlgo::deletePoints requires an Vertex [Int|Bool|Float]VectorData primitiveVariable " );
 
+}
+
+PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives )
+{
+	size_t totalPointCount = 0;
+	typedef std::map<std::string, TypeId> FoundPrimvars;
+	FoundPrimvars foundPrimvars;
+
+	PrimitiveVariableMap constantPrimVars;
+
+	std::vector<PointsPrimitivePtr> validatedPointsPrimitives( pointsPrimitives.size() );
+
+	// find out which primvars can be merged
+	for( size_t i = 0; i < pointsPrimitives.size(); ++i )
+	{
+		PointsPrimitivePtr pointsPrimitive = validatedPointsPrimitives[i] = pointsPrimitives[i]->copy();
+
+		totalPointCount += pointsPrimitive->getNumPoints();
+		PrimitiveVariableMap &variables = pointsPrimitive->variables;
+		for( PrimitiveVariableMap::iterator it = variables.begin(); it != variables.end(); ++it )
+		{
+			DataPtr data = it->second.data;
+			TypeId typeId = data->typeId();
+			PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
+			const std::string &name = it->first;
+
+			bool bExistingConstant = constantPrimVars.find( name ) != constantPrimVars.end();
+			FoundPrimvars::const_iterator fIt = foundPrimvars.find( name );
+			bool bExistingVertex = fIt != foundPrimvars.end();
+
+			if( interpolation == PrimitiveVariable::Constant )
+			{
+				if( bExistingVertex )
+				{
+					std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints mismatching primvar %s" ) % name );
+					throw InvalidArgumentException( msg );
+				}
+
+				if( !bExistingConstant )
+				{
+					constantPrimVars[name] = it->second;
+				}
+				continue;
+			}
+
+			if( interpolation == PrimitiveVariable::Vertex )
+			{
+
+				PrimitiveVariableMap::const_iterator constantPrimVarIt = constantPrimVars.find( name );
+				if( constantPrimVarIt != constantPrimVars.end() )
+				{
+					std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints mismatching primvar %s" ) % name );
+					throw InvalidArgumentException( msg );
+				}
+
+				if( !bExistingVertex )
+				{
+					foundPrimvars[name] = typeId;
+				}
+				else
+				{
+					if( fIt->second != typeId )
+					{
+						DataCastOpPtr castOp = new DataCastOp();
+
+						castOp->objectParameter()->setValue( data );
+						castOp->targetTypeParameter()->setNumericValue( fIt->second );
+
+						try
+						{
+							it->second.data = runTimeCast<Data>( castOp->operate() );
+						}
+						catch( const IECore::Exception &e )
+						{
+							std::string msg = boost::str( boost::format( "PointsAlgo::mergePoints unable to cast primvar %s (%s) " ) % name % e.what() );
+							throw InvalidArgumentException( msg );
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// allocate the new points primitive and copy the primvars
+	PointsPrimitivePtr newPoints = new PointsPrimitive( totalPointCount );
+
+	// copy constant primvars
+	for( PrimitiveVariableMap::const_iterator it = constantPrimVars.begin(); it != constantPrimVars.end(); ++it )
+	{
+		newPoints->variables[it->first] = it->second;
+	}
+
+	// merge vertex primvars
+	for( FoundPrimvars::const_iterator it = foundPrimvars.begin(); it != foundPrimvars.end(); ++it )
+	{
+		DataPtr mergedData = mergePrimVars( validatedPointsPrimitives, it->first, totalPointCount );
+		newPoints->variables[it->first] = PrimitiveVariable( PrimitiveVariable::Vertex, mergedData );
+	}
+
+	return newPoints;
 }
 
 

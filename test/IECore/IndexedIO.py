@@ -39,6 +39,8 @@ import unittest
 import math
 import random
 
+import IECore
+## \todo: remove this and cleanup the file
 from IECore import *
 
 class TestIndexedIO(unittest.TestCase):
@@ -102,6 +104,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 		self.assertEqual( txt, Object.load( f2, "obj1" ) )
 		self.assertEqual( txt, Object.load( f2, "obj2" ) )
 
+	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
 		
@@ -328,6 +331,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual( len(e), 0 )
 		f.remove("sub2")
 
+	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
 	def testRmStress(self) :
 		"""Test FileIndexedIO rm (stress test)"""
 		

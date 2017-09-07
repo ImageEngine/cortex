@@ -101,6 +101,10 @@ o.Add(
 )
 
 o.Add(
+	BoolVariable( "DEBUGINFO", "Make debug info for release builds", False )
+)
+
+o.Add(
 	"LINKFLAGS",
 	"The extra flags to pass to the linker.",
 	[]
@@ -1056,7 +1060,10 @@ if env["WARNINGS_AS_ERRORS"] :
 if env["DEBUG"] :
 	env.Append( CXXFLAGS = [ "-g", "-O0" ] )
 else :
-	env.Append( CXXFLAGS = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O2" ] )
+	cxxFlags = [ "-DNDEBUG", "-DBOOST_DISABLE_ASSERTS", "-O2" ]
+	if env["DEBUGINFO"] :
+		cxxFlags.append( "-g" )
+	env.Append( CXXFLAGS = cxxFlags )
 
 # autoconf-like checks for stuff.
 # this part of scons doesn't seem so well thought out.

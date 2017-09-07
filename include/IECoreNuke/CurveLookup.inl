@@ -100,8 +100,7 @@ void CurveLookup<T>::knob( DD::Image::Knob_Callback f )
 	{
 		for( unsigned i=0; i<m_namesAndDefaultsStrings->size(); i+=2 )
 		{
-			DD::Image::CurveDescription d;
-			memset( &d, 0, sizeof( d ) );
+			DD::Image::CurveDescription d = DD::Image::CurveDescription();
 			d.name = (*m_namesAndDefaultsStrings)[i].c_str();
 			d.defaultValue = (*m_namesAndDefaultsStrings)[i+1].c_str();
 			d.flags = 0;
