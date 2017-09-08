@@ -128,6 +128,14 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		rawMap1Values = ff.read( "value" )
 		self.assertAlmostEqual( rawMap1Values[0], 0.95 )
 		self.assertEqual( rawMap1Values[-1], 0 )
+		self.assertEqual( len(rawMap1Values), 1560 )
+		# it also has indices
+		ff = f.directory( [ "root", "children", "A", "children", "a", "object", "0", "data", "Primitive", "data", "variables", "map1Indices", "data", "data" ] )
+		rawMap1Indices = ff.read( "value" )
+		self.assertEqual( rawMap1Indices[0], 0 )
+		self.assertEqual( rawMap1Indices[-1], 438 )
+		self.assertEqual( max(rawMap1Indices), 438 )
+		self.assertEqual( len(rawMap1Indices), 1560 )
 
 		# read legacy file and confirm values are packed into V2f and unflipped
 		s = SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IndexedIO.OpenMode.Read )
@@ -137,10 +145,19 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertAlmostEqual( animSphere["uv"].data[0][1], 0.05 )
 		self.assertAlmostEqual( animSphere["uv"].data[-1][0], 0.975 )
 		self.assertEqual( animSphere["uv"].data[-1][1], 1 )
+		self.assertEqual( animSphere["uv"].indices[0], 0 )
+		self.assertEqual( animSphere["uv"].indices[-1], 438 )
+		self.assertEqual( len(animSphere["uv"].data), 439 )
+		self.assertEqual( len(animSphere["uv"].indices), 1560 )
+		# and the duplicate UV Set matches
 		self.assertEqual( animSphere["map1"].data[0][0], 0 )
 		self.assertAlmostEqual( animSphere["map1"].data[0][1], 0.05 )
 		self.assertAlmostEqual( animSphere["map1"].data[-1][0], 0.975 )
 		self.assertEqual( animSphere["map1"].data[-1][1], 1 )
+		self.assertEqual( animSphere["map1"].indices[0], 0 )
+		self.assertEqual( animSphere["map1"].indices[-1], 438 )
+		self.assertEqual( len(animSphere["map1"].data), 439 )
+		self.assertEqual( len(animSphere["map1"].indices), 1560 )
 
 		# even for lower level loading from a SceneCache
 		# note that the new uvSet names must be specified.
@@ -341,6 +358,16 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		m2 = MeshPrimitive.createSphere( radius = 1 )
 		self.assertTrue( m.numFaces() < m2.numFaces() )
 	
+	def testLegacyIndices( self ) :
+
+		# load a legacy file that contains myString and myStringIndices
+		m = Reader.create( "test/IECore/data/cobFiles/cube.cob" ).read()
+		self.assertEqual( m.keys(), [ "P", "myString" ] )
+		self.assertTrue( m.isPrimitiveVariableValid( m["myString"] ) )
+		self.assertEqual( m["myString"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( m["myString"].data, StringVectorData( [ "indexed", "my", "string" ] ) )
+		self.assertEqual( m["myString"].indices, IntVectorData( [ 1, 0, 2, 1, 0, 2, 1, 0 ] ) )
+
 	def tearDown( self ) :
 
 		for f in (

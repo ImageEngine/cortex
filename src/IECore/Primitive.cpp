@@ -126,20 +126,35 @@ void flipV( FloatVectorData *v )
 	}
 }
 
-V2fVectorDataPtr combineUVs( const FloatVectorData *u, const FloatVectorData *v )
+V2fVectorDataPtr combineUVs( const FloatVectorData *u, const FloatVectorData *v, const IntVectorData *indices )
 {
 	const std::vector<float> &uValues = u->readable();
 	const std::vector<float> &vValues = v->readable();
-
-	size_t length = uValues.size();
-
 	V2fVectorDataPtr uvs = new V2fVectorData();
-	std::vector<Imath::V2f> &uvValues = uvs->writable();
-	uvValues.reserve( length );
 
-	for( size_t i = 0; i < length; ++i )
+	if( indices )
 	{
-		uvValues.emplace_back( uValues[i], vValues[i] );
+		const std::vector<int> &indexValues = indices->readable();
+		int numUVs = 1 + *max_element( indexValues.begin(), indexValues.end() );
+		std::vector<Imath::V2f> &uvValues = uvs->writable();
+		uvValues.resize( numUVs );
+
+		for( size_t i = 0, e = indexValues.size(); i < e; ++i )
+		{
+			uvValues[indexValues[i]] = Imath::V2f( uValues[i], vValues[i] );
+		}
+	}
+	else
+	{
+		size_t numUVs = uValues.size();
+
+		std::vector<Imath::V2f> &uvValues = uvs->writable();
+		uvValues.reserve( numUVs );
+
+		for( size_t i = 0; i < numUVs; ++i )
+		{
+			uvValues.emplace_back( uValues[i], vValues[i] );
+		}
 	}
 
 	return uvs;
@@ -164,11 +179,13 @@ void remapToLegacyVariableNames( const IndexedIO::EntryIDList &requested, const 
 		{
 			result.push_back( "s" );
 			result.push_back( "t" );
+			result.push_back( "stIndices" );
 		}
 		else if( std::find( extraUVs.begin(), extraUVs.end(), name ) != extraUVs.end() )
 		{
 			result.push_back( name.string() + "_s" );
 			result.push_back( name.string() + "_t" );
+			result.push_back( name.string() + "Indices" );
 		}
 		else
 		{
@@ -194,24 +211,40 @@ void convertLegacyVariables( PrimitiveVariableMap &variables )
 		//      represent the components of an extra UV set
 		//      named "<var>".
 
+		// We also changed from storing separate indices
+		// as side-car PrimitiveVariables to storing them
+		// directly on the primary PrimitiveVariable.
+
+		// We have 3 legacy conventions for storing indices:
+		//  (a) For the primary UV set, as in (a) above, the
+		//      indices were named "stIndices".
+		//  (b) For the extra UV sets, as in (b) above, the
+		//      indices were named "<var>Indices".
+		//  (c) For non-UV PrimitiveVariables named "<var>"
+		//      the indices were also named "<var>Indices".
+
 		// the name of the uvSet if there is one
 		std::string uvSet;
 		// the u values if we find any
 		PrimitiveVariableMap::const_iterator uIt = variables.end();
 		// the v values if we find any
 		PrimitiveVariableMap::const_iterator vIt = variables.end();
+		// the indices if we find any
+		PrimitiveVariableMap::const_iterator indicesIt = variables.end();
 
 		if( it->first == "s" )
 		{
 			uvSet = "uv";
 			uIt = it;
 			vIt = variables.find( "t" );
+			indicesIt = variables.find( "stIndices" );
 		}
 		else if( it->first == "t" )
 		{
 			uvSet = "uv";
 			uIt = variables.find( "s" );
 			vIt = it;
+			indicesIt = variables.find( "stIndices" );
 		}
 		else if( boost::ends_with( it->first, "_s" ) )
 		{
@@ -219,6 +252,7 @@ void convertLegacyVariables( PrimitiveVariableMap &variables )
 
 			uIt = it;
 			vIt = variables.find( uvSet + "_t" );
+			indicesIt = variables.find( uvSet + "Indices" );
 		}
 		else if( boost::ends_with( it->first, "_t" ) )
 		{
@@ -226,10 +260,11 @@ void convertLegacyVariables( PrimitiveVariableMap &variables )
 
 			uIt = variables.find( uvSet + "_s" );
 			vIt = it;
+			indicesIt = variables.find( uvSet + "Indices" );
 		}
 		else
 		{
-			continue;
+			indicesIt = variables.find( it->first + "Indices" );
 		}
 
 		if(
@@ -258,21 +293,41 @@ void convertLegacyVariables( PrimitiveVariableMap &variables )
 			)
 			{
 				// We changed UV set convention to be V2fVectorData in version 2,
-				// so we must combine them for older files.
+				// so we must combine them for older files and associate the
+				// indicies, compacting the UV data if possible.
+
+				IntVectorData *indices = nullptr;
+				PrimitiveVariable::Interpolation interpolation = uIt->second.interpolation;
+				if( indicesIt != variables.end() )
+				{
+					indices = runTimeCast<IntVectorData>( indicesIt->second.data.get() );
+					interpolation = indicesIt->second.interpolation;
+					variablesToErase.push_back( indicesIt );
+				}
+
+				V2fVectorDataPtr uvData = combineUVs( u, v, indices );
+
 				bool inserted;
 				PrimitiveVariableMap::iterator uvIt;
-				PrimitiveVariable uvVariable = PrimitiveVariable( uIt->second.interpolation, combineUVs( u, v ) );
-				std::tie( uvIt, inserted ) = variables.emplace( uvSet, uvVariable );
+				std::tie( uvIt, inserted ) = variables.emplace( uvSet, PrimitiveVariable( interpolation, uvData, indices ) );
 				if( !inserted )
 				{
 					// the uvSet name already existed, but we just stomp over it.
 					// in practice, there shouldn't be any files like this.
-					uvIt->second = uvVariable;
+					uvIt->second = PrimitiveVariable( interpolation, uvData, indices );
 				}
 
 				variablesToErase.push_back( uIt );
 				variablesToErase.push_back( vIt );
 			}
+		}
+		else if( indicesIt != variables.end() )
+		{
+			// We presume that non-UV indices are already as compact as possible
+			IntVectorData *indices = runTimeCast<IntVectorData>( indicesIt->second.data.get() );
+			it->second.indices = indices;
+			it->second.interpolation = indicesIt->second.interpolation;
+			variablesToErase.push_back( indicesIt );
 		}
 	}
 
