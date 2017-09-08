@@ -367,13 +367,11 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	std::vector<int> &vpf = verticesPerFace->writable();
 	std::vector<int> &vIds = vertexIds->writable();
 	
-	FloatVectorDataPtr sData = new FloatVectorData;
-	FloatVectorDataPtr tData = new FloatVectorData;
-	std::vector<float> &s = sData->writable();
-	std::vector<float> &t = tData->writable();
-	
-	float sStep = 1.0f / (float)divisions.x;
-	float tStep = 1.0f / (float)divisions.y;
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	std::vector<Imath::V2f> &uvs = uvData->writable();
+
+	float uStep = 1.0f / (float)divisions.x;
+	float vStep = 1.0f / (float)divisions.y;
 	
 	// add faces
 	int v0, v1, v2, v3;
@@ -391,22 +389,16 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 			vIds.push_back( v1 );
 			vIds.push_back( v2 );
 			vIds.push_back( v3 );
-			
-			s.push_back( j * sStep );
-			s.push_back( (j+1) * sStep );
-			s.push_back( (j+1) * sStep );
-			s.push_back( j * sStep );
-			
-			t.push_back( i * tStep );
-			t.push_back( i * tStep );
-			t.push_back( (i+1) * tStep );
-			t.push_back( (i+1) * tStep );
+
+			uvs.emplace_back( j * uStep, i * vStep );
+			uvs.emplace_back( (j+1) * uStep, i * vStep );
+			uvs.emplace_back( (j+1) * uStep, (i+1) * vStep );
+			uvs.emplace_back( j * uStep, (i+1) * vStep );
 		}
 	}
 
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
-	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData );
 
 	return result;
 }
@@ -422,11 +414,9 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	V3fVectorDataPtr nData = new V3fVectorData;
 	std::vector<V3f> &pVector = pData->writable();
 	std::vector<V3f> &nVector = nData->writable();
-	
-	FloatVectorDataPtr sData = new FloatVectorData;
-	FloatVectorDataPtr tData = new FloatVectorData;
-	std::vector<float> &sVector = sData->writable();
-	std::vector<float> &tVector = tData->writable();
+
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	std::vector<Imath::V2f> &uvs = uvData->writable();
 
 	/// \todo: Rewrite this such that the poles are aligned to Y rather than Z.
 	/// The centroid should remain at origin, uv(0,0) should be at the south
@@ -454,8 +444,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 			float u = (float)j/(float)(nT-1);
 			float theta = thetaMaxRad * u;
 			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
-			sVector.push_back( u );
-			tVector.push_back( v );
+			uvs.emplace_back( u, v );
 			pVector.push_back( p );
 			nVector.push_back( p );
 			if( i < nO - 1 && j < nT - 1 )
@@ -478,8 +467,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
 	result->variables["N"] = PrimitiveVariable( PrimitiveVariable::Vertex, nData );
-	result->variables["s"] = PrimitiveVariable( PrimitiveVariable::Vertex, sData );
-	result->variables["t"] = PrimitiveVariable( PrimitiveVariable::Vertex, tData );
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::Vertex, uvData );
 
 	return result;
 }
