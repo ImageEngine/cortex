@@ -195,8 +195,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		void calculateAverageNormals() const;
 		
 		void triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const;
-		PrimitiveVariable m_u;
-		PrimitiveVariable m_v;
+		PrimitiveVariable m_uv;
 
 		mutable bool m_haveMassProperties;
 		mutable float m_volume;

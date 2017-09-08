@@ -106,26 +106,20 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		P.append( V3f(  0, 0, -1 ) + translation )
 		P.append( V3f( -1, 0, -1 ) + translation )
 
-		sOffset = 7
-		s = FloatVectorData()
-		t = FloatVectorData()
-		tOffset = 12
+		uOffset = 7
+		uv = V2fVectorData()
+		vOffset = 12
 
 		for p in P :
+			uv.append( V2f( p.x + uOffset, p.z + vOffset ) )
 
-			s.append( p.x + sOffset )
-			t.append( p.z + tOffset )
-
-		assert( len( P ) == len ( s ) )
-		assert( len( P ) == len ( t ) )
+		self.assertEqual( len( P ), len( uv ) )
 
 		m = MeshPrimitive( verticesPerFace, vertexIds )
 		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
 
 		# We use Varying interpolation here because the tests which use pSphereShape1.cob exercise FaceVarying
-		m["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, s )
-		m["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, t )
-
+		m["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, uv )
 
 		mpe = PrimitiveEvaluator.create( m )
 		r = mpe.createResult()
@@ -148,7 +142,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		for p in P:
 			foundClosest = mpe.closestPoint( p , r )
 			self.assert_( foundClosest )
-			testUV = V2f( p.x + sOffset, p.z + tOffset )
+			testUV = V2f( p.x + uOffset, p.z + vOffset )
 			self.assertAlmostEqual( ( testUV - r.uv() ).length(), 0 )
 
 			# Now when we looking up that UV in reverse we should get back the point again!
@@ -159,8 +153,8 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 		# test the uvBound method
 		uvb = Box2f()
-		for i in range( 0, len( s ) ) :
-			uvb.extendBy( V2f( s[i], t[i] ) )
+		for i in range( 0, len( uv ) ) :
+			uvb.extendBy( uv[i] )
 			
 		self.assertEqual( mpe.uvBound(), uvb )
 
