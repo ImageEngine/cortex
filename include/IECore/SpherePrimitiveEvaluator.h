@@ -72,6 +72,7 @@ class IECORE_API SpherePrimitiveEvaluator : public PrimitiveEvaluator
 				Imath::V3f vTangent() const;
 
 				Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const;
+				Imath::V2f          vec2PrimVar  ( const PrimitiveVariable &pv ) const;
 				float               floatPrimVar ( const PrimitiveVariable &pv ) const;
 				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
 				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;

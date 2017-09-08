@@ -166,6 +166,11 @@ Imath::V3f CurvesPrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVaria
 	return primVar<V3f>( pv, m_coefficients );
 }
 
+V2f CurvesPrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
+{
+	return primVar<V2f>( pv, m_coefficients );
+}
+
 float CurvesPrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
 	return primVar<float>( pv, m_coefficients );

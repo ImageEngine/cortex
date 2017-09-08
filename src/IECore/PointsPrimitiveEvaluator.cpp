@@ -117,6 +117,11 @@ Imath::V3f PointsPrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVaria
 	return primVar<V3f>( pv );
 }
 
+V2f PointsPrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
+{
+	return primVar<V2f>( pv );
+}
+
 float PointsPrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
 	return primVar<float>( pv );

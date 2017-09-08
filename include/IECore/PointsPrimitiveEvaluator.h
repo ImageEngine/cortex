@@ -76,6 +76,7 @@ class IECORE_API PointsPrimitiveEvaluator : public PrimitiveEvaluator
 				size_t pointIndex() const;
 
 				virtual Imath::V3f vectorPrimVar( const PrimitiveVariable &pv ) const;
+				virtual Imath::V2f vec2PrimVar( const PrimitiveVariable &pv ) const;
 				virtual float floatPrimVar( const PrimitiveVariable &pv ) const;
 				virtual int intPrimVar( const PrimitiveVariable &pv ) const;
 				virtual const std::string &stringPrimVar( const PrimitiveVariable &pv ) const;

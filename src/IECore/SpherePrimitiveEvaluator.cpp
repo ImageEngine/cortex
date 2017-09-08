@@ -109,6 +109,11 @@ V3f SpherePrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVariable &pv
 	return getPrimVar< V3f >( pv );
 }
 
+V2f SpherePrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< V2f >( pv );
+}
+
 float SpherePrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
 	return getPrimVar< float >( pv );

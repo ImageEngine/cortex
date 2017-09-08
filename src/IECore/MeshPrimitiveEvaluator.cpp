@@ -86,6 +86,11 @@ V3f MeshPrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVariable &pv )
 	return getPrimVar< V3f >( pv );
 }
 
+V2f MeshPrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< V2f >( pv );
+}
+
 float MeshPrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
 	return getPrimVar< float >( pv );
