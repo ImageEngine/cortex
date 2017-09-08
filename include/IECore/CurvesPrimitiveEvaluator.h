@@ -64,23 +64,23 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 				IE_CORE_DECLAREMEMBERPTR( Result );
 
-				virtual Imath::V3f point() const;
+				Imath::V3f point() const override;
 				/// Not yet implemented.
-				virtual Imath::V3f normal() const;
+				Imath::V3f normal() const override;
 				/// U parameter will always be 0.
-				virtual Imath::V2f uv() const;
+				Imath::V2f uv() const override;
 				/// Not yet implemented.
-				virtual Imath::V3f uTangent() const;
-				virtual Imath::V3f vTangent() const;
+				Imath::V3f uTangent() const override;
+				Imath::V3f vTangent() const override;
 				unsigned curveIndex() const;
 
-				virtual Imath::V3f vectorPrimVar( const PrimitiveVariable &pv ) const;
-				virtual Imath::V2f vec2PrimVar( const PrimitiveVariable &pv ) const;
-				virtual float floatPrimVar( const PrimitiveVariable &pv ) const;
-				virtual int intPrimVar( const PrimitiveVariable &pv ) const;
-				virtual const std::string &stringPrimVar( const PrimitiveVariable &pv ) const;
-				virtual Imath::Color3f colorPrimVar( const PrimitiveVariable &pv ) const;
-				virtual half halfPrimVar( const PrimitiveVariable &pv ) const;
+				Imath::V3f vectorPrimVar( const PrimitiveVariable &pv ) const override;
+				Imath::V2f vec2PrimVar( const PrimitiveVariable &pv ) const override;
+				float floatPrimVar( const PrimitiveVariable &pv ) const override;
+				int intPrimVar( const PrimitiveVariable &pv ) const override;
+				const std::string &stringPrimVar( const PrimitiveVariable &pv ) const override;
+				Imath::Color3f colorPrimVar( const PrimitiveVariable &pv ) const override;
+				half halfPrimVar( const PrimitiveVariable &pv ) const override;
 				
 			private :
 			
