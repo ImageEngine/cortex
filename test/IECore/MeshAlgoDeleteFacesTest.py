@@ -35,43 +35,42 @@
 import unittest
 
 import IECore
-from IECore import *
 
 class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 
 	def makeQuadTriangleMesh( self ):
 
-		verticesPerFace = IntVectorData( [ 3, 3 ] )
-		vertexIds = IntVectorData( [ 0, 1, 2, 0, 2, 3 ] )
-		p = V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 ) ] )
-		uv = V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] )
+		verticesPerFace = IECore.IntVectorData( [ 3, 3 ] )
+		vertexIds = IECore.IntVectorData( [ 0, 1, 2, 0, 2, 3 ] )
+		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 0, 1, 0 ) ] )
+		uv = IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] )
 
-		mesh = MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
-		mesh["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, uv )
+		mesh = IECore.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
+		mesh["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, uv )
 
 		return mesh
 
 	def testHandlesInvalidPrimvarType( self ) :
-		deleteAttributeData = V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 ) ]  )
+		deleteAttributeData = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 0, 1, 0 ) ]  )
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
 
-		self.assertRaises( RuntimeError, lambda : MeshAlgo.deleteFaces( mesh, mesh["delete"] ) )
+		self.assertRaises( RuntimeError, lambda : IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] ) )
 
 	def testHandlesInvalidPrimvarInterpolation( self ) :
-		deleteAttributeData = IntVectorData( [0, 0, 0, 0, 0, 0] )
+		deleteAttributeData = IECore.IntVectorData( [0, 0, 0, 0, 0, 0] )
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, deleteAttributeData )
 
-		self.assertRaises( RuntimeError, lambda : MeshAlgo.deleteFaces( mesh, mesh["delete"] ) )
+		self.assertRaises( RuntimeError, lambda : IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] ) )
 
 	def testCanRemoveAllFaces( self ) :
-		deleteAttributeData = IntVectorData( [1, 1] )
+		deleteAttributeData = IECore.IntVectorData( [1, 1] )
 
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
 
-		facesDeletedMesh = MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+		facesDeletedMesh = IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
 
 		self.assertEqual( facesDeletedMesh.numFaces(), 0 )
 		self.assertEqual( len( facesDeletedMesh.verticesPerFace ), 0 )
@@ -82,56 +81,56 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( len( facesDeletedMesh["delete"].data ), 0 )
 
 	def testCanRemoveFirstFace( self ) :
-		deleteAttributeData = IntVectorData( [1, 0] )
+		deleteAttributeData = IECore.IntVectorData( [1, 0] )
 
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
 
-		facesDeletedMesh = MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+		facesDeletedMesh = IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
 
 		self.assertEqual( facesDeletedMesh.numFaces(), 1 )
-		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
-		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
+		self.assertEqual( facesDeletedMesh.verticesPerFace, IECore.IntVectorData( [3] ) )
+		self.assertEqual( facesDeletedMesh.vertexIds, IECore.IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
-		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
-		self.assertEqual( facesDeletedMesh["delete"].data, IntVectorData( [0] ) )
+		self.assertEqual( facesDeletedMesh["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 0, 1, 0 ) ] ) )
+		self.assertEqual( facesDeletedMesh["delete"].data, IECore.IntVectorData( [0] ) )
 
 
 	def testCanRemoveFirstFaceBool( self ) :
-		deleteAttributeData = BoolVectorData( [True, False] )
+		deleteAttributeData = IECore.BoolVectorData( [True, False] )
 
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
 
-		facesDeletedMesh = MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+		facesDeletedMesh = IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
 
 		self.assertEqual( facesDeletedMesh.numFaces(), 1 )
-		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
-		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
+		self.assertEqual( facesDeletedMesh.verticesPerFace, IECore.IntVectorData( [ 3 ] ) )
+		self.assertEqual( facesDeletedMesh.vertexIds, IECore.IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
-		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
-		self.assertEqual( facesDeletedMesh["delete"].data, BoolVectorData( [False] ) )
+		self.assertEqual( facesDeletedMesh["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 0, 1, 0 ) ] ) )
+		self.assertEqual( facesDeletedMesh["delete"].data, IECore.BoolVectorData( [False] ) )
 
 	def testCanRemoveFirstFaceFloat( self ) :
-		deleteAttributeData = FloatVectorData( [1.0, 0.0] )
+		deleteAttributeData = IECore.FloatVectorData( [1.0, 0.0] )
 
 		mesh = self.makeQuadTriangleMesh()
-		mesh["delete"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
+		mesh["delete"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, deleteAttributeData )
 
-		facesDeletedMesh = MeshAlgo.deleteFaces( mesh, mesh["delete"] )
+		facesDeletedMesh = IECore.MeshAlgo.deleteFaces( mesh, mesh["delete"] )
 
 		self.assertEqual( facesDeletedMesh.numFaces(), 1 )
-		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
-		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
+		self.assertEqual( facesDeletedMesh.verticesPerFace, IECore.IntVectorData( [3] ) )
+		self.assertEqual( facesDeletedMesh.vertexIds, IECore.IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
-		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
-		self.assertEqual( facesDeletedMesh["delete"].data, FloatVectorData( [0.0] ) )
+		self.assertEqual( facesDeletedMesh["P"].data, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 0, 1, 0 ) ] ) )
+		self.assertEqual( facesDeletedMesh["delete"].data, IECore.FloatVectorData( [0.0] ) )
 
 if __name__ == "__main__":
 	unittest.main()
