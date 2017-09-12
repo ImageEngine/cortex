@@ -217,7 +217,6 @@
 #include "IECorePython/LightBinding.h"
 #include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/CamelCaseBinding.h"
-#include "IECorePython/PointDistributionOpBinding.h"
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
@@ -447,7 +446,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindCamelCase();
-	bindPointDistributionOp();
 	bindLRUCache();
 	bindDataInterleaveOp();
 	bindDataConvertOp();

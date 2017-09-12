@@ -93,6 +93,8 @@ void bindMeshAlgo()
 	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 	def( "deleteFaces", &MeshAlgo::deleteFaces );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );
+	def( "distributePoints", &MeshAlgo::distributePoints, ( arg_( "mesh" ), arg_( "density" ) = 100.0, arg_( "offset" ) = Imath::V2f( 0 ), arg_( "densityMask" ) = "density", arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
+
 }
 
 } // namespace IECorePython

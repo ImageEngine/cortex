@@ -194,7 +194,6 @@ from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from CameraControllerTest import CameraControllerTest
-from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest
