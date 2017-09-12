@@ -87,8 +87,10 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.verifyMerge( p1, p2, merged )
 		
 		TriangulateOp()( input=p2, copyInput=False )
-		p2['stIndices'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		MeshTangentsOp()( input=p2, copyInput=False )
+		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
+		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
+		p2["uTangent"] = uTangent
+		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
@@ -96,8 +98,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 		
 		plane = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
-		del plane["s"]
-		del plane["t"]
+		del plane["uv"]
 		MeshNormalsOp()( input=plane, copyInput=False )
 		box = MeshPrimitive.createBox( Box3f( V3f( 0 ), V3f( 1 ) ) )
 		MeshNormalsOp()( input=box, copyInput=False )
@@ -121,20 +122,22 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.verifyMerge( p1, p2, merged )
 		
 		TriangulateOp()( input=p2, copyInput=False )
-		p2['stIndices'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		MeshTangentsOp()( input=p2, copyInput=False )
+		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
+		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
+		p2["uTangent"] = uTangent
+		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
 		self.failUnless( "uTangent" in merged )
 		self.failUnless( "vTangent" in merged )
-		self.failUnless( "stIndices" in merged )
+		self.failUnless( "myInt" in merged )
 		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
 		self.failUnless( "uTangent" not in merged )
 		self.failUnless( "vTangent" not in merged )
-		self.failUnless( "stIndices" not in merged )
+		self.failUnless( "myInt" not in merged )
 		del p2["uTangent"]
 		del p2["vTangent"]
-		del p2["stIndices"]
+		del p2["myInt"]
 		self.verifyMerge( p1, p2, merged )
 	
 	def testReferencedData( self ) :
