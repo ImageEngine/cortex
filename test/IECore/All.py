@@ -157,7 +157,6 @@ from TypedDataTest import *
 from DataTraitsTest import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
-from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest

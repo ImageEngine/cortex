@@ -189,7 +189,6 @@
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
-#include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
@@ -420,7 +419,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindNParticleReader();
-	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
 	bindPointDistribution();

@@ -35,6 +35,7 @@
 import unittest
 
 from MeshAlgoDeleteFacesTest import MeshAlgoDeleteFacesTest
+from MeshAlgoFaceAreaTest import MeshAlgoFaceAreaTest
 from MeshAlgoResampleTest import MeshAlgoResampleTest
 from MeshAlgoTangentsTest import MeshAlgoTangentsTest
 from MeshAlgoWindingTest import MeshAlgoWindingTest

@@ -47,11 +47,13 @@ namespace MeshAlgo
 {
 
 /// Calculate the surface tangent vectors of a mesh primitive.
-std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh,
-	const std::string &uvSet = "uv",
-	bool orthoTangents = true,
-	const std::string &position = "P"
-);
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh, const std::string &uvSet = "uv", bool orthoTangents = true, const std::string &position = "P" );
+
+/// Calculate the face area of a mesh primitive.
+PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::string &position = "P" );
+
+/// Calculate the face texture area of a mesh primitive based on the specified UV set.
+PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P" );
 
 void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
