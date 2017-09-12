@@ -384,7 +384,9 @@ void FromHoudiniGeometryConverter::transferAttribData(
 	}
 	
 	const GA_Attribute *attr = attrRef.getAttribute();
-	
+
+	IntVectorDataPtr indices = nullptr;
+
 	switch ( attrRef.getStorageClass() )
 	{
 		case GA_STORECLASS_FLOAT :
@@ -525,22 +527,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
  		}
 		case GA_STORECLASS_STRING :
  		{
-			/// \todo: replace this with IECore::IndexedData once it exists...
-			IntVectorDataPtr indexDataPtr = 0;
-			dataPtr = extractStringVectorData( attr, range, indexDataPtr );
-			if ( indexDataPtr )
-			{
-				std::string name( attr->getName() );
-				if ( remapInfo )
-				{
-					name = remapInfo->name;
-					interpolation = remapInfo->interpolation;
-				}
-				
-				name = name + "Indices";
-				result->variables[name] = PrimitiveVariable( interpolation, indexDataPtr );
-				interpolation = PrimitiveVariable::Constant;
-			}
+			dataPtr = extractStringVectorData( attr, range, indices );
 			break;
 		}
 		default :
@@ -567,7 +554,7 @@ void FromHoudiniGeometryConverter::transferAttribData(
 		}
 		
 		// add the primitive variable to our result
-		result->variables[ varName ] = PrimitiveVariable( varInterpolation, dataPtr );
+		result->variables[ varName ] = PrimitiveVariable( varInterpolation, dataPtr, indices );
 	}
 }
 

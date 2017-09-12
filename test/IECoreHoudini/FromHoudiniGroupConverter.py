@@ -211,7 +211,6 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
-			self.failUnless( "nameIndices" not in child )
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			blindData = IECore.CompoundData() if names[i] == "" else IECore.CompoundData( { "name" : names[i] } )
 			self.assertEqual( child.blindData(), blindData )
@@ -252,8 +251,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				self.failUnless( child.arePrimitiveVariablesValid() )
 				self.failUnless( "name" not in child )
-				self.failUnless( "nameIndices" not in child )
-			
+
 			elif child.isInstanceOf( IECore.TypeId.Group ) :
 				self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : "curveBoxGroup" } ) )
 				self.failUnless( child.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
@@ -293,7 +291,6 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
-			self.failUnless( "nameIndices" not in child )
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			blindData = IECore.CompoundData() if names[i] == "" else IECore.CompoundData( { "name" : names[i] } )
 			self.assertEqual( child.blindData(), blindData )
@@ -529,7 +526,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		uvunwrap = merge.createOutputNode( "uvunwrap" )
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
-		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap']
+		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap']
 		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
 		
@@ -579,9 +576,9 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		for child in result.children() :
 			if hou.applicationVersion()[0] >= 15 :
-				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'width'] )
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'width'] )
 			else :
-				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
 
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -593,9 +590,9 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		for child in result.children() :
 			if hou.applicationVersion()[0] >= 15 :
-				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v'] )
+				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v'] )
 			else :
-				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v', 'varmap'] )
+				self.assertEqual( child.keys(), ['Cd', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pscale', 'pstate', 'rest', 'source', 'uv', 'v', 'varmap'] )
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
@@ -607,7 +604,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge = self.buildScene()
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		result = converter.convert()
-		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'generatorIndices', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap']
+		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap']
 		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
 		

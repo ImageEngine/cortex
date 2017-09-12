@@ -211,36 +211,6 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	
 	UT_String filter( attributeFilterParameter()->getTypedValue() );
 	
-	// match all the string variables to each associated indices variable
-	/// \todo: replace all this logic with IECore::IndexedData once it exists...
-	PrimitiveVariableMap stringsToIndices;
-	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
-	{
-		if ( !primitive->isPrimitiveVariableValid( it->second ) )
-		{
-			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
-			filter += UT_String( " ^" + it->first );
-			continue;
-		}
-
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data.get() );
-		if ( !converter )
-		{
-			continue;
-		}
-		
-		if ( it->second.data->isInstanceOf( StringVectorDataTypeId ) )
-		{
-			std::string indicesVariableName = it->first + "Indices";
-			PrimitiveVariableMap::const_iterator indices = primitive->variables.find( indicesVariableName );
-			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) && primitive->isPrimitiveVariableValid( indices->second ) )
-			{
-				stringsToIndices[it->first] = indices->second;
-				filter += UT_String( " ^" + indicesVariableName );
-			}
-		}
-	}
-	
 	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
 	if ( convertStandardAttributes && UT_String( "s" ).multiMatch( filter ) && UT_String( "t" ).multiMatch( filter ) )
 	{
@@ -285,36 +255,36 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
 	{
+		if( !primitive->isPrimitiveVariableValid( it->second ) )
+		{
+			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
+			continue;
+		}
+
 		UT_String varName( it->first );
 		if ( !varName.multiMatch( attribFilter ) )
 		{
 			continue;
 		}
-		
+
 		PrimitiveVariable primVar = processPrimitiveVariable( primitive, it->second );
 		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data.get() );
 		if ( !converter )
 		{
 			continue;
 		}
-		
-		PrimitiveVariable::Interpolation interpolation = primVar.interpolation;
-		
-		if ( converter->isInstanceOf( (IECore::TypeId)ToHoudiniStringVectorAttribConverterTypeId ) )
+
+		if( ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() ) )
 		{
-			PrimitiveVariableMap::const_iterator indices = stringsToIndices.find( it->first );
-			if ( indices != stringsToIndices.end() )
+			if( it->second.indices )
 			{
-				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() );
-				PrimitiveVariable indicesPrimVar = processPrimitiveVariable( primitive, indices->second );
-				stringVectorConverter->indicesParameter()->setValidatedValue( indicesPrimVar.data );
-				interpolation = indices->second.interpolation;
+				stringVectorConverter->indicesParameter()->setValidatedValue( it->second.indices.get() );
 			}
 		}
-		
+
 		const std::string name = ( convertStandardAttributes ) ? processPrimitiveVariableName( it->first ) : it->first;
 		
-		if ( interpolation == detailInterpolation )
+		if ( primVar.interpolation == detailInterpolation )
  		{
 			// add detail attribs
 			try
@@ -326,7 +296,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Detail Attrib: " + e.what() );
 			}
 	 	}
-		else if ( interpolation == pointInterpolation )
+		else if ( primVar.interpolation == pointInterpolation )
 		{
 		
 #if UT_MAJOR_VERSION_INT < 15
@@ -368,7 +338,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				}
 			}
 		}
-		else if ( interpolation == primitiveInterpolation )
+		else if ( primVar.interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
 			try
@@ -380,7 +350,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Primitive Attrib: " + e.what() );
 			}
 		}
-		else if ( interpolation == vertexInterpolation )
+		else if ( primVar.interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
 			try

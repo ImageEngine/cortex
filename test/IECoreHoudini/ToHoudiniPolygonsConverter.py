@@ -99,9 +99,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
 		mesh["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
 		mesh["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8] )
-		mesh["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8 ) ) )
-		
+		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+
 		# add all valid primitive attrib types
 		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
@@ -110,9 +109,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
 		mesh["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
 		mesh["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:6] )
-		mesh["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, 6 ) ) )
-		
+		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+
 		# add all valid vertex attrib types
 		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["v2fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2fVectorData )
@@ -121,9 +119,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		mesh["intVert"] = IECore.PrimitiveVariable( vertexInterpolation, intVectorData )
 		mesh["v2iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2iVectorData )
 		mesh["v3iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		mesh["stringVertIndices"] = IECore.PrimitiveVariable( vertexInterpolation, IECore.IntVectorData( range( 0, 24 ) ) )
-		
+		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+
 		return mesh
 	
 	def emptySop( self ) :
@@ -162,7 +159,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopPoints[i].attribValue( key ) )
 		
 		data = prim["stringPoint"].data
-		dataIndices = prim["stringPointIndices"].data
+		dataIndices = prim["stringPoint"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
 		
@@ -180,7 +177,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopPrims[i].attribValue( key ) )
 		
 		data = prim["stringPrim"].data
-		dataIndices = prim["stringPrimIndices"].data
+		dataIndices = prim["stringPrim"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPrims[i].attribValue( "stringPrim" ) )
 		
@@ -206,7 +203,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopVerts[i].attribValue( key ) )
 		
 		data = prim["stringVert"].data
-		dataIndices = prim["stringVertIndices"].data
+		dataIndices = prim["stringVert"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopVerts[i].attribValue( "stringVert" ) )
 		
@@ -271,11 +268,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopPoints[ origNumPoints + i ].attribValue( key ) )
 		
 		data = prim["stringPoint"].data
-		dataIndices = prim["stringPointIndices"].data
+		dataIndices = prim["stringPoint"].indices
 		
 		if multipleConversions :
 			defaultData = origSopPrim["stringPoint"].data
-			defaultIndices = origSopPrim["stringPointIndices"].data
+			defaultIndices = origSopPrim["stringPoint"].indices
 			for i in range( 0, origNumPoints ) :
 				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopPoints[ i ].attribValue( "stringPoint" ) )
@@ -320,11 +317,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopPrims[ origNumPrims + i ].attribValue( key ) )
 		
 		data = prim["stringPrim"].data
-		dataIndices = prim["stringPrimIndices"].data
+		dataIndices = prim["stringPrim"].indices
 		
 		if multipleConversions :
 			defaultData = origSopPrim["stringPrim"].data
-			defaultIndices = origSopPrim["stringPrimIndices"].data
+			defaultIndices = origSopPrim["stringPrim"].indices
 			for i in range( 0, origNumPrims ) :
 				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopPrims[ i ].attribValue( "stringPrim" ) )
@@ -378,11 +375,11 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( tuple(data[i]), sopVerts[ origNumVerts + i ].attribValue( key ) )
 
 		data = prim["stringVert"].data
-		dataIndices = prim["stringVertIndices"].data
+		dataIndices = prim["stringVert"].indices
 		
 		if multipleConversions :
 			defaultData = origSopPrim["stringVert"].data
-			defaultIndices = origSopPrim["stringVertIndices"].data
+			defaultIndices = origSopPrim["stringVert"].indices
 			for i in range( 0, origNumVerts ) :
 				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopVerts[ i ].attribValue( "stringVert" ) )
@@ -761,7 +758,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		sopPoints = geo.points()
 		data = mesh["stringPoint"].data
-		dataIndices = mesh["stringPointIndices"].data
+		dataIndices = mesh["stringPoint"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
 		
@@ -771,7 +768,6 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.keys(), mesh.keys() )
 		
 		self.assertEqual( result["stringPoint"], mesh["stringPoint"] )
-		self.assertEqual( result["stringPointIndices"], mesh["stringPointIndices"] )
 
 	def testName( self ) :
 		

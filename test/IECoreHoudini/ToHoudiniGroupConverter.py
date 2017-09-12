@@ -99,9 +99,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		points["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData )
 		points["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData )
 		points["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		points["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 12 ) ) )
-		
+		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+
 		points.blindData()['name'] = "pointsGroup"
 		
 		return points
@@ -158,9 +157,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
 		mesh["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
 		mesh["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8] )
-		mesh["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8 ) ) )
-		
+		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+
 		# add all valid primitive attrib types
 		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
@@ -169,9 +167,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
 		mesh["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
 		mesh["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:6] )
-		mesh["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, 6 ) ) )
-		
+		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+
 		# add all valid vertex attrib types
 		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["v2fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2fVectorData )
@@ -180,9 +177,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intVert"] = IECore.PrimitiveVariable( vertexInterpolation, intVectorData )
 		mesh["v2iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2iVectorData )
 		mesh["v3iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		mesh["stringVertIndices"] = IECore.PrimitiveVariable( vertexInterpolation, IECore.IntVectorData( range( 0, 24 ) ) )
-		
+		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+
 		mesh.blindData()['name'] = "meshGroupA"
 		
 		return mesh
@@ -366,11 +362,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def testAdjustedStringVectorIndices( self ) :
 		null = self.emptySop()
 		group = self.twoMeshes()
-		group.children()[0]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "first" ] ) )
-		indices = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [ 0 ] * 6 ) )
-		group.children()[0]["commonStringIndices"] = indices
-		group.children()[1]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "second" ] ) )
-		group.children()[1]["commonStringIndices"] = indices
+		group.children()[0]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "first" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
+		group.children()[1]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "second" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )

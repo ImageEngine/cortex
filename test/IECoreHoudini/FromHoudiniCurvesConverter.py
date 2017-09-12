@@ -384,7 +384,6 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
-		self.assertFalse( "nameIndices" in result )
 		# all curves were converted as one CurvesPrimitive
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 5 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
@@ -395,7 +394,6 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
-		self.assertFalse( "nameIndices" in result )
 		# only the named curves were converted
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 4 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
@@ -406,7 +404,6 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# names are not stored on the object at all
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
-		self.assertFalse( "nameIndices" in result )
 		# only the named curves were converted
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
