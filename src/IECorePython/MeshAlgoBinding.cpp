@@ -87,7 +87,7 @@ void bindMeshAlgo()
 
 	StdPairToTupleConverter<IECore::PrimitiveVariable, IECore::PrimitiveVariable>();
 
-	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "uvSet" ) = "st", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
+	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 	def( "deleteFaces", &MeshAlgo::deleteFaces );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );

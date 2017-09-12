@@ -48,7 +48,7 @@ namespace MeshAlgo
 
 /// Calculate the surface tangent vectors of a mesh primitive.
 std::pair<PrimitiveVariable, PrimitiveVariable> calculateTangents( const MeshPrimitive *mesh,
-	const std::string &uvSet = "st",
+	const std::string &uvSet = "uv",
 	bool orthoTangents = true,
 	const std::string &position = "P"
 );

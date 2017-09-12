@@ -611,56 +611,9 @@ void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, Pri
 // Calculate tangents
 //////////////////////////////////////////////////////////////////////////
 
-namespace
-{
-
-class TexturePrimVarNames
-{
-	public:
-		TexturePrimVarNames( const std::string &uvSetName );
-
-		std::string uvSetName;
-
-		std::string uName() const;
-		std::string vName() const;
-
-		std::string indicesName() const;
-};
-
-TexturePrimVarNames::TexturePrimVarNames( const std::string &uvSetName ) : uvSetName( uvSetName )
-{
-};
-
-std::string TexturePrimVarNames::uName() const
-{
-	if( uvSetName == "st" )
-	{
-		return "s";
-	}
-
-	return uvSetName + "_s";
-}
-
-std::string TexturePrimVarNames::vName() const
-{
-	if( uvSetName == "st" )
-	{
-		return "t";
-	}
-
-	return uvSetName + "_t";
-}
-
-std::string TexturePrimVarNames::indicesName() const
-{
-	return uvSetName + "Indices";
-}
-
-} // anonymous namespace
-
 std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTangents(
 	const MeshPrimitive *mesh,
-	const std::string &uvSet, /* = "st" */
+	const std::string &uvSet, /* = "uv" */
 	bool orthoTangents, /* = true */
 	const std::string &position /* = "P" */
 )
@@ -669,8 +622,6 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 	{
 		throw InvalidArgumentException( "MeshAlgo::calculateTangents : MeshPrimitive must only contain triangles" );
 	}
-
-	const TexturePrimVarNames texturePrimVarNames( uvSet );
 
 	const V3fVectorData *positionData = mesh->variableData<V3fVectorData>( position );
 	if( !positionData )
@@ -687,41 +638,23 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 	const IntVectorData *vertIdsData = mesh->vertexIds();
 	const IntVectorData::ValueType &vertIds = vertIdsData->readable();
 
-	const IntVectorData *stIndicesData = mesh->variableData<IntVectorData>( texturePrimVarNames.indicesName() );
-	if( !stIndicesData )
+	const auto uvIt = mesh->variables.find( uvSet );
+	if( uvIt == mesh->variables.end() || uvIt->second.interpolation != PrimitiveVariable::FaceVarying || uvIt->second.data->typeId() != V2fVectorDataTypeId )
 	{
-		// I'm a little unsure about using the vertIds for the stIndices.
-		stIndicesData = vertIdsData;
-	}
-	const IntVectorData::ValueType &stIndices = stIndicesData->readable();
-
-	ConstFloatVectorDataPtr uData = mesh->variableData<FloatVectorData>( texturePrimVarNames.uName(), PrimitiveVariable::FaceVarying );
-	if( !uData )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no FaceVarying FloatVectorData primitive variable named \"%s\"."  ) % ( texturePrimVarNames.uName() ) ).str() );
+		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no FaceVarying V2fVectorData primitive variable named \"%s\"."  ) % ( uvSet ) ).str() );
 	}
 
-	ConstFloatVectorDataPtr vData = mesh->variableData<FloatVectorData>( texturePrimVarNames.vName(), PrimitiveVariable::FaceVarying );
-	if( !vData )
-	{
-		throw InvalidArgumentException( ( boost::format( "MeshAlgo::calculateTangents : MeshPrimitive has no FaceVarying FloatVectorData primitive variable named \"%s\"."  ) % ( texturePrimVarNames.vName() ) ).str() );
-	}
+	const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvIt->second.data.get() );
+	const V2fVectorData::ValueType &uvs = uvData->readable();
 
-	const FloatVectorData::ValueType &u = uData->readable();
-	const FloatVectorData::ValueType &v = vData->readable();
+	// I'm a little unsure about using the vertIds as a fallback for the stIndices.
+	const IntVectorData::ValueType &uvIndices = uvIt->second.indices ? uvIt->second.indices->readable() : vertIds;
 
+	size_t numUVs = uvs.size();
 
-	// the uvIndices array is indexed as with any other facevarying data. the values in the
-	// array specify the connectivity of the uvs - where two facevertices have the same index
-	// they are known to be sharing a uv. for each one of these unique indices we compute
-	// the tangents and normal, by accumulating all the tangents and normals for the faces
-	// that reference them. we then take this data and shuffle it back into facevarying
-	// primvars for the mesh.
-	int numUniqueTangents = 1 + *std::max_element( stIndices.begin(), stIndices.end() );
-
-	std::vector<V3f> uTangents( numUniqueTangents, V3f( 0 ) );
-	std::vector<V3f> vTangents( numUniqueTangents, V3f( 0 ) );
-	std::vector<V3f> normals( numUniqueTangents, V3f( 0 ) );
+	std::vector<V3f> uTangents( numUVs, V3f( 0 ) );
+	std::vector<V3f> vTangents( numUVs, V3f( 0 ) );
+	std::vector<V3f> normals( numUVs, V3f( 0 ) );
 
 	for( size_t faceIndex = 0; faceIndex < vertsPerFace.size(); faceIndex++ )
 	{
@@ -732,8 +665,7 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 		size_t fvi1 = fvi0 + 1;
 		size_t fvi2 = fvi1 + 1;
 		assert( fvi2 < vertIds.size() );
-		assert( fvi2 < u.size() );
-		assert( fvi2 < v.size() );
+		assert( fvi2 < uvIndices.size() );
 
 		// positions for each vertex of this face
 		const V3f &p0 = points[vertIds[fvi0]];
@@ -741,9 +673,9 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 		const V3f &p2 = points[vertIds[fvi2]];
 
 		// uv coordinates for each vertex of this face
-		const V2f uv0( u[fvi0], v[fvi0] );
-		const V2f uv1( u[fvi1], v[fvi1] );
-		const V2f uv2( u[fvi2], v[fvi2] );
+		const V2f &uv0 = uvs[uvIndices[fvi0]];
+		const V2f &uv1 = uvs[uvIndices[fvi1]];
+		const V2f &uv2 = uvs[uvIndices[fvi2]];
 
 		// compute tangents and normal for this face
 		const V3f e0 = p1 - p0;
@@ -759,17 +691,17 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 		normal.normalize();
 
 		// and accumlate them into the computation so far
-		uTangents[stIndices[fvi0]] += tangent;
-		uTangents[stIndices[fvi1]] += tangent;
-		uTangents[stIndices[fvi2]] += tangent;
+		uTangents[uvIndices[fvi0]] += tangent;
+		uTangents[uvIndices[fvi1]] += tangent;
+		uTangents[uvIndices[fvi2]] += tangent;
 
-		vTangents[stIndices[fvi0]] += bitangent;
-		vTangents[stIndices[fvi1]] += bitangent;
-		vTangents[stIndices[fvi2]] += bitangent;
+		vTangents[uvIndices[fvi0]] += bitangent;
+		vTangents[uvIndices[fvi1]] += bitangent;
+		vTangents[uvIndices[fvi2]] += bitangent;
 
-		normals[stIndices[fvi0]] += normal;
-		normals[stIndices[fvi1]] += normal;
-		normals[stIndices[fvi2]] += normal;
+		normals[uvIndices[fvi0]] += normal;
+		normals[uvIndices[fvi1]] += normal;
+		normals[uvIndices[fvi2]] += normal;
 
 	}
 
@@ -807,13 +739,13 @@ std::pair<PrimitiveVariable, PrimitiveVariable> IECore::MeshAlgo::calculateTange
 
 	std::vector<V3f> &fvU = fvUD->writable();
 	std::vector<V3f> &fvV = fvVD->writable();
-	fvU.resize( stIndices.size() );
-	fvV.resize( stIndices.size() );
+	fvU.resize( uvIndices.size() );
+	fvV.resize( uvIndices.size() );
 
-	for( unsigned i = 0; i < stIndices.size(); i++ )
+	for( unsigned i = 0; i < uvIndices.size(); i++ )
 	{
-		fvU[i] = uTangents[stIndices[i]];
-		fvV[i] = vTangents[stIndices[i]];
+		fvU[i] = uTangents[uvIndices[i]];
+		fvV[i] = vTangents[uvIndices[i]];
 	}
 
 	PrimitiveVariable tangentPrimVar( PrimitiveVariable::FaceVarying, fvUD );

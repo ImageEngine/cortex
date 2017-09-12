@@ -46,15 +46,12 @@ class MeshAlgoTangentTest( unittest.TestCase ) :
 		verticesPerFace = IntVectorData( [ 3 ] )
 		vertexIds = IntVectorData( [ 0, 1, 2 ] )
 		p = V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 1, 0, 0 ), V3f( 0, 1, 0 ) ] )
-		s = FloatVectorData( [ 0, 1, 0 ] )
-		t = FloatVectorData( [ 0, 0, 1 ] )
+		uv = V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ) ] )
 
 		mesh = MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
-		mesh["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, s )
-		mesh["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, t )
+		mesh["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, uv )
 
-		mesh["foo_s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, FloatVectorData( [0, 0, 1] ) )
-		mesh["foo_t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, FloatVectorData( [0, 1, 0] ) )
+		mesh["foo"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 0 ) ] ) )
 
 		prefData = V3fVectorData( [V3f( 0, 0, 0 ), V3f( 0, -1, 0 ), V3f( 1, 0, 0 )] )
 		mesh["Pref"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, prefData )
@@ -66,12 +63,10 @@ class MeshAlgoTangentTest( unittest.TestCase ) :
 		verticesPerFace = IntVectorData( [3] )
 		vertexIds = IntVectorData( [0, 1, 2] )
 		p = V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 0, 0 ), V3f( 0, 1, 0 )] )
-		s = FloatVectorData( [0] )
-		t = FloatVectorData( [0] )
+		uv = V2fVectorData( [ IECore.V2f( 0 ) ] )
 
 		mesh = MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
-		mesh["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, s )
-		mesh["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, t )
+		mesh["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, uv )
 
 		return mesh
 
