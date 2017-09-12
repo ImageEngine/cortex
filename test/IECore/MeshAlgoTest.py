@@ -328,12 +328,10 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		verticesPerFace = IntVectorData( [ 3, 3 ] )
 		vertexIds = IntVectorData( [ 0, 1, 2, 0, 2, 3 ] )
 		p = V3fVectorData( [ V3f( 0, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 ) ] )
-		s = FloatVectorData( [ 0, 1, 1, 0, 1, 0] )
-		t = FloatVectorData( [ 0, 0, 1, 0, 1, 1] )
+		uv = V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] )
 
 		mesh = MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
-		mesh["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, s )
-		mesh["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, t )
+		mesh["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, uv )
 
 		return mesh
 
@@ -363,8 +361,7 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( len( facesDeletedMesh.verticesPerFace ), 0 )
 		self.assertEqual( len( facesDeletedMesh.vertexIds ), 0 )
 
-		self.assertEqual( len( facesDeletedMesh["s"].data ), 0 )
-		self.assertEqual( len( facesDeletedMesh["t"].data ), 0 )
+		self.assertEqual( len( facesDeletedMesh["uv"].data ), 0 )
 		self.assertEqual( len( facesDeletedMesh["P"].data ), 0 )
 		self.assertEqual( len( facesDeletedMesh["delete"].data ), 0 )
 
@@ -380,8 +377,7 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
 		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["s"].data, FloatVectorData( [0, 1, 0] ) )
-		self.assertEqual( facesDeletedMesh["t"].data, FloatVectorData( [0, 1, 1] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
 		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
 		self.assertEqual( facesDeletedMesh["delete"].data, IntVectorData( [0] ) )
@@ -399,8 +395,7 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
 		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["s"].data, FloatVectorData( [0, 1, 0] ) )
-		self.assertEqual( facesDeletedMesh["t"].data, FloatVectorData( [0, 1, 1] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
 		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
 		self.assertEqual( facesDeletedMesh["delete"].data, BoolVectorData( [False] ) )
@@ -417,8 +412,7 @@ class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 		self.assertEqual( facesDeletedMesh.verticesPerFace, IntVectorData( [3] ) )
 		self.assertEqual( facesDeletedMesh.vertexIds, IntVectorData( [0, 1, 2] ) )
 
-		self.assertEqual( facesDeletedMesh["s"].data, FloatVectorData( [0, 1, 0] ) )
-		self.assertEqual( facesDeletedMesh["t"].data, FloatVectorData( [0, 1, 1] ) )
+		self.assertEqual( facesDeletedMesh["uv"].data, V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ), IECore.V2f( 0, 1 ) ] ) )
 
 		self.assertEqual( facesDeletedMesh["P"].data, V3fVectorData( [V3f( 0, 0, 0 ), V3f( 1, 1, 0 ), V3f( 0, 1, 0 )] ) )
 		self.assertEqual( facesDeletedMesh["delete"].data, FloatVectorData( [0.0] ) )
