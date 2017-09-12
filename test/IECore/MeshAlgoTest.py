@@ -440,7 +440,7 @@ class MeshAlgoReverseWindingTest( unittest.TestCase ) :
 		# Except for vertex ids, and facevarying data
 
 		self.assertEqual( list( meshReversed.vertexIds ), list( reversed( mesh.vertexIds ) ) )
-		self.assertEqual( list( meshReversed["s"].data ), list( reversed( mesh["s"].data ) ) )
+		self.assertEqual( list( meshReversed["uv"].data ), list( reversed( mesh["uv"].data ) ) )
 
 	def testPlane( self ) :
 
@@ -463,12 +463,11 @@ class MeshAlgoReverseWindingTest( unittest.TestCase ) :
 			evaluatorReversed.closestPoint( p, resultReversed )
 
 			self.assertEqual( resultReversed.normal(), -result.normal() )
-			for n in ( "s", "t" ) :
-				self.assertAlmostEqual(
-					resultReversed.floatPrimVar( meshReversed[n] ),
-					result.floatPrimVar( mesh[n] ),
-					delta = 0.0001
-				)
+
+			reversedUV = resultReversed.vec2PrimVar( meshReversed["uv"] )
+			uv = result.vec2PrimVar( mesh["uv"] )
+			self.assertAlmostEqual( reversedUV[0], uv[0], delta = 0.0001 )
+			self.assertAlmostEqual( reversedUV[1], uv[1], delta = 0.0001 )
 
 	def testRoundTrip( self ) :
 
@@ -479,6 +478,32 @@ class MeshAlgoReverseWindingTest( unittest.TestCase ) :
 		IECore.MeshAlgo.reverseWinding( meshReversedAgain )
 
 		self.assertEqual( mesh, meshReversedAgain )
+
+	def testUVIndices( self ) :
+
+		verticesPerFace = IECore.IntVectorData( [ 3 ] )
+		vertexIds = IECore.IntVectorData( [ 0, 1, 2 ] )
+		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 0, 1, 0 ) ] )
+		uv = IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ) ] )
+		uvIndices = IECore.IntVectorData( [ 0, 1, 2 ] )
+		mesh = IECore.MeshPrimitive( verticesPerFace, vertexIds, "linear", p )
+		mesh["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, uv, uvIndices )
+
+		meshReversed = mesh.copy()
+		IECore.MeshAlgo.reverseWinding( meshReversed )
+
+		# Meshes should be identical
+
+		self.assertEqual( meshReversed.interpolation, mesh.interpolation )
+		for interpolation in IECore.PrimitiveVariable.Interpolation.values.values() :
+			self.assertEqual( meshReversed.variableSize( interpolation ), mesh.variableSize( interpolation ) )
+		self.assertEqual( mesh.keys(), meshReversed.keys() )
+		self.assertEqual( mesh["P"], meshReversed["P"] )
+
+		# UV indices should change, but UV data doesn't need to
+
+		self.assertEqual( meshReversed["uv"].data, mesh["uv"].data )
+		self.assertEqual( list( meshReversed["uv"].indices ), list( reversed( mesh["uv"].indices ) ) )
 
 if __name__ == "__main__":
 	unittest.main()

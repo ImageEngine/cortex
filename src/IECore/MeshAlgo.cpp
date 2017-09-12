@@ -809,7 +809,14 @@ void IECore::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
 	{
 		if( it.second.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+			if( it.second.indices )
+			{
+				::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable() );
+			}
+			else
+			{
+				despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+			}
 		}
 	}
 }
