@@ -103,27 +103,34 @@ class MeshReader : public PrimitiveReader
 				return;
 			}
 
-			/// \todo It'd be nice if we stored uvs as a single primitive variable instead of having to split them in two.
-			/// It'd also be nice if we supported indexed data directly.
 			typedef IV2fArrayProperty::sample_ptr_type SamplePtr;
-			SamplePtr sample = uvs.getExpandedValue( sampleSelector ).getVals();
-			size_t size = sample->size();
-
-			FloatVectorDataPtr sData = new FloatVectorData;
-			FloatVectorDataPtr tData = new FloatVectorData;
-			std::vector<float> &s = sData->writable();
-			std::vector<float> &t = tData->writable();
-			s.resize( size );
-			t.resize( size );
-			for( size_t i=0; i<size; ++i )
+			auto uvParam = uvs.getIndexedValue( sampleSelector );
+			SamplePtr sample = uvParam.getVals();
+			size_t uvSize = sample->size();
+			V2fVectorDataPtr uvData = new V2fVectorData;
+			std::vector<Imath::V2f> &uvValues = uvData->writable();
+			uvValues.reserve( uvSize );
+			for( size_t i=0; i<uvSize; ++i )
 			{
-				s[i] = (*sample)[i][0];
-				t[i] = (*sample)[i][1];
+				uvValues.push_back( (*sample)[i] );
+			}
+
+			IntVectorDataPtr indexData = nullptr;
+			if( uvParam.isIndexed() )
+			{
+				UInt32ArraySamplePtr indices = uvParam.getIndices();
+				size_t indexSize = indices->size();
+				indexData = new IntVectorData;
+				std::vector<int> &indexValues = indexData->writable();
+				indexValues.reserve( indexSize );
+				for( size_t i = 0; i < indexSize; ++i )
+				{
+					indexValues.push_back( (*indices)[i] );
+				}
 			}
 
 			PrimitiveVariable::Interpolation interpolation = PrimitiveReader::interpolation( uvs.getScope() );
-			primitive->variables["s"] = PrimitiveVariable( interpolation, sData );
-			primitive->variables["t"] = PrimitiveVariable( interpolation, tData );
+			primitive->variables["uv"] = PrimitiveVariable( interpolation, uvData, indexData );
 		}
 
 };
