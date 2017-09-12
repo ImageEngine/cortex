@@ -77,10 +77,10 @@ class ThreadingTest( unittest.TestCase ) :
 		kwArgs = []
 		for i in range( 0, 4 ) :
 		
-			ops.append( IECore.PointDistributionOp() )
+			ops.append( IECore.DataCastOp() )
 			kwArgs.append( {
-				"mesh" : IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
-				"density" : 10000,
+				"object" : IECore.FloatVectorData( range( 0, 100000 ) ),
+				"targetType" : IECore.DoubleVectorData.staticTypeId(),
 			} )
 
 		tStart = time.time()
@@ -127,11 +127,11 @@ class ThreadingTest( unittest.TestCase ) :
 		ops = []
 		kwArgs = []
 		for i in range( 0, 4 ) :
-		
-			ops.append( IECore.PointDistributionOp() )
+
+			ops.append( IECore.DataCastOp() )
 			kwArgs.append( {
-				"mesh" : IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) ),
-				"density" : 10000,
+				"object" : IECore.FloatVectorData( range( 0, 100000 ) ),
+				"targetType" : IECore.DoubleVectorData.staticTypeId(),
 			} )
 			
 			ops.append( IECore.ClassLsOp() )
