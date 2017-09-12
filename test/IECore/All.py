@@ -172,7 +172,6 @@ from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
-from MeshDistortionsOpTest import TestMeshDistortionsOp
 from PointVelocityDisplaceOp import *
 from HexConversionTest import HexConversionTest
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest

@@ -196,7 +196,6 @@
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
-#include "IECorePython/MeshDistortionsOpBinding.h"
 #include "IECorePython/PointVelocityDisplaceOpBinding.h"
 #include "IECorePython/HexConversionBinding.h"
 #include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
@@ -425,7 +424,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
 	bindHexConversion();
 	bindCompressSmoothSkinningDataOp();

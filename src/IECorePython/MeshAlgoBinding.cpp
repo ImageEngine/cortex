@@ -90,6 +90,7 @@ void bindMeshAlgo()
 	def( "calculateTangents", &MeshAlgo::calculateTangents, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "orthoTangents" ) = true, arg_( "position" ) = "P" ) );
 	def( "calculateFaceArea", &MeshAlgo::calculateFaceArea, ( arg_( "mesh" ), arg_( "position" ) = "P" ) );
 	def( "calculateFaceTextureArea", &MeshAlgo::calculateFaceTextureArea, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "position" ) = "P" ) );
+	def( "calculateDistortion", &MeshAlgo::calculateDistortion, ( arg_( "mesh" ), arg_( "uvSet" ) = "uv", arg_( "referencePosition" ) = "Pref", arg_( "position" ) = "P" ) );
 	def( "resamplePrimitiveVariable", &MeshAlgo::resamplePrimitiveVariable );
 	def( "deleteFaces", &MeshAlgo::deleteFaces );
 	def( "reverseWinding", &MeshAlgo::reverseWinding );

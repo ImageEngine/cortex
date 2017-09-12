@@ -56,6 +56,11 @@ PrimitiveVariable calculateFaceArea( const MeshPrimitive *mesh, const std::strin
 /// Calculate the face texture area of a mesh primitive based on the specified UV set.
 PrimitiveVariable calculateFaceTextureArea( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &position = "P" );
 
+/// Calculate the distortions (expansion and contraction) on the mesh edges
+/// The first return value is the float distortion between the two position variables.
+/// The second return value is the V2f distortion of the UV set.
+std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshPrimitive *mesh, const std::string &uvSet = "uv", const std::string &referencePosition = "Pref", const std::string &position = "P" );
+
 void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 /// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToDelete uniform (int|float|bool) PrimitiveVariable
