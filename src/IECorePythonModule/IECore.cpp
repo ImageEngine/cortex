@@ -225,7 +225,6 @@
 #include "IECorePython/DataConvertOpBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
-#include "IECorePython/MeshFaceFilterOpBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
 #include "IECorePython/TimeCodeParameterBinding.h"
@@ -458,7 +457,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataConvertOp();
 	bindMurmurHash();
 	bindDiskPrimitive();
-	bindMeshFaceFilterOp();
 	bindImf();
 	bindTimeCodeData();
 	bindTimeCodeParameter();
