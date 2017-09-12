@@ -141,7 +141,6 @@ from SplineParameterTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
 from DisplayTest import *
-from MeshTangentsOpTest import *
 from CompoundVectorParameterTest import *
 from ObjectVectorTest import *
 from OversamplesCalculatorTest import *

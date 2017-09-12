@@ -164,7 +164,6 @@
 #include "IECorePython/SplineDataBinding.h"
 #include "IECorePython/CoordinateSystemBinding.h"
 #include "IECorePython/DisplayBinding.h"
-#include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
@@ -397,7 +396,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCoordinateSystem();
 	bindOBJReader();
 	bindDisplay();
-	bindMeshTangentsOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindDateTimeData();
