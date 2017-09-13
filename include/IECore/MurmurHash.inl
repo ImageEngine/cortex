@@ -56,7 +56,7 @@ inline uint64_t fmix( uint64_t k )
 
 inline void MurmurHash::append( const void *data, size_t bytes, int elementSize )
 {
-	const int nBlocks = bytes / 16;
+	const size_t nBlocks = bytes / 16;
 	
 	const uint64_t c1 = 0x87c37b91114253d5;
 	const uint64_t c2 = 0x4cf5ad432745937f;
@@ -71,7 +71,7 @@ inline void MurmurHash::append( const void *data, size_t bytes, int elementSize 
 	// body
 	
 	const uint64_t *blocks = (const uint64_t *)data;
-	for( int i = 0; i < nBlocks; i++ )
+	for( size_t i = 0; i < nBlocks; i++ )
 	{
 		uint64_t k1 = blocks[i*2];
 		uint64_t k2 = blocks[i*2+1];
