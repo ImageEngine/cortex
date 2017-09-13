@@ -48,7 +48,7 @@ class MeshTest( AppleseedTest.TestCase ):
 		r.worldBegin()
 		r.setAttribute( "name", IECore.StringData( "plane" ) )
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -6 ), IECore.V2f( 6 ) ) )
-		s, t = m["s"].data, m["t"].data
+		uvData = m["uv"].data
 		m.render( r )
 
 		mainAss = self._getMainAssembly( r )
@@ -60,8 +60,7 @@ class MeshTest( AppleseedTest.TestCase ):
 		for i in range( 0, obj.get_tex_coords_count() ):
 			uv = obj.get_tex_coords( i )
 			j = quadTo2TrisIndices[i]
-			self.assertEqual( uv[0], s[j] )
-			self.assertEqual( uv[1], t[j] )
+			self.assertEqual( uv, uvData[j] )
 
 if __name__ == "__main__":
 	unittest.main()
