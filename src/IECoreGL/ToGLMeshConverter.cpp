@@ -100,7 +100,27 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
-		if ( pIt->second.data )
+		if( pIt->first == "uv" )
+		{
+			if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( "uv", IECore::PrimitiveVariable::FaceVarying ) )
+			{
+				std::vector<Imath::V2f> &uvs = uvData->writable();
+				for( unsigned i = 0; i < uvs.size(); ++i )
+				{
+					// as of Cortex 10, we take a UDIM centric approach
+					// to UVs, which clashes with OpenGL, so we must flip
+					// the v values during conversion.
+					uvs[i][1] = 1.0 - uvs[i][1];
+				}
+
+				glMesh->addPrimitiveVariable( "uv", IECore::PrimitiveVariable( IECore::PrimitiveVariable::FaceVarying, uvData ) );
+			}
+			else
+			{
+				IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variable \"uv\" must be of type V2fVectorData." );
+			}
+		}
+		else if( pIt->second.data )
 		{
 			glMesh->addPrimitiveVariable( pIt->first, pIt->second );
 		}
@@ -108,49 +128,6 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		{
 			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
 		}
-	}
-
-	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
-	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( "t" );
-	if ( sIt != mesh->variables.end() && tIt != mesh->variables.end() )
-	{
-		if ( sIt->second.interpolation != IECore::PrimitiveVariable::Constant  
-			&&  tIt->second.interpolation != IECore::PrimitiveVariable::Constant
-			&& sIt->second.interpolation == tIt->second.interpolation )
-		{
-			IECore::ConstFloatVectorDataPtr s = IECore::runTimeCast< const IECore::FloatVectorData >( sIt->second.data );
-			IECore::ConstFloatVectorDataPtr t = IECore::runTimeCast< const IECore::FloatVectorData >( tIt->second.data );
-
-			if ( s && t )
-			{
-				/// Should hold true if primvarsAreValid
-				assert( s->readable().size() == t->readable().size() );
-
-				IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData();
-				stData->writable().resize( s->readable().size() );
-
-				for ( unsigned i = 0; i < s->readable().size(); i++ )
-				{
-					// as of Cortex 10, we take a UDIM centric approach
-					// to UVs, which clashes with OpenGL, so we must flip
-					// the v values during conversion.
-					stData->writable()[i] = Imath::V2f( s->readable()[i], 1.0 - t->readable()[i] );
-				}
-				glMesh->addPrimitiveVariable( "st", IECore::PrimitiveVariable( sIt->second.interpolation, stData ) );
-			}
-			else
-			{
-				IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variables \"s\" and \"t\" must be of type FloatVectorData and interpolation type FaceVarying." );
-			}
-		}
-		else
-		{
-			IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variables \"s\" and \"t\" must be of type FloatVectorData and non-Constant interpolation type." );
-		}
-	}
-	else if ( sIt != mesh->variables.end() || tIt != mesh->variables.end() )
-	{
-		IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "Primitive variable \"s\" or \"t\" found, but not both." );
 	}
 
 	return glMesh;

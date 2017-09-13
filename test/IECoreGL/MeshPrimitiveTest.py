@@ -52,24 +52,24 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		#include "IECoreGL/VertexShader.h"
 		
 		IECOREGL_VERTEXSHADER_IN vec3 vertexP;
-		IECOREGL_VERTEXSHADER_IN vec2 vertexst;
-		IECOREGL_VERTEXSHADER_OUT vec4 stColor;
+		IECOREGL_VERTEXSHADER_IN vec2 vertexuv;
+		IECOREGL_VERTEXSHADER_OUT vec4 color;
 
 		void main()
 		{
 			vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );
 			gl_Position = gl_ProjectionMatrix * pCam;
 
-			stColor = vec4(vertexst.x, vertexst.y, 0.0, 1.0);
+			color = vec4(vertexuv.x, vertexuv.y, 0.0, 1.0);
 		}
 		"""
 
 		fragmentSource = """
-		varying vec4 stColor;
+		varying vec4 color;
 
 		void main()
 		{
-			gl_FragColor = stColor;
+			gl_FragColor = color;
 		}
 		"""
 
@@ -90,7 +90,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
-			r.shader( "surface", "showST",
+			r.shader( "surface", "showUV",
 				{ "gl:fragmentSource" : IECore.StringData( fragmentSource ),
 				  "gl:vertexSource" : IECore.StringData( vertexSource   )
 				}
