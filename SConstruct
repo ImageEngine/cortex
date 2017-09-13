@@ -1536,27 +1536,27 @@ coreTestEnv.Alias( "testCorePython", corePythonTest )
 # Build, install and test the IECoreImage library and bindings
 ###########################################################################################
 
+imageEnvSets = {
+	"IECORE_NAME" : "IECoreImage",
+}
+
+imageEnvAppends = {
+
+	"CXXFLAGS" : [
+		"-isystem", "$OIIO_INCLUDE_PATH",
+	],
+	"LIBPATH" : [
+		"$OIIO_LIB_PATH",
+	],
+	"LIBS" : [
+		"boost_signals" + env["BOOST_LIB_SUFFIX"],
+	],
+}
+
+imageEnv = coreEnv.Clone( **imageEnvSets )
+imageEnv.Append( **imageEnvAppends )
+
 if doConfigure :
-
-	imageEnvSets = {
-		"IECORE_NAME" : "IECoreImage",
-	}
-
-	imageEnvAppends = {
-
-		"CXXFLAGS" : [
-			"-isystem", "$OIIO_INCLUDE_PATH",
-		],
-		"LIBPATH" : [
-			"$OIIO_LIB_PATH",
-		],
-		"LIBS" : [
-			"boost_signals" + env["BOOST_LIB_SUFFIX"],
-		],
-	}
-
-	imageEnv = coreEnv.Clone( **imageEnvSets )
-	imageEnv.Append( **imageEnvAppends )
 
 	c = Configure( imageEnv )
 
