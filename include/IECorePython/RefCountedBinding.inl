@@ -173,78 +173,9 @@ struct IntrusivePtrFromPython
 //////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self )
-	:	T(), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1 )
-	:	T( arg1 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
-	:	T( arg1, arg2 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
-	:	T( arg1, arg2, arg3 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 )
-	:	T( arg1, arg2, arg3, arg4 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 )
-	:	T( arg1, arg2, arg3, arg4, arg5 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 )
-	:	T( arg1, arg2, arg3, arg4, arg5, arg6 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 )
-	:	T( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 )
-	:	T( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 )
-	:	T( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 ), WrapperGarbageCollector( self, this, pyType() )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 )
-	:	T( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 ), WrapperGarbageCollector( self, this, pyType() )
+template<typename... Args>
+RefCountedWrapper<T>::RefCountedWrapper( PyObject *self, Args&&... args )
+	:	T( std::forward<Args>( args )... ), WrapperGarbageCollector( self, this, pyType() )
 {
 }
 

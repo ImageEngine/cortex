@@ -78,78 +78,9 @@ static bool isInstanceOf2( T &t, const char *n )
 //////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self )
-	:	RefCountedWrapper<T>( self )
-{
-}
-
-template<typename T>
-template<typename Arg1>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1 )
-	:	RefCountedWrapper<T>( self, arg1 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
-	:	RefCountedWrapper<T>( self, arg1, arg2 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
-{
-}
-
-template<typename T>
-template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 )
-	:	RefCountedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+template<typename... Args>
+RunTimeTypedWrapper<T>::RunTimeTypedWrapper( PyObject *self, Args&&... args )
+	:	RefCountedWrapper<T>( self, std::forward<Args>( args )... )
 {
 }
 
