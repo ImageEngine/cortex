@@ -1,3 +1,11 @@
+9.23.1
+======
+
+Fixes
+-----
+
+- Fixed signed integer overflow in MurmurHash
+ 
 9.23.0
 ======
 
