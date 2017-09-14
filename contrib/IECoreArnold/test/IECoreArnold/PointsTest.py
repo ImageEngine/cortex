@@ -201,10 +201,10 @@ class PointsTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nkeys, 2 )
 
 			for i in range( 0, 10 ) :
-				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 10 ) )
+				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 10 ) )
 				self.assertEqual( arnold.AiArrayGetFlt( r, i ), 0.5 )
 			for i in range( 11, 20 ) :
-				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 20 ) )
+				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 20 ) )
 				self.assertEqual( arnold.AiArrayGetFlt( r, i ), 1 )
 
 			a = arnold.AiNodeGetArray( n, "deform_time_samples" )

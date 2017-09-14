@@ -89,8 +89,8 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 	const Imath::V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
 	const float pixelAspectRatio = cameraCopy->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
 	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
-	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
-	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
+	AiNodeSetVec2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
+	AiNodeSetVec2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
 
 	// Set any Arnold-specific parameters
 

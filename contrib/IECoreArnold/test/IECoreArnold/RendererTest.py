@@ -855,8 +855,8 @@ class RendererTest( unittest.TestCase ) :
 			volume = self.__allNodes( type = arnold.AI_NODE_SHAPE )[-1]
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( volume ) ), "volume" )
 
-			self.assertEqual( arnold.AiNodeGetPnt( volume, "min" ), arnold.AtPoint( -1, -2, -3 ) )
-			self.assertEqual( arnold.AiNodeGetPnt( volume, "max" ), arnold.AtPoint( 4, 5, 6 ) )
+			self.assertEqual( arnold.AiNodeGetVec( volume, "min" ), arnold.AtVector( -1, -2, -3 ) )
+			self.assertEqual( arnold.AiNodeGetVec( volume, "max" ), arnold.AtVector( 4, 5, 6 ) )
 			self.assertEqual( arnold.AiNodeGetStr( volume, "dso" ), "someVolumeThing.so" )
 			self.assertEqual( arnold.AiNodeGetFlt( volume, "testFloat" ), 0.5 )
 

@@ -126,13 +126,13 @@ void convertIndexedUVSet( const std::string &setName, PrimitiveVariableMap &vari
 	const vector<int> &indices = indicesData->readable();
 
 	int numUVs = 1 + *max_element( indices.begin(), indices.end() );
-	AtArray *uvsArray = AiArrayAllocate( numUVs, 1, AI_TYPE_POINT2 );
+	AtArray *uvsArray = AiArrayAllocate( numUVs, 1, AI_TYPE_VECTOR2 );
 	AtArray *indicesArray = AiArrayAllocate( indices.size(), 1, AI_TYPE_UINT );
 
 	for( size_t i = 0, e = indices.size(); i < e; ++i )
 	{
-		AtPoint2 uv = { s[i], 1.0f - t[i] };
-		AiArraySetPnt2( uvsArray, indices[i], uv );
+		AtVector2 uv( s[i], 1.0f - t[i] );
+		AiArraySetVec2( uvsArray, indices[i], uv );
 		AiArraySetUInt( indicesArray, i, indices[i] );
 	}
 
@@ -190,11 +190,11 @@ void convertUVSet( const std::string &setName, PrimitiveVariableMap &variables, 
 	const vector<float> &s = sData->readable();
 	const vector<float> &t = tData->readable();
 
-	AtArray *uvsArray = AiArrayAllocate( s.size(), 1, AI_TYPE_POINT2 );
+	AtArray *uvsArray = AiArrayAllocate( s.size(), 1, AI_TYPE_VECTOR2 );
 	for( size_t i = 0, e = s.size(); i < e; ++i )
 	{
-		AtPoint2 uv = { s[i], 1.0f - t[i] };
-		AiArraySetPnt2( uvsArray, i, uv );
+		AtVector2 uv( s[i], 1.0f - t[i] );
+		AiArraySetVec2( uvsArray, i, uv );
 	}
 
 	AtArray *indicesArray = NULL;
