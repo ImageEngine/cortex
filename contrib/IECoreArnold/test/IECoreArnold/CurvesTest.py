@@ -62,8 +62,8 @@ class CurvesTest( unittest.TestCase ) :
 			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], [ -0.25, 0.25 ] )
 
 			a = arnold.AiNodeGetArray( n, "points" )
-			self.assertEqual( a.contents.nelements, 4 )
-			self.assertEqual( a.contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( a.contents ), 2 )
 
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 1 ) )
@@ -90,7 +90,7 @@ class CurvesTest( unittest.TestCase ) :
 
 			n = IECoreArnold.NodeAlgo.convert( c )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "ribbon" )
-			self.assertEqual( arnold.AiNodeGetArray( n, "orientations" ).contents.nelements, 0 )
+			self.assertEqual( arnold.AiArrayGetNumElements( arnold.AiNodeGetArray( n, "orientations" ).contents ), 0 )
 
 			# N - should be oriented
 
@@ -102,7 +102,7 @@ class CurvesTest( unittest.TestCase ) :
 			n = IECoreArnold.NodeAlgo.convert( c )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
-			self.assertEqual( orientations.contents.nelements, 4 )
+			self.assertEqual( arnold.AiArrayGetNumElements( orientations.contents ), 4 )
 
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetVec( orientations, i ), arnold.AtVector( 0, math.sin( i ), math.cos( i ) ) )
@@ -119,8 +119,8 @@ class CurvesTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
-			self.assertEqual( orientations.contents.nelements, 4 )
-			self.assertEqual( orientations.contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( orientations.contents ), 4 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( orientations.contents ), 2 )
 
 			for i in range( 0, 4 ) :
 				self.assertEqual( arnold.AiArrayGetVec( orientations, i ), arnold.AtVector( 0, math.sin( i ), math.cos( i ) ) )

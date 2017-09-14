@@ -105,7 +105,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 			IECoreArnold.ParameterAlgo.setParameter( n, "trace_sets", IECore.StringVectorData( [ "a", "b" ] ) )
 
 			a = arnold.AiNodeGetArray( n, "trace_sets" )
-			self.assertEqual( a.contents.nelements, 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 2 )
 			self.assertEqual( arnold.AiArrayGetStr( a, 0 ), "a" )
 			self.assertEqual( arnold.AiArrayGetStr( a, 1 ), "b" )
 
