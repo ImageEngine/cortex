@@ -130,7 +130,7 @@ class PointsTest( unittest.TestCase ) :
 
 			n = IECoreArnold.NodeAlgo.convert( p )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
-			self.assertEqual( a.contents.nelements, 10 )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
 
@@ -157,7 +157,7 @@ class PointsTest( unittest.TestCase ) :
 
 				n = IECoreArnold.NodeAlgo.convert( p )
 				a = arnold.AiNodeGetArray( n, "myPrimVar" )
-				self.assertEqual( a.contents.nelements, 10 )
+				self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
 				for i in range( 0, 10 ) :
 					self.assertEqual( arnold.AiArrayGetInt( a, i ), i )
 
@@ -192,12 +192,12 @@ class PointsTest( unittest.TestCase ) :
 			n = IECoreArnold.NodeAlgo.convert( [ p1, p2 ], [ -0.25, 0.25 ] )
 
 			a = arnold.AiNodeGetArray( n, "points" )
-			self.assertEqual( a.contents.nelements, 10 )
-			self.assertEqual( a.contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( a.contents ), 2 )
 
 			r = arnold.AiNodeGetArray( n, "radius" )
-			self.assertEqual( a.contents.nelements, 10 )
-			self.assertEqual( a.contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( a.contents ), 2 )
 
 			for i in range( 0, 10 ) :
 				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 10 ) )

@@ -282,7 +282,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 			AiNodeSetArray(
 				shape,
 				(name + string("idxs")).c_str(),
-				identityIndices( array->nelements )
+				identityIndices( AiArrayGetNumElements( array ) )
 			);
 		}
 	}

@@ -154,7 +154,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			n1 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
-			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 
 			n2 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n2 ) ), "ginstance" )
@@ -162,11 +162,11 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			n3 = c.convert( [ m2, m1 ], [ -0.25, 0.25 ] )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
-			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 
 			n4 = c.convert( [ m1, m2 ], [ -0.5, 0.5 ] )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
-			self.assertEqual( arnold.AiNodeGetArray( n1, "vlist" ).contents.nkeys, 2 )
+			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 
 if __name__ == "__main__":
     unittest.main()

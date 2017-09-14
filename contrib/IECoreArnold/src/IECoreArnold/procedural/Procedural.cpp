@@ -120,7 +120,7 @@ static int procInit( AtNode *node, void **userPtr )
 		if( parameterValues )
 		{
 			boost::python::list toParse;
-			for( unsigned i=0; i<parameterValues->nelements; i++ )
+			for( unsigned i=0; i<AiArrayGetNumElements(parameterValues); i++ )
 			{
 				// hack to workaround ass parsing errors
 				/// \todo Remove when we get the Arnold version that fixes this
