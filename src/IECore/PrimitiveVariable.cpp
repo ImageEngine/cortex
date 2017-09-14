@@ -81,21 +81,31 @@ bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
 		return false;
 	}
 
-	// if they're both null then they're both equal
-	bool dataEqual = !data && !other.data;
-	bool indicesEqual = !indices && !other.indices;
-
 	if( data && other.data )
 	{
-		dataEqual = data->isEqualTo( other.data.get() );
+		if( !data->isEqualTo( other.data.get() ) )
+		{
+			return false;
+		}
+	}
+	else if( data || other.data )
+	{
+		return false;
 	}
 
 	if( indices && other.indices )
 	{
-		indicesEqual = indices->isEqualTo( other.indices.get() );
+		if( !indices->isEqualTo( other.indices.get() ) )
+		{
+			return false;
+		}
+	}
+	else if( indices || other.indices )
+	{
+		return false;
 	}
 
-	return dataEqual && indicesEqual;
+	return true;
 }
 
 bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
