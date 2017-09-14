@@ -73,12 +73,8 @@ MeshPrimitivePtr processMesh( const IECore::MeshPrimitive *mesh, const std::stri
 		throw InvalidArgumentException( "MeshAlgo::distributePoints : The input mesh could not be triangulated" );
 	}
 
-	if( result->variables.find( "faceArea" ) == result->variables.end() )
-	{
-		result->variables["faceArea"] = MeshAlgo::calculateFaceArea( result.get(), position );
-	}
-
-	if( result->variables.find( "textureArea" ) == result->variables.end() && result->variables.find( uvSet ) != result->variables.end() )
+	result->variables["faceArea"] = MeshAlgo::calculateFaceArea( result.get(), position );
+	if( result->variables.find( uvSet ) != result->variables.end() )
 	{
 		result->variables["textureArea"] = MeshAlgo::calculateFaceTextureArea( result.get(), uvSet, position );
 	}
