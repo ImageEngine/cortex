@@ -72,7 +72,7 @@ class ToMayaMeshConverter : public ToMayaObjectConverter
 	private:
 		
 		void assignDefaultShadingGroup( MObject &shape ) const;
-		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, const std::string &stIdPrimVarName, MString *uvSetName = 0 ) const;
+		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECore::MeshPrimitive *mesh, IECore::PrimitiveVariableMap::const_iterator &uvIt ) const;
 
 };
 

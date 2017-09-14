@@ -63,11 +63,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 
-		self.assert_( "s" in coreMesh )
-		self.assert_( "t" in coreMesh )
+		self.assertTrue( "uv" in coreMesh )
 		
-		coreMesh[ "testUVSet_s" ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
-		coreMesh[ "testUVSet_t" ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 		
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
@@ -104,26 +102,24 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 		
-		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
+		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
+		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
 		
 		fnMesh.getUVs( u, v, "testUVSet" )
 
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 	
-		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
-		self.assertEqual( v[12], coreMesh[ "testUVSet_t" ].data[12] )
+		self.assertEqual( u[12], coreMesh[ "testUVSet" ].data[12][0] )
+		self.assertEqual( v[12], coreMesh[ "testUVSet" ].data[12][1] )
 
 	def testUVConversionFromPlug( self ) :
 		
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		
-		self.assert_( "s" in coreMesh )
-		self.assert_( "t" in coreMesh )
-		
-		coreMesh[ "testUVSet_s" ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
-		coreMesh[ "testUVSet_t" ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+		self.assertTrue( "uv" in coreMesh )
+
+		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 		
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		op = fn.getOp()
@@ -158,29 +154,27 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-		
-		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
+
+		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
+		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
 		
 		fnMesh.getUVs( u, v, "testUVSet" )
 		
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-		
-		self.assertEqual( u[12], coreMesh[ "testUVSet_s" ].data[12] )
-		self.assertEqual( v[12], coreMesh[ "testUVSet_t" ].data[12] )
+
+		self.assertEqual( u[12], coreMesh[ "testUVSet" ].data[12][0] )
+		self.assertEqual( v[12], coreMesh[ "testUVSet" ].data[12][1] )
 	
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Invisible meshes with 6+ UV sets cause seg faults prior to Maya 2016" )
 	def testManyUVConversionsFromPlug( self ) :
 		
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		
-		self.assertTrue( "s" in coreMesh )
-		self.assertTrue( "t" in coreMesh )
+		self.assertTrue( "uv" in coreMesh )
 		
 		for i in range( 0, 7 ) :
-			coreMesh[ "testUVSet%d_s" % i ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
-			coreMesh[ "testUVSet%d_t" % i ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
+			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 		
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		
@@ -216,16 +210,16 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		fnMesh.getUVs( u, v )
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-		self.assertEqual( u[0], coreMesh[ "s" ].data[0] )
-		self.assertEqual( v[0], coreMesh[ "t" ].data[0] )
+		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
+		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
 		
 		for i in range( 0, 7 ) :
 			
 			fnMesh.getUVs( u, v, "testUVSet%d" % i )
 			self.assertEqual( u.length(), 2280 )
 			self.assertEqual( v.length(), 2280 )
-			self.assertEqual( u[12], coreMesh[ "testUVSet%d_s" % i ].data[12] )
-			self.assertEqual( v[12], coreMesh[ "testUVSet%d_t" % i ].data[12] )
+			self.assertEqual( u[12], coreMesh[ "testUVSet%d" % i ].data[12][0] )
+			self.assertEqual( v[12], coreMesh[ "testUVSet%d" % i ].data[12][1] )
 	
 	def testUVConversionFromMayaMesh( self ) :
 		
@@ -256,8 +250,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		
 		# Check uvIndices
 		coreMesh2 = IECoreMaya.FromMayaMeshConverter( mayaMesh2 ).convert()
-		self.assertEqual( coreMesh["stIndices"].data, coreMesh2["stIndices"].data )
-	
+		# self.assertEqual( coreMesh["uv"].data, coreMesh2["uv"].data )
+		self.assertEqual( coreMesh["uv"].indices, coreMesh2["uv"].indices )
+
 	def testShadingGroup( self ) :
 	
 		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
