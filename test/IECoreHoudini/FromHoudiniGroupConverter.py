@@ -526,7 +526,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		uvunwrap = merge.createOutputNode( "uvunwrap" )
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
-		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap']
+		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v', 'varmap']
 		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
 		
@@ -542,7 +542,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^generator* ^varmap ^born ^event" )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v'] )
 			
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		result = converter.convert()
@@ -559,7 +559,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter.parameters()["attributeFilter"].setTypedValue( "uv Cd" )
 		result = converter.convert()
 		for child in result.children() :
-			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 's', 't'] )
+			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'uv'] )
 	
 	def testStandardAttributeConversion( self ) :
 		
@@ -576,9 +576,9 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		result = converter.convert()
 		for child in result.children() :
 			if hou.applicationVersion()[0] >= 15 :
-				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'width'] )
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v', 'width'] )
 			else :
-				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 's', 'source', 't', 'v', 'varmap', 'width'] )
+				self.assertEqual( child.keys(), ['Cs', 'P', 'Pref', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v', 'varmap', 'width'] )
 
 			self.assertTrue( child.arePrimitiveVariablesValid() )
 			self.assertEqual( child["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )

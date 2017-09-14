@@ -402,21 +402,21 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 		
-		# have to filter the source attrs s, t and not uv
+		# have to filter the source attrs
 		converter = IECoreHoudini.ToHoudiniCortexObjectConverter( mesh )
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		result = IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert()
-		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P', 'Pref', 's', 't', 'width' ] )
+		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P', 'Pref', 'width' ] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
 		result = IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert()
 		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P' ] )
 		
 		# verify non-primitives do not break
 		converter = IECoreHoudini.ToHoudiniCortexObjectConverter( IECore.IntData( 1 ) )
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^pscale ^rest" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertEqual( IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert(), IECore.IntData( 1 ) )
 	

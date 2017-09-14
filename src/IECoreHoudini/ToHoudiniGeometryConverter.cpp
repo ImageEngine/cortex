@@ -68,7 +68,7 @@ ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const IECore::Object *ob
 	
 	m_convertStandardAttributesParameter = new BoolParameter(
 		"convertStandardAttributes",
-		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)",
+		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd)",
 		true
 	);
 	
@@ -212,40 +212,35 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	UT_String filter( attributeFilterParameter()->getTypedValue() );
 	
 	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
-	if ( convertStandardAttributes && UT_String( "s" ).multiMatch( filter ) && UT_String( "t" ).multiMatch( filter ) )
+
+	if( UT_String( "uv" ).multiMatch( filter ) )
 	{
-		// convert s and t to uv
-		PrimitiveVariableMap::const_iterator sPrimVar = primitive->variables.find( "s" );
-		PrimitiveVariableMap::const_iterator tPrimVar = primitive->variables.find( "t" );
-		if ( sPrimVar != primitive->variables.end() && tPrimVar != primitive->variables.end() )
+		PrimitiveVariableMap::const_iterator uvPrimVar = primitive->variables.find( "uv" );
+		if( uvPrimVar != primitive->variables.end() && uvPrimVar->second.data->typeId() == V2fVectorDataTypeId )
 		{
-			if ( sPrimVar->second.interpolation == tPrimVar->second.interpolation )
+			// Houdini doesn't have a concept of indexed numeric data
+			// so we must expand indices if they exist.
+			V2fVectorDataPtr uvData = runTimeCast<V2fVectorData>( uvPrimVar->second.expandedData() );
+			const std::vector<Imath::V2f> &uvs = uvData->readable();
+
+			// Houdini prefers a V3f uvw rather than V2f uv,
+			// though they advise setting the 3rd component to 0.
+			std::vector<Imath::V3f> uvw;
+			uvw.reserve( uvs.size() );
+			for ( size_t i=0; i < uvs.size(); ++i )
 			{
-				const FloatVectorData *sData = runTimeCast<const FloatVectorData>( sPrimVar->second.data.get() );
-				const FloatVectorData *tData = runTimeCast<const FloatVectorData>( tPrimVar->second.data.get() );
-				if ( sData && tData )
-				{
-					const std::vector<float> &s = sData->readable();
-					const std::vector<float> &t = tData->readable();
-					
-					std::vector<Imath::V3f> uvw;
-					uvw.reserve( s.size() );
-					for ( size_t i=0; i < s.size(); ++i )
-					{
-						uvw.emplace_back( s[i], t[i], 0 );
-					}
-					
-					GA_Range range = vertRange;
-					if ( sPrimVar->second.interpolation == pointInterpolation )
-					{
-						range = points;
-					}
-					
-					ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( new V3fVectorData( uvw ) );
-					converter->convert( "uv", geo, range );
-					filter += " ^s ^t";
-				}
+				uvw.emplace_back( uvs[i][0], uvs[i][1], 0 );
 			}
+
+			GA_Range range = vertRange;
+			if ( uvPrimVar->second.interpolation == pointInterpolation )
+			{
+				range = points;
+			}
+
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( new V3fVectorData( uvw ) );
+			converter->convert( "uv", geo, range );
+			filter += " ^uv";
 		}
 	}
 	

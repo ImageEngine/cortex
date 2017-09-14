@@ -901,8 +901,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			if key != "P" :
 				del curves[key]
 		rand = IECore.Rand32()
-		curves["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
-		curves["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
 		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
 		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
@@ -914,24 +913,24 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		# have to filter the source attrs s, t and not uv
+		# have to filter the source attrs
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]),TestToHoudiniCurvesConverter.PointPositionAttribs + ['pscale', 'rest', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]),TestToHoudiniCurvesConverter.PointPositionAttribs + ['pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s  ^width ^Cs" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^width ^Cs" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['rest', 't'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['rest', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
@@ -944,8 +943,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			if key != "P" :
 				del curves[key]
 		rand = IECore.Rand32()
-		curves["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
-		curves["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ rand.nextf() for x in range( 0, 32 ) ] ) )
+		curves["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
 		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
 		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
@@ -960,31 +958,32 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
-		sData = curves["s"].data
-		tData = curves["t"].data
+		uvData = curves["uv"].data
 		uvs = geo.findPointAttrib( "uv" )
 		
 		i = 0
 		for point in geo.points() :
 			uvValues = point.attribValue( uvs )
-			self.assertAlmostEqual( uvValues[0], sData[i] )
-			self.assertAlmostEqual( uvValues[1], tData[i] )
+			self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+			self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 			i += 1
 		
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		geo = sop.geometry()
-		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['Pref', 's', 't', 'width'] )
+		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniCurvesConverter.PointPositionAttribs + ['Pref', 'uv', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['Cs'] )
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
 		i = 0
-		s = geo.findPointAttrib( "s" )
-		t = geo.findPointAttrib( "t" )
+		uvData = curves["uv"].data
+		uvIndices = curves["uv"].indices
+		uvs = geo.findPointAttrib( "uv" )
 		for point in geo.points() :
-			self.assertAlmostEqual( point.attribValue( s ), sData[i] )
-			self.assertAlmostEqual( point.attribValue( t ), tData[i] )
+			uvValues = point.attribValue( uvs )
+			self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+			self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 			i += 1
 	
 	def tearDown( self ) :

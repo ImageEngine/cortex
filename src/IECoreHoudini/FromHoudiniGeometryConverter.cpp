@@ -81,7 +81,7 @@ void FromHoudiniGeometryConverter::constructCommon()
 	
 	m_convertStandardAttributesParameter = new BoolParameter(
 		"convertStandardAttributes",
-		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs ; uv->s,t)",
+		"Performs automated conversion of Houdini Attributes to standard PrimitiveVariables (i.e. rest->Pref ; Cd->Cs)",
 		true
 	);
 	
@@ -316,8 +316,6 @@ void FromHoudiniGeometryConverter::transferAttribs(
 
 void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter, AttributeMap &attributeMap, Primitive *result, PrimitiveVariable::Interpolation interpolation ) const
 {
-	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
-	
 	for ( GA_AttributeDict::iterator it=attribs.begin( GA_SCOPE_PUBLIC ); it != attribs.end(); ++it )
 	{
 		GA_Attribute *attr = it.attrib();
@@ -339,14 +337,40 @@ void FromHoudiniGeometryConverter::transferElementAttribs( const GU_Detail *geo,
 		}
 		
 		// special case for uvs
-		if ( convertStandardAttributes && name.equal( "uv" ) )
+		if( name.equal( "uv" ) )
 		{
-			FloatVectorDataPtr sData = extractData<FloatVectorData>( attr, range, 0 );
-			FloatVectorDataPtr tData = extractData<FloatVectorData>( attr, range, 1 );
+			IntVectorDataPtr indexData = new IntVectorData;
+			std::vector<int> &indices = indexData->writable();
 
-			result->variables["s"] = PrimitiveVariable( interpolation, sData );
-			result->variables["t"] = PrimitiveVariable( interpolation, tData );
-			
+			// uvs are V3f in Houdini, so we must extract individual components
+			FloatVectorDataPtr uData = extractData<FloatVectorData>( attr, range, 0 );
+			FloatVectorDataPtr vData = extractData<FloatVectorData>( attr, range, 1 );
+			const std::vector<float> &u = uData->readable();
+			const std::vector<float> &v = vData->readable();
+
+			V2fVectorDataPtr uvData = new V2fVectorData;
+			uvData->setInterpretation( GeometricData::UV );
+			std::vector<Imath::V2f> &uvs = uvData->writable();
+			uvs.reserve( u.size() );
+			for( size_t i = 0, nextIndex = 0; i < u.size(); ++i )
+			{
+				Imath::V2f uv( u[i], v[i] );
+
+				const auto uvIt = std::find( uvs.begin(), uvs.end(), uv );
+				if( uvIt != uvs.end() )
+				{
+					indices.push_back( (int)(uvIt - uvs.begin()) );
+				}
+				else
+				{
+					indices.push_back( (int)nextIndex );
+					uvs.push_back( uv );
+					++nextIndex;
+				}
+			}
+
+			result->variables["uv"] = PrimitiveVariable( interpolation, uvData, indexData );
+
 			continue;
 		}
 		

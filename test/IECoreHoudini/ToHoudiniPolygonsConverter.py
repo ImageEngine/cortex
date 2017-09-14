@@ -846,26 +846,19 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		# have to filter the source attrs s, t and not uv
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^pscale ^rest" )
+		# have to filter the source attrs
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
-		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
-		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ],  TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^width ^Cs" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual([ x.name() for x in sop.geometry().pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'rest'] )
+		self.assertItemsEqual( [ x.name() for x in sop.geometry().pointAttribs() ],  TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation', ] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['t'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
 	def testStandardAttributeConversion( self ) :
@@ -888,8 +881,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
-		sData = mesh["s"].data
-		tData = mesh["t"].data
+		uvData = mesh["uv"].data
 		uvs = geo.findVertexAttrib( "uv" )
 		
 		i = 0
@@ -898,8 +890,8 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 			verts.reverse()
 			for vert in verts :
 				uvValues = vert.attribValue( uvs )
-				self.assertAlmostEqual( uvValues[0], sData[i] )
-				self.assertAlmostEqual( uvValues[1], tData[i] )
+				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 				i += 1
 		
 		converter["convertStandardAttributes"].setTypedValue( False )
@@ -907,18 +899,19 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		self.assertItemsEqual( [ x.name() for x in geo.pointAttribs() ], TestToHoudiniPolygonsConverter.PointPositionAttribs + ['N', 'Pref', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation', ] )
-		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 's', 't'] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
+		uvs = geo.findVertexAttrib( "uv" )
+
 		i = 0
-		s = geo.findVertexAttrib( "s" )
-		t = geo.findVertexAttrib( "t" )
 		for prim in geo.prims() :
 			verts = list(prim.vertices())
 			verts.reverse()
 			for vert in verts :
-				self.assertAlmostEqual( vert.attribValue( s ), sData[i] )
-				self.assertAlmostEqual( vert.attribValue( t ), tData[i] )
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 				i += 1
 	
 	def testCannotTransformRest( self ) :
@@ -993,6 +986,75 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		attrib = sop.geometry().findPrimAttrib( "ieMeshInterpolation" )
 		for prim in sop.geometry().prims() :
 			self.assertEqual( prim.attribValue( attrib ), "subdiv" )
+
+	def testExpandedUVRoundTrip( self ) :
+
+		mesh = IECore.Reader.create( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
+		mesh["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, mesh["uv"].expandedData(), None )
+		mesh["uv"].indices = None
+		uvData = mesh["uv"].data
+
+		sop = self.emptySop()
+
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+
+		geo = sop.geometry()
+		self.assertTrue( "uv" in [ x.name() for x in geo.vertexAttribs() ] )
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
+				i += 1
+
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( sop )
+		result = converter.convert()
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		# we cannot guarantee to generate the same data when extracting from Houdini
+		# because we always generate indices, but we can generate correctly indexed data
+		self.assertEqual( result["uv"].data.size(), 4 )
+		self.assertEqual( result["uv"].indices.size(), 6 )
+		for i in range( 0, mesh.variableSize( mesh["uv"].interpolation ) ) :
+			self.assertEqual( mesh["uv"].data[i], result["uv"].data[ result["uv"].indices[i] ] )
+
+	def testIndexedUVRoundTrip( self ) :
+
+		mesh = IECore.Reader.create( "test/IECore/data/cobFiles/twoTrianglesWithSharedUVs.cob" ).read()
+		uvData = mesh["uv"].data
+		uvIndices = mesh["uv"].indices
+
+		sop = self.emptySop()
+
+		self.assertTrue( IECoreHoudini.ToHoudiniPolygonsConverter( mesh ).convert( sop ) )
+
+		geo = sop.geometry()
+		self.assertTrue( "uv" in [ x.name() for x in geo.vertexAttribs() ] )
+		uvs = geo.findVertexAttrib( "uv" )
+
+		i = 0
+		for prim in geo.prims() :
+			verts = list(prim.vertices())
+			verts.reverse()
+			for vert in verts :
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvValues[0], uvData[uvIndices[i]][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[uvIndices[i]][1] )
+				i += 1
+
+		converter = IECoreHoudini.FromHoudiniPolygonsConverter( sop )
+		result = converter.convert()
+		self.assertEqual( result["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		# we cannot guarantee to generate the same indices when extracting from Houdini
+		# nor the same data, but we can generate correctly indexed data
+		self.assertEqual( result["uv"].data.size(), 4 )
+		self.assertEqual( result["uv"].indices.size(), 6 )
+		for i in range( 0, mesh.variableSize( mesh["uv"].interpolation ) ) :
+			self.assertEqual( mesh["uv"].data[ mesh["uv"].indices[i] ], result["uv"].data[ result["uv"].indices[i] ] )
 
 	def tearDown( self ) :
 		
