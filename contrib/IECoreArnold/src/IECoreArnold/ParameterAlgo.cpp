@@ -75,7 +75,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 			msg( Msg::Warning, "setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );
 			return;
 		}
-		if( a->type != parameterType )
+		if( AiArrayGetType( a ) != parameterType )
 		{
 			msg( Msg::Warning, "setParameter", boost::format( "Unable to create array of type %s from data of type \"%s\" for parameter \"%s\"" ) % AiParamGetTypeName( parameterType ) % value->typeName() % name );
 			return;
@@ -199,8 +199,8 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 	typename DataType::Ptr data = new DataType;
 	VectorType &v = data->writable();
 
-	v.reserve( array->nelements );
-	for( size_t i = 0; i < array->nelements; ++i )
+	v.reserve( AiArrayGetNumElements(array) );
+	for( size_t i = 0; i < AiArrayGetNumElements(array); ++i )
 	{
 		v.push_back( f( array, i, __AI_FILE__, __AI_LINE__ ) );
 	}
@@ -212,7 +212,7 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 /// consider exposing it in the public API.
 IECore::DataPtr arrayToData( AtArray *array )
 {
-	if( array->nkeys > 1 )
+	if( AiArrayGetNumKeys( array ) > 1 )
 	{
 		/// \todo Decide how to deal with more
 		/// than one key - is it more useful to return multiple Data
@@ -220,7 +220,7 @@ IECore::DataPtr arrayToData( AtArray *array )
 		return NULL;
 	}
 
-	switch( array->type )
+	switch( AiArrayGetType( array ) )
 	{
 		case AI_TYPE_BOOLEAN :
 			return arrayToDataInternal<bool>( array, AiArrayGetBoolFunc );
@@ -286,7 +286,7 @@ void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Da
 	int type = AiParamGetType( parameter );
 	if( type == AI_TYPE_ARRAY )
 	{
-		type = AiParamGetDefault( parameter )->ARRAY->type;
+		type = AiArrayGetType( AiParamGetDefault( parameter )->ARRAY() );
 		isArray = true;
 	}
 
