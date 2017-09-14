@@ -85,8 +85,9 @@ struct IECORE_API PrimitiveVariable {
 	/// Optional indices array into the primary Data. This can be used
 	/// to store a more compact representation of the data, for example
 	/// a constant list of strings which are mapped to Vertex, Uniform,
-	/// or FaceVarying via the indices. Similarly, UV sets can be stored
-	/// as Vertex data and mapped to FaceVarying using the indices.
+	/// or FaceVarying via the indices. Similarly, UV sets can store an
+	/// array of unique UVs in data and map them to FaceVarying using
+	/// the indices.
 	IntVectorDataPtr indices;
 };
 
