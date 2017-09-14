@@ -84,20 +84,20 @@ const T *variableData( const PrimitiveVariableMap &variables, const std::string 
 	return runTimeCast<T>( it->second.data.get() );
 }
 
-void convertUVSet( PrimitiveVariableMap::const_iterator uvIt, const vector<int> &vertexIds, AtNode *node )
+void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable, const vector<int> &vertexIds, AtNode *node )
 {
-	const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvIt->second.data.get() );
+	const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvVariable.data.get() );
 
 	if( !uvData )
 	{
 		return;
 	}
 
-	if( uvIt->second.interpolation != PrimitiveVariable::Varying && uvIt->second.interpolation != PrimitiveVariable::Vertex && uvIt->second.interpolation != PrimitiveVariable::FaceVarying )
+	if( uvVariable.interpolation != PrimitiveVariable::Varying && uvVariable.interpolation != PrimitiveVariable::Vertex && uvVariable.interpolation != PrimitiveVariable::FaceVarying )
 	{
 		msg(
 			Msg::Warning, "ToArnoldMeshConverter::doConversion",
-			boost::format( "Variable \"%s\" has an invalid interpolation type - not generating uvs." ) % uvIt->first
+			boost::format( "Variable \"%s\" has an invalid interpolation type - not generating uvs." ) % uvSet
 		);
 		return;
 	}
@@ -112,16 +112,16 @@ void convertUVSet( PrimitiveVariableMap::const_iterator uvIt, const vector<int> 
 	}
 
 	AtArray *indicesArray = nullptr;
-	if( uvIt->second.indices )
+	if( uvVariable.indices )
 	{
-		const vector<int> &indices = uvIt->second.indices->readable();
+		const vector<int> &indices = uvVariable.indices->readable();
 		indicesArray = AiArrayAllocate( indices.size(), 1, AI_TYPE_UINT );
 		for( size_t i = 0, e = indices.size(); i < e; ++i )
 		{
 			AiArraySetUInt( indicesArray, i, indices[i] );
 		}
 	}
-	else if( uvIt->second.interpolation == PrimitiveVariable::FaceVarying )
+	else if( uvVariable.interpolation == PrimitiveVariable::FaceVarying )
 	{
 		indicesArray = identityIndices( vertexIds.size() );
 	}
@@ -134,16 +134,16 @@ void convertUVSet( PrimitiveVariableMap::const_iterator uvIt, const vector<int> 
 		}
 	}
 
-	if( uvIt->first == "uv" )
+	if( uvSet == "uv" )
 	{
 		AiNodeSetArray( node, "uvlist", uvsArray );
 		AiNodeSetArray( node, "uvidxs", indicesArray );
 	}
 	else
 	{
-		AiNodeDeclare( node, uvIt->first.c_str(), "indexed POINT2" );
-		AiNodeSetArray( node, uvIt->first.c_str(), uvsArray );
-		AiNodeSetArray( node, (uvIt->first + "idxs").c_str(), indicesArray );
+		AiNodeDeclare( node, uvSet.c_str(), "indexed POINT2" );
+		AiNodeSetArray( node, uvSet.c_str(), uvsArray );
+		AiNodeSetArray( node, (uvSet + "idxs").c_str(), indicesArray );
 	}
 }
 
@@ -176,34 +176,26 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 		AiNodeSetBool( result, "smoothing", true );
 	}
 
-	// Convert primitive variables. We start with indexed uvs,
-	// since those require matching sets of three variables.
-	// Each successful conversion removes the used variables
-	// so they are not used by the next potential conversion.
+	// Convert primitive variables.
 
 	PrimitiveVariableMap variablesToConvert = mesh->variables;
 	variablesToConvert.erase( "P" ); // These will be converted
 	variablesToConvert.erase( "N" ); // outside of this function.
 
-	// Find all UV sets. We must perform the iteration to find the
-	// names separately to the iteration to convert them, because
-	// convertUVSet() removes items from variablesToConvert, and
-	// would therefore invalidate the interators we were using if
-	// we were to do it in one loop.
-	vector<PrimitiveVariableMap::iterator> uvSets;
-	for( PrimitiveVariableMap::iterator it = variablesToConvert.begin(), eIt = variablesToConvert.end(); it != eIt; ++it )
+	// Find all UV sets and convert them explicitly.
+	for( auto it = variablesToConvert.begin(); it != variablesToConvert.end(); )
 	{
 		/// \todo: add a role enum to PrimitiveVariable, so we can distinguish between UVs and
 		///  things that just happen to hold V2fVectorData.
 		if( it->second.data->typeId() == V2fVectorDataTypeId )
 		{
-			uvSets.push_back( it );
+			::convertUVSet( it->first, it->second, vertexIds, result );
+			it = variablesToConvert.erase( it );
 		}
-	}
-	for( auto &it : uvSets )
-	{
-		::convertUVSet( it, vertexIds, result );
-		variablesToConvert.erase( it );
+		else
+		{
+			++it;
+		}
 	}
 
 	// Finally, do a generic conversion of anything that remains.
