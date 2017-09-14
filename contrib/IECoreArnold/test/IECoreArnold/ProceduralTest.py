@@ -186,9 +186,9 @@ class ProceduralTest( unittest.TestCase ) :
 		e = IECore.ImagePrimitiveEvaluator( i )
 		r = e.createResult()
 		self.assertEqual( e.pointAtUV( IECore.V2f( 0.5 ), r ), True )
-		self.assertEqual( r.floatPrimVar( e.R() ), 0 )
-		self.assertEqual( r.floatPrimVar( e.G() ), 1 )
-		self.assertEqual( r.floatPrimVar( e.B() ), 0 )
+		self.assertAlmostEqual( r.floatPrimVar( e.R() ), 0, 6 )
+		self.assertAlmostEqual( r.floatPrimVar( e.G() ), 1, 6 )
+		self.assertAlmostEqual( r.floatPrimVar( e.B() ), 0, 6 )
 
 	def testEmptyProceduralIsIgnored( self ) :
 
