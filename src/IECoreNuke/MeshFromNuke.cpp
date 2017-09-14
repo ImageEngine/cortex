@@ -102,23 +102,18 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 
 	if( uvAttr )
 	{
-		FloatVectorDataPtr ud = new FloatVectorData();
-		FloatVectorDataPtr vd = new FloatVectorData();
-		std::vector<float> &u = ud->writable();
-		std::vector<float> &v = vd->writable();
-		u.resize( uvAttr->size() );
-		v.resize( uvAttr->size() );
-		unsigned s = uvAttr->size();
-		for( unsigned i=0; i<s; i++ )
+		V2fVectorDataPtr uvData = new V2fVectorData();
+		std::vector<Imath::V2f> &uvs = uvData->writable();
+		uvs.reserve( uvAttr->size() );
+		unsigned numUVs = uvAttr->size();
+		for( unsigned i=0; i<numUVs; i++ )
 		{
-			u[i] = uvAttr->vector4( i ).x;
 			// as of Cortex 10, we take a UDIM centric approach
 			// to UVs, which clashes with Nuke, so we must flip
 			// the v values during conversion.
-			v[i] = 1.0 - uvAttr->vector4( i ).y;
+			uvs.emplace_back( uvAttr->vector4( i ).x, 1.0 - uvAttr->vector4( i ).y );
 		}
-		result->variables["s"] = PrimitiveVariable( uvInterpolation, ud );
-		result->variables["t"] = PrimitiveVariable( uvInterpolation, vd );
+		result->variables["uv"] = PrimitiveVariable( uvInterpolation, uvData );
 	}
 
 	// normals

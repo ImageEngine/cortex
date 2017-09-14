@@ -95,20 +95,34 @@ void MeshToNukeGeometryConverter::doConversion( const IECore::Object *from, Geom
 	}
 
 	// get uvs
-	const FloatVectorData *meshS = mesh->variableData< FloatVectorData >( "s", PrimitiveVariable::FaceVarying );
-	const FloatVectorData *meshT = mesh->variableData< FloatVectorData >( "t", PrimitiveVariable::FaceVarying );
-	if ( meshS && meshT )
+	PrimitiveVariableMap::const_iterator uvIt = mesh->variables.find( "uv" );
+	if( uvIt != mesh->variables.end() && uvIt->second.interpolation == PrimitiveVariable::FaceVarying && uvIt->second.data->typeId() == V2fVectorDataTypeId )
 	{
 		Attribute* uv = to.writable_attribute( objIndex, Group_Vertices, "uv", VECTOR4_ATTRIB );
-		unsigned v = 0;
-		std::vector< float >::const_iterator sIt = meshS->readable().begin();
-		std::vector< float >::const_iterator tIt = meshT->readable().begin();
-		for ( ; sIt < meshS->readable().end(); sIt++, tIt++, v++)
+		if( uvIt->second.indices )
 		{
-			// as of Cortex 10, we take a UDIM centric approach
-			// to UVs, which clashes with Nuke, so we must flip
-			// the v values during conversion.
-			uv->vector4(v).set( *sIt, 1.0 - *tIt, 0.0f, 1.0f);
+			const std::vector<Imath::V2f> &uvs = runTimeCast<V2fVectorData>( uvIt->second.data )->readable();
+			const std::vector<int> &indices = uvIt->second.indices->readable();
+
+			for( size_t i = 0; i < indices.size() ; ++i )
+			{
+				// as of Cortex 10, we take a UDIM centric approach
+				// to UVs, which clashes with Nuke, so we must flip
+				// the v values during conversion.
+				uv->vector4( i ).set( uvs[indices[i]][0], 1.0 - uvs[indices[i]][1], 0.0f, 1.0f );
+			}
+		}
+		else
+		{
+			const std::vector<Imath::V2f> &uvs = runTimeCast<V2fVectorData>( uvIt->second.data )->readable();
+
+			for( size_t i = 0; i < uvs.size() ; ++i )
+			{
+				// as of Cortex 10, we take a UDIM centric approach
+				// to UVs, which clashes with Nuke, so we must flip
+				// the v values during conversion.
+				uv->vector4( i ).set( uvs[i][0], 1.0 - uvs[i][1], 0.0f, 1.0f );
+			}
 		}
 	}
 
