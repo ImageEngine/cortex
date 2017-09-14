@@ -164,12 +164,7 @@ class MeshWriter : public PrimitiveWriter
 					if( uvIt->second.indices )
 					{
 						const std::vector<int> &indexValues = uvIt->second.indices->readable();
-						indices.reserve( indexValues.size() );
-						for( const auto &index : indexValues )
-						{
-							indices.push_back( index );
-						}
-
+						indices = std::vector<unsigned int>( indexValues.begin(), indexValues.end() );
 						uvSample.setIndices( indices );
 					}
 
