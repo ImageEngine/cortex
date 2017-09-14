@@ -305,17 +305,7 @@ void convertLegacyVariables( PrimitiveVariableMap &variables )
 					variablesToErase.push_back( indicesIt );
 				}
 
-				V2fVectorDataPtr uvData = combineUVs( u, v, indices );
-
-				bool inserted;
-				PrimitiveVariableMap::iterator uvIt;
-				std::tie( uvIt, inserted ) = variables.emplace( uvSet, PrimitiveVariable( interpolation, uvData, indices ) );
-				if( !inserted )
-				{
-					// the uvSet name already existed, but we just stomp over it.
-					// in practice, there shouldn't be any files like this.
-					uvIt->second = PrimitiveVariable( interpolation, uvData, indices );
-				}
+				variables[uvSet] = PrimitiveVariable( interpolation, combineUVs( u, v, indices ), indices );
 
 				variablesToErase.push_back( uIt );
 				variablesToErase.push_back( vIt );
