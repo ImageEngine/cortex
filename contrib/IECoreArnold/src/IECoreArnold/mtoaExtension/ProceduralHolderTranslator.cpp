@@ -158,8 +158,8 @@ class ProceduralHolderTranslator : public CShapeTranslator
 			MFnDagNode fnDagNode( m_dagPath );
 			MBoundingBox bound = fnDagNode.boundingBox();
 
-			AiNodeSetPnt( node, "min", bound.min().x, bound.min().y, bound.min().z );
-			AiNodeSetPnt( node, "max", bound.max().x, bound.max().y, bound.max().z );
+			AiNodeSetVec( node, "min", bound.min().x, bound.min().y, bound.min().z );
+			AiNodeSetVec( node, "max", bound.max().x, bound.max().y, bound.max().z );
 
 			const char *dsoPath = getenv( "IECOREARNOLD_PROCEDURAL_PATH" );
 			AiNodeSetStr( node, "dso", dsoPath ? dsoPath : "ieProcedural.so" );
