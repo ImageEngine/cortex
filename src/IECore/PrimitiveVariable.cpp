@@ -33,6 +33,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/DespatchTypedData.h"
 #include "IECore/PrimitiveVariable.h"
 
 using namespace IECore;
@@ -113,3 +114,45 @@ bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
 	return !(*this == other);
 }
 
+namespace
+{
+
+struct Expander
+{
+	typedef DataPtr ReturnType;
+
+	Expander( const std::vector<int> &indices ) : m_indices( indices )
+	{
+	}
+
+	const std::vector<int> &m_indices;
+
+	template<typename T>
+	ReturnType operator() ( T * data )
+	{
+		const typename T::ValueType &compactValues = data->readable();
+
+		typename T::Ptr result = new T();
+		typename T::ValueType &expandedValues = result->writable();
+		expandedValues.reserve( m_indices.size() );
+		for( const auto &index : m_indices )
+		{
+			expandedValues.push_back( compactValues[index] );
+		}
+
+		return result;
+	}
+};
+
+} // namespace
+
+DataPtr PrimitiveVariable::expandedData() const
+{
+	if( !indices )
+	{
+		return data->copy();
+	}
+
+	Expander expander( indices->readable() );
+	return despatchTypedData<Expander, TypeTraits::IsVectorTypedData>( data.get(), expander );
+}

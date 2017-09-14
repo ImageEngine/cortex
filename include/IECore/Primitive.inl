@@ -97,23 +97,7 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 		return nullptr;
 	}
 
-	if( !it->second.indices )
-	{
-		return data->copy();
-	}
-
-	const typename T::ValueType &compactValues = data->readable();
-	const std::vector<int> &indices = it->second.indices->readable();
-
-	typename T::Ptr result = new T();
-	typename T::ValueType &expandedValues = result->writable();
-	expandedValues.reserve( indices.size() );
-	for( const auto &index : indices )
-	{
-		expandedValues.push_back( compactValues[index] );
-	}
-
-	return result;
+	return runTimeCast<T>( it->second.expandedData() );
 }
 
 } // namespace IECore
