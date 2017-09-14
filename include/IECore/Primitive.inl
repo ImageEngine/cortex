@@ -92,6 +92,11 @@ typename T::Ptr Primitive::expandedVariableData( const std::string &name, Primit
 	}
 
 	T *data = runTimeCast<T>( it->second.data.get() );
+	if( !data )
+	{
+		return nullptr;
+	}
+
 	if( !it->second.indices )
 	{
 		return data->copy();
