@@ -148,11 +148,11 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 					AiNodeSetBool( node, name, data->readable() );
 				}
 				break;
-			case AI_TYPE_POINT2 :
+			case AI_TYPE_VECTOR2 :
 				if( const V2fData *data = dataCast<V2fData>( name, value ) )
 				{
 					const Imath::V2f &v = data->readable();
-					AiNodeSetPnt2( node, name, v.x, v.y );
+					AiNodeSetVec2( node, name, v.x, v.y );
 				}
 				break;
 			case AI_TYPE_VECTOR :
@@ -160,13 +160,6 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				{
 					const Imath::V3f &v = data->readable();
 					AiNodeSetVec( node, name, v.x, v.y, v.z );
-				}
-				break;
-			case AI_TYPE_POINT :
-				if( const V3fData *data = dataCast<V3fData>( name, value ) )
-				{
-					const Imath::V3f &v = data->readable();
-					AiNodeSetPnt( node, name, v.x, v.y, v.z );
 				}
 				break;
 			case AI_TYPE_MATRIX :
@@ -460,19 +453,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 
 int parameterType( const IECore::Data *data, bool &array )
 {
-	int type = parameterType( data->typeId(), array );
-
-	// if we have data of type vector, its interpretation matters
-	if( type == AI_TYPE_VECTOR )
-	{
-		GeometricData::Interpretation interpretation = getGeometricInterpretation( data );
-		if( interpretation == GeometricData::Point )
-		{
-			type = AI_TYPE_POINT;
-		}
-	}
-
-	return type;
+	return parameterType( data->typeId(), array );
 }
 
 AtArray *dataToArray( const IECore::Data *data, int aiType )

@@ -60,8 +60,8 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( uvIndices.contents.nelements, 4 )
 
 			for i in range( 0, 4 ) :
-				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
+				p = arnold.AiArrayGetVec2( uvs, i )
+				self.assertEqual( arnold.AiArrayGetVec2( uvs, i ), arnold.AtVector2( uvData[i][0], uvData[i][1] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
 	def testIndexedUVs( self ) :
@@ -82,12 +82,12 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( uvIndices.contents.nelements, 4 )
 
 			for i in range( 0, 4 ) :
-				aiUv = arnold.AiArrayGetPnt2( uvs, i )
+				aiUv = arnold.AiArrayGetVec2( uvs, i )
 				aiUVId = arnold.AiArrayGetInt( uvIndices, i )
-				aiIndexedUV = arnold.AiArrayGetPnt2( uvs, aiUVId )
+				aiIndexedUV = arnold.AiArrayGetVec2( uvs, aiUVId )
 				self.assertEqual( aiUVId, uvIds[i] )
-				self.assertEqual( aiUv, arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
-				self.assertEqual( aiIndexedUV, arnold.AtPoint2( uvData[uvIds[i]][0], uvData[uvIds[i]][1] ) )
+				self.assertEqual( aiUv, arnold.AtVector2( uvData[i][0], uvData[i][1] ) )
+				self.assertEqual( aiIndexedUV, arnold.AtVector2( uvData[uvIds[i]][0], uvData[uvIds[i]][1] ) )
 
 	def testAdditionalUVs( self ) :
 
@@ -106,8 +106,8 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( uvIndices.contents.nelements, 4 )
 
 			for i in range( 0, 4 ) :
-				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
+				p = arnold.AiArrayGetVec2( uvs, i )
+				self.assertEqual( arnold.AiArrayGetVec2( uvs, i ), arnold.AtVector2( uvData[i][0], uvData[i][1] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
 
 	def testNormals( self ) :
@@ -205,15 +205,15 @@ class MeshTest( unittest.TestCase ) :
 			self.assertEqual( nList.contents.nkeys, 2 )
 
 			for i in range( 0, 4 ) :
-				p = arnold.AiArrayGetPnt( vList, i )
+				p = arnold.AiArrayGetVec( vList, i )
 				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m1["P"].data[i] )
-				n = arnold.AiArrayGetPnt( nList, i )
+				n = arnold.AiArrayGetVec( nList, i )
 				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m1["N"].data[i] )
 
 			for i in range( 4, 8 ) :
-				p = arnold.AiArrayGetPnt( vList, i )
+				p = arnold.AiArrayGetVec( vList, i )
 				self.assertEqual( IECore.V3f( p.x, p.y, p.z ), m2["P"].data[i-4] )
-				n = arnold.AiArrayGetPnt( nList, i )
+				n = arnold.AiArrayGetVec( nList, i )
 				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m2["N"].data[i-4] )
 
 			a = arnold.AiNodeGetArray( node, "deform_time_samples" )
@@ -257,7 +257,7 @@ class MeshTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock( writable = True ) :
 			node = IECoreArnold.NodeAlgo.convert( m )
 			p = arnold.AiNodeGetArray( node, "points" )
-			self.assertEqual( p.contents.type, arnold.AI_TYPE_POINT )
+			self.assertEqual( p.contents.type, arnold.AI_TYPE_VECTOR )
 
 			v = arnold.AiNodeGetArray( node, "vectors" )
 			self.assertEqual( v.contents.type, arnold.AI_TYPE_VECTOR )

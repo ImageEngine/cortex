@@ -104,11 +104,11 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 
 	const vector<Imath::V2f> &uvs = uvData->readable();
 
-	AtArray *uvsArray = AiArrayAllocate( uvs.size(), 1, AI_TYPE_POINT2 );
+	AtArray *uvsArray = AiArrayAllocate( uvs.size(), 1, AI_TYPE_VECTOR2 );
 	for( size_t i = 0, e = uvs.size(); i < e; ++i )
 	{
-		AtPoint2 uv = { uvs[i][0], uvs[i][1] };
-		AiArraySetPnt2( uvsArray, i, uv );
+		AtVector2 uv = { uvs[i][0], uvs[i][1] };
+		AiArraySetVec2( uvsArray, i, uv );
 	}
 
 	AtArray *indicesArray = nullptr;

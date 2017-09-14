@@ -66,9 +66,9 @@ class CurvesTest( unittest.TestCase ) :
 			self.assertEqual( a.contents.nkeys, 2 )
 
 			for i in range( 0, 4 ) :
-				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 1 ) )
+				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 1 ) )
 			for i in range( 4, 8 ) :
-				self.assertEqual( arnold.AiArrayGetPnt( a, i ), arnold.AtPoint( 2 ) )
+				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 2 ) )
 
 			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
 			self.assertEqual( a.contents.nelements, 2 )

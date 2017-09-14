@@ -121,7 +121,7 @@ void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *na
 	AiNodeSetArray(
 		shape,
 		name,
-		AiArrayConvert( p->readable().size(), 1, AI_TYPE_POINT, (void *)&( p->readable()[0] ) )
+		AiArrayConvert( p->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( p->readable()[0] ) )
 	);
 }
 
@@ -140,7 +140,7 @@ void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *sh
 		dataSamples.push_back( p );
 	}
 
-	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_POINT );
+	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_VECTOR );
 	AiNodeSetArray( shape, name, array );
 }
 
