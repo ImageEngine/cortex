@@ -68,26 +68,14 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		//! @name Parameter accessors
 		//////////////////////////////////////////////////////////
 		//@{
-		IECore::StringParameterPtr interpolationParameter();
-		IECore::StringParameterPtr interpolationParameter() const;
+		IECore::StringParameter *interpolationParameter();
+		const IECore::StringParameter *interpolationParameter() const;
 
-		IECore::BoolParameterPtr pointsParameter();
-		IECore::BoolParameterPtr pointsParameter() const;
+		IECore::BoolParameter *colorsParameter();
+		const IECore::BoolParameter *colorsParameter() const;
 
-		IECore::BoolParameterPtr normalsParameter();
-		IECore::BoolParameterPtr normalsParameter() const;
-
-		IECore::BoolParameterPtr stParameter();
-		IECore::BoolParameterPtr stParameter() const;
-
-		IECore::BoolParameterPtr extraSTParameter();
-		IECore::BoolParameterPtr extraSTParameter() const;
-
-		IECore::BoolParameterPtr colorsParameter();
-		IECore::ConstBoolParameterPtr colorsParameter() const;
-
-		IECore::BoolParameterPtr extraColorsParameter();
-		IECore::ConstBoolParameterPtr extraColorsParameter() const;
+		IECore::BoolParameter *extraColorsParameter();
+		const IECore::BoolParameter *extraColorsParameter() const;
 
 		//@}
 
@@ -116,13 +104,6 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 		void sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const;
 
 		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
-
-		IECore::StringParameterPtr m_interpolation;
-		IECore::BoolParameterPtr m_points;
-		IECore::BoolParameterPtr m_normals;
-		IECore::BoolParameterPtr m_st;
-		IECore::BoolParameterPtr m_extraST;
-		IECore::StringParameterPtr m_primVarAttrPrefix;
 
 		static Description<FromMayaMeshConverter> m_description;
 		static Description<FromMayaMeshConverter> m_dataDescription;

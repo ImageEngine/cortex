@@ -87,98 +87,29 @@ void FromMayaMeshConverter::constructCommon()
 	// the last interpolation type is 'default'
 	interpolationPresets.push_back( StringParameter::Preset( "default", "default" ) );
 
-	m_interpolation = new StringParameter(
+	StringParameterPtr interpolation = new StringParameter(
 		"interpolation",
 		"Sets the interpolation type of the new mesh. When 'default' is used it will query the attribute 'ieMeshInterpolation' from the Mesh instead (and use linear if nonexistent).",
 		"default",
 		interpolationPresets
 	);
 
-	parameters()->addParameter( m_interpolation );
-
-	// points
-	BoolParameter::PresetsContainer pointsPresets;
-	pointsPresets.push_back( BoolParameter::Preset( "poly", true ) );
-	pointsPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
-
-	m_points = new BoolParameter(
-		"points",
-		"When this is on the mesh points are added to the result as a primitive variable named \"P\".",
-		true,
-		pointsPresets
-	);
-
-	parameters()->addParameter( m_points );
-
-	// normals
-	BoolParameter::PresetsContainer normalsPresets;
-	normalsPresets.push_back( BoolParameter::Preset( "poly", true ) );
-	normalsPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
-
-	m_normals = new BoolParameter(
-		"normals",
-		"When this is on the mesh normals are added to the result as a primitive variable named \"N\". "
-		"Note that normals will only ever be added to meshes created with linear interpolation as "
-		"vertex normals are unsuitable for meshes which will be rendered with some form of "
-		"subdivision.",
-		true,
-		normalsPresets
-	);
-
-	parameters()->addParameter( m_normals );
-
-	// st
-	BoolParameter::PresetsContainer stPresets;
-	stPresets.push_back( BoolParameter::Preset( "poly", true ) );
-	stPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
-
-	m_st = new BoolParameter(
-		"st",
-		"When this is on the default uv set is added to the result as primitive variables named \"s\" and \"t\".",
-		true,
-		stPresets
-	);
-
-	parameters()->addParameter( m_st );
-
-	// extra st
-	BoolParameter::PresetsContainer extraSTPresets;
-	extraSTPresets.push_back( BoolParameter::Preset( "poly", true ) );
-	extraSTPresets.push_back( BoolParameter::Preset( "subdiv", true ) );
-
-	m_extraST = new BoolParameter(
-		"extraST",
-		"When this is on, any additional uv sets are added to the result as primitive variables named \"setName_s\" and \"setName_t\".",
-		true,
-		extraSTPresets
-	);
-
-	parameters()->addParameter( m_extraST );
+	parameters()->addParameter( interpolation );
 
 	// colors
-	BoolParameter::PresetsContainer colorsPresets;
-	colorsPresets.push_back( BoolParameter::Preset( "poly", false ) );
-	colorsPresets.push_back( BoolParameter::Preset( "subdiv", false ) );
-
 	BoolParameterPtr colors = new BoolParameter(
 		"colors",
 		"When this is on the default color set is added to the result as primitive variable named \"Cs\".",
-		false,
-		colorsPresets
+		false
 	);
 
 	parameters()->addParameter( colors );
 
 	// extra colors
-	BoolParameter::PresetsContainer extraColorsPresets;
-	extraColorsPresets.push_back( BoolParameter::Preset( "poly", false ) );
-	extraColorsPresets.push_back( BoolParameter::Preset( "subdiv", false ) );
-
 	BoolParameterPtr extraColors = new BoolParameter(
 		"extraColors",
 		"When this is on, all color sets are added to the result as primitive variables named \"setName_Cs\".",
-		false,
-		extraColorsPresets
+		false
 	);
 
 	parameters()->addParameter( extraColors );
@@ -193,72 +124,32 @@ FromMayaMeshConverter::~FromMayaMeshConverter()
 // parameter access
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IECore::StringParameterPtr FromMayaMeshConverter::interpolationParameter()
+IECore::StringParameter *FromMayaMeshConverter::interpolationParameter()
 {
-	return m_interpolation;
+	return parameters()->parameter< StringParameter >( "interpolation" );
 }
 
-IECore::StringParameterPtr FromMayaMeshConverter::interpolationParameter() const
+const IECore::StringParameter *FromMayaMeshConverter::interpolationParameter() const
 {
-	return m_interpolation;
+	return parameters()->parameter< StringParameter >( "interpolation" );
 }
 
-IECore::BoolParameterPtr FromMayaMeshConverter::pointsParameter()
-{
-	return m_points;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::pointsParameter() const
-{
-	return m_points;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::normalsParameter()
-{
-	return m_normals;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::normalsParameter() const
-{
-	return m_normals;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::stParameter()
-{
-	return m_st;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::stParameter() const
-{
-	return m_st;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter()
-{
-	return m_extraST;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::extraSTParameter() const
-{
-	return m_extraST;
-}
-
-IECore::BoolParameterPtr FromMayaMeshConverter::colorsParameter()
+IECore::BoolParameter *FromMayaMeshConverter::colorsParameter()
 {
 	return parameters()->parameter< BoolParameter >( "colors" );
 }
 
-IECore::ConstBoolParameterPtr FromMayaMeshConverter::colorsParameter() const
+const IECore::BoolParameter *FromMayaMeshConverter::colorsParameter() const
 {
 	return parameters()->parameter< BoolParameter >( "colors" );
 }
 
-IECore::BoolParameterPtr FromMayaMeshConverter::extraColorsParameter()
+IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter()
 {
 	return parameters()->parameter< BoolParameter >( "extraColors" );
 }
 
-IECore::ConstBoolParameterPtr FromMayaMeshConverter::extraColorsParameter() const
+const IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter() const
 {
 	return parameters()->parameter< BoolParameter >( "extraColors" );
 }
@@ -596,7 +487,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	copy( MArrayIter<MIntArray>::begin( vertexCounts ), MArrayIter<MIntArray>::end( vertexCounts ), verticesPerFaceIt );
 	copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
 	
-	std::string interpolation = m_interpolation->getTypedValue();
+	std::string interpolation = interpolationParameter()->getTypedValue();
 	if ( interpolation == "default" )
 	{
 		MStatus st;
@@ -606,10 +497,10 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			unsigned int interpolationIndex = interpolationPlug.asInt(MDGContext::fsNormal, &st);
 			if ( st )
 			{
-				if ( interpolationIndex < m_interpolation->getPresets().size() - 1 )
+				if ( interpolationIndex < interpolationParameter()->getPresets().size() - 1 )
 				{
 					// convert interpolation index to the preset value
-					interpolation = boost::static_pointer_cast< StringData >( m_interpolation->getPresets()[interpolationIndex].second )->readable();
+					interpolation = boost::static_pointer_cast< StringData >( interpolationParameter()->getPresets()[interpolationIndex].second )->readable();
 				}
 				else
 				{
@@ -629,59 +520,48 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, interpolation );
 
-	if( m_points->getTypedValue() )
-	{
-		result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );
-	}
-	if( m_normals->getTypedValue() && interpolation=="linear" )
+	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );
+
+	if( interpolation=="linear" )
 	{
 		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
 	}
 
-	bool convertST = stParameter()->getTypedValue();
-	if( convertST )
+	MString currentUVSet;
+	fnMesh.getCurrentUVSetName( currentUVSet );
+	if( currentUVSet.length() )
 	{
-		MString currentUVSet;
-		fnMesh.getCurrentUVSetName( currentUVSet );
-		if( currentUVSet.length() )
-		{
-			FloatVectorDataPtr sData = new FloatVectorData;
-			FloatVectorDataPtr tData = new FloatVectorData;
-			IntVectorDataPtr stIndicesData = getStIndices( currentUVSet, verticesPerFaceData );
-			sAndT( currentUVSet, stIndicesData, sData, tData );
+		FloatVectorDataPtr sData = new FloatVectorData;
+		FloatVectorDataPtr tData = new FloatVectorData;
+		IntVectorDataPtr stIndicesData = getStIndices( currentUVSet, verticesPerFaceData );
+		sAndT( currentUVSet, stIndicesData, sData, tData );
 
-			result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-			result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-			result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
-		}
+		result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+		result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+		result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 	}
-	
-	if( extraSTParameter()->getTypedValue() )
+
+	MStringArray uvSets;
+	fnMesh.getUVSetNames( uvSets );
+	for( unsigned int i=0; i<uvSets.length(); i++ )
 	{
-		MString currentUVSet;
-		fnMesh.getCurrentUVSetName( currentUVSet );
-		MStringArray uvSets;
-		fnMesh.getUVSetNames( uvSets );
-		for( unsigned int i=0; i<uvSets.length(); i++ )
+		if( uvSets[i] == currentUVSet )
 		{
-			if( convertST && uvSets[i] == currentUVSet )
-			{
-				// we've already converted these UVs above
-				continue;
-			}
-			
-			FloatVectorDataPtr sData = new FloatVectorData;
-			FloatVectorDataPtr tData = new FloatVectorData;
-			IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
-			sAndT( uvSets[i], stIndicesData, sData, tData );
-			
-			MString sName = uvSets[i] + "_s";
-			MString tName = uvSets[i] + "_t";
-			MString indicesName = uvSets[i] + "Indices";
-			result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-			result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-			result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+			// we've already converted these UVs above
+			continue;
 		}
+
+		FloatVectorDataPtr sData = new FloatVectorData;
+		FloatVectorDataPtr tData = new FloatVectorData;
+		IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
+		sAndT( uvSets[i], stIndicesData, sData, tData );
+
+		MString sName = uvSets[i] + "_s";
+		MString tName = uvSets[i] + "_t";
+		MString indicesName = uvSets[i] + "Indices";
+		result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
+		result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
+		result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
 	}
 
 	bool convertColors = colorsParameter()->getTypedValue();

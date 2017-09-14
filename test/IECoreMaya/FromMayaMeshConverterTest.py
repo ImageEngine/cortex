@@ -93,30 +93,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertFalse( "N" in p )
 		self.assertEqual( p.interpolation, "catmullClark" )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["points"].getTypedValue(), True )
-		m = converter.convert()
-		self.assert_( "P" in m )
-		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		converter["points"].setTypedValue( False )
-		self.assert_( not "P" in converter.convert() )
-
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["normals"].getTypedValue(), True )
-		m = converter.convert()
-		self.assert_( "N" in m )
-		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		converter["normals"].setTypedValue( False )
-		self.assert_( not "N" in converter.convert() )
-
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["st"].getTypedValue(), True )
-		self.assert_( "s" in converter.convert() )
-		self.assert_( "t" in converter.convert() )
-		converter["st"].setTypedValue( False )
-		self.assert_( not "s" in converter.convert() )
-		self.assert_( not "t" in converter.convert() )
-
 	def testInterpolationType( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
