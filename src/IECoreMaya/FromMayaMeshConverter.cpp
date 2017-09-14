@@ -158,7 +158,7 @@ const IECore::BoolParameter *FromMayaMeshConverter::extraColorsParameter() const
 // conversion
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
+IECore::PrimitiveVariable FromMayaMeshConverter::points() const
 {
 	MFnMesh fnMesh;
 	const MDagPath *d = dagPath( true );
@@ -187,10 +187,11 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::points() const
 		fnMesh.getPoints( mPoints, space() );
 		std::transform( MArrayIter<MFloatPointArray>::begin( mPoints ), MArrayIter<MFloatPointArray>::end( mPoints ), points->writable().begin(), VecConvert<MFloatPoint, V3f>() );
 	}
-	return points;
+
+	return PrimitiveVariable( PrimitiveVariable::Vertex, points );
 }
 
-IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
+IECore::PrimitiveVariable FromMayaMeshConverter::normals() const
 {
 	MFnMesh fnMesh;
 	const MDagPath *d = dagPath( true );
@@ -247,136 +248,67 @@ IECore::V3fVectorDataPtr FromMayaMeshConverter::normals() const
 		}
 	}
 	
-	return normalsData;
+	return PrimitiveVariable( PrimitiveVariable::FaceVarying, normalsData );
 }
 
-void FromMayaMeshConverter::sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const
+IECore::PrimitiveVariable FromMayaMeshConverter::uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const
 {
 	MFnMesh fnMesh( object() );
-	
-	MFloatArray uArray, vArray;
-	fnMesh.getUVs( uArray, vArray, &uvSet );
-	
-	size_t numIndices = stIndicesData->readable().size();
-	
-	if( uArray.length() == 0 )
-	{
-		if( s )
-		{
-			s->writable().resize( numIndices, .0f );
-		}
-		if( t )
-		{
-			t->writable().resize( numIndices, .0f );
-		}
-	}
-	else
-	{
-		const vector< int >& stIndices = stIndicesData->readable();
-		if( s )
-		{
-			vector< float >& sValues = s->writable();
-			sValues.reserve( numIndices );
-			for( size_t i=0; i < numIndices; ++i )
-			{
-				sValues.push_back( uArray[ stIndices[i] ] );
-			}
-		}
-		if( t )
-		{
-			vector< float >& tValues = t->writable();
-			tValues.reserve( numIndices );
-			for( size_t i=0; i < numIndices; ++i )
-			{
-				tValues.push_back( vArray[ stIndices[i] ] );
-			}
-		}
-	}
-	
-}
 
-IECore::FloatVectorDataPtr FromMayaMeshConverter::s( const MString &uvSet ) const
-{
-	FloatVectorDataPtr sData = new FloatVectorData;
-	FloatVectorDataPtr tData = 0;
-	IntVectorDataPtr stIndicesData = stIndices( uvSet );
-	sAndT( uvSet, stIndicesData, sData, tData );
-	
-	return sData;
-}
+	IntVectorDataPtr indexData = new IntVectorData;
+	vector<int> &indices = indexData->writable();
+	indices.reserve( fnMesh.numFaceVertices() );
 
-IECore::FloatVectorDataPtr FromMayaMeshConverter::t( const MString &uvSet ) const
-{
-	FloatVectorDataPtr sData = 0;
-	FloatVectorDataPtr tData = new FloatVectorData;
-	IntVectorDataPtr stIndicesData = stIndices( uvSet );
-	sAndT( uvSet, stIndicesData, sData, tData );
-	
-	return tData;
-}
-
-
-IECore::IntVectorDataPtr FromMayaMeshConverter::stIndices( const MString &uvSet ) const
-{
-	MFnMesh fnMesh( object() );
-	
-	// get face vertex counts:
-	int numPolygons = fnMesh.numPolygons();
-	IntVectorDataPtr verticesPerFaceData = new IntVectorData;
-	verticesPerFaceData->writable().resize( numPolygons );
-	vector<int>::iterator verticesPerFaceIt = verticesPerFaceData->writable().begin();
-	
-	for( int i=0; i<numPolygons; i++ )
-	{
-		*verticesPerFaceIt++ = fnMesh.polygonVertexCount( i );
-	}
-	
-	return getStIndices( uvSet, verticesPerFaceData );
-}
-
-IECore::IntVectorDataPtr FromMayaMeshConverter::getStIndices( const MString &uvSet, IECore::ConstIntVectorDataPtr verticesPerFaceData ) const
-{
-	MFnMesh fnMesh( object() );
-	IntVectorDataPtr resultData = new IntVectorData;
-	vector<int> &result = resultData->writable();
-	result.reserve( fnMesh.numFaceVertices() );
-	
 	// get uv data. A list of uv counts per polygon, and a bunch of uv ids:
 	MIntArray uvCounts, uvIds;
 	fnMesh.getAssignedUVs( uvCounts, uvIds, &uvSet );
-	
-	// get per face vertex count data:
-	const std::vector<int> &vertsPerPoly = verticesPerFaceData->readable();
-	
-	int numPolygons = fnMesh.numPolygons();
+
 	int uvIdIndex = 0;
-	for( int i=0; i < numPolygons; ++i )
+	for( size_t i=0; i < vertsPerFace.size(); ++i )
 	{
 		int numPolyUvs = uvCounts[i];
-		int numPolyVerts = vertsPerPoly[i];
-		
+		int numPolyVerts = vertsPerFace[i];
+
 		if( numPolyUvs == 0 )
 		{
 			for( int j=0; j < numPolyVerts; ++j )
 			{
-				result.push_back( 0 );
+				indices.push_back( 0 );
 			}
 		}
 		else
 		{
 			for( int j=0; j < numPolyVerts; ++j )
 			{
-				result.push_back( uvIds[ uvIdIndex++ ] );
+				indices.push_back( uvIds[ uvIdIndex++ ] );
 			}
 		}
-		
 	}
-	
-	return resultData;
 
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	std::vector<Imath::V2f> &uvs = uvData->writable();
+
+	MFloatArray uArray, vArray;
+	fnMesh.getUVs( uArray, vArray, &uvSet );
+
+	size_t numIndices = indices.size();
+	if( uArray.length() == 0 )
+	{
+		uvs.resize( numIndices, Imath::V2f( .0f ) );
+	}
+	else
+	{
+		uvs.reserve( uArray.length() );
+		for( size_t i=0; i < uArray.length(); ++i )
+		{
+			uvs.emplace_back( uArray[i], vArray[i] );
+		}
+	}
+
+	return PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, indexData );
 }
 
-IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
+IECore::PrimitiveVariable FromMayaMeshConverter::colors( const MString &colorSet, bool forceRgb ) const
 {
 	MFnMesh fnMesh( object() );
 	MFnMesh::MColorRepresentation rep = fnMesh.getColorRepresentation( colorSet );
@@ -449,7 +381,7 @@ IECore::DataPtr  FromMayaMeshConverter::colors( const MString &colorSet, bool fo
 			data = colorVec;
 		}
 	}
-	return data;
+	return PrimitiveVariable( PrimitiveVariable::FaceVarying, data );
 }
 
 IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
@@ -520,25 +452,18 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, interpolation );
 
-	result->variables["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, points() );
+	result->variables["P"] = points();
 
 	if( interpolation=="linear" )
 	{
-		result->variables["N"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, normals() );
+		result->variables["N"] = normals();
 	}
 
 	MString currentUVSet;
 	fnMesh.getCurrentUVSetName( currentUVSet );
 	if( currentUVSet.length() )
 	{
-		FloatVectorDataPtr sData = new FloatVectorData;
-		FloatVectorDataPtr tData = new FloatVectorData;
-		IntVectorDataPtr stIndicesData = getStIndices( currentUVSet, verticesPerFaceData );
-		sAndT( currentUVSet, stIndicesData, sData, tData );
-
-		result->variables["s"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-		result->variables["t"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-		result->variables["stIndices"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+		result->variables["uv"] = uvs( currentUVSet, verticesPerFaceData->readable() );
 	}
 
 	MStringArray uvSets;
@@ -551,17 +476,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			continue;
 		}
 
-		FloatVectorDataPtr sData = new FloatVectorData;
-		FloatVectorDataPtr tData = new FloatVectorData;
-		IntVectorDataPtr stIndicesData = getStIndices( uvSets[i], verticesPerFaceData );
-		sAndT( uvSets[i], stIndicesData, sData, tData );
-
-		MString sName = uvSets[i] + "_s";
-		MString tName = uvSets[i] + "_t";
-		MString indicesName = uvSets[i] + "Indices";
-		result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, sData );
-		result->variables[tName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, tData );
-		result->variables[indicesName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, stIndicesData );
+		result->variables[ uvSets[i].asChar() ] = uvs( uvSets[i], verticesPerFaceData->readable() );
 	}
 
 	bool convertColors = colorsParameter()->getTypedValue();
@@ -577,14 +492,14 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			if( convertColors && colorSets[i]==currentColorSet )
 			{
 				// Cs is always converted to Color3f
-				result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, colors( currentColorSet, true ) );
+				result->variables["Cs"] = colors( currentColorSet, true );
 			}
 			
 			if( convertExtraColors )
 			{
 				MString sName = colorSets[i] + "_Cs";
 				// Extra color sets are not converted
-				result->variables[sName.asChar()] = PrimitiveVariable( PrimitiveVariable::FaceVarying, colors( colorSets[i] ) );
+				result->variables[sName.asChar()] = colors( colorSets[i] );
 			}
 		}
 	}

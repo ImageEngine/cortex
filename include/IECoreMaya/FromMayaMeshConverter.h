@@ -88,20 +88,10 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 		void constructCommon();
 
-		IECore::V3fVectorDataPtr points() const;
-		IECore::V3fVectorDataPtr normals() const;
-		IECore::FloatVectorDataPtr s( const MString &uvSet="" ) const;
-		IECore::FloatVectorDataPtr t( const MString &uvSet="" ) const;
-		IECore::IntVectorDataPtr stIndices( const MString &uvSet="" ) const;
-		IECore::DataPtr colors( const MString &colorSet="", bool forceRgb = false ) const;
-		template< class T >	typename IECore::TypedData< T >::Ptr colors( const MString &colorSet="" ) const
-		{
-			return boost::dynamic_pointer_cast< T >( colors( colorSet, false  ) );
-		}
-
-		IECore::IntVectorDataPtr getStIndices( const MString &uvSet, IECore::ConstIntVectorDataPtr verticesPerFaceData ) const;
-
-		void sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const;
+		IECore::PrimitiveVariable points() const;
+		IECore::PrimitiveVariable normals() const;
+		IECore::PrimitiveVariable uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const;
+		IECore::PrimitiveVariable colors( const MString &colorSet="", bool forceRgb = false ) const;
 
 		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 
