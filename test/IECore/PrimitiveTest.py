@@ -154,10 +154,11 @@ class PrimitiveTest( unittest.TestCase ) :
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0, 0, 0 ] ) ) ) )
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0, 1, 2 ] ) ) ) )
 		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
+		# except for constant which can have any number of indices
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1 ] ), IntVectorData( [ 0, 0 ] ) ) ) )
 		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0 ] ) ) ) )
-		self.assert_( not m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0, 1, 2 ] ) ) ) )
+		self.assert_( m.isPrimitiveVariableValid( PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatVectorData( [ 1, 2, 3 ] ), IntVectorData( [ 0, 1, 2 ] ) ) ) )
 
 if __name__ == "__main__":
     unittest.main()

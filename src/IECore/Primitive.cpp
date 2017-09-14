@@ -495,7 +495,8 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 	if( !pv.indices && pv.interpolation == PrimitiveVariable::Constant )
 	{
 		// any data is reasonable for constant interpolation
-		// provided there are no indices.
+		// provided there are no indices. if there are indices
+		// we still need to validate their range below.
 		return true;
 	}
 
@@ -520,9 +521,11 @@ bool Primitive::isPrimitiveVariableValid( const PrimitiveVariable &pv ) const
 		return dataSize == sz;
 	}
 
-	/// if there are indices, we must ensure they're within the range of data
-	/// and that they match the expected variable size.
-	if( pv.indices->readable().size() != sz )
+	// if there are indices, we must ensure they're within the range of data
+	// and that they match the expected variable size. the exception for
+	// constant variables, since size is irrelevant as the entire array
+	// is considered the variable value
+	if( pv.indices->readable().size() != sz && pv.interpolation != PrimitiveVariable::Constant )
 	{
 		return false;
 	}
