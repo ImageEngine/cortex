@@ -159,12 +159,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m["N"].data.size(), 180 )
 		self.assertEqual( m["s"].data.size(), 180 )
 		self.assertEqual( m["t"].data.size(), 180 )
-		self.assert_( m["P"].data == converter.points() )
 		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		self.assert_( m["N"].data == converter.normals() )
-		self.assert_( m["s"].data == converter.s( "map1" ) )
-		self.assert_( m["t"].data == converter.t( "map1" ) )
 
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
 		self.assert_( m.bound().contains( IECore.Box3f( IECore.V3f( -0.90 ), IECore.V3f( 0.90 ) ) ) )
@@ -369,7 +365,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(0), IECore.Color3f(1), IECore.Color3f(0.8), IECore.Color3f(0.5) ] ) )
-		self.assertEqual( converter.colors("cAlpha",True), m['Cs'].data )
 
 		# test rgba to rgb conversion
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
@@ -383,7 +378,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f( 1, 1, 0 ), IECore.Color3f( 1, 1, 1 ), IECore.Color3f( 0, 1, 1 ), IECore.Color3f( 0, 1, 0 ) ] ) )
-		self.assertEqual( converter.colors("cRGBA",True), m['Cs'].data )
 
 	def testExtraColors( self ):
 
@@ -394,11 +388,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['extraColors'] = True
 		m = converter.convert()
 		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )
-		self.assertEqual( converter.colors("cAlpha"), m['cAlpha_Cs'].data )
 		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(1,0,0), IECore.Color3f(0), IECore.Color3f(0,0,1), IECore.Color3f(0,1,0) ] ) )
-		self.assertEqual( converter.colors("cRGB"), m['cRGB_Cs'].data )
 		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ IECore.Color4f( 1, 1, 0, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ), IECore.Color4f( 0, 1, 1, 1 ), IECore.Color4f( 0, 1, 0, 0.5 ) ] ) )
-		self.assertEqual( converter.colors("cRGBA"), m['cRGBA_Cs'].data )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

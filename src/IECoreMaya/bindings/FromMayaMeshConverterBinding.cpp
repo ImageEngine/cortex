@@ -46,11 +46,5 @@ void IECoreMaya::bindFromMayaMeshConverter()
 {
 	IECorePython::RunTimeTypedClass<FromMayaMeshConverter>()
 		.def( init<const MDagPath &>() )
-		.def( "points", &FromMayaMeshConverter::points )
-		.def( "normals", &FromMayaMeshConverter::normals )
-		.def( "colors", (IECore::DataPtr (FromMayaMeshConverter::*)( const MString &, bool) const)&FromMayaMeshConverter::colors, arg( "forceRgb" ) = false )
-		.def( "s", &FromMayaMeshConverter::s )
-		.def( "t", &FromMayaMeshConverter::t )
-		.def( "stIndices", &FromMayaMeshConverter::stIndices )
 	;
 }

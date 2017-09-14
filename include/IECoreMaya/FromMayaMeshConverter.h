@@ -65,32 +65,6 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 		virtual ~FromMayaMeshConverter();
 
-		/// Returns just the points for the mesh.
-		/// \todo It would be nice if this was virtual somewhere and implemented for other
-		/// converters for which it makes sense. I'm not sure it belongs in the FromMayaShapeConverter though.
-		IECore::V3fVectorDataPtr points() const;
-		/// Returns just the normals for the mesh.
-		IECore::V3fVectorDataPtr normals() const;
-		/// Returns just the s for the mesh.
-		IECore::FloatVectorDataPtr s( const MString &uvSet="" ) const;
-		/// Returns just the t for the mesh.
-		IECore::FloatVectorDataPtr t( const MString &uvSet="" ) const;
-		/// Returns the facevarying uv indexes for the specified uv set,
-		/// or the current set if not specified. This can be necessary for
-		/// some algorithms as the facevarying uv data returned from the above
-		/// functions has thrown away the concept of two faces sharing the same
-		/// logical uv at a vertex. By comparing the uv indices this information can be
-		/// obtained.
-		IECore::IntVectorDataPtr stIndices( const MString &uvSet="" ) const;
-		/// Returns just the face-varying colors for the mesh.
-		/// @param forceRgb will do appropriate conversions to return rgb colors.
-		IECore::DataPtr colors( const MString &colorSet="", bool forceRgb = false ) const;
-		/// Returns just the face-varying colors for the mesh.
-		template< class T >	typename IECore::TypedData< T >::Ptr colors( const MString &colorSet="" ) const
-		{
-			return boost::dynamic_pointer_cast< T >( colors( colorSet, false  ) );
-		}
-
 		//! @name Parameter accessors
 		//////////////////////////////////////////////////////////
 		//@{
@@ -125,9 +99,20 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 	private :
 
 		void constructCommon();
-		
+
+		IECore::V3fVectorDataPtr points() const;
+		IECore::V3fVectorDataPtr normals() const;
+		IECore::FloatVectorDataPtr s( const MString &uvSet="" ) const;
+		IECore::FloatVectorDataPtr t( const MString &uvSet="" ) const;
+		IECore::IntVectorDataPtr stIndices( const MString &uvSet="" ) const;
+		IECore::DataPtr colors( const MString &colorSet="", bool forceRgb = false ) const;
+		template< class T >	typename IECore::TypedData< T >::Ptr colors( const MString &colorSet="" ) const
+		{
+			return boost::dynamic_pointer_cast< T >( colors( colorSet, false  ) );
+		}
+
 		IECore::IntVectorDataPtr getStIndices( const MString &uvSet, IECore::ConstIntVectorDataPtr verticesPerFaceData ) const;
-		
+
 		void sAndT( const MString &uvSet, IECore::ConstIntVectorDataPtr stIndicesData, IECore::FloatVectorDataPtr& s, IECore::FloatVectorDataPtr& t ) const;
 
 		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
