@@ -106,9 +106,6 @@ class PointsTest( unittest.TestCase ) :
 		image = IECore.ImageDisplayDriver.removeStoredImage( "testHandle" )
 		del image["A"]
 
-		# raise blackPoint massively to remove possible watermark
-		IECore.Grade()( input = image, copyInput = False, blackPoint = IECore.Color3f( 0.9 ) )
-
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/data/pointsImages/points.tif" ).read()
 
 		IECore.ImageWriter.create( image, "/tmp/test.tif" ).write()
