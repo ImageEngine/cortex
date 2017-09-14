@@ -107,7 +107,7 @@ void driverUpdate( AtNode *node, AtParamValue *parameters )
 {
 }
 
-bool driverSupportsPixelType( const AtNode *node, AtByte pixelType )
+bool driverSupportsPixelType( const AtNode *node, uint8_t pixelType )
 {
 	switch( pixelType )
 	{

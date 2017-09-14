@@ -899,7 +899,7 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 
 void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 {
-	AtByte visibility = 0;
+	uint8_t visibility = 0;
 	const BoolData *visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:camera" );
 	if( visData->readable() )
 	{
