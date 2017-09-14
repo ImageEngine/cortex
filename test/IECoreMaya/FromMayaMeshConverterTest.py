@@ -284,12 +284,15 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testManyUVConversionsFromPlug( self ) :
 
-		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		
+		# load a mesh with indexed UVs
+		scc = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		coreMesh = scc.scene( [ "A", "a" ] ).readObject( 0 )
 		self.assertTrue( "uv" in coreMesh )
 
 		for i in range( 0, 7 ) :
-			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
+			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy(), coreMesh["uv"].indices.copy() )
+
+		self.assertTrue( coreMesh.arePrimitiveVariablesValid() )
 
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		
@@ -308,8 +311,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		result = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
 		
 		self.assertTrue( result.arePrimitiveVariablesValid() )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 760 )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 2280 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 400 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1560 )
 		
 		self.assertEqual( coreMesh["uv"], result["uv"] )
 		
