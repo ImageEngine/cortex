@@ -91,7 +91,7 @@ const BoolParameter * TriangulateOp::throwExceptionsParameter() const
 /// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
 struct TriangleDataRemap
 {
-	typedef size_t ReturnType;
+	typedef void ReturnType;
 
 	TriangleDataRemap( const std::vector<int> &indices ) : m_other(0), m_indices( indices )
 	{
@@ -101,7 +101,7 @@ struct TriangleDataRemap
 	const std::vector<int> &m_indices;
 
 	template<typename T>
-	size_t operator() ( T * data )
+	void operator() ( T * data )
 	{
 		assert( data );
 		typename T::ValueType &dataWritable = data->writable();
@@ -119,8 +119,6 @@ struct TriangleDataRemap
 		}
 
 		assert( dataWritable.size() == m_indices.size() );
-
-		return dataWritable.size();
 	}
 };
 
@@ -320,8 +318,7 @@ struct TriangulateOp::TriangulateFn
 			DataPtr result = inputData->copy();
 			remap->m_other = inputData;
 
-			size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( result.get(), *remap );
-			(void)primVarSize;
+			despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( result.get(), *remap );
 
 			if( it->second.indices )
 			{
