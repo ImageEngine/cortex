@@ -91,11 +91,10 @@ class ParameterAlgoTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiNodeGetFlt( n, "customFloat" ), 0.25 )
 
 			IECoreArnold.ParameterAlgo.setParameter( n, "customMatrix", IECore.M44dData( IECore.M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ) ) )
-			m = arnold.AtMatrix()
-			arnold.AiNodeGetMatrix( n, "customMatrix", m )
+			m = arnold.AiNodeGetMatrix( n, "customMatrix" )
 			self.assertEqual(
-				[ getattr( m, f[0] ) for f in m._fields_ ],
-				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
+				[ list( i ) for i in m.data ],
+				[ [1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16] ],
 			)
 
 	def testStringArray( self ) :
