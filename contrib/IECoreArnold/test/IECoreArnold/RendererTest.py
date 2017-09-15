@@ -68,9 +68,9 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "ai:AA_samples" ), IECore.IntData( 11 ) )
 
 		# check we can set an already existing float
-		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .99 ) )
-		r.setOption( "ai:auto_transparency_threshold", IECore.FloatData( .9 ) )
-		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .9 ) )
+		self.assertEqual( r.getOption( "ai:texture_max_sharpen" ), IECore.FloatData( 1.5 ) )
+		r.setOption( "ai:texture_max_sharpen", IECore.FloatData( .9 ) )
+		self.assertEqual( r.getOption( "ai:texture_max_sharpen" ), IECore.FloatData( .9 ) )
 
 		# check tbat trying to set nonexistent options yields a message
 		m = IECore.CapturingMessageHandler()
@@ -166,7 +166,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
+			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
@@ -187,7 +187,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			shader = arnold.AiNode( "standard" )
+			shader = arnold.AiNode( "standard_surface" )
 			arnold.AiNodeSetStr( shader, "name", "red_shader" )
 			arnold.AiNodeSetFlt( shader, "emission", 1 )
 			arnold.AiNodeSetRGB( shader, "emission_color", 1, 0, 0 )
@@ -654,7 +654,7 @@ class RendererTest( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
+			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
 
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
@@ -681,7 +681,7 @@ class RendererTest( unittest.TestCase ) :
 	 		m = IECore.CapturingMessageHandler()
  			with m :
 				r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-				r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
+				r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
 
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
@@ -699,7 +699,7 @@ class RendererTest( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 
-			r.shader( "surface", "standard", {} )
+			r.shader( "surface", "standard_surface", {} )
 
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )

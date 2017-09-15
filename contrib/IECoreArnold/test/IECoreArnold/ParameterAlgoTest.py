@@ -53,38 +53,39 @@ class ParameterAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = arnold.AiNode( "standard" )
+			n = arnold.AiNode( "standard_surface" )
 
-			IECoreArnold.ParameterAlgo.setParameter( n, "Kd", IECore.FloatData( 0.25 ) )
-			IECoreArnold.ParameterAlgo.setParameter( n, "aov_emission", IECore.StringData( "test" ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "base", IECore.FloatData( 0.25 ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customString", IECore.StringData( "test" ) )
 
-			self.assertEqual( arnold.AiNodeGetFlt( n, "Kd" ), 0.25 )
-			self.assertEqual( arnold.AiNodeGetStr( n, "aov_emission" ), "test" )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "base" ), 0.25 )
+			self.assertEqual( arnold.AiNodeGetStr( n, "customString" ), "test" )
 
 	def testGetParameter( self ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = arnold.AiNode( "standard" )
+			n = arnold.AiNode( "standard_surface" )
 
 			self.assertEqual(
-				IECoreArnold.ParameterAlgo.getParameter( n, "Kd" ),
-				IECore.FloatData( arnold.AiNodeGetFlt( n, "Kd" ) )
+				IECoreArnold.ParameterAlgo.getParameter( n, "base" ),
+				IECore.FloatData( arnold.AiNodeGetFlt( n, "base" ) )
 			)
 
+			IECore.FloatData( arnold.AiNodeSetStr( n, "name", "testString" ) )
 			self.assertEqual(
-				IECoreArnold.ParameterAlgo.getParameter( n, "aov_emission" ),
-				IECore.StringData( "emission" ),
+				IECoreArnold.ParameterAlgo.getParameter( n, "name" ),
+				IECore.StringData( "testString" ),
 			)
 
 	def testDoubleData( self ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = arnold.AiNode( "standard" )
+			n = arnold.AiNode( "standard_surface" )
 
-			IECoreArnold.ParameterAlgo.setParameter( n, "Kd", IECore.DoubleData( 0.25 ) )
-			self.assertEqual( arnold.AiNodeGetFlt( n, "Kd" ), 0.25 )
+			IECoreArnold.ParameterAlgo.setParameter( n, "base", IECore.DoubleData( 0.25 ) )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "base" ), 0.25 )
 
 			IECoreArnold.ParameterAlgo.setParameter( n, "customFloat", IECore.DoubleData( 0.25 ) )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "customFloat" ), 0.25 )
