@@ -238,7 +238,7 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	AiNodeSetInt( options, "yres", resolution->readable().y );
 
 	const FloatData *pixelAspectRatio = cortexCamera->parametersData()->member<FloatData>( "pixelAspectRatio" );
-	AiNodeSetFlt( options, "aspect_ratio", 1.0f / pixelAspectRatio->readable() ); // arnold is y/x, we're x/y
+	AiNodeSetFlt( options, "pixel_aspect_ratio", pixelAspectRatio->readable() );
 }
 
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )

@@ -747,7 +747,7 @@ class RendererTest( unittest.TestCase ) :
 			pass
 
 		ass = "".join( file( self.__assFileName ).readlines() )
-		self.assertTrue( "aspect_ratio 0.5" in ass )
+		self.assertTrue( "pixel_aspect_ratio 2\n" in ass )
 
 	def testLightPrefixes( self ) :
 
