@@ -88,12 +88,12 @@ class SphereAlgoTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiNodeGetBool( n, "b" ), True )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "f" ), 2.5 )
 
-			m = arnold.AtMatrix()
-			arnold.AiNodeGetMatrix( n, "m", m )
+			m = arnold.AiNodeGetMatrix( n, "m" )
 			self.assertEqual(
-				[ getattr( m, f[0] ) for f in m._fields_ ],
-				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
+				[ list( i ) for i in m.data ],
+				[ [1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16] ],
 			)
+
 
 if __name__ == "__main__":
     unittest.main()
