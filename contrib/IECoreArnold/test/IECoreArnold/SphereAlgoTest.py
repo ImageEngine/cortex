@@ -82,7 +82,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 			n = IECoreArnold.NodeAlgo.convert( s )
 			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )
-			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtColor( 1, 2, 3 ) )
+			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtRGB( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetStr( n, "s" ), "test" )
 			self.assertEqual( arnold.AiNodeGetInt( n, "i" ), 11 )
 			self.assertEqual( arnold.AiNodeGetBool( n, "b" ), True )
