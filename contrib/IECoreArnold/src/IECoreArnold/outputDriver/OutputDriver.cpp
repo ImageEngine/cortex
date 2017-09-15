@@ -54,7 +54,7 @@ namespace
 
 // Stores a Cortex DisplayDriver and the parameters
 // used to create it. This forms the private data
-// accessed via AiDriverGetLocalData.
+// accessed via AiNodeGetLocalData.
 struct LocalData
 {
 
@@ -89,21 +89,22 @@ struct LocalData
 
 };
 
-void driverParameters( AtList *params, AtMetaDataStore *metaData )
+void driverParameters( AtList *params, AtNodeEntry *nentry )
 {
-	AiParameterSTR( "driverType", "" );
+	AiParameterStr( "driverType", "" );
 
 	// we need to specify this metadata to keep MtoA happy.
-	AiMetaDataSetStr( metaData, 0, "maya.attr_prefix", "" );
-	AiMetaDataSetStr( metaData, 0, "maya.translator", "ie" );
+	AiMetaDataSetStr( nentry, 0, "maya.attr_prefix", "" );
+	AiMetaDataSetStr( nentry, 0, "maya.translator", "ie" );
 }
 
-void driverInitialize( AtNode *node, AtParamValue *parameters )
+void driverInitialize( AtNode *node )
 {
-	AiDriverInitialize( node, true, new LocalData );
+	AiDriverInitialize( node, true );
+	AiNodeSetLocalData( node, new LocalData );
 }
 
-void driverUpdate( AtNode *node, AtParamValue *parameters )
+void driverUpdate( AtNode *node )
 {
 }
 
@@ -128,7 +129,7 @@ const char **driverExtension()
 
 void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
 {
-	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	localData->numOutputs = 0;
 
 	std::vector<std::string> channelNames;
@@ -195,7 +196,7 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 		1.0f / AiNodeGetFlt( AiUniverseGetOptions(), "aspect_ratio" )
 	);
 
-	const std::string driverType = AiNodeGetStr( node, "driverType" );
+	const std::string driverType = AiNodeGetStr( node, "driverType" ).c_str();
 
 	// We reuse the previous driver if we can - this allows us to use
 	// the same driver for every stage of a progressive render.
@@ -233,22 +234,22 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	}
 }
 
-bool driverNeedsBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
+bool driverNeedsBucket( AtNode *node, int x, int y, int sx, int sy, uint16_t tId )
 {
 	return true;
 }
 
-void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, int tId )
+void driverPrepareBucket( AtNode *node, int x, int y, int sx, int sy, uint16_t tId )
 {
 }
 
-void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx, int sy, int tId )
+void driverProcessBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sample_iterator, int x, int y, int sx, int sy, uint16_t tId )
 {
 }
 
 void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct AtAOVSampleIterator *sampleIterator, int x, int y, int sx, int sy )
 {
-	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	if( !localData->displayDriver )
 	{
 		return;
@@ -330,7 +331,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 
 void driverClose( AtNode *node, struct AtOutputIterator *iterator )
 {
-	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	// We only close the display immediately if it doesn't accept
 	// repeated data (progressive renders). This is so we can reuse it in
 	// driverOpen if it appears that a progressive render is taking place.
@@ -342,11 +343,10 @@ void driverClose( AtNode *node, struct AtOutputIterator *iterator )
 
 void driverFinish( AtNode *node )
 {
-	LocalData *localData = (LocalData *)AiDriverGetLocalData( node );
+	LocalData *localData = (LocalData *)AiNodeGetLocalData( node );
 	// Perform any pending close we may have deferred in driverClose().
 	localData->imageClose();
 	delete localData;
-	AiDriverDestroy( node );
 }
 
 } // namespace
@@ -356,6 +356,8 @@ AI_EXPORT_LIB bool NodeLoader( int i, AtNodeLib *node )
 	if( i==0 )
 	{
 		static AtCommonMethods commonMethods = {
+			NULL, // Whole plugin init
+			NULL, // Whole plugin cleanup
 			driverParameters,
 			driverInitialize,
 			driverUpdate,
