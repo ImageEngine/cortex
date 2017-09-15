@@ -81,10 +81,12 @@ RendererImplementation::AttributeState::AttributeState()
 	attributes = new CompoundData;
 	attributes->writable()["ai:visibility:camera"] = new BoolData( true );
 	attributes->writable()["ai:visibility:shadow"] = new BoolData( true );
-	attributes->writable()["ai:visibility:reflected"] = new BoolData( true );
-	attributes->writable()["ai:visibility:refracted"] = new BoolData( true );
-	attributes->writable()["ai:visibility:diffuse"] = new BoolData( true );
-	attributes->writable()["ai:visibility:glossy"] = new BoolData( true );
+	attributes->writable()["ai:visibility:diffuse_reflect"] = new BoolData( true );
+	attributes->writable()["ai:visibility:specular_reflect"] = new BoolData( true );
+	attributes->writable()["ai:visibility:diffuse_transmit"] = new BoolData( true );
+	attributes->writable()["ai:visibility:specular_transmit"] = new BoolData( true );
+	attributes->writable()["ai:visibility:volume"] = new BoolData( true );
+	attributes->writable()["ai:visibility:subsurface"] = new BoolData( true );
 }
 
 RendererImplementation::AttributeState::AttributeState( const AttributeState &other )
@@ -914,28 +916,40 @@ void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 		visibility |= AI_RAY_SHADOW;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:reflected" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse_reflect" );
 	if( visData->readable() )
 	{
-		visibility |= AI_RAY_REFLECTED;
+		visibility |= AI_RAY_DIFFUSE_REFLECT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:refracted" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specular_reflect" );
 	if( visData->readable() )
 	{
-		visibility |= AI_RAY_REFRACTED;
+		visibility |= AI_RAY_SPECULAR_REFLECT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse_transmit" );
 	if( visData->readable() )
 	{
-		visibility |= AI_RAY_DIFFUSE;
+		visibility |= AI_RAY_DIFFUSE_TRANSMIT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:glossy" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specular_transmit" );
 	if( visData->readable() )
 	{
-		visibility |= AI_RAY_GLOSSY;
+		visibility |= AI_RAY_SPECULAR_TRANSMIT;
+	}
+
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:volume" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_VOLUME;
+	}
+
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:subsurface" );
+	if( visData->readable() )
+	{
+		visibility |= AI_RAY_SUBSURFACE;
 	}
 
 	AiNodeSetByte( node, "visibility", visibility );

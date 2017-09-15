@@ -95,10 +95,12 @@ class IECOREARNOLD_API Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ai:visibility:camera" BoolData( true )</b>
 		/// \li <b>"ai:visibility:shadow" BoolData( true )</b>
-		/// \li <b>"ai:visibility:reflected" BoolData( true )</b>
-		/// \li <b>"ai:visibility:refracted" BoolData( true )</b>
-		/// \li <b>"ai:visibility:diffuse" BoolData( true )</b>
-		/// \li <b>"ai:visibility:glossy" BoolData( true )</b>
+		/// \li <b>"ai:visibility:diffuse_reflect" BoolData( true )</b>
+		/// \li <b>"ai:visibility:specular_reflect" BoolData( true )</b>
+		/// \li <b>"ai:visibility:diffuse_transmit" BoolData( true )</b>
+		/// \li <b>"ai:visibility:specular_transmit" BoolData( true )</b>
+		/// \li <b>"ai:visibility:volume" BoolData( true )</b>
+		/// \li <b>"ai:visibility:subsurface" BoolData( true )</b>
 		///
 		/// \li <b>"ai:*:*" Data</b><br>
 		/// Mapped to shape node parameters, such that "ai:nodeType:parameterName"
