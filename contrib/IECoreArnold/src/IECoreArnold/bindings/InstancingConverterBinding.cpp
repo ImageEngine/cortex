@@ -55,32 +55,28 @@ using namespace IECoreArnoldBindings;
 namespace
 {
 
-object convertWrapper1( InstancingConverter &c, object pythonSamples, object pythonSampleTimes )
+object convertWrapper1( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd )
 {
 	vector<const Primitive *> samples;
-	vector<float> sampleTimes;
 	boost::python::container_utils::extend_container( samples, pythonSamples );
-	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
 
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( samples, sampleTimes );
+		node = c.convert( samples, motionStart, motionEnd );
 	}
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper2( InstancingConverter &c, object pythonSamples, object pythonSampleTimes, const IECore::MurmurHash &h )
+object convertWrapper2( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd, const IECore::MurmurHash &h )
 {
 	vector<const Primitive *> samples;
-	vector<float> sampleTimes;
 	boost::python::container_utils::extend_container( samples, pythonSamples );
-	boost::python::container_utils::extend_container( sampleTimes, pythonSampleTimes );
 
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( samples, sampleTimes, h );
+		node = c.convert( samples, motionStart, motionEnd, h );
 	}
 	return atNodeToPythonObject( node );
 }

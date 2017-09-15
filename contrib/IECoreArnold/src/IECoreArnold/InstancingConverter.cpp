@@ -88,12 +88,12 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	return NULL;
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd )
 {
-	return convert( samples, sampleTimes, IECore::MurmurHash() );
+	return convert( samples, motionStart, motionEnd, IECore::MurmurHash() );
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes, const IECore::MurmurHash &additionalHash )
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash )
 {
 	IECore::MurmurHash h;
 	for( std::vector<const IECore::Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
@@ -106,7 +106,7 @@ AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive 
 	if( m_data->cache.insert( a, h ) )
 	{
 		std::vector<const IECore::Object *> objectSamples( samples.begin(), samples.end() );
-		a->second = NodeAlgo::convert( objectSamples, sampleTimes );
+		a->second = NodeAlgo::convert( objectSamples, motionStart, motionEnd );
 		return a->second;
 	}
 	else

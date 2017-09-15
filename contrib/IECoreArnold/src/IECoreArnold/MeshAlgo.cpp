@@ -391,7 +391,7 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 	return result;
 }
 
-AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd )
 {
 	AtNode *result = convertCommon( samples.front() );
 
@@ -428,7 +428,8 @@ AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &sam
 
 	// add time sampling
 
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	AiNodeSetFlt( result, "motion_start", motionStart );
+	AiNodeSetFlt( result, "motion_end", motionEnd );
 
 	return result;
 }

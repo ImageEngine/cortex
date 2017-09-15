@@ -56,16 +56,15 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s, [ 0, 1 ] )
+			n = IECoreArnold.NodeAlgo.convert( s, 0, 1 )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 
 			a = arnold.AiNodeGetArray( n, "radius" )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0.25 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.5 )
 
-			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 1 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_start" ), 0 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_end" ), 1 )
 
 	def testPrimitiveVariables( self ) :
 

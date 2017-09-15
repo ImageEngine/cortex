@@ -116,7 +116,7 @@ AtNode *convert( const IECore::PointsPrimitive *points )
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd )
 {
 	AtNode *result = convertCommon( samples.front() );
 
@@ -124,7 +124,9 @@ AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, co
 	ShapeAlgo::convertP( primitiveSamples, result, "points" );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
 
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	
+	AiNodeSetFlt( result, "motion_start", motionStart );
+	AiNodeSetFlt( result, "motion_end", motionEnd );
 
 	/// \todo Aspect, rotation
 

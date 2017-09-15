@@ -837,6 +837,43 @@ class RendererTest( unittest.TestCase ) :
 		e.pointAtUV( IECore.V2f( 0.5 ), result )
 		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
 
+	def testNonUniformMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			# A motion block that has slightly non-uniform sampling, but not enough to notice
+			# We should allow it, since the user won't notice that Arnold is ignoring the non-uniformity
+			with IECore.MotionBlock( r, [ 0, 0.3333, 0.6666, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.3333333333, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.33333333333, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+
+			with self.assertRaises( RuntimeError ):
+				# This block is actually non-uniform, and won't render correctly, so we should fail
+				with IECore.MotionBlock( r, [ 0, 0.333, 0.666, 2 ] ):
+					pass
+
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh.render( r )
+
+
+		image = IECore.ImageDisplayDriver.removeStoredImage( "test" )
+		e = IECore.PrimitiveEvaluator.create( image )
+		result = e.createResult()
+
+		e.pointAtUV( IECore.V2f( 0.5 ), result )
+		self.assertAlmostEqual( result.floatPrimVar( e.A() ), 0.5, 2 )
+
 	def testProcedural( self ) :
 
 		r = IECoreArnold.Renderer( "/tmp/test.ass" )
