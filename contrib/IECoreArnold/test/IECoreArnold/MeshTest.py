@@ -194,7 +194,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], -0.25, 0.25 )
 
 			vList = arnold.AiNodeGetArray( node, "vlist" )
 			self.assertEqual( arnold.AiArrayGetNumElements( vList.contents ), 4 )
@@ -216,11 +216,8 @@ class MeshTest( unittest.TestCase ) :
 				n = arnold.AiArrayGetVec( nList, i )
 				self.assertEqual( IECore.V3f( n.x, n.y, n.z ), m2["N"].data[i-4] )
 
-			a = arnold.AiNodeGetArray( node, "deform_time_samples" )
-			self.assertEqual( a.contents.nelements, 2 )
-			self.assertEqual( a.contents.nkeys, 1 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( node, "motion_start" ), -0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( node, "motion_end" ), 0.25 )
 
 	def testClashingPrimitiveVariables( self ) :
 		# make sure that names of arnold built-in's can't be used as names for primitive variables

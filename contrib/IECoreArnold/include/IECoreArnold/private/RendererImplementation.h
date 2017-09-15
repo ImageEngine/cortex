@@ -195,7 +195,9 @@ class RendererImplementation : public IECore::Renderer
 		AttributeStack m_attributeStack;
 
 		// motion blur stuff
-		std::vector<float> m_motionTimes;
+		unsigned int m_motionBlockSize;
+		float m_motionStart;
+		float m_motionEnd;
 		std::vector<IECore::ConstPrimitivePtr> m_motionPrimitives;
 
 		// list of nodes that have been output so far. we have

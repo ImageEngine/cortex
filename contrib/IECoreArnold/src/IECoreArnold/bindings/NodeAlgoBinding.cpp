@@ -51,14 +51,12 @@ object convertWrapper( const IECore::Object *object )
 	return atNodeToPythonObject( NodeAlgo::convert( object ) );
 }
 
-object convertWrapper2( object pythonSamples, object pythonSampleTimes )
+object convertWrapper2( object pythonSamples, float motionStart, float motionEnd )
 {
 	std::vector<const IECore::Object *> samples;
-	std::vector<float> sampleTimes;
 	container_utils::extend_container( samples, pythonSamples );
-	container_utils::extend_container( sampleTimes, pythonSampleTimes );
 
-	return atNodeToPythonObject( NodeAlgo::convert( samples, sampleTimes ) );
+	return atNodeToPythonObject( NodeAlgo::convert( samples, motionStart, motionEnd ) );
 }
 
 } // namespace

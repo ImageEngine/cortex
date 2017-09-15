@@ -87,7 +87,7 @@ AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere )
 	return result;
 }
 
-AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd )
 {
 	AtNode *result = AiNode( "sphere" );
 	ShapeAlgo::convertPrimitiveVariables( samples.front(), result );
@@ -102,7 +102,8 @@ AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> 
 	}
 
 	AiNodeSetArray( result, "radius", radiusSamples );
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	AiNodeSetFlt( result, "motion_start", motionStart );
+	AiNodeSetFlt( result, "motion_end", motionEnd );
 
 	return result;
 }

@@ -152,19 +152,19 @@ class InstancingConverterTest( unittest.TestCase ) :
 			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
-			n1 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+			n1 = c.convert( [ m1, m2 ], -0.25, 0.25 )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
 			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 
-			n2 = c.convert( [ m1, m2 ], [ -0.25, 0.25 ] )
+			n2 = c.convert( [ m1, m2 ], -0.25, 0.25 )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n2 ) ), "ginstance" )
 			self.assertEqual( arnold.AiNodeGetPtr( n2, "node" ), ctypes.addressof( n1.contents ) )
 
-			n3 = c.convert( [ m2, m1 ], [ -0.25, 0.25 ] )
+			n3 = c.convert( [ m2, m1 ], -0.25, 0.25 )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
 			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 
-			n4 = c.convert( [ m1, m2 ], [ -0.5, 0.5 ] )
+			n4 = c.convert( [ m1, m2 ], -0.5, 0.5 )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )
 			self.assertEqual( arnold.AiArrayGetNumKeys( arnold.AiNodeGetArray( n1, "vlist" ).contents ), 2 )
 

@@ -124,7 +124,7 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 	return result;
 }
 
-AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd )
 {
 	AtNode *result = convertCommon( samples.front() );
 
@@ -155,7 +155,8 @@ AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> 
 		IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Missing sample for primitive variable \"N\" - not setting orientations." );
 	}
 
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	AiNodeSetFlt( result, "motion_start", motionStart );
+	AiNodeSetFlt( result, "motion_end", motionEnd );
 
 	return result;
 }

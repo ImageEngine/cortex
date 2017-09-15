@@ -59,7 +59,7 @@ class CurvesTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], [ -0.25, 0.25 ] )
+			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], -0.25, 0.25 )
 
 			a = arnold.AiNodeGetArray( n, "points" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
@@ -70,11 +70,8 @@ class CurvesTest( unittest.TestCase ) :
 			for i in range( 4, 8 ) :
 				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 2 ) )
 
-			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
-			self.assertEqual( a.contents.nelements, 2 )
-			self.assertEqual( a.contents.nkeys, 1 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_start" ), -0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_end" ), 0.25 )
 
 	def testNPrimitiveVariable( self ) :
 
@@ -115,7 +112,7 @@ class CurvesTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], [ 0.0, 1.0 ] )
+			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0 )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
