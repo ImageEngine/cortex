@@ -874,7 +874,8 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 	const size_t numSamples = m_transformStack.numSamples();
 	if( numSamples == 1 )
 	{
-		AiNodeSetMatrix( node, "matrix", m_transformStack.get().x );
+		M44f m = m_transformStack.get();
+		AiNodeSetMatrix( node, "matrix", reinterpret_cast<AtMatrix&>( m.x ) );
 	}
 	else
 	{
@@ -883,7 +884,8 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 		for( size_t i = 0; i < numSamples; ++i )
 		{
 			AiArraySetFlt( times, i, m_transformStack.sampleTime( i ) );
-			AiArraySetMtx( matrices, i, m_transformStack.sample( i ).x );
+			M44f m = m_transformStack.sample( i );
+			AiArraySetMtx( matrices, i, reinterpret_cast<AtMatrix&>( m.x ) );
 		}
 		AiNodeSetArray( node, "matrix", matrices );
 		if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), "transform_time_samples" ) )
