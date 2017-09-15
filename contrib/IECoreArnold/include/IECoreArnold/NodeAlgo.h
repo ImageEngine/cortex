@@ -53,14 +53,14 @@ AtNode *convert( const IECore::Object *object );
 /// equivalent moving Arnold object. If no motion converter
 /// is available, then returns a standard conversion of the
 /// first sample.
-AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes );
+AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd );
 
 /// Signature of a function which can convert an IECore::Object
 /// into an Arnold object.
 typedef AtNode * (*Converter)( const IECore::Object * );
 /// Signature of a function which can convert a series of IECore::Object
 /// samples into a moving Arnold object.
-typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes );
+typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd );
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -77,7 +77,7 @@ class ConverterDescription
 
 		/// Type-specific conversion functions.
 		typedef AtNode *(*Converter)( const T * );
-		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, const std::vector<float> & );
+		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, float, float );
 
 		ConverterDescription( Converter converter, MotionConverter motionConverter = NULL )
 		{
@@ -89,6 +89,13 @@ class ConverterDescription
 		}
 
 };
+
+/// Arnold does not support non-uniform sampling.  It just takes a start and end time, and assume
+/// the samples are distributed evenly between them.  We need to throw an exception if given data
+/// we can't render.
+/// \todo - this should not be public, but I currently need to use it from IECorePreview in Gaffer
+/// In Cortex 10, this should not be exposed
+void ensureUniformTimeSamples( const std::vector<float> &times );
 
 } // namespace NodeAlgo
 

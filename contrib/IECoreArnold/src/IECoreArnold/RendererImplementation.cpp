@@ -104,20 +104,20 @@ RendererImplementation::AttributeState::AttributeState( const AttributeState &ot
 extern AtNodeMethods *ieDisplayDriverMethods;
 
 IECoreArnold::RendererImplementation::RendererImplementation()
-	:	m_defaultFilter( 0 )
+	:	m_defaultFilter( 0 ), m_motionBlockSize( 0 )
 {
 	constructCommon( Render );
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const std::string &assFileName )
-	:	m_defaultFilter( 0 )
+	:	m_defaultFilter( 0 ), m_motionBlockSize( 0 )
 {
 	m_assFileName = assFileName;
 	constructCommon( AssGen );
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const RendererImplementation &other )
-	:	m_transformStack( other.m_transformStack, /* flatten = */ true )
+	:	m_transformStack( other.m_transformStack, /* flatten = */ true ), m_motionBlockSize( 0 )
 {
 	constructCommon( Procedural );
 	m_instancingConverter = other.m_instancingConverter;
@@ -125,6 +125,7 @@ IECoreArnold::RendererImplementation::RendererImplementation( const RendererImpl
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const AtNode *proceduralNode )
+	:	m_motionBlockSize( 0 )
 {
 	constructCommon( Procedural );
 	m_instancingConverter = new InstancingConverter;
@@ -357,9 +358,12 @@ void IECoreArnold::RendererImplementation::transformEnd()
 
 void IECoreArnold::RendererImplementation::setTransform( const Imath::M44f &m )
 {
-	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	if( m_motionBlockSize && !m_transformStack.inMotion() )
 	{
-		m_transformStack.motionBegin( m_motionTimes );
+		// We call motionBegin on the transform stack with a dummy time sample vector of the correct size
+		// Arnold doesn't support non-uniform time sampling, so we won't use the actual values, we just
+		// need the transform block to know how many values to expect.
+		m_transformStack.motionBegin( std::vector<float>( m_motionBlockSize, 0.0f ) );
 	}
 	m_transformStack.set( m );
 }
@@ -382,9 +386,10 @@ Imath::M44f IECoreArnold::RendererImplementation::getTransform( const std::strin
 
 void IECoreArnold::RendererImplementation::concatTransform( const Imath::M44f &m )
 {
-	if( m_motionTimes.size() && !m_transformStack.inMotion() )
+	if( m_motionBlockSize && !m_transformStack.inMotion() )
 	{
-		m_transformStack.motionBegin( m_motionTimes );
+		// See comment in setTransform
+		m_transformStack.motionBegin( std::vector<float>( m_motionBlockSize, 0.0f ) );
 	}
 	m_transformStack.concatenate( m );
 }
@@ -542,24 +547,31 @@ void IECoreArnold::RendererImplementation::illuminate( const std::string &lightH
 
 void IECoreArnold::RendererImplementation::motionBegin( const std::set<float> &times )
 {
-	if( !m_motionTimes.empty() )
+	if( m_motionBlockSize )
 	{
 		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionBegin", "Already in a motion block." );
 		return;
 	}
 
-	m_motionTimes.insert( m_motionTimes.end(), times.begin(), times.end() );
+	std::vector<float> timesVector;
+	timesVector.insert( timesVector.end(), times.begin(), times.end() );
+	NodeAlgo::ensureUniformTimeSamples( timesVector );
+
+	m_motionStart = timesVector.front();
+	m_motionEnd = timesVector.back();
+	m_motionBlockSize = times.size();
+
 }
 
 void IECoreArnold::RendererImplementation::motionEnd()
 {
-	if( m_motionTimes.empty() )
+	if( !m_motionBlockSize )
 	{
 		msg( Msg::Error, "IECoreArnold::RendererImplementation::motionEnd", "Not in a motion block." );
 		return;
 	}
 
-	m_motionTimes.clear();
+	m_motionBlockSize = 0;
 	m_motionPrimitives.clear();
 	if( m_transformStack.inMotion() )
 	{
@@ -769,12 +781,12 @@ bool IECoreArnold::RendererImplementation::automaticInstancing() const
 
 void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive *primitive, const std::string &attributePrefix )
 {
-	if( !m_motionTimes.empty() )
+	if( m_motionBlockSize )
 	{
 		// We're in a motion block. Just store samples
 		// until we have all of them.
 		m_motionPrimitives.push_back( primitive );
-		if( m_motionPrimitives.size() != m_motionTimes.size() )
+		if( m_motionPrimitives.size() != m_motionBlockSize )
 		{
 			return;
 		}
@@ -797,14 +809,14 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 				it->second->hash( hash );
 			}
 		}
-		if( !m_motionTimes.empty() )
+		if( m_motionBlockSize )
 		{
 			vector<const Primitive *> prims;
 			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
 			{
 				prims.push_back( it->get() );
 			}
-			shape = m_instancingConverter->convert( prims, m_motionTimes, hash );
+			shape = m_instancingConverter->convert( prims, m_motionStart, m_motionEnd, hash );
 		}
 		else
 		{
@@ -813,14 +825,14 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 	}
 	else
 	{
-		if( !m_motionTimes.empty() )
+		if( m_motionBlockSize )
 		{
 			vector<const Object *> prims;
 			for( vector<ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(), eIt = m_motionPrimitives.end(); it != eIt; ++it )
 			{
 				prims.push_back( it->get() );
 			}
-			shape = NodeAlgo::convert( prims, m_motionTimes );
+			shape = NodeAlgo::convert( prims, m_motionStart, m_motionEnd );
 		}
 		else
 		{
@@ -881,23 +893,15 @@ void IECoreArnold::RendererImplementation::applyTransformToNode( AtNode *node )
 	}
 	else
 	{
-		AtArray *times = AiArrayAllocate( numSamples, 1, AI_TYPE_FLOAT );
 		AtArray *matrices = AiArrayAllocate( 1, numSamples, AI_TYPE_MATRIX );
 		for( size_t i = 0; i < numSamples; ++i )
 		{
-			AiArraySetFlt( times, i, m_transformStack.sampleTime( i ) );
 			M44f m = m_transformStack.sample( i );
 			AiArraySetMtx( matrices, i, reinterpret_cast<AtMatrix&>( m.x ) );
 		}
 		AiNodeSetArray( node, "matrix", matrices );
-		if( AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), "transform_time_samples" ) )
-		{
-			AiNodeSetArray( node, "transform_time_samples", times );
-		}
-		else
-		{
-			AiNodeSetArray( node, "time_samples", times );
-		}
+		AiNodeSetFlt( node, "motion_start", m_motionStart );
+		AiNodeSetFlt( node, "motion_end", m_motionEnd );
 	}
 }
 

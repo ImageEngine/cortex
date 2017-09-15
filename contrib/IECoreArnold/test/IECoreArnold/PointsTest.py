@@ -190,7 +190,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( [ p1, p2 ], [ -0.25, 0.25 ] )
+			n = IECoreArnold.NodeAlgo.convert( [ p1, p2 ], -0.25, 0.25 )
 
 			a = arnold.AiNodeGetArray( n, "points" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
@@ -207,11 +207,8 @@ class PointsTest( unittest.TestCase ) :
 				self.assertEqual( arnold.AiArrayGetVec( a, i ), arnold.AtVector( 20 ) )
 				self.assertEqual( arnold.AiArrayGetFlt( r, i ), 1 )
 
-			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
-			self.assertEqual( a.contents.nelements, 2 )
-			self.assertEqual( a.contents.nkeys, 1 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), -0.25 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_start" ), -0.25 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_end" ), 0.25 )
 
 if __name__ == "__main__":
     unittest.main()
