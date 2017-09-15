@@ -166,7 +166,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 				if( const M44dData *data = runTimeCast<const M44dData>( value ) )
 				{
 					const Imath::M44f v( data->readable() );
-					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+					AiNodeSetMatrix( node, name, reinterpret_cast<const AtMatrix &>( v.x ) );
 				}
 				else if( const M44fData *data = dataCast<M44fData>( name, value ) )
 				{
@@ -174,7 +174,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 
 					// Can't see any reason why AiNodeSetMatrix couldn't have been declared const,
 					// this const_cast seems safe
-					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+					AiNodeSetMatrix( node, name, reinterpret_cast<const AtMatrix &>( v.x ) );
 				}
 				break;
 			default :
