@@ -65,7 +65,7 @@ inline const T *dataCast( const char *name, const IECore::Data *data )
 	return NULL;
 }
 
-void setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value )
+void setParameterInternal( AtNode *node, AtString name, int parameterType, bool array, const IECore::Data *value )
 {
 	if( array )
 	{
@@ -208,6 +208,12 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 	return data;
 }
 
+const char* getStrWrapperFunc( const AtArray* a, uint32_t i, const char* file, int line )
+{
+	return AiArrayGetStrFunc( a, i, file, line ).c_str();
+}
+
+
 /// \todo Flesh this out to support more types and then
 /// consider exposing it in the public API.
 IECore::DataPtr arrayToData( AtArray *array )
@@ -229,7 +235,7 @@ IECore::DataPtr arrayToData( AtArray *array )
 		case AI_TYPE_FLOAT :
 			return arrayToDataInternal<float>( array, AiArrayGetFltFunc );
 		case AI_TYPE_STRING :
-			return arrayToDataInternal<string>( array, AiArrayGetStrFunc );
+			return arrayToDataInternal<string>( array, getStrWrapperFunc );
 		default :
 			return NULL;
 	}
@@ -246,7 +252,7 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 		case AI_TYPE_FLOAT :
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
-			return new StringData( AiNodeGetStr( node, name ) );
+			return new StringData( AiNodeGetStr( node, name ).c_str() );
 		case AI_TYPE_RGB :
 		{
 			AtRGB rgb = AiNodeGetRGB( node, name );
@@ -293,7 +299,7 @@ void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Da
 	setParameterInternal( node, AiParamGetName( parameter ), type, isArray, value );
 }
 
-void setParameter( AtNode *node, const char *name, const IECore::Data *value )
+void setParameter( AtNode *node, AtString name, const IECore::Data *value )
 {
 	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
@@ -329,6 +335,11 @@ void setParameter( AtNode *node, const char *name, const IECore::Data *value )
 	}
 }
 
+void setParameter( AtNode *node, const char* name, const IECore::Data *value )
+{
+	setParameter( node, AtString( name ), value );
+}
+
 void setParameters( AtNode *node, const IECore::CompoundDataMap &values )
 {
 	for( CompoundDataMap::const_iterator it=values.begin(); it!=values.end(); it++ )
@@ -347,7 +358,7 @@ IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter )
 	return getParameterInternal( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
 }
 
-IECore::DataPtr getParameter( AtNode *node, const char *name )
+IECore::DataPtr getParameter( AtNode *node, AtString name )
 {
 	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
@@ -364,6 +375,11 @@ IECore::DataPtr getParameter( AtNode *node, const char *name )
 	}
 
 	return NULL;
+}
+
+IECore::DataPtr getParameter( AtNode *node, const char *name )
+{
+	return getParameter( node, AtString( name ) );
 }
 
 void getParameters( AtNode *node, IECore::CompoundDataMap &values )
