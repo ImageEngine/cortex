@@ -69,9 +69,6 @@ from PrimVarInterpretationTest import PrimVarInterpretationTest
 
 if hasattr( IECoreRI, "SXRenderer" ) :
 	from SXRendererTest import SXRendererTest
-	
-if hasattr( IECoreRI, "GXEvaluator" ) :
-	from GXEvaluatorTest import GXEvaluatorTest
 
 if IECore.withFreeType() :
 
