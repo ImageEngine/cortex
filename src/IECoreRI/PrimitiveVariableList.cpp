@@ -171,6 +171,9 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 			arraySize = boost::static_pointer_cast<const Color3fVectorData>( d )->readable().size();
 		case Color3fDataTypeId :
 			return "color";
+		case V2fVectorDataTypeId :
+			arraySize = boost::static_pointer_cast<const V2fVectorData>( d )->readable().size();
+			return geometryInterpretationToType( boost::static_pointer_cast<const V2fVectorData>( d )->getInterpretation(), name );
 		case FloatVectorDataTypeId :
 			arraySize = boost::static_pointer_cast<const FloatVectorData>( d )->readable().size();
 		case FloatDataTypeId :

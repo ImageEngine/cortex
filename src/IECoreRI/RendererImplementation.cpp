@@ -1831,8 +1831,8 @@ namespace
 // As of Cortex 10, we take a UDIM centric approach
 // to UVs, which clashes with RenderMan, so we must
 // flip the t values before sending to the renderer.
-// We also represent UVs as V2fVectorData and must
-// convert it back to paired FloatVectorData.
+// We also need to match RenderMan's expected naming
+// convention by using "st" rather than "uv".
 void convertUVs( MeshPrimitive *mesh )
 {
 	// Convert and remove UVs. We must perform the iteration to find
@@ -1854,33 +1854,23 @@ void convertUVs( MeshPrimitive *mesh )
 	{
 		if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( it->first, IECore::PrimitiveVariable::FaceVarying ) )
 		{
-			const std::vector<Imath::V2f> &uvs = uvData->readable();
-
-			FloatVectorDataPtr sData = new FloatVectorData();
-			FloatVectorDataPtr tData = new FloatVectorData();
-			std::vector<float> &s = sData->writable();
-			std::vector<float> &t = tData->writable();
-			s.reserve( uvs.size() );
-			t.reserve( uvs.size() );
+			std::vector<Imath::V2f> &uvs = uvData->writable();
 
 			for( unsigned i = 0; i < uvs.size(); ++i )
 			{
-				s.push_back( uvs[i][0] );
 				// as of Cortex 10, we take a UDIM centric approach
 				// to UVs, which clashes with OpenGL, so we must flip
 				// the v values during conversion.
-				t.push_back( 1.0 - uvs[i][1] );
+				uvs[i][1] = 1.0 - uvs[i][1];
 			}
 
 			if( it->first == "uv" )
 			{
-				mesh->variables["s"] = IECore::PrimitiveVariable( it->second.interpolation, sData );
-				mesh->variables["t"] = IECore::PrimitiveVariable( it->second.interpolation, tData );
+				mesh->variables["st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
 			}
 			else
 			{
-				mesh->variables[it->first + "_s"] = IECore::PrimitiveVariable( it->second.interpolation, sData );
-				mesh->variables[it->first + "_t"] = IECore::PrimitiveVariable( it->second.interpolation, tData );
+				mesh->variables[it->first + "_st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
 			}
 
 			mesh->variables.erase( it );
