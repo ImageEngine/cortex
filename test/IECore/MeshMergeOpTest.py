@@ -53,22 +53,67 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.verifyData( mesh2, mesh1, merged, flipped=True )
 	
 	def verifyData( self, meshA, meshB, merged, flipped=False ) :
-		
+
 		for name in meshA.keys() :
-			
+
 			self.failUnless( name in merged )
-			
+
 			interpolation = meshA[name].interpolation
-			self.assertEqual( len(merged[name].data), meshA.variableSize( interpolation ) + meshB.variableSize( interpolation ) )
-			
+			if merged[name].indices :
+				self.assertEqual( len(merged[name].indices), meshA.variableSize( interpolation ) + meshB.variableSize( interpolation ) )
+			else :
+				self.assertEqual( len(merged[name].data), meshA.variableSize( interpolation ) + meshB.variableSize( interpolation ) )
+
 			offset = meshB.variableSize( interpolation ) if flipped else 0
-			for i in range( 0, len(meshA[name].data) ) :
-				self.assertEqual( merged[name].data[offset + i], meshA[name].data[i] )
-		
+
+			if merged[name].indices and meshA[name].indices :
+				for i in range( 0, len(meshA[name].indices) ) :
+					index = merged[name].indices[offset + i]
+					indexA = meshA[name].indices[i]
+					self.assertEqual( index, indexA + offset if flipped else indexA )
+					self.assertEqual( merged[name].data[index], meshA[name].data[indexA] )
+
+			elif merged[name].indices :
+				for i in range( 0, len(meshA[name].data) ) :
+					index = merged[name].indices[offset + i]
+					indexA = offset + i
+					self.assertEqual( index, indexA )
+					self.assertEqual( merged[name].data[index], meshA[name].data[i] )
+
+			elif meshA[name].indices :
+				for i in range( 0, len(meshA[name].indices) ) :
+					indexA = meshA[name].indices[i]
+					self.assertEqual( merged[name].data[offset + i], meshA[name].data[indexA] )
+
+			else :
+				for i in range( 0, len(meshA[name].data) ) :
+					self.assertEqual( merged[name].data[offset + i], meshA[name].data[i] )
+
 			offset = 0 if flipped else meshA.variableSize( interpolation )
 			if name in meshB and meshB[name].interpolation == interpolation :
-				for i in range( 0, len(meshB[name].data) ) :
-					self.assertEqual( merged[name].data[offset + i], meshB[name].data[i] )
+
+				if merged[name].indices and meshB[name].indices :
+					for i in range( 0, len(meshB[name].indices) ) :
+						index = merged[name].indices[offset + i]
+						indexB = meshB[name].indices[i]
+						self.assertEqual( index, indexB if flipped else indexB + offset )
+						self.assertEqual( merged[name].data[index], meshB[name].data[indexB] )
+
+				elif merged[name].indices :
+					for i in range( 0, len(meshB[name].data) ) :
+						index = merged[name].indices[offset + i]
+						indexB = offset + i
+						self.assertEqual( index, indexB )
+						self.assertEqual( merged[name].data[index], meshB[name].data[i] )
+
+				elif meshB[name].indices :
+					for i in range( 0, len(meshB[name].indices) ) :
+						indexB = meshB[name].indices[i]
+						self.assertEqual( merged[name].data[offset + i], meshB[name].data[indexB] )
+
+				else :
+					for i in range( 0, len(meshB[name].data) ) :
+						self.assertEqual( merged[name].data[offset + i], meshB[name].data[i] )
 
 	def testPlanes( self ) :
 		
@@ -153,6 +198,45 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		p2["Pref"] = p2["P"]
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.failUnless( "Pref" in merged )
+		self.verifyMerge( p1, p2, merged )
+
+	def testIndexedPrimVars( self ) :
+
+		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
+		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+
+		# both meshes have indexed UVs
+		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
+		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		self.verifyMerge( p1, p2, merged )
+
+		# meshA has indexed UVs, meshB has expanded UVs
+		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, None )
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		self.verifyMerge( p1, p2, merged )
+
+		# both meshes have expanded UVs
+		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, None )
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		self.verifyMerge( p1, p2, merged )
+
+		# meshA has expanded UVs, meshB has indexed UVs
+		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		self.verifyMerge( p1, p2, merged )
+
+		# meshA has indexed UVs, meshB has no UVs
+		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
+		del p2["uv"]
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		self.verifyMerge( p1, p2, merged )
+
+		# meshA has no UVs, meshB has indexed UVs
+		del p1["uv"]
+		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 if __name__ == "__main__":
