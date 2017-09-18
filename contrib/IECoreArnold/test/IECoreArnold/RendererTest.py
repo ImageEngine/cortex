@@ -783,7 +783,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
@@ -811,7 +811,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
