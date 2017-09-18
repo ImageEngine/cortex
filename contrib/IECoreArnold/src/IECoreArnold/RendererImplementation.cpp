@@ -644,14 +644,12 @@ void IECoreArnold::RendererImplementation::geometry( const std::string &type, co
 /////////////////////////////////////////////////////////////////////////////////////////
 // procedurals
 /////////////////////////////////////////////////////////////////////////////////////////
-
-int IECoreArnold::RendererImplementation::procLoader( AtProcVtable *vTable )
+int IECoreArnold::RendererImplementation::procFunc( AtProceduralNodeMethods *methods )
 {
-	vTable->Init = procInit;
-	vTable->Cleanup = procCleanup;
-	vTable->NumNodes = procNumNodes;
-	vTable->GetNode = procGetNode;
-	strcpy( vTable->version, AI_VERSION );
+	methods->Init = procInit;
+	methods->Cleanup = procCleanup;
+	methods->NumNodes = procNumNodes;
+	methods->GetNode = procGetNode;
 	return 1;
 }
 
@@ -664,20 +662,20 @@ int IECoreArnold::RendererImplementation::procInit( AtNode *node, void **userPtr
 	return 1;
 }
 
-int IECoreArnold::RendererImplementation::procCleanup( void *userPtr )
+int IECoreArnold::RendererImplementation::procCleanup( const AtNode *node, void *userPtr )
 {
 	ProceduralData *data = (ProceduralData *)( userPtr );
 	delete data;
 	return 1;
 }
 
-int IECoreArnold::RendererImplementation::procNumNodes( void *userPtr )
+int IECoreArnold::RendererImplementation::procNumNodes( const AtNode *node, void *userPtr )
 {
 	ProceduralData *data = (ProceduralData *)( userPtr );
 	return data->renderer->m_implementation->m_nodes.size();
 }
 
-AtNode* IECoreArnold::RendererImplementation::procGetNode( void *userPtr, int i )
+AtNode* IECoreArnold::RendererImplementation::procGetNode( const AtNode *node, void *userPtr, int i )
 {
 	ProceduralData *data = (ProceduralData *)( userPtr );
 	return data->renderer->m_implementation->m_nodes[i];
@@ -696,17 +694,12 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 
 	if( const ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
 	{
-		// Allow a parameter "ai:nodeType" == "volume" to create a volume shape rather
-		// than a procedural shape. Volume shapes provide "dso", "min" and "max" parameters
-		// just as procedural shapes do, so the mapping is a fairly natural one.
-		CompoundDataMap::const_iterator nodeTypeIt = externalProc->parameters().find( "ai:nodeType" );
-		if( nodeTypeIt != externalProc->parameters().end() && nodeTypeIt->second->isInstanceOf( StringData::staticTypeId() ) )
-		{
-			nodeType = static_cast<const StringData *>( nodeTypeIt->second.get() )->readable();
-		}
-		node = AiNode( nodeType.c_str() );
-
-		AiNodeSetStr( node, "dso", externalProc->fileName().c_str() );
+		// In Arnold, external procedurals register node types, and then we use the node types
+		// just like built in nodes - we don't reference the filename of the dso that defines the node type.
+		// So here we just interpret "filename" as the node type to create.
+		// \todo : Change the name of the parameter to ExternalProcedural
+		// to be just "name" instead of "filename" in Cortex 10?
+		node = AiNode( externalProc->fileName().c_str() );
 		ParameterAlgo::setParameters( node, externalProc->parameters() );
 		applyTransformToNode( node );
 	}
@@ -727,24 +720,13 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 			bound = transformedBound;
 		}
 
-		AiNodeSetPtr( node, "funcptr", (void *)procLoader );
+		AiNodeSetPtr( node, "funcptr", (void *)procFunc );
 
 		ProceduralData *data = new ProceduralData;
 		data->procedural = proc;
 		data->renderer = new IECoreArnold::Renderer( new RendererImplementation( *this ) );
 
 		AiNodeSetPtr( node, "userptr", data );
-	}
-
-	if( bound != Procedural::noBound )
-	{
-		AiNodeSetVec( node, "min", bound.min.x, bound.min.y, bound.min.z );
-		AiNodeSetVec( node, "max", bound.max.x, bound.max.y, bound.max.z );
-	}
-	else
-	{
-		// No bound available - expand procedural immediately.
-		AiNodeSetBool( node, "load_at_init", true );
 	}
 
 	if( nodeType == "procedural" )

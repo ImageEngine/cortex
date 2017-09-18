@@ -708,7 +708,7 @@ class RendererTest( unittest.TestCase ) :
 
 			r.procedural(
 				r.ExternalProcedural(
-					"test.so",
+					"volume",
 					IECore.Box3f(
 						IECore.V3f( 1, 2, 3 ),
 						IECore.V3f( 4, 5, 6 )
@@ -724,10 +724,7 @@ class RendererTest( unittest.TestCase ) :
 
 		ass = "".join( file( self.__assFileName ).readlines() )
 
-		self.assertTrue( "procedural" in ass )
-		self.assertTrue( "min 1 2 3" in ass )
-		self.assertTrue( "max 4 5 6" in ass )
-		self.assertTrue( "dso \"test.so\"" in ass )
+		self.assertTrue( "volume" in ass )
 		self.assertTrue( "declare stringParm constant STRING" in ass )
 		self.assertTrue( "declare floatParm constant FLOAT" in ass )
 		self.assertTrue( "declare intParm constant INT" in ass )
@@ -862,12 +859,14 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
+			# In Arnold 5, external procedurals register node types that look just like the built-in
+			# ones.  So we need to be able to use ExternalProcedural to create an arbitrary node type,
+			# instead of passing in a filename. Test with a volume, because this node type exists by default.
 			r.procedural(
 				r.ExternalProcedural(
-					"someVolumeThing.so",
+					"volume",
 					IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 4, 5, 6 ) ),
 					{
-						"ai:nodeType" : "volume",
 						"testFloat" : 0.5
 					}
 				)
@@ -876,9 +875,6 @@ class RendererTest( unittest.TestCase ) :
 			volume = self.__allNodes( type = arnold.AI_NODE_SHAPE )[-1]
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( volume ) ), "volume" )
 
-			self.assertEqual( arnold.AiNodeGetVec( volume, "min" ), arnold.AtVector( -1, -2, -3 ) )
-			self.assertEqual( arnold.AiNodeGetVec( volume, "max" ), arnold.AtVector( 4, 5, 6 ) )
-			self.assertEqual( arnold.AiNodeGetStr( volume, "dso" ), "someVolumeThing.so" )
 			self.assertEqual( arnold.AiNodeGetFlt( volume, "testFloat" ), 0.5 )
 
 	def tearDown( self ) :

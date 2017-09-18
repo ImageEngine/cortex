@@ -149,11 +149,11 @@ class RendererImplementation : public IECore::Renderer
 			RendererPtr renderer;
 		};
 
-		static int procLoader( AtProcVtable *vTable );
+		static int procFunc( AtProceduralNodeMethods *methods );
 		static int procInit( AtNode *node, void **userPtr );
-		static int procCleanup( void *userPtr );
-		static int procNumNodes( void *userPtr );
-		static AtNode *procGetNode( void *userPtr, int i );
+		static int procCleanup( const AtNode *node, void *userPtr );
+		static int procNumNodes( const AtNode *node, void *userPtr );
+		static AtNode *procGetNode( const AtNode *node, void *userPtr, int i );
 
 		boost::shared_ptr<UniverseBlock> m_universe;
 		InstancingConverterPtr m_instancingConverter;
