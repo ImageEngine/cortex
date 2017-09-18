@@ -24,17 +24,8 @@ persp_camera
 	name camera
 }
 
-procedural
+ieProcedural
 {
-
-	dso contrib/IECoreArnold/test/IECoreArnold/plugins/ieProcedural.so
-	min -100 -100 -100
-	max 100 100 100
-
-	declare className constant STRING
-	declare classVersion constant INT
-	declare parameterValues constant ARRAY STRING
-	
 	matrix 1 0 0 0   0 1 0 0  0 0 1 0   0 0 -20 1
 	
 	className "read"

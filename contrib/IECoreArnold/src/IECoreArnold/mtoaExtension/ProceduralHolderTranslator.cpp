@@ -62,7 +62,7 @@ class ProceduralHolderTranslator : public CShapeTranslator
                   if (m_isMasterDag)
                   {
 
-			return AddArnoldNode( "procedural" );
+			return AddArnoldNode( "ieProcedural" );
                   }
                   else
                   {
@@ -157,16 +157,6 @@ class ProceduralHolderTranslator : public CShapeTranslator
 
 			MFnDagNode fnDagNode( m_dagPath );
 			MBoundingBox bound = fnDagNode.boundingBox();
-
-			AiNodeSetVec( node, "min", bound.min().x, bound.min().y, bound.min().z );
-			AiNodeSetVec( node, "max", bound.max().x, bound.max().y, bound.max().z );
-
-			const char *dsoPath = getenv( "IECOREARNOLD_PROCEDURAL_PATH" );
-			AiNodeSetStr( node, "dso", dsoPath ? dsoPath : "ieProcedural.so" );
-
-			AiNodeDeclare( node, "className", "constant STRING" );
-			AiNodeDeclare( node, "classVersion", "constant INT" );
-			AiNodeDeclare( node, "parameterValues", "constant ARRAY STRING" );
 
 			// cast should be ok as we're registered to only work on procedural holders
 			IECoreMaya::ProceduralHolder *pHolder = static_cast<IECoreMaya::ProceduralHolder *>( fnDagNode.userNode() );
