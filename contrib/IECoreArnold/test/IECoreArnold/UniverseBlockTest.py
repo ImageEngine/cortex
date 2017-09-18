@@ -91,17 +91,18 @@ class UniverseBlockTest( unittest.TestCase ) :
 
 			e = arnold.AiNodeEntryLookUp( "options" )
 
-			s = ctypes.c_char_p()
+			s = arnold.AtStringReturn()
 			i = ctypes.c_int()
 
+
 			arnold.AiMetaDataGetStr( e, "", "cortex.testString", s )
-			self.assertEqual( s.value, "test" )
+			self.assertEqual( arnold.AtStringToStr( s ), "test" )
 
 			arnold.AiMetaDataGetInt( e, "", "cortex.testInt", i )
 			self.assertEqual( i.value, 25 )
 
 			arnold.AiMetaDataGetStr( e, "AA_samples", "cortex.testString", s )
-			self.assertEqual( s.value, "test2" )
+			self.assertEqual( arnold.AtStringToStr( s ), "test2" )
 
 			arnold.AiMetaDataGetInt( e, "AA_samples", "cortex.testInt", i )
 			self.assertEqual( i.value, 12 )
