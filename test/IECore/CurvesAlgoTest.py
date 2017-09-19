@@ -80,6 +80,13 @@ class CurvesAlgoTest( unittest.TestCase ) :
 		testObject["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 2 ) ) )
 		testObject["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 12 ) ) )
 		testObject["e"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 12 ) ) )
+
+		# indexed
+		testObject["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+		testObject["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1 ] ) )
+		testObject["h"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+		testObject["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
 		return testObject
@@ -251,6 +258,102 @@ class CurvesAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 12 ) ) )
+
+	def testBSplineCurvesIndexedVertexToUniform( self ) :
+		curves = self.curvesBSpline()
+		p = curves["f"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Uniform)
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.875, 1 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testBSplineCurvesIndexedVertexToVarying( self ) :
+		curves = self.curvesBSpline()
+		p = curves["f"]
+
+		self.assertRaises( RuntimeError, IECore.CurvesAlgo.resamplePrimitiveVariable, curves, p, IECore.PrimitiveVariable.Interpolation.Varying )
+
+	def testBSplineCurvesIndexedVertexToFaceVarying( self ) :
+		curves = self.curvesBSpline()
+		p = curves["f"]
+
+		self.assertRaises( RuntimeError, IECore.CurvesAlgo.resamplePrimitiveVariable, curves, p, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+
+	def testBSplineCurvesIndexedUniformToVertex( self ) :
+		curves = self.curvesBSpline()
+		p = curves["g"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Vertex)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( ( [ 0 ] * 8 ) + ( [ 1 ] * 8 ) ) )
+
+	def testBSplineCurvesIndexedUniformToVarying( self ) :
+		curves = self.curvesBSpline()
+		p = curves["g"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Varying)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( ( [ 0 ] * 6 ) + ( [ 1 ] * 6 ) ) )
+
+	def testBSplineCurvesIndexedUniformToFaceVarying( self ) :
+
+		curves = self.curvesBSpline()
+		p = curves["g"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.FaceVarying)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( ( [ 0 ] * 6 ) + ( [ 1 ] * 6 ) ) )
+
+	def testBSplineCurvesIndexedVaryingToVertex( self ) :
+		curves = self.curvesBSpline()
+		p = curves["h"]
+
+		self.assertRaises( RuntimeError, IECore.CurvesAlgo.resamplePrimitiveVariable, curves, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+
+	def testBSplineCurvesIndexedVaryingToUniform( self ) :
+		curves = self.curvesBSpline()
+		p = curves["h"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 1, 1 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testBSplineCurvesIndexedVaryingToFaceVarying( self ) :
+		curves = self.curvesBSpline()
+		p = curves["h"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.FaceVarying)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+
+	def testBSplineCurvesIndexedFaceVaryingToVertex( self ) :
+		curves = self.curvesBSpline()
+		p = curves["i"]
+
+		self.assertRaises( RuntimeError, IECore.CurvesAlgo.resamplePrimitiveVariable, curves, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+
+	def testBSplineCurvesIndexedFaceVaryingToUniform( self ) :
+		curves = self.curvesBSpline()
+		p = curves["i"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Uniform)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 1, 1 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testBSplineCurvesIndexedFaceVaryingToVarying( self ) :
+		curves = self.curvesBSpline()
+		p = curves["i"]
+		IECore.CurvesAlgo.resamplePrimitiveVariable(curves, p, IECore.PrimitiveVariable.Interpolation.Varying)
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 3 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
 	# endregion
 
 	# region catmullrom
