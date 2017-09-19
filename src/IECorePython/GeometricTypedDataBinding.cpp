@@ -59,6 +59,7 @@ void bindGeometricTypedData()
 		.value( "Normal", GeometricData::Normal )
 		.value( "Vector", GeometricData::Vector )
 		.value( "Color", GeometricData::Color )
+		.value( "UV", GeometricData::UV )
 	;
 }
 
