@@ -131,6 +131,7 @@ V2fVectorDataPtr combineUVs( const FloatVectorData *u, const FloatVectorData *v,
 	const std::vector<float> &uValues = u->readable();
 	const std::vector<float> &vValues = v->readable();
 	V2fVectorDataPtr uvs = new V2fVectorData();
+	uvs->setInterpretation( GeometricData::UV );
 
 	if( indices )
 	{

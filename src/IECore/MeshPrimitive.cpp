@@ -368,6 +368,7 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	std::vector<int> &vIds = vertexIds->writable();
 	
 	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
 	std::vector<Imath::V2f> &uvs = uvData->writable();
 
 	float uStep = 1.0f / (float)divisions.x;
@@ -416,6 +417,7 @@ MeshPrimitivePtr MeshPrimitive::createSphere( float radius, float zMin, float zM
 	std::vector<V3f> &nVector = nData->writable();
 
 	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
 	std::vector<Imath::V2f> &uvs = uvData->writable();
 
 	/// \todo: Rewrite this such that the poles are aligned to Y rather than Z.

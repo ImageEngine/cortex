@@ -101,6 +101,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		# read legacy file and confirm values are packed into V2f and unflipped
 		sphere = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		self.assertTrue( sphere.arePrimitiveVariablesValid() )
+		self.assertEqual( sphere["uv"].data.getInterpretation(), GeometricData.Interpretation.UV )
 		self.assertEqual( sphere["uv"].data[0][0], 0 )
 		self.assertAlmostEqual( sphere["uv"].data[0][1], 0.05 )
 		self.assertAlmostEqual( sphere["uv"].data[-1][0], 0.975 )
@@ -110,6 +111,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		Writer.create( sphere, "test/IECore/mesh.cob" ).write()
 		newSphere = Reader.create( "test/IECore/mesh.cob" ).read()
 		self.assertTrue( newSphere.arePrimitiveVariablesValid() )
+		self.assertEqual( newSphere["uv"].data.getInterpretation(), GeometricData.Interpretation.UV )
 		self.assertEqual( newSphere["uv"].data[0][0], 0 )
 		self.assertAlmostEqual( newSphere["uv"].data[0][1], 0.05 )
 		self.assertAlmostEqual( newSphere["uv"].data[-1][0], 0.975 )
@@ -141,6 +143,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		s = SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IndexedIO.OpenMode.Read )
 		ss = s.scene( [ "A", "a" ] )
 		animSphere = ss.readObject( 0 )
+		self.assertEqual( animSphere["uv"].data.getInterpretation(), GeometricData.Interpretation.UV )
 		self.assertEqual( animSphere["uv"].data[0][0], 0 )
 		self.assertAlmostEqual( animSphere["uv"].data[0][1], 0.05 )
 		self.assertAlmostEqual( animSphere["uv"].data[-1][0], 0.975 )
@@ -150,6 +153,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( len(animSphere["uv"].data), 439 )
 		self.assertEqual( len(animSphere["uv"].indices), 1560 )
 		# and the duplicate UV Set matches
+		self.assertEqual( animSphere["map1"].data.getInterpretation(), GeometricData.Interpretation.UV )
 		self.assertEqual( animSphere["map1"].data[0][0], 0 )
 		self.assertAlmostEqual( animSphere["map1"].data[0][1], 0.05 )
 		self.assertAlmostEqual( animSphere["map1"].data[-1][0], 0.975 )
