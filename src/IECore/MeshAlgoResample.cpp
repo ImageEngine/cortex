@@ -249,21 +249,42 @@ struct MeshAnythingToFaceVarying
 
 void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation )
 {
-	Data *srcData = primitiveVariable.data.get();
-	DataPtr dstData;
-
 	PrimitiveVariable::Interpolation srcInterpolation = primitiveVariable.interpolation;
-
 	if ( srcInterpolation == interpolation )
 	{
 		return;
+	}
+
+	DataPtr dstData = nullptr;
+	DataPtr srcData = nullptr;
+
+	if( primitiveVariable.indices )
+	{
+		if( srcInterpolation < interpolation )
+		{
+			// upsampling can be a resampling of indices
+			srcData = primitiveVariable.indices;
+		}
+		else
+		{
+			// downsampling forces index expansion to
+			// simplify the algorithms.
+			// \todo: allow indices to be maintained.
+			srcData = primitiveVariable.expandedData();
+			primitiveVariable.indices = nullptr;
+		}
+	}
+	else
+	{
+		// with no indices we can just resample the data
+		srcData = primitiveVariable.data;
 	}
 
 	// average array to single value
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		primitiveVariable = PrimitiveVariable( interpolation, dstData );
 		return;
 	}
@@ -283,12 +304,12 @@ void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, Pri
 		if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
 			MeshVertexToUniform fn( mesh );
-			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshVertexToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToUniform fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshFaceVaryingToUniform, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 	}
 	else if( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::Vertex )
@@ -296,12 +317,12 @@ void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, Pri
 		if( srcInterpolation == PrimitiveVariable::Uniform )
 		{
 			MeshUniformToVertex fn( mesh );
-			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshUniformToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::FaceVarying )
 		{
 			MeshFaceVaryingToVertex fn( mesh );
-			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+			dstData = despatchTypedData<MeshFaceVaryingToVertex, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 		}
 		else if( srcInterpolation == PrimitiveVariable::Varying || srcInterpolation == PrimitiveVariable::Vertex )
 		{
@@ -311,8 +332,15 @@ void IECore::MeshAlgo::resamplePrimitiveVariable( const MeshPrimitive *mesh, Pri
 	else if( interpolation == PrimitiveVariable::FaceVarying )
 	{
 		MeshAnythingToFaceVarying fn( mesh, srcInterpolation );
-		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData, fn );
+		dstData = despatchTypedData<MeshAnythingToFaceVarying, Detail::IsArithmeticVectorTypedData>( srcData.get(), fn );
 	}
 
-	primitiveVariable = PrimitiveVariable( interpolation, dstData );
+	if( primitiveVariable.indices )
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, primitiveVariable.data, runTimeCast<IntVectorData>( dstData ) );
+	}
+	else
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+	}
 }

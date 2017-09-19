@@ -48,6 +48,12 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		testObject["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 9 ) ) )
 		testObject["e"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 16 ) ) )
 
+		# indexed
+		testObject["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+		testObject["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0 ] ) )
+		testObject["h"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+		testObject["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+
 		return testObject
 
 	@classmethod
@@ -181,6 +187,90 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
+
+	def testMeshIndexedVertexToUniform( self ) :
+		p = self.mesh["f"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5, 1.5, 0.5, 1.5 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testMeshIndexedVertexToVarying( self ) :
+		p = self.mesh["f"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+
+	def testMeshIndexedVertexToFaceVarying( self ) :
+		p = self.mesh["f"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 1, 0, 1, 2, 2, 1, 0, 1, 1, 0, 1, 2, 2, 1 ] ) )
+
+	def testMeshIndexedUniformToVertex( self ) :
+		p = self.mesh["g"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 0, 1, 1, 0, 0, 2, 1, 0 ] ) )
+
+	def testMeshIndexedUniformToVarying( self ) :
+		p = self.mesh["g"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 0, 1, 1, 0, 0, 2, 1, 0 ] ) )
+
+	def testMeshIndexedUniformToFaceVarying( self ) :
+		p = self.mesh["g"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 0, 0, 0, 0 ] ) )
+
+	def testMeshIndexedVaryingToVertex( self ) :
+		p = self.mesh["h"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testMeshIndexedVaryingToUniform( self ) :
+		p = self.mesh["h"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5, 1.5, 0.5, 1.5 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testMeshIndexedVaryingToFaceVarying( self ) :
+		p = self.mesh["h"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0, 1, 1, 0, 1, 2, 2, 1, 0, 1, 1, 0, 1, 2, 2, 1 ] ) )
+
+	def testMeshIndexedFaceVaryingToVertex( self ) :
+		p = self.mesh["i"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 1, 0.75, 0.5, 2, 0.5, 2 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testMeshIndexedFaceVaryingToUniform( self ) :
+		p = self.mesh["i"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.75, 1, 1.25, 0.75 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testMeshIndexedFaceVaryingToVarying( self ) :
+		p = self.mesh["i"]
+		IECore.MeshAlgo.resamplePrimitiveVariable( self.mesh, p, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 1, 0.75, 0.5, 2, 0.5, 2 ] ) )
+		self.assertEqual( p.indices, None )
 
 if __name__ == "__main__":
 	unittest.main()
