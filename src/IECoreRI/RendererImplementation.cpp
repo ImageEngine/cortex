@@ -1842,11 +1842,12 @@ void convertUVs( MeshPrimitive *mesh )
 	std::vector<PrimitiveVariableMap::iterator> uvSets;
 	for( auto it = mesh->variables.begin(), eIt = mesh->variables.end(); it != eIt; ++it )
 	{
-		/// \todo: add a role enum to PrimitiveVariable, so we can distinguish between UVs and
-		///  things that just happen to hold V2fVectorData.
-		if( it->second.data->typeId() == V2fVectorDataTypeId )
+		if( const V2fVectorData *data = runTimeCast<const V2fVectorData>( it->second.data.get() ) )
 		{
-			uvSets.push_back( it );
+			if( data->getInterpretation() == GeometricData::UV )
+			{
+				uvSets.push_back( it );
+			}
 		}
 	}
 
