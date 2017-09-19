@@ -185,12 +185,17 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 	// Find all UV sets and convert them explicitly.
 	for( auto it = variablesToConvert.begin(); it != variablesToConvert.end(); )
 	{
-		/// \todo: add a role enum to PrimitiveVariable, so we can distinguish between UVs and
-		///  things that just happen to hold V2fVectorData.
-		if( it->second.data->typeId() == V2fVectorDataTypeId )
+		if( const V2fVectorData *data = runTimeCast<const V2fVectorData>( it->second.data.get() ) )
 		{
-			::convertUVSet( it->first, it->second, vertexIds, result );
-			it = variablesToConvert.erase( it );
+			if( data->getInterpretation() == GeometricData::UV )
+			{
+				::convertUVSet( it->first, it->second, vertexIds, result );
+				it = variablesToConvert.erase( it );
+			}
+			else
+			{
+				++it;
+			}
 		}
 		else
 		{
