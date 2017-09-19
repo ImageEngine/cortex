@@ -158,10 +158,6 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 
 IECoreArnold::RendererImplementation::~RendererImplementation()
 {
-	if( m_mode != Procedural )
-	{
-		AiEnd();
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////
