@@ -335,12 +335,12 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 	/// Add UV sets
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
-		/// \todo: add a role enum to PrimitiveVariable, so we can distinguish between UVs and
-		///  things that just happen to hold V2fVectorData.
-		if( it->second.data->typeId() == IECore::V2fVectorDataTypeId )
+		if( const IECore::V2fVectorData *data = IECore::runTimeCast<const IECore::V2fVectorData>( it->second.data.get() ) )
 		{
-			// add extra uvs
-			addUVSet( fnMesh, polygonCounts, mesh.get(), it );
+			if( data->getInterpretation() == IECore::GeometricData::UV )
+			{
+				addUVSet( fnMesh, polygonCounts, mesh.get(), it );
+			}
 		}
 	}
 

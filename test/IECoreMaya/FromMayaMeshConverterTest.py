@@ -137,6 +137,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m["uv"].indices.size(), 180 )
 		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
 		self.assert_( m.bound().contains( IECore.Box3f( IECore.V3f( -0.90 ), IECore.V3f( 0.90 ) ) ) )
@@ -221,7 +222,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( set( m.keys() ), set( [ "P", "N", "uv", "Double", "DoubleArray" ] ) )
 		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ) ] ) )
+		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ) ], IECore.GeometricData.Interpretation.UV ) )
 		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 0, 1, 3, 2 ] ) )
 		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
@@ -251,6 +252,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.failUnless( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		
 	def testSplitUVIndices( self ) :
 			
@@ -261,6 +263,7 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.failUnless( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )
+		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 	def testExtraSTs( self ) :
 	
@@ -282,12 +285,16 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( "map1" not in m )
 		self.assert_( "map2" in m )
 
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( m["map2"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+
 	def testManyUVConversionsFromPlug( self ) :
 
 		# load a mesh with indexed UVs
 		scc = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
 		coreMesh = scc.scene( [ "A", "a" ] ).readObject( 0 )
 		self.assertTrue( "uv" in coreMesh )
+		self.assertEqual( coreMesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		for i in range( 0, 7 ) :
 			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy(), coreMesh["uv"].indices.copy() )

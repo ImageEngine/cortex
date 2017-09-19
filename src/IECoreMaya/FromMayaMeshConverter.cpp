@@ -286,6 +286,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::uvs( const MString &uvSet, cons
 	}
 
 	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
 	std::vector<Imath::V2f> &uvs = uvData->writable();
 
 	MFloatArray uArray, vArray;
