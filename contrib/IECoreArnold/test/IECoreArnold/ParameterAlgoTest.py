@@ -109,5 +109,18 @@ class ParameterAlgoTest( unittest.TestCase ) :
 			self.assertEqual( arnold.AiArrayGetStr( a, 0 ), "a" )
 			self.assertEqual( arnold.AiArrayGetStr( a, 1 ), "b" )
 
+	def testVectorIntData( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "standard_surface" )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "customV2i", IECore.V2iData( IECore.V2i( 3, 4 ) ) )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "customV2i" ), arnold.AtVector2( 3, 4 ) )
+
+			IECoreArnold.ParameterAlgo.setParameter( n, "customV3i", IECore.V3iData( IECore.V3i( 3, 4, 5 ) ) )
+			self.assertEqual( arnold.AiNodeGetVec( n, "customV3i" ), arnold.AtVector( 3, 4, 5 ) )
+
+
 if __name__ == "__main__":
     unittest.main()
