@@ -268,18 +268,29 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 		}
 
 		PrimitiveVariable primVar = processPrimitiveVariable( primitive, it->second );
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data.get() );
+
+		DataPtr data = nullptr;
+		ToHoudiniAttribConverterPtr converter = nullptr;
+
+		if( primVar.indices && primVar.data->typeId() == StringVectorDataTypeId )
+		{
+			// we want to process the indexed strings rather than the expanded strings
+			converter = ToHoudiniAttribConverter::create( primVar.data.get() );
+			if( ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() ) )
+			{
+				stringVectorConverter->indicesParameter()->setValidatedValue( primVar.indices.get() );
+			}
+		}
+		else
+		{
+			// all other primitive variables must be expanded
+			data = primVar.expandedData();
+			converter = ToHoudiniAttribConverter::create( data.get() );
+		}
+
 		if ( !converter )
 		{
 			continue;
-		}
-
-		if( ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() ) )
-		{
-			if( it->second.indices )
-			{
-				stringVectorConverter->indicesParameter()->setValidatedValue( it->second.indices.get() );
-			}
 		}
 
 		const std::string name = ( convertStandardAttributes ) ? processPrimitiveVariableName( it->first ) : it->first;
