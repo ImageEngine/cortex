@@ -103,6 +103,7 @@ IECore::ObjectPtr MeshFromNuke::doConversion( IECore::ConstCompoundObjectPtr ope
 	if( uvAttr )
 	{
 		V2fVectorDataPtr uvData = new V2fVectorData();
+		uvData->setInterpretation( GeometricData::UV );
 		std::vector<Imath::V2f> &uvs = uvData->writable();
 		uvs.reserve( uvAttr->size() );
 		unsigned numUVs = uvAttr->size();
