@@ -149,14 +149,28 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 				}
 				break;
 			case AI_TYPE_VECTOR2 :
-				if( const V2fData *data = dataCast<V2fData>( name, value ) )
+				if( const V2iData *data = runTimeCast<const V2iData>( value ) )
+				{
+					// Accept a V2i as an alternate since Arnold has
+					// no integer vector type to store these in.
+					const Imath::V2i &v = data->readable();
+					AiNodeSetVec2( node, name, v.x, v.y );
+				}
+				else if( const V2fData *data = dataCast<V2fData>( name, value ) )
 				{
 					const Imath::V2f &v = data->readable();
 					AiNodeSetVec2( node, name, v.x, v.y );
 				}
 				break;
 			case AI_TYPE_VECTOR :
-				if( const V3fData *data = dataCast<V3fData>( name, value ) )
+				if( const V3iData *data = runTimeCast<const V3iData>( value ) )
+				{
+					// Accept a V3i as an alternate since Arnold has
+					// no integer vector type to store these in.
+					const Imath::V3i &v = data->readable();
+					AiNodeSetVec( node, name, v.x, v.y, v.z );
+				}
+				else if( const V3fData *data = dataCast<V3fData>( name, value ) )
 				{
 					const Imath::V3f &v = data->readable();
 					AiNodeSetVec( node, name, v.x, v.y, v.z );
@@ -431,7 +445,12 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolDataTypeId :
 			array = false;
 			return AI_TYPE_BOOLEAN;
+		case V2fDataTypeId :
+		case V2iDataTypeId :
+			array = false;
+			return AI_TYPE_VECTOR2;
 		case V3fDataTypeId :
+		case V3iDataTypeId :
 			array = false;
 			return AI_TYPE_VECTOR;
 		case M44fDataTypeId :
@@ -456,7 +475,12 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolVectorDataTypeId :
 			array = true;
 			return AI_TYPE_BOOLEAN;
+		case V2fVectorDataTypeId :
+		case V2iVectorDataTypeId :
+			array = true;
+			return AI_TYPE_VECTOR2;
 		case V3fVectorDataTypeId :
+		case V3iVectorDataTypeId :
 			array = true;
 			return AI_TYPE_VECTOR;
 		case M44fVectorDataTypeId :
