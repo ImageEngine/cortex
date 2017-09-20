@@ -108,6 +108,7 @@ class MeshReader : public PrimitiveReader
 			SamplePtr sample = uvParam.getVals();
 			size_t uvSize = sample->size();
 			V2fVectorDataPtr uvData = new V2fVectorData;
+			uvData->setInterpretation( GeometricData::UV );
 			std::vector<Imath::V2f> &uvValues = uvData->writable();
 			uvValues.reserve( uvSize );
 			for( size_t i=0; i<uvSize; ++i )

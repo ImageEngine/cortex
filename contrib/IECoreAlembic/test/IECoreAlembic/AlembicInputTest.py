@@ -169,6 +169,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 
 		self.failUnless( isinstance( m["uv"].data, IECore.V2fVectorData ) )
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		self.failUnless( isinstance( m["uv"].indices, IECore.IntVectorData ) )
 
 		self.assertEqual( len(m["uv"].data), m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
