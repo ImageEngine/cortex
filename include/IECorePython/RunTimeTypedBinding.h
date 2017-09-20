@@ -55,39 +55,9 @@ class RunTimeTypedWrapper : public RefCountedWrapper<T>
 {
 
 	public :
-	
-		RunTimeTypedWrapper( PyObject *self );
-	
-		template<typename Arg1>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1 );
-	
-		template<typename Arg1, typename Arg2>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 );
-		
-		template<typename Arg1, typename Arg2, typename Arg3>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 );
 
-		/// \todo Once we require c++11, replace all this with a single variadic template.
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 );
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-		RunTimeTypedWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 );
+		template<typename... Args>
+		RunTimeTypedWrapper( PyObject *self, Args&&... args );
 
 		virtual IECore::TypeId typeId() const;
 		virtual const char *typeName() const;

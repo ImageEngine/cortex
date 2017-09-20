@@ -81,69 +81,9 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 		{
 		};
 
-		ParameterWrapper( PyObject *self )
-			:	IECorePython::RunTimeTypedWrapper<T>( self )
-		{
-		}
-
-		/// \todo Once we require c++11, replace all this with a single variadic template.
-		template<typename Arg1>
-		ParameterWrapper( PyObject *self, Arg1 arg1 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9 )
-		{
-		}
-
-		template<typename Arg1, typename Arg2, typename Arg3, typename Arg4, typename Arg5, typename Arg6, typename Arg7, typename Arg8, typename Arg9, typename Arg10>
-		ParameterWrapper( PyObject *self, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4, Arg5 arg5, Arg6 arg6, Arg7 arg7, Arg8 arg8, Arg9 arg9, Arg10 arg10 )
-			:	IECorePython::RunTimeTypedWrapper<T>( self, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10 )
+		template<typename... Args>
+		ParameterWrapper( PyObject *self, Args&&... args )
+			:	IECorePython::RunTimeTypedWrapper<T>( self, std::forward<Args>( args )... )
 		{
 		}
 
