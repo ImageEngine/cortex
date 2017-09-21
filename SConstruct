@@ -3101,7 +3101,7 @@ if doConfigure :
 		arnoldTestEnv["ENV"]["ARNOLD_PLUGIN_PATH"] = "contrib/IECoreArnold/test/IECoreArnold/plugins"
 		arnoldTest = arnoldTestEnv.Command( "contrib/IECoreArnold/test/IECoreArnold/results.txt", arnoldPythonModule, pythonExecutable + " $TEST_ARNOLD_SCRIPT" )
 		NoCache( arnoldTest )
-		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldProceduralForTest + arnoldDriverForTest ] )
+		arnoldTestEnv.Depends( arnoldTest, [ arnoldPythonModule + arnoldProceduralForTest + arnoldDriverForTest + arnoldLibrary ] )
 		arnoldTestEnv.Depends( arnoldTest, glob.glob( "contrib/IECoreArnold/test/IECoreArnold/*.py" ) )
 		arnoldTestEnv.Alias( "testArnold", arnoldTest )
 
