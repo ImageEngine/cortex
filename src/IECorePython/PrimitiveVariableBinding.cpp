@@ -79,6 +79,7 @@ void bindPrimitiveVariable()
 		.def_readwrite( "interpolation", &PrimitiveVariable::interpolation )
 		.add_property( "data", &dataGetter, &dataSetter )
 		.add_property( "indices", &indicesGetter, &indicesSetter )
+		.def( "expandedData", &PrimitiveVariable::expandedData )
 		.def( self == self )
 		.def( self != self )
 	;

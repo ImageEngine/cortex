@@ -145,5 +145,16 @@ class PrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p, p )
 		self.assertEqual( p2, p2 )
 
+	def testExpandedData( self ) :
+
+		p = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( range( 10, 20 ) ), IECore.IntVectorData( [ 4, 5 ] ) )
+		self.assertEqual( p.data, IECore.IntVectorData( range( 10, 20 ) ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 4, 5 ] ) )
+		self.assertEqual( p.expandedData(), IECore.IntVectorData( [ 14, 15 ] ) )
+
+		p.data = p.expandedData()
+		p.indices = None
+		self.assertEqual( p.expandedData(), p.data )
+
 if __name__ == "__main__":
 	unittest.main()
