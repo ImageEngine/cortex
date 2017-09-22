@@ -44,7 +44,7 @@ class ProceduralDSOTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
+		os.system( "kick -v 0 -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
 
 		image = IECore.EXRImageReader( "testProceduralDSO.exr" ).read()
 		evaluator = IECore.ImagePrimitiveEvaluator( image )
