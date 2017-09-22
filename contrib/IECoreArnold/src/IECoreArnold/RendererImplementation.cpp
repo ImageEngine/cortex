@@ -145,9 +145,6 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 		m_universe = boost::shared_ptr<UniverseBlock>( new UniverseBlock( /* writable = */ true ) );
 		m_instancingConverter = new InstancingConverter;
 
-		/// \todo Control with an option
-		AiMsgSetConsoleFlags( AI_LOG_ALL );
-
 		// create a generic filter we can use for all displays
 		m_defaultFilter = AiNode( "gaussian_filter" );
 		AiNodeSetStr( m_defaultFilter, "name", "ieCoreArnold:defaultFilter" );
