@@ -80,6 +80,10 @@ void loadMetadata( const std::string &pluginPaths )
 void begin()
 {
 	AiBegin();
+	// Default to logging errors / warnings only - we may not even be using this universe block to perform a render,
+	// we might just be loading some shader metadata or something, so we don't want to be dumping lots of
+	// unnecessary output
+	AiMsgSetConsoleFlags( AI_LOG_ERRORS | AI_LOG_WARNINGS );
 
 	const char *pluginPaths = getenv( "ARNOLD_PLUGIN_PATH" );
 	if( pluginPaths )
