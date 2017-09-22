@@ -143,11 +143,11 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 			self.__arnoldMessages.append( msg )
 
 		r = IECoreArnold.Renderer()
-		r.display( "test", "driver_null", "rgba", {} )
 
 		messageCallback = arnold.AtMsgCallBack( arnoldMessageCallback )
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = []
+		arnold.AiMsgSetConsoleFlags( arnold.AI_LOG_ALL )
 
 		with IECore.WorldBlock( r ) :
 
