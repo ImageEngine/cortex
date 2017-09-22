@@ -48,7 +48,7 @@ class OutputDriverTest( unittest.TestCase ) :
 		server = IECore.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
 
-		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/mergedDisplays.ass" )
+		os.system( "kick -v 0 -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/mergedDisplays.ass" )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "mergedImage" )
 		channelNames = image.keys()
@@ -67,7 +67,7 @@ class OutputDriverTest( unittest.TestCase ) :
 		server = IECore.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
 
-		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )
+		os.system( "kick -v 0 -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/vectorAndPointDisplays.ass" )
 
 		image = IECore.ImageDisplayDriver.removeStoredImage( "vectorAndPointImage" )
 		channelNames = image.keys()
