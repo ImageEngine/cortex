@@ -613,7 +613,7 @@ class RendererTest( unittest.TestCase ) :
 			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 
 			self.assertEqual( len( shapes ), 1 )
-			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
+			self.assertEqual( arnold.AiNodeGetByte( shapes[0], "subdiv_iterations" ), 10 )
 
 	def testEnumAttributes( self ) :
 
@@ -695,7 +695,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			r.light( "point_light", "handle", { "intensity" : 1, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
+			r.light( "point_light", "handle", { "intensity" : 1.0, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 
