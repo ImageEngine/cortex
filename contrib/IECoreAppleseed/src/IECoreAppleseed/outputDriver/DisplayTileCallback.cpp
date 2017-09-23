@@ -40,6 +40,7 @@
 #include "foundation/image/image.h"
 #include "foundation/utility/autoreleaseptr.h"
 
+#include "renderer/api/aov.h"
 #include "renderer/api/frame.h"
 #include "renderer/api/log.h"
 #include "renderer/api/rendering.h"
@@ -66,19 +67,15 @@ namespace asr = renderer;
 namespace IECoreAppleseed
 {
 
-class DisplayTileCallback : public ProgressTileCallback
+class DisplayLayer
 {
-
 	public :
 
-		explicit DisplayTileCallback( const asr::ParamArray &params )
-			: ProgressTileCallback()
-			, m_params( params )
+		DisplayLayer( const char *name, const asf::Dictionary& params ) : m_image( nullptr ), m_layerName( name ), m_params( params )
 		{
-			m_display_initialized = false;
 		}
 
-		~DisplayTileCallback() override
+		~DisplayLayer()
 		{
 			if( m_driver )
 			{
@@ -88,95 +85,48 @@ class DisplayTileCallback : public ProgressTileCallback
 				}
 				catch( const std::exception &e )
 				{
-					// we have to catch and report exceptions because letting them out into pure c land
-					// just causes aborts.
-					msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
+					msg( Msg::Error, "ieDisplay:delete layer", e.what() );
 				}
 			}
 		}
 
-		void release() override
+		void init_display( const asr::Frame *frame, const Box2i &displayWindow, const Box2i &dataWindow )
 		{
-			// We don't need to do anything here.
-			// The tile callback factory deletes this instance.
-		}
-
-		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
-		{
-			const asf::CanvasProperties &props = frame->image().properties();
-			const size_t x = tileX * props.m_tile_width;
-			const size_t y = tileY * props.m_tile_height;
-
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			if( m_display_initialized )
-			{
-				hightlight_region( x, y, props.m_tile_width, props.m_tile_height );
-			}
-		}
-
-		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
-		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			if( !m_display_initialized )
-			{
-				init_display( frame );
-			}
-
-			log_progress( frame, tileX, tileY );
-			write_tile( frame, tileX, tileY );
-		}
-
-		void on_progressive_frame_end(const asr::Frame* frame) override
-		{
-			boost::lock_guard<boost::mutex> guard( m_mutex );
-
-			if( !m_display_initialized )
-			{
-				init_display( frame );
-			}
-
-			const asf::CanvasProperties &frame_props = frame->image().properties();
-
-			for( size_t ty = 0; ty < frame_props.m_tile_count_y; ++ty )
-			{
-				for( size_t tx = 0; tx < frame_props.m_tile_count_x; ++tx )
-				{
-					write_tile( frame, tx, ty );
-				}
-			}
-		}
-
-	private:
-
-		void init_display( const asr::Frame *frame )
-		{
-			assert( !m_display_initialized );
-
-			Box2i displayWindow( V2i( 0, 0 ), V2i( frame->image().properties().m_canvas_width - 1, frame->image().properties().m_canvas_height - 1 ) );
-
-			m_data_window = Box2i( V2i( frame->get_crop_window().min[0], frame->get_crop_window().min[1] ),
-								   V2i( frame->get_crop_window().max[0], frame->get_crop_window().max[1] ) );
+			const asf::CanvasProperties &frameProps = frame->image().properties();
+			m_tile_width = frameProps.m_tile_width;
+			m_tile_height = frameProps.m_tile_height;
+			m_data_window = dataWindow;
 
 			std::vector<std::string> channelNames;
 
-			if( frame->image().properties().m_channel_count >= 1 )
+			if( m_layerName == "beauty" )
 			{
+				m_image = &frame->image();
+				m_channel_count = 4;
 				channelNames.push_back( "R" );
-			}
-
-			if( frame->image().properties().m_channel_count >= 3 )
-			{
 				channelNames.push_back( "G" );
 				channelNames.push_back( "B" );
-			}
-
-			if( frame->image().properties().m_channel_count == 4 )
-			{
 				channelNames.push_back( "A" );
 			}
+			else
+			{
+				const asr::AOV *aov = frame->aovs().get_by_name( m_layerName.c_str() );
+				assert( aov );
 
+				const size_t imageIndex = frame->aov_images().get_index( m_layerName.c_str() );
+				assert( imageIndex != ~0 );
+
+				m_image = &frame->aov_images().get_image( imageIndex );
+				m_channel_count = aov->get_channel_count();
+
+				string aovChannelNamePrefix = m_layerName + ".";
+				for( size_t i = 0; i < m_channel_count; ++i )
+				{
+					channelNames.push_back( aovChannelNamePrefix + aov->get_channel_names()[i] );
+				}
+			}
+
+			// Convert parameters.
 			CompoundDataPtr parameters = new CompoundData();
 			CompoundDataMap &p = parameters->writable();
 
@@ -185,26 +135,18 @@ class DisplayTileCallback : public ProgressTileCallback
 				p[it.key()] = new StringData( it.value() );
 			}
 
-			// reserve space for one tile
-			const asf::CanvasProperties &frameProps = frame->image().properties();
-			m_tile_width = frameProps.m_tile_width;
-			m_tile_height = frameProps.m_tile_height;
-			m_channel_count = frameProps.m_channel_count;
-			m_buffer.reserve( m_tile_width * m_tile_height * m_channel_count );
-
+			// Create the driver.
 			try
 			{
 				m_driver = IECoreImage::DisplayDriver::create( m_params.get( "driverType" ), displayWindow, m_data_window, channelNames, parameters );
 			}
 			catch( const std::exception &e )
 			{
-				// we have to catch and report exceptions because letting them out into pure c land
-				// just causes aborts.
-				msg( Msg::Error, "ieOutputDriver:driverOpen", e.what() );
+				msg( Msg::Error, "ieDisplay:init layer display", e.what() );
 			}
 
-			m_renderedPixels = 0;
-			m_display_initialized = true;
+			// reserve space for one tile
+			m_buffer.reserve( m_tile_width * m_tile_height * m_channel_count );
 		}
 
 		void hightlight_region( const size_t x, const size_t y, const size_t width, const size_t height )
@@ -242,9 +184,9 @@ class DisplayTileCallback : public ProgressTileCallback
 			write_buffer( Box2i( V2i( bucketBox.max.x, bucketBox.min.y ), V2i( bucketBox.max.x, bucketBox.max.y ) ) );
 		}
 
-		void write_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
+		void write_tile( const size_t tileX, const size_t tileY )
 		{
-			const asf::Tile &tile = frame->image().tile( tileX, tileY );
+			const asf::Tile &tile = m_image->tile( tileX, tileY );
 
 			int x0 = tileX * m_tile_width;
 			int y0 = tileY * m_tile_height;
@@ -270,6 +212,8 @@ class DisplayTileCallback : public ProgressTileCallback
 			write_buffer( bucketBox );
 		}
 
+	private :
+
 		void write_buffer( const Box2i &bucketBox ) const
 		{
 			try
@@ -282,8 +226,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			}
 			catch( const std::exception &e )
 			{
-				// We have to catch and report exceptions because letting them out into pure c land just causes aborts.
-				msg( Msg::Error, "ieOutputDriver:driverWriteBucket", e.what() );
+				msg( Msg::Error, "ieDisplay:write_buffer", e.what() );
 			}
 		}
 
@@ -296,15 +239,122 @@ class DisplayTileCallback : public ProgressTileCallback
 						  V2i( std::min( x1, m_data_window.max.x ), std::min( y1, m_data_window.max.y ) ) );
 		}
 
-		asr::ParamArray m_params;
-		bool m_display_initialized;
 		DisplayDriverPtr m_driver;
+		asf::Image *m_image;
 		Box2i m_data_window;
 		vector<float> m_buffer;
 		size_t m_tile_width;
 		size_t m_tile_height;
 		size_t m_channel_count;
-		size_t m_xxx;
+		string m_layerName;
+		asf::Dictionary m_params;
+
+};
+
+class DisplayTileCallback : public ProgressTileCallback
+{
+
+	public :
+
+		explicit DisplayTileCallback( const asr::ParamArray &params ) : ProgressTileCallback(), m_displays_initialized( false )
+		{
+			// Create display layers.
+			m_layers.reserve( params.dictionaries().size() );
+			for( auto it( params.dictionaries().begin() ), eIt( params.dictionaries().end() ); it != eIt; ++it )
+			{
+				m_layers.push_back( new DisplayLayer( it.key(), it.value() ) );
+			}
+		}
+
+		~DisplayTileCallback() override
+		{
+			for( DisplayLayer *layer : m_layers )
+			{
+				delete layer;
+			}
+		}
+
+		void release() override
+		{
+			// We don't need to do anything here.
+			// The tile callback factory deletes this instance.
+		}
+
+		void on_tile_begin(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
+		{
+			const asf::CanvasProperties &props = frame->image().properties();
+			const size_t x = tileX * props.m_tile_width;
+			const size_t y = tileY * props.m_tile_height;
+
+			boost::lock_guard<boost::mutex> guard( m_mutex );
+
+			if( m_displays_initialized )
+			{
+				for( DisplayLayer *layer : m_layers )
+				{
+					layer->hightlight_region( x, y, props.m_tile_width, props.m_tile_height );
+				}
+			}
+		}
+
+		void on_tile_end(const asr::Frame *frame, const size_t tileX, const size_t tileY) override
+		{
+			boost::lock_guard<boost::mutex> guard( m_mutex );
+
+			init_layer_displays( frame );
+
+			for( DisplayLayer *layer : m_layers )
+			{
+				layer->write_tile( tileX, tileY );
+			}
+
+			log_progress( frame, tileX, tileY );
+		}
+
+		void on_progressive_frame_end( const asr::Frame* frame ) override
+		{
+			boost::lock_guard<boost::mutex> guard( m_mutex );
+
+			init_layer_displays( frame );
+
+			const asf::CanvasProperties &frame_props = frame->image().properties();
+
+			for( size_t ty = 0; ty < frame_props.m_tile_count_y; ++ty )
+			{
+				for( size_t tx = 0; tx < frame_props.m_tile_count_x; ++tx )
+				{
+					for( DisplayLayer *layer : m_layers )
+					{
+						layer->write_tile( tx, ty );
+					}
+				}
+			}
+		}
+
+	private :
+
+		void init_layer_displays( const asr::Frame* frame )
+		{
+			if( !m_displays_initialized )
+			{
+				const asf::CanvasProperties &frameProps = frame->image().properties();
+
+				Box2i displayWindow( V2i( 0, 0 ), V2i( frameProps.m_canvas_width - 1, frameProps.m_canvas_height - 1 ) );
+
+				const asf::AABB2u &cropWindow = frame->get_crop_window();
+				Box2i dataWindow = Box2i( V2i( cropWindow.min[0], cropWindow.min[1] ), V2i( cropWindow.max[0], cropWindow.max[1] ) );
+
+				for( DisplayLayer *layer : m_layers )
+				{
+					layer->init_display( frame, displayWindow, dataWindow );
+				}
+
+				m_displays_initialized = true;
+			}
+		}
+
+		std::vector<DisplayLayer*> m_layers;
+		bool m_displays_initialized;
 };
 
 class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
