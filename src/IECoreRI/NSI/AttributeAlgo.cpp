@@ -50,7 +50,6 @@ NSIType_t convertGeometricInterpretation( GeometricData::Interpretation interpre
 	switch( interpretation )
 	{
 		case GeometricData::None :
-		case GeometricData::UV :
 			/// \todo This isn't really right - we should probably treat
 			/// this as float[3] instead. We need to be using Interpretation
 			/// consistently across the board before this becomes an option
@@ -64,8 +63,9 @@ NSIType_t convertGeometricInterpretation( GeometricData::Interpretation interpre
 			return NSITypeVector;
 		case GeometricData::Color :
 			return NSITypeColor;
+		default :
+			return NSITypeInvalid;
 	}
-	return NSITypeInvalid;
 }
 
 } // namespace
