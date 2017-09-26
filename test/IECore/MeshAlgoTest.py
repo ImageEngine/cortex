@@ -321,6 +321,20 @@ class MeshAlgoPrimitiveVariableTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, FloatVectorData( [ 0, 2.5, 5, 5.5, 7.5, 9.5, 11, 12.5, 14 ] ) )
 
+	def testInitialisationOfVectorData( self ) :
+		# This exercises a bug whereby the resampling methods that use averaging
+		# were not initialising the results to zero before accumulating.
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ), V2i( 100 ) )
+		for i in range( 0, 10 ) :
+			for interpolation in ( PrimitiveVariable.Interpolation.Uniform, PrimitiveVariable.Interpolation.FaceVarying ) :
+				pv = PrimitiveVariable(
+					interpolation,
+					V2fVectorData( [ V2f( 0 ) ] * m.variableSize( interpolation ) )
+				)
+				MeshAlgo.resamplePrimitiveVariable( m, pv, PrimitiveVariable.Interpolation.Vertex )
+				self.assertEqual( len( pv.data ), m.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
+				for v in pv.data :
+					self.assertEqual( v, V2f( 0 ) )
 
 class MeshAlgoDeleteFacesTest( unittest.TestCase ) :
 
