@@ -272,5 +272,26 @@ class MeshAlgoResampleTest( unittest.TestCase ) :
 		self.assertEqual( p.data, IECore.FloatVectorData( [ 0, 1, 2, 1, 0.75, 0.5, 2, 0.5, 2 ] ) )
 		self.assertEqual( p.indices, None )
 
+	def testInitialisationOfVectorData( self ) :
+
+		# This exercises a bug whereby the resampling methods that use averaging
+		# were not initialising the results to zero before accumulating.
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 100 ) )
+
+		for i in range( 0, 10 ) :
+
+			for interpolation in ( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.PrimitiveVariable.Interpolation.FaceVarying ) :
+
+				pv = IECore.PrimitiveVariable(
+					interpolation,
+					IECore.V2fVectorData( [ IECore.V2f( 0 ) ] * m.variableSize( interpolation ) )
+				)
+
+				IECore.MeshAlgo.resamplePrimitiveVariable( m, pv, IECore.PrimitiveVariable.Interpolation.Vertex )
+				self.assertEqual( len( pv.data ), m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+				for v in pv.data :
+					self.assertEqual( v, IECore.V2f( 0 ) )
+
 if __name__ == "__main__":
 	unittest.main()

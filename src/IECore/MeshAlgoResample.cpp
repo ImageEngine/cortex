@@ -104,7 +104,7 @@ struct MeshUniformToVertex
 
 		size_t numVerts = m_mesh->variableSize( PrimitiveVariable::Vertex );
 		std::vector<int> count( numVerts, 0 );
-		trg.resize( numVerts );
+		trg.resize( numVerts, typename From::ValueType::value_type( 0.0f ) );
 
 		typename From::ValueType::const_iterator srcIt = src.begin();
 		std::vector<int>::const_iterator vId = m_mesh->vertexIds()->readable().begin();
@@ -147,7 +147,7 @@ struct MeshFaceVaryingToVertex
 
 		size_t numVerts = m_mesh->variableSize( PrimitiveVariable::Vertex );
 		std::vector<int> count( numVerts, 0 );
-		trg.resize( numVerts );
+		trg.resize( numVerts, typename From::ValueType::value_type( 0.0f ) );
 
 		const std::vector<int>& vertexIds = m_mesh->vertexIds()->readable();
 		std::vector<int>::const_iterator vertexIdIt = vertexIds.begin();
