@@ -207,8 +207,8 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		///////////////////////////////////////////////////////////
 		//@{
 		/// Default vertex shader source. This takes vertexP, vertexN,
-		/// vertexst, vertexCs and Cs inputs and sets fragmentI, fragmentP, fragmentN,
-		/// fragmentst and fragmentCs outputs. It also sets equivalent geometry*
+		/// vertexuv, vertexCs and Cs inputs and sets fragmentI, fragmentP, fragmentN,
+		/// fragmentuv and fragmentCs outputs. It also sets equivalent geometry*
 		/// outputs which may be used by geometry shaders in calculating new
 		/// values for the corresponding fragment* outputs.
 		static const std::string &defaultVertexSource();

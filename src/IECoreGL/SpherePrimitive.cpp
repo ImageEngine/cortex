@@ -64,12 +64,12 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
-	IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData;
+	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 	m_vertIds = new IECore::UIntVectorData;
 	
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
-	vector<V2f> &stVector = stData->writable();
+	vector<V2f> &uvVector = uvData->writable();
 	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
 	
 	float oMin = Math<float>::asin( m_zMin );
@@ -91,7 +91,7 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 			float u = (float)j/(float)(nT-1);
 			float theta = thetaMax * u;
 			V3f p( r * Math<float>::cos( theta ), r * Math<float>::sin( theta ), z );
-			stVector.push_back( V2f( u, v ) );
+			uvVector.push_back( V2f( u, v ) );
 			pVector.push_back( p );
 			nVector.push_back( p );
 			if( i < nO - 1 && j < nT - 1 )
@@ -112,7 +112,7 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
-	addVertexAttribute( "st", stData );
+	addVertexAttribute( "uv", uvData );
 }
 
 SpherePrimitive::~SpherePrimitive()

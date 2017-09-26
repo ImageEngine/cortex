@@ -50,12 +50,12 @@ QuadPrimitive::QuadPrimitive( float width, float height )
 {
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
-	IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData;
+	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 	m_vertIds = new IECore::UIntVectorData;
 	
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
-	vector<V2f> &stVector = stData->writable();
+	vector<V2f> &uvVector = uvData->writable();
 	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
 	
 	nVector.push_back( V3f( 0, 0, 1 ) );
@@ -68,10 +68,10 @@ QuadPrimitive::QuadPrimitive( float width, float height )
 	pVector.push_back( V3f( m_width/2.0f, m_height/2.0f, 0 ) );
 	pVector.push_back( V3f( -m_width/2.0f, m_height/2.0f, 0 ) );
 
-	stVector.push_back( V2f( 0.0f, 0.0f ) );
-	stVector.push_back( V2f( 1.0f, 0.0f ) );
-	stVector.push_back( V2f( 1.0f, 1.0f ) );
-	stVector.push_back( V2f( 0.0f, 1.0f ) );
+	uvVector.push_back( V2f( 0.0f, 0.0f ) );
+	uvVector.push_back( V2f( 1.0f, 0.0f ) );
+	uvVector.push_back( V2f( 1.0f, 1.0f ) );
+	uvVector.push_back( V2f( 0.0f, 1.0f ) );
 	
 	vertIdsVector.push_back( 0 );
 	vertIdsVector.push_back( 1 );
@@ -83,7 +83,7 @@ QuadPrimitive::QuadPrimitive( float width, float height )
 	
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
-	addVertexAttribute( "st", stData );
+	addVertexAttribute( "uv", uvData );
 }
 
 QuadPrimitive::~QuadPrimitive()

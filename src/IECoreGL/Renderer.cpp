@@ -1663,11 +1663,11 @@ static const std::string &imageFragmentShader()
 	static const std::string shaderCode = 
 		"uniform sampler2D texture;"
 		""
-		"varying vec2 fragmentst;"
+		"varying vec2 fragmentuv;"
 		""
 		"void main()"
 		"{"
-		"	gl_FragColor = texture2D( texture, fragmentst );"
+		"	gl_FragColor = texture2D( texture, fragmentuv );"
 		"}";
 	return shaderCode;
 }

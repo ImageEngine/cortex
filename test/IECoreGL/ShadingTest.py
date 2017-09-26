@@ -108,11 +108,11 @@ class ShadingTest( unittest.TestCase ) :
 			
 			uniform sampler2D sampler;
 			
-			varying vec2 fragmentst;
+			varying vec2 fragmentuv;
 						
 			void main()
 			{
-				gl_FragColor = vec4( texture2D( sampler, fragmentst ).rgb, 1 );
+				gl_FragColor = vec4( texture2D( sampler, fragmentuv ).rgb, 1 );
 			}
 		"""
 		

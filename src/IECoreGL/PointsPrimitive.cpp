@@ -382,11 +382,11 @@ std::string &PointsPrimitive::instancingVertexSource()
 		""
 		"IECOREGL_VERTEXSHADER_IN vec3 instanceP;"
 		"IECOREGL_VERTEXSHADER_IN vec3 instanceN;"
-		"IECOREGL_VERTEXSHADER_IN vec2 instancest;"
+		"IECOREGL_VERTEXSHADER_IN vec2 instanceuv;"
 		""
 		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentI;"
 		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentN;"
-		"IECOREGL_VERTEXSHADER_OUT vec2 fragmentst;"
+		"IECOREGL_VERTEXSHADER_OUT vec2 fragmentuv;"
 		"IECOREGL_VERTEXSHADER_OUT vec3 fragmentCs;"
 		""
 		"void main()"
@@ -408,7 +408,7 @@ std::string &PointsPrimitive::instancingVertexSource()
 		"	}"
 		""
 		"	fragmentCs = mix( Cs, vertexCs, float( vertexCsActive ) );"
-		"	fragmentst = instancest;"
+		"	fragmentuv = instanceuv;"
 		""
 		"}";
 
