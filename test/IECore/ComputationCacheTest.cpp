@@ -144,6 +144,7 @@ struct ComputationCacheTest
 		// test when the computation function does not match the already registered computation hash....
 		IntDataPtr weirdValue = new IntData(666);
 		cache.clear();
+		pool->clear();
 		cache.set( ComputationParams(1), weirdValue.get(), ObjectPool::StoreReference );
 		ConstObjectPtr v0 = cache.get( ComputationParams(1) );
 		BOOST_CHECK( *weirdValue == *cache.get( ComputationParams(1), Cache::NullIfMissing ) );
