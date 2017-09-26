@@ -384,6 +384,24 @@ DataView::DataView( const IECore::Data *d, bool createUStrings )
 			);
 			data = static_cast<const UCharVectorData *>( d )->baseReadable();
 			break;
+		case V2fVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::FLOAT,
+				TypeDesc::VEC2,
+				vecSemantics( static_cast<const V2fVectorData *>( d )->getInterpretation() ),
+				static_cast<const V2fVectorData *>( d )->readable().size()
+			);
+			data = static_cast<const V2fVectorData *>( d )->baseReadable();
+			break;
+		case V2iVectorDataTypeId :
+			type = TypeDesc(
+				TypeDesc::INT,
+				TypeDesc::VEC2,
+				vecSemantics( static_cast<const V2iVectorData *>( d )->getInterpretation() ),
+				static_cast<const V2iVectorData *>( d )->readable().size()
+			);
+			data = static_cast<const V2iVectorData *>( d )->baseReadable();
+			break;
 		case V3fVectorDataTypeId :
 			type = TypeDesc(
 				TypeDesc::FLOAT,
