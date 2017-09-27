@@ -59,8 +59,11 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		{
 			vec4 pCam = gl_ModelViewMatrix * vec4( vertexP, 1 );
 			gl_Position = gl_ProjectionMatrix * pCam;
-
-			color = vec4(vertexuv.x, vertexuv.y, 0.0, 1.0);
+			// Note that we're only flipping V here because the expected
+			// output image was generated with the wrong texture coordinates.
+			// It is _not_ expected that you would need to modify texture
+			// coordinates in the general case.
+			color = vec4(vertexuv.x, 1.0 - vertexuv.y, 0.0, 1.0);
 		}
 		"""
 
