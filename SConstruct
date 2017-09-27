@@ -53,7 +53,7 @@ SConsignFile()
 
 ieCoreMajorVersion=9
 ieCoreMinorVersion=23
-ieCorePatchVersion=1
+ieCorePatchVersion=2
 ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
 ###########################################################################################
@@ -3459,5 +3459,3 @@ if doConfigure :
 
 		sys.stdout.write( "no\n" )
 		sys.stderr.write( "WARNING : no doxygen binary found, not building documentation - check DOXYGEN\n" )
-
-
