@@ -164,7 +164,6 @@
 #include "IECorePython/SplineDataBinding.h"
 #include "IECorePython/CoordinateSystemBinding.h"
 #include "IECorePython/DisplayBinding.h"
-#include "IECorePython/MeshTangentsOpBinding.h"
 #include "IECorePython/ObjectVectorBinding.h"
 #include "IECorePython/HenyeyGreensteinBinding.h"
 #include "IECorePython/OversamplesCalculatorBinding.h"
@@ -190,7 +189,6 @@
 #include "IECorePython/ParameterisedProceduralBinding.h"
 #include "IECorePython/LevenbergMarquardtBinding.h"
 #include "IECorePython/NParticleReaderBinding.h"
-#include "IECorePython/FaceAreaOpBinding.h"
 #include "IECorePython/CurvesMergeOpBinding.h"
 #include "IECorePython/CurvesPrimitiveEvaluatorBinding.h"
 #include "IECorePython/PointDistributionBinding.h"
@@ -198,7 +196,6 @@
 #include "IECorePython/CurveTangentsOpBinding.h"
 #include "IECorePython/SmoothSkinningDataBinding.h"
 #include "IECorePython/FaceVaryingPromotionOpBinding.h"
-#include "IECorePython/MeshDistortionsOpBinding.h"
 #include "IECorePython/PointVelocityDisplaceOpBinding.h"
 #include "IECorePython/HexConversionBinding.h"
 #include "IECorePython/CompressSmoothSkinningDataOpBinding.h"
@@ -219,13 +216,11 @@
 #include "IECorePython/LightBinding.h"
 #include "IECorePython/ContrastSmoothSkinningWeightsOpBinding.h"
 #include "IECorePython/CamelCaseBinding.h"
-#include "IECorePython/PointDistributionOpBinding.h"
 #include "IECorePython/LRUCacheBinding.h"
 #include "IECorePython/DataInterleaveOpBinding.h"
 #include "IECorePython/DataConvertOpBinding.h"
 #include "IECorePython/MurmurHashBinding.h"
 #include "IECorePython/DiskPrimitiveBinding.h"
-#include "IECorePython/MeshFaceFilterOpBinding.h"
 #include "IECorePython/ImfBinding.h"
 #include "IECorePython/TimeCodeDataBinding.h"
 #include "IECorePython/TimeCodeParameterBinding.h"
@@ -398,7 +393,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCoordinateSystem();
 	bindOBJReader();
 	bindDisplay();
-	bindMeshTangentsOp();
 	bindObjectVector();
 	bindHenyeyGreenstein();
 	bindDateTimeData();
@@ -423,7 +417,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindParameterisedProcedural();
 	bindLevenbergMarquardt();
 	bindNParticleReader();
-	bindFaceAreaOp();
 	bindCurvesMergeOp();
 	bindCurvesPrimitiveEvaluator();
 	bindPointDistribution();
@@ -431,7 +424,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindCurveTangentsOp();
 	bindSmoothSkinningData();
 	bindFaceVaryingPromotionOp();
-	bindMeshDistortionsOp();
 	bindPointVelocityDisplaceOp();
 	bindHexConversion();
 	bindCompressSmoothSkinningDataOp();
@@ -452,13 +444,11 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindLight();
 	bindContrastSmoothSkinningWeightsOp();
 	bindCamelCase();
-	bindPointDistributionOp();
 	bindLRUCache();
 	bindDataInterleaveOp();
 	bindDataConvertOp();
 	bindMurmurHash();
 	bindDiskPrimitive();
-	bindMeshFaceFilterOp();
 	bindImf();
 	bindTimeCodeData();
 	bindTimeCodeParameter();

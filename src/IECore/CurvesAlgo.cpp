@@ -536,37 +536,72 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		return;
 	}
 
-	DataPtr result;
+	DataPtr dstData = nullptr;
+	DataPtr srcData = nullptr;
+
+	if( primitiveVariable.indices )
+	{
+		if( primitiveVariable.interpolation == PrimitiveVariable::Vertex && ( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::FaceVarying ) )
+		{
+			// \todo: fix CurvesVertexToVarying so it works with arbitrary PrimitiveVariables
+			// rather than requiring the variables exist on the input CurvesPrimitive.
+			throw InvalidArgumentException( "CurvesAlgo::resamplePrimitiveVariable : Resampling indexed Vertex variables to FaceVarying/Varying is not currently supported. Expand indices first." );
+		}
+		else if( ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying ) && interpolation == PrimitiveVariable::Vertex )
+		{
+			// \todo: fix CurvesVaryingToVertex so it works with arbitrary PrimitiveVariables
+			// rather than requiring the variables exist on the input CurvesPrimitive.
+			throw InvalidArgumentException( "CurvesAlgo::resamplePrimitiveVariable : Resampling indexed FaceVarying/Varying variables to Vertex is not currently supported. Expand indices first." );
+		}
+		else if( primitiveVariable.interpolation < interpolation )
+		{
+			// upsampling can be a resampling of indices
+			srcData = primitiveVariable.indices;
+		}
+		else if( primitiveVariable.interpolation == PrimitiveVariable::FaceVarying && interpolation == PrimitiveVariable::Varying )
+		{
+			// FaceVarying and Varying are the same for CurvesPrimitives
+			srcData = primitiveVariable.indices;
+		}
+		else
+		{
+			// downsampling forces index expansion to
+			// simplify the algorithms.
+			// \todo: allow indices to be maintained.
+			srcData = primitiveVariable.expandedData();
+			primitiveVariable.indices = nullptr;
+		}
+	}
+	else
+	{
+		// with no indices we can just resample the data
+		srcData = primitiveVariable.data;
+	}
 
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		Detail::AverageValueFromVector fn;
-		result = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
-		primitiveVariable = PrimitiveVariable(interpolation, result);
-		return;
+		dstData = despatchTypedData<Detail::AverageValueFromVector, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 	}
-
-	if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
+	else if ( primitiveVariable.interpolation == PrimitiveVariable::Constant )
 	{
 		DataPtr arrayData = Detail::createArrayData(primitiveVariable, curves, interpolation);
 		if (arrayData)
 		{
-			primitiveVariable = PrimitiveVariable(interpolation, arrayData);
+			dstData = arrayData;
 		}
-		return;
 	}
-
-	if ( interpolation == PrimitiveVariable::Uniform )
+	else if ( interpolation == PrimitiveVariable::Uniform )
 	{
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
 			CurvesVertexToUniform fn( curves );
-			result = despatchTypedData<CurvesVertexToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<CurvesVertexToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			CurvesVaryingToUniform fn( curves );
-			result = despatchTypedData<CurvesVaryingToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<CurvesVaryingToUniform, Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 	}
 	else if ( interpolation == PrimitiveVariable::Vertex )
@@ -574,12 +609,12 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
 			CurvesUniformToVertex fn( curves->verticesPerCurve()->readable() );
-			result = despatchTypedData<CurvesUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<CurvesUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			CurvesVaryingToVertex fn( curves );
-			result = despatchTypedData<CurvesVaryingToVertex, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<CurvesVaryingToVertex, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 	}
 	else if ( interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::FaceVarying )
@@ -587,19 +622,27 @@ void resamplePrimitiveVariable( const CurvesPrimitive *curves, PrimitiveVariable
 		if ( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
 			CurvesUniformToVarying fn( curves );
-			result = despatchTypedData<CurvesUniformToVarying, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get()), fn );
+			dstData = despatchTypedData<CurvesUniformToVarying, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( srcData.get()), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Vertex )
 		{
 			CurvesVertexToVarying fn( curves );
-			result = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<CurvesVertexToVarying, IsPrimitiveEvaluatableTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if ( primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			result = primitiveVariable.data;
+			dstData = srcData;
 		}
 	}
-	primitiveVariable = PrimitiveVariable(interpolation, result);
+
+	if( primitiveVariable.indices )
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, primitiveVariable.data, runTimeCast<IntVectorData>( dstData ) );
+	}
+	else
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+	}
 }
 
 CurvesPrimitivePtr deleteCurves( const CurvesPrimitive *curvesPrimitive, const PrimitiveVariable &curvesToDelete)

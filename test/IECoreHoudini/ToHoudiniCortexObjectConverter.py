@@ -65,18 +65,15 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		mesh["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
 		mesh["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8] )
-		mesh["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8 ) ) )
-		
+		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+
 		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["color3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:6] )
-		mesh["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, 6 ) ) )
-		
+		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+
 		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["color3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, color3fVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		mesh["stringVertIndices"] = IECore.PrimitiveVariable( vertexInterpolation, IECore.IntVectorData( range( 0, 24 ) ) )
+		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
 		
 		return mesh
 	
@@ -101,14 +98,12 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		
 		points["floatPrim"] = IECore.PrimitiveVariable( uniformInterpolation, floatVectorData[:1] )
 		points["color3fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, color3fVectorData[:1] )
-		points["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:1] )
-		points["stringPrimIndices"] = IECore.PrimitiveVariable( uniformInterpolation, IECore.IntVectorData( [ 0 ] ) )
-		
+		points["stringPrim"] = IECore.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
+
 		points["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData )
 		points["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		points["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 12 ) ) )
-		
+		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+
 		return points
 	
 	def ints( self ) :
@@ -381,7 +376,7 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniCortexObjectConverter( mesh )
 		self.assertTrue( converter.convert( sop ) )
 		result = IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert()
-		self.assertEqual( result.keys(), [ 'P', 'color3fPoint', 'color3fPrim', 'color3fVert', 'floatPoint', 'floatPrim', 'floatVert', 'stringPoint', 'stringPointIndices', 'stringPrim', 'stringPrimIndices', 'stringVert', 'stringVertIndices' ] )
+		self.assertEqual( result.keys(), [ 'P', 'color3fPoint', 'color3fPrim', 'color3fVert', 'floatPoint', 'floatPrim', 'floatVert', 'stringPoint', 'stringPrim', 'stringVert' ] )
 		
 		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
 		self.assertTrue( converter.convert( sop ) )
@@ -407,21 +402,21 @@ class TestToHoudiniCortexObjectConverter( IECoreHoudini.TestCase ) :
 		mesh["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 4 ) )
 		mesh["Pref"] = mesh["P"]
 		
-		# have to filter the source attrs s, t and not uv
+		# have to filter the source attrs
 		converter = IECoreHoudini.ToHoudiniCortexObjectConverter( mesh )
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		result = IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert()
-		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P', 'Pref', 's', 't', 'width' ] )
+		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P', 'Pref', 'width' ] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t  ^width ^Pref" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^width ^Pref" )
 		self.assertTrue( converter.convert( sop ) )
 		result = IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert()
 		self.assertEqual( result.keys(), [ 'Cs', 'N', 'P' ] )
 		
 		# verify non-primitives do not break
 		converter = IECoreHoudini.ToHoudiniCortexObjectConverter( IECore.IntData( 1 ) )
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv  ^pscale ^rest" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertEqual( IECoreHoudini.FromHoudiniCortexObjectConverter( sop ).convert(), IECore.IntData( 1 ) )
 	

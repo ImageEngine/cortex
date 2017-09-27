@@ -63,8 +63,9 @@ NSIType_t convertGeometricInterpretation( GeometricData::Interpretation interpre
 			return NSITypeVector;
 		case GeometricData::Color :
 			return NSITypeColor;
+		default :
+			return NSITypeInvalid;
 	}
-	return NSITypeInvalid;
 }
 
 } // namespace

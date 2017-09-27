@@ -86,6 +86,11 @@ V3f MeshPrimitiveEvaluator::Result::vectorPrimVar( const PrimitiveVariable &pv )
 	return getPrimVar< V3f >( pv );
 }
 
+V2f MeshPrimitiveEvaluator::Result::vec2PrimVar( const PrimitiveVariable &pv ) const
+{
+	return getPrimVar< V2f >( pv );
+}
+
 float MeshPrimitiveEvaluator::Result::floatPrimVar( const PrimitiveVariable &pv ) const
 {
 	return getPrimVar< float >( pv );
@@ -235,18 +240,11 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 
 	m_meshVertexIds = &(m_mesh->vertexIds()->readable());
 
-	m_u.interpolation = PrimitiveVariable::Invalid;
-	primVarIt = m_mesh->variables.find("s");
+	m_uv.interpolation = PrimitiveVariable::Invalid;
+	primVarIt = m_mesh->variables.find( "uv" );
 	if ( primVarIt != m_mesh->variables.end() )
 	{
-		m_u = primVarIt->second;
-	}
-
-	m_v.interpolation = PrimitiveVariable::Invalid;
-	primVarIt = m_mesh->variables.find("t");
-	if ( primVarIt != m_mesh->variables.end() )
-	{
-		m_v = primVarIt->second;
+		m_uv = primVarIt->second;
 	}
 
 	const std::vector<int> &verticesPerFace = m_mesh->verticesPerFace()->readable();
@@ -282,7 +280,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 
 		m_triangles.push_back( bound );
 
-		if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+		if( m_uv.interpolation != PrimitiveVariable::Invalid )
 		{
 			Imath::V2f uv[3];
 			triangleUVs( triangleIdx, triangleVertexIds, uv );
@@ -297,13 +295,13 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 	
 	m_tree = new TriangleBoundTree( m_triangles.begin(), m_triangles.end() );
 
-	if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+	if( m_uv.interpolation != PrimitiveVariable::Invalid )
 	{
 		m_uvTree = new UVBoundTree( m_uvTriangles.begin(), m_uvTriangles.end() );
 	}
 	else
 	{
-		m_uvTree = 0;
+		m_uvTree = nullptr;
 	}
 }
 
@@ -865,12 +863,9 @@ bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, co
 
 	r->m_n = triangleNormal( p0, p1, p2 );
 
-	if( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+	if( m_uv.interpolation != PrimitiveVariable::Invalid )
 	{
-		r->m_uv = V2f(
-			r->floatPrimVar( m_u ),
-			r->floatPrimVar( m_v )
-		);
+		r->m_uv = r->vec2PrimVar( m_uv );
 	}
 				
 	return true;
@@ -910,12 +905,9 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 				result->m_vertexIds = vertexIds;
 				result->m_triangleIdx = triangleIndex;
 
-				if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+				if( m_uv.interpolation != PrimitiveVariable::Invalid )
 				{
-					result->m_uv = V2f(
-						result->floatPrimVar( m_u ),
-						result->floatPrimVar( m_v )
-					);
+					result->m_uv = result->vec2PrimVar( m_uv );
 				}
 
 				const Imath::V3f &p0 = m_verts->readable()[vertexIds[0]];
@@ -970,7 +962,7 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 
 bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, Result *result ) const
 {
-	assert( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid);
+	assert( m_uv.interpolation != PrimitiveVariable::Invalid );
 	assert( m_uvTree );
 
 	const UVBoundTree::Node &node = m_uvTree->node( nodeIndex );
@@ -1079,12 +1071,9 @@ bool MeshPrimitiveEvaluator::intersectionPointWalk( TriangleBoundTree::NodeIndex
 
 					result->m_p = hitPoint;
 
-					if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+					if( m_uv.interpolation != PrimitiveVariable::Invalid )
 					{
-						result->m_uv = V2f(
-							result->floatPrimVar( m_u ),
-							result->floatPrimVar( m_v )
-						);
+						result->m_uv = result->vec2PrimVar( m_uv );
 					}
 
 					result->m_n = triangleNormal( p0, p1, p2 );
@@ -1238,12 +1227,9 @@ void MeshPrimitiveEvaluator::intersectionPointsWalk( TriangleBoundTree::NodeInde
 
 					result->m_p = hitPoint;
 
-					if ( m_u.interpolation != PrimitiveVariable::Invalid && m_v.interpolation != PrimitiveVariable::Invalid )
+					if ( m_uv.interpolation != PrimitiveVariable::Invalid )
 					{
-						result->m_uv = V2f(
-							result->floatPrimVar( m_u ),
-							result->floatPrimVar( m_v )
-						);
+						result->m_uv = result->vec2PrimVar( m_uv );
 					}
 
 					result->m_n = triangleNormal( p0, p1, p2 );
@@ -1316,35 +1302,19 @@ const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree()
 
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
 {
-	const std::vector<float> &u = ((FloatVectorData *)(m_u.data.get()))->readable();
-	if( m_u.interpolation==PrimitiveVariable::FaceVarying )
+	const std::vector<Imath::V2f> &uvs = ((V2fVectorData *)(m_uv.data.get()))->readable();
+	if( m_uv.interpolation==PrimitiveVariable::FaceVarying )
 	{
 		size_t index = triangleIndex * 3;
-		uv[0][0] = u[index++];
-		uv[1][0] = u[index++];
-		uv[2][0] = u[index];
+		uv[0] = uvs[index++];
+		uv[1] = uvs[index++];
+		uv[2] = uvs[index];
 	}
 	else
 	{
 		// vertex interpolation
-		uv[0][0] = u[vertexIds[0]];
-		uv[1][0] = u[vertexIds[1]];
-		uv[2][0] = u[vertexIds[2]];
+		uv[0] = uvs[vertexIds[0]];
+		uv[1] = uvs[vertexIds[1]];
+		uv[2] = uvs[vertexIds[2]];
 	}
-	
-	const std::vector<float> &v = ((FloatVectorData *)(m_v.data.get()))->readable();
-	if( m_v.interpolation==PrimitiveVariable::FaceVarying )
-	{
-		size_t index = triangleIndex * 3;
-		uv[0][1] = v[index++];
-		uv[1][1] = v[index++];
-		uv[2][1] = v[index];
-	}
-	else
-	{
-		// vertex interpolation
-		uv[0][1] = v[vertexIds[0]];
-		uv[1][1] = v[vertexIds[1]];
-		uv[2][1] = v[vertexIds[2]];
-	}	
 }

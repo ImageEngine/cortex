@@ -94,6 +94,7 @@ class IECORE_API PrimitiveEvaluator : public RunTimeTyped
 				/// an invalid primvar leads to undefined behaviour, but will most likely crash the application.
 				//@{
 				virtual Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const =0;
+				virtual Imath::V2f          vec2PrimVar  ( const PrimitiveVariable &pv ) const =0;
 				virtual float               floatPrimVar ( const PrimitiveVariable &pv ) const =0;
 				virtual int                 intPrimVar   ( const PrimitiveVariable &pv ) const =0;
 				virtual const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const =0;

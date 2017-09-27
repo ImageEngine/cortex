@@ -67,22 +67,23 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 				Result();
 
-				Imath::V3f point() const;
-				Imath::V3f normal() const;
-				Imath::V2f uv() const;
-				Imath::V3f uTangent() const;
-				Imath::V3f vTangent() const;
+				Imath::V3f point() const override;
+				Imath::V3f normal() const override;
+				Imath::V2f uv() const override;
+				Imath::V3f uTangent() const override;
+				Imath::V3f vTangent() const override;
 
-				Imath::V3f          vectorPrimVar( const PrimitiveVariable &pv ) const;
-				float               floatPrimVar ( const PrimitiveVariable &pv ) const;
-				int                 intPrimVar   ( const PrimitiveVariable &pv ) const;
-				const std::string  &stringPrimVar( const PrimitiveVariable &pv ) const;
-				Imath::Color3f      colorPrimVar ( const PrimitiveVariable &pv ) const;
-				half                halfPrimVar  ( const PrimitiveVariable &pv ) const;
+				Imath::V3f vectorPrimVar( const PrimitiveVariable &pv ) const override;
+				Imath::V2f vec2PrimVar( const PrimitiveVariable &pv ) const override;
+				float floatPrimVar( const PrimitiveVariable &pv ) const override;
+				int intPrimVar( const PrimitiveVariable &pv ) const override;
+				const std::string &stringPrimVar( const PrimitiveVariable &pv ) const override;
+				Imath::Color3f colorPrimVar( const PrimitiveVariable &pv ) const override;
+				half halfPrimVar( const PrimitiveVariable &pv ) const override;
 
-				unsigned int        triangleIndex() const;
-				const Imath::V3f   &barycentricCoordinates() const;
-				const Imath::V3i   &vertexIds() const;
+				unsigned int triangleIndex() const;
+				const Imath::V3f &barycentricCoordinates() const;
+				const Imath::V3i &vertexIds() const;
 
 			protected:
 
@@ -194,8 +195,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		void calculateAverageNormals() const;
 		
 		void triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const;
-		PrimitiveVariable m_u;
-		PrimitiveVariable m_v;
+		PrimitiveVariable m_uv;
 
 		mutable bool m_haveMassProperties;
 		mutable float m_volume;

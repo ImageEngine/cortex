@@ -139,6 +139,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			switch( interpretation )
 			{
 				case GeometricData::None:
+				case GeometricData::UV:
 					// no geometric information has been provided - check the type hints:
 					if( typeHints )
 					{

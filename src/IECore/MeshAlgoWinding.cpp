@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //
-//  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
+//  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 //
 //  Redistribution and use in source and binary forms, with or without
 //  modification, are permitted provided that the following conditions are
@@ -32,47 +32,77 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "boost/python.hpp"
-#include "boost/python/suite/indexing/container_utils.hpp"
+#include "IECore/DespatchTypedData.h"
+#include "IECore/MeshAlgo.h"
+#include "IECore/PolygonIterator.h"
 
-#include "IECorePython/ScopedGILRelease.h"
+using namespace Imath;
+using namespace IECore;
 
-#include "IECoreRI/GXEvaluator.h"
-#include "IECoreRI/bindings/GXEvaluatorBinding.h"
+//////////////////////////////////////////////////////////////////////////
+// Reverse winding
+//////////////////////////////////////////////////////////////////////////
 
-using namespace boost::python;
-
-namespace IECoreRI
+namespace
 {
 
-static IECore::CompoundDataPtr evaluate1( GXEvaluator &e, const IECore::IntVectorData *faceIndices, const IECore::FloatVectorData *u, const IECore::FloatVectorData *v, const object &primVarNames )
+template<typename T>
+void reverseWinding( MeshPrimitive *mesh, T &values )
 {
-	std::vector<std::string> pvn;
-	container_utils::extend_container( pvn, primVarNames );
-	
-	IECorePython::ScopedGILRelease gilRelease;
-		
-	return e.evaluate( faceIndices, u, v, pvn );
+	for( PolygonIterator it = mesh->faceBegin(), eIt = mesh->faceEnd(); it != eIt; ++it )
+	{
+		std::reverse( it.faceVaryingBegin( values.begin() ), it.faceVaryingEnd( values.begin() ) );
+	}
 }
 
-static IECore::CompoundDataPtr evaluate2( GXEvaluator &e, const IECore::FloatVectorData *s, const IECore::FloatVectorData *t, const object &primVarNames )
+struct ReverseWindingFunctor
 {
-	std::vector<std::string> pvn;
-	container_utils::extend_container( pvn, primVarNames );
-	
-	IECorePython::ScopedGILRelease gilRelease;
-		
-	return e.evaluate( s, t, pvn );
+
+	typedef void ReturnType;
+
+	ReverseWindingFunctor( MeshPrimitive *mesh ) : m_mesh( mesh )
+	{
+	}
+
+	template<typename T>
+	void operator()( T *data )
+	{
+		reverseWinding( m_mesh, data->writable() );
+	}
+
+	private :
+
+		MeshPrimitive *m_mesh;
+
+};
+
+} // namespace
+
+void IECore::MeshAlgo::reverseWinding( MeshPrimitive *mesh )
+{
+	IntVectorDataPtr vertexIds = mesh->vertexIds()->copy();
+	::reverseWinding( mesh, vertexIds->writable() );
+	mesh->setTopologyUnchecked(
+		mesh->verticesPerFace(),
+		vertexIds,
+		mesh->variableSize( PrimitiveVariable::Vertex ),
+		mesh->interpolation()
+	);
+
+	ReverseWindingFunctor reverseWindingFunctor( mesh );
+	for( auto &it : mesh->variables )
+	{
+		if( it.second.interpolation == PrimitiveVariable::FaceVarying )
+		{
+			if( it.second.indices )
+			{
+				::reverseWinding<IntVectorData::ValueType>( mesh, it.second.indices->writable() );
+			}
+			else
+			{
+				despatchTypedData<ReverseWindingFunctor, TypeTraits::IsVectorTypedData>( it.second.data.get(), reverseWindingFunctor );
+			}
+		}
+	}
 }
 
-void bindGXEvaluator()
-{
-	class_<GXEvaluator, boost::noncopyable>( "GXEvaluator", no_init )
-		.def( init<const IECore::Primitive *>() )
-		.def( "numFaces", &GXEvaluator::numFaces )
-		.def( "evaluate", &evaluate1 )
-		.def( "evaluate", &evaluate2 )
-	;
-}
-
-} // namespace IECoreRI

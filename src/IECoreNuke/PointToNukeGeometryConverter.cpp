@@ -116,20 +116,34 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 	}
 
 	// get uvs
-	const FloatVectorData *pointS = points->variableData< FloatVectorData >( "s", PrimitiveVariable::Vertex );
-	const FloatVectorData *pointT = points->variableData< FloatVectorData >( "t", PrimitiveVariable::Vertex );
-	if ( pointS && pointT )
+	PrimitiveVariableMap::const_iterator uvIt = points->variables.find( "uv" );
+	if( uvIt != points->variables.end() && uvIt->second.interpolation == PrimitiveVariable::Vertex && uvIt->second.data->typeId() == V2fVectorDataTypeId )
 	{
 		Attribute* uv = to.writable_attribute( objIndex, Group_Vertices, "uv", VECTOR4_ATTRIB );
-		unsigned v = 0;
-		std::vector< float >::const_iterator sIt = pointS->readable().begin();
-		std::vector< float >::const_iterator tIt = pointT->readable().begin();
-		for ( ; sIt < pointS->readable().end(); sIt++, tIt++, v++)
+		if( uvIt->second.indices )
 		{
-			// as of Cortex 10, we take a UDIM centric approach
-			// to UVs, which clashes with Nuke, so we must flip
-			// the v values during conversion.
-			uv->vector4(v).set( *sIt, 1.0 - *tIt, 0.0f, 1.0f);
+			const std::vector<Imath::V2f> &uvs = runTimeCast<V2fVectorData>( uvIt->second.data )->readable();
+			const std::vector<int> &indices = uvIt->second.indices->readable();
+
+			for( size_t i = 0; i < indices.size() ; ++i )
+			{
+				// as of Cortex 10, we take a UDIM centric approach
+				// to UVs, which clashes with Nuke, so we must flip
+				// the v values during conversion.
+				uv->vector4( i ).set( uvs[indices[i]][0], 1.0 - uvs[indices[i]][1], 0.0f, 1.0f );
+			}
+		}
+		else
+		{
+			const std::vector<Imath::V2f> &uvs = runTimeCast<V2fVectorData>( uvIt->second.data )->readable();
+
+			for( size_t i = 0; i < uvs.size() ; ++i )
+			{
+				// as of Cortex 10, we take a UDIM centric approach
+				// to UVs, which clashes with Nuke, so we must flip
+				// the v values during conversion.
+				uv->vector4( i ).set( uvs[i][0], 1.0 - uvs[i][1], 0.0f, 1.0f );
+			}
 		}
 	}
 

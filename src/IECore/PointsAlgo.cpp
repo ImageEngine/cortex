@@ -233,18 +233,41 @@ namespace PointsAlgo
 
 void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation )
 {
-	DataPtr result;
-
 	if ( primitiveVariable.interpolation == interpolation )
 	{
 		return;
 	}
 
+	DataPtr dstData = nullptr;
+	DataPtr srcData = nullptr;
+
+	if( primitiveVariable.indices )
+	{
+		if( primitiveVariable.interpolation < interpolation )
+		{
+			// upsampling can be a resampling of indices
+			srcData = primitiveVariable.indices;
+		}
+		else
+		{
+			// downsampling forces index expansion to
+			// simplify the algorithms.
+			// \todo: allow indices to be maintained.
+			srcData = primitiveVariable.expandedData();
+			primitiveVariable.indices = nullptr;
+		}
+	}
+	else
+	{
+		// with no indices we can just resample the data
+		srcData = primitiveVariable.data;
+	}
+
 	if ( interpolation == PrimitiveVariable::Constant )
 	{
 		IECore::Detail::AverageValueFromVector fn;
-		result = despatchTypedData<IECore::Detail::AverageValueFromVector, IECore::Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
-		primitiveVariable = PrimitiveVariable(PrimitiveVariable::Constant, result );
+		dstData = despatchTypedData<IECore::Detail::AverageValueFromVector, IECore::Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
+		primitiveVariable = PrimitiveVariable(PrimitiveVariable::Constant, dstData );
 		return;
 	}
 
@@ -256,52 +279,48 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 			case IntDataTypeId:
 			{
 				IntVectorDataPtr newData = new IntVectorData();
-				newData->writable().resize( len, static_cast< const IntData * >( primitiveVariable.data.get() )->readable() );
-				result = newData;
+				newData->writable().resize( len, static_cast< const IntData * >( srcData.get() )->readable() );
+				dstData = newData;
 			}
 				break;
 			case FloatDataTypeId:
 			{
 				FloatVectorDataPtr newData = new FloatVectorData();
-				newData->writable().resize( len, static_cast< const FloatData * >(primitiveVariable.data.get())->readable() );
-				result = newData;
+				newData->writable().resize( len, static_cast< const FloatData * >( srcData.get() )->readable() );
+				dstData = newData;
 			}
 				break;
 			case V2fDataTypeId:
 			{
 				V2fVectorDataPtr newData = new V2fVectorData();
-				newData->writable().resize( len, static_cast< const V2fData * >(primitiveVariable.data.get())->readable() );
-				result = newData;
+				newData->writable().resize( len, static_cast< const V2fData * >( srcData.get() )->readable() );
+				dstData = newData;
 			}
 				break;
 			case V3fDataTypeId:
 			{
 				V3fVectorDataPtr newData = new V3fVectorData();
-				newData->writable().resize( len, static_cast< const V3fData * >(primitiveVariable.data.get())->readable() );
-				result = newData;
+				newData->writable().resize( len, static_cast< const V3fData * >( srcData.get() )->readable() );
+				dstData = newData;
 			}
 				break;
 			case Color3fDataTypeId:
 			{
 				Color3fVectorDataPtr newData = new Color3fVectorData();
-				newData->writable().resize( len, static_cast< const Color3fData * >(primitiveVariable.data.get())->readable() );
-				result = newData;
+				newData->writable().resize( len, static_cast< const Color3fData * >( srcData.get() )->readable() );
+				dstData = newData;
 			}
 				break;
 			default:
 				return;
 		}
-
-		primitiveVariable = PrimitiveVariable( interpolation, result );
-		return;
 	}
-
-	if( interpolation == PrimitiveVariable::Uniform )
+	else if( interpolation == PrimitiveVariable::Uniform )
 	{
 		if( primitiveVariable.interpolation == PrimitiveVariable::Vertex || primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
 			PointsVertexToUniform fn( points );
-			result = despatchTypedData<PointsVertexToUniform, IECore::Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<PointsVertexToUniform, IECore::Detail::IsArithmeticVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 	}
 	else if( interpolation == PrimitiveVariable::Vertex || interpolation == PrimitiveVariable::Varying || interpolation == PrimitiveVariable::FaceVarying )
@@ -309,15 +328,22 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 		if( primitiveVariable.interpolation == PrimitiveVariable::Uniform )
 		{
 			PointsUniformToVertex fn( points );
-			result = despatchTypedData<PointsUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( primitiveVariable.data.get() ), fn );
+			dstData = despatchTypedData<PointsUniformToVertex, TypeTraits::IsNumericBasedVectorTypedData>( const_cast< Data * >( srcData.get() ), fn );
 		}
 		else if( primitiveVariable.interpolation == PrimitiveVariable::Vertex || primitiveVariable.interpolation == PrimitiveVariable::Varying || primitiveVariable.interpolation == PrimitiveVariable::FaceVarying )
 		{
-			result = primitiveVariable.data;
+			dstData = srcData;
 		}
 	}
 
-	primitiveVariable = PrimitiveVariable( interpolation, result );
+	if( primitiveVariable.indices )
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, primitiveVariable.data, runTimeCast<IntVectorData>( dstData ) );
+	}
+	else
+	{
+		primitiveVariable = PrimitiveVariable( interpolation, dstData );
+	}
 }
 
 PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToKeep )

@@ -47,7 +47,7 @@ class MeshTest( unittest.TestCase ) :
 	def testUVs( self ) :
 
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		s, t = m["s"].data, m["t"].data
+		uvData = m["uv"].data
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
@@ -61,16 +61,39 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], t[i] ) )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
+
+	def testIndexedUVs( self ) :
+
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
+		uvData = m["uv"].data
+		uvIds = m["uv"].indices
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = IECoreArnold.NodeAlgo.convert( m )
+
+			uvs = arnold.AiNodeGetArray( n, "uvlist" )
+			self.assertEqual( uvs.contents.nelements, 4 )
+
+			uvIndices = arnold.AiNodeGetArray( n, "uvidxs" )
+			self.assertEqual( uvIndices.contents.nelements, 4 )
+
+			for i in range( 0, 4 ) :
+				aiUv = arnold.AiArrayGetPnt2( uvs, i )
+				aiUVId = arnold.AiArrayGetInt( uvIndices, i )
+				aiIndexedUV = arnold.AiArrayGetPnt2( uvs, aiUVId )
+				self.assertEqual( aiUVId, uvIds[i] )
+				self.assertEqual( aiUv, arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
+				self.assertEqual( aiIndexedUV, arnold.AtPoint2( uvData[uvIds[i]][0], uvData[uvIds[i]][1] ) )
 
 	def testAdditionalUVs( self ) :
 
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m["myMap_s"] = m["s"]
-		m["myMap_t"] = m["t"]
-		s, t = m["s"].data, m["t"].data
-
+		m["myMap"] = m["uv"]
+		uvData = m["uv"].data
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
@@ -84,9 +107,8 @@ class MeshTest( unittest.TestCase ) :
 
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetPnt2( uvs, i )
-				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( s[i], t[i] ) )
+				self.assertEqual( arnold.AiArrayGetPnt2( uvs, i ), arnold.AtPoint2( uvData[i][0], uvData[i][1] ) )
 				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
-
 
 	def testNormals( self ) :
 

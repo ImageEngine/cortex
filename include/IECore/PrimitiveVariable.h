@@ -36,7 +36,7 @@
 #define IE_CORE_PRIMITIVEVARIABLE_H
 
 #include "IECore/Export.h"
-#include "IECore/Data.h"
+#include "IECore/VectorTypedData.h"
 
 namespace IECore
 {
@@ -44,7 +44,8 @@ namespace IECore
 /// The PrimitiveVariable defines a simple
 /// structure to store primitive variables to
 /// be used by the Renderer and Primitive classes.
-struct IECORE_API PrimitiveVariable {
+struct IECORE_API PrimitiveVariable
+{
 	/// The Interpolation enum is used to describe how the
 	/// values of a Variable are to be interpolated
 	/// across the surface of a Primitive. The types are
@@ -57,6 +58,7 @@ struct IECORE_API PrimitiveVariable {
 		Varying,
 		FaceVarying
 	};
+
 	/// Constructs a PrimitiveVariable with Interpolation type Invalid
 	/// and a null data pointer. This allows the [] operator to work
 	/// in the PrimitiveVariableMap, but you must be careful to use it
@@ -67,19 +69,38 @@ struct IECORE_API PrimitiveVariable {
 	PrimitiveVariable();
 	/// Constructor - Data is not copied but referenced directly.
 	PrimitiveVariable( Interpolation i, DataPtr d );
+	/// Constructor - Data is not copied but referenced directly.
+	PrimitiveVariable( Interpolation i, DataPtr d, IntVectorDataPtr indices );
 	/// Shallow copy constructor - data is not copied just rereferenced
 	PrimitiveVariable( const PrimitiveVariable &other );
+
 	/// Copy constructor which optionally allows a deep copy of data
 	/// to be taken.
 	PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy );
+
 	bool operator==( const PrimitiveVariable &other ) const;
 	bool operator!=( const PrimitiveVariable &other ) const;
+
+	/// Use expandedData() to expand indices if they exist. If the variable
+	/// is not indexed, a direct copy will be returned.
+	/// \todo: Provide accessors that return an iterator range for the data,
+	/// providing transparent access to the indexed data without actually
+	/// copying and expanding.
+	DataPtr expandedData() const;
+
 	/// The interpolation type for this PrimitiveVariable.
 	Interpolation interpolation;
 	/// The Data for this PrimitiveVariable. Unless Interpolation is Constant,
 	/// Variable data is expected to be one of the types defined in VectorTypedData.h.
 	/// Constant interpolated data can be represented by any type of Data.
 	DataPtr data;
+	/// Optional indices array into the primary Data. This can be used
+	/// to store a more compact representation of the data, for example
+	/// a constant list of strings which are mapped to Vertex, Uniform,
+	/// or FaceVarying via the indices. Similarly, UV sets can store an
+	/// array of unique UVs in data and map them to FaceVarying using
+	/// the indices.
+	IntVectorDataPtr indices;
 };
 
 /// A simple type to hold named PrimitiveVariables.

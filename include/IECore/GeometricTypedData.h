@@ -55,7 +55,8 @@ enum Interpretation
 	Point,
 	Normal,
 	Vector,
-	Color
+	Color,
+	UV
 };
 
 } // namespace GeometricData

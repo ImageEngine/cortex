@@ -54,16 +54,16 @@ DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
 	
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
-	IECore::V2fVectorDataPtr stData = new IECore::V2fVectorData;
+	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 	
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
-	vector<V2f> &stVector = stData->writable();
+	vector<V2f> &uvVector = uvData->writable();
 
 	// centre point
 	pVector.push_back( V3f( 0.0f, 0.0f, m_z ) );
 	nVector.push_back( V3f( 0.0f, 0.0f, 1.0f ) );
-	stVector.push_back( V2f( 0.5f, 0.5f ) );
+	uvVector.push_back( V2f( 0.5f, 0.5f ) );
 
 	const unsigned int n = 20;
 	float thetaMaxRadians = m_thetaMax/180.0f * M_PI;
@@ -74,14 +74,14 @@ DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
 		float y = Math<float>::sin( t );
 		pVector.push_back( V3f( m_radius * x, m_radius * y, m_z ) );
 		nVector.push_back( V3f( 0.0f, 0.0f, 1.0f ) );
-		stVector.push_back( V2f( x/2.0f + 0.5f, y/2.0f + 0.5f ) );
+		uvVector.push_back( V2f( x/2.0f + 0.5f, y/2.0f + 0.5f ) );
 	}
 
 	m_nPoints = n + 1;
 	
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
-	addVertexAttribute( "st", stData );
+	addVertexAttribute( "uv", uvData );
 }
 
 DiskPrimitive::~DiskPrimitive()

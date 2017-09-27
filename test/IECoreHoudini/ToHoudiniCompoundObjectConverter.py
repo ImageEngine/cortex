@@ -65,19 +65,16 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 		mesh["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
 		mesh["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8] )
 		mesh["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8] )
-		mesh["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8 ) ) )
+		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
 		
 		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["color3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:6] )
-		mesh["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, 6 ) ) )
-		
+		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+
 		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["color3fVert"] = IECore.PrimitiveVariable( vertexInterpolation, color3fVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		mesh["stringVertIndices"] = IECore.PrimitiveVariable( vertexInterpolation, IECore.IntVectorData( range( 0, 24 ) ) )
-		
+		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+
 		return mesh
 	
 	def points( self ) :
@@ -101,14 +98,12 @@ class TestToHoudiniCompoundObjectConverter( IECoreHoudini.TestCase ) :
 		
 		points["floatPrim"] = IECore.PrimitiveVariable( uniformInterpolation, floatVectorData[:1] )
 		points["color3fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, color3fVectorData[:1] )
-		points["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:1] )
-		points["stringPrimIndices"] = IECore.PrimitiveVariable( uniformInterpolation, IECore.IntVectorData( [ 0 ] ) )
-		
+		points["stringPrim"] = IECore.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
+
 		points["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData )
 		points["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		points["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 12 ) ) )
-		
+		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+
 		return points
 	
 	def ints( self ) :

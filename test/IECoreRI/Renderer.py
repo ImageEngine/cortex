@@ -294,8 +294,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
 		self.failUnless( '[ "interpolateboundary" ] [ 0 0 ] [ ] [ ]' in l )
 		self.failUnless( 'vertex point P' in l )
-		self.failUnless( 'facevarying float s' in l )
-		self.failUnless( 'facevarying float t' in l )
+		self.failUnless( 'facevarying float[3] st' in l )
 		
 	def testSubDivTags( self ) :
 	
@@ -328,8 +327,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
 		self.failUnless( '[ "interpolateboundary" "facevaryinginterpolateboundary" ] [ 1 0 1 0 ] [ 1 0 ] [ ]' in l )
 		self.failUnless( 'vertex point P' in l )
-		self.failUnless( 'facevarying float s' in l )
-		self.failUnless( 'facevarying float t' in l )
+		self.failUnless( 'facevarying float[3] st' in l )
 
 	def testCommands( self ) :
 

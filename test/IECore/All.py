@@ -141,7 +141,6 @@ from SplineParameterTest import *
 from AttributeStateTest import *
 from CoordinateSystemTest import *
 from DisplayTest import *
-from MeshTangentsOpTest import *
 from CompoundVectorParameterTest import *
 from ObjectVectorTest import *
 from OversamplesCalculatorTest import *
@@ -158,7 +157,6 @@ from TypedDataTest import *
 from DataTraitsTest import *
 from NParticleReader import *
 from OBJReaderTest import TestOBJReader
-from FaceAreaOpTest import FaceAreaOpTest
 from CurvesMergeOpTest import CurvesMergeOpTest
 from CurvesPrimitiveEvaluatorTest import CurvesPrimitiveEvaluatorTest
 from SubstitutedDictTest import SubstitutedDictTest
@@ -174,7 +172,6 @@ from SmoothSkinningDataTest import *
 from IgnoredExceptionsTest import IgnoredExceptionsTest
 from PrimitiveVariableTest import PrimitiveVariableTest
 from FaceVaryingPromotionOpTest import FaceVaryingPromotionOpTest
-from MeshDistortionsOpTest import TestMeshDistortionsOp
 from PointVelocityDisplaceOp import *
 from HexConversionTest import HexConversionTest
 from CompressAndDecompressSmoothSkinningDataOpsTest import CompressAndDecompressSmoothSkinningDataOpsTest
@@ -196,7 +193,6 @@ from CapturingRendererTest import CapturingRendererTest
 from LightTest import LightTest
 from ContrastSmoothSkinningWeightsOpTest import ContrastSmoothSkinningWeightsOpTest
 from CameraControllerTest import CameraControllerTest
-from PointDistributionOpTest import PointDistributionOpTest
 from LRUCacheTest import LRUCacheTest
 from DataInterleaveOpTest import DataInterleaveOpTest
 from DataConvertOpTest import DataConvertOpTest

@@ -99,9 +99,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		points["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData )
 		points["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData )
 		points["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		points["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 12 ) ) )
-		
+		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
+
 		points.blindData()['name'] = "pointsGroup"
 		
 		return points
@@ -158,9 +157,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8] )
 		mesh["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8] )
 		mesh["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8] )
-		mesh["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:8] )
-		mesh["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 8 ) ) )
-		
+		mesh["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8], IECore.IntVectorData( range( 0, 8 ) ) )
+
 		# add all valid primitive attrib types
 		mesh["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:6] )
 		mesh["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:6] )
@@ -169,9 +167,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:6] )
 		mesh["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:6] )
 		mesh["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:6] )
-		mesh["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:6] )
-		mesh["stringPrimIndices"] = IECore.PrimitiveVariable( primitiveInterpolation, IECore.IntVectorData( range( 0, 6 ) ) )
-		
+		mesh["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:6], IECore.IntVectorData( range( 0, 6 ) ) )
+
 		# add all valid vertex attrib types
 		mesh["floatVert"] = IECore.PrimitiveVariable( vertexInterpolation, floatVectorData )
 		mesh["v2fVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2fVectorData )
@@ -180,9 +177,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		mesh["intVert"] = IECore.PrimitiveVariable( vertexInterpolation, intVectorData )
 		mesh["v2iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v2iVectorData )
 		mesh["v3iVert"] = IECore.PrimitiveVariable( vertexInterpolation, v3iVectorData )
-		mesh["stringVert"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		mesh["stringVertIndices"] = IECore.PrimitiveVariable( vertexInterpolation, IECore.IntVectorData( range( 0, 24 ) ) )
-		
+		mesh["stringVert"] = IECore.PrimitiveVariable( vertexInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 24 ) ) )
+
 		mesh.blindData()['name'] = "meshGroupA"
 		
 		return mesh
@@ -366,11 +362,8 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 	def testAdjustedStringVectorIndices( self ) :
 		null = self.emptySop()
 		group = self.twoMeshes()
-		group.children()[0]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "first" ] ) )
-		indices = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.IntVectorData( [ 0 ] * 6 ) )
-		group.children()[0]["commonStringIndices"] = indices
-		group.children()[1]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "second" ] ) )
-		group.children()[1]["commonStringIndices"] = indices
+		group.children()[0]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "first" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
+		group.children()[1]["commonString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "second" ] ), IECore.IntVectorData( [ 0 ] * 6 ) )
 		self.failUnless( IECoreHoudini.ToHoudiniGroupConverter( group ).convert( null ) )
 		geo = null.geometry()
 		nameAttr = geo.findPrimAttrib( "name" )
@@ -506,26 +499,26 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		# have to filter the source attrs s, t and not uv
+		# have to filter the source attrs
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^uv ^pscale ^rest" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
-		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^t ^width ^Pref" )
-		self.assertTrue( converter.convert( sop ) )
-		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 		
-		converter.parameters()["attributeFilter"].setTypedValue( "* ^s ^width ^Cs" )
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^width ^Pref" )
+		self.assertTrue( converter.convert( sop ) )
+		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['Cd', 'uv'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
+		
+		converter.parameters()["attributeFilter"].setTypedValue( "* ^width ^Cs" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['ieMeshInterpolation'] )
-		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['t'] )
+		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), ['uv'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
 	
 	def testStandardAttributeConversion( self ) :
@@ -554,12 +547,9 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cd', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
-		sData = mesh["s"].data.copy()
-		sData.extend( mesh["s"].data )
-		sData.extend( mesh["s"].data )
-		tData = mesh["t"].data.copy()
-		tData.extend( mesh["t"].data )
-		tData.extend( mesh["t"].data )
+		uvData = mesh["uv"].data.copy()
+		uvData.extend( mesh["uv"].data )
+		uvData.extend( mesh["uv"].data )
 		uvs = geo.findVertexAttrib( "uv" )
 		
 		i = 0
@@ -568,8 +558,8 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 			verts.reverse()
 			for vert in verts :
 				uvValues = vert.attribValue( uvs )
-				self.assertAlmostEqual( uvValues[0], sData[i] )
-				self.assertAlmostEqual( uvValues[1], tData[i] )
+				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 				i += 1
 		
 		converter["convertStandardAttributes"].setTypedValue( False )
@@ -577,18 +567,18 @@ IECoreHoudini.ToHoudiniGroupConverter( group ).convertToGeo( hou.pwd().geometry(
 		geo = sop.geometry()
 		self.assertItemsEqual( sorted([ x.name() for x in geo.pointAttribs() ]), TestToHoudiniGroupConverter.PointPositionAttribs + ['N', 'Pref', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in geo.primAttribs() ]), ['ieMeshInterpolation'] )
-		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 's', 't'] )
+		self.assertEqual( sorted([ x.name() for x in geo.vertexAttribs() ]), ['Cs', 'uv'] )
 		self.assertEqual( sorted([ x.name() for x in geo.globalAttribs() ]), [] )
 		
 		i = 0
-		s = geo.findVertexAttrib( "s" )
-		t = geo.findVertexAttrib( "t" )
+		uvs = geo.findVertexAttrib( "uv" )
 		for prim in geo.prims() :
 			verts = list(prim.vertices())
 			verts.reverse()
 			for vert in verts :
-				self.assertAlmostEqual( vert.attribValue( s ), sData[i] )
-				self.assertAlmostEqual( vert.attribValue( t ), tData[i] )
+				uvValues = vert.attribValue( uvs )
+				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
+				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 				i += 1
 	
 	def testInterpolation( self ) :

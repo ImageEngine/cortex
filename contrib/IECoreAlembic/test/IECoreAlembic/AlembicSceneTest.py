@@ -231,14 +231,18 @@ class AlembicSceneTest( unittest.TestCase ) :
 		a = IECore.SceneInterface.create( os.path.dirname( __file__ ) + "/data/coloredMesh.abc", IECore.IndexedIO.OpenMode.Read )
 		m = a.child( "pPlane1" ).readObjectAtSample( 0 )
 
-		self.failUnless( "s" in m )
-		self.failUnless( "t" in m )
+		self.failUnless( "uv" in m )
 
-		self.assertEqual( m["s"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( m["t"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 
-		self.failUnless( isinstance( m["s"].data, IECore.FloatVectorData ) )
-		self.failUnless( isinstance( m["t"].data, IECore.FloatVectorData ) )
+		self.failUnless( isinstance( m["uv"].data, IECore.V2fVectorData ) )
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.failUnless( isinstance( m["uv"].indices, IECore.IntVectorData ) )
+
+		self.assertEqual( len(m["uv"].data), m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( len(m["uv"].indices), m.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ) )
+
+		self.failUnless( m.isPrimitiveVariableValid( m["uv"] ) )
 
 	def testSamples( self ) :
 

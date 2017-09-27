@@ -93,30 +93,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertFalse( "N" in p )
 		self.assertEqual( p.interpolation, "catmullClark" )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["points"].getTypedValue(), True )
-		m = converter.convert()
-		self.assert_( "P" in m )
-		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		converter["points"].setTypedValue( False )
-		self.assert_( not "P" in converter.convert() )
-
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["normals"].getTypedValue(), True )
-		m = converter.convert()
-		self.assert_( "N" in m )
-		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		converter["normals"].setTypedValue( False )
-		self.assert_( not "N" in converter.convert() )
-
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
-		self.assertEqual( converter["st"].getTypedValue(), True )
-		self.assert_( "s" in converter.convert() )
-		self.assert_( "t" in converter.convert() )
-		converter["st"].setTypedValue( False )
-		self.assert_( not "s" in converter.convert() )
-		self.assert_( not "t" in converter.convert() )
-
 	def testInterpolationType( self ) :
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
@@ -157,14 +133,11 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 42 )
 		self.assertEqual( m["P"].data.size(), 42 )
 		self.assertEqual( m["N"].data.size(), 180 )
-		self.assertEqual( m["s"].data.size(), 180 )
-		self.assertEqual( m["t"].data.size(), 180 )
-		self.assert_( m["P"].data == converter.points() )
+		self.assertEqual( m["uv"].data.size(), 64 )
+		self.assertEqual( m["uv"].indices.size(), 180 )
 		self.assertEqual( m["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
-		self.assert_( m["N"].data == converter.normals() )
-		self.assert_( m["s"].data == converter.s( "map1" ) )
-		self.assert_( m["t"].data == converter.t( "map1" ) )
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ), IECore.V3f( 1.0001 ) ).contains( m.bound() ) )
 		self.assert_( m.bound().contains( IECore.Box3f( IECore.V3f( -0.90 ), IECore.V3f( 0.90 ) ) ) )
@@ -247,7 +220,10 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 
-		self.assertEqual( len( m.keys() ), 7 )
+		self.assertEqual( set( m.keys() ), set( [ "P", "N", "uv", "Double", "DoubleArray" ] ) )
+		self.assertEqual( m["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( m["uv"].data, IECore.V2fVectorData( [ IECore.V2f( 0, 0 ), IECore.V2f( 1, 0 ), IECore.V2f( 0, 1 ), IECore.V2f( 1, 1 ) ], IECore.GeometricData.Interpretation.UV ) )
+		self.assertEqual( m["uv"].indices, IECore.IntVectorData( [ 0, 1, 3, 2 ] ) )
 		self.assertEqual( m["Double"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( m["Double"].data, IECore.FloatData( 1 ) )
 		self.assertEqual( m["DoubleArray"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
@@ -267,25 +243,27 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( m["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
 
-	def testSharedSTIndices( self ) :
+	def testSharedUVIndices( self ) :
 	
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSharedUVs.ma", force = True, open = True )
 		
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 		
-		self.failUnless( "stIndices" in mesh )
-		self.assertEqual( mesh["stIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( mesh["stIndices"].data, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		self.failUnless( "uv" in mesh )
+		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
+		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 		
-	def testSplitSTIndices( self ) :
+	def testSplitUVIndices( self ) :
 			
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSplitUVs.ma", force = True, open = True )
 		
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
 		
-		self.failUnless( "stIndices" in mesh )
-		self.assertEqual( mesh["stIndices"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
-		self.assertEqual( mesh["stIndices"].data, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )	
+		self.failUnless( "uv" in mesh )
+		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )
+		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 	def testExtraSTs( self ) :
 	
@@ -295,38 +273,34 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
 		
-		self.assert_( "s" in m )
-		self.assert_( "t" in m )
-		self.assert_( "stIndices" in m )
-		self.assert_( "map1_s" not in m )
-		self.assert_( "map1_t" not in m )
-		self.assert_( "map1Indices" not in m )
-		
+		self.assert_( "uv" in m )
+		# map1 is the default set
+		self.assert_( "map1" not in m )
+
 		maya.cmds.polyUVSet( plane, copy=True, uvSet="map1", newUVSet="map2" )
-		
+
 		m = converter.convert()
-				
-		self.assert_( "s" in m )
-		self.assert_( "t" in m )
-		self.assert_( "stIndices" in m )
-		self.assert_( "map1_s" not in m )
-		self.assert_( "map1_t" not in m )
-		self.assert_( "map1Indices" not in m )
-		self.assert_( "map2_s" in m )
-		self.assert_( "map2_t" in m )
-		self.assert_( "map2Indices" in m )
+
+		self.assert_( "uv" in m )
+		self.assert_( "map1" not in m )
+		self.assert_( "map2" in m )
+
+		self.assertEqual( m["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+		self.assertEqual( m["map2"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 	def testManyUVConversionsFromPlug( self ) :
-		
-		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		
-		self.assertTrue( "s" in coreMesh )
-		self.assertTrue( "t" in coreMesh )
-		
+
+		# load a mesh with indexed UVs
+		scc = IECore.SceneCache( "test/IECore/data/sccFiles/animatedSpheres.scc", IECore.IndexedIO.OpenMode.Read )
+		coreMesh = scc.scene( [ "A", "a" ] ).readObject( 0 )
+		self.assertTrue( "uv" in coreMesh )
+		self.assertEqual( coreMesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
+
 		for i in range( 0, 7 ) :
-			coreMesh[ "testUVSet%d_s" % i ] = IECore.PrimitiveVariable( coreMesh["s"].interpolation, coreMesh["s"].data.copy() )
-			coreMesh[ "testUVSet%d_t" % i ] = IECore.PrimitiveVariable( coreMesh["t"].interpolation, coreMesh["t"].data.copy() )
-		
+			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy(), coreMesh["uv"].indices.copy() )
+
+		self.assertTrue( coreMesh.arePrimitiveVariablesValid() )
+
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
@@ -344,15 +318,13 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		result = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
 		
 		self.assertTrue( result.arePrimitiveVariablesValid() )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 760 )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 2280 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 400 )
+		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1560 )
 		
-		self.assertEqual( coreMesh["s"], result["s"] )
-		self.assertEqual( coreMesh["t"], result["t"] )
+		self.assertEqual( coreMesh["uv"], result["uv"] )
 		
 		for i in range( 0, 7 ) :
-			self.assertEqual( coreMesh[ "testUVSet%d_s" % i ], result[ "testUVSet%d_s" %  i ] )
-			self.assertEqual( coreMesh[ "testUVSet%d_t" %  i ], result[ "testUVSet%d_t" %  i ] )
+			self.assertEqual( coreMesh[ "testUVSet%d" % i ], result[ "testUVSet%d" %  i ] )
 	
 	def testColors( self ):
 
@@ -369,7 +341,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(0), IECore.Color3f(1), IECore.Color3f(0.8), IECore.Color3f(0.5) ] ) )
-		self.assertEqual( converter.colors("cAlpha",True), m['Cs'].data )
 
 		# test rgba to rgb conversion
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/colouredPlane.ma", force = True, open = True )
@@ -383,7 +354,6 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['colors'] = True
 		m = converter.convert()
 		self.assertEqual( m['Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f( 1, 1, 0 ), IECore.Color3f( 1, 1, 1 ), IECore.Color3f( 0, 1, 1 ), IECore.Color3f( 0, 1, 0 ) ] ) )
-		self.assertEqual( converter.colors("cRGBA",True), m['Cs'].data )
 
 	def testExtraColors( self ):
 
@@ -394,11 +364,8 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter['extraColors'] = True
 		m = converter.convert()
 		self.assertEqual( m['cAlpha_Cs'].data, IECore.FloatVectorData( [ 0, 1, 0.8, 0.5 ] ) )
-		self.assertEqual( converter.colors("cAlpha"), m['cAlpha_Cs'].data )
 		self.assertEqual( m['cRGB_Cs'].data, IECore.Color3fVectorData( [ IECore.Color3f(1,0,0), IECore.Color3f(0), IECore.Color3f(0,0,1), IECore.Color3f(0,1,0) ] ) )
-		self.assertEqual( converter.colors("cRGB"), m['cRGB_Cs'].data )
 		self.assertEqual( m['cRGBA_Cs'].data, IECore.Color4fVectorData( [ IECore.Color4f( 1, 1, 0, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ), IECore.Color4f( 0, 1, 1, 1 ), IECore.Color4f( 0, 1, 0, 0.5 ) ] ) )
-		self.assertEqual( converter.colors("cRGBA"), m['cRGBA_Cs'].data )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

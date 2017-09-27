@@ -264,5 +264,29 @@ class TestTriangulateOp( unittest.TestCase ) :
 	
 		self.assertEqual( m.interpolation, "catmullClark" )
 
+	def testFaceVaryingIndices( self ) :
+
+		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
+
+		m2 = TriangulateOp()( input = m, copyInput = True )
+
+		self.assertTrue( m2.arePrimitiveVariablesValid() )
+
+		self.assertEqual( m2["uv"].data, m["uv"].data )
+		self.assertEqual( m2["uv"].indices, IntVectorData( [ 0, 3, 1, 0, 1, 2 ] ) )
+
+	def testUniformIndices( self ) :
+
+		m = MeshPrimitive.createPlane( Box2f( V2f( -4 ), V2f( 4 ) ), divisions = V2i( 2, 2 ) )
+		m["myString"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, StringVectorData( [ "a", "b" ] ), IntVectorData( [ 1, 0, 0, 1 ] ) )
+
+		m2 = TriangulateOp()( input = m, copyInput = True )
+
+		self.assertTrue( m2.arePrimitiveVariablesValid() )
+
+		self.assertEqual( m2["myString"].data, m["myString"].data )
+		self.assertEqual( m2["myString"].indices, IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
+
 if __name__ == "__main__":
     unittest.main()

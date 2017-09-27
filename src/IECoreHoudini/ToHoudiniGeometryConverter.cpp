@@ -68,7 +68,7 @@ ToHoudiniGeometryConverter::ToHoudiniGeometryConverter( const IECore::Object *ob
 	
 	m_convertStandardAttributesParameter = new BoolParameter(
 		"convertStandardAttributes",
-		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd ; s,t->uv)",
+		"Performs automated conversion of standard PrimitiveVariables to Houdini Attributes (i.e. Pref->rest ; Cs->Cd)",
 		true
 	);
 	
@@ -211,71 +211,36 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	
 	UT_String filter( attributeFilterParameter()->getTypedValue() );
 	
-	// match all the string variables to each associated indices variable
-	/// \todo: replace all this logic with IECore::IndexedData once it exists...
-	PrimitiveVariableMap stringsToIndices;
-	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
-	{
-		if ( !primitive->isPrimitiveVariableValid( it->second ) )
-		{
-			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
-			filter += UT_String( " ^" + it->first );
-			continue;
-		}
-
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( it->second.data.get() );
-		if ( !converter )
-		{
-			continue;
-		}
-		
-		if ( it->second.data->isInstanceOf( StringVectorDataTypeId ) )
-		{
-			std::string indicesVariableName = it->first + "Indices";
-			PrimitiveVariableMap::const_iterator indices = primitive->variables.find( indicesVariableName );
-			if ( indices != primitive->variables.end() && indices->second.data->isInstanceOf( IntVectorDataTypeId ) && primitive->isPrimitiveVariableValid( indices->second ) )
-			{
-				stringsToIndices[it->first] = indices->second;
-				filter += UT_String( " ^" + indicesVariableName );
-			}
-		}
-	}
-	
 	bool convertStandardAttributes = m_convertStandardAttributesParameter->getTypedValue();
-	if ( convertStandardAttributes && UT_String( "s" ).multiMatch( filter ) && UT_String( "t" ).multiMatch( filter ) )
+
+	if( UT_String( "uv" ).multiMatch( filter ) )
 	{
-		// convert s and t to uv
-		PrimitiveVariableMap::const_iterator sPrimVar = primitive->variables.find( "s" );
-		PrimitiveVariableMap::const_iterator tPrimVar = primitive->variables.find( "t" );
-		if ( sPrimVar != primitive->variables.end() && tPrimVar != primitive->variables.end() )
+		PrimitiveVariableMap::const_iterator uvPrimVar = primitive->variables.find( "uv" );
+		if( uvPrimVar != primitive->variables.end() && uvPrimVar->second.data->typeId() == V2fVectorDataTypeId )
 		{
-			if ( sPrimVar->second.interpolation == tPrimVar->second.interpolation )
+			// Houdini doesn't have a concept of indexed numeric data
+			// so we must expand indices if they exist.
+			V2fVectorDataPtr uvData = runTimeCast<V2fVectorData>( uvPrimVar->second.expandedData() );
+			const std::vector<Imath::V2f> &uvs = uvData->readable();
+
+			// Houdini prefers a V3f uvw rather than V2f uv,
+			// though they advise setting the 3rd component to 0.
+			std::vector<Imath::V3f> uvw;
+			uvw.reserve( uvs.size() );
+			for ( size_t i=0; i < uvs.size(); ++i )
 			{
-				const FloatVectorData *sData = runTimeCast<const FloatVectorData>( sPrimVar->second.data.get() );
-				const FloatVectorData *tData = runTimeCast<const FloatVectorData>( tPrimVar->second.data.get() );
-				if ( sData && tData )
-				{
-					const std::vector<float> &s = sData->readable();
-					const std::vector<float> &t = tData->readable();
-					
-					std::vector<Imath::V3f> uvw;
-					uvw.reserve( s.size() );
-					for ( size_t i=0; i < s.size(); ++i )
-					{
-						uvw.emplace_back( s[i], t[i], 0 );
-					}
-					
-					GA_Range range = vertRange;
-					if ( sPrimVar->second.interpolation == pointInterpolation )
-					{
-						range = points;
-					}
-					
-					ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( new V3fVectorData( uvw ) );
-					converter->convert( "uv", geo, range );
-					filter += " ^s ^t";
-				}
+				uvw.emplace_back( uvs[i][0], uvs[i][1], 0 );
 			}
+
+			GA_Range range = vertRange;
+			if ( uvPrimVar->second.interpolation == pointInterpolation )
+			{
+				range = points;
+			}
+
+			ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( new V3fVectorData( uvw ) );
+			converter->convert( "uv", geo, range );
+			filter += " ^uv";
 		}
 	}
 	
@@ -285,36 +250,47 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 	// add the primitive variables to the various GEO_AttribDicts based on interpolation type
 	for ( PrimitiveVariableMap::const_iterator it=primitive->variables.begin() ; it != primitive->variables.end(); it++ )
 	{
+		if( !primitive->isPrimitiveVariableValid( it->second ) )
+		{
+			IECore::msg( IECore::MessageHandler::Warning, "ToHoudiniGeometryConverter", "PrimitiveVariable " + it->first + " is invalid. Ignoring." );
+			continue;
+		}
+
 		UT_String varName( it->first );
 		if ( !varName.multiMatch( attribFilter ) )
 		{
 			continue;
 		}
-		
+
 		PrimitiveVariable primVar = processPrimitiveVariable( primitive, it->second );
-		ToHoudiniAttribConverterPtr converter = ToHoudiniAttribConverter::create( primVar.data.get() );
+
+		DataPtr data = nullptr;
+		ToHoudiniAttribConverterPtr converter = nullptr;
+
+		if( primVar.indices && primVar.data->typeId() == StringVectorDataTypeId )
+		{
+			// we want to process the indexed strings rather than the expanded strings
+			converter = ToHoudiniAttribConverter::create( primVar.data.get() );
+			if( ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() ) )
+			{
+				stringVectorConverter->indicesParameter()->setValidatedValue( primVar.indices.get() );
+			}
+		}
+		else
+		{
+			// all other primitive variables must be expanded
+			data = primVar.expandedData();
+			converter = ToHoudiniAttribConverter::create( data.get() );
+		}
+
 		if ( !converter )
 		{
 			continue;
 		}
-		
-		PrimitiveVariable::Interpolation interpolation = primVar.interpolation;
-		
-		if ( converter->isInstanceOf( (IECore::TypeId)ToHoudiniStringVectorAttribConverterTypeId ) )
-		{
-			PrimitiveVariableMap::const_iterator indices = stringsToIndices.find( it->first );
-			if ( indices != stringsToIndices.end() )
-			{
-				ToHoudiniStringVectorAttribConverter *stringVectorConverter = IECore::runTimeCast<ToHoudiniStringVectorAttribConverter>( converter.get() );
-				PrimitiveVariable indicesPrimVar = processPrimitiveVariable( primitive, indices->second );
-				stringVectorConverter->indicesParameter()->setValidatedValue( indicesPrimVar.data );
-				interpolation = indices->second.interpolation;
-			}
-		}
-		
+
 		const std::string name = ( convertStandardAttributes ) ? processPrimitiveVariableName( it->first ) : it->first;
 		
-		if ( interpolation == detailInterpolation )
+		if ( primVar.interpolation == detailInterpolation )
  		{
 			// add detail attribs
 			try
@@ -326,7 +302,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Detail Attrib: " + e.what() );
 			}
 	 	}
-		else if ( interpolation == pointInterpolation )
+		else if ( primVar.interpolation == pointInterpolation )
 		{
 		
 #if UT_MAJOR_VERSION_INT < 15
@@ -368,7 +344,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				}
 			}
 		}
-		else if ( interpolation == primitiveInterpolation )
+		else if ( primVar.interpolation == primitiveInterpolation )
 		{
 			// add primitive attribs
 			try
@@ -380,7 +356,7 @@ void ToHoudiniGeometryConverter::transferAttribValues(
 				throw IECore::Exception( "PrimitiveVariable \"" + it->first + "\" could not be converted as a Primitive Attrib: " + e.what() );
 			}
 		}
-		else if ( interpolation == vertexInterpolation )
+		else if ( primVar.interpolation == vertexInterpolation )
 		{
 			// add vertex attribs
 			try

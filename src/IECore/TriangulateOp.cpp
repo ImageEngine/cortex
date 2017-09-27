@@ -91,7 +91,7 @@ const BoolParameter * TriangulateOp::throwExceptionsParameter() const
 /// A functor for use with despatchTypedData, which copies elements from another vector, as specified by an array of indices into that data
 struct TriangleDataRemap
 {
-	typedef size_t ReturnType;
+	typedef void ReturnType;
 
 	TriangleDataRemap( const std::vector<int> &indices ) : m_other(0), m_indices( indices )
 	{
@@ -101,7 +101,7 @@ struct TriangleDataRemap
 	const std::vector<int> &m_indices;
 
 	template<typename T>
-	size_t operator() ( T * data )
+	void operator() ( T * data )
 	{
 		assert( data );
 		typename T::ValueType &dataWritable = data->writable();
@@ -119,8 +119,6 @@ struct TriangleDataRemap
 		}
 
 		assert( dataWritable.size() == m_indices.size() );
-
-		return dataWritable.size();
 	}
 };
 
@@ -302,29 +300,33 @@ struct TriangulateOp::TriangulateFn
 		TriangleDataRemap uniformRemap( uniformIndices );
 		for ( PrimitiveVariableMap::iterator it = m_mesh->variables.begin(); it != m_mesh->variables.end(); ++it )
 		{
+			TriangleDataRemap *remap = nullptr;
 			if ( it->second.interpolation == PrimitiveVariable::FaceVarying )
 			{
- 				assert( it->second.data );
-				varyingRemap.m_other = it->second.data.get();
-				DataPtr data = it->second.data->copy();
-
-				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data.get(), varyingRemap );
-				assert( primVarSize == faceVaryingIndices.size() );
-				(void)primVarSize;
-
-				it->second.data = data;
+				remap = &varyingRemap;
 			}
 			else if ( it->second.interpolation == PrimitiveVariable::Uniform )
 			{
- 				assert( it->second.data );
-				uniformRemap.m_other = it->second.data.get();
-				DataPtr data = it->second.data->copy();
+				remap = &uniformRemap;
+			}
+			else
+			{
+				continue;
+			}
 
-				size_t primVarSize = despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( data.get(), uniformRemap );
-				assert( primVarSize == uniformIndices.size() );
-				(void)primVarSize;
+			const Data *inputData = it->second.indices ? it->second.indices.get() : it->second.data.get();
+			DataPtr result = inputData->copy();
+			remap->m_other = inputData;
 
-				it->second.data = data;
+			despatchTypedData<TriangleDataRemap, TypeTraits::IsVectorTypedData>( result.get(), *remap );
+
+			if( it->second.indices )
+			{
+				it->second.indices = runTimeCast<IntVectorData>( result );
+			}
+			else
+			{
+				it->second.data = result;
 			}
 		}
 

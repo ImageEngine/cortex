@@ -106,8 +106,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["intPrim"] = IECore.PrimitiveVariable( uniformInterpolation, intVectorData[:1] )
 		points["v2iPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v2iVectorData[:1] )
 		points["v3iPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v3iVectorData[:1] )
-		points["stringPrim"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData[:1] )
-		points["stringPrimIndices"] = IECore.PrimitiveVariable( uniformInterpolation, IECore.IntVectorData( [ 0 ] ) )
+		points["stringPrim"] = IECore.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
 		points["m33fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m33fVectorData[:1] )
 		points["m44fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m44fVectorData[:1] )
 		
@@ -120,8 +119,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData )
 		points["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData )
 		points["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData )
-		points["stringPoint"] = IECore.PrimitiveVariable( detailInterpolation, stringVectorData )
-		points["stringPointIndices"] = IECore.PrimitiveVariable( pointInterpolation, IECore.IntVectorData( range( 0, 12 ) ) )
+		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
 		points["m33fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m33fVectorData )
 		points["m44fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m44fVectorData )
 		
@@ -187,7 +185,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( components, sopPrims[i].attribValue( "quatPrim" ) )
 		
 		data = prim["stringPrim"].data
-		dataIndices = prim["stringPrimIndices"].data
+		dataIndices = prim["stringPrim"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPrims[i].attribValue( "stringPrim" ) )
 		
@@ -209,7 +207,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( components, sopPoints[i].attribValue( "quatPoint" ) )
 
 		data = prim["stringPoint"].data
-		dataIndices = prim["stringPointIndices"].data
+		dataIndices = prim["stringPoint"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
 		
@@ -265,7 +263,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 					self.assertEqual( toTuple(data[i]), sopPrim.attribValue( key ) )
 		
 		data = prim["stringPrim"].data
-		dataIndices = prim["stringPrimIndices"].data
+		dataIndices = prim["stringPrim"].indices
 		for i in range( 0, data.size() ) :
 			for sopPrim in sopPrims :
 				self.assertEqual( data[ dataIndices[i] ], sopPrim.attribValue( "stringPrim" ) )
@@ -307,11 +305,11 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( toTuple(data[i]), sopPoints[ origSopPrim.numPoints + i ].attribValue( key ) )
 		
 		data = prim["stringPoint"].data
-		dataIndices = prim["stringPointIndices"].data
+		dataIndices = prim["stringPoint"].indices
 		
 		if multipleConversions :
 			defaultData = origSopPrim["stringPoint"].data
-			defaultIndices = origSopPrim["stringPointIndices"].data
+			defaultIndices = origSopPrim["stringPoint"].indices
 			for i in range( 0, origSopPrim.numPoints ) :
 				val = "" if ( defaultIndices[i] >= defaultData.size() ) else defaultData[ defaultIndices[i] ]
 				self.assertEqual( val, sopPoints[ i ].attribValue( "stringPoint" ) )

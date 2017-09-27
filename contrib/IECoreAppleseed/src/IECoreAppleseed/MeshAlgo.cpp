@@ -186,60 +186,47 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 
 	// texture coords
 	{
-		const FloatVectorData *s = triangulatedMeshPrimPtr->variableData<FloatVectorData>( "s" );
-		const FloatVectorData *t = triangulatedMeshPrimPtr->variableData<FloatVectorData>( "t" );
-		if( s && t )
+		PrimitiveVariableMap::const_iterator uvIt = triangulatedMeshPrimPtr->variables.find( "uv" );
+		if( uvIt != triangulatedMeshPrimPtr->variables.end() && uvIt->second.data->typeId() == V2fVectorDataTypeId )
 		{
-			PrimitiveVariable::Interpolation sInterpolation = triangulatedMeshPrimPtr->variables.find( "s" )->second.interpolation;
-			PrimitiveVariable::Interpolation tInterpolation = triangulatedMeshPrimPtr->variables.find( "t" )->second.interpolation;
-			if( sInterpolation == tInterpolation )
+			if( uvIt->second.interpolation == PrimitiveVariable::Varying || uvIt->second.interpolation == PrimitiveVariable::Vertex || uvIt->second.interpolation == PrimitiveVariable::FaceVarying )
 			{
-				if( sInterpolation == PrimitiveVariable::Varying || sInterpolation == PrimitiveVariable::Vertex || sInterpolation == PrimitiveVariable::FaceVarying )
+				const std::vector<Imath::V2f> &uvs = runTimeCast<const V2fVectorData>( uvIt->second.data )->readable();
+				size_t numUVs = uvs.size();
+
+				meshEntity->reserve_tex_coords( numUVs );
+
+				for( size_t i = 0; i < numUVs; ++i)
 				{
-					size_t numSTs = s->readable().size();
-					meshEntity->reserve_tex_coords( numSTs );
-					const std::vector<float> &svec = s->readable();
-					const std::vector<float> &tvec = t->readable();
+					meshEntity->push_tex_coords( asr::GVector2( uvs[i] ) );
+				}
 
-					for( size_t i = 0; i < numSTs; ++i)
+				/// \todo: handle UV Indices correctly
+				if( uvIt->second.interpolation == PrimitiveVariable::FaceVarying )
+				{
+					for( size_t i = 0, j = 0; i < numTriangles; ++i)
 					{
-						meshEntity->push_tex_coords( asr::GVector2( svec[i], tvec[i] ) );
-					}
-
-					if( sInterpolation == PrimitiveVariable::FaceVarying )
-					{
-						for( size_t i = 0, j = 0; i < numTriangles; ++i)
-						{
-							asr::Triangle& tri = triangles[i];
-							tri.m_a0 = j++;
-							tri.m_a1 = j++;
-							tri.m_a2 = j++;
-						}
-					}
-					else
-					{
-						for( size_t i = 0; i < vidx.size(); i += 3)
-						{
-							asr::Triangle& tri = triangles[i / 3];
-							tri.m_a0 = vidx[i];
-							tri.m_a1 = vidx[i+1];
-							tri.m_a2 = vidx[i+2];
-						}
+						asr::Triangle& tri = triangles[i];
+						tri.m_a0 = j++;
+						tri.m_a1 = j++;
+						tri.m_a2 = j++;
 					}
 				}
 				else
 				{
-					msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have unsupported interpolation type - not generating uvs." );
+					for( size_t i = 0; i < vidx.size(); i += 3)
+					{
+						asr::Triangle& tri = triangles[i / 3];
+						tri.m_a0 = vidx[i];
+						tri.m_a1 = vidx[i+1];
+						tri.m_a2 = vidx[i+2];
+					}
 				}
 			}
 			else
 			{
-				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variables s and t have different interpolation - not generating uvs." );
+				msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Variable \"uv\" has unsupported interpolation type - not generating uvs." );
 			}
-		}
-		else if( s || t )
-		{
-			msg( Msg::Warning, "ToAppleseedMeshConverter::doConversion", "Only one of s and t available - not generating uvs." );
 		}
 	}
 

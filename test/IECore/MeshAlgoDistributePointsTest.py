@@ -34,9 +34,10 @@
 
 import os
 import unittest
-from IECore import *
 
-class PointDistributionOpTest( unittest.TestCase ) :
+import IECore
+
+class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def pointTest( self, mesh, points, density, error=0.05 ) :
 		
@@ -44,8 +45,8 @@ class PointDistributionOpTest( unittest.TestCase ) :
 		self.assertEqual( points.numPoints, points['P'].data.size() )
 		self.failUnless( points.arePrimitiveVariablesValid() )
 		
-		mesh = TriangulateOp()( input = mesh )
-		meshEvaluator = MeshPrimitiveEvaluator( mesh )
+		mesh = IECore.TriangulateOp()( input = mesh )
+		meshEvaluator = IECore.MeshPrimitiveEvaluator( mesh )
 		result = meshEvaluator.createResult()
 		pointsPerFace = [ 0 ] * mesh.verticesPerFace.size()
 		positions = points["P"].data
@@ -57,7 +58,7 @@ class PointDistributionOpTest( unittest.TestCase ) :
 		
 		## test that we have roughly the expected density per face
 		origDensity = density
-		mesh = FaceAreaOp()( input = mesh )
+		mesh["faceArea"] = IECore.MeshAlgo.calculateFaceArea( mesh )
 		for f in range( 0, mesh.verticesPerFace.size() ) :
 			if "density" in mesh :
 				density = mesh["density"].data[f] * origDensity
@@ -65,34 +66,34 @@ class PointDistributionOpTest( unittest.TestCase ) :
 	
 	def testSimple( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		p = PointDistributionOp()( mesh = m, density = 100 )
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
 	
 	def testHighDensity( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		p = PointDistributionOp()( mesh = m, density = 50000, offset = V2f( 0.0001, 0.0001 ) )
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = IECore.V2f( 0.0001, 0.0001 ) )
 
 		self.pointTest( m, p, 50000 )
 	
 	def testDensityMaskPrimVar( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		m = TriangulateOp()( input = m )
-		numFaces = m.variableSize( PrimitiveVariable.Interpolation.Uniform )
-		m['density'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, FloatVectorData( [ float(x)/numFaces for x in range( 0, numFaces ) ] ) )
-		p = PointDistributionOp()( mesh = m, density = 100 )
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.TriangulateOp()( input = m )
+		numFaces = m.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform )
+		m['density'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ float(x)/numFaces for x in range( 0, numFaces ) ] ) )
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100, error=0.1 )
-		p = PointDistributionOp()( mesh = m, density = 1000 )
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 1000 )
 		self.pointTest( m, p, 1000, error=0.1 )
 	
 	def testOffsetParameter( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		density = 500
-		p = PointDistributionOp()( mesh = m, density = density, offset = V2f( 0, 0 ) )
-		pOffset = PointDistributionOp()( mesh = m, density = density, offset = V2f( 0.5, 0.75 ) )
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = density, offset = IECore.V2f( 0, 0 ) )
+		pOffset = IECore.MeshAlgo.distributePoints( mesh = m, density = density, offset = IECore.V2f( 0.5, 0.75 ) )
 		self.pointTest( m, p, density )
 		self.pointTest( m, pOffset, density )
 		self.assertNotEqual( p.numPoints, pOffset.numPoints )
@@ -104,13 +105,13 @@ class PointDistributionOpTest( unittest.TestCase ) :
 	
 	def testDistanceBetweenPoints( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		
 		density = 300
-		points = PointDistributionOp()( mesh = m, density = density )
+		points = IECore.MeshAlgo.distributePoints( mesh = m, density = density )
 		positions = points["P"].data
 		
-		tree = V3fTree( points["P"].data )
+		tree = IECore.V3fTree( points["P"].data )
 		for i in range( 0, positions.size() ) :
 			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
 			self.failUnless( i in neighbours )
@@ -120,17 +121,17 @@ class PointDistributionOpTest( unittest.TestCase ) :
 	
 	def testPointOrder( self ) :
 		
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		m2 = m.copy()
-		m2['P'].data += V3f( 0, 5, 0 )
+		m2['P'].data += IECore.V3f( 0, 5, 0 )
 		pos = m["P"].data
 		pos2 = m2["P"].data
 		for i in range( 0, pos.size() ) :
 			self.assertNotEqual( pos[i], pos2[i] )
 
 		density = 500
-		p = PointDistributionOp()( mesh = m, density = density )
-		p2 = PointDistributionOp()( mesh = m2, density = density )
+		p = IECore.MeshAlgo.distributePoints( mesh = m, density = density )
+		p2 = IECore.MeshAlgo.distributePoints( mesh = m2, density = density )
 		self.pointTest( m, p, density )
 		self.pointTest( m2, p2, density )
 		self.assertEqual( p.numPoints, p2.numPoints )
@@ -138,14 +139,12 @@ class PointDistributionOpTest( unittest.TestCase ) :
 		pos = p["P"].data
 		pos2 = p2["P"].data
 		for i in range( 0, p.numPoints ) :
-			self.failUnless( pos2[i].equalWithRelError( pos[i] + V3f( 0, 5, 0 ), 1e-6 ) )
+			self.failUnless( pos2[i].equalWithRelError( pos[i] + IECore.V3f( 0, 5, 0 ), 1e-6 ) )
 	
 	def testDensityRange( self ) :
-	
-		p = PointDistributionOp()
-		p["density"].setNumericValue( -1 )
-		
-		self.assertRaises( RuntimeError, p["density"].validate )
+
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		self.assertRaises( RuntimeError, IECore.MeshAlgo.distributePoints, m, -1.0 )
 	
 	def setUp( self ) :
 	

@@ -1828,32 +1828,54 @@ void IECoreRI::RendererImplementation::emitCurvesPrimitive( const IECore::Curves
 namespace
 {
 
-/// \todo: perhaps this should be made public in MeshAlgo or PrimitiveAlgo
-void convertUVs( PrimitiveVariableMap &variables )
+// As of Cortex 10, we take a UDIM centric approach
+// to UVs, which clashes with RenderMan, so we must
+// flip the t values before sending to the renderer.
+// We also need to match RenderMan's expected naming
+// convention by using "st" rather than "uv".
+void convertUVs( MeshPrimitive *mesh )
 {
-	std::set<Data *> visited;
-
-	for( auto it = variables.begin(), eIt = variables.end(); it != eIt; ++it )
+	// Convert and remove UVs. We must perform the iteration to find
+	// the names separately to the iteration to convert them, because
+	// removing items would invalidate the interators if we were to
+	// do it in one loop.
+	std::vector<PrimitiveVariableMap::iterator> uvSets;
+	for( auto it = mesh->variables.begin(), eIt = mesh->variables.end(); it != eIt; ++it )
 	{
-		if( visited.find( it->second.data.get() ) != visited.end() )
+		if( const V2fVectorData *data = runTimeCast<const V2fVectorData>( it->second.data.get() ) )
 		{
-			continue;
-		}
-
-		// by convention, PrimitiveVariables named "t" or ending
-		// with "_t" represent the second component of a UV set.
-		if ( it->first == "t" || boost::ends_with( it->first, "_t" ) )
-		{
-			if( FloatVectorData *values = runTimeCast<FloatVectorData>( it->second.data.get() ) )
+			if( data->getInterpretation() == GeometricData::UV )
 			{
-				for( auto &value : values->writable() )
-				{
-					value = 1.0f - value;
-				}
+				uvSets.push_back( it );
 			}
 		}
+	}
 
-		visited.insert( it->second.data.get() );
+	for( auto &it : uvSets )
+	{
+		if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( it->first, IECore::PrimitiveVariable::FaceVarying ) )
+		{
+			std::vector<Imath::V2f> &uvs = uvData->writable();
+
+			for( unsigned i = 0; i < uvs.size(); ++i )
+			{
+				// as of Cortex 10, we take a UDIM centric approach
+				// to UVs, which clashes with OpenGL, so we must flip
+				// the v values during conversion.
+				uvs[i][1] = 1.0 - uvs[i][1];
+			}
+
+			if( it->first == "uv" )
+			{
+				mesh->variables["st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
+			}
+			else
+			{
+				mesh->variables[it->first + "_st"] = IECore::PrimitiveVariable( it->second.interpolation, uvData );
+			}
+
+			mesh->variables.erase( it );
+		}
 	}
 }
 
@@ -1861,11 +1883,8 @@ void convertUVs( PrimitiveVariableMap &variables )
 
 void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrimitive *primitive )
 {
-	// as of Cortex 10, we take a UDIM centric approach
-	// to UVs, which clashes with RenderMan, so we must
-	// flip the t values before sending to the renderer
 	MeshPrimitivePtr mesh = primitive->copy();
-	::convertUVs( mesh->variables );
+	::convertUVs( mesh.get() );
 
 	PrimitiveVariableList pv( mesh->variables, &( m_attributeStack.top().primVarTypeHints ) );
 	const std::vector<int> &vertsPerFace = mesh->verticesPerFace()->readable();

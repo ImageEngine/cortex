@@ -33,17 +33,23 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include "IECore/DespatchTypedData.h"
 #include "IECore/PrimitiveVariable.h"
 
 using namespace IECore;
 
 PrimitiveVariable::PrimitiveVariable()
-	: interpolation( Invalid ), data( 0 )
+	: interpolation( Invalid ), data( nullptr ), indices( nullptr )
 {
 }
 
 PrimitiveVariable::PrimitiveVariable( Interpolation i, DataPtr d )
-	: interpolation( i ), data( d )
+	: interpolation( i ), data( d ), indices( nullptr )
+{
+}
+
+PrimitiveVariable::PrimitiveVariable( Interpolation i, DataPtr d, IntVectorDataPtr indices )
+	: interpolation( i ), data( d ), indices( indices )
 {
 }
 
@@ -51,6 +57,7 @@ PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other )
 {
 	interpolation = other.interpolation;
 	data = other.data;
+	indices = other.indices;
 }
 
 PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepCopy )
@@ -58,11 +65,13 @@ PrimitiveVariable::PrimitiveVariable( const PrimitiveVariable &other, bool deepC
 	interpolation = other.interpolation;
 	if( deepCopy )
 	{
-		data = other.data ? other.data->copy() : 0;
+		data = other.data ? other.data->copy() : nullptr;
+		indices = other.indices ? other.indices->copy() : nullptr;
 	}
 	else
 	{
 		data = other.data;
+		indices = other.indices;
 	}
 }
 
@@ -72,11 +81,32 @@ bool PrimitiveVariable::operator==( const PrimitiveVariable &other ) const
 	{
 		return false;
 	}
+
 	if( data && other.data )
 	{
-		return data->isEqualTo( other.data.get() );
+		if( !data->isEqualTo( other.data.get() ) )
+		{
+			return false;
+		}
 	}
-	return !data && !other.data;
+	else if( data || other.data )
+	{
+		return false;
+	}
+
+	if( indices && other.indices )
+	{
+		if( !indices->isEqualTo( other.indices.get() ) )
+		{
+			return false;
+		}
+	}
+	else if( indices || other.indices )
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
@@ -84,3 +114,45 @@ bool PrimitiveVariable::operator!=( const PrimitiveVariable &other ) const
 	return !(*this == other);
 }
 
+namespace
+{
+
+struct Expander
+{
+	typedef DataPtr ReturnType;
+
+	Expander( const std::vector<int> &indices ) : m_indices( indices )
+	{
+	}
+
+	const std::vector<int> &m_indices;
+
+	template<typename T>
+	ReturnType operator() ( T * data )
+	{
+		const typename T::ValueType &compactValues = data->readable();
+
+		typename T::Ptr result = new T();
+		typename T::ValueType &expandedValues = result->writable();
+		expandedValues.reserve( m_indices.size() );
+		for( const auto &index : m_indices )
+		{
+			expandedValues.push_back( compactValues[index] );
+		}
+
+		return result;
+	}
+};
+
+} // namespace
+
+DataPtr PrimitiveVariable::expandedData() const
+{
+	if( !indices )
+	{
+		return data->copy();
+	}
+
+	Expander expander( indices->readable() );
+	return despatchTypedData<Expander, TypeTraits::IsVectorTypedData>( data.get(), expander );
+}

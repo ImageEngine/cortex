@@ -199,7 +199,8 @@ ObjectPtr FromHoudiniCurvesConverter::doDetailConversion( const GU_Detail *geo, 
 		// only duplicate point and vertex attrib end points
 		if ( it->second.interpolation == IECore::PrimitiveVariable::Vertex )
 		{
-			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( it->second.data.get(), func );
+			IECore::Data *data = it->second.indices ? it->second.indices.get() : it->second.data.get();
+			despatchTypedData<DuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( data, func );
 		}
 	}
 	

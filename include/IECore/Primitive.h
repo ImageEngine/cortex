@@ -62,13 +62,27 @@ class IECORE_API Primitive : public VisibleRenderable
 
 		/// Variables a stored as a public map for easy manipulation.
 		PrimitiveVariableMap variables;
-		
-		/// Convenience function to find name in variables, and returning a runTimeCast to the requested type. If requiredInterpolation is
-		/// specified then 0 is returned if the interpolation doesn't match.
+
+		/// Use variableData() to find a named variable and cast to the requested data type.
+		/// If requiredInterpolation is specified and does not match the interpolation of the
+		/// variable, or if the type does not match the data, then nullptr is returned.
+		/// These methods throw if the PrimitiveVariable is indexed, as the returned data
+		/// would not be sufficient for manipulating the PrimitiveVariable. To access indexed
+		/// variables, either call expandedVariableData and take ownership of the copied data,
+		/// or get them directly from the PrimitiveVariableMap to manipulate them in-place.
 		template<typename T>
 		T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid );
 		template<typename T>
 		const T *variableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
+		/// Use expandedVariableData() to find a named variable, expand indices if they exist,
+		/// and cast to the requested data type. If the variable is not indexed, a direct copy
+		/// will be returned. Note that the PrimitiveVariable itself remains unchanged.
+		/// If requiredInterpolation is specified and does not match the interpolation of the
+		/// variable, or if the type does not match the data, then nullptr is returned.
+		/// \todo: Provide accessors that return an iterator range for the data, providing
+		/// transparent access to the indexed data without actually copying and expanding.
+		template<typename T>
+		typename T::Ptr expandedVariableData( const std::string &name, PrimitiveVariable::Interpolation requiredInterpolation=PrimitiveVariable::Invalid ) const;
 
 		/// Returns true if the given primitive variable has the correct size for its interpolation type
 		bool isPrimitiveVariableValid( const PrimitiveVariable &pv ) const;

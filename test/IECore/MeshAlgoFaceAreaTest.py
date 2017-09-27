@@ -36,19 +36,18 @@ import unittest
 import IECore
 import math
 
-class FaceAreaOpTest( unittest.TestCase ) :
+class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 	def test( self ) :
 
 		p = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) ) )
 
-		p = IECore.FaceAreaOp()( input=p )
-		
-		self.failUnless( p.arePrimitiveVariablesValid() )
-		
-		self.failUnless( "faceArea" in p )
-		self.assertEqual( p["faceArea"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( p["faceArea"].data[0], 8 )
+		faceArea = IECore.MeshAlgo.calculateFaceArea( p )
+
+		self.failUnless( p.isPrimitiveVariableValid( faceArea ) )
+
+		self.assertEqual( faceArea.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( faceArea.data[0], 8 )
 
 	def testRandomTriangles( self ) :
 	
@@ -58,15 +57,14 @@ class FaceAreaOpTest( unittest.TestCase ) :
 			p = IECore.V3fVectorData( [ r.nextV3f(), r.nextV3f(), r.nextV3f() ] )
 			m = IECore.MeshPrimitive( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), "linear", p )
 			
-			s = IECore.FloatVectorData( [ r.nextf(), r.nextf(), r.nextf() ] )
-			t = IECore.FloatVectorData( [ r.nextf(), r.nextf(), r.nextf() ] )
-			m["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, s )
-			m["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, t )
-			
-			m = IECore.FaceAreaOp()( input=m )
-			self.assertAlmostEqual( m["faceArea"].data[0], IECore.triangleArea( p[0], p[1], p[2] ), 4 )
-			self.assertAlmostEqual( m["textureArea"].data[0], IECore.triangleArea( IECore.V3f( s[0], t[0], 0 ), IECore.V3f( s[1], t[1], 0 ), IECore.V3f( s[2], t[2], 0 ) ), 4 )
-	
+			uv = IECore.V2fVectorData( [ IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ) ] )
+			m["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, uv )
+
+			faceArea = IECore.MeshAlgo.calculateFaceArea( m )
+			textureArea = IECore.MeshAlgo.calculateFaceTextureArea( m, "uv" )
+
+			self.assertAlmostEqual( faceArea.data[0], IECore.triangleArea( p[0], p[1], p[2] ), 4 )
+			self.assertAlmostEqual( textureArea.data[0], IECore.triangleArea( IECore.V3f( uv[0][0], uv[0][1], 0 ), IECore.V3f( uv[1][0], uv[1][1], 0 ), IECore.V3f( uv[2][0], uv[2][1], 0 ) ), 4 )
 	
 	def testTwoFaces( self ) :
 	
@@ -77,7 +75,7 @@ class FaceAreaOpTest( unittest.TestCase ) :
 		# |   |\
 		# |_ _|_\
 		#
-		# st
+		# uv
 		#
 		#  _ _ _
 		# |     |  |\
@@ -94,42 +92,30 @@ class FaceAreaOpTest( unittest.TestCase ) :
 			]
 		)
 		
-		s = IECore.FloatVectorData(
+		uvs = IECore.V2fVectorData(
 			[
-				0,
-				3,
-				3,
-				0,
-				5,
-				6,
-				5
+				IECore.V2f( 0, 0 ),
+				IECore.V2f( 3, 0 ),
+				IECore.V2f( 3, 2 ),
+				IECore.V2f( 0, 2 ),
+				IECore.V2f( 5, 0 ),
+				IECore.V2f( 6, 0 ),
+				IECore.V2f( 5, 2 ),
 			]
 		)
-		
-		t = IECore.FloatVectorData(
-			[
-				0,
-				0,
-				2,
-				2,
-				0,
-				0,
-				2
-			]
-		)
-		
-		m = IECore.MeshPrimitive( IECore.IntVectorData( [ 4, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 3, 1, 4, 2 ] ), "linear", p )
-		m["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, s )
-		m["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, t )
-	
-		m = IECore.FaceAreaOp()( input=m )
 
-		faceAreas = m["faceArea"].data
+		m = IECore.MeshPrimitive( IECore.IntVectorData( [ 4, 3 ] ), IECore.IntVectorData( [ 0, 1, 2, 3, 1, 4, 2 ] ), "linear", p )
+		m["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, uvs )
+
+		faceArea = IECore.MeshAlgo.calculateFaceArea( m )
+		textureArea = IECore.MeshAlgo.calculateFaceTextureArea( m, "uv" )
+
+		faceAreas = faceArea.data
 		self.assertEqual( len( faceAreas ), 2 )
 		self.assertEqual( faceAreas[0], 4 )
 		self.assertEqual( faceAreas[1], 1 )
 		
-		textureAreas = m["textureArea"].data
+		textureAreas = textureArea.data
 		self.assertEqual( len( textureAreas ), 2 )
 		self.assertEqual( textureAreas[0], 6 )
 		self.assertEqual( textureAreas[1], 1 )

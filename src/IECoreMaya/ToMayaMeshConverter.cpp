@@ -76,178 +76,106 @@ void ToMayaMeshConverter::assignDefaultShadingGroup( MObject &shape ) const
 	MGlobal::executeCommand( "sets -addElement initialShadingGroup " + fnDN.fullPathName() );
 }
 
-void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, IECore::ConstMeshPrimitivePtr mesh, const std::string &sPrimVarName, const std::string &tPrimVarName, const std::string &stIdPrimVarName, MString *uvSetName ) const
+void ToMayaMeshConverter::addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECore::MeshPrimitive *mesh, IECore::PrimitiveVariableMap::const_iterator &uvIt ) const
 {
-	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( sPrimVarName );
-	bool haveS = sIt != mesh->variables.end();
-	IECore::PrimitiveVariableMap::const_iterator tIt = mesh->variables.find( tPrimVarName );
-	bool haveT = tIt != mesh->variables.end();
-	IECore::PrimitiveVariableMap::const_iterator stIdIt = mesh->variables.find( stIdPrimVarName );
-	bool haveSTId = stIdIt != mesh->variables.end();
+	// Maya's default UV set is named "map1" instead of "uv"
+	MString uvSetName = uvIt->first == "uv" ? "map1" : uvIt->first.c_str();
 
-	if ( haveS && haveT )
+	if( uvIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
 	{
-		if ( sIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
+		IECore::msg( IECore::Msg::Warning,"ToMayaMeshConverter::doConversion",  boost::format(  "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % uvSetName.asChar() );
+		return;
+	}
+
+	const IECore::V2fVectorData *uvData = IECore::runTimeCast<const IECore::V2fVectorData>( uvIt->second.data.get() );
+	if ( !uvData )
+	{
+		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % uvSetName.asChar() % uvIt->second.data->typeName() );
+		return;
+	}
+
+	bool setExists = false;
+	MStringArray existingSets;
+	fnMesh.getUVSetNames( existingSets );
+	for ( unsigned i=0; i < existingSets.length(); ++i )
+	{
+		if( uvSetName == existingSets[i] )
 		{
-			IECore::msg( IECore::Msg::Warning,"ToMayaMeshConverter::doConversion",  boost::format(  "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % sPrimVarName );
-			return;
+			fnMesh.clearUVs( &uvSetName );
+			setExists = true;
+			break;
 		}
+	}
 
-		if ( tIt->second.interpolation != IECore::PrimitiveVariable::FaceVarying )
+	if ( !setExists )
+	{
+		MDagPath dag;
+		MStatus s = fnMesh.getPath( dag );
+		if ( s )
 		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported interpolation (expected FaceVarying).") % tPrimVarName);
-			return;
-		}
-
-		if ( !sIt->second.data )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has no data." ) % sPrimVarName );
-		}
-
-		if ( !tIt->second.data )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has no data." ) % tPrimVarName );
-		}
-
-		/// \todo Employ some M*Array converters to simplify this
-		int numUVs = mesh->variableSize( IECore::PrimitiveVariable::FaceVarying );
-
-		IECore::ConstFloatVectorDataPtr u = IECore::runTimeCast<const IECore::FloatVectorData>(sIt->second.data);
-
-		if ( !u )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % sPrimVarName % sIt->second.data->typeName() );
-			return;
-		}
-
-		assert( (int)u->readable().size() == numUVs );
-		
-		IECore::ConstFloatVectorDataPtr v = IECore::runTimeCast<const IECore::FloatVectorData>(tIt->second.data);
-		if ( !v )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % tPrimVarName % tIt->second.data->typeName() );
-			return;
-		}
-
-		assert( (int)v->readable().size() == numUVs );
-		
-		const std::vector<float> &uAll = u->readable();
-		const std::vector<float> &vAll = v->readable();
-
-		if ( uvSetName )
-		{
-			bool setExists = false;
-			MStringArray existingSets;
-			fnMesh.getUVSetNames( existingSets );
-			for ( unsigned i=0; i < existingSets.length(); ++i )
-			{
-				if ( *uvSetName == existingSets[i] )
-				{
-					fnMesh.clearUVs( uvSetName );
-					setExists = true;
-					break;
-				}
-			}
-			
-			if ( !setExists )
-			{
-				MDagPath dag;
-				MStatus s = fnMesh.getPath( dag );
-				if ( s )
-				{
-					fnMesh.createUVSetWithName( *uvSetName );
-				}
-				else
-				{
-					fnMesh.createUVSetDataMeshWithName( *uvSetName );
-				}
-			}
-		}
-		
-		MIntArray uvIds;
-		uvIds.setLength( numUVs );
-		MFloatArray uArray;
-		MFloatArray vArray;
-		
-		if( haveSTId )
-		{
-			// Get compressed uv values by matching them with their uvId.
-			IECore::ConstIntVectorDataPtr uvId = IECore::runTimeCast<const IECore::IntVectorData>(stIdIt->second.data);
-			if ( !uvId )
-			{
-				IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"%s\" has unsupported type \"%s\"." ) % stIdPrimVarName % stIdIt->second.data->typeName() );
-				return;
-			}
-			
-			const std::vector<int> &uvIdData = uvId->readable();
-	
-			assert( (int)uvIdData.size() == numUVs );
-			
-			int highestId = 0;
-			for ( int i = 0; i < numUVs; i++)
-			{
-				uvIds[i] = uvIdData[i];
-				if( uvIdData[i] > highestId )
-				{
-					highestId = uvIdData[i];
-				}
-			}
-			
-			// u and v arrays need only be as long as the number of unique uvIds
-			uArray.setLength( highestId + 1 );
-			vArray.setLength( highestId + 1 );
-			
-			for ( int i = 0; i < numUVs; i++ )
-			{
-				uArray[ uvIds[i] ] = uAll[i];
-				vArray[ uvIds[i] ] = vAll[i];
-			}
+			fnMesh.createUVSetWithName( uvSetName );
 		}
 		else
 		{
-			// If for some reason we cannot find the uv indices, set the UVs using the old way
-			// the performances in maya won't be good (for weigth painting in particular)
-			uArray.setLength( numUVs );
-			vArray.setLength( numUVs );
-
-			for ( int i = 0; i < numUVs; i++)
-			{
-				uArray[i] = u->readable()[i];
-				vArray[i] = v->readable()[i];
-			}
-			
-			for ( int i = 0; i < numUVs; i++)
-			{
-				uvIds[i] = i;
-			}
+			fnMesh.createUVSetDataMeshWithName( uvSetName );
 		}
-		
-		MStatus s = fnMesh.setUVs( uArray, vArray, uvSetName );
-		if ( !s )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
-			return;
-		}
-
-		s = fnMesh.assignUVs( polygonCounts, uvIds, uvSetName );
-		if ( !s )
-		{
-			IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
-			return;
-		}
-
 	}
-	else if ( haveS )
+
+	const std::vector<Imath::V2f> &uvs = uvData->readable();
+
+	MIntArray uvIds;
+	MFloatArray uArray;
+	MFloatArray vArray;
+
+	if( uvIt->second.indices )
 	{
-		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Primitive variable \"%s\" found, but not \"%s\"." ) % sPrimVarName % tPrimVarName );
-	}
-	else if ( haveT )
-	{
-		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "Primitive variable \"%s\" found, but not \"%s\"." ) % tPrimVarName % sPrimVarName );
+		const std::vector<int> &indices = uvIt->second.indices->readable();
+		size_t numIndices = indices.size();
+		uvIds.setLength( numIndices );
+		for( size_t i = 0; i < numIndices; ++i )
+		{
+			uvIds[i] = indices[i];
+		}
+
+		size_t numUVs = uvs.size();
+		uArray.setLength( numUVs );
+		vArray.setLength( numUVs );
+		for( size_t i = 0; i < numUVs; ++i )
+		{
+			uArray[i] = uvs[i][0];
+			vArray[i] = uvs[i][1];
+		}
 	}
 	else
 	{
-		assert( !uvSetName );
+		// If for some reason we cannot find the uv indices, set the UVs using the old way
+		// the performances in maya won't be good (for weigth painting in particular)
+		// We've already guaranteed that the data is FaceVarying above.
+
+		size_t numUVs = uvs.size();
+		uvIds.setLength( numUVs );
+		uArray.setLength( numUVs );
+		vArray.setLength( numUVs );
+
+		for( size_t i = 0; i < numUVs; ++i )
+		{
+			uvIds[i] = i;
+			uArray[i] = uvs[i][0];
+			vArray[i] = uvs[i][1];
+		}
+	}
+
+	MStatus s = fnMesh.setUVs( uArray, vArray, &uvSetName );
+	if ( !s )
+	{
+		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to set UVs." );
+		return;
+	}
+	s = fnMesh.assignUVs( polygonCounts, uvIds, &uvSetName );
+	if ( !s )
+	{
+		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", "Failed to assign UVs." );
+		return;
 	}
 }
 
@@ -404,66 +332,14 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 		}
 	}
 
-	bool haveDefaultUVs = false;
-	IECore::PrimitiveVariableMap::const_iterator sIt = mesh->variables.find( "s" );
-	IECore::RefCountedPtr sDataRef = ( sIt == mesh->variables.end() ) ? 0 : static_cast<IECore::RefCountedPtr>( sIt->second.data );
-
-	/// Add named UV sets
-	std::set< std::string > uvSets;
+	/// Add UV sets
 	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
 	{
-		const std::string &sName = it->first;
-
-		size_t suffixOffset = sName.rfind( "_s" );
-
-		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == sName.length() - 2 ) )
+		if( const IECore::V2fVectorData *data = IECore::runTimeCast<const IECore::V2fVectorData>( it->second.data.get() ) )
 		{
-			std::string uvSetNameStr = sName.substr( 0, suffixOffset );
-
-			if ( uvSetNameStr.size() )
+			if( data->getInterpretation() == IECore::GeometricData::UV )
 			{
-				MString uvSetName = uvSetNameStr.c_str();
-				std::string tName = uvSetNameStr + "_t";
-				std::string stIdName = uvSetNameStr + "Indices";
-
-				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, stIdName, &uvSetName );
-
-				uvSets.insert( uvSetNameStr );
-				
-				if ( sDataRef == static_cast<IECore::RefCountedPtr>( it->second.data ) )
-				{
-					haveDefaultUVs = true;
-				}
-			}
-		}
-	}
-
-	/// Add default UV set if it isn't just a reference to a named set
-	if ( !haveDefaultUVs )
-	{
-		addUVSet( fnMesh, polygonCounts, mesh, "s", "t", "stIndices" );
-	}
-
-	// We do the search again, but looking for primvars ending "_t", so we can catch cases where either "UVSETNAME_s" or "UVSETNAME_t" is present, but not both, taking care
-	// not to attempt adding any duplicate sets
-	for ( it = mesh->variables.begin(); it != mesh->variables.end(); ++it )
-	{
-		const std::string &tName = it->first;
-
-		size_t suffixOffset = tName.rfind( "_t" );
-
-		if ( ( suffixOffset != std::string::npos) && ( suffixOffset == tName.length() - 2 ) )
-		{
-			std::string uvSetNameStr = tName.substr( 0, suffixOffset );
-
-			if ( uvSetNameStr.size() && uvSets.find( uvSetNameStr ) == uvSets.end() )
-			{
-				MString uvSetName = uvSetNameStr.c_str();
-				std::string sName = uvSetNameStr + "_s";
-				std::string stIdName = uvSetNameStr + "Indices";
-				
-				addUVSet( fnMesh, polygonCounts, mesh, sName, tName, stIdName, &uvSetName );
-				uvSets.insert( uvSetNameStr );
+				addUVSet( fnMesh, polygonCounts, mesh.get(), it );
 			}
 		}
 	}

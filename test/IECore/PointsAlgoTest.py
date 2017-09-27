@@ -46,6 +46,13 @@ class PointsAlgoTest( unittest.TestCase ) :
 		testObject["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 0 ] ) )
 		testObject["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 10 ) ) )
 		testObject["e"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 10 ) ) )
+
+		# indexed
+		testObject["f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+		testObject["g"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.FloatVectorData( [ 0.5 ] ), IECore.IntVectorData( [ 0 ] ) )
+		testObject["h"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+		testObject["i"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( range( 0, 3 ) ), IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2, 0, 1, 2, 0 ] ) )
+
 		self.assertTrue( testObject.arePrimitiveVariablesValid() )
 
 		return testObject
@@ -211,6 +218,60 @@ class PointsAlgoTest( unittest.TestCase ) :
 
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( p.data, IECore.FloatVectorData( range( 0, 10 ) ) )
+
+	def testPointsIndexedVertexToUniform( self ) :
+		points = self.points()
+		p = points["f"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.9 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testPointsIndexedUniformToVertex( self ) :
+		points = self.points()
+		p = points["g"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.Vertex )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0 ] * 10 ) )
+
+	def testPointsIndexedUniformToVarying( self ) :
+		points = self.points()
+		p = points["g"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.Varying )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0 ] * 10 ) )
+
+	def testPointsIndexedUniformToFaceVarying( self ) :
+		points = self.points()
+		p = points["g"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.5 ] ) )
+		self.assertEqual( p.indices, IECore.IntVectorData( [ 0 ] * 10 ) )
+
+	def testPointsIndexedVaryingToUniform( self ) :
+		points = self.points()
+		p = points["h"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.9 ] ) )
+		self.assertEqual( p.indices, None )
+
+	def testPointsIndexedFaceVaryingToUniform( self ) :
+		points = self.points()
+		p = points["i"]
+		IECore.PointsAlgo.resamplePrimitiveVariable(points, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [ 0.9 ] ) )
+		self.assertEqual( p.indices, None )
 
 class DeletePointsTest( unittest.TestCase ) :
 	def points( self ) :

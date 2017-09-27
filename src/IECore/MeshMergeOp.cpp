@@ -109,8 +109,8 @@ struct MeshMergeOp::AppendPrimVars
 {
 	typedef void ReturnType;
 
-	AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, std::set<DataPtr> &visitedData )
-		:	m_mesh( mesh ), m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_visitedData( visitedData )
+	AppendPrimVars( MeshPrimitive *mesh, const MeshPrimitive *mesh2, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, IntVectorData *indices, std::set<DataPtr> &visitedData )
+		:	m_mesh( mesh ), m_mesh2( mesh2 ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_indices( indices ), m_visitedData( visitedData )
 	{
 	}
 
@@ -123,10 +123,49 @@ struct MeshMergeOp::AppendPrimVars
 		}
 		m_visitedData.insert( data );
 
-		const T *data2 = m_mesh2->variableData<T>( m_name, m_interpolation );
-		if ( data2 )
+		PrimitiveVariableMap::const_iterator it = m_mesh2->variables.find( m_name );
+		if( it != m_mesh2->variables.end() && it->second.data->isInstanceOf( data->staticTypeId() ) && it->second.interpolation == m_interpolation )
 		{
-			data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
+			if( m_indices )
+			{
+				const int offset = data->readable().size();
+
+				const T *data2 = runTimeCast<const T>( it->second.data.get() );
+				data->writable().insert( data->writable().end(), data2->readable().begin(), data2->readable().end() );
+
+				if( it->second.indices )
+				{
+					/// Re-index to fit on the end of the existing data
+					/// \todo: the data would be more compact if we search
+					/// existing values rather than blindly insert.
+					std::vector<int> &indices = m_indices->writable();
+					const std::vector<int> &indices2 = it->second.indices->readable();
+					indices.reserve( indices.size() + indices2.size() );
+					for( const auto &index : indices2 )
+					{
+						indices.push_back( offset + index );
+					}
+				}
+				else
+				{
+					/// Append new indices for the second mesh
+					/// \todo: the data would be more compact if we search
+					/// existing values rather than blindly insert.
+					std::vector<int> &indices = m_indices->writable();
+					const int data2Size = data2->readable().size();
+					for( size_t i = 0; i < data2Size; ++i )
+					{
+						indices.push_back( offset + i );
+					}
+				}
+			}
+			else
+			{
+				/// The first mesh dictates whether the PrimitiveVariable should
+				/// be indexed. If the second mesh has indices, we must expand them.
+				typename T::Ptr expandedData2 = runTimeCast<T>( it->second.expandedData() );
+				data->writable().insert( data->writable().end(), expandedData2->readable().begin(), expandedData2->readable().end() );
+			}
 		}
 		else if ( m_remove )
 		{
@@ -137,8 +176,24 @@ struct MeshMergeOp::AppendPrimVars
 			typedef typename T::ValueType::value_type ValueType;
  			ValueType defaultValue = DefaultValue<ValueType>()();
  			size_t size = m_mesh2->variableSize( m_interpolation );
-			
- 			data->writable().insert( data->writable().end(), size, defaultValue );
+			if( !size )
+			{
+				/// mesh2 may have an empty variableSize if it contains
+				/// no topology, so early out rather than appending.
+				return;
+			}
+
+			if( m_indices )
+			{
+				/// \todo: the data would be more compact if we search for defaultValue
+				/// in the existing data rather than blindly insert.
+				m_indices->writable().insert( m_indices->writable().end(), size, data->writable().size() );
+				data->writable().push_back( defaultValue );
+			}
+			else
+			{
+				data->writable().insert( data->writable().end(), size, defaultValue );
+			}
 		}
 	}
 
@@ -149,6 +204,7 @@ struct MeshMergeOp::AppendPrimVars
 		const std::string m_name;
 		const PrimitiveVariable::Interpolation m_interpolation;
 		const bool m_remove;
+		IntVectorData *m_indices;
 		std::set<DataPtr> &m_visitedData;
 
 };
@@ -157,8 +213,8 @@ struct MeshMergeOp::PrependPrimVars
 {
 	typedef void ReturnType;
 	
-	PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable::Interpolation interpolation, const bool remove, std::map<ConstDataPtr, DataPtr> &visitedData )
-		:	m_mesh( mesh ), m_name( name ), m_interpolation( interpolation ), m_remove( remove ), m_visitedData( visitedData )
+	PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable &primVar, const bool remove, std::map<ConstDataPtr, DataPtr> &visitedData )
+		:	m_mesh( mesh ), m_name( name ), m_primVar( primVar ), m_remove( remove ), m_visitedData( visitedData )
 	{
 	}
 	
@@ -180,14 +236,18 @@ struct MeshMergeOp::PrependPrimVars
 			{
 				typedef typename T::ValueType::value_type ValueType;
 				ValueType defaultValue = DefaultValue<ValueType>()();
-				size_t size = m_mesh->variableSize( m_interpolation ) - data->readable().size();
+				size_t size = m_mesh->variableSize( m_primVar.interpolation ) - data->readable().size();
 				
 				data2 = new T();
 				data2->writable().insert( data2->writable().end(), size, defaultValue );
-				data2->writable().insert( data2->writable().end(), data->readable().begin(), data->readable().end() );
+
+				/// The first mesh dictates whether the PrimitiveVariable should
+				/// be indexed. If the second mesh has indices, we must expand them.
+				typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
+				data2->writable().insert( data2->writable().end(), expandedData->readable().begin(), expandedData->readable().end() );
 			}
 			
-			m_mesh->variables[m_name] = PrimitiveVariable( m_interpolation, data2 );
+			m_mesh->variables[m_name] = PrimitiveVariable( m_primVar.interpolation, data2 );
 			
 			m_visitedData[data] = data2;
 		}
@@ -197,7 +257,7 @@ struct MeshMergeOp::PrependPrimVars
 
 		MeshPrimitive *m_mesh;
 		const std::string m_name;
-		const PrimitiveVariable::Interpolation m_interpolation;
+		const PrimitiveVariable &m_primVar;
 		const bool m_remove;
 		std::map<ConstDataPtr, DataPtr> &m_visitedData;
 
@@ -234,7 +294,8 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	{
 		if( pvIt->second.interpolation!=PrimitiveVariable::Constant )
 		{
-			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData );
+			IntVectorData *indices = pvIt->second.indices ? pvIt->second.indices.get() : nullptr;
+			AppendPrimVars f( mesh, mesh2, pvIt->first, pvIt->second.interpolation, m_removePrimVarsParameter->getTypedValue(), indices, visitedData );
 			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
 		}
 	}
@@ -245,7 +306,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	{
 		if ( pvIt2->second.interpolation != PrimitiveVariable::Constant )
 		{
-			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second.interpolation, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
+			PrependPrimVars f( mesh, pvIt2->first, pvIt2->second, m_removePrimVarsParameter->getTypedValue(), visitedData2 );
 			despatchTypedData<PrependPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt2->second.data.get(), f );
 		}
 	}

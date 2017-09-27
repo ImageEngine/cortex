@@ -152,31 +152,27 @@ class MeshWriter : public PrimitiveWriter
 				);
 			}
 
-			const FloatVectorData *sData = meshPrimitive->variableData<FloatVectorData>( "s" );
-			const FloatVectorData *tData = meshPrimitive->variableData<FloatVectorData>( "t" );
-			vector<V2f> st;
-			if( sData && tData )
+			std::vector<unsigned int> indices;
+			PrimitiveVariableMap::const_iterator uvIt = meshPrimitive->variables.find( "uv" );
+			if( uvIt != meshPrimitive->variables.end() )
 			{
-				const vector<float> &s = sData->readable();
-				const vector<float> &t = tData->readable();
-				if( s.size() == t.size() )
+				const V2fVectorData *uvData = runTimeCast<V2fVectorData>( uvIt->second.data.get() );
+				if( uvData )
 				{
-					st.reserve( s.size() );
-					for( vector<float>::const_iterator sIt = s.begin(), tIt = t.begin(), eIt = s.end(); sIt != eIt; ++sIt, ++tIt )
+					OV2fGeomParam::Sample uvSample( uvData->readable(), geometryScope( uvIt->second.interpolation ) );
+
+					if( uvIt->second.indices )
 					{
-						st.push_back( V2f( *sIt, *tIt ) );
+						const std::vector<int> &indexValues = uvIt->second.indices->readable();
+						indices = std::vector<unsigned int>( indexValues.begin(), indexValues.end() );
+						uvSample.setIndices( indices );
 					}
-					sample.setUVs(
-						OV2fGeomParam::Sample( st, geometryScope( meshPrimitive->variables.find( "s" )->second.interpolation ) )
-					);
-				}
-				else
-				{
-					IECore::msg( IECore::Msg::Warning, "MeshWriter", "s and t have different sizes" );
+
+					sample.setUVs( uvSample );
 				}
 			}
 
-			const char *namesToIgnore[] = { "P", "N", "s", "t", nullptr };
+			const char *namesToIgnore[] = { "P", "N", "uv", nullptr };
 			OCompoundProperty geomParams = schema.getArbGeomParams();
 			writeArbGeomParams( meshPrimitive, geomParams, namesToIgnore );
 
