@@ -65,7 +65,7 @@ ToGLMeshConverter::~ToGLMeshConverter()
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
 	IECore::MeshPrimitivePtr mesh = boost::static_pointer_cast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
-	
+
 	if( !mesh->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) )
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
@@ -84,7 +84,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		);
 		normalOp->operate();
 	}
-	
+
 	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
 	op->inputParameter()->setValue( mesh );
 	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
@@ -100,27 +100,7 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 
 	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
-		if( pIt->first == "uv" )
-		{
-			if( IECore::V2fVectorDataPtr uvData = mesh->expandedVariableData<IECore::V2fVectorData>( "uv", IECore::PrimitiveVariable::FaceVarying ) )
-			{
-				std::vector<Imath::V2f> &uvs = uvData->writable();
-				for( unsigned i = 0; i < uvs.size(); ++i )
-				{
-					// as of Cortex 10, we take a UDIM centric approach
-					// to UVs, which clashes with OpenGL, so we must flip
-					// the v values during conversion.
-					uvs[i][1] = 1.0 - uvs[i][1];
-				}
-
-				glMesh->addPrimitiveVariable( "uv", IECore::PrimitiveVariable( IECore::PrimitiveVariable::FaceVarying, uvData ) );
-			}
-			else
-			{
-				IECore::msg( IECore::Msg::Warning, "ToGLMeshConverter", "If specified, primitive variable \"uv\" must be of type V2fVectorData." );
-			}
-		}
-		else if( pIt->second.data )
+		if( pIt->second.data )
 		{
 			glMesh->addPrimitiveVariable( pIt->first, pIt->second );
 		}
