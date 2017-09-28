@@ -55,11 +55,11 @@ class classVectorParameterTest( IECore.Op ) :
 				searchPathEnvVar = "IECORE_OP_PATHS",
 			)
 		)
-		
+
 		self.parameters().userData()["UI"] = IECore.CompoundObject()
 		self.parameters().userData()["UI"]["aeCollapsed"] = IECore.BoolData( False )
 		self.parameters().userData()["whatever"] = IECore.IntData( 1 )
-		
+
 	def doOperation( self, operands ) :
 
 		return IECore.IntData( 1 )

@@ -40,7 +40,7 @@ import maya.cmds
 import unittest
 
 class SceneShapeTest( IECoreMaya.TestCase ) :
-	
+
 	__testFile = "test/test.scc"
 	__testPlugFile = "test/testPlug.scc"
 	__testPlugAnimFile = "test/testPlugAnim.scc"
@@ -51,7 +51,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 	def writeSCC( self, file, rotation=IECore.V3d( 0, 0, 0 ), time=0 ) :
-		
+
 		scene = IECore.SceneCache( file, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str( 1 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
@@ -59,47 +59,47 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
-		
+
 		sc = sc.createChild( str( 2 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
-		
+
 		sc = sc.createChild( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
 		sc.writeObject( mesh, time )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		matrix = matrix.rotate( rotation )
 		sc.writeTransform( IECore.M44dData( matrix ), time )
-		
+
 		return scene
-	
+
 	def writeAnimSCC( self, file ) :
-		
+
 		scene = self.writeSCC( file )
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
 		sc3 = sc2.child( str( 3 ) )
 		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		
+
 		for time in [ 0.5, 1, 1.5, 2, 5, 10 ] :
-			
+
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 1, time, 0 ) )
 			sc1.writeTransform( IECore.M44dData( matrix ), time )
 
 			sc2.writeObject( mesh, time )
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 2, time, 0 ) )
 			sc2.writeTransform( IECore.M44dData( matrix ), time )
-			
+
 			matrix = IECore.M44d.createTranslated( IECore.V3d( 3, time, 0 ) )
 			sc3.writeTransform( IECore.M44dData( matrix ), time )
 
 		return scene
 
 	def writeAttributeSCC( self, file ) :
-		
+
 		scene = self.writeSCC( file )
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
@@ -107,18 +107,18 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		sc1.writeAttribute( "boolAttr", IECore.BoolData( True ), 0.0 )
 		sc1.writeAttribute( "floatAttr", IECore.FloatData( 5.20 ), 0.0 )
-		
+
 		sc2.writeAttribute( "boolAttr", IECore.BoolData( False ), 0.0 )
 		sc2.writeAttribute( "floatAttr", IECore.FloatData( 2.0 ), 0.0 )
 
 		sc3.writeAttribute( "intAttr", IECore.IntData( 12 ), 0.0 )
 		sc3.writeAttribute( "strAttr", IECore.StringData( "blah" ), 0.0 )
 		sc3.writeAttribute( "doubleAttr", IECore.DoubleData( 1.2 ), 0.0 )
-		
+
 		return scene
-	
+
 	def writeTagSCC( self, file ) :
-		
+
 		scene = self.writeSCC( file )
 		sc1 = scene.child( str( 1 ) )
 		sc2 = sc1.child( str( 2 ) )
@@ -127,51 +127,51 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		sc1.writeTags( [ "a" ] )
 		sc2.writeTags( [ "b" ] )
 		sc3.writeTags( [ "c" ] )
-		
+
 		return scene
-	
+
 	def testComputePlugs( self ) :
-			
+
 		self.writeSCC( file = SceneShapeTest.__testFile )
-		
+
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile,type='string' )
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), None)
-		
+
 		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
 		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
 		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), None)
-		
+
 		# Check only the plugs we trigger get computed
 		maya.cmds.getAttr( node+".outTransform[0].outTranslate" )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), [0])
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), None)
-		
+
 		maya.cmds.getAttr( node+".outTransform[2].outTranslate" )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), [0, 2])
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), None)
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), None)
-		
+
 		maya.cmds.getAttr( node+".outTransform[1].outTranslate" )
 		maya.cmds.getAttr( node+".outBound[1].outBoundCenter" )
-		
+
 		mesh = maya.cmds.createNode("mesh")
 		maya.cmds.connectAttr( node+'.outObjects[2]', mesh+".inMesh" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), [0, 1, 2])
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), [1])
 		self.assertEqual( maya.cmds.getAttr( node+".outObjects", mi=True ), [2])
-		
+
 		maya.cmds.setAttr( node+".queryPaths[3]", "/", type="string");
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform", mi=True ), [0, 1, 2])
 		self.assertEqual( maya.cmds.getAttr( node+".outBound", mi=True ), [1])
@@ -179,7 +179,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 
 	def testPlugValues( self ) :
-		
+
 		self.writeSCC( file=SceneShapeTest.__testPlugFile, rotation = IECore.V3d( 0, 0, IECore.degreesToRadians( -30 ) ) )
 		maya.cmds.file( new=True, f=True )
 
@@ -198,7 +198,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateX"), 2.732050895 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateY"), -1.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateZ"), 0.0 )
@@ -206,7 +206,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateZ")), -60.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateX"), 4.232050895 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateY"), -3.598076105 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateZ"), 0.0 )
@@ -222,13 +222,13 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate"), [(2.0, 0.0, 0.0)] )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateX"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(3.0, 0.0, 0.0)] )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateX"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateY"), 0.0 )
@@ -237,11 +237,11 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 
 		# Change the root path
 		maya.cmds.setAttr( node+'.root', "/1",type='string' )
-		
+
 		maya.cmds.setAttr( node+".queryPaths[0]", "/", type="string")
 		maya.cmds.setAttr( node+".queryPaths[1]", "/2", type="string")
 		maya.cmds.setAttr( node+".queryPaths[2]", "/2/3", type="string")
-		
+
 		# World space
 		maya.cmds.setAttr( node+".querySpace", 0)
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outTranslate"), [(0.0, 0.0, 0.0)] )
@@ -249,7 +249,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateZ")), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateX"), 2.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateY"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate.outTranslateZ"), 0.0 )
@@ -257,7 +257,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateX"), 4.5980763 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateY"), -1.5 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate.outTranslateZ"), 0.0 )
@@ -273,25 +273,25 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[0].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[0].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outTranslate"), [(2.0, 0.0, 0.0)] )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateX"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[1].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(3.0, 0.0, 0.0)] )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateX"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateY"), 0.0 )
 		self.assertEqual( round(maya.cmds.getAttr( node+".outTransform[2].outRotate.outRotateZ")), -30.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		maya.cmds.setAttr( node+'.time', 5 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 5 )
-		
-		
+
+
 	def testAnimPlugValues( self ) :
-		
+
 		self.writeAnimSCC( file=SceneShapeTest.__testPlugAnimFile )
 
 		maya.cmds.file( new=True, f=True )
@@ -300,7 +300,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAnimFile,type='string' )
 
 		maya.cmds.setAttr( node+'.root',"/",type='string' )
-		
+
 		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
 		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
 		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
@@ -325,7 +325,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		maya.cmds.currentTime( 48 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 48 )
 
@@ -340,13 +340,13 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(6.0, 6.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateX"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		maya.cmds.currentTime( 60 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 60 )
 
@@ -361,13 +361,13 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(6.0, 7.5, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateX"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		maya.cmds.currentTime( 0 )
 		maya.cmds.setAttr( node+".querySpace", 1)
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 0 )
@@ -383,13 +383,13 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(3.0, 0.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateX"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		maya.cmds.currentTime( 48 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTime" ), 48 )
 
@@ -404,26 +404,26 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[1].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[1].outScale"), [(1.0, 1.0, 1.0)] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outTranslate"), [(3.0, 2.0, 0.0)] )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateX"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateY"), 0.0 )
 		self.assertAlmostEqual( maya.cmds.getAttr( node+".outTransform[2].outRotateZ"), 0.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".outTransform[2].outScale"), [(1.0, 1.0, 1.0)] )
-	
-	
+
+
 	def testqueryAttributes( self ) :
-		
+
 		self.writeAttributeSCC( file=SceneShapeTest.__testPlugAttrFile )
 
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testPlugAttrFile,type='string' )
-		
+
 		maya.cmds.setAttr( node+".queryPaths[0]", "/1", type="string")
 		maya.cmds.setAttr( node+".queryPaths[1]", "/1/2", type="string")
 		maya.cmds.setAttr( node+".queryPaths[2]", "/1/2/3", type="string")
-		
+
 		maya.cmds.setAttr( node+".queryAttributes[0]", "boolAttr", type="string")
 		maya.cmds.setAttr( node+".queryAttributes[1]", "floatAttr", type="string")
 		maya.cmds.setAttr( node+".queryAttributes[2]", "intAttr", type="string")
@@ -437,14 +437,14 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[3]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[4]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[0].attributeValues[5]" ), None )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[0]" ), False )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[1]" ), 2.0 )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[2]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[3]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[4]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[1].attributeValues[5]" ), None )
-		
+
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[0]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[1]" ), None )
 		self.assertEqual( maya.cmds.getAttr( node+".attributes[2].attributeValues[2]" ), 12 )
@@ -453,22 +453,22 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( round(maya.cmds.getAttr( node+".attributes[2].attributeValues[5]" ), 6), 1.2 )
 
 	def testTags( self ) :
-		
+
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
-		
+
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
-		
+
 		scene = IECoreMaya.LiveScene().child( transform )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
-		
+
 		# double expanding because the first level has all the same tags
 		childFn = fn.expandOnce()[0].expandOnce()[0]
 		scene = childFn.sceneInterface()
@@ -477,7 +477,7 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
-		
+
 		childFn = childFn.expandOnce()[0]
 		scene = childFn.sceneInterface()
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.DescendantTag|IECore.SceneInterface.TagFilter.LocalTag ) ]), [ "ObjectType:MeshPrimitive", "c" ] )
@@ -485,36 +485,36 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
-	
+
 	def testLiveSceneTags( self ) :
-		
+
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
-		
+
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
-		
+
 		scene = IECoreMaya.LiveScene().child( transform )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
-		
+
 		# expand once:
 		child1Fn = fn.expandOnce()[0]
 		child1 = scene.child("sceneShape_1")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		self.assertEqual( sorted([ str(x) for x in child1.readTags() ]), ["ObjectType:MeshPrimitive","a"] )
-		
+
 		child2Fn = child1Fn.expandOnce()[0]
 		child2 = child1.child("sceneShape_2")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		self.assertEqual( sorted([ str(x) for x in child1.readTags() ]), ["ObjectType:MeshPrimitive","a"] )
 		self.assertEqual( sorted([ str(x) for x in child2.readTags() ]), ["ObjectType:MeshPrimitive","b"] )
-		
+
 		child3Fn = child2Fn.expandOnce()[0]
 		child3 = child2.child("sceneShape_3")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
@@ -523,34 +523,34 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( sorted([ str(x) for x in child3.readTags() ]), ["ObjectType:MeshPrimitive","c"] )
 
 	def testLinkedLiveSceneTags( self ) :
-		
+
 		self.writeTagSCC( file=SceneShapeTest.__testFile )
-		
+
 		maya.cmds.file( new=True, f=True )
 		node = maya.cmds.createNode( 'ieSceneShape' )
 		fn = IECoreMaya.FnSceneShape( node )
 		transform = str(maya.cmds.listRelatives( node, parent=True )[0])
 		maya.cmds.setAttr( node+'.file', SceneShapeTest.__testFile, type='string' )
-		
+
 		scene = IECore.LinkedScene( IECoreMaya.LiveScene() ).child( transform )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags( IECore.SceneInterface.TagFilter.EveryTag ) ]), [ "ObjectType:MeshPrimitive", "a", "b", "c", "top" ] )
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		for tag in scene.readTags(IECore.SceneInterface.TagFilter.EveryTag) :
 			self.assertTrue( scene.hasTag( tag, IECore.SceneInterface.TagFilter.EveryTag ) )
 		self.assertFalse( scene.hasTag( "fakeTag", IECore.SceneInterface.TagFilter.EveryTag ) )
-		
+
 		# expand once:
 		child1Fn = fn.expandOnce()[0]
 		child1 = scene.child("sceneShape_1")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		self.assertEqual( sorted([ str(x) for x in child1.readTags() ]), ["ObjectType:MeshPrimitive","a"] )
-		
+
 		child2Fn = child1Fn.expandOnce()[0]
 		child2 = child1.child("sceneShape_2")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
 		self.assertEqual( sorted([ str(x) for x in child1.readTags() ]), ["ObjectType:MeshPrimitive","a"] )
 		self.assertEqual( sorted([ str(x) for x in child2.readTags() ]), ["ObjectType:MeshPrimitive","b"] )
-		
+
 		child3Fn = child2Fn.expandOnce()[0]
 		child3 = child2.child("sceneShape_3")
 		self.assertEqual( sorted([ str(x) for x in scene.readTags() ]), ["top"] )
@@ -558,14 +558,14 @@ class SceneShapeTest( IECoreMaya.TestCase ) :
 		self.assertEqual( sorted([ str(x) for x in child2.readTags() ]), ["ObjectType:MeshPrimitive","b"] )
 		self.assertEqual( sorted([ str(x) for x in child3.readTags() ]), ["ObjectType:MeshPrimitive","c"] )
 
-	
+
 	def tearDown( self ) :
-		
+
 		for f in [ SceneShapeTest.__testFile, SceneShapeTest.__testPlugFile, SceneShapeTest.__testPlugAnimFile, SceneShapeTest.__testPlugAttrFile ] :
 			if os.path.exists( f ) :
 				os.remove( f )
 
-			
+
 
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

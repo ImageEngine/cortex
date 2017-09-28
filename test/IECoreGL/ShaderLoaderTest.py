@@ -73,35 +73,35 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, l.load, "failWithoutPreprocessing" )
 
 	def testPreprocessingAllowsVersionAndExtension( self ) :
-	
+
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 		l = IECoreGL.ShaderLoader( sp, psp )
 
 		l.load( "versionAndExtension" )
-		
+
 	def testPreprocessingThrowsOnBadDirective( self ) :
-	
+
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 		l = IECoreGL.ShaderLoader( sp, psp )
 
-		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )	
-	
+		self.assertRaises( RuntimeError, l.load, "badPreprocessingDirective" )
+
 	def testLoadSourceMessagesAndCaching( self ) :
-	
+
 		sp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders", ":" )
 		psp = IECore.SearchPath( os.path.dirname( __file__ ) + "/shaders/include", ":" )
 		l = IECoreGL.ShaderLoader( sp, psp )
-		
+
 		with IECore.CapturingMessageHandler() as mh :
-		
+
 			source = l.loadSource( "thisShaderDoesntExist" )
 			self.assertEqual( source, ( "", "", "" ) )
-			
+
 			source = l.loadSource( "thisShaderDoesntExist" )
 			self.assertEqual( source, ( "", "", "" ) )
-			
+
 		# we don't want messages over and over for repeated failures to
 		# load.
 		self.assertEqual( len( mh.messages ), 1 )
@@ -143,6 +143,6 @@ class ShaderLoaderTest( unittest.TestCase ) :
 		s3 = l.load( "testShader" )
 		self.assert_( not s.isSame( s3 ) )
 
-		
+
 if __name__ == "__main__":
     unittest.main()

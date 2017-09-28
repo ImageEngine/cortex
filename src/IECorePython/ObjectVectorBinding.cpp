@@ -82,14 +82,14 @@ static std::string repr( ObjectVector &o )
 	if( o.members().size() )
 	{
 		s << " [ ";
-	
+
 		for( size_t i = 0, e = o.members().size(); i < e; i++ )
 		{
 			object item( o.members()[i] );
 			std::string v = call_method< std::string >( item.ptr(), "__repr__" );
 			s << v << ", ";
 		}
-	
+
 		s << "] ";
 	}
 
@@ -141,7 +141,7 @@ static void remove( ObjectVector &o, ObjectPtr value )
 		PyErr_SetString( PyExc_ValueError, "Value not in ObjectVector" );
 		throw_error_already_set();
 	}
-	o.members().erase( it );	
+	o.members().erase( it );
 }
 
 static size_t index( ObjectVector &o, ObjectPtr value )

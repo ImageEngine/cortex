@@ -207,7 +207,7 @@ class SplineTest( unittest.TestCase ) :
 		self.assert_( t2 < t )
 
 	def testIntegral( self ) :
-	
+
 		def computeIntegrals( s, interval = None ):
 
 			if interval:

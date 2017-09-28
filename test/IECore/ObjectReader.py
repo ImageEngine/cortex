@@ -58,15 +58,15 @@ class TestObjectReader( unittest.TestCase ) :
 		self.assertEqual( c["melon"].value, 2.5)
 
 	def testSlashInKey( self ) :
-		
+
 		c = IECore.CompoundData( { "a/b" : IECore.StringData( "test" ) } )
 		IECore.ObjectWriter( c, "test/compoundData.cob" ).write()
 		c2 = IECore.ObjectReader( "test/compoundData.cob" ).read()
-		
+
 		self.assertEqual( c, c2 )
-	
+
 	def tearDown( self ) :
-		
+
 		for f in ( "test/compoundData.cob" ) :
 			if os.path.isfile( f ) :
 				os.remove( f )

@@ -85,7 +85,7 @@ class ProceduralPrimitive : public VRAY_Procedural
 		virtual void render();
 		// cortex types interface
 		virtual void addVisibleRenderable ( IECore::VisibleRenderablePtr renderable );
-		
+
         // mantra data for procedurals
 		Imath::Box3f m_bound;
 #if UT_MAJOR_VERSION_INT >= 16
@@ -98,7 +98,7 @@ class ProceduralPrimitive : public VRAY_Procedural
 		fpreal m_preBlur, m_postBlur;
 #endif
 		static const UT_StringHolder ieProceduralName;
-	
+
     private:
 		void applySettings(VRAY_ProceduralChildPtr child);
 		// cortex data
@@ -107,7 +107,7 @@ class ProceduralPrimitive : public VRAY_Procedural
 
         friend class IECoreMantra::RendererImplementation;
 };
-		
+
 } // end namespace
 
 #endif // IECOREMANTRA_PROCEDURALPRIMITIVE_H

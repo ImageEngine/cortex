@@ -43,8 +43,8 @@
 namespace IECore
 {
 
-/// LRUCache for generic computation that results on Object derived classes. It uses ObjectPool for the storage and retrieval of 
-/// the computation results, and internally it only holds a map of computationHash to objectHash. The get functions will return the resulting 
+/// LRUCache for generic computation that results on Object derived classes. It uses ObjectPool for the storage and retrieval of
+/// the computation results, and internally it only holds a map of computationHash to objectHash. The get functions will return the resulting
 /// Object, which should be copied prior to modification. The retrieve function will only query the cache and not force computation.
 template< typename T >
 class ComputationCache : public RefCounted
@@ -88,7 +88,7 @@ class ComputationCache : public RefCounted
 			ComputeIfMissing
 		} MissingBehaviour;
 
-		/// Returns the computation results if available on the cache, otherwise behaves 
+		/// Returns the computation results if available on the cache, otherwise behaves
 		/// according to the missingBehavior parameter explained below:
 		/// ThrowIfMissing: Throws an Exception.
 		/// NullIfMissing: Returns NULL pointer.

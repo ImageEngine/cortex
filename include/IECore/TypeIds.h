@@ -471,7 +471,7 @@ enum TypeId
 
 	FirstGafferTypeId = 110000,
 	LastGafferTypeId = 110999,
-	
+
 	FirstCoreHoudiniTypeId = 111000,
 	LastCoreHoudiniTypeId = 111999,
 
@@ -480,7 +480,7 @@ enum TypeId
 
 	FirstCoreMantraTypeId = 113000,
 	LastCoreMantraTypeId = 113999,
-	
+
 	FirstCoreArnoldTypeId = 114000,
 	LastCoreArnoldTypeId = 114999,
 

@@ -64,7 +64,7 @@ FrameBuffer::ScopedBinding::ScopedBinding( const FrameBuffer &frameBuffer, GLenu
 		default :
 			throw IECore::Exception( "IECoreGL::FrameBuffer::ScopedBinding : Unknown target type" );
 	}
-	
+
 	glBindFramebuffer( m_target, frameBuffer.m_frameBuffer );
 }
 
@@ -110,12 +110,12 @@ unsigned int FrameBuffer::maxColors()
 }
 
 void FrameBuffer::setColor( TexturePtr texture, unsigned int index )
-{	
+{
 	if( index >= maxColors() )
 	{
 		throw IECore::Exception( "Attachment index exceeds GL_MAX_COLOR_ATTACHMENTS." );
 	}
-	
+
 	ScopedBinding binding( *this );
 
 	glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_TEXTURE_2D, texture->m_texture, 0 );
@@ -162,7 +162,7 @@ ConstDepthTexturePtr FrameBuffer::getDepth() const
 void FrameBuffer::validate() const
 {
 	ScopedBinding binding( *this );
-	
+
 	GLenum status;
 	status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
 

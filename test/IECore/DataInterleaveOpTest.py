@@ -41,125 +41,125 @@ class DataInterleaveOpTest( unittest.TestCase ) :
 	def test( self ) :
 
 		i = IECore.ObjectVector(
-			
+
 			[
 				IECore.IntVectorData( [ 1, 2, 3 ] ),
 				IECore.IntVectorData( [ 11, 12, 13 ] ),
 				IECore.IntVectorData( [ 21, 22, 23 ] ),
 			]
-			
+
 		)
-		
-		o = IECore.DataInterleaveOp()( 
-		
+
+		o = IECore.DataInterleaveOp()(
+
 			data = i,
 			targetType = IECore.IntVectorData.staticTypeId()
-		
+
 		)
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.IntVectorData( [
 				1, 11, 21,
 				2, 12, 22,
 				3, 13, 23,
 			] )
-			
+
 		)
-	
+
 	def testDataScaling( self ) :
-	
-		i = IECore.ObjectVector( 
-		
+
+		i = IECore.ObjectVector(
+
 			[
 				IECore.FloatVectorData( [ 0 ] ),
 				IECore.FloatVectorData( [ 0.5 ] ),
 				IECore.FloatVectorData( [ 1 ] ),
 			]
-			
+
 		)
-		
-		o = IECore.DataInterleaveOp()( 
-		
+
+		o = IECore.DataInterleaveOp()(
+
 			data = i,
 			targetType = IECore.UCharVectorData.staticTypeId()
-		
+
 		)
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.UCharVectorData( [ 0, 128, 255 ] )
-			
+
 		)
-	
+
 	def testMismatchedInputLengths( self ) :
-	
+
 		i = IECore.ObjectVector(
-			
+
 			[
 				IECore.IntVectorData( [ 1, 2, 3 ] ),
 				IECore.IntVectorData( [ 11, 12, 13 ] ),
 				IECore.IntVectorData( [ 21, 23 ] ),
 			]
-			
+
 		)
-	
+
 		o = IECore.DataInterleaveOp()
 		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.IntVectorData.staticTypeId() )
-		
+
 	def testBadTargetTypes( self ) :
-	
+
 		i = IECore.ObjectVector(
-			
+
 			[
 				IECore.IntVectorData( [ 1, 2, 3 ] ),
 				IECore.IntVectorData( [ 11, 12, 13 ] ),
 				IECore.IntVectorData( [ 21, 22, 23 ] ),
 			]
-			
+
 		)
-	
+
 		o = IECore.DataInterleaveOp()
-	
+
 		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.MeshPrimitive.staticTypeId() )
 		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.StringVectorData.staticTypeId() )
-	
+
 	def testInterleaveIntoV3( self ) :
-	
+
 		i = IECore.ObjectVector(
-			
+
 			[
 				IECore.IntVectorData( [ 1, 2 ] ),
 				IECore.IntVectorData( [ 11, 12 ] ),
 				IECore.IntVectorData( [ 21, 22 ] ),
 			]
-			
+
 		)
-	
+
 		o = IECore.DataInterleaveOp()( data=i, targetType = IECore.V3iVectorData.staticTypeId() )
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.V3iVectorData( [ IECore.V3i( 1, 11, 21 ), IECore.V3i( 2, 12, 22 ), ] )
-		
+
 		)
-	
+
 	def testWrongDataForV3( self ) :
-	
+
 		i = IECore.ObjectVector(
-			
+
 			[
 				IECore.IntVectorData( [ 1, 2, 3 ] ),
 				IECore.IntVectorData( [ 11, 12, 13 ] ),
 			]
-			
+
 		)
-		
+
 		o = IECore.DataInterleaveOp()
 		self.assertRaises( RuntimeError, o, data=i, targetType = IECore.V3iVectorData.staticTypeId() )
-	
+
 if __name__ == "__main__":
     unittest.main()

@@ -44,7 +44,7 @@ class DirNameParameterUI( IECoreMaya.PathParameterUI ) :
 		IECoreMaya.PathParameterUI.__init__( self, node, parameter, **kw )
 
 	def _fileDialog( self ) :
-		
+
 		IECoreMaya.PathParameterUI._fileDialog( self,
 			filter = IECoreMaya.FileBrowser.DirectoriesOnlyFilter().filter,
 		)

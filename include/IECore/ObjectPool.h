@@ -53,9 +53,9 @@ IE_CORE_FORWARDDECLARE( ObjectPool );
 /// ObjectPool::defaultObjectPool() for more information.
 
 /// The ObjectPool class implements a cache of Object instances indexed by their own hash and limited by the memory consumption.
-/// The function defaultObjectPool() returns a singleton object that should be used by most of the operations, 
-/// so there will be one single place where the total memory used by IECore objects is defined. 
-/// 
+/// The function defaultObjectPool() returns a singleton object that should be used by most of the operations,
+/// so there will be one single place where the total memory used by IECore objects is defined.
+///
 /// \ingroup utilityGroup
 class IECORE_API ObjectPool : public RefCounted
 {
@@ -95,18 +95,18 @@ class IECORE_API ObjectPool : public RefCounted
 			StoreReference,
 		};
 
-		/// Stores a reference to the object or a copy to the object in the pool, depending on the storeMode parameter. 
+		/// Stores a reference to the object or a copy to the object in the pool, depending on the storeMode parameter.
 		/// If the object passed is already in the pool, than this function will have no effect and will return the stored object instead.
-		/// If the storeMode is Reference, then the object should not be modified after the call to this function to 
+		/// If the storeMode is Reference, then the object should not be modified after the call to this function to
 		/// prevent affecting the contents of the pool and it's memoryUsage count.
 		ConstObjectPtr store( const Object *obj, StoreMode mode );
 
 		/// Returns a static ObjectPool instance to be used by anything
-		/// wishing to share IECore::Object instances. 
+		/// wishing to share IECore::Object instances.
 		/// It makes sense to use this wherever possible to conserve memory. This initially
 		/// has a memory limit specified in megabytes by the IECORE_OBJECTPOOL_MEMORY
-		/// environment variable. If it needs changing it's recommended to do 
-		/// that from a config file loaded by the ConfigLoader, to avoid multiple 
+		/// environment variable. If it needs changing it's recommended to do
+		/// that from a config file loaded by the ConfigLoader, to avoid multiple
 		/// clients fighting over the same set of settings.
 		static ObjectPool *defaultObjectPool();
 

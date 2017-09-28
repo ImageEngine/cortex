@@ -45,45 +45,45 @@ class CoshaderTest( IECoreRI.TestCase ) :
 	def testRendererSupport( self ) :
 
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/coshaderTest.sdl test/IECoreRI/shaders/coshaderTest.sl" ), 0 )
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCoshader.rib" )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.shader( "shader", "test/IECoreRI/shaders/coshaderTest", { "f" : 1.0, "s" : "hello", "__handle" : "h" } )
 
 		r = "".join( file( "test/IECoreRI/output/testCoshader.rib" ).readlines() )
-				
+
 		self.failUnless( 'Shader "test/IECoreRI/shaders/coshaderTest" "h"' in r )
 		self.failUnless( '"string s" [ "hello" ]' in r )
 		self.failUnless( '"float f" [ 1 ]' in r )
 		self.failIf( "__handle" in r )
 
 	def testSLOReaderSupport( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/coshaderTest.sdl test/IECoreRI/shaders/coshaderTest.sl" ), 0 )
-		
+
 		s = IECoreRI.SLOReader( "test/IECoreRI/shaders/coshaderTest.sdl" ).read()
-		
+
 		# old versions of 3delight reported the type as <unknown> (which we don't really want) but
 		# new versions report it correctly as "shader".
 		self.failUnless( s.type == "<unknown>" or s.type == "shader" )
-	
+
 		k = s.parameters.keys()
 		self.assertEqual( len( k ), 2 )
 		self.failUnless( "f" in k )
 		self.failUnless( "s" in k )
-		
+
 	def tearDown( self ) :
-		
+
 		IECoreRI.TestCase.tearDown( self )
-		
+
 		for f in [
 			"test/IECoreRI/shaders/coshaderTest.sdl",
 		] :
-		
+
 			if os.path.exists( f ) :
 				os.remove( f )
-		
+
 if __name__ == "__main__":
     unittest.main()

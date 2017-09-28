@@ -99,15 +99,15 @@ class TestTransform( unittest.TestCase ) :
 		mmm = Reader.create( "test/motionTransform.cob" ).read()
 
 		self.assertEqual( mm, mmm )
-		
+
 	def testHash( self ) :
-	
+
 		t = MatrixTransform( M44f() )
 		self.assertEqual( t.hash(), MatrixTransform( M44f() ).hash() )
 
 		t2 = MatrixTransform( M44f.createTranslated( V3f( 1 ) ) )
 		self.assertNotEqual( t.hash(), t2.hash() )
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/motionTransform.cob"):

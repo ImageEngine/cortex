@@ -57,7 +57,7 @@ class ToHoudiniAttribConverter : public ToHoudiniConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniAttribConverter, ToHoudiniAttribConverterTypeId, ToHoudiniConverter );
-		
+
 		/// Converts the IECore::Data into a GB_Attribute on the given GU_Detail and returns the
 		/// associated GA_RWAttributeRef. It is assumed that the user has aquired the write lock
 		/// for the given GU_Detail.
@@ -71,13 +71,13 @@ class ToHoudiniAttribConverter : public ToHoudiniConverter
 	protected :
 
 		ToHoudiniAttribConverter( const IECore::Data *data, const std::string &description );
-		
+
 		virtual ~ToHoudiniAttribConverter();
-		
+
 		/// Must be implemented by derived classes to create a GB_Attribute on the given GU_Detail and fill it with the IECore::Data
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const = 0;
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const = 0;
-		
+
 		typedef ToHoudiniAttribConverterPtr (*CreatorFn)( const IECore::Data *data );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );
@@ -92,9 +92,9 @@ class ToHoudiniAttribConverter : public ToHoudiniConverter
 			private :
 				static ToHoudiniAttribConverterPtr creator( const IECore::Data *data );
 		};
-		
+
 	private :
-			
+
 		/// Struct for maintaining the registered derived classes
 		struct Types
 		{

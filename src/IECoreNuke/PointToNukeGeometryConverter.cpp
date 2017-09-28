@@ -83,7 +83,7 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 			N->normal(p) = IECore::convert< Vector3, Imath::V3f >( *nIt );
 		}
 	}
-	// get width 
+	// get width
 	const FloatData *constWidth = points->variableData< FloatData >( "constantwidth", PrimitiveVariable::Constant );
 	const FloatVectorData *width = points->variableData< FloatVectorData >( "width", PrimitiveVariable::Vertex );
 	Attribute* size = to.writable_attribute( objIndex, Group_Points, "size", FLOAT_ATTRIB );
@@ -112,7 +112,7 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 		{
 			size->flt(v) = 0.1;
 		}
-	
+
 	}
 
 	// get uvs
@@ -147,7 +147,7 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 		}
 	}
 
-	Attribute *Cf = to.writable_attribute( objIndex, Group_Vertices, "Cf", VECTOR4_ATTRIB );	
+	Attribute *Cf = to.writable_attribute( objIndex, Group_Vertices, "Cf", VECTOR4_ATTRIB );
 	v = 0;
 	// get colours
 	const Color3fVectorData *pointColours = points->variableData< Color3fVectorData >( "Cs", PrimitiveVariable::Vertex );
@@ -164,6 +164,6 @@ void PointToNukeGeometryConverter::doConversion( const IECore::Object *from, Geo
 		{
 			Cf->vector4( v ).set(1, 1, 1, 1);
 		}
-		
+
 	}
 }

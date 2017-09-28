@@ -83,7 +83,7 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 0 ) ) )
 		r.setOption( "shutter", V2fData( V2f( 1, 2 ) ) )
 		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 1, 2 ) ) )
-		
+
 		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( False ) )
 		r.setOption( "gl:drawCoordinateSystems", BoolData( True ) )
 		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( True ) )
@@ -121,10 +121,10 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( True ) )
 			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( True ) )
 			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( False ) )
-			
+
 			self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( "always" ) )
 			self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( 0.0 ) )
-			
+
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( True ) )
 
 			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
@@ -187,16 +187,16 @@ class TestRenderer( unittest.TestCase ) :
 			if withFreeType() :
 				r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
 				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
-				
+
 			r.setAttribute( "gl:depthTest", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )	
-			
+			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )
+
 			r.setAttribute( "gl:depthMask", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( False ) )	
+			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( False ) )
 
 			r.setAttribute( "gl:alphaTest", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( True ) )	
-			
+			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( True ) )
+
 			alphaTestModes = [ "never", "less", "equal", "lequal", "greater", "notequal", "gequal", "always" ]
 			value = 0.1
 			for m in alphaTestModes :
@@ -204,14 +204,14 @@ class TestRenderer( unittest.TestCase ) :
 				r.setAttribute( "gl:alphaTest:mode", StringData( m ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( m ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), last )
-				
+
 				last = r.getAttribute( "gl:alphaTest:mode" )
 				r.setAttribute( "gl:alphaTest:value", FloatData( value ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( value ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), last )
-				
+
 				value += 0.05
-			
+
 			r.setAttribute( "gl:visibility:camera", BoolData( False ) )
 			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( False ) )
 
@@ -223,7 +223,7 @@ class TestRenderer( unittest.TestCase ) :
 			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
 
 			r.worldEnd()
-		
+
 	def testOtherRendererAttributes( self ) :
 
 		"""Attributes destined for other renderers should be silently ignored."""
@@ -409,45 +409,45 @@ class TestRenderer( unittest.TestCase ) :
 		for c in g.children():
 			count += self.__countChildrenRecursive( c )
 		return count
-		
+
 	def testEdits( self ):
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
-		
+
 		r.worldBegin()
 		r.worldEnd()
-		
+
 		with CapturingMessageHandler() as handler :
-		
+
 			r.attributeBegin()
 			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
 			r.attributeEnd()
-		
+
 		self.assertEqual( len( handler.messages ), 3 )
-		
+
 		with CapturingMessageHandler() as handler :
-		
+
 			r.command( "editBegin", {} )
 			r.attributeBegin()
 			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
 			r.attributeEnd()
 			r.command( "editEnd", {} )
-		
+
 		self.assertEqual( len( handler.messages ), 0 )
-			
+
 	def testRemoveObject( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		with WorldBlock( r ) :
-		
+
 			r.setAttribute( "name", "sphereOne" )
-		
+
 			r.sphere( 1, -1, 1, 360, {} )
 
 			r.setAttribute( "name", "sphereTwo" )
-		
+
 			r.sphere( 1, -1, 1, 360, {} )
 
 			with AttributeBlock( r ) :
@@ -455,30 +455,30 @@ class TestRenderer( unittest.TestCase ) :
 				r.sphere( 1, -1, 1, 360, {} )
 
 				r.setAttribute( "name", "sphereOne" )
-		
+
 				r.sphere( 1, -1, 1, 360, {} )
 				r.sphere( 1, -1, 1, 360, {} )
 				r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
 		self.assertEqual( len( s.root().children() ), 3 )
-		
+
 		# check that trying to remove objects when not in an editBegin/editEnd block
 		# fails and prints a message
-		
+
 		errorCatcher = CapturingMessageHandler()
 		with errorCatcher :
 			commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
-			
+
 		self.assertEqual( commandResult, None )
 		self.assertEqual( len( errorCatcher.messages ), 1 )
-		
+
 		# check we can remove one object without affecting the other
-		
+
 		r.command( "editBegin", {} )
 		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 		r.command( "editEnd", {} )
-		
+
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 2 )
 		self.assertEqual( self.__countChildrenRecursive( s.root() ), 2 )
@@ -490,32 +490,32 @@ class TestRenderer( unittest.TestCase ) :
 
 		self.assertEqual( commandResult, BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 0 )
-		
+
 	def testEditQuery( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		with WorldBlock( r ) :
 			self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
-			
+
 		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
 		r.command( "editBegin", {} )
 		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( True ) )
 		r.command( "editEnd", {} )
 		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
-		
+
 	def testRemoveObjectDuringProcedural( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		with WorldBlock( r ) :
-		
+
 			r.setAttribute( "name", "sphereOne" )
-		
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 			r.setAttribute( "name", "sphereTwo" )
-		
+
 			r.sphere( 1, -1, 1, 360, {} )
 
 		s = r.scene()
@@ -540,21 +540,21 @@ class TestRenderer( unittest.TestCase ) :
 		r.command( "editBegin", {} )
 		r.procedural( RemovalProcedural() )
 		r.command( "editEnd", {} )
-		
+
 		self.assertEqual( len( s.root().children() ), 1 )
 		self.assertEqual( self.__countChildrenRecursive( r.scene().root() ), 1 )
-		
+
 	def testRemoveObjectWithResourcesDuringProcedural( self ) :
-	
+
 		r = Renderer()
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		with WorldBlock( r ) :
-		
+
 			with AttributeBlock( r ) :
-				
+
 				r.setAttribute( "name", "sphereOne" )
-		
+
 				r.shader( "surface", "image", {
 					"texture" : IECore.SplinefColor3fData(
 						IECore.SplinefColor3f(
@@ -568,9 +568,9 @@ class TestRenderer( unittest.TestCase ) :
 						),
 					),
 				} )
-		
+
 				r.sphere( 1, -1, 1, 360, {} )
-			
+
 		s = r.scene()
 		self.assertEqual( len( s.root().children()[0].children() ), 1 )
 
@@ -579,25 +579,25 @@ class TestRenderer( unittest.TestCase ) :
 		class RemovalProcedural( Renderer.Procedural ):
 
 			def __init__( proc, level=0 ) :
-			
+
 				Renderer.Procedural.__init__( proc )
 
 			def bound( proc ) :
-			
+
 				return Box3f( V3f( -1 ), V3f( 1 ) )
 
 			def render( proc, renderer ):
 
 				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
 				self.assertEqual( commandResult, BoolData( True ) )
-			
+
 			def hash( self ):
-			
+
 				h = IECore.MurmurHash()
 				return h
-		
+
 		r.command( "editBegin", {} )
-		
+
 		# typically you wouldn't call a renderer method on a separate thread like this. we're just
 		# doing it here to force the procedural onto a different thread. if left to its own devices
 		# the renderer will run procedurals on different threads, but it equally well might call
@@ -606,18 +606,18 @@ class TestRenderer( unittest.TestCase ) :
 		t = threading.Thread( target=IECore.curry( r.procedural, RemovalProcedural() ) )
 		t.start()
 		t.join()
-		
+
 		# if an edit session removes objects which use gl resources (shaders, textures etc),
 		# then it's essential that the editEnd call occurs on the thread with the correct gl context.
 		# this is so the gl resources can be deleted in the correct context.
 		r.command( "editEnd", {} )
-		
+
 		self.assertEqual( len( s.root().children() ), 0 )
 
 	def testParallelRenders( self ):
 
 		allScenes = []
-		
+
 		def threadedRendering():
 			r = Renderer()
 			r.setOption( "gl:mode", StringData( "deferred" ) )
@@ -678,12 +678,12 @@ class TestRenderer( unittest.TestCase ) :
 					renderer.transformEnd()
 				renderer.transformEnd()
 			renderer.attributeEnd()
-		
+
 		def hash( self ):
-		
+
 			h = IECore.MurmurHash()
 			return h
-		
+
 	class RecursiveParameterisedProcedural( ParameterisedProcedural ):
 
 		maxLevel = 5
@@ -749,7 +749,7 @@ class TestRenderer( unittest.TestCase ) :
 			newThread = threading.Thread(target=newRender)
 			newThread.start()
 			threads.append( newThread )
-		
+
 		for t in threads :
 			t.join()
 
@@ -777,7 +777,7 @@ class TestRenderer( unittest.TestCase ) :
 			p.render( r )
 
 		self.assertEqual( len( self.RecursiveParameterisedProcedural.threadsUsed ), 1 )
-		
+
 	def testObjectSpaceCulling( self ):
 
 		p = self.RecursiveProcedural()
@@ -884,11 +884,11 @@ class TestRenderer( unittest.TestCase ) :
 		r.transformEnd()
 		# confirms that transformEnd recovers the matrix.
 		self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
-		
+
 		r.worldEnd()
 
 	def testInstances(self):
-		
+
 		r = Renderer()
 		r.instanceBegin( "instanceA", {} )
 		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
@@ -922,7 +922,7 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( self.__countChildrenRecursive( g ), 12 )
 		self.assert_( g.bound().min.equalWithAbsError( V3f( -1, 4, 9 ), 0.001 ) )
 		self.assert_( g.bound().max.equalWithAbsError( V3f( 4, 11, 31 ), 0.001 ) )
-	
+
 	def testCuriousCrashOnThreadedProceduralsAndAttribute( self ):
 
 		myMesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
@@ -942,11 +942,11 @@ class TestRenderer( unittest.TestCase ) :
 					g.addChild( myMesh )
 					g.addState( IECore.AttributeState( { "name" : StringData( str(self.__level) ) } ) )
 					g.render( renderer )
-			
+
 			def hash( self ):
 				h = IECore.MurmurHash()
 				return h
-			
+
 		r = Renderer()
 		r.setOption( "gl:mode", StringData( "deferred" ) )
 		r.worldBegin()
@@ -955,9 +955,9 @@ class TestRenderer( unittest.TestCase ) :
 		r.worldEnd()
 
 	def testDepthTest( self ) :
-	
+
 		def doTest( depthTest, r, g, b ) :
-		
+
 			renderer = Renderer()
 			renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 			renderer.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
@@ -992,18 +992,18 @@ class TestRenderer( unittest.TestCase ) :
 				self.assertEqual( p, g )
 			for p in i["B"] :
 				self.assertEqual( p, b )
-			
+
 		doTest( True, 1, 0, 0 )
 		doTest( False, 0, 1, 0 )
-		
+
 	def testCameraVisibility( self ) :
-	
+
 		def doRender( mode, visibility ) :
-	
+
 			r = Renderer()
 			r.setOption( "gl:mode", IECore.StringData( mode ) )
 			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
-		
+
 			r.camera( "main", {
 					"projection" : IECore.StringData( "perspective" ),
 					"projection:fov" : IECore.FloatData( 20 ),
@@ -1014,89 +1014,89 @@ class TestRenderer( unittest.TestCase ) :
 			)
 			if mode=="immediate" :
 				r.display( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif", "tif", "rgba", {} )
-		
+
 			with IECore.WorldBlock( r ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			
+
 				r.setAttribute( "gl:visibility:camera", IECore.BoolData( visibility ) )
-				r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } ) 
-			
+				r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
+
 			return r
-		
+
 		# test immediate renderer by checking images
-			
+
 		doRender( "immediate", True )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
 		self.failUnless( i["A"][256 * 128 + 128] > .99 )
-		
+
 		doRender( "immediate", False )
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif" ).read()
 		self.assertEqual( i["A"], IECore.FloatVectorData( [ 0 ] * 256 * 256 ) )
-		
+
 		# test deferred renderer by checking scene
-		
+
 		r = doRender( "deferred", True )
 		self.assertEqual(  len( r.scene().root().children()[0].children() ), 1 )
-		
+
 		r = doRender( "deferred", False )
 		self.assertEqual( len( r.scene().root().children() ), 0 )
-	
+
 	def testWarningMessages( self ):
 		r = Renderer()
-		
+
 		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		# gl renderer only supports "surface" shaders, so it should complain about this:
 		c = CapturingMessageHandler()
 		with c :
 			with IECore.WorldBlock( r ):
 				r.shader( "shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		
+
 		self.assertEqual( len( c.messages ), 1 )
 		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
-		
+
 		# it should just ignore this, because of the "ri:" prefix:
 		c = CapturingMessageHandler()
 		with c :
 			with IECore.WorldBlock( r ):
 				r.shader( "ri:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		
+
 		self.assertEqual( len( c.messages ), 0 )
-		
+
 		# this should work fine:
 		c = CapturingMessageHandler()
 		with c :
 			with IECore.WorldBlock( r ):
 				r.shader( "gl:surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		
+
 		self.assertEqual( len( c.messages ), 0 )
-		
-		
+
+
 		# it should just ignore this, because of the "lg:" prefix:
 		c = CapturingMessageHandler()
 		with c :
 			with IECore.WorldBlock( r ):
 				r.shader( "lg:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		
+
 		self.assertEqual( len( c.messages ), 0 )
-		
+
 		# this aint right!:
 		c = CapturingMessageHandler()
 		with c :
 			with IECore.WorldBlock( r ):
 				r.shader( "gl:nonsense", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		
+
 		self.assertEqual( len( c.messages ), 1 )
 		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
-	
+
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

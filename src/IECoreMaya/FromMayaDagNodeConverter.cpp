@@ -60,23 +60,23 @@ IECore::ObjectPtr FromMayaDagNodeConverter::doConversion( const MObject &object,
 
 FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &dagPath, IECore::TypeId resultType )
 {
-	
+
 	MayaType typeId( dagPath.apiType(), 0 );
-	
+
 	MPxNode* userNode = MFnDagNode( dagPath ).userNode();
 	if( userNode )
 	{
 		typeId.first = MFn::kInvalid;
 		typeId.second = userNode->typeId().id();
 	}
-	
+
 	const TypesToFnsMap &m = typesToFns();
 	TypesToFnsMap::const_iterator it = m.find( Types( typeId, resultType ) );
 	if( it!=m.end() )
 	{
 		return it->second( dagPath );
 	}
-	
+
 	// if not then see if the default converter is suitable
 	DefaultConvertersMap &dc = defaultConverters();
 	DefaultConvertersMap::const_iterator dcIt = dc.find( typeId );
@@ -87,7 +87,7 @@ FromMayaDagNodeConverterPtr FromMayaDagNodeConverter::create( const MDagPath &da
 			return dcIt->second->second( dagPath );
 		}
 	}
-	
+
 	return 0;
 }
 

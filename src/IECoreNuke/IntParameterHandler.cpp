@@ -48,16 +48,16 @@ IntParameterHandler::IntParameterHandler()
 		m_knob( 0 )
 {
 }
-		
+
 void IntParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const IntParameter *intParameter = static_cast<const IntParameter *>( parameter );
-	
+
 	if( f.makeKnobs() )
 	{
 		m_storage = intParameter->numericDefaultValue();
 	}
-		
+
 	std::string label = knobLabel( parameter );
 	DD::Image::IRange range( intParameter->minValue(), intParameter->maxValue() );
 	m_knob = Int_knob( f, &m_storage, range, knobName, label.c_str() );

@@ -67,14 +67,14 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 		IECore::msg( IECore::Msg::Warning, "ToMayaLocatorConverter::doConversion",  "The source object is not an IECore::CoordinateSystem." );
 		return false;
 	}
-	
+
 	// check if incoming object is a locator itself
 	MObject locatorObj;
 	if ( to.hasFn( MFn::kLocator ) )
 	{
 		locatorObj = to;
 	}
-	
+
 	// check if incoming object is a parent of an existing locator
 	if ( locatorObj.isNull() )
 	{
@@ -89,7 +89,7 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 			}
 		}
 	}
-	
+
 	// make a new locator and parent it to the incoming object
 	if ( locatorObj.isNull() )
 	{
@@ -98,7 +98,7 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 			IECore::msg( IECore::Msg::Warning, "ToMayaLocatorConverter::doConversion",  "Unable to create a locator as a child of the input object." );
 			return false;
 		}
-		
+
 		MDagModifier dagMod;
 		locatorObj = dagMod.createNode( "locator", to );
 		dagMod.renameNode( locatorObj, coordSys->getName().c_str() );
@@ -109,15 +109,15 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 			return false;
 		}
 	}
-	
+
 	if ( locatorObj.isNull() )
 	{
 		IECore::msg( IECore::Msg::Warning, "ToMayaLocatorConverter::doConversion",  "Unable to find or create a locator from the input object." );
 		return false;
 	}
-	
+
 	MFnDagNode fnLocator( locatorObj );
-	
+
 	Imath::M44f m;
 	const IECore::Transform* transform = coordSys->getTransform();
 	if( transform )

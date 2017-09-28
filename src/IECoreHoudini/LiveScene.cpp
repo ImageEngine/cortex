@@ -35,13 +35,13 @@
 #include "OpenEXR/ImathBoxAlgo.h"
 #include "OpenEXR/ImathMatrixAlgo.h"
 
-#include "OBJ/OBJ_Node.h" 
-#include "OP/OP_Director.h" 
-#include "OP/OP_Input.h" 
-#include "MGR/MGR_Node.h" 
-#include "MOT/MOT_Director.h" 
-#include "UT/UT_Version.h" 
-#include "UT/UT_WorkArgs.h" 
+#include "OBJ/OBJ_Node.h"
+#include "OP/OP_Director.h"
+#include "OP/OP_Input.h"
+#include "MGR/MGR_Node.h"
+#include "MOT/MOT_Director.h"
+#include "UT/UT_Version.h"
+#include "UT/UT_WorkArgs.h"
 
 #include "IECore/Group.h"
 #include "IECore/TransformationMatrixData.h"
@@ -72,7 +72,7 @@ LiveScene::LiveScene() : m_rootIndex( 0 ), m_contentIndex( 0 ), m_defaultTime( s
 {
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
 	motDirector->getObjectManager()->getFullPath( m_nodePath );
-	
+
 	Path contentPath, rootPath;
 	calculatePath( contentPath, rootPath );
 }
@@ -93,7 +93,7 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 {
 	m_nodePath = nodePath;
 	m_nodePath.hardenIfNeeded();
-	
+
 	if ( OP_Node *contentNode = locateContent( retrieveNode() ) )
 	{
 		if ( !m_splitter )
@@ -103,7 +103,7 @@ void LiveScene::constructCommon( const UT_String &nodePath, const Path &contentP
 			m_splitter = new DetailSplitter( handle );
 		}
 	}
-	
+
 	calculatePath( contentPath, rootPath );
 }
 
@@ -127,7 +127,7 @@ double LiveScene::adjustedDefaultTime() const
 	{
 		return adjustTime( CHgetEvalTime() );
 	}
-	
+
 	return adjustTime( m_defaultTime );
 }
 
@@ -152,7 +152,7 @@ SceneInterface::Name LiveScene::name() const
 	{
 		return SceneInterface::rootName;
 	}
-	
+
 	return *m_path.rbegin();
 }
 
@@ -169,17 +169,17 @@ void LiveScene::calculatePath( const Path &contentPath, const Path &rootPath )
 	{
 		return;
 	}
-	
+
 	UT_String tmp( m_nodePath );
 	UT_WorkArgs workArgs;
 	tmp.tokenize( workArgs, "/" );
-	
+
 	OP_Node *current = dynamic_cast<MOT_Director *>( OPgetDirector() )->getObjectManager();
 	// skipping the token for the OBJ manager
 	for ( int i = 1; i < workArgs.getArgc(); ++i )
 	{
 		current = current->getChild( workArgs[i] );
-		
+
 		/// recursively collect all input connections
 		OP_Node *parent = current->getInput( 0 );
 		UT_StringArray parentNames;
@@ -188,26 +188,26 @@ void LiveScene::calculatePath( const Path &contentPath, const Path &rootPath )
 			parentNames.append( parent->getName() );
 			parent = parent->getInput( 0 );
 		}
-		
+
 		// add them in reverse order
 		for ( int j = parentNames.entries() - 1; j >= 0; --j )
 		{
 			m_path.push_back( Name( parentNames( j ) ) );
 		}
-		
+
 		if ( ( i < workArgs.getArgc() - 1 ) || Name( workArgs[i] ) != contentName )
 		{
 			m_path.push_back( Name( workArgs[i] ) );
 		}
 	}
-	
+
 	if ( !contentPath.empty() )
 	{
 		m_contentIndex = m_path.size();
 		m_path.resize( m_path.size() + contentPath.size() );
 		std::copy( contentPath.begin(), contentPath.end(), m_path.begin() + m_contentIndex );
 	}
-	
+
 	if ( m_path.size() < rootPath.size() )
 	{
 		std::string pStr, rStr;
@@ -215,7 +215,7 @@ void LiveScene::calculatePath( const Path &contentPath, const Path &rootPath )
 		pathToString( rootPath, rStr );
 		throw Exception( "IECoreHoudini::LiveScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
 	}
-	
+
 	for ( size_t i = 0; i < rootPath.size(); ++i )
 	{
 		if ( rootPath[i] != m_path[i] )
@@ -226,14 +226,14 @@ void LiveScene::calculatePath( const Path &contentPath, const Path &rootPath )
 			throw Exception( "IECoreHoudini::LiveScene: Path \"" + pStr + "\" is not a valid child of root \"" + rStr + "\"." );
 		}
 	}
-	
+
 	m_rootIndex = rootPath.size();
 }
 
 Imath::Box3d LiveScene::readBound( double time ) const
 {
 	OP_Node *node = retrieveNode( true );
-	
+
 	Imath::Box3d bounds;
 	UT_BoundingBox box;
 	OP_Context context( adjustTime( time ) );
@@ -243,13 +243,13 @@ Imath::Box3d LiveScene::readBound( double time ) const
 	{
 		bounds = IECore::convert<Imath::Box3d>( box );
 	}
-	
+
 	// paths embedded within a sop already have bounds accounted for
 	if ( m_contentIndex )
 	{
 		return bounds;
 	}
-	
+
 	NameList children;
 	childNames( children );
 	for ( NameList::iterator it=children.begin(); it != children.end(); ++it )
@@ -261,7 +261,7 @@ Imath::Box3d LiveScene::readBound( double time ) const
 			bounds.extendBy( Imath::transform( childBound, childScene->readTransformAsMatrix( time ) ) );
 		}
 	}
-	
+
 	return bounds;
 }
 
@@ -275,37 +275,37 @@ ConstDataPtr LiveScene::readTransform( double time ) const
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readTransformAsMatrix( time );
 	Imath::extractSHRT( matrix, s, h, r, t, true );
-	
+
 	return new TransformationMatrixdData( TransformationMatrixd( s, r, t ) );
 }
 
 Imath::M44d LiveScene::readTransformAsMatrix( double time ) const
 {
-	OP_Node *node = retrieveNode();	
+	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
 	{
 		return Imath::M44d();
 	}
-	
+
 	OBJ_Node *objNode = node->castToOBJNode();
 	if ( !objNode )
 	{
 		return Imath::M44d();
 	}
-	
+
 	// paths embedded within a sop always have identity transforms
 	if ( m_contentIndex )
 	{
 		return Imath::M44d();
 	}
-	
+
 	UT_DMatrix4 matrix;
 	OP_Context context( adjustTime( time ) );
 	if ( !objNode->getParmTransform( context, matrix ) )
 	{
 		return Imath::M44d();
 	}
-	
+
 	return IECore::convert<Imath::M44d>( matrix );
 }
 
@@ -314,31 +314,31 @@ ConstDataPtr LiveScene::readWorldTransform( double time ) const
 	Imath::V3d s, h, r, t;
 	Imath::M44d matrix = readWorldTransformAsMatrix( time );
 	Imath::extractSHRT( matrix, s, h, r, t, true );
-	
+
 	return new TransformationMatrixdData( TransformationMatrixd( s, r, t ) );
 }
 
 Imath::M44d LiveScene::readWorldTransformAsMatrix( double time ) const
 {
-	OP_Node *node = retrieveNode();	
+	OP_Node *node = retrieveNode();
 	if ( node->isManager() )
 	{
 		return Imath::M44d();
 	}
-	
+
 	OBJ_Node *objNode = node->castToOBJNode();
 	if ( !objNode )
 	{
 		return Imath::M44d();
 	}
-	
+
 	UT_DMatrix4 matrix;
 	OP_Context context( adjustTime( time ) );
 	if ( !objNode->getWorldTransform( matrix, context ) )
 	{
 		return Imath::M44d();
 	}
-	
+
 	return IECore::convert<Imath::M44d>( matrix );
 }
 
@@ -350,7 +350,7 @@ void LiveScene::writeTransform( const Data *transform, double time )
 bool LiveScene::hasAttribute( const Name &name ) const
 {
 	OP_Node *node = retrieveNode();
-	
+
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
 	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -361,16 +361,16 @@ bool LiveScene::hasAttribute( const Name &name ) const
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
 void LiveScene::attributeNames( NameList &attrs ) const
 {
 	attrs.clear();
-	
+
 	OP_Node *node = retrieveNode();
-	
+
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
 	for ( std::vector<CustomAttributeReader>::const_iterator it = attributeReaders.begin(); it != attributeReaders.end(); ++it )
 	{
@@ -390,7 +390,7 @@ void LiveScene::attributeNames( NameList &attrs ) const
 ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 {
 	OP_Node *node = retrieveNode();
-	
+
 	// iterate attribute readers in reverse order so the ones registered later take precedence:
 	const std::vector<CustomAttributeReader> &attributeReaders = customAttributeReaders();
 	for ( std::vector<CustomAttributeReader>::const_reverse_iterator it = attributeReaders.rbegin(); it != attributeReaders.rend(); ++it )
@@ -400,7 +400,7 @@ ConstObjectPtr LiveScene::readAttribute( const Name &name, double time ) const
 			return object;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -416,7 +416,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 	{
 		return false;
 	}
-	
+
 	if ( filter & SceneInterface::LocalTag )
 	{
 		// check for user supplied tags if we're not inside a SOP
@@ -430,7 +430,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 			}
 		}
 	}
-	
+
 	// check with the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
@@ -440,7 +440,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 			return true;
 		}
 	}
-	
+
 	if ( filter & SceneInterface::LocalTag )
 	{
 		// check tags based on primitive groups
@@ -462,7 +462,7 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 						{
 							continue;
 						}
-						
+
 						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
@@ -479,21 +479,21 @@ bool LiveScene::hasTag( const Name &name, int filter ) const
 			}
 		}
 	}
-	
+
 	return false;
 }
 
 void LiveScene::readTags( NameList &tags, int filter ) const
 {
 	tags.clear();
-	
+
 	const OP_Node *node = retrieveNode();
 
 	if ( !node )
 	{
 		return;
 	}
-	
+
 	std::set< Name > uniqueTags;
 
 	if ( filter & SceneInterface::LocalTag )
@@ -514,7 +514,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 			}
 		}
 	}
-	
+
 	// add tags from the registered tag readers
 	std::vector<CustomTagReader> &tagReaders = customTagReaders();
 	for ( std::vector<CustomTagReader>::const_iterator it = tagReaders.begin(); it != tagReaders.end(); ++it )
@@ -523,7 +523,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 		it->m_read( node, values, filter );
 		uniqueTags.insert( values.begin(), values.end() );
 	}
-	
+
 	if ( filter & SceneInterface::LocalTag )
 	{
 		// add tags based on primitive groups
@@ -545,7 +545,7 @@ void LiveScene::readTags( NameList &tags, int filter ) const
 						{
 							continue;
 						}
-					
+
 						const UT_String groupName = group->getName().c_str();
 						if ( groupName.startsWith( tagGroupPrefix ) && group->containsAny( prims ) )
 						{
@@ -576,13 +576,13 @@ bool LiveScene::hasObject() const
 	{
 		return false;
 	}
-	
+
 	OBJ_Node *objNode = node->castToOBJNode();
 	if ( !objNode )
 	{
 		return false;
 	}
-	
+
 	OBJ_OBJECT_TYPE type = objNode->getObjectType();
 	if ( type == OBJ_GEOMETRY  )
 	{
@@ -592,7 +592,7 @@ bool LiveScene::hasObject() const
 		{
 			return false;
 		}
-		
+
 		// multiple named shapes define children that contain each object
 		/// \todo: similar attribute logic is repeated in several places. unify in a single function if possible
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
@@ -600,7 +600,7 @@ bool LiveScene::hasObject() const
 		{
 			return true;
 		}
-		
+
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		GA_StringTableStatistics stats;
@@ -610,7 +610,7 @@ bool LiveScene::hasObject() const
 		{
 			return true;
 		}
-		
+
 		GA_Size numStrings = stats.getCapacity();
 		for ( GA_Size i=0; i < numStrings; ++i )
 		{
@@ -619,7 +619,7 @@ bool LiveScene::hasObject() const
 			{
 				continue;
 			}
-			
+
 			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 			const char *match = matchPath( currentName );
 			if ( match && *match == *emptyString )
@@ -628,12 +628,12 @@ bool LiveScene::hasObject() const
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/// \todo: need to account for OBJ_CAMERA and OBJ_LIGHT
-	
+
 	return false;
 }
 
@@ -644,29 +644,29 @@ ConstObjectPtr LiveScene::readObject( double time ) const
 	{
 		return 0;
 	}
-	
+
 	if ( objNode->getObjectType() == OBJ_GEOMETRY )
 	{
 		OP_Context context( adjustTime( time ) );
 		GU_DetailHandle handle = objNode->getRenderGeometryHandle( context, false );
-		
+
 		if ( !m_splitter || ( handle != m_splitter->handle() ) )
 		{
 			m_splitter = new DetailSplitter( handle );
 		}
-		
+
 		GU_DetailHandle newHandle = contentHandle();
 		FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( ( newHandle.isNull() ) ? handle : newHandle );
 		if ( !converter )
 		{
 			return 0;
 		}
-		
+
 		return converter->convert();
 	}
-	
+
 	/// \todo: need to account for cameras and lights
-	
+
 	return 0;
 }
 
@@ -691,14 +691,14 @@ void LiveScene::childNames( NameList &childNames ) const
 	OP_Node *node = retrieveNode();
 	OBJ_Node *objNode = node->castToOBJNode();
 	OBJ_Node *contentNode = retrieveNode( true )->castToOBJNode();
-	
+
 	// add subnet children
 	if ( node->isManager() || ( objNode && objNode->getObjectType() == OBJ_SUBNET ) )
 	{
 		for ( int i=0; i < node->getNchildren(); ++i )
 		{
 			OBJ_Node *child = node->getChild( i )->castToOBJNode();
-			
+
 			// ignore children that have incoming connections, as those are actually grandchildren
 			// also ignore the contentNode, which is actually an extension of ourself
 			if ( child && child != contentNode && !hasInput( child ) )
@@ -707,12 +707,12 @@ void LiveScene::childNames( NameList &childNames ) const
 			}
 		}
 	}
-	
+
 	if ( !contentNode )
 	{
 		return;
 	}
-	
+
 #if UT_MAJOR_VERSION_INT >= 16
 
 	// add connected outputs
@@ -733,7 +733,7 @@ void LiveScene::childNames( NameList &childNames ) const
 
 #endif
 
-	
+
 	// add child shapes within the geometry
 	if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 	{
@@ -743,13 +743,13 @@ void LiveScene::childNames( NameList &childNames ) const
 		{
 			return;
 		}
-		
+
 		GA_ROAttributeRef nameAttrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, "name" );
 		if ( !nameAttrRef.isValid() )
 		{
 			return;
 		}
-		
+
 		const GA_Attribute *nameAttr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = nameAttr->getAIFSharedStringTuple();
 		GA_Size numStrings = tuple->getTableEntries( nameAttr );
@@ -760,7 +760,7 @@ void LiveScene::childNames( NameList &childNames ) const
 			{
 				continue;
 			}
-			
+
 			const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 			const char *match = matchPath( currentName );
 			if ( match && *match != *emptyString )
@@ -790,14 +790,14 @@ SceneInterfacePtr LiveScene::child( const Name &name, MissingBehaviour missingBe
 	{
 		return 0;
 	}
-	
+
 	UT_String nodePath;
 	child->getFullPath( nodePath );
-	
+
 	Path rootPath;
 	rootPath.resize( m_rootIndex );
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
-	
+
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
 	return duplicate( nodePath, contentPath, rootPath);
 }
@@ -837,7 +837,7 @@ OP_Node *LiveScene::retrieveNode( bool content, MissingBehaviour missingBehaviou
 			node = contentNode;
 		}
 	}
-	
+
 	if ( missingBehaviour == ThrowIfMissing )
 	{
 		if ( !node )
@@ -850,7 +850,7 @@ OP_Node *LiveScene::retrieveNode( bool content, MissingBehaviour missingBehaviou
 			throw Exception( "IECoreHoudini::LiveScene: Node \"" + m_nodePath.toStdString() + "\" is not a valid OBJ." );
 		}
 	}
-	
+
 	return node;
 }
 
@@ -872,7 +872,7 @@ OP_Node *LiveScene::locateContent( OP_Node *node ) const
 	{
 		return objNode;
 	}
-	
+
 	return 0;
 }
 
@@ -884,10 +884,10 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 	{
 		return 0;
 	}
-	
+
 	OBJ_Node *objNode = node->castToOBJNode();
 	OBJ_Node *contentNode = contentBaseNode->castToOBJNode();
-	
+
 	// check subnet children
 	if ( node->isManager() || ( objNode && objNode->getObjectType() == OBJ_SUBNET ) )
 	{
@@ -899,14 +899,14 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 			{
 				continue;
 			}
-			
+
 			if ( child && child->getName().equal( name.c_str() ) && !hasInput( child ) )
 			{
 				return child;
 			}
 		}
 	}
-	
+
 	if ( contentNode )
 	{
 		// check connected outputs
@@ -929,7 +929,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 				return child;
 			}
 		}
-#endif	
+#endif
 		// check child shapes within the geo
 		if ( contentNode->getObjectType() == OBJ_GEOMETRY )
 		{
@@ -949,7 +949,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 						{
 							continue;
 						}
-						
+
 						const char *currentName = tuple->getTableString( nameAttr, validatedIndex );
 						const char *match = matchPath( currentName );
 						if ( match && *match != *emptyString )
@@ -975,7 +975,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 			}
 		}
 	}
-	
+
 	if ( missingBehaviour == SceneInterface::ThrowIfMissing )
 	{
 		Path p;
@@ -984,7 +984,7 @@ OP_Node *LiveScene::retrieveChild( const Name &name, Path &contentPath, MissingB
 		pathToString( p, pStr );
 		throw Exception( "IECoreHoudini::LiveScene::retrieveChild: Path \"" + pStr + "\" has no child named " + name.string() + "." );
 	}
-	
+
 	return 0;
 }
 
@@ -993,7 +993,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 	Path rootPath, emptyPath;
 	rootPath.resize( m_rootIndex );
 	std::copy( m_path.begin(), m_path.begin() + m_rootIndex, rootPath.begin() );
-	
+
 	LiveScenePtr rootScene = create();
 	rootScene->setDefaultTime( m_defaultTime );
 	for ( Path::const_iterator it = rootPath.begin(); it != rootPath.end(); ++it )
@@ -1004,7 +1004,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 			return 0;
 		}
 	}
-	
+
 	UT_String rootNodePath;
 	OP_Node *node = rootScene->retrieveNode();
 	if ( !node )
@@ -1012,7 +1012,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 		return 0;
 	}
 	node->getFullPath( rootNodePath );
-	
+
 	/// \todo: is this really what we want? can we just pass rootIndex and contentIndex instead?
 	SceneInterfacePtr scene = duplicate( rootNodePath, emptyPath, rootPath);
 	for ( Path::const_iterator it = path.begin(); it != path.end(); ++it )
@@ -1023,7 +1023,7 @@ SceneInterfacePtr LiveScene::retrieveScene( const Path &path, MissingBehaviour m
 			return 0;
 		}
 	}
-	
+
 	return scene;
 }
 
@@ -1038,7 +1038,7 @@ bool LiveScene::hasInput( const OP_Node *node ) const
 			return true;
 		}
 	}
-	
+
 	return false;
 }
 
@@ -1050,13 +1050,13 @@ double LiveScene::adjustTime( double time ) const
 bool LiveScene::matchPattern( const char *value, const char *pattern ) const
 {
 	size_t size = strlen( pattern );
-	
+
 	// can't be a match unless its exactly the right length
 	if ( ( strlen( value ) < size  ) || ( strlen( value ) > size && value[size] != '\0' && value[size] != '/' ) )
 	{
 		return false;
 	}
-	
+
 	// all characters must match
 	for ( size_t i = 0; i < size; ++i )
 	{
@@ -1065,7 +1065,7 @@ bool LiveScene::matchPattern( const char *value, const char *pattern ) const
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
@@ -1079,47 +1079,47 @@ const char *LiveScene::matchPath( const char *value ) const
 		{
 			return emptyString;
 		}
-		
+
 		return &value[0];
 	}
-	
+
 	// looking for some value, so empty is a failed match
 	if ( value == 0 )
 	{
 		return NULL;
 	}
-	
+
 	size_t i = 0;
 	for ( Path::const_iterator it = m_path.begin() + m_contentIndex; it != m_path.end(); ++it )
 	{
 		const char *current = it->c_str();
-		
+
 		if ( value[i] == '/' )
 		{
 			i++;
 		}
-		
+
 		if ( !matchPattern( &value[i], current ) )
 		{
 			return NULL;
 		}
-		
+
 		i += strlen( current );
 	}
-	
+
 	return &value[i];
 }
 
 std::pair<const char *, size_t> LiveScene::nextWord( const char *value ) const
 {
 	std::pair<const char *, size_t> result( value, 0 );
-	
+
 	if ( value[0] == '/' )
 	{
 		result.first = &value[1];
 		result.second = 1;
 	}
-	
+
 	size_t size = strlen( value );
 	for ( ; result.second < size; ++result.second )
 	{
@@ -1129,19 +1129,19 @@ std::pair<const char *, size_t> LiveScene::nextWord( const char *value ) const
 			break;
 		}
 	}
-	
+
 	return result;
 }
 
 void LiveScene::relativeContentPath( SceneInterface::Path &path ) const
 {
 	path.clear();
-	
+
 	if ( !m_contentIndex )
 	{
 		return;
 	}
-	
+
 	path.reserve( m_path.size() - m_contentIndex );
 	path.insert( path.begin(), m_path.begin() + m_contentIndex, m_path.end() );
 }
@@ -1152,15 +1152,15 @@ GU_DetailHandle LiveScene::contentHandle() const
 	SceneInterface::Path path;
 	relativeContentPath( path );
 	pathToString( path, name );
-	
+
 	GU_DetailHandle handle = m_splitter->split( name.c_str() );
-	
+
 	// we need to try again, in case the user didn't use a / prefix on the shape name
 	if ( handle.isNull() && m_contentIndex == 1 && !path.empty() && path[0] != "" )
 	{
 		handle = m_splitter->split( &name.c_str()[1] );
 	}
-	
+
 	return handle;
 }
 

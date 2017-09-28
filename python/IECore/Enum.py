@@ -58,16 +58,16 @@ def create( *names ) :
 		__names = names
 
 		def __init__( self, value ) :
-			
+
 			if isinstance( value, str ) :
-				
+
 				if value not in Enum.__names :
 					raise ValueError( "Enum value out of range." )
-				
+
 				value = Enum.__names.index( value )
-			
+
 			else :
-				
+
 				if value < 0 or value >= len( Enum.__names ) :
 					raise ValueError( "Enum value out of range." )
 
@@ -89,12 +89,12 @@ def create( *names ) :
 		def __str__( self ) :
 
 			return Enum.__names[self.__value]
-		
+
 		@classmethod
 		def values( cls ) :
-			
+
 			return tuple( cls( i ) for i in range( 0, len(cls.__names) ) )
-	
+
 	for i, name in enumerate( names ) :
 
 		setattr( Enum, name, Enum( i ) )

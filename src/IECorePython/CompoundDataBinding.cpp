@@ -139,7 +139,7 @@ class CompoundDataFromPythonDict
 class CompoundDataFunctions
 {
 	public:
-	
+
 		IE_CORE_DECLAREMEMBERPTR( CompoundData );
 		typedef const char * key_type;
 		typedef CompoundDataMap::value_type::second_type data_type;

@@ -56,16 +56,16 @@ class TestMessageHandler( unittest.TestCase ) :
 
 		m1 = NullMessageHandler()
 		m2 = NullMessageHandler()
-		
+
 		self.assertTrue( MessageHandler.currentHandler().isSame( MessageHandler.getDefaultHandler() ) )
-		
+
 		with m1 :
 			self.assertTrue( MessageHandler.currentHandler().isSame( m1 ) )
 			with m2 :
 				self.assertTrue( MessageHandler.currentHandler().isSame( m2 ) )
 			self.assertTrue( MessageHandler.currentHandler().isSame( m1 ) )
-			
-		self.assertTrue( MessageHandler.currentHandler().isSame( MessageHandler.getDefaultHandler() ) )				
+
+		self.assertTrue( MessageHandler.currentHandler().isSame( MessageHandler.getDefaultHandler() ) )
 
 	def testLevelStringConversion( self ) :
 
@@ -127,7 +127,7 @@ class TestMessageHandler( unittest.TestCase ) :
 			self.lastLevel.value = level
 			self.lastContext.value = context
 			self.lastMessage.value = msg
-				
+
 	def testSubclassing( self ):
 
 		myHandler = self.Derived()
@@ -139,16 +139,16 @@ class TestMessageHandler( unittest.TestCase ) :
 		self.assertEqual( myHandler.lastMessage.value, "message" )
 
 	def testContextManager( self ) :
-	
+
 		currentHandler = MessageHandler.currentHandler()
-		
+
 		myHandler = self.Derived()
 		with myHandler :
-		
+
 			MessageHandler.output( Msg.Level.Info, "context", "message" )
-			
+
 		self.failUnless( currentHandler.isSame( MessageHandler.currentHandler() ) )
-		
+
 		self.assertEqual( myHandler.lastLevel.value, Msg.Level.Info )
 		self.assertEqual( myHandler.lastContext.value, "context" )
 		self.assertEqual( myHandler.lastMessage.value, "message" )
@@ -156,45 +156,45 @@ class TestMessageHandler( unittest.TestCase ) :
 	def testIsRefCounted( self ) :
 
 		self.assert_( issubclass( MessageHandler, RefCounted ) )
-		
+
 	def testDefaultHandler( self ) :
-	
+
 		self.failUnless( isinstance( MessageHandler.currentHandler(), LevelFilteredMessageHandler ) )
-	
+
 	def testSetLogLevel( self ) :
-	
+
 		oldLevel = MessageHandler.currentHandler().getLevel()
-		
+
 		if oldLevel==MessageHandler.Level.Info :
 			newLevel = MessageHandler.Level.Warning
 		else :
 			newLevel = MessageHandler.Level.Info
-			
+
 		setLogLevel( newLevel )
-		
+
 		self.assertEqual( MessageHandler.currentHandler().getLevel(), newLevel )
 
 		setLogLevel( oldLevel )
 
 		self.assertEqual( MessageHandler.currentHandler().getLevel(), oldLevel )
-				
+
 	def testContextManagerReturnValue( self ) :
-	
+
 		mh = self.Derived()
 		with mh as mh2 :
 			pass
-			
+
 		self.failUnless( mh is mh2 )
-	
+
 	def testThreading( self ) :
-	
+
 		def f( handler ) :
-		
+
 			with handler :
 				for i in range( 0, 100 ) :
 					msg( Msg.Level.Info, "test", str( i ) )
 					time.sleep( 0.0001 ) # encourage python to switch threads
-					
+
 		handlers = []
 		threads = []
 		for i in range( 0, 100 ) :
@@ -203,26 +203,26 @@ class TestMessageHandler( unittest.TestCase ) :
 			threads.append( thread )
 			handlers.append( handler )
 			thread.start()
-			
+
 		for thread in threads :
 			thread.join()
-		
+
 		for handler in handlers :
 			self.assertEqual( len( handler.messages ), 100 )
 			for i, m in enumerate( handler.messages ) :
 				self.assertEqual( str( i ), m.message )
-	
+
 	def testLifetime( self ) :
-	
+
 		m = NullMessageHandler()
 		w = weakref.ref( m )
-		
+
 		with m :
 			pass
-			
+
 		del m
-		
+
 		self.assertEqual( w(), None )
-		
+
 if __name__ == "__main__":
     unittest.main()

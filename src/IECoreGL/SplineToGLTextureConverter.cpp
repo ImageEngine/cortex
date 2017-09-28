@@ -71,7 +71,7 @@ SplineToGLTextureConverter::~SplineToGLTextureConverter()
 
 IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	
+
 	TexturePtr t = 0;
 	IECoreImage::SplineToImagePtr op = new IECoreImage::SplineToImage();
 	op->splineParameter()->setValue( boost::const_pointer_cast< IECore::Object >(src) );
@@ -87,7 +87,7 @@ IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstO
 	{
 			t = new ColorTexture( image.get() );
 	}
-	else if ( y && !r && !g && !b ) 
+	else if ( y && !r && !g && !b )
 	{
 			t = new LuminanceTexture( image.get() );
 	}

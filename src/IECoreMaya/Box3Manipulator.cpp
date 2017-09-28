@@ -34,8 +34,8 @@
 
 #include <maya/MFnStateManip.h>
 #include <maya/MFnFreePointTriadManip.h>
-#include <maya/MString.h> 
-#include <maya/MTypeId.h> 
+#include <maya/MString.h>
+#include <maya/MTypeId.h>
 #include <maya/MPlug.h>
 #include <maya/MVector.h>
 #include <maya/MTransformationMatrix.h>
@@ -69,7 +69,7 @@ Box3Manipulator::~Box3Manipulator()
 {
 }
 
-void *Box3Manipulator::creator() 
+void *Box3Manipulator::creator()
 {
 	return new Box3Manipulator();
 }
@@ -78,154 +78,154 @@ MStatus Box3Manipulator::initialize()
 {
 	return MPxManipContainer::initialize();
 }
-    
+
 MStatus Box3Manipulator::createChildren()
-{	
+{
 	m_minManip = addFreePointTriadManip( "Manipulates the 'minimum' corner of the Box", "min" );
 	m_maxManip = addFreePointTriadManip( "Manipulates the 'maximum' corner of the Box", "max" );
 
 	m_stateManip = addStateManip( "Toggles validity checking, when on, min can never be greater than max.", "validate" );
-	
+
 	return MStatus::kSuccess;
 }
 
 MStatus Box3Manipulator::connectToDependNode( const MObject & node )
-{	
+{
 	MFnDagNode dagFn( node );
 	dagFn.getPath( m_nodePath );
-	
+
 	if( !findPlugs( dagFn ) )
 	{
 		return MStatus::kFailure;
 	}
-		
+
 	MFnFreePointTriadManip minFn( m_minManip );
 	MFnFreePointTriadManip maxFn( m_maxManip );
-	
+
 	minFn.connectToPointPlug( m_minPlug );
 	maxFn.connectToPointPlug( m_maxPlug );
-	
+
 	addManipToPlugConversionCallback( m_minPlug, (manipToPlugConversionCallback)&Box3Manipulator::vectorManipToPlugConversion );
 	addManipToPlugConversionCallback( m_maxPlug, (manipToPlugConversionCallback)&Box3Manipulator::vectorManipToPlugConversion );
-	
+
 	addPlugToManipConversionCallback( minFn.pointIndex(), (plugToManipConversionCallback)&Box3Manipulator::vectorPlugToManipConversion );
-	addPlugToManipConversionCallback( maxFn.pointIndex(), (plugToManipConversionCallback)&Box3Manipulator::vectorPlugToManipConversion );		
+	addPlugToManipConversionCallback( maxFn.pointIndex(), (plugToManipConversionCallback)&Box3Manipulator::vectorPlugToManipConversion );
 
 	MFnStateManip validateFn( m_stateManip );
 	validateFn.setMaxStates( 2 );
 
-	addPlugToManipConversionCallback( validateFn.positionIndex(), (plugToManipConversionCallback)&Box3Manipulator::updateCenteredManipPosition );		
+	addPlugToManipConversionCallback( validateFn.positionIndex(), (plugToManipConversionCallback)&Box3Manipulator::updateCenteredManipPosition );
 
 	MStatus stat = finishAddingManips();
 	if( stat == MStatus::kFailure )
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	MPxManipContainer::connectToDependNode( node );
 
 	readParameterOptions( dagFn );
-		
+
 	if( m_worldSpace)
 	{
 		m_localMatrix.setToIdentity();
 		m_localMatrixInv.setToIdentity();
 	}
 	else
-	{	
+	{
 		// Inhereit any transform to the parent
 		MDagPath transformPath = m_nodePath;
-		transformPath.pop(); 
+		transformPath.pop();
 		MFnTransform transformFn( transformPath );
 		m_localMatrix = transformPath.inclusiveMatrix();
 		m_localMatrixInv = transformPath.inclusiveMatrixInverse();
-		
+
 		MPxTransformationMatrix m( m_localMatrix );
 		MEulerRotation r = m.eulerRotation();
 		MVector t = m.translation();
 
 		minFn.setRotation( r );
 		maxFn.setRotation( r );
-		validateFn.setRotation( r );	
-		
+		validateFn.setRotation( r );
+
 		minFn.setTranslation( t, MSpace::kTransform );
 		maxFn.setTranslation( t, MSpace::kTransform );
 		validateFn.setTranslation( t, MSpace::kTransform );
 	}
-	
+
 	return stat;
 }
-	
+
 void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::DisplayStyle style, M3dView::DisplayStatus status )
 {
-	
+
 	MPxManipContainer::draw( view, path, style, status);
-	
+
 	MFnStateManip validateFn( m_stateManip );
 	MFnFreePointTriadManip minFn( m_minManip );
 	MFnFreePointTriadManip maxFn( m_maxManip );
-	
+
 	MPoint min, max, minOffset, maxOffset, center, notUsed;
 	getConverterManipValue( minFn.pointIndex(), min );
 	getConverterManipValue( maxFn.pointIndex(), max );
 	getConverterManipValue( validateFn.positionIndex(), center );
-	
+
 	// We want to offset the labels by a constant amount in view space,
 	// so as the user changes the view, the lable doesnt separate/overlap
 	// the control.
 	short x, y;
-	
+
 	bool drawLabel = view.worldToView( center * m_localMatrix, x, y );
-	if( drawLabel ) 
+	if( drawLabel )
 	{
 		y -= 18;
 		view.viewToWorld( x, y, center, notUsed );
 	}
-	
+
 	bool drawMin = view.worldToView( min * m_localMatrix, x, y );
-	if( drawMin ) 
+	if( drawMin )
 	{
 		y -= 18;
 		view.viewToWorld( x, y, minOffset, notUsed );
 	}
-	
+
 	bool drawMax = view.worldToView( max * m_localMatrix, x, y );
-	if( drawMax ) 
+	if( drawMax )
 	{
 		y -= 18;
 		view.viewToWorld( x, y, maxOffset, notUsed );
 	}
-	
-	view.beginGL(); 
-	
+
+	view.beginGL();
+
 		if( drawMin )
 			view.drawText( MString("min"), minOffset, M3dView::kCenter );
-	
+
 		if( drawMax )
-			view.drawText( MString("max"), maxOffset, M3dView::kCenter );	
-		
+			view.drawText( MString("max"), maxOffset, M3dView::kCenter );
+
 		if( m_label != "" && drawLabel )
 		{
-			view.drawText( m_label, center, M3dView::kCenter );	
+			view.drawText( m_label, center, M3dView::kCenter );
 		}
-		
+
 	view.endGL();
 
 	MTransformationMatrix m( m_localMatrix );
-	
+
 	MVector t = m.getTranslation( MSpace::kWorld );
-	
+
 	double r[3];
 	MTransformationMatrix::RotationOrder ro;
 	m.getRotation( r, ro );
-	
+
 	double s[3];
 	m.getScale( s, MSpace::kWorld );
 
-	view.beginGL(); 
+	view.beginGL();
 
 		glPushMatrix();
-		
+
 		/// \todo Support other rotation orders
 		glTranslated( t.x, t.y, t.z );
 		glRotated( r[2] * 57.29577, 0.0, 0.0, 1.0 );
@@ -235,13 +235,13 @@ void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::Disp
 
 		// If the bbox is invalid, then set the color to something
 		// more, er, SCARY.
-		if ( min[0] > max[0] || min[1] > max[1] || min[2] > max[2] ) 
+		if ( min[0] > max[0] || min[1] > max[1] || min[2] > max[2] )
 		{
 			if (status == M3dView::kActive) {
 				view.setDrawColor(12, M3dView::kActiveColors);
 			} else {
 				view.setDrawColor(12, M3dView::kDormantColors);
-			}  
+			}
 		}
 		else
 		{
@@ -249,12 +249,12 @@ void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::Disp
 				view.setDrawColor(14, M3dView::kActiveColors);
 			} else {
 				view.setDrawColor(14, M3dView::kDormantColors);
-			}  
+			}
 		}
-	
+
 		glLineStipple( 2, 0xAAAA );
-		glEnable( GL_LINE_STIPPLE ); 
-	
+		glEnable( GL_LINE_STIPPLE );
+
 		glBegin( GL_LINE_LOOP );
 
 			glVertex3f( min[0], min[1], min[2] );
@@ -263,37 +263,37 @@ void Box3Manipulator::draw( M3dView & view, const MDagPath & path, M3dView::Disp
 			glVertex3f( max[0], min[1], min[2] );
 
 		glEnd();
-		
+
 		glBegin( GL_LINE_LOOP );
-		
+
 			glVertex3f( min[0], min[1], max[2] );
 			glVertex3f( min[0], max[1], max[2] );
 			glVertex3f( max[0], max[1], max[2] );
 			glVertex3f( max[0], min[1], max[2] );
-		
-		
+
+
 		glEnd();
-		
+
 		glBegin( GL_LINES );
-		
+
 			glVertex3f( min[0], min[1], min[2] );
 			glVertex3f( min[0], min[1], max[2] );
-			
+
 			glVertex3f( min[0], max[1], min[2] );
 			glVertex3f( min[0], max[1], max[2] );
 
 			glVertex3f( max[0], min[1], min[2] );
 			glVertex3f( max[0], min[1], max[2] );
-			
+
 			glVertex3f( max[0], max[1], min[2] );
 			glVertex3f( max[0], max[1], max[2] );
-		
+
 		glEnd();
-		
-		glDisable( GL_LINE_STIPPLE ); 
-		
+
+		glDisable( GL_LINE_STIPPLE );
+
 		glPopMatrix();
-		
+
 	view.endGL();
 
 }
@@ -303,13 +303,13 @@ MManipData Box3Manipulator::vectorPlugToManipConversion( unsigned int manipIndex
 {
 	MFnFreePointTriadManip minFn( m_minManip );
 	MFnFreePointTriadManip maxFn( m_maxManip );
-	
+
 	MFnNumericData numericData;
     MObject returnData = numericData.create( MFnNumericData::k3Double );
     numericData.setData( 0.0, 0.0, 0.0 );
-	
+
 	MPlug sourcePlug;
-		
+
 	if( manipIndex == minFn.pointIndex() )
 	{
 		sourcePlug = m_minPlug;
@@ -322,45 +322,45 @@ MManipData Box3Manipulator::vectorPlugToManipConversion( unsigned int manipIndex
 	{
 		return returnData;
 	}
-		
+
 	MPoint p = getPlugValues( sourcePlug );
-	
-	numericData.setData( p.x, p.y, p.z );	
-		
-	return MManipData( returnData );	
+
+	numericData.setData( p.x, p.y, p.z );
+
+	return MManipData( returnData );
 }
 
 
 MManipData Box3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex )
-{	
-	
+{
+
 	unsigned int validateState = 0;
 	MFnStateManip validateFn( m_stateManip );
 	getConverterManipValue( validateFn.stateIndex(), validateState );
-	
+
 	MFnFreePointTriadManip minFn( m_minManip );
 	MFnFreePointTriadManip maxFn( m_maxManip );
-	
+
 	MPoint min, max;
 	getConverterManipValue( minFn.pointIndex(), min );
 	getConverterManipValue( maxFn.pointIndex(), max );
-	
+
 	MPoint out;
 	MPlug sourcePlug;
-		
+
 	if( validateState == 0 )
 	{
 		if( plugIndex == 0 )
 		{
 			out.x = std::min( min[0], max[0] );
 			out.y = std::min( min[1], max[1] );
-			out.z = std::min( min[2], max[2] );	
+			out.z = std::min( min[2], max[2] );
 		}
 		else
 		{
 			out.x = std::max( min[0], max[0] );
 			out.y = std::max( min[1], max[1] );
-			out.z = std::max( min[2], max[2] );	
+			out.z = std::max( min[2], max[2] );
 		}
 	}
 	else
@@ -376,10 +376,10 @@ MManipData Box3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex 
 			sourcePlug = m_maxPlug;
 		}
 	}
-	
+
 	MFnNumericData numericData;
     MObject returnData;
-	
+
 	// We have to check what type of data to generate so Maya
 	// will be able to set it back into the attribute correctly.
 	MFnNumericAttribute attr( sourcePlug.attribute() );
@@ -389,10 +389,10 @@ MManipData Box3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex 
 		numericData.setData( float(out.x), float(out.y), float(out.z) );
 	}
 	else
-	{	
+	{
 		returnData = numericData.create( MFnNumericData::k3Double );
 		numericData.setData( out.x, out.y, out.z );
-	}	
+	}
 
 	return MManipData( returnData );
 }
@@ -401,19 +401,19 @@ MManipData Box3Manipulator::updateCenteredManipPosition( unsigned int manipIndex
 {
 	MFnNumericData numericData;
     MObject returnData = numericData.create( MFnNumericData::k3Double );
-	
+
 	MPoint min = getPlugValues( m_minPlug );
 	MPoint max = getPlugValues( m_maxPlug );
-	
+
 	MPoint average = ( ( min + max ) / 2.0 );
-	
+
 	numericData.setData( average.x, average.y, average.z );
-	
-	return MManipData( returnData );	
+
+	return MManipData( returnData );
 }
 
 bool Box3Manipulator::findPlugs( MFnDagNode &dagFn )
-{	
+{
 	MString minPlugName = m_plug.partialName() + "Min";
 	MString maxPlugName = m_plug.partialName() + "Max";
 
@@ -427,10 +427,10 @@ bool Box3Manipulator::findPlugs( MFnDagNode &dagFn )
 		m_maxPlugName = "";
 		return false;
 	}
-	
+
 	m_minPlugName = minPlugName;
 	m_maxPlugName = maxPlugName;
-	
+
 	return true;
 }
 
@@ -459,7 +459,7 @@ void Box3Manipulator::getPlugValues( MPlug &plug, double *values )
 void Box3Manipulator::getPlugValues( MPlug &plug, MFnNumericData &data )
 {
 	double values[3];
-	getPlugValues( plug, values ); 
+	getPlugValues( plug, values );
 	data.setData( values[0], values[1], values[2] );
 }
 
@@ -472,15 +472,15 @@ MPoint Box3Manipulator::getPlugValues( MPlug &plug )
 
 void Box3Manipulator::readParameterOptions( MFnDagNode &nodeFn )
 {
-	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );		
-	if( !pHolder ) 
-	{	
+	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );
+	if( !pHolder )
+	{
 		return;
 	}
-	
+
 	ParameterPtr parameter = pHolder->plugParameter( m_plug );
 	CompoundObjectPtr userData = parameter->userData();
-	
+
 	if( CompoundObjectPtr uiData = userData->member<CompoundObject>( "UI" ) )
 	{
 		// World space parameter values
@@ -492,16 +492,16 @@ void Box3Manipulator::readParameterOptions( MFnDagNode &nodeFn )
 			}
 			else if( wsData->readable() == "object" )
 			{
-				m_worldSpace = false;			
+				m_worldSpace = false;
 			}
 			else
 			{
 				MGlobal::displayWarning( "Box3Manipulator: Ignoring invalid box3ManipSpace '"
 										 + MString( wsData->readable().c_str() )
-										 + "' for parameter '" 
+										 + "' for parameter '"
 										 + MString( parameter->name().c_str() )
 										 + "', using 'object'." );
 			}
-		}				
+		}
 	}
 }

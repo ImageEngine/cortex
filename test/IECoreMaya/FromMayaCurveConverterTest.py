@@ -40,10 +40,10 @@ import IECoreMaya
 class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
-	
+
 		circle = maya.cmds.circle( ch = False )[0]
 		circle = str( maya.cmds.listRelatives( circle, shapes=True )[0] )
-		
+
 		converter = IECoreMaya.FromMayaShapeConverter.create( circle, IECore.CurvesPrimitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 
@@ -52,13 +52,13 @@ class FromMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( circle )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECore.CurvesPrimitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( circle, IECore.Primitive.staticTypeId() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( circle )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCurveConverter ) ) )
 

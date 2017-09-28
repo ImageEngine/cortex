@@ -71,19 +71,19 @@ class IECOREGL_API Texture : public Bindable
 
 		/// Binds the texture as the current GL texture.
 		virtual void bind() const;
-		
+
 		class IECOREGL_API ScopedBinding
 		{
-			
+
 			public :
-			
+
 				ScopedBinding( const Texture &texture );
 				~ScopedBinding();
-				
+
 			private :
-			
+
 				GLint m_prevTexture;
-		
+
 		};
 
 		/// Creates an ImagePrimitive using the texture contents.

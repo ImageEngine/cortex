@@ -60,50 +60,50 @@ bool ToHoudiniPolygonsConverter::doConversion( const Object *object, GU_Detail *
 	{
 		return false;
 	}
-	
+
 	GA_Range newPoints = appendPoints( geo, mesh->variableSize( PrimitiveVariable::Vertex ) );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
-	
+
 	GA_OffsetList pointOffsets;
 	pointOffsets.reserve( newPoints.getEntries() );
 	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
 	{
 		pointOffsets.append( it.getOffset() );
 	}
-	
+
 	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
-	
+
 	GA_OffsetList offsets;
 	offsets.reserve( verticesPerFace.size() );
-	
+
 	size_t vertCount = 0;
 	size_t numPrims = geo->getNumPrimitives();
 	for ( size_t f=0; f < verticesPerFace.size(); f++ )
 	{
 		GU_PrimPoly *poly = GU_PrimPoly::build( geo, 0, GU_POLY_CLOSED, 0 );
 		offsets.append( geo->primitiveOffset( numPrims + f ) );
-		
+
 		for ( size_t v=0; v < (size_t)verticesPerFace[f]; v++ )
 		{
 			poly->appendVertex( pointOffsets.get( vertexIds[ vertCount + verticesPerFace[f] - 1 - v ] ) );
 		}
-		
+
 		vertCount += verticesPerFace[f];
 	}
-	
+
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
 	transferAttribs( geo, newPoints, newPrims );
-	
+
 	// add the interpolation type
 	if ( newPrims.isValid() )
 	{
 		std::string interpolation = ( mesh->interpolation() == "catmullClark" ) ? "subdiv" : "poly";
 		ToHoudiniStringVectorAttribConverter::convertString( "ieMeshInterpolation", interpolation, geo, newPrims );
 	}
-	
+
 	return true;
 }

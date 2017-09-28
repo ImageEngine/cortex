@@ -56,7 +56,7 @@
 		useAspectRatio ? vertexpatchaspectratio : 1.0,\
 		useRotation ? vertexpatchrotation : 0.0\
 	)
-	
+
 mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspectRatio, in float rotation )
 {
 	vec3 pCam = (gl_ModelViewMatrix * vec4( P, 1.0 )).xyz;
@@ -71,16 +71,16 @@ mat4 iePointsPrimitiveInstanceMatrix( in vec3 P, in float width, in float aspect
 	{
 		// orthographic
 		Az = vec3( 0, 0, 1 );
-		
+
 	}
 
 	vec3 up = vec3( sin( radians( rotation ) ), cos( radians( rotation ) ), 0 );
-	
+
 	vec3 Ax = normalize( cross( up, Az ) );
 	vec3 Ay = normalize( cross( Az, Ax ) );
 
 	mat4 placementMatrix = ieMatrixFromBasis( Ax * width, Ay * width / aspectRatio, Az * width, pCam );
-	
+
 	return placementMatrix;
 }
 

@@ -65,19 +65,19 @@ class ToGLCurvesConverter::ToVertexConverter
 	public :
 
 		typedef IECore::DataPtr ReturnType;
-		
+
 		ToVertexConverter( const vector<int> &vertsPerCurve, size_t numVertices, size_t step )
 			:	m_vertsPerCurve( vertsPerCurve ), m_numVertices( numVertices ), m_step( step )
 		{
 		}
-		
+
 		template<typename T>
 		IECore::DataPtr operator()( const T *inData )
 		{
 			const typename T::Ptr outData = new T();
 			typename T::ValueType &out = outData->writable();
 			out.resize( m_numVertices );
-			
+
 			size_t inIndex = 0;
 			size_t outIndex = 0;
 			const typename T::ValueType &in = inData->readable();
@@ -89,12 +89,12 @@ class ToGLCurvesConverter::ToVertexConverter
 				}
 				inIndex += m_step;
 			}
-			
+
 			return outData;
 		}
-		
+
 	private :
-	
+
 		const vector<int> &m_vertsPerCurve;
 		size_t m_numVertices;
 		size_t m_step;
@@ -132,14 +132,14 @@ IECore::RunTimeTypedPtr ToGLCurvesConverter::doConversion( IECore::ConstObjectPt
 			IECore::msg( IECore::Msg::Warning, "ToGLCurvesConverter", boost::format( "No data given for primvar \"%s\"" ) % pIt->first );
 			continue;
 		}
-		
+
 		if( pIt->second.interpolation == IECore::PrimitiveVariable::Vertex || pIt->second.interpolation == IECore::PrimitiveVariable::Constant )
 		{
 			result->addPrimitiveVariable( pIt->first, pIt->second );
 		}
 		else if( pIt->second.interpolation == IECore::PrimitiveVariable::Uniform )
 		{
-			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECore::PrimitiveVariable::Vertex ), 1 );	
+			ToVertexConverter converter( curves->verticesPerCurve()->readable(), curves->variableSize( IECore::PrimitiveVariable::Vertex ), 1 );
 			IECore::DataPtr newData = IECore::despatchTypedData<ToVertexConverter, IECore::TypeTraits::IsVectorTypedData>( pIt->second.data.get(), converter );
 			if( newData )
 			{

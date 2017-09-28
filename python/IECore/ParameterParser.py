@@ -139,7 +139,7 @@ class ParameterParser :
 					parser = self.__typesToParsers[typeId]
 					break
 				typeId = IECore.RunTimeTyped.baseTypeId( typeId )
-			
+
 			if parser is None :
 				raise SyntaxError( "No parser available for parameter \"%s\"." % name )
 
@@ -153,10 +153,10 @@ class ParameterParser :
 	# be passed to parse() to retrieve the values. Parameter values will be validated,
 	# and may throw an exception, unless the alternate values argument is used.
 	def serialise( self, parameters, values=None ) :
-		
+
 		if values is None :
 			values = parameters.getValidatedValue()
-		
+
 		return self.__serialiseWalk( parameters, values, "" )
 
 	def __serialiseWalk( self, parameter, value, rootName ) :
@@ -186,7 +186,7 @@ class ParameterParser :
 			# bail if no serialiser available, unless it's a CompoundParameter in which case we'll content
 			# ourselves with serialising the children if no serialiser is available.
 			raise RuntimeError( "No serialiser available for parameter \"%s\"" % parameter.name )
-		
+
 		result = []
 		if serialiser is not None :
 			# we have a registered serialiser - use it
@@ -197,7 +197,7 @@ class ParameterParser :
 					## \todo: remove this in Cortex 8
 					IECore.warning( "ParameterParser: Serialiser \"%s\" has a deprecated signature. Should be func( parameter, value )" % serialiser )
 					s = serialiser( parameter )
-				
+
 				if not isinstance( s, list ) :
 					raise RuntimeError( "Serialiser did not return a list." )
 				for ss in s :
@@ -220,9 +220,9 @@ class ParameterParser :
 					result += self.__serialiseWalk( childParm, value[childParm.name], path )
 				else :
 					result += self.__serialiseWalk( childParm, value, path )
-		
+
 		return result
-		
+
 	@classmethod
 	## Registers a parser and serialiser for a new Parameter type.
 	def registerType( cls, typeId, parser, serialiser ) :
@@ -269,7 +269,7 @@ def __parseBool( args, parameter ) :
 			# flag, then we turn it on.
 			parameter.setValidatedValue( IECore.BoolData( True ) )
 			return
-			
+
 	parameter.setValidatedValue( IECore.BoolData( validValues[args[0]] ) )
 	del args[0]
 
@@ -356,11 +356,11 @@ def __parseString( args, parameter ) :
 def __parseStringArray( args, parameter ) :
 
 	d = IECore.StringVectorData()
-	
+
 	acceptFlags = False
 	if "parser" in parameter.userData() and "acceptFlags" in parameter.userData()["parser"] :
 		acceptFlags = parameter.userData()["parser"]["acceptFlags"].value
-	
+
 	if acceptFlags :
 		d.extend( args )
 		del args[:]
@@ -429,7 +429,7 @@ def __parseNumericArray( dataType, integer, args, parameter ) :
 				done = True
 
 	parameter.setValidatedValue( d )
-	
+
 def __parseTransformationMatrix( dataType, args, parameter ) :
 
 	if not len(args) :
@@ -448,32 +448,32 @@ def __parseTransformationMatrix( dataType, args, parameter ) :
 
 	t.translate = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	t.scale = vecType( float(args[0]), float(args[1]), float(args[2] ) )
-	del args[0:3]	
-	
+	del args[0:3]
+
 	t.shear = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	t.rotate = angleType( float(args[0]), float(args[1]), float(args[2] ) )
 	t.rotate.setOrder( getattr( angleType.Order, args[3] ) )
 	del args[0:4]
-	
+
 	t.rotationOrientation = orientationType( float(args[0]), float(args[1]), float(args[2] ), float(args[3]) )
 	del args[0:4]
-	
+
 	t.rotatePivot = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	t.rotatePivotTranslation = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	t.scalePivot = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	t.scalePivotTranslation = vecType( float(args[0]), float(args[1]), float(args[2] ) )
 	del args[0:3]
-	
+
 	parameter.setValidatedValue( dataType(t) )
 
 def __parseObject( args, parameter ) :
@@ -484,25 +484,25 @@ def __parseObject( args, parameter ) :
 	v = IECore.Object.load( mio, "v" )
 	parameter.setValidatedValue( v )
 	del args[0]
-	
+
 def __serialiseString( parameter, value ) :
-	
+
 	return [ value.value ]
 
 def __serialiseStringArray( parameter, value ) :
-	
+
 	return list(value)
 
 def __serialiseUsingStr( parameter, value ) :
-	
+
 	return [ str(value) ]
-	
+
 def __serialiseUsingSplitStr( parameter, value ) :
-	
-	return str(value).split()	
+
+	return str(value).split()
 
 def _serialiseUsingRepr( parameter, value ) :
-	
+
 	return [ "python:" + repr(value) ]
 
 def __serialiseTransformationMatrix( parameter, value ) :
@@ -527,7 +527,7 @@ def __serialiseObject( parameter, value ) :
 	value.save( mio, "v" )
 	buf = mio.buffer()
 	return [ IECore.decToHexCharVector( buf ) ]
-	
+
 ParameterParser.registerType( IECore.BoolParameter.staticTypeId(), __parseBool, __serialiseUsingStr )
 ParameterParser.registerType( IECore.IntParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.IntData, True, args, parameter ) ), __serialiseUsingStr )
 ParameterParser.registerType( IECore.FloatParameter.staticTypeId(), ( lambda args, parameter : __parseNumeric( IECore.FloatData, False, args, parameter ) ), __serialiseUsingStr )

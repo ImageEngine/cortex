@@ -68,7 +68,7 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		bool hasEntry( const IndexedIO::EntryID &name ) const;
 
 		const IndexedIO::EntryID &currentEntryId() const;
-		
+
 		void entryIds( IndexedIO::EntryIDList &names ) const;
 
 		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const;

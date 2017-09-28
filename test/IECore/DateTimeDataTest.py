@@ -89,19 +89,19 @@ class DateTimeDataTest( unittest.TestCase ) :
 		self.assertEqual( dd, eval( repr(dd) ) )
 
 	def testHash( self ) :
-	
+
 		self.assertEqual(
 			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash(),
 			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash()
 		)
-		
+
 		self.assertNotEqual(
 			IECore.DateTimeData( datetime.datetime( 2009, 2, 12 ) ).hash(),
 			IECore.DateTimeData( datetime.datetime( 2009, 3, 12 ) ).hash()
 		)
-		
+
 	def testHasBase( self ) :
-	
+
 		self.failIf( IECore.DateTimeData.hasBase() )
 
 	def testImplicitConversion( self ) :

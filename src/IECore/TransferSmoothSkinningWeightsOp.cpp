@@ -61,7 +61,7 @@ TransferSmoothSkinningWeightsOp::TransferSmoothSkinningWeightsOp()
 		"The target influence name",
 		new StringData
 	);
-	
+
 	m_sourceInfluenceNamesParameter = new StringVectorParameter(
 		"sourceInfluenceNames",
 		"The source influence names",
@@ -79,22 +79,22 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	const std::string target = m_targetInfluenceNameParameter->getTypedValue();
 	const std::vector<std::string> &sources = m_sourceInfluenceNamesParameter->getTypedValue();
 	if ( !sources.size() )
 	{
 		throw IECore::Exception( "TransferSmoothSkinningWeightsOp: you need to specify source influences" );
 	}
-	
+
 	const std::vector<std::string> &influenceNames = skinningData->influenceNames()->readable();
-	
+
 	const std::vector<std::string>::const_iterator foundSame = find( sources.begin(), sources.end(), target );
 	if ( foundSame != sources.end() )
 	{
 		throw IECore::Exception( ( boost::format( "TransferSmoothSkinningWeightsOp: \"%s\" cannot be both source and target" ) % target ).str() );
 	}
-	
+
 	const std::vector<std::string>::const_iterator location = find( influenceNames.begin(), influenceNames.end(), target );
 	if ( location == influenceNames.end() )
 	{
@@ -102,11 +102,11 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 	}
 	int targetIndex = location - influenceNames.begin();
 	std::vector<int> sourceIndices;
-	
+
 	for ( unsigned i=0; i < sources.size(); i++ )
 	{
 		std::string name = sources[i];
-		
+
 		const std::vector<std::string>::const_iterator found = find( influenceNames.begin(), influenceNames.end(), name );
 		if ( found == influenceNames.end() )
 		{
@@ -120,23 +120,23 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 	decompressionOp->inputParameter()->setValidatedValue( skinningData );
 	decompressionOp->copyParameter()->setTypedValue( false );
 	decompressionOp->operate();
-	
+
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
 	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
-	
+
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
 		float targetWeight = 0.0;
 		int targetCurrentIndex = 0;
-		
+
 		for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 		{
 			int current = pointIndexOffsets[i] + j;
 			int index = pointInfluenceIndices[current];
 			float weight = pointInfluenceWeights[current];
-			
+
 			if( index == targetIndex )
 			{
 				targetWeight += weight;
@@ -154,7 +154,7 @@ void TransferSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 		}
 		pointInfluenceWeights[ targetCurrentIndex ] = targetWeight;
 	}
-	
+
 	// re-compress
 	CompressSmoothSkinningDataOpPtr compressionOp = new CompressSmoothSkinningDataOp;
 	compressionOp->inputParameter()->setValidatedValue( skinningData );

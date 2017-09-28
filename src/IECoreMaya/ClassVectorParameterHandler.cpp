@@ -63,14 +63,14 @@ MStatus ClassVectorParameterHandler::setClasses( IECore::ParameterPtr parameter,
 	try
 	{
 		boost::python::object pythonParameter( parameter );
-		
+
 		boost::python::list classes;
 		for( unsigned i=0; i<parameterNames.length(); i++ )
 		{
 			classes.append( make_tuple( parameterNames[i].asChar(), classNames[i].asChar(), classVersions[i] ) );
 		}
-				
-		pythonParameter.attr( "setClasses" )( classes );	
+
+		pythonParameter.attr( "setClasses" )( classes );
 	}
 	catch( boost::python::error_already_set )
 	{
@@ -92,7 +92,7 @@ MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr param
 	{
 		boost::python::object pythonParameter( boost::const_pointer_cast<IECore::Parameter>( parameter ) );
 		boost::python::list classesInfo = extract<list>( pythonParameter.attr( "getClasses" )( true ) );
-		
+
 		int l = boost::python::len( classesInfo );
 		for( int i=0; i<l; i++ )
 		{
@@ -101,7 +101,7 @@ MStatus ClassVectorParameterHandler::getClasses( IECore::ConstParameterPtr param
 			classNames.append( MString( extract<const char *>( c[2] ) ) );
 			classVersions.append( extract<int>( c[3] ) );
 		}
-				
+
 		return MS::kSuccess;
 	}
 	catch( boost::python::error_already_set )
@@ -125,32 +125,32 @@ void ClassVectorParameterHandler::currentClasses( const MPlug &plug, MStringArra
 		MObject parameterNamesObject = plug.child( 0 ).asMObject();
 		MFnStringArrayData fnSAD( parameterNamesObject );
 		fnSAD.copyTo( parameterNames );
-		
+
 		MObject classNamesObject = plug.child( 1 ).asMObject();
 		fnSAD.setObject( classNamesObject );
 		fnSAD.copyTo( classNames );
-		
+
 		MObject classVersionsObject = plug.child( 2 ).asMObject();
 		MFnIntArrayData fnIAD( classVersionsObject );
 		fnIAD.copyTo( classVersions );
 		return;
 	}
-	
+
 	parameterNames.clear();
 	classNames.clear();
 	classVersions.clear();
-	
+
 	MFnStringArrayData fnSAD( plug.asMObject() );
 	if ( fnSAD.length() == 0 )
 	{
 		return;
 	}
-	
+
 	if ( fnSAD.length() % 3 != 0 )
 	{
 		throw( IECore::InvalidArgumentException( ( plug.name() + " needs 3 values per class. Expected a series of name, className, version." ).asChar() ) );
 	}
-	
+
 	MStringArray storedClassInfo = fnSAD.array();
 	for ( unsigned i=0; i < storedClassInfo.length(); i+=3 )
 	{
@@ -158,15 +158,15 @@ void ClassVectorParameterHandler::currentClasses( const MPlug &plug, MStringArra
 		{
 			throw( IECore::InvalidArgumentException( ( "Version values of " + plug.name() + " must represent an integer" ).asChar() ) );
 		}
-		
+
 		parameterNames.append( storedClassInfo[i] );
 		classNames.append( storedClassInfo[i+1] );
 		classVersions.append( storedClassInfo[i+2].asInt() );
 	}
 }
-				
+
 MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
-{	
+{
 	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
 	{
 		return MS::kFailure;
@@ -182,17 +182,17 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 		{
 			return MS::kFailure;
 		}
-		
+
 		if( fnCAttr.numChildren()!=3 )
 		{
 			return MS::kFailure;
 		}
-		
+
 		MObject parameterNamesAttr = fnCAttr.child( 0 );
 		MFnTypedAttribute fnTAttr( parameterNamesAttr );
 		if( !fnTAttr.hasObj( parameterNamesAttr ) )
 		{
-			return MS::kFailure;	
+			return MS::kFailure;
 		}
 		if( fnTAttr.name() != fnCAttr.name() + "__parameterNames" )
 		{
@@ -202,12 +202,12 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 		{
 			return MS::kFailure;
 		}
-		
+
 		MObject classNamesAttr = fnCAttr.child( 1 );
 		fnTAttr.setObject( classNamesAttr );
 		if( !fnTAttr.hasObj( classNamesAttr ) )
 		{
-			return MS::kFailure;	
+			return MS::kFailure;
 		}
 		if( fnTAttr.name() != fnCAttr.name() + "__classNames" )
 		{
@@ -217,12 +217,12 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 		{
 			return MS::kFailure;
 		}
-		
+
 		MObject classVersionsAttr = fnCAttr.child( 2 );
 		fnTAttr.setObject( classVersionsAttr );
 		if( !fnTAttr.hasObj( classVersionsAttr ) )
 		{
-			return MS::kFailure;	
+			return MS::kFailure;
 		}
 		if( fnTAttr.name() != fnCAttr.name() + "__classVersions" )
 		{
@@ -233,12 +233,12 @@ MStatus ClassVectorParameterHandler::doUpdate( IECore::ConstParameterPtr paramet
 			return MS::kFailure;
 		}
 	}
-	
+
 	if( !storeClasses( parameter, plug ) )
 	{
 		return MS::kFailure;
 	}
-	
+
 	return finishUpdating( parameter, plug );
 }
 
@@ -247,7 +247,7 @@ MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::Param
 	MStringArray parameterNames;
 	MStringArray classNames;
 	MIntArray classVersions;
-	
+
 	try
 	{
 		currentClasses( plug, parameterNames, classNames, classVersions );
@@ -257,32 +257,32 @@ MStatus ClassVectorParameterHandler::doRestore( const MPlug &plug, IECore::Param
 		MGlobal::displayError( MString( "ClassVectorParameterHandler::doRestore : " ) + e.what() );
 		return MS::kFailure;
 	}
-	
+
 	return setClasses( parameter, parameterNames, classNames, classVersions );
 }
 
 MPlug ClassVectorParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const
-{	
+{
 	if( !parameter || !parameter->isInstanceOf( IECore::ClassVectorParameterTypeId ) )
 	{
 		return MPlug();
 	}
-	
+
 	MFnTypedAttribute fnTAttr;
 	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray );
 	MPlug result = finishCreating( parameter, attribute, node );
-	
+
 	if( !storeClasses( parameter, result ) )
 	{
 		return MPlug(); // failure
 	}
-	
+
 	if( !finishUpdating( parameter, result ) )
 	{
 		return MPlug(); // failure
 	}
-		
-	return result; 
+
+	return result;
 }
 
 MStatus ClassVectorParameterHandler::doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const
@@ -300,7 +300,7 @@ MStatus ClassVectorParameterHandler::doSetValue( const MPlug &plug, IECore::Para
 	{
 		return MS::kFailure;
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -311,7 +311,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 	{
 		boost::python::object pythonParameter( boost::const_pointer_cast<IECore::Parameter>( parameter ) );
 		boost::python::object classes = pythonParameter.attr( "getClasses" )( true );
-	
+
 		MStringArray storedParameterNames;
 		MStringArray storedClassNames;
 		MIntArray storedClassVersions;
@@ -319,20 +319,20 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 		unsigned storedParameterNamesLength = storedParameterNames.length();
 		unsigned storedClassNamesLength = storedClassNames.length();
 		unsigned storedClassVersionsLength = storedClassVersions.length();
-		
+
 		MStringArray updatedClassInfo;
 		// compatibility for the deprecated compound plug behaviour
 		MStringArray parameterNames;
 		MStringArray classNames;
 		MIntArray classVersions;
-		
+
 		size_t l = IECorePython::len( classes );
 		bool changed = l != storedParameterNamesLength || l != storedClassNamesLength || l != storedClassVersionsLength;
-		
+
 		for( size_t i=0; i<l; i++ )
 		{
 			object cl = classes[i];
-			
+
 			MString parameterName = boost::python::extract<const char *>( cl[1] )();
 			updatedClassInfo.append( parameterName );
 			parameterNames.append( parameterName );
@@ -340,7 +340,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 			{
 				changed = true;
 			}
-			
+
 			MString className = boost::python::extract<const char *>( cl[2] )();
 			updatedClassInfo.append( className );
 			classNames.append( className );
@@ -348,7 +348,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 			{
 				changed = true;
 			}
-			
+
 			int classVersion = boost::python::extract<int>( cl[3] );
 			MString classVersionStr;
 			classVersionStr.set( classVersion, 0 );
@@ -359,7 +359,7 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 				changed = true;
 			}
 		}
-		
+
 		// only set the plug values if the new value is genuinely different, as otherwise
 		// we end up generating unwanted reference edits.
 		if ( changed )
@@ -395,6 +395,6 @@ MStatus ClassVectorParameterHandler::storeClasses( IECore::ConstParameterPtr par
 		MGlobal::displayError( MString( "ClassVectorParameterHandler::setClass : " ) + e.what() );
 		return MS::kFailure;
 	}
-	
+
 	return MS::kSuccess;
 }

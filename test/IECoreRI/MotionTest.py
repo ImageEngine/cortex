@@ -46,9 +46,9 @@ class MotionTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/motionTest.rib" )
 		with IECore.WorldBlock( r ) :
-		
+
 			with IECore.MotionBlock( r, [ 1.75, 2.25 ] ) :
-			
+
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
 

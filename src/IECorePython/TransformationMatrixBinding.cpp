@@ -82,7 +82,7 @@ void bindTypedTransformationMatrix(const char *bindName)
 		.add_property( "transform",	&TransformationMatrix<T>::transform )
 
 		.def(self == self)
-		
+
 		/// \todo repr/str
 	;
 }

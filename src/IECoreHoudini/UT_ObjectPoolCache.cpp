@@ -61,7 +61,7 @@ int64 UT_ObjectPoolCache::utReduceCacheSizeBy( int64 amount )
 	size_t max = m_pool->getMaxMemoryUsage();
 	m_pool->setMaxMemoryUsage( begin - amount );
 	m_pool->setMaxMemoryUsage( max );
-	
+
 	return begin - m_pool->memoryUsage();
 }
 
@@ -88,11 +88,11 @@ bool UT_ObjectPoolCache::utHasMinSize() const
 UT_ObjectPoolCache *UT_ObjectPoolCache::defaultObjectPoolCache()
 {
 	static UT_ObjectPoolCache *defaultCache = 0;
-	
+
 	if ( !defaultCache )
 	{
 		defaultCache = new UT_ObjectPoolCache( "Cortex Object Pool", IECore::ObjectPool::defaultObjectPool() );
 	}
-	
+
 	return defaultCache;
 }

@@ -52,16 +52,16 @@ def __savePresetMenuModifierVectorClass( menuDefinition, parent, parameter, node
 	__savePresetMenuModifier( menuDefinition, parameter, node, parent=parent )
 
 def __savePresetMenuModifier( menuDefinition, parameter, node, parent=None ) :
-		
+
 	fnPh = FnParameterisedHolder( node )
 	plugPath = fnPh.parameterPlugPath( parameter )
-	
+
 	if len( menuDefinition.items() ):
 		menuDefinition.append( "/PresetsDivider", { "divider" : True } )
-	
+
 	saveItemName = "/Presets/Save Preset..."
 	loadItemName = "/Presets/Load Preset..."
-	
+
 	# If we are actually a class in a vector, use slightly different names
 	# so that its more obvious whats going on
 	## \todo Add an item to save the class as a preset, rather than its values.
@@ -71,7 +71,7 @@ def __savePresetMenuModifier( menuDefinition, parameter, node, parent=None ) :
 	):
 		saveItemName = "/Presets/Save Parameter Values Preset..."
 		loadItemName = "/Presets/Load Parameter Values Preset..."
-	
+
 	menuDefinition.append( saveItemName, { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.SavePresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
 	menuDefinition.append( loadItemName, { "command" : IECore.curry( maya.cmds.evalDeferred, 'import IECoreMaya; IECoreMaya.LoadPresetUI( "%s", "%s" )' % ( fnPh.fullPathName(), plugPath ) ) } )
 
@@ -88,38 +88,38 @@ def SavePresetUI( nodeName, attribute ) :
 
 	fnPh = FnParameterisedHolder( nodeName )
 	rootParam = fnPh.plugParameter( attribute )
-	
+
 	PresetsUI( nodeName, rootParam ).save()
-	
+
 def LoadPresetUI( nodeName, attribute ) :
 
 	fnPh = FnParameterisedHolder( nodeName )
 	rootParam = fnPh.plugParameter( attribute )
-		
+
 	PresetsUI( nodeName, rootParam ).load()
 ### @}
 
 ### This class provides a UI for loading and saving presets for nodes
 ### derived from the ParameterisedHolder class. Currently, it creates
 ### BasicPresets in one of the locations set in the relevant search
-### paths for the Parameterised objects. Categories, and titles aren't 
+### paths for the Parameterised objects. Categories, and titles aren't
 ### yet implemented.
 ###
-### \todo Currently, the LoadUI, has to instantiate every preset in the 
+### \todo Currently, the LoadUI, has to instantiate every preset in the
 ### search path, and call 'applicableTo'. This is potentially a huge
 ### bottle neck, so, well see what happens when we use it in earnest...
 class PresetsUI() :
-	
+
 	def __init__( self, node, rootParameter=None ) :
-	
+
 		try :
 			fn = FnParameterisedHolder( node )
 		except:
 			raise ValueError, 'PresetsUI: "%s" is not a valid Parameterised object.' % node
-	
+
 		self.__node = node
 		self.__rootParameter = rootParameter
-	
+
 	### Call to save a preset.
 	def save( self ) :
 		SaveUI( self.__node, self.__rootParameter )
@@ -129,7 +129,7 @@ class PresetsUI() :
 	## called with the Preset instance after the user has selected
 	## a number of prameters
 	def copy( self, callback ) :
-		CopyUI( self.__node, self.__rootParameter, callback )	
+		CopyUI( self.__node, self.__rootParameter, callback )
 
 	### Call to load a preset.
 	def load( self ) :
@@ -142,12 +142,12 @@ class PresetsUI() :
 	## it's needed for the user to select parameters within a hierarchy.
 	def selectParameters( self, callback ) :
 		SelectUI( self.__node, self.__rootParameter, callback )
-		
+
 
 # Private implementation classes
 
 # This is a base class for all the UIs which need to display a list of available parameters
-# and obtain a subset which the user is interested in. Thi takes care of drawing a list in 
+# and obtain a subset which the user is interested in. Thi takes care of drawing a list in
 # a form layout. Derived classes can then edit/add to this layout to add additional controls.
 #   self._fnP will contain a parameterised holder around the node passed to the constructor.
 #   self._rootParamter will contain the rootParameter passed to the constructor.
@@ -160,7 +160,7 @@ class ParamSelectUI( UIElement ) :
 
 		self._fnP = FnParameterisedHolder( node )
 
-		parameterised = self._fnP.getParameterised()		
+		parameterised = self._fnP.getParameterised()
 		self._rootParameter = rootParameter if rootParameter else parameterised[0].parameters()
 
 		self._window = maya.cmds.window(
@@ -175,7 +175,7 @@ class ParamSelectUI( UIElement ) :
 
 		self._scroll = maya.cmds.scrollLayout( parent=self._form )
 
-		self._selector = ParameterSelector( self._rootParameter, self._scroll, autoCollapseDepth=autoCollapseDepth )	
+		self._selector = ParameterSelector( self._rootParameter, self._scroll, autoCollapseDepth=autoCollapseDepth )
 
 		maya.cmds.formLayout( self._form, edit=True,
 
@@ -193,10 +193,10 @@ class ParamSelectUI( UIElement ) :
 class SelectUI( ParamSelectUI ) :
 
 	def __init__( self, node, rootParameter=None, callback=None, label="Select" ) :
-	
+
 		self.__callback = callback
 		self.__node = node
-	
+
 		ParamSelectUI.__init__( self, node, rootParameter )
 
 		self.__button = maya.cmds.button(
@@ -204,22 +204,22 @@ class SelectUI( ParamSelectUI ) :
 			parent=self._form,
 			height=30,
 			c=self._createCallback( self.__doAction )
-		)	
-	
+		)
+
 		maya.cmds.formLayout( self._form, edit=True,
 
 			attachForm=[	( self._scroll, 			"top",  	0  ),
 							( self._scroll, 			"left", 	0  ),
-							( self._scroll, 			"right",	0  ), 
+							( self._scroll, 			"right",	0  ),
 							( self.__button, 			"bottom",	0  ),
 							( self.__button, 			"left", 	0  ),
 							( self.__button, 			"right",	0  ) ],
-							
+
 			attachControl=[	( self._scroll, 	"bottom", 	0, 	self.__button ),  ],
 		)
 
 		maya.cmds.showWindow( self._window )
-		
+
 	def __doAction( self ) :
 
 		parameters = self._selector.getActiveParameters()
@@ -227,24 +227,24 @@ class SelectUI( ParamSelectUI ) :
 		if not parameters :
 			maya.cmds.confirmDialog( message="Please select at least one paremeter.", button="OK" )
 			return
-	
+
 		maya.cmds.deleteUI( self._window )
-		
-		if self.__callback:	
+
+		if self.__callback:
 			self.__callback( self.__node, self._rootParameter, parameters )
 
 # The CopyUI extends the selector to create a preset from the users selection, and call a callback
-# passing that preset.	
+# passing that preset.
 class CopyUI( SelectUI ) :
 
 	def __init__( self, node, rootParameter=None, callback=None ) :
-	
-		self.__callback = callback	
+
+		self.__callback = callback
 		SelectUI.__init__( self, node, rootParameter, callback=self.__copyCallback, label="copy" )
-	
+
 	# The copy callback simply creates a preset, then forwards this to whatever other callback was registered
 	def __copyCallback( self, node, rootParameter, parameters ) :
-	
+
 		preset = IECore.BasicPreset( self._fnP.getParameterised()[0], rootParameter, parameters=parameters )
 		self.__callback( preset )
 
@@ -252,10 +252,10 @@ class CopyUI( SelectUI ) :
 class SaveUI( ParamSelectUI ) :
 
 	def __init__( self, node, rootParameter=None, autoCollapseDepth=2 ) :
-	
+
 		fnP = FnParameterisedHolder( node )
-		parameterised = fnP.getParameterised()	
-	
+		parameterised = fnP.getParameterised()
+
 		self.__envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
 
 		if self.__envVar not in os.environ :
@@ -263,7 +263,7 @@ class SaveUI( ParamSelectUI ) :
 			"this variable to point to one or more paths.\nPresets can then be saved to these "+\
 			"locations.", button="OK" )
 			return
-	
+
 		ParamSelectUI.__init__( self, node, rootParameter, autoCollapseDepth=autoCollapseDepth )
 
 		self.__location = SearchPathMenu(
@@ -274,7 +274,7 @@ class SaveUI( ParamSelectUI ) :
 			cw = ( 1, 65 ),
 			adj = 2,
 		)
-	
+
 		self.__name = maya.cmds.textFieldGrp(
 			parent = self._form,
 			label = "Name:",
@@ -282,30 +282,30 @@ class SaveUI( ParamSelectUI ) :
 			columnWidth = ( 1, 65 )
 		)
 
-		descripLabel = maya.cmds.text( 
+		descripLabel = maya.cmds.text(
 			parent = self._form,
 			label = "Description:",
 			align = "left",
 		)
-		
+
 		self.__description = maya.cmds.scrollField(
 			parent = self._form,
 			numberOfLines = 5,
 			height = 100,
-		)	
+		)
 
 		self.__saveButton = maya.cmds.button(
 			l = "Save",
 			parent = self._form,
 			height = 30,
 			c = self._createCallback( self.__doSave )
-		)	
-	
+		)
+
 		maya.cmds.formLayout( self._form, edit=True,
 
 			attachForm=[	( self._scroll, 			"top",  	0  ),
 							( self._scroll, 			"left", 	0  ),
-							( self._scroll, 			"right",	0  ), 
+							( self._scroll, 			"right",	0  ),
 							( self.__location.menu(),	"left", 	10 ),
 							( self.__location.menu(),	"right",	10 ),
 							( self.__name,				"left", 	10 ),
@@ -319,7 +319,7 @@ class SaveUI( ParamSelectUI ) :
 							( self.__saveButton, 		"right",	0  ) ],
 
 			attachControl=[	( self._scroll, 	 		"bottom",	5,	self.__location.menu() 	),
-							( self.__location.menu(),	"bottom",   3,  self.__name  		    ), 
+							( self.__location.menu(),	"bottom",   3,  self.__name  		    ),
 							( self.__name,				"bottom",   5,  descripLabel	    ),
 							( descripLabel,				"bottom",   5,  self.__description	    ),
 							( self.__description,				"bottom",   5,  self.__saveButton	    ), ]
@@ -341,7 +341,7 @@ class SaveUI( ParamSelectUI ) :
 		# We have to also make sure that the name doesnt begin with a number,
 		# as it wouldn't be a legal class name in the resulting py stub.
 		name = re.sub( '^[0-9]+', "", name )
-		
+
 		description = maya.cmds.scrollField( self.__description, query=True, text=True )
 
 		parameters = self._selector.getActiveParameters()
@@ -351,21 +351,21 @@ class SaveUI( ParamSelectUI ) :
 			return
 
 		path = self.__location.getValue()
-		
+
 		self._fnP.setParameterisedValues()
-		
+
 		preset = IECore.BasicPreset(
 			self._fnP.getParameterised()[0],
 			self._rootParameter,
 			parameters = parameters
 		)
-		
-		preset.save( 
+
+		preset.save(
 			path,
 			name,
 			description = description,
 		)
-			
+
 		maya.cmds.deleteUI( self._window )
 
 
@@ -375,11 +375,11 @@ class LoadUI( UIElement ) :
 
 		fn = FnParameterisedHolder( node )
 		parameterised = fn.getParameterised()
-		
+
 		self.__parameterised = parameterised
-		
+
 		# Just using 'not' on a ClassVector takes its length, which equates to False if its empty.
-		self.__rootParameter = rootParameter if rootParameter is not None else parameterised[0].parameters()	
+		self.__rootParameter = rootParameter if rootParameter is not None else parameterised[0].parameters()
 
 		self.__fnP = fn
 		self.__envVar = parameterised[3].replace( "_PATHS", "_PRESET_PATHS" )
@@ -387,28 +387,28 @@ class LoadUI( UIElement ) :
 		if self.__envVar not in os.environ :
 			maya.cmds.confirmDialog( message="Environment variable not set:\n\n$%s\n\nPlease set "%self.__envVar+\
 			"this variable to point to one or more paths.\nPresets can then be loaded from these "+\
-			"locations.", button="OK" )		
+			"locations.", button="OK" )
 			return
-			
+
 		paths = os.environ[self.__envVar]
 		sp = IECore.SearchPath( os.path.expandvars( paths ), ":" )
 		self.__classLoader = IECore.ClassLoader( sp )
-		
+
 		presets = self.__getPresets( parameterised[0], self.__rootParameter )
 		if not presets:
 			maya.cmds.confirmDialog( message="No presets applicable to %s found in the current search paths ($%s)." % ( self.__rootParameter.name, self.__envVar ), button="OK" )
 			return
-			
+
 		self.__loadedPresets = {}
 
 		self.__window = maya.cmds.window( title="Load: %s" % node, width=300, height=500 )
-		
+
 		UIElement.__init__( self, self.__window )
 
 		self.__form = maya.cmds.formLayout()
 
 		self.__infoColumn = PresetInfo( parent=self.__form )
-		self.__selector = PresetSelector( presets, self.__form, allowMultiSelection=True, selectCommand=self._createCallback( self.__selectionChanged ) )	
+		self.__selector = PresetSelector( presets, self.__form, allowMultiSelection=True, selectCommand=self._createCallback( self.__selectionChanged ) )
 		self.__loadButton = maya.cmds.button( l="Load", parent=self.__form, height=30, c=self._createCallback( self.__doLoad ) )
 
 		if not presets:
@@ -430,55 +430,55 @@ class LoadUI( UIElement ) :
 		)
 
 		maya.cmds.showWindow( self.__window )
-	
+
 	def __selectionChanged( self, *args ) :
-		
+
 		self.__loadedPresets = {}
-		
+
 		classNames = self.__classLoader.classNames()
 		selected = [ s for s in self.__selector.selected() if s in classNames ]
 		presets = []
 		for s in selected:
 			self.__loadedPresets[s] = self.__classLoader.load( s )()
 			presets.append( self.__loadedPresets[s] )
-		
+
 		self.__infoColumn.setPresets( presets )
-	
+
 	def __doLoad( self ) :
 
 		loaded = self.__loadedPresets.keys()
 		selected = [ s for s in self.__selector.selected() if s in loaded ]
-		
+
 		if not selected :
 			maya.cmds.confirmDialog( message="Please select at least one preset to load.", button="OK" )
 			return
 
-		parameterised = self.__fnP.getParameterised()[0]	
+		parameterised = self.__fnP.getParameterised()[0]
 
 		# Make sure the any parameter changes get set back into
 		# the parameterised objects for each preset.
 		self.__infoColumn.commitParameters()
-	
+
 		# We need to make sure we have the right values in the first place.
 		self.__fnP.setParameterisedValues()
-	
-		with self.__fnP.parameterModificationContext() : 
-	
+
+		with self.__fnP.parameterModificationContext() :
+
 			for s in selected:
 				# These should have been loaded by the selectCommand callback
 				self.__loadedPresets[s]( self.__parameterised, self.__rootParameter )
-	
-		maya.cmds.deleteUI( self.__window )	
+
+		maya.cmds.deleteUI( self.__window )
 		self.__loadedPrestes = {}
 
 	def __getPresets( self, parameterised, parameter ) :
-		
+
 		validPresets = []
-	
+
 		self.__classLoader.refresh()
 		presets = self.__classLoader.classNames( "*" )
-				
-		for name in presets:	
+
+		for name in presets:
 			p = self.__classLoader.load( name )()
 			if not isinstance( p, IECore.Preset ):
 				continue
@@ -493,36 +493,36 @@ class LoadUI( UIElement ) :
 class PresetInfo() :
 
 	def __init__( self, parent=None ) :
-	
+
 		oldParent = maya.cmds.setParent( q=True )
 		if not parent :
 			parent = oldParent
 
 		maya.cmds.setParent( parent )
-	
-		self.__parent = parent	
+
+		self.__parent = parent
 		self.__layout = maya.cmds.columnLayout( co=( "both", 5 ), adj=True )
-		
+
 		maya.cmds.setParent( oldParent )
 
 	def layout( self ):
 		return self.__layout
 
 	def setPresets( self, presets=() ) :
-	
+
 		children = maya.cmds.columnLayout( self.__layout, q=True, ca=True )
 		if children :
 			for c in children:
 				maya.cmds.deleteUI( c )
-			
+
 		self.__parameterHolders = {}
-		
+
 		for p in presets:
-			
+
 			meta = p.metadata()
-			
+
 			name = meta["title"] if "description" in meta else p.__class__
-			
+
 			maya.cmds.text(
 				parent = self.__layout,
 				label = name,
@@ -530,7 +530,7 @@ class PresetInfo() :
 				recomputeSize = True,
 				align = "left"
 			)
-		
+
 			wrapWidth = ( int(maya.cmds.layout( self.__parent, query=True, width=True )) - 5 ) / 5
 
 			if "description" in meta and meta["description"]:
@@ -538,25 +538,25 @@ class PresetInfo() :
 				lines = descripWrap.split( "\n" )
 				for l in lines:
 					maya.cmds.text( parent=self.__layout, label=l, font="smallPlainLabelFont", align="left" )
-			
+
 			maya.cmds.separator(
 				parent = self.__layout,
 				width = 5,
 				height = 10,
 				style = "none",
 			)
-			
+
 			if len( p.parameters().keys() ) :
-				self.__parameterHolders[ name ] = FnTransientParameterisedHolderNode.create( self.__layout, p )		
-	
+				self.__parameterHolders[ name ] = FnTransientParameterisedHolderNode.create( self.__layout, p )
+
 	# This must be called before querying the parameters of any presets passed to this UI
 	# section, in order to update the Parameterised object with any changed made in the UI
 	def commitParameters( self ) :
-	
+
 		for s in self.__parameterHolders.keys():
 			 self.__parameterHolders[s].setParameterisedValues()
 			 del  self.__parameterHolders[s]
-		
+
 # Provides an optionMenu to select from paths in the supplied search path string.
 class SearchPathMenu() :
 
@@ -572,7 +572,7 @@ class SearchPathMenu() :
 		self.__menu = maya.cmds.optionMenuGrp( *args, **kwargs )
 
 		for p in searchPaths.split( ":" ) :
-			maya.cmds.menuItem( label = p ) 
+			maya.cmds.menuItem( label = p )
 
 		maya.cmds.setParent( oldParent )
 
@@ -602,8 +602,8 @@ class PresetSelector( UIElement ) :
 
 		if not presets:
 
-			maya.cmds.textScrollList( 
-				self.__list, 
+			maya.cmds.textScrollList(
+				self.__list,
 				edit=True,
 				append="No presets found...",
 				enable=False
@@ -617,15 +617,15 @@ class PresetSelector( UIElement ) :
 				if path not in presetsByPath :
 					presetsByPath[path] = []
 				presetsByPath[path].append( name )
-			
+
 			for ( path, names ) in presetsByPath.items() :
-				
+
 				maya.cmds.textScrollList( self.__list, edit=True, append=path )
-				
+
 				for name in names :
-					
+
 					maya.cmds.textScrollList( self.__list, edit=True, append=name )
-				
+
 				maya.cmds.textScrollList( self.__list, edit=True, append="" )
 
 		maya.cmds.setParent( oldParent )
@@ -641,19 +641,19 @@ class PresetSelector( UIElement ) :
 
 	# \return The Maya ELF handle for the list.
 	def list( self ) :
-		return self.__list	
+		return self.__list
 
 # Provides a maya.cmds.columnLayout containing a hierarchical selection
 # interface for the supplied parameter. Each parameter is presented with
-# A checkbox to allow selection. 
+# A checkbox to allow selection.
 class ParameterSelector( UIElement ) :
 
 	def __init__( self, parameter, parent=None, autoCollapseDepth=2 ) :
 
-		oldParent = maya.cmds.setParent( query=True )		
+		oldParent = maya.cmds.setParent( query=True )
 
-		if not parent :	
-			parent = oldParent	
+		if not parent :
+			parent = oldParent
 
 		self.__mainColumn = maya.cmds.columnLayout( adj=True, parent=parent )
 
@@ -666,20 +666,20 @@ class ParameterSelector( UIElement ) :
 
 	# \return A list of the selected parameters.
 	def getActiveParameters( self ) :
-		return  self.__controls.getActiveParameters() 
+		return  self.__controls.getActiveParameters()
 
 	# Provides an interface for selecting an individual parameter.
 	class Parameter() :
 
 		def __init__( self, parameter, **kw ) :
-			
+
 			self.__depth = kw["depth"] if "depth" in kw else 0
-			
+
 			self.__checkbox = maya.cmds.checkBox( label=parameter.name, align="left", value=True )
 			self.__parameter = parameter
-	
+
 		# Sets the active state of the parameter
-		def setState( self, state ) :		
+		def setState( self, state ) :
 			maya.cmds.checkBox( self.__checkbox, edit=True, value=state )
 
 		# Returns the active state of the parameter
@@ -688,7 +688,7 @@ class ParameterSelector( UIElement ) :
 			state = maya.cmds.checkBox( self.__checkbox, query=True, value=True )
 			if state:
 				return True
-			else :	
+			else :
 				return False
 
 		# \return the IECore Parameter represented by the control.
@@ -701,14 +701,14 @@ class ParameterSelector( UIElement ) :
 		def getActiveParameters( self ) :
 			if self.getState():
 				return [ self.__parameter ]
-			else: 
+			else:
 				return []
 
-	# Provides a hierarchical interface for selecting parameters in a CompoundParameter 
+	# Provides a hierarchical interface for selecting parameters in a CompoundParameter
 	class ParameterGroup( UIElement ) :
 
 		def __init__( self, compoundParameter, **kw ) :
-		
+
 			self.__depth = kw["depth"] if "depth" in kw else 0
 			self.__autoCollapseDepth = kw["autoCollapseDepth"] if "autoCollapseDepth" in kw else 2
 			self.__parameter = compoundParameter
@@ -724,8 +724,8 @@ class ParameterSelector( UIElement ) :
 				name = compoundParameter["label"].getTypedValue()
 
 			collapsed = False if self.__depth < self.__autoCollapseDepth else True
-		
-			self.__frame = maya.cmds.frameLayout( 
+
+			self.__frame = maya.cmds.frameLayout(
 				label = name,
 				labelIndent = 5,
 				marginWidth = 5,
@@ -740,7 +740,7 @@ class ParameterSelector( UIElement ) :
 			for p in compoundParameter.values() :
 
 				if isinstance( p, IECore.CompoundParameter ) :
-					self.__children[ p.name ] = ParameterSelector.ParameterGroup( 
+					self.__children[ p.name ] = ParameterSelector.ParameterGroup(
 													p,
 													depth = self.__depth+1,
 													autoCollapseDepth = self.__autoCollapseDepth
@@ -758,7 +758,7 @@ class ParameterSelector( UIElement ) :
 		# Called by a callback or directly, to set the state of all child
 		# parameters of the CompundParameter. If a state is not provided
 		# then the curent checked state of the group is propogated
-		def syncState( self, state=None ):	
+		def syncState( self, state=None ):
 
 			if state == None:
 				state = self.getState()
@@ -771,24 +771,24 @@ class ParameterSelector( UIElement ) :
 			maya.cmds.checkBox( self.__checkbox, edit=True, value=state )
 			self.syncState( state )
 
-		# \return (Bool) The checked state of the group itself. Note, this does not 
+		# \return (Bool) The checked state of the group itself. Note, this does not
 		# take into account whether or not any children are checked.
 		def getState( self ) :
 
 			state = maya.cmds.checkBox( self.__checkbox, query=True, value=True )
 			if state == 1 :
 				return True
-			else :	
+			else :
 				return False
 
 		# \return A list of active parameters in the group.
 		def getActiveParameters( self ) :
 
 			params = []
-			
+
 			if self.getState():
 				params.append( self.__parameter )
-			
+
 			for p in self.__children.values() :
 				params.extend( p.getActiveParameters() )
 

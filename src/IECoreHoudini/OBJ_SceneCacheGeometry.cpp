@@ -68,7 +68,7 @@ OP_TemplatePair *OBJ_SceneCacheGeometry::buildParameters()
 	{
 		templatePair = new OP_TemplatePair( OBJ_SceneCacheNode<OBJ_Geometry>::buildParameters() );
 	}
-	
+
 	return templatePair;
 }
 
@@ -76,11 +76,11 @@ bool OBJ_SceneCacheGeometry::runCreateScript()
 {
 	UT_String path;
 	getFullPath( path );
-	
+
 	// add the standard mantra geometry parms
 	UT_String script( "opproperty -f -F Render " + path.toStdString() + " mantra default_geometry" );
 	executeHscriptScript( script, 0 );
-	
+
 	return OBJ_Geometry::runCreateScript();
 }
 
@@ -90,7 +90,7 @@ void OBJ_SceneCacheGeometry::expandHierarchy( const SceneInterface *scene )
 	{
 		return;
 	}
-	
+
 	doExpandGeometry( scene );
 	setInt( pExpanded.getToken(), 0, 0, 1 );
 }
@@ -105,7 +105,7 @@ void OBJ_SceneCacheGeometry::pushToHierarchy()
 	getShapeFilter( shapeFilter );
 	getFullPathName( fullPathName );
 	GeometryType geomType = getGeometryType();
-	
+
 	UT_PtrArray<OP_Node*> children;
 	int numSceneSops = getOpsByName( SOP_SceneCacheSource::typeName, children );
 	for ( int i=0; i < numSceneSops; ++i )
@@ -126,10 +126,10 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	const char *name = ( scene->name() == SceneInterface::rootName ) ? "root" : scene->name().c_str();
 	OP_Node *opNode = createNode( SOP_SceneCacheSource::typeName, name );
 	SOP_SceneCacheSource *sop = reinterpret_cast<SOP_SceneCacheSource*>( opNode );
-	
+
 	sop->referenceParent( pFile.getToken() );
 	sop->referenceParent( pRoot.getToken() );
-	
+
 	bool objectOnly = true;
 	Space space = getSpace();
 	SOP_SceneCacheSource::Space sopSpace = SOP_SceneCacheSource::Object;
@@ -138,7 +138,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 		objectOnly = false;
 		sopSpace = SOP_SceneCacheSource::Path;
 	}
-	
+
 	UT_String attribFilter, attribCopy, tagFilter, shapeFilter, fullPathName;
 	getAttributeFilter( attribFilter );
 	sop->setAttributeFilter( attribFilter );
@@ -151,7 +151,7 @@ void OBJ_SceneCacheGeometry::doExpandGeometry( const SceneInterface *scene )
 	sop->setShapeFilter( shapeFilter );
 	getFullPathName( fullPathName );
 	sop->setFullPathName( fullPathName );
-	
+
 	sop->setSpace( sopSpace );
 	sop->setObjectOnly( objectOnly );
 	sop->setGeometryType( (SOP_SceneCacheSource::GeometryType)getGeometryType() );

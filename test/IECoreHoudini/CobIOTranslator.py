@@ -40,12 +40,12 @@ import os
 import shutil
 
 class TestCobIOTranslator( IECoreHoudini.TestCase ) :
-	
+
 	__testDir = "test/cobIO"
 	__testFile = "%s/testCobIO.cob" % __testDir
 	__testPDCFile = "%s/testPdcIO.pdc" % __testDir
 	__testPTCFile = "%s/testPtcIO.ptc" % __testDir
-	
+
 	def torus( self ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
@@ -57,15 +57,15 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 			mountain.parm("offsetx").setExpression("$FF")
 		else:
 			mountain.parm("offset1").setExpression( "$FF" )
-		
+
 		return mountain
-		
+
 	def points( self, inNode=None ) :
 		if not inNode :
 			inNode = self.torus()
-		
+
 		return inNode.createOutputNode( "scatter" )
-	
+
 	def curves( self, inNode=None ) :
 		points = self.points( inNode )
 		add = points.createOutputNode( "add" )
@@ -73,55 +73,55 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		add.parm( "switcher1" ).set( 1 )
 		convert = add.createOutputNode( "convert" )
 		convert.parm( "totype" ).set( 4 )
-		
+
 		return convert
-	
+
 	def reader( self ) :
 		geo = hou.node( "/obj/geo1" )
 		if not geo :
 			obj = hou.node( "/obj" )
 			geo = obj.createNode( "geo", run_init_scripts=False )
-		
+
 		reader = geo.createNode( "file" )
 		reader.parm( "file" ).set( TestCobIOTranslator.__testFile )
 		reader.parm( "filemode" ).set( 1 )
-		
+
 		return reader
-	
+
 	def writer( self, inNode ) :
 		writer = inNode.createOutputNode( "file" )
 		writer.parm( "file" ).set( TestCobIOTranslator.__testFile )
 		writer.parm( "filemode" ).set( 2 )
-		
+
 		return writer
 
 	def testReadWritePoints( self ) :
 		points = self.points()
 		writer = self.writer( points )
 		reader = self.reader()
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
-	
+
 	def testReadWriteMesh( self ) :
 		mesh = self.torus()
 		writer = self.writer( mesh )
 		reader = self.reader()
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 		result = converter.convert()
@@ -131,13 +131,13 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		curves = self.curves()
 		writer = self.writer( curves )
 		reader = self.reader()
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
@@ -151,13 +151,13 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		merge.setInput( 1, curves )
 		writer = self.writer( merge )
 		reader = self.reader()
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 		result = converter.convert()
@@ -166,23 +166,23 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 	def testCantReadBadCob( self ) :
 		writer = self.writer( self.torus() )
 		reader = self.reader()
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		f = file( "testCobIO.cob", "w" )
 		f.write( "this is not a real cob" )
 		f.close()
-		
+
 		reader.parm( "file" ).set( "testCobIO.cob" )
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
-		
+
 		os.remove( "testCobIO.cob" )
-		
+
 	def testCobWithNonPrimitiveData( self ) :
 		IECore.ObjectWriter( IECore.V3f( 1 ), TestCobIOTranslator.__testFile ).write()
 		reader = self.reader()
@@ -192,40 +192,40 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(prims), 1 )
 		self.assertEqual( prims[0].type(), hou.primType.Custom )
 		self.assertEqual( prims[0].vertices()[0].point().number(), 0 )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assertTrue( isinstance( converter, IECoreHoudini.FromHoudiniCortexObjectConverter ) )
 		result = converter.convert()
 		self.assertEqual( result, IECore.V3fData( IECore.V3f( 1 ) ) )
-	
+
 	def testReadWritePDC( self ) :
 		points = self.points()
 		writer = self.writer( points )
 		writer.parm( "file" ).set( TestCobIOTranslator.__testPDCFile )
 		reader = self.reader()
 		reader.parm( "file" ).set( TestCobIOTranslator.__testPDCFile )
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
 		writer.cook()
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
-	
+
 	def testReadWritePTC( self ) :
 		points = self.points()
 		writer = self.writer( points )
 		writer.parm( "file" ).set( TestCobIOTranslator.__testPTCFile )
 		reader = self.reader()
 		reader.parm( "file" ).set( TestCobIOTranslator.__testPTCFile )
-		
+
 		self.assert_( not reader.geometry() )
 		self.assert_( reader.errors() )
-		
+
 		# If IECoreRI isn't available, then we just can't read/write PTCs
 		try :
 			import IECoreRI
@@ -234,17 +234,17 @@ class TestCobIOTranslator( IECoreHoudini.TestCase ) :
 			self.assert_( writer.errors() )
 			self.assert_( not reader.geometry() )
 			return
-		
+
 		writer.cook()
-		
+
 		self.assert_( reader.geometry() )
 		self.assert_( not reader.errors() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( reader )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		self.assert_( result.isInstanceOf( IECore.TypeId( IECore.TypeId.PointsPrimitive ) ) )
-	
+
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		if not os.path.exists( TestCobIOTranslator.__testDir ) :

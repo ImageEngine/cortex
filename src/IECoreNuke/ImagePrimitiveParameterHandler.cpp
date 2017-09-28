@@ -45,7 +45,7 @@ ParameterHandler::Description<ImagePrimitiveParameterHandler> ImagePrimitivePara
 ImagePrimitiveParameterHandler::ImagePrimitiveParameterHandler()
 {
 }
-		
+
 int ImagePrimitiveParameterHandler::minimumInputs( const IECore::Parameter *parameter )
 {
 	return 1;
@@ -71,16 +71,16 @@ void ImagePrimitiveParameterHandler::setParameterValue( IECore::Parameter *param
 	if( iOp )
 	{
 		DD::Image::Tile tile( *iOp, iOp->requested_channels(), true );
-		
+
 		FromNukeTileConverterPtr converter = new FromNukeTileConverter( &tile );
 		IECoreImage::ImagePrimitivePtr image = boost::static_pointer_cast<IECoreImage::ImagePrimitive>( converter->convert() );
-		
+
 		/// \todo Sort out data window vs display window and suchlike.
-		
+
 		parameter->setValue( image );
 		return;
 	}
-	
+
 	// no input - set parameter to default value.
 	parameter->setValue( parameter->defaultValue()->copy() );
 }

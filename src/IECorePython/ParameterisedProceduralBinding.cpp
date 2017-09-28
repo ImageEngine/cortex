@@ -62,7 +62,7 @@ class ParameterisedProceduralWrapper : public RunTimeTypedWrapper<ParameterisedP
 			: RunTimeTypedWrapper<ParameterisedProcedural>( self, description )
 		{
 		}
-		
+
 		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
 		{
 			if( isSubclassed() )

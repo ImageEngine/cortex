@@ -76,9 +76,9 @@ MStatus DrawableHolder::initialize()
 {
 	MStatus s = inheritAttributesFrom( ParameterisedHolderSurfaceShape::typeName );
 	assert( s );
-	
+
 	MFnNumericAttribute nAttr;
-	
+
 	aDraw = nAttr.create( "draw", "draw", MFnNumericData::kBoolean, 1, &s );
 	assert( s );
 	nAttr.setReadable( true );
@@ -86,10 +86,10 @@ MStatus DrawableHolder::initialize()
 	nAttr.setStorable( true );
 	nAttr.setConnectable( true );
 	nAttr.setHidden( false );
-	
+
 	s = addAttribute( aDraw );
 	assert( s );
-	
+
 	return s;
 }
 
@@ -124,7 +124,7 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 	{
 		return m_scene;
 	}
-	
+
 	m_scene = 0;
 	IECore::RunTimeTypedPtr drawable = getParameterised();
 	IECore::ParameterisedInterface *drawableInterface = dynamic_cast<IECore::ParameterisedInterface *>( drawable.get() );
@@ -136,18 +136,18 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			IECoreGL::RendererPtr renderer = new IECoreGL::Renderer;
 			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 			renderer->worldBegin();
-			
+
 				{
 					IECorePython::ScopedGILLock gilLock;
 					boost::python::object pythonDrawable( drawable );
 					pythonDrawable.attr( "draw" )( renderer );
 				}
-				
+
 			renderer->worldEnd();
-			
+
 			m_scene = renderer->scene();
 			m_scene->setCamera( 0 );
-			
+
 		}
 		catch( boost::python::error_already_set )
 		{
@@ -167,7 +167,7 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			IECore::msg( IECore::Msg::Error, "DrawableHolder::scene", "Exception thrown in MapGenerator::draw" );
 		}
 	}
-	
+
 	return m_scene;
 
 }

@@ -55,7 +55,7 @@ class TestPDCReader( unittest.TestCase ) :
 		r.parameters()["realType"].setValue( "native" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
-		
+
 		self.assertEqual( r.numParticles(), 25 )
 		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {
@@ -80,7 +80,7 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( len( attrNames ), len( expectedAttrNamesAndTypes ) )
 		for i in expectedAttrNamesAndTypes.keys() :
 			self.assert_( i in attrNames )
-		
+
 		expectedConvertedAttrNamesAndTypes = {
 			"particleId" : IECore.DoubleVectorData,
 			"mass" : IECore.DoubleVectorData,
@@ -115,12 +115,12 @@ class TestPDCReader( unittest.TestCase ) :
 			self.assert_( abs( p.z ) < 1.1 )
 
 		self.assertEqual( c["particleId"].data, IECore.DoubleVectorData( range( 0, 25 ) ) )
-		
+
 	def testReadNoPrimVarConversion( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( type( r ), IECore.PDCParticleReader )
-		
+
 		r["realType"].setValue( "native" )
 		r["convertPrimVarNames"].setValue( IECore.BoolData( False ) )
 		self.assertFalse( r.parameters()["convertPrimVarNames"].getTypedValue() )
@@ -164,7 +164,7 @@ class TestPDCReader( unittest.TestCase ) :
 			self.assert_( abs( p.z ) < 1.1 )
 
 		self.assertEqual( c["particleId"].data, IECore.DoubleVectorData( range( 0, 25 ) ) )
-		
+
 	def testFiltering( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
@@ -187,7 +187,7 @@ class TestPDCReader( unittest.TestCase ) :
 		for attr in convertedAttributesToLoad :
 			self.assertEqual( p.numPoints, p[attr].data.size() )
 
-		# compare filtering with int ids		
+		# compare filtering with int ids
 		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.intId.250.pdc" )
 
 		attributesToLoad = [ "position", "age" ]
@@ -318,7 +318,7 @@ class TestPDCReader( unittest.TestCase ) :
 		self.assertEqual( p.resultParameter().validTypes(), [IECore.TypeId.PointsPrimitive] )
 
 	def testWarnings( self ) :
-		
+
 		p = IECore.PointsPrimitive( 3 )
 		p["d"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
 		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
@@ -329,19 +329,19 @@ class TestPDCReader( unittest.TestCase ) :
 		with c :
 			r.read()
 		self.assertEqual( len( c.messages ), 0 )
-		
+
 		r["percentage"].setTypedValue( 10 )
 		with c :
-			r.read()	
+			r.read()
 
 		self.assertEqual( len( c.messages ), 1 )
 		self.assertEqual( c.messages[0].level, IECore.Msg.Level.Warning )
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/particleShape1.250.pdc" ) :
 			os.remove( "test/particleShape1.250.pdc" )
-			
+
 if __name__ == "__main__":
 	unittest.main()
 

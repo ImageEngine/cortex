@@ -55,7 +55,7 @@ float ieFilteredAbs( float x, fw )
 	{
 		return sign(t) * 0.5 * t*t ;
 	}
-	
+
 	float x0 = x - 0.5*fw;
 	float x1 = x0 + fw;
 	return ( integral( x1 ) - integral( x0 ) ) / fw;

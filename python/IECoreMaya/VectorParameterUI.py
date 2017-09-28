@@ -40,7 +40,7 @@ import IECoreMaya
 class VectorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+
 		self.__dim = parameter.getTypedValue().dimensions()
 		if self.__dim == 2:
 			layout = maya.cmds.rowLayout(
@@ -54,7 +54,7 @@ class VectorParameterUI( IECoreMaya.ParameterUI ) :
 			)
 		else:
 			raise RuntimeError("Unsupported vector dimension in VectorParameterUI")
-		
+
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, layout, **kw )
 
 		self.__fields = []

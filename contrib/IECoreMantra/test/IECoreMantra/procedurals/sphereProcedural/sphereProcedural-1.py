@@ -35,18 +35,18 @@
 import IECore
 
 class sphereProcedural( IECore.ParameterisedProcedural ) :
-	""" 
+	"""
 	This is a 'sphere-like' procedural, it makes a cube and then asks
-	mantra to smooth it with the rendersubd attribute. 
+	mantra to smooth it with the rendersubd attribute.
 	"""
 
 	def __init__( self ):
 		IECore.ParameterisedProcedural.__init__( self, "Renders a sphere." )
-	
+
 	def doBound( self, args ):
 		r = 1.0
 		return IECore.Box3f( IECore.V3f( -r,-r,-r ), IECore.V3f( r,r,r ) )
-	
+
 	def doRenderState(self, renderer, args):
 		pass
 

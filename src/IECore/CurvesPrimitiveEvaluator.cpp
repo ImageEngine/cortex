@@ -106,7 +106,7 @@ T CurvesPrimitiveEvaluator::Result::primVar( const PrimitiveVariable &primVar, c
 		case PrimitiveVariable::Vertex :
 			{
 				const vector<T> &d = static_cast<TypedData<vector<T> > *>( primVar.data.get() )->readable();
-				
+
 				if ( m_linear )
 				{
 					return	(T)( coefficients[0] * d[m_vertexDataIndices[0]] +
@@ -245,14 +245,14 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 			numSegments = (numVertices - 4 ) / basis.step + 1;
 		}
 	}
-	
+
 	float vv = v * numSegments;
 	unsigned segment = min( (unsigned)fastFloatFloor( vv ), numSegments - 1 );
 	m_segmentV = vv - segment;
-	
+
 	unsigned o = evaluator->m_vertexDataOffsets[m_curveIndex];
 	unsigned i = segment * basis.step;
-	
+
 	if( linear )
 	{
 		m_coefficients[0] = 1.0f - m_segmentV;
@@ -273,7 +273,7 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 	{
 		basis.coefficients( m_segmentV, m_coefficients );
 		basis.derivativeCoefficients( m_segmentV, m_derivativeCoefficients );
-		
+
 		if( periodic )
 		{
 			m_vertexDataIndices[0] = o + i;
@@ -304,30 +304,30 @@ void CurvesPrimitiveEvaluator::Result::init( unsigned curveIndex, float v, const
 struct CurvesPrimitiveEvaluator::Line
 {
 	public :
-	
+
 		Line( const V3f &p1, const V3f &p2, unsigned curveIndex, float vMin, float vMax )
 			:	m_lineSegment( p1, p2 ), m_curveIndex( curveIndex ), m_vMin( vMin ), m_vMax( vMax )
 		{
 		}
-	
+
 		/// \todo I wonder if this could be derived on the fly from a min/max flag per axis and the
 		/// bound for the Line? It would save memory and perhaps lead to speedups.
 		const LineSegment3f &lineSegment() const { return m_lineSegment; }
 		int curveIndex() const { return m_curveIndex; }
 		float vMin() const { return m_vMin; }
 		float vMax() const { return m_vMax; }
-	
+
 		static int linesPerCurveSegment() { return 20; };
-	
+
 	private :
-	
+
 		LineSegment3f m_lineSegment;
 		int m_curveIndex;
 		float m_vMin;
 		float m_vMax;
-		
+
 };
-				
+
 //////////////////////////////////////////////////////////////////////////
 // Implementation of Evaluator
 //////////////////////////////////////////////////////////////////////////
@@ -343,11 +343,11 @@ CurvesPrimitiveEvaluator::CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curv
 	{
 		m_vertexDataOffsets.push_back( vertexDataOffset );
 		vertexDataOffset += m_verticesPerCurve[i];
-		
+
 		m_varyingDataOffsets.push_back( varyingDataOffset );
 		varyingDataOffset += m_curvesPrimitive->variableSize( PrimitiveVariable::Varying, i );
 	}
-	
+
 	PrimitiveVariableMap::iterator pIt = m_curvesPrimitive->variables.find( "P" );
 	if( pIt==m_curvesPrimitive->variables.end() )
 	{
@@ -419,7 +419,7 @@ bool CurvesPrimitiveEvaluator::closestPoint( const Imath::V3f &p, PrimitiveEvalu
 	float distSquared = Imath::limits<float>::max();
 	closestPointWalk( m_tree.rootIndex(), p, curveIndex, v, distSquared );
 	(typedResult->*typedResult->m_init)( curveIndex, v, this );
-	
+
 	return true;
 }
 
@@ -434,11 +434,11 @@ void CurvesPrimitiveEvaluator::closestPointWalk( Box3fTree::NodeIndex nodeIndex,
 		for( Box3fTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
 			const Line &line = m_treeLines[*perm - m_treeBounds.begin()];
-			
+
 			float t;
 			V3f cp = line.lineSegment().closestPointTo( p, t );
 			float d2 = (cp - p).length2();
-			
+
 			if( d2 < closestDistSquared )
 			{
 				closestDistSquared = d2;
@@ -455,7 +455,7 @@ void CurvesPrimitiveEvaluator::closestPointWalk( Box3fTree::NodeIndex nodeIndex,
 
 		float d2Low = ( closestPointInBox( p, m_tree.node( lowChild ).bound() ) - p ).length2();
 		float d2High = ( closestPointInBox( p, m_tree.node( highChild ).bound() ) - p ).length2();
-	
+
 		if( d2Low < d2High )
 		{
 			closestPointWalk( lowChild, p, curveIndex, v, closestDistSquared );
@@ -511,7 +511,7 @@ float CurvesPrimitiveEvaluator::integrateCurve( unsigned curveIndex, float vStar
 	(typedResult.*typedResult.m_init)( curveIndex, vStart, this );
 	Imath::V3f current;
 	Imath::V3f previous = typedResult.point();
-	
+
 	// take ten samples along the curve, and measure the length of the resulting polyline:
 	const float vStep = ( vEnd - vStart ) / samples;
 	float length = 0;
@@ -521,70 +521,70 @@ float CurvesPrimitiveEvaluator::integrateCurve( unsigned curveIndex, float vStar
 		v = vStart + vStep * i;
 		(typedResult.*typedResult.m_init)( curveIndex, v, this );
 		current = typedResult.point();
-		
+
 		length += ( current - previous ).length();
-		
+
 		previous = current;
 	}
-	
+
 	return length;
 }
 
 
 float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, float vEnd ) const
 {
-	
+
 	if( curveIndex >= m_verticesPerCurve.size() || vStart >= vEnd || vStart < 0.0f || vStart > 1.0f || vEnd < 0.0f || vEnd > 1.0f )
 	{
 		return 0.0f;
 	}
-	
+
 	size_t nSegments = m_curvesPrimitive->numSegments( curveIndex );
 	if ( m_curvesPrimitive->basis() == CubicBasisf::linear() )
 	{
-		
+
 		size_t curvePts = m_curvesPrimitive->variableSize( PrimitiveVariable::Vertex, curveIndex );
-		
+
 		const std::vector<V3f> &p = static_cast<const V3fVectorData *>( m_p.data.get() )->readable();
-		
+
 		float lowerPos = vStart * nSegments;
 		float upperPos = vEnd * nSegments;
-		
+
 		// find curve relative vertex indices that bound the interval we're measuring:
 		size_t lowerVertex = (unsigned)floor( lowerPos );
 		size_t upperVertex = (unsigned)ceil( upperPos );
-		
+
 		if( upperVertex == lowerVertex + 1 )
 		{
 			// the interval lands entirely in one segment, so we just measure the length of the segment
 			// and scale it by the appropriate factor:
-			
+
 			if( upperVertex == curvePts )
 			{
 				// this can happen if the curve's periodic:
 				upperVertex = 0;
 			}
-			
+
 			// offset into the main vertex list:
 			lowerVertex += m_vertexDataOffsets[ curveIndex ];
 			upperVertex += m_vertexDataOffsets[ curveIndex ];
-			
+
 			return ( p[ upperVertex ] - p[ lowerVertex ] ).length() * ( upperPos - lowerPos );
 		}
 		else
 		{
 			float length = 0.0f;
-			
+
 			float lowerFrac = lowerVertex + 1 - lowerPos;
 			float upperFrac = upperPos - ( upperVertex - 1 );
-			
+
 			// offset into the main vertex list:
 			lowerVertex += m_vertexDataOffsets[ curveIndex ];
 			upperVertex += m_vertexDataOffsets[ curveIndex ];
-			
+
 			// work out length in lower interval:
 			length = ( p[ lowerVertex + 1 ] - p[ lowerVertex ] ).length() * lowerFrac;
-			
+
 			// work out length in upper interval:
 			if( upperVertex - m_vertexDataOffsets[ curveIndex ] == curvePts )
 			{
@@ -595,7 +595,7 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 			{
 				length += ( p[ upperVertex ] - p[ upperVertex - 1 ] ).length() * upperFrac;
 			}
-			
+
 			// work out the intervals in between:
 			for( size_t currentVertex = lowerVertex + 1; currentVertex < ( upperVertex - 1 ); ++currentVertex )
 			{
@@ -603,18 +603,18 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 			}
 			return length;
 		}
-		
+
 	}
 	else
 	{
 		// find curve relative vertex indices that bound the interval we're measuring:
 		size_t lowerVertex = (unsigned)floor( vStart * nSegments );
 		size_t upperVertex = (unsigned)ceil( vEnd * nSegments );
-		
+
 		Result typedResult( m_p, false, m_curvesPrimitive->periodic() );
-		
+
 		const int curveSamples = 10;
-		
+
 		if( upperVertex - lowerVertex == 1 )
 		{
 			// entirely in a single interval, so just directly integrate with ten samples:
@@ -624,16 +624,16 @@ float CurvesPrimitiveEvaluator::curveLength( unsigned curveIndex, float vStart, 
 		{
 			// integrate from vStart to first control point after vStart:
 			float length = integrateCurve( curveIndex, vStart, ( lowerVertex + 1.0f ) / nSegments, curveSamples, typedResult );
-			
+
 			// measure the intervals between the start and end intervals:
 			for( size_t currentVertex = lowerVertex + 1; currentVertex < ( upperVertex - 1 ); ++currentVertex )
 			{
 				length += integrateCurve( curveIndex, float(currentVertex) / nSegments, float(currentVertex + 1) / nSegments, curveSamples, typedResult );
 			}
-			
+
 			// integrate from the last control point before vEnd to vEnd:
 			length += integrateCurve( curveIndex, ( upperVertex - 1.0f ) / nSegments, vEnd, curveSamples, typedResult );
-			
+
 			return length;
 		}
 	}
@@ -645,18 +645,18 @@ void CurvesPrimitiveEvaluator::buildTree()
 	{
 		return;
 	}
-	
+
 	TreeMutex::scoped_lock lock( m_treeMutex );
 	if( m_haveTree )
 	{
 		// another thread may have built the tree while we waited for the mutex
 		return;
 	}
-	
+
 	bool linear = m_curvesPrimitive->basis() == CubicBasisf::linear();
 	const std::vector<V3f> &p = static_cast<const V3fVectorData *>( m_p.data.get() )->readable();
 	PrimitiveEvaluator::ResultPtr result = createResult();
-	
+
 	size_t numCurves = m_curvesPrimitive->numCurves();
 	for( size_t curveIndex = 0; curveIndex<numCurves; curveIndex++ )
 	{
@@ -676,7 +676,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 					m_treeBounds.push_back( b );
 					m_treeLines.push_back( Line(  p[vertIndex-1], p[vertIndex], curveIndex, prevV, v ) );
 				}
-				prevV = v;				
+				prevV = v;
 			}
 		}
 		else
@@ -704,7 +704,7 @@ void CurvesPrimitiveEvaluator::buildTree()
 			}
 		}
 	}
-	
+
 	m_tree.init( m_treeBounds.begin(), m_treeBounds.end() );
 	m_haveTree = true;
 }

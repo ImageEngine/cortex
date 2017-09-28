@@ -53,13 +53,13 @@ MeshMergeOp::MeshMergeOp()
 		"The mesh to be merged with the input.",
 		new MeshPrimitive
 	);
-	
+
 	m_removePrimVarsParameter = new BoolParameter(
 		"removeNonMatchingPrimVars",
 		"If true, PrimitiveVariables that exist on one mesh and not the other will be removed. If false, the PrimitiveVariable data will be expanded using a default value.",
 		false
 	);
-	
+
 	parameters()->addParameter( m_meshParameter );
 	parameters()->addParameter( m_removePrimVarsParameter );
 }
@@ -212,12 +212,12 @@ struct MeshMergeOp::AppendPrimVars
 struct MeshMergeOp::PrependPrimVars
 {
 	typedef void ReturnType;
-	
+
 	PrependPrimVars( MeshPrimitive *mesh, const std::string &name, const PrimitiveVariable &primVar, const bool remove, std::map<ConstDataPtr, DataPtr> &visitedData )
 		:	m_mesh( mesh ), m_name( name ), m_primVar( primVar ), m_remove( remove ), m_visitedData( visitedData )
 	{
 	}
-	
+
 	template<typename T>
 	ReturnType operator()( const T *data )
 	{
@@ -231,13 +231,13 @@ struct MeshMergeOp::PrependPrimVars
 			{
 				data2 = runTimeCast<T>( dataIt->second );
 			}
-			
+
 			if ( !data2 )
 			{
 				typedef typename T::ValueType::value_type ValueType;
 				ValueType defaultValue = DefaultValue<ValueType>()();
 				size_t size = m_mesh->variableSize( m_primVar.interpolation ) - data->readable().size();
-				
+
 				data2 = new T();
 				data2->writable().insert( data2->writable().end(), size, defaultValue );
 
@@ -246,13 +246,13 @@ struct MeshMergeOp::PrependPrimVars
 				typename T::Ptr expandedData = runTimeCast<T>( m_primVar.expandedData() );
 				data2->writable().insert( data2->writable().end(), expandedData->readable().begin(), expandedData->readable().end() );
 			}
-			
+
 			m_mesh->variables[m_name] = PrimitiveVariable( m_primVar.interpolation, data2 );
-			
+
 			m_visitedData[data] = data2;
 		}
 	}
-	
+
 	private :
 
 		MeshPrimitive *m_mesh;
@@ -287,7 +287,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 	transform( vertexIds2.begin(), vertexIds2.end(), it, bind2nd( plus<int>(), vertexIdOffset ) );
 
 	mesh->setTopology( verticesPerFaceData, vertexIdsData, mesh->interpolation() );
-	
+
 	std::set<DataPtr> visitedData;
 	PrimitiveVariableMap::iterator pvIt;
 	for( pvIt=mesh->variables.begin(); pvIt!=mesh->variables.end(); pvIt++ )
@@ -299,7 +299,7 @@ void MeshMergeOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObje
 			despatchTypedData<AppendPrimVars, TypeTraits::IsVectorTypedData, DespatchTypedDataIgnoreError>( pvIt->second.data.get(), f );
 		}
 	}
-	
+
 	std::map<ConstDataPtr, DataPtr> visitedData2;
 	PrimitiveVariableMap::const_iterator pvIt2;
 	for ( pvIt2=mesh2->variables.begin(); pvIt2 != mesh2->variables.end(); pvIt2++ )

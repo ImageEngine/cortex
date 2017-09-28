@@ -85,7 +85,7 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 		/// Indicates whether this display driver will accept calls to
 		/// imageData() that respecify data sent by a previous
 		/// call. By accepting repeated data, it is possible to receive images
-		/// from progressive and/or rerendering renders. 
+		/// from progressive and/or rerendering renders.
 		virtual bool acceptsRepeatedData() const = 0;
 
 		/// Returns display window size.
@@ -108,9 +108,9 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 		/// Registers a new display driver type.
 		static void registerType( const std::string &typeName, CreatorFn creator );
 		//@}
-	
+
 	protected :
-	
+
 		/// Create a static const instance of one of these to automatically register a display driver type. Should
 		/// be templated on the type of the DisplayDriver.
 		template<typename T>
@@ -118,7 +118,7 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 		{
 			public :
 				DisplayDriverDescription();
-			private :			
+			private :
 				static DisplayDriverPtr creator( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 		};
 
@@ -130,7 +130,7 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 		Imath::Box2i m_displayWindow;
 		Imath::Box2i m_dataWindow;
 		std::vector<std::string> m_channelNames;
-		
+
 };
 
 }  // namespace IECoreImage

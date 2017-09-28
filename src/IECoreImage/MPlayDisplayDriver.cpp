@@ -62,7 +62,7 @@ struct MPlayDisplayDriver::ImageHeader
 		reserved[0] = 0;
 		reserved[1] = 0;
 	}
-	
+
 	int	magicNumber;
 	int	xRes;
 	int	yRes;
@@ -83,7 +83,7 @@ struct MPlayDisplayDriver::TileHeader
 		y0 = 0;
 		y1 = 0;
 	}
-	
+
 	TileHeader( const Box2i &box )
 	{
 		x0 = box.min.x;
@@ -91,7 +91,7 @@ struct MPlayDisplayDriver::TileHeader
 		y0 = box.min.y;
 		y1 = box.max.y;
 	}
-	
+
 	int	x0, x1;
 	int	y0, y1;
 };
@@ -109,7 +109,7 @@ struct MPlayDisplayDriver::PlaneHeader
 		reserved[2] = 0;
 		reserved[3] = 0;
 	}
-	
+
 	int	planeIndex;
 	int	nameLength;
 	int	dataType;
@@ -145,7 +145,7 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 		{
 			planeName = "C";
 		}
-		
+
 		if( !m_planes.size() || m_planes.rbegin()->name != planeName )
 		{
 			m_planes.push_back( Plane( planeName ) );
@@ -154,7 +154,7 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 		currentPlane->channelNames.push_back( channelName );
 		currentPlane->channelIndices.push_back( cIt - channelNames.begin() );
 	}
-	
+
 	// Validate that our planes match mplay requirements.
 	for( vector<Plane>::iterator pIt = m_planes.begin(); pIt != m_planes.end(); pIt++ )
 	{
@@ -166,7 +166,7 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 		{
 			throw Exception( "MPlayDisplayDriver only supports 1, 3, and 4 channel images" );
 		}
-		
+
 		// Make sure that the "C" plane is first, as otherwise MPlay
 		// gets a bit upset. It's ok to swap with the first plane because
 		// we already checked that one.
@@ -175,35 +175,35 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 			std::swap( *pIt, m_planes[0] );
 		}
 	}
-	
+
 	// Construct a command line calling imdisplay, and open it as a pipe
 	std::string commandLine = "imdisplay -f -p";
-	
+
 	commandLine += boost::str( boost::format( " -o %d %d" ) % displayWindow.min.x % displayWindow.min.y );
-	
+
 	V2i originalSize = displayWindow.size() + V2i( 1 );
 	commandLine += boost::str( boost::format( " -Z %d %d" ) % originalSize.x % originalSize.y );
-			
+
 	const StringData *extraArguments = parameters->member<StringData>( "imdisplayExtraArguments" );
 	if( extraArguments && extraArguments->readable().size() )
 	{
 		commandLine += " " + extraArguments->readable();
 	}
-		
+
 	m_imDisplayStdIn = popen( commandLine.c_str(), "w" );
 
 	// Pipe out our image header
 	ImageHeader header( dataWindow.size() + V2i( 1 ), m_planes.size() );
 	fwrite( &header, sizeof( ImageHeader ), 1, m_imDisplayStdIn );
-	
+
 	// Pipe out a header for each of our planes
 	for( vector<Plane>::const_iterator pIt = m_planes.begin(); pIt != m_planes.end(); pIt++ )
 	{
-		PlaneHeader planeHeader( *pIt, pIt - m_planes.begin() );	
+		PlaneHeader planeHeader( *pIt, pIt - m_planes.begin() );
 		fwrite( &planeHeader, sizeof( PlaneHeader ), 1, m_imDisplayStdIn );
 		fwrite( &(pIt->name[0]), pIt->name.size(), 1, m_imDisplayStdIn );
 	}
-	
+
 }
 
 MPlayDisplayDriver::~MPlayDisplayDriver()
@@ -226,36 +226,36 @@ bool MPlayDisplayDriver::acceptsRepeatedData() const
 }
 
 void MPlayDisplayDriver::imageData( const Imath::Box2i &box, const float *data, size_t dataSize )
-{	
+{
 	for( size_t planeIndex = 0; planeIndex < m_planes.size(); planeIndex++ )
 	{
 		const Plane &plane = m_planes[planeIndex];
-	
+
 		TileHeader planeHeader( planeIndex );
 		fwrite( &planeHeader, sizeof( planeHeader ), 1, m_imDisplayStdIn );
-	
+
 		TileHeader tileHeader( box );
 		fwrite( &tileHeader, sizeof( tileHeader ), 1, m_imDisplayStdIn );
-		
+
 		const size_t numPixels = ( box.size().x + 1 ) * ( box.size().y + 1 );
-		
+
 		// need to create interleaved data for the channels in the current plane
 		std::vector<float> planeData( plane.channelIndices.size() * numPixels );
 		const float *in = data;
 		float *out = &planeData[0];
 		const size_t numInChannels = channelNames().size();
 		const size_t numOutChannels = plane.channelIndices.size();
-								
+
 		for( size_t i=0; i<numPixels; ++i )
 		{
 			for( size_t c=0; c<numOutChannels; ++c )
 			{
 				*out++ = in[plane.channelIndices[c]];
-				
+
 			}
 			in += numInChannels;
 		}
-		
+
 		fwrite( &planeData[0], sizeof( float ), planeData.size(), m_imDisplayStdIn );
 	}
 }

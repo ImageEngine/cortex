@@ -83,7 +83,7 @@ static unsigned char g_delete[512] = {
 	1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
-	
+
 };
 
 ImageThinner::ImageThinner()
@@ -94,7 +94,7 @@ ImageThinner::ImageThinner()
 		"The threshold above which pixels are considered to be part of the foreground.",
 		0.5f
 	);
-	
+
 	parameters()->addParameter( thresholdParameter );
 }
 
@@ -117,7 +117,7 @@ void ImageThinner::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 	float threshold = thresholdParameter()->getNumericValue();
 
 	const V2i size = dataWindow.size() + V2i( 1 );
-	
+
 	for( unsigned i=0; i<channels.size(); i++ )
 	{
 		FloatVectorDataPtr floatData = runTimeCast<FloatVectorData>( channels[i] );
@@ -126,16 +126,16 @@ void ImageThinner::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 			throw Exception( "ImageThinner::modifyChannels : only float channels supported." );
 		}
 		std::vector<float> &channel = floatData->writable();
-		
+
 		// threshold the image first
 		for( std::vector<float>::iterator it=channel.begin(); it!=channel.end(); it++ )
 		{
 			*it = *it < threshold ? 0.0f : 1.0f;
 		}
-		
+
 		// then apply the graphics gems magic that i don't understand in the slightest
 		//////////////////////////////////////////////////////////////////////////////
-		
+
 		boost::multi_array_ref<float, 2> image( &channel[0], boost::extents[size.y][size.x] );
 
 		int	p, q; // Neighborhood maps of adjacent cells
@@ -160,7 +160,7 @@ void ImageThinner::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 				{
 					qb[x] = p = ((p<<1)&0006) | (image[0][x+1] > 0.5f);
 				}
-				
+
 				// Scan image for pixel deletion candidates
 
 				for( int y = 0; y < size.y-1; y++ )
@@ -190,7 +190,7 @@ void ImageThinner::modifyChannels( const Imath::Box2i &displayWindow, const Imat
 						count++;
 						image[y][size.x-1] = 0.f;
 					}
-					
+
 				}
 
 				// Process bottom scan line

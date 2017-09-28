@@ -52,7 +52,7 @@ static IndexedIO::EntryID g_sizeEntry("size");
 		Data::memoryUsage( accumulator );																	\
 		accumulator.accumulate( &readable(), sizeof( TNAME::ValueType ) + readable().capacity() * sizeof( TNAME::ValueType::value_type ) );	\
 	}																										\
-	
+
 #define IE_CORE_DEFINEVECTORTYPEDDATATRAITSSPECIALIZATION( TNAME )											\
 	template <>																									\
 	size_t TNAME::baseSize() const																		\

@@ -44,20 +44,20 @@ class BoolParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		BoolParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
-				
+
 	private :
-	
+
 		bool m_storage;
 		DD::Image::Knob *m_knob;
-	
+
 		static Description<BoolParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

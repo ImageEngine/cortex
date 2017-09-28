@@ -115,7 +115,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 		case V3fVectorDataTypeId :
 		case V3fDataTypeId :
 		case V3dDataTypeId :
-			
+
 			// find what kind of geometric object this data is supposed to represent:
 			GeometricData::Interpretation interpretation;
 			switch( d->typeId() )
@@ -198,7 +198,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 
 const void *ParameterList::value( const IECore::Data *d )
 {
-	
+
 	switch( d->typeId() )
 	{
 		case StringDataTypeId :
@@ -216,7 +216,7 @@ const void *ParameterList::value( const IECore::Data *d )
 			}
 			if( v.size() )
 			{
-				return (&*(m_charPtrs.rbegin())) - ( v.size() - 1 );			
+				return (&*(m_charPtrs.rbegin())) - ( v.size() - 1 );
 			}
 			else
 			{
@@ -228,10 +228,10 @@ const void *ParameterList::value( const IECore::Data *d )
 			}
 		}
 		case BoolDataTypeId :
-		
+
 			m_ints.push_back( static_cast<const BoolData *>( d )->readable() );
 			return &*(m_ints.rbegin());
-		
+
 		// convert double precision types to single precision:
 		case M44dDataTypeId :
 			{
@@ -277,10 +277,10 @@ const void *ParameterList::value( const IECore::Data *d )
 			return &*(m_floats.rbegin());
 
 		default :
-		
+
 			return despatchTypedData< TypedDataAddress, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d ) );
 
-	
+
 	}
 }
 
@@ -319,7 +319,7 @@ void ParameterList::accumulateReservations( const IECore::Data *d, size_t &numSt
 	{
 		return;
 	}
-	
+
 	numStrings++; // for the formatted parameter name
 	IECore::TypeId t = d->typeId();
 	switch( t )
@@ -395,7 +395,7 @@ void ParameterList::appendInt( char *&str, size_t n )
 		*str++ = '0';
 		return;
 	}
-	
+
 	str += numPlaces( n );
 	char* cc = str;
 	--cc;
@@ -421,7 +421,7 @@ void ParameterList::appendString( char *&str, const std::string &toAppend )
 void ParameterList::buildPositionsString( char*& str, const std::string& name, size_t arraySize )
 {
 	str = new char[ 6 + name.size() + 10 + numPlaces( arraySize ) + 2 ];
-	
+
 	char* c = str;
 	appendString( c, "float ", 6 );
 	appendString( c, name );
@@ -434,7 +434,7 @@ void ParameterList::buildPositionsString( char*& str, const std::string& name, s
 void ParameterList::buildColorValuesString( char*& str, const std::string& name, size_t arraySize )
 {
 	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
-	
+
 	char* c = str;
 	appendString( c, "color ", 6 );
 	appendString( c, name );
@@ -447,7 +447,7 @@ void ParameterList::buildColorValuesString( char*& str, const std::string& name,
 void ParameterList::buildFloatValuesString( char*& str, const std::string& name, size_t arraySize )
 {
 	str = new char[ 6 + name.size() + 7 + numPlaces( arraySize ) + 2 ];
-	
+
 	char* c = str;
 	appendString( c, "float ", 6 );
 	appendString( c, name );
@@ -464,7 +464,7 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 	{
 		return;
 	}
-	
+
 	// \todo: Investigate caching these parameter name strings so we don't have to allocate memory all the time.
 
 	// we have to deal with the spline types separately, as they map to two shader parameters rather than one.
@@ -542,10 +542,10 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 			if( isArray )
 			{
 				// manually build boost::str( boost::format( "%s %s[%d]" ) % t % name % arraySize ):
-				
+
 				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 + numPlaces( arraySize ) + 2 ];
 				char* c = m_tokens.back();
-				
+
 				appendString( c, t, typeNameLen );
 				*c++ = ' ';
 				appendString( c, name );
@@ -557,10 +557,10 @@ void ParameterList::appendParameter( const std::string &name, const IECore::Data
 			else
 			{
 				// maually build string( t ) + " " + name ):
-				
+
 				m_tokens.back() = new char[ typeNameLen + 1 + name.size() + 1 ];
 				char *c = m_tokens.back();
-				
+
 				appendString( c, t, typeNameLen );
 				*c++ = ' ';
 				appendString( c, name );

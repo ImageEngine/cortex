@@ -40,31 +40,31 @@ import _IECoreNuke
 class FnOpHolder( IECoreNuke.FnParameterisedHolder ) :
 
 	def __init__( self, node ) :
-	
+
 		IECoreNuke.FnParameterisedHolder.__init__( self, node )
 
 	def setOp( self, className, classVersion=None ) :
-	
+
 		self.setParameterised( className, classVersion, "IECORE_OP_PATHS" )
-		
+
 	def getOp( self ) :
-	
+
 		return self.getParameterised()[0]
-	
+
 	## Executes the node, returning the result of the Op. You may also
 	# use nuke.execute() directly on an OpHolder node, but in this case
 	# the result is not returned (which you might not need).
 	def execute( self ) :
-	
+
 		nuke.execute( self.node(), nuke.frame(), nuke.frame() )
 		return _IECoreNuke._opHolderExecuteResult()
 
 	@staticmethod
 	def create( nodeName, className, classVersion=None ) :
-	
+
 		node = nuke.createNode( "ieOp" )
 		node.setName( nodeName )
 		fnOH = FnOpHolder( node )
 		fnOH.setOp( className, classVersion )
-		
+
 		return fnOH

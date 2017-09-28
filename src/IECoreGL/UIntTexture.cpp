@@ -65,14 +65,14 @@ ImagePrimitivePtr UIntTexture::imagePrimitive() const
 	GLint height = 0;
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height );
-	
+
 	std::vector<unsigned int> data( width * height );
 	glGetTexImage( GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &data[0] );
-		
+
 	UIntVectorDataPtr uiData = new UIntVectorData();
 	std::vector<unsigned int> &ui = uiData->writable();
 	ui.resize( width * height );
-	
+
 	unsigned int i = 0;
 	for( int y=height-1; y>=0; y-- )
 	{
@@ -82,7 +82,7 @@ ImagePrimitivePtr UIntTexture::imagePrimitive() const
 			ry[x] = data[i++];
 		}
 	}
-	
+
 	Imath::Box2i imageExtents( Imath::V2i( 0, 0 ), Imath::V2i( width-1, height-1 ) );
 	ImagePrimitivePtr image = new ImagePrimitive( imageExtents, imageExtents );
 	image->channels["Y"] = uiData;

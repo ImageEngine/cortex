@@ -60,13 +60,13 @@ ParameterHandler::Description<ClassVectorParameterHandler> ClassVectorParameterH
 ClassVectorParameterHandler::ClassVectorParameterHandler()
 {
 }
-		
+
 void ClassVectorParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
-{	
+{
 	beginGroup( parameter, knobName, f );
-		
+
 		childKnobs( parameter, knobName, f );
-		
+
 		addEditKnobs( parameter, knobName, f );
 
 	endGroup( parameter, knobName, f );
@@ -80,7 +80,7 @@ void ClassVectorParameterHandler::setParameterValue( IECore::Parameter *paramete
 void ClassVectorParameterHandler::setState( IECore::Parameter *parameter, const IECore::Object *state )
 {
 	const CompoundObject *d = static_cast<const CompoundObject *>( state );
-	
+
 	const vector<string> &parameterNames = d->member<StringVectorData>( "__parameterNames" )->readable();
 	const vector<string> &classNames = d->member<StringVectorData>( "__classNames" )->readable();
 	const vector<int> &classVersions = d->member<IntVectorData>( "__classVersions" )->readable();
@@ -96,7 +96,7 @@ void ClassVectorParameterHandler::setState( IECore::Parameter *parameter, const 
 		{
 			classes.append( boost::python::make_tuple( parameterNames[i], classNames[i], classVersions[i] ) );
 		}
-		
+
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		pythonParameter.attr( "setClasses" )( classes );
 	}
@@ -108,7 +108,7 @@ void ClassVectorParameterHandler::setState( IECore::Parameter *parameter, const 
 	{
 		msg( Msg::Error, "ClassVectorParameterHandler::setState", e.what() );
 	}
-	
+
 	CompoundParameterHandler::setState( parameter, state );
 }
 
@@ -119,13 +119,13 @@ IECore::ObjectPtr ClassVectorParameterHandler::getState( const IECore::Parameter
 	{
 		result = new CompoundObject;
 	}
-	
+
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		boost::python::list classes = extract<boost::python::list>( pythonParameter.attr( "getClasses" )( true ) );
-		
+
 		IECore::StringVectorDataPtr parameterNames = new StringVectorData;
 		IECore::StringVectorDataPtr classNames = new StringVectorData;
 		IECore::IntVectorDataPtr classVersions = new IntVectorData;
@@ -136,7 +136,7 @@ IECore::ObjectPtr ClassVectorParameterHandler::getState( const IECore::Parameter
 			classNames->writable().push_back( extract<string>( classes[i][2] ) );
 			classVersions->writable().push_back( extract<int>( classes[i][3] ) );
 		}
-		
+
 		result->members()["__parameterNames"] = parameterNames;
 		result->members()["__classNames"] = classNames;
 		result->members()["__classVersions"] = classVersions;
@@ -156,19 +156,19 @@ void ClassVectorParameterHandler::addEditKnobs( const IECore::Parameter *paramet
 {
 	std::string addName = string( knobName ) + "__addClass";
 	std::string removeName = string( knobName ) + "__removeClass";
-	
+
 	static const char *emptyMenu[] = { " ", "", 0 };
 	DD::Image::Knob *addKnob = PyPulldown_knob( f, emptyMenu, addName.c_str(), "Add" );
 	DD::Image::Knob *removeKnob = PyPulldown_knob( f, emptyMenu, removeName.c_str(), " Remove" );
 	ClearFlags( f, DD::Image::Knob::STARTLINE );
-	
+
 	if( !f.makeKnobs() )
 	{
 		// making the menu is slow, and only needs doing when we're making knobs (not storing for instance),
 		// so early out now to avoid massive slowdown.
 		return;
 	}
-	
+
 	std::string parameterPath = knobName + 5; // naughty! we're not meant to know the knob name format
 	replace_all( parameterPath, "_", "']['" );
 
@@ -193,7 +193,7 @@ void ClassVectorParameterHandler::buildAddMenu( DD::Image::Knob *knob, const IEC
 	vector<string> menuItems;
 	menuItems.push_back( " " );
 	menuItems.push_back( "" );
-	
+
 	// get the parameter as a python object
 
 	boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
@@ -250,7 +250,7 @@ void ClassVectorParameterHandler::buildAddMenu( DD::Image::Knob *knob, const IEC
 			menuItems.push_back( cmd );
 		}
 	}
-		
+
 	knob->enumerationKnob()->menu( menuItems );
 }
 
@@ -265,9 +265,9 @@ void ClassVectorParameterHandler::buildRemoveMenu( DD::Image::Knob *knob, const 
 	// get the parameter as a python object
 
 	boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
-	
+
 	// then make a menu entry in the remove class menu for each currently held class
-		
+
 	boost::python::list classes = extract<boost::python::list>( pythonParameter.attr( "getClasses" )( true ) );
 
 	int numClasses = len( classes );
@@ -275,18 +275,18 @@ void ClassVectorParameterHandler::buildRemoveMenu( DD::Image::Knob *knob, const 
 	{
 		std::string parameterName = extract<string>( classes[i][1] );
 		const IECore::Parameter *childParameter = compoundParameter->parameter<Parameter>( parameterName );
-		
+
 		menuItems.push_back( knobLabel( childParameter ) );
-		
+
 		std::string cmd = ( boost::format(
 
 			"with IECoreNuke.FnParameterisedHolder( nuke.thisNode() ).parameterModificationContext() as parameters :"
 			"	parameter = parameters['%s']; parameter.removeClass( '%s' );"
 
 		) % parameterPath % parameterName ).str();
-		
+
 		menuItems.push_back( cmd );
 	}
-	
+
 	knob->enumerationKnob()->menu( menuItems );
 }

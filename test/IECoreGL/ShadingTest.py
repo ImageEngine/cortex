@@ -48,45 +48,45 @@ class ShadingTest( unittest.TestCase ) :
 	__imageFileName = os.path.dirname( __file__ ) + "/output/test.tif"
 
 	def mesh( self ) :
-	
+
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
 		m["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 4 ) )
 		return m
-	
+
 	def constantShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
 			#include "IECoreGL/FragmentShader.h"
-			
+
 			IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
-						
+
 			void main()
 			{
 				gl_FragColor = vec4( fragmentCs, 1.0 );
 			}
 		"""
-		
+
 		return s
-	
+
 	def colorShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
-			
+
 			uniform bool rB;
-			
+
 			uniform float rF;
 			uniform int gI;
-			
+
 			uniform vec2 rgF;
 			uniform ivec2 rgI;
-			
+
 			uniform vec3 rgbF;
 			uniform ivec3 rgbI;
-						
+
 			void main()
 			{
 				gl_FragColor = vec4(
@@ -97,37 +97,37 @@ class ShadingTest( unittest.TestCase ) :
 				);
 			}
 		"""
-		
+
 		return s
-	
+
 	def textureShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
-			
+
 			uniform sampler2D sampler;
-			
+
 			varying vec2 fragmentuv;
-						
+
 			void main()
 			{
 				gl_FragColor = vec4( texture2D( sampler, fragmentuv ).rgb, 1 );
 			}
 		"""
-		
+
 		return s
-		
+
 	def geometryShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:geometrySource"] = """
 #version 150
-			
+
 			layout( points ) in;
 			layout( points, max_vertices=3 ) out;
-			
+
 			void main()
 			{
 				for( int i = -1; i<2; i++ )
@@ -137,27 +137,27 @@ class ShadingTest( unittest.TestCase ) :
 				}
 			}
 		"""
-		
+
 		s.parameters["gl:fragmentSource"] = """
 			void main()
 			{
 				gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
 			}
 		"""
-		
+
 		return s
 
 	def floatArrayShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
-			
+
 			uniform float f[8];
 			uniform vec2 f2[8];
 			uniform vec3 f3[8];
 			uniform vec4 f4[8];
-						
+
 			void main()
 			{
 				vec3 accum = vec3( 0 );
@@ -165,19 +165,19 @@ class ShadingTest( unittest.TestCase ) :
 				gl_FragColor = vec4( accum, 1.0);
 			}
 		"""
-		
+
 		return s
 
 	def intArrayShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
-			
+
 			uniform int i[8];
 			uniform ivec2 i2[8];
 			uniform ivec3 i3[8];
-						
+
 			void main()
 			{
 				vec3 accum = vec3( 0 );
@@ -185,20 +185,20 @@ class ShadingTest( unittest.TestCase ) :
 				gl_FragColor = vec4( accum, 1.0);
 			}
 		"""
-		
+
 		return s
 
 	def matrixShader( self ) :
-	
+
 		s = IECore.Shader( "test", "gl:surface" )
-		
+
 		s.parameters["gl:fragmentSource"] = """
-			
+
 			uniform mat3 m3;
 			uniform mat3 m3v[8];
 			uniform mat4 m4;
 			uniform mat4 m4v[8];
-						
+
 			void main()
 			{
 				vec3 accum = vec3( 0 );
@@ -248,10 +248,10 @@ class ShadingTest( unittest.TestCase ) :
 		return s
 
 	def renderImage( self, group ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		
+
 		r.camera(
 			"main", {
 				"projection" : "orthographic" ,
@@ -263,13 +263,13 @@ class ShadingTest( unittest.TestCase ) :
 		r.display( self.__imageFileName, "tif", "rgba", {} )
 		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( "./test/IECoreGL/shaders" ) )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			
+
 			group.render( r )
-			
+
 		return IECore.Reader.create( self.__imageFileName ).read()
 
 	def assertImageValues( self, image, tests ) :
@@ -292,7 +292,7 @@ class ShadingTest( unittest.TestCase ) :
 					raise AssertionError( repr( c ) + " != " + repr( t[1] ) )
 
 	def splineGradient( self, color0, color1 ) :
-	
+
 		return IECore.SplinefColor3fData(
 			IECore.SplinefColor3f(
 				IECore.CubicBasisf.catmullRom(),
@@ -304,294 +304,294 @@ class ShadingTest( unittest.TestCase ) :
 				),
 			),
 		)
-		
+
 	def testBasicPositioning( self ) :
-	
+
 		g = IECore.Group()
 		g.addChild( self.mesh() )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 			]
 		)
-	
+
 	def testUniformBoolParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rB"] = IECore.BoolData( 1 )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
 		)
-		
+
 	def testUniformFloatParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rF"] = IECore.FloatData( 1 )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
 		)
-		
+
 	def testUniformIntParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["gI"] = IECore.FloatData( 1 )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
-		)	
+		)
 
 	def testUniform2fParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgF"] = IECore.V2fData( IECore.V2f( 0, 1 ) )
 		c2.state()[0].parameters["rgF"] = IECore.V2fData( IECore.V2f( 1, 0 ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
 			]
-		)	
+		)
 
 	def testUniform2iParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgF"] = IECore.V2iData( IECore.V2i( 0, 1 ) )
 		c2.state()[0].parameters["rgF"] = IECore.V2iData( IECore.V2i( 1, 0 ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
 			]
-		)	
+		)
 
 	def testUniform3fParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )
 		c2.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 1, 1, 0 ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
 			]
-		)	
+		)
 
 	def testUniform3iParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgbI"] = IECore.V3iData( IECore.V3i( 0, 1, 1 ) )
 		c2.state()[0].parameters["rgbI"] = IECore.V3iData( IECore.V3i( 1, 1, 0 ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
 			]
-		)	
-	
+		)
+
 	def testConstantPrimVarTemporarilyOverridesShaderParameter( self ) :
-		
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgbF"] = IECore.V3iData( IECore.V3i( 0, 1, 1 ) )
 		c1.children()[0]["rgbF"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 1, 1, 0 ) ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
 		)
-		
+
 	def testSplineAsTexture( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = self.splineGradient( IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 1, 0, 0 ) )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
 		)
 
 	def testImageFileAsTexture( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
-		
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
 		)
-		
+
 
 	def testCompoundDataAsTexture( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
-		
+
 		yellowImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/yellow.exr" ).read()
 		yellowCompoundData = IECore.CompoundData( {
 			"dataWindow" : IECore.Box2iData( yellowImage.dataWindow ),
@@ -602,33 +602,33 @@ class ShadingTest( unittest.TestCase ) :
 				"B" : yellowImage["B"],
 			}
 		} )
-		
-		
+
+
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = yellowCompoundData
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 0, 0, 0, 1 ) ),
 			]
-		)	
-	
+		)
+
 	def testWireframe( self ) :
-	
+
 		g = IECore.Group()
 		g.addChild( self.mesh() )
-		
+
 		g.addState(
 			IECore.AttributeState(
 				{
@@ -641,138 +641,138 @@ class ShadingTest( unittest.TestCase ) :
 		)
 
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ), 
-				( IECore.V2f( 0.55, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ),
+				( IECore.V2f( 0.55, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 			]
 		)
 
 	def testSameMeshTwoShaders( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
-		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )		
-		
+		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )
+
 		c2 = IECore.Group()
 		c2.addChild( self.mesh() )
 		c2.addState( self.textureShader() )
 		c2.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
-		
+
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ), 
+				( IECore.V2f( 0.7, 0.5 ), IECore.Color4f( 0, 1, 1, 1 ) ),
+				( IECore.V2f( 0.3, 0.5 ), IECore.Color4f( 1, 1, 0, 1 ) ),
 			]
 		)
 
 	def testGeometryShaderViaParameters( self ) :
-	
+
 		if IECoreGL.glslVersion() < 150 :
 			# no point testing unavailable functionality
 			return
-	
+
 		g = IECore.Group()
-		
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
 		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 		g.addChild( p )
-		
+
 		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
 		g.addState( self.geometryShader() )
-		
+
 		image = self.renderImage( g )
 
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 			]
 		)
-		
+
 	def testGeometryShaderViaFile( self ) :
-	
+
 		if IECoreGL.glslVersion() < 150 :
 			# no point testing unavailable functionality
 			return
 
 		g = IECore.Group()
-		
+
 		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
 		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 		g.addChild( p )
-		
+
 		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
 		g.addState( IECore.Shader( "pointTripler", "gl:surface" ) )
-		
+
 		image = self.renderImage( g )
 
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
-				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ), 
-				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ), 
+				( IECore.V2f( 0.125, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.25, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.375, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.625, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
+				( IECore.V2f( 0.75, 0.5 ), IECore.Color4f( 1, 1, 1, 1 ) ),
+				( IECore.V2f( 0.875, 0.5 ), IECore.Color4f( 0, 0, 0, 0 ) ),
 			]
-		)	
+		)
 
 	def testCsParameterTrumpsColorAttribute( self ) :
-	
+
 		# if there is no Cs parameter value specified then we should get
 		# Cs from the attribute state.
-		
+
 		g = IECore.Group()
 		g.addChild( self.mesh() )
-		
+
 		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
 		g.addState( self.constantShader() )
-		
+
 		image = self.renderImage( g )
 		self.assertImageValues( image, [ ( IECore.V2f( 0.5 ), IECore.Color4f( 1, 0, 0, 1 ) ) ] )
-		
+
 		# but if there is a Cs parameter, it should override the colour
 		# from the attribute state.
-		
+
 		g = IECore.Group()
 		g.addChild( self.mesh() )
-		
+
 		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
-		
+
 		s = self.constantShader()
 		s.parameters["Cs"] = IECore.Color3f( 0, 1, 0 )
 		g.addState( s )
-		
+
 		image = self.renderImage( g )
 		self.assertImageValues( image, [ ( IECore.V2f( 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ) ] )
-	
+
 	def testColorAttributeDoesntAffectWireframe( self ) :
-	
+
 		g = IECore.Group()
 		g.addChild( self.mesh() )
-		
+
 		g.addState(
 			IECore.AttributeState(
 				{
@@ -786,11 +786,11 @@ class ShadingTest( unittest.TestCase ) :
 		)
 
 		image = self.renderImage( g )
-		
+
 		self.assertImageValues(
 			image,
 			[
-				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ), 
+				( IECore.V2f( 0.5, 0.5 ), IECore.Color4f( 0, 1, 0, 1 ) ),
 			]
 		)
 
@@ -806,7 +806,7 @@ class ShadingTest( unittest.TestCase ) :
 
 		g = IECore.Group()
 		g.addChild( m )
-		
+
 		g.addState(
 			IECore.AttributeState(
 				{
@@ -820,7 +820,7 @@ class ShadingTest( unittest.TestCase ) :
 
 		image = self.renderImage( g )
 		# wireframe is green, and vertex Cs is black,
-		# so there should be no contribution from 
+		# so there should be no contribution from
 		# wireframe or solid shading in the red channel.
 		self.assertEqual( sum( image["R"] ), 0 )
 		# black vertex colour should have no effect on
@@ -829,11 +829,11 @@ class ShadingTest( unittest.TestCase ) :
 		self.assertTrue( sum( image["G"] ) > 0 )
 
 	def testUniformFloatArrayParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.floatArrayShader() )
-		
+
 		c2 = c1.copy()
 		c3 = c1.copy()
 		c4 = c1.copy()
@@ -841,69 +841,69 @@ class ShadingTest( unittest.TestCase ) :
 		c2.state()[0].parameters["f2"] = IECore.V2fVectorData( [ IECore.V2f( i, 100.0 / 16) for i in range( 8 ) ] )
 		c3.state()[0].parameters["f3"] = IECore.V3fVectorData( [ IECore.V3f( i, 100.0 / 16, 100 * 0.5 ** ( i + 2 )) for i in range( 8 ) ] )
 		c4.state()[0].parameters["f4"] = IECore.Color4fVectorData( [ IECore.Color4f( i, 100.0 / 32, 100 * 0.5 ** ( i + 2), 0.0 ) for i in range( 8 ) ] )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
 		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
 		c4.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
 		g.addChild( c4 )
-		
+
 		image = self.renderImage( g )
-	
+
 		self.assertImageValues(
 			image,
 			[
 				( IECore.V2f( 0.3, 0.3 ), IECore.Color4f( 0.28, 0, 0, 1 ) ),
 				( IECore.V2f( 0.7, 0.3 ), IECore.Color4f( 0.28, 0.5, 0, 1 ) ),
-				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.5, 0.5, 1 ) ), 
-				( IECore.V2f( 0.7, 0.7 ), IECore.Color4f( 0.28, 0.25, 0.5, 1 ) ), 
+				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.5, 0.5, 1 ) ),
+				( IECore.V2f( 0.7, 0.7 ), IECore.Color4f( 0.28, 0.25, 0.5, 1 ) ),
 			]
 		)
 
 	def testUniformIntArrayParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.intArrayShader() )
-		
+
 		c2 = c1.copy()
 		c3 = c1.copy()
 		c1.state()[0].parameters["i"] = IECore.FloatVectorData( [ i for i in range( 8 ) ] )
 		c2.state()[0].parameters["i2"] = IECore.V2fVectorData( [ IECore.V2f( i, 100.0 / 16) for i in range( 8 ) ] )
 		c3.state()[0].parameters["i3"] = IECore.V3fVectorData( [ IECore.V3f( i, 100.0 / 16, 100 * 0.5 ** ( i + 2 )) for i in range( 8 ) ] )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
 		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
-		
+
 		image = self.renderImage( g )
 		shutil.copy( self.__imageFileName, "/tmp/foo.exr" )
-	
+
 		self.assertImageValues(
 			image,
 			[
 				( IECore.V2f( 0.3, 0.3 ), IECore.Color4f( 0.28, 0, 0, 1 ) ),
 				( IECore.V2f( 0.7, 0.3 ), IECore.Color4f( 0.28, 0.48, 0, 1 ) ),
-				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.48, 0.47, 1 ) ), 
+				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.48, 0.47, 1 ) ),
 			]
 		)
-		
+
 	def testMatrixParameters( self ) :
-	
+
 		c1 = IECore.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.matrixShader() )
-		
+
 		c2 = c1.copy()
 		c3 = c1.copy()
 		c4 = c1.copy()
@@ -911,30 +911,30 @@ class ShadingTest( unittest.TestCase ) :
 		c2.state()[0].parameters["m4"] = IECore.M44fData( IECore.M44f( [ i * 0.01 for i in range( 16 ) ] ) )
 		c3.state()[0].parameters["m3v"] = IECore.M33fVectorData( [ IECore.M33f( [0,0,0, i * 0.01, i * 0.02, i * 0.03, 0,0,0] ) for i in range( 8 ) ] )
 		c4.state()[0].parameters["m4v"] = IECore.M44fVectorData( [ IECore.M44f( [0,0,0,0, i * 0.005, i * 0.01, i * 0.02, 0, 0,0,0,0,0,0,0,0 ] ) for i in range( 8 ) ] )
-		
+
 		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
 		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
 		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
 		c4.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
-		
+
 		g = IECore.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
 		g.addChild( c4 )
-		
+
 		image = self.renderImage( g )
-	
+
 		self.assertImageValues(
 			image,
 			[
 				( IECore.V2f( 0.3, 0.3 ), IECore.Color4f( 0.6, 0.7, 0.8, 1 ) ),
 				( IECore.V2f( 0.7, 0.3 ), IECore.Color4f( 0.20, 0.22, 0.24, 1 ) ),
-				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.56, 0.84, 1 ) ), 
-				( IECore.V2f( 0.7, 0.7 ), IECore.Color4f( 0.14, 0.28, 0.56, 1 ) ), 
+				( IECore.V2f( 0.3, 0.7 ), IECore.Color4f( 0.28, 0.56, 0.84, 1 ) ),
+				( IECore.V2f( 0.7, 0.7 ), IECore.Color4f( 0.14, 0.28, 0.56, 1 ) ),
 			]
 		)
-		
+
 	def testWireframeWithCustomVertexShader( self ) :
 
 		def renderOffsetImage( offset ) :
@@ -991,14 +991,14 @@ class ShadingTest( unittest.TestCase ) :
 		)
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
-		
+
 if __name__ == "__main__":
     unittest.main()

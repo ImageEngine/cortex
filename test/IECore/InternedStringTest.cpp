@@ -53,15 +53,15 @@ namespace IECore
 
 struct InternedStringTest
 {
-	
+
 	struct Constructor
 	{
 		public :
-		
+
 			Constructor()
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				Imath::Rand32 rand;
@@ -71,7 +71,7 @@ struct InternedStringTest
 					InternedString ss( s );
 				}
 			}
-			
+
 	};
 
 	void testConcurrentConstruction()

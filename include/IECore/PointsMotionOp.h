@@ -54,7 +54,7 @@ namespace IECore
 IE_CORE_FORWARDDECLARE( ObjectParameter )
 
 /// The PointsMotionOp creates a MotionPrimitive object from a list of PointsPrimitive objects.
-/// If a point does not exist on any given snapshot then it's non-masked primvars are copied from the closest available snapshot. 
+/// If a point does not exist on any given snapshot then it's non-masked primvars are copied from the closest available snapshot.
 /// Masked primvars are set to zero.
 /// \ingroup geometryProcessingGroup
 /// \ingroup renderingGroup
@@ -92,7 +92,7 @@ class IECORE_API PointsMotionOp : public Op
 		typedef std::map< unsigned, IdInfo > IdMap;
 #endif
 		struct PrimVarBuilder;
-		
+
 		FloatVectorParameterPtr m_snapshotTimesParameter;
 		ObjectVectorParameterPtr m_pointsPrimitiveVectorParameter;
 		StringParameterPtr m_idPrimVarNameParameter;

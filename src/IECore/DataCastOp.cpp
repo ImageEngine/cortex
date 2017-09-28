@@ -664,7 +664,7 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 				CASTVECTORDATA( Color3fVector, Box3fVector )
 				default:	break;
 			}
-			break;	
+			break;
 		case Box3fVectorDataTypeId :
 			switch ( targetType )
 			{

@@ -22,9 +22,9 @@ class objectDebug( IECore.Op ) :
 				type = IECore.TypeId.Object
 			)
 		)
-		
+
 		levelPresets = [ ( str(x), int(x) ) for x in IECore.MessageHandler.Level.values.values() if x != IECore.MessageHandler.Level.Invalid ]
-		
+
 		self.parameters().addParameters( [
 			IECore.IntParameter(
 				name = "messageLevel",
@@ -36,18 +36,18 @@ class objectDebug( IECore.Op ) :
 		] )
 
 	def doOperation( self, args ) :
-		
+
 		obj = args['input']
-		
+
 		level = IECore.MessageHandler.Level( args["messageLevel"].value )
 		IECore.msg( level, "objectDebug", obj.typeName() + " " + str(obj) )
-		
+
 		if obj.isInstanceOf( IECore.TypeId.Primitive ) :
 			for k in obj.keys() :
 				primvar = obj[k]
 				msg = "[%s], %s, %s, %s" % ( k, primvar.interpolation, primvar.data.typeName(), str(primvar.data) )
 				IECore.msg( level, "objectDebug", msg )
-		
+
 		return obj
 
 IECore.registerRunTimeTyped( objectDebug )

@@ -44,9 +44,9 @@ import IECore
 import IECoreHoudini
 
 class FnParameterisedHolder():
-	
+
 	_nodeType = None
-	
+
 	# create our function set and stash which node we're looking at
 	def __init__(self, node=None):
 		self.__node = node
@@ -60,12 +60,12 @@ class FnParameterisedHolder():
 			return True
 		except hou.ObjectWasDeleted:
 			return False
-		
+
 	# return the node we're currently wrapping
 	def node(self):
 
 		return self.__node if self.nodeValid() else None
-	
+
 	@staticmethod
 	# nodeType: type of node to create (str)
 	# name: desired node name (str)
@@ -76,24 +76,24 @@ class FnParameterisedHolder():
 	# contextArgs:	args related to the creation context, as would come from UI menu interactions (dict)
 	#		If empty or not in UI mode, will create a top level OBJ to house the new holder
 	def _doCreate( nodeType, name, className, version=None, envVarName=None, parent=None, contextArgs={} ) :
-		
+
 		if hou.isUIAvailable() and contextArgs.get( "toolname", "" ) :
 			holder = toolutils.genericTool( contextArgs, nodeType, nodename = name )
 		else :
 			parent = parent if parent else hou.node( "/obj" ).createNode( "geo", node_name=name, run_init_scripts=False )
 			holder = parent.createNode( nodeType, node_name=name )
-		
+
 		IECoreHoudini.FnParameterisedHolder( holder ).setParameterised( className, version, envVarName )
-		
+
 		if contextArgs.get( "shiftclick", False ) :
 			converter = holder.parent().createNode( "ieCortexConverter", node_name = holder.name()+"Converter" )
 			outputNode = hou.node( contextArgs.get( "outputnodename", "" ) )
 			toolutils.connectInputsAndOutputs( converter, False, holder, outputNode, 0, 0 )
 			x, y = holder.position()
 			converter.setPosition( [x,y-1] )
-		
+
 		return holder
-	
+
 	# do we have a valid parameterised instance?
 	def hasParameterised( self ) :
 
@@ -101,18 +101,18 @@ class FnParameterisedHolder():
 
 	# this sets a parameterised object on our node and then updates the parameters
 	def setParameterised( self, classNameOrParameterised, classVersion=None, envVarName=None, updateGui=True ) :
-	
+
 		if not self.nodeValid() :
 			return
-		
+
 		if isinstance( classNameOrParameterised, str ) :
 			if classVersion is None or classVersion < 0 :
 				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
-				classVersion = classVersions[-1] if classVersions else 0 
+				classVersion = classVersions[-1] if classVersions else 0
 			IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterised( classNameOrParameterised, classVersion, envVarName )
 		else :
 			IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterised( classNameOrParameterised )
-		
+
 		parameterised = self.getParameterised()
 
 		if updateGui and parameterised :
@@ -120,25 +120,25 @@ class FnParameterisedHolder():
 
 	# this returns the parameterised object our node is working with
 	def getParameterised( self ) :
-		
+
 		return IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).getParameterised() if self.hasParameterised() else None
-	
+
 	def setParameterisedValues( self, time = None ) :
-		
+
 		time = hou.time() if time is None else time
 		IECoreHoudini._IECoreHoudini._FnParameterisedHolder( self.node() ).setParameterisedValues( time )
-	
+
 	# get our list of class names based on matchString
 	def classNames( self ) :
-		
+
 		if not self.nodeValid() :
 			return []
-		
+
 		matchString = self.__node.parm( "__classMatchString" ).eval()
 		searchPathEnvVar = self.__node.parm( "__classSearchPathEnvVar" ).eval()
 		return IECore.ClassLoader.defaultLoader( searchPathEnvVar ).classNames( matchString )
 
-	# takes a snapshot of the parameter values & expressions on our node so 
+	# takes a snapshot of the parameter values & expressions on our node so
 	# that if we change the procedural/op we can restore the parameters afterwards.
 	def cacheParameters(self):
 		cached_parameters = {}
@@ -157,7 +157,7 @@ class FnParameterisedHolder():
 				data['expressions'] = expressions
 				cached_parameters[p.name()] = data
 		return cached_parameters
-	
+
 	# resores parameter values/expressions from those cached by cacheParameters
 	def restoreCachedParameters(self, cached):
 		for p in self.__node.parmTuplesInFolder(['Parameters']):
@@ -169,30 +169,30 @@ class FnParameterisedHolder():
 						expr = cached_data['expressions'][i][0]
 						lang = cached_data['expressions'][i][1]
 						p[i].setExpression( expr, lang )
-						
+
 	# return the spare parameters under the "Parameters" tab
 	def spareParameters( self, tuples=True ) :
-		
+
 		result = []
-		
+
 		for p in self.__node.spareParms() :
 			if "Parameters" in p.containingFolders() :
 				result.append( p.tuple() if tuples else p )
-		
+
 		return result
-	
+
 	# this method removes all spare parameters from the "Parameters" folder
 	def removeParameters( self ) :
-		
+
 		if not self.nodeValid() :
 			return
-		
+
 		spareParms = self.spareParameters()
 		while spareParms :
 			self.__node.removeSpareParmTuple( spareParms[0] )
 			# this is needed to account for parms removed by a containing folder
 			spareParms = self.spareParameters()
-	
+
 	# add/remove parameters on our node so we correctly reflect our Procedural
 	def updateParameters( self, parameterised ) :
 		if not self.nodeValid():
@@ -203,7 +203,7 @@ class FnParameterisedHolder():
 		self.removeParameters()
 		if not parameterised:
 			return
-		
+
 		# get a list of our parm templates by calling createParm on our top-level CompoundParameter
 		# and add them as spare parameter
 		parms = IECoreHoudini.ParmTemplates.createParm( parameterised.parameters(), top_level=True )
@@ -212,8 +212,8 @@ class FnParameterisedHolder():
 			parm_names.append( p['name'] )
 			parm = self.__node.addSpareParmTuple( p['tuple'], in_folder=p['folder'], create_missing_folders=True )
 			parm.set( p['initialValue'] )
-		
-		# restore our cached parameters	
+
+		# restore our cached parameters
 		self.restoreCachedParameters( cached_parameters )
 
 		# update the nodes parameter evaluation expression

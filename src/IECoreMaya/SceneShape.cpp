@@ -86,23 +86,23 @@ MStatus SceneShape::initialize()
 {
 	MStatus s = inheritAttributesFrom( "ieSceneShapeInterface" );
 	MFnTypedAttribute tAttr;
-	
+
 	// will need to check for sceneFile extensions
 	aSceneFilePlug = tAttr.create( "file", "scf", MFnData::kString, &s );
 	assert( s );
 	s = addAttribute( aSceneFilePlug );
 	assert( s );
-	
+
 	aSceneRootPlug = tAttr.create( "root", "scr", MFnData::kString, MFnStringData().create( "/" ), &s );
 	assert( s );
 	s = addAttribute( aSceneRootPlug );
 	assert( s );
-	
+
 	attributeAffects( aSceneFilePlug, aTransform );
 	attributeAffects( aSceneFilePlug, aBound );
 	attributeAffects( aSceneFilePlug, aOutputObjects );
 	attributeAffects( aSceneFilePlug, aAttributes );
-	
+
 	attributeAffects( aSceneRootPlug, aTransform );
 	attributeAffects( aSceneRootPlug, aBound );
 	attributeAffects( aSceneRootPlug, aOutputObjects );
@@ -117,29 +117,29 @@ IECore::ConstSceneInterfacePtr SceneShape::getSceneInterface()
 	{
 		return m_scene;
 	}
-	
+
 	MPlug pSceneFile( thisMObject(), aSceneFilePlug );
 	MString sceneFile;
 	pSceneFile.getValue( sceneFile );
-	
+
 	MPlug pSceneRoot( thisMObject(), aSceneRootPlug );
 	MString sceneRoot;
 	pSceneRoot.getValue( sceneRoot );
-	
+
 	try
 	{
 		m_scene = IECore::SharedSceneInterfaces::get( sceneFile.asChar() );
 		IECore::SceneInterface::Path rootPath;
 		IECore::SceneInterface::stringToPath( sceneRoot.asChar(), rootPath );
 		m_scene = m_scene->scene( rootPath );
-	
+
 		m_sceneDirty = false;
 	}
 	catch( std::exception &e )
 	{
 		m_scene = 0;
 	}
-	
+
 	return m_scene;
 }
 
@@ -174,7 +174,7 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 				{
 					continue;
 				}
-				
+
 				SceneShape *sceneShape = dynamic_cast< SceneShape * >( userNode );
 				if ( !sceneShape )
 				{
@@ -190,7 +190,7 @@ SceneShape *SceneShape::findScene( const MDagPath &p, bool noIntermediate, MDagP
 			}
 		}
 	}
-	return 0;			
+	return 0;
 }
 
 bool SceneShape::hasSceneShapeLink( const MDagPath &p )
@@ -201,7 +201,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 	{
 		return false;
 	}
-	
+
 	MFnDagNode fnChildDag( dagPath );
 	MStatus st;
 	MPlug objectOnlyPlug = fnChildDag.findPlug( aObjectOnly, &st );
@@ -209,8 +209,8 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
 	}
-			
-	// if we're doing objects only, we just output the object directly, so we don't need link attributes... 
+
+	// if we're doing objects only, we just output the object directly, so we don't need link attributes...
 	if( objectOnlyPlug.asBool() )
 	{
 		return false;
@@ -220,7 +220,7 @@ bool SceneShape::hasSceneShapeLink( const MDagPath &p )
 	{
 		return false;
 	}
-	
+
 	// so if it's not object only, then we know the scene loads everything and we can create a link to it.
 	return true;
 }
@@ -278,7 +278,7 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 	{
 		return;
 	}
-	
+
 	SceneInterface::NameList sceneAttrNames;
 	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
 	if ( !scene )
@@ -287,13 +287,13 @@ void SceneShape::sceneShapeAttributeNames( const MDagPath &p, SceneInterface::Na
 	}
 	scene->attributeNames( sceneAttrNames );
 	attributeNames.insert( attributeNames.end(), sceneAttrNames.begin(), sceneAttrNames.end() );
-	
+
 	MFnDagNode fnChildDag( dagPath );
 	if( !fnChildDag.isIntermediateObject() && hasSceneShapeLink( p ) )
 	{
 		attributeNames.push_back( LinkedScene::linkAttribute );
 	}
-	
+
 }
 
 ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInterface::Name attributeName )
@@ -304,7 +304,7 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 	{
 		return 0;
 	}
-	
+
 	MFnDagNode fnChildDag( dagPath );
 	if( attributeName == LinkedScene::linkAttribute )
 	{
@@ -313,13 +313,13 @@ ConstObjectPtr SceneShape::readSceneShapeAttribute( const MDagPath &p, SceneInte
 			return readSceneShapeLink(p);
 		}
 	}
-	
+
 	ConstSceneInterfacePtr scene = sceneShape->getSceneInterface();
 	if ( !scene )
 	{
 		return 0;
 	}
-	
+
 	MPlug timePlug = fnChildDag.findPlug( aTime );
 	MTime time;
 	timePlug.getValue( time );
@@ -349,19 +349,19 @@ bool SceneShape::hasSceneShapeObject( const MDagPath &p )
 	{
 		throw Exception( "Could not find 'objectOnly' plug in SceneShape!");
 	}
-			
-	// if we're rendering object and children than it should only be represented as a link to the scene and no objects. 
+
+	// if we're rendering object and children than it should only be represented as a link to the scene and no objects.
 	if( !objectOnlyPlug.asBool() )
 	{
 		return false;
 	}
-	
+
 	IECore::ConstSceneInterfacePtr sceneInterface = sceneShape->getSceneInterface();
 	if( !sceneInterface )
 	{
 		return false;
 	}
-	
+
 	return sceneInterface->hasObject();
 }
 
@@ -387,7 +387,7 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 	{
 		return false;
 	}
-	
+
 	/// \todo Perhaps getSceneInterface() should return a raw pointer?
 	/// Also perhaps it shouldn't be prefixed with "get" since there is no
 	/// corresponding set.
@@ -396,7 +396,7 @@ bool SceneShape::hasTag( const MDagPath &p, const SceneInterface::Name &tag, int
 	{
 		return false;
 	}
-	
+
 	return scene->hasTag( tag, filter );
 }
 
@@ -407,12 +407,12 @@ void SceneShape::readTags( const MDagPath &p, SceneInterface::NameList &tags, in
 	{
 		return;
 	}
-	
+
 	const SceneInterface *scene = sceneShape->getSceneInterface().get();
 	if ( !scene )
 	{
 		return;
 	}
-	
+
 	scene->readTags( tags, filter );
 }

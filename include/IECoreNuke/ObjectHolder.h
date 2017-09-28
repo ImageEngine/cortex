@@ -56,15 +56,15 @@ class ObjectHolder : public DD::Image::Op
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
-		
+
 	private :
-		
+
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
 
 		// class specification
 		IECore::ObjectPtr m_object;
-		
+
 };
 
 } // namespace IECoreNuke

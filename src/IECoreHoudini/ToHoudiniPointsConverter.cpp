@@ -59,7 +59,7 @@ bool ToHoudiniPointsConverter::doConversion( const Object *object, GU_Detail *ge
 	{
 		return false;
 	}
-	
+
 	size_t numPrims = geo->getNumPrimitives();
 	GU_PrimParticle *system = GU_PrimParticle::build( geo, points->getNumPoints(), true );
 	GA_Range newPoints = system->getPointRange();
@@ -67,13 +67,13 @@ bool ToHoudiniPointsConverter::doConversion( const Object *object, GU_Detail *ge
 	{
 		return false;
 	}
-	
+
 	GA_OffsetList offsets;
 	offsets.append( geo->primitiveOffset( numPrims ) );
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	
+
 	transferAttribs( geo, newPoints, newPrims );
-	
+
 	return true;
 }
 
@@ -84,6 +84,6 @@ void ToHoudiniPointsConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	{
 		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
-	
+
 	setName( geo, prims );
 }

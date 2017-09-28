@@ -111,23 +111,23 @@ class TestPDCWriter( unittest.TestCase ) :
 		self.assertEqual( p2["v3f"].data, IECore.V3dData( IECore.V3d( 1, 2, 3 ) ) )
 		self.assertEqual( p2["fVector"].data, IECore.DoubleVectorData( [ 1, 2, 3 ] ) )
 		self.assertEqual( p2["v3fVector"].data, IECore.V3dVectorData( [ IECore.V3d( 1, 2, 3 ), IECore.V3d( 4, 5, 6 ), IECore.V3d( 7, 8, 9 ) ] ) )
-	
+
 	def testWriteColorData( self ) :
-	
+
 		p = IECore.PointsPrimitive( 3 )
 		p["color3f"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1 ) ) )
 		p["color3fVector"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1 ), IECore.Color3f( 2 ), IECore.Color3f( 3 ) ] ) )
-	
+
 		IECore.Writer.create( p, "test/particleShape1.250.pdc" ).write()
 
 		p2 = IECore.Reader.create( "test/particleShape1.250.pdc" ).read()
 
 		self.assertEqual( p.keys(), p2.keys() )
-		
+
 		# we can't expect them to come back as colours, because there's not support for that in pdcs - they should therefore come back as float vectors
 		self.assertEqual( p2["color3f"].data, IECore.V3fData( IECore.V3f( 1 ) ) )
 		self.assertEqual( p2["color3fVector"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] ) )
-	
+
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/particleShape1.250.pdc" ) :

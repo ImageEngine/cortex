@@ -53,9 +53,9 @@ static MCallbackId callbackIdFromPython( PyObject *id )
 		return (MCallbackId)PyCObject_AsVoidPtr( id );
 	}
 	else
-	{	
+	{
 		// maya prior to 2011 stores the id as a PySwigObject.
-		
+
 		// if we allow a bound MCallbackId to die in python then we get this error printing out :
 		//
 		// 		"swig/python detected a memory leak of type 'MCallbackId *', no destructor found".
@@ -66,7 +66,7 @@ static MCallbackId callbackIdFromPython( PyObject *id )
 		// be a big deal as it could be a member function on a large object). according to the message
 		// the MCallbackId is going to leak anyway, so we're not making matters any worse.
 		Py_INCREF( id );
-	
+
 		// extract the MCallbackId from the SWIG object we're being passed. This isn't
 		// typesafe in any way - calling with anything other than the correct type
 		// is likely to explode. i haven't yet found a good way of checking the type.
@@ -82,7 +82,7 @@ class CallbackIdWrapper : public CallbackId
 		CallbackIdWrapper( PyObject *id )
 			:	CallbackId( callbackIdFromPython( id ) )
 		{
-			
+
 		}
 
 };

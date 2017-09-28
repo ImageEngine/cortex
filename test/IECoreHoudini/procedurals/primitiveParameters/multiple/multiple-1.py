@@ -32,11 +32,11 @@
 #
 ##########################################################################
 
-from IECore import * 
+from IECore import *
 
-class multiple( ParameterisedProcedural ) : 
+class multiple( ParameterisedProcedural ) :
 
-	def __init__( self ) : 
+	def __init__( self ) :
 		ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
 		self.parameters().addParameters( [
 			MeshPrimitiveParameter(
@@ -63,16 +63,16 @@ class multiple( ParameterisedProcedural ) :
 			),
 		] )
 
-	def doBound( self, args ) : 
+	def doBound( self, args ) :
 		meshBound = args['mesh'].bound()
 		pointsBound = args['points'].bound()
 		meshPointsOrGroupBound = args['meshPointsOrGroupObject'].bound()
 		meshOnlyBound = args['meshOnlyObject'].bound()
-		
+
 		bound = Box3f( V3f( 0 ), V3f( 0 ) )
 		bound.min = min( min( min( meshBound.min, pointsBound.min ), meshPointsOrGroupBound.min ), meshOnlyBound.min )
 		bound.max = max( max( max( meshBound.max, pointsBound.max ), meshPointsOrGroupBound.max ), meshOnlyBound.max )
-		
+
 		return bound
 
 	def doRenderState( self, renderer, args ) :

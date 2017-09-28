@@ -55,9 +55,9 @@ class TestNameStateComponent( unittest.TestCase ) :
 		self.assertEqual( n.name(), "sphere" )
 
 	def testStaticFunctions( self ) :
-	
+
 		self.assertRaises( RuntimeError, NameStateComponent.glNameFromName, "thisNameHasn'tBeenUsedYet" )
-		
+
 		n = NameStateComponent.glNameFromName( "neitherHasThisOneButWe'reMakingIt", True )
 		self.assertEqual( NameStateComponent.nameFromGLName( n ), "neitherHasThisOneButWe'reMakingIt" )
 

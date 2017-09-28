@@ -45,9 +45,9 @@ class AttributeStateTest( unittest.TestCase ) :
 
 		aa = a.copy()
 		self.assertEqual( a, aa )
-		
+
 	def testConstructFromDict( self ) :
-	
+
 		a = IECore.AttributeState( {
 			"a" : IECore.StringData( "a" ),
 			"b" : IECore.IntData( 10 ),
@@ -58,17 +58,17 @@ class AttributeStateTest( unittest.TestCase ) :
 		self.assertEqual( a.attributes["b"], IECore.IntData( 10 ) )
 
 	def testHash( self ) :
-	
+
 		a1 = IECore.AttributeState()
 		a2 = IECore.AttributeState()
-		
+
 		self.assertEqual( a1.hash(), a2.hash() )
-		
+
 		a1.attributes["a"] = IECore.StringData( "a" )
 		self.assertNotEqual( a1.hash(), a2.hash() )
-		
+
 		a2.attributes["a"] = IECore.StringData( "a" )
 		self.assertEqual( a1.hash(), a2.hash() )
-		
+
 if __name__ == "__main__":
 	unittest.main()

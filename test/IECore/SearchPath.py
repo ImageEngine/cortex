@@ -58,10 +58,10 @@ class SearchPathTest( unittest.TestCase ) :
 		self.assertEqual( s.find( "particleShape1.250.pdc" ), "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 
 	def testCopyConstructor( self ) :
-	
+
 		s = SearchPath( "a:b:c", ":" )
 		s2 = SearchPath( s )
-		
+
 		self.assertEqual( s, s2 )
 
 if __name__ == "__main__":

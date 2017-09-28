@@ -73,10 +73,10 @@ class IECOREIMAGE_API MPlayDisplayDriver : public DisplayDriver
 		};
 
 		typedef std::vector<Plane> PlaneVector;
-		
+
 		FILE *m_imDisplayStdIn;
 		PlaneVector m_planes;
-		
+
 };
 
 IE_CORE_DECLAREPTR( MPlayDisplayDriver )

@@ -59,7 +59,7 @@ class ToMayaImageConverter : public ToMayaConverter
 	public :
 
 		ToMayaImageConverter( IECoreImage::ConstImagePrimitivePtr image );
-		
+
 		typedef enum
 		{
 			Float,

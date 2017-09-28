@@ -69,7 +69,7 @@ SXRendererImplementation::State::State()
 		context( SxContextPtr( SxCreateContext(), SxDestroyContext ) ),
 		displacementShader( 0 ), surfaceShader( 0 ),
 		atmosphereShader( 0 ), imagerShader( 0 )
-	
+
 {
 }
 
@@ -88,7 +88,7 @@ SXRendererImplementation::State::State( const State &other, bool deepCopy )
 SXRendererImplementation::State::~State()
 {
 }
-			
+
 ////////////////////////////////////////////////////////////////////////
 // IECoreRI::SXRendererImplementation implementation
 ////////////////////////////////////////////////////////////////////////
@@ -99,19 +99,19 @@ IECoreRI::SXRendererImplementation::SXRendererImplementation( IECoreRI::SXRender
 	m_stateStack.push( State() );
 	setAttribute( "color", new IECore::Color3fData( Color3f( 1 ) ) );
 	setAttribute( "opacity", new IECore::Color3fData( Color3f( 1 ) ) );
-		
+
 	const char *shaderSearchPath = getenv( "DL_SHADERS_PATH" );
 	if( shaderSearchPath )
 	{
 		SxSetOption( m_stateStack.top().context.get(), "searchpath:shader", SxString, (SxData)&shaderSearchPath );
 	}
-	
+
 	const char *textureSearchPath = getenv( "DL_TEXTURES_PATH" );
 	if( textureSearchPath )
 	{
 		SxSetOption( m_stateStack.top().context.get(), "searchpath:texture", SxString, (SxData)&textureSearchPath );
 	}
-	
+
 	// we don't know how many threads the client will use this class on, but we have to tell
 	// 3delight how many there will be or it crashes. this should be a reasonable number for most
 	// use cases, and people will just have to set it themselves if they want to do something
@@ -144,7 +144,7 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 				{
 					const char *s = static_cast<const StringData *>( value.get() )->readable().c_str();
 					SxSetOption( m_stateStack.top().context.get(), name.c_str() + 3, SxString, &s );
-					break;	
+					break;
 				}
 			default :
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
@@ -164,7 +164,7 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 				{
 					const char *s = static_cast<const StringData *>( value.get() )->readable().c_str();
 					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &s );
-					break;	
+					break;
 				}
 			case StringVectorDataTypeId :
 				{
@@ -175,7 +175,7 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 						s.push_back( strings[i].c_str() );
 					}
 					SxSetOption( m_stateStack.top().context.get(), name.c_str(), SxString, &(s[0]), s.size() );
-					break;	
+					break;
 				}
 			default :
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::setOption", format( "Unsupport type \"%s\"." ) % value->typeName() );
@@ -321,8 +321,8 @@ IECore::ConstDataPtr IECoreRI::SXRendererImplementation::getAttribute( const std
 }
 
 void IECoreRI::SXRendererImplementation::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
-{	
-	
+{
+
 	if( type=="displacement" || type=="ri:displacement" )
 	{
 		m_stateStack.top().displacementShader = createShader( name.c_str(), 0, parameters );
@@ -492,7 +492,7 @@ void IECoreRI::SXRendererImplementation::editEnd()
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::editEnd", "Not implemented" );
 }
-		
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // shading
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -502,18 +502,18 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 	// create a shader which we'll use just for getting information from. we have to do this
 	// in a temporary context created just for the purpose, so that we don't end up making two shaders
 	// in the context we actually care about.
-	
+
 	boost::shared_ptr<void> tmpContext( SxCreateContext( m_stateStack.top().context.get() ), SxDestroyContext );
-	
+
 	SxShader shaderInfo = SxCreateShader( tmpContext.get(), 0, name, 0 );
 	if( !shaderInfo )
 	{
 		// 3delight will have printed a warning already.
 		return 0;
 	}
-	
+
 	// convert the parameter list for the shader
-		
+
 	SxParameterList parameterList = SxCreateParameterList( m_stateStack.top().context.get(), 1, "shader" );
 	for( IECore::CompoundDataMap::const_iterator it=parameters.begin(); it!=parameters.end(); it++ )
 	{
@@ -531,13 +531,13 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 			{
 				float value = static_cast<const IntData *>( it->second.get() )->readable();
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, &value );
-				break;	
+				break;
 			}
 			case BoolDataTypeId :
 			{
 				float value = static_cast<const BoolData *>( it->second.get() )->readable() ? 1.0f : 0.0f;
 				SxSetParameter( parameterList, it->first.value().c_str(), SxFloat, &value );
-				break;		
+				break;
 			}
 			case V3fDataTypeId :
 			{
@@ -619,7 +619,7 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 				{
 					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "SplinefColor3f parameter \"%s\" has no points and will be ignored" ) % it->second->typeName() );
 				}
-				break;	
+				break;
 			}
 			case SplinefColor3fDataTypeId :
 			{
@@ -645,13 +645,13 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 				{
 					msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "SplinefColor3f parameter \"%s\" has no points and will be ignored" ) % it->second->typeName() );
 				}
-				break;	
+				break;
 			}
 			default :
 				msg( Msg::Warning, "IECoreRI::SXRendererImplementation::createShader", boost::format( "Unsupported parameter type \"%s\"" ) % it->second->typeName() );
 		}
 	}
-		
+
 	return SxCreateShader( m_stateStack.top().context.get(), parameterList, name, handle );
 }
 
@@ -681,12 +681,12 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 	{
 		shaders.push_back( state.imagerShader );
 	}
-	
+
 	if( !shaders.size() )
 	{
 		throw Exception( "No shaders specified" );
 	}
-	
+
 	SXExecutor executor( shaders, m_stateStack.top().context.get(), m_stateStack.top().coshaders, m_stateStack.top().lights );
 	return executor.execute( points, gridSize );
 }
@@ -694,7 +694,7 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shade( const IECore:
 IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2i &resolution ) const
 {
 	IECore::CompoundDataPtr points = new IECore::CompoundData();
-	
+
 	V3fVectorDataPtr pData = new IECore::V3fVectorData();
 	V3fVectorDataPtr nData = new IECore::V3fVectorData();
 	FloatVectorDataPtr sData = new IECore::FloatVectorData();
@@ -704,42 +704,42 @@ IECore::CompoundDataPtr IECoreRI::SXRendererImplementation::shadePlane( const V2
 	std::vector<V3f> &n = nData->writable();
 	std::vector<float> &s = sData->writable();
 	std::vector<float> &t = tData->writable();
-	
+
 	unsigned numPoints = resolution[0] * resolution[1];
-	
+
 	p.resize( numPoints );
 	n.resize( numPoints );
 	s.resize( numPoints );
 	t.resize( numPoints );
-	
+
 	unsigned xResMinus1 = resolution[0] - 1;
 	unsigned yResMinus1 = resolution[1] - 1;
-	
+
 	unsigned i = 0;
 	for( int y = 0; y < resolution[1]; y++ )
 	{
 		for( int x = 0; x < resolution[0]; x++ )
 		{
-			p[i] = V3f( float(x) / xResMinus1 , float(y) / yResMinus1, 0.0 );	
+			p[i] = V3f( float(x) / xResMinus1 , float(y) / yResMinus1, 0.0 );
 			s[i] = p[i][0];
 			t[i] = p[i][1];
 			n[i] = V3f( 0.0f, 0.0f, 1.0f );
 			i++;
 		}
-	}	
-	
+	}
+
 	points->writable()[ "P" ] = pData;
 	points->writable()[ "N" ] = nData;
 	points->writable()[ "s" ] = sData;
 	points->writable()[ "t" ] = tData;
-	
+
 	return shade( points.get(), resolution );
 }
 
 IECoreImage::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToImage( const V2i &resolution ) const
 {
 	IECore::CompoundDataPtr result = shadePlane( resolution );
-	
+
 	Box2i window =  Box2i( V2i( 0, 0 ), V2i( resolution[0] - 1, resolution[1] - 1 ) );
 
 	IECoreImage::ImagePrimitivePtr img = new IECoreImage::ImagePrimitive( window, window );
@@ -759,20 +759,20 @@ IECoreImage::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToI
 	g.resize( numPoints );
 	b.resize( numPoints );
 	a.resize( numPoints );
-	
+
 	IECore::Color3fVectorDataPtr cData = result->member<Color3fVectorData>( "Ci", false );
 	IECore::Color3fVectorDataPtr oData = result->member<Color3fVectorData>( "Oi", false );
 	if( !cData || !oData )
 	{
 		throw( Exception( "The renderer didn't return Ci/Oi when shading the points." ) );
 	}
-	
+
 	const std::vector<Color3f> &c = cData->readable();
 	const std::vector<Color3f> &o = oData->readable();
 
 	if( c.size() != numPoints )
 	{
-		throw( Exception( boost::str( 
+		throw( Exception( boost::str(
 			boost::format( "The renderer didn't return the right number of shaded points. (%d but should be %d)." )
 		 	% c.size() % numPoints
 		) ) );
@@ -785,7 +785,7 @@ IECoreImage::ImagePrimitivePtr IECoreRI::SXRendererImplementation::shadePlaneToI
 		b[i] = c[i][2];
 		a[i] = ( o[i][0] + o[i][1] + o[i][2] ) / 3.0f;
 	}
-	
+
 	return img;
 }
 

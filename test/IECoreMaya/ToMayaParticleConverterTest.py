@@ -40,88 +40,88 @@ import IECoreMaya
 class ToMayaParticleConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
-	
+
 		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
-		converter = IECoreMaya.ToMayaObjectConverter.create( points )		
+		converter = IECoreMaya.ToMayaObjectConverter.create( points )
 		self.failUnless( isinstance( converter, IECoreMaya.ToMayaParticleConverter ) )
 
 	def testConversion( self ) :
 
 		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
-		
+
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
-		
-		children = maya.cmds.listRelatives( parent )		
+
+		children = maya.cmds.listRelatives( parent )
 		self.assertEqual( len( children ), 1 )
-		
+
 		particleShape = children[0]
 		self.assertEqual( maya.cmds.nodeType( particleShape ), "particle" )
-		
+
 		self.assertEqual( maya.cmds.particle( particleShape, query=True, count=True ), 10 )
-		
+
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="position", q=True, order=i ), [ i, i, i ] )
-		
+
 		self.failIf( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
-		
+
 	def testConversionFromDoubles( self ) :
 
 		points = IECore.PointsPrimitive( 10 )
 		points["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ IECore.V3d( x ) for x in range( 0, 10 ) ] ) )
 		points["rgbPP"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3dVectorData( [ IECore.V3d( x ) for x in range( 10, 20 ) ] ) )
-		
+
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
-		
-		children = maya.cmds.listRelatives( parent )		
+
+		children = maya.cmds.listRelatives( parent )
 		self.assertEqual( len( children ), 1 )
-		
+
 		particleShape = children[0]
 		self.assertEqual( maya.cmds.nodeType( particleShape ), "particle" )
-		
+
 		self.assertEqual( maya.cmds.particle( particleShape, query=True, count=True ), 10 )
-		
+
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="position", q=True, order=i ), [ i, i, i ] )
-		
-		self.failIf( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )	
-					
+
+		self.failIf( "P" in maya.cmds.particle( particleShape, query=True, perParticleVector=True ) )
+
 	def testRGBPPConversion( self ) :
 
 		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
 		points["rgbPP"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in range( 10, 20 ) ] ) )
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
-		
-		children = maya.cmds.listRelatives( parent )		
+
+		children = maya.cmds.listRelatives( parent )
 		self.assertEqual( len( children ), 1 )
-		
+
 		particleShape = children[0]
 		self.assertEqual( maya.cmds.nodeType( particleShape ), "particle" )
-		
+
 		self.assertEqual( maya.cmds.particle( particleShape, query=True, count=True ), 10 )
-		
+
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="rgbPP", q=True, order=i ), [ i+10, i+10, i+10 ] )
-			
+
 	def testCsConversion( self ) :
 
 		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 10 ) ] ) )
 		points["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in range( 10, 20 ) ] ) )
 		parent = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaParticleConverter( points ).convert( parent )
-		
-		children = maya.cmds.listRelatives( parent )		
+
+		children = maya.cmds.listRelatives( parent )
 		self.assertEqual( len( children ), 1 )
-		
+
 		particleShape = children[0]
 		self.assertEqual( maya.cmds.nodeType( particleShape ), "particle" )
-		
+
 		self.assertEqual( maya.cmds.particle( particleShape, query=True, count=True ), 10 )
-		
+
 		for i in range( 0, 10 ) :
 			self.assertEqual( maya.cmds.particle( attribute="rgbPP", q=True, order=i ), [ i+10, i+10, i+10 ] )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

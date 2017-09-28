@@ -62,7 +62,7 @@ class IECOREGL_API Font : public IECore::RunTimeTyped
 
 		const MeshPrimitive *mesh( char c ) const;
 		const AlphaTexture *texture() const;
-		
+
 		/// Emits a series of quads with appropriate texture coordinates,
 		/// such that if you have bound texture() you can render text.
 		void renderSprites( const std::string &text ) const;

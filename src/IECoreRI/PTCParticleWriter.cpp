@@ -124,7 +124,7 @@ static void writeAttribute( float *target, DataPtr attr, int index )
 				write3DAttr<V3fVectorData>( target, f.get(), index );
 			}
 			break;
-			
+
 		case Color3dVectorDataTypeId :
 			{
 				Color3dVectorDataPtr d = static_pointer_cast<Color3dVectorData>( attr );

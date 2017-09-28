@@ -100,7 +100,7 @@ class CubicBasis
 		inline void integralCoefficients( S t0, S t1, S &c0, S &c1, S &c2, S &c3 ) const;
 		template<class S>
 		inline void integralCoefficients( S t0, S t1, S c[4] ) const;
-		
+
 		template<class S>
 		inline S integral( S t0, S t1, S p0, S p1, S p2, S p3 ) const;
 		template<class S>

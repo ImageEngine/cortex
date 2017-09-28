@@ -122,7 +122,7 @@ void bindShader()
 		.def( "constant", &Shader::constant, return_value_policy<IECorePython::CastToIntrusivePtr>() ).staticmethod( "constant" )
 		.def( "facingRatio", &Shader::facingRatio, return_value_policy<IECorePython::CastToIntrusivePtr>() ).staticmethod( "facingRatio" )
 	;
-	
+
 	IECorePython::RefCountedClass<Shader::Setup, IECore::RefCounted>( "Setup" )
 		.def( init<ConstShaderPtr>() )
 		.def( "shader", &shader )
@@ -130,7 +130,7 @@ void bindShader()
 		.def( "addUniformParameter", (void (Shader::Setup::*)( const std::string &, IECore::ConstDataPtr ))&Shader::Setup::addUniformParameter )
 		.def( "addVertexAttribute", &Shader::Setup::addVertexAttribute )
 	;
-	
+
 	class_<Shader::Parameter>( "Parameter", no_init )
 		.def_readonly( "type", &Shader::Parameter::type )
 		.def_readonly( "size", &Shader::Parameter::size )

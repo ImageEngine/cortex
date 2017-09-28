@@ -75,7 +75,7 @@ from UITemplate import UITemplate
 from FnParameterisedHolderSet import FnParameterisedHolderSet
 from TemporaryAttributeValues import TemporaryAttributeValues
 from GenericParameterUI import GenericParameterUI
-from FnDagNode import FnDagNode  
+from FnDagNode import FnDagNode
 from CompoundParameterUI import CompoundParameterUI
 from ClassParameterUI import ClassParameterUI
 from ClassVectorParameterUI import ClassVectorParameterUI

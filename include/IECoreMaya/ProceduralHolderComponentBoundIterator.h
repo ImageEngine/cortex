@@ -63,7 +63,7 @@ class ProceduralHolderComponentBoundIterator : public MPxGeometryIterator
 		ProceduralHolderComponentBoundIterator( void *userGeometry, MObjectArray &components );
 		ProceduralHolderComponentBoundIterator( void *userGeometry, MObject &components );
 		~ProceduralHolderComponentBoundIterator();
-		
+
 		virtual bool isDone() const;
 		virtual void next();
 		virtual void reset();
@@ -76,16 +76,16 @@ class ProceduralHolderComponentBoundIterator : public MPxGeometryIterator
 		virtual int index() const;
 		virtual bool hasNormals() const;
 		virtual int indexUnsimplified() const;
-		
+
 	private:
-		
+
 		void computeNumComponents();
-		
+
 		ProceduralHolder* m_proceduralHolder;
 		unsigned m_idx;
 		MObjectArray m_components;
 		unsigned m_numComponents;
-	
+
 };
 
 } // namespace IECoreMaya

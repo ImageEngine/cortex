@@ -66,14 +66,14 @@ namespace IECoreHoudini
 class GEO_CortexPrimitive : public GEO_Primitive
 {
 	public :
-		
+
 		GEO_CortexPrimitive( GA_Detail *detail, GA_Offset offset = GA_INVALID_OFFSET );
 		GEO_CortexPrimitive( GEO_Detail *detail, GA_Offset offset = GA_INVALID_OFFSET );
 #if UT_MAJOR_VERSION_INT < 16
 		GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 #endif
 		virtual ~GEO_CortexPrimitive();
-		
+
 #if UT_MAJOR_VERSION_INT < 16
 		virtual void swapVertexOffsets( const GA_Defragment &defrag );
 		virtual GA_Size getVertexCount() const;
@@ -96,7 +96,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual void transform( const UT_Matrix4 &xform );
 		virtual const GA_PrimitiveJSON* getJSON() const;
 		virtual void reverse();
-		
+
 		virtual GEO_Primitive * copy( int preserve_shared_pts ) const;
 		virtual void copyPrimitive( const GEO_Primitive *src, GEO_Point **ptredirect );
 		virtual int getBBox( UT_BoundingBox *bbox ) const;
@@ -104,7 +104,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual UT_Vector3 computeNormal() const;
 		virtual int detachPoints( GA_PointGroup &grp );
 #if UT_MAJOR_VERSION_INT >= 16
- 
+
 		bool saveVertexArray( UT_JSONWriter &w,	const GA_SaveMap &map ) const;
 		bool loadVertexArray( UT_JSONParser &p, const GA_LoadMap &map );
 
@@ -117,8 +117,8 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
 
 #elif UT_MAJOR_VERSION_INT >= 14
-		
-		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );		
+
+		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );
 		// merge constructor
 		static GA_Primitive *create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 
@@ -126,17 +126,17 @@ class GEO_CortexPrimitive : public GEO_Primitive
 
 		// factory
 		static GEO_CortexPrimitive *build( GU_Detail *geo, const IECore::Object *object );
-		
+
 		virtual int64 getMemoryUsage() const;
 		virtual void countMemory( UT_MemoryCounter &counter ) const;
 		virtual void copyPrimitive( const GEO_Primitive *src );
-		
+
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
 		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
 		/// Maybe we should just give up registration in the plugin and do it all here.
 		static void setTypeDef( GA_PrimitiveDefinition *def );
 		static GA_PrimitiveTypeId typeId();
-		
+
 		virtual GEO_Primitive *convert( ConvertParms &parms, GA_PointGroup *usedpts = 0 );
 		virtual GEO_Primitive *convertNew( ConvertParms &parms );
 		virtual void normal( NormalComp &output ) const;
@@ -151,11 +151,11 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		/// Allowing non-const access to the IECore::Object so it can be updated in-place.
 		/// Most users should prefer the const method above.
 		IECore::Object *getObject();
-		
+
 		/// Convenience method to inspect a GU_Detail and return some information about
 		/// the GU_CortexPrimitives within, if there are any.
 		static void infoText( const GU_Detail *geo, OP_Context &context, OP_NodeInfoParms &parms );
-	
+
 	protected :
 
 #if (UT_VERSION_INT >= 0x0c050132) // 12.5.306 or later
@@ -165,7 +165,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 #endif
 
 		virtual bool evaluatePointRefMap( GA_Offset result_vtx, GA_AttributeRefMap &map, fpreal u, fpreal v=0, uint du=0, uint dv=0 ) const;
-		
+
 		IECore::ObjectPtr m_object;
 #if UT_MAJOR_VERSION_INT < 16
 		// offset for the representative vertex
@@ -173,11 +173,11 @@ class GEO_CortexPrimitive : public GEO_Primitive
 #endif
 
 	private :
-		
+
 		class geo_CortexPrimitiveJSON;
 
 		GEO_Primitive *doConvert( ConvertParms &parms );
-		
+
 		static GA_PrimitiveDefinition *m_definition;
 
 };

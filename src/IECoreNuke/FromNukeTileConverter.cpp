@@ -49,7 +49,7 @@ FromNukeTileConverter::FromNukeTileConverter( const DD::Image::Tile *tile )
 FromNukeTileConverter::~FromNukeTileConverter()
 {
 }
-		
+
 IECore::ObjectPtr FromNukeTileConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
 	Box2i dataWindow( V2i( m_tile->x(), m_tile->y() ), V2i( m_tile->r() - 1, m_tile->t() - 1 ) );
@@ -74,20 +74,20 @@ IECore::ObjectPtr FromNukeTileConverter::doConversion( IECore::ConstCompoundObje
 				break;
 			case DD::Image::Chan_Z :
 				name = "Z";
-				break;	
+				break;
 			default :
 				name = getName( z );
 		}
-			
+
 		FloatVectorDataPtr channelData = result->createChannel<float>( name );
 		float *out = &*(channelData->writable().begin());
-		
+
 		for( int y=m_tile->t()-1; y>=m_tile->y(); y-- )
 		{
 			memcpy( out, (*m_tile)[z][y] + m_tile->x(), m_tile->w() * sizeof( float ) );
 			out += m_tile->w();
 		}
 	}
-	
+
 	return result;
 }

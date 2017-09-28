@@ -41,7 +41,7 @@ import re, fnmatch
 __all__ = [ "FileBrowser" ]
 
 ## The Browser class provides a file picker interface within a Maya formLayout.
-## User actions cause several signals to be emitted, see the signals section. 
+## User actions cause several signals to be emitted, see the signals section.
 ## Behvaiour of the dialog can be modified by a variety of creation arguments:
 ##
 ## \param uiParent The name of a maya UI element to parent the browser layout
@@ -51,32 +51,32 @@ __all__ = [ "FileBrowser" ]
 ## path box. uiParent is an empty columnLayout.
 ## If the object passed has a method 'update' it will be connected to the pathChangedSignal
 ## of the brower instance.
-## If the object passed has a method 'selectionChanged' it will be connected to the 
+## If the object passed has a method 'selectionChanged' it will be connected to the
 ## selectionChangedSignal of the browser instance.
 ##
 ## \param filter A callable with the signature ( string path, ( {}, ... ) items ), which
-## is allowed to modify the items list however it sees fit. See the section below on the 
+## is allowed to modify the items list however it sees fit. See the section below on the
 ## structure of the items list. The result of the filter will be used as the item list for
 ## display.
 ##
 ## \param validate A callable with the signature ( string path, ( {}, ... ) items ), which
-## must return True of False as to wether the items in the supplied list are considered a 
+## must return True of False as to wether the items in the supplied list are considered a
 ## valid 'selection'.
-## 
-## \param showHidden (bool) Wether or not hidden files should be shown in the browser. 
-## 
+##
+## \param showHidden (bool) Wether or not hidden files should be shown in the browser.
+##
 ## \param buttonTitle (string) The label for the main button
-## 
+##
 ## \param withCancel (bool) Wether or not a cancel button should be drawn
-## 
+##
 ## \param cancelButtonTitle (string) The label for the cancel button.
-## 
+##
 ## \param rightHanded (bool) The main button defaults to the left, to match Maya's
 ## look. If you prefer the other side, to match other environments, this can be set
 ## to True.
 ##
 ## \param allowMultiSelection (bool) Can the user select more than one item at once.
-## 
+##
 ## \param saveMode (bool) When enabled, the user is allowed to choose paths to files
 ## that don't exist yet. Otherwise, the selection is always conformed to an item in the
 ## list, or the current directory itself if nothing is selected.
@@ -98,9 +98,9 @@ __all__ = [ "FileBrowser" ]
 ## NOTE: Neither 'path', nor 'name' must be valid filesystem entries. They can be modified to substitute
 ## variables or similar into the paths or item names. Validation and filtering functions are called
 ## with the 'real' working path of the browser, as well as the item list. It is up to these functions
-## to valiate the 'correctness' of the result of the users selection. 
+## to valiate the 'correctness' of the result of the users selection.
 ## If a filter is modifying the items list, it is it's responsibility to ensure that the the relevant metadata
-## is created for any 'synthesized' items. For example, when collapsing a file sequence into a single item, 
+## is created for any 'synthesized' items. For example, when collapsing a file sequence into a single item,
 ## appropriate dates should be generated to permit 'by date' sorting.
 
 class FileBrowser( IECoreMaya.UIElement ) :
@@ -114,10 +114,10 @@ class FileBrowser( IECoreMaya.UIElement ) :
 	):
 
 		self.__path = None
-		
+
 		# For consistency, we're not exposing these are attributes
 		self.__filter = filter
-		self.__validate = validate 
+		self.__validate = validate
 		self.__showHidden = showHidden
 		self.__saveMode = saveMode
 
@@ -140,11 +140,11 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 		maya.cmds.formLayout(
 			self.__layout, edit=True,
-			attachForm = ( 
+			attachForm = (
 				( listUI, "left", 0 ), ( listUI, "top", 0 ), ( listUI, "right", 0 ),
 				( pathUI, "left", 0 ), ( pathUI, "right", 0 ),
 			),
-			attachControl = ( 
+			attachControl = (
 				( listUI, "bottom", 2, pathUI ),
 			)
 		)
@@ -160,20 +160,20 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 		maya.cmds.formLayout(
 			self.__layout, edit=True,
-			attachForm = ( 
+			attachForm = (
 				( self.__selectButton, edge, 4 ), ( self.__selectButton, "bottom", 4 )
 			),
-			attachControl = ( 
+			attachControl = (
 				( pathUI, "bottom", 0, self.__selectButton ),
 			)
-		)		
+		)
 
 		if withCancel:
-		
-			edge = "left" if rightHanded else "right" 
 
-			self.__cancelButton = maya.cmds.button( 
-				label = cancelButtonTitle, 
+			edge = "left" if rightHanded else "right"
+
+			self.__cancelButton = maya.cmds.button(
+				label = cancelButtonTitle,
 				command=self.__emitCancel,
 				width=200, height=30,
 				parent = self.__layout,
@@ -181,17 +181,17 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 			maya.cmds.formLayout(
 				self.__layout, edit=True,
-				attachForm = ( 
+				attachForm = (
 					( self.__cancelButton, edge, 4 ), ( self.__cancelButton, "bottom", 4 )
 				),
-			)		
+			)
 
 		else:
-		
+
 			self.__cancelButton = None
 
 		if options :
-		
+
 			optionsColumn = maya.cmds.columnLayout( adj=True, parent=self.__layout )
 			self.__optionsProcInstance = options( self, optionsColumn )
 
@@ -205,10 +205,10 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 			maya.cmds.formLayout(
 				self.__layout, edit=True,
-				attachForm = ( 
+				attachForm = (
 					( optionsColumn, "left", 15 ), ( optionsColumn, "right", 15 ),
 				),
-				attachControl = ( 
+				attachControl = (
 					( optionsColumn, "bottom", 2, self.__selectButton ),
 					( pathUI, "bottom", 6, optionsColumn ),
 				)
@@ -216,7 +216,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 		# Listen for changes the user makes to the path field. True allows immediate entry
 		# in applicable modes. For 'type a name and hit enter to save'.
-		self.__pathField.valueChangedSignal.connect( lambda p: self.setPath( p, True ) )							
+		self.__pathField.valueChangedSignal.connect( lambda p: self.setPath( p, True ) )
 		# When the main working path changes, we need to update the items in that path
 		self.pathChangedSignal.connect( self.__getItemsForPath )
 		# When the selection in the list changes, we need to update the path/validate
@@ -225,7 +225,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		self.__itemList.itemChosenSignal.connect( self.__itemChosen )
 
 	## Sets the working path for the file browser.
-	## \param path <string> If this is the path to a file, then the dialog will display 
+	## \param path <string> If this is the path to a file, then the dialog will display
 	## the parent directory and select the file. The pathChangedSignal is then emitted
 	## with the path to the directory. If None is passed, the listing of the current path
 	## will be refreshed.
@@ -234,9 +234,9 @@ class FileBrowser( IECoreMaya.UIElement ) :
 	## the dialogue opener to use the setPath method to set  default name without thinking
 	## about it too much.
 	def setPath( self, path=None, allowImmediateSelection=False ) :
-	
+
 		if not path:
-			path = self.__path	
+			path = self.__path
 
 		path = os.path.expandvars( path )
 
@@ -256,12 +256,12 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		self.__emitPathChanged()
 
 		if item:
-		
+
 			self.__itemList.setSelection( item )
 
 			# If we in file creation mode (save), then we allow the user to enter
 			# a full path to a file, if this validates, we then potentially immediately
-			# choose that file. This is, essentially, to allow you to 'type a name and hit enter'.	
+			# choose that file. This is, essentially, to allow you to 'type a name and hit enter'.
 			if self.__saveMode:
 
 				userItem = {
@@ -271,16 +271,16 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 				itemList = (userItem,)
 				self.__selectionChanged( itemList )
-	
-				if allowImmediateSelection:	
+
+				if allowImmediateSelection:
 					if self._validate( itemList ) :
 						self.__itemChosen( userItem )
-					
+
 	## This function should be used to query the users selection in clases using an
 	## instance of the FileDialog.
-	## \return <tuple> This returns a list of the items selected in the file browser. 
-	## Each item is specified by its full path. If items names have been modified by 
-	## filtering, the full path is returned with the filtered name instead of the 
+	## \return <tuple> This returns a list of the items selected in the file browser.
+	## Each item is specified by its full path. If items names have been modified by
+	## filtering, the full path is returned with the filtered name instead of the
 	## file name. If validation is setup, and fails, () is returned.
 	def getCurrentSelection( self ) :
 
@@ -293,15 +293,15 @@ class FileBrowser( IECoreMaya.UIElement ) :
 
 	# See whats on disk...
 	def __getItemsForPath( self, path, *args ) :
-	
+
 		try:
 			fullDirContents = os.listdir( self.__path )
 		except Exception, e :
 			print e
 			maya.cmds.evalDeferred( 'import maya.cmds; maya.cmds.confirmDialog( b="OK", title="Error retrieving file list...", message="%s" )' % e )
 			return
-	
-		# We'll do basic hidden item filtering here 
+
+		# We'll do basic hidden item filtering here
 		# to make life simpler in most common cases
 		items = []
 		for f in fullDirContents:
@@ -342,7 +342,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 	# This function returns an unvalidated list of items considered 'selected', along with
 	# their info. This is either the actual selection in the item list, or the current contents
 	# of the path field, if this has been modified by the user since the list was read.
-	def __getSelectedItems( self ) :	
+	def __getSelectedItems( self ) :
 
 		selection = self.__itemList.getSelection()
 
@@ -354,7 +354,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		# This allows 'save' behavoiur, where they might type a
 		# file name onto the current path. We may want to make it
 		# so that this behaviour is enabled only when saveMode is True
-		if ( requestedPath != self.__path and requestedFile not in selection 
+		if ( requestedPath != self.__path and requestedFile not in selection
 				and requestedFile != "<multiple items>" ):
 
 			# The user had modified the path by hand
@@ -364,9 +364,9 @@ class FileBrowser( IECoreMaya.UIElement ) :
 			}
 			items.append( userItem )
 
-		elif not selection:	
+		elif not selection:
 
-			# The current path can be considered a selection in the case of 
+			# The current path can be considered a selection in the case of
 			# directory picking.
 			cwdItem = {
 				"name" : os.path.basename( self.__path ),
@@ -406,12 +406,12 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		# If its a directory, we don't want to navigate, rather than
 		# 'choose' the item.
 		if os.path.isdir( path ) :
-		
+
 			path = os.path.normpath(path).replace( "//", "/" )
 			self.setPath( path )
-		
+
 		else:
-		
+
 			self.__emitSelect( items=(item,) )
 
 	def _validate( self, items ):
@@ -445,15 +445,15 @@ class FileBrowser( IECoreMaya.UIElement ) :
 	## will receive the following args:
 	##  - browserInstance <IECore.FileDialog.Browser>
 	def cancelSignal( self ):
-		return self.__s_cancel		
+		return self.__s_cancel
 
 	@property
-	## This will be emitted whenever the current directory has changed as a result 
+	## This will be emitted whenever the current directory has changed as a result
 	## of the user browsing around the file system. Connected callables will be called
 	## with the following args:
 	##  - path <string>
 	def pathChangedSignal( self ):
-		return self.__s_pathChanged	
+		return self.__s_pathChanged
 
 	##! }
 
@@ -463,7 +463,7 @@ class FileBrowser( IECoreMaya.UIElement ) :
 			items = kw["items"]
 		else:
 			items = self.__getSelectedItems()
-		
+
 		if self._validate( items ):
 			self.__s_select( self )
 
@@ -471,32 +471,32 @@ class FileBrowser( IECoreMaya.UIElement ) :
 		self.__s_cancel( self )
 
 	def __emitPathChanged( self, *args ) :
-		self.__s_pathChanged( self.__path )			
+		self.__s_pathChanged( self.__path )
 
 	## Sets the title of the main button
 	def setButtonTitle( self, title ):
-	
+
 		maya.cmds.button( self.__selectButton, edit=True, label=title )
-	
+
 	## \return the title of the main button.
 	def getButtonTitle( self, title ):
-	
+
 		maya.cmds.button( self.__selectButton, query=True, label=True )
-	
+
 	## Sets the title of the Cancel button, if one exists
 	def setCancelButtonTitle( self, title ):
-	
+
 		if self.__cancelButton:
 			maya.cmds.button( self.__cancelButton, edit=True, label=title )
-	
+
 	## \return the title of the cancel button, else None if none exists.
 	def getCancelButtonTitle( self, title ):
-	
+
 		if self.__cancelButton:
 			return maya.cmds.button( self.__cancelButton, query=True, label=True )
 		else:
 			return None
-	
+
 	##! \name Filters
 	## Filters and Validation for common customisations of the Browser.
 	##! {
@@ -504,104 +504,104 @@ class FileBrowser( IECoreMaya.UIElement ) :
 	## displayed. Register the appropriate method(s) depending on the desired
 	## behaviour
 	class FileExtensionFilter():
-		
-		### \param extentions One or more extensions to allow, testing is case insensitive. 
+
+		### \param extentions One or more extensions to allow, testing is case insensitive.
 		def __init__( self, extensions ) :
-			
+
 			if not isinstance( extensions, list ) and not isinstance( extensions, tuple ):
 				extensions = ( extensions, )
-			
+
 			self.__exts = []
-			
+
 			for e in extensions:
 				self.__exts.append( ( ".%s" % e.lower(), len(e) ) )
-			
+
 		def filter( self, path, items ) :
-			
+
 			if not self.__exts:
 				return
-				
+
 			# Removal during the for loop fails, and re-assigning
 			# to 'items' fails as it just reassigns the pointer.
 			allItems = list(items)
 			del items[:]
-			
+
 			for i in allItems:
 				if os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
 					items.append( i )
 				else:
 					if self.__check( i["name"] ) :
 						items.append( i )
-						
+
 		def validate( self, path, items ) :
-			
+
 			if not items:
 				return False
-			
+
 			for i in items:
 				if os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
 					return False
 				elif not self.__check( i["name"] ):
 					return False
-			
+
 			return True
-					
+
 		def __check( self, itemName ) :
-		
+
 			if not self.__exts:
 				return True
-			
+
 			item = itemName.lower()
-			
+
 			for e in self.__exts:
 				if (".%s" % item[-e[1]:]) == e[0] :
 					return True
-		
-			return False	
-			
+
+			return False
+
 	## A simple filter that only shows or validates directories.
 	class DirectoriesOnlyFilter():
-		
+
 		def filter( self, path, items ) :
-			
+
 			allitems = list(items)
 			del items[:]
-			
+
 			for i in allitems:
 				if os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
 					items.append( i )
-			
+
 		def validate( self, path, items ) :
-			
+
 			if not items:
 				return False
-				
+
 			for i in items:
 				if not os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
 					return False
-			
+
 			return True
-	
+
 	## A filter that matches a pattern to the filenames
 	class FnMatchFilter() :
-		
+
 		def __init__( self, pattern ) :
-			
+
 			self.__reobj = re.compile( fnmatch.translate( pattern ) )
-		
+
 		def filter( self, path, items ) :
-			
+
 			items[:] = [ i for i in items if self.__reobj.match( i["path"] ) or os.path.isdir( i["path"] ) ]
-		
+
 		def validate( self, path, items ) :
-			
+
 			if not items :
 				return False
-				
+
 			for i in items:
 				if not self.__reobj.match( i["path"] ) :
 					return False
-			
+
 			return True
 	##! }
 
@@ -621,7 +621,7 @@ class _Signal() :
 		self.__slots.append( callable )
 
 	def disconnect( self, callable ) :
-		self.__slots.remove( callable )		
+		self.__slots.remove( callable )
 
 
 class _PathField( object, IECoreMaya.UIElement ) :
@@ -639,13 +639,13 @@ class _PathField( object, IECoreMaya.UIElement ) :
 
 		maya.cmds.formLayout(
 			self.__layout, edit=True,
-			attachForm = ( 
+			attachForm = (
 				( self.__upButton, "left", 0 ), ( self.__upButton, "top", 0 ),
 				( self.__field, "left", 54 ), ( self.__field, "right", 0 ), ( self.__field, "top", 0 ),
 			),
 		)
 
-		self.__s_valueChanged = _Signal()	
+		self.__s_valueChanged = _Signal()
 
 	def up( self, *args ) :
 
@@ -655,14 +655,14 @@ class _PathField( object, IECoreMaya.UIElement ) :
 		path = os.path.dirname( path )
 
 		self.setValue( path, True )
-			
+
 	def getValue( self ):
 		return str( maya.cmds.textField( self.__field, query=True, text=True ) )
 
 	def setValue( self, value, emit=True ):
 		maya.cmds.textField( self.__field, edit=True, text=value )
 		if emit:
-			self.__emitValueChanged()			
+			self.__emitValueChanged()
 
 	value = property( getValue, setValue )
 
@@ -685,7 +685,7 @@ class _FileList( object, IECoreMaya.UIElement ) :
 		IECoreMaya.UIElement.__init__( self, self.__layout )
 
 		self.__sort = _DefaultFileListSort( self.__layout )
-		sortUI = self.__sort._topLevelUI()		
+		sortUI = self.__sort._topLevelUI()
 
 		self.__list = maya.cmds.textScrollList(
 			parent = self.__layout,
@@ -696,11 +696,11 @@ class _FileList( object, IECoreMaya.UIElement ) :
 
 		maya.cmds.formLayout(
 			self.__layout, edit=True,
-			attachForm = ( 
+			attachForm = (
 				( sortUI, "left", 0 ), ( sortUI, "top", 0 ), ( sortUI, "right", 0 ),
 				( self.__list, "left", 0 ), ( self.__list, "right", 0 ), ( self.__list, "bottom", 0 ),
 			),
-			attachControl = ( 
+			attachControl = (
 				( self.__list, "top", 0, sortUI ),
 			)
 		)
@@ -747,10 +747,10 @@ class _FileList( object, IECoreMaya.UIElement ) :
 	def setItems( self, items, emit=True ) :
 
 		self.__items = items
-		
-		# This is emited before we re-populate to allow sorting etc... to 
+
+		# This is emited before we re-populate to allow sorting etc... to
 		# take place if need be.
-		if emit:	
+		if emit:
 			self.__emitItemsChanged()
 
 		maya.cmds.textScrollList( self.__list, edit=True, removeAll=True )
@@ -758,53 +758,53 @@ class _FileList( object, IECoreMaya.UIElement ) :
 		for i in self.__items:
 			maya.cmds.textScrollList( self.__list, edit=True, append=self.itemName(i) )
 
-		if emit:	
+		if emit:
 			self.__emitSelectionChanged()
 
 	def getItems( self  ) :
 
 		return list( self.__items )
-	
+
 	# \arg item can be the item dictionary, or name
 	def hasItem( self, item ) :
-		
+
 		if isinstance( item, dict ) :
-		
+
 			for i in self.__items:
 				if i == item :
 					return True
-	
+
 		else:
-			
+
 			for i in self.__items:
 				if i["name"] == item :
 					return True
-			
+
 		return False
-	
+
 	def itemName( self, item ) :
-	
+
 		return item["name"] if isinstance( item, dict ) else item
-				
+
 	def getItem( self, itemName ) :
-		
+
 			for i in self.__items:
 				# itemName may be unicode.
 				if i["name"] == str(itemName) :
 					return i
-			
+
 			return {}
-	
+
 
 	def sortItems( self, *args ):
 
 		if not self.__sort:
 			return
-			
+
 		oldSelection = maya.cmds.textScrollList( self.__list, query=True, si=True )
 
 		self.__sort.sort( self.__items )
-		
+
 		## \todo This effectively calls setItems inside setItems
 		self.setItems( self.__items, False )
 
@@ -820,18 +820,18 @@ class _FileList( object, IECoreMaya.UIElement ) :
 	def __emitSelectionChanged( self, *args ) :
 
 		items = self.getSelection()
-		self.__s_selectionChanged( items )		
+		self.__s_selectionChanged( items )
 
 	@property
 	def itemsChangedSignal( self ):
-		return self.__s_itemsChanged		
+		return self.__s_itemsChanged
 
 	def __emitItemsChanged( self, *args ) :
-		self.__s_itemsChanged( self.__items )			
+		self.__s_itemsChanged( self.__items )
 
 	@property
 	def itemChosenSignal( self ):
-		return self.__s_itemChosen	
+		return self.__s_itemChosen
 
 	def __emitItemChosen( self, *args ) :
 		selection = maya.cmds.textScrollList( self.__list, query=True, si=True )
@@ -850,12 +850,12 @@ class _DefaultFileListSort( object, IECoreMaya.UIElement ) :
 
 		maya.cmds.text( label="Sort by:" )
 
-		self.__keyMenu = maya.cmds.optionMenu( 
+		self.__keyMenu = maya.cmds.optionMenu(
 			changeCommand = self.__emitTermsChanged,
 			parent=self.__layout,
 		)
 
-		self.__directionMenu = maya.cmds.optionMenu( 
+		self.__directionMenu = maya.cmds.optionMenu(
 			changeCommand = self.__emitTermsChanged,
 			parent=self.__layout,
 		)
@@ -866,16 +866,16 @@ class _DefaultFileListSort( object, IECoreMaya.UIElement ) :
 		maya.cmds.menuItem( label="Ascending", parent=self.__directionMenu )
 		maya.cmds.menuItem( label="Descending", parent=self.__directionMenu )
 
-		self.__s_termsChanged = _Signal()	
+		self.__s_termsChanged = _Signal()
 
 	@property
 	def termsChangedSignal( self ):
 		return self.__s_termsChanged
 
 	def __emitTermsChanged( self, *args ) :
-		self.__s_termsChanged()		
+		self.__s_termsChanged()
 
-	def sort( self, items ) :		
+	def sort( self, items ) :
 
 		key = maya.cmds.optionMenu( self.__keyMenu, query=True, value=True )
 		direction = maya.cmds.optionMenu( self.__directionMenu, query=True, value=True )

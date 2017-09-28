@@ -72,7 +72,7 @@ const char ** LensDistort::modelNames()
 	static bool init = false;
 	static std::vector<std::string> lensModels = IECore::LensModel::lensModels();
 	static const char ** cStrings = new const char*[lensModels.size()+1];
-	
+
 	if ( !init )
 	{
 		const unsigned int nLensModels( lensModels.size() );
@@ -115,7 +115,7 @@ LensDistort::LensDistort( Node* node ) :
 	for( int i = 0; i < m_nThreads; ++i ) m_model[i] = IECore::LensModel::create(modelNames()[0]);
 }
 
-void LensDistort::updateLensModel( bool updateKnobsFromParameters ) 
+void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 {
 	if ( updateKnobsFromParameters ) m_pluginAttributes.clear(); // Give us a fresh start by clearing our internal parameter list.
 
@@ -129,7 +129,7 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 	{
 		// Get the default value.
 		IECore::ConstObjectPtr o( (*j)->getValue() );
-		
+
 		// We only handle double parameters so ignore all other types...
 		IECore::ConstDoubleDataPtr d = IECore::runTimeCast<const IECore::DoubleData>( o.get() );
 		if (!d) continue;
@@ -147,14 +147,14 @@ void LensDistort::updateLensModel( bool updateKnobsFromParameters )
 			}
 		}
 		++attrIdx;
-	
+
 		if ( parameterExists ) continue;
-	
+
 		// Add the new attribute.
 		double value( d->readable() );
 		m_pluginAttributes.insert( m_pluginAttributes.begin()+attrIdx-1, PluginAttribute( (*j)->name().c_str(), value ) );
 	}
-	
+
 	// Erase all remaining parameters that are not in our current lens model.
 	m_pluginAttributes.erase( m_pluginAttributes.begin()+attrIdx, m_pluginAttributes.end() );
 
@@ -188,7 +188,7 @@ void LensDistort::setLensModel( std::string modelName )
 void LensDistort::_validate(bool for_real)
 {
 	copy_info();
-	
+
 	m_filter.initialize();
 
 	// Update the lens model if the frame or frame offset changed.
@@ -222,13 +222,13 @@ void LensDistort::_validate(bool for_real)
 		}
 		m_model[i]->validate();
 	}
-	
+
 	// Set the output bounding box according to the lens model.
 	bool black = input0().black_outside();
 	Imath::Box2i input( Imath::V2i( input0().info().x(), input0().info().y() ), Imath::V2i( input0().info().r()-1, input0().info().t()-1 ) );
 	Imath::Box2i box( m_model[0]->bounds( m_mode, input, format().width(), format().height() ) );
 	info_.set( box.min.x-black, box.min.y-black, box.max.x+black, box.max.y+black );
-	
+
 	set_out_channels( Mask_All );
 }
 
@@ -261,27 +261,27 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 	double x_max = std::numeric_limits<double>::min();
 	double y_min = std::numeric_limits<double>::max();
 	double y_max = std::numeric_limits<double>::min();
-	
+
 	// Work out which of the array of lens models we should use depending on the current thread.
 	int lensIdx = 0;
 	const Thread::ThreadInfo * f = Thread::thisThread();
 	if( f ) lensIdx=f->index;
-	
+
 	// Clamp the index to the array range.
 	lensIdx = lensIdx > m_nThreads ? 0 : lensIdx;
-	
+
 	// Create an array of distorted values that we will populate.
 	Imath::V2d distort[r-x];
-	
+
 	// Thread safe read of distortion data.
 	{
 		Guard l( m_locks[lensIdx] );
-		
+
 		// Distort each pixel on the row, store the result in an array and track the bounding box.
 		for( int i = x; i < r; i++ )
 		{
 			double u = (i+0.0)/w;
-	
+
 			Imath::V2d &dp( distort[i-x] );
 			Imath::V2d p(u, v);
 			if( m_mode )
@@ -292,10 +292,10 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 			{
 				dp = m_model[lensIdx]->undistort( p );
 			}
-			
+
 			dp.x *= w;
 			dp.y *= h;
-			
+
 			// Clamp our distorted values to the bounding box.
 			dp.x = std::max( double(info.x()), dp.x );
 			dp.y = std::max( double(info.y()), dp.y );
@@ -307,13 +307,13 @@ void LensDistort::engine( int y, int x, int r, ChannelMask channels, Row & outro
 			y_max = std::max( y_max, dp.y );
 		}
 	}
-	
+
 	// Now we know which pixels we'll need, request them!
 	y_max++;
 	x_max++;
-	
+
 	DD::Image::Pixel out(channels);
-	
+
 	// Lock the tile into the cache
 	DD::Image::Tile t( input0(), IECore::fastFloatFloor( x_min ), IECore::fastFloatFloor( y_min ), IECore::fastFloatCeil( x_max ), IECore::fastFloatCeil( y_max ), channels );
 
@@ -391,7 +391,7 @@ bool LensDistort::getFileSequencePath( std::string& path )
 bool LensDistort::setLensFromFile( std::string &returnPath )
 {
 	returnPath.clear();
-	
+
 	// Check that the returnPath isn't null.
 	if ( !getFileSequencePath( returnPath ) ) return false;
 
@@ -432,7 +432,7 @@ bool LensDistort::setLensFromFile( std::string &returnPath )
 	std::ifstream ifile;
 	ifile.open( returnPath.c_str(), std::ifstream::in );
 	if ( !ifile.is_open() ) return false;;
-	
+
 	// Try to open the lens file.
 	try
 	{
@@ -473,13 +473,13 @@ void LensDistort::knobs( Knob_Callback f )
 	Tooltip( f, "Whether to Distort or Undistort the input by the current lens model." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
-	
+
 	m_lastStaticKnob = m_kModel = Enumeration_knob( f, &m_lensModel, modelNames(), "model", "Model" );
 	Tooltip( f, "Choose the lens model to distort the input with. This list is populated with all lens models that have been registered to Cortex." );
 	SetFlags( f, Knob::KNOB_CHANGED_ALWAYS );
 	SetFlags( f, Knob::ALWAYS_SAVE );
 	SetFlags( f, Knob::NO_UNDO );
-	
+
 	updatePluginAttributesFromKnobs();
 
 	// Create the Dynamic knobs.
@@ -488,7 +488,7 @@ void LensDistort::knobs( Knob_Callback f )
 		setLensModel( modelNames()[0] );
 		m_numNewKnobs = add_knobs( buildDynamicKnobs, this->firstOp(), f );
 	}
-	else 
+	else
 	{
 		LensDistort::addDynamicKnobs( this->firstOp(), f );
 	}
@@ -528,12 +528,12 @@ int LensDistort::knob_changed(Knob* k)
 			m_hasValidFileSequence = setLensFromFile( path );
 			updateRequired |= m_hasValidFileSequence != oldValue;
 		}
-		
+
 		if( updateRequired )
 		{
 			updateUI();
 		}
-		
+
 		return true;
 	}
 
@@ -584,7 +584,7 @@ void LensDistort::updateUI()
 	}
 }
 
-void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
+void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f)
 {
 	PluginAttributeList& attributeList( ((LensDistort*)p)->attributeList() );
 	const unsigned int nAttributes( attributeList.size() );
@@ -599,7 +599,7 @@ void LensDistort::buildDynamicKnobs(void* p, DD::Image::Knob_Callback f)
 	}
 }
 
-void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f) 
+void LensDistort::addDynamicKnobs(void* p, DD::Image::Knob_Callback f)
 {
 	PluginAttributeList& attributeList( ((LensDistort*)p)->attributeList() );
 	const unsigned int nAttributes( attributeList.size() );

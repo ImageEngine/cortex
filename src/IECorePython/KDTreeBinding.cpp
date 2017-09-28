@@ -141,7 +141,7 @@ struct KDTreeWrapper
 		return indices;
 
 	}
-	
+
 	IntVectorDataPtr enclosedPoints( const Box &bound )
 	{
 		typedef std::vector<typename T::Iterator> PointArray;

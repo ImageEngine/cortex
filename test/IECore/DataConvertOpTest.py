@@ -39,63 +39,63 @@ import IECore
 class DataConvertOpTest( unittest.TestCase ) :
 
 	def testScaling( self ) :
-		
-		o = IECore.DataConvertOp()( 
-		
+
+		o = IECore.DataConvertOp()(
+
 			data = IECore.FloatVectorData( [ 0, 0.5, 1 ] ),
 			targetType = IECore.UCharVectorData.staticTypeId()
-		
+
 		)
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.UCharVectorData( [ 0, 128, 255 ] )
-			
+
 		)
-	
+
 	def testDimensionUpConversion( self ) :
-	
-		o = IECore.DataConvertOp()( 
-			
+
+		o = IECore.DataConvertOp()(
+
 			data = IECore.FloatVectorData( [ 0, 0.5, 1, 0.1, 2, 10 ] ),
 			targetType = IECore.V3fVectorData.staticTypeId()
-		
+
 		)
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.V3fVectorData( [ IECore.V3f( 0, 0.5, 1 ), IECore.V3f( 0.1, 2, 10 ) ] )
-			
+
 		)
-		
+
 	def testDimensionDownConversion( self ) :
-	
-		o = IECore.DataConvertOp()( 
-			
+
+		o = IECore.DataConvertOp()(
+
 			data = IECore.V3iVectorData( [ IECore.V3i( 1, 2, 3 ), IECore.V3i( 4, 5, 6 ) ] ),
 			targetType = IECore.IntVectorData.staticTypeId()
-		
+
 		)
-		
+
 		self.assertEqual(
-		
+
 			o,
 			IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-			
-		)	
-	
+
+		)
+
 	def testWrongSizeForDimensions( self ) :
-	
+
 		self.assertRaises(
-			
+
 			RuntimeError,
 			IECore.DataConvertOp(),
 			data = IECore.FloatVectorData( [ 1, 2 ] ),
 			targetType = IECore.V3fVectorData.staticTypeId()
-			
+
 		)
-	
+
 if __name__ == "__main__":
     unittest.main()

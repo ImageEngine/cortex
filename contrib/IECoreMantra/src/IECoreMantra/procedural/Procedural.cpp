@@ -95,7 +95,7 @@ public:
 	UT_StringHolder m_className;
 	int32 m_classVersion;
 	UT_StringHolder m_parameterString;
-#else 
+#else
 	UT_String m_className;
 	int m_classVersion;
 	UT_String m_parameterString;
@@ -155,9 +155,9 @@ void registerProcedural(VRAY_ProceduralFactory *factory)
 }
 #endif
 
-// The initialize method is called when the procedural is created. 
+// The initialize method is called when the procedural is created.
 // Returning zero (failure) will abort the rendering of this procedural.
-// The bounding box passed in is the user defined bounding box. 
+// The bounding box passed in is the user defined bounding box.
 // If the user didn't specify a bounding box, then the box will be NULL
 int
 VRAY_ieProcedural::initialize(const UT_BoundingBox *box)
@@ -169,7 +169,7 @@ VRAY_ieProcedural::initialize(const UT_BoundingBox *box)
 	import("className", m_className);
 	import("classVersion", &m_classVersion, 1);
 	import("parameterString", m_parameterString);
-	
+
 #if UT_MAJOR_VERSION_INT >= 16
 	size_t size;
 	const UT_StringHolder * classNameValue = getSParm("className", size);
@@ -180,19 +180,19 @@ VRAY_ieProcedural::initialize(const UT_BoundingBox *box)
 	const int *classVersion = getIParm("classVersion");
 	const char **parameterString = getSParm("parameterString");
 #endif
-	if (classNameValue) 
+	if (classNameValue)
     {
 		m_className = UT_StringHolder(*classNameValue);
 	}
-	if (classVersion) 
+	if (classVersion)
     {
 		m_classVersion = *classVersion;
 	}
-	if (parameterString) 
+	if (parameterString)
     {
 		m_parameterString = UT_StringHolder(*parameterString);
 	}
-	return 1;	
+	return 1;
 }
 
 void
@@ -201,9 +201,9 @@ VRAY_ieProcedural::getBoundingBox(UT_BoundingBox &box)
 	box = convert<UT_BoundingBox>( m_bound );
 }
 
-// When mantra determines that the bounding box needs to be rendered, the 
-// render method is called. At this point, the procedural can either 
-// generate geometry (VRAY_Procedural::openGeometryObject()) or it can 
+// When mantra determines that the bounding box needs to be rendered, the
+// render method is called. At this point, the procedural can either
+// generate geometry (VRAY_Procedural::openGeometryObject()) or it can
 // generate further procedurals (VRAY_Procedural::openProceduralObject()).
 void
 VRAY_ieProcedural::render()
@@ -221,14 +221,14 @@ VRAY_ieProcedural::render()
 		UT_String parameterString = m_parameterString.c_str();
 		if (parameterString.tokenize(argv, ","))
 		{
-            // The Cortex Mantra Inject otl parses the parameters of a 
-            // SOP_ProceduralHolder and replaces empty values with a '!' 
+            // The Cortex Mantra Inject otl parses the parameters of a
+            // SOP_ProceduralHolder and replaces empty values with a '!'
             // character to make them easier to parse here.
-            // 
-            // This hack is upsetting, a pure python procedural in the style 
+            //
+            // This hack is upsetting, a pure python procedural in the style
             // of IECoreRI iePython.dso could parse these parameters correctly
             // like python/IECoreRI/ExecuteProcedural.py
-			for (int i = 0; i < argv.getArgc(); i++) 
+			for (int i = 0; i < argv.getArgc(); i++)
 			{
 				std::string s(argv[i]);
 				if (s == "!")
@@ -260,7 +260,7 @@ VRAY_ieProcedural::render()
 	if( parameterisedProcedural )
 	{
 		IECoreMantra::RendererPtr renderer = new IECoreMantra::Renderer( this );
-		parameterisedProcedural->render( renderer.get(), false, false, true, true ); 
+		parameterisedProcedural->render( renderer.get(), false, false, true, true );
 	}
 }
 

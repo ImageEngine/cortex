@@ -48,14 +48,14 @@ class TestFrameList( unittest.TestCase ) :
 		f = FrameList.parse( " " )
 		self.assert_( isinstance( f, EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
-	
+
 	def testReverseConstruction( self ) :
-		
+
 		f = FrameList.parse( "1-5r" )
 		self.assertEqual( f.asList(), [ 5, 4, 3, 2, 1 ] )
 		self.assertEqual( frameListFromList( [ 5, 4, 3, 2, 1 ] ), f )
-	
+
 	## \todo: there should probably be a lot more tests in here...
-	
+
 if __name__ == "__main__":
         unittest.main()

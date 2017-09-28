@@ -48,41 +48,41 @@ namespace IECoreHoudini
 class ROP_SceneCacheWriter : public ROP_Node
 {
 	public :
-		
+
 		ROP_SceneCacheWriter( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~ROP_SceneCacheWriter();
-		
+
 		static const char *typeName;
-		
+
 		static PRM_Name pFile;
 		static PRM_Name pRootObject;
 		static PRM_Name pForceObjects;
-		
+
 		static PRM_Default fileDefault;
 		static PRM_Default rootObjectDefault;
 		static PRM_SpareData forceObjectsSpareData;
-		
+
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-	
+
 	protected :
-		
+
 		virtual int startRender( int nframes, fpreal s, fpreal e );
 		virtual ROP_RENDER_CODE renderFrame( fpreal time, UT_Interrupt *boss );
 		virtual ROP_RENDER_CODE endRender();
-		
+
 		virtual bool updateParmsFlags();
-		
+
 		/// Called recursively to traverse the IECoreHoudini::LiveScene, starting with the Root Object,
 		/// and write the hierarchy to the output file.
 		virtual ROP_RENDER_CODE doWrite( const IECore::SceneInterface *liveScene, IECore::SceneInterface *outScene, double time, UT_Interrupt *progress );
-	
+
 	private :
-		
+
 		static const IECore::SceneInterface::Name &changingHierarchyAttribute;
 
 		bool linked( const std::string &file ) const;
-		
+
 		enum Mode
 		{
 			NaturalLink = 0,
@@ -90,12 +90,12 @@ class ROP_SceneCacheWriter : public ROP_Node
 			NaturalExpand,
 			ForcedExpand
 		};
-		
+
 		IECoreHoudini::LiveScenePtr m_liveHoudiniScene;
 		IECore::ConstSceneInterfacePtr m_liveScene;
 		IECore::SceneInterfacePtr m_outScene;
 		UT_StringMMPattern *m_forceFilter;
-		
+
 		double m_startTime;
 		double m_endTime;
 

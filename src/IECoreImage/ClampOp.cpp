@@ -50,19 +50,19 @@ ClampOp::ClampOp()
 		"Values below this value are clamped.",
 		0.0f
 	);
-	
+
 	FloatParameterPtr maxParameter = new FloatParameter(
 		"max",
 		"Values above this value are clamped.",
 		1.0f
 	);
-	
+
 	BoolParameterPtr enableMinToParameter = new BoolParameter(
 		"enableMinTo",
 		"When this is on, the minTo parameter is used.",
 		false
 	);
-	
+
 	FloatParameterPtr minToParameter = new FloatParameter(
 		"minTo",
 		"When enableMinTo is on, values less than min will "
@@ -70,13 +70,13 @@ ClampOp::ClampOp()
 		"at min.",
 		0.0f
 	);
-	
+
 	BoolParameterPtr enableMaxToParameter = new BoolParameter(
 		"enableMaxTo",
 		"When this is on, the maxTo parameter is used.",
 		false
 	);
-	
+
 	FloatParameterPtr maxToParameter = new FloatParameter(
 		"maxTo",
 		"When enableMaxTo is on, values greater than max will "
@@ -85,7 +85,7 @@ ClampOp::ClampOp()
 		1.0f
 	);
 
-	
+
 	parameters()->addParameter( minParameter );
 	parameters()->addParameter( maxParameter );
 	parameters()->addParameter( enableMinToParameter );
@@ -127,7 +127,7 @@ const BoolParameter *ClampOp::enableMinToParameter() const
 {
 	return parameters()->parameter<BoolParameter>( "enableMinTo" );
 }
-		
+
 FloatParameter *ClampOp::minToParameter()
 {
 	return parameters()->parameter<FloatParameter>( "minTo" );
@@ -162,10 +162,10 @@ void ClampOp::modifyChannels( const Imath::Box2i &displayWindow, const Imath::Bo
 {
 	float minValue = minParameter()->getNumericValue();
 	float maxValue = maxParameter()->getNumericValue();
-	
+
 	float minTo = enableMinToParameter()->getTypedValue() ? minToParameter()->getNumericValue() : minValue;
 	float maxTo = enableMaxToParameter()->getTypedValue() ? maxToParameter()->getNumericValue() : maxValue;
-	
+
 	for( unsigned i=0; i<channels.size(); i++ )
 	{
 		vector<float> &channel = channels[i]->writable();

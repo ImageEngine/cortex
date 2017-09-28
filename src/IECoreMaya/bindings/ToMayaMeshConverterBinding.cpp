@@ -70,7 +70,7 @@ static bool setMeshInterpolationAttribute( std::string n, std::string interpolat
 		IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::setMeshInterpolationAttribute",  "Failed to set interpolation attribute in " + n );
 		return false;
 	}
-	
+
 	return true;
 }
 

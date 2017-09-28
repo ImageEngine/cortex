@@ -47,7 +47,7 @@ import os
 ##
 ## If effectively provides an instance of the IECoreMaya.FileBrowser class in a
 ## window, along with path history, and bookmarking facilities.
-## 
+##
 ## \param key (string) This key is used to provide context specific path history
 ## and bookmarks. It can be None, in which case, the global history/bookmarks are used.
 ##
@@ -61,29 +61,29 @@ import os
 ## the dialog. If the string "last" is passed, then the last path picked in an instance
 ## with a matching key will be used. If the argument is omitted, then the current working
 ## directory is used.
-## 
+##
 ## Other kw arguments are passed to the FileBrowser constructor. \see IECoreMaya.FileBrowser
 class FileDialog():
 
 	__pathPresets = {}
 
-	def __init__( self, 
+	def __init__( self,
 		key=None,
 		callback=None,
 		title="Choose a file",
 		path=None,
 		**kw
 	) :
-	
+
 		self.__key = key if key else "__global"
 
 		self.__callback = callback
-		
+
 		self.__window = maya.cmds.window( title=title, mb=True )
 		self.__bookmarksMenu = maya.cmds.menu( parent=self.__window, label="Bookmarks", postMenuCommand=self.__buildBookmarksMenu )
 
 		# We need to turn the user closing the window into a 'cancel' event.
-		callback = maya.OpenMayaUI.MUiMessage.addUiDeletedCallback( self.__window, self.__cancelled ) 
+		callback = maya.OpenMayaUI.MUiMessage.addUiDeletedCallback( self.__window, self.__cancelled )
 		self.__deletionCallback = IECoreMaya.CallbackId( callback )
 
 		self.__browser = IECoreMaya.FileBrowser( self.__window, **kw )
@@ -96,46 +96,46 @@ class FileDialog():
 		self.__browser.selectSignal.connect( self.__selected )
 		self.__browser.cancelSignal.connect( self.__cancelled )
 
-		maya.cmds.showWindow( self.__window )	
-	
+		maya.cmds.showWindow( self.__window )
+
 	## Can be called to set the path being displayed in the Dialog.
-	## \see IECoreMaya.FileBrowser.setPath 
+	## \see IECoreMaya.FileBrowser.setPath
 	def setPath( self, path, *args ) :
 			self.__browser.setPath( path )
 
 	def __selected( self, browser ) :
-	
+
 		selection = browser.getCurrentSelection()
-			
+
 		if selection:
 			self.__addToHistory( selection )
-		
+
 		self.__exit( selection )
-	
+
 	def __cancelled( self, *args ) :
 		self.__exit( () )
 
 	# Called to close the window if it exists, and run the callback.
 	def __exit( self, returnValue ) :
-		
+
 		if self.__deletionCallback:
 			del self.__deletionCallback
-		
+
 		if maya.cmds.window( self.__window, exists=True ):
 			maya.cmds.evalDeferred( "import maya.cmds; maya.cmds.deleteUI( '%s' )" % self.__window )
-	
+
 		self.__window = None
-	
+
 		self.__callback( returnValue )
-		
+
 	def __addToHistory( self, items ) :
-		
+
 		path = items[0]
 		if not os.path.isdir( path ):
 			path = os.path.dirname( path )
-		
+
 		## \todo Multiple item persistent history
-		maya.cmds.optionVar( sv=( "cortexFileBrowserLastPath_%s" % self.__key, path ) )		
+		maya.cmds.optionVar( sv=( "cortexFileBrowserLastPath_%s" % self.__key, path ) )
 
 	@staticmethod
 	def __lastPath( key ) :
@@ -155,19 +155,19 @@ class FileDialog():
 	## \param key (string) if specified, the preset will only be available for dialogs
 	## with that ui key.
 	def registerPreset( name, pathOrProc, key=None ) :
-		
+
 		if not key:
 			key = "__global"
-		
+
 		if key not in FileDialog.__pathPresets:
-			FileDialog.__pathPresets[key] = []		
-		
+			FileDialog.__pathPresets[key] = []
+
 		FileDialog.__pathPresets[key].append( (name, pathOrProc) )
 
 	@staticmethod
 	## Removes the named preset with the given key, or global preset if no key is specified.
 	def removePreset( name, key=None ):
-		
+
 		if not key :
 			key = "__global"
 
@@ -177,48 +177,48 @@ class FileDialog():
 					FileDialog.__pathPresets[key].remove( p )
 
 	def __buildBookmarksMenu( self ) :
-			
-		menu = self.__bookmarksMenu	
-		
+
+		menu = self.__bookmarksMenu
+
 		## \todo MenuDefinition here? Can we pickle the commands up as easily given the
 		## references to self, etc...
-		
+
 		maya.cmds.menu( menu, edit=True, deleteAllItems=True )
-		
+
 		self.__bookmarkMenuItemsForKey( "__global", menu )
-		
+
 		if self.__key != "__global":
 			self.__bookmarkMenuItemsForKey( self.__key, menu )
-						
+
 		lastPath = FileDialog.__lastPath( self.__key )
 		if lastPath :
-			
+
 			maya.cmds.menuItem( divider=True, parent=menu )
 			maya.cmds.menuItem( enable=False, label="Recent", parent=menu )
 			maya.cmds.menuItem( label=lastPath, parent=menu, command=IECore.curry( self.setPath, lastPath ) )
-		
+
 		if maya.cmds.menu( menu, numberOfItems=True, query=True ) == 0:
 			maya.cmds.menuItem( enable=False, parent=menu, label="No presets or history" )
 
-	
+
 	def __bookmarkMenuItemsForKey( self, key, menu ) :
-		
+
 		if key in FileDialog.__pathPresets :
 
 			for p in FileDialog.__pathPresets[key] :
-							
+
 				if isinstance( p[1], str ) :
-				
+
 					maya.cmds.menuItem( parent=menu, label=p[0], command=IECore.curry( self.setPath, p[1] ) )
-				
+
 				else:
-					
+
 					items = p[1]()
 					if not items:
 						continue
-											
+
 					if len(items) == 1:
-						maya.cmds.menuItem( parent=menu, label=items[0], command=IECore.curry( self.setPath, items[1] ) )	
+						maya.cmds.menuItem( parent=menu, label=items[0], command=IECore.curry( self.setPath, items[1] ) )
 					else:
 						subMenu = maya.cmds.menuItem( parent=menu, label=p[0], subMenu=True )
 						for i in items:

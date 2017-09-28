@@ -39,24 +39,24 @@ import IECoreNuke
 class FnProceduralHolder( IECoreNuke.FnParameterisedHolder ) :
 
 	def __init__( self, node ) :
-	
+
 		IECoreNuke.FnParameterisedHolder.__init__( self, node )
 
 	def setProcedural( self, className, classVersion=None ) :
-	
+
 		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS" )
-		
+
 	def getProcedural( self ) :
-	
+
 		return self.getParameterised()[0]
 
 	@staticmethod
 	def create( nodeName, className, classVersion=None ) :
-	
+
 		node = nuke.createNode( "ieProcedural" )
 		node.setName( nodeName )
 		node.knob( "postage_stamp" ).setValue( False )
 		fnPH = FnProceduralHolder( node )
 		fnPH.setProcedural( className, classVersion )
-		
+
 		return fnPH

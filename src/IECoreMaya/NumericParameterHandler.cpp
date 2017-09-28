@@ -73,7 +73,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 	}
 
 	fnNAttr.setDefault( p->numericDefaultValue() );
-	
+
 	if( p->minValue()!=Imath::limits<T>::min() )
 	{
 		fnNAttr.setMin( p->minValue() );
@@ -88,7 +88,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 			return MS::kFailure;
 		}
 	}
-	
+
 	if( p->maxValue()!=Imath::limits<T>::max() )
 	{
 		fnNAttr.setMax( p->maxValue() );
@@ -103,7 +103,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 			return MS::kFailure;
 		}
 	}
-	
+
 	T v;
 	MStatus result = plug.getValue( v );
 	if( result )
@@ -114,7 +114,7 @@ MStatus NumericParameterHandler<T>::doUpdate( IECore::ConstParameterPtr paramete
 			return MS::kFailure;
 		}
 	}
-	
+
 	bool keyable = true;
 	bool channelBox = true;
 
@@ -159,10 +159,10 @@ MPlug NumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter,
 
 	MFnNumericAttribute fnNAttr;
 	MObject attribute = fnNAttr.create( plugName, plugName, NumericTraits<T>::dataType(), p->numericDefaultValue() );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 

@@ -39,12 +39,12 @@ __all__ = []
 def __enter( self ) :
 
 	self.__scope = self._Scope( self )
-	
+
 	return self
-	
+
 def __exit( self, type, value, traceBack ) :
 
 	del self.__scope
-	
+
 IECore.MessageHandler.__enter__ = __enter
 IECore.MessageHandler.__exit__ = __exit

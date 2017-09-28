@@ -97,7 +97,7 @@ def quoteCmdLineArgs( args ):
 
 ## Builds a single command line string from the given argument list.
 # You can use this function together with ParameterParser.serialise when building a command line.
-# It is better than pipes.quote() because it is recursive in nature gives more 
+# It is better than pipes.quote() because it is recursive in nature gives more
 # compact representation for single quote characters and does not break with unbalanced quotes (example: """ 'a" """ ).
 # Just make sure to call unquoteCmdLineArgs or unquoteCmdLine when parsing the arguments.
 def quotedCmdLine( args ):

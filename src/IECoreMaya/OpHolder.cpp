@@ -71,28 +71,28 @@ class OpHolder<B>::PostLoadCallback : public IECoreMaya::PostLoadCallback
 {
 
 	public :
-	
+
 		PostLoadCallback( OpHolder<B> *node )
 			:	m_node( node )
 		{
 		}
-	
+
 	protected :
 
 		OpHolder<B> *m_node;
 
 		virtual void postLoad()
-		{	
+		{
 			MFnDependencyNode fnDN( m_node->thisMObject() );
-	
+
 			MPlug plug = fnDN.findPlug( aResultDependency );
 			plug.setValue( 1 );
 
 			m_node->m_postLoadCallback = 0; // remove this callback
 		}
-		
+
 };
-		
+
 template<typename B>
 OpHolder<B>::OpHolder()
 {
@@ -118,12 +118,12 @@ MStatus OpHolder<B>::initialize()
 	{
 		return s;
 	}
-	
+
 	// when we create the result attribute in createResultAttribute(), we make it
 	// non-storable. it's common for the result to be a large object such as a mesh so
 	// storing it would be prohibitively expensive, and in any case it doesn't make sense to
 	// store something which can be recomputed.
-	// 
+	//
 	// however, that causes problems because maya seems incapable of realising that because
 	// it didn't save the attribute in the file, it can't possibly have a valid value.
 	// maya also doesn't call setDependentsDirty() during scene open, so we don't get a
@@ -136,14 +136,14 @@ MStatus OpHolder<B>::initialize()
 	aResultDependency = fnNAttr.create( "resultDependency", "rdep", MFnNumericData::kInt, 0 );
 	fnNAttr.setStorable( false );
 	fnNAttr.setHidden( true );
-	
+
 	return B::addAttribute( aResultDependency );
 }
 
 template<typename B>
 MStatus OpHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArray &plugArray )
 {
-	
+
 	/// This isn't the best way of doing it, but at this point we can't even be sure that the Op has been loaded,
 	/// so calling plugParameter() may not work. We can't call getOp() or getParameterised() here, as it seems
 	/// we can't do things such as adding/removing attributes within this function
@@ -241,7 +241,7 @@ IECore::RunTimeTypedPtr OpHolder<B>::getParameterised( std::string *classNameOut
 			ParameterisedHolder<B>::m_failedToLoad = true;
 		}
 	}
-	
+
 	return result;
 }
 
@@ -256,7 +256,7 @@ MStatus OpHolder<B>::createResultAttribute()
 		msg( Msg::Error, "OpHolder::createResultAttribute", boost::format( "No Op found on node \"%s\"." ) % nodeName.asChar() );
 		return MStatus::kFailure;
 	}
-	
+
 	MStatus s = ParameterisedHolder<B>::createOrUpdateAttribute( const_cast<IECore::Parameter *>( op->resultParameter() ), "result" );
 	if( !s )
 	{
@@ -264,14 +264,14 @@ MStatus OpHolder<B>::createResultAttribute()
 		msg( Msg::Error, "OpHolder::createResultAttribute", boost::format( "Unable to update result attribute to represent class \"%s\" on node \"%s\"." ) % op->typeName() % nodeName.asChar() );
 		return s;
 	}
-			
+
 	MFnDependencyNode fnDN( B::thisMObject() );
 	MObject attribute = fnDN.attribute( "result" );
 
 	MFnAttribute fnAttr( attribute );
 	fnAttr.setWritable( false );
 	fnAttr.setStorable( false );
-	
+
 	return MStatus::kSuccess;
 }
 

@@ -61,21 +61,21 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 class LiveScene : public IECore::SceneInterface
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
-		
+
 		// default constructor
 		LiveScene();
-		
+
 		virtual ~LiveScene();
-		
+
 		virtual std::string fileName() const;
 
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const;
 		/// Returns the tokenized dag path this instance is referring to.
 		virtual void path( Path &p ) const;
-		
+
 		/*
 		 * Bounding box
 		 */
@@ -90,10 +90,10 @@ class LiveScene : public IECore::SceneInterface
 		 * Transform
 		 */
 
-		/// Returns the local transform of this node at the specified 
+		/// Returns the local transform of this node at the specified
 		/// point in time, which must be equal to the current maya time in seconds.
 		virtual IECore::ConstDataPtr readTransform( double time ) const;
-		/// Returns the transform of this node at the specified 
+		/// Returns the transform of this node at the specified
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const;
 		/// Not currently supported - will throw an exception.
@@ -131,7 +131,7 @@ class LiveScene : public IECore::SceneInterface
 		/// Reads the object stored at this path in the scene at the given time - may
 		/// return 0 when no object has been stored. Time must be equal to the current maya time in seconds
 		virtual IECore::ConstObjectPtr readObject( double time ) const;
-		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
+		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
 		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
 		/// Not currently supported - will throw an exception.
@@ -147,7 +147,7 @@ class LiveScene : public IECore::SceneInterface
 		/// Queries weather the named child exists.
 		virtual bool hasChild( const Name &name ) const;
 		/// Returns an object for the specified child location in the scene.
-		/// If the child does not exist then it will behave according to the 
+		/// If the child does not exist then it will behave according to the
 		/// missingBehavior parameter. May throw and exception, may return a NULL pointer,
 		/// or may create the child (if that is possible).
 		/// Bounding boxes will be automatically propagated up from the children
@@ -159,12 +159,12 @@ class LiveScene : public IECore::SceneInterface
 		/// Bounding boxes will be automatically propagated up from the children
 		/// to the parent as it is written.
 		virtual IECore::SceneInterfacePtr createChild( const Name &name );
-		
-		
+
+
 		/// Returns an object for querying the scene at the given path (full path).
 		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
-		
-		/// Returns an object for querying the scene at the given path (full path). 
+
+		/// Returns an object for querying the scene at the given path (full path).
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 
 		/// Currently raises an exception
@@ -177,7 +177,7 @@ class LiveScene : public IECore::SceneInterface
 		typedef boost::function<void (const MDagPath &, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const MDagPath &, NameList &)> NamesFn;
 		typedef boost::function<bool (const MDagPath &, const Name &)> MightHaveFn;
-		
+
 		// Register callbacks for custom objects.
 		// The has function will be called during hasObject and it stops in the first one that returns true.
 		// The read method is called if the has method returns true, so it should return a valid Object pointer or raise an Exception.
@@ -189,18 +189,18 @@ class LiveScene : public IECore::SceneInterface
 		// If the mightHave function is specified, it will be called before names function for early out, to see if the names function can return the expected attribute.
 		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn );
 		static void registerCustomAttributes( NamesFn namesFn, ReadAttrFn readFn, MightHaveFn mightHaveFn);
-		
+
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
 		// readTags will return the union of all custom ReadTagsFns.
 		static void registerCustomTags( HasTagFn hasFn, ReadTagsFn readFn );
 
 	private :
-		
+
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveChild( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveParent() const;
-		
+
 		void getChildDags( const MDagPath& dagPath, MDagPathArray& paths ) const;
 
 		/// Struct for registering readers for custom Object.
@@ -209,14 +209,14 @@ class LiveScene : public IECore::SceneInterface
 			HasFn m_has;
 			ReadFn m_read;
 		};
-		
+
 		/// Struct for registering readers for custom Tags.
 		struct CustomTagReader
 		{
 			HasTagFn m_has;
 			ReadTagsFn m_read;
 		};
-		
+
 		/// Struct for registering readers for custom Attributes.
 		struct CustomAttributeReader
 		{
@@ -224,26 +224,26 @@ class LiveScene : public IECore::SceneInterface
 			ReadAttrFn m_read;
 			MightHaveFn m_mightHave;
 		};
-		
+
 		static std::vector< CustomReader > &customObjectReaders();
 		static std::vector< CustomAttributeReader > &customAttributeReaders();
 		static std::vector< CustomTagReader > &customTagReaders();
-		
+
 	protected:
-		
+
 		// constructor for a specific dag path:
 		LiveScene( const MDagPath& p, bool isRoot = false );
-		
+
 		MDagPath m_dagPath;
 		bool m_isRoot;
-		
-		/// calls the constructor for a specific dag path. Derived classes can override this so their child() and scene() methods can 
+
+		/// calls the constructor for a specific dag path. Derived classes can override this so their child() and scene() methods can
 		/// return instances of the derived class
 		virtual LiveScenePtr duplicate( const MDagPath& p, bool isRoot = false ) const;
-	
+
 		typedef tbb::mutex Mutex;
 		static Mutex s_mutex;
-		
+
 };
 
 IE_CORE_DECLAREPTR( LiveScene )

@@ -32,9 +32,9 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "OP/OP_Director.h" 
-#include "MOT/MOT_Director.h" 
-#include "UT/UT_Version.h" 
+#include "OP/OP_Director.h"
+#include "MOT/MOT_Director.h"
+#include "UT/UT_Version.h"
 
 #include "IECore/CompoundData.h"
 #include "IECore/HeaderGenerator.h"
@@ -51,7 +51,7 @@ static void houdiniHeaderGenerator( CompoundObjectPtr header )
 {
 	CH_Manager *channelManager = OPgetDirector()->getChannelManager();
 	MOT_Director *motDirector = dynamic_cast<MOT_Director *>( OPgetDirector() );
-	
+
 	CompoundDataPtr compound = new CompoundData();
 	compound->writable()["houdiniVersion"] = new StringData( UTgetFullVersion() );
 	compound->writable()["sceneFile"] = new StringData( motDirector->getFileName().toStdString() );

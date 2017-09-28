@@ -42,22 +42,22 @@ IECoreGL.init( False )
 class BufferTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = IECore.V3fVectorData( [ IECore.V3f( x ) for x in range( 0, 100 ) ] )
-		
+
 		b = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
 		self.failUnless( isinstance( b, IECoreGL.Buffer ) )
-		
+
 		self.assertEqual( b.size(), 100 * 3 * 4 )
-		
+
 		b2 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d )
 		self.failUnless( b2.isSame( b ) )
-		
+
 		d2 = IECore.V3fVectorData( [ IECore.V3f( x * 2 ) for x in range( 0, 50 ) ] )
-		
+
 		b3 = IECoreGL.CachedConverter.defaultCachedConverter().convert( d2 )
 		self.failUnless( isinstance( b, IECoreGL.Buffer ) )
 		self.failIf( b3.isSame( b ) )
-		
+
 if __name__ == "__main__":
     unittest.main()

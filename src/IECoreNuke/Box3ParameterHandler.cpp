@@ -49,7 +49,7 @@ Box3ParameterHandler<T>::Box3ParameterHandler()
 	:	m_knob( 0 )
 {
 }
-		
+
 template<typename T>
 void Box3ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
@@ -59,7 +59,7 @@ void Box3ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const c
 		m_storage.min = defaultValue.min;
 		m_storage.max = defaultValue.max;
 	}
-	
+
 	std::string label = knobLabel( parameter );
 	m_knob = Box3_knob( f, (float *)&m_storage, knobName, label.c_str() );
 	setKnobProperties( parameter, f, m_knob );
@@ -85,7 +85,7 @@ void Box3ParameterHandler<T>::setParameterValue(IECore::Parameter *parameter, Va
 		value.max.y = m_knob->get_value( 4 );
 		value.max.z = m_knob->get_value( 5 );
 	}
-	
+
 	boxParameter->setTypedValue( value );
 }
 

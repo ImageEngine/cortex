@@ -44,22 +44,22 @@ class ClassVectorParameterHandler : public CompoundParameterHandler
 {
 
 	public :
-				
+
 		ClassVectorParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setState( IECore::Parameter *parameter, const IECore::Object *state );
 		virtual IECore::ObjectPtr getState( const IECore::Parameter *parameter );
-				
+
 	private :
-		
+
 		void addEditKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void buildAddMenu( DD::Image::Knob *knob, const IECore::Parameter *parameter, const std::string &parameterPath );
 		void buildRemoveMenu( DD::Image::Knob *knob, const IECore::Parameter *parameter, const std::string &parameterPath );
-		
+
 		static Description<ClassVectorParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

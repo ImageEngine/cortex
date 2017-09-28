@@ -49,10 +49,10 @@ namespace IECoreHoudini
 class GUI_CortexPrimitiveHook : public GUI_PrimitiveHook
 {
 	public :
-		
+
 		GUI_CortexPrimitiveHook();
 		virtual ~GUI_CortexPrimitiveHook();
-		
+
 		virtual GR_Primitive *createPrimitive( const GT_PrimitiveHandle &gt_prim, const GEO_Primitive *geo_prim, const GR_RenderInfo *info, const char *cache_name, GR_PrimAcceptResult &processed );
 
 };

@@ -39,40 +39,40 @@ from IECore import *
 
 
 class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
-	
+
 	def createSSD( self, weights ) :
-		
+
 		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
 		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
 		offsets = IntVectorData( [0, 2, 5, 6] )
 		counts = IntVectorData( [2, 3, 1, 2] )
 		indices = IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2] )
-		
+
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def original( self ) :
-		
+
 		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8] )
 
 		return self.createSSD( weights )
-	
+
 	def normalized( self ) :
-		
+
 		weights = FloatVectorData( [0.5, 0.5, 0.25, 0.75, 0.0, 1.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
-	
+
 	def normalizedWithLocks( self ) :
-		
+
 		weights = FloatVectorData( [0.7, 0.3, 0.2, 0.8, 0.0, 1.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
-	
+
 	def testTypes( self ) :
 		""" Test NormalizeSmoothSkinningWeightsOp types"""
-		
+
 		ssd = self.original()
 
 		op = NormalizeSmoothSkinningWeightsOp()
@@ -83,13 +83,13 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testNormalizingNormalized( self ) :
 		""" Test NormalizeSmoothSkinningWeightsOp with weights which are already normalized"""
-		
+
 		ssd = self.normalized()
 
 		op = NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
-		
+
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
@@ -100,9 +100,9 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testNormalizingUnnormalized( self ) :
 		""" Test NormalizeSmoothSkinningWeightsOp with unnormalized weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
@@ -113,9 +113,9 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		normalized = self.normalized()
-		
+
 		self.assertEqual( result.influenceNames(), normalized.influenceNames() )
 		self.assertEqual( result.influencePose(), normalized.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), normalized.pointIndexOffsets() )
@@ -123,12 +123,12 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), normalized.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), normalized.pointInfluenceWeights() )
 		self.assertEqual( result, normalized )
-	
+
 	def testLocks( self ) :
 		""" Test NormalizeSmoothSkinningWeightsOp locking mechanism"""
-		
+
 		ssd = self.original()
-		
+
 		op = NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['applyLocks'].setValue( True )
@@ -141,9 +141,9 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		normalized = self.normalizedWithLocks()
-		
+
 		self.assertEqual( result.influenceNames(), normalized.influenceNames() )
 		self.assertEqual( result.influencePose(), normalized.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), normalized.pointIndexOffsets() )
@@ -151,7 +151,7 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), normalized.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), normalized.pointInfluenceWeights() )
 		self.assertEqual( result, normalized )
-				
+
 		# make sure locked weights did not change
 		dop = DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )

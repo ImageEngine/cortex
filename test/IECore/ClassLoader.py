@@ -102,14 +102,14 @@ class TestClassLoader( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, l.setDefaultVersion, "maths/multiply", 10 )
 
 	def testSearchPathAccessor( self ) :
-	
+
 		l = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) )
 		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops", ":" ) )
-	
+
 		# check a copy is returned so it can't be modified in place
 		s = l.searchPath()
 		s.setPaths( "a:b:c", ":" )
 		self.assertEqual( l.searchPath(), IECore.SearchPath( "test/IECore/ops", ":" ) )
-		
+
 if __name__ == "__main__":
         unittest.main()

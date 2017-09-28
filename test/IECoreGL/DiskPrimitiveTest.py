@@ -89,13 +89,13 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 				self.assertEqual( a[i], 0 )
 
 	def testWindingOrder( self ) :
-	
+
 		# camera facing single sided - should be visible
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -109,21 +109,21 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
-			
+
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
-			
+
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( image["A"][index], 1 )
-		
+
 		# back facing single sided - should be invisible
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -138,22 +138,22 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
 			r.setAttribute( "rightHandedOrientation", IECore.BoolData( False ) )
-			
+
 			r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 0, 0, 1 ) ) } )
 			r.disk( 1, 0, 360, {} )
-			
+
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * dimensions.y/2 + dimensions.x/2
 		self.assertEqual( image["A"][index], 0 )
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

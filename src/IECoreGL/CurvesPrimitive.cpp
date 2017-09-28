@@ -72,7 +72,7 @@ class CurvesPrimitive::MemberData : public IECore::RefCounted
 {
 
 	public :
-	
+
 		MemberData( const IECore::CubicBasisf &b, bool p, IECore::ConstIntVectorDataPtr v, float w )
 			:	basis( b ), periodic( p ), vertsPerCurve( v->copy() ), width( w )
 		{
@@ -90,7 +90,7 @@ class CurvesPrimitive::MemberData : public IECore::RefCounted
 
 		mutable IECoreGL::ConstBufferPtr adjacencyVertIdsBuffer;
 		mutable GLuint numAdjacencyVertIds;
-	
+
 		mutable IECoreGL::ConstBufferPtr linearAdjacencyVertIdsBuffer;
 		mutable GLuint numLinearAdjacencyVertIds;
 
@@ -158,10 +158,10 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		// we just render in the standard way.
 		return Primitive::shaderSetup( shader, state );
 	}
-		
+
 	// we're rendering with ribbons and/or cubic interpolation. we need
 	// to substitute in a geometry shader to do the work.
-	
+
 	for( MemberData::GeometrySetupVector::const_iterator it = m_memberData->geometrySetups.begin(), eIt = m_memberData->geometrySetups.end(); it != eIt; it++ )
 	{
 		if( it->originalShader == shader && it->linear == linear && it->ribbons == ribbons )
@@ -182,11 +182,11 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 		{
 			if( linear )
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), linearRibbonsGeometrySource(), geometryShader->fragmentSource() );		
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), linearRibbonsGeometrySource(), geometryShader->fragmentSource() );
 			}
 			else
 			{
-				geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );		
+				geometryShader = shaderLoader->create( geometryShader->vertexSource(), cubicRibbonsGeometrySource(), geometryShader->fragmentSource() );
 			}
 		}
 		else
@@ -202,7 +202,7 @@ const Shader::Setup *CurvesPrimitive::shaderSetup( const Shader *shader, State *
 	geometryShaderSetup->addUniformParameter( "width", new IECore::M44fData( m_memberData->width ) );
 
 	m_memberData->geometrySetups.push_back( MemberData::GeometrySetup( shader, geometryShaderSetup, linear, ribbons ) );
-	
+
 	return geometryShaderSetup.get();
 }
 
@@ -210,7 +210,7 @@ void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) 
 {
 	bool linear, ribbons;
 	renderMode( currentState, linear, ribbons );
-	
+
 	if( !ribbons )
 	{
 		glLineWidth( currentState->get<GLLineWidth>()->value() );
@@ -250,15 +250,15 @@ void CurvesPrimitive::renderMode( const State *state, bool &linear, bool &ribbon
 		ribbons = false;
 		return;
 	}
-	
+
 	linear = m_memberData->basis==IECore::CubicBasisf::linear() || state->get<IgnoreBasis>()->value();
 	ribbons = !state->get<UseGLLines>()->value();
 }
 
 const std::string &CurvesPrimitive::cubicLinesGeometrySource()
 {
-	static std::string s = 
-	
+	static std::string s =
+
 		"#version 150 compatibility\n"
 		""
 		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
@@ -277,14 +277,14 @@ const std::string &CurvesPrimitive::cubicLinesGeometrySource()
 		""
 		"	}"
 		"}";
-		
+
 	return s;
 }
 
 const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
 {
-	static std::string s = 
-	
+	static std::string s =
+
 		"#version 150 compatibility\n"
 		""
 		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
@@ -321,14 +321,14 @@ const std::string &CurvesPrimitive::cubicRibbonsGeometrySource()
 		""
 		"	}"
 		"}";
-		
+
 	return s;
 }
 
 const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
 {
-	static std::string s = 
-	
+	static std::string s =
+
 		"#version 150 compatibility\n"
 		""
 		"#include \"IECoreGL/CurvesPrimitive.h\"\n"
@@ -340,13 +340,13 @@ const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
 		""
 		"void main()"
 		"{"
-		
+
 		"	for( int i = 0; i < 2; i++ )"
 		"	{"
 
 		"		vec4 p, n, uTangent, vTangent;"
 		"		IECOREGL_CURVESPRIMITIVE_LINEARFRAME( i, p, n, uTangent, vTangent );"
-				
+
 		"		IECOREGL_ASSIGN_VERTEX_PASS_THROUGH"
 		"		fragmentN = n.xyz;"
 		"		fragmentI = -n.xyz;"
@@ -361,7 +361,7 @@ const std::string &CurvesPrimitive::linearRibbonsGeometrySource()
 		""
 		"	}"
 		"}";
-		
+
 	return s;
 }
 
@@ -371,10 +371,10 @@ void CurvesPrimitive::ensureVertIds() const
 	{
 		return;
 	}
-	
+
 	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
 	vector<unsigned int> &vertIds = vertIdsData->writable();
-	
+
 	unsigned vertIndex = 0;
 	const vector<int> &vertsPerCurve = m_memberData->vertsPerCurve->readable();
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
@@ -383,7 +383,7 @@ void CurvesPrimitive::ensureVertIds() const
 		for( int i = 0; i < numSegments; i++ )
 		{
 			vertIds.push_back( vertIndex );
-			vertIds.push_back( ++vertIndex );			
+			vertIds.push_back( ++vertIndex );
 		}
 		if( m_memberData->periodic )
 		{
@@ -392,9 +392,9 @@ void CurvesPrimitive::ensureVertIds() const
 		}
 		vertIndex++;
 	}
-	
+
 	m_memberData->numVertIds = vertIds.size();
-	
+
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 	m_memberData->vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }
@@ -405,10 +405,10 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 	{
 		return;
 	}
-	
+
 	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
 	vector<unsigned int> &vertIds = vertIdsData->writable();
-	
+
 	int baseIndex = 0;
 	const vector<int> &vertsPerCurve = m_memberData->vertsPerCurve->readable();
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
@@ -426,25 +426,25 @@ void CurvesPrimitive::ensureAdjacencyVertIds() const
 		}
 
 		baseIndex += numPoints;
-	
+
 	}
-	
+
 	m_memberData->numAdjacencyVertIds = vertIds.size();
-	
+
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 	m_memberData->adjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }
 
 void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
-{	
+{
 	if( m_memberData->linearAdjacencyVertIdsBuffer )
 	{
 		return;
 	}
-	
+
 	IECore::UIntVectorDataPtr vertIdsData = new IECore::UIntVectorData;
 	vector<unsigned int> &vertIds = vertIdsData->writable();
-	
+
 	int baseIndex = 0;
 	const vector<int> &vertsPerCurve = m_memberData->vertsPerCurve->readable();
 	for( vector<int>::const_iterator it = vertsPerCurve.begin(), eIt = vertsPerCurve.end(); it != eIt; it++ )
@@ -472,11 +472,11 @@ void CurvesPrimitive::ensureLinearAdjacencyVertIds() const
 		}
 
 		baseIndex += numPoints;
-	
+
 	}
-	
+
 	m_memberData->numLinearAdjacencyVertIds = vertIds.size();
-	
+
 	CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 	m_memberData->linearAdjacencyVertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( vertIdsData.get() ) );
 }

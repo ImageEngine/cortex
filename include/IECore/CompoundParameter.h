@@ -74,7 +74,7 @@ class IECORE_API CompoundParameter : public Parameter
 		virtual const Object *defaultValue() const;
 		/// If true was passed to adoptChildPresets at construction, then update the presets
 		/// with the intersection of the presets of all the child parameters, otherwise returns
-		/// an empty container or the presets defined by setPresets(). 
+		/// an empty container or the presets defined by setPresets().
 		/// Please note that the map returned may differ between one call
 		/// to presets() and the next.
 		virtual const PresetsContainer &getPresets() const;

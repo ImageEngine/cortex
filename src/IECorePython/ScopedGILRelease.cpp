@@ -42,7 +42,7 @@ ScopedGILRelease::ScopedGILRelease()
 	if( m_threadsInitialised )
 	{
 		m_state = PyEval_SaveThread();
-	}	
+	}
 }
 
 ScopedGILRelease::~ScopedGILRelease()

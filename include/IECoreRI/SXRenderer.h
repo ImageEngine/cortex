@@ -52,7 +52,7 @@ class IECORERI_API SXRenderer : public IECore::Renderer
 {
 
 	public :
-		
+
 		SXRenderer();
 		virtual ~SXRenderer();
 
@@ -116,7 +116,7 @@ class IECORERI_API SXRenderer : public IECore::Renderer
 
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 		//! @group Shader Execution
 		/// These functions allow direct execution of shaders,
 		/// and always evaluate the shaders active in the current
@@ -132,7 +132,7 @@ class IECORERI_API SXRenderer : public IECore::Renderer
 		/// This method shades a plane, of the specified resolution and returns an RGBA float ImagePrimitive.
 		IECoreImage::ImagePrimitivePtr shadePlaneToImage( const Imath::V2i &resolution ) const;
 		//@}
-		
+
 	private :
 
 		IECoreRI::SXRendererImplementationPtr m_implementation;

@@ -62,11 +62,11 @@ class SOP_OpHolder : public SOP_ParameterisedHolder
 		virtual ~SOP_OpHolder();
 
 		virtual OP_ERROR cookMySop( OP_Context &context );
-		
+
 		/// Overridden for the primary input since that value is used during cook to control
 		/// the number of operations. Falls back to default implementation for all other inputs.
 		virtual void setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex );
-		
+
 		/// Run the op once all parameters have been set. This may be called several times
 		/// when using a nameFilter on the primary input.
 		virtual void doOperation( IECore::Op *op, const GU_DetailHandle &handle, const std::string &name );

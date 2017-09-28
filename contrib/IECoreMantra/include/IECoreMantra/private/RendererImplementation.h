@@ -47,62 +47,62 @@
 namespace IECoreMantra
 {
 
-// Mantra doesn't have a single context/api for defining both scenes and 
+// Mantra doesn't have a single context/api for defining both scenes and
 // procedurals outside of a HIP file.
-// 
+//
 // For defining a scene the api is IFD script fed to mantra over stdin.
-// 
-// For defining procedural geometry the api is VRAY_Procedural ..and GU_Detail by 
+//
+// For defining procedural geometry the api is VRAY_Procedural ..and GU_Detail by
 // association.
-// 
+//
 // This implementation has to do some strange things in an attempt to be faithful
 // to the client interface of IECore::Renderer. It is incomplete.
-// 
+//
 // There are 3 render modes: Procedural, Render and IfdGen.
-// 
-// Render and IfdGen modes aren't currently very useful, only a few render 
+//
+// Render and IfdGen modes aren't currently very useful, only a few render
 // methods are implemented, just enough to pass some very simple tests.
 //
 // Procedural
-//     
+//
 // This is simple case, during the normal rendering of an IFD mantra has hit the
-// bound of a VRAY_ieProcedural.so which then loads a cortex 
-// ParameterisedProcedural. It runs the cortex procedural when Mantra asks for 
+// bound of a VRAY_ieProcedural.so which then loads a cortex
+// ParameterisedProcedural. It runs the cortex procedural when Mantra asks for
 // geometry.
-// 
-// VRAY_ieProcedural provides an entry point for users to declare cortex 
-// procedurals. It's registred as a SHOP type in the ieCoreMantra.otl and is 
+//
+// VRAY_ieProcedural provides an entry point for users to declare cortex
+// procedurals. It's registred as a SHOP type in the ieCoreMantra.otl and is
 // wrapped in a HDA helper familliar to RI users: 'cortexMantraInject'.
-// 
+//
 // VRAY_ieProcedural is derived form IECoreMantra::ProceduralPrimitve which has an
 // interface that RendererImplementation uses to add VisibleRenderables to mantra.
 // RendererImplementation and ProceduralPrimitive are friends and they touch each
 // others private data. (Internaly ProceduralPrimitive is derived from the HDK
 // class VRAY_Procedural and uses ToHoudiniConverter to create Houdini geometry).
-// 
+//
 // Render
-// 
+//
 // An empty constructor starts a live Render context. For IECoreMantra this means
 // popen()-ing mantra. Pre and Post world calls are sent as strings over stdin.
-// 
+//
 // Upon worldBegin() a secret procedural VRAY_ieworld.so is added to the scene
 // with the geometry() method. A temporary file name using the pid is stashed in
 // the IFD using setOption. ("/tmp/ieworld_${PID}.cob")
-// 
+//
 // Calls that affect render state are stored in a IECore::Group object m_world.
-// 
+//
 // Upon worldEnd() the m_world group is saved to the temporary file.
-// The IFD commands 'ray_raytrace' and 'ray_quit' are then sent to mantra to   
+// The IFD commands 'ray_raytrace' and 'ray_quit' are then sent to mantra to
 // signal the end of scene description and start the rendering. The first object
-// that mantra encounters will probably be the ieworld procedural. This 
-// procedural looks for the stored temporary file of m_world and loads the 
+// that mantra encounters will probably be the ieworld procedural. This
+// procedural looks for the stored temporary file of m_world and loads the
 // retained scene.
-// 
+//
 // IfdGen
-// 
-// Like Render mode but rather than a pipe to mantra a file stream is used to 
-// write an IFD for later rendering. In this case the world cob file is not 
-// considered temporary. It uses the same name as the IFD with the suffix 
+//
+// Like Render mode but rather than a pipe to mantra a file stream is used to
+// write an IFD for later rendering. In this case the world cob file is not
+// considered temporary. It uses the same name as the IFD with the suffix
 // 'ieworld.cob'
 
 class RendererImplementation : public IECore::Renderer
@@ -171,12 +171,12 @@ class RendererImplementation : public IECore::Renderer
 		virtual void instance( const std::string &name );
 
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
-	
+
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 	private:
-		
+
 		enum Mode
 		{
 			IfdGen,
@@ -192,17 +192,17 @@ class RendererImplementation : public IECore::Renderer
         FILE *m_fpipe;
 
 		bool m_preWorld;
-	 
+
 	 	IECore::CameraPtr m_camera;
 		void outputCamera ( IECore::CameraPtr camera );
 
 		// An object for creating geometry, derived from VRAY_Procedural.
 		// This is a raw pointer because mantra owns it. It is only valid in Procedural mode.
 		ProceduralPrimitive* m_vrayproc;
-		
+
 		typedef std::stack<Imath::M44f> TransformStack;
 		TransformStack m_transformStack;
-		
+
 		struct AttributeState
 		{
 			AttributeState();
@@ -211,7 +211,7 @@ class RendererImplementation : public IECore::Renderer
 		};
 		typedef std::stack<AttributeState> AttributeStack;
 		AttributeStack m_attributeStack;
-		
+
 		enum MotionType
 		{
 			Unknown,
@@ -233,15 +233,15 @@ class RendererImplementation : public IECore::Renderer
 		typedef std::map<std::string, GetOptionHandler> GetOptionHandlerMap;
 		SetOptionHandlerMap m_setOptionHandlers;
 		GetOptionHandlerMap m_getOptionHandlers;
-		
-		
+
+
 		typedef void (RendererImplementation::*SetAttributeHandler)( const std::string &name, IECore::ConstDataPtr d );
-		typedef IECore::ConstDataPtr (RendererImplementation::*GetAttributeHandler)( const std::string &name ) const; 
-		typedef std::map<std::string, SetAttributeHandler> SetAttributeHandlerMap;									
-		typedef std::map<std::string, GetAttributeHandler> GetAttributeHandlerMap;									
-		SetAttributeHandlerMap m_setAttributeHandlers;																
+		typedef IECore::ConstDataPtr (RendererImplementation::*GetAttributeHandler)( const std::string &name ) const;
+		typedef std::map<std::string, SetAttributeHandler> SetAttributeHandlerMap;
+		typedef std::map<std::string, GetAttributeHandler> GetAttributeHandlerMap;
+		SetAttributeHandlerMap m_setAttributeHandlers;
 		GetAttributeHandlerMap m_getAttributeHandlers;
-		
+
 		void constructCommon( Mode mode );
 
 		IECore::ConstDataPtr getShutterOption( const std::string &name ) const;
@@ -249,8 +249,8 @@ class RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getVelocityBlurAttribute( const std::string &name ) const;
 		void setMatteAttribute( const std::string &name, IECore::ConstDataPtr d );
 
-		void ifdString( IECore::ConstDataPtr value, std::string &ifd, std::string &type ); 
-		
+		void ifdString( IECore::ConstDataPtr value, std::string &ifd, std::string &type );
+
 		friend class IECoreMantra::Renderer;
 		friend class IECoreMantra::ProceduralPrimitive;
 };
@@ -258,4 +258,4 @@ class RendererImplementation : public IECore::Renderer
 } // namespace IECoreMantra
 
 #endif
- 
+

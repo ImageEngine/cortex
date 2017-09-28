@@ -56,10 +56,10 @@ namespace IECoreMaya
 /// If this member exists, valid values are "world" and "object". When using
 /// object space (default), on-screen controls are transformed along with the node.
 ///
-class V3Manipulator : public ParameterManipContainer 
+class V3Manipulator : public ParameterManipContainer
 {
 	public:
-	
+
 		V3Manipulator();
 		virtual ~V3Manipulator();
 
@@ -69,28 +69,28 @@ class V3Manipulator : public ParameterManipContainer
 		virtual MStatus createChildren();
     	virtual MStatus connectToDependNode( const MObject &node);
 
-		virtual void draw( M3dView & view, 
-						   const MDagPath & path, 
+		virtual void draw( M3dView & view,
+						   const MDagPath & path,
 						   M3dView::DisplayStyle style,
 						   M3dView::DisplayStatus status );
-						   
+
 		MManipData vectorPlugToManipConversion( unsigned int manipIndex );
 		MManipData vectorManipToPlugConversion( unsigned int plugIndex );
 
 		static MTypeId id;
 
 	private:
-		
+
 		MPoint getPlugValues( MPlug &plug );
 		void getPlugValues( MPlug &plug, double *values );
 		void getPlugValues( MPlug &plug, MFnNumericData &data );
 
 		void readParameterOptions( MFnDagNode &nodeFn );
 		bool m_worldSpace;
-				
+
 		MDagPath m_translateManip;
 		MPlug m_translatePlug;
-		MMatrix m_localMatrix; 
+		MMatrix m_localMatrix;
 		MMatrix m_localMatrixInv;
 };
 

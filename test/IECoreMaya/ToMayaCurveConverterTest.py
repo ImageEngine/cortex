@@ -41,102 +41,102 @@ import IECoreMaya
 class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 ) ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
-		
+
 		converter = IECoreMaya.ToMayaCurveConverter( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		converter.convert( transform )
 		self.assertEqual( maya.cmds.nodeType( maya.cmds.listRelatives( transform, shapes=True )[0] ), "nurbsCurve" )
-	
+
 	def testConversion( self ) :
-		
+
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
-	
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaCurveConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECore.FromCoreConverter.staticTypeId() ) )
-	
+
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
-		
+
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMin" ), [( 0, 0, 0 )] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMax" ), [( 3, 3, 3 )] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".degree" ), 3 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".cv[*]" ), [(0,0,0),(1,1,1),(2,2,2),(3,3,3)] )
-		
+
 	def testPeriodic( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), True, p )
-	
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
-		
+
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMin" ), [( 0, 0, 0 )] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMax" ), [( 1, 1, 0 )] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".degree" ), 3 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".cv[*]" ), [(0,0,0),(0,0,0),(0,0,0),(0,1,0),(1,1,0),(1,0,0)] )
-	
+
 	def testOpenLinear( self ) :
-		
+
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.linear(), False, p )
-		
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
-		
+
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
-		
+
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMin" ), [( 0, 0, 0 )] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMax" ), [( 3, 3, 3 )] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".degree" ), 1 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".cv[*]" ), [(0,0,0),(1,1,1),(2,2,2),(3,3,3)] )
-		
+
 	def testPeriodicLinear( self ) :
 
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 1, 1, 0 ), IECore.V3f( 1, 0, 0 ) ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.linear(), True, p )
-	
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
-		
+
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMin" ), [( 0, 0, 0 )] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".boundingBoxMax" ), [( 1, 1, 0 )] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".degree" ), 1 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve + ".cv[*]" ), [(0,0,0),(0,1,0),(1,1,0),(1,0,0)] )
-	
+
 	def testCurveIndex( self ):
-		
+
 		i = IECore.IntVectorData( [ 8, 9, 10, 11] )
 		cvs = [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 ) ]
 		cvs.extend([ IECore.V3f( 4 ), IECore.V3f( 4 ), IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ), IECore.V3f( 8 ), IECore.V3f( 8 ), IECore.V3f( 8 ) ])
@@ -144,16 +144,16 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		cvs.extend([ IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 15 ), IECore.V3f( 16 ), IECore.V3f( 17 ), IECore.V3f( 18 ), IECore.V3f( 19 ), IECore.V3f( 20 ), IECore.V3f( 21 ), IECore.V3f( 21 ), IECore.V3f( 21 ) ])
 		p = IECore.V3fVectorData( cvs )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
-		
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform1 = maya.cmds.createNode( "transform" )
 		transform2 = maya.cmds.createNode( "transform" )
 		transform3 = maya.cmds.createNode( "transform" )
 		transform4 = maya.cmds.createNode( "transform" )
-		
+
 		# should default to converting curve zero:
 		self.assertEqual( converter["index"].getNumericValue(), 0 )
-		
+
 		# convert the curves separately:
 		self.assert_( converter.convert( transform1 ) )
 		converter["index"].setNumericValue( 1 )
@@ -162,54 +162,54 @@ class ToMayaCurveConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.convert( transform3 ) )
 		converter["index"].setNumericValue( 3 )
 		self.assert_( converter.convert( transform4 ) )
-		
+
 		mayaCurve1 = maya.cmds.listRelatives( transform1, shapes=True )[0]
 		mayaCurve2 = maya.cmds.listRelatives( transform2, shapes=True )[0]
 		mayaCurve3 = maya.cmds.listRelatives( transform3, shapes=True )[0]
 		mayaCurve4 = maya.cmds.listRelatives( transform4, shapes=True )[0]
-		
+
 		self.assertEqual( maya.cmds.getAttr( mayaCurve1 + ".cv[*]" ), [ (n,n,n) for n in range( 0,4 ) ] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve2 + ".cv[*]" ), [ (n,n,n) for n in range( 4,9 ) ] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve3 + ".cv[*]" ), [ (n,n,n) for n in range( 9,15 ) ] )
 		self.assertEqual( maya.cmds.getAttr( mayaCurve4 + ".cv[*]" ), [ (n,n,n) for n in range( 15,22 ) ] )
-		
+
 		# should error gracefully if we specify a rubbish curve index:
 		converter["index"].setNumericValue( -1 )
 		self.assertFalse( converter.convert( transform1 ) )
 		converter["index"].setNumericValue( 4 )
 		self.assertFalse( converter.convert( transform1 ) )
-	
+
 	def testWrongCubicCurve( self ):
-		
+
 		i = IECore.IntVectorData( [ 4 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
-		
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		self.assertFalse( converter.convert( transform ) )
-	
+
 	def testToMayaAndBack( self ):
-		
+
 		# open, cubic curve:
 		i = IECore.IntVectorData( [ 8 ] )
 		p = IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ), IECore.V3f( 3 ), IECore.V3f( 3 )   ] )
 		coreCurves = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
-		
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreCurves )
 		transform = maya.cmds.createNode( "transform" )
 		self.assert_( converter.convert( transform ) )
-		
+
 		mayaCurve = maya.cmds.listRelatives( transform, shapes=True )[0]
 		converter = IECoreMaya.FromMayaShapeConverter.create( mayaCurve, IECore.CurvesPrimitive.staticTypeId() )
 		curve = converter.convert()
-		
+
 		self.assertEqual( curve['P'], coreCurves['P'] )
 		self.assertEqual( curve.numCurves(), coreCurves.numCurves() )
 		self.assertEqual( curve.basis(), coreCurves.basis() )
 		self.assertEqual( curve.verticesPerCurve(), coreCurves.verticesPerCurve() )
-	
-	
-	
+
+
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

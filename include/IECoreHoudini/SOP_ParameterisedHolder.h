@@ -56,29 +56,29 @@ class SOP_ParameterisedHolder : public ParameterisedHolder<SOP_Node>
 
 		SOP_ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SOP_ParameterisedHolder();
-		
+
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
-	
+
 	protected :
-		
+
 		/// Pushes the geometry data from the incomming connections into the associated Cortex parameters.
 		/// This method will cook the incomming nodes. If the input node derives from SOP_ParameterisedHolder,
 		/// it's Cortex output will be passed through. If it is a native Houdini node, it will be converted
 		/// using the appropriate FromHoudiniGeometryConverter.
 		virtual void setInputParameterValues( float now );
-		
+
 		/// Used by setInputParameterValues to set the value on each individual input parameter. Providing a
 		/// null handle will result in the default behaviour of using the filteredInputValue for this input.
 		virtual void setInputParameterValue( IECore::Parameter *parameter, const GU_DetailHandle &handle, unsigned inputIndex );
-		
+
 		/// Used to pre-filter the input geometry during setInputParameterValue. It checks for the existance of
 		/// a nameFilter parm cooresponding to the input parameter, and uses FromHoudiniGeometryConverter::extract
 		/// to limit the input geometry based on that filter.
 		GU_DetailHandle filteredInputValue( const IECore::Parameter *parameter, unsigned inputIndex );
-		
+
 		/// Used to find and evaluate the nameFilter, if it is enabled.
 		bool getNameFilter( const IECore::Parameter *parameter, UT_StringMMPattern &filter );
-		
+
 		/// Updates the input connections for parameters relevant to FromHoudiniGeometryConverters
 		virtual void refreshInputConnections();
 

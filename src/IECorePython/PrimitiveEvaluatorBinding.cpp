@@ -156,7 +156,7 @@ static object primVar( PrimitiveEvaluator::Result &r, PrimitiveVariable &v )
 			return object( r.colorPrimVar( v ) );
 		case HalfDataTypeId :
 		case HalfVectorDataTypeId :
-			return object( r.halfPrimVar( v ) );	
+			return object( r.halfPrimVar( v ) );
 		default :
 			throw Exception( "Unsupported PrimitiveVariable datatype." );
 	}

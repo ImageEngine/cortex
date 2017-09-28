@@ -43,7 +43,7 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		"Uniform" : IECore.IntVectorData( [ 1, 2 ] ),
 		"Varying" : IECore.IntVectorData( [ 1, 2, 3, 4 ] ),
 		"Vertex" : IECore.IntVectorData( [ 1, 2, 3, 4 ] ),
-		"FaceVarying" : IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ),	
+		"FaceVarying" : IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ),
 	}
 
 	__indexValues = {
@@ -59,30 +59,30 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		"Uniform" : IECore.IntVectorData( [ 1, 1, 1, 2, 2, 2 ] ),
 		"Varying" : IECore.IntVectorData( [ 1, 2, 4, 1, 4, 3 ] ),
 		"Vertex" : IECore.IntVectorData( [ 1, 2, 4, 1, 4, 3 ] ),
-		"FaceVarying" : IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ),	
+		"FaceVarying" : IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] ),
 	}
 
 	def __plane( self, indices = False ) :
-	
+
 		p = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		IECore.TriangulateOp()( input=p, copyInput=False )
-		
+
 		for n in self.__inputValues.keys() :
-		
+
 			i = getattr( IECore.PrimitiveVariable.Interpolation, n )
 			if indices :
 				p[n] = IECore.PrimitiveVariable( i, self.__inputValues[n], self.__indexValues[n] )
 			else:
 				p[n] = IECore.PrimitiveVariable( i, self.__inputValues[n] )
-		
+
 		return p
-		
+
 	def test( self ) :
 
-		p = self.__plane()		
+		p = self.__plane()
 		p2 = IECore.FaceVaryingPromotionOp()( input=p )
 		self.failUnless( p2.arePrimitiveVariablesValid() )
-		
+
 		self.assertEqual( p2["Constant"], p["Constant"] )
 		self.assertEqual( p2["Uniform"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p2["Varying"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
@@ -92,12 +92,12 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		self.assertEqual( p2["Varying"].data, self.__outputValues["Varying"] )
 		self.assertEqual( p2["Vertex"].data, self.__outputValues["Vertex"] )
 		self.assertEqual( p2["FaceVarying"].data, self.__outputValues["FaceVarying"] )
-		
-		p = self.__plane()		
+
+		p = self.__plane()
 		p2 = IECore.FaceVaryingPromotionOp()( input=p, promoteUniform=False )
-		
+
 		self.failUnless( p2.arePrimitiveVariablesValid() )
-		
+
 		self.assertEqual( p2["Constant"], p["Constant"] )
 		self.assertEqual( p2["Uniform"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p2["Varying"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
@@ -107,12 +107,12 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		self.assertEqual( p2["Varying"].data, self.__outputValues["Varying"] )
 		self.assertEqual( p2["Vertex"].data, self.__outputValues["Vertex"] )
 		self.assertEqual( p2["FaceVarying"].data, self.__outputValues["FaceVarying"] )
-		
-		p = self.__plane()		
+
+		p = self.__plane()
 		p2 = IECore.FaceVaryingPromotionOp()( input=p, promoteVarying=False )
-		
+
 		self.failUnless( p2.arePrimitiveVariablesValid() )
-		
+
 		self.assertEqual( p2["Constant"], p["Constant"] )
 		self.assertEqual( p2["Uniform"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p2["Varying"].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
@@ -122,12 +122,12 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		self.assertEqual( p2["Varying"].data, self.__inputValues["Varying"] )
 		self.assertEqual( p2["Vertex"].data, self.__outputValues["Vertex"] )
 		self.assertEqual( p2["FaceVarying"].data, self.__outputValues["FaceVarying"] )
-		
-		p = self.__plane()		
+
+		p = self.__plane()
 		p2 = IECore.FaceVaryingPromotionOp()( input=p, promoteVertex=False )
-		
+
 		self.failUnless( p2.arePrimitiveVariablesValid() )
-		
+
 		self.assertEqual( p2["Constant"], p["Constant"] )
 		self.assertEqual( p2["Uniform"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( p2["Varying"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
@@ -137,12 +137,12 @@ class FaceVaryingPromotionOpTest( unittest.TestCase ) :
 		self.assertEqual( p2["Varying"].data, self.__outputValues["Varying"] )
 		self.assertEqual( p2["Vertex"].data, self.__inputValues["Vertex"] )
 		self.assertEqual( p2["FaceVarying"].data, self.__outputValues["FaceVarying"] )
-				
-		p = self.__plane()		
+
+		p = self.__plane()
 		p2 = IECore.FaceVaryingPromotionOp()( input=p, primVarNames=IECore.StringVectorData( ["Varying"] ) )
-		
+
 		self.failUnless( p2.arePrimitiveVariablesValid() )
-		
+
 		self.assertEqual( p2["Constant"], p["Constant"] )
 		self.assertEqual( p2["Uniform"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p2["Varying"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )

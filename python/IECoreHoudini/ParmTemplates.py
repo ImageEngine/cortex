@@ -50,7 +50,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 	results = []
 	if not folders:
 		folders = []
-		
+
 	# Compound Parameter
 	if p.isInstanceOf( IECore.TypeId.CompoundParameter ) :
 		if top_level==True: # this is our top-level CompoundParameter
@@ -60,7 +60,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 			label = parmLabel( p )
 			sub_folder = folders + [label]
 			name = parmName( p.name, prefix=parent )
-		
+
 		# recurse through children
 		for child in p.values():
 			results += createParm( child, sub_folder, parent=name )
@@ -147,7 +147,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3, parent=parent )
 	if p.typeId()==IECore.TypeId.Box3dParameter:
 		parm = IECoreHoudini.ParmTemplates.boxParmFloat( p, 3, parent=parent )
-	
+
 	if p.isInstanceOf( IECore.TypeId.ObjectParameter ) :
 		# input connection parameter, may need to add conversion parameters
 		if set(p.validTypes()).intersection( set(IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes()) ) :
@@ -165,22 +165,22 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 			results += createParm( nameFilterParm, sub_folder, parent=name )
 			for child in converter.parameters().values() :
 				results += createParm( child, sub_folder, parent=name )
-	
+
 	if parm:
-		
+
 		with IECore.IgnoredExceptions( KeyError ) :
 			parm['tuple'].hide( not bool(p.userData()["UI"]['visible'].value) )
-		
+
 		with IECore.IgnoredExceptions( KeyError ) :
 			parm['tuple'].setDisableWhen( p.userData()["houdini"]['disableWhen'].value )
-		
+
 		# add our list of parent folders
 		parm['folder'] = folders
 		parm['cortex_name'] = p.name
-		
+
 		# add to our list of results
 		results.append(parm)
-		
+
 	# certain parameter types are ok to ignore
 	ignoredParameterTypes = (
 		IECore.CompoundParameter,
@@ -188,17 +188,17 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 		IECore.PrimitiveParameter,
 		IECore.GroupParameter,
 	)
-	
+
 	if not parm and not isinstance( p, ignoredParameterTypes ) :
 		msg = "IECoreHoudini does not currently support parameters of type " + p.typeName()
-		
+
 		# hbatch/hython don't support ui.setStatusMessage()
 		## \todo: remove this if the Houdini load errors stop masking the IECore warnings
 		if hou.isUIAvailable() :
 			hou.ui.setStatusMessage( msg, hou.severityType.Warning )
-		
+
 		IECore.warning( msg )
-	
+
 	# our parent folder list
 	return results
 
@@ -206,7 +206,7 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 def parmName( name, prefix=None ) :
 	if not prefix :
 		prefix = "parm"
-	
+
 	return "_".join( [ prefix, name ] )
 
 # returns a parameter label
@@ -223,7 +223,7 @@ def presetsMenuArgs( p ) :
 	menuType = hou.menuType.Normal
 	if not p.presetsOnly :
 		menuType = hou.menuType.StringReplace
-	
+
 	return {
 		"menu_items" : menuItems,
 		"menu_labels" : menuLabels,
@@ -251,7 +251,7 @@ def intParm( p, dim=1, parent=None ):
 		if p.hasMaxValue():
 			max_val = p.maxValue
 			max_lock = True
-		
+
 	else:
 		default = list(p.defaultValue.value)
 		initialValue = list(p.getTypedValue())
@@ -259,7 +259,7 @@ def intParm( p, dim=1, parent=None ):
 		max_val = 10
 		min_lock = max_lock = False
 		naming = hou.parmNamingScheme.XYZW
-	
+
 	# Houdini can only handle presets for dim 1 ints, and even then its quite messy...
 	if dim == 1 and p.presetsOnly :
 		parm = hou.MenuParmTemplate(
@@ -267,7 +267,7 @@ def intParm( p, dim=1, parent=None ):
 			help=p.description,
 			**presetsMenuArgs( p )
 		)
-		
+
 		initialValue = [ p.presetValues().index( p.getValue() ) ]
 	else :
 		parm = hou.IntParmTemplate(
@@ -275,7 +275,7 @@ def intParm( p, dim=1, parent=None ):
 	 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
 			naming_scheme=naming, help=p.description
 		)
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 #=====
@@ -312,12 +312,12 @@ def floatParm( p, dim=1, parent=None ):
 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
 		look=hou.parmLook.Regular, naming_scheme=naming, help=p.description
 	)
-	
+
 	if dim == 1 :
 		initialValue = [ p.getTypedValue() ]
 	else :
 		initialValue = list(p.getTypedValue())
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 #=====
@@ -328,20 +328,20 @@ def boolParm( p, parent=None ):
 	label = parmLabel( p )
 	default = p.defaultValue.value
 	parm = hou.ToggleParmTemplate( name, label, default_value=default, disable_when="", help=p.description )
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def stringParm( p, parent=None ):
 	name = parmName( p.name, prefix=parent )
 	label = parmLabel( p )
 	default = ([p.defaultValue.value])
-	
+
 	parm = hou.StringParmTemplate(
 		name, label, 1,	default_value=default,
 		naming_scheme = hou.parmNamingScheme.Base1, help=p.description,
 		**presetsMenuArgs( p )
 	)
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def pathParm( p, parent=None ):
@@ -354,7 +354,7 @@ def pathParm( p, parent=None ):
 		string_type=hou.stringParmType.FileReference, help=p.description,
 		**presetsMenuArgs( p )
 	)
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : [ p.getTypedValue() ] }
 
 def colParm( p, dim, parent=None ):
@@ -367,7 +367,7 @@ def colParm( p, dim, parent=None ):
 		look=hou.parmLook.ColorSquare,
 		naming_scheme=hou.parmNamingScheme.RGBA, help=p.description
 	)
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : list(p.getTypedValue()) }
 
 def matrixParm( p, dim=16, parent=None ):
@@ -387,13 +387,13 @@ def matrixParm( p, dim=16, parent=None ):
 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
 		look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1, help=p.description
 	)
-	
+
 	matrix = p.getTypedValue()
 	initialValue = []
 	for i in range(dim_sqrt):
 		for j in range(dim_sqrt):
 			initialValue.append( matrix[(i,j)] )
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 def boxParmInt( p, dim, parent=None ):
@@ -412,11 +412,11 @@ def boxParmInt( p, dim, parent=None ):
 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
 		naming_scheme=hou.parmNamingScheme.Base1, help=p.description
 	)
-	
+
 	box = p.getTypedValue()
 	initialValue = list(box.min)
 	initialValue.extend( list(box.max) )
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }
 
 def boxParmFloat( p, dim, parent=None ):
@@ -435,9 +435,9 @@ def boxParmFloat( p, dim, parent=None ):
 		min=min_val, max=max_val, min_is_strict=min_lock, max_is_strict=max_lock,
 		look=hou.parmLook.Regular, naming_scheme=hou.parmNamingScheme.Base1, help=p.description
 	)
-	
+
 	box = p.getTypedValue()
 	initialValue = list(box.min)
 	initialValue.extend( list(box.max) )
-	
+
 	return { 'name' : name, 'tuple' : parm, 'initialValue' : initialValue }

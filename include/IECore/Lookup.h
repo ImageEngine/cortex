@@ -52,27 +52,27 @@ namespace IECore
 template<typename X, typename Y>
 class Lookup
 {
-	
+
 	public :
-	
+
 		typedef X XType;
 		typedef Y YType;
 		typedef boost::function<Y ( X )> Function;
-	
+
 		Lookup();
 		Lookup( const Function &function, XType xMin, XType xMax, unsigned numSamples );
 
 		void init( const Function &function, XType xMin, XType xMax, unsigned numSamples );
-		
+
 		inline Y operator() ( X x ) const;
-		
+
 	private :
-	
+
 		std::vector<Y> m_values;
 		XType m_xMin;
 		XType m_xMax;
 		XType m_xMult;
-				
+
 };
 
 typedef Lookup<float, float> Lookupff;

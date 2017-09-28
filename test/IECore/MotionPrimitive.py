@@ -79,32 +79,32 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
-		
+
 	def testItems( self ) :
-	
+
 		m = MotionPrimitive()
 		m[0] = PointsPrimitive( 1 )
 		m[1] = PointsPrimitive( 2 )
 		self.assertEqual( m.items(), [ ( 0, PointsPrimitive( 1 ) ), ( 1, PointsPrimitive( 2 ) ) ] )
 
 	def testHash( self ) :
-	
+
 		m = MotionPrimitive()
 		m2 = MotionPrimitive()
 		self.assertEqual( m.hash(), m2.hash() )
-		
+
 		m[0] = SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
-		
+
 		m2[0] = SpherePrimitive()
 		self.assertEqual( m.hash(), m2.hash() )
 
 		m[1] = SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
-		
+
 		m2[2] = SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/motionPrimitive.fio" ):

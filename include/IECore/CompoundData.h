@@ -47,12 +47,12 @@ namespace IECore
 class IECORE_API CompoundData : public CompoundDataBase
 {
 	public :
-	
+
 		CompoundData();
 		CompoundData( const CompoundDataMap &members );
 
 		IE_CORE_DECLAREOBJECT( CompoundData, CompoundDataBase );
-		
+
 		/// Convenience functions to find a child Data object. If the named child doesn't exist
 		/// or doesn't match the type specified as the template argument, behavior
 		/// is defined by the throwExceptions parameter. When this parameter is true a descriptive
@@ -61,10 +61,10 @@ class IECORE_API CompoundData : public CompoundDataBase
 		T *member( const InternedString &name, bool throwExceptions = false );
 		template<typename T>
 		const T *member( const InternedString &name, bool throwExceptions = false ) const;
-		
+
 		/// A Convenience function to find a child Data object.
 		/// If the named child doesn't exist, if createIfMissing is true, a child will be added
-		/// with the type's object factory create method. If false, or the named child does not match the 
+		/// with the type's object factory create method. If false, or the named child does not match the
 		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
 		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
 		template<typename T>

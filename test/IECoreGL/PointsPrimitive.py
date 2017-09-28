@@ -66,18 +66,18 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		vertexSource = """
 		#include \"IECoreGL/PointsPrimitive.h\"
 		#include \"IECoreGL/VertexShader.h\"
-		
+
 		IECOREGL_POINTSPRIMITIVE_DECLAREVERTEXPARAMETERS
-		
+
 		IECOREGL_VERTEXSHADER_IN vec3 instanceP;
 		// although we don't need to pass st to the fragment shader, everything
 		// ceases to work on os x if we don't.
 		IECOREGL_VERTEXSHADER_IN vec2 instancest;
 		IECOREGL_VERTEXSHADER_IN float vertexgreyTo255;
-		
+
 		IECOREGL_VERTEXSHADER_OUT float fragmentGrey;
 		IECOREGL_VERTEXSHADER_OUT vec2 fragmentst;
-		
+
 		void main()
 		{
 			mat4 instanceMatrix = IECOREGL_POINTSPRIMITIVE_INSTANCEMATRIX;
@@ -112,7 +112,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -121,9 +121,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -2, -2, -10 ) ) )
 			r.shader( "surface", "grey", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 			r.points( numPoints, { "P" : p, "greyTo255" : g } )
@@ -164,19 +164,19 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			r.points( 0, { "P" : p, "greyTo255" : g } )		# it should not crash rendering 0 points.
 
 	def performAimTest( self, projection, expectedImage, particleType ) :
-	
+
 		fragmentSource = """
 		void main()
 		{
 			gl_FragColor = vec4( 1, 1, 1, 1 );
 		}
 		"""
-		
+
 		p = IECore.V3fVectorData()
 		for x in range( -2, 3 ) :
 			for y in range( -2, 3 ) :
 				p.append( IECore.V3f( x, y, 0 ) )
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
@@ -190,13 +190,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
-			
+
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
-			r.points( p.size(), { 
+			r.points( p.size(), {
 					"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p ),
 					"constantwidth" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.75 ) ),
 					"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( particleType ) )
@@ -205,34 +205,34 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/" + expectedImage ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		
+
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
 
 	def testPerspectiveAimedPoints( self ) :
-	
+
 		self.performAimTest( "perspective", "aimedPerspectivePoints.tif", "particle" )
-		
+
 	def testOrthographicAimedPoints( self ) :
-	
+
 		self.performAimTest( "orthographic", "aimedOrthographicPoints.tif", "particle" )
-		
+
 	def testPerspectiveAimedPatches( self ) :
-	
+
 		self.performAimTest( "perspective", "aimedPerspectivePatches.tif", "patch" )
-		
+
 	def testOrthographicAimedPatches( self ) :
-	
-		self.performAimTest( "orthographic", "aimedOrthographicPatches.tif", "patch" )		
-	
+
+		self.performAimTest( "orthographic", "aimedOrthographicPatches.tif", "patch" )
+
 	def testGLPoints( self ) :
-	
+
 		fragmentSource = """
 		void main()
 		{
 			gl_FragColor = vec4( 1, 1, 1, 1 );
 		}
 		"""
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
@@ -246,40 +246,40 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
-			
+
 			r.shader( "surface", "white", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
-		
+
 			with IECore.AttributeBlock( r ) :
-			
+
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 20 ) )
-			
-				r.points( 1, { 
+
+				r.points( 1, {
 						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
 				)
-				
+
 			with IECore.AttributeBlock( r ) :
-			
+
 				r.setAttribute( "gl:pointsPrimitive:glPointWidth", IECore.FloatData( 10 ) )
-			
-				r.points( 1, { 
+
+				r.points( 1, {
 						"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] ) ),
 						"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 					}
-				)	
+				)
 
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/glPoints.tif" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		
+
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
-	
+
 	def testTexturing( self ) :
-	
+
 		fragmentSource = """
 		uniform sampler2D texture;
 		varying vec2 fragmentuv;
@@ -302,10 +302,10 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			}
 		)
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
-			
+
 			r.shader(
 				"surface", "test",
 				{
@@ -313,7 +313,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 					"texture" : "test/IECoreGL/images/numbers.exr",
 				}
 			)
-			
+
 			r.points( 1, {
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 				"type" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "patch" ) )
@@ -322,7 +322,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		expectedImage = IECore.Reader.create( "test/IECoreGL/images/numbers.exr" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
-	
+
 	def testWindingOrder( self ) :
 
 		def performTest( rightHandedOrientation, expectedAlpha ) :
@@ -358,7 +358,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		performTest( False, 0 )
 
 	def testAspectAndRotation( self ) :
-	
+
 		fragmentSource = """
 		void main()
 		{
@@ -408,15 +408,15 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/rotatedPointPatches.exr" ).read()
 		actualImage = IECore.Reader.create( self.outputFileName ).read()
-		
+
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.08 ).value, False )
-	
+
 	def testBound( self ) :
 
 		p = IECoreGL.PointsPrimitive( IECoreGL.PointsPrimitive.Type.Point )
-		
+
 		self.assertEqual( p.bound(), IECore.Box3f() )
-		
+
 		p.addPrimitiveVariable(
 			"P",
 			IECore.PrimitiveVariable(
@@ -426,7 +426,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 10.5 ) ) )
-		
+
 		p.addPrimitiveVariable(
 			"constantwidth",
 			IECore.PrimitiveVariable(
@@ -434,7 +434,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				IECore.FloatData( 2 )
 			)
 		)
-		
+
 		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -2 ), IECore.V3f( 11 ) ) )
 
 		p.addPrimitiveVariable(
@@ -444,9 +444,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				IECore.FloatVectorData( [ .5, 2 ] )
 			)
 		)
-		
+
 		self.assertEqual( p.bound(), IECore.Box3f( IECore.V3f( -1.5 ), IECore.V3f( 12 ) ) )
-	
+
 		p.addPrimitiveVariable(
 			"patchaspectratio",
 			IECore.PrimitiveVariable(
@@ -466,7 +466,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 			gl_FragColor = vec4( myColor, 1 );
 		}
 		"""
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
@@ -482,9 +482,9 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
-			
+
 			r.shader( "surface", "test", { "gl:fragmentSource" : fragmentSource, "myColor" : IECore.Color3f( 1, 0, 0 ) } )
-			
+
 			r.points( 1, {
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
@@ -498,11 +498,11 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( i["B"][index], 0 )
 
 	def testWireframeShading( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		
-		r.camera( 
+
+		r.camera(
 			"main",
 			{
 				"projection" : IECore.StringData( "orthographic" ),
@@ -511,17 +511,17 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -.5 ), IECore.V2f( .5 ) ) )
 			}
 		)
-		
+
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
 			r.setAttribute( "gl:primitive:wireframe", True )
-			r.setAttribute( "gl:primitive:wireframeColor", IECore.Color4f( 1, 0, 0, 1 ) )			
-			r.setAttribute( "gl:primitive:wireframeWidth", 5.0 )			
+			r.setAttribute( "gl:primitive:wireframeColor", IECore.Color4f( 1, 0, 0, 1 ) )
+			r.setAttribute( "gl:primitive:wireframeWidth", 5.0 )
 			r.setAttribute( "gl:primitive:solid", False )
-						
+
 			r.points( 1, {
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ),
 			} )
@@ -535,11 +535,11 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( i["B"][index], 0 )
 
 	def testVertexCs( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
-		
-		r.camera( 
+
+		r.camera(
 			"main",
 			{
 				"projection" : IECore.StringData( "orthographic" ),
@@ -548,13 +548,13 @@ class TestPointsPrimitive( unittest.TestCase ) :
 				"screenWindow" : IECore.Box2fData( IECore.Box2f( IECore.V2f( -1), IECore.V2f( 1 ) ) )
 			}
 		)
-		
+
 		r.display( self.outputFileName, "exr", "rgba", {} )
-		
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -6 ) ) )
-						
+
 			r.points( 2, {
 				"P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( -.5 ), IECore.V3f( .5 ) ] ) ),
 				"Cs" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) ),
@@ -575,12 +575,12 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

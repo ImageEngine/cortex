@@ -108,11 +108,11 @@ void CurvesMergeOp::modifyTypedPrimitive( CurvesPrimitive * curves, const Compou
 
 	const vector<int> &verticesPerCurve1 = curves->verticesPerCurve()->readable();
 	const vector<int> &verticesPerCurve2 = curves2->verticesPerCurve()->readable();
-	
+
 	IntVectorDataPtr verticesPerCurveData = new IntVectorData;
 	vector<int> &verticesPerCurve = verticesPerCurveData->writable();
 	verticesPerCurve.resize( verticesPerCurve1.size() + verticesPerCurve2.size() );
-	
+
 	vector<int>::iterator it = copy( verticesPerCurve1.begin(), verticesPerCurve1.end(), verticesPerCurve.begin() );
 	copy( verticesPerCurve2.begin(), verticesPerCurve2.end(), it );
 

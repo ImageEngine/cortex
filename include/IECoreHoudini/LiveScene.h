@@ -35,7 +35,7 @@
 #ifndef IECOREHOUDINI_LIVESCENE_H
 #define IECOREHOUDINI_LIVESCENE_H
 
-#include "OP/OP_Node.h" 
+#include "OP/OP_Node.h"
 #include "UT/UT_String.h"
 
 #include "IECore/SceneInterface.h"
@@ -54,19 +54,19 @@ IE_CORE_FORWARDDECLARE( LiveScene );
 class LiveScene : public IECore::SceneInterface
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LiveScene, LiveSceneTypeId, IECore::SceneInterface );
-		
+
 		LiveScene();
 		LiveScene( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, double defaultTime = std::numeric_limits<double>::infinity() );
 
 		virtual ~LiveScene();
-		
+
 		virtual std::string fileName() const;
 
 		virtual Name name() const;
 		virtual void path( Path &p ) const;
-		
+
 		virtual Imath::Box3d readBound( double time ) const;
 		virtual void writeBound( const Imath::Box3d &bound, double time );
 
@@ -96,19 +96,19 @@ class LiveScene : public IECore::SceneInterface
 		virtual IECore::SceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		virtual IECore::ConstSceneInterfacePtr child( const Name &name, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		virtual IECore::SceneInterfacePtr createChild( const Name &name );
-		
+
 		virtual IECore::SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing );
 		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
-		
+
 		/// Currently raises an exception
 		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
 
 		/// Convenience method to access the Houdini node this scene refers to
 		const OP_Node *node() const;
-		
+
 		/// Convenience method to determine if this scene refers to hierarchy embedded inside a SOP
 		bool embedded() const;
-		
+
 		/// These methods provide a default cooking time for methods that do not accept time
 		/// as an argument (e.g. hasObject or childNames). In a LiveScene which points at
 		/// a SOP, it is necessary to use time in these methods. The default time will pass
@@ -116,23 +116,23 @@ class LiveScene : public IECore::SceneInterface
 		/// for these queries. See ROP_SceneCacheWriter for a use case.
 		double getDefaultTime() const;
 		void setDefaultTime( double time );
-		
+
 		/// The parameter name used to identify user defined tags on any OBJ node. This will be accessed
 		/// by hasTag and readTags as a string parameter, and will be split on spaces to separate tags.
 		static PRM_Name pTags;
-		
+
 		typedef boost::function<bool (const OP_Node *)> HasFn;
 		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, double &)> ReadFn;
 		typedef boost::function<IECore::ConstObjectPtr (const OP_Node *, const Name &, double &)> ReadAttrFn;
 		typedef boost::function<bool (const OP_Node *, const Name &, int)> HasTagFn;
 		typedef boost::function<void (const OP_Node *, NameList &, int)> ReadTagsFn;
 		typedef boost::function<void (const OP_Node *, NameList &)> ReadNamesFn;
-		
+
 		// Register callbacks for custom named attributes.
 		// The names function will be called during attributeNames and hasAttribute.
 		// The read method is called if the names method returns the expected attribute, so it should return a valid Object pointer or raise an Exception.
 		static void registerCustomAttributes( ReadNamesFn namesFn, ReadAttrFn readFn );
-		
+
 		// Register callbacks for nodes to define custom tags
 		// The functions will be called during hasTag and readTags.
 		// readTags will return the union of all custom ReadTagsFns.
@@ -149,49 +149,49 @@ class LiveScene : public IECore::SceneInterface
 	private :
 
 		void constructCommon( const UT_String &nodePath, const Path &contentPath, const Path &rootPath, DetailSplitter *splitter );
-		
+
 		OP_Node *retrieveNode( bool content = false, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		OP_Node *locateContent( OP_Node *node ) const;
 		OP_Node *retrieveChild( const Name &name, Path &contentPath, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		IECore::SceneInterfacePtr retrieveScene( const Path &path, MissingBehaviour missingBehaviour = SceneInterface::ThrowIfMissing ) const;
 		bool hasInput( const OP_Node *node ) const;
 		// We need to adjust the time internally, because SceneInterfaces treat time
-		// starting at Frame 0, while Houdini treats time starting at Frame 1. 
+		// starting at Frame 0, while Houdini treats time starting at Frame 1.
 		double adjustTime( double time ) const;
 		double adjustedDefaultTime() const;
-		
+
 		void calculatePath( const Path &contentPath, const Path &rootPath );
 		const char *matchPath( const char *value ) const;
 		bool matchPattern( const char *value, const char *pattern ) const;
 		std::pair<const char *, size_t> nextWord( const char *value ) const;
 		void relativeContentPath( IECore::SceneInterface::Path &path ) const;
 		GU_DetailHandle contentHandle() const;
-		
+
 		/// Struct for registering readers for custom Attributes.
 		struct CustomAttributeReader
 		{
 			ReadNamesFn m_names;
 			ReadAttrFn m_read;
 		};
-		
+
 		/// Struct for registering readers for custom Tags.
 		struct CustomTagReader
 		{
 			HasTagFn m_has;
 			ReadTagsFn m_read;
 		};
-		
+
 		static std::vector<CustomAttributeReader> &customAttributeReaders();
 		static std::vector<CustomTagReader> &customTagReaders();
-		
+
 		UT_String m_nodePath;
 		size_t m_rootIndex;
 		size_t m_contentIndex;
 		IECore::SceneInterface::Path m_path;
-		
+
 		// used by instances which track the hierarchy inside a SOP
 		mutable DetailSplitterPtr m_splitter;
-		
+
 		// used as the default cook time for methods that do not accept a time
 		double m_defaultTime;
 

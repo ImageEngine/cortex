@@ -40,15 +40,15 @@ import IECoreMaya
 class ColorParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+
 		IECoreMaya.ParameterUI.__init__(
-			
+
 			self,
 			node,
 			parameter,
 			maya.cmds.attrColorSliderGrp(),
 			**kw
-			
+
 		)
 
 		self.replace( self.node(), self.parameter )

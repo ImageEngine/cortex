@@ -81,21 +81,21 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				const std::string &stringPrimVar( const PrimitiveVariable &pv ) const override;
 				Imath::Color3f colorPrimVar( const PrimitiveVariable &pv ) const override;
 				half halfPrimVar( const PrimitiveVariable &pv ) const override;
-				
+
 			private :
-			
+
 				friend class CurvesPrimitiveEvaluator;
-			
+
 				Result( PrimitiveVariable p, bool linear, bool periodic );
-								
+
 				typedef void (Result::*InitFunction)( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
 
 				template<bool linear, bool periodic>
 				void init( unsigned curveIndex, float v, const CurvesPrimitiveEvaluator *evaluator );
-				
+
 				template<typename T>
 				T primVar( const PrimitiveVariable &pv, const float *coefficients ) const;
-				
+
 				unsigned m_curveIndex;
 				float m_v;
 				float m_segmentV;
@@ -106,8 +106,8 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 				PrimitiveVariable m_p;
 				bool m_linear;
 				InitFunction m_init;
-				
-				
+
+
 		};
 		IE_CORE_DECLAREPTR( Result );
 
@@ -115,7 +115,7 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual ~CurvesPrimitiveEvaluator();
 
 		virtual ConstPrimitivePtr primitive() const;
-		
+
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
 
@@ -131,10 +131,10 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
 		/// Returns pointAtV( 0, uv[1], result ).
 		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
-		/// Not yet implemented.	
+		/// Not yet implemented.
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
-		/// Not yet implemented.	
+		/// Not yet implemented.
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 		//@}
@@ -164,25 +164,25 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		//@}
 
 	protected :
-		
+
 		/// \todo It would be much better if PrimitiveEvaluator::Description didn't require these create()
 		/// functions and instead just called the constructors that have to exist anyway.
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
 		friend struct PrimitiveEvaluator::Description<CurvesPrimitiveEvaluator>;
 		static PrimitiveEvaluator::Description<CurvesPrimitiveEvaluator> g_evaluatorDescription;
-		
+
 	private :
 
 		friend class Result;
 
 		float integrateCurve( unsigned curveIndex, float vStart, float vEnd, int samples, Result& typedResult ) const;
-		
+
 		CurvesPrimitivePtr m_curvesPrimitive;
 		const std::vector<int> &m_verticesPerCurve;
 		std::vector<int> m_vertexDataOffsets; // one value per curve
 		std::vector<int> m_varyingDataOffsets; // one value per curve
 		PrimitiveVariable m_p;
-		
+
 		void buildTree();
 		bool m_haveTree;
 		typedef tbb::mutex TreeMutex;
@@ -191,9 +191,9 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		std::vector<Imath::Box3f> m_treeBounds;
 		struct Line;
 		std::vector<Line> m_treeLines;
-		
+
 		void closestPointWalk( Box3fTree::NodeIndex nodeIndex, const Imath::V3f &p, unsigned &curveIndex, float &v, float &closestDistSquared ) const;
-		
+
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitiveEvaluator );

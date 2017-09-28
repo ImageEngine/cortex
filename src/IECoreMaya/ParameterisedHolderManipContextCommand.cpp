@@ -59,9 +59,9 @@ MPxContext *ParameterisedHolderManipContextCommand::makeObj()
 MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 {
 	 MStatus stat;
-	 
+
 	 MArgParser args = parser();
-	 
+
 	 if( args.isFlagSet( kModeFlag ) )
 	 {
 	 	MString mode;
@@ -89,7 +89,7 @@ MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 			return stat;
 		}
 	 }
-	 
+
 	 if( args.isFlagSet( kTargetFlag ) )
 	 {
 	 	MString param;
@@ -101,7 +101,7 @@ MStatus ParameterisedHolderManipContextCommand::doEditFlags()
 		}
 		m_context->setTarget( param );
 	 }
-	 
+
 	 return MS::kSuccess;
 }
 
@@ -121,16 +121,16 @@ MStatus ParameterisedHolderManipContextCommand::doQueryFlags()
 			case ParameterisedHolderManipContext::First:
 				setResult( MString( "first" ) );
 				break;
-			
+
 			case ParameterisedHolderManipContext::Targeted:
 				setResult( MString( "targeted" ) );
 				break;
-			
-			default:	
+
+			default:
 				setResult( MString( "unknown" ) );
-		}		
+		}
 	}
-	
+
 	if( args.isFlagSet( kTargetFlag ) )
 	{
 		setResult( m_context->getTarget() );
@@ -138,25 +138,25 @@ MStatus ParameterisedHolderManipContextCommand::doQueryFlags()
 
 	return MS::kSuccess;
 }
-		
+
 MStatus ParameterisedHolderManipContextCommand::appendSyntax()
 {
 	MStatus stat;
-	
+
 	MSyntax mySyntax = syntax();
-	
+
 	stat = mySyntax.addFlag( kModeFlag, kModeFlagLong, MSyntax::kString );
 	if ( !stat )
 	{
 		return MS::kFailure;
 	}
-	
+
 	stat = mySyntax.addFlag( kTargetFlag, kTargetFlagLong, MSyntax::kString );
 	if ( !stat )
 	{
 		return MS::kFailure;
 	}
-	
+
 	return MS::kSuccess;
 }
 

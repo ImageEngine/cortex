@@ -159,52 +159,52 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 4 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
-		
+
 		newVertsPerCurve = IntVectorData( [ 4, 4 ] )
 		c.setTopology( newVertsPerCurve, CubicBasisf.bezier(), False )
-		
+
 		self.assertEqual( c.verticesPerCurve(), newVertsPerCurve )
 		self.assertEqual( c.basis(), CubicBasisf.bezier() )
 		self.assertEqual( c.periodic(), False )
 		self.assertEqual( c.numCurves(), 2 )
-		
+
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Uniform ), 2 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Vertex ), 8 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
 		self.assertEqual( c.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
-		
+
 		newVertsPerCurve.append( 10 )
 		self.assertEqual( c.verticesPerCurve(), IntVectorData( [ 4, 4 ] ) )
-	
+
 	def testHash( self ) :
-	
+
 		c = CurvesPrimitive( IntVectorData( [ 4 ] ), CubicBasisf.bSpline(), True )
 		h = c.hash()
 		t = c.topologyHash()
-		
+
 		c2 = c.copy()
 		self.assertEqual( c2.hash(), h )
 		self.assertEqual( c2.topologyHash(), t )
-		
+
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.bSpline(), True )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
 		t = c.topologyHash()
-		
+
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.catmullRom(), True )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
 		t = c.topologyHash()
-		
+
 		c.setTopology( IntVectorData( [ 5 ] ), CubicBasisf.catmullRom(), False )
 		self.assertNotEqual( c.hash(), h )
 		self.assertNotEqual( c.topologyHash(), h )
 		h = c.hash()
 		t = c.topologyHash()
-		
+
 		c["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( c.hash(), h )
 		self.assertEqual( c.topologyHash(), t )

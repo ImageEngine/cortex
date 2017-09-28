@@ -53,13 +53,13 @@ template<typename BaseType>
 class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 {
 	public :
-		
+
 		ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~ParameterisedHolder();
-		
+
 		static PRM_Template parameters[];
 		static CH_LocalVariable variables[];
-		
+
 		static PRM_Name pParameterisedClassCategory;
 		static PRM_Name pParameterisedClassName;
 		static PRM_Name pParameterisedVersion;
@@ -68,14 +68,14 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static PRM_Name pReloadButton;
 		static PRM_Name pEvaluateParameters;
 		static PRM_Name pSwitcher;
-		
+
 		static PRM_Default matchStringDefault;
 		static PRM_Default switcherDefaults[];
-		
+
 		static PRM_ChoiceList classCategoryMenu;
 		static PRM_ChoiceList classNameMenu;
 		static PRM_ChoiceList classVersionMenu;
-		
+
 		//! @name className/version UI functions
 		/// Dynamic menus, callbacks, and helper functions for the className/version parameters.
 		/////////////////////////////////////////////////////////////////////////////////////////
@@ -91,11 +91,11 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		static void classVersions( const std::string className, const std::string searchPathEnvVar, std::vector<int> &versions );
 		static int defaultClassVersion( const std::string className, const std::string searchPathEnvVar );
 		//@}
-		
+
 		virtual const char *inputLabel( unsigned pos ) const;
 		virtual unsigned minInputs() const;
 		virtual unsigned maxInputs() const;
-		
+
 		//! @name ParameterisedHolderInterface implementation
 		/////////////////////////////////////////////////////////////////////////////////////////
 		//@{
@@ -110,43 +110,43 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		virtual bool setNodeValues();
 		virtual void setParameterisedValues( double time );
 		//@}
-	
+
 	protected :
-		
+
 		/// Load the node from disk. It checks for className/version/searchPath values on the node
 		/// and attempts to reload the parameterised class from disk
 		virtual bool load( UT_IStream &is, const char *ext, const char *path );
-		
+
 		virtual IECore::MessageHandler *getMessageHandler();
 		virtual void setMessageHandler( IECore::MessageHandler *handler );
-		
+
 		/// Update a specific Cortex parameter using values from the corresponding Houdini node parameter.
 		/// @param prefix A string prefix for the houdini parameter name
 		/// @param top_level This should be true if you know the parm is the top-level CompoundParameter
 		void updateParameter( IECore::ParameterPtr parm, float now, std::string prefix="", bool top_level=false );
-		
+
 		/// Pushes the data from the incomming connections into the associated Cortex parameters.
 		/// Derived classes should implement this method in a way appropriate to the context.
 		virtual void setInputParameterValues( float now ) = 0;
-		
+
 		/// updates the input connections to match the current loaded parameters
 		virtual void refreshInputConnections() = 0;
-				
+
 		/// A vector of IECore::Parameters which are passed through node inputs rather than PRM_Templates
 		/// Should be filled by refreshInputConnections() if input parameters make sense for this context.
 		IECore::CompoundParameter::ParameterVector m_inputParameters;
-		
+
 		/// Determines if the node is dirty
 		bool m_dirty;
-	
+
 	private :
-		
+
 		/// creates and sets a particular type/version of class on this node
 		void load( const std::string &className, int classVersion, const std::string &searchPathEnvVar, bool updateGUI=true );
-		
+
 		/// Method for loading a Parameterised object from disk
 		IECore::RunTimeTypedPtr loadParameterised( const std::string &className, int classVersion, const std::string &searchPathEnvVar );
-		
+
 		/// Checks for changes in parameter values and marks the node as dirty
 		template <class T, class U>
 		void checkForUpdate( bool do_update, T val, IECore::ParameterPtr parm )
@@ -160,12 +160,12 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 				}
 			}
 		}
-		
+
 		IECore::RunTimeTypedPtr m_parameterised;
-		
+
 		// stores the className of the currently loaded parameterised object (if any)
 		std::string m_loadedClassName;
-		
+
 		IECore::MessageHandlerPtr m_messageHandler;
 
 };

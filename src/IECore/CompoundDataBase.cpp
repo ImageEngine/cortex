@@ -55,7 +55,7 @@ void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 	Data::memoryUsage( accumulator );
 	const CompoundDataMap &data = readable();
 	accumulator.accumulate( data.size() * sizeof( CompoundDataMap::value_type ) );
-	
+
 	CompoundDataMap::const_iterator iter = data.begin();
 	while (iter != data.end())
 	{
@@ -64,7 +64,7 @@ void CompoundDataBase::memoryUsage( Object::MemoryAccumulator &accumulator ) con
 			accumulator.accumulate( iter->second.get() );
 		}
 		iter++;
-	}	
+	}
 }
 
 template<>
@@ -156,7 +156,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 		// data from CompoundData container instead.
 		container = context->container( "CompoundData", v );
 	}
-	
+
 	CompoundDataMap &m = writable();
 	m.clear();
 	container = container->subdirectory( g_membersEntry );
@@ -177,13 +177,13 @@ static inline bool comp( CompoundDataMap::const_iterator a, CompoundDataMap::con
 
 template<>
 void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
-{	
+{
 	// the CompoundDataMap is sorted by InternedString::operator <,
 	// which just compares addresses of the underlying interned object.
 	// this isn't stable between multiple processes.
 	const CompoundDataMap &m = readable();
 	std::vector<CompoundDataMap::const_iterator> iterators;
-	iterators.reserve( m.size() );	
+	iterators.reserve( m.size() );
 	for( CompoundDataMap::const_iterator it=m.begin(); it!=m.end(); it++ )
 	{
 		iterators.push_back( it );
@@ -192,7 +192,7 @@ void SimpleDataHolder<CompoundDataMap>::hash( MurmurHash &h ) const
 	// so we have to sort again based on the string values
 	// themselves.
 	sort( iterators.begin(), iterators.end(), comp );
-	
+
 	// and then hash everything in the stable order.
 	std::vector<CompoundDataMap::const_iterator>::const_iterator it;
 	for( it=iterators.begin(); it!=iterators.end(); it++ )

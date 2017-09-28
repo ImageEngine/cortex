@@ -43,19 +43,19 @@ class ImageConverterTest( IECoreMaya.TestCase ) :
 	def test( self ) :
 
 		imageA = IECore.Reader.create( "test/IECoreImage/data/exr/colorBarsWithAlpha.exr" ).read()
-		
+
 		toMaya = IECoreMaya.ToMayaImageConverter( imageA )
-		
+
 		mImage = maya.OpenMaya.MImage()
 		toMaya.convert( mImage )
-	
+
 		fromMaya = IECoreMaya.FromMayaImageConverter( mImage )
 		imageB = fromMaya.convert()
-		
+
 		self.failIf(
-		
+
 			IECoreImage.ImageDiffOp()( imageA=imageA, imageB=imageB, maxError=1.0/256 ).value
-			
+
 		)
 
 if __name__ == "__main__":

@@ -45,9 +45,9 @@ namespace IECore
 
 class IECORE_API CamelCase
 {
-	
+
 	public :
-	
+
 		enum Caps
 		{
 			Unchanged,

@@ -66,13 +66,13 @@ GA_RWAttributeRef ToHoudiniAttribConverter::convert( std::string name, GU_Detail
 ToHoudiniAttribConverterPtr ToHoudiniAttribConverter::create( const Data *data )
 {
 	const TypesToFnsMap *m = typesToFns();
-	
+
 	TypesToFnsMap::const_iterator it = m->find( Types( data->typeId() ) );
 	if( it!=m->end() )
 	{
 		return it->second( data );
 	}
-	
+
 	return 0;
 }
 

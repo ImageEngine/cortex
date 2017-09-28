@@ -109,7 +109,7 @@ class DeferredRendererImplementation : public RendererImplementation
 		};
 		IE_CORE_DECLAREPTR( RenderContext );
 
-		// render context used by renderer outside procedural rendering.		
+		// render context used by renderer outside procedural rendering.
 		RenderContextPtr m_defaultContext;
 
 		typedef tbb::enumerable_thread_specific< std::stack< RenderContextPtr > > ThreadRenderContext;

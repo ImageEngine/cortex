@@ -110,7 +110,7 @@ enum TypeId
 	CullingSpaceStateComponentTypeId = 105067,
 	CullingBoxStateComponentTypeId = 105068,
 	ToGLPointsConverterTypeId = 105069,
-	ProceduralThreadingStateComponentTypeId = 105070,	
+	ProceduralThreadingStateComponentTypeId = 105070,
 	SkeletonPrimitiveTypeId = 105071,
 	ConePrimitiveTypeId = 105072,
 	JointPrimitiveTypeId = 105073,

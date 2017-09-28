@@ -58,11 +58,11 @@ class TransformationMatrixParameterUI( IECoreMaya.ParameterUI ) :
 	_allFields = ( "translate", "rotate", "scale", "shear",	"scalePivot", "scalePivotTranslation", "rotatePivot", "rotatePivotTranslation" )
 
 	def __init__( self, node, parameter, **kw ) :
-			
+
 		self._outerColumn = maya.cmds.columnLayout( adj=True )
-		
+
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, self._outerColumn, **kw )
-		
+
 		maya.cmds.rowLayout( numberOfColumns=2, parent=self._outerColumn )
 
 		self._label = maya.cmds.text(
@@ -86,14 +86,14 @@ class TransformationMatrixParameterUI( IECoreMaya.ParameterUI ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
 		currentParent = maya.cmds.setParent( query=True )
-		
+
 		visibleFields = IECore.StringVectorData( ( "translate", "rotate", "scale", "shear" ) )
 		with IECore.IgnoredExceptions( KeyError ) :
-			userDataFields = parameter.userData()["UI"]["visibleFields"]	
+			userDataFields = parameter.userData()["UI"]["visibleFields"]
 			visibleFields = []
 			for u in userDataFields :
 				if u not in TransformationMatrixParameterUI._allFields:
-					IECore.msg( 
+					IECore.msg(
 						IECore.Msg.Level.Warning,
 						"TransformationMatrixParameterUI",
 						"Invalid field '%s' requested in UI userData for '%s'. Available fields are %s."
@@ -101,19 +101,19 @@ class TransformationMatrixParameterUI( IECoreMaya.ParameterUI ) :
 					)
 					continue
 				visibleFields.append( u )
-		
+
 		for f in self._fields.keys() :
 			if f not in visibleFields :
 				maya.cmds.deleteUI( self._fields[f][0] )
-				del self._fields[f]	
-		
+				del self._fields[f]
+
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		baseName = fnPH.parameterPlugPath( parameter )
-		
+
 		self._addPopupMenu( parentUI=self._label, attributeName=baseName )
-		
+
 		for f in visibleFields :
-			
+
 			if f not in self._fields :
 				layout = maya.cmds.rowLayout(
 					numberOfColumns = 4,
@@ -121,21 +121,21 @@ class TransformationMatrixParameterUI( IECoreMaya.ParameterUI ) :
 					columnWidth4 = [ IECoreMaya.ParameterUI.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex ]
 				)
 				maya.cmds.text( label=f, font="smallPlainLabelFont", align="right" )
-				self._fields[f] = ( layout, maya.cmds.floatField(), maya.cmds.floatField(), maya.cmds.floatField() )				
-					
+				self._fields[f] = ( layout, maya.cmds.floatField(), maya.cmds.floatField(), maya.cmds.floatField() )
+
 			maya.cmds.connectControl( self._fields[f][1], "%s%s%i" % ( baseName, f, 0 ) )
 			maya.cmds.connectControl( self._fields[f][2], "%s%s%i" % ( baseName, f, 1 ) )
 			maya.cmds.connectControl( self._fields[f][3], "%s%s%i" % ( baseName, f, 2 ) )
 
-		maya.cmds.button( 
-			self._manip, 
+		maya.cmds.button(
+			self._manip,
 			edit = True,
 			# The manip is currently only registered for float types
 			visible = isinstance( parameter, IECore.TransformationMatrixfParameter ),
-			command = self._createCallback( IECore.curry( IECoreMaya.ManipulatorUI.manipulateParameter, node, parameter ) ) 
+			command = self._createCallback( IECore.curry( IECoreMaya.ManipulatorUI.manipulateParameter, node, parameter ) )
 		)
-		
+
 		maya.cmds.setParent( currentParent )
-		
+
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.TransformationMatrixfParameter, TransformationMatrixParameterUI )
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.TransformationMatrixdParameter, TransformationMatrixParameterUI )

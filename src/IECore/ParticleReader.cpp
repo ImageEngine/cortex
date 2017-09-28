@@ -90,7 +90,7 @@ ParticleReader::ParticleReader( const std::string &description )
 		realTypePresets,
 		true
 	);
-	
+
 	m_convertPrimVarNamesParameter = new BoolParameter(
 		"convertPrimVarNames",
 		"Convert the position primVar name to P.",

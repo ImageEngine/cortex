@@ -82,7 +82,7 @@ void bindState()
 		.def( "defaultState", &defaultState ).staticmethod( "defaultState" )
 		.def( "bindBaseState", &State::bindBaseState ).staticmethod( "bindBaseState" )
 	;
-	
+
 	// this is turned into the actual ScopedBinding class in IECoreGL/State.py.
 	class_<State::ScopedBinding, boost::noncopyable>( "_ScopedBinding", no_init )
 		.def( init<const State &, State &>() )

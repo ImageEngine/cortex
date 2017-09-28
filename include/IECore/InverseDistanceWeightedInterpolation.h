@@ -53,7 +53,7 @@ class InverseDistanceWeightedInterpolation
 
 		typedef typename std::iterator_traits<PointIterator>::value_type Point;
 		typedef typename VectorTraits<Point>::BaseType PointBaseType;
-		
+
 		typedef KDTree<PointIterator> Tree;
 		typedef std::vector<typename Tree::Neighbour> NeighbourVector;
 
@@ -93,7 +93,7 @@ class InverseDistanceWeightedInterpolation
 		Tree *m_tree;
 		PointIterator m_firstPoint;
 		ValueIterator m_firstValue;
-		
+
 		unsigned int m_numNeighbours;
 };
 

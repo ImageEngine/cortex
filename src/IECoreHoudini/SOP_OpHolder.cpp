@@ -38,7 +38,7 @@
 #include "PRM/PRM_Parm.h"
 #include "UT/UT_Interrupt.h"
 
-#include "IECorePython/ScopedGILLock.h" 
+#include "IECorePython/ScopedGILLock.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/SOP_OpHolder.h"
@@ -65,7 +65,7 @@ SOP_OpHolder::~SOP_OpHolder()
 OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 {
 	IECore::MessageHandler::Scope handlerScope( getMessageHandler() );
-	
+
 	// some defaults and useful variables
 	Imath::Box3f bbox( Imath::V3f(-1,-1,-1), Imath::V3f(1,1,1) );
 	float now = context.getTime();
@@ -75,7 +75,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 
 	// get our op
 	IECore::OpPtr op = IECore::runTimeCast<IECore::Op>( getParameterised() );
-	
+
 	// check for a valid parameterised on this SOP
 	if ( !op )
 	{
@@ -93,13 +93,13 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building OpHolder Geometry...");
 	gdp->clearAndDestroy();
-	
+
 	// update the op parameters
 	setParameterisedValues( now );
-	
+
 	// main input is reserved for splitting by name when the filter is enabled
 	UT_StringMMPattern nameFilter;
-	if ( !m_inputParameters.empty() && getNameFilter( m_inputParameters[0].get(), nameFilter ) ) 
+	if ( !m_inputParameters.empty() && getNameFilter( m_inputParameters[0].get(), nameFilter ) )
 	{
 		DetailSplitterPtr splitter = new DetailSplitter( inputGeoHandle( 0 ) );
 		std::vector<std::string> names;
@@ -122,7 +122,7 @@ OP_ERROR SOP_OpHolder::cookMySop( OP_Context &context )
 	{
 		doOperation( op.get(), GU_DetailHandle(), "" );
 	}
-	
+
 	boss->opEnd();
 	unlockInputs();
 	return error();
@@ -134,9 +134,9 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 	{
 		SOP_ParameterisedHolder::setInputParameterValue( m_inputParameters[0].get(), handle, 0 );
 	}
-	
+
 	IECore::ConstObjectPtr result = 0;
-	
+
 	try
 	{
 		result = op->operate();
@@ -159,7 +159,7 @@ void SOP_OpHolder::doOperation( IECore::Op *op, const GU_DetailHandle &handle, c
 	{
 		addError( SOP_MESSAGE, "Caught unknown exception!" );
 	}
-	
+
 	if ( result )
 	{
 		ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( result.get() );
@@ -178,7 +178,7 @@ void SOP_OpHolder::doPassThrough( const GU_DetailHandle &handle, const std::stri
 		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	GU_DetailHandleAutoReadLock readHandle( handle );
 	const GU_Detail *inputGeo = readHandle.getGdp();
 	if ( !inputGeo )
@@ -186,7 +186,7 @@ void SOP_OpHolder::doPassThrough( const GU_DetailHandle &handle, const std::stri
 		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	gdp->merge( *inputGeo );
 }
 
@@ -196,6 +196,6 @@ void SOP_OpHolder::setInputParameterValue( IECore::Parameter *parameter, const G
 	{
 		return;
 	}
-	
+
 	SOP_ParameterisedHolder::setInputParameterValue( parameter, handle, inputIndex );
 }

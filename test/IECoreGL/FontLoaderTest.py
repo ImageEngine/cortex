@@ -44,17 +44,17 @@ class FontLoaderTest( unittest.TestCase ) :
 	def test( self ) :
 
 		fl = IECoreGL.FontLoader( IECore.SearchPath( "./test/IECore/data/fonts", ":" ) )
-		
+
 		f = fl.load( "Vera.ttf" )
 		self.failUnless( isinstance( f, IECoreGL.Font ) )
-		
+
 		f2 = fl.load( "Vera.ttf" )
 		self.failUnless( f.isSame( f2 ) )
-		
+
 		fl.clear()
-		
+
 		f3 = fl.load( "Vera.ttf" )
 		self.failIf( f3.isSame( f2 ) )
-		
+
 if __name__ == "__main__":
     unittest.main()

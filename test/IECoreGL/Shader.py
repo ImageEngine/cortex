@@ -61,14 +61,14 @@ class TestShader( unittest.TestCase ) :
 		"""
 
 		s1 = IECoreGL.Shader( vertexSource, fragmentSource )
-		
+
 		self.assertNotEqual( s1.program(), 0 )
 		self.assertEqual( s1.vertexSource(), vertexSource )
 		self.assertEqual( s1.geometrySource(), "" )
 		self.assertEqual( s1.fragmentSource(), fragmentSource )
 
 		s2 = IECoreGL.Shader( "", "", fragmentSource )
-		
+
 		self.assertNotEqual( s2.program(), 0 )
 		self.assertNotEqual( s1.program(), s2.program() )
 		self.assertEqual( s2.vertexSource(), "" )
@@ -155,11 +155,11 @@ class TestShader( unittest.TestCase ) :
 			self.assertTrue( s.uniformParameter( n ) is not None )
 			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
 			self.assertEqual( s.uniformParameter( n ).size, 1 )
-	
+
 	def testUniformArrayParameters( self ) :
-		
+
 		# TODO: get bool/bvec2/bvec3 array parameters working, and test them.
-		
+
 		vertexSource = """
 		attribute float floatAttrib;
 		varying float varyingFloatParm;
@@ -174,11 +174,11 @@ class TestShader( unittest.TestCase ) :
 		// uniform bool boolParm[4];
 		uniform int intParm[2];
 		uniform float floatParm[4];
-		
+
 		// uniform bvec2 bvec2Parm[4];
 		// uniform bvec3 bvec3Parm[4];
 		// uniform ivec4 bvec4Parm; // we have no suitable datatype for specifying this in IECore
-		
+
 		uniform ivec2 ivec2Parm[5];
 		uniform ivec3 ivec3Parm[6];
 		// uniform ivec4 ivec4Parm; // we have no suitable datatype for specifying this in IECore
@@ -196,7 +196,7 @@ class TestShader( unittest.TestCase ) :
 
 		uniform mat3 mat3Parm[4];
 		uniform mat4 mat4Parm[4];
-		
+
 		varying float varyingFloatParm;
 
 		void main()
@@ -227,12 +227,12 @@ class TestShader( unittest.TestCase ) :
 
 		parameterNames = s.uniformParameterNames()
 		self.assertEqual( len( parameterNames ), len( expectedParameterNamesAndSizes ) )
-		
+
 		for n in expectedParameterNamesAndSizes.keys() :
 			self.assertTrue( n in parameterNames )
 			self.assertTrue( s.uniformParameter( n ) is not None )
 			self.assertTrue( s.uniformParameter( n + "VeryUnlikelySuffix" ) is None )
-			
+
 			self.assertEqual( s.uniformParameter( n ).size, expectedParameterNamesAndSizes[n] )
 
 	def testVertexParameters( self ) :
@@ -279,21 +279,21 @@ class TestShader( unittest.TestCase ) :
 			self.assertTrue( s.vertexAttribute( n ) is not None )
 			self.assertTrue( s.vertexAttribute( n + "VeryUnlikelySuffix" ) is None )
 			self.assertEqual( s.vertexAttribute( n ).size, 1 )
-							
+
 	def testGeometryShader( self ) :
-	
+
 		if IECoreGL.glslVersion() < 150 :
 			# can't test geometry shaders if they don't exist
 			return
-			
+
 		geometrySource = """
 		#version 150
-		
+
 		layout( triangles ) in;
 		layout( triangle_strip, max_vertices=3 ) out;
-		
+
 		uniform float geometryShaderParameter = 0;
-		
+
 		void main()
 		{
 			for( int i = 0; i < gl_in.length(); i++)
@@ -303,19 +303,19 @@ class TestShader( unittest.TestCase ) :
 			}
 		}
 		"""
-		
+
 		s = IECoreGL.Shader( IECoreGL.Shader.defaultVertexSource(), geometrySource, IECoreGL.Shader.defaultFragmentSource() )
-		
+
 		self.failUnless( "geometryShaderParameter" in s.uniformParameterNames() )
 
 	def testEmptyGeometryShader( self ) :
-	
+
 		s = IECoreGL.Shader( IECoreGL.Shader.defaultVertexSource(), "", IECoreGL.Shader.defaultFragmentSource() )
 
 	def testStandardParameters( self ) :
-	
+
 		s = IECoreGL.Shader.constant()
 		self.assertEqual( s.csParameter(), s.uniformParameter( "Cs" ) )
-	
+
 if __name__ == "__main__":
     unittest.main()

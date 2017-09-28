@@ -39,7 +39,7 @@
 
 namespace IECorePython
 {
- 
+
 IECOREPYTHON_API void bindAttributeState();
 
 } // namespace IECorePython

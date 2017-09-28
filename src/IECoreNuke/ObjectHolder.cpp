@@ -50,9 +50,9 @@ ObjectHolder::~ObjectHolder()
 }
 
 void ObjectHolder::knobs( DD::Image::Knob_Callback f )
-{	
+{
 	Op::knobs( f );
-	
+
 	ObjectKnob::objectKnob( f, &m_object, "object", "Object" );
 }
 

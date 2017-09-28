@@ -111,23 +111,23 @@ struct InverseDistanceWeightedInterpolationWrapper
 	ValueDataPtr call2( ConstPointDataPtr pData ) const
 	{
 		assert(m_idw);
-		
+
 		ValueDataPtr resultData = new ValueData;
 		std::vector<typename T::Value> &v = resultData->writable();
-		
+
 		const std::vector<typename T::Point> &p = pData->readable();
-		
+
 		v.resize( p.size() );
-		
+
 		typename T::NeighbourVector neighbours;
 		for( unsigned i=0; i<p.size(); i++ )
 		{
 			v[i] = (*m_idw)( p[i], neighbours );
 		}
-		
+
 		return resultData;
 	}
-	
+
 };
 
 template<typename T>

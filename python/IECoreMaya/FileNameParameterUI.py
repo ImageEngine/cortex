@@ -42,10 +42,10 @@ class FileNameParameterUI( IECoreMaya.PathParameterUI ) :
 		IECoreMaya.PathParameterUI.__init__( self, node, parameter, **kw )
 
 	def _fileDialog( self ) :
-		
+
 		tools = IECoreMaya.FileBrowser.FileExtensionFilter( self.parameter.extensions )
 
-		IECoreMaya.PathParameterUI._fileDialog( self, 
+		IECoreMaya.PathParameterUI._fileDialog( self,
 			filter = tools.filter,
 			validate = tools.validate
 		)

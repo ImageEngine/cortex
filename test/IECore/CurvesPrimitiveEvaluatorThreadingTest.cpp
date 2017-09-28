@@ -54,11 +54,11 @@ namespace IECore
 struct CurvesPrimitiveEvaluatorThreadingTest
 {
 	static const unsigned g_numCurves = 10000;
-	
+
 	CurvesPrimitiveEvaluatorPtr makeEvaluator()
 	{
 		Rand32 rand;
-	
+
 		IntVectorDataPtr vertsPerCurveData = new IntVectorData;
 		std::vector<int> &vertsPerCurve = vertsPerCurveData->writable();
 		V3fVectorDataPtr pointsData = new V3fVectorData;
@@ -72,20 +72,20 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 				points.push_back( V3f( rand.nextf(), rand.nextf(), rand.nextf() ) );
 			}
 		}
-		
+
 		CurvesPrimitivePtr curves = new CurvesPrimitive( vertsPerCurveData, CubicBasisf::linear(), false, pointsData );
 		return new CurvesPrimitiveEvaluator( curves );
 	}
-	
+
 	struct CreateResultAndQueryPointAtV
 	{
 		public :
-		
+
 			CreateResultAndQueryPointAtV( CurvesPrimitiveEvaluator &evaluator )
 				:	m_evaluator( evaluator )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -95,13 +95,13 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 					m_evaluator.pointAtV( curveIndex, 0.5, result.get() );
 				}
 			}
-			
+
 		private :
-		
+
 			CurvesPrimitiveEvaluator &m_evaluator;
-	
+
 	};
-	
+
 	void testResultCreation()
 	{
 		CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
@@ -109,16 +109,16 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 		parallel_for( blocked_range<size_t>( 0, 1000000 ), CreateResultAndQueryPointAtV( *evaluator ) );
 		BOOST_CHECK_EQUAL( pRefCount, evaluator->primitive()->variableData<Data>( "P" )->refCount() );
 	}
-	
+
 	struct CheckClosestPoint
 	{
 		public :
-			
+
 			CheckClosestPoint( CurvesPrimitiveEvaluator &evaluator )
 				:	m_evaluator( evaluator )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				PrimitiveEvaluator::ResultPtr result = m_evaluator.createResult();
@@ -148,17 +148,17 @@ struct CurvesPrimitiveEvaluatorThreadingTest
 			}
 
 		private :
-		
+
 			CurvesPrimitiveEvaluator &m_evaluator;
 
 	};
-	
+
 	void testClosestPoint()
 	{
 		CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
 		parallel_for( blocked_range<size_t>( 0, 10000 ), CheckClosestPoint( *evaluator ) );
 	}
-	
+
 };
 
 

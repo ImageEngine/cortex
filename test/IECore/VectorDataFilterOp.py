@@ -57,9 +57,9 @@ class TestVectorDataFilterOp( unittest.TestCase ) :
 		self.assertEqual( ii, IntVectorData( [ 1, 3, 5, 6 ] ) )
 
 	def testOperateInPlace( self ) :
-	
+
 		f = BoolVectorData( [ 0, 1, 0, 1 ] )
-		
+
 		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
 		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = True )
 		self.assertEqual( i, IntVectorData( [ 2, 4 ] ) )

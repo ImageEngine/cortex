@@ -53,28 +53,28 @@ class TestEnum( unittest.TestCase ) :
 		self.assertEqual( int( E.Red ), 0 )
 		self.assertEqual( int( E.Green ), 1 )
 		self.assertEqual( int( E.Blue ), 2 )
-		
+
 		self.failUnless( E.Red < E.Green )
 		self.failUnless( E.Green < E.Blue )
-		
+
 		self.assertEqual( E.values(), ( E.Red, E.Green, E.Blue ) )
-		
+
 		self.assertRaises( ValueError, E, 3 )
 		self.assertRaises( ValueError, E, "Tree" )
 
 	def testHash( self ) :
-	
+
 		E = Enum.create( "Red", "Green", "Blue" )
 		E2 = Enum.create( "Red", "Green", "Blue" )
-		
+
 		self.assertEqual( hash( E.Red ), hash( E.Red ) )
 		self.assertEqual( hash( E2.Red ), hash( E2.Red ) )
 		self.assertNotEqual( hash( E.Red ), hash( E2.Red ) )
-		
+
 		d = {}
 		d[E.Red] = "a"
 		d[E2.Red] = "b"
-		
+
 		self.assertEqual( len( d ), 2 )
 		self.assertEqual( d[E.Red], "a" )
 		self.assertEqual( d[E2.Red], "b" )

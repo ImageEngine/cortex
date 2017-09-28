@@ -609,7 +609,7 @@ class RendererTest( unittest.TestCase ) :
 			( IECore.StringData( "linear" ), 2 ),
 			( IECore.IntData( 1 ), 1 ),
 			( IECore.IntData( 2 ), 2 ) ]:
-	
+
 			r = IECoreArnold.Renderer()
 
 			r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )

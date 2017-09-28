@@ -40,7 +40,7 @@ import IECoreMaya
 class NumericParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+
 		if parameter.hasMinValue() and parameter.hasMaxValue():
 
 			layout = maya.cmds.rowLayout(
@@ -54,7 +54,7 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 				numberOfColumns = 2,
 				columnWidth2 = [ IECoreMaya.ParameterUI.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex ]
 			)
-			
+
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, layout, **kw )
 
 		self.__field = None
@@ -89,12 +89,12 @@ class NumericParameterUI( IECoreMaya.ParameterUI ) :
 		if self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ) :
 
 			kw['precision'] = 12
-		
+
 		if parameter.userData().has_key( 'UI' ) :
-			
+
 			if self.parameter.isInstanceOf( IECore.TypeId.DoubleParameter ) or self.parameter.isInstanceOf( IECore.TypeId.FloatParameter ):
 				precision = parameter.userData()['UI'].get( "precision", None )
-				
+
 				if isinstance( precision, IECore.IntData ):
 					kw['precision'] = precision.value
 

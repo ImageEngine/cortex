@@ -80,6 +80,6 @@ OP_Node *NodeHandle::node() const
 	catch( HOM_ObjectWasDeleted )
 	{
 	}
-	
+
 	return 0;
 }

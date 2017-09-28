@@ -60,10 +60,10 @@ IECore::RunTimeTypedPtr ToGLConverter::convert()
 ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::TypeId resultType )
 {
 	Registrations &r = registrations();
-	
+
 	IECore::TypeId objectTypeId = object->typeId();
 	while( objectTypeId != InvalidTypeId )
-	{	
+	{
 		Registrations::const_iterator low = r.lower_bound( objectTypeId );
 		Registrations::const_iterator high = r.upper_bound( objectTypeId );
 		for( Registrations::const_iterator it = low; it != high; it++ )
@@ -83,5 +83,5 @@ ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::T
 ToGLConverter::Registrations &ToGLConverter::registrations()
 {
 	static Registrations r;
-	return r; 
+	return r;
 }

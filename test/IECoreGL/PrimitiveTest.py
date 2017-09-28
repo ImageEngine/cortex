@@ -68,9 +68,9 @@ class TestPrimitive( unittest.TestCase ) :
 		g.getState().add( IECoreGL.Primitive.PointWidth( 2.2 ) )
 		g.getState().add( IECoreGL.Primitive.TransparencySort( True ) )
 		g.getState().add( IECoreGL.Primitive.Selectable( False ) )
-		
+
 	def testRunTimeTyped( self ) :
-	
+
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECoreGL.Primitive.staticTypeId(), IECoreGL.Renderable.staticTypeId() ) )
 
 if __name__ == "__main__":

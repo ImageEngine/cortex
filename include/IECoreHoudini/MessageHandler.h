@@ -50,16 +50,16 @@ class MessageHandler : public IECore::MessageHandler
 	public :
 
 		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
-		
+
 		typedef boost::function<void ( const char *m )> HandlerFn;
-		
+
 		MessageHandler( HandlerFn errorFn = 0, HandlerFn warningFn = 0, HandlerFn infoFn = 0, HandlerFn debugFn = 0 );
 		virtual ~MessageHandler();
-		
+
 		virtual void handle( Level level, const std::string &context, const std::string &message );
-		
+
 	private :
-		
+
 		HandlerFn m_errorFn;
 		HandlerFn m_warningFn;
 		HandlerFn m_infoFn;

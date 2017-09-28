@@ -49,13 +49,13 @@ IE_CORE_DEFINERUNTIMETYPED( DiskPrimitive );
 DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
 	:	m_radius( radius ), m_z( z ), m_thetaMax( thetaMax ), m_nPoints( 0 )
 {
-	
+
 	// build vertex attributes for P, N and st, and indexes for triangles.
-	
+
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
 	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
-	
+
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
 	vector<V2f> &uvVector = uvData->writable();
@@ -78,7 +78,7 @@ DiskPrimitive::DiskPrimitive( float radius, float z, float thetaMax )
 	}
 
 	m_nPoints = n + 1;
-	
+
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
 	addVertexAttribute( "uv", uvData );

@@ -51,7 +51,7 @@ namespace IECore
 /// http://www.3dequalizer.com/user_daten/tech_docs/pdf/distortion.pdf
 ///
 /// Further information on this algorithm and others can be found freely at:
-/// Lens Distortion Plugin Kit v1.3 by Uwe Sassenberg, Science-D-Visions 
+/// Lens Distortion Plugin Kit v1.3 by Uwe Sassenberg, Science-D-Visions
 /// http://www.3dequalizer.com/index.php#?site=tech_docs&id=110216_01
 
 class IECORE_API StandardRadialLensModel : public LensModel
@@ -63,12 +63,12 @@ class IECORE_API StandardRadialLensModel : public LensModel
 		virtual void validate();
 		virtual Imath::V2d distort( Imath::V2d p );
 		virtual Imath::V2d undistort( Imath::V2d p );
-		
+
 	protected:
 
 		/// The Default Constructor is protected and the LensModel::create() method
 		/// should be used to instantiate a new LensModel instead.
-		StandardRadialLensModel();	
+		StandardRadialLensModel();
 		virtual ~StandardRadialLensModel();
 
 	private:
@@ -77,12 +77,12 @@ class IECORE_API StandardRadialLensModel : public LensModel
 		/// to dimesionless coordinates which
 		/// are used by the distortion algorithm.
 		Imath::V2d UVtoDN( const Imath::V2d& uv );
-		
+
 		/// Transforms the dimesionless coordinates
 		/// used by the distortion algorithm to UV
 		/// coordinates of in the range 0-1.
 		Imath::V2d DNtoUV( const Imath::V2d& uv );
-		
+
 		/// Coeficients needed by the distortion algorithm.
 		/// These values are calculated within validate().
 		double m_filmbackDiagonal;

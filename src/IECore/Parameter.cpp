@@ -207,7 +207,7 @@ void Parameter::setValidatedValue( ObjectPtr value )
 void Parameter::setValue( const std::string &presetName )
 {
 	const PresetsContainer &pr = getPresets();
-	
+
 	PresetsContainer::const_iterator it;
 	for( it=pr.begin(); it != pr.end(); it++ )
 	{
@@ -216,7 +216,7 @@ void Parameter::setValue( const std::string &presetName )
 			break;
 		}
 	}
-	
+
 	if( it==pr.end() )
 	{
 		throw Exception( string( "Preset \"" ) + presetName + "\" does not exist." );

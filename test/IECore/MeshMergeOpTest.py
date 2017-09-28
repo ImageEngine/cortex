@@ -39,19 +39,19 @@ import math
 class MeshMergeOpTest( unittest.TestCase ) :
 
 	def verifyMerge( self, mesh1, mesh2, merged ) :
-		
+
 		self.failUnless( mesh1.arePrimitiveVariablesValid() )
 		self.failUnless( mesh2.arePrimitiveVariablesValid() )
 		self.failUnless( merged.arePrimitiveVariablesValid() )
-		
+
 		for v in PrimitiveVariable.Interpolation.values :
 			i = PrimitiveVariable.Interpolation( v )
 			if i!=PrimitiveVariable.Interpolation.Invalid and i!=PrimitiveVariable.Interpolation.Constant :
 				self.assertEqual( merged.variableSize( i ), mesh1.variableSize( i ) + mesh2.variableSize( i ) )
-		
+
 		self.verifyData( mesh1, mesh2, merged )
 		self.verifyData( mesh2, mesh1, merged, flipped=True )
-	
+
 	def verifyData( self, meshA, meshB, merged, flipped=False ) :
 
 		for name in meshA.keys() :
@@ -116,21 +116,21 @@ class MeshMergeOpTest( unittest.TestCase ) :
 						self.assertEqual( merged[name].data[offset + i], meshB[name].data[i] )
 
 	def testPlanes( self ) :
-		
+
 		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
-		
+
 	def testDifferentPrimVars( self ) :
-		
+
 		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		MeshNormalsOp()( input=p1, copyInput=False )
 		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
 		self.assertNotEqual( p1.keys(), p2.keys() )
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
-		
+
 		TriangulateOp()( input=p2, copyInput=False )
 		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
 		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
@@ -141,7 +141,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.verifyMerge( p1, p2, merged )
 
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
-		
+
 		plane = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		del plane["uv"]
 		MeshNormalsOp()( input=plane, copyInput=False )
@@ -154,7 +154,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.verifyMerge( plane, box, merged )
 
 	def testRemovePrimVars( self ) :
-		
+
 		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		MeshNormalsOp()( input=p1, copyInput=False )
 		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
@@ -165,7 +165,7 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.failUnless( "N" not in merged )
 		del p1["N"]
 		self.verifyMerge( p1, p2, merged )
-		
+
 		TriangulateOp()( input=p2, copyInput=False )
 		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
 		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
@@ -184,16 +184,16 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		del p2["vTangent"]
 		del p2["myInt"]
 		self.verifyMerge( p1, p2, merged )
-	
+
 	def testReferencedData( self ) :
-		
+
 		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
 		p1["Pref"] = p1["P"]
 		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
 		merged = MeshMergeOp()( input=p1, mesh=p2 )
 		self.failUnless( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
-		
+
 		del p1["Pref"]
 		p2["Pref"] = p2["P"]
 		merged = MeshMergeOp()( input=p1, mesh=p2 )

@@ -55,21 +55,21 @@ class dummyProcedural( IECore.ParameterisedProcedural ) :
 IECore.registerRunTimeTyped( dummyProcedural )
 
 class FromMayaProceduralHolderConverterTest( IECoreMaya.TestCase ) :
-	
+
 	def testFactory( self ) :
-		
+
 		procHolderShape = maya.cmds.createNode( "ieProceduralHolder" )
-		
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( str(procHolderShape) )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaProceduralHolderConverter.staticTypeId() ) )
-		
+
 	def testConversion( self ) :
-		
+
 		procHolderShape = maya.cmds.createNode( "ieProceduralHolder" )
 		IECoreMaya.FnProceduralHolder( procHolderShape ).setProcedural( dummyProcedural() )
-		
+
 		converter = IECoreMaya.FromMayaProceduralHolderConverter( str(procHolderShape) )
 		self.failUnless( isinstance( converter.convert(), dummyProcedural ) )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

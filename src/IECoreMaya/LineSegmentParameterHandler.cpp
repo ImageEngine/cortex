@@ -56,7 +56,7 @@ MPlug LineSegmentParameterHandler<T>::doCreate( IECore::ConstParameterPtr parame
 	{
 		return MPlug();
 	}
-	
+
 	MFnNumericAttribute fnNAttr;
 	MFnCompoundAttribute fnCAttr;
 	MObject oStart, oEnd;
@@ -84,10 +84,10 @@ MPlug LineSegmentParameterHandler<T>::doCreate( IECore::ConstParameterPtr parame
 	MObject attribute = fnCAttr.create( plugName, plugName );
 	fnCAttr.addChild( oStart );
 	fnCAttr.addChild( oEnd );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 
@@ -136,37 +136,37 @@ MStatus LineSegmentParameterHandler<T>::doUpdate( IECore::ConstParameterPtr para
 		{
 			return s;
 		}
-		
+
 		MObject endChildAttr = fnEndAttr.child( i, &s );
 		if( !s )
 		{
 			return s;
-		}	
-	
+		}
+
 		MFnNumericAttribute fnStartChildAttr( startChildAttr, &s );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		MFnNumericAttribute fnEndChildAttr( endChildAttr, &s );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		s = fnStartChildAttr.setDefault( defValue.p0[i] );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		s = fnEndChildAttr.setDefault( defValue.p1[i] );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 	}
 
 	return finishUpdating( parameter, plug );

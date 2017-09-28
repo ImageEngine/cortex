@@ -40,7 +40,7 @@ import os.path
 import os
 
 class CameraTest( IECoreRI.TestCase ) :
-	
+
 	def testParameters( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
@@ -142,7 +142,7 @@ class CameraTest( IECoreRI.TestCase ) :
 		with IECore.TransformBlock( r ) :
 
 			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
-		
+
 			r.camera( "first", {
 				"projection" : IECore.StringData( "perspective" ),
 				"projection:fov" : IECore.FloatData( 45 ),
@@ -151,7 +151,7 @@ class CameraTest( IECoreRI.TestCase ) :
 		with IECore.TransformBlock( r ) :
 
 			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 3, 4, 5 ) ) )
-		
+
 			r.camera( "second", {
 				"projection" : IECore.StringData( "perspective" ),
 				"projection:fov" : IECore.FloatData( 50 ),
@@ -159,7 +159,7 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 			pass
-			
+
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
 		l = " ".join( l.split() )
 
@@ -168,7 +168,7 @@ class CameraTest( IECoreRI.TestCase ) :
 		self.assertTrue( "Projection \"perspective\" \"float fov\" [ 50 ]" in l )
 		self.assertTrue( "Camera \"second\"" in l )
 		self.assertEqual( l.count( "Camera" ), 2 )
-		
+
 	def testMultipleCameraRender( self ) :
 
 		r = IECoreRI.Renderer( "" )
@@ -176,11 +176,11 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		with IECore.TransformBlock( r ) :
 			r.camera( "iCantSeeAnything", {} )
-		
+
 		with IECore.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 			r.camera( "iCanSeeSomething", {} )
-		
+
 		with IECore.WorldBlock( r ) :
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 
@@ -189,19 +189,19 @@ class CameraTest( IECoreRI.TestCase ) :
 		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["A"][index], 1 )
-	
+
 	def testMotionBlurCameraRender( self ) :
-	
+
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
-		
+
 		with IECore.TransformBlock( r ) :
 			with IECore.MotionBlock( r, [ 0, 1 ] ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
-			
+
 			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
-		
+
 		with IECore.WorldBlock( r ) :
 			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 
@@ -211,25 +211,25 @@ class CameraTest( IECoreRI.TestCase ) :
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertTrue( i["A"][index] > 0 ) # something should be there
 		self.assertTrue( i["A"][index] < 1 ) # but it should be blurry
-	
+
 	def testMotionBlurCameraRib( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
-		
+
 		with IECore.TransformBlock( r ) :
 			with IECore.MotionBlock( r, [ 0, 1 ] ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
-			
+
 			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
-		
+
 		r.worldBegin()
 		r.worldEnd()
-		
+
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
-		
+
 		self.assert_( "MotionBegin [ 0 1 ]" in l )
-	
+
 	def testPixelAspectRatio( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
@@ -247,6 +247,6 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		self.assertTrue( "Format 100 200 2" in l )
 		self.assertTrue( "ScreenWindow -1 1 -1 1" in l )
-	
+
 if __name__ == "__main__":
     unittest.main()

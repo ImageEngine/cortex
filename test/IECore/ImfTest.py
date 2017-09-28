@@ -41,76 +41,76 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
 		"""Test TimeCode constructors"""
-		
+
 		t = IECore.TimeCode()
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4 )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4, True )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True, True, True, True, True )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4, True, True, True, True, True, True, 1, 2, 3, 4, 5, 6, 7, 8 )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 593058073 )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 593058073, 256 )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		t = IECore.TimeCode( 593058073, 256, IECore.TimeCode.Packing.FILM24 )
 		self.failUnless( isinstance( t, IECore.TimeCode ) )
-		
+
 		tt = IECore.TimeCode( t )
 		self.failUnless( isinstance( tt, IECore.TimeCode ) )
-		
+
 		self.assertRaises( RuntimeError, IECore.TimeCode, 25, 2, 3, 4 )
 		self.assertRaises( RuntimeError, IECore.TimeCode, 1, 60, 3, 4 )
 		self.assertRaises( RuntimeError, IECore.TimeCode, 1, 2, 60, 4 )
 		self.assertRaises( RuntimeError, IECore.TimeCode, 1, 2, 3, 60 )
-	
+
 	def testCopyAndAssign( self ) :
 		"""Test TimeCode copy construction and assignment"""
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4 )
 		tt = t
 		self.assertEqual( t, tt )
-		
+
 		ttt = IECore.TimeCode( t )
 		self.assertEqual( tt, ttt )
-	
+
 	def testEquality( self ) :
 		"""Test TimeCode comparison for equality"""
-		
+
 		self.assertEqual( IECore.TimeCode( 1, 2, 3, 4 ), IECore.TimeCode( 1, 2, 3, 4 ) )
 		self.assertNotEqual( IECore.TimeCode( 1, 2, 3, 4 ), IECore.TimeCode( 4, 3, 2, 1 ) )
-		
+
 		self.assertEqual( IECore.TimeCode( 1, 2, 3, 4, fieldPhase = True ), IECore.TimeCode( 1, 2, 3, 4, False, False, True ) )
-		
+
 		t = IECore.TimeCode( hours = 12, minutes = 24, seconds = 12, frame = 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
-		
+
 		self.assertEqual( t, IECore.TimeCode( t.timeAndFlags(), t.userData() ) )
-		
+
 		self.assertNotEqual( t, IECore.TimeCode( t.timeAndFlags() ) )
 		self.assertNotEqual( t, IECore.TimeCode( t.timeAndFlags( IECore.TimeCode.Packing.FILM24 ) ) )
 		self.assertNotEqual( t, IECore.TimeCode( t.timeAndFlags( IECore.TimeCode.Packing.FILM24 ), t.userData() ) )
-		
+
 		tt = IECore.TimeCode( t.timeAndFlags( IECore.TimeCode.Packing.FILM24 ), t.userData(), IECore.TimeCode.Packing.FILM24 )
 		self.assertNotEqual( t.dropFrame(), tt.dropFrame() )
 		tt.setDropFrame( True )
 		self.assertEqual( t, tt )
-	
+
 	def testMethods( self ) :
 		"""Test TimeCode miscellaneous methods"""
-		
+
 		t = IECore.TimeCode(
 			hours = 12,
 			minutes = 23,
@@ -131,7 +131,7 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 			binaryGroup7 = 7,
 			binaryGroup8 = 8,
 		)
-		
+
 		self.assertEqual( t.hours(), 12 )
 		self.assertEqual( t.minutes(), 23 )
 		self.assertEqual( t.seconds(), 49 )
@@ -155,7 +155,7 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 		self.assertEqual( t.timeAndFlags( IECore.TimeCode.Packing.TV50 ), 2460207381 )
 		self.assertEqual( t.timeAndFlags( IECore.TimeCode.Packing.FILM24  ), 2460207381 )
 		self.assertEqual( t.userData(), 2271560481 )
-		
+
 		t.setHours( 8 )
 		t.setMinutes( 15 )
 		t.setSeconds( 30 )
@@ -174,7 +174,7 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 		t.setBinaryGroup( 6, 3 )
 		t.setBinaryGroup( 7, 2 )
 		t.setBinaryGroup( 8, 1 )
-		
+
 		self.assertEqual( t.hours(), 8 )
 		self.assertEqual( t.minutes(), 15 )
 		self.assertEqual( t.seconds(), 30 )
@@ -201,26 +201,26 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 
 	def testPackingModes( self ) :
 		"""Test TimeCode Packing modes"""
-		
+
 		t = IECore.TimeCode( timeAndFlags = 192 )
 		self.assertEqual( t, IECore.TimeCode( timeAndFlags = 192, packing = IECore.TimeCode.Packing.TV60 ) )
 		self.assertNotEqual( t, IECore.TimeCode( timeAndFlags = 192, packing = IECore.TimeCode.Packing.TV50 ) )
 		self.assertNotEqual( t,	IECore.TimeCode( timeAndFlags = 192, packing = IECore.TimeCode.Packing.FILM24 ) )
-		
+
 		tt = IECore.TimeCode()
 		tt.setTimeAndFlags( 192 )
 		self.assertEqual( t, tt )
-		
+
 		tv60 = IECore.TimeCode()
 		tv60.setTimeAndFlags( 192, packing = IECore.TimeCode.Packing.TV60 )
 		self.assertEqual( t, tv60 )
-		
+
 		tv50 = IECore.TimeCode()
 		tv50.setTimeAndFlags( 128, packing = IECore.TimeCode.Packing.TV50 )
 		self.assertNotEqual( t.dropFrame(), tv50.dropFrame() )
 		tv50.setDropFrame( True )
 		self.assertEqual( t, tv50 )
-		
+
 		film = IECore.TimeCode()
 		film.setTimeAndFlags( 0, packing = IECore.TimeCode.Packing.FILM24 )
 		self.assertNotEqual( t.dropFrame(), film.dropFrame() )
@@ -231,14 +231,14 @@ class ImfTimeCodeTest( unittest.TestCase ) :
 
 	def testRepr( self ) :
 		"""Test TimeCode repr"""
-		
+
 		t = IECore.TimeCode( 12, 5, 3, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
 		self.assertEqual( repr(t), "IECore.TimeCode( 12, 5, 3, 15, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 12, 0, 0 )" )
 		self.assertEqual( t, eval( repr(t) ) )
-	
+
 	def testStr( self ) :
 		"""Test TimeCode str"""
-		
+
 		t = IECore.TimeCode( 12, 5, 3, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
 		self.assertEqual( str(t), "12:05:03:15" )
 

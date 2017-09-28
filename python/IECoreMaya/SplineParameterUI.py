@@ -43,7 +43,7 @@ class SplineParameterUI( ParameterUI ) :
 	def __init__( self, node, parameter, **kw ) :
 
 		ParameterUI.__init__(
-			
+
 			self,
 			node,
 			parameter,
@@ -52,7 +52,7 @@ class SplineParameterUI( ParameterUI ) :
 				rowAttach = [ ( 1, "top", 0 ), ( 2, "both", 0 ), ( 3, "both", 0 ) ]
 			),
 			**kw
-			
+
 		)
 
 		maya.cmds.text(
@@ -76,7 +76,7 @@ class SplineParameterUI( ParameterUI ) :
 				self.__editWindow = None
 
 		ParameterUI.replace( self, node, parameter )
-		
+
 		maya.cmds.gradientControl( self.__gradientControl, edit=True, attribute=self.plugName() )
 		maya.cmds.button( self.__button, edit=True, command=self.__openEditWindow )
 
@@ -90,11 +90,11 @@ class SplineParameterUI( ParameterUI ) :
 	def __openEditWindow( self, unused ) :
 
 		if not self.__editWindow :
-			
+
 			editWindowName = re.sub( "[\|\.]" , "_", self.plugName() )
 			if maya.cmds.window( editWindowName, q=True, exists=True ):
 				maya.cmds.deleteUI( editWindowName )
-			
+
 			self.__editWindow = maya.cmds.window( editWindowName, title=self.nodeName() + " " + self.label(), retain=True, widthHeight=[ 600, 300 ] )
 
 			layout = maya.cmds.formLayout()

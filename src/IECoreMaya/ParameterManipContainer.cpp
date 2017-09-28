@@ -1,5 +1,5 @@
 
-#include "IECoreMaya/ParameterManipContainer.h" 
+#include "IECoreMaya/ParameterManipContainer.h"
 
 using namespace IECoreMaya;
 
@@ -16,7 +16,7 @@ void ParameterManipContainer::setPlug( MPlug &plug )
 MPlug ParameterManipContainer::getPlug()
 {
 	return m_plug;
-}	
+}
 
 void ParameterManipContainer::setLabel( MString &label )
 {
@@ -26,5 +26,5 @@ void ParameterManipContainer::setLabel( MString &label )
 MString ParameterManipContainer::getLabel()
 {
 	return m_label;
-}	
+}
 

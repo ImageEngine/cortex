@@ -150,7 +150,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		{
 			return it->second( plug );
 		}
-		
+
 		UnitDefaultConvertersMap &dc = unitDefaultConverters();
 		UnitDefaultConvertersMap::const_iterator dcIt = dc.find( fnUAttr.unitType() );
 		if( dcIt != dc.end() )
@@ -171,7 +171,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		{
 			return it->second( plug );
 		}
-		
+
 		NumericDefaultConvertersMap &dc = numericDefaultConverters();
 		NumericDefaultConvertersMap::const_iterator dcIt = dc.find( fnNAttr.unitType() );
 		if( dcIt != dc.end() )
@@ -192,7 +192,7 @@ FromMayaConverterPtr FromMayaPlugConverter::create( const MPlug &plug, IECore::T
 		{
 			return it->second( plug );
 		}
-		
+
 		TypedDefaultConvertersMap &dc = typedDefaultConverters();
 		TypedDefaultConvertersMap::const_iterator dcIt = dc.find( fnTAttr.attrType() );
 		if( dcIt != dc.end() )

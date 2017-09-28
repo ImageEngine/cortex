@@ -69,7 +69,7 @@ NParticleReader::NParticleReader( const std::string &fileName )
 	:	ParticleReader( "Reads Maya .mc format nCaches" ), m_iffFile( 0 ), m_frames( new IntVectorData )
 {
 	m_fileNameParameter->setTypedValue( fileName );
-	
+
 	m_frameParameter = new IntParameter( "frameIndex", "Index of the desired frame to be loaded", 0 );
 	parameters()->addParameter( m_frameParameter );
 }
@@ -93,7 +93,7 @@ bool NParticleReader::canRead( const std::string &fileName )
 	catch( ... )
 	{
 	}
-	
+
 	return false;
 }
 
@@ -102,16 +102,16 @@ bool NParticleReader::open()
 	if( !m_iffFile || m_iffFileName!=fileName() )
 	{
 		m_iffFile = new IFFFile( fileName().c_str() );
-		
+
 		IFFFile::Chunk *root = m_iffFile->root();
 		IFFFile::Chunk::ChunkIterator headerIt = root->childrenBegin();
-		
+
 		if ( !headerIt->isGroup() || headerIt->groupName().id() != kCACH )
 		{
 			m_header.valid = false;
 			return false;
 		}
-		
+
 		IFFFile::Chunk::ChunkIterator child = headerIt->childrenBegin();
 		for ( ; child != headerIt->childrenEnd(); child++ )
 		{
@@ -128,10 +128,10 @@ bool NParticleReader::open()
 				child->read( m_header.endTime );
 			}
 		}
-		
+
 		m_frames->writable().clear();
 		frameToRootChildren.clear();
-		
+
 		// single frame per file
 		if ( m_header.startTime == m_header.endTime && (headerIt+1)->groupName().id() == kMYCH )
 		{
@@ -162,13 +162,13 @@ bool NParticleReader::open()
 				}
 			}
 		}
-		
+
 		sort( m_frames->writable().begin(), m_frames->writable().end() );
-		
+
 		m_header.valid = true;
 		m_iffFileName = fileName();
 	}
-	
+
 	return m_header.valid && m_iffFileName == fileName();
 }
 
@@ -178,7 +178,7 @@ unsigned long NParticleReader::numParticles()
 	{
 		return 0;
 	}
-	
+
 	int numParticles = 0;
 	int frameIndex = m_frameParameter->getNumericValue();
 	int frame = m_frames->readable()[frameIndex];
@@ -200,7 +200,7 @@ unsigned long NParticleReader::numParticles()
 			break;
 		}
 	}
-	
+
 	return numParticles;
 }
 
@@ -208,10 +208,10 @@ void NParticleReader::attributeNames( std::vector<std::string> &names )
 {
 	names.clear();
 	if( !open() )
-	{	
+	{
 		return;
 	}
-	
+
 	int frameIndex = m_frameParameter->getNumericValue();
 	int frame = m_frames->readable()[frameIndex];
 	std::map<int, IFFFile::Chunk::ChunkIterator>::const_iterator frameIt = frameToRootChildren.find( frame );
@@ -242,7 +242,7 @@ const IntVectorData * NParticleReader::frameTimes()
 		msg( Msg::Error, "NParticleReader::attributeNames()", boost::format( "Failed to open '%s'." ) % m_iffFileName );
 		return 0;
 	}
-	
+
 	return m_frames.get();
 }
 
@@ -290,7 +290,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 	{
 		return 0;
 	}
-	
+
 	int frameIndex = m_frameParameter->getNumericValue();
 	int frame = m_frames->readable()[frameIndex];
 	std::map<int, IFFFile::Chunk::ChunkIterator>::const_iterator frameIt = frameToRootChildren.find( frame );
@@ -299,19 +299,19 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 		msg( Msg::Warning, "NParticleReader::readAttribute()", boost::format( "Frame '%d' (index '%d') does not exist in '%s'." ) % frame % frameIndex % m_iffFileName );
 		return 0;
 	}
-	
+
 	bool foundAttr = false;
 	std::string channelName;
 	IFFFile::Chunk::ChunkIterator attrIt;
 	IFFFile::Chunk::ChunkIterator cache = frameIt->second;
 	IFFFile::Chunk::ChunkIterator it = cache->childrenBegin();
-	
+
 	for ( ; it != cache->childrenEnd(); it++ )
 	{
 		if ( it->type().id() == kCHNM )
 		{
 			it->read( channelName );
-			
+
 			if ( name.compare( channelName ) == 0 )
 			{
 				attrIt = it;
@@ -320,12 +320,12 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 			}
 		}
 	}
-	
+
 	if ( !foundAttr )
 	{
 		return 0;
 	}
-	
+
 	for ( it++; it < attrIt+2 && it != cache->childrenEnd(); it++ )
 	{
 		int id = it->type().id();
@@ -335,12 +335,12 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 			return 0;
 		}
 	}
-	
+
 	DataPtr result = 0;
-	
+
 	int numParticles = 0;
 	(attrIt+1)->read( numParticles );
-	
+
 	switch( (attrIt+2)->type().id() )
 	{
 		case kDBLA :
@@ -411,7 +411,7 @@ std::string NParticleReader::positionPrimVarName()
 {
 	std::vector<std::string> names;
 	attributeNames( names );
-	
+
 	// The position channel for an nParticle cache should be something like "nParticleShape1_position"
 	for( vector<string>::const_iterator it = names.begin(); it != names.end(); it++ )
 	{
@@ -420,7 +420,7 @@ std::string NParticleReader::positionPrimVarName()
 			return *it ;
 		}
 	}
-	
+
 	msg( Msg::Warning, "NParticleReader::posPrimVarName()", "Cannot find name for particle position channel, using P" );
 	return "P";
 }

@@ -43,43 +43,43 @@ import IECoreRI
 class StringArrayParameterTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [ "a", "b" ] ) } )
 
 		r = "".join( file( "test/IECoreRI/output/testStringArrayParameter.rib" ).readlines() )
-		
+
 		self.failUnless( '"string sa[2]" [ "a" "b" ]' in r )
 
 	def testEmptyString( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [] ) } )
 
 		r = "".join( file( "test/IECoreRI/output/testStringArrayParameter.rib" ).readlines() )
-		
+
 		self.failUnless( '"string sa[0]" [ ]' in r )
 
 	def tearDown( self ) :
-		
+
 		IECoreRI.TestCase.tearDown( self )
-		
+
 		for f in [
 			"test/IECoreRI/shaders/types.sdl",
 		] :
-		
+
 			if os.path.exists( f ) :
 				os.remove( f )
-		
+
 if __name__ == "__main__":
     unittest.main()

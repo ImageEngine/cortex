@@ -84,7 +84,7 @@ bool SLOReader::canRead( const std::string &fileName )
 	}
 
 	tbb::mutex::scoped_lock lock( g_mutex );
-	
+
 	if( Slo_SetShader( (char *)fileName.c_str() ) )
 	{
 		return false;
@@ -96,7 +96,7 @@ bool SLOReader::canRead( const std::string &fileName )
 ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 {
 	tbb::mutex::scoped_lock lock( g_mutex );
-	
+
 	if( Slo_SetShader( (char *)fileName().c_str() ) )
 	{
 		throw Exception( boost::str( boost::format( "Unable to set shader to \"%s\"" ) % fileName() ) );
@@ -113,12 +113,12 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	// so we stick the correct order in the blind data as a workaround for anyone interested
 	// in the true ordering.
 	StringVectorDataPtr orderedParameterNames = new StringVectorData;
-	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:orderedParameterNames", orderedParameterNames ) );	
+	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:orderedParameterNames", orderedParameterNames ) );
 
 	// we don't have a way of communicating which parameters are outputs in the Shader::parametersData(),
 	// so we work around that using the blind data too.
 	StringVectorDataPtr outputParameterNames = new StringVectorData;
-	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:outputParameterNames", outputParameterNames ) );	
+	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:outputParameterNames", outputParameterNames ) );
 
 	int numArgs = Slo_GetNArgs();
 	for( int i=1; i<=numArgs; i++ )
@@ -126,12 +126,12 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 		DataPtr data = 0;
 
 		SLO_VISSYMDEF *arg = Slo_GetArgById( i );
-		
+
 		// find geometric interpretation, if this is relevant:
 		GeometricData::Interpretation interpretation;
 		switch( arg->svd_type )
 		{
-			case SLO_TYPE_POINT : 
+			case SLO_TYPE_POINT :
 				interpretation = GeometricData::Point;
 				break;
 			case SLO_TYPE_VECTOR :
@@ -144,7 +144,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 				interpretation = GeometricData::None;
 				break;
 		}
-		
+
 		switch( arg->svd_type )
 		{
 			case SLO_TYPE_POINT :
@@ -313,7 +313,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 					}
 				}
 				break;
-				
+
 			case SLO_TYPE_SHADER :
 				{
 					if( arg->svd_arraylen==0 )
@@ -356,10 +356,10 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	}
 
 	// shader annotations
-	
+
 	CompoundDataPtr annotations = new CompoundData;
 	result->blindData()->writable().insert( pair<string, DataPtr>( "ri:annotations", annotations ) );
-	
+
 #ifndef PRMANEXPORT
 	for( int i=1, n=Slo_GetNAnnotations(); i <= n; i++ )
 	{

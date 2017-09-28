@@ -313,21 +313,21 @@ class SimpleTypedDataTest(unittest.TestCase):
 				self.assertEqual( v.value, b2 )
 
 	def testInternedStringData( self ) :
-	
+
 		s = InternedStringData( "i" )
 		self.assertEqual( str( s ), "i" )
 		self.assertEqual( repr(s ), 'IECore.InternedStringData( "i" )' )
 
 		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
 		s.save( m, "o" )
-		
+
 		s2 = Object.load( m, "o" )
-		
+
 		self.assertEqual( s2.value.value(), "i" )
 		self.assertEqual( s, s2 )
 
 	def testStringDataRepr( self ) :
-	
+
 		for s in [
 			"a\nb",
 			"a'",
@@ -337,28 +337,28 @@ class SimpleTypedDataTest(unittest.TestCase):
 			self.assertEqual( eval( repr( d ) ), d )
 
 	def testComparison( self ) :
-	
+
 		for i in range( 0, 1000 ) :
-		
+
 			self.assertTrue( IntData( 10 ) < IntData( 20 ) )
 			self.assertFalse( IntData( 20 ) < IntData( 10 ) )
-			
+
 			self.assertTrue( IntData( 11 ) > IntData( 10 ) )
 			self.assertFalse( IntData( 10 ) > IntData( 10 ) )
-			
+
 			self.assertTrue( IntData( 11 ) >= IntData( 11 ) )
 			self.assertTrue( IntData( 12 ) >= IntData( 11 ) )
 			self.assertFalse( IntData( 9 ) >= IntData( 10 ) )
-			
+
 			self.assertTrue( IntData( 11 ) <= IntData( 11 ) )
 			self.assertTrue( IntData( 10 ) <= IntData( 11 ) )
 			self.assertFalse( IntData( 11 ) <= IntData( 10 ) )
-			
+
 	def testEqualityDoesntThrow( self ) :
-	
+
 		self.assertFalse( IntData( 100 ) == None )
 		self.assertTrue( IntData( 100 ) != None )
-		
+
 class BoolDataTest( unittest.TestCase ) :
 
 	def test( self ) :
@@ -393,7 +393,7 @@ class BoolDataTest( unittest.TestCase ) :
 		self.assertEqual( o, oo )
 
 	def testLineSegmentData( self ) :
-	
+
 		for vt, dt in [
 			( V3f, LineSegment3fData ),
 			( V3d, LineSegment3dData ),

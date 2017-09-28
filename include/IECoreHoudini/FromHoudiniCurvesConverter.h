@@ -54,39 +54,39 @@ class FromHoudiniCurvesConverter : public IECoreHoudini::FromHoudiniGeometryConv
 		FromHoudiniCurvesConverter( const SOP_Node *sop );
 
 		virtual ~FromHoudiniCurvesConverter();
-		
+
 		/// Determines if the given GU_Detail can be converted
 		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
-	
+
 	protected :
-		
+
 		/// performs conversion to an IECore::CurvesPrimitive
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
 
 		static FromHoudiniGeometryConverter::Description<FromHoudiniCurvesConverter> m_description;
-		
+
 		/// Utility struct for duplicating curve end points using DespatchedTypedData
 		struct DuplicateEnds
 		{
 			typedef void ReturnType;
-			
+
 			DuplicateEnds( const std::vector<int> &vertsPerCurve );
-			
+
 			template<typename T>
 			ReturnType operator()( T *data ) const;
-			
+
 			const std::vector<int> &m_vertsPerCurve;
 		};
-		
+
 		static bool compatiblePrimitive( GA_PrimitiveTypeId type )
 		{
 			if ( ( type == GEO_PRIMNURBCURVE ) || ( type == GEO_PRIMBEZCURVE ) )
 			{
 				return true;
 			}
-			
+
 			return false;
 		};
 };

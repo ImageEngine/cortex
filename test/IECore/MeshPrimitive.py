@@ -184,7 +184,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assert_( m.arePrimitiveVariablesValid() )
 
 	def testEqualityOfEmptyMeshes( self ) :
-	
+
 		self.assertEqual( MeshPrimitive(), MeshPrimitive() )
 
 	def testVerticesPerFace( self ) :
@@ -194,47 +194,47 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		vertsPerFace = IntVectorData( [ 3, 4 ] )
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
 		self.assertEqual( m.minVerticesPerFace(), 3 )
-		self.assertEqual( m.maxVerticesPerFace(), 4 )		
+		self.assertEqual( m.maxVerticesPerFace(), 4 )
 
 		vertsPerFace = IntVectorData( [ 4, 3 ] )
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
 		self.assertEqual( m.minVerticesPerFace(), 3 )
-		self.assertEqual( m.maxVerticesPerFace(), 4 )		
-		
+		self.assertEqual( m.maxVerticesPerFace(), 4 )
+
 	def testHash( self ) :
-	
+
 		m = MeshPrimitive( IntVectorData(), IntVectorData(), "linear", V3fVectorData() )
 		h = m.hash()
 		t = m.topologyHash()
-		
+
 		m2 = m.copy()
 		self.assertEqual( m2.hash(), h )
 		self.assertEqual( m2.topologyHash(), t )
-		
+
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 1, 2 ] ), "linear" )
 		self.assertNotEqual( m.hash(), h )
 		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
 		t = m.topologyHash()
-		
+
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "linear" )
 		self.assertNotEqual( m.hash(), h )
 		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
 		t = m.topologyHash()
-		
+
 		m.setTopology( IntVectorData( [ 3 ] ), IntVectorData( [ 0, 2, 1 ] ), "catmullClark" )
 		self.assertNotEqual( m.hash(), h )
 		self.assertNotEqual( m.topologyHash(), t )
 		h = m.hash()
 		t = m.topologyHash()
-		
+
 		m["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( m.hash(), h )
 		self.assertEqual( m.topologyHash(), t )
-	
+
 	def testBox( self ) :
-		
+
 		m = MeshPrimitive.createBox( Box3f( V3f( 0 ), V3f( 1 ) ) )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 6 )
@@ -245,9 +245,9 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.verticesPerFace, IntVectorData( [ 4 ] * 6 ) )
 		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-	
+
 	def testPlane( self ) :
-		
+
 		m = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
@@ -259,7 +259,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData( [ 0, 1, 3, 2 ] ) )
 		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		
+
 		# verify uvs
 		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
 		r = e.createResult()
@@ -275,7 +275,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertTrue( e.pointAtUV( V2f( 0, 1 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[2] )
 		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
-		
+
 		# test divisions
 		m = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ), divisions = V2i( 2, 3 ) )
 		self.assertEqual( m.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -288,7 +288,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.vertexIds, IntVectorData( [ 0, 1, 4, 3, 1, 2, 5, 4, 3, 4, 7, 6, 4, 5, 8, 7, 6, 7, 10, 9, 7, 8, 11, 10 ] ) )
 		self.assertEqual( m.bound(), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		
+
 		# corners still have correct uvs
 		e = MeshPrimitiveEvaluator( TriangulateOp()( input = m ) )
 		r = e.createResult()
@@ -306,7 +306,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertEqual( r.point(), V3f( 0, 1, 0 ) )
 
 	def testSphere( self ) :
-		
+
 		m = MeshPrimitive.createSphere( radius = 1, divisions = V2i( 30, 40 ) )
 		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
@@ -320,7 +320,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 				me.pointAtUV( V2f( s/100., t/100. ), mer )
 				se.pointAtUV( V2f( s/100., t/100. ), ser )
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
-		
+
 		# test divisions
 		m = MeshPrimitive.createSphere( radius = 1, divisions = V2i( 300, 300 ) )
 		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
@@ -333,7 +333,7 @@ class TestMeshPrimitive( unittest.TestCase ) :
 				se.pointAtUV( V2f( s/100., t/100. ), ser )
 				# more divisions means points are closer to ground truth
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-4 ) )
-		
+
 		# test radius
 		m = MeshPrimitive.createSphere( radius = 2, divisions = V2i( 30, 40 ) )
 		self.assertFalse( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
@@ -349,19 +349,19 @@ class TestMeshPrimitive( unittest.TestCase ) :
 				me.pointAtUV( V2f( s/100., t/100. ), mer )
 				se.pointAtUV( V2f( s/100., t/100. ), ser )
 				self.assertTrue( mer.point().equalWithAbsError( ser.point(), 1e-2 ) )
-		
+
 		# test zMin/zMax
 		m = MeshPrimitive.createSphere( radius = 1, zMin = -0.75, zMax = 0.75 )
 		self.assertTrue( Box3f( V3f( -1, -1, -0.75 ), V3f( 1, 1, 0.75 ) ).contains( m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
-		
+
 		# test thetaMax
 		m = MeshPrimitive.createSphere( radius = 1, thetaMax = 300 )
 		self.assertTrue( Box3f( V3f( -1 ), V3f( 1 ) ).contains( m.bound() ) )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 		m2 = MeshPrimitive.createSphere( radius = 1 )
 		self.assertTrue( m.numFaces() < m2.numFaces() )
-	
+
 	def testLegacyIndices( self ) :
 
 		# load a legacy file that contains myString and myStringIndices

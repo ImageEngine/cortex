@@ -52,12 +52,12 @@ static void convert( ToMayaImageConverter &c, MImage &i )
 
 void IECoreMaya::bindToMayaImageConverter()
 {
-	
+
 	IECorePython::RunTimeTypedClass<ToMayaImageConverter>()
 		.def( init<IECoreImage::ConstImagePrimitivePtr>() )
 		.def( "convert", &convert )
 	;
-	
+
 	IECorePython::PointerFromSWIG<MImage>();
 
 }

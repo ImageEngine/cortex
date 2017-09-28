@@ -46,35 +46,35 @@ namespace IECoreHoudini
 class OBJ_SceneCacheGeometry : public OBJ_SceneCacheNode<OBJ_Geometry>
 {
 	public :
-		
+
 		OBJ_SceneCacheGeometry( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~OBJ_SceneCacheGeometry();
-		
+
 		static const char *typeName;
-		
+
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-		
+
 		virtual bool runCreateScript();
-		
+
 		/// Implemented to expand the SceneCache using a SOP_SceneCacheSource. Derived classes
 		/// should re-implement doExpandGeometry() if specialized behaviour is necessary.
 		/// \todo: do we need this extra abstraction?
 		virtual void expandHierarchy( const IECore::SceneInterface *scene );
 		/// Implemented to push the GeometryType and attribute filter values to the sop below.
 		virtual void pushToHierarchy();
-	
+
 	protected :
-		
+
 		/// Called by expandHierarchy() to load the SceneCache. The Space parameter will
 		/// determine what settings are used. World and Path will load all descedants,
 		/// while Local and Object will load the immediate child object only.
 		virtual void doExpandGeometry( const IECore::SceneInterface *scene );
-		
+
 		virtual int *getIndirect() const;
-	
+
 	private :
-		
+
 		static int *g_indirection;
 
 };

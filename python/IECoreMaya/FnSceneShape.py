@@ -60,15 +60,15 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 	## Creates a new node under a transform of the specified name. Returns a function set instance operating on this new node.
 	@staticmethod
 	def create( parentName, transformParent = None ) :
-		
+
 		try:
 			parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True, parent = transformParent )
 		except:
 			# The parent name is supposed to be the children names in a sceneInterface, they could be numbers, maya doesn't like that. Use a prefix.
 			parentNode = maya.cmds.createNode( "transform", name="sceneShape_"+parentName, skipSelect=True, parent = transformParent )
-				
+
 		return FnSceneShape.createShape( parentNode )
-	
+
 	## Create a scene shape under the given node. Returns a function set instance operating on this shape.
 	@staticmethod
 	def createShape( parentNode ) :
@@ -80,23 +80,23 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			shapeName = parentShort[:-len(numbers)] + "SceneShape" + numbers
 		else :
 			shapeName = parentShort + "SceneShape"
-			
+
 		dagMod = maya.OpenMaya.MDagModifier()
 		shapeNode = dagMod.createNode( "ieSceneShape", IECoreMaya.StringUtil.dependencyNodeFromString( parentNode ) )
 		dagMod.renameNode( shapeNode, shapeName )
 		dagMod.doIt()
-		
+
 		fnScS = FnSceneShape( shapeNode )
-		
+
 		maya.cmds.sets( fnScS.fullPathName(), add="initialShadingGroup" )
-		
+
 		fnScS.findPlug( "objectOnly" ).setLocked( True )
-		
+
 		dgMod = maya.OpenMaya.MDGModifier()
 		outTime = IECoreMaya.StringUtil.plugFromString( "time1.outTime" )
 		dgMod.connect( outTime, fnScS.findPlug( "time" ) )
 		dgMod.doIt()
-		
+
 		return fnScS
 
 	## Returns a set of the names of any currently selected components.
@@ -106,7 +106,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		s = maya.OpenMaya.MSelectionList()
 		maya.OpenMaya.MGlobal.getActiveSelectionList( s )
-		
+
 		allComponents = self.componentNames()
 
 		fullPathName = self.fullPathName()
@@ -152,18 +152,18 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		maya.cmds.hilite( fullPathName )
 		if toSelect:
 			maya.cmds.select( toSelect, r=True )
-			
+
 	def sceneInterface( self ) :
 
 		return _IECoreMaya._sceneShapeSceneInterface( self )
-	
+
 	def componentNames( self ) :
 
 		return _IECoreMaya._sceneShapeComponentNames( self )
-	
+
 	## Returns True if the scene shape can be expanded.
 	# We assume that if the objectOnly flag is on, it means the scene shape has already been expanded so return False.
-	# Can only be expanded if the scene interface for the scene shape has children.	
+	# Can only be expanded if the scene interface for the scene shape has children.
 	def canBeExpanded( self ) :
 
 		# An already expanded scene should have objectOnly on
@@ -196,7 +196,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		index = max(validIndices) + 1 if validIndices else 0
 		queryPaths.elementByLogicalIndex( index ).setString( path )
 		return index
-	
+
 	## create the given child for the scene shape
 	# Returns a the function set for the child scene shape.
 	def __createChild( self, childName, sceneFile, sceneRoot, drawGeo = False, drawChildBounds = False, drawRootBound = True, drawTagsFilter = "", namespace = "" ) :
@@ -214,7 +214,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			childExists = True
 		except RuntimeError :
 			childExists = False
-		
+
 		if childExists :
 			shape = maya.cmds.listRelatives( childPath, f=True, type="ieSceneShape" )
 			if shape:
@@ -228,40 +228,40 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		sceneRootName = "/"+childName if sceneRoot == "/" else sceneRoot+"/"+childName
 		fnChild.findPlug( "root" ).setString( sceneRootName )
 		fnChildTransform = maya.OpenMaya.MFnDagNode( fnChild.parent( 0 ) )
-		
+
 		index = self.__queryIndexForPath( "/"+childName )
 		outTransform = self.findPlug( "outTransform" ).elementByLogicalIndex( index )
-		
+
 		dgMod = maya.OpenMaya.MDGModifier()
-		
+
 		childTranslate = fnChildTransform.findPlug( "translate" )
 		if childTranslate.isConnected() :
 			connections = maya.OpenMaya.MPlugArray()
 			childTranslate.connectedTo( connections, True, False )
 			dgMod.disconnect( connections[0], childTranslate )
 		dgMod.connect( outTransform.child( self.attribute( "outTranslate" ) ), childTranslate )
-		
+
 		childRotate = fnChildTransform.findPlug( "rotate" )
 		if childRotate.isConnected() :
 			connections = maya.OpenMaya.MPlugArray()
 			childRotate.connectedTo( connections, True, False )
 			dgMod.disconnect( connections[0], childRotate )
 		dgMod.connect( outTransform.child( self.attribute( "outRotate" ) ), childRotate )
-		
+
 		childScale = fnChildTransform.findPlug( "scale" )
 		if childScale.isConnected() :
 			connections = maya.OpenMaya.MPlugArray()
 			childScale.connectedTo( connections, True, False )
 			dgMod.disconnect( connections[0], childScale )
 		dgMod.connect( outTransform.child( self.attribute( "outScale" ) ), childScale )
-		
+
 		childTime = fnChild.findPlug( "time" )
 		if childTime.isConnected() :
 			connections = maya.OpenMaya.MPlugArray()
 			childTime.connectedTo( connections, True, False )
 			dgMod.disconnect( connections[0], childTime )
 		dgMod.connect( self.findPlug( "outTime" ), childTime )
-		
+
 		dgMod.doIt()
 
 		fnChild.findPlug( "drawGeometry" ).setBool( drawGeo )
@@ -277,7 +277,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 				fnChildTransform.findPlug( "visibility" ).setBool( False )
 			else:
 				fnChild.findPlug( "drawTagsFilter" ).setString( " ".join( commonTags ) )
-		
+
 		return fnChild
 
 	## create the given child for the scene shape
@@ -310,37 +310,37 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		scene = self.sceneInterface()
 		if not scene:
 			return []
-			
+
 		sceneChildren = sorted( scene.childNames() )
-		
+
 		if sceneChildren == []:
 			# No children to expand to
 			return []
 
 		sceneFile = self.findPlug( "file" ).asString()
 		sceneRoot = self.findPlug( "root" ).asString()
-		
+
 		# Set querySpace to world (which is world space starting from the root)
 		self.findPlug( "querySpace" ).setInt( 0 )
 		objectOnlyPlug = self.findPlug( "objectOnly" )
 		objectOnlyPlug.setLocked( False )
 		objectOnlyPlug.setBool( True )
 		objectOnlyPlug.setLocked( True )
-		
+
 		drawGeo = self.findPlug( "drawGeometry" ).asBool()
 		drawChildBounds = self.findPlug( "drawChildBounds" ).asBool()
 		drawRootBound = self.findPlug( "drawRootBound" ).asBool()
 		drawTagsFilter = self.findPlug( "drawTagsFilter" ).asString()
-		
+
 		newSceneShapeFns = []
 
 		for i, child in enumerate( sceneChildren ):
-			
+
 			fnChild = self.createChild( child, sceneFile, sceneRoot, drawGeo, drawChildBounds, drawRootBound, drawTagsFilter, preserveNamespace )
 			newSceneShapeFns.append( fnChild )
-			
+
 		return newSceneShapeFns
-		
+
 	## Recursively expands all levels starting from the scene shape.
 	# Returns a list of function sets for all the child scene shapes.
 	# If preserveNamespace is True, it creates transforms and shapes with the same namespace as the one this sceneShape node has.
@@ -349,7 +349,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 
 		newFn = []
 		def recursiveExpand( fnSceneShape ):
-			
+
 			if tagName and tagName not in fnSceneShape.sceneInterface().readTags( IECore.SceneInterface.DescendantTag ):
 				return
 
@@ -357,27 +357,27 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			newFn.extend( new )
 			for n in new:
 				recursiveExpand( n )
-			
+
 		recursiveExpand( self )
-		
+
 		return newFn
-	
+
 	## Collapses all children up to this scene shape.
 	def collapse( self ) :
 
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		allTransformChildren = maya.cmds.listRelatives( transform, f=True, type = "transform" ) or []
-		
+
 		for child in allTransformChildren:
 			# \todo check for connections and new parented nodes
 			maya.cmds.delete( child )
-		
+
 		maya.cmds.setAttr( node+".objectOnly", l=False )
 		maya.cmds.setAttr( node+".objectOnly", 0 )
 		maya.cmds.setAttr( node+".objectOnly", l=True )
 		maya.cmds.setAttr( node+".intermediateObject", 0 )
-	
+
 	## Returns tuple of maya type and input plug name that match the object in the scene interface, by checking the objectType tags.
 	# Returns (None, None) if no object in the scene interface or the object isn't compatible with maya geometry we can create.
 	def __mayaCompatibleShapeAndPlug( self ) :
@@ -393,7 +393,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 				result = ( "locator", "localPosition" )
 
 		return result
-	
+
 	## Recursively converts all objects in the scene interface to compatible maya geometry
 	# All scene shape nodes in the hierarchy are turned into an intermediate object.
 	def convertAllToGeometry( self, preserveNamespace=False ) :
@@ -401,13 +401,13 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		# Expand scene first, then for each scene shape we turn them into an intermediate object and connect a mesh
 		self.expandAll( preserveNamespace )
 		transform = maya.cmds.listRelatives( self.fullPathName(), parent=True, f=True )[0]
-		
+
 		allSceneShapes = maya.cmds.listRelatives( transform, ad=True, f=True, type="ieSceneShape" )
 
 		for sceneShape in allSceneShapes:
 			fn = FnSceneShape( sceneShape )
 			fn.findPlug( "querySpace" ).setInt( 1 )
-			
+
 			if fn.sceneInterface() and fn.sceneInterface().hasObject():
 				fn.convertObjectToGeometry()
 
@@ -455,7 +455,7 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			shapeNode = dagMod.createNode( shapeType, IECoreMaya.StringUtil.dependencyNodeFromString( transformNode ) )
 			dagMod.renameNode( shapeNode, shapeName )
 			dagMod.doIt()
-			
+
 			fnShape = maya.OpenMaya.MFnDagNode( shapeNode )
 
 			if shapeType == "mesh":
@@ -593,25 +593,25 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 		self.__connectShapes( transformNode )
 
 	def createLocatorAtTransform( self, path ) :
-		
+
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
 		locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + "Transform" )[0]
-		
+
 		index = self.__queryIndexForPath( path )
 		outTransform = node+".outTransform["+str(index)+"]"
 		maya.cmds.connectAttr( outTransform+".outTranslate", locator + ".translate" )
 		maya.cmds.connectAttr( outTransform+".outRotate", locator + ".rotate" )
 		maya.cmds.connectAttr( outTransform+".outScale", locator + ".scale" )
 		locator = transform + "|" + maya.cmds.parent( locator, transform, relative=True )[0]
-		
+
 		return locator
-	
+
 	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
-		
+
 		node = self.fullPathName()
 		transform = maya.cmds.listRelatives( node, parent=True, f=True )[0]
-		
+
 		locators = []
 		for childPlugSuffix in childPlugSuffixes :
 			index = self.__queryIndexForPath( path )
@@ -619,12 +619,12 @@ class FnSceneShape( maya.OpenMaya.MFnDagNode ) :
 			locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + childPlugSuffix )[0]
 			maya.cmds.connectAttr( outBound + ".outBound" + childPlugSuffix, locator + ".translate" )
 			locators.append( transform + "|" + maya.cmds.parent( locator, transform, relative=True )[0] )
-		
+
 		return locators
-			
+
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):
-		
+
 		return "ieSceneShape"
 

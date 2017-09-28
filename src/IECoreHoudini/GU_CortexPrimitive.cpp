@@ -152,20 +152,20 @@ int GU_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d, 
 GU_RayIntersect *GU_CortexPrimitive::createRayCache( int &persistent )
 {
 	GU_Detail *gdp = (GU_Detail *)getParent();
-	
+
 	persistent = 0;
 	if ( gdp->cacheable() )
 	{
 		buildRayCache();
 	}
-	
+
 	GU_RayIntersect	*intersect = getRayCache();
 	if ( !intersect )
 	{
 		intersect = new GU_RayIntersect( gdp, this );
 		persistent = 1;
 	}
-	
+
 	return intersect;
 }
 

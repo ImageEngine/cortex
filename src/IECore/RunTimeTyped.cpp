@@ -116,7 +116,7 @@ bool RunTimeTyped::inheritsFrom( const char *typeName, const char *baseTypeName 
 {
 	return inheritsFrom( typeIdFromTypeName( typeName ), typeIdFromTypeName( baseTypeName ) );
 }
-		
+
 void RunTimeTyped::registerType( TypeId derivedTypeId, const char *derivedTypeName, TypeId baseTypeId )
 {
 	assert( derivedTypeName );
@@ -223,9 +223,9 @@ const std::vector<TypeId> &RunTimeTyped::baseTypeIds( TypeId typeId )
 	{
 		return it->second;
 	}
-	
+
 	lock.upgrade_to_writer();
-	
+
 	baseTypes.insert( BaseTypesRegistryMap::value_type( typeId, std::vector<TypeId>() ) );
 	it = baseTypes.find( typeId );
 	assert( it != baseTypes.end() );
@@ -247,7 +247,7 @@ const std::set<TypeId> &RunTimeTyped::derivedTypeIds( TypeId typeId )
 	DerivedTypesRegistryMap::iterator it = derivedTypes.find( typeId );
 
 	if ( it == derivedTypes.end() )
-	{	
+	{
 		lock.upgrade_to_writer();
 		derivedTypes.insert( DerivedTypesRegistryMap::value_type( typeId, std::set<TypeId>() ) );
 		it = derivedTypes.find( typeId );

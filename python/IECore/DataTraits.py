@@ -219,7 +219,7 @@ __dataTypesConversionDict = {
 	IECore.TimePeriodData: ( IECore.TimePeriod, True ),
 
 	IECore.SmoothSkinningData: None,
-	
+
 	IECore.TimeCodeData: ( IECore.TimeCode, True ),
 }
 

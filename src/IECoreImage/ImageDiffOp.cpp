@@ -98,7 +98,7 @@ ImageDiffOp::ImageDiffOp()
 	        "If true then channels present in one image but missing in the other are ignored. If false, then missing channels mean the images are different.",
 	        false
 	);
-	
+
 	m_alignDisplayWindowsParameter = new BoolParameter(
 	        "alignDisplayWindows",
 	        "If true then display windows that are offset from the origin are moved to the origin before being compared.",
@@ -209,7 +209,7 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 	}
 
 	const bool alignDisplayWindows = m_alignDisplayWindowsParameter->getTypedValue();
-	
+
 	if( alignDisplayWindows )
 	{
 		/// Fail if the display windows are of a different width or height.

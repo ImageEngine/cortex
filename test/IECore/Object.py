@@ -151,7 +151,7 @@ class TestObject( unittest.TestCase ) :
 				o = Object.create( tId )
 				oo = o.copy()
 				self.assertEqual( o, oo )
-	
+
 	def testCopyFrom( self ) :
 
 		i = IntData( 1 )
@@ -159,11 +159,11 @@ class TestObject( unittest.TestCase ) :
 		self.assertNotEqual( i, ii )
 		ii.copyFrom( i )
 		self.assertEqual( i, ii )
-		
+
 		f = FloatData( 1 )
 		self.assertNotEqual( i, f )
 		self.assertRaises( RuntimeError, curry( ii.copyFrom, f ) )
-		
+
 		vertsPerFace = IntVectorData( [ 3, 3 ] )
 		vertexIds = IntVectorData( [ 0, 1, 2, 1, 2, 3 ] )
 		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
@@ -171,10 +171,10 @@ class TestObject( unittest.TestCase ) :
 		self.assertNotEqual( m, mm )
 		mm.copyFrom( m )
 		self.assertEqual( m, mm )
-		
+
 		p = PointsPrimitive( 3 )
 		self.assertRaises( RuntimeError, curry( p.copyFrom, m ) )
-		
+
 		b = BlindDataHolder()
 		b.blindData()["floatData"] = FloatData( 1.0 )
 		b.blindData()["intData"] = IntData( -5 )
@@ -182,14 +182,14 @@ class TestObject( unittest.TestCase ) :
 		self.assertNotEqual( b, bb )
 		bb.copyFrom( b )
 		self.assertEqual( b, bb )
-		
+
 		m.blindData()["floatData"] = FloatData( 3.0 )
 		b.copyFrom( m )
 		self.assertNotEqual( b, bb )
 		self.assertEqual( b.blindData(), m.blindData() )
-		
+
 	def testHash( self ) :
-	
+
 		allHashes = set()
 		objectsCreated = 0
 		for t in TypeId.names :
@@ -202,8 +202,8 @@ class TestObject( unittest.TestCase ) :
 				h = MurmurHash()
 				o.hash( h )
 				self.assertEqual( h, o.hash() )
-				
+
 		self.assertEqual( len( allHashes ), objectsCreated )
-				
+
 if __name__ == "__main__":
     unittest.main()

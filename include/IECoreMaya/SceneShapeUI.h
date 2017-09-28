@@ -72,9 +72,9 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		#endif
 
 		static void *creator();
-	
+
 	private :
-		
+
 		typedef std::map< IECoreGL::GroupPtr, IECoreGL::StatePtr > StateMap;
 
 		void hiliteGroups( IECoreGL::GroupPtr group, IECoreGL::StateComponentPtr hilite, IECoreGL::StateComponentPtr base ) const;
@@ -89,7 +89,7 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
-		
+
 		enum DrawMode
 		{
 			SceneDrawMode,
@@ -97,7 +97,7 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		};
 
 		static void setWireFrameColors( MDrawRequest &request, M3dView::DisplayStatus status );
-		
+
 		struct LightingState {
 			unsigned int numMayaLights;
 			unsigned int numGlLights;
@@ -105,9 +105,9 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 			std::vector<Imath::Color4f> specs;
 			std::vector<Imath::Color4f> ambients;
 		};
-		
+
 		bool cleanupLights( const MDrawRequest &request, M3dView &view, LightingState *s ) const;
-		void restoreLights( LightingState *s ) const;	
+		void restoreLights( LightingState *s ) const;
 };
 
 } // namespace IECoreMaya

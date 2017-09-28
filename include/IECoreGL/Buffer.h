@@ -61,35 +61,35 @@ class IECOREGL_API Buffer : public IECore::RunTimeTyped
 		Buffer( const void *data, size_t sizeInBytes, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW );
 		/// Deletes the buffer with glDeleteBuffers().
 		virtual ~Buffer();
-		
+
 		/// Returns the size of the buffer in bytes.
 		size_t size() const;
-		
+
 		/// The ScopedBinding class allows the buffer to be bound to a target
 		/// for a specific duration, without worrying about remembering to
 		/// unbind it.
 		class ScopedBinding
 		{
-			
+
 			public :
-			
+
 				/// Binds the specified buffer to the specified target.
 				ScopedBinding( const Buffer &buffer, GLenum target = GL_ARRAY_BUFFER  );
 				/// Rebinds the previously bound buffer.
 				~ScopedBinding();
-				
+
 			private :
-			
+
 				GLenum m_target;
 				GLuint m_buffer;
 				GLint m_prevBuffer;
-			
+
 		};
-	
+
 	private :
-	
+
 		GLuint m_buffer;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Buffer );

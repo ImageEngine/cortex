@@ -97,7 +97,7 @@ class IECORE_API CameraController : public boost::noncopyable
 		void unproject( const Imath::V2f rasterPosition, Imath::V3f &near, Imath::V3f &far );
 		/// Projects the point in world space into a raster space position.
 		Imath::V2f project( const Imath::V3f &worldPosition ) const;
-		
+
 		//! @name Motion
 		/// These functions facilitate the implementation of maya style
 		/// camera movement controls within a UI. All coordinates passed

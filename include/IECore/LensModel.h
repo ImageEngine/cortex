@@ -85,7 +85,7 @@ class IECORE_API LensModel : public Parameterised
 		typedef LensModelPtr (*CreatorFn)( ConstCompoundObjectPtr data );
 
 		IE_CORE_DECLARERUNTIMETYPED( LensModel, Parameterised );
-		
+
 		/// Calculates the distorted/undistorted data window of an image.
 		/// The distorted bounding box is calculated by finding the smallest box that contains a set of
 		/// distort points which were taken from the border of the undistorted bounding box.
@@ -122,7 +122,7 @@ class IECORE_API LensModel : public Parameterised
 		/// @param lensParams Must contain a string object called "lensModel" that contains the name of
 		/// the registered lens model to instantiate.
 		static LensModelPtr create( ConstCompoundObjectPtr lensParams );
-		
+
 		/// Instantiates a new LensModel object from just the lens model's typeName.
 		/// @param name The typeName() of the registered lens model.
 		static LensModelPtr create( const std::string &name );
@@ -147,12 +147,12 @@ class IECORE_API LensModel : public Parameterised
 		/// to their creator functions. This allows the LensModel::create()
 		/// methods to return instantiations of the LensModel.
 		/// The best way to ensure that your lens model is registered is to create a
-		/// static instantiation of LensModelRegistration within YourLensModelClass. 
+		/// static instantiation of LensModelRegistration within YourLensModelClass.
 		template<class T>
 		struct LensModelRegistration
 		{
 			public:
-				/// Registers the lens model 
+				/// Registers the lens model
 				LensModelRegistration();
 
 			private:
@@ -163,8 +163,8 @@ class IECORE_API LensModel : public Parameterised
 	private:
 
 		typedef std::map< std::string, CreatorFn > CreatorMap;
-		
-		/// Registration mechanism for Lens Model classes. 
+
+		/// Registration mechanism for Lens Model classes.
 		static CreatorMap& creators();
 
 };

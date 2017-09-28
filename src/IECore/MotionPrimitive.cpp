@@ -193,7 +193,7 @@ void MotionPrimitive::load( IECore::Object::LoadContextPtr context )
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
 		ConstIndexedIOPtr snapshot = snapshots->subdirectory( *it );
-		float t; 
+		float t;
 		snapshot->read( g_timeEntry, t );
 		m_snapshots[t] = context->load<Primitive>( snapshot.get(), g_primitiveEntry );
 	}
@@ -243,6 +243,6 @@ void MotionPrimitive::hash( MurmurHash &h ) const
 	for( SnapshotMap::const_iterator it=m_snapshots.begin(); it!=m_snapshots.end(); it++ )
 	{
 		h.append( it->first );
-		it->second->hash( h );	
+		it->second->hash( h );
 	}
 }

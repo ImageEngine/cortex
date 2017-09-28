@@ -85,7 +85,7 @@ MStatus GeometryCombiner::initialize()
 
 	aBlindDataAttrPrefix = tAttr.create( "blindDataAttrPrefix", "bda", MFnData::kString, MFnStringData().create( "" ) );
 	addAttribute( aBlindDataAttrPrefix );
-	
+
 	aConvertBlindData = fnNAttr.create( "convertBlindData", "cbd", MFnNumericData::kBoolean, 0.0f );
 	addAttribute( aConvertBlindData );
 
@@ -93,9 +93,9 @@ MStatus GeometryCombiner::initialize()
     fnEAttr.addField( "World", FromMayaShapeConverter::World );
     fnEAttr.addField( "Object", FromMayaShapeConverter::Object );
 	addAttribute( aConversionSpace );
-	
+
 	MFnGenericAttribute fnGAttr;
-	
+
 	aInputGeometry = fnGAttr.create( "inputGeometry", "ig" );
 	fnGAttr.addDataAccept( MFnData::kMesh );
 	fnGAttr.addDataAccept( MFnData::kNurbsCurve );
@@ -109,7 +109,7 @@ MStatus GeometryCombiner::initialize()
 	addAttribute( aInputGeometry );
 
 	MFnTypedAttribute fnTAttr;
-	
+
 	aOutputGroup = fnTAttr.create( "outputGroup", "og", ObjectData::id );
 	fnTAttr.setReadable( true );
 	fnTAttr.setWritable( false );
@@ -117,13 +117,13 @@ MStatus GeometryCombiner::initialize()
 	fnTAttr.setConnectable( true );
 	fnTAttr.setHidden( false );
 	addAttribute( aOutputGroup );
-	
+
 	attributeAffects( aConvertPrimVars, aOutputGroup );
 	attributeAffects( aBlindDataAttrPrefix, aOutputGroup );
 	attributeAffects( aConvertBlindData, aOutputGroup );
 	attributeAffects( aConversionSpace, aOutputGroup );
 	attributeAffects( aInputGeometry, aOutputGroup );
-	
+
 	return MS::kSuccess;
 }
 
@@ -132,14 +132,14 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 	if( plug==aOutputGroup )
 	{
-	
+
 		bool convertPrimVars = dataBlock.inputValue( aConvertPrimVars ).asBool();
 		MString blindDataAttrPrefix = dataBlock.inputValue( aBlindDataAttrPrefix ).asString();
 		bool convertBlindData = dataBlock.inputValue( aConvertBlindData ).asBool();
 		FromMayaShapeConverter::Space conversionSpace = (FromMayaShapeConverter::Space)dataBlock.inputValue( aConversionSpace ).asInt();
-	
+
 		IECore::GroupPtr group = new IECore::Group;
-			
+
 		MArrayDataHandle arrayHandle = dataBlock.inputArrayValue( aInputGeometry );
 
 		unsigned numInputs = arrayHandle.elementCount();
@@ -148,7 +148,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			// whether we go the cheating route below (where we access our input nodes) or not, it's
 			// essential that we pull on our input plugs.
 			MObject input = arrayHandle.inputValue().data();
-			
+
 			FromMayaShapeConverterPtr converter = 0;
 			if( !convertPrimVars && !convertBlindData )
 			{
@@ -167,11 +167,11 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 				{
 					MDagPath path;
 					MDagPath::getAPathTo( inputConnections[0].node(), path );
-					converter = FromMayaShapeConverter::create( path );					
+					converter = FromMayaShapeConverter::create( path );
 				}
-			
+
 			}
-			
+
 			if( converter )
 			{
 				converter->spaceParameter()->setNumericValue( conversionSpace );
@@ -195,19 +195,19 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 				{
 					group->addChild( cortexGeometry );
 				}
-			}			
+			}
 		}
-		
+
 		MFnPluginData fnD;
 		MObject data = fnD.create( IECoreMaya::ObjectData::id );
 		IECoreMaya::ObjectData *objectData = dynamic_cast<IECoreMaya::ObjectData *>( fnD.data() );
 		objectData->setObject( group );
-		
+
 		dataBlock.outputValue( aOutputGroup ).set( objectData );
 		dataBlock.setClean( aOutputGroup );
 
 		return MS::kSuccess;
-	
+
 	}
 
 	return MS::kUnknownParameter;

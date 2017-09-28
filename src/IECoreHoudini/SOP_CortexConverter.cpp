@@ -122,16 +122,16 @@ OP_ERROR SOP_CortexConverter::cookMySop( OP_Context &context )
 	{
 		return error();
 	}
-	
+
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building CortexConverter Geometry...");
 	gdp->clearAndDestroy();
-	
+
 	UT_String nameFilterStr;
 	evalString( nameFilterStr, pNameFilter.getToken(), 0, 0 );
 	UT_StringMMPattern nameFilter;
 	nameFilter.compile( nameFilterStr );
-	
+
 	UT_String p( "P" );
 	UT_String attributeFilter;
 	evalString( attributeFilter, pAttributeFilter.getToken(), 0, 0 );
@@ -140,17 +140,17 @@ OP_ERROR SOP_CortexConverter::cookMySop( OP_Context &context )
 		attributeFilter += " P";
 	}
 	const std::string attributeFilterStr = attributeFilter.toStdString();
-	
+
 	ResultType type = (ResultType)this->evalInt( pResultType.getToken(), 0, 0 );
 	bool convertStandardAttributes = evalInt( pConvertStandardAttributes.getToken(), 0, 0 );
-	
+
 	DetailSplitterPtr splitter = new DetailSplitter( inputGeoHandle( 0 ) );
 	std::vector<std::string> names;
 	splitter->values( names );
 	for ( std::vector<std::string>::const_iterator it = names.begin(); it != names.end(); ++it )
 	{
 		const std::string &name = *it;
-		
+
 		// we want match all to also match no-name
 		if ( UT_String( name ).multiMatch( nameFilter ) || ( name == "" && UT_String( "*" ).multiMatch( nameFilter ) ) )
 		{
@@ -161,7 +161,7 @@ OP_ERROR SOP_CortexConverter::cookMySop( OP_Context &context )
 			doPassThrough( splitter->split( name ), name );
 		}
 	}
-	
+
 	boss->opEnd();
 	unlockInputs();
 	return error();
@@ -174,21 +174,21 @@ void SOP_CortexConverter::doConvert( const GU_DetailHandle &handle, const std::s
 		addError( SOP_MESSAGE, ( "Could not extract the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	FromHoudiniGeometryConverterPtr fromConverter = FromHoudiniGeometryConverter::create( handle );
 	if ( !fromConverter )
 	{
 		addError( SOP_MESSAGE, ( "Could not convert the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	IECore::ObjectPtr result = fromConverter->convert();
 	if ( !result )
 	{
 		addError( SOP_MESSAGE, ( "Could not find Cortex Object named " + name + " on input geometry" ).c_str() );
 		return;
 	}
-	
+
 	if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result.get() ) )
 	{
 		IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
@@ -204,15 +204,15 @@ void SOP_CortexConverter::doConvert( const GU_DetailHandle &handle, const std::s
 				procedural->render( renderer.get() );
 			}
 		}
-		
+
 		result = boost::const_pointer_cast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 	}
-	
+
 	ToHoudiniGeometryConverterPtr converter = ( type == Cortex ) ? new ToHoudiniCortexObjectConverter( result.get() ) : ToHoudiniGeometryConverter::create( result.get() );
 	converter->nameParameter()->setTypedValue( name );
 	converter->attributeFilterParameter()->setTypedValue( attributeFilter );
 	converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );
-	
+
 	if ( !converter->convert( myGdpHandle ) )
 	{
 		addError( SOP_MESSAGE, ( "Could not convert the Cortex Object named " + name + " to Houdini geometry" ).c_str() );
@@ -226,7 +226,7 @@ void SOP_CortexConverter::doPassThrough( const GU_DetailHandle &handle, const st
 		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	GU_DetailHandleAutoReadLock readHandle( handle );
 	const GU_Detail *inputGeo = readHandle.getGdp();
 	if ( !inputGeo )
@@ -234,21 +234,21 @@ void SOP_CortexConverter::doPassThrough( const GU_DetailHandle &handle, const st
 		addError( SOP_MESSAGE, ( "Could not pass through the geometry named " + name ).c_str() );
 		return;
 	}
-	
+
 	gdp->merge( *inputGeo );
 }
 
 void SOP_CortexConverter::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
 {
 	SOP_Node::getNodeSpecificInfoText( context, parms );
-	
+
 	GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
-	
+
 	if ( !evalInt( pConvertStandardAttributes.getToken(), 0, 0 ) )
 	{
 		return;
 	}
-	
+
 	UT_String p( "P" );
 	UT_String filter;
 	evalString( filter, pAttributeFilter.getToken(), 0, 0 );
@@ -258,29 +258,29 @@ void SOP_CortexConverter::getNodeSpecificInfoText( OP_Context &context, OP_NodeI
 	}
 	UT_StringMMPattern attributeFilter;
 	attributeFilter.compile( filter );
-	
+
 	/// \todo: this text could come from a static method on a class that manages these name relations (once that exists)
 	parms.append( "Converting standard Cortex PrimitiveVariables:\n" );
 	if ( UT_String( "s" ).multiMatch( attributeFilter ) && UT_String( "t" ).multiMatch( attributeFilter ) )
 	{
 		parms.append( "  s,t <--> uv\n" );
 	}
-	
+
 	if ( UT_String( "Cs" ).multiMatch( attributeFilter ) )
 	{
 		parms.append( "  Cs <--> Cd\n" );
 	}
-	
+
 	if ( UT_String( "Pref" ).multiMatch( attributeFilter ) )
 	{
 		parms.append( "  Pref <--> rest\n" );
 	}
-	
+
 	if ( UT_String( "width" ).multiMatch( attributeFilter ) )
 	{
 		parms.append( "  width <--> pscale\n" );
 	}
-	
+
 	if ( UT_String( "Os" ).multiMatch( attributeFilter ) )
 	{
 		parms.append( "  Os <--> Alpha\n" );

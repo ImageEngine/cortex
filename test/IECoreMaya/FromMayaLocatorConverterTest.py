@@ -49,21 +49,21 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.setAttr( locatorTransform + ".translate", 1,2,3 )
 		maya.cmds.setAttr( locatorShape + ".localPosition", 10,20,30 )
 		maya.cmds.setAttr( locatorShape + ".localScale", 1,2,3 )
-		
+
 	def testFactory( self ) :
-	
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.CoordinateSystem.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.Renderable.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaLocatorConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator", IECore.Writer.staticTypeId() )
 		self.assertEqual( converter, None )
-		
+
 	def test( self ) :
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "myLocator" )
@@ -79,12 +79,12 @@ class FromMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( t, IECore.V3f(10,20,30) )
 		self.assertEqual( r, IECore.V3f(0,0,0) )
 		self.assertEqual( h, IECore.V3f(0,0,0) )
-		
+
 	def testConstructor( self ) :
-	
+
 		converter = IECoreMaya.FromMayaLocatorConverter( "myLocator" )
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECore.CoordinateSystem.staticTypeId() ) )	
-		
+		self.assert_( camera.isInstanceOf( IECore.CoordinateSystem.staticTypeId() ) )
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram()

@@ -55,12 +55,12 @@ class ToMayaCurveConverter : public ToMayaObjectConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaCurveConverter, ToMayaCurveConverterTypeId, ToMayaObjectConverter );
 
 		ToMayaCurveConverter( IECore::ConstObjectPtr object );
-		
+
 		IECore::IntParameterPtr indexParameter();
 		IECore::ConstIntParameterPtr indexParameter() const;
-		
+
 	protected:
-		
+
 		/// Converts one of the curves in srcParameter() to a maya curve. The curve it converts
 		/// is specified by indexParameter() (named "index")
 		virtual bool doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const;
@@ -68,9 +68,9 @@ class ToMayaCurveConverter : public ToMayaObjectConverter
 		typedef ToMayaObjectConverterDescription<ToMayaCurveConverter> Description;
 		static Description g_curvesDataDescription;
 		static Description g_curvesDescription;
-	
+
 	private:
-		
+
 		IECore::IntParameterPtr m_indexParameter;
 };
 

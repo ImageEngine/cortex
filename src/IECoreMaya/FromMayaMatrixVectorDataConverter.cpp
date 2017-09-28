@@ -65,11 +65,11 @@ IECore::ObjectPtr FromMayaMatrixVectorDataConverter<T>::doConversion( const MObj
 	{
 		return 0;
 	}
-	
+
 	MDoubleArray array = fnArrayData.array();
 	typename T::Ptr resultData = new T;
 	typename T::ValueType &resultArray = resultData->writable();
-	
+
 	resultArray.resize( array.length() / 16 );
 	for ( unsigned int i=0; i<resultArray.size(); i++ )
 	{

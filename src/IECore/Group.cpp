@@ -146,12 +146,12 @@ const Data *Group::getAttribute( const std::string &name ) const
 			}
 		}
 	}
-	
+
 	if( m_parent )
 	{
 		return m_parent->getAttribute( name );
 	}
-	
+
 	return 0;
 }
 
@@ -173,13 +173,13 @@ void Group::setAttribute( const std::string &name, ConstDataPtr value )
 			}
 		}
 	}
-	
+
 	if( !attrFound )
 	{
 		attrFound = new AttributeState;
 		addState( attrFound );
 	}
-	
+
 	attrFound->attributes()[ name ] = value->copy();
 }
 
@@ -189,7 +189,7 @@ void Group::addChild( VisibleRenderablePtr child )
 	{
 		throw InvalidArgumentException( "Cannot add null child object." );
 	}
-	
+
 	GroupPtr gChild = runTimeCast<Group>( child );
 	if( gChild )
 	{
@@ -298,7 +298,7 @@ bool Group::entryListCompare( const IndexedIO::EntryID& a, const IndexedIO::Entr
 {
 	int a_idx( 0 );
 	int b_idx( 0 );
-	
+
 	try
 	{
 		a_idx = boost::lexical_cast<int>( a.value() );
@@ -313,7 +313,7 @@ bool Group::entryListCompare( const IndexedIO::EntryID& a, const IndexedIO::Entr
 	catch (...)
 	{
 	}
-	
+
 	return a_idx < b_idx;
 }
 
@@ -332,7 +332,7 @@ void Group::load( LoadContextPtr context )
 	{
 	}
 	clearState();
-	
+
 	ConstIndexedIOPtr stateContainer = container->subdirectory( g_stateEntry );
 	IndexedIO::EntryIDList l;
 	stateContainer->entryIds( l );
@@ -424,7 +424,7 @@ void Group::hash( MurmurHash &h ) const
 	{
 		m_transform->hash( h );
 	}
-	
+
 	for( StateContainer::const_iterator it=state().begin(); it!=state().end(); it++ )
 	{
 		(*it)->hash( h );
@@ -433,7 +433,7 @@ void Group::hash( MurmurHash &h ) const
 	for( ChildContainer::const_iterator it=children().begin(); it!=children().end(); it++ )
 	{
 		(*it)->hash( h );
-	}	
+	}
 }
 
 void Group::render( Renderer *renderer ) const
@@ -470,7 +470,7 @@ void Group::renderChildren( Renderer *renderer ) const
 		(*it)->render( renderer );
 	}
 }
-	
+
 Imath::Box3f Group::bound() const
 {
 	Box3f result;

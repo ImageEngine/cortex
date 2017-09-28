@@ -78,13 +78,13 @@ class FromMayaDagNodeConverter : public FromMayaObjectConverter
 		class Description
 		{
 			public :
-			
+
 				/// use this constructor to register a converter for a native maya node:
 				Description( MFn::Type fromType, IECore::TypeId resultType, bool defaultConversion );
-				
+
 				/// use this constructor to register a converter for a plugin maya node:
 				Description( MTypeId fromType, IECore::TypeId resultType, bool defaultConversion );
-				
+
 			private :
 				static FromMayaDagNodeConverterPtr creator( const MDagPath &dagPath );
 		};

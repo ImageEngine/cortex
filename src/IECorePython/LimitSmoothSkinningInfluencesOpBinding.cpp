@@ -50,9 +50,9 @@ void bindLimitSmoothSkinningInfluencesOp()
 	object o = RunTimeTypedClass<LimitSmoothSkinningInfluencesOp>()
 		.def( init<>() )
 	;
-	
+
 	scope s( o );
-	
+
 	enum_< LimitSmoothSkinningInfluencesOp::Mode >( "Mode" )
 		.value( "WeightLimit", LimitSmoothSkinningInfluencesOp::WeightLimit )
 		.value( "MaxInfluences", LimitSmoothSkinningInfluencesOp::MaxInfluences )

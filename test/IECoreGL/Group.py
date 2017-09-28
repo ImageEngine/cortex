@@ -50,23 +50,23 @@ class TestGroup( unittest.TestCase ) :
 		self.assertEqual( g.getTransform(), M44f.createScaled( V3f( 3 ) ) )
 
 		self.assertEqual( g.children(), [] )
-		
+
 		g2 = Group()
-		
+
 		g.addChild( g2 )
 		self.assertEqual( len( g.children() ), 1 )
 		self.failUnless( g.children()[0].isSame( g2 ) )
-		
+
 		g.removeChild( g2 )
 		self.assertEqual( g.children(), [] )
 
 		g.addChild( g2 )
 		self.assertEqual( len( g.children() ), 1 )
 		self.failUnless( g.children()[0].isSame( g2 ) )
-		
+
 		g.clearChildren()
 		self.assertEqual( g.children(), [] )
 
-		
+
 if __name__ == "__main__":
     unittest.main()

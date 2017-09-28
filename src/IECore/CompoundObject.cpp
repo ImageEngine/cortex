@@ -150,7 +150,7 @@ bool CompoundObject::isEqualTo( const Object *other ) const
 void CompoundObject::memoryUsage( Object::MemoryAccumulator &a ) const
 {
 	Object::memoryUsage( a );
-	a.accumulate( m_members.size() * sizeof( ObjectMap::value_type ) );	
+	a.accumulate( m_members.size() * sizeof( ObjectMap::value_type ) );
 	for( ObjectMap::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
 	{
 		if ( it->second )
@@ -168,12 +168,12 @@ static inline bool comp( CompoundObject::ObjectMap::const_iterator a, CompoundOb
 void CompoundObject::hash( MurmurHash &h ) const
 {
 	Object::hash( h );
-	
+
 	// the ObjectMap is sorted by InternedString::operator <,
 	// which just compares addresses of the underlying interned object.
 	// this isn't stable between multiple processes.
 	std::vector<ObjectMap::const_iterator> iterators;
-	iterators.reserve( m_members.size() );	
+	iterators.reserve( m_members.size() );
 	for( ObjectMap::const_iterator it=m_members.begin(); it!=m_members.end(); it++ )
 	{
 		iterators.push_back( it );
@@ -182,7 +182,7 @@ void CompoundObject::hash( MurmurHash &h ) const
 	// so we have to sort again based on the string values
 	// themselves.
 	sort( iterators.begin(), iterators.end(), comp );
-	
+
 	// and then hash everything in the stable order.
 	std::vector<ObjectMap::const_iterator>::const_iterator it;
 	for( it=iterators.begin(); it!=iterators.end(); it++ )

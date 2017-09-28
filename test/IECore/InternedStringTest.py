@@ -62,7 +62,7 @@ class InternedStringTest( unittest.TestCase ) :
 		self.assertEqual( InternedString.numUniqueStrings(), originalSize + 2 )
 
 	def testDefaultConstructor( self ) :
-	
+
 		self.assertEqual( InternedString(), InternedString( "" ) )
 
 	def testNumberConstructor( self ) :
@@ -78,7 +78,7 @@ class InternedStringTest( unittest.TestCase ) :
 
 		# create a list of unique interned strings
 		strings = makeStrings( xrange(0,30000) )
-		
+
 		# make sure the hash creates unique ids
 		uniqueStringsSet = set(strings)
 		self.assertEqual( len(strings), len(uniqueStringsSet) )

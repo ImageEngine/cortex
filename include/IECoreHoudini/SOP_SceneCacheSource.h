@@ -53,27 +53,27 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 
 		SOP_SceneCacheSource( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SOP_SceneCacheSource();
-		
+
 		static const char *typeName;
-		
+
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-		
+
 		static PRM_Name pObjectOnly;
-		
+
 		bool getObjectOnly() const;
 		void setObjectOnly( bool objectOnly );
-		
+
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
-	
+
 	protected :
-	
+
 		virtual OP_ERROR cookMySop( OP_Context &context );
-		
+
 		virtual void sceneChanged();
-	
+
 	private :
-		
+
 		struct Parameters
 		{
 			GeometryType geometryType;
@@ -88,7 +88,7 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 			std::vector<IECore::InternedString> animatedPrimVars;
 			std::map<std::string, GA_Range> namedRanges;
 		};
-		
+
 		// Modify the object according the parameters, copying if neccessary.
 		IECore::ConstObjectPtr modifyObject( const IECore::Object *object, Parameters &params );
 		// Transform the object, copying if neccessary. Transforms Primitives (using IECore::TransformOp),
@@ -96,21 +96,21 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
 		bool convertObject( const IECore::Object *object, const std::string &name, const IECore::SceneInterface *scene, Parameters &params );
-		
+
 		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath );
 		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
 		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
-		
+
 		struct InternedStringSort
 		{
 			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
 		};
-		
+
 		/// Utility for detecting geometric primitive variables that need transforming
 		struct TransformGeometricData
 		{
 			typedef bool ReturnType;
-			
+
 			template<typename T>
 			ReturnType operator()( const T *data ) const;
 		};

@@ -71,22 +71,22 @@ ToGLTextureConverter::~ToGLTextureConverter()
 
 IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	
+
 	TexturePtr t = 0;
 	IECoreImage::ImagePrimitive::ConstPtr image;
-	
+
 	image = IECore::runTimeCast<const IECoreImage::ImagePrimitive>( src );
-	
+
 	if ( ! image )
 	{
-	
+
 		IECore::CompoundData::ConstPtr data = IECore::runTimeCast<const IECore::CompoundData>( src );
 		if ( !data ) {
 			throw IECore::Exception( "Invalid object supplied. ToGLTextureConverter takes an ImagePrimitive or its CompoundData representation." );
 		}
 
 		image = imageFromCompoundData( data );
-	
+
 	}
 
 	bool r = image->channelValid( "R" );
@@ -98,7 +98,7 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 	{
 		t = new ColorTexture( image.get() );
 	}
-	else if ( y && !r && !g && !b ) 
+	else if ( y && !r && !g && !b )
 	{
 		t = new LuminanceTexture( image.get() );
 	}

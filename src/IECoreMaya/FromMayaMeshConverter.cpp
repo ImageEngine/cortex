@@ -175,7 +175,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::points() const
 	points->setInterpretation( GeometricData::Point );
 	int numVerts = fnMesh.numVertices();
 	points->writable().resize( numVerts );
-	
+
 	if( space() == MSpace::kObject )
 	{
 		const V3f* rawPoints = ( const V3f* )fnMesh.getRawPoints(0);
@@ -208,10 +208,10 @@ IECore::PrimitiveVariable FromMayaMeshConverter::normals() const
 	normalsData->setInterpretation( GeometricData::Normal );
 	vector<V3f> &normals = normalsData->writable();
 	normals.reserve( fnMesh.numFaceVertices() );
-	
+
 	int numPolygons = fnMesh.numPolygons();
 	V3f blankVector;
-	
+
 	if( space() == MSpace::kObject )
 	{
 		const float* rawNormals = fnMesh.getRawNormals(0);
@@ -247,7 +247,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::normals() const
 			}
 		}
 	}
-	
+
 	return PrimitiveVariable( PrimitiveVariable::FaceVarying, normalsData );
 }
 
@@ -329,7 +329,7 @@ IECore::PrimitiveVariable FromMayaMeshConverter::colors( const MString &colorSet
 	}
 
 	DataPtr data;
-	
+
 	if ( rep == MFnMesh::kAlpha )
 	{
 		if ( forceRgb )
@@ -413,13 +413,13 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 	fnMesh.numFaceVertices();
 	vertexIds->writable().resize( fnMesh.numFaceVertices() );
 	vector<int>::iterator vertexIdsIt = vertexIds->writable().begin();
-	
+
 	MIntArray vertexCounts, polygonVertices;
 	fnMesh.getVertices( vertexCounts, polygonVertices );
-	
+
 	copy( MArrayIter<MIntArray>::begin( vertexCounts ), MArrayIter<MIntArray>::end( vertexCounts ), verticesPerFaceIt );
 	copy( MArrayIter<MIntArray>::begin( polygonVertices ), MArrayIter<MIntArray>::end( polygonVertices ), vertexIdsIt );
-	
+
 	std::string interpolation = interpolationParameter()->getTypedValue();
 	if ( interpolation == "default" )
 	{
@@ -450,7 +450,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 			interpolation = "linear";
 		}
 	}
-	
+
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFaceData, vertexIds, interpolation );
 
 	result->variables["P"] = points();
@@ -495,7 +495,7 @@ IECore::PrimitivePtr FromMayaMeshConverter::doPrimitiveConversion( MFnMesh &fnMe
 				// Cs is always converted to Color3f
 				result->variables["Cs"] = colors( currentColorSet, true );
 			}
-			
+
 			if( convertExtraColors )
 			{
 				MString sName = colorSets[i] + "_Cs";

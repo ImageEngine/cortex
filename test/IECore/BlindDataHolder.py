@@ -81,7 +81,7 @@ class TestBlindDataHolder(unittest.TestCase):
 		self.assertEqual( c, a )
 		self.assertEqual( b, c )
 		self.assertEqual( c, b )
-		
+
 		c.blindData()['a'] = IntData(10)
 		self.assertNotEqual( a, c )
 		self.assertNotEqual( c, a )
@@ -102,7 +102,7 @@ class TestBlindDataHolder(unittest.TestCase):
 
 		b2 = Object.load( iface, "test" )
 		self.assertEqual( b1, b2 )
-		
+
 		# should have written a "blindData" entry into the indexed io hierarchy
 		self.failUnless( isinstance( iface.directory( ["test","data","BlindDataHolder", "data", "blindData"], IndexedIO.MissingBehaviour.NullIfMissing ), IndexedIO ) )
 
@@ -119,27 +119,27 @@ class TestBlindDataHolder(unittest.TestCase):
 		g1.save( iface, "test" )
 		g2 = Object.load( iface, "test" )
 		self.assertEqual( g1, g2 )
-		
+
 		# fourth test: overriding with no blind data
 		g1 = Group()
 		g1.blindData()
 		g1.save( iface, "test" )
 		g2 = Object.load( iface, "test" )
 		self.assertEqual( g1, g2 )
-		
+
 		# "blindData" entry should be excluded from the IndexedIO hierarchy
 		self.assertEqual( iface.directory( ["test","data","BlindDataHolder"], IndexedIO.MissingBehaviour.NullIfMissing ), None )
-		
+
 	def testHash( self ) :
-	
+
 		b1 = BlindDataHolder()
 		b2 = BlindDataHolder()
-		
+
 		self.assertEqual( b1.hash(), b2.hash() )
-		
+
 		b2.blindData()["a"] = FloatData( 1 )
 		self.assertNotEqual( b1.hash(), b2.hash() )
-		
+
 	def tearDown(self):
 
 		if os.path.isfile("./test/BlindDataHolder.fio") :

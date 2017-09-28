@@ -39,58 +39,58 @@ from IECore import *
 
 
 class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
-	
+
 	def createSSD( self, weights ) :
-		
+
 		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
 		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
 		offsets = IntVectorData( [0, 2, 5, 6] )
 		counts = IntVectorData( [2, 3, 1, 2] )
 		indices = IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2] )
-		
+
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def original( self ) :
-		
+
 		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.2, 0.1, 1.2, 0.8] )
 
 		return self.createSSD( weights )
-	
+
 	def toMix( self ) :
-		
+
 		weights = FloatVectorData( [0.5, 0.5, 0.25, 0.75, 0.2, 1.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
-	
+
 	def mixed50_50_50( self ) :
-		
+
 		weights = FloatVectorData( [0.6, 0.6, 0.225, 0.675, 0.2, 0.55, 0.9, 0.6] )
 
 		return self.createSSD( weights )
-	
+
 	def mixed75_75_75( self ) :
-		
+
 		weights = FloatVectorData( [0.65, 0.65, 0.2125, 0.6375, 0.2, 0.325, 1.05, 0.7] )
 
 		return self.createSSD( weights )
-		
+
 	def mixed40_60_80( self ) :
-		
+
 		weights = FloatVectorData( [0.58, 0.62, 0.23, 0.66, 0.2, 0.46, 0.96, 0.72] )
 
 		return self.createSSD( weights )
-	
+
 	def mixed0_50_100( self ) :
-		
+
 		weights = FloatVectorData( [0.5, 0.6, 0.25, 0.675, 0.2, 0.55, 0.9, 0.8] )
 
 		return self.createSSD( weights )
-	
+
 	def testTypes( self ) :
 		""" Test MixSmoothSkinningWeightsOp types"""
-		
+
 		ssd = self.original()
 
 		op = MixSmoothSkinningWeightsOp()
@@ -101,7 +101,7 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSelfMixing( self ) :
 		""" Test MixSmoothSkinningWeightsOp by mixing with itself"""
-		
+
 		ssd = self.original()
 
 		op = MixSmoothSkinningWeightsOp()
@@ -109,7 +109,7 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['skinningDataToMix'].setValue( ssd )
 		op.parameters()['mixingWeights'].setValue( FloatVectorData( [ 0.5, 0.5, 0.5 ] ) )
 		result = op.operate()
-		
+
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
@@ -120,9 +120,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testMix50_50_50( self ) :
 		""" Test MixSmoothSkinningWeightsOp with a 50-50 split between all weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -135,9 +135,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		mixed = self.mixed50_50_50()
-		
+
 		self.assertEqual( result.influenceNames(), mixed.influenceNames() )
 		self.assertEqual( result.influencePose(), mixed.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), mixed.pointIndexOffsets() )
@@ -150,9 +150,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testMix75_75_75( self ) :
 		""" Test MixSmoothSkinningWeightsOp with a 75-25 split between all weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -165,9 +165,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		mixed = self.mixed75_75_75()
-		
+
 		self.assertEqual( result.influenceNames(), mixed.influenceNames() )
 		self.assertEqual( result.influencePose(), mixed.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), mixed.pointIndexOffsets() )
@@ -180,9 +180,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testMix40_60_80( self ) :
 		""" Test MixSmoothSkinningWeightsOp with a mixed split between all weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -195,9 +195,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		mixed = self.mixed40_60_80()
-		
+
 		self.assertEqual( result.influenceNames(), mixed.influenceNames() )
 		self.assertEqual( result.influencePose(), mixed.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), mixed.pointIndexOffsets() )
@@ -210,9 +210,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testLockedInput( self ) :
 		""" Test MixSmoothSkinningWeightsOp with locked input weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -227,12 +227,12 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		mixedWeights = ssd.pointInfluenceWeights()
 		for i in range( 0, result.pointInfluenceWeights().size() ) :
 			self.assertAlmostEqual( resultWeights[i], mixedWeights[i], 6 )
-		
+
 	def testLockedMixingData( self ) :
 		""" Test MixSmoothSkinningWeightsOp with locked mixing weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -245,9 +245,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		mixed = self.toMix()
-		
+
 		self.assertEqual( result.influenceNames(), mixed.influenceNames() )
 		self.assertEqual( result.influencePose(), mixed.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), mixed.pointIndexOffsets() )
@@ -257,12 +257,12 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		mixedWeights = mixed.pointInfluenceWeights()
 		for i in range( 0, result.pointInfluenceWeights().size() ) :
 			self.assertAlmostEqual( resultWeights[i], mixedWeights[i], 6 )
-	
+
 	def testMix0_50_100( self ) :
 		""" Test MixSmoothSkinningWeightsOp with some mixed and some locked weights"""
-		
+
 		ssd = self.original()
-		
+
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
@@ -275,9 +275,9 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		mixed = self.mixed0_50_100()
-		
+
 		self.assertEqual( result.influenceNames(), mixed.influenceNames() )
 		self.assertEqual( result.influencePose(), mixed.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), mixed.pointIndexOffsets() )
@@ -290,23 +290,23 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testErrorStates( self ) :
 		""" Test MixSmoothSkinningWeightsOp with the various error states"""
-		
+
 		ssd = self.original()
 
 		op = MixSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
-		
+
 		# no data to mix
 		op.parameters()['mixingWeights'].setValue( FloatVectorData( [ 0.5, 0.5, 0.5 ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# wrong number of mixing weights
 		op.parameters()['skinningDataToMix'].setValue( self.toMix() )
 		op.parameters()['mixingWeights'].setValue( FloatVectorData( [ 0.5, 0.5 ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 		op.parameters()['mixingWeights'].setValue( FloatVectorData( [ 0.5, 0.5, 0.5, 0.5 ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# wrong number of influences
 		bad = SmoothSkinningData( StringVectorData( [ 'jointA', 'jointB' ] ), ssd.influencePose(), ssd.pointIndexOffsets(), ssd.pointInfluenceCounts(), ssd.pointInfluenceIndices(), ssd.pointInfluenceWeights() )
 		op.parameters()['skinningDataToMix'].setValue( bad )
@@ -315,7 +315,7 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		bad = SmoothSkinningData( StringVectorData( [ 'jointA', 'jointB', 'jointC', 'jointD' ] ), ssd.influencePose(), ssd.pointIndexOffsets(), ssd.pointInfluenceCounts(), ssd.pointInfluenceIndices(), ssd.pointInfluenceWeights() )
 		op.parameters()['skinningDataToMix'].setValue( bad )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# wrong number of points
 		bad = SmoothSkinningData( ssd.influenceNames(), ssd.influencePose(), IntVectorData( [0, 2, 5, 6, 8] ), ssd.pointInfluenceCounts(), ssd.pointInfluenceIndices(), ssd.pointInfluenceWeights() )
 		op.parameters()['skinningDataToMix'].setValue( bad )

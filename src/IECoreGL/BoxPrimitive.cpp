@@ -69,7 +69,7 @@ const Imath::Box3f BoxPrimitive::getBox() const
 void BoxPrimitive::render( const State * state, IECore::TypeId style ) const
 {
 	if( style==(IECore::TypeId)PrimitiveWireframeTypeId )
-	{	
+	{
 		renderWireframe( m_box );
 	}
 	else

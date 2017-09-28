@@ -93,7 +93,7 @@ void ImmediateRendererImplementation::worldBegin()
 	}
 
 	glPushAttrib( GL_ALL_ATTRIB_BITS );
-	
+
 	m_camera->render( m_stateStack.top().get() );
 
 	glViewport( 0, 0, width, height );
@@ -118,7 +118,7 @@ void ImmediateRendererImplementation::worldEnd()
 			m_displays[i]->display( m_frameBuffer );
 		}
 	}
-	
+
 	delete m_frameBufferBinding;
 	m_frameBufferBinding = 0;
 }

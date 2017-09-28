@@ -85,7 +85,7 @@ class IECORE_API PatchMeshPrimitive : public Primitive
 
 		/// Follows the RenderMan specification for variable sizes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	protected :

@@ -64,7 +64,7 @@ class Selector::Implementation : public IECore::RefCounted
 {
 
 	public :
-	
+
 		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
 			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( NULL )
 		{
@@ -75,14 +75,14 @@ class Selector::Implementation : public IECore::RefCounted
 			// changes we'd made so far. so we throw immediately if there is a
 			// preexisting error.
 			IECoreGL::Exception::throwIfError();
-			
+
 			if( g_currentSelector )
 			{
 				throw( IECore::Exception( "Another Selector is already active" ) );
 			}
-			
+
 			g_currentSelector = parent;
-	
+
 			GLdouble projectionMatrix[16];
 			glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
 			GLint viewport[4];
@@ -126,7 +126,7 @@ class Selector::Implementation : public IECore::RefCounted
 
 			glPushAttrib( GL_ALL_ATTRIB_BITS );
 		}
-		
+
 		~Implementation()
 		{
 			// we don't want preexisting errors to
@@ -139,11 +139,11 @@ class Selector::Implementation : public IECore::RefCounted
 			{
 				IECore::msg( IECore::Msg::Error, "IECoreGL::Selector end", (const char *)gluErrorString( error ) );
 			}
-		
+
 			g_currentSelector = 0;
-			
+
 			glPopAttrib();
-			
+
 			switch( m_mode )
 			{
 				case GLSelect :
@@ -186,10 +186,10 @@ class Selector::Implementation : public IECore::RefCounted
 				default :
 					assert( 0 );
 			}
-			
+
 			m_currentName = name;
 		}
-		
+
 		GLuint loadName()
 		{
 			const GLuint name = m_nextGeneratedName++;
@@ -207,7 +207,7 @@ class Selector::Implementation : public IECore::RefCounted
 			bindIDShader( shader );
 			m_IDShaderStack.push( shader );
 		}
-		
+
 		void popIDShader()
 		{
 			m_IDShaderStack.pop();
@@ -242,14 +242,14 @@ class Selector::Implementation : public IECore::RefCounted
 		}
 
 	private :
-		
+
 		Mode m_mode;
 		Imath::M44d m_postProjectionMatrix;
 		std::vector<HitRecord> &m_hits;
 		StatePtr m_baseState;
 		GLuint m_currentName;
 		GLuint m_nextGeneratedName;
-		
+
 		static Selector *g_currentSelector;
 
 		//////////////////////////////////////////////////////////////////////////
@@ -257,7 +257,7 @@ class Selector::Implementation : public IECore::RefCounted
 		//////////////////////////////////////////////////////////////////////////
 
 		std::vector<GLuint> m_selectBuffer;
-		
+
 		void beginGLSelect()
 		{
 			m_selectBuffer.resize( 20000 ); // enough to select 5000 distinct objects
@@ -274,7 +274,7 @@ class Selector::Implementation : public IECore::RefCounted
 		}
 
 		void endGLSelect()
-		{		
+		{
 			int numHits = glRenderMode( GL_RENDER );
 			if( numHits < 0 )
 			{
@@ -311,10 +311,10 @@ class Selector::Implementation : public IECore::RefCounted
 			m_frameBuffer->setDepth( new DepthTexture( 128, 128 ) );
 			m_frameBuffer->validate();
 			m_frameBufferBinding = boost::shared_ptr<FrameBuffer::ScopedBinding>( new FrameBuffer::ScopedBinding( *m_frameBuffer ) );
-			
+
 			glGetIntegerv( GL_VIEWPORT, m_prevViewport );
 			glViewport( 0, 0, 128, 128 );
-			
+
 			GLfloat prevClearColor[4];
 			GLfloat prevClearDepth;
 			glGetFloatv( GL_COLOR_CLEAR_VALUE, prevClearColor );
@@ -324,7 +324,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 			glClearColor( prevClearColor[0], prevClearColor[1], prevClearColor[2], prevClearColor[3] );
 			glClearDepth( prevClearDepth );
-			
+
 			glGetIntegerv( GL_CURRENT_PROGRAM, &m_prevProgram );
 			pushIDShader( defaultIDShader() );
 		}
@@ -349,7 +349,7 @@ class Selector::Implementation : public IECore::RefCounted
 			const IECore::FloatVectorData *zData = static_cast<const IECore::FloatVectorData *>( zImage->channels["Z"].get() );
 			const std::vector<float> z = zData->readable();
 
-			std::map<unsigned int, HitRecord> idRecords;	
+			std::map<unsigned int, HitRecord> idRecords;
 			for( size_t i = 0, e = ids.size(); i < e; i++ )
 			{
 				if( ids[i] == 0 )
@@ -363,7 +363,7 @@ class Selector::Implementation : public IECore::RefCounted
 					it = idRecords.insert( std::pair<unsigned int, HitRecord>( ids[i], r ) ).first;
 				}
 				it->second.depthMin = std::min( it->second.depthMin, z[i] );
-				it->second.depthMax = std::max( it->second.depthMax, z[i] );		
+				it->second.depthMax = std::max( it->second.depthMax, z[i] );
 			}
 
 			m_hits.clear();
@@ -411,16 +411,16 @@ class Selector::Implementation : public IECore::RefCounted
 		//////////////////////////////////////////////////////////////////////////
 		// OcclusionQuery
 		//////////////////////////////////////////////////////////////////////////
-		
+
 		std::vector<GLuint> m_queries;
 		std::vector<GLuint> m_queryNames;
-		
+
 		static DepthTestStateComponent *depthTestStateComponent()
 		{
 			static DepthTestStateComponentPtr d = new DepthTestStateComponent( false );
 			return d.get();
 		}
-		
+
 		void beginOcclusionQuery()
 		{
 			m_queries.resize( 0 );
@@ -452,7 +452,7 @@ class Selector::Implementation : public IECore::RefCounted
 		}
 
 		void endOcclusionQuery()
-		{	
+		{
 			if( m_queries.size() )
 			{
 				glEndQueryARB( GL_SAMPLES_PASSED_ARB );
@@ -467,7 +467,7 @@ class Selector::Implementation : public IECore::RefCounted
 					m_hits.push_back( HitRecord( 0, 0, m_queryNames[i] ) );
 				}
 			}
-		
+
 			glDeleteQueriesARB( m_queries.size(), &(m_queries[0]) );
 			m_baseState->add( const_cast<DepthTestStateComponent *>( State::defaultState()->get<DepthTestStateComponent>() ), false /* no override */ );
 		}

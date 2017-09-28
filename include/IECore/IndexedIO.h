@@ -57,7 +57,7 @@ IE_CORE_FORWARDDECLARE( IndexedIO );
 class IECORE_API IndexedIO : public RunTimeTyped
 {
 	public:
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( IndexedIO, RunTimeTyped );
 
 		/// General enums and low level structures
@@ -172,11 +172,11 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		// Stores in the given array all the ids for the given entry type
 		virtual void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const = 0;
 
-		/// Returns a new interface for the child or if missing then consults missingBehaviour and throws exception if ThrowIfMissing, 
+		/// Returns a new interface for the child or if missing then consults missingBehaviour and throws exception if ThrowIfMissing,
 		//returns Null pointer if NullIfMissing or creates the child directory if CreateIfMissing.
 		virtual IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
 
-		/// Returns read-only interface for the child directory or if missing then consults missingBehaviour and throws exception if 
+		/// Returns read-only interface for the child directory or if missing then consults missingBehaviour and throws exception if
 		// ThrowIfMissing or CreateIfMissing, returns Null pointer if NullIfMissing.
 		virtual ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
@@ -493,7 +493,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		{
 			public:
 				Entry();
-		
+
 				Entry( const EntryID &id, EntryType eType, DataType dType, unsigned long arrayLength);
 
 				/// ID, or name, of the file/directory
@@ -508,13 +508,13 @@ class IECORE_API IndexedIO : public RunTimeTyped
 
 				/// Convenience method to return if entry respresents an array. If Entry's datatype is not an array then an IOException is thrown.
 				bool isArray() const;
-	
+
 				/// Convenience method to return size of array. If Entry's datatype is not an array then an IOException is thrown.
 				unsigned long arrayLength() const;
-	
+
 				/// Convenience method to return if a data is an array or not
 				static bool isArray( DataType dType );
-	
+
 			protected:
 
 				EntryID m_ID;
@@ -526,11 +526,11 @@ class IECORE_API IndexedIO : public RunTimeTyped
 		// Method for establishing flattened size of a data object
 		template<typename T>
 		struct DataSizeTraits;
-	
+
 		// Method for flatting/unflattening data objects
 		template<typename T>
 		struct DataFlattenTraits;
-	
+
 		template<typename T>
 		struct DataTypeTraits;
 

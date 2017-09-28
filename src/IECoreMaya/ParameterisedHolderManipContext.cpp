@@ -56,34 +56,34 @@ ParameterisedHolderManipContext::ParameterisedHolderManipContext() :
 void ParameterisedHolderManipContext::toolOnSetup( MEvent & )
 {
 	m_toolOn = true;
-	
+
 	updateHelpString();
-	
+
 	MStatus status;
 	selectionChangeCallback = MModelMessage::addCallback( MModelMessage::kActiveListModified,
-									 					  updateManipulators, 
+									 					  updateManipulators,
 														  this,
-														  &status );													  
+														  &status );
 	if( !status )
 	{
 		MGlobal::displayError( "ParameterisedHolderManipContext::toolOnSetup() Unable to add "
 							   "selectionChanged callback for manipulators." );
 	}
-	
+
 	updateManipulators( this );
 }
 
 void ParameterisedHolderManipContext::toolOffCleanup()
 {
 	MStatus status = MModelMessage::removeCallback( selectionChangeCallback );
-	if( !status ) 
+	if( !status )
 	{
 		MGlobal::displayError( "ParameterisedHolderManipContext::toolOffCleanup() Unable to remove "
 							   "selectionChanged callback." );
 	}
-	
+
 	m_toolOn = false;
-	
+
 	MPxContext::toolOffCleanup();
 }
 
@@ -94,17 +94,17 @@ void ParameterisedHolderManipContext::updateManipulators( void *blindData )
 }
 
 void ParameterisedHolderManipContext::updateManipulators()
-{	
+{
 	deleteManipulators();
 
 	MStatus stat;
-	
+
 	if( m_mode == Targeted && m_targetPlugPath == "" )
 	{
 		MGlobal::displayError( "ParameterisedHolderManipContext: No target parameter specified to manipulate." );
 		return;
-	}	
-	
+	}
+
 	MSelectionList list;
 	stat = MGlobal::getActiveSelectionList( list );
 
@@ -121,7 +121,7 @@ void ParameterisedHolderManipContext::updateManipulators()
 		it.getDependNode( node );
 		dagWalk( node );
 	}
-		
+
 }
 
 void ParameterisedHolderManipContext::dagWalk( MObject &node )
@@ -157,10 +157,10 @@ void ParameterisedHolderManipContext::processNode( MObject &node )
 	if( !stat )
 	{
 		return;
-	}	
-	
-	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );		
-	if( !pHolder ) 
+	}
+
+	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );
+	if( !pHolder )
 	{
 		return;
 	}
@@ -171,7 +171,7 @@ void ParameterisedHolderManipContext::processNode( MObject &node )
 		MPlug targetPlug = nodeFn.findPlug( m_targetPlugPath, &stat );
 		if( stat )
 		{
-			createAndConnectManip( pHolder->plugParameter( targetPlug ), nodeFn );	
+			createAndConnectManip( pHolder->plugParameter( targetPlug ), nodeFn );
 		}
 	}
 	else
@@ -191,7 +191,7 @@ MPxManipContainer *ParameterisedHolderManipContext::createManipulatorWalk( Param
 	{
 		MPxManipContainer *manip = 0;
 		for( CompoundParameter::ParameterVector::const_iterator it = c->orderedParameters().begin(); it != c->orderedParameters().end(); it++ )
-		{	
+		{
 			manip = createManipulatorWalk( *it, nodeFn );
 			if( m_mode == First && manip )
 			{
@@ -212,11 +212,11 @@ MPxManipContainer *ParameterisedHolderManipContext::createAndConnectManip( Param
 	{
 		return 0;
 	}
-	
+
 	// The 'name' of the manipulator to create is: ie<manipulatorTypeHint><parameterTypeName>Manipulator
 	MString manipLabel( "" );
 	MString manipName( "ie" );
-	
+
 	CompoundObjectPtr userData = parameter->userData();
 	if( CompoundObjectPtr manipData = userData->member<CompoundObject>( "UI" ) )
 	{
@@ -227,36 +227,36 @@ MPxManipContainer *ParameterisedHolderManipContext::createAndConnectManip( Param
 			{
 				return 0;
 			}
-		}	
-		
+		}
+
 		if( StringDataPtr labelData = manipData->member<StringData>( "manipLabel" ) )
 		{
 			manipLabel += MString( labelData->readable().c_str() );
-		}	
-		
+		}
+
 		if( StringDataPtr hintData = manipData->member<StringData>( "manipTypeHint" ) )
 		{
 			manipName += MString( hintData->readable().c_str() );
-		}	
+		}
 	}
-	
+
 	manipName += parameter->typeName();
 	manipName += "Manipulator";
-		
+
 	MObject manipObj;
 	MPxManipContainer *manip = MPxManipContainer::newManipulator( manipName, manipObj );
-	
+
 	if( !manip )
 	{
 		return 0;
 	}
-	
-	// If we are derived from our custom manipulator base, then we can set the 
+
+	// If we are derived from our custom manipulator base, then we can set the
 	// desired plug name into the manipulator, incase it wishes to use it.
 	ParameterManipContainer *paramManip = dynamic_cast<ParameterManipContainer *>( manip );
 	if( paramManip )
 	{
-		ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );	
+		ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );
 		MPlug targetPlug = pHolder->parameterPlug( parameter );
 		paramManip->setPlug( targetPlug );
 		if( manipLabel != "" )
@@ -264,16 +264,16 @@ MPxManipContainer *ParameterisedHolderManipContext::createAndConnectManip( Param
 			paramManip->setLabel( manipLabel );
 		}
 	}
-		
+
 	addManipulator( manipObj );
 	MStatus stat = manip->connectToDependNode( nodeFn.object() );
-	
+
 	if( !stat )
 	{
 		MGlobal::displayError( "ParameterisedHolderManipContext::createAndConnectManip() Unable to connect manipulator." );
 		return 0;
 	}
-	
+
 	return manip;
 }
 
@@ -315,14 +315,14 @@ void ParameterisedHolderManipContext::updateHelpString()
 		case First:
 			setHelpString( "Adjusting the first manipulatable parameter on the selection." );
 			break;
-			
+
 		case All:
 			setHelpString( "Adjusting all manipulatable parameter on the selection." );
-			break;	
-			
+			break;
+
 		case Targeted:
 			setHelpString( "Adjusting the parameter named '" + m_targetPlugPath + "' on the selection, if available." );
-			break;	
+			break;
 	}
 }
 

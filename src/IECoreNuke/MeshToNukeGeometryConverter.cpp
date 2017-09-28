@@ -130,7 +130,7 @@ void MeshToNukeGeometryConverter::doConversion( const IECore::Object *from, Geom
 	const Color3fVectorData *meshColours = mesh->variableData< Color3fVectorData >( "Cs", PrimitiveVariable::FaceVarying );
 	if ( meshColours )
 	{
-		Attribute *Cf = to.writable_attribute( objIndex, Group_Vertices, "Cf", VECTOR4_ATTRIB );	
+		Attribute *Cf = to.writable_attribute( objIndex, Group_Vertices, "Cf", VECTOR4_ATTRIB );
 		unsigned v = 0;
 		for ( std::vector< Imath::Color3f >::const_iterator cIt = meshColours->readable().begin(); cIt < meshColours->readable().end(); cIt++, v++)
 		{

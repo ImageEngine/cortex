@@ -77,13 +77,13 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
 		# for MustNotExist and DontCare, the getFileSequenceValue does not check the file system. It returns a FileSequence with EmptyFrameList.
 		self.assertEqual( p.getFileSequenceValue().frameList, IECore.EmptyFrameList() )
-		
+
 		p = IECore.FileSequenceParameter( name = "n", description = "d", check = IECore.FileSequenceParameter.CheckType.MustExist )
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) )
 		# for MustExist getFileSequence should use ls internally.
 		self.assertEqual( p.getFileSequenceValue(), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		self.assertEqual( p.getFileSequenceValue( IECore.StringData( "test/sequences/parameterTest/a.#.tif" ) ), IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
-		
+
 		p.setFileSequenceValue( IECore.FileSequence( "test/sequences/parameterTest/a.#.tif", IECore.FrameRange( 1, 10 ) ) )
 		# Setting a frame range should reflect on the parameter value.
 		self.assertEqual( p.getValue(), IECore.StringData( "test/sequences/parameterTest/a.#.tif 1-10" ) )
@@ -152,15 +152,15 @@ class TestFileSequenceParameter( unittest.TestCase ) :
 		)
 
 		p.setValidatedValue( IECore.StringData( "test/sequences/parameterTest/test with   spaces  .#.tif 5-10" ) )
-		
+
 	def tearDown( self ) :
-		
+
 		directory = "test/sequences"
 
 		if os.path.exists( directory ) :
 
 			shutil.rmtree( directory )
-			
+
 		for f in [
 			"test/IECore/data/fileSequenceParameter.cob"
 		] :

@@ -51,7 +51,7 @@ def createCortexMenu() :
 
 	if os.environ.get( "IECOREMAYA_DISABLE_MENU", "0" ) == "1" :
 		return
-		
+
 	m = IECore.MenuDefinition()
 	m.append(
 		"/Create Procedural",
@@ -59,17 +59,17 @@ def createCortexMenu() :
 			"subMenu" : proceduralCreationMenuDefinition,
 		}
 	)
-	
+
 	m.append(
 		"/Create Op",
 		{
 			"subMenu" : opCreationMenuDefinition,
 		}
 	)
-	
+
 	global __cortexMenu
 	__cortexMenu = IECoreMaya.Menu( m, "MayaWindow", "Cortex" )._topLevelUI()
-	
+
 def removeCortexMenu() :
 
 	global __cortexMenu
@@ -81,37 +81,37 @@ def __createProcedural( className ) :
 
 	fnPH = IECoreMaya.FnProceduralHolder.create( os.path.basename( className ), className )
 	maya.cmds.select( fnPH.fullPathName() )
-	
+
 def proceduralCreationMenuDefinition() :
 
 	m = IECore.MenuDefinition()
 	loader = IECore.ClassLoader.defaultProceduralLoader()
 	for className in loader.classNames() :
 		m.append(
-			"/" + className,	
+			"/" + className,
 			{
 				"command" : IECore.curry( __createProcedural, className ),
 			}
 		)
-		
+
 	return m
 
 def __createOp( className ) :
 
 	fnOH = IECoreMaya.FnOpHolder.create( os.path.basename( className ), className )
 	maya.cmds.select( fnOH.fullPathName() )
-			
+
 def opCreationMenuDefinition() :
 
 	m = IECore.MenuDefinition()
 	loader = IECore.ClassLoader.defaultOpLoader()
 	for className in loader.classNames() :
 		m.append(
-			"/" + className,	
+			"/" + className,
 			{
 				"command" : IECore.curry( __createOp, className ),
 			}
 		)
-		
+
 	return m
-	
+

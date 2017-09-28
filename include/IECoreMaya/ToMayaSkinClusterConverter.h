@@ -51,7 +51,7 @@ class ToMayaSkinClusterConverter : public ToMayaObjectConverter
 	public:
 
 		ToMayaSkinClusterConverter( IECore::ConstObjectPtr object );
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToMayaSkinClusterConverter, ToMayaSkinClusterConverterTypeId, ToMayaObjectConverter );
 
 	protected:
@@ -60,9 +60,9 @@ class ToMayaSkinClusterConverter : public ToMayaObjectConverter
 
 		typedef ToMayaObjectConverterDescription<ToMayaSkinClusterConverter> Description;
 		static Description g_skinClusterDescription;
-	
+
 	private :
-		
+
 		IECore::BoolParameterPtr m_ignoreMissingInfluencesParameter;
 		IECore::BoolParameterPtr m_ignoreBindPoseParameter;
 

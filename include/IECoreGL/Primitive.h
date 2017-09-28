@@ -72,13 +72,13 @@ class IECOREGL_API Primitive : public Renderable
 
 		/// Returns the bounding box for the primitive.
 		virtual Imath::Box3f bound() const = 0;
-		
+
 		/// High level rendering function which renders in the styles represented by
 		/// currentState, allowing representations such as wireframe over shaded etc to
 		/// be achieved with a single call. The currentState must be complete and
 		/// already have been bound. Finer grained control over rendering can be achieved
 		/// by using the shaderSetup() and renderInstances() methods - in fact those methods
-		/// are used to implement this one.  
+		/// are used to implement this one.
 		virtual void render( State *currentState ) const;
 
 		//! @name Lower level rendering methods
@@ -132,7 +132,7 @@ class IECOREGL_API Primitive : public Renderable
 		/// primitive must be bound before calling this method.
 		virtual void renderInstances( size_t numInstances = 1 ) const = 0;
 		///@}
-		
+
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
 		/// Primitive objects.
@@ -177,10 +177,10 @@ class IECOREGL_API Primitive : public Renderable
 
 		typedef std::vector<Shader::SetupPtr> ShaderSetupVector;
 		mutable ShaderSetupVector m_shaderSetups;
-		
+
 		mutable Shader::SetupPtr m_boundSetup;
 		const Shader::Setup *boundSetup() const;
-		
+
 		typedef std::map<std::string, IECore::ConstDataPtr> AttributeMap;
 		AttributeMap m_vertexAttributes;
 		AttributeMap m_uniformAttributes;

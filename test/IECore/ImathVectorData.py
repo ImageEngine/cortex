@@ -303,18 +303,18 @@ class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 	def testByValueItem(self):
 		"""Test V3fVectorData by value return type"""
 		BaseVectorDataTest.testByValueItem(self)
-		
+
 	def testOperatedInterpretation( self ) :
-		
+
 		v = V3fVectorData( [ V3f(1), V3f(2), V3f(3) ], GeometricData.Interpretation.Vector )
 		self.assertEqual( v.getInterpretation(), GeometricData.Interpretation.Vector )
-		
+
 		# add and iadd
 		v2 = v + V3fVectorData( [ V3f(4), V3f(5), V3f(6) ] )
 		self.assertEqual( v2.getInterpretation(), GeometricData.Interpretation.Vector )
 		v2 += V3fVectorData( [ V3f(7), V3f(8), V3f(9) ], GeometricData.Interpretation.Normal )
 		self.assertEqual( v2.getInterpretation(), GeometricData.Interpretation.Vector )
-		
+
 		# sub and isub
 		v3 = v - V3fVectorData( [ V3f(4), V3f(5), V3f(6) ], GeometricData.Interpretation.Normal )
 		self.assertEqual( v3.getInterpretation(), GeometricData.Interpretation.Vector )
@@ -332,7 +332,7 @@ class V3fVectorDataTest(BaseVectorDataTest, unittest.TestCase):
 		self.assertEqual( v5.getInterpretation(), GeometricData.Interpretation.Vector )
 		v5 /= V3fVectorData( [ V3f(7), V3f(8), V3f(9) ], GeometricData.Interpretation.Color )
 		self.assertEqual( v5.getInterpretation(), GeometricData.Interpretation.Vector )
-		
+
 		# slices
 		v6 = v[:]
 		self.assertEqual( v6.getInterpretation(), GeometricData.Interpretation.Vector )

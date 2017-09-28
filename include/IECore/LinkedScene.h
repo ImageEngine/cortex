@@ -53,13 +53,13 @@ IE_CORE_FORWARDDECLARE( LinkedScene );
 /// are still loaded from the main scene. Tags defined in the link location will be applied (when read) to all the child transforms from the linked scene.
 /// This class wraps another SceneInterface object that is responsible for actually storing the data
 /// (we call it the "main scene"). Links are represented as an attribute in the main scene called "SceneInterface:link".
-/// When created for reading, this class provides seamless access to the hierarchy inside the linked scenes, 
-/// concatenating the two hierarchies in a single path that uniquely identify that location. The time is also 
-/// transparently translated. Tags that were saved in the linked scene are propagated to the main scene, 
+/// When created for reading, this class provides seamless access to the hierarchy inside the linked scenes,
+/// concatenating the two hierarchies in a single path that uniquely identify that location. The time is also
+/// transparently translated. Tags that were saved in the linked scene are propagated to the main scene,
 /// to keep consistent behavior.
 /// When writing, there's no access to the contents of the indexed scene. Instead, it creates the links by either
-/// (1) calls to the function writeLink() or 
-/// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ). 
+/// (1) calls to the function writeLink() or
+/// (2) calls to the function writeAttribute( LinkedScene::linkSceneAttribute, LinkedScene::linkAttributeData(), ... ).
 /// Note that the link can be animated, allowing for time remapped animations.
 class IECORE_API LinkedScene : public  SampledSceneInterface
 {
@@ -70,13 +70,13 @@ class IECORE_API LinkedScene : public  SampledSceneInterface
 		/// Equals to "SceneInterface:link" and it's the name given to the link attribute that is recognized
 		// by this class when expanding linked scenes.
 		static const Name &linkAttribute;
-		
+
 		static const Name &fileNameLinkAttribute;
 		static const Name &rootLinkAttribute;
 		static const Name &timeLinkAttribute;
 
 		/// When the open mode is Read it expands the links and only the const methods may be used and the
-		/// when the open mode is Write, only the non-const methods may be used and 
+		/// when the open mode is Write, only the non-const methods may be used and
 		/// Append mode is not supported.
 		LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode );
 
@@ -87,7 +87,7 @@ class IECORE_API LinkedScene : public  SampledSceneInterface
 		virtual ~LinkedScene();
 
 		/// Creates an attribute on the current location of this scene that represents a link to the given scene (no time remapping).
-		/// This function should only be used once in a given scene location. For more control (and time remapping), 
+		/// This function should only be used once in a given scene location. For more control (and time remapping),
 		/// use writeAttribute in combination with linkAttributeData.
 		void writeLink( const SceneInterface *scene );
 
@@ -151,7 +151,7 @@ class IECORE_API LinkedScene : public  SampledSceneInterface
 		virtual ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 		virtual SceneInterfacePtr createChild( const Name &name );
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
-		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;				
+		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
 
 		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;
 

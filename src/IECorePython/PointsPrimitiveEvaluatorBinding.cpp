@@ -50,7 +50,7 @@ void bindPointsPrimitiveEvaluator()
 	scope s = RunTimeTypedClass<PointsPrimitiveEvaluator>()
 		.def( init<PointsPrimitivePtr>() )
 	;
-	
+
 	RefCountedClass<PointsPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 		.def( "pointIndex", &PointsPrimitiveEvaluator::Result::pointIndex )
 	;

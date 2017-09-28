@@ -61,7 +61,7 @@ class IECORE_API MixSmoothSkinningWeightsOp : public ModifyOp
 		virtual void modify( Object *object, const CompoundObject *operands );
 
 	private :
-		
+
 		SmoothSkinningDataParameterPtr m_skinningDataParameter;
 		FloatVectorParameterPtr m_mixingWeightsParameter;
 };

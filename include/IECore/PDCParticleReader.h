@@ -65,10 +65,10 @@ class IECORE_API PDCParticleReader : public ParticleReader
 		virtual DataPtr readAttribute( const std::string &name );
 
 	protected:
-		
+
 		// Returns the name of the position primVar
 		virtual std::string positionPrimVarName();
-		
+
 	private :
 
 		static const ReaderDescription<PDCParticleReader> m_readerDescription;

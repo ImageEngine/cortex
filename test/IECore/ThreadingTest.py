@@ -44,39 +44,39 @@ import IECore
 class ThreadingTest( unittest.TestCase ) :
 
 	def callSomeThings( self, things, args=(), kwArgs=(), threaded=False, iterations=1 ) :
-	
+
 		for i in range( 0, iterations ) :
-				
+
 			threads = []
 			for j in range( 0, len( things ) ) :
-				
+
 				a = args[j] if args else ()
-								
+
 				kwa = kwArgs[j] if kwArgs else {}
 				if threaded :
-				
+
 					t = threading.Thread( target=things[j], args=a, kwargs=kwa )
 					t.start()
 					threads.append( t )
-					
+
 				else :
-				
+
 					things[j]( *a, **kwa )
-					
+
 			for t in threads :
 
 				t.join()
 
 	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testThreadedOpGains( self ) :
-	
+
 		## Checks that we actually get a speedup by running a bunch of slow
 		# C++ ops in parallel.
-	
+
 		ops = []
 		kwArgs = []
 		for i in range( 0, 4 ) :
-		
+
 			ops.append( IECore.DataCastOp() )
 			kwArgs.append( {
 				"object" : IECore.FloatVectorData( range( 0, 100000 ) ),
@@ -86,19 +86,19 @@ class ThreadingTest( unittest.TestCase ) :
 		tStart = time.time()
 		self.callSomeThings( ops, kwArgs=kwArgs, threaded=False )
 		nonThreadedTime = time.time() - tStart
-		
+
 		tStart = time.time()
 		self.callSomeThings( ops, kwArgs=kwArgs, threaded=True )
 		threadedTime = time.time() - tStart
-		
+
 		self.failUnless( threadedTime < nonThreadedTime ) # may fail on single core machines or machines under varying load
 
 	def testThreadedReaders( self ) :
-	
+
 		## Checks that we can read a bunch of files in parallel, even when one
 		# of the Readers is implemented in python. We're using the CachedReader
 		# here as it forces a call to Reader::create when the GIL isn't held yet.
-	
+
 		args = [
 			( "test/IECore/data/cobFiles/ball.cob", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
@@ -113,14 +113,14 @@ class ThreadingTest( unittest.TestCase ) :
 			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
 			( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob", ),
 		]
-	
+
 		sp = IECore.SearchPath( "./", ":" )
 		calls = [ lambda f : IECore.CachedReader( sp, IECore.ObjectPool(1024 * 1024 * 10) ).read( f ) ] * len( args )
-		
+
 		self.callSomeThings( calls, args, threaded=True )
 
 	def testMixedCPPAndPython( self ) :
-	
+
 		## Checks that we can mix a bunch of C++ and python ops concurrently
 		# without crashing
 
@@ -133,7 +133,7 @@ class ThreadingTest( unittest.TestCase ) :
 				"object" : IECore.FloatVectorData( range( 0, 100000 ) ),
 				"targetType" : IECore.DoubleVectorData.staticTypeId(),
 			} )
-			
+
 			ops.append( IECore.ClassLsOp() )
 			kwArgs.append( { "type" : "op" } )
 
@@ -141,10 +141,10 @@ class ThreadingTest( unittest.TestCase ) :
 
 	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testReadingGains( self ) :
-	
+
 		## Checks that we can use a bunch of readers in different threads and
 		# that we get a speedup of some sort doing that.
-	
+
 		args = [
 			( "test/IECore/data/cobFiles/beforeEmptyContainerOptimisation.cob", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
@@ -156,7 +156,7 @@ class ThreadingTest( unittest.TestCase ) :
 		]
 
 		calls = [ lambda f : IECore.Reader.create( f ).read() ] * len( args )
-	
+
 		tStart = time.time()
 		self.callSomeThings( calls, args, threaded=False )
 		nonThreadedTime = time.time() - tStart
@@ -164,18 +164,18 @@ class ThreadingTest( unittest.TestCase ) :
 		tStart = time.time()
 		self.callSomeThings( calls, args, threaded=True )
 		threadedTime = time.time() - tStart
-				
+
 		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
 
 	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testWritingGains( self ) :
-	
+
 		primitive = IECore.Reader.create( "test/IECore/data/cobFiles/ball.cob" ).read()
-		
+
 		def write( o, f ) :
-		
+
 			 IECore.Writer.create( o, f ).write()
-		
+
 		calls = []
 		for i in range( 0, 4 ) :
 			fileName = "test/IECore/test%d.cob" % i
@@ -188,11 +188,11 @@ class ThreadingTest( unittest.TestCase ) :
 		tStart = time.time()
 		self.callSomeThings( calls, threaded=True )
 		threadedTime = time.time() - tStart
-		
+
 		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
 
 	def testCachedReaderConcurrency( self ) :
-	
+
 		args = [
 			( "test/IECore/data/idxFiles/test.idx", ),
 			( "test/IECore/data/idxFiles/test.idx", ),
@@ -202,10 +202,10 @@ class ThreadingTest( unittest.TestCase ) :
 			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
 			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
 			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
-		] 
-	
+		]
+
 		cachedReader = IECore.CachedReader( IECore.SearchPath( "./", ":" ) )
-		
+
 		calls = [ lambda f : cachedReader.read( f ) ] * len( args )
 
 		for i in range( 0, 5 ) :
@@ -214,16 +214,16 @@ class ThreadingTest( unittest.TestCase ) :
 
 	@unittest.skipIf( "TRAVIS" in os.environ, "Low hardware concurrency on Travis" )
 	def testCachedReaderGains( self ) :
-	
+
 		args = [
 			( "test/IECore/data/pdcFiles/particleMesh.pdc", ),
 			( "test/IECore/data/pdcFiles/particleShape1.250.pdc", ),
 			( "test/IECore/data/cobFiles/ball.cob", ),
 			( "test/IECore/data/cobFiles/pSphereShape1.cob", ),
 		] * 4
-	
+
 		cachedReader = IECore.CachedReader( IECore.SearchPath( "./", ":" ) )
-		
+
 		calls = [ lambda f : cachedReader.read( f ) ] * len( args )
 
 		tStart = time.time()
@@ -235,11 +235,11 @@ class ThreadingTest( unittest.TestCase ) :
 		cachedReader.clear()
 		self.callSomeThings( calls, args=args, threaded=True )
 		threadedTime = time.time() - tStart
-				
+
 		self.failUnless( threadedTime < nonThreadedTime ) # this could plausibly fail due to varying load on the machine / io but generally shouldn't
 
 	def tearDown( self ) :
-		
+
 		for f in [
 			"test/IECore/test0.cob",
 			"test/IECore/test1.cob",
@@ -248,7 +248,7 @@ class ThreadingTest( unittest.TestCase ) :
 		] :
 			if os.path.exists( f ) :
 				os.remove( f )
-				
+
 if __name__ == "__main__":
 	unittest.main()
 

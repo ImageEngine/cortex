@@ -66,7 +66,7 @@ MStatus CurveCombiner::initialize()
 {
 
 	MFnTypedAttribute fnTAttr;
-	
+
 	aInputCurves = fnTAttr.create( "inputCurves", "ic", MFnData::kNurbsCurve );
 	fnTAttr.setReadable( false );
 	fnTAttr.setWritable( true );
@@ -75,20 +75,20 @@ MStatus CurveCombiner::initialize()
 	fnTAttr.setHidden( false );
 	fnTAttr.setArray( true );
 	fnTAttr.setIndexMatters( false );
-	
+
 	addAttribute( aInputCurves );
-	
+
 	aOutputCurves = fnTAttr.create( "outputCurves", "oc", IECoreMaya::ObjectData::id );
 	fnTAttr.setReadable( true );
 	fnTAttr.setWritable( false );
 	fnTAttr.setStorable( true );
 	fnTAttr.setConnectable( true );
 	fnTAttr.setHidden( false );
-	
+
 	addAttribute( aOutputCurves );
-	
+
 	attributeAffects( aInputCurves, aOutputCurves );
-	
+
 	return MS::kSuccess;
 }
 
@@ -97,13 +97,13 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 	if( plug==aOutputCurves )
 	{
-	
+
 		MArrayDataHandle arrayHandle = dataBlock.inputArrayValue( aInputCurves );
 		IECore::CurvesPrimitivePtr combinedCurves = 0;
-		
+
 		IECore::CurvesMergeOpPtr curvesMergeOp = new IECore::CurvesMergeOp();
 		curvesMergeOp->copyParameter()->setTypedValue( false );
-		
+
 		unsigned numCurves = arrayHandle.elementCount();
 		for( unsigned curveIndex = 0; curveIndex < numCurves; curveIndex++, arrayHandle.next() )
 		{
@@ -112,7 +112,7 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			// we want worldspace points if a worldShape is connected, and local otherwise
 			converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
 			IECore::CurvesPrimitivePtr cortexCurve = boost::static_pointer_cast<IECore::CurvesPrimitive>( converter->convert() );
-			
+
 			if( !combinedCurves )
 			{
 				combinedCurves = cortexCurve;
@@ -124,22 +124,22 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 				curvesMergeOp->operate();
 			}
 		}
-		
+
 		if( !combinedCurves )
 		{
 			combinedCurves = new IECore::CurvesPrimitive();
 		}
-		
+
 		MFnPluginData fnD;
 		MObject data = fnD.create( IECoreMaya::ObjectData::id );
 		IECoreMaya::ObjectData *objectData = dynamic_cast<IECoreMaya::ObjectData *>( fnD.data() );
 		objectData->setObject( combinedCurves );
-		
+
 		dataBlock.outputValue( aOutputCurves ).set( objectData );
 		dataBlock.setClean( aOutputCurves );
 
 		return MS::kSuccess;
-	
+
 	}
 
 	return MS::kUnknownParameter;

@@ -66,37 +66,37 @@ class LightTest( unittest.TestCase ) :
 		self.assertEqual( s.handle, "myNewHandle" )
 
 	def testConstructWithParameters( self ) :
-	
+
 		s = Light( "test", "test001", CompoundData( { "a" : StringData( "a" ) } ) )
-		
+
 		self.assertEqual( s.name, "test" )
 		self.assertEqual( s.handle, "test001" )
 		self.assertEqual( len( s.parameters ), 1 )
 		self.assertEqual( s.parameters.typeName(), CompoundData.staticTypeName() )
 		self.assertEqual( s.parameters["a"], StringData( "a" ) )
-		
+
 	def testCopy( self ) :
-	
+
 		s = Light( "test", "surface", CompoundData( { "a" : StringData( "a" ) } ) )
 		ss = s.copy()
-				
+
 		self.assertEqual( s, ss )
-		
+
 	def testHash( self ) :
-	
+
 		s = Light( "name", "handle" )
 		h = s.hash()
-		
+
 		s.name = "name2"
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
-		
+
 		s.handle = "handle2"
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
-		
+
 		s.parameters["a"] = StringData( "a" )
 		self.assertNotEqual( s.hash(), h )
-		
+
 if __name__ == "__main__":
     unittest.main()

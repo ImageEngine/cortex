@@ -84,7 +84,7 @@ void bindCurvesPrimitiveEvaluator()
 		.def( "vertexDataOffsets", &vertexDataOffsets )
 		.def( "varyingDataOffsets", &varyingDataOffsets )
 	;
-	
+
 	RefCountedClass<CurvesPrimitiveEvaluator::Result, PrimitiveEvaluator::Result>( "Result" )
 		.def( "curveIndex", &CurvesPrimitiveEvaluator::Result::curveIndex )
 	;

@@ -44,20 +44,20 @@ class Color3fParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		Color3fParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
-				
+
 	private :
-	
+
 		Imath::Color3f m_storage;
 		DD::Image::Knob *m_knob;
-	
+
 		static Description<Color3fParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

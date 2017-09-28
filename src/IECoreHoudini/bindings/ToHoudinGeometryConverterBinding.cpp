@@ -53,7 +53,7 @@ static bool convert( ToHoudiniGeometryConverter &c, GU_DetailHandle &handle, boo
 	{
 		return false;
 	}
-	
+
 	if ( !append )
 	{
 		GU_DetailHandleAutoWriteLock writeHandle( handle );
@@ -62,10 +62,10 @@ static bool convert( ToHoudiniGeometryConverter &c, GU_DetailHandle &handle, boo
 		{
 			return false;
 		}
-		
+
 		geo->clearAndDestroy();
 	}
-	
+
 	return c.convert( handle );
 }
 
@@ -77,15 +77,15 @@ static bool convertToSop( ToHoudiniGeometryConverter &c, SOP_Node *sop, bool app
 	// create the work context
 	OP_Context context;
 	context.setTime( CHgetEvalTime() );
-	
+
 	GU_DetailHandle handle = sop->getCookedGeoHandle( context );
-	
+
 	if ( convert( c, handle, append ) )
 	{
 		sop->setModelLock( true );
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -98,7 +98,7 @@ static bool convertToGeo( ToHoudiniGeometryConverter &c, HOM_Geometry *homGeo, b
 	{
 		return false;
 	}
-	
+
 	// this HOM manipulation was provided by SideFx, with a warning
 	// that it is safe but not really meant for HDK developers
 	HOM_GUDetailHandle *gu_handle = homGeo->_guDetailHandle();
@@ -106,12 +106,12 @@ static bool convertToGeo( ToHoudiniGeometryConverter &c, HOM_Geometry *homGeo, b
 	{
 		return false;
 	}
-	
+
 	GU_Detail *geo = (GU_Detail *)gu_handle->_asVoidPointer();
-	
+
 	GU_DetailHandle handle;
 	handle.allocateAndSet( geo, false );
-	
+
 	return convert( c, handle, append );
 }
 
@@ -124,7 +124,7 @@ static list supportedTypes()
 	{
 		result.append( *it );
 	}
-	
+
 	return result;
 }
 

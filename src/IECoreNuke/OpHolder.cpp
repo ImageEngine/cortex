@@ -57,7 +57,7 @@ IECore::ObjectPtr OpHolder::engine()
 	{
 		return m_result;
 	}
-	
+
 	IECore::ConstOpPtr constOp = IECore::runTimeCast<const IECore::Op>( parameterised() );
 	if( !constOp )
 	{
@@ -69,10 +69,10 @@ IECore::ObjectPtr OpHolder::engine()
 
 	setParameterValues(); /// \todo is this really needed?? didn't we do that in validate()?
 	setParameterValuesFromInputs(); /// \todo Should this be done by an engine() call on the base class?
-	
+
 	m_result = op->operate();
 	m_resultHash = hash();
-	
+
 	return m_result;
 }
 

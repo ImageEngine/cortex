@@ -58,14 +58,14 @@ class IECORE_API LimitSmoothSkinningInfluencesOp : public ModifyOp
 
 		LimitSmoothSkinningInfluencesOp();
 		virtual ~LimitSmoothSkinningInfluencesOp();
-		
+
 		enum Mode
 		{
 			WeightLimit = 0,
 			MaxInfluences,
 			Indexed,
 		};
-	
+
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );

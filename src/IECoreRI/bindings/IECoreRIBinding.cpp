@@ -57,7 +57,7 @@ BOOST_PYTHON_MODULE( _IECoreRI )
 #endif // IECORERI_WITH_PTC
 	bindRIBWriter();
 #ifdef IECORERI_WITH_SX
-	bindSXRenderer();	
+	bindSXRenderer();
 #endif // IECORERI_WITH_SX
 
 	def( "withRiProceduralV", &IECoreRI::withRiProceduralV );

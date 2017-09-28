@@ -39,32 +39,32 @@ import IECore
 class MurmurHashTest( unittest.TestCase ) :
 
 	def testConstructor( self ) :
-	
+
 		h = IECore.MurmurHash()
 		self.assertEqual( str( h ), "0" * 32 )
 		self.assertEqual( h, IECore.MurmurHash() )
-		
+
 	def testCopyConstructor( self ) :
-	
+
 		h = IECore.MurmurHash()
 		h.append( 1 )
 		h.append( "hello" )
-		
+
 		self.assertEqual( h, IECore.MurmurHash( h ) )
 		self.assertNotEqual( h, IECore.MurmurHash() )
-	
+
 	def testAppend( self ) :
-	
+
 		h = IECore.MurmurHash()
 		for k in [ "hello", 'a', 1, 2.0, 2**62 ] :
 			h2 = IECore.MurmurHash( h )
 			h.append( k )
 			self.assertNotEqual( h, h2 )
-	
+
 	def testKnownHashes( self ) :
-	
+
 		# test against hashes generated using the smhasher code directly
-		
+
 		h = IECore.MurmurHash()
 		h.append( "the quick brown fox jumps over the lazy dog" )
 		self.assertEqual(
@@ -78,7 +78,7 @@ class MurmurHashTest( unittest.TestCase ) :
 			str( h ),
 			"1739807a7ecb8d70bbf1c02a2a649b8f",
 		)
-		
+
 		h = IECore.MurmurHash()
 		h.append( IECore.FloatVectorData( [ 1, 2, 3 ] ) )
 		self.assertEqual(
@@ -87,28 +87,28 @@ class MurmurHashTest( unittest.TestCase ) :
 		)
 
 	def testStringRepeatability( self ) :
-	
+
 		h = IECore.MurmurHash()
 		h.append( "i am a lovely string" )
-		
+
 		for i in range( 0, 1000 ) :
 			h2 = IECore.MurmurHash()
 			h2.append( "i am a lovely string" )
 			self.assertEqual( h, h2 )
-			
+
 	def testStringDifferences( self ) :
-	
+
 		s = "i am a lovely string"
 		h = IECore.MurmurHash()
 		h.append( s )
-		
+
 		for i in range( 1, len( s ) ) :
 			h2 = IECore.MurmurHash()
 			h2.append( s[0:-i] )
 			self.assertNotEqual( h, h2 )
-	
+
 	def testInternedString( self ) :
-	
+
 		# because the underlying data is identical,
 		# InternedStrings should hash equal to their
 		# string equivalents
@@ -118,24 +118,24 @@ class MurmurHashTest( unittest.TestCase ) :
 			h2 = IECore.MurmurHash()
 			h2.append( IECore.InternedString( s ) )
 			self.assertEqual( h1, h2 )
-			
+
 	def testInternedStringVector( self ) :
-	
+
 		# because the underlying data is identical,
 		# InternedStrings should hash equal to their
 		# string equivalents
 		s = [ "one", "apple", "two", "fish" ]
-		
+
 		h1 = IECore.MurmurHash()
 		h1.append( IECore.StringVectorData( s ) )
-		
+
 		h2 = IECore.MurmurHash()
 		h2.append( IECore.InternedStringVectorData( s ) )
-		
-		self.assertEqual( h1, h2 )		
-		
+
+		self.assertEqual( h1, h2 )
+
 	def testTypeDoesntMatter( self ) :
-	
+
 		# although these are different types they should hash equal, because
 		# the underlying data has exactly the same layout. see TypedDataTest.testHash()
 		# for an equivalent test showing that the differing types /are/ taken
@@ -143,22 +143,22 @@ class MurmurHashTest( unittest.TestCase ) :
 
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
-		
+
 		h1.append( IECore.V3f( 1, 2, 3 ) )
 		h2.append( IECore.Color3f( 1, 2, 3 ) )
-	
+
 		self.assertEqual( h1, h2 )
-		
+
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
-		
+
 		h1.append( IECore.IntVectorData( [ 0, 0, 0 ] ) )
 		h2.append( IECore.UIntVectorData( [ 0, 0, 0 ] ) )
-	
+
 		self.assertEqual( h1, h2 )
 
 	def testAllDimensionsOfImathVecs( self ) :
-	
+
 		vv = [ IECore.V3f( 1, 2, 3 ), IECore.Color4f( 1, 2, 3, 4 ) ]
 		for v in vv :
 			h = IECore.MurmurHash()
@@ -169,14 +169,14 @@ class MurmurHashTest( unittest.TestCase ) :
 				nextH.append( v )
 				self.assertNotEqual( h, nextH )
 				h = nextH
-	
+
 	def testAllElementsOfImathBoxes( self ) :
-	
+
 		vv = [
 			IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ),
 			IECore.Box2f( IECore.V2f( 1, 2 ), IECore.V2f( 3, 4 ) ),
 		]
-		
+
 		for v in vv :
 			h = IECore.MurmurHash()
 			h.append( v )
@@ -187,35 +187,35 @@ class MurmurHashTest( unittest.TestCase ) :
 					nextH.append( v )
 					self.assertNotEqual( h, nextH )
 					h = nextH
-	
+
 	def testCopyFrom( self ) :
 
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
 		self.assertEqual( h1, h2 )
-		
+
 		h1.append( 1 )
 		self.assertNotEqual( h1, h2 )
-		
+
 		h2.copyFrom( h1 )
 		self.assertEqual( h1, h2 )
-	
+
 	def testHashOfEmptyStrings( self ) :
-	
+
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
-		
+
 		h2.append( "" )
 		self.assertNotEqual( h1, h2 )
-		
+
 		h1 = IECore.MurmurHash()
 		h2 = IECore.MurmurHash()
-		
+
 		h1.append( IECore.StringVectorData( [ "" ] ) )
 		h2.append( IECore.StringVectorData( [ "", "" ] ) )
-		
+
 		self.assertNotEqual( h1, h2 )
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

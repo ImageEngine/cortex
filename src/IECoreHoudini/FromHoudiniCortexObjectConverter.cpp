@@ -86,7 +86,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCortexObjectConverter::c
 			return Ideal;
 		}
 	}
-	
+
 	return Inapplicable;
 }
 
@@ -98,26 +98,26 @@ ObjectPtr FromHoudiniCortexObjectConverter::doDetailConversion( const GU_Detail 
 	{
 		throw std::runtime_error( "FromHoudiniCortexObjectConverter: Geometry does not contain a single CortexObject primitive" );
 	}
-	
+
 	ConstObjectPtr object = ((CortexPrimitive *)prim)->getObject();
 
 	ObjectPtr result = filterAttribs( object.get(), operands->member<StringData>( "attributeFilter" )->readable().c_str() );
-	
+
 	if ( result )
 	{
 		return result;
 	}
-	
+
 	if ( object )
 	{
 		if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
 		{
 			return boost::const_pointer_cast<IECore::Object>( object );
 		}
-		
+
 		return object->copy();
 	}
-	
+
 	return 0;
 }
 
@@ -128,7 +128,7 @@ ObjectPtr FromHoudiniCortexObjectConverter::filterAttribs( const Object *object,
 	{
 		return 0;
 	}
-	
+
 	std::vector<InternedString> variablesToErase;
 	const PrimitiveVariableMap &variables = primitive->variables;
 	for ( PrimitiveVariableMap::const_iterator it = variables.begin(); it != variables.end(); ++it )
@@ -138,18 +138,18 @@ ObjectPtr FromHoudiniCortexObjectConverter::filterAttribs( const Object *object,
 			variablesToErase.push_back( it->first );
 		}
 	}
-	
+
 	if ( variablesToErase.empty() )
 	{
 		return 0;
 	}
-	
+
 	PrimitivePtr result = primitive->copy();
 	PrimitiveVariableMap &resultVariables = result->variables;
 	for ( size_t i = 0; i < variablesToErase.size(); ++i )
 	{
 		resultVariables.erase( variablesToErase[i] );
 	}
-	
+
 	return result;
 }

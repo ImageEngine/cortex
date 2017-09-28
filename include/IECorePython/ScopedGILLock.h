@@ -48,17 +48,17 @@ namespace IECorePython
 /// get_override() to call into python.
 class IECOREPYTHON_API ScopedGILLock : boost::noncopyable
 {
-	
+
 	public :
-	
+
 		ScopedGILLock();
 		~ScopedGILLock();
 
 	private :
-	
+
 		bool m_threadsInitialised;
 		PyGILState_STATE m_state;
-		
+
 };
 
 } // namespace IECorePython

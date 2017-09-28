@@ -380,7 +380,7 @@ enum TypeId
 	SkeletonPrimitiveParameterTypeId = 332,
 	SkeletonPrimitiveOpTypeId = 333,
 	MatrixModifyOpTypeId = 334,
-	
+
 	MeshPrimitiveSmoothSkinningOpTypeId = 335,
 
 	AddSmoothSkinningInfluencesOpTypeId = 336,

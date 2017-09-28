@@ -98,37 +98,37 @@ MStatus BoxParameterHandler<T>::doUpdate( IECore::ConstParameterPtr parameter, M
 		{
 			return s;
 		}
-		
+
 		MObject maxChildAttr = fnMaxAttr.child( i, &s );
 		if( !s )
 		{
 			return s;
-		}	
-	
+		}
+
 		MFnNumericAttribute fnMinChildAttr( minChildAttr, &s );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		MFnNumericAttribute fnMaxChildAttr( maxChildAttr, &s );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		s = fnMinChildAttr.setDefault( defValue.min[i] );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 		s = fnMaxChildAttr.setDefault( defValue.max[i] );
 		if( !s )
 		{
 			return s;
 		}
-		
+
 	}
 
 	return finishUpdating( parameter, plug );
@@ -170,10 +170,10 @@ MPlug BoxParameterHandler<T>::doCreate( IECore::ConstParameterPtr parameter, con
 	MObject attribute = fnCAttr.create( plugName, plugName );
 	fnCAttr.addChild( oMin );
 	fnCAttr.addChild( oMax );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 

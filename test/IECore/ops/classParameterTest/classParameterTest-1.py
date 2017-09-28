@@ -46,7 +46,7 @@ class classParameterTest( IECore.Op ) :
 				defaultValue = 0,
 			)
 		)
-		
+
 		self.parameters().addParameter(
 
 			IECore.ClassParameter(

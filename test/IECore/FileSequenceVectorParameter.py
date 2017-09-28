@@ -108,7 +108,7 @@ class TestFileSequenceVectorParameter( unittest.TestCase ) :
 		self.assertEqual( len(fs), 2 )
 		self.assertEqual( fs[0], IECore.ls( "test/sequences/parameterTest/a.#.tif" ) )
 		self.assertEqual( fs[1], IECore.ls( "test/sequences/parameterTest/b.#.tif" ) )
-		
+
 		fs = p.getFileSequenceValues( t )
 
 		self.assertEqual( len(fs), 2 )

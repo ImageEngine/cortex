@@ -72,7 +72,7 @@ std::string str<TimeCodeData>( TimeCodeData &x )
 	object item( x.readable() );
 
 	assert( item.attr( "__str__" ) != object() );
-	
+
 	return call_method< std::string >( item.ptr(), "__str__" );
 }
 

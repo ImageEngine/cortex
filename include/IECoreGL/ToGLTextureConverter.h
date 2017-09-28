@@ -61,7 +61,7 @@ IE_CORE_FORWARDDECLARE( Texture )
 ///
 /// The channels data object should contain FloatVectorData in keys corresponding to the original image channel names.
 /// Other data types in images are not currently supported.
-/// 
+///
 /// Such an object can easily be constructed in python like so:
 ///
 /// \code
@@ -73,7 +73,7 @@ IE_CORE_FORWARDDECLARE( Texture )
 ///	   channelData = IECore.CompoundData()
 ///	   for channel in image.channelNames() :
 ///	       channelData[ channel ] = image[ channel ].data
-///	
+///
 ///	   compoundData["channels"] = channelData
 /// \endcode
 /// \ingroup conversionGroup
@@ -84,7 +84,7 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 
 		typedef IECoreImage::ImagePrimitive InputType;
 		typedef IECoreGL::Texture ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLTextureConverter, ToGLTextureConverterTypeId, ToGLConverter );
 
 		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0, bool createMissingRGBChannels = false );
@@ -93,7 +93,7 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 	protected :
 
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-	
+
 	private :
 
 		IECoreImage::ImagePrimitivePtr createMissingChannels( const IECoreImage::ImagePrimitive *image ) const;
@@ -102,7 +102,7 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 
 		static ConverterDescription<ToGLTextureConverter> g_description;
 		static ConverterDescription<ToGLTextureConverter> g_compoundDataDescription;
-	
+
 };
 
 IE_CORE_DECLAREPTR( ToGLTextureConverter );

@@ -70,7 +70,7 @@ class PostLoadCallback::PostLoadCallbackData
 		static void afterLoad(void *clientData)
 		{
 			assert( clientData );
-			
+
 			// we only emit the callback when isReadingFile() is false, as this indicates that all
 			// loading is complete. otherwise we would emit a whole series of callbacks when loading a scene
 			// with lots of references in.

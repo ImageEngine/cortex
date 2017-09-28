@@ -40,7 +40,7 @@ import IECore
 from UIElement import UIElement
 
 ## A class for making maya menus from an IECore.MenuDefinition. The menu is built dynamically when it's
-# displayed, so the definition can be edited at any time to change the menu. 
+# displayed, so the definition can be edited at any time to change the menu.
 class Menu( UIElement ) :
 
 	# Creates a menu defined by the specified definition. parent may be a
@@ -87,11 +87,11 @@ class Menu( UIElement ) :
 			menu = maya.cmds.popupMenu( parent=parent, button=button, allowOptionBoxes=True )
 
 		maya.cmds.menu( menu, edit=True, postMenuCommand = IECore.curry( self.__postMenu, menu, definition ) )
-		
+
 		UIElement.__init__( self, menu )
-	
+
 	def __wrapCallback( self, cb ) :
-		
+
 		if ( callable( cb ) ) :
 			return self._createCallback( cb )
 		else :
@@ -119,15 +119,15 @@ class Menu( UIElement ) :
 					maya.cmds.menu( subMenu, edit=True, postMenuCommand=IECore.curry( self.__postMenu, subMenu, subMenuDefinition ) )
 					done.add( name )
 			else :
-			
+
 				kw = {}
-				
+
 				if getattr( item, "bold", False ) :
 					kw["boldFont"] = True
-					
+
 				if getattr( item, "italic", False ) :
 					kw["italicized"] = True
-					
+
 				if item.divider :
 
 					menuItem = maya.cmds.menuItem( parent=parent, divider=True )
@@ -142,12 +142,12 @@ class Menu( UIElement ) :
 					active = item.active
 					if callable( active ) :
 						active = active()
-					
+
 					checked = item.checkBox
 					if callable( checked ) :
 						checked = checked()
 						kw["checkBox"] = checked
-					
+
 					menuItem = maya.cmds.menuItem( label=name, parent=parent, enable=active, annotation=item.description, **kw )
 					if item.command :
 						maya.cmds.menuItem( menuItem, edit=True, command=self.__wrapCallback( item.command ) )

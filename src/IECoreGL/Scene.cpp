@@ -92,7 +92,7 @@ size_t Scene::select( Selector::Mode mode, const Imath::Box2f &region, std::vect
 	}
 
 	Selector selector( region, mode, hits );
-	
+
 	State::bindBaseState();
 	selector.baseState()->bind();
 	root()->render( selector.baseState() );

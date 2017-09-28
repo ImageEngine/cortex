@@ -70,20 +70,20 @@ namespace IECoreMaya
 class SceneShapeInterface: public MPxComponentShape
 {
 	friend class SceneShapeInterfaceComponentBoundIterator;
-	
+
 	public:
-		
+
 		SceneShapeInterface();
 		virtual ~SceneShapeInterface();
-		
+
 		/*
 		 * For Maya
 		 */
-		
+
 		virtual void postConstructor();
 		static void *creator();
 		static MStatus initialize();
-		
+
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
@@ -99,30 +99,30 @@ class SceneShapeInterface: public MPxComponentShape
 		/// This method is overridden to supply a geometry iterator, which maya uses to work out
 		/// the bounding boxes of the components you've selected in the viewport
 		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
-		
+
 		/// This is a blank override, to stop maya offering you a rotation manipulator for the
 		/// procedural components, then crashing when you try and use it (maya 2013)
 		virtual void transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache );
-		
+
 		static MTypeId id;
-		
+
 		// Public variables because plugs need to be accessed by the UI creator which implements the drawing/selection
 		static MObject aObjectOnly;
 		static MObject aDrawGeometry;
 		static MObject aDrawRootBound;
 		static MObject aDrawChildBounds;
 		static MObject aDrawTagsFilter;
-		
+
 		/*
 		 * Custom
 		 */
-		
+
 		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
 		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
-		
+
 		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawLocators, drawChildBounds )
 		IECoreGL::ConstScenePtr glScene();
-		
+
 		/// Returns GL Group matching the given path name.
 		IECoreGL::GroupPtr glGroup( const IECore::InternedString &name );
 		/// Returns the internal index stored for the given path
@@ -135,7 +135,7 @@ class SceneShapeInterface: public MPxComponentShape
 		double time() const;
 
 	protected :
-		
+
 		// protected variables, used by derived classes to set attribute dependencies
 		static MObject aTime;
 		static MObject aOutTime;
@@ -144,10 +144,10 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aAttributes;
 		static MObject aTransform;
 		static MObject aBound;
-		
+
 		/// Flags the GL scene as dirty, for use by derived classes
 		void setDirty();
-		
+
 	private :
 
 		static MObject aQuerySpace;
@@ -161,9 +161,9 @@ class SceneShapeInterface: public MPxComponentShape
 		Converter parameters are updated with a string value held in aConvertParamQueries with IECore.ParameterParser.
 		**/
 		static MObject aConvertParamQueries;
-		
+
 		static MObject aAttributeValues;
-		
+
 		static MObject aTranslate;
 		static MObject aTranslateX;
 		static MObject aTranslateY;
@@ -176,7 +176,7 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aScaleX;
 		static MObject aScaleY;
 		static MObject aScaleZ;
-		
+
 		static MObject aBoundMin;
 		static MObject aBoundMinX;
 		static MObject aBoundMinY;
@@ -189,7 +189,7 @@ class SceneShapeInterface: public MPxComponentShape
 		static MObject aBoundCenterX;
 		static MObject aBoundCenterY;
 		static MObject aBoundCenterZ;
-		
+
 		/// Available modes for querySpace: Local space or World space (starts at sceneInterface path)
 		enum Space
 		{
@@ -201,7 +201,7 @@ class SceneShapeInterface: public MPxComponentShape
 		bool m_previewSceneDirty;
 
 		IECoreGL::ScenePtr m_scene;
-		
+
 		/// Uses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
 		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
 
@@ -214,7 +214,7 @@ class SceneShapeInterface: public MPxComponentShape
 		void buildGroups( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr subScene );
 
 		void registerGroup( const std::string &name, IECoreGL::GroupPtr &group );
-		
+
 		std::string relativePathName( IECore::SceneInterface::Path path );
 		IECore::SceneInterface::Path fullPathName( std::string relativeName );
 		/// Returns concatenated matrix from current sceneInterface path to given scene
@@ -239,7 +239,7 @@ class SceneShapeInterface: public MPxComponentShape
 		NameToGroupMap m_nameToGroupMap;
 		HashToName m_hashToName;
 		InstanceArray m_instances;
-		
+
 		IE_CORE_FORWARDDECLARE( PostLoadCallback );
 		PostLoadCallbackPtr m_postLoadCallback;
 

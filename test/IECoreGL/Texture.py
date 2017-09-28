@@ -82,7 +82,7 @@ class TestTexture( unittest.TestCase ) :
 			gl_TexCoord[0] = gl_MultiTexCoord0;
 		}
 		"""
-	
+
 		fs = """
 		uniform sampler2D testSampler;
 		void main()
@@ -92,9 +92,9 @@ class TestTexture( unittest.TestCase ) :
 		"""
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-			
+
 			r.shader( "surface", "color",
 				{
 					"gl:vertexSource" : vs,
@@ -102,24 +102,24 @@ class TestTexture( unittest.TestCase ) :
 					"testSampler" : shaderParameter,
 				}
 			)
-			
+
 			r.sphere( 1, -1, 1, 360, {} )
 
 	def testEmptyStringShaderParameter( self ) :
-	
+
 		self.performShaderParameterTest( IECore.StringData( "" ) )
 
 	def testMissingStringShaderParameter( self ) :
-	
+
 		self.performShaderParameterTest( IECore.StringData( "thisFileDoesntExist" ) )
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

@@ -54,16 +54,16 @@ class IECORERI_API SXExecutor : public boost::noncopyable
 {
 
 	public :
-	
+
 		typedef std::vector<SxShader> ShaderVector;
-	
+
 		/// Constructs an executor for the specified set of shaders - the shaders in the shaders parameter will be
 		/// run in sequence, with the output from one forming the input to the next. Due to quirks of the Sx API,
 		/// you must also pass the context the shaders were created in, and the coshaders and lights from that context.
 		/// It is the caller's responsibility to ensure that the context and ShaderVectors remain alive for as long as the executor is in use.
 		SXExecutor( const ShaderVector &shaders, SxContext context, const ShaderVector &coshaders, const ShaderVector &lights );
 		~SXExecutor();
-		
+
 		/// Executes the shaders for the specified points. The points are considered
 		/// to have no specific connectivity, meaning that area and filtering functions
 		/// will be effectively disabled during shader execution.

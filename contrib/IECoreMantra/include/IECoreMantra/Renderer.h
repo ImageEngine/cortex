@@ -50,13 +50,13 @@ class Renderer : public IECore::Renderer
 {
 	public:
 		Renderer();
-		Renderer( const std::string &ifdFileName );	
+		Renderer( const std::string &ifdFileName );
 		// A VRAY dso derived from  ProceduralPrimitive uses this as an entry point.
 		Renderer( ProceduralPrimitive *procedural );
 		virtual ~Renderer();
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreMantra::Renderer, RendererTypeId, IECore::Renderer );
-		
+
 		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
 		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
 		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
@@ -113,7 +113,7 @@ class Renderer : public IECore::Renderer
 
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 	private:
 		friend class RendererImplementation;
 		Renderer( RendererImplementationPtr implementation );

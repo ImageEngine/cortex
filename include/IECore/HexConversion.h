@@ -53,7 +53,7 @@ inline void decToHex( T value, OutputIterator result )
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
 	typedef typename std::iterator_traits<OutputIterator>::value_type CharType;
 	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
-	
+
 	for( int i = sizeof( T ) * 2 - 1; i >= 0 ; --i )
 	{
 		int m = ( value >> (i * 4) ) & 0xF;
@@ -98,7 +98,7 @@ inline T hexToDec( InputIterator first, InputIterator last )
 	BOOST_STATIC_ASSERT( boost::is_integral<T>::value );
 	typedef typename std::iterator_traits<InputIterator>::value_type CharType;
 	BOOST_STATIC_ASSERT( ( boost::is_same<CharType, char>::value ) );
-    
+
 	T n = 0;
 
 	for( ; first != last; ++first )
@@ -165,7 +165,7 @@ inline T hexToDec( InputIterator first, InputIterator last )
 			assert( false );
 		}
 	}
-	
+
 	return n;
 }
 

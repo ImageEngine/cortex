@@ -80,18 +80,18 @@ void CompoundParameterHandler::inputs( const IECore::Parameter *parameter, int &
 		{
 			int min = h->minimumInputs( cIt->get() );
 			int max = h->maximumInputs( cIt->get() );
-			
+
 			if( min && foundOptionalInputs )
 			{
 				msg( Msg::Error, "CompoundParameterHandler::inputs", "Parameter needing inputs found after parameter needing optional inputs." );
 				error = true;
 			}
-			
+
 			if( max != min )
 			{
 				foundOptionalInputs = true;
 			}
-			
+
 			minimum += min;
 			maximum += max;
 		}
@@ -116,13 +116,13 @@ bool CompoundParameterHandler::testInput(  const IECore::Parameter *parameter, i
 			input -= inputs; // make indexing relative to the next handler.
 		}
 	}
-	return false;	
+	return false;
 }
 
 void CompoundParameterHandler::setParameterValue( IECore::Parameter *parameter, InputIterator first, InputIterator last )
 {
 	const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
-	
+
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
@@ -140,13 +140,13 @@ void CompoundParameterHandler::setParameterValue( IECore::Parameter *parameter, 
 		}
 	}
 }
-		
+
 void CompoundParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
-{	
+{
 	beginGroup( parameter, knobName, f );
 
 		childKnobs( parameter, knobName, f );
-		
+
 	endGroup( parameter, knobName, f );
 }
 
@@ -182,7 +182,7 @@ void CompoundParameterHandler::setState( IECore::Parameter *parameter, const IEC
 {
 	const CompoundObject *o = static_cast<const CompoundObject *>( state );
 	CompoundParameter *compoundParameter = static_cast<CompoundParameter *>( parameter );
-	
+
 	const CompoundObject::ObjectMap &members = o->members();
 	for( CompoundObject::ObjectMap::const_iterator it = members.begin(); it!=members.end(); it++ )
 	{
@@ -202,7 +202,7 @@ IECore::ObjectPtr CompoundParameterHandler::getState( const IECore::Parameter *p
 {
 	const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
 	CompoundObjectPtr result = new CompoundObject;
-	
+
 	const CompoundParameter::ParameterVector &childParameters = compoundParameter->orderedParameters();
 	for( CompoundParameter::ParameterVector::const_iterator cIt=childParameters.begin(); cIt!=childParameters.end(); cIt++ )
 	{
@@ -216,12 +216,12 @@ IECore::ObjectPtr CompoundParameterHandler::getState( const IECore::Parameter *p
 			}
 		}
 	}
-	
+
 	if( result->members().size() )
 	{
 		return result;
 	}
-	
+
 	return 0;
 }
 
@@ -232,9 +232,9 @@ void CompoundParameterHandler::beginGroup( const IECore::Parameter *parameter, c
 		// we don't need any grouping for the top level compound parameter
 		return;
 	}
-	
+
 	std::string label = knobLabel( parameter );
-	
+
 	switch( containerType( parameter ) )
 	{
 		case Tab :
@@ -257,7 +257,7 @@ void CompoundParameterHandler::endGroup( const IECore::Parameter *parameter, con
 		// we don't need any grouping for the top level compound parameter
 		return;
 	}
-	
+
 	switch( containerType( parameter ) )
 	{
 		case Tab :
@@ -271,8 +271,8 @@ void CompoundParameterHandler::endGroup( const IECore::Parameter *parameter, con
 			DD::Image::EndGroup( f );
 			break;
 	}
-}		
-				
+}
+
 void CompoundParameterHandler::childKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const CompoundParameter *compoundParameter = static_cast<const CompoundParameter *>( parameter );
@@ -300,7 +300,7 @@ void CompoundParameterHandler::childKnobs( const IECore::Parameter *parameter, c
 				DD::Image::EndTabGroup( f );
 				inTabGroup = false;
 			}
-		
+
 			std::string childKnobName = std::string( knobName ) + "_" + (*cIt)->name();
 			h->knobs( cIt->get(), childKnobName.c_str(), f );
 		}
@@ -315,13 +315,13 @@ CompoundParameterHandler::ContainerType CompoundParameterHandler::containerType(
 	{
 		return Collapsible;
 	}
-	
+
 	const StringData *typeHint = ui->member<StringData>( "typeHint" );
 	if( !typeHint )
 	{
-		return Collapsible;	
+		return Collapsible;
 	}
-	
+
 	if( typeHint->readable()=="collapsible" || typeHint->readable()=="collapsable" )
 	{
 		return Collapsible;
@@ -339,7 +339,7 @@ CompoundParameterHandler::ContainerType CompoundParameterHandler::containerType(
 }
 
 std::string CompoundParameterHandler::knobLabel( const IECore::Parameter *parameter ) const
-{	
+{
 	// Code to display the same label as would be displayed in maya.
 	// this relies on the convention of having an invisible StringParameter named
 	// label immediately under the CompoundParameter. not very pretty.
@@ -360,7 +360,7 @@ std::string CompoundParameterHandler::knobLabel( const IECore::Parameter *parame
 			}
 		}
 	}
-		
+
 	return ParameterHandler::knobLabel( parameter );
 }
 
@@ -371,18 +371,18 @@ ParameterHandlerPtr CompoundParameterHandler::handler( const Parameter *child, b
 	{
 		return it->second;
 	}
-	
+
 	if( !createIfMissing )
 	{
 		return 0;
 	}
-	
+
 	ParameterHandlerPtr h = ParameterHandler::create( child );
 	if( !h )
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreNuke::CompoundParameterHandler", boost::format(  "Unable to create handler for parameter \"%s\" of type \"%s\"" ) % child->name() % child->typeName() );
 	}
-	
+
 	m_handlers[child->internedName()] = h;
 	return h;
 }

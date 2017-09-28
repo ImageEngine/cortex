@@ -34,11 +34,11 @@
 
 #include <iostream>
 
-#include "CompoundObjectTest.h" 
+#include "CompoundObjectTest.h"
 
-#include "IECore/CompoundObject.h" 
-#include "IECore/TypedData.h" 
-#include "IECore/SimpleTypedData.h" 
+#include "IECore/CompoundObject.h"
+#include "IECore/TypedData.h"
+#include "IECore/SimpleTypedData.h"
 #include "IECore/MemoryIndexedIO.h"
 
 using namespace boost;
@@ -51,89 +51,89 @@ struct CompoundObjectTest
 {
 	void testMemberRetrieval()
 	{
-		
+
 		CompoundObjectPtr c = new CompoundObject();
-		
+
 		c->members()["floatElement"] = new FloatData( 42.0f );
 		c->members()["stringElement"] = new StringData( "cake" );
-		
+
 		try
 		{
 			FloatData *f = c->member<FloatData>( "floatElement", false );
 			BOOST_CHECK( f );
 			BOOST_CHECK( f->staticTypeId() == FloatData::staticTypeId() );
-			
+
 			IntData *i = c->member<IntData>( "floatElement", false );
 			BOOST_CHECK( !i );
-			
+
 			StringData *s = c->member<StringData>( "iAmMissing", false );
 			BOOST_CHECK( !s );
-			
+
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
 			BOOST_WARN( !e.what() );
 			BOOST_CHECK( !"Exception thrown during member retrieval with exceptions disabled." );
 		}
-		
+
 		try
 		{
 			FloatData *f = c->member<FloatData>( "floatElement", true );
 			BOOST_REQUIRE( f );
 			BOOST_CHECK( f->staticTypeId() == FloatData::staticTypeId() );
-			
+
 			StringData *s = c->member<StringData>( "stringElement", true );
 			BOOST_REQUIRE( s );
 			BOOST_CHECK( s->staticTypeId() == StringData::staticTypeId() );
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
 			BOOST_WARN( !e.what() );
 			BOOST_CHECK( !"Exception thrown during member retrieval." );
 		}
-		
+
 		try
 		{
 			IntData *i = c->member<IntData>( "floatElement", true );
 			BOOST_CHECK( !"Exception not thrown during invalid member retrieval." );
 			BOOST_CHECK( !i );
 		}
-		catch ( const Exception &e ) 
+		catch ( const Exception &e )
 		{
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
-			BOOST_CHECK( !"Exception should be of type IECore::Exception." );		
+			BOOST_CHECK( !"Exception should be of type IECore::Exception." );
 		}
 		try
 		{
 			StringData *s = c->member<StringData>( "iAmMissing", true, false );
 			BOOST_CHECK( !"Exception not thrown during missing member retrieval." );
-			BOOST_CHECK( !s );		
+			BOOST_CHECK( !s );
 		}
-		catch ( const Exception &e ) 
+		catch ( const Exception &e )
 		{
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
-			BOOST_CHECK( !"Exception should be of type IECore::Exception." );		
+			BOOST_CHECK( !"Exception should be of type IECore::Exception." );
 		}
-		
+
 		try
 		{
 			StringData *s = c->member<StringData>( "iAmMissing", true, true );
 			BOOST_REQUIRE( s );
 			BOOST_CHECK( s->staticTypeId() == StringData::staticTypeId() );
-		
+
 			FloatData *f = c->member<CompoundObject>( "newParent", true, true )->member<FloatData>( "newChild", true, true );
 			BOOST_REQUIRE( f );
 			BOOST_CHECK( f->staticTypeId() == FloatData::staticTypeId() );
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
 			BOOST_CHECK( !"Exception thrown during creation of member." );
 		}
-		
+
 		const StringData *s = c->member<const StringData>( "stringElement" );
 		BOOST_CHECK( s );
 	}
@@ -149,7 +149,7 @@ struct CompoundObjectTest
 		{
 			CompoundObjectPtr dd = d->copy();
 		}
-		catch ( std::exception &e ) 
+		catch ( std::exception &e )
 		{
 			BOOST_CHECK( !"Exception thrown during CompoundObject copy." );
 		}
@@ -180,7 +180,7 @@ struct CompoundObjectTest
 		catch ( std::exception &e )
 		{
 		}
-		
+
 		// memoryUsage
 		try
 		{

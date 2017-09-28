@@ -72,7 +72,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( imageParameter );
-	
+
 	StringParameterPtr channelNameParameter = new StringParameter(
 		"channelName",
 		"The channel the curves are to be traced from.",
@@ -80,7 +80,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( channelNameParameter );
-	
+
 	FloatParameterPtr vertexMergeDistanceParameter = new FloatParameter(
 		"vertexMergeDistance",
 		"Vertices closer together than this distance will be merged together.",
@@ -89,7 +89,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( vertexMergeDistanceParameter );
-	
+
 	FloatParameterPtr minimumLengthParameter = new FloatParameter(
 		"minimumLength",
 		"The minimum length a spur must be to make it into the output.",
@@ -98,7 +98,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( minimumLengthParameter );
-	
+
 	BoolParameterPtr colorParameter = new BoolParameter(
 		"color",
 		"When this is on, a random color is given to each curve.",
@@ -106,11 +106,11 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( colorParameter );
-	
+
 	IntParameter::PresetsContainer outputTypePresets;
 	outputTypePresets.push_back( IntParameter::Preset( "linear", Linear ) );
 	outputTypePresets.push_back( IntParameter::Preset( "catmullRom", CatmullRom ) );
-	
+
 	IntParameterPtr outputTypeParameter = new IntParameter(
 		"outputType",
 		"The type of curves to output. Linear gives linear curves with approximately one vertex per pixel. "
@@ -124,7 +124,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( outputTypeParameter );
-	
+
 	IntParameterPtr catmullRomStepParameter = new IntParameter(
 		"catmullRomStep",
 		"The number of pixels between vertices when outputting catmull rom curves.",
@@ -138,7 +138,7 @@ CurveTracer::CurveTracer()
 	outputSpacePresets.push_back( IntParameter::Preset( "pixel", ImagePrimitive::Pixel ) );
 	outputSpacePresets.push_back( IntParameter::Preset( "uv", ImagePrimitive::UV ) );
 	outputSpacePresets.push_back( IntParameter::Preset( "object", ImagePrimitive::Object ) );
-	
+
 	IntParameterPtr outputSpaceParameter = new IntParameter(
 		"outputSpace",
 		"The coordinate system to output the curves in.",
@@ -150,7 +150,7 @@ CurveTracer::CurveTracer()
 	);
 
 	parameters()->addParameter( outputSpaceParameter );
-	
+
 }
 
 CurveTracer::~CurveTracer()
@@ -186,7 +186,7 @@ const FloatParameter * CurveTracer::vertexMergeDistanceParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "vertexMergeDistance" );
 }
-		
+
 FloatParameter * CurveTracer::minimumLengthParameter()
 {
 	return parameters()->parameter<FloatParameter>( "minimumLength" );
@@ -226,12 +226,12 @@ const IntParameter * CurveTracer::outputSpaceParameter() const
 {
 	return parameters()->parameter<IntParameter>( "outputSpace" );
 }
-		
+
 ObjectPtr CurveTracer::doOperation( const CompoundObject * operands )
 {
-	
+
 	// find the channel to operate on
-	
+
 	ConstImagePrimitivePtr image = operands->member<ImagePrimitive>( "image" );
 	const std::string &channelName = operands->member<StringData>( "channelName" )->readable();
 	ConstFloatVectorDataPtr channelData = image->getChannel<float>( channelName );
@@ -242,30 +242,30 @@ ObjectPtr CurveTracer::doOperation( const CompoundObject * operands )
 	}
 
 	// build the graph
-	
+
 	Graph graph;
 	buildGraph( channelData->readable(), image->getDataWindow().size() + V2i( 1 ), graph );
-	
+
 	// postprocess it to deal with things we don't like
 
 	removeSpurs( graph, operands->member<FloatData>( "minimumLength" )->readable() );
 	mergeVertices( graph, operands->member<FloatData>( "vertexMergeDistance" )->readable() );
-	
+
 	// turn it into a curves primitive
-	
+
 	CurvesPrimitivePtr result = buildCurves(
 		graph,
 		(OutputType)operands->member<IntData>( "outputType" )->readable(),
 		operands->member<IntData>( "catmullRomStep" )->readable()
 	);
-	
+
 	// transform it to the output space
 	ImagePrimitive::Space space = (ImagePrimitive::Space)operands->member<IntData>( "outputSpace" )->readable();
 	M33f t = image->matrix( ImagePrimitive::Pixel, space );
-	M44f t3d( 
+	M44f t3d(
 		t[0][0], t[0][1], 0.0f, t[0][2],
 		t[1][0], t[1][1], 0.0f, t[1][2],
-		   0.0f,	0.0f, 0.0f, 0.0f, 	
+		   0.0f,	0.0f, 0.0f, 0.0f,
 		t[2][0], t[2][1], 0.0f, t[2][2]
 	);
 	t3d.translate( V3f( -1, -1, 0 ) ); // to correct for the padding introduced during tracing.
@@ -274,13 +274,13 @@ ObjectPtr CurveTracer::doOperation( const CompoundObject * operands )
 	transformOp->copyParameter()->setTypedValue( false );
 	transformOp->matrixParameter()->setValue( new M44fData( t3d ) );
 	transformOp->operate();
-	
+
 	// add color if requested
 	if( operands->member<BoolData>( "color" )->readable() )
 	{
 		colorCurves( result.get() );
 	}
-	
+
 	return result;
 }
 
@@ -288,15 +288,15 @@ void CurveTracer::buildGraph( const std::vector<float> &channel, const Imath::V2
 {
 	// copy the channel into a temporary buffer which we can modify. pad the edges while we're at
 	// it so we don't have to worry about going outside the bound.
-	
+
 	V2i paddedSize = size + V2i( 2 );
-	
+
 	vector<float>::const_iterator fIt = channel.begin();
-	
+
 	vector<char> pixels;
 	pixels.resize( paddedSize.x * paddedSize.y, 0 );
 	vector<char>::iterator it = pixels.begin() + paddedSize.x + 1;
-		
+
 	for( int y=0; y<size.y; y++ )
 	{
 		for( int x=0; x<size.x; x++ )
@@ -305,11 +305,11 @@ void CurveTracer::buildGraph( const std::vector<float> &channel, const Imath::V2
 		}
 		it += 2; // skip padding
 	}
-	
+
 	boost::multi_array_ref<char, 2> array( &pixels[0], extents[paddedSize.y][paddedSize.x] );
-	
+
 	// make the graph we'll use to process everything
-	
+
 	property_map<Graph, vertex_name_t>::type vertexPositions = get( vertex_name, graph );
 	property_map<Graph, edge_name_t>::type edgePixels = get( edge_name, graph );
 	VertexMap vertexMap;
@@ -349,7 +349,7 @@ void CurveTracer::buildGraph( const std::vector<float> &channel, const Imath::V2
 	for( VertexIterator vIt = vertRange.first; vIt != vertRange.second; vIt++ )
 	{
 		V2i vertexPosition = vertexPositions[*vIt];
-		
+
 		V2i startPixel;
 		for( startPixel.y = vertexPosition.y - 1; startPixel.y <= vertexPosition.y + 1; startPixel.y++ )
 		{
@@ -381,7 +381,7 @@ void CurveTracer::buildGraph( const std::vector<float> &channel, const Imath::V2
 
 					array[thisPixel.y][thisPixel.x] = 0;
 
-					// find the next pixel to visit.	
+					// find the next pixel to visit.
 					V2i nextPixel( -1 );
 					for( int yo=-1; yo<2; yo++ )
 					{
@@ -424,7 +424,7 @@ void CurveTracer::buildGraph( const std::vector<float> &channel, const Imath::V2
 }
 
 void CurveTracer::removeSpurs( Graph &graph, float minimumLength ) const
-{	
+{
 	if( minimumLength <= 0.0f )
 	{
 		return;
@@ -470,12 +470,12 @@ void CurveTracer::mergeVertices( Graph &graph, float mergeDistance ) const
 	for( EdgeIterator eIt = edgeRange.first; eIt!=edgeRange.second; )
 	{
 		EdgeIterator nextEdgeIt = eIt; nextEdgeIt++;
-	
+
 		if( 1 + edgePixels[*eIt].size() <= mergeDistance )
 		{
 			Vertex v0 = source( *eIt, graph );
 			Vertex v1 = target( *eIt, graph );
-		
+
 			if( v0 == v1 )
 			{
 				// we've found a very short loop from a vertex back to itself.
@@ -526,9 +526,9 @@ void CurveTracer::mergeVertices( Graph &graph, float mergeDistance ) const
 
 				remove_vertex( v0, graph );
 			}
-			
+
 		}
-		
+
 		eIt = nextEdgeIt;
 	}
 
@@ -538,7 +538,7 @@ CurvesPrimitivePtr CurveTracer::buildCurves( Graph &graph, OutputType type, int 
 {
 	IntVectorDataPtr vertsPerCurve = new IntVectorData;
 	V3fVectorDataPtr verts = new V3fVectorData;
-	
+
 	property_map<Graph, edge_name_t>::type edgePixels = get( edge_name, graph );
 	property_map<Graph, vertex_name_t>::type vertexPositions = get( vertex_name, graph );
 
@@ -549,8 +549,8 @@ CurvesPrimitivePtr CurveTracer::buildCurves( Graph &graph, OutputType type, int 
 		Vertex v2 = target( *eIt, graph );
 
 		const PixelVector &pixels = edgePixels[*eIt];
-		
-		int numVerts = 2;		
+
+		int numVerts = 2;
 		V2i vp = vertexPositions[v1];
 		verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		if( type==CatmullRom )
@@ -564,14 +564,14 @@ CurvesPrimitivePtr CurveTracer::buildCurves( Graph &graph, OutputType type, int 
 			numVerts++;
 			verts->writable().push_back( V3f( pixels[i].x, pixels[i].y, 0.f ) );
 		}
-		
+
 		vp = vertexPositions[v2];
 		verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
 		if( type==CatmullRom )
 		{
 			numVerts++;
 			verts->writable().push_back( V3f( vp.x, vp.y, 0.0f ) );
-		}	
+		}
 
 		vertsPerCurve->writable().push_back( numVerts );
 	}
@@ -589,7 +589,7 @@ void CurveTracer::colorCurves( CurvesPrimitive * curves ) const
 	Color3fVectorDataPtr colors = new Color3fVectorData;
 
 	Rand32 random;
-	
+
 	int numCurves = curves->numCurves();
 	colors->writable().resize( curves->numCurves() );
 	for( int i=0; i<numCurves; i++ )

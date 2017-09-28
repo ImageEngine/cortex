@@ -50,19 +50,19 @@ namespace IECore
 
 struct SceneCacheThreadingTest
 {
-	
+
 	struct TestSceneCache
 	{
 		public :
-			
+
 			TestSceneCache( const char *attribute ) : m_errors( 0 ), m_attribute( attribute )
 			{
 			}
-			
+
 			TestSceneCache( TestSceneCache &that, tbb::split ) : m_errors( 0 ), m_attribute( that.m_attribute )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				for ( size_t i = r.begin(); i != r.end(); ++i )
@@ -76,7 +76,7 @@ struct SceneCacheThreadingTest
 
 						ConstSceneInterfacePtr scene = SharedSceneInterfaces::get("test/IECore/data/sccFiles/attributeAtRoot.scc");
 
-						try 
+						try
 						{
 							scene->readAttribute( m_attribute, 0 );
 						}
@@ -87,17 +87,17 @@ struct SceneCacheThreadingTest
 					}
 				}
 			}
-			
+
 			void join( const TestSceneCache &that )
 			{
 				m_errors += that.m_errors;
 			}
-			
+
 			size_t errors() const
 			{
 				return m_errors;
 			}
-		
+
 		private :
 			mutable size_t m_errors;
 			SceneInterface::Name m_attribute;
@@ -106,19 +106,19 @@ struct SceneCacheThreadingTest
 	void testAttributeRead()
 	{
 		task_scheduler_init scheduler( 100 );
-		
+
 		TestSceneCache task( "w" );
-		
+
 		parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
  		BOOST_CHECK( task.errors() == 0 );
 	}
-	
+
 	void testFakeAttributeRead()
 	{
 		task_scheduler_init scheduler( 100 );
-		
+
 		TestSceneCache task( "fake" );
-		
+
 		parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
  		BOOST_CHECK( task.errors() == 100000 );
 	}

@@ -57,7 +57,7 @@ static list supportedTypes()
 	{
 		result.append( *it );
 	}
-	
+
 	return result;
 }
 
@@ -67,10 +67,10 @@ static FromHoudiniGeometryConverterPtr createFromGeo( HOM_Geometry *homGeo, IECo
 	// that it is safe but not really meant for HDK developers
 	HOM_GUDetailHandle *gu_handle = homGeo->_guDetailHandle();
 	GU_Detail *geo = (GU_Detail *)gu_handle->_asVoidPointer();
-	
+
 	GU_DetailHandle handle;
 	handle.allocateAndSet( geo, false );
-	
+
 	return FromHoudiniGeometryConverter::create( handle, resultType );
 }
 
@@ -81,7 +81,7 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 	{
 		return FromHoudiniGeometryConverter::create( GU_DetailHandle(), ex() );
 	}
-	
+
 	std::set<IECore::TypeId> resultTypes;
 	for ( long i = 0; i < IECorePython::len( ids ); i++ )
 	{
@@ -90,10 +90,10 @@ static FromHoudiniGeometryConverterPtr createDummy( object ids )
 		{
 			throw IECore::InvalidArgumentException( "FromHoudiniGeometryConverter.supportedTypes: List element is not an IECore.TypeId" );
 		}
-		
+
 		resultTypes.insert( ex() );
 	}
-	
+
 	return FromHoudiniGeometryConverter::create( GU_DetailHandle(), resultTypes );
 }
 

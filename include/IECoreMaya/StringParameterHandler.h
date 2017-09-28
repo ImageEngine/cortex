@@ -52,15 +52,15 @@ class StringParameterHandler : public ParameterHandler
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 	private:
-	
+
 		enum ValueProvider {
 			InvalidValueProvider = 0,
 			NodeNameValueProvider = 1,
 			ConnectedNodeNameValueProvider = 2
 		};
-	
+
 		MStatus getPlugValue( const MPlug &plug, IECore::ConstStringParameterPtr parameter, MString &value ) const;
 		static MStatus getPathOrNameFromNode( const MObject &node, MString &name );
 		static ValueProvider getValueProvider( const IECore::ConstParameterPtr parameter );

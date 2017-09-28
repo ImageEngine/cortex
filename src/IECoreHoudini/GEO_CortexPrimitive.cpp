@@ -98,9 +98,9 @@ GEO_CortexPrimitive::GEO_CortexPrimitive( const GA_MergeMap &map, GA_Detail &det
 	: GEO_Primitive( static_cast<GEO_Detail *>( &detail ), offset )
 {
 	const GEO_CortexPrimitive *orig = static_cast<const GEO_CortexPrimitive *>( &src );
-	
+
 	m_offset = ( map.isIdentityMap( GA_ATTRIB_VERTEX ) ) ? orig->m_offset : map.mapDestFromSource( GA_ATTRIB_VERTEX, orig->m_offset );
-	
+
 	m_object = orig->m_object->copy();
 }
 #endif
@@ -141,7 +141,7 @@ GA_Primitive::GA_DereferenceStatus GEO_CortexPrimitive::dereferencePoint( GA_Off
 	{
 		return GA_DEREFERENCE_DEGENERATE;
 	}
-	
+
 	return GA_DEREFERENCE_FAIL;
 }
 
@@ -151,7 +151,7 @@ GA_Primitive::GA_DereferenceStatus GEO_CortexPrimitive::dereferencePoints( const
 	{
 		return GA_DEREFERENCE_DEGENERATE;
 	}
-	
+
 	return GA_DEREFERENCE_FAIL;
 }
 
@@ -171,7 +171,7 @@ void GEO_CortexPrimitive::stashed( bool beingstashed, GA_Offset offset )
 	else
 	{
 		m_offset = allocateVertex();
-	}	
+	}
 #endif
 }
 
@@ -181,7 +181,7 @@ void GEO_CortexPrimitive::stashed( bool beingstashed, GA_Offset offset )
 void GEO_CortexPrimitive::stashed( int onoff, GA_Offset offset )
 {
 	GEO_Primitive::stashed( onoff, offset );
-	
+
 	m_object = 0;
 #if UT_MAJOR_VERSION_INT < 16
 	if ( onoff )
@@ -212,9 +212,9 @@ bool GEO_CortexPrimitive::isDegenerate() const
 void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA_MergeMap &map )
 {
 	const GEO_CortexPrimitive *orig = static_cast<const GEO_CortexPrimitive *>( src );
-	
+
 	m_object = orig->m_object->copy();
-	
+
 #if UT_MAJOR_VERSION_INT >= 16
 	GEO_Primitive::copyUnwiredForMerge(src, map);
 #else
@@ -222,7 +222,7 @@ void GEO_CortexPrimitive::copyUnwiredForMerge( const GA_Primitive *src, const GA
 	{
 		destroyVertex(  m_offset );
 	}
-	
+
 	m_offset = ( map.isIdentityMap( GA_ATTRIB_VERTEX ) ) ? orig->m_offset : map.mapDestFromSource( GA_ATTRIB_VERTEX, orig->m_offset );
 #endif
 }
@@ -233,9 +233,9 @@ void GEO_CortexPrimitive::transform( const UT_Matrix4 &xform )
 	{
 		return;
 	}
-	
+
 	Imath::M44f transform = IECore::convert<Imath::M44f>( xform );
-	
+
 	if ( Primitive *primitive = IECore::runTimeCast<Primitive>( m_object.get() ) )
 	{
 		TransformOpPtr transformer = new TransformOp();
@@ -270,16 +270,16 @@ int GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
 	{
 		return 0;
 	}
-	
+
 	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object.get() );
 	if ( !renderable )
 	{
 		return 0;
 	}
-	
+
 	Imath::Box3f bound = renderable->bound();
 	bbox->setBounds( bound.min.x, bound.min.y, bound.min.z, bound.max.x, bound.max.y, bound.max.z );
-	
+
 	return 1;
 }
 
@@ -290,7 +290,7 @@ void GEO_CortexPrimitive::enlargePointBounds( UT_BoundingBox &box ) const
 	{
 		box.enlargeBounds( bounds );
 	}
-	
+
 	GEO_Primitive::enlargePointBounds( box );
 }
 
@@ -309,7 +309,7 @@ int GEO_CortexPrimitive::detachPoints( GA_PointGroup &grp )
 	{
 		return -2;
 	}
-	
+
 	return 0;
 }
 
@@ -321,16 +321,16 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src, GEO_Point **p
 	{
 		return;
 	}
-	
+
 	const GEO_CortexPrimitive *orig = (const GEO_CortexPrimitive *)src;
-	
+
 	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
-	
+
 	/// \todo: should we make a shallow or a deep copy?
 	m_object = orig->m_object;
-	
+
 	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
-	
+
 	GA_Offset v = m_offset;
 
 #if UT_MAJOR_VERSION_INT >= 14
@@ -363,17 +363,17 @@ void GEO_CortexPrimitive::copyOffsetPrimitive( const GEO_Primitive *src, int bas
 	{
 		return;
 	}
-	
+
 	const GEO_CortexPrimitive *orig = (const GEO_CortexPrimitive *)src;
-	
+
 	const GA_IndexMap &points = getParent()->getPointMap();
 	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
-	
+
 	/// \todo: should we make a shallow or a deep copy?
 	m_object = orig->m_object;
-	
+
 	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
-	
+
 	GA_Offset v = m_offset;
 	GA_Offset point = points.offsetFromIndex( srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) ) + basept );
 	wireVertex( v, point );
@@ -499,7 +499,7 @@ GA_Primitive *GEO_CortexPrimitive::create( const GA_MergeMap &map, GA_Detail &de
 GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::Object *object )
 {
 	GEO_CortexPrimitive *result = (GEO_CortexPrimitive *)geo->appendPrimitive( m_definition->getId() );
-	
+
 #if UT_MAJOR_VERSION_INT >= 16
 	GA_Offset point = result->getPointOffset(0 );
 #else
@@ -508,23 +508,23 @@ GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::O
 #endif
 
 	result->setObject( object );
-	
+
 	if ( const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object ) )
 	{
 		geo->setPos3( point, IECore::convert<UT_Vector3>( renderable->bound().center() ) );
 		return result;
 	}
-	
+
 	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
 	{
 		if ( const IECore::Transform *transform = coord->getTransform() )
 		{
 			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
 		}
-		
+
 		return result;
 	}
-	
+
 	return result;
 }
 
@@ -540,7 +540,7 @@ int64 GEO_CortexPrimitive::getMemoryUsage() const
 	{
 		total += m_object->memoryUsage();
 	}
-	
+
 	return total;
 }
 
@@ -557,23 +557,23 @@ void GEO_CortexPrimitive::copyPrimitive( const GEO_Primitive *src )
 	{
 		return;
 	}
-	
+
 	const GEO_CortexPrimitive *orig = (const GEO_CortexPrimitive *)src;
 
 	/// \todo: should we make a shallow or a deep copy?
 	m_object = orig->m_object;
-	
+
 #if UT_MAJOR_VERSION_INT >= 16
 	GEO_Primitive::copyPrimitive(src);
 #else
 	// this will also copy the attribute versions, but according to the header, it shouldn't
 	const GA_IndexMap &srcPoints = orig->getParent()->getPointMap();
-	
+
 	GA_VertexWrangler vertexWrangler( *getParent(),	*orig->getParent() );
-	
+
 	GA_Offset v = m_offset;
 	GA_Offset p = srcPoints.indexFromOffset( orig->getDetail().vertexPoint( 0 ) );
-	
+
 	wireVertex( v, p );
 	vertexWrangler.copyAttributeValues( v, orig->m_offset );
 #endif
@@ -589,7 +589,7 @@ GEO_Primitive * GEO_CortexPrimitive::copy(int preserve_shared_pts) const
 
 	/// \todo: should we make a shallow or a deep copy?
 	clone->m_object = m_object;
-	
+
 	return clone;
 }
 
@@ -600,12 +600,12 @@ GEO_Primitive *GEO_CortexPrimitive::convert( ConvertParms &parms, GA_PointGroup 
 	{
 		return 0;
 	}
-	
+
 	if ( usedpts )
 	{
 		addPointRefToGroup( *usedpts );
 	}
-	
+
 	if ( GA_PrimitiveGroup *group = parms.getDeletePrimitives() )
 	{
 		group->add( this );
@@ -614,7 +614,7 @@ GEO_Primitive *GEO_CortexPrimitive::convert( ConvertParms &parms, GA_PointGroup 
 	{
 		getParent()->deletePrimitive( *this, usedpts != NULL );
 	}
-	
+
 	return prim;
 }
 
@@ -629,9 +629,9 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 	{
 		return 0;
 	}
-	
+
 	GA_PrimCompat::TypeMask type = parms.toType();
-	
+
 	/// \todo: should the GEO_PrimTypeCompat be registered with the converters?
 	if ( m_object->isInstanceOf( IECore::MeshPrimitiveTypeId ) && type == GEO_PrimTypeCompat::GEOPRIMPOLY )
 	{
@@ -643,9 +643,9 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 			return 0;
 		}
 	}
-	
+
 	/// \todo: support for CurvesPrimitive, PointsPrimitive, and any other existing converters
-	
+
 	return 0;
 }
 
@@ -693,7 +693,7 @@ int GEO_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d,
 {
 	UT_BoundingBox bbox;
 	getBBox( &bbox );
-	
+
 	float dist;
 	int result = bbox.intersectRay( o, d, tmax, &dist, nml );
 	if ( result )
@@ -702,13 +702,13 @@ int GEO_CortexPrimitive::intersectRay( const UT_Vector3 &o, const UT_Vector3 &d,
 		{
 			*distance = dist;
 		}
-		
+
 		if ( pos )
 		{
 			*pos = o + dist * d;
 		}
 	}
-	
+
 	return result;
 }
 
@@ -718,7 +718,7 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 	{
 		return;
 	}
-	
+
 	std::map<std::string, int> typeMap;
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
 	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
@@ -735,12 +735,12 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 			}
 		}
 	}
-	
+
 	if ( typeMap.empty() )
 	{
 		return;
 	}
-	
+
 	parms.append( "Cortex Object Details:\n" );
 	for ( std::map<std::string, int>::iterator it = typeMap.begin(); it != typeMap.end(); ++it )
 	{
@@ -752,37 +752,37 @@ void GEO_CortexPrimitive::infoText( const GU_Detail *geo, OP_Context &context, O
 class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 {
 	public :
-    		
+
 		geo_CortexPrimitiveJSON()
 		{
 		}
-		
+
 		virtual ~geo_CortexPrimitiveJSON()
 		{
 		}
-		
+
 		enum
 		{
 			geo_TBJ_VERTEX,
 			geo_TBJ_CORTEX,
 			geo_TBJ_ENTRIES
 		};
-		
+
 		const GEO_CortexPrimitive *object( const GA_Primitive *p ) const
 		{
 			return static_cast<const GEO_CortexPrimitive *>(p);
 		}
-		
+
 		GEO_CortexPrimitive *object( GA_Primitive *p ) const
 		{
 			return static_cast<GEO_CortexPrimitive *>(p);
 		}
-		
+
 		virtual int getEntries() const
 		{
 			return geo_TBJ_ENTRIES;
 		}
-		
+
 		virtual const char *getKeyword( int i ) const
 		{
 			switch ( i )
@@ -800,10 +800,10 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					break;
 				}
 			}
-			
+
 			return 0;
 		}
-		
+
 		virtual bool shouldSaveField( const GA_Primitive *prim, int i, const GA_SaveMap &sm ) const
 		{
 			switch ( i )
@@ -821,10 +821,10 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					break;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		virtual bool saveField( const GA_Primitive *pr, int i, UT_JSONWriter &w, const GA_SaveMap &map ) const
 		{
 			switch ( i )
@@ -834,12 +834,12 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 #ifdef GA_PRIMITIVE_VERTEXLIST
 
 					return object(pr)->saveVertexArray(w, map);
-					
+
 #else
 
 					GA_Offset offset = object( pr )->getVertexOffset( 0 );
 					return w.jsonInt( int64( map.getVertexIndex( offset ) ) );
-					
+
 #endif
 				}
 				case geo_TBJ_CORTEX :
@@ -849,21 +849,21 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					{
 						return false;
 					}
-					
+
 					try
 					{
 						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( IECore::ConstCharVectorDataPtr(), IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Write );
-						
+
 						obj->save( io, "object" );
-						
+
 						IECore::ConstCharVectorDataPtr buf = io->buffer();
 						const IECore::CharVectorData::ValueType &data = buf->readable();
-						
+
 						if ( w.getBinary() )
 						{
 							int64 length = data.size();
 							w.jsonValue( length );
-							
+
 							UT_JSONWriter::TiledStream out( w );
 							out.write( &data[0], length );
 						}
@@ -878,7 +878,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 						std::cerr << e.what() << std::endl;
 						return false;
 					}
-					
+
 					return true;
 				}
 				case geo_TBJ_ENTRIES :
@@ -886,10 +886,10 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					break;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		virtual bool loadField( GA_Primitive *pr, int i, UT_JSONParser &p, const GA_LoadMap &map ) const
 		{
 			switch ( i )
@@ -904,7 +904,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					{
 						return false;
 					}
-					
+
 					GEO_CortexPrimitive *prim = object( pr );
 					GA_Offset offset = map.getVertexOffset( GA_Index( vId ) );
 					if ( prim->m_offset != offset )
@@ -912,9 +912,9 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 						prim->destroyVertex( prim->m_offset );
 						prim->m_offset = offset;
 					}
-					
+
 					return true;
-					
+
 #endif
 				}
 				case geo_TBJ_CORTEX :
@@ -922,7 +922,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					try
 					{
 						IECore::CharVectorDataPtr buf = new IECore::CharVectorData();
-						
+
 						if ( p.getBinary() )
 						{
 							int64 length;
@@ -930,7 +930,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 							{
 								return false;
 							}
-							
+
 							UT_JSONParser::TiledStream in( p );
 							buf->writable().resize( length );
 							in.read( &buf->writable()[0], length );
@@ -942,11 +942,11 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 							{
 								return false;
 							}
-							
+
 							buf->writable().resize( workBuffer.length() / 2 );
 							IECore::hexToDec<char>( workBuffer.buffer(), workBuffer.buffer() + workBuffer.length(), buf->writable().begin() );
 						}
-						
+
 						IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( buf, IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Read );
 						object( pr )->setObject( IECore::Object::load( io, "object" ).get() );
 					}
@@ -955,7 +955,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 						std::cerr << e.what() << std::endl;
 						return false;
 					}
-					
+
 					return true;
 				}
 				case geo_TBJ_ENTRIES :
@@ -963,10 +963,10 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					break;
 				}
 			}
-			
+
 			return false;
 		}
-		
+
 		virtual bool isEqual( int i, const GA_Primitive *p0, const GA_Primitive *p1 ) const
 		{
 			switch ( i )
@@ -985,7 +985,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 					break;
 				}
 			}
-			
+
 			UT_ASSERT(0);
 			return false;
 		}
@@ -998,7 +998,7 @@ class GEO_CortexPrimitive::geo_CortexPrimitiveJSON : public GA_PrimitiveJSON
 			UT_AutoJSONWriter w( val );
 			return saveField( pr, i, *w, map );
 		}
-		
+
 		virtual bool loadField( GA_Primitive *pr, int i, UT_JSONParser &p, const UT_JSONValue &jval, const GA_LoadMap &map ) const
 		{
 			UT_AutoJSONParser parser( jval );
@@ -1018,6 +1018,6 @@ const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
 	{
 		jsonPrim = new geo_CortexPrimitiveJSON();
 	}
-	
+
 	return jsonPrim;
 }

@@ -55,13 +55,13 @@ namespace IECoreHoudini
 class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 {
 	public :
-		
+
 		GU_CortexPrimitive( GU_Detail *gdp, GA_Offset offset = GA_INVALID_OFFSET );
 		GU_CortexPrimitive( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 		virtual ~GU_CortexPrimitive();
-		
+
 		static const char *typeName;
-		
+
 #if UT_MAJOR_VERSION_INT >= 13
 
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );
@@ -70,21 +70,21 @@ class GU_CortexPrimitive : public GEO_CortexPrimitive, GU_Primitive
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset );
 
 #endif
-		
+
 		// merge constructor
 		static GA_Primitive *create( const GA_MergeMap &map, GA_Detail &detail, GA_Offset offset, const GA_Primitive &src );
 
 		virtual int64 getMemoryUsage() const;
-		
+
 #if UT_MAJOR_VERSION_INT >= 13
 
 		virtual void countMemory( UT_MemoryCounter &counter ) const;
 		virtual void copyPrimitive( const GEO_Primitive *src );
 
 #endif
-		
+
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
-		
+
 		virtual GEO_Primitive *convert( GU_ConvertParms &parms, GA_PointGroup *usedpts = 0 );
 		virtual GEO_Primitive *convertNew( GU_ConvertParms &parms );
 		virtual void *castTo() const;

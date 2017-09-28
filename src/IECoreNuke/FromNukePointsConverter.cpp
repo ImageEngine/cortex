@@ -51,7 +51,7 @@ FromNukePointsConverter::~FromNukePointsConverter()
 
 IECore::ObjectPtr FromNukePointsConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
-	
+
 	// get points
 	V3fVectorDataPtr p = new V3fVectorData();
 	if( const DD::Image::PointList *pl = m_geo->point_list() )
@@ -61,18 +61,18 @@ IECore::ObjectPtr FromNukePointsConverter::doConversion( IECore::ConstCompoundOb
 	}
 
 	PointsPrimitivePtr result = new PointsPrimitive( p );
-		
+
 	// get colour
 	const DD::Image::Attribute *colorAttr = m_geo->get_typed_attribute( "Cf", DD::Image::VECTOR4_ATTRIB );
 	if( colorAttr && colorAttr->size()==result->getNumPoints() )
 	{
 		Color3fVectorDataPtr colorData = new Color3fVectorData();
 		colorData->writable().resize( result->getNumPoints() );
-		std::transform( colorAttr->vector4_list->begin(), colorAttr->vector4_list->end(), colorData->writable().begin(), IECore::convert<Imath::Color3f, DD::Image::Vector4> );		
+		std::transform( colorAttr->vector4_list->begin(), colorAttr->vector4_list->end(), colorData->writable().begin(), IECore::convert<Imath::Color3f, DD::Image::Vector4> );
 		result->variables["Cs"] = PrimitiveVariable( PrimitiveVariable::Vertex, colorData );
 	}
-	
+
 	/// \todo Other primitive variables
-	
+
 	return result;
 }

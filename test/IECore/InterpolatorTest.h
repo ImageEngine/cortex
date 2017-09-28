@@ -100,7 +100,7 @@ struct InterpolatorTestSuite : public boost::unit_test::test_suite
 		addLinearTest<double>();
 		addLinearTest<Imath::V3f>();
 		addLinearTest<Imath::V3d>();
-		
+
 		addLinearMatrixTest<float>();
 		addLinearMatrixTest<double>();
 
@@ -108,7 +108,7 @@ struct InterpolatorTestSuite : public boost::unit_test::test_suite
 		addCubicTest<double>();
 		addCubicTest<Imath::V3f>();
 		addCubicTest<Imath::V3d>();
-		
+
 		addCubicMatrixTest<float>();
 		addCubicMatrixTest<double>();
 	}

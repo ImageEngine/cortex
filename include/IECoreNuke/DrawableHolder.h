@@ -61,30 +61,30 @@ class DrawableHolder : public ParameterisedHolderOp
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
 		//@}
-		
+
 		/// Returns the scene created by the draw() method of the held class,
 		/// in a form suitable for OpenGL rendering.
 		IECoreGL::ConstScenePtr scene();
 		/// Returns the transform for the drawable.
 		Imath::M44f transform();
-			
+
 	protected :
-	
+
 		/// Implemented to do the drawing
 		virtual void build_handles( DD::Image::ViewerContext *ctx );
 		virtual void draw_handle( DD::Image::ViewerContext *ctx );
 
 	private :
-	
+
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
 
 		IECoreGL::ScenePtr m_scene;
 		DD::Image::Hash m_sceneHash;
-		
+
 		DD::Image::Matrix4 m_transform;
 		DD::Image::Knob *m_transformKnob;
-		
+
 };
 
 } // namespace IECoreNuke

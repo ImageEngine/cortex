@@ -45,15 +45,15 @@ class LineSegmentParameterHandler : public ParameterHandler
 {
 
 	protected :
-	
+
 		typedef typename T::ValueType LineSegment;
 		typedef typename LineSegment::Point Point;
-	
+
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 };
 
 

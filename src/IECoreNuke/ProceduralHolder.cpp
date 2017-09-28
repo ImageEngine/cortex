@@ -76,13 +76,13 @@ ProceduralHolder::~ProceduralHolder()
 void ProceduralHolder::knobs( DD::Image::Knob_Callback f )
 {
 	ParameterisedHolderOp::knobs( f );
-	
+
 	DD::Image::Tab_knob( f, "Transform" );
 
 	m_transformKnob = DD::Image::Axis_knob( f, &m_transform, "transform", "Transform" );
 
 	DD::Image::Tab_knob( f, "Display" );
-	
+
 	DD::Image::Bool_knob( f, &m_drawContents, "drawContents", "Draw Contents" );
 	DD::Image::Tooltip( f,
 		"When this is on, the contents of the procedural are drawn. "
@@ -90,19 +90,19 @@ void ProceduralHolder::knobs( DD::Image::Knob_Callback f )
 		"greatly improve drawing speed."
 	);
 	DD::Image::Newline( f );
-		
+
 	DD::Image::Bool_knob( f, &m_drawBound, "drawBound", "Draw Bound" );
 	DD::Image::Tooltip( f,
 		"When this is on, the bounding box of the procedural is drawn. "
 	);
 	DD::Image::Newline( f );
-	
+
 	DD::Image::Bool_knob( f, &m_drawCoordinateSystems, "drawCoordinateSystems", "Draw Coordinate Systems" );
 	DD::Image::Tooltip( f,
 		"When this is on, coordinate systems the procedural generates are drawn. "
 	);
 	DD::Image::Newline( f );
-	
+
 }
 
 #if kDDImageVersionInteger >= 70000
@@ -110,17 +110,17 @@ void ProceduralHolder::knobs( DD::Image::Knob_Callback f )
 DD::Image::Op::HandlesMode ProceduralHolder::doAnyHandles( DD::Image::ViewerContext *ctx )
 {
 	HandlesMode result = ParameterisedHolderOp::doAnyHandles( ctx );
-	
+
 	if ( panel_visible() )
 	{
 		result |= eHandlesCooked;
 	}
-	
+
 	if ( ctx->connected() == DD::Image::SHOW_OBJECT )
 	{
 		result |= eHandlesCooked;
 	}
-	
+
 	return result;
 }
 
@@ -133,37 +133,37 @@ bool ProceduralHolder::doAnyHandles( DD::Image::ViewerContext *ctx )
 	{
 		return true;
 	}
-	
+
 	if( panel_visible() )
 	{
 		return true;
 	}
-	
+
 	if( ctx->connected()==DD::Image::SHOW_OBJECT )
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
 #endif
 
 void ProceduralHolder::build_handles( DD::Image::ViewerContext *ctx )
-{	
+{
 	if( ctx->transform_mode() == DD::Image::VIEWER_2D )
 	{
 		return;
 	}
-	
+
 	if( m_transformKnob->build_handle( ctx ) )
 	{
 		m_transformKnob->add_draw_handle( ctx );
 	}
-	
+
 	DD::Image::Matrix4 parentMatrix = ctx->modelmatrix;
 	ctx->modelmatrix *= m_transform;
-	
+
 		buildParameterKnobHandles( ctx );
 
 		Imath::Box3f b = bound();
@@ -173,7 +173,7 @@ void ProceduralHolder::build_handles( DD::Image::ViewerContext *ctx )
 		}
 
 		add_draw_handle( ctx );
-	
+
 	ctx->modelmatrix = parentMatrix;
 }
 
@@ -181,7 +181,7 @@ void ProceduralHolder::draw_handle( DD::Image::ViewerContext *ctx )
 {
 	if( ctx->draw_solid() )
 	{
-				
+
 		// nuke apparently uses the name stack to determine which handle is under
 		// the mouse. the IECoreGL::NameStateComponent will ruin this by overwriting
 		// the current name. we work around this by pushing another name onto the stack.
@@ -206,7 +206,7 @@ void ProceduralHolder::draw_handle( DD::Image::ViewerContext *ctx )
 			}
 
 		glPopName();
-								
+
 	}
 	else if( ctx->draw_lines() )
 	{
@@ -237,18 +237,18 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	{
 		return m_scene;
 	}
-	
+
 	IECore::ConstParameterisedProceduralPtr proc = procedural();
 	if( !proc )
 	{
 		return 0;
 	}
-	
+
 	try
 	{
-	
+
 		setParameterValues();
-	
+
 		IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 		renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 		renderer->setOption( "gl:drawCoordinateSystems", new IECore::BoolData( m_drawCoordinateSystems ) );
@@ -260,7 +260,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 		m_scene = renderer->scene();
 		m_scene->setCamera( 0 );
-		
+
 	}
 	/// \todo I think python errors should be handled in the python wrappers - why should C++
 	/// code have to catch boost::python exceptions?
@@ -277,7 +277,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 	{
 		IECore::msg( IECore::Msg::Error, "ProceduralHolder::scene", "Caught unknown exception" );
 	}
-	
+
 	m_sceneHash = hash();
 	return m_scene;
 }
@@ -317,9 +317,9 @@ Imath::Box3f ProceduralHolder::bound()
 			IECore::msg( IECore::Msg::Error, "ProceduralHolder::bound", "Caught unknown exception" );
 		}
 	}
-	
+
 	m_boundHash = hash();
-	
+
 	return m_bound;
 }
 

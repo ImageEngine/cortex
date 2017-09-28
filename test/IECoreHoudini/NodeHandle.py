@@ -42,57 +42,57 @@ import IECore
 import IECoreHoudini
 
 class TestNodeHandle( IECoreHoudini.TestCase ) :
-	
+
 	def createBox(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
 		box = geo.createNode( "box" )
 		return box
-	
+
 	# testing a class that uses NodeHandle internally can be created
 	def testCreation( self ) :
-		
+
 		box = self.createBox()
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		self.assert_( isinstance( converter, IECoreHoudini.FromHoudiniPolygonsConverter ) )
 
 	# testing deletion of HOM node is irrelevant
 	def testDeleteHOMNode( self ) :
-		
+
 		box = self.createBox()
 		w = weakref.ref( box )
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
-		
+
 		del box
 		gc.collect()
-		
+
 		self.assertEqual( w(), None )
 		self.assert_( converter.convert().isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 
 	# testing deletion of node causes converter to return None
 	def testDeleteNode( self ) :
-		
+
 		box = self.createBox()
 		w = weakref.ref( box )
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		result = converter.convert()
-		
+
 		box.destroy()
 		gc.collect()
-		
+
 		self.assertRaises( Exception, w() )
 		self.assertEqual( converter.convert(), result )
 
 	# testing new scene causes converter to return None
 	def testNewScene( self ) :
-		
+
 		box = self.createBox()
 		w = weakref.ref( box )
 		converter = IECoreHoudini.FromHoudiniPolygonsConverter( box )
 		result = converter.convert()
-		
+
 		hou.hipFile.clear( False )
-		
+
 		self.assertRaises( Exception, w() )
 		self.assertEqual( converter.convert(), result )
 

@@ -131,11 +131,11 @@ class RendererTest( IECoreRI.TestCase ) :
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( 'Option "render" "string bucketorder" [ "zigzag" ]' in l )
 		self.failUnless( 'Option "user" "int magicNumber"' in l )
 		self.failUnless( 'PixelSamples 8 8' in l )
-		
+
 	def testAttributes( self ) :
 
 		tests = [
@@ -167,12 +167,12 @@ class RendererTest( IECoreRI.TestCase ) :
 			l = "".join( file( "test/IECoreRI/output/testAttributes.rib" ).readlines() )
 			l = " ".join( l.split() )
 			self.assert_( t[2] in l )
-	
+
 	def testDoublePrecisionAttributes( self ) :
-		
-		# separate test case for M44d attributes, as they get converted to M44f before being 
+
+		# separate test case for M44d attributes, as they get converted to M44f before being
 		# written into the rib:
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testDoublePrecisionAttributes.rib" )
 		with WorldBlock( r ) :
 			r.setAttribute( "user:Mref", M44dData( M44d( 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 ) ) )
@@ -190,11 +190,11 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assert_( "Attribute \"user\" \"vector v\" [ 3 4 5 ]" in l )
 		self.assert_( "Attribute \"user\" \"color c\" [ 0 1 2 ]" in l )
 		self.assert_( "Attribute \"user\" \"float number\" [ 10 ]" in l )
-	
+
 	def testCompoundDataAttributes( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
-		
+
 		with WorldBlock( r ) :
 
 			r.setAttribute(
@@ -212,19 +212,19 @@ class RendererTest( IECoreRI.TestCase ) :
 				"\"string coordinatesystem\" [ \"shader\" ]" in line and
 				"\"float sphere\" [ 10 ]" in line ) :
 					found = True
-				
+
 		self.failUnless( found )
-		
+
 		# check that we get appropriate warnings if not providing CompoundData
-		
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testAttributes.rib" )
-		
+
 		with WorldBlock( r ) :
-		
+
 			c = CapturingMessageHandler()
 			with c :
 				r.setAttribute( "ri:displacementbound", FloatData( 10 ) )
-				
+
 		self.assertEqual( len( c.messages ), 1 )
 		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
 
@@ -270,7 +270,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/testDisplay.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( 'Display "test.tif" "tiff" "rgba"   "float quantize[4]" [ 0 1 0 1 ]' in l )
 
 	def testSubDivs( self ) :
@@ -290,14 +290,14 @@ class RendererTest( IECoreRI.TestCase ) :
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/subdiv.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
 		self.failUnless( '[ "interpolateboundary" ] [ 0 0 ] [ ] [ ]' in l )
 		self.failUnless( 'vertex point P' in l )
 		self.failUnless( 'facevarying float[3] st' in l )
-		
+
 	def testSubDivTags( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/subdiv.rib" )
 
 		r.display( "test", "idisplay", "rgba", {} )
@@ -317,13 +317,13 @@ class RendererTest( IECoreRI.TestCase ) :
 				"integers" : IntVectorData( [ 1, 0 ] ),
 			} )
 		)
-		
+
 		m.render( r )
 
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/subdiv.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( 'SubdivisionMesh "catmull-clark" [ 4 4 4 4 4 ]' in l )
 		self.failUnless( '[ "interpolateboundary" "facevaryinginterpolateboundary" ] [ 1 0 1 0 ] [ 1 0 ] [ ]' in l )
 		self.failUnless( 'vertex point P' in l )
@@ -340,9 +340,9 @@ class RendererTest( IECoreRI.TestCase ) :
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/commands.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( 'ReadArchive "nameOfArchive"' in l )
-		
+
 	def testMotion( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/motion.rib" )
@@ -362,10 +362,10 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.failUnless( "MotionBegin [ 0 1 ]" in l )
 		self.assertEqual( l.count( "ConcatTransform" ), 2 )
 		self.failUnless( "MotionEnd" in l )
-		
+
 		self.failUnless( l.index( "MotionBegin" ) < l.index( "ConcatTransform" ) )
 		self.failUnless( l.index( "ConcatTransform" ) < l.index( "MotionEnd" ) )
-		
+
 	def testStringPrimVars( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/stringPrimVars.rib" )
@@ -378,11 +378,11 @@ class RendererTest( IECoreRI.TestCase ) :
 		r.worldEnd()
 
 		l = "".join( file( "test/IECoreRI/output/stringPrimVars.rib" ).readlines() ).replace( "\n", "" )
-		
-		self.failUnless( '"constant string ieGeneric_diffuse_Color_Textures" [ "woodTrain/woodTrainRed_v001_color_LIN.tdl" ]' in l ) 
-		self.failUnless( '"constant string ieGeneric_displacement_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l ) 
-		self.failUnless( '"constant string ieGeneric_reflection_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l ) 
-		
+
+		self.failUnless( '"constant string ieGeneric_diffuse_Color_Textures" [ "woodTrain/woodTrainRed_v001_color_LIN.tdl" ]' in l )
+		self.failUnless( '"constant string ieGeneric_displacement_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l )
+		self.failUnless( '"constant string ieGeneric_reflection_Textures" [ "woodTrain/woodTrain_v001_bump_LIN.tdl" ]' in l )
+
 	def testGetTransform( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/transform.rib" )
@@ -433,7 +433,7 @@ class RendererTest( IECoreRI.TestCase ) :
 			r.worldEnd()
 
 		self.assertEqual( len( m.messages ), 0 )
-		
+
 	def testMissingShaders( self ) :
 
 		"""Check that missing shaders don't throw an exception but print a message instead."""
@@ -488,30 +488,30 @@ class RendererTest( IECoreRI.TestCase ) :
 			self.assertEqual( r.getAttribute( k ), v )
 
 	def testFloat3ShaderParameters( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
 		with WorldBlock( r ) :
-		
+
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
-	
+
 		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
-		
+
 		self.failUnless( "Surface \"test/IECoreRI/shaders/types\"" in l )
 		self.failUnless( "\"float[3] f3\" [ 4 5 6 ]" in l )
-		
+
 	def testFloat3PrimitiveVariables( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 
 		with WorldBlock( r ) :
-		
+
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : V3fData( V3f( 4, 5, 6 ) ) } )
-			
+
 			r.mesh(
 				IntVectorData( [ 4, 4 ] ),
 				IntVectorData( [ 0, 1, 2, 3, 3, 2, 4, 5 ] ),
@@ -527,35 +527,35 @@ class RendererTest( IECoreRI.TestCase ) :
 					)
 				}
 			)
-	
+
 		l = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() ).replace( "\n", "" )
-				
+
 		self.failUnless( "\"uniform float[3] f3\" [ 0 0 0 1 1 1 ]" in l )
 
 	def testNullShaderParameters( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 		with WorldBlock( r ) :
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "f3" : None } )
-	
+
 	def testErrorsReportedForUnknownRenderManOptions( self ) :
-	
+
 		with CapturingMessageHandler() as mh :
-		
+
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-			
+
 			r.setOption( "ri:unknownOption", StringData( "whatYouGonnaDo?" ) )
-			
+
 			with WorldBlock( r ) :
 				pass
-				
+
 		self.assertEqual( len( mh.messages ), 1 )
 		self.assertTrue( "ri:unknownOption" in mh.messages[0].message )
-		
+
 	def testSetHiderViaOptions( self ) :
-	
+
 		with CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
@@ -575,9 +575,9 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertTrue( "hidden" in rib )
 		self.assertTrue( "jitter" in rib )
 		self.assertTrue( "depthfilter" in rib )
-	
+
 	def testSetBucketSizeViaOptions( self ) :
-	
+
 		with CapturingMessageHandler() as mh :
 
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
@@ -592,42 +592,42 @@ class RendererTest( IECoreRI.TestCase ) :
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
 
 		self.assertTrue( 'Option "limits" "integer bucketsize[2]" [ 32 32 ]' in rib )
-	
+
 	def testTextureCoordinates( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		
+
 		with WorldBlock( r ) :
-		
+
 			r.setAttribute( "ri:textureCoordinates", FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
 			self.assertEqual( r.getAttribute( "ri:textureCoordinates" ), FloatVectorData( [ 0, 1, 2, 3, 4, 5, 6, 7 ] ) )
-	
+
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
-		
+
 		self.assertTrue( 'TextureCoordinates 0 1 2 3 4 5 6 7' in rib )
 
 	def testMultipleDisplays( self ) :
-	
+
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		
+
 		r.display( "test.exr", "exr", "rgba", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
 		r.display( "z.exr", "exr", "z", { "quantize" : FloatVectorData( [ 0, 0, 0, 0 ] ) } )
-		
+
 		with WorldBlock( r ) :
 			pass
-			
+
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
-				
+
 		self.assertTrue( "+z.exr" in rib )
-	
+
 	def testFrameBlock( self ) :
-	
+
 		with CapturingMessageHandler() as mh :
-		
+
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		
+
 			r.setOption( "ri:frame", 10 )
-		
+
 			with WorldBlock( r ) :
 				pass
 
@@ -638,7 +638,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		rib = "".join( file( "test/IECoreRI/output/test.rib" ).readlines() )
 		self.assertTrue( "FrameBegin 10" in rib )
 		self.assertTrue( "FrameEnd" in rib )
-	
+
 	def testDynamicLoadProcedural( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
@@ -694,7 +694,7 @@ class RendererTest( IECoreRI.TestCase ) :
 	def testClippingPlane( self ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
-		
+
 		with TransformBlock( r ) :
 
 			r.concatTransform( M44f.createTranslated( V3f( 1, 2, 3 ) ) )
@@ -836,7 +836,7 @@ class RendererTest( IECoreRI.TestCase ) :
 		self.assertEqual( set( x[1] for x in nodes ), { "shader" } )
 
 	def testSampleMotion( self ) :
-	
+
 		with CapturingMessageHandler() as mh :
 			r = IECoreRI.Renderer( "test/IECoreRI/output/test.rib" )
 			with WorldBlock( r ) :

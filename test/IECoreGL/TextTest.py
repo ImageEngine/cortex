@@ -84,7 +84,7 @@ class TextTest( unittest.TestCase ) :
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.004 ), IECore.BoolData( False ) )
 
 	def testSprites( self ) :
-	
+
 		r = IECoreGL.Renderer()
 
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
@@ -120,14 +120,14 @@ class TextTest( unittest.TestCase ) :
 		expectedImage = reader.read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.0575 ), IECore.BoolData( False ) )
-	
+
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

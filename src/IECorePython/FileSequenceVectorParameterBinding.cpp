@@ -223,7 +223,7 @@ class FileSequenceVectorParameterWrapper : public ParameterWrapper< FileSequence
 
 			return r;
 		}
-		
+
 		list getFileSequenceValuesDataWrap( const StringVectorData *value ) const
 		{
 			list r;

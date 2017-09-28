@@ -80,7 +80,7 @@ MStatus ObjectData::readASCII( const MArgList &argList, unsigned int &endOfTheLa
 		CharVectorDataPtr buf = new CharVectorData();
 		buf->writable().resize( str.length() / 2 );
 		IECore::hexToDec<char>( str.asChar(), str.asChar() + str.length(), buf->writable().begin() );
-				
+
 		try
 		{
 			MemoryIndexedIOPtr io = new MemoryIndexedIO( buf, IndexedIO::rootPath, IndexedIO::Exclusive | IndexedIO::Read );
@@ -142,7 +142,7 @@ MStatus ObjectData::writeASCII( ostream& out )
 			// than it is to parse a single long string. so we output lots of little string concatenations in order to
 			// speed up the reading.
 			out << "( \n";
-			
+
 			const size_t chunkSize = 5000;
 			for( size_t i = 0; i < data.size(); i += chunkSize )
 			{

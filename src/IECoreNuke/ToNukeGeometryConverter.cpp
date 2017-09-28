@@ -52,7 +52,7 @@ ToNukeGeometryConverter::ToNukeGeometryConverter( const std::string &description
 
 	m_objIndexParameter = new IntParameter( "objIndex", "Index for the first object inserted on the GeometryList. Use -1 to simply add on the next index available", -1 );
 	parameters()->addParameter( m_objIndexParameter );
-	
+
 }
 
 void ToNukeGeometryConverter::convert( GeometryList &geoList ) const

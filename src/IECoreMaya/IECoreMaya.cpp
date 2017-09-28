@@ -121,7 +121,7 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( ParameterisedHolderLocator::typeName, ParameterisedHolderLocator::id,
 			ParameterisedHolderLocator::creator, ParameterisedHolderLocator::initialize, MPxNode::kLocatorNode );
 		assert( s );
-		
+
 		s = plugin.registerNode( ParameterisedHolderDeformer::typeName, ParameterisedHolderDeformer::id,
 			ParameterisedHolderDeformer::creator, ParameterisedHolderDeformer::initialize, MPxNode::kDeformerNode );
 		assert( s );
@@ -145,15 +145,15 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerShape( DrawableHolder::typeName, DrawableHolder::id,
 			DrawableHolder::creator, DrawableHolder::initialize, DrawableHolderUI::creator );
 		assert( s );
-		
+
 		s = plugin.registerShape( "ieProceduralHolder", ProceduralHolder::id,
 			ProceduralHolder::creator, ProceduralHolder::initialize, ProceduralHolderUI::creator );
 		assert( s );
-		
+
 		s = plugin.registerShape( "ieSceneShapeInterface", SceneShapeInterface::id,
 			SceneShapeInterface::creator, SceneShapeInterface::initialize, SceneShapeUI::creator );
 		assert( s );
-		
+
 		s = plugin.registerShape( "ieSceneShape", SceneShape::id,
 			SceneShape::creator, SceneShape::initialize, SceneShapeUI::creator );
 		assert( s );
@@ -177,26 +177,26 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( "ieImagePlaneHolder", ImagePlaneHolder::id,
 			ImagePlaneHolder::creator, ImagePlaneHolder::initialize, MPxNode::kImagePlaneNode );
 		assert( s );
-		
+
 		s = plugin.registerNode( CurveCombiner::typeName, CurveCombiner::id,
 			CurveCombiner::creator, CurveCombiner::initialize, MPxNode::kDependNode );
 		assert( s );
-		
+
 		s = plugin.registerNode( GeometryCombiner::typeName, GeometryCombiner::id,
 			GeometryCombiner::creator, GeometryCombiner::initialize, MPxNode::kDependNode );
-		assert( s );	
-		
+		assert( s );
+
 		// This should be used to set the classification of any manipulators that are
 		// compatible with the ieParameterisedHolderManipContext to permit the UI code
 		// to identify if a Parameter is manipulatable.
 		const MString manipClassification( "ieParameterManipulator" );
 		// Convention for parameter manipulator names:
 		//    ie<manipulatorTypeHint><parameterTypeName>Manipulator
-		
+
 		s = plugin.registerNode( "ieBox3fParameterManipulator", Box3Manipulator::id,
 			Box3Manipulator::creator, Box3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
-	
+
 		s = plugin.registerNode( "ieTransformationMatrixfParameterManipulator", TransformationMatrixManipulator::id,
 			TransformationMatrixManipulator::creator, TransformationMatrixManipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
@@ -204,7 +204,7 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerNode( "ieV3fParameterManipulator", V3Manipulator::id,
 			V3Manipulator::creator, V3Manipulator::initialize, MPxNode::kManipContainer, &manipClassification );
 		assert( s );
-		
+
 		s = plugin.registerCommand( "iePython", PythonCmd::creator, PythonCmd::newSyntax );
 		PythonCmd::initialize();
 
@@ -213,9 +213,9 @@ MStatus initialize(MFnPlugin &plugin)
 		s = plugin.registerCommand( "ieParameterisedHolderSetValue", ParameterisedHolderSetValueCmd::creator, ParameterisedHolderSetValueCmd::newSyntax );
 
 		s = plugin.registerCommand( "ieParameterisedHolderModification", ParameterisedHolderModificationCmd::creator );
-			
+
 		s = plugin.registerContextCommand("ieParameterisedHolderManipContext", &ParameterisedHolderManipContextCommand::creator );
-		
+
 #ifdef DL_INTERFACE // we are building for 3delight
 		s = plugin.registerCommand( "ieDelightProceduralCache", DelightProceduralCacheCommand::creator, DelightProceduralCacheCommand::newSyntax );
 #endif
@@ -237,12 +237,12 @@ MStatus initialize(MFnPlugin &plugin)
 			h = new IECore::LevelFilteredMessageHandler( h, IECore::LevelFilteredMessageHandler::defaultLevel() );
 			IECore::MessageHandler::setDefaultHandler( h );
 		}
-		
+
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
 		{
 			MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.Menus.createCortexMenu()" );
 		}
-		
+
 	}
 
 	g_refCount ++;
@@ -301,12 +301,12 @@ MStatus uninitialize(MFnPlugin &plugin)
 		s = plugin.deregisterData( ObjectData::id );
 
 		s = plugin.deregisterImageFile( "ieImageFile" );
-		
+
 		if( MGlobal::mayaState() == MGlobal::kInteractive )
 		{
 			MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.Menus.removeCortexMenu()" );
 		}
-		
+
 	}
 
 	return s;

@@ -43,38 +43,38 @@ import maya.cmds
 ## menus to allow the values of Parameterised object Parameters to be
 ## copied and pasted between nodes, or between different parameters on
 ## the same node. It currently does this using in-memory BasicPreset
-## instances, held in a global variable. 
+## instances, held in a global variable.
 ## Pasting 'values' as a connection is also supported, though not using
 ## the basic preset mechanism.
 __all__ = [ 'copy', 'copyClass', 'paste', 'pasteLinked', '_clearReferences' ]
 
 def __copyPasteMenuModifier( menuDefinition, parameter, node, parent=None ) :
-	
+
 	with IECore.IgnoredExceptions( KeyError ) :
 		if not parameter.userData()['UI']['copyPaste'].value :
 			return
-	
+
 	global _ieCoreParameterClipboardUIBuffer
-	
+
 	fnPh = IECoreMaya.FnParameterisedHolder( node )
 	plugPath = fnPh.parameterPlugPath( parameter )
-	
+
 	commandBase = 'import IECoreMaya; IECoreMaya.ParameterClipboardUI'
-	
-	copyString = '%s.copy( "%s" )' % ( commandBase, plugPath ) 
+
+	copyString = '%s.copy( "%s" )' % ( commandBase, plugPath )
 	copySomeString = '%s.copy( "%s", True )' % ( commandBase, plugPath )
-	pasteString = '%s.paste( "%s" )' % ( commandBase, plugPath ) 
-	pasteLinkedString = '%s.pasteLinked( "%s" )' % ( commandBase, plugPath ) 
+	pasteString = '%s.paste( "%s" )' % ( commandBase, plugPath )
+	pasteLinkedString = '%s.pasteLinked( "%s" )' % ( commandBase, plugPath )
 
 	if len( menuDefinition.items() ):
 		menuDefinition.append( "/CopyPasteDivider", { "divider" : True } )
 
 	copyActive = True
-	
+
 	if isinstance( parameter, IECore.ClassParameter ) :
 		if parameter.getClass( False ) == None :
 			copyActive = False
-			
+
 	elif isinstance( parameter, IECore.ClassVectorParameter ) :
 		classes = parameter.getClasses( False )
 		if not len(classes) :
@@ -86,37 +86,37 @@ def __copyPasteMenuModifier( menuDefinition, parameter, node, parent=None ) :
 		 isinstance( parent, IECore.ClassVectorParameter )
 		 or isinstance( parent, IECore.ClassParameter )
 	):
-		menuDefinition.append( 
+		menuDefinition.append(
 			"/Copy Values",
 			{
-				"command" : IECore.curry( maya.cmds.evalDeferred, copyString ),		
+				"command" : IECore.curry( maya.cmds.evalDeferred, copyString ),
 				"secondaryCommand" : IECore.curry( maya.cmds.evalDeferred, copySomeString ),
 				"active" : copyActive,
 			}
 		)
-		
-		parentPlugPath = fnPh.parameterPlugPath( parent )
-		copyComponentString = '%s.copyClass( "%s", "%s" )' % ( commandBase, plugPath, parentPlugPath ) 
 
-		menuDefinition.append( 
+		parentPlugPath = fnPh.parameterPlugPath( parent )
+		copyComponentString = '%s.copyClass( "%s", "%s" )' % ( commandBase, plugPath, parentPlugPath )
+
+		menuDefinition.append(
 		"/Copy Component",
 		{
-			"command" : IECore.curry( maya.cmds.evalDeferred, copyComponentString ),		
+			"command" : IECore.curry( maya.cmds.evalDeferred, copyComponentString ),
 			"active" : copyActive,
 		}
 	)
-	
+
 	else:
-	
-		menuDefinition.append( 
+
+		menuDefinition.append(
 			"/Copy",
 			{
-				"command" : IECore.curry( maya.cmds.evalDeferred, copyString ),		
+				"command" : IECore.curry( maya.cmds.evalDeferred, copyString ),
 				"secondaryCommand" : IECore.curry( maya.cmds.evalDeferred, copySomeString ),
 				"active" : copyActive,
 			}
 		)
-	
+
 	pasteActive = False
 	pasteLinkedActive = False
 
@@ -124,21 +124,21 @@ def __copyPasteMenuModifier( menuDefinition, parameter, node, parent=None ) :
 		pasteActive = _ieCoreParameterClipboardUIBuffer.applicableTo( fnPh.getParameterised()[0], parameter )
 		if pasteActive and _ieCoreParameterClipboardUILastNode and maya.cmds.objExists( _ieCoreParameterClipboardUILastNode ) :
 			pasteLinkedActive = True
-		
-	menuDefinition.append( 
+
+	menuDefinition.append(
 		"/Paste",
 		{
-			"command" : IECore.curry( maya.cmds.evalDeferred, pasteString ),		
+			"command" : IECore.curry( maya.cmds.evalDeferred, pasteString ),
 			"active" : pasteActive,
-		}	
+		}
 	)
-	
-	menuDefinition.append( 
+
+	menuDefinition.append(
 		"/Paste Linked",
 		{
-			"command" : IECore.curry( maya.cmds.evalDeferred, pasteLinkedString ),		
+			"command" : IECore.curry( maya.cmds.evalDeferred, pasteLinkedString ),
 			"active" : pasteLinkedActive,
-		}	
+		}
 	)
 
 def __copyPasteVectorMenuModifier( menuDefinition, parent, parameter, node ) :
@@ -170,29 +170,29 @@ def copy( plugPath, showUI=False ) :
 	parameter = fnPh.plugParameter( plugPath )
 
 	def copyCallback( node, rootParameter, parameters ):
-		
+
 		global _ieCoreParameterClipboardUIBuffer
 		global _ieCoreParameterClipboardUILastParameterList
 		global _ieCoreParameterClipboardUILastNode
 		global _ieCoreParameterClipboardUILastRoot
-		
+
 		fnPh = IECoreMaya.FnParameterisedHolder( node )
 		preset = IECore.BasicPreset( fnPh.getParameterised()[0], rootParameter, parameters=parameters )
-		
+
 		_ieCoreParameterClipboardUIBuffer = preset
 		_ieCoreParameterClipboardUILastParameterList = parameters
 		_ieCoreParameterClipboardUILastNode = node
 		_ieCoreParameterClipboardUILastRoot = rootParameter
-	
+
 	# We need to make sure that the values in the parameterised are in sync
 	fnPh.setParameterisedValues()
-	
+
 	if showUI :
 
 		IECoreMaya.PresetsUI( parts[0], parameter ).selectParameters( copyCallback )
-	
+
 	else :
-		
+
 		paramList = []
 		__getParameters( parameter, paramList )
 
@@ -207,7 +207,7 @@ def copyClass( plugPath, parentPlugPath ) :
 	global _ieCoreParameterClipboardUILastParameterList
 	global _ieCoreParameterClipboardUILastNode
 	global _ieCoreParameterClipboardUILastRoot
-	
+
 	parts = plugPath.split( "." )
 	fnPh = IECoreMaya.FnParameterisedHolder( parts[0] )
 	parameter = fnPh.plugParameter( plugPath )
@@ -215,13 +215,13 @@ def copyClass( plugPath, parentPlugPath ) :
 
 	# We need to make sure that the values in the parameterised are in sync
 	fnPh.setParameterisedValues()
-	
-	# This bit is slightly irritating, but we have to get all 
+
+	# This bit is slightly irritating, but we have to get all
 	# The child parameters of the target class, so we only save that one
 	paramList = []
 	__getParameters( parameter, paramList )
 	_ieCoreParameterClipboardUIBuffer = IECore.BasicPreset( fnPh.getParameterised()[0], parent, paramList )
-	
+
 	# For now, we only support pasting values linked. Otherwise, we'd have to go find
 	# any classes we instantiated to know their plug prefix...
 	_ieCoreParameterClipboardUILastParameterList = None
@@ -234,59 +234,59 @@ def paste( plugPath ) :
 	global _ieCoreParameterClipboardUILastParameterList
 	global _ieCoreParameterClipboardUILastNode
 	global _ieCoreParameterClipboardUILastRoot
-		
+
 	if not _ieCoreParameterClipboardUIBuffer or not isinstance( _ieCoreParameterClipboardUIBuffer, IECore.Preset ) :
 		return
-		
+
 	parts = plugPath.split( "." )
 	fnPh = IECoreMaya.FnParameterisedHolder( parts[0] )
 	parameter = fnPh.plugParameter( plugPath )
-	
+
 	if not _ieCoreParameterClipboardUIBuffer.applicableTo( fnPh.getParameterised()[0], parameter ):
 		raise RuntimeError, "The parameters on the clipboard are not applicable to '%s'" % plugPath
-	
+
 	fnPh.setParameterisedValues()
-	
-	with fnPh.parameterModificationContext() : 
+
+	with fnPh.parameterModificationContext() :
 		_ieCoreParameterClipboardUIBuffer( fnPh.getParameterised()[0], parameter )
-	
+
 def pasteLinked( plugPath ) :
-	
+
 	global _ieCoreParameterClipboardUIBuffer
 	global _ieCoreParameterClipboardUILastParameterList
 	global _ieCoreParameterClipboardUILastNode
 	global _ieCoreParameterClipboardUILastRoot
-		
+
 	if not _ieCoreParameterClipboardUIBuffer or not isinstance( _ieCoreParameterClipboardUIBuffer, IECore.Preset ) :
 		return
-		
+
 	parts = plugPath.split( "." )
 	fnPh = IECoreMaya.FnParameterisedHolder( parts[0] )
 	parameter = fnPh.plugParameter( plugPath )
-	
+
 	if not _ieCoreParameterClipboardUIBuffer.applicableTo( fnPh.getParameterised()[0], parameter ):
 		raise RuntimeError, "The parameters on the clipboard are not applicable to '%s'" % plugPath
-	
+
 	# Apply the preset to make sure that the children are there
 	fnPh.setParameterisedValues()
-	
-	with fnPh.parameterModificationContext() : 
+
+	with fnPh.parameterModificationContext() :
 		_ieCoreParameterClipboardUIBuffer( fnPh.getParameterised()[0], parameter )
-		
+
 	# Connect up
 	if not maya.cmds.objExists( _ieCoreParameterClipboardUILastNode ) :
 		raise RuntimeError, "The source node '%s' no longer exists." % _ieCoreParameterClipboardUILastNode
-	
+
 	if not _ieCoreParameterClipboardUILastRoot :
 		raise RuntimeError, "Unable to link, the source root parameter is not known." % _ieCoreParameterClipboardUILastNode
-	
-	
+
+
 	sourceNodeHolder = IECoreMaya.FnParameterisedHolder( _ieCoreParameterClipboardUILastNode )
 	sourceRootPlugPath = sourceNodeHolder.parameterPlugPath( _ieCoreParameterClipboardUILastRoot )
-		
+
 	if sourceRootPlugPath == plugPath :
 		raise RuntimeError, "The source and destination parameters are the same, unable to link."
-	
+
 	for p in _ieCoreParameterClipboardUILastParameterList :
 		sourcePlugPath = sourceNodeHolder.parameterPlugPath( p )
 		destPlugPath = sourcePlugPath.replace( sourceRootPlugPath, plugPath )
@@ -296,35 +296,35 @@ def pasteLinked( plugPath ) :
 def __getParameters( parameter, paramList=[] ) :
 
 	if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
-		
+
 		for p in parameter.values():
 			__getParameters( p, paramList )
-	
+
 	elif isinstance( parameter, IECore.ClassParameter ) :
-		
+
 		c = parameter.getClass( False )
 		if c:
 			paramList.append( parameter )
 			__getParameters( c.parameters(), paramList )
-		
+
 	elif isinstance( parameter, IECore.ClassVectorParameter ) :
-		
+
 		cl = parameter.getClasses( False )
 		if cl :
 			paramList.append( parameter )
 			for c in cl :
 				__getParameters( c.parameters(), paramList )
-	
+
 	else :
 		paramList.append( parameter )
-	
+
 # We need to clear out the references we're holding on parameters when the scene changes
 def _clearReferences( *args, **kwargs ) :
 
 	global _ieCoreParameterClipboardUILastParameterList
 	global _ieCoreParameterClipboardUILastNode
 	global _ieCoreParameterClipboardUILastRoot
-	
+
 	_ieCoreParameterClipboardUILastParameterList = None
 	_ieCoreParameterClipboardUILastNode = None
 	_ieCoreParameterClipboardUILastRoot = None

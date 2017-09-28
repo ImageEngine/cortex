@@ -65,10 +65,10 @@ namespace IECoreMaya
 ///
 /// Curently the node is only tested/registered for Box3f Parameter types.
 
-class Box3Manipulator : public ParameterManipContainer 
+class Box3Manipulator : public ParameterManipContainer
 {
 	public:
-	
+
 		Box3Manipulator();
 		virtual ~Box3Manipulator();
 
@@ -78,38 +78,38 @@ class Box3Manipulator : public ParameterManipContainer
 		virtual MStatus createChildren();
     	virtual MStatus connectToDependNode( const MObject &node);
 
-		virtual void draw( M3dView & view, 
-						   const MDagPath & path, 
+		virtual void draw( M3dView & view,
+						   const MDagPath & path,
 						   M3dView::DisplayStyle style,
 						   M3dView::DisplayStatus status );
-						   
+
 		MManipData vectorPlugToManipConversion( unsigned int manipIndex );
 		MManipData vectorManipToPlugConversion( unsigned int plugIndex );
 		MManipData updateCenteredManipPosition( unsigned int manipIndex );
-		
+
 		static MTypeId id;
 		static const MString typeName;
 
 	private:
-		
+
 		MDagPath m_nodePath;
-	
-		bool findPlugs( MFnDagNode &dagFn );		
+
+		bool findPlugs( MFnDagNode &dagFn );
 		MString m_minPlugName;
 		MString m_maxPlugName;
 		MPlug m_minPlug;
 		MPlug m_maxPlug;
-		
+
 		void readParameterOptions( MFnDagNode &nodeFn );
 		bool m_worldSpace;
-								
+
 		MPoint getPlugValues( MPlug &plug );
 		void getPlugValues( MPlug &plug, double *values );
 		void getPlugValues( MPlug &plug, MFnNumericData &data );
-		
-		MMatrix m_localMatrix; 
+
+		MMatrix m_localMatrix;
 		MMatrix m_localMatrixInv;
-			
+
 		MDagPath m_minManip;
 		MDagPath m_maxManip;
 		MDagPath m_stateManip;

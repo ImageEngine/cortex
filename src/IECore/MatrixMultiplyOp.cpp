@@ -127,7 +127,7 @@ struct MultiplyFunctor
 	void multiply33( U * data, const T &matrix )
 	{
 		assert( data );
-		
+
 		GeometricData::Interpretation mode = data->getInterpretation();
 		typename U::ValueType::iterator beginIt = data->writable().begin();
 		typename U::ValueType::iterator endIt = data->writable().end();
@@ -153,7 +153,7 @@ struct MultiplyFunctor
 	void multiply( U * data, const T &matrix )
 	{
 		assert( data );
-		
+
 		GeometricData::Interpretation mode = data->getInterpretation();
 		typename U::ValueType::iterator beginIt = data->writable().begin();
 		typename U::ValueType::iterator endIt = data->writable().end();

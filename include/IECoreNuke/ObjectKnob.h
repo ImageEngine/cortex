@@ -52,30 +52,30 @@ class ObjectKnob : public DD::Image::Knob
 		/// to the old value and false otherwise.
 		bool setValue( IECore::ConstObjectPtr value );
 		IECore::ConstObjectPtr getValue() const;
-		
+
 		/// Call this from an Op::knobs() implementation to create an ObjectKnob. The value placed in storage by the knob
 		/// must be treated as read only.
 		static ObjectKnob *objectKnob( DD::Image::Knob_Callback f, IECore::ObjectPtr *storage, const char *name, const char *label );
 
 	protected :
-	
+
 		ObjectKnob( DD::Image::Knob_Closure *f, IECore::ObjectPtr *storage, const char *name, const char *label = 0 );
 		virtual ~ObjectKnob();
-		
+
 		virtual const char *Class() const;
 
 		virtual void to_script( std::ostream &os, const DD::Image::OutputContext *context, bool quote ) const;
 		virtual bool from_script( const char *value );
 		virtual bool not_default() const;
 		virtual void store( DD::Image::StoreType storeType, void *storage, DD::Image::Hash &hash, const DD::Image::OutputContext &context );
-		
+
 	private :
 
 		bool valuesEqual( const IECore::Object *value1, const IECore::Object *value2 ) const;
 
 		IECore::ObjectPtr m_defaultValue;
 		IECore::ObjectPtr m_value;
-		
+
 };
 
 namespace Detail
@@ -86,9 +86,9 @@ struct PythonObjectKnob : public IECore::RefCounted
 {
 
 	IE_CORE_DECLAREMEMBERPTR( PythonObjectKnob );
-	
+
 	ObjectKnob *objectKnob;
-	
+
 };
 
 IE_CORE_DECLAREPTR( PythonObjectKnob );

@@ -100,7 +100,7 @@ void IECoreMantra::ProceduralPrimitive::render()
 void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderablePtr renderable )
 {
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( renderable.get() );
-	if( !converter ) 
+	if( !converter )
 	{
 		msg( Msg::Warning, "ProceduralPrimitive::addVisibleRenderable", "converter could not be found" );
 		return;
@@ -137,7 +137,7 @@ void IECoreMantra::ProceduralPrimitive::addVisibleRenderable( VisibleRenderableP
 	else if ( m_renderer->m_motionType == RendererImplementation::ConcatTransform ||
 			  m_renderer->m_motionType == RendererImplementation::SetTransform )
 	{
-		// It isn't clear that this will give correct results. 
+		// It isn't clear that this will give correct results.
 		// ConcatTransform may need to interpolate transform snapshots.
 		msg(Msg::Debug, "IECoreMantra::ProceduralPrimitive::addVisibleRenderable", "MotionBlur:Transform" );
 		VRAY_ProceduralChildPtr proceduralGeometryChild = createChild();
@@ -189,7 +189,7 @@ void IECoreMantra::ProceduralPrimitive::applySettings(VRAY_ProceduralChildPtr ch
 		child->changeSetting("surface", s->readable().c_str(), "object");
 	}
 	CompoundDataMap::const_iterator a_it;
-	for (a_it = m_renderer->m_attributeStack.top().attributes->readable().begin(); 
+	for (a_it = m_renderer->m_attributeStack.top().attributes->readable().begin();
 		 a_it != m_renderer->m_attributeStack.top().attributes->readable().end(); a_it++)
 	{
 		std::string name = a_it->first;

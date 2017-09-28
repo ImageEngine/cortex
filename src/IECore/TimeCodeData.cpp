@@ -49,9 +49,9 @@ void TimeCodeData::save( SaveContext *context ) const
 {
 	Data::save( context );
 	IndexedIO *container = context->rawContainer();
-	
+
 	const Imf::TimeCode &timeCode = readable();
-	/// \todo: should we be using FILM24_PACKING rather than the default? 
+	/// \todo: should we be using FILM24_PACKING rather than the default?
 	unsigned data[2] = { timeCode.timeAndFlags(), timeCode.userData() };
 	container->write( g_valueEntry, data, 2 );
 }
@@ -61,11 +61,11 @@ void TimeCodeData::load( LoadContextPtr context )
 {
 	Data::load( context );
 	const IndexedIO *container = context->rawContainer();
-	
+
 	unsigned data[2];
 	unsigned *dataPtr = &data[0];
 	container->read( g_valueEntry, dataPtr, 2 );
-	
+
 	Imf::TimeCode &timeCode = writable();
 	timeCode.setTimeAndFlags( data[0] );
 	timeCode.setUserData( data[1] );
@@ -78,11 +78,11 @@ bool TimeCodeData::isEqualTo( const Object *other ) const
 	{
 		return false;
 	}
-	
+
 	const Imf::TimeCode &thisCode = readable();
 	const TimeCodeData *tOther = static_cast<const TimeCodeData *>( other );
 	const Imf::TimeCode &thatCode = tOther->readable();
-	
+
 	return ( thisCode.timeAndFlags() == thatCode.timeAndFlags() && thisCode.userData() == thatCode.userData() );
 }
 

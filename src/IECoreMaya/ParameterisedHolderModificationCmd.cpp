@@ -83,18 +83,18 @@ bool ParameterisedHolderModificationCmd::hasSyntax() const
 }
 
 MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
-{	
+{
 	// get the node we're operating on
-	
+
 	MSelectionList selection;
 	selection.add( argList.asString( 0 ) );
-	
+
 	selection.getDependNode( 0, m_node );
 	if( m_node.isNull() )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnDependencyNode fnNode( m_node );
 	MPxNode *userNode = fnNode.userNode();
 	m_parameterisedHolder = dynamic_cast<ParameterisedHolderInterface *>( userNode );
@@ -113,36 +113,36 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 		m_parameterisedHolder->getParameterised( &originalClassName, &m_originalClassVersion, &originalSearchPathEnvVar );
 		m_originalClassName = originalClassName.c_str();
 		m_originalSearchPathEnvVar = originalSearchPathEnvVar.c_str();
-	
+
 		m_newClassName = argList.asString( 1 );
 		m_newClassVersion = argList.asInt( 2 );
 		m_newSearchPathEnvVar = argList.asString( 3 );
-		
+
 		m_changingClass = true;
 	}
 	else if( argList.length() != 1 )
 	{
 		displayError( "ieParameterisedHolderSetParameterised : wrong number of arguments." );
 		return MS::kFailure;
-	}	
-		
+	}
+
 	// store the original and new values of everything. these are just passed in from
 	// the FnParameterisedHolder. in the case of changing the held class we won't have
 	// any new values.
-	
+
 	m_originalValues = g_originalValue;
 	m_originalClasses = g_originalClasses;
 	m_newValues = g_newValue;
 	m_newClasses = g_newClasses;
-	
+
 	g_originalValue = 0;
 	g_originalClasses = 0;
 	g_newValue = 0;
 	g_newClasses = 0;
-	
+
 	// change the maya side class or monkey with the maya side class parameters as requested. then remember the new values
 	// of everything and which parameters are changing so we can push them in and out during undo and redo.
-	
+
 	if( m_changingClass )
 	{
 		MStatus s = m_parameterisedHolder->setParameterised( m_newClassName.asChar(), m_newClassVersion, m_newSearchPathEnvVar.asChar() );
@@ -156,12 +156,12 @@ MStatus ParameterisedHolderModificationCmd::doIt( const MArgList &argList )
 	}
 	else
 	{
-		storeParametersWithNewValues( m_originalValues.get(), m_newValues.get(), "" );	
+		storeParametersWithNewValues( m_originalValues.get(), m_newValues.get(), "" );
 		m_parameterisedHolder->updateParameterised();
 		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
 	}
-		
+
 	return MS::kSuccess;
 }
 
@@ -173,7 +173,7 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 	}
 
 	MStatus s;
-	if( m_changingClass ) 
+	if( m_changingClass )
 	{
 		s = m_parameterisedHolder->setParameterised( m_originalClassName.asChar(), m_originalClassVersion, m_originalSearchPathEnvVar.asChar() );
 		if( !s )
@@ -181,13 +181,13 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 			return s;
 		}
 	}
-	
+
 	if( m_originalClasses->readable().size() )
 	{
 		restoreClassParameterStates( m_originalClasses.get(), m_parameterisedHolder->getParameterisedInterface()->parameters(), "" );
 		m_parameterisedHolder->updateParameterised();
 	}
-	
+
 	if( m_originalValues )
 	{
 		m_parameterisedHolder->getParameterisedInterface()->parameters()->setValue( m_originalValues->copy() );
@@ -203,12 +203,12 @@ MStatus ParameterisedHolderModificationCmd::undoIt()
 	{
 		despatchClassSetCallbacks();
 	}
-	
+
 	return s;
 }
 
 MStatus ParameterisedHolderModificationCmd::redoIt()
-{	
+{
 	if( !m_parameterisedHolder )
 	{
 		return MStatus::kFailure;
@@ -231,7 +231,7 @@ MStatus ParameterisedHolderModificationCmd::redoIt()
 		setNodeValuesForParametersWithNewValues();
 		despatchClassSetCallbacks();
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -243,9 +243,9 @@ void ParameterisedHolderModificationCmd::restoreClassParameterStates( const IECo
 		parameterPath += ".";
 	}
 	parameterPath += parameter->name();
-		
+
 	if( parameter->isInstanceOf( "ClassParameter" ) )
-	{				
+	{
 		const CompoundData *c = classes->member<const CompoundData>( parameterPath );
 		if( c )
 		{
@@ -258,7 +258,7 @@ void ParameterisedHolderModificationCmd::restoreClassParameterStates( const IECo
 		}
 	}
 	else if( parameter->isInstanceOf( "ClassVectorParameter" ) )
-	{		
+	{
 		const CompoundData *c = classes->member<const CompoundData>( parameterPath );
 		if( c )
 		{
@@ -278,7 +278,7 @@ void ParameterisedHolderModificationCmd::restoreClassParameterStates( const IECo
 			ClassVectorParameterHandler::setClasses( parameter, mParameterNames, mClassNames, mClassVersions );
 		}
 	}
-	
+
 	if( parameter->isInstanceOf( IECore::CompoundParameter::staticTypeId() ) )
 	{
 		CompoundParameter *compoundParameter = static_cast<CompoundParameter *>( parameter );
@@ -325,7 +325,7 @@ void ParameterisedHolderModificationCmd::storeParametersWithNewValues( const IEC
 			}
 			storeParametersWithNewValues( it->second.get(), newCompound->member<Object>( it->first ), childParameterPath );
 		}
-		
+
 		const CompoundObject::ObjectMap &newChildren = static_cast<const CompoundObject *>( newValue )->members();
 		for( CompoundObject::ObjectMap::const_iterator it = newChildren.begin(); it!=newChildren.end(); it++ )
 		{
@@ -370,7 +370,7 @@ void ParameterisedHolderModificationCmd::setNodeValuesForParametersWithNewValues
 void ParameterisedHolderModificationCmd::setNodeValue( IECore::Parameter *parameter ) const
 {
 	m_parameterisedHolder->setNodeValue( parameter );
-	
+
 	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
 	{
 		// recurse to the children - this is the only reason this function
@@ -393,7 +393,7 @@ void ParameterisedHolderModificationCmd::despatchSetParameterisedCallbacks() con
 	{
 		nodeName = fnDN.fullPathName();
 	}
-	
+
 	MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetParameterisedCallbacks( \"" + nodeName + "\" )" );
 }
 
@@ -406,7 +406,7 @@ void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 	{
 		nodeName = fnDN.fullPathName();
 	}
-	
+
 	ParameterisedInterface *parameterised = m_parameterisedHolder->getParameterisedInterface();
 
 	std::set<IECore::InternedString> names;
@@ -425,7 +425,7 @@ void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 		if( parameter )
 		{
 			IECore::CompoundDataMap::const_iterator it1 = m_originalClasses->readable().find( *it );
-			IECore::CompoundDataMap::const_iterator it2 = m_newClasses->readable().find( *it );			
+			IECore::CompoundDataMap::const_iterator it2 = m_newClasses->readable().find( *it );
 
 			if( it1==m_originalClasses->readable().end() || it2==m_newClasses->readable().end() || !(it1->second->isEqualTo( it2->second.get() ) ) )
 			{
@@ -439,7 +439,7 @@ void ParameterisedHolderModificationCmd::despatchClassSetCallbacks() const
 				{
 					MGlobal::executePythonCommand( "import IECoreMaya; IECoreMaya.FnParameterisedHolder._despatchSetClassVectorParameterClassesCallbacks( \"" + plugName + "\" )" );
 				}
-			}		
+			}
 		}
 	}
 }
@@ -448,7 +448,7 @@ IECore::Parameter *ParameterisedHolderModificationCmd::parameterFromPath( Parame
 {
 	std::vector<std::string> names;
 	boost::split( names, path, boost::is_any_of( "." ) );
-	
+
 	CompoundParameter *parent = parameterised->parameters();
 	for( int i=0; i<(int)names.size(); i++ )
 	{
@@ -465,6 +465,6 @@ IECore::Parameter *ParameterisedHolderModificationCmd::parameterFromPath( Parame
 			}
 		}
 	}
-	
+
 	return 0;
 }

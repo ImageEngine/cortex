@@ -51,35 +51,35 @@ class SOP_SceneCacheTransform : public SceneCacheNode<SOP_Node>
 
 		SOP_SceneCacheTransform( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SOP_SceneCacheTransform();
-		
+
 		static const char *typeName;
-		
+
 		enum Mode
 		{
 			Name = 0,
 			Root
 		};
-		
+
 		static PRM_Name pMode;
 		static PRM_Name pInvert;
-		
+
 		static PRM_Default modeDefault;
-		
+
 		static PRM_ChoiceList modeList;
-		
+
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 		static OP_TemplatePair *buildParameters();
-				
+
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
-	
+
 	protected :
-	
+
 		virtual OP_ERROR cookMySop( OP_Context &context );
-		
+
 		virtual void sceneChanged();
-	
+
 	private :
-		
+
 		void transformByName( const IECore::SceneInterface *scene, double time, Space space, bool invert );
 		UT_Matrix4 getTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time, Space space, bool invert );
 		Imath::M44d relativeTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time );

@@ -45,39 +45,39 @@ import IECoreRI
 class TeapotProcedural( IECore.Renderer.Procedural ) :
 
 	def __init__( self ) :
-	
+
 		IECore.Renderer.Procedural.__init__( self )
-		
+
 	def bound( self ) :
-						
+
 		return IECore.Box3f( IECore.V3f( -5 ), IECore.V3f( 5 ) )
-		
+
 	def render( self, renderer ) :
-	
+
 		renderer.geometry( "teapot", {}, {} )
-		
+
 	def hash( self ):
 		h = IECore.MurmurHash()
 		return h
-	
+
 class ParameterisedTeapotProcedural( IECore.ParameterisedProcedural ) :
 
 	def __init__( self ) :
-	
+
 		IECore.ParameterisedProcedural.__init__( self, "" )
-		
+
 	def doBound( self, args ) :
-						
+
 		return IECore.Box3f( IECore.V3f( -5 ), IECore.V3f( 5 ) )
-		
+
 	def doRender( self, renderer, args ) :
-	
-		renderer.geometry( "teapot", {}, {} )		
-				
+
+		renderer.geometry( "teapot", {}, {} )
+
 class ProceduralThreadingTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testProceduralThreading.tif"
-	
+
 	## This function serves as an example of performing a direct render to 3delight from
 	# python, either using threaded python procedurals or not. You must do one
 	# of two things :
@@ -93,14 +93,14 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 	# rendering.
 	#
 	def performRender( self, withMultiThreading, withParameterisedProcedural ) :
-	
+
 		if withMultiThreading :
 			# this is necessary so python will allow threads created by the renderer
 			# to enter into python when those threads execute procedurals.
 			IECore.initThreads()
 
 		r = IECoreRI.Renderer( "" )
-		
+
 		r.camera( "main", {
 				"projection" : IECore.StringData( "orthographic" ),
 				"resolution" : IECore.V2iData( IECore.V2i( 256 ) ),
@@ -111,20 +111,20 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 		)
 		r.display( self.outputFileName, "tiff", "rgba", {} )
 		r.setOption( "ri:pixelSamples", IECore.V2i( 16 ) )
-		
+
 		with IECore.WorldBlock( r ) :
-			
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -10 ) ) )
 			r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.1 ) ) )
-				
+
 			if not withMultiThreading :
 				r.setAttribute( "ri:procedural:reentrant", 0 )
-			
+
 			random.seed( 0 )
 			for i in range( 0, 20 ) :
-			
+
 				with IECore.TransformBlock( r ) :
-				
+
 					r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), 0 ) ) )
 					if withParameterisedProcedural :
 						ParameterisedTeapotProcedural().render( r )
@@ -135,29 +135,29 @@ class ProceduralThreadingTest( IECoreRI.TestCase ) :
 		expectedImage = IECore.Reader.create( "test/IECoreRI/data/testProceduralThreading.tif" ).read()
 
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA=imageCreated, imageB=expectedImage, maxError=0.01 ), IECore.BoolData( False ) )
-	
+
 	def test( self ) :
-		
+
 		# we do the same thing over and over to give it a decent chance of failing
 		# as threading errors are somewhat random.
-		
+
 		while gc.collect() :
 			pass
 		IECore.RefCounted.collectGarbage()
 		numInstances = IECore.RefCounted.numWrappedInstances()
-		
+
 		for i in range( 0, 20 ) :
 			self.performRender( False, False )
-			
+
 		for i in range( 0, 20 ) :
-			self.performRender( False, True )	
+			self.performRender( False, True )
 
 		for i in range( 0, 20 ) :
 			self.performRender( True, False )
-			
+
 		for i in range( 0, 20 ) :
-			self.performRender( True, True )		
-		
+			self.performRender( True, True )
+
 		# clean up and check that we haven't leaked any procedurals
 		while gc.collect() :
 			pass

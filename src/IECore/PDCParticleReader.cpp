@@ -383,7 +383,7 @@ const Data * PDCParticleReader::idAttribute()
 		{
 			it = m_header.attributes.find( "id" );
 		}
-		
+
 		if( it!=m_header.attributes.end() )
 		{
 			if( it->second.type==DoubleArray )

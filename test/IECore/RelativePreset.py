@@ -51,27 +51,27 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertRaises( Exception, lambda : emptyPreset.setDiffData( IECore.CompoundData() ) )
 
 	def testSparseSimpleChanges( self ) :
-	
+
 		def createTestObj():
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.BoolParameter( "a", "", True ),	
-					IECore.FloatParameter( "b", "", 1.0 ),	
+					IECore.BoolParameter( "a", "", True ),
+					IECore.FloatParameter( "b", "", 1.0 ),
 				]
 			)
 			return testObj
-			
+
 		def createTestObj2():
 			testObj2 = IECore.Parameterised( "testParameterised2" )
 			testObj2.parameters().addParameters(
 				[
 					IECore.BoolParameter( "a", "", True ),
-					IECore.FloatParameter( "c", "", 0.0	),	
+					IECore.FloatParameter( "c", "", 0.0	),
 				]
 			)
 			return testObj2
-		
+
 		testObjA = createTestObj()
 		testObjB = createTestObj()
 		testObjB["a"] = False
@@ -83,12 +83,12 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.failUnless( r.applicableTo( testObj2, testObj2.parameters() ) )
 
 		r( testObjB, testObjB.parameters() )
-		
+
 		self.assertEqual( testObjB.parameters()["a"].getTypedValue(), False )
 		self.assertEqual( testObjB.parameters()["b"].getTypedValue(), 1.0 )
 
 		r( testObj2, testObj2.parameters() )
-		
+
 		self.assertEqual( testObj2.parameters()["a"].getTypedValue(), False )
 		self.assertEqual( testObj2.parameters()["c"].getTypedValue(), 0.0 )
 
@@ -99,24 +99,24 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( testObjB.parameters()["a"].getTypedValue(), False )
 		self.assertEqual( testObjB.parameters()["b"].getTypedValue(), 1.0 )
 
-		
+
 	def testClasses( self ) :
-	
+
 		def createTestObj():
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.BoolParameter( "a", "", True ),	
-					IECore.ClassParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.BoolParameter( "a", "", True ),
+					IECore.ClassParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			return testObj
-		
+
 		def createTestObj2():
 			testObj2 = IECore.Parameterised( "testParameterised2" )
 			testObj2.parameters().addParameters(
 				[
-					IECore.ClassParameter( "b", "",	"IECORE_OP_PATHS" ),	
+					IECore.ClassParameter( "b", "",	"IECORE_OP_PATHS" ),
 				]
 			)
 			return testObj2
@@ -126,7 +126,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		testObj2 = createTestObj2()
 
 		testObjB["b"].setClass( "maths/multiply", 2 )
-		
+
 		classes1 = testObjB.parameters()["b"].getClass( True )
 		classes2 = testObj2.parameters()["b"].getClass( True )
 		self.assertNotEqual( classes1[1:], classes2[1:] )
@@ -137,10 +137,10 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.failUnless( r.applicableTo( testObj2, testObj2.parameters() ) )
 
 		r( testObj2, testObj2.parameters() )
-		
+
 		classes1 = testObjB.parameters()["b"].getClass( True )
 		classes2 = testObj2.parameters()["b"].getClass( True )
-		
+
 		self.assertEqual( classes1[1:], classes2[1:] )
 
 		r = IECore.RelativePreset( testObjB.parameters() )
@@ -162,17 +162,17 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( classes1[1:], classes2[1:] )
 
 	def testCompareFilter( self ) :
-	
+
 		def createTestObj():
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.ClassParameter( "a", "", "IECORE_OP_PATHS" ),	
-					IECore.ClassParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.ClassParameter( "a", "", "IECORE_OP_PATHS" ),
+					IECore.ClassParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			return testObj
-		
+
 		def filterCmp( p1, p2 ):
 			# only keep track of changes on parameter 'a'
 			return bool(p1.name in ['a', ''])
@@ -188,7 +188,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		testObjB["a"]["b"].setTypedValue( 20 )
 		testObjB["b"]["a"].setTypedValue( 30 )
 		testObjB["b"]["b"].setTypedValue( 40 )
-		
+
 		r = IECore.RelativePreset( testObjB.parameters(), testObjA.parameters(), compareFilter = filterCmp )
 
 		r( testObjA, testObjA.parameters() )
@@ -199,13 +199,13 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( testObjA["b"]["b"].getTypedValue(), 2 )
 
 	def testClassVectors( self ) :
-	
+
 		def createTestObj() :
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.BoolParameter( "a", "", True ),	
-					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.BoolParameter( "a", "", True ),
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			return testObj
@@ -224,28 +224,28 @@ class TestRelativePreset( unittest.TestCase ) :
 			testObj2 = IECore.Parameterised( "testParameterised2" )
 			testObj2.parameters().addParameters(
 				[
-					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			return testObj2
 
 		testObj2 = createTestObj2()
-		
+
 		classes1 = [ c[1:] for c in testObjB.parameters()["b"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["b"].getClasses( True ) ]
-		
+
 		self.assertNotEqual( classes1, classes2 )
 		self.assertEqual( len(classes1), 2 )
-		
+
 		r1 = IECore.RelativePreset( testObjB.parameters() )
 		r2 = IECore.RelativePreset( testObjB.parameters(), testObjA.parameters() )
-		
+
 		self.failUnless( r1.applicableTo( testObjB, testObjB.parameters() ) )
 		self.failUnless( r1.applicableTo( testObj2, testObj2.parameters() ) )
 		self.failUnless( r2.applicableTo( testObj2, testObj2.parameters() ) )
 
 		r2( testObj2, testObj2.parameters() )
-		
+
 		classes2 = [ c[1:] for c in testObj2.parameters()["b"].getClasses( True ) ]
 		self.assertEqual( classes1, classes2 )
 
@@ -267,7 +267,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		r( testObjB, testObjB.parameters() )
 		classes1 = [ c[1] for c in testObjB.parameters()["b"].getClasses( True ) ]
 		self.assertEqual( classes1, [ "coIO" ] )
-		
+
 		# now we add it back
 		testObj2["b"].setClass( "mult", "maths/multiply", 2 )
 		testObj2["b"].setClass( "another", "maths/multiply", 2 )
@@ -293,9 +293,9 @@ class TestRelativePreset( unittest.TestCase ) :
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.BoolParameter( "a", "", True ),	
-					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
-					IECore.BoolParameter( "c", "", False ),	
+					IECore.BoolParameter( "a", "", True ),
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
+					IECore.BoolParameter( "c", "", False ),
 				]
 			)
 			testObj.parameters()["b"].setClasses(
@@ -358,7 +358,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		self.assertEqual( testObjB.parameters()["b"]["p2"]["cv"].keys(), [ 'p0', 'p1', 'p3' ] )
 		self.assertEqual( len(classes2), 3 )
 		self.assertEqual( classes1, classes2 )
-		
+
 		# we test the other way around
 		testObj2 = createParameterised()
 		r = IECore.RelativePreset( testObj2.parameters(), testObjB.parameters() )
@@ -377,7 +377,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		testObj2 = createParameterised()
 		testObj2.parameters().removeParameter("a")		# remove "a"
 		testObj2.parameters().removeParameter("c")		# replace "c" by something else
-		testObj2.parameters().addParameter( 
+		testObj2.parameters().addParameter(
 			IECore.IntParameter( "c", "", 10 )
 		)
 		testObj2.parameters().addParameter(				# add new parameter "d"
@@ -390,7 +390,7 @@ class TestRelativePreset( unittest.TestCase ) :
 		testObj2["b"]["p2"]["cv"].setClass("p3", "compoundObjectInOut", 1 )	# add one op that the preset will try to add too... name clashes!
 
 		relPreset( testObj2, testObj2.parameters() )
-		
+
 		self.assertEqual( testObj2["c"].getTypedValue(), 10 )	# guarantee that the replaced parameter "c" was not affected by the Preset
 		self.assert_( "p3" in testObj2["b"].keys() )			# ok, "p3" was not removed!
 		self.assertEqual( testObj2["b"]["p4"]["cp"]["a"].getTypedValue(), 10 )	# ok, the preset changes were applied here
@@ -403,15 +403,15 @@ class TestRelativePreset( unittest.TestCase ) :
 	def __checkOrder( self, localChangesParam, applyToParam, expectedOrder ):
 		r = IECore.RelativePreset( localChangesParam, baseVec() )
 		testObj = IECore.Parameterised( "test" )
-		testObj.parameters().addParameters( 
+		testObj.parameters().addParameters(
 			[
-						applyToParam 
+						applyToParam
 			]
 		)
 		r( testObj, applyToParam )
 		resultOrder = map( lambda c: c[1], applyToParam.getClasses( True ) )
 		self.assertEqual( resultOrder, expectedOrder )
-	
+
 	def testBaseInsertions( self ):
 		# easy tests applying to base vector
 		self.__checkOrder( topInsert(), baseVec(), [ 'p5', 'p1', 'p2', 'p3', 'p4' ] )
@@ -549,7 +549,7 @@ def nameclashingVec():
 def unrelatedVec():
 	return createVec( [ ('p10','maths/multiply'), ('p11','floatParameter'), ('p12', 'floatParameter')  ] )
 
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

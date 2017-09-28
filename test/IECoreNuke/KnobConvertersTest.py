@@ -53,7 +53,7 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 						IECore.CompoundParameter(
 							name = "B",	description = "",
 							members = [
-					
+
 								IECore.DoubleParameter(
 									name = "C",	description = "",
 									defaultValue = 2
@@ -63,7 +63,7 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 									name = "D",	description = "",
 									defaultValue = 3
 								),
-			
+
 							]
 						),
 
@@ -90,7 +90,7 @@ class KnobConvertersTest( IECoreNuke.TestCase ) :
 									name = "I",	description = "",
 									defaultValue = IECore.DoubleVectorData()
 								),
-					
+
 							]
 						),
 

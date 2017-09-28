@@ -146,11 +146,11 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( s, a.parameters() )
 
 		a()
-		
+
 		# test alternate serialisation (without validation)
 		notValidated = IECore.ParameterParser().serialise( a.parameters(), values = a.parameters().getValue() )
 		IECore.ParameterParser().parse( notValidated, a.parameters() )
-		
+
 		a()
 
 	def testSerialisingNonValidParameterValues( self ) :
@@ -167,13 +167,13 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.curry( IECore.ParameterParser().serialise, p ) )
 		s = IECore.ParameterParser().serialise( p, values = p.getValue() )
 		self.assertRaises( SyntaxError, IECore.curry( IECore.ParameterParser().parse, s, p ) )
-		
+
 		realImage = IECore.StringData( "test/IECore/data/cobFiles/ball.cob" )
 		s = IECore.ParameterParser().serialise( p, values = realImage )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
 		IECore.ParameterParser().parse( s, p )
 		self.assertEqual( p.getValidatedValue(), realImage )
-	
+
 	def testStringParsing( self ) :
 
 		a = IECore.ClassLoader( IECore.SearchPath( "test/IECore/ops", ":" ) ).load( "stringParsing" )()
@@ -274,7 +274,7 @@ class testParameterParser( unittest.TestCase ) :
 		)
 
 	def testOptionalSerialisation( self ) :
-	
+
 		parameters = IECore.CompoundParameter(
 
 			members = [
@@ -301,7 +301,7 @@ class testParameterParser( unittest.TestCase ) :
 		)
 
 		s = IECore.ParameterParser().serialise( parameters )
-		
+
 		self.failIf( "-a" not in s )
 		self.failIf( "-b" not in s )
 		self.failIf( "-c" in s )
@@ -349,10 +349,10 @@ class testParameterParser( unittest.TestCase ) :
 				),
 			]
 		)
-		
+
 		args = [ "-t", '1', '2', '3', '10', '11', '12', '4', '5', '6', '7', '8', '9', 'ZYX', '1', '21', '22', '23', '26', '27', '28', '36', '37', '38', '46', '47', '48', '56', '57', '58' ]
 		IECore.ParameterParser().parse( args, p )
-		
+
 		t = p["t"].getTypedValue()
 		self.assertEqual( t.translate,IECore.V3f( 1,2,3 ) )
 		self.assertEqual( t.scale,IECore.V3f( 10,11,12 ) )
@@ -366,33 +366,33 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertEqual( t.scalePivotTranslation, IECore.V3f( 56,57,58 ) )
 
 	def testLineSegmentParsing( self ) :
-	
+
 		p = IECore.CompoundParameter(
-			
+
 			members = [
-			
+
 				IECore.LineSegment3fParameter(
 					name = "f",
 					description = "",
 					defaultValue = IECore.LineSegment3f( IECore.V3f( 1 ), IECore.V3f( 2 ) )
 				),
-				
+
 				IECore.LineSegment3dParameter(
 					name = "d",
 					description = "",
 					defaultValue = IECore.LineSegment3d( IECore.V3d( 1 ), IECore.V3d( 2 ) )
 				),
-			
+
 			]
-		
+
 		)
-		
+
 		args = "-f 1 2 3 4 5 6 -d 6 5 4 3 2 1".split()
 		IECore.ParameterParser().parse( args, p )
 
 		self.assertEqual( p["f"].getTypedValue(), IECore.LineSegment3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
 		self.assertEqual( p["d"].getTypedValue(), IECore.LineSegment3d( IECore.V3d( 6, 5, 4 ), IECore.V3d( 3, 2, 1 ) ) )
-		
+
 		self.assertEqual( IECore.ParameterParser().serialise( p ), args )
 
 	def testDatetimeParsing( self ) :
@@ -435,7 +435,7 @@ class testParameterParser( unittest.TestCase ) :
 			IECore.IntVectorData( [ 4 ] ), IECore.IntVectorData( [ 0, 1, 2, 3 ] ), "linear",
 			IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ) ] )
 		)
-		
+
 		p = IECore.CompoundParameter(
 			members = [
 				IECore.MeshPrimitiveParameter(
@@ -448,7 +448,7 @@ class testParameterParser( unittest.TestCase ) :
 
 		s = IECore.ParameterParser().serialise( p )
 		v = p["testName"].getValue().copy()
-		
+
 		testMesh = IECore.MeshPrimitive(
 			IECore.IntVectorData( [ 4 ] ), IECore.IntVectorData( [ 0, 2, 1, 3 ] ), "linear",
 			IECore.V3fVectorData( [ IECore.V3f( 10 ), IECore.V3f( 20 ), IECore.V3f( 30 ), IECore.V3f( 40 ) ] )
@@ -459,7 +459,7 @@ class testParameterParser( unittest.TestCase ) :
 		IECore.ParameterParser().parse( s, p )
 
 		self.assertEqual( p["testName"].getValue(), v )
-	
+
 	def testEmptyVector( self ) :
 		""" Test that serializing then parsing a vector with no elements in it succeeds """
 
@@ -514,11 +514,11 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertRaises( SyntaxError, parser.parse, ["-spline"], p )
 
 	def testDerivedClassParsing( self ) :
-	
+
 		class DerivedParameter( IECore.StringParameter ) :
-		
+
 			def __init__( self, name, description, defaultValue ) :
-			
+
 				IECore.StringParameter.__init__( self, name, description, defaultValue )
 
 		IECore.registerRunTimeTyped( DerivedParameter )
@@ -530,17 +530,17 @@ class testParameterParser( unittest.TestCase ) :
 		)
 
 		p["n"].setTypedValue( "test" )
-		
+
 		s = IECore.ParameterParser().serialise( p )
-		
+
 		p["n"].setTypedValue( "ohDear" )
-		
+
 		IECore.ParameterParser().parse( s, p )
-		
+
 		self.assertEqual( p["n"].getTypedValue(), "test" )
-		
+
 	def testStringVectorParameterAcceptsFlags( self ) :
-	
+
 		p = IECore.CompoundParameter(
 			members = [
 				IECore.StringVectorParameter(
@@ -550,9 +550,9 @@ class testParameterParser( unittest.TestCase ) :
 				),
 			],
 		)
-		
+
 		self.assertRaises( SyntaxError, IECore.ParameterParser().parse, [ "-s", "something", "-ohNoAFlag" ], p )
-		
+
 		p["s"].userData()["parser"] = IECore.CompoundObject( { "acceptFlags" : IECore.BoolData( True ) } )
 
 		IECore.ParameterParser().parse( [ "-s", "something", "-flagsAreFine" ], p )
@@ -560,7 +560,7 @@ class testParameterParser( unittest.TestCase ) :
 		self.assertEqual( p["s"].getValue(), IECore.StringVectorData( [ "something", "-flagsAreFine" ] ) )
 
 	def testBooleanParsingWithoutValues( self ) :
-	
+
 		p = IECore.CompoundParameter(
 			members = [
 				IECore.BoolParameter(
@@ -575,9 +575,9 @@ class testParameterParser( unittest.TestCase ) :
 				),
 			],
 		)
-		
+
 		IECore.ParameterParser().parse( [ "-b", "-s", "stringValue" ], p )
-		
+
 		self.assertEqual( p["b"].getTypedValue(), True )
 		self.assertEqual( p["s"].getTypedValue(), "stringValue" )
 
@@ -633,18 +633,18 @@ class testParameterParser( unittest.TestCase ) :
 		# check that parsing without a value works too
 
 		parameters["a"].setTypedValue( False )
-		
+
 		IECore.ParameterParser().parse( [
 				"-a",
 				"hello", "22"
 			],
 			parameters
 		)
-		
+
 		self.assertEqual( parameters["a"].getTypedValue(), True )
 		self.assertEqual( parameters["b"].getTypedValue(), "hello" )
 		self.assertEqual( parameters["c"].getNumericValue(), 22 )
-		
+
 if __name__ == "__main__":
         unittest.main()
 

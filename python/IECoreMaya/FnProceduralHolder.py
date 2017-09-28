@@ -62,7 +62,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		fnPH = FnProceduralHolder( fnDN.object() )
 		maya.cmds.sets( fnPH.fullPathName(), add="initialShadingGroup" )
 		fnPH.setProcedural( className, classVersion, undoable=False ) # undo for the node creation is all we need
-		
+
 		return fnPH
 
 	## Convenience method to call setParameterised with the environment variable
@@ -81,20 +81,20 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	# are specified by the procedural by setting the "name" attribute in the
 	# renderer
 	def componentNames( self ) :
-	
+
 		# Makes sure that the scene has been built at least once with the
 		# current node values, so there will be something in the plug
 		# for us to read.
 		self.scene()
-		
+
 		attributeName = "%s.proceduralComponents" % self.fullPathName()
-	
+
 		result = set()
 		for i in range( maya.cmds.getAttr( attributeName, size=True ) ) :
 			result.add( maya.cmds.getAttr( "%s[%i]" % ( attributeName, i ) ) )
-		
+
 		return result
-		
+
 	## Returns a set of the names of any currently selected components. These names
 	# are specified by the procedural by setting the "name" attribute in the
 	# renderer.
@@ -160,61 +160,61 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 	# under it, otherwise it will share the parent of the procedural. Returns the
 	# path to the top level transform of the new geometry.
 	def convertToGeometry( self, parent=None ) :
-	
+
 		procedural = self.getProcedural()
 		if not procedural :
 			return None
-			
+
 		renderer = IECore.CapturingRenderer()
-		
+
 		selected = self.selectedComponentNames()
-		
+
 		objectFilter = set()
-		
+
 		for sel in selected:
 			# we want to output the selected components, and all of their children:
 			objectFilter.add( sel )
 			objectFilter.add( sel + "/*" )
-		
+
 		if len( objectFilter ):
 			renderer.setOption( "cp:objectFilter", IECore.StringVectorData( list( objectFilter ) ) )
-		
+
 		with IECore.WorldBlock( renderer ) :
 			procedural.render( renderer )
-		
+
 		world = renderer.world()
-		
+
 		# These things have a tendency to generate big, useless stacks of groups.
 		# Only the tree structure is actually useful to us, so lets remove these if possible:
 		self.__collapseGroups( world )
 		self.__removeChildlessGroups( world )
-		
+
 		if parent is None :
 			parent = maya.cmds.listRelatives( self.fullPathName(), fullPath=True, parent=True )
 			if parent is not None :
 				parent = parent[0]
-			
+
 		IECoreMaya.ToMayaGroupConverter( world ).convert( parent )
-		
+
 		return maya.cmds.listRelatives( parent, fullPath=True )[-1]
-	
+
 	## Returns a path to a plug which outputs the transform for the specified component. The plug
 	# will have "componentTranslate", "componentRotate" and "componentScale" children with the appropriate values.
 	def componentTransformPlugPath( self, componentName ) :
-	
+
 		i = self.__componentIndex( componentName )
 		return self.fullPathName() + ".componentTransform[" + str( i ) + "]"
 
-	## Returns a path to a plug which outputs the bounding box of the specified component. The 
+	## Returns a path to a plug which outputs the bounding box of the specified component. The
 	# plug will have "componentBoundMin", "componentBoundMax" and "componentBoundCenter" children with the
 	# appropriate values.
 	def componentBoundPlugPath( self, componentName ) :
-	
+
 		i = self.__componentIndex( componentName )
 		return self.fullPathName() + ".componentBound[" + str( i ) + "]"
 
 	def __componentIndex( self, componentName ) :
-	
+
 		fullPathName = self.fullPathName()
 
 		queryIndices = maya.cmds.getAttr( fullPathName + ".componentQueries", multiIndices=True )
@@ -225,21 +225,21 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 				if maya.cmds.getAttr( fullPathName + ".componentQueries[" + str( i ) + "]" ) == componentName :
 					return i
 			i += 1
-			
+
 		maya.cmds.setAttr( fullPathName + ".componentQueries[" + str( i ) + "]", componentName, type="string" )
 		return i
-					
+
 	def __removeChildlessGroups( self, group ) :
-		
+
 		children = group.children()
-		
+
 		for c in group.children():
 			if isinstance( c, IECore.Group ) :
 				if len( c.children() ) == 0:
 					group.removeChild( c )
 				else:
 					self.__removeChildlessGroups( c )
-		
+
 
 	def __collapseGroups( self, group ) :
 
@@ -266,7 +266,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 				childName = child.getAttribute("name")
 				if childName:
 					group.addState( IECore.AttributeState( { "name" : childName } ) )
-					
+
 				group.removeChild( child )
 
 				for c in child.children():
@@ -285,9 +285,9 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			for c in group.children():
 				if isinstance( c, IECore.Group ) :
 					self.__collapseGroups( c )
-	
+
 	def createLocatorAtTransform( self, path ):
-		
+
 		proceduralParent = maya.cmds.listRelatives( self.fullPathName(), parent=True, fullPath=True )[0]
 		outputPlug = self.componentTransformPlugPath( path )
 		locator = "|" + maya.cmds.spaceLocator( name = path.replace( "/", "_" ) + "Transform" )[0]
@@ -295,15 +295,15 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		maya.cmds.connectAttr( outputPlug + ".componentRotate", locator + ".rotate" )
 		maya.cmds.connectAttr( outputPlug + ".componentScale", locator + ".scale" )
 		loc = proceduralParent + "|" + maya.cmds.parent( locator, proceduralParent, relative=True )[0]
-		
+
 		return loc
-		
-		
-		
+
+
+
 	def createLocatorAtPoints( self, path, childPlugSuffixes ) :
-		
+
 		proceduralParent = maya.cmds.listRelatives( self.fullPathName(), parent=True, fullPath=True )[0]
-		
+
 		locators = []
 		for childPlugSuffix in childPlugSuffixes :
 			outputPlug = self.componentBoundPlugPath( path )
@@ -312,9 +312,9 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			locators.append( proceduralParent + "|" + maya.cmds.parent( locator, proceduralParent, relative=True )[0] )
 		return locators
 
-	
+
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):
-		
+
 		return "ieProceduralHolder"

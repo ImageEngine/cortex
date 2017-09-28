@@ -39,13 +39,13 @@ import time
 import IECore
 import IECoreImage
 import IECoreRI
-				
+
 class DspyTest( IECoreRI.TestCase ) :
 
 	def testRenderDirectToImagePrimitive( self ) :
-		
+
 		r = IECoreRI.Renderer( "" )
-		
+
 		# write one image direct to memory
 		r.display( "test", "ie", "rgba",
 			{
@@ -54,38 +54,38 @@ class DspyTest( IECoreRI.TestCase ) :
 				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}
 		)
-		
+
 		# write another to disk the usual way
 		r.display( "test/IECoreRI/output/sphere.tif", "tiff", "rgba",
 			{
 				"quantize" : IECore.FloatVectorData( [ 0, 0, 0, 0 ] ),
 			}
 		)
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
-	
+
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		# check that they're the same
-		
+
 		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
 		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
-		
+
 		i.blindData().clear()
 		i2.blindData().clear()
-		
+
 		self.failIf( IECoreImage.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
-	
+
 	def testDisplayDriver( self ) :
-	
+
 		server = IECoreImage.DisplayDriverServer( 1559 )
 		time.sleep( 2 )
-		
+
 		rib = """
 		Option "searchpath" "string display" "@:./src/rmanDisplays/ieDisplay"
-		
+
 		Display "test" "ieTestDisplay" "rgba"
 			"quantize" [ 0 0 0 0 ]
 			"string driverType" "ClientDisplayDriver"
@@ -93,32 +93,32 @@ class DspyTest( IECoreRI.TestCase ) :
 			"string displayPort" "1559"
 			"string remoteDisplayType" "ImageDisplayDriver"
 			"string handle" "myLovelySphere"
-			
+
 		Display "+test/IECoreRI/output/sphere.tif" "tiff" "rgba" "quantize" [ 0 0 0 0 ]
-			
+
 		Projection "perspective" "float fov" [ 40 ]
-		
+
 		WorldBegin
-		
-			Translate 0 0 5			
+
+			Translate 0 0 5
 			Sphere 1 -1 1 360
 
 		WorldEnd
 		"""
-		
+
 		ribFile = open( "test/IECoreRI/output/display.rib", "w" )
 		ribFile.write( rib )
 		ribFile.close()
-		
+
 		os.system( "renderdl test/IECoreRI/output/display.rib" )
-		
+
 		i = IECoreImage.ImageDisplayDriver.removeStoredImage( "myLovelySphere" )
 		i2 = IECore.Reader.create( "test/IECoreRI/output/sphere.tif" ).read()
-		
+
 		i.blindData().clear()
 		i2.blindData().clear()
-		
+
 		self.failIf( IECoreImage.ImageDiffOp()( imageA = i, imageB = i2, maxError = 0.001 ).value )
-				
+
 if __name__ == "__main__":
     unittest.main()

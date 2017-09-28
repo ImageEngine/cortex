@@ -361,18 +361,18 @@ class TestPerlinNoise( unittest.TestCase ) :
 
 
 	def testFilterWidth( self ) :
-	
+
 		n = IECore.PerlinNoiseV2ff( 0 )
-		
+
 		for i in range( 1, 50 ) :
 			for j in range( 1, 50 ) :
 				p = IECore.V2f( i/50.0, j/50.0 )
-				self.failUnless( n.noise( p ) != 0 )		
-				self.failUnless( n.noise( p, 0.5 ) != 0 )		
+				self.failUnless( n.noise( p ) != 0 )
+				self.failUnless( n.noise( p, 0.5 ) != 0 )
 				self.failUnless( n.noise( p, 0.6 ) == 0 )
-				self.failUnless( n( p ) != 0 )		
-				self.failUnless( n( p, 0.5 ) != 0 )		
-				self.failUnless( n( p, 0.6 ) == 0 )			
+				self.failUnless( n( p ) != 0 )
+				self.failUnless( n( p, 0.5 ) != 0 )
+				self.failUnless( n( p, 0.6 ) == 0 )
 
 if __name__ == "__main__":
 	unittest.main()

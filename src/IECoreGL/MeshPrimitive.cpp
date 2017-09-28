@@ -53,9 +53,9 @@ using namespace std;
 
 class MeshPrimitive::MemberData : public IECore::RefCounted
 {
-	
+
 	public :
-	
+
 		MemberData( unsigned numTriangles ) : numTriangles( numTriangles )
 		{
 		}

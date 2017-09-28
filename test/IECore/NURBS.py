@@ -73,13 +73,13 @@ class TestNURBSPrimitive( unittest.TestCase ) :
 		self.assertEqual( nnn, n )
 
 	def testHash( self ) :
-	
+
 		n = NURBSPrimitive()
 		n2 = NURBSPrimitive( 3, FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
 			2, FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
-		
+
 		self.assertNotEqual( n.hash(), n2.hash() )
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/IECore/nurbs.fio"):

@@ -62,14 +62,14 @@ class IECORE_API ParameterisedProcedural : public VisibleRenderable, public Para
 	public:
 
 		ParameterisedProcedural( const std::string &description = "" );
-		
+
 		virtual ~ParameterisedProcedural();
-		
+
 		IE_CORE_DECLAREABSTRACTOBJECT( ParameterisedProcedural, VisibleRenderable );
-		
+
 		/// Returns a description for this parameterised object.
 		const std::string &description() const;
-		
+
 		/// Calls render( renderer, true, true, true, false );
 		virtual void render( Renderer *renderer ) const;
 		/// An additional render method to provide finer grained control. When inAttributeBlock is true,

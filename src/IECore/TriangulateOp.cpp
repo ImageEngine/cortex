@@ -105,7 +105,7 @@ struct TriangleDataRemap
 	{
 		assert( data );
 		typename T::ValueType &dataWritable = data->writable();
-		
+
 		const T * otherData = runTimeCast<const T, const Data>( m_other );
 		assert( otherData );
 		const typename T::ValueType &otherDataReadable = otherData->readable();

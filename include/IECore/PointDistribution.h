@@ -63,15 +63,15 @@ class IECORE_API PointDistribution : public boost::noncopyable
 {
 
 	public :
-	
+
 		/// Constructor takes the filename of a tile set. We use the set
 		/// found at http://johanneskopf.de/publications/blue_noise/tilesets/tileset_2048.dat
 		PointDistribution( const std::string &tileSet );
-	
+
 		/// Returns points in the box specified by bounds.
 		///
 		/// density specifies the number of points generated per unit area if the densitySampler always returns 1.
-		/// 
+		///
 		/// densitySampler must have signature float( const Imath::V2f &pos ) and return a density in the range 0-1.
 		///
 		/// pointEmitter is called for each point generated and must have the signature void( const Imath::V2f &pos ).
@@ -87,33 +87,33 @@ class IECORE_API PointDistribution : public boost::noncopyable
 		/// is less than densityThreshold then that point should be rejected.
 		template<typename PointFunction>
 		void operator () ( const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
-	
+
 		/// Returns a reference to a static PointDistribution which can be shared by anyone who needs one. This
 		/// distribution uses the tile set pointed to by the CORTEX_POINTDISTRIBUTION_TILESET environment variable.
 		static const PointDistribution &defaultInstance();
-	
+
 	private :
 
 		struct Tile;
-		
+
 		template<typename DensityFunction, typename PointFunction>
 		struct DensityThresholdedEmitter;
-		
+
 		template<typename PointFunction>
 		void processTile( const Tile &tile, const Imath::V2f &bottomLeft, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
 
 		template<typename PointFunction>
 		void recurseTile( const Tile &tile, const Imath::V2f &bottomLeft, unsigned level, const Imath::Box2f &bounds, float density, PointFunction &pointEmitter ) const;
-	
+
 		typedef std::vector<Tile> TileVector;
 		TileVector m_tiles;
-		
+
 		int m_numSubTiles; // number of subtiles in one axis (so there are m_numSubTiles * m_numSubTiles child tiles really)
-		
+
 		inline unsigned int hash( int x, int y ) const;
 		static const unsigned int m_permSize = 256;
 		std::vector<unsigned int> m_perm;
-		
+
 };
 
 } // namespace IECore

@@ -53,7 +53,7 @@ IE_CORE_DECLAREPTR( LevelFilteredMessageHandler );
 ///   - WARNING
 ///   - INFO
 ///   - DEBUG
-		
+
 /// This class implements a FilteredMessageHandler that only passes
 /// messages which have a Level below a certain threshold.
 /// \ingroup utilityGroup

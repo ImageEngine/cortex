@@ -54,9 +54,9 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 		self.failUnless( "ScopedCoordinateSystem \"helloWorld\"" in l )
 		self.failIf( "TransformBegin" in l )
 		self.failIf( "TransformEnd" in l )
-		
+
 	def testTransform( self ) :
-	
+
 		r = IECoreRI.Renderer( self.outputFileName )
 
 		with IECore.WorldBlock( r ) :
@@ -71,43 +71,43 @@ class CoordinateSystemTest( IECoreRI.TestCase ) :
 		self.failUnless( "TransformBegin" in l )
 		self.failUnless( "TransformEnd" in l )
 		self.failUnless( "ConcatTransform" in l )
-	
+
 	def testScoping( self ) :
-	
+
 		class TestProcedural( IECore.ParameterisedProcedural ) :
-		
+
 			def __init__( self ) :
-			
+
 				IECore.ParameterisedProcedural.__init__( self, "" )
-			
+
 			def doBound( self, args ) :
-			
+
 				return IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) )
-				
+
 			def doRender( self, renderer, args ) :
-			
+
 				self.coordinateSystem = renderer.getTransform( "testCoordSys" )
 
-	
+
 		renderer = IECoreRI.Renderer( "" )
-		
+
 		procedurals = []
 		with IECore.WorldBlock( renderer ) :
-		
+
 			for i in range( 0, 10 ) :
-			
+
 				renderer.setAttribute( "user:proceduralIndex", IECore.IntData( i ) )
-				
+
 				g = IECore.Group()
 				g.addState( IECore.CoordinateSystem( "testCoordSys", IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( i ) ) ) ) )
 				p = TestProcedural()
 				g.addChild( p )
 				procedurals.append( p )
-				
+
 				g.render( renderer )
-				
+
 		for i in range( 0, 10 ) :
-			
+
 			self.assertEqual( procedurals[i].coordinateSystem.translation(), IECore.V3f( i ) )
 
 if __name__ == "__main__":

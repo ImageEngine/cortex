@@ -77,7 +77,7 @@ GR_CortexPrimitive::GR_CortexPrimitive( const GR_RenderInfo *info, const char *c
 	: GR_Primitive( info, cache_name, GA_PrimCompat::TypeMask(0) )
 {
 	IECoreGL::init( true );
-	
+
 	if ( prim->getTypeDef().getId() == CortexPrimitive::typeId().get() )
 	{
 
@@ -117,7 +117,7 @@ GR_PrimAcceptResult GR_CortexPrimitive::acceptPrimitive( GT_PrimitiveType t, int
 
 		return GR_PROCESSED;
 	}
-	
+
 	return GR_NOT_PROCESSED;
 }
 
@@ -139,7 +139,7 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 		m_renderable = 0;
 		return;
 	}
-	
+
 	const GU_Detail *detail = handle.getGdp();
 
 #else
@@ -156,19 +156,19 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 		m_renderable = 0;
 		return;
 	}
-	
+
 	m_renderable = IECore::runTimeCast<const IECore::Renderable>( prim->getObject() );
 	if ( !m_renderable )
 	{
 		m_scene = 0;
 		return;
 	}
-	
+
 	IECoreGL::RendererPtr renderer = new IECoreGL::Renderer();
 	renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 	renderer->setOption( "gl:drawCoordinateSystems", new IECore::BoolData( true ) );
 	renderer->worldBegin();
-	
+
 	if ( p.dopts.boundBox() )
 	{
 		const IECore::VisibleRenderable *visible = IECore::runTimeCast<const IECore::VisibleRenderable>( m_renderable );
@@ -181,9 +181,9 @@ void GR_CortexPrimitive::update( RE_Render *r, const GT_PrimitiveHandle &primh, 
 	{
 		m_renderable->render( renderer.get() );
 	}
-	
+
 	renderer->worldEnd();
-	
+
 	m_scene = renderer->scene();
 	m_scene->setCamera( 0 ); // houdini will be providing the camera
 }
@@ -202,21 +202,21 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 	{
 		return;
 	}
-	
+
 	UT_Matrix4D transform;
 	memcpy( transform.data(), r->getUniform( RE_UNIFORM_OBJECT_MATRIX )->getValue(), sizeof(double) * 16 );
-	
+
 	GLint currentProgram = 0;
 	glGetIntegerv( GL_CURRENT_PROGRAM, &currentProgram );
 
 #if UT_MAJOR_VERSION_INT >= 16
 
 	IECoreGL::State *state = getState( render_mode, flags, dp.opts );
-	
+
 #else
 
 	IECoreGL::State *state = getState( render_mode, flags, opt );
-	
+
 #endif
 
 	if ( render_mode == GR_RENDER_OBJECT_PICK )
@@ -239,40 +239,40 @@ void GR_CortexPrimitive::render( RE_Render *r, GR_RenderMode render_mode, GR_Ren
 #endif
 
 	}
-	
+
 #if UT_MAJOR_VERSION_INT < 14
 
 	r->pushMatrix();
-		
+
 		r->multiplyMatrix( transform );
 		m_scene->render( state );
-	
+
 	r->popMatrix();
 
 #else
 
 	UT_Matrix4D proj, view;
-	
+
 	memcpy( proj.data(), r->getUniform( RE_UNIFORM_PROJECT_MATRIX )->getValue(), sizeof(double) * 16 );
 	memcpy( view.data(), r->getUniform( RE_UNIFORM_VIEW_MATRIX )->getValue(), sizeof(double) * 16 );
-	
+
 	glMatrixMode( GL_PROJECTION );
 	glPushMatrix();
-		
+
 		glLoadMatrixd( proj.data() );
 		glMatrixMode( GL_MODELVIEW );
 		glPushMatrix();
-			
+
 			glLoadMatrixd( (transform * view).data() );
 			m_scene->render( state );
-		
+
 		glPopMatrix();
-	
+
 	glMatrixMode( GL_PROJECTION );
 	glPopMatrix();
 
 #endif
-	
+
 	if ( render_mode == GR_RENDER_OBJECT_PICK )
 	{
 		glUseProgram( currentProgram );
@@ -319,7 +319,7 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 		g_shaded->add( new IECoreGL::PointsPrimitive::UseGLPoints( IECoreGL::ForAll ) );
 		g_shaded->add( new IECoreGL::PointsPrimitive::GLPointWidth( 3. ) );
 		g_shaded->add( new IECoreGL::CurvesPrimitive::UseGLLines( true ) );
-		
+
 		/// \todo: this doesn't seem to get the lights. maybe they aren't in the gl light list?
 		g_lit = new IECoreGL::State( *g_shaded );
 		g_lit->add(
@@ -335,20 +335,20 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 			/// ShaderStateComponents in the hierarhcy. Is this desirable in all cases?
 			true
 		);
-		
+
 		g_wireShaded = new IECoreGL::State( *g_shaded );
 		g_wireShaded->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 		g_wireShaded->add( new IECoreGL::WireframeColorStateComponent( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_WIREFRAME_COLOR ) ) ) );
-		
+
 		g_wire = new IECoreGL::State( *g_shaded );
 		g_wire->add( new IECoreGL::Primitive::DrawSolid( false ) );
 		g_wire->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 		g_wire->add( new IECoreGL::WireframeColorStateComponent( Imath::Color4f( 1 ) ) );
-		
+
 		g_wireLit = new IECoreGL::State( *g_lit );
 		g_wireLit->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 		g_wireLit->add( new IECoreGL::WireframeColorStateComponent( Imath::Color4f( 0.5, 0.5, 0.5, 1 ) ) );
-		
+
 		g_wireConstBG = new IECoreGL::State( *g_wireShaded );
 		g_wireConstBG->add( new IECoreGL::Color( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_BACKGROUND_COLOR ) ) ) );
 		g_wireConstBG->add(
@@ -362,10 +362,10 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 			),
 			true
 		);
-		
+
 		g_wireConstGhost = new IECoreGL::State( *g_wireConstBG );
 		g_wireConstGhost->add( new IECoreGL::Color( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_GHOST_FILL_COLOR ) ) ) );
-		
+
 		g_pick = new IECoreGL::State( *g_shaded );
 		g_pick->add(
 			new IECoreGL::ShaderStateComponent(
@@ -378,22 +378,22 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 			),
 			true
 		);
-		
+
 		g_selected = new IECoreGL::State( *g_shaded );
 		g_selected->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 		IECoreGL::WireframeColorStateComponentPtr selectionColor = new IECoreGL::WireframeColorStateComponent( IECore::convert<Imath::Color4f>( opt->common().getColor( GR_OBJECT_SELECT_COLOR ) ) );
 		g_selected->add( selectionColor.get() );
-		
+
 		g_wireSelected = new IECoreGL::State( *g_wire );
 		g_wireSelected->add( selectionColor.get() );
-		
+
 		g_wireConstBGSelected = new IECoreGL::State( *g_wireConstBG );
 		g_wireConstBGSelected->add( selectionColor.get() );
-		
+
 		g_wireConstGhostSelected = new IECoreGL::State( *g_wireConstGhost );
 		g_wireConstGhostSelected->add( selectionColor.get() );
 	}
-	
+
 	switch ( mode )
 	{
 		case GR_RENDER_BEAUTY :
@@ -411,15 +411,15 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 				{
 					return g_wireShaded.get();
 				}
-				
+
 				return g_wireLit.get();
 			}
-			
+
 			if ( flags & GR_RENDER_FLAG_UNLIT )
 			{
 				return g_shaded.get();
 			}
-			
+
 			return g_lit.get();
 		}
 		case GR_RENDER_WIREFRAME :
@@ -462,14 +462,14 @@ IECoreGL::State *GR_CortexPrimitive::getState( GR_RenderMode mode, GR_RenderFlag
 			break;
 		}
 	}
-	
+
 	return g_shaded.get();
 }
 
 const std::string &GR_CortexPrimitive::pickFragmentSource()
 {
-	static std::string s = 
-	
+	static std::string s =
+
 		"#version 150 compatibility\n"
 		"#extension GL_EXT_gpu_shader4 : enable\n"
 		""
@@ -480,7 +480,7 @@ const std::string &GR_CortexPrimitive::pickFragmentSource()
 		"{"
 		"	id = ivec4( objectPickId, 0, 0, 0 );"
 		"}";
-	
+
 	return s;
 }
 

@@ -48,9 +48,9 @@ class SceneInterface::CreatorMap : public std::map< std::pair< std::string, Inde
 {
 };
 
-SceneInterface::CreatorMap &SceneInterface::fileCreators() 
+SceneInterface::CreatorMap &SceneInterface::fileCreators()
 {
-	static CreatorMap *g_createFns = new CreatorMap(); 
+	static CreatorMap *g_createFns = new CreatorMap();
 	return *g_createFns;
 }
 

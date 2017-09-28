@@ -54,10 +54,10 @@ template<typename BaseType>
 class SceneCacheNode : public BaseType
 {
 	public :
-		
+
 		SceneCacheNode( OP_Network *net, const char *name, OP_Operator *op );
 		virtual ~SceneCacheNode();
-		
+
 		static PRM_Name pFile;
 		static PRM_Name pRoot;
 		static PRM_Name pSpace;
@@ -69,12 +69,12 @@ class SceneCacheNode : public BaseType
 		static PRM_Name pTagGroups;
 		static PRM_Name pShapeFilter;
 		static PRM_Name pFullPathName;
-		
+
 		static PRM_Default rootDefault;
 		static PRM_Default spaceDefault;
 		static PRM_Default filterDefault;
 		static PRM_Default geometryTypeDefault;
-		
+
 		static PRM_ChoiceList rootMenu;
 		static PRM_ChoiceList spaceList;
 		static PRM_ChoiceList geometryTypeList;
@@ -87,7 +87,7 @@ class SceneCacheNode : public BaseType
 		static void buildRootMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		static void buildTagFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
 		static void buildShapeFilterMenu( void *data, PRM_Name *menu, int maxSize, const PRM_SpareData *, const PRM_Parm * );
-		
+
 		enum Space
 		{
 			World,
@@ -95,7 +95,7 @@ class SceneCacheNode : public BaseType
 			Local,
 			Object
 		};
-		
+
 		enum GeometryType
 		{
 			Cortex,
@@ -103,7 +103,7 @@ class SceneCacheNode : public BaseType
 			BoundingBox,
 			PointCloud
 		};
-		
+
 		/// convenience methods for the common parameters;
 		std::string getFile() const;
 		void setFile( std::string file );
@@ -129,36 +129,36 @@ class SceneCacheNode : public BaseType
 		void getFullPathName( UT_String &name ) const;
 		void setFullPathName( const UT_String &name );
 		void referenceParent( const char *parmName );
-		
+
 		/// Access point to the actual SceneCache. All users should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
 		IECore::ConstSceneInterfacePtr scene() const;
-		
+
 		/// Return the SceneCache time represented by this Houdini Context. This is not a
 		/// simple getTime() call, because Houdini treats time starting at Frame 1, while
 		/// SceneCaches treat time starting at Frame 0. Note that this function should
 		/// really be adjusting time by 1/fps used at cache time, but we don't have access
 		/// to that, so we assume that Houdini's current frame rate is representative.
 		double time( OP_Context context ) const;
-		
+
 		/// Determine if the given scene has any tag matching the filter
 		static bool tagged( const IECore::SceneInterface *scene, const UT_StringMMPattern &filter );
-	
+
 	protected :
-		
+
 		/// Access point to the actual SceneCache. All derived classes should only access the cache
 		/// using this method, in order to avoid re-opening existing files.
 		static IECore::ConstSceneInterfacePtr scene( const std::string &fileName, const std::string &path );
-		
+
 		/// Computes the worldTransform for the specified path
 		Imath::M44d worldTransform( const std::string &fileName, const std::string &path, double time );
-		
+
 		/// Called from setFile, setPath, and when either the file or path parameters are changed.
 		/// The default implementation sets m_loaded false. Derived nodes may override this if convenient.
 		virtual void sceneChanged();
 		/// get the file and ensure it is a valid SCC
 		bool ensureFile( std::string &file );
-		
+
 		/// get a breadth first list of all descendant paths
 		void descendantNames( const IECore::SceneInterface *scene, std::vector<std::string> &descendants );
 		/// get a depth first list of all object names
@@ -167,10 +167,10 @@ class SceneCacheNode : public BaseType
 		static std::string getFullScenePath( const IECore::SceneInterface *scene );
 		/// utility method to build a UI menu from one of the previous lists
 		void createMenu( PRM_Name *menu, const std::vector<std::string> &values );
-		
+
 		static OP_TemplatePair *buildMainParameters();
 		static OP_TemplatePair *buildOptionParameters();
-		
+
 		bool m_loaded;
 		boost::tribool m_static;
 		IECore::MurmurHash m_hash;

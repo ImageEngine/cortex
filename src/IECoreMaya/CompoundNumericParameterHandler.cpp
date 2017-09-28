@@ -209,7 +209,7 @@ MPlug CompoundNumericParameterHandler<T>::doCreate( IECore::ConstParameterPtr pa
 
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 

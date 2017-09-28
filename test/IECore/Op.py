@@ -128,7 +128,7 @@ class TestPythonOp( unittest.TestCase ) :
 		self.assertRaises( Exception, op )
 
 	def testRunTimeTyped( self ) :
-	
+
 		op = PythonOp()
 
 		self.assertEqual( op.typeName(), "PythonOp" )

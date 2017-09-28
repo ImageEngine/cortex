@@ -51,28 +51,28 @@ class DisplayIop : public DD::Image::Iop
 
 		DisplayIop( Node *node );
 		virtual ~DisplayIop();
-		
+
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
-		
+
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual int knob_changed( DD::Image::Knob *knob );
 		virtual void append( DD::Image::Hash &hash );
 		virtual void _validate( bool forReal );
 		virtual void engine( int y, int x, int r, const DD::Image::ChannelSet &channels, DD::Image::Row &row );
-		
+
 	private :
-	
+
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
-		
+
 		DisplayIop *firstDisplayIop();
 		void driverCreated( NukeDisplayDriver *driver );
 		void connectToDriver( NukeDisplayDriver *driver );
 		void driverDataReceived( NukeDisplayDriver *driver, const Imath::Box2i &box );
-		
+
 		int m_portNumber;
-		
+
 		DD::Image::Format m_format;
 		DD::Image::Format m_fullSizeFormat;
 
@@ -83,7 +83,7 @@ class DisplayIop : public DD::Image::Iop
 		// and those ops would have missed the display driver creation.
 		unsigned int m_updateCount;
 		IECoreNuke::NukeDisplayDriverPtr m_driver;
-		
+
 };
 
 } // namespace IECoreNuke

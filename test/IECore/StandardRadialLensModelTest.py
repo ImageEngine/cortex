@@ -39,14 +39,14 @@ import unittest
 class StandardRadialLensModelTest(unittest.TestCase):
 
 	def testModelNames( self ):
-		
+
 		names = LensModel.lensModels()
 		valid = len(names) > 0
 		self.assertEqual( valid, True )
 		self.assertEqual( names[0], "StandardRadialLensModel" )
 
 	def testStandardRadialLensModel( self ):
-		
+
 		lens = LensModel.create( "StandardRadialLensModel" )
 		lens["distortion"] = 0.2
 		lens["anamorphicSqueeze"] = 1.
@@ -56,17 +56,17 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens["lensCenterOffsetXCm"] = .25
 		lens["lensCenterOffsetYCm"] = -.1
 		lens.validate()
-		
+
 		# Test the full-format distortion.
 		window = Box2i( V2i( 0, 0 ), V2i( 2047, 1555 ) )
 		bbox = lens.bounds( LensModel.Distort, window, 2048, 1556 )
 		self.assertEqual( bbox, Box2i( V2i( 268, 37 ), V2i( 2034, 1439 ) ) )
-		
+
 		bbox = lens.bounds( LensModel.Undistort, window, 2048, 1556 )
 		self.assertEqual( bbox, Box2i( V2i( -1309, -659 ), V2i( 2243, 2740 ) ) )
-		
+
 	def testStandardRadialLensModelWindowed( self ):
-		
+
 		lens = LensModel.create( "StandardRadialLensModel" )
 		lens["distortion"] = 0.2
 		lens["anamorphicSqueeze"] = 1.
@@ -76,12 +76,12 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		lens["lensCenterOffsetXCm"] = .25
 		lens["lensCenterOffsetYCm"] = -.1
 		lens.validate()
-		
+
 		# Test windowed distortion.
 		window = Box2i( V2i( 140, 650 ), V2i( 1697, 1359 ) )
 		bbox = lens.bounds( LensModel.Undistort, window, 2048, 1556 )
 		self.assertEqual( bbox, Box2i( V2i( -635, 650 ), V2i( 1729, 2044 ) ) )
-		
+
 		bbox = lens.bounds( LensModel.Distort, window, 2048, 1556 )
 		self.assertEqual( bbox, Box2i( V2i( 351, 640 ), V2i( 1696, 1298 ) ) )
 
@@ -115,7 +115,7 @@ class StandardRadialLensModelTest(unittest.TestCase):
 		self.assertEqual( lens["curvatureY"].getNumericValue(), 0.5 )
 
 	def testReconstructionFromParameters( self ):
-		
+
 		l1 = LensModel.create( "StandardRadialLensModel" )
 		l1["distortion"] = 0.2
 		o = l1.parameters().getValue()

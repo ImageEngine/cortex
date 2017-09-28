@@ -38,7 +38,7 @@ import os
 import re
 
 ## Implements a Preset that represents changes between two Parameter objects.
-# The comparison on elements in a ClassVectorParameters takes in consideration both the parameter name and 
+# The comparison on elements in a ClassVectorParameters takes in consideration both the parameter name and
 # the loaded class name in order to consider the "same" element. We do that do try to work around the fact
 # that the parameter names ("p0", "p1", etc) are very simple and easy to reapper after a sequence of removal/addition
 # operations in a ClassVectorParameter. The method is not 100% safe but should work for most cases.
@@ -47,12 +47,12 @@ import re
 #
 class RelativePreset( IECore.Preset ) :
 
-	## \param currParameter, IECore.Parameter, represents the parameter state after all changes have been made. 
-	## \param oldParameter, IECore.Parameter, represents the parameter state before any changes. 
-	## \param compareFilter, callable function that receives currParameter and oldParameter child and it should 
+	## \param currParameter, IECore.Parameter, represents the parameter state after all changes have been made.
+	## \param oldParameter, IECore.Parameter, represents the parameter state before any changes.
+	## \param compareFilter, callable function that receives currParameter and oldParameter child and it should
 	## return a boolean to indicate if the difference should be computed or not.
 	def __init__( self, currParameter=None, oldParameter=None, compareFilter = None ) :
-		
+
 		IECore.Preset.__init__( self )
 
 		self.__data = IECore.CompoundObject()
@@ -77,10 +77,10 @@ class RelativePreset( IECore.Preset ) :
 				raise TypeError, "Mismatching types for currParameter and oldParameter!"
 
 		self.__grabParameterChanges( currParameter, oldParameter, self.__data )
-	
-	## \see IECore.Preset.applicableTo	
+
+	## \see IECore.Preset.applicableTo
 	def applicableTo( self, parameterised, rootParameter ) :
-		
+
 		return RelativePreset.__applicableTo( rootParameter, self.__data )
 
 	def getDiffData( self ):
@@ -99,7 +99,7 @@ class RelativePreset( IECore.Preset ) :
 
 		if not self.applicableTo( parameterised, rootParameter ) :
 			raise RuntimeError, "Sorry, this preset is not applicable to the given parameter."
-		
+
 		if len( self.__data ) :
 			self.__applyParameterChanges( rootParameter, self.__data )
 
@@ -116,13 +116,13 @@ class RelativePreset( IECore.Preset ) :
 		if isinstance( currParameter, IECore.ClassParameter ) :
 
 			self.__grabClassParameterChanges( currParameter, oldParameter, data, paramPath )
-			
+
 		elif isinstance( currParameter, IECore.ClassVectorParameter ) :
-			
+
 			self.__grabClassVectorParameterChanges( currParameter, oldParameter, data, paramPath )
-			
+
 		elif isinstance( currParameter, IECore.CompoundParameter ) :
-			
+
 			self.__grabCompoundParameterChanges( currParameter, oldParameter, data, paramPath )
 
 		else :
@@ -132,7 +132,7 @@ class RelativePreset( IECore.Preset ) :
 	def __grabCompoundParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
 
 		for p in currParameter.keys() :
-			
+
 			newData = IECore.CompoundObject()
 			childOldParam = None
 			if not oldParameter is None :
@@ -141,7 +141,7 @@ class RelativePreset( IECore.Preset ) :
 
 			self.__grabParameterChanges(
 				currParameter[p],
-				childOldParam, 
+				childOldParam,
 				newData,
 				paramPath + "." + p
 			)
@@ -161,11 +161,11 @@ class RelativePreset( IECore.Preset ) :
 
 		data["_type_"] = IECore.StringData( currParameter.typeName() )
 		data["_value_"] = currParameter.getValue().copy()
-	
+
 	def __grabClassParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
-		
+
 		c = currParameter.getClass( True )
-		
+
 		className = c[1]
 		classVersion = c[2]
 		classNameFilter = "*"
@@ -187,7 +187,7 @@ class RelativePreset( IECore.Preset ) :
 		classValue = IECore.CompoundObject()
 
 		if c[0] :
-	
+
 			self.__grabParameterChanges(
 				c[0].parameters(),
 				childOldParam,
@@ -203,11 +203,11 @@ class RelativePreset( IECore.Preset ) :
 			data["_classVersion_"] = IECore.IntData(classVersion)
 			data["_classNameFilter_"] = IECore.StringData(classNameFilter)
 			data["_type_"] = IECore.StringData( "ClassParameter" )
-	
+
 	def __grabClassVectorParameterChanges( self, currParameter, oldParameter, data, paramPath ) :
-		
+
 		classes = currParameter.getClasses( True )
-				
+
 		classNameFilter = "*"
 		try :
 			classNameFilter = currParameter.userData()["UI"]["classNameFilter"].value
@@ -295,7 +295,7 @@ class RelativePreset( IECore.Preset ) :
 					added = True
 
 				addedParam.append( added )
-		
+
 		if len(modifiedParams) :
 			data["_modifiedParamsNames_"] = modifiedParams
 			data["_modifiedClassNames_"] = modifiedClassNames
@@ -308,7 +308,7 @@ class RelativePreset( IECore.Preset ) :
 		if not oldParameter is None :
 			# get all non-deleted original parameters
 			baseOrder = filter( lambda n: not n in removedParams, oldParameter.keys() )
-			
+
 		if baseOrder != parameterOrder :
 
 			if len(baseOrder) != len(parameterOrder):
@@ -356,19 +356,19 @@ class RelativePreset( IECore.Preset ) :
 			RelativePreset.__applySimpleParameterChanges( parameter, data, paramPath )
 
 		else :
-			IECore.msg( 
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
+			IECore.msg(
+				IECore.Msg.Level.Warning,
+				"IECore.RelativePreset",
 				"Unrecognized type (%s) for parameter %s. Not affected by preset." % ( parameter.typeName(), parameter.name )
 			)
 
-	@staticmethod		
+	@staticmethod
 	def __applyCompoundParameterChanges( parameter, data, paramPath ) :
-		
+
 		if data["_type_"].value != "CompoundParameter" :
 			IECore.msg(
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
+				IECore.Msg.Level.Warning,
+				"IECore.RelativePreset",
 				"Unable to set preset on '%s'. Expected %s but found CompoundParameter."
 					% ( paramPath, data["_type_"].value )
 			)
@@ -384,63 +384,63 @@ class RelativePreset( IECore.Preset ) :
 				newParamPath = p
 
 			if p not in parameter :
-				IECore.msg( 
-					IECore.Msg.Level.Warning, 
-					"IECore.RelativePreset", 
+				IECore.msg(
+					IECore.Msg.Level.Warning,
+					"IECore.RelativePreset",
 					"Could not find parameter '%s'. Preset value ignored." % newParamPath
 				)
 				continue
-				
+
 			RelativePreset.__applyParameterChanges( parameter[p], data[p], newParamPath )
-			
-	@staticmethod		
+
+	@staticmethod
 	def __applySimpleParameterChanges( parameter, data, paramPath ) :
 
 		if data["_type_"].value != parameter.typeName() :
 			IECore.msg(
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
+				IECore.Msg.Level.Warning,
+				"IECore.RelativePreset",
 				"Unable to set preset on '%s'. Expected %s but found %s."
 					% ( paramPath, data["_type_"].value, parameter.typeName() )
 			)
 			return
-		
+
 		try:
 			parameter.setValue( data["_value_"] )
 		except Exception, e:
 			IECore.msg( IECore.Msg.Level.Warning, "IECore.RelativePreset", str(e) )
-		
-	@staticmethod		
+
+	@staticmethod
 	def __applyClassParameterChanges( parameter, data, paramPath ) :
-		
+
 		if data["_type_"].value != "ClassParameter" :
 			IECore.msg(
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
+				IECore.Msg.Level.Warning,
+				"IECore.RelativePreset",
 				"Unable to set preset on '%s'. Expected %s but found ClassParameter."
 					% ( paramPath, data["_type_"].value )
 			)
 			return
 
 		c = parameter.getClass( True )
-		
+
 		className = data["_className_"].value
 		classVersion = data["_classVersion_"].value
 
 		if c[1] != className or c[2] != classVersion :
 			parameter.setClass( className, classVersion )
-			
+
 		c = parameter.getClass( False )
 		if c and '_classValue_' in data :
 			RelativePreset.__applyParameterChanges( c.parameters(), data["_classValue_"], paramPath )
-		
+
 	@staticmethod
 	def __applyClassVectorChanges( parameter, data, paramPath ) :
-		
+
 		if data["_type_"].value != "ClassVectorParameter" :
 			IECore.msg(
-				IECore.Msg.Level.Warning, 
-				"IECore.RelativePreset", 
+				IECore.Msg.Level.Warning,
+				"IECore.RelativePreset",
 				"Unable to set preset on '%s'. Expected %s but found ClassVectorParameter."
 					% ( paramPath, data["_type_"].value )
 			)
@@ -465,11 +465,11 @@ class RelativePreset( IECore.Preset ) :
 
 			# first modify items
 			for i in range( len( modifiedClassNames ) ) :
-	
+
 				if addedParam[i] :
 
 					addedCount += 1
-		
+
 				else :
 
 					# must find an existing matching parameter, no matter what
@@ -480,15 +480,15 @@ class RelativePreset( IECore.Preset ) :
 								parameter.setClass( modifiedParams[i], modifiedClassNames[i], modifiedClassVersions[i] )
 						else :
 							IECore.msg(
-								IECore.Msg.Level.Warning, 
-								"IECore.RelativePreset", 
+								IECore.Msg.Level.Warning,
+								"IECore.RelativePreset",
 								"Parameter '%s.%s' has a different class. Expected %s but found %s. Ignoring class change on this parameter."
 									% ( paramPath, modifiedParams[i], modifiedClassNames[i], c[1] )
 							)
 					else :
 						IECore.msg(
-							IECore.Msg.Level.Warning, 
-							"IECore.RelativePreset", 
+							IECore.Msg.Level.Warning,
+							"IECore.RelativePreset",
 							"Unable to find parameter '%s.%s' in %s. Ignoring class change on this parameter."
 								% ( paramPath, modifiedParams[i], parameter.name )
 						)
@@ -527,7 +527,7 @@ class RelativePreset( IECore.Preset ) :
 					if firstParam is None:
 						firstParam = i
 					lastParam = i
-			
+
 			if firstParam != lastParam :
 
 				# adds one by one the unknown parameters that lied between the reordered parameters.
@@ -587,11 +587,11 @@ class RelativePreset( IECore.Preset ) :
 
 								if not re.match("^p[0-9]+$", pName) :
 									IECore.msg(
-										IECore.Msg.Level.Warning, 
-										"IECore.RelativePreset", 
+										IECore.Msg.Level.Warning,
+										"IECore.RelativePreset",
 										"Custom parameter %s.%s is being renamed to %s..."
 											% ( paramPath, pName, newParamName )
-									)		
+									)
 								paramRemaps[ pName ] = newParamName
 								pName = newParamName
 							# add the parameter to the vector, so that next calls to parameter.newParameterName() will work.
@@ -623,69 +623,69 @@ class RelativePreset( IECore.Preset ) :
 						)
 					else :
 						IECore.msg(
-							IECore.Msg.Level.Warning, 
-							"IECore.RelativePreset", 
+							IECore.Msg.Level.Warning,
+							"IECore.RelativePreset",
 							"Ignoring preset values for parameter %s.%s. Expected class %s but found %s."
 								% ( paramPath, remapedParamName, presetValue["_class_"].value, c[1] )
 						)
 
 				else :
 					IECore.msg(
-						IECore.Msg.Level.Warning, 
-						"IECore.RelativePreset", 
+						IECore.Msg.Level.Warning,
+						"IECore.RelativePreset",
 						"Unable to find parameter '%s.%s' in %s. Ignoring this preset changes."
 							% ( paramPath, remapedParamName, parameter.name )
 					)
-		
+
 	@staticmethod
 	def __applicableTo( parameter, data ) :
-		
+
 		if len(data) == 0 :
 			return True
 
 		if parameter.staticTypeId() == IECore.TypeId.CompoundParameter :
-			
+
 			if data["_type_"].value != "CompoundParameter":
 				return False
-			
+
 		elif isinstance( parameter, IECore.ClassParameter ) :
-			
+
 			if data["_type_"].value != "ClassParameter":
 				return False
-			
+
 			classNameFilter = "*"
 			try :
 				classNameFilter = parameter.userData()["UI"]["classNameFilter"].value
 			except :
 				pass
-			
+
 			if classNameFilter != data["_classNameFilter_"].value:
 				return False
 
 		elif isinstance( parameter, IECore.ClassVectorParameter ) :
-			
+
 			if data["_type_"].value != "ClassVectorParameter":
 				return False
-			
+
 			classNameFilter = "*"
 			try :
 				classNameFilter = parameter.userData()["UI"]["classNameFilter"].value
 			except :
 				pass
-			
+
 			if classNameFilter != data["_classNameFilter_"].value:
 				return False
-				
+
 		else :
-			
+
 			if data["_type_"].value != parameter.typeName():
 				return False
 
 			if not parameter.valueValid( data["_value_"] )[0]:
-				return False		
-		
+				return False
+
 		return True
 
 
 IECore.registerRunTimeTyped( RelativePreset )
-	
+

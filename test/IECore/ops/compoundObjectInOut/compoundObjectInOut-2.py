@@ -45,13 +45,13 @@ class compoundObjectInOut( IECore.Op ) :
 				defaultValue = IECore.CompoundObject(),
 				type=IECore.CompoundObject.staticTypeId()
 			)
-							
+
 		)
-		
+
 		self.parameters().addParameters(
-		
+
 			[
-		
+
 				IECore.StringParameter(
 					"label",
 					"A label for use with ClassVectorParameterUI",
@@ -64,13 +64,13 @@ class compoundObjectInOut( IECore.Op ) :
 					defaultValue = IECore.CompoundObject(),
 					type=IECore.CompoundObject.staticTypeId()
 				),
-				
+
 			]
-		
+
 		)
 
 	def doOperation( self, args ):
-		
+
 		return IECore.CompoundObject()
 
 IECore.registerRunTimeTyped( compoundObjectInOut )

@@ -60,18 +60,18 @@ DataInterleaveOp::DataInterleaveOp()
 		)
 {
 	parameters()->addParameter(
-	
+
 		new ObjectVectorParameter(
 			g_dataName,
 			"The data to be interleaved. This should consist of a series of VectorData instances "
 			"of the same type and length.",
 			new ObjectVector()
 		)
-	
+
 	);
-	
+
 	parameters()->addParameter(
-	
+
 		new IntParameter(
 			g_targetTypeName,
 			"The type of data created.",
@@ -79,7 +79,7 @@ DataInterleaveOp::DataInterleaveOp()
 			0,
 			Imath::limits<int>::max()
 		)
-		
+
 	);
 }
 
@@ -109,7 +109,7 @@ const IntParameter *DataInterleaveOp::targetTypeParameter() const
 
 struct DataInterleaveOp::InterleaveFnStage1
 {
-	
+
 	typedef DataPtr ReturnType;
 
 	InterleaveFnStage1( const std::vector<ObjectPtr> &dataArrays, TypeId resultType )
@@ -122,7 +122,7 @@ struct DataInterleaveOp::InterleaveFnStage1
 	{
 		typedef typename From::BaseType FromBaseType;
 		std::vector<const FromBaseType *> rawDataArrays;
-		
+
 		size_t arrayLength = 0;
 		for( size_t i=0; i<m_dataArrays.size(); ++i )
 		{
@@ -142,17 +142,17 @@ struct DataInterleaveOp::InterleaveFnStage1
 					throw InvalidArgumentException( "Inputs must all be of the same length" );
 				}
 			}
-			
+
 			rawDataArrays.push_back( f->baseReadable() );
 		}
-		
+
 		InterleaveFnStage2<FromBaseType> fn( rawDataArrays, arrayLength );
-		
+
 		DataPtr result = boost::static_pointer_cast<Data>( Object::create( m_resultType ) );
-	
+
 		return despatchTypedData<InterleaveFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result.get(), fn );
 	}
-	
+
 	const std::vector<ObjectPtr> &m_dataArrays;
 	TypeId m_resultType;
 
@@ -163,7 +163,7 @@ struct DataInterleaveOp::InterleaveFnStage2
 {
 
 	typedef DataPtr ReturnType;
-	
+
 	InterleaveFnStage2( const std::vector<const FromBaseType *> &rawDataArrays, size_t arrayLength )
 		:	m_rawDataArrays( rawDataArrays ), m_arrayLength( arrayLength )
 	{
@@ -174,9 +174,9 @@ struct DataInterleaveOp::InterleaveFnStage2
 	{
 		typedef typename To::BaseType BaseType;
 		typedef typename To::ValueType::value_type ValueType;
-	
+
 		size_t numRawDataArrays = m_rawDataArrays.size();
-		
+
 		const size_t dimensions = sizeof( ValueType ) / sizeof( BaseType );
 		if( dimensions != 1 )
 		{
@@ -185,14 +185,14 @@ struct DataInterleaveOp::InterleaveFnStage2
 				throw InvalidArgumentException( "Number of inputs must match dimension of output type" );
 			}
 		}
-		
+
 		typename To::ValueType &writable = data->writable();
 		writable.resize( m_rawDataArrays.size() * m_arrayLength / dimensions );
-		
+
 		BaseType *baseWritable = data->baseWritable();
-		
+
 		ScaledDataConversion<FromBaseType, BaseType> converter;
-		
+
 		for( size_t i=0; i<m_arrayLength; ++i )
 		{
 			for( size_t j=0; j<numRawDataArrays; ++j )
@@ -200,13 +200,13 @@ struct DataInterleaveOp::InterleaveFnStage2
 				*baseWritable++ = converter( m_rawDataArrays[j][i] );
 			}
 		}
-	
+
 		return data;
 	}
-	
+
 	const std::vector<const FromBaseType *> &m_rawDataArrays;
 	const size_t m_arrayLength;
-	
+
 };
 
 ObjectPtr DataInterleaveOp::doOperation( const CompoundObject *operands )
@@ -216,22 +216,22 @@ ObjectPtr DataInterleaveOp::doOperation( const CompoundObject *operands )
 	{
 		throw InvalidArgumentException( "Target type must derive from data" );
 	}
-	
+
 	const ObjectVector *inputData = operands->member<ObjectVector>( g_dataName );
-	
+
 	if( !inputData->members().size() )
 	{
 		return Object::create( targetType );
 	}
-	
+
 	ConstDataPtr firstData = runTimeCast<const Data>( inputData->members()[0] );
 	if( !firstData )
 	{
 		throw InvalidArgumentException( "Expected a Data object" );
 	}
-	
+
 	InterleaveFnStage1 fn( inputData->members(), targetType );
-	
+
 	DataPtr result = despatchTypedData<InterleaveFnStage1, TypeTraits::IsNumericVectorTypedData>( const_cast<Data *>( firstData.get() ), fn );
 
 	return result;

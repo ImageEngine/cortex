@@ -67,7 +67,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		name = color.createOutputNode( "name" )
 		name.parm( "name1" ).set( "torusAGroup" )
 		return name
-	
+
 	def torusB( self ) :
 		torus = self.geo().createNode( "torus" )
 		torus.parm( "rows" ).set( 10 )
@@ -77,13 +77,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		name = xform.createOutputNode( "name" )
 		name.parm( "name1" ).set( "torusBGroup" )
 		return name
-	
+
 	def twoTorii( self ) :
 		merge = self.geo().createNode( "merge" )
 		merge.setInput( 0, self.torusA() )
 		merge.setInput( 1, self.torusB() )
 		return merge
-	
+
 	def curve( self ) :
 		curve = self.geo().createNode( "curve" )
 		curve.parm( "type" ).set( 1 ) # NURBS
@@ -91,10 +91,10 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		color = curve.createOutputNode( "color" )
 		color.parm( "colortype" ).set( 2 )
 		return color
-		
+
 	def box( self ) :
 		return self.geo().createNode( "box" )
-	
+
 	def curveBox( self ) :
 		merge = self.geo().createNode( "merge" )
 		merge.setInput( 0, self.curve() )
@@ -102,7 +102,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		name = merge.createOutputNode( "name" )
 		name.parm( "name1" ).set( "curveBoxGroup" )
 		return name
-	
+
 	def buildScene( self ) :
 		merge = self.geo().createNode( "merge" )
 		merge.setInput( 0, self.points() )
@@ -118,50 +118,50 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		scene = self.buildScene()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( scene )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.box(), resultType = IECore.TypeId.Group )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-				
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( scene, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.points() )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.curve() )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( self.torusA() )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
-		
+
 		merge = self.twoTorii()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		merge.inputs()[0].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
-		
+
 		merge.inputs()[1].bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
-		
+
 		group = self.curveBox()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( group )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		group.bypass( True )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( group )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		self.failUnless( IECore.TypeId.Group in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.Group )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.Group ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		points = self.points()
 		torus = self.torusA()
 		merge = self.geo().createNode( "merge" )
@@ -169,15 +169,15 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge.setInput( 1, self.twoTorii() )
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-	
+
 	def testConvertFromHOMGeo( self ) :
 		geo = self.curveBox().geometry()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
-		
+
 		result = converter.convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
-		
+
 		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.Group )
 		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniGroupConverter ) ) )
 
@@ -188,40 +188,40 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		names = [ "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ]
 		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive ]
 		for i in range( 0, len(result.children()) ) :
-		
+
 			child = result.children()[i]
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : names[i] } ) )
-	
+
 	def testConvertSceneFromNameAttribute( self ) :
 		merge = self.buildScene()
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
-		
+
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 5 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.CurvesPrimitive, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
 		names = [ "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup", "torusBGroup" ]
 		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive ]
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		
+
 		for i in range( 0, len(result.children()) ) :
-		
+
 			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			blindData = IECore.CompoundData() if names[i] == "" else IECore.CompoundData( { "name" : names[i] } )
 			self.assertEqual( child.blindData(), blindData )
-		
+
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
 		for prim in null.geometry().prims() :
 			self.failUnless( prim.stringAttribValue( "name" ) in names )
-	
+
 	def testConvertSceneFromGroups( self ) :
-		
+
 		merge = self.buildScene()
 		for node in merge.parent().children() :
 			if node.type().name() == "name" :
@@ -230,24 +230,24 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 				group.parm( "crname" ).set( node.parm( "name1" ).eval() )
 				connection = node.outputConnections()[0]
 				connection.outputNode().setInput( connection.inputIndex(), group )
-		
+
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.PrimitiveGroup )
 		result = converter.convert()
-		
+
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 4 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.Group, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
 		names = [ "pointsGroup", "torusAGroup", "torusBGroup", "curveBoxGroup" ]
 		expectedTypes = [ IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.Group ]
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		
+
 		for i in range( 0, len(result.children()) ) :
-			
+
 			child = result.children()[i]
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			self.assertEqual( child.blindData(), IECore.CompoundData( { "name" : names[i] } ) )
-			
+
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				self.failUnless( child.arePrimitiveVariablesValid() )
 				self.failUnless( "name" not in child )
@@ -258,14 +258,14 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( child.children()[0].blindData(), IECore.CompoundData() )
 				self.failUnless( child.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 				self.assertEqual( child.children()[1].blindData(), IECore.CompoundData() )
-		
+
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
 		for prim in null.geometry().prims() :
 			self.failUnless( prim.stringAttribValue( "name" ) in names )
-	
+
 	def testNameAttributeExistsButSomeValuesAreEmpty( self ) :
-		
+
 		merge = self.buildScene()
 		values = []
 		namers = [ x for x in merge.parent().children() if x.type().name() == "name" ]
@@ -274,32 +274,32 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			if namer.parm( "name1" ).eval() == "torusBGroup" :
 				namer.bypass( True )
 				values[-1] = ""
-		
+
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
-		
+
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
 		self.assertEqual( len(result.children()), 5 )
 		self.assertEqual( set([ x.typeId() for x in result.children() ]), set([IECore._IECore.TypeId.CurvesPrimitive, IECore._IECore.TypeId.MeshPrimitive, IECore._IECore.TypeId.PointsPrimitive]) )
 		names = [ "", "curveBoxGroup", "curveBoxGroup", "pointsGroup", "torusAGroup" ]
 		expectedTypes = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.MeshPrimitive, IECore.TypeId.CurvesPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.MeshPrimitive ]
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		
+
 		for i in range( 0, len(result.children()) ) :
-			
+
 			child = result.children()[i]
 			self.failUnless( child.arePrimitiveVariablesValid() )
 			self.failUnless( "name" not in child )
 			self.assertTrue( child.isInstanceOf( expectedTypes[i] ) )
 			blindData = IECore.CompoundData() if names[i] == "" else IECore.CompoundData( { "name" : names[i] } )
 			self.assertEqual( child.blindData(), blindData )
-		
+
 		null = merge.parent().createNode( "null" )
 		self.failUnless( IECoreHoudini.ToHoudiniGeometryConverter.create( result ).convert( null ) )
 		for prim in null.geometry().prims() :
 			self.failUnless( prim.stringAttribValue( "name" ) in values )
-	
+
 	def testConvertGroupedPoints( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.points() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -307,7 +307,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData( { "name" : "pointsGroup" } ) )
-	
+
 	def testConvertUngroupedPoints( self ) :
 		group = self.points()
 		group.bypass( True )
@@ -317,7 +317,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
-	
+
 	def testConvertGroupedCurves( self ) :
 		curve = self.curve()
 		name = curve.createOutputNode( "name" )
@@ -328,7 +328,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData( { "name" : "curvesGroup" } ) )
-	
+
 	def testConvertUngroupedCurves( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.curve() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -336,7 +336,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
-	
+
 	def testConvertGroupedPolygons( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.torusA() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -344,7 +344,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData( { "name" : "torusAGroup" } ) )
-	
+
 	def testConvertUngroupedPolygons( self ) :
 		group = self.torusA()
 		group.bypass( True )
@@ -354,7 +354,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
-	
+
 	def testConvertGroupedMultiPolygons( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.twoTorii() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -366,7 +366,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
 		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData( { "name" : "torusBGroup" } ) )
-	
+
 	def testConvertUngroupedMultiPolygons( self ) :
 		merge = self.twoTorii()
 		merge.inputs()[0].bypass( True )
@@ -378,7 +378,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[0].blindData(), IECore.CompoundData() )
 		self.assertEqual( result.children()[0]["P"].data.size(), 200 )
-	
+
 	def testConvertPartiallyGroupedMultiPolygons( self ) :
 		merge = self.twoTorii()
 		merge.inputs()[0].bypass( True )
@@ -392,7 +392,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData( { "name" : "torusBGroup" } ) )
 		self.assertEqual( result.children()[1]["P"].data.size(), 100 )
-	
+
 	def testConvertGroupedCurvesAndPolygons( self ) :
 		result = IECoreHoudini.FromHoudiniGroupConverter( self.curveBox() ).convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.Group ) )
@@ -402,7 +402,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData( { "name" : "curveBoxGroup" } ) )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-	
+
 	def testConvertUngroupedCurvesAndPolygons( self ) :
 		group = self.curveBox()
 		group.bypass( True )
@@ -414,12 +414,12 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertEqual( result.children()[1].blindData(), IECore.CompoundData() )
 		self.failUnless( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-	
+
 	def testFakeNameAttribute( self ) :
 		merge = self.buildScene()
 		noName = merge.createOutputNode( "attribute" )
 		noName.parm( "primdel" ).set( "name" )
-		
+
 		converter = IECoreHoudini.FromHoudiniGroupConverter( noName )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
@@ -431,13 +431,13 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-	
+
 	def testNonPrimitiveNameAttribute( self ) :
 		merge = self.buildScene()
 		for node in merge.parent().children() :
 			if node.type().name() == "name" :
 				node.bypass( True )
-		
+
 		attrib = merge.createOutputNode( "attribcreate" )
 		attrib.parm( "name1" ).set( "name" )
 		attrib.parm( "class1" ).set( 2 ) # Point
@@ -452,7 +452,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-	
+
 	def testNonStringNameAttribute( self ) :
 		merge = self.buildScene()
 		noName = merge.createOutputNode( "attribute" )
@@ -460,7 +460,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		rename = noName.createOutputNode( "attribute" )
 		rename.parm( "frompr0" ).set( "born" )
 		rename.parm( "topr0" ).set( "name" )
-		
+
 		converter = IECoreHoudini.FromHoudiniGroupConverter( rename )
 		converter["groupingMode"].setTypedValue( IECoreHoudini.FromHoudiniGroupConverter.GroupingMode.NameAttribute )
 		result = converter.convert()
@@ -472,7 +472,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( result.children()[0].isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.assertTrue( result.children()[1].isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
 		self.assertTrue( result.children()[2].isInstanceOf( IECore.TypeId.PointsPrimitive ) )
-	
+
 	def testObjectWasDeleted( self ) :
 		torii = self.twoTorii()
 		converter = IECoreHoudini.FromHoudiniGroupConverter( torii )
@@ -481,7 +481,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		g2 = converter.convert()
 		self.assertEqual( g2, g1 )
 		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.FromHoudiniGroupConverter, torii ) )
-	
+
 	def testObjectWasDeletedFactory( self ) :
 		torii = self.twoTorii()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( torii )
@@ -490,7 +490,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		g2 = converter.convert()
 		self.assertEqual( g2, g1 )
 		self.assertRaises( RuntimeError, IECore.curry( IECoreHoudini.FromHoudiniGeometryConverter.create, torii ) )
-		
+
 	def testAdjustedStringVectorIndices( self ) :
 		box = self.box()
 		geo = box.parent()
@@ -521,7 +521,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 				self.assertEqual( m[key], c[key] )
 
 	def testAttributeFilter( self ) :
-		
+
 		merge = self.buildScene()
 		uvunwrap = merge.createOutputNode( "uvunwrap" )
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
@@ -529,40 +529,40 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v', 'varmap']
 		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
-		
+
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
 			self.assertEqual( sorted(child.keys()), expectedKeys )
-		
+
 		converter.parameters()["attributeFilter"].setTypedValue( "P" )
 		result = converter.convert()
 		for child in result.children() :
 			self.assertEqual( sorted(child.keys()), [ "P" ] )
-		
+
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^generator* ^varmap ^born ^event" )
 		result = converter.convert()
 		for child in result.children() :
 			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'accel', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'uv', 'v'] )
-			
+
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^P" )
 		result = converter.convert()
 		for child in result.children() :
 			# P must be converted
 			self.assertTrue( "P" in child.keys() )
-		
+
 		# have to filter the source attr uv and not s, t
 		converter.parameters()["attributeFilter"].setTypedValue( "s t Cs" )
 		result = converter.convert()
 		for child in result.children() :
 			self.assertEqual( sorted(child.keys()), ['P'] )
-		
+
 		converter.parameters()["attributeFilter"].setTypedValue( "uv Cd" )
 		result = converter.convert()
 		for child in result.children() :
 			self.assertEqual( sorted(child.keys()), ['Cs', 'P', 'uv'] )
-	
+
 	def testStandardAttributeConversion( self ) :
-		
+
 		merge = self.buildScene()
 		color = merge.createOutputNode( "color" )
 		color.parm( "colortype" ).set( 2 )
@@ -571,7 +571,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		scale.parm( "name1" ).set( "pscale" )
 		scale.parm( "value1v1" ).setExpression( "$PT" )
 		uvunwrap = scale.createOutputNode( "uvunwrap" )
-		
+
 		converter = IECoreHoudini.FromHoudiniGroupConverter( uvunwrap )
 		result = converter.convert()
 		for child in result.children() :
@@ -585,7 +585,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( child["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		
+
 		converter["convertStandardAttributes"].setTypedValue( False )
 		result = converter.convert()
 		for child in result.children() :
@@ -598,16 +598,16 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( child["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-	
+
 	def testInterpretation( self ) :
-		
+
 		merge = self.buildScene()
 		converter = IECoreHoudini.FromHoudiniGroupConverter( merge )
 		result = converter.convert()
 		expectedKeys = ['Cs', 'P', 'accel', 'born', 'event', 'generator', 'id', 'life', 'nextid', 'parent', 'pstate', 'source', 'v', 'varmap']
 		if hou.applicationVersion()[0] >= 13 :
 			expectedKeys.remove( "varmap" )
-		
+
 		for child in result.children() :
 			self.assertTrue( child.isInstanceOf( IECore.TypeId.Primitive ) )
 			self.assertEqual( sorted(child.keys()), expectedKeys )
@@ -615,9 +615,9 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( child["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
 			self.assertEqual( child["life"].data.getInterpretation(), IECore.GeometricData.Interpretation.None )
 			self.assertEqual( child["v"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-	
+
 	def testInterpolation( self ) :
-		
+
 		torusA = self.torusA()
 		attrA = torusA.createOutputNode( "attribcreate", node_name = "interpolation", exact_type_name=True )
 		attrA.parm( "name" ).set( "ieMeshInterpolation" )
@@ -633,7 +633,7 @@ class TestFromHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		merge = self.geo().createNode( "merge" )
 		merge.setInput( 0, attrA )
 		merge.setInput( 1, attrB )
-		
+
 		result = IECoreHoudini.FromHoudiniGroupConverter( merge ).convert()
 		self.assertTrue( "ieMeshInterpolation" not in result.children()[0].keys() )
 		self.assertEqual( result.children()[0].interpolation, "catmullClark" )

@@ -136,8 +136,8 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual Imath::V3f centerOfGravity() const;
 
 		virtual float surfaceArea() const;
-		
-		
+
+
 		/// Returns a bounding box covering all the uv coordinates of the mesh.
 		const Imath::Box2f uvBound() const;
 
@@ -158,7 +158,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		/// Returns a pointer to a tree that can be used for performing fast spacial queries.
 		///  The iterators in this tree point to elements in the vector returned by triangleBounds().
 		const TriangleBoundTree *triangleBoundTree() const;
-		
+
 		/// A type for storing the uv bounding box for a triangle.
 		typedef Imath::Box2f UVBound;
 		/// A type for storing an array of uv bounds, one per triangle.
@@ -173,7 +173,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		/// this function may return 0 in the case of the mesh not having suitable uvs.
 		const UVBoundTree *uvBoundTree() const;
 		//@}
-		
+
 	protected:
 
 		ConstMeshPrimitivePtr m_mesh;
@@ -183,7 +183,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 		TriangleBoundVector m_triangles;
 		TriangleBoundTree *m_tree;
 
-		UVBoundVector m_uvTriangles;		
+		UVBoundVector m_uvTriangles;
 		UVBoundTree *m_uvTree;
 
 		bool pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, const Imath::V2f &targetUV, Result *result ) const;
@@ -193,7 +193,7 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		void calculateMassProperties() const;
 		void calculateAverageNormals() const;
-		
+
 		void triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const;
 		PrimitiveVariable m_uv;
 

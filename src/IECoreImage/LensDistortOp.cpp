@@ -103,23 +103,23 @@ void LensDistortOp::begin( const CompoundObject * operands )
 {
 	// Get the lens model parameters.
 	IECore::CompoundObjectPtr lensModelParams( runTimeCast<CompoundObject>( lensParameter()->getValue() ) );
-	
+
 	// Load the lens object.
 	m_lensModel = LensModel::create( lensModelParams );
 	m_lensModel->validate();
-	
+
 	// Get the distortion mode.
 	m_mode = m_modeParameter->getNumericValue();
-	
+
 	// Get our image information.
 	assert( runTimeCast< ImagePrimitive >(inputParameter()->getValue()) );
 	ImagePrimitive *inputImage = static_cast<ImagePrimitive *>( inputParameter()->getValue() );
-	
+
 	Imath::Box2i dataWindow( inputImage->getDataWindow() );
 	Imath::Box2i displayWindow( inputImage->getDisplayWindow() );
 	double displayWH[2] = { static_cast<double>( displayWindow.size().x + 1 ), static_cast<double>( displayWindow.size().y + 1 ) };
 	double displayOrigin[2] = { static_cast<double>( displayWindow.min[0] ), static_cast<double>( displayWindow.min[1] ) };
-	
+
 	// Get the distorted window.
 	// As the LensModel::bounds() method requires that the display window has it's origin at (0,0) in the bottom left of the image and the ImagePrimitive has it's origin in the top left,
 	// convert to the correct image space and offset if by the display window's origin if it is non-zero.
@@ -132,11 +132,11 @@ void LensDistortOp::begin( const CompoundObject * operands )
 	Imath::Box2i distortedWindow = m_lensModel->bounds( m_mode, distortionSpaceBox, ( displayWindow.size().x + 1 ), ( displayWindow.size().y + 1 ) );
 
 	// Convert the distorted data window back to the same image space as ImagePrimitive.
-	m_distortedDataWindow =  Imath::Box2i( 
+	m_distortedDataWindow =  Imath::Box2i(
 		Imath::V2i( distortedWindow.min[0] + displayWindow.min[0], ( displayWindow.size().y - distortedWindow.max[1] ) + displayWindow.min[1] ),
 		Imath::V2i( distortedWindow.max[0] + displayWindow.min[0], ( displayWindow.size().y - distortedWindow.min[1] ) + displayWindow.min[1] )
 	);
-	
+
 	// Compute a 2D cache of the warped points for use in the warp() method.
 	IECore::FloatVectorDataPtr cachePtr = new IECore::FloatVectorData;
 	std::vector<float> &cache( cachePtr->writable() );
@@ -146,7 +146,7 @@ void LensDistortOp::begin( const CompoundObject * operands )
 	{
 		for( int x = distortedWindow.min.x; x <= distortedWindow.max.x; ++x )
 		{
-			// Convert to UV space with the origin in the bottom left.	
+			// Convert to UV space with the origin in the bottom left.
 			Imath::V2f p( Imath::V2f( x, y ) );
 			Imath::V2d uv( p[0] / displayWH[0], p[1] / displayWH[1] );
 
@@ -155,7 +155,7 @@ void LensDistortOp::begin( const CompoundObject * operands )
 
 			// Transform it to image space.
 			p = Imath::V2f(
-				duv[0] * displayWH[0] + displayOrigin[0], ( ( displayWH[1] - 1. ) - ( duv[1] * displayWH[1] ) ) + displayOrigin[1] 
+				duv[0] * displayWH[0] + displayOrigin[0], ( ( displayWH[1] - 1. ) - ( duv[1] * displayWH[1] ) ) + displayOrigin[1]
 			);
 
 			cache[pixelIndex++] = p[0];

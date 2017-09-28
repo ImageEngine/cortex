@@ -57,7 +57,7 @@ class IECORE_API DataConvertOp : public Op
 
 		DataConvertOp();
 		virtual ~DataConvertOp();
-	
+
 		/// The data to be interleaved. This is specified
 		/// as an ObjectVector containing Data objects of
 		/// identical type and length.
@@ -72,13 +72,13 @@ class IECORE_API DataConvertOp : public Op
 	protected :
 
 		virtual ObjectPtr doOperation( const CompoundObject *operands );
-		
+
 	private :
-	
+
 		struct ConvertFnStage1;
 		template<class FromBaseType>
 		struct ConvertFnStage2;
-	
+
 		static InternedString g_dataName;
 		static InternedString g_targetTypeName;
 

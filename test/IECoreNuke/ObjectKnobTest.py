@@ -44,111 +44,111 @@ import IECore
 import IECoreNuke
 
 class ObjectKnobTest( IECoreNuke.TestCase ) :
-	
+
 	def testNameAndLabel( self ) :
-	
+
 		n = nuke.createNode( "ieObject" )
-		
+
 		k = n.knob( "object" )
-		
+
 		self.assertEqual( k.name(), "object" )
 		self.assertEqual( k.label(), "Object" )
-					
+
 	def testAccessors( self ) :
 
 		n = nuke.createNode( "ieObject" )
 
 		k = n.knob( "object" )
-		
+
 		self.failUnless( isinstance( k, IECoreNuke.ObjectKnob ) )
-		
+
 		self.assertEqual( k.getValue(), None )
-		
+
 		i = IECore.IntData( 10 )
 		k.setValue( i )
 		self.failIf( k.getValue().isSame( i ) )
-		
+
 		self.assertEqual( k.getValue(), IECore.IntData( 10 ) )
 		i.value = 20
 		self.assertEqual( k.getValue(), IECore.IntData( 10 ) )
 
 	def testLifetime( self ) :
-	
+
 		n = nuke.createNode( "ieObject" )
 
 		k = n.knob( "object" )
-				
+
 		nuke.scriptClear()
-				
+
 		self.assertRaises( RuntimeError, k.name )
 		self.assertRaises( RuntimeError, k.label )
 		self.assertRaises( RuntimeError, k.setValue, None )
 		self.assertRaises( RuntimeError, k.getValue )
-		
+
 		w = weakref.ref( k )
 		self.failIf( w() is None )
-		
+
 		del k
-		
+
 		self.failIf( w() is not None )
-		
+
 	def testSetValueReturn( self ) :
 
 		n = nuke.createNode( "ieObject" )
 
 		k = n.knob( "object" )
-		
+
 		self.assertEqual( k.setValue( None ), False )
 		self.assertEqual( k.setValue( IECore.IntData( 1 ) ), True )
 		self.assertEqual( k.setValue( IECore.IntData( 1 ) ), False )
 		self.assertEqual( k.setValue( IECore.IntData( 10 ) ), True )
 		self.assertEqual( k.setValue( None ), True )
-	
+
 	def testCopyPaste( self ) :
-	
+
 		n = nuke.createNode( "ieObject" )
 		self.assertEqual( nuke.selectedNodes(), [ n ] )
-		
+
 		n.knob( "object" ).setValue( IECore.IntData( 10 ) )
-				
+
 		nuke.nodeCopy( "test/IECoreNuke/objectKnob.nk" )
-				
+
 		nuke.scriptClear()
-				
+
 		n2 = nuke.nodePaste( "test/IECoreNuke/objectKnob.nk" )
 		self.assertEqual( n2.knob( "object" ).getValue(), IECore.IntData( 10 ) )
-		
+
 	def testCopyPasteNoValue( self ) :
-	
-		n = nuke.createNode( "ieObject" )				
+
+		n = nuke.createNode( "ieObject" )
 		self.assertEqual( nuke.selectedNodes(), [ n ] )
-				
+
 		nuke.nodeCopy( "test/IECoreNuke/objectKnob.nk" )
-				
+
 		nuke.scriptClear()
-				
+
 		n2 = nuke.nodePaste( "test/IECoreNuke/objectKnob.nk" )
-		self.assertEqual( n2.knob( "object" ).getValue(), None )	
-	
+		self.assertEqual( n2.knob( "object" ).getValue(), None )
+
 	def testUndo( self ) :
-	
+
 		# check our custom knob undoes in the same way as
 		# standard knobs
-	
+
 		n = nuke.createNode( "ieObject" )
 		n2 = nuke.createNode( "Blur" )
 
 		self.assertEqual( n.knob( "object" ).getValue(), None )
 		self.assertEqual( n2.knob( "size" ).getValue(), 0 )
-		
+
 		self.assertEqual( nuke.Undo.disabled(), True )
-		
+
 		with IECoreNuke.UndoEnabled() :
-		
+
 			self.assertEqual( nuke.Undo.disabled(), False )
-		
+
 			with IECoreNuke.UndoBlock() :
-					
+
 				n.knob( "object" ).setValue( IECore.IntData( 10 ) )
 				self.assertEqual( n.knob( "object" ).getValue(), IECore.IntData( 10 ) )
 
@@ -159,21 +159,21 @@ class ObjectKnobTest( IECoreNuke.TestCase ) :
 
 		self.assertEqual( n.knob( "object" ).getValue(), IECore.IntData( 10 ) )
 		self.assertEqual( n2.knob( "size" ).getValue(), 10 )
-		
+
 		nuke.undo()
-		
+
 		self.assertEqual( n2.knob( "size" ).getValue(), 0 )
 		self.assertEqual( n.knob( "object" ).getValue(), None )
-				
+
 	def tearDown( self ) :
-	
+
 		for f in [
 				"test/IECoreNuke/objectKnob.nk",
 			] :
-			
+
 			if os.path.exists( f ) :
 				os.remove( f )
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

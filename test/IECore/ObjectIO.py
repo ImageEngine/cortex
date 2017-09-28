@@ -109,7 +109,7 @@ class TestObjectIO( unittest.TestCase ) :
 
 		for i in range( 0, 1000 ) :
 			self.assertEqual( o[i], oo[i] )
-		
+
 		self.assertEqual( oo.getInterpretation(), GeometricData.Interpretation.Vector )
 		self.assertEqual( o, oo )
 
@@ -138,13 +138,13 @@ class TestObjectIO( unittest.TestCase ) :
 		d["A"] = IntData( 10 )
 		d["B"] = StringData( "hithere" )
 
-		d.save( iface, "test2" )		
+		d.save( iface, "test2" )
 		dd = Object.load( iface, "test2" )
 		self.assertEqual( d, dd );
 
 		# override CompoundData with less data
 		d = CompoundData()
-		d.save( iface, "test2" )		
+		d.save( iface, "test2" )
 		dd = Object.load( iface, "test2" )
 		self.assertEqual( d, dd );
 
@@ -177,7 +177,7 @@ class TestObjectIO( unittest.TestCase ) :
 		d['x'] = StringData( "testttt" )
 		d['z'] = StringVectorData( [ "a", 'b', 'adffs' ] )
 
-		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )		
+		iface = IndexedIO.create( "test/o.fio", [], IndexedIO.OpenMode.Write )
 		d.save( iface, "test" )
 
 		dd = Object.load( iface, "test" )

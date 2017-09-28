@@ -136,27 +136,27 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		self.assertEqual( w(), None )
 
 	def testThreading( self ) :
-	
+
 		class ClassWithDel :
-		
+
 			def __init__( self ) :
-			
+
 				pass
-				
+
 			def __del__( self ) :
-			
+
 				for i in range( 0, 100 ) :
-				
+
 					pass
-	
+
 		def f() :
-		
+
 			for i in range( 0, 100 ) :
 				o = Renderer.Procedural()
 				# The ClassWithDel class defines a __del__ method.
 				# This means that when it is deleted (when
 				# WrapperGarbageCollector::collect() calls Py_DECREF( o ) )
-				# arbitrary python code gets run. This in 
+				# arbitrary python code gets run. This in
 				# turn means the interpreter might switch to
 				# a different thread. Which also might call
 				# WrapperGarbageCollector::collect(). Which
@@ -171,14 +171,14 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 					while gc.collect() :
 						pass
 					RefCounted.collectGarbage()
-		
+
 		for j in range( 0, 10 ) :
 			threads = []
 			for i in range( 0, 8 ) :
 				t = threading.Thread( target = f )
 				t.start()
 				threads.append( t )
-				
+
 			for t in threads :
 				t.join()
 

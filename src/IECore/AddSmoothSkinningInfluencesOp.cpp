@@ -60,19 +60,19 @@ AddSmoothSkinningInfluencesOp::AddSmoothSkinningInfluencesOp()
 		"Names of the new influences",
 		new StringVectorData
 	);
-	
+
 	m_influencePoseParameter = new M44fVectorParameter(
 		"influencePose",
 		"Pose matrices for the new influences",
 		new M44fVectorData
 	);
-	
+
 	m_indicesParameter = new IntVectorParameter(
 		"indices",
 		"Per-new-influence indices into the running influence list at the time each new influence is added",
 		new IntVectorData
 	);
-	
+
 	parameters()->addParameter( m_influenceNamesParameter );
 	parameters()->addParameter( m_influencePoseParameter );
 	parameters()->addParameter( m_indicesParameter );
@@ -86,36 +86,36 @@ void AddSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObjec
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	const std::vector<std::string> &newNames = m_influenceNamesParameter->getTypedValue();
 	const std::vector<Imath::M44f> &newPoseData = m_influencePoseParameter->getTypedValue();
 	const std::vector<int> &indices = m_indicesParameter->getTypedValue();
 
 	std::vector<std::string> &influenceNames = skinningData->influenceNames()->writable();
 	std::vector<Imath::M44f> &influencePoseData = skinningData->influencePose()->writable();
-		
+
 	// make sure the parameter values are the same length
 	if ( newNames.size() != newPoseData.size() )
 	{
 		throw IECore::Exception( "AddSmoothSkinningInfluencesOp: the influenceNames and influencePose parameters are not the same size" );
 	}
-	
+
 	if ( newNames.size() != indices.size() )
 	{
 		throw IECore::Exception( "AddSmoothSkinningInfluencesOp: the influenceNames and indices parameters are not the same size" );
 	}
-	
+
 	// determine the proper order of influences
 	std::vector<std::string> finalOrder( influenceNames.begin(), influenceNames.end() );
 	for ( unsigned i=0; i < newNames.size(); i++ )
 	{
 		std::string name = newNames[i];
-		
+
 		if ( find( influenceNames.begin(), influenceNames.end(), name ) != influenceNames.end() )
 		{
 			throw IECore::Exception( ( boost::format( "AddSmoothSkinningInfluencesOp: \"%s\" is already an influence" ) % name ).str() );
 		}
-		
+
 		if ( indices[i] > (int)finalOrder.size() )
 		{
 			throw IECore::Exception( ( boost::format( "AddSmoothSkinningInfluencesOp: \"%d\" is outside the range of valid indices" ) % indices[i] ).str() );
@@ -129,14 +129,14 @@ void AddSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObjec
 			finalOrder.insert( finalOrder.begin() + indices[i], name );
 		}
 	}
-	
+
 	// add new influences to the end
 	for ( unsigned i=0; i < newNames.size(); i++ )
 	{
 		influenceNames.push_back( newNames[i] );
 		influencePoseData.push_back( newPoseData[i] );
 	}
-	
+
 	// reorder the influences
 	ReorderSmoothSkinningInfluencesOp reorderOp;
 	reorderOp.inputParameter()->setValidatedValue( skinningData );

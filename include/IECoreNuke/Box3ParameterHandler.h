@@ -45,20 +45,20 @@ class Box3ParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		Box3ParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
-				
+
 	private :
-	
+
 		Imath::Box3f m_storage;
 		DD::Image::Knob *m_knob;
-	
+
 		static Description<Box3ParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

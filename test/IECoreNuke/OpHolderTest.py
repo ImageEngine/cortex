@@ -46,71 +46,71 @@ class OpHolderTest( IECoreNuke.TestCase ) :
 	def testExecute( self ) :
 
 		fnOH = IECoreNuke.FnOpHolder.create( "test", "maths/multiply", 2 )
-		
+
 		with fnOH.parameterModificationContext() as parameters :
-		
+
 			parameters["a"].setNumericValue( 10 )
 			parameters["b"].setNumericValue( 20 )
-		
+
 		fnOH.getOp()
-		
+
 		result = fnOH.execute()
 		self.assertEqual( result, IECore.IntData( 200 ) )
-		
+
 	def testExecuteWithMeshInputs( self ) :
 
 		fnOH = IECoreNuke.FnOpHolder.create( "test", "meshMerge", 1 )
-		
+
 		self.assertEqual( fnOH.node().minimumInputs(), 2 )
 		self.assertEqual( fnOH.node().maximumInputs(), 2 )
-		
+
 		card1 = nuke.nodes.Card()
 		card2 = nuke.nodes.Card()
-		
+
 		fnOH.node().setInput( 0, card1 )
 		fnOH.node().setInput( 1, card2 )
 
 		merged = fnOH.execute()
-		
+
 		self.failUnless( isinstance( merged, IECore.MeshPrimitive ) )
 		self.assertEqual( merged.numFaces(), 2 )
 		self.assertEqual( merged.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
-		
+
 	def testExecuteWithObjectVectorInput( self ) :
-	
-		fnOHMult1 = IECoreNuke.FnOpHolder.create( "mult1", "maths/multiply", 2 )		
+
+		fnOHMult1 = IECoreNuke.FnOpHolder.create( "mult1", "maths/multiply", 2 )
 		with fnOHMult1.parameterModificationContext() as parameters :
 			parameters["a"].setNumericValue( 10 )
 			parameters["b"].setNumericValue( 20 )
-				
-		fnOHMult2 = IECoreNuke.FnOpHolder.create( "mult2", "maths/multiply", 2 )		
+
+		fnOHMult2 = IECoreNuke.FnOpHolder.create( "mult2", "maths/multiply", 2 )
 		with fnOHMult2.parameterModificationContext() as parameters :
 			parameters["a"].setNumericValue( 12 )
 			parameters["b"].setNumericValue( 10 )
-			
+
 		fnOH = IECoreNuke.FnOpHolder.create( "merge", "objectVectorInOut", 1 )
-		
+
 		self.assertEqual( fnOH.node().minimumInputs(), 0 )
 		self.assertEqual( fnOH.node().maximumInputs(), 100 )
-		
+
 		fnOH.node().setInput( 0, fnOHMult1.node() )
 		fnOH.node().setInput( 1, fnOHMult2.node() )
 		fnOH.node().setInput( 2, fnOHMult1.node() )
 		fnOH.node().setInput( 3, fnOHMult2.node() )
-								
+
 		self.assertEqual( fnOH.execute(), IECore.ObjectVector( [ IECore.IntData( 200 ), IECore.IntData( 120 ), IECore.IntData( 200 ), IECore.IntData( 120 ) ] ) )
-	
+
 	def testExecuteWithImageInput( self ) :
-	
+
 		fnOH = IECoreNuke.FnOpHolder.create( "test", "imagePrimitiveInOut", 1 )
-		
+
 		self.assertEqual( fnOH.node().minimumInputs(), 1 )
 		self.assertEqual( fnOH.node().maximumInputs(), 1 )
-		
+
 		check = nuke.nodes.CheckerBoard()
-		
+
 		fnOH.node().setInput( 0, check )
-		
+
 		# get the image as output by the op
 		image = fnOH.execute()
 
@@ -120,20 +120,20 @@ class OpHolderTest( IECoreNuke.TestCase ) :
 		write.knob( "file" ).setValue( "test/IECoreNuke/check.exr" )
 		write.knob( "channels" ).setValue( "rgba" )
 		nuke.execute( write, 1, 1 )
-		
+
 		# check that they are the same in terms of size and channel data.
 		# allow a slight difference due to one having been saved as half float and reloaded.
-		
+
 		image2 = IECore.Reader.create( "test/IECoreNuke/check.exr" ).read()
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = image, imageB = image2, maxError = 0.001 ).value, False )
 
 	def tearDown( self ) :
-		
+
 		for f in [
 			"test/IECoreNuke/check.exr"
 		] :
 			if os.path.exists( f ) :
 				os.remove( f )
-							
+
 if __name__ == "__main__":
 	unittest.main()

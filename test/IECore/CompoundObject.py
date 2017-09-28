@@ -122,93 +122,93 @@ class testCompoundObject( unittest.TestCase ) :
 		v = IECore.CompoundObject( { "a" : IECore.IntData( 1 ) } )
 
 		self.assertRaises( AttributeError, getattr, v, "a" )
-		
+
 	def testKeyErrors( self ) :
-	
+
 		def get( c ) :
-		
+
 			c["iDontExist"]
-			
+
 		def delete( c ) :
-		
-			del c["iDontExist"]	
-	
+
+			del c["iDontExist"]
+
 		c = IECore.CompoundObject()
-		
+
 		self.assertRaises( KeyError, get, c )
 		self.assertRaises( KeyError, delete, c )
 
-	def testItems( self ) :	
-	
+	def testItems( self ) :
+
 		o = IECore.CompoundObject( { "a": IECore.IntData( 1 ) } )
 		self.assertEqual( o.items(), [ ( "a", IECore.IntData( 1 ) ) ] )
-		
+
 	def testDefaultInstance( self ) :
-	
+
 		o = IECore.CompoundObject.defaultInstance()
-		
+
 		o["a"] = IECore.IntData( 10 )
-		
+
 		self.failUnless( o["a"].isSame( IECore.CompoundObject.defaultInstance()["a"] ) )
-		
+
 		del o["a"]
-		
+
 		self.failUnless( "a" not in IECore.CompoundObject.defaultInstance() )
-	
+
 	def testHash( self ) :
-	
+
 		o1 = IECore.CompoundObject()
 		o2 = IECore.CompoundObject()
-		
+
 		o1["a"] = IECore.StringData( "a" )
 		o1["b"] = IECore.StringData( "b" )
-		
+
 		o2["b"] = IECore.StringData( "b" )
 		o2["a"] = IECore.StringData( "a" )
-		
+
 		self.assertEqual( o1.hash(), o2.hash() )
-		
+
 		o2["c"] = IECore.StringData( "c" )
-		
+
 		self.assertNotEqual( o1.hash(), o2.hash() )
 
 	def testHashIndependentFromOrderOfConstruction( self ) :
-	
+
 		# CompoundObject internally uses a map from InternedString to Data.
 		# a naive iteration over this might yield a different order in each
 		# process as it's dependent on the addresses of the InternedStrings.
 		# we need to keep hashes consistent between processes.
-		
+
 		commands = [
 			"import IECore; IECore.InternedString( 'a' ); print IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
 			"import IECore; IECore.InternedString( 'b' ); print IECore.CompoundObject( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
 		]
-		
+
 		hashes = set()
 		for command in commands :
 			p = subprocess.Popen( [ sys.executable, "-c", command ], stdout=subprocess.PIPE )
 			hash, nothing = p.communicate()
 			hashes.add( hash )
-			
+
 		self.assertEqual( len( hashes ), 1 )
-		
+
 	def testHash( self ) :
-		
+
 		thingsToAdd = [
 			( "a", IECore.IntData( 1 ), True ),
 			( "a", IECore.UIntData( 1 ), True ),
 			( "a", IECore.IntData( 1 ), True ),
 			( "a", IECore.IntData( 1 ), False ),
 			( "b", IECore.StringVectorData( [ "a", "b", "c" ] ), True ),
-			( "b", IECore.StringVectorData( [ "a", "b" ] ), True ),		
+			( "b", IECore.StringVectorData( [ "a", "b" ] ), True ),
 			( "b", IECore.StringVectorData( [ "a", "c" ] ), True ),
 			( "b", IECore.StringVectorData( [ "a", "c" ] ), False ),
 			( "d", IECore.StringVectorData( [ "a", "c" ] ), True ),
 			( "d", None, True ),
 		]
-		
+
 		o = IECore.CompoundObject()
-		
+
 		for t in thingsToAdd :
 			h = o.hash()
 			for i in range( 0, 10 ) :
@@ -222,7 +222,7 @@ class testCompoundObject( unittest.TestCase ) :
 			else :
 				self.assertEqual( h, o.hash() )
 			h = o.hash()
-	
+
 if __name__ == "__main__":
         unittest.main()
 

@@ -105,7 +105,7 @@ IECore::RunTimeTypedPtr ToGLPointsConverter::doConversion( IECore::ConstObjectPt
 		{
 			continue;
 		}
-		
+
 		if ( pIt->second.data )
 		{
 			result->addPrimitiveVariable( pIt->first, pIt->second );

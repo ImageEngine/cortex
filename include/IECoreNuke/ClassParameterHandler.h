@@ -44,20 +44,20 @@ class ClassParameterHandler : public CompoundParameterHandler
 {
 
 	public :
-				
+
 		ClassParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setState( IECore::Parameter *parameter, const IECore::Object *state );
 		virtual IECore::ObjectPtr getState( const IECore::Parameter *parameter );
-				
+
 	private :
-		
+
 		void classChooserKnob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
-		
+
 		static Description<ClassParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

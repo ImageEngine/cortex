@@ -38,8 +38,8 @@
 #include "IECoreMaya/V3Manipulator.h"
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 
-#include <maya/MString.h> 
-#include <maya/MTypeId.h> 
+#include <maya/MString.h>
+#include <maya/MTypeId.h>
 #include <maya/MPlug.h>
 #include <maya/MGlobal.h>
 #include <maya/MVector.h>
@@ -64,7 +64,7 @@ V3Manipulator::~V3Manipulator()
 {
 }
 
-void *V3Manipulator::creator() 
+void *V3Manipulator::creator()
 {
 	return new V3Manipulator();
 }
@@ -73,19 +73,19 @@ MStatus V3Manipulator::initialize()
 {
 	return MPxManipContainer::initialize();
 }
-    
+
 MStatus V3Manipulator::createChildren()
-{	
+{
 	m_translateManip = addFreePointTriadManip( "Manipulates the vector in space.", "translate" );
 	return MStatus::kSuccess;
 }
 
 MStatus V3Manipulator::connectToDependNode( const MObject & node )
-{	
+{
 	MFnDagNode dagFn( node );
 	MDagPath nodePath;
 	dagFn.getPath( nodePath );
-	
+
 	MStatus status;
 	m_translatePlug = dagFn.findPlug( m_plug.partialName(), &status );
 	if( !status )
@@ -98,13 +98,13 @@ MStatus V3Manipulator::connectToDependNode( const MObject & node )
 
 	addManipToPlugConversionCallback( m_translatePlug, (manipToPlugConversionCallback)&V3Manipulator::vectorManipToPlugConversion );
 	addPlugToManipConversionCallback( translateFn.pointIndex(), (plugToManipConversionCallback)&V3Manipulator::vectorPlugToManipConversion );
-	
+
 	MStatus stat = finishAddingManips();
 	if( stat == MStatus::kFailure )
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	MPxManipContainer::connectToDependNode( node );
 
 	readParameterOptions( dagFn );
@@ -118,7 +118,7 @@ MStatus V3Manipulator::connectToDependNode( const MObject & node )
 	{
 		// Inherit any transform to the parent
 		MDagPath transformPath = nodePath;
-		transformPath.pop(); 
+		transformPath.pop();
 		MFnTransform transformFn( transformPath );
 		m_localMatrix = transformPath.inclusiveMatrix();
 		m_localMatrixInv = transformPath.inclusiveMatrixInverse();
@@ -139,20 +139,20 @@ MManipData V3Manipulator::vectorPlugToManipConversion( unsigned int manipIndex )
     MObject returnData = numericData.create( MFnNumericData::k3Double );
     numericData.setData( 0.0, 0.0, 0.0 );
 	MPoint p = getPlugValues( m_translatePlug ) * m_localMatrix;
-	numericData.setData( p.x, p.y, p.z );	
-	return MManipData( returnData );	
+	numericData.setData( p.x, p.y, p.z );
+	return MManipData( returnData );
 }
 
 MManipData V3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex )
-{	
+{
 	MFnFreePointTriadManip translateFn( m_translateManip );
 	MPoint t;
 	getConverterManipValue( translateFn.pointIndex(), t );
 	t = t * m_localMatrixInv;
-	
+
 	MFnNumericData numericData;
     MObject returnData;
-	
+
 	// We have to check what type of data to generate so Maya
 	// will be able to set it back into the attribute correctly.
 	MFnNumericAttribute attr( m_translatePlug.attribute() );
@@ -162,7 +162,7 @@ MManipData V3Manipulator::vectorManipToPlugConversion( unsigned int plugIndex )
 		numericData.setData( float(t.x), float(t.y), float(t.z) );
 	}
 	else
-	{	
+	{
 		returnData = numericData.create( MFnNumericData::k3Double );
 		numericData.setData( t.x, t.y, t.z );
 	}
@@ -194,7 +194,7 @@ void V3Manipulator::getPlugValues( MPlug &plug, double *values )
 void V3Manipulator::getPlugValues( MPlug &plug, MFnNumericData &data )
 {
 	double values[3];
-	getPlugValues( plug, values ); 
+	getPlugValues( plug, values );
 	data.setData( values[0], values[1], values[2] );
 }
 
@@ -207,15 +207,15 @@ MPoint V3Manipulator::getPlugValues( MPlug &plug )
 
 void V3Manipulator::readParameterOptions( MFnDagNode &nodeFn )
 {
-	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );		
-	if( !pHolder ) 
+	ParameterisedHolderInterface *pHolder = dynamic_cast<ParameterisedHolderInterface *>( nodeFn.userNode() );
+	if( !pHolder )
 	{
 		return;
 	}
-	
+
 	ParameterPtr parameter = pHolder->plugParameter( m_plug );
 	CompoundObjectPtr userData = parameter->userData();
-	
+
 	if( CompoundObjectPtr uiData = userData->member<CompoundObject>( "UI" ) )
 	{
 		// World space parameter values
@@ -227,17 +227,17 @@ void V3Manipulator::readParameterOptions( MFnDagNode &nodeFn )
 			}
 			else if( wsData->readable() == "object" )
 			{
-				m_worldSpace = false;			
+				m_worldSpace = false;
 			}
 			else
 			{
 				MGlobal::displayWarning( "V3Manipulator: Ignoring invalid v3ManipSpace '"
 										 + MString( wsData->readable().c_str() )
-										 + "' for parameter '" 
+										 + "' for parameter '"
 										 + MString( parameter->name().c_str() )
 										 + "', using 'object'." );
 			}
-		}				
+		}
 	}
 }
 

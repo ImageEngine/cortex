@@ -52,18 +52,18 @@ ToMayaGroupConverter::ToMayaGroupConverter( IECore::ConstObjectPtr object )
 }
 
 bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
-{	
+{
 	IECore::ConstGroupPtr group = IECore::runTimeCast<const IECore::Group>( from );
 	if( !group )
 	{
 		return false;
 	}
-	
+
 	// find the name of this group, if it has one:
 	std::string name;
 	IECore::Group::StateContainer::const_iterator it = group->state().begin();
 	IECore::Group::StateContainer::const_iterator end = group->state().end();
-	
+
 	for(; it != end; ++it )
 	{
 		IECore::ConstAttributeStatePtr attrs = IECore::runTimeCast< const IECore::AttributeState >( *it );
@@ -80,31 +80,31 @@ bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 
 		IECore::ConstStringDataPtr nameData = IECore::runTimeCast< const IECore::StringData >( nameIt->second );
 		name = nameData->readable();
-		
+
 		// we only need the characters following the final slash:
 		size_t lastSlashPos = name.rfind("/");
 		if( lastSlashPos != std::string::npos )
 		{
 			name = std::string( name.begin() + lastSlashPos + 1, name.end() );
 		}
-		
+
 		break;
 	}
-	
+
 	MFnTransform fnTransform;
 	MObject oTransform = fnTransform.create( to );
 	if( name !=  "" )
 	{
 		fnTransform.setName( name.c_str() );
 	}
-	
+
 	IECore::ConstTransformPtr coreTransform = group->getTransform();
 	if( coreTransform )
 	{
 		Imath::M44f matrix = coreTransform->transform();
 		fnTransform.set( MTransformationMatrix( IECore::convert<MMatrix>( matrix ) ) );
 	}
-	
+
 	for( IECore::Group::ChildContainer::const_iterator it=group->children().begin(); it!=group->children().end(); it++ )
 	{
 		ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( *it );
@@ -113,8 +113,8 @@ bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 			continue;
 		}
 		MObject parent = oTransform;
-		converter->convert( parent );	
+		converter->convert( parent );
 	}
-	
+
 	return true;
 }

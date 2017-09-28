@@ -45,7 +45,7 @@ void bindFnOpHolder()
 {
 
 	def( "_opHolderExecuteResult", OpHolder::executeResult );
-	
+
 }
 
 } // namespace IECoreNuke

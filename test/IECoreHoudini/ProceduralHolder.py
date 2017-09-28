@@ -66,24 +66,24 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		# test generic creation
 		n = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes" )
 		self.assertEqual( n.path(), "/obj/test/test" )
-		
+
 		# test contextArgs outside UI mode fallback to generic behaviour
 		contextArgs = { "toolname" : "ieProceduralHolder" }
 		n2 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", contextArgs=contextArgs )
 		self.assertEqual( n2.path(), "/obj/test1/test" )
-		
+
 		# test parent arg
 		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		n3 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
 		self.assertEqual( n3.path(), "/obj/geo1/test" )
-		
+
 		# test automatic conversion
 		contextArgs["shiftclick"] = True
 		n4 = IECoreHoudini.FnProceduralHolder.create( "test", "parameterTypes", parent=geo, contextArgs=contextArgs )
 		self.assertEqual( n4.path(), "/obj/geo1/test1" )
 		self.assertEqual( len(n4.outputConnectors()[0]), 1 )
 		self.assertEqual( n4.outputConnectors()[0][0].outputNode().type().name(), "ieCortexConverter" )
-		
+
 		# test automatic conversion and output connections
 		mountain = geo.createNode( "mountain" )
 		contextArgs["outputnodename"] = mountain.path()
@@ -96,7 +96,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		outputNode = converter.outputConnectors()[0][0].outputNode()
 		self.assertEqual( outputNode.type().name(), "mountain::2.0" if hou.applicationVersion()[0] >= 16 else "mountain" )
 		self.assertEqual( outputNode, mountain )
-	
+
 	def testProceduralParameters(self):
 		obj = hou.node("/obj")
 		geo = obj.createNode("geo", run_init_scripts=False)
@@ -250,7 +250,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc.parmTuple("parm_a").set( [123] )
 		proc.cook(force=True)
 		self.assertEqual( cl['a'].getValue().value, 123 )
-		
+
 	def testParameterLabels( self ):
 		( proc, cl ) = self.testProceduralParameters()
 		# check the hidden userData works
@@ -258,7 +258,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( proc.parmTuple("parm_b").parmTemplate().label(), "B" )
 		self.assertEqual( proc.parmTuple("parm_c").parmTemplate().label(), "Double" )
 		self.assertEqual( proc.parmTuple("parm_d").parmTemplate().label(), "D" )
-		
+
 	def testMatchString(self):
 		(op,fn)=self.testProceduralParameters()
 		fn = IECoreHoudini.FnProceduralHolder(op)
@@ -276,16 +276,16 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( cl.typeName(), "sphereProcedural" )
 		op.parm( "__classMatchString" ).set( "*" )
 		self.assert_( len(fn.classNames()) > 1 )
-	
+
 	def createProcedural( self, path="primitiveParameters/multiple", version=1 ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		proc = geo.createNode( "ieProceduralHolder" )
 		fn = IECoreHoudini.FnProceduralHolder( proc )
 		fn.setProcedural( path, version )
-		
+
 		return ( proc, fn )
-	
+
 	def testObjectParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 2, "torus" )
@@ -302,7 +302,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0].numFaces(), 100 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 0 )
-		
+
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
 		self.assertEqual( len( proc.errors() ), 0)
@@ -314,7 +314,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0].numFaces(), 100 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 0 )
-	
+
 	def testObjectParameterWithMultipleTypesConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 3, "torus" )
@@ -331,7 +331,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0].numFaces(), 100 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 0 )
-		
+
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
 		self.assertEqual( len( proc.errors() ), 0)
@@ -340,7 +340,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.numPoints, 100 )
-	
+
 	def testPointsParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural()
 		torus = proc.createInputNode( 1, "torus" )
@@ -354,7 +354,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.numPoints, 100 )
-		
+
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
 		self.assertEqual( len( proc.errors() ), 0)
@@ -363,7 +363,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.numPoints, 100 )
-	
+
 	def testMeshParameterConversion( self ) :
 		( proc, fn ) = self.createProcedural( "primitiveParameters/meshRender" )
 		torus = proc.createInputNode( 0, "torus" )
@@ -377,7 +377,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 100 )
-		
+
 		torus.parm( "type" ).set( 1 )
 		proc.cook()
 		self.assertEqual( len( proc.errors() ), 0)
@@ -386,7 +386,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		result = IECoreHoudini.FromHoudiniGeometryConverter.create( converterSop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.numFaces(), 100 )
-	
+
 	# test an proceduralHolder with multiple inputs
 	def testMultipleInputs( self ) :
 		( proc, fn ) = self.createProcedural()
@@ -408,7 +408,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0].numFaces(), 206 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 0 )
-		
+
 		torus2.parm( "type" ).set( 1 )
 		proc.cook()
 		self.assertEqual( len( proc.errors() ), 0)
@@ -421,7 +421,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0]["P"].data.size(), 108 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 100 )
-	
+
 	# test using op holders and procedural holders as inputs
 	def testCortexInputs( self ) :
 		( proc, fn ) = self.createProcedural()
@@ -464,9 +464,9 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( result.children()[0].numFaces(), 206 )
 		self.assertEqual( result.children()[1].typeId(), IECore.TypeId.PointsPrimitive )
 		self.assertEqual( result.children()[1].numPoints, 0 )
-	
+
 	def testAnimatedValues( self ) :
-		
+
 		sphere = IECoreHoudini.FnProceduralHolder.create( "test", "sphereProcedural", 1 )
 		fn = IECoreHoudini.FnProceduralHolder( sphere )
 		sphere.parm( "parm_radius" ).setExpression( "$FF" )
@@ -480,33 +480,33 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		# so we flush them
 		fn.setParameterisedValues()
 		self.assertAlmostEqual( fn.getProcedural().parameters()["radius"].getTypedValue(), 12.25 )
-	
+
 	def testNameFilter( self ) :
-		
+
 		meshRender = IECoreHoudini.FnProceduralHolder.create( "meshRender", "primitiveParameters/meshRender", 1 )
-		
+
 		boxA = meshRender.parent().createNode( "box" )
 		nameA = boxA.createOutputNode( "name" )
 		nameA.parm( "name1" ).set( "boxA" )
-		
+
 		boxB = meshRender.parent().createNode( "box" )
 		transformB = boxB.createOutputNode( "xform" )
 		transformB.parm( "tx" ).set( 5 )
 		nameB = transformB.createOutputNode( "name" )
 		nameB.parm( "name1" ).set( "boxB" )
-		
+
 		boxC = meshRender.parent().createNode( "box" )
 		transformC = boxC.createOutputNode( "xform" )
 		transformC.parm( "tx" ).set( 10 )
 		nameC = transformC.createOutputNode( "name" )
 		nameC.parm( "name1" ).set( "boxC" )
-		
+
 		merge = meshRender.parent().createNode( "merge" )
 		merge.setInput( 0, nameA )
 		merge.setInput( 1, nameB )
 		merge.setInput( 2, nameC )
 		meshRender.setInput( 0, merge )
-		
+
 		# converts all 3 meshes as one (because the parameter type forces it)
 		geo = meshRender.geometry()
 		self.assertEqual( len(geo.prims()), 1 )
@@ -516,7 +516,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.Box3f( IECore.V3f( -0.5, -0.5, -0.5 ), IECore.V3f( 10.5, 0.5, 0.5 ) ) )
-		
+
 		# setting to one name limits the bounds
 		meshRender.parm( "parm_mesh_nameFilter" ).set( "boxB" )
 		self.assertEqual( len(geo.prims()), 1 )
@@ -526,7 +526,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.Box3f( IECore.V3f( 4.5, -0.5, -0.5 ), IECore.V3f( 5.5, 0.5, 0.5 ) ) )
-		
+
 		# setting to multiple names expands the bounds, but not all the way
 		meshRender.parm( "parm_mesh_nameFilter" ).set( "* ^boxA" )
 		self.assertEqual( len(geo.prims()), 1 )
@@ -536,7 +536,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.Box3f( IECore.V3f( 4.5, -0.5, -0.5 ), IECore.V3f( 10.5, 0.5, 0.5 ) ) )
-		
+
 		# multiple CortexObjects cause warnings (because the parameter wants one mesh only)
 		converter = merge.createOutputNode( "ieCortexConverter" )
 		converter.parm( "resultType" ).set( 0 ) # Cortex
@@ -549,7 +549,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.MeshPrimitive().bound() )
-		
+
 		# a single CortexObject will work fine
 		meshRender.parm( "parm_mesh_nameFilter" ).set( "boxB" )
 		self.assertEqual( len(geo.prims()), 1 )
@@ -559,7 +559,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.Box3f( IECore.V3f( 4.5, -0.5, -0.5 ), IECore.V3f( 5.5, 0.5, 0.5 ) ) )
-		
+
 		# disabling the nameFilter brings the warnings back
 		meshRender.setInput( 0, converter )
 		meshRender.parm( "parm_mesh_useNameFilter" ).set( False )
@@ -571,7 +571,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
 		self.assertEqual( proc.bound(), IECore.MeshPrimitive().bound() )
-	
+
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )
 		if not os.path.exists( "test/proceduralHolder_testData" ):

@@ -79,7 +79,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		if isinstance( classNameOrParameterised, str ) :
 			if classVersion is None or classVersion < 0 :
 				classVersions = IECore.ClassLoader.defaultLoader( envVarName ).versions( classNameOrParameterised )
-				classVersion = classVersions[-1] if classVersions else 0 
+				classVersion = classVersions[-1] if classVersions else 0
 			if undoable  :
 				if self.getParameterised()[0] :
 					self.setParameterisedValues()
@@ -101,7 +101,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			self._despatchSetParameterisedCallbacks( self.fullPathName() )
 
 	## Returns a tuple of the form (parameterised, className, classVersion, searchPathEnvVar).
-	# The returned parameterised object is not guaranteed to be in sync with the plug values. 
+	# The returned parameterised object is not guaranteed to be in sync with the plug values.
 	# Use setParameterisedValues function if you need that.
 	def getParameterised( self ) :
 
@@ -112,9 +112,9 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	# ClassVectorParameters) in such a way that they are automatically transferred onto
 	# the maya attributes and furthermore in an undoable fashion.
 	def parameterModificationContext( self ) :
-	
+
 		return _ParameterModificationContext( self )
-		
+
 	## Sets the values of the plugs representing the parameterised object,
 	# using the current values of the parameters. If the undoable parameter is True
 	# then this method is undoable using the standard maya undo mechanism.
@@ -157,7 +157,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		plugName = _IECoreMaya._parameterisedHolderParameterPlug( self, parameter )
 		if plugName == "" :
 			return maya.OpenMaya.MPlug()
-		
+
 		return StringUtil.plugFromString( self.fullPathName() + "." + plugName )
 
 	## Returns a string containing a full pathname for the plug representing the given parameter.
@@ -205,7 +205,7 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	__setParameterisedCallbacks = set()
 	@classmethod
 	def _despatchSetParameterisedCallbacks( cls, nodeName ) :
-	
+
 		fnPH = FnParameterisedHolder( nodeName )
 		for c in cls.__setParameterisedCallbacks :
 			c( fnPH )
@@ -214,22 +214,22 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	# is called. The expected function signature is callback( FnParameterisedHolder, parameter )
 	@classmethod
 	def addSetClassVectorParameterClassesCallback( cls, callback ) :
-	
+
 		cls.__setClassVectorParameterClassesCallbacks.add( callback )
-	
+
 	## Removes a callback added previously with addSetClassVectorParameterClassesCallback()
 	@classmethod
 	def removeSetClassVectorParameterClassesCallback( cls, callback ) :
-	
+
 		cls.__setClassVectorParameterClassesCallbacks.remove( callback )
-		
+
 	__setClassVectorParameterClassesCallbacks = set()
-	
+
 	# Invoked by the ieParameterisedHolderModification MPxCommand. It must be invoked from there
 	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
 	@classmethod
 	def _despatchSetClassVectorParameterClassesCallbacks( cls, plugPath ) :
-		
+
 		# This function gets called deferred (on idle) from ParameterisedHolderSetClassParameterCmd.cpp.
 		# Because of the deferred nature of the call, it's possible that the plug has been destroyed before
 		# we're called - in this case we just don't despatch callbacks.
@@ -238,32 +238,32 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		# themselves.
 		if not maya.cmds.objExists( plugPath ) :
 			return
-		
+
 		fnPH = FnParameterisedHolder( StringUtil.nodeFromAttributePath( plugPath ) )
 		parameter = fnPH.plugParameter( plugPath )
 		for c in cls.__setClassVectorParameterClassesCallbacks :
 			c( fnPH, parameter )
-	
+
 	## Adds a callback which will be invoked whenever FnParameterisedHolder.setClassParameterClass
 	# is called. The expected function signature is callback( FnParameterisedHolder, parameter )
 	@classmethod
 	def addSetClassParameterClassCallback( cls, callback ) :
-	
+
 		cls.__setClassParameterClassCallbacks.add( callback )
-	
+
 	## Removes a callback added previously with addSetClassParameterClassCallback()
 	@classmethod
 	def removeSetClassParameterClassCallback( cls, callback ) :
-	
-		cls.__setClassParameterClassCallbacks.remove( callback )  
-		
+
+		cls.__setClassParameterClassCallbacks.remove( callback )
+
 	__setClassParameterClassCallbacks = set()
-	
+
 	# Invoked by the ieParameterisedHolderModification MPxCommand. It must be invoked from there
 	# rather than the methods above so that callbacks get correctly despatched during undo and redo.
 	@classmethod
 	def _despatchSetClassParameterClassCallbacks( cls, plugPath ) :
-		
+
 		# See comment in _despatchSetClassVectorParameterClassesCallbacks
 		if not maya.cmds.objExists( plugPath ) :
 			return
@@ -272,36 +272,36 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 		parameter = fnPH.plugParameter( plugPath )
 		for c in cls.__setClassParameterClassCallbacks :
 			c( fnPH, parameter )
-			
+
 	def _classParameterStates( self, parameter=None, parentParameterPath="", result=None ) :
-	
+
 		if result is None :
 			result = IECore.CompoundData()
-			
+
 		if parameter is None :
-			parameter = self.getParameterised()[0].parameters()	
-	
+			parameter = self.getParameterised()[0].parameters()
+
 		parameterPath = parameter.name
 		if parentParameterPath :
 			parameterPath = parentParameterPath + "." + parameterPath
-			
+
 		if isinstance( parameter, IECore.ClassParameter ) :
-				
+
 			classInfo = parameter.getClass( True )
 			result[parameterPath] = IECore.CompoundData( {
 				"className" : IECore.StringData( classInfo[1] ),
 				"classVersion" : IECore.IntData( classInfo[2] ),
-				"searchPathEnvVar" : IECore.StringData( classInfo[3] ),	
+				"searchPathEnvVar" : IECore.StringData( classInfo[3] ),
 			} )
 
 		elif isinstance( parameter, IECore.ClassVectorParameter ) :
-		
+
 			classInfo = parameter.getClasses( True )
 			if classInfo :
 				classInfo = zip( *classInfo )
 			else :
 				classInfo = [ [], [], [], [] ]
-						
+
 			result[parameterPath] = IECore.CompoundData({
 				"parameterNames" : IECore.StringVectorData( classInfo[1] ),
 				"classNames" : IECore.StringVectorData( classInfo[2] ),
@@ -309,19 +309,19 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 			} )
 
 		if isinstance( parameter, IECore.CompoundParameter ) :
-		
+
 			for c in parameter.values() :
-			
+
 				self._classParameterStates( c, parameterPath, result )
 
 		return result
-	
+
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):
-		
+
 		return "ieParameterisedHolderNode"
-		
+
 	## Lists the ieParameterisedHolderNodes in the current scene. The keyword arguments operate as follows :
 	#
 	# selection :
@@ -335,41 +335,41 @@ class FnParameterisedHolder( maya.OpenMaya.MFnDependencyNode ) :
 	#
 	@classmethod
 	def ls( cls, selection=False, fnSets=True, classType=None ) :
-	
+
 		nodeNames = maya.cmds.ls( sl=selection, leaf=True, type=cls._mayaNodeType() )
 		matches = []
 		for n in nodeNames :
 			fnH = cls( n )
 			if classType is None or isinstance( fnH.getParameterised()[0], classType ) :
 				matches.append( fnH )
-				
+
 		if fnSets :
 			return matches
 		else :
 			return [ x.fullPathName() for x in matches ]
-	
+
 class _ParameterModificationContext :
 
 	def __init__( self, fnPH ) :
-	
+
 		self.__fnPH = fnPH
 
 	def __enter__( self ) :
-	
+
 		self.__fnPH.setParameterisedValues()
 		self.__originalValues = self.__fnPH.getParameterised()[0].parameters().getValue().copy()
 		self.__originalClasses = self.__fnPH._classParameterStates()
-		
+
 		return self.__fnPH.getParameterised()[0]
-		
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		_IECoreMaya._parameterisedHolderAssignModificationState(
 			self.__originalValues,
 			self.__originalClasses,
 			self.__fnPH.getParameterised()[0].parameters().getValue().copy(),
 			self.__fnPH._classParameterStates(),
 		)
-		
+
 		maya.cmds.ieParameterisedHolderModification( self.__fnPH.fullPathName() )
 

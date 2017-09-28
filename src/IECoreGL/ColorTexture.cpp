@@ -213,7 +213,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 	}
 
 	glGenTextures( 1, &m_texture );
-	
+
 	ScopedBinding binding( *this );
 
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
@@ -307,6 +307,6 @@ IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
 	}
 
 	Exception::throwIfError();
-	
+
 	return image;
 }

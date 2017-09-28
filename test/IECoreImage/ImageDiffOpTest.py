@@ -51,7 +51,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			alignDisplayWindows = False
 		)
 		self.assertFalse( res.value )
-	
+
 		# Offset the display and data windows.
 		offsetDisplayWindow = IECore.Box2i( imageA.displayWindow.min + IECore.V2i( -261, 172 ), imageA.displayWindow.max + IECore.V2i( -261, 172 ) )
 		offsetDataWindow = IECore.Box2i( imageA.dataWindow.min + IECore.V2i( -261, 172 ), imageA.dataWindow.max + IECore.V2i( -261, 172 ) )
@@ -66,7 +66,7 @@ class ImageDiffOpTest(unittest.TestCase):
 			alignDisplayWindows = False
 		)
 		self.assertTrue( res.value )
-		
+
 		# Compare the images again and they should not fail if "alignDisplayWindows" is turned on.
 		op = IECoreImage.ImageDiffOp()
 		res = op(

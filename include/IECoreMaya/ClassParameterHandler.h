@@ -46,14 +46,14 @@ class ClassParameterHandler : public ParameterHandler
 {
 
 	public :
-	
+
 		/// Convenience function for setting the class held by parameter. This makes no changes to the maya representation
 		/// of the parameter whatsoever.
 		static MStatus setClass( IECore::ParameterPtr parameter, const MString &className, int classVersion, const MString &searchPathEnvVar );
 		/// Convenience function for getting the class held by parameter. This has nothing to do with the maya
 		/// representation of the class whatsoever - see below for that.
 		static MStatus getClass( IECore::ConstParameterPtr parameter, MString &className, int &classVersion, MString &searchPathEnvVar );
-		
+
 		/// Can be used to query the details of the class currently being held by the parameter represented
 		/// by the specified plug. Note that this returns the class currently being represented in maya,
 		/// which may not be the same as the class on the parameter if the two have not been synchronised by a call
@@ -61,7 +61,7 @@ class ClassParameterHandler : public ParameterHandler
 		/// This function typically shouldn't be called directly, as a combination of direct access
 		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
 		static void currentClass( const MPlug &plug, MString &className, int &classVersion, MString &searchPathEnvVar );
-	
+
 	protected:
 
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
@@ -69,12 +69,12 @@ class ClassParameterHandler : public ParameterHandler
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 		virtual MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 	private :
-	
+
 		static MStatus storeClass( IECore::ConstParameterPtr parameter, MPlug &plug );
-	
-		
+
+
 };
 
 } // namespace IECoreMaya

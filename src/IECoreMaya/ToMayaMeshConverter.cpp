@@ -297,7 +297,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 					IECore::msg( IECore::Msg::Warning, "ToMayaMeshConverter::doConversion", boost::format( "PrimitiveVariable \"N\" has unsupported type \"%s\"." ) % it->second.data->typeName() );
 				}
 			}
-			
+
 			if ( vertexNormalsArray.length() )
 			{
 				MStatus status;
@@ -310,7 +310,7 @@ bool ToMayaMeshConverter::doConversion( IECore::ConstObjectPtr from, MObject &to
 				unsigned v = 0;
 				MIntArray vertexIds;
 				MIntArray faceIds;
-				
+
 				for ( ; !itPolygon.isDone(); itPolygon.next() )
 				{
 					for ( v=0; v < itPolygon.polygonVertexCount(); ++v )
@@ -392,7 +392,7 @@ bool ToMayaMeshConverter::setMeshInterpolationAttribute( MObject &object, std::s
 	}
 
 	MPlug interpPlug = fnDep.findPlug( "ieMeshInterpolation", &st );
-	
+
 	if ( !st )
 	{
 		MFnEnumAttribute fnAttrib;

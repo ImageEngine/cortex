@@ -68,7 +68,7 @@ class CustomTagReader
 				throw IECore::Exception( std::string( "Python exception while checking IECoreMaya::LiveScene tag " + tag.string() ) );
 			}
 		}
-		
+
 		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
 		{
 			MString p = dagPath.fullPathName();
@@ -88,7 +88,7 @@ class CustomTagReader
 			{
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
-			
+
 			IECorePython::listToSceneInterfaceNameList( l(), tags );
 		}
 
@@ -123,7 +123,7 @@ class CustomAttributeReader
 				throw IECore::Exception( std::string( "Python exception while evaluating IECoreMaya::LiveScene attribute " + attr.string() ) );
 			}
 		}
-		
+
 		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
 		{
 			MString p = dagPath.fullPathName();
@@ -138,13 +138,13 @@ class CustomAttributeReader
 				PyErr_Print();
 				throw IECore::Exception( std::string( "Python exception while evaluating attribute names for IECoreMaya::LiveScene." ) );
 			}
-			
+
 			extract<list> l( o );
 			if ( !l.check() )
 			{
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
-			
+
 			IECorePython::listToSceneInterfaceNameList( l(), attributes );
 		}
 

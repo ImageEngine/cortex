@@ -48,12 +48,12 @@ template<typename T>
 VecParameterHandler<T>::VecParameterHandler()
 {
 }
-		
+
 template<typename T>
 void VecParameterHandler<T>::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const T *vecParameter = static_cast<const T *>( parameter );
-	
+
 	if( f.makeKnobs() )
 	{
 		typename T::ValueType defaultValue = vecParameter->typedDefaultValue();
@@ -62,10 +62,10 @@ void VecParameterHandler<T>::knobs( const IECore::Parameter *parameter, const ch
 			m_storage[i] = defaultValue[i];
 		}
 	}
-	
+
 	std::string label = knobLabel( parameter );
 	if( T::ValueType::dimensions()==2 )
-	{		
+	{
 		m_knob = XY_knob( f, m_storage, knobName, label.c_str() );
 		SetFlags( f, DD::Image::Knob::NO_PROXYSCALE | DD::Image::Knob::NO_HANDLES );
 	}
@@ -74,7 +74,7 @@ void VecParameterHandler<T>::knobs( const IECore::Parameter *parameter, const ch
 		assert( T::ValueType::dimensions()==3 );
 		m_knob = XYZ_knob( f, m_storage, knobName, label.c_str() );
 	}
-	
+
 	setKnobProperties( parameter, f, m_knob );
 }
 
@@ -87,7 +87,7 @@ void VecParameterHandler<T>::setParameterValue( Parameter *parameter, ValueSourc
 		for( unsigned i=0; i<T::ValueType::dimensions(); i++ )
 		{
 			value[i] = m_storage[i];
-		}		
+		}
 	}
 	else
 	{

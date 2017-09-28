@@ -61,7 +61,7 @@ class ProceduralHolder : public ParameterisedHolderOp
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
 		//@}
-		
+
 		/// Returns the procedural which is being held.
 		IECore::ConstParameterisedProceduralPtr procedural();
 		/// Returns the scene created by the procedural in a form
@@ -73,9 +73,9 @@ class ProceduralHolder : public ParameterisedHolderOp
 		Imath::Box3f bound();
 		/// Returns the transform for the procedural.
 		Imath::M44f transform();
-		
+
 	protected :
-	
+
 		/// Implemented to draw the procedural
 #if kDDImageVersionInteger >= 70000
 		virtual DD::Image::Op::HandlesMode doAnyHandles( DD::Image::ViewerContext *ctx );
@@ -87,9 +87,9 @@ class ProceduralHolder : public ParameterisedHolderOp
 
 		/// Implemented to distinguish these nodes from others.
 		const char *node_shape() const;
-		
+
 	private :
-	
+
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
 
@@ -99,10 +99,10 @@ class ProceduralHolder : public ParameterisedHolderOp
 
 		IECoreGL::ScenePtr m_scene;
 		DD::Image::Hash m_sceneHash;
-		
+
 		Imath::Box3f m_bound;
 		DD::Image::Hash m_boundHash;
-		
+
 		DD::Image::Matrix4 m_transform;
 		DD::Image::Knob *m_transformKnob;
 

@@ -106,7 +106,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		# test no P
 		del p2["P"]
 		self.assertRaises( RuntimeError, op.__call__, **{} )
-	
+
 	def testDifferentPointsOrder( self ):
 
 		def rearrangeVec( vec ):
@@ -116,14 +116,14 @@ class PointsMotionOpTest( unittest.TestCase ) :
 				vec[i] = vec[ lastIndex ]
 				vec[ lastIndex ] = tmp
 				lastIndex -= 1
-		
+
 		p1 = self._buildPoints( 1.0 )
 		p2 = self._buildPoints( 1.0 )
 		points = ObjectVector()
 		points.append( p1 )
 		points.append( p2 )
 		op = PointsMotionOp()
-		
+
 		for primVar in p2.values() :
 			if primVar.interpolation in [ PrimitiveVariable.Interpolation.Vertex, PrimitiveVariable.Interpolation.Varying, PrimitiveVariable.Interpolation.FaceVarying ] :
 				rearrangeVec( primVar.data )
@@ -134,7 +134,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[2], p1 )
 
 	def testSingleSnapshot( self ):
-		
+
 		p1 = self._buildPoints( 1.0 )
 		points = ObjectVector()
 		points.append( p1 )
@@ -144,12 +144,12 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[1], p1 )
 
 	def testNoSnapshots( self ):
-		
+
 		points = ObjectVector()
 		op = PointsMotionOp()
 		result = op( snapshotTimes = FloatVectorData( [] ), pointsPrimitives = points )
 		self.assertEqual( len(result), 0 )
-	
+
 	def testMissingSnapshots( self ):
 
 		p1 = self._buildPoints( 1.0 )
@@ -174,7 +174,7 @@ class PointsMotionOpTest( unittest.TestCase ) :
 
 		op = PointsMotionOp()
 		result = op( snapshotTimes = FloatVectorData( [ 1, 2, 3, 4, 5 ] ), pointsPrimitives = points, maskedPrimVars = StringVectorData( [ 'vec3' ] ) )
-		
+
 		self.assertEqual( len(result), 5 )
 		# checking ids
 		self.assertEqual( result[1]["id"].data, IntVectorData([ 10,11,3,4,5,1,2,12,13 ]) )
@@ -188,6 +188,6 @@ class PointsMotionOpTest( unittest.TestCase ) :
 		self.assertEqual( result[5]["P"].data, V3fVectorData( [ V3f(1*1), V3f(2*2), V3f(5*3), V3f(3*4), V3f(4*5),   V3f(5*1), V3f(5*2), V3f(5*4), V3f(5*5) ] ) )
 		# checkin if masked prim var was filled with zero
 		self.assertEqual( result[3]["vec3"].data, V3fVectorData( [ V3f(0), V3f(0), V3f(3*4), V3f(3*5), V3f(3*6),   V3f(3*2), V3f(3*3), V3f(0), V3f(0) ] ) )
-		
+
 if __name__ == "__main__":
     unittest.main()

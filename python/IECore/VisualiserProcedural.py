@@ -46,13 +46,13 @@ class VisualiserProcedural( IECore.ParameterisedProcedural ) :
 		self.parameters().addParameters(
 
 			[
-				
+
 				IECore.VisibleRenderableParameter(
 					"renderable",
 					"The object to visualise",
 					IECore.Group()
 				)
-				
+
 			]
 
 		)
@@ -62,7 +62,7 @@ class VisualiserProcedural( IECore.ParameterisedProcedural ) :
 		return args["renderable"].bound()
 
 	def doRenderState( self, renderer, args ) :
-	
+
 		pass
 
 	def doRender( self, renderer, args ) :

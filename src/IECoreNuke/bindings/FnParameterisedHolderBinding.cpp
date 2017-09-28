@@ -46,7 +46,7 @@ void bindFnParameterisedHolder()
 
 	def( "_parameterisedHolderGetParameterisedResult", ParameterisedHolderOp::getParameterisedResult );
 	def( "_parameterisedHolderSetModifiedParametersInput", ParameterisedHolderOp::setModifiedParametersInput );
-	
+
 }
 
 } // namespace IECoreNuke

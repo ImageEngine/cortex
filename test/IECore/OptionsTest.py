@@ -44,9 +44,9 @@ class OptionsTest( unittest.TestCase ) :
 
 		oo = o.copy()
 		self.assertEqual( o, oo )
-		
+
 	def testConstructFromDict( self ) :
-	
+
 		o = IECore.Options( {
 			"a" : IECore.StringData( "a" ),
 			"b" : IECore.IntData( 10 ),
@@ -57,17 +57,17 @@ class OptionsTest( unittest.TestCase ) :
 		self.assertEqual( o.options["b"], IECore.IntData( 10 ) )
 
 	def testHash( self ) :
-	
+
 		o1 = IECore.Options()
 		o2 = IECore.Options()
-		
+
 		self.assertEqual( o1.hash(), o2.hash() )
-		
+
 		o1.options["a"] = IECore.StringData( "a" )
 		self.assertNotEqual( o1.hash(), o2.hash() )
-		
+
 		o2.options["a"] = IECore.StringData( "a" )
 		self.assertEqual( o1.hash(), o2.hash() )
-		
+
 if __name__ == "__main__":
 	unittest.main()

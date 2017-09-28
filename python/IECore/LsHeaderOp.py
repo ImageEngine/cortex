@@ -79,7 +79,7 @@ class LsHeaderOp( Op ) :
 								)
 
 	def doOperation( self, operands ) :
-		
+
 		try:
 			reader = Reader.create( operands["file"].value )
 			headers = reader.readHeader()

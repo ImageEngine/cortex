@@ -48,11 +48,11 @@ WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCou
 	assert( self );
 	assert( wrapped );
 	assert( wrappedType );
-	
+
 	if( self->ob_type != wrappedType )
 	{
 		// we're dealing with a python subclass.
-		
+
 		m_pyObject = self;
 
 		g_allocCount++;
@@ -87,7 +87,7 @@ void WrapperGarbageCollector::collect()
 				{
 					// add to the list of objects to destroy
 					toCollect.push_back( it->second );
-					
+
 					// Make sure the object is removed from the list before the next loop, which
 					// destroys it. This is because Py_DECREF() can run arbitrary, multithreaded python
 					// code, (especially if the python object has a __del__ method) which may create
@@ -146,7 +146,7 @@ boost::python::object WrapperGarbageCollector::methodOverride( const char *name,
 	{
 		return boost::python::object();
 	}
-	
+
 	// lookup the method on the python instance. this may
 	// or may not be an override. a new reference is returned
 	// so we must use a handle to manage it.
@@ -158,7 +158,7 @@ boost::python::object WrapperGarbageCollector::methodOverride( const char *name,
 			)
 		)
 	);
-		
+
 	if( !methodFromInstance || !PyMethod_Check( methodFromInstance.get() ) )
 	{
 		// if the attribute lookup failed, an error will be set, and we
@@ -166,14 +166,14 @@ boost::python::object WrapperGarbageCollector::methodOverride( const char *name,
 		PyErr_Clear();
 		return boost::python::object();
 	}
-	
+
 	// lookup the method defined by our type. a borrowed reference
 	// is returned so we don't need to use a handle to manage the
 	// reference count.
 	PyObject *methodFromType = PyDict_GetItemString(
 		wrappedType->tp_dict, const_cast<char*>( name )
 	);
-	
+
 	// if they're not the same then we have an override
 	if( methodFromType != ((PyMethodObject *)methodFromInstance.get())->im_func )
 	{

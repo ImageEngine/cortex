@@ -152,9 +152,9 @@ void registerProcedural(VRAY_ProceduralFactory *factory)
 }
 #endif
 
-// The initialize method is called when the procedural is created. 
+// The initialize method is called when the procedural is created.
 // Returning zero (failure) will abort the rendering of this procedural.
-// The bounding box passed in is the user defined bounding box. 
+// The bounding box passed in is the user defined bounding box.
 // If the user didn't specify a bounding box, then the box will be NULL
 int
 VRAY_ieWorld::initialize(const UT_BoundingBox *box)
@@ -175,7 +175,7 @@ VRAY_ieWorld::initialize(const UT_BoundingBox *box)
 		msg( Msg::Warning, "VRAY_ieWorld", boost::format("Failed to find ieworld cache file: %s") % m_worldFileName.buffer() );
 		return 0;
 	}
-	return 1;	
+	return 1;
 }
 
 void
@@ -184,9 +184,9 @@ VRAY_ieWorld::getBoundingBox(UT_BoundingBox &box)
 	box = convert<UT_BoundingBox>( m_bound );
 }
 
-// When mantra determines that the bounding box needs to be rendered, the 
-// render method is called. At this point, the procedural can either 
-// generate geometry (VRAY_Procedural::openGeometryObject()) or it can 
+// When mantra determines that the bounding box needs to be rendered, the
+// render method is called. At this point, the procedural can either
+// generate geometry (VRAY_Procedural::openGeometryObject()) or it can
 // generate further procedurals (VRAY_Procedural::openProceduralObject()).
 void
 VRAY_ieWorld::render()

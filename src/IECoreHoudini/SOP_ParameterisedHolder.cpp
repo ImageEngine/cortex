@@ -84,10 +84,10 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 		{
 			continue;
 		}
-		
+
 		inputNodes.push_back( input );
 	}
-	
+
 	// clear the input parameters and break the node connections
 	disconnectAllInputs();
 	m_inputParameters.clear();
@@ -115,7 +115,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 			{
 				continue;
 			}
-			
+
 			FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( GU_DetailHandle(), objectParam->validTypes() );
 			if ( converter )
 			{
@@ -123,7 +123,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 				/// \todo: add converter parameters here once ParameterHandlers are defined in c++
 			}
 		}
-		
+
 		/// \todo: try using the messageHandler(). it might not work outside of a cook though...
 		if ( m_inputParameters.size() > 4 )
 		{
@@ -137,7 +137,7 @@ void SOP_ParameterisedHolder::refreshInputConnections()
 	{
 		setInput( i, inputNodes[i] );
 	}
-	
+
 	/// \todo: Is this really the only we can get the gui to update the input connections?
 	setXY( getX()+.0001, getY()+.0001 );
 	setXY( getX()-.0001, getY()-.0001 );
@@ -148,7 +148,7 @@ void SOP_ParameterisedHolder::setInputParameterValues( float now )
 	for ( unsigned int i=0; i < m_inputParameters.size(); i++ )
 	{
 		useInputSource( i, m_dirty, false );
-		
+
 		setInputParameterValue( m_inputParameters[i].get(), GU_DetailHandle(), i );
 	}
 }
@@ -160,7 +160,7 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 	{
 		return;
 	}
-	
+
 	GU_DetailHandle inputHandle = ( handle.isNull() ) ? filteredInputValue( parameter, inputIndex ) : handle;
 	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( inputHandle, objectParameter->validTypes() );
 	if ( !converter )
@@ -168,14 +168,14 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 		addWarning( SOP_MESSAGE, ( boost::format( "Could not find an appropriate converter for parameter \"%s\" (input %d)" ) % parameter->name() % inputIndex ).str().c_str() );
 		return;
 	}
-	
+
 	// set converter parameters from the node values
 	const CompoundParameter::ParameterVector &converterParameters = converter->parameters()->orderedParameters();
 	for ( CompoundParameter::ParameterVector::const_iterator it=converterParameters.begin(); it != converterParameters.end(); ++it )
 	{
 		updateParameter( *it, 0, "parm_" + parameter->name() + "_" );
 	}
-	
+
 	try
 	{
 		IECore::ObjectPtr result = converter->convert();
@@ -183,7 +183,7 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 		{
 			return;
 		}
-		
+
 		if ( IECore::ParameterisedProcedural *procedural = IECore::runTimeCast<IECore::ParameterisedProcedural>( result.get() ) )
 		{
 			IECore::CapturingRendererPtr renderer = new IECore::CapturingRenderer();
@@ -199,10 +199,10 @@ void SOP_ParameterisedHolder::setInputParameterValue( IECore::Parameter *paramet
 					procedural->render( renderer.get() );
 				}
 			}
-			
+
 			result = boost::const_pointer_cast<IECore::Object>( IECore::runTimeCast<const IECore::Object>( renderer->world() ) );
 		}
-		
+
 		parameter->setValidatedValue( result );
 	}
 	catch ( const IECore::Exception &e )
@@ -224,7 +224,7 @@ GU_DetailHandle SOP_ParameterisedHolder::filteredInputValue( const IECore::Param
 	{
 		return inputHandle;
 	}
-	
+
 	UT_StringMMPattern nameFilter;
 	if ( getNameFilter( parameter, nameFilter ) )
 	{
@@ -234,7 +234,7 @@ GU_DetailHandle SOP_ParameterisedHolder::filteredInputValue( const IECore::Param
 			return filteredGeo;
 		}
 	}
-	
+
 	return inputHandle;
 }
 
@@ -249,14 +249,14 @@ bool SOP_ParameterisedHolder::getNameFilter( const IECore::Parameter *parameter,
 		filter.compile( filterStr );
 		return true;
 	}
-	
+
 	return false;
 }
 
 void SOP_ParameterisedHolder::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
 {
 	SOP_Node::getNodeSpecificInfoText( context, parms );
-	
+
 	// add type descriptions for the Cortex Objects
 	GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 }

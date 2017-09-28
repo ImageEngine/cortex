@@ -98,7 +98,7 @@ void BlindDataHolder::load( LoadContextPtr context )
 	if ( container )
 	{
 		m_data = context->load<CompoundData>( container.get(), g_blindDataEntry );
-		assert(m_data);	
+		assert(m_data);
 	}
 	else
 	{

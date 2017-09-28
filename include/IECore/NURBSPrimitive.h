@@ -81,7 +81,7 @@ class IECORE_API NURBSPrimitive : public Primitive
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		virtual void render( Renderer *renderer ) const;
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:

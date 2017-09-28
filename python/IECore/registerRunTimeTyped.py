@@ -76,7 +76,7 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 
 	if typeName is None :
 		typeName = typ.__name__
-	
+
 	runTypedBaseClass = filter( lambda c: issubclass( c, IECore.RunTimeTyped ), typ.__bases__ )[0]
 
 	# constants below are the same as in TypeIds.h

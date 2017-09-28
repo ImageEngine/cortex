@@ -132,7 +132,7 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 			parameterisedProcedural->hash( h );
 			return h;
 		}
-		
+
 		ConstParameterisedProceduralPtr parameterisedProcedural;
 		ConstCompoundObjectPtr validatedArgs;
 };

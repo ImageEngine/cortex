@@ -125,10 +125,10 @@ class TestSelection( unittest.TestCase ) :
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "white" )
 
 	def testIDSelect( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
@@ -148,7 +148,7 @@ class TestSelection( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
@@ -161,17 +161,17 @@ class TestSelection( unittest.TestCase ) :
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
 
 	def testIDSelectDepths( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.setAttribute( "name", IECore.StringData( "ball" ) )
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		scene = r.scene()
 		scene.setCamera( IECoreGL.OrthographicCamera() )
 
@@ -182,14 +182,14 @@ class TestSelection( unittest.TestCase ) :
 		s2 = scene.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		self.assertEqual( len( s2 ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( s2[0].name ), "ball" )
-		
+
 		self.assertAlmostEqual( s1[0].depthMin, s2[0].depthMin, 5 )
-	
+
 	def testOcclusionQuerySelect( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
@@ -209,7 +209,7 @@ class TestSelection( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
@@ -220,12 +220,12 @@ class TestSelection( unittest.TestCase ) :
 		ss = s.select( IECoreGL.Selector.Mode.OcclusionQuery, IECore.Box2f( IECore.V2f( 0.75, 0 ), IECore.V2f( 1, 1 ) ) )
 		self.assertEqual( len( ss ), 2 )
 		self.assertEqual( set( [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ] ), set( ( "frontRight", "backRight" ) ) )
-	
+
 	def testIDSelectWithAdditionalDisplayStyles( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.setAttribute( "gl:primitive:wireframe", IECore.BoolData( True ) )
@@ -250,7 +250,7 @@ class TestSelection( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 			r.setAttribute( "name", IECore.StringData( "backRight" ) )
 			r.sphere( 1, -1, 1, 360, {} )
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.OrthographicCamera() )
 
@@ -261,7 +261,7 @@ class TestSelection( unittest.TestCase ) :
 		ss = s.select( IECoreGL.Selector.Mode.IDRender, IECore.Box2f( IECore.V2f( 0.75, 0.5 ), IECore.V2f( 0.76, 0.51 ) ) )
 		self.assertEqual( len( ss ), 1 )
 		self.assertEqual( IECoreGL.NameStateComponent.nameFromGLName( ss[0].name ), "frontRight" )
-	
+
 	def testPointsPrimitiveSelect( self ) :
 
 		r = IECoreGL.Renderer()
@@ -272,7 +272,7 @@ class TestSelection( unittest.TestCase ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			r.setAttribute( "name", IECore.StringData( "pointsNeedSelectingToo" ) )           
+			r.setAttribute( "name", IECore.StringData( "pointsNeedSelectingToo" ) )
 			r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
 
 		s = r.scene()
@@ -283,18 +283,18 @@ class TestSelection( unittest.TestCase ) :
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "pointsNeedSelectingToo" )
-	
+
 	def testCurvesPrimitiveSelect( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 
 			r.curves(
 				IECore.CubicBasisf.linear(),
@@ -307,7 +307,7 @@ class TestSelection( unittest.TestCase ) :
 					)
 				}
 			)
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
@@ -316,18 +316,18 @@ class TestSelection( unittest.TestCase ) :
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
 			self.assertEqual( names[0], "curvesNeedSelectingToo" )
-			
+
 	def testCurvesPrimitiveSelectUsingLines( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
 
 			r.curves(
@@ -341,7 +341,7 @@ class TestSelection( unittest.TestCase ) :
 					)
 				}
 			)
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
@@ -349,19 +349,19 @@ class TestSelection( unittest.TestCase ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
-			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
+			self.assertEqual( names[0], "curvesNeedSelectingToo" )
 
 	def testCurvesPrimitiveSelectUsingWireframeLines( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			
+
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
-			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )           
+			r.setAttribute( "name", IECore.StringData( "curvesNeedSelectingToo" ) )
 			r.setAttribute( "gl:curvesPrimitive:useGLLines", IECore.BoolData( True ) )
 			r.setAttribute( "gl:primitive:wireframe", IECore.BoolData( True ) )
 			r.setAttribute( "gl:primitive:solid", IECore.BoolData( False ) )
@@ -377,7 +377,7 @@ class TestSelection( unittest.TestCase ) :
 					)
 				}
 			)
-			
+
 		s = r.scene()
 		s.setCamera( IECoreGL.PerspectiveCamera() )
 
@@ -385,10 +385,10 @@ class TestSelection( unittest.TestCase ) :
 			ss = s.select( mode, IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 			names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in ss ]
 			self.assertEqual( len( names ), 1 )
-			self.assertEqual( names[0], "curvesNeedSelectingToo" )			
-	
+			self.assertEqual( names[0], "curvesNeedSelectingToo" )
+
 	def testContextManager( self ) :
-	
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
@@ -407,15 +407,15 @@ class TestSelection( unittest.TestCase ) :
 
 		scene = r.scene()
 		scene.setCamera( None )
-		
+
 		IECoreGL.PerspectiveCamera().render( IECoreGL.State.defaultState() )
-		
+
 		hits = []
 		with IECoreGL.Selector( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ), IECoreGL.Selector.Mode.IDRender, hits ) as selector :
 			IECoreGL.State.bindBaseState()
 			selector.baseState().bind()
 			scene.root().render( selector.baseState() )
-				
+
 		names = [ IECoreGL.NameStateComponent.nameFromGLName( x.name ) for x in hits ]
 		self.assertEqual( len( names ), 2 )
 		self.assert_( "one" in names )

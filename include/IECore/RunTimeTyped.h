@@ -305,12 +305,12 @@ class IECORE_API RunTimeTyped : public RefCounted
 		typedef std::map< TypeId, TypeId > BaseTypeRegistryMap;
 		typedef std::map< TypeId, std::vector<TypeId> > BaseTypesRegistryMap;
 		typedef std::map< TypeId, std::set< TypeId > > DerivedTypesRegistryMap;
-		
+
 		typedef tbb::spin_rw_mutex Mutex;
-		
+
 		static Mutex g_baseTypeIdsMutex;
 		static Mutex g_derivedTypeIdsMutex;
-		
+
 		static BaseTypeRegistryMap &baseTypeRegistry();
 		static DerivedTypesRegistryMap &derivedTypesRegistry();
 

@@ -68,7 +68,7 @@ class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<ToGLPointsConverter> g_description;
 
 };

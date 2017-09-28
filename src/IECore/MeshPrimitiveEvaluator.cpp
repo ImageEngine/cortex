@@ -292,7 +292,7 @@ MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m
 			m_uvTriangles.push_back( uvBound );
 		}
 	}
-	
+
 	m_tree = new TriangleBoundTree( m_triangles.begin(), m_triangles.end() );
 
 	if( m_uv.interpolation != PrimitiveVariable::Invalid )
@@ -467,19 +467,19 @@ void MeshPrimitiveEvaluator::calculateMassProperties() const
 void MeshPrimitiveEvaluator::calculateAverageNormals() const
 {
 	assert( m_mesh );
-	
+
 	if( m_haveAverageNormals )
 	{
 		return;
 	}
-	
+
 	NormalsMutex::scoped_lock lock( m_normalsMutex );
 	if( m_haveAverageNormals )
 	{
 		// another thread may have calculated the normals while we waited for the mutex
 		return;
 	}
-	
+
 	ConstIntVectorDataPtr verticesPerFace = m_mesh->verticesPerFace();
 
 #ifndef NDEBUG
@@ -848,10 +848,10 @@ bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, co
 	}
 
 	Result *r = static_cast<Result *>( result );
-	
+
 	r->m_triangleIdx = triangleIndex;
 	r->m_bary = barycentricCoordinates;
-	
+
 	size_t vertIdOffset = triangleIndex * 3;
 	r->m_vertexIds = Imath::V3i( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
 
@@ -867,7 +867,7 @@ bool MeshPrimitiveEvaluator::barycentricPosition( unsigned int triangleIndex, co
 	{
 		r->m_uv = r->vec2PrimVar( m_uv );
 	}
-				
+
 	return true;
 }
 
@@ -884,7 +884,7 @@ void MeshPrimitiveEvaluator::closestPointWalk( TriangleBoundTree::NodeIndex node
 			size_t triangleIndex = *perm - m_triangles.begin(); // triangle index is just the distance of the triangle from the beginning of the vector
 			size_t vertIdOffset = triangleIndex * 3;
 			Imath::V3i vertexIds( (*m_meshVertexIds)[vertIdOffset], (*m_meshVertexIds)[vertIdOffset+1], (*m_meshVertexIds)[vertIdOffset+2] );
-			
+
 			assert( vertexIds[0] < (int)( m_verts->readable().size() ) );
 			assert( vertexIds[1] < (int)( m_verts->readable().size() ) );
 			assert( vertexIds[2] < (int)( m_verts->readable().size() ) );
@@ -966,7 +966,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 	assert( m_uvTree );
 
 	const UVBoundTree::Node &node = m_uvTree->node( nodeIndex );
-	
+
 	if( !node.bound().intersects( targetUV ) )
 	{
 		return false;
@@ -974,7 +974,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 
 	if( node.isLeaf() )
 	{
-		
+
 		UVBoundTree::Iterator *permLast = node.permLast();
 		for( UVBoundTree::Iterator *perm = node.permFirst(); perm!=permLast; perm++ )
 		{
@@ -1008,7 +1008,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 	else
@@ -1017,7 +1017,7 @@ bool MeshPrimitiveEvaluator::pointAtUVWalk( UVBoundTree::NodeIndex nodeIndex, co
 		{
 			return true;
 		}
-		
+
 		if( pointAtUVWalk( UVBoundTree::highChildIndex( nodeIndex ), targetUV, result ) )
 		{
 			return true;

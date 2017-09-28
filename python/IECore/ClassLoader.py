@@ -54,7 +54,7 @@ from IECore import Msg, msg, SearchPath, warning
 # This class will find files with the following template path:
 # <any path>/<className>/<className>-<version>.py
 # Where [] represents optional field.
-# And for performance sake, it will not explore directories which 
+# And for performance sake, it will not explore directories which
 # contain files that match this:
 # <any path>/<className>/<className>*.*
 class ClassLoader :
@@ -71,7 +71,7 @@ class ClassLoader :
 
 	## Returns a copy of the searchpath used to find classes.
 	def searchPath( self ) :
-	
+
 		return SearchPath( self.__searchPaths )
 
 	## Returns an alphabetically sorted list
@@ -89,7 +89,7 @@ class ClassLoader :
 		return n
 
 	## Returns the available versions of the specified
-	# class as a list of ints, with the latest version last. 
+	# class as a list of ints, with the latest version last.
 	# If the class doesn't exist returns an empty list.
 	def versions( self, name ) :
 		try :
@@ -136,9 +136,9 @@ class ClassLoader :
 	# It also adds two class attributes named "path" and "version"
 	# with the info necessary to reload the Op from ClassLoader.
 	def load( self, name, version = None ) :
-		
+
 		with self.__loadMutex:
-		
+
 			c = self.__findClass( name )
 
 			if not version :
@@ -204,7 +204,7 @@ class ClassLoader :
 	def defaultLoader( cls, envVar ) :
 
 		with cls.__defaultLoaderMutex:
-			
+
 			loader = cls.__defaultLoaders.get( envVar, None )
 			if loader :
 				return loader
@@ -244,7 +244,7 @@ class ClassLoader :
 		pruneDir = False
 		nameTail = os.path.split( name )[-1]
 
-		# globbing for any extension rather than .py to avoid exploring shader 
+		# globbing for any extension rather than .py to avoid exploring shader
 		# directories without Python files. Function returns true on those cases.
 		gf = glob.glob( os.path.join( searchPath, name, nameTail + "*.*" ) )
 		for f in gf :

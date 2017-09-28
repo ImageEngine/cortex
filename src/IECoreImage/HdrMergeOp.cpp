@@ -75,7 +75,7 @@ HdrMergeOp::HdrMergeOp()
 		"This number specifies the difference in exposure between one image and the next,"
 		"measured in stops. You should set it to match the step used when shooting the bracketed "
 		"images. Entering a higher number can produce an image which has more contrast and an "
-		"artifically exaggerated dynamic range. Entering a lower number is undesirable as it " 
+		"artifically exaggerated dynamic range. Entering a lower number is undesirable as it "
 		"results in images without enough contrast.",
 		1,
 		0,

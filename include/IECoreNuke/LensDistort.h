@@ -63,7 +63,7 @@ class LensDistort : public DD::Image::Iop
 	struct PluginAttribute
 	{
 		public:
-			
+
 			PluginAttribute( std::string name, double defaultValue = 0. ) :
 				m_name( name ),
 				m_knob( NULL ),
@@ -71,7 +71,7 @@ class LensDistort : public DD::Image::Iop
 				m_low( 0. ),
 				m_high( 1. )
 			{};
-			
+
 			PluginAttribute() :
 				m_name( "Unused" ),
 				m_knob( NULL ),
@@ -79,7 +79,7 @@ class LensDistort : public DD::Image::Iop
 				m_low( 0. ),
 				m_high( 1. )
 			{};
-			
+
 			std::string m_name;
 			DD::Image::Knob *m_knob;
 			std::string m_script;
@@ -87,9 +87,9 @@ class LensDistort : public DD::Image::Iop
 			double m_low;
 			double m_high;
 	};
-	
+
 	typedef std::vector< PluginAttribute > PluginAttributeList;
-	
+
 	public:
 
 		enum
@@ -97,12 +97,12 @@ class LensDistort : public DD::Image::Iop
 			Distort,
 			Undistort
 		};
-		
+
 		LensDistort( Node* node );
-		
+
 		inline int getLensModel() const { return (int)knob("model")->get_value(); };
 		inline PluginAttributeList &attributeList() { return m_pluginAttributes; };
-		
+
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual int knob_changed( DD::Image::Knob* k );
 		virtual void append( DD::Image::Hash &hash );
@@ -111,18 +111,18 @@ class LensDistort : public DD::Image::Iop
 		virtual const char *node_help() const;
 		virtual void _validate( bool for_real );
 		virtual void engine( int y, int x, int r, DD::Image::ChannelMask channels, DD::Image::Row & outrow );
-		
+
 		static void buildDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static void addDynamicKnobs( void*, DD::Image::Knob_Callback f );
 		static const Iop::Description m_description;
 		static DD::Image::Op *build( Node *node );
-		
+
 	private:
-		
+
 		/// Returns an array of const char* which is populated with the available lens models.
 		static const char ** modelNames();
 		static int indexFromModelName( const char *name );
-	
+
 		/// Sets the lens model to use by calling the appropriate creators..
 		void setLensModel( IECore::ConstCompoundObjectPtr parameters );
 		void setLensModel( std::string modelName );
@@ -132,7 +132,7 @@ class LensDistort : public DD::Image::Iop
 		/// @param updateKnobsFromParameters If this value is true then all knobs will be updated to the new lens model's parameters and any existing knob values.
 		/// will be discarded. If this value is false then the values of common parameters between the current and new lens model will be copied across.
 		void updateLensModel( bool updateKnobsFromParameters = false );
-		
+
 		/// Returns true if there is text in the file sequence knob. The contents of the knob are returned in the attribute 'path'.
 		bool getFileSequencePath( std::string& path );
 
@@ -148,41 +148,41 @@ class LensDistort : public DD::Image::Iop
 		/// Updates the dynamic knobs. This method should be called whenever a knob is changed or an event happens that requires
 		/// the dynamic knobs to be recreated or their enabled state changed.
 		void updateUI();
-		
+
 		/// The maximum number of threads that we are going to use in parallel.
 		const int m_nThreads;
-		
+
 		/// Plugin loaders. We need one of these per threads to make the lens lib thread safe.
 		std::vector< IECore::LensModelPtr > m_model;
-		
+
 		/// locks for each LensModel object
 		DD::Image::Lock* m_locks;
-		
+
 		/// A list of the attributes that the plugin uses.
 		PluginAttributeList m_pluginAttributes;
-		
+
 		/// Which lens model we are currently using.
 		int m_lensModel;
-		
+
 		/// Used to track the number of knobs created by the previous pass, so that the same number can be deleted next time.
 		int m_numNewKnobs;
-		
+
 		/// The method of filtering. Defined by the 'filter' knob.
 		DD::Image::Filter m_filter;
-	
+
 		/// Pointer to the 'mode' knob.
 		DD::Image::Knob *m_kModel;
 
 		/// Distort or undistort.
 		int m_mode;
-		
+
 		/// All knobs below this one are dynamic.
 		DD::Image::Knob* m_lastStaticKnob;
 
 		/// Path that holds the file sequence information.
 		const char *m_assetPath;
-		
-		/// Set within the knob_changed method to indicate whether a valid file sequence has been entered.		
+
+		/// Set within the knob_changed method to indicate whether a valid file sequence has been entered.
 		bool m_hasValidFileSequence;
 		bool m_useFileSequence;
 };

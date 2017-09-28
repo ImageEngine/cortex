@@ -47,7 +47,7 @@ MeshNormalsOp::MeshNormalsOp() : MeshPrimitiveOp( "Calculates vertex normals for
 {
 	/// \todo Add this parameter to a member variable and update pPrimVarNameParameter() functions.
 	StringParameterPtr pPrimVarNameParameter = new StringParameter(
-		"pPrimVarName",	
+		"pPrimVarName",
 		"Input primitive variable name.",
 		"P"
 	);
@@ -179,7 +179,7 @@ struct MeshNormalsOp::CalculateNormals
 				it->normalize();
 			}
 		}
-		
+
 		return normalsData;
 	}
 
@@ -218,7 +218,7 @@ void MeshNormalsOp::modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundOb
 	}
 
 	const PrimitiveVariable::Interpolation interpolation = static_cast<PrimitiveVariable::Interpolation>( operands->member<IntData>( "interpolation" )->readable() );
-	
+
 	CalculateNormals f( mesh->verticesPerFace(), mesh->vertexIds(), interpolation );
 	DataPtr n = despatchTypedData<CalculateNormals, TypeTraits::IsVec3VectorTypedData, HandleErrors>( pvIt->second.data.get(), f );
 

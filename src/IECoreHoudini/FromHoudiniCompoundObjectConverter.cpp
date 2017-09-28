@@ -75,7 +75,7 @@ FromHoudiniCompoundObjectConverter::~FromHoudiniCompoundObjectConverter()
 FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter::canConvert( const GU_Detail *geo )
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	
+
 	// need multiple names
 	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
 	if ( attrRef.isValid() && attrRef.isString() )
@@ -93,7 +93,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 	{
 		return Inapplicable;
 	}
-	
+
 	// Need them all to be convertable as objects. Even then, if they're VisibleRenderable,
 	// then the FromHoudiniGroupConverter would be preferable.
 	bool nonRenderable = false;
@@ -105,13 +105,13 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniCompoundObjectConverter:
 		{
 			return Inapplicable;
 		}
-		
+
 		if ( !IECore::runTimeCast<const VisibleRenderable>( ((CortexPrimitive *)prim)->getObject() ) )
 		{
 			nonRenderable = true;
 		}
 	}
-	
+
 	return ( nonRenderable ) ? Ideal : Suitable;
 }
 
@@ -122,9 +122,9 @@ ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detai
 	{
 		throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Can only convert named CortexObject primitives" );
 	}
-	
+
 	CompoundObjectPtr result = new CompoundObject();
-	
+
 	const GA_Attribute *attr = attrRef.getAttribute();
 	const GA_AIFStringTuple *attrAIF = attrRef.getAIFStringTuple();
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
@@ -136,18 +136,18 @@ ObjectPtr FromHoudiniCompoundObjectConverter::doDetailConversion( const GU_Detai
 		{
 			throw std::runtime_error( "FromHoudiniCompoundObjectConverter: Geometry contains non-CortexObject primitives" );
 		}
-		
+
 		std::string name = "";
 		const char *tmp = attrAIF->getString( attr, it.getOffset() );
 		if ( tmp )
 		{
 			name = tmp;
 		}
-		
+
 		ConstObjectPtr object = ((CortexPrimitive *)prim)->getObject();
 
 		result->members()[name] = ( object ) ? object->copy() : 0;
 	}
-	
+
 	return result;
 }

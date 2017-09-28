@@ -100,20 +100,20 @@ class IECOREGL_API FrameBuffer : public IECore::RunTimeTyped
 		/// unbind it.
 		class ScopedBinding
 		{
-			
+
 			public :
-			
+
 				/// Binds the specified FrameBuffer to the specified target.
 				ScopedBinding( const FrameBuffer &frameBuffer, GLenum target = GL_FRAMEBUFFER  );
 				/// Rebinds the previously bound FrameBuffer.
 				~ScopedBinding();
-				
+
 			private :
-			
+
 				GLenum m_target;
 				GLint m_prevDrawBuffer;
 				GLint m_prevReadBuffer;
-			
+
 		};
 
 	private :

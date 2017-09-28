@@ -61,18 +61,18 @@ namespace IECoreHoudini
 class GR_CortexPrimitive : public GR_Primitive
 {
 	public :
-		
+
 		GR_CortexPrimitive( const GR_RenderInfo *info, const char *cache_name, const GEO_Primitive *prim );
 		virtual ~GR_CortexPrimitive();
-		
+
 		virtual const char *className() const
 		{
 			return "GR_CortexPrimitive";
 		};
-		
+
 		virtual GR_PrimAcceptResult acceptPrimitive( GT_PrimitiveType t, int geo_type, const GT_PrimitiveHandle &ph, const GEO_Primitive *prim );
 		virtual void resetPrimitives();
-	
+
 	protected :
 
 		virtual void update( RE_Render *r, const GT_PrimitiveHandle &primh, const GR_UpdateParms &p );
@@ -80,26 +80,26 @@ class GR_CortexPrimitive : public GR_Primitive
 #if UT_MAJOR_VERSION_INT >= 16
 
 		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, GR_DrawParms parms);
-		
+
 #else
 
 		virtual void render( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials );
-		
+
 #endif
 
 		virtual void renderInstances( RE_Render *r, GR_RenderMode render_mode, GR_RenderFlags flags, const GR_DisplayOption *opt, const UT_Array<RE_MaterialPtr> *materials, int render_instance );
 		virtual int renderPick( RE_Render *r, const GR_DisplayOption *opt, unsigned int pick_type, GR_PickStyle pick_style, bool has_pick_map );
-	
+
 	private :
-		
+
 		GA_Index m_primId;
 		IECoreGL::ScenePtr m_scene;
-		const IECore::Renderable *m_renderable;		
-		
+		const IECore::Renderable *m_renderable;
+
 		IECoreGL::State *getState( GR_RenderMode mode, GR_RenderFlags flags, const GR_DisplayOption *opt );
-		
+
 		const std::string &pickFragmentSource();
-		
+
 		static IECoreGL::StatePtr g_lit;
 		static IECoreGL::StatePtr g_shaded;
 		static IECoreGL::StatePtr g_wire;

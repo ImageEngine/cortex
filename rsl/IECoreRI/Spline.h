@@ -55,7 +55,7 @@ color ieSpline( uniform float positions[]; uniform color values[]; float t )
 	{
 		return 0;
 	}
-	
+
 	float tt = clamp( t, positions[0], positions[n-1] );
 	tt = spline( "solvecatmull-rom", tt, positions );
 	return spline( "catmull-rom", tt, values );

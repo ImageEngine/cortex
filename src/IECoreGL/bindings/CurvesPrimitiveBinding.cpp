@@ -63,11 +63,11 @@ void bindCurvesPrimitive()
 			) )
 		)
 	;
-	
+
 	bindTypedStateComponent<CurvesPrimitive::IgnoreBasis>( "IgnoreBasis" );
 	bindTypedStateComponent<CurvesPrimitive::UseGLLines>( "UseGLLines" );
 	bindTypedStateComponent<CurvesPrimitive::GLLineWidth>( "GLLineWidth" );
-	
+
 }
 
 } // namespace IECoreGL

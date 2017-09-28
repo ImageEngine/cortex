@@ -43,28 +43,28 @@ import IECore
 ## Presets themselves are Parametersied objects, to allow them to have
 ## their own parameters to control how they might be applied.
 class Preset( IECore.Parameterised ) :
- 	
+
 	def __init__( self, description="" ) :
-	
+
 		IECore.Parameterised.__init__( self, description )
-	
+
 	## \return Presets may return a dictionary of arbitrary metadata
 	## to describe their contents/function. The default implementation
 	## simply sets "title" to the class name.
 	def metadata( self ) :
-	
+
 		return { "title" : self.__class__ }
-		
+
  	## \return True if the Preset can be applied to the given rootParameter
 	## on the given parameterised object, otherwise False
 	def applicableTo( self, parameterised, rootParameter ) :
-		
+
 		raise NotImplementedError
-	
-	## Applies the preset to the specified parameterised and 
+
+	## Applies the preset to the specified parameterised and
 	## root parameter.
 	def __call__( self, parameterised, rootParameter ) :
-		
+
 		raise NotImplementedError
 
 IECore.registerRunTimeTyped( Preset )

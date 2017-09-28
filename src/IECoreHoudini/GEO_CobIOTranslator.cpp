@@ -63,16 +63,16 @@ const char *GEO_CobIOTranslator::formatName() const
 	return "Cortex Object Format";
 }
 
-int GEO_CobIOTranslator::checkExtension( const char *fileName ) 
+int GEO_CobIOTranslator::checkExtension( const char *fileName )
 {
 	UT_String sname( fileName );
-	
+
 	/// \todo: support all extensions that can read/write any object supported by the To/FromHoudiniGeometryConverters
 	if ( sname.fileExtension() && ( !strcmp( sname.fileExtension(), ".cob" ) || !strcmp( sname.fileExtension(), ".pdc" ) || !strcmp( sname.fileExtension(), ".ptc" ) ) )
 	{
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -84,7 +84,7 @@ int GEO_CobIOTranslator::checkMagicNumber( unsigned magic )
 GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &is, bool ate_magic )
 {
 	((UT_IFStream&)is).close();
-	
+
 	ConstObjectPtr object = 0;
 	try
 	{
@@ -93,28 +93,28 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileLoad( GEO_Detail *geo, UT_IStream &
 		{
 			return false;
 		}
-		
+
 		object = reader->read();
 	}
 	catch ( IECore::Exception e )
 	{
 		return false;
 	}
-	
+
 	if ( !object )
 	{
 		return false;
 	}
-	
+
 	ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( object.get() );
 	if ( !converter )
 	{
 		return false;
 	}
-	
+
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
-	
+
 	return converter->convert( handle );
 }
 
@@ -132,19 +132,19 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, 
 {
 	GU_DetailHandle handle;
 	handle.allocateAndSet( (GU_Detail*)geo, false );
-	
+
 	FromHoudiniGeometryConverterPtr converter = FromHoudiniGeometryConverter::create( handle );
 	if ( !converter )
 	{
 		return false;
 	}
-	
+
 	ObjectPtr object = converter->convert();
 	if ( !object )
 	{
 		return false;
 	}
-	
+
 	try
 	{
 		WriterPtr writer = Writer::create( object, fileName );
@@ -154,14 +154,14 @@ GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, 
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 
 GA_Detail::IOStatus GEO_CobIOTranslator::fileSaveToFile( const GEO_Detail *geo, std::ostream &os, const char *fileName )
 {
 	((std::ofstream&)os).close();
-	
+
 	return fileSaveToFile( geo, fileName );
 }
 
@@ -174,7 +174,7 @@ bool GEO_CobIOTranslator::fileStat( const char *fileName, GA_Stat &stat, uint le
 		{
 			return false;
 		}
-		
+
 		ConstCompoundObjectPtr header = reader->readHeader();
 
 		UT_BoundingBox bbox = convert<UT_BoundingBox>( reader->readHeader()->member<const Box3fData>( "bound", true )->readable() );

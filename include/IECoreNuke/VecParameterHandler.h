@@ -45,20 +45,20 @@ class VecParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		VecParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
-				
+
 	private :
-	
+
 		float m_storage[3]; // enough for either V2 or V3
 		DD::Image::Knob *m_knob;
-	
+
 		static Description<VecParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

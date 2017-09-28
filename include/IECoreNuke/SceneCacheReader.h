@@ -59,18 +59,18 @@ namespace IECoreNuke
 class SceneCacheReader : public DD::Image::SourceGeo
 {
 	public :
-		
+
 		SceneCacheReader( Node *node );
 		~SceneCacheReader();
-			
+
 		virtual void knobs( DD::Image::Knob_Callback f );
 		virtual const char *Class() const;
 		virtual const char *node_help() const;
-		
+
 	protected :
-		
+
 		virtual void _validate( bool forReal );
-		virtual void append( DD::Image::Hash &hash ); 
+		virtual void append( DD::Image::Hash &hash );
 		virtual void get_geometry_hash();
 		virtual void geometry_engine( DD::Image::Scene& scene, DD::Image::GeometryList &out );
 	 	virtual void create_geometry( DD::Image::Scene &scene, DD::Image::GeometryList &out );
@@ -135,7 +135,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Hash sceneHash() const;
 		/// Get the hash of the SceneView knob (the default hash implementation of that knob returns a constant hash...)
 		DD::Image::Hash selectionHash( bool force = false ) const;
-		
+
 		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
 
 		// uses firstOp to return the Op that has the up-to-date private data
@@ -148,14 +148,14 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		SharedData *sharedData();
 		const SharedData *sharedData() const;
 
-		// Knob Members.	
+		// Knob Members.
 		const char *m_filePath; // Holds the raw SceneCache file path.
 		std::string m_root; // Holds the root item in the SceneCache.
 		std::string m_filter; // The text to filter the scene with.
 		bool m_worldSpace; // Set to ignore local transforms..
 		DD::Image::Matrix4 m_baseParentMatrix; // The global matrix that is applied to the geo.
 
-		// Pointers to various knobs.	
+		// Pointers to various knobs.
 		DD::Image::Knob *m_filePathKnob;
 		DD::Image::Knob *m_baseParentMatrixKnob;
 		DD::Image::Knob *m_sceneKnob;
@@ -164,7 +164,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		DD::Image::Knob *m_rootKnob;
 
 		// only the first reader allocates the shared data
-		SharedData *m_data;	
+		SharedData *m_data;
 };
 
 } // namespace IECoreNuke

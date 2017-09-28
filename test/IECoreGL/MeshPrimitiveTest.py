@@ -50,7 +50,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 
 		vertexSource = """
 		#include "IECoreGL/VertexShader.h"
-		
+
 		IECOREGL_VERTEXSHADER_IN vec3 vertexP;
 		IECOREGL_VERTEXSHADER_IN vec2 vertexuv;
 		IECOREGL_VERTEXSHADER_OUT vec4 color;
@@ -109,18 +109,18 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
 
 	def testUniformCs( self ) :
-		
+
 		fragmentSource = """
 		#include "IECoreGL/FragmentShader.h"
-		
+
 		IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
-					
+
 		void main()
 		{
 			gl_FragColor = vec4( fragmentCs, 1.0 );
 		}
 		"""
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
@@ -136,9 +136,9 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
-			
+
 			r.shader( "surface", "test", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
-			
+
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 2 ) )
 			m["Cs"] = IECore.PrimitiveVariable(
 				IECore.PrimitiveVariable.Interpolation.Uniform,
@@ -149,9 +149,9 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 					IECore.Color3f( 1, 1, 1, ),
 				] )
 			)
-			
+
 			m.render( r )
-		
+
 		image = IECore.Reader.create( self.outputFileName ).read()
 		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.75) + int(dimensions.x * 0.25)
@@ -173,19 +173,19 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )
 		self.assertEqual( image["B"][index], 1 )
-		
+
 	def testBound( self ) :
-	
+
 		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
 		m2 = IECoreGL.ToGLMeshConverter( m ).convert()
-		
+
 		self.assertEqual( m.bound(), m2.bound() )
-		
+
 	def testFaceNormals( self ) :
-	
+
 		# when a polygon mesh has no normals, we must calculate face normals so we can
 		# shade it in a faceted manner.
-		
+
 		fragmentSource = """
 		#include "IECoreGL/FragmentShader.h"
 		IECOREGL_FRAGMENTSHADER_IN vec3 fragmentN;
@@ -195,7 +195,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
  			gl_FragColor = vec4( fragmentN, 1.0 );
  		}
 		"""
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
@@ -211,7 +211,7 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		with IECore.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -15 ) ) )
-			
+
 			r.shader( "surface", "test", { "gl:fragmentSource" : IECore.StringData( fragmentSource ) } )
 
 			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
@@ -224,16 +224,16 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( image["R"][index], 0 )
 		self.assertEqual( image["G"][index], 0 )
 		self.assertEqual( image["B"][index], 1 )
-		 
+
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
-	
+
 if __name__ == "__main__":
     unittest.main()

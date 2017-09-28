@@ -39,94 +39,94 @@ import os
 
 import IECore
 import IECoreRI
-				
+
 class GroupTest( IECoreRI.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/groupTest.rib"
-		
+
 	def testRender( self ) :
-		
+
 		g = IECore.Group()
 		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
 		g.addChild( IECore.SpherePrimitive() )
-		
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			g.render( r )
-		
+
 		l = "\n".join( open( self.outputFileName ).readlines() )
-		
+
 		self.failUnless( "AttributeBegin" in l )
 		self.failUnless( "ConcatTransform" in l )
 		self.failUnless( "string name" in l )
 		self.failUnless( "Sphere" in l )
 		self.failUnless( "AttributeEnd" in l )
-		
+
 	def testRenderNoAttributeBlock( self ) :
-		
+
 		g = IECore.Group()
 		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
 		g.addChild( IECore.SpherePrimitive() )
-		
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			g.render( r, False )
-		
+
 		l = "\n".join( open( self.outputFileName ).readlines() )
-		
+
 		self.failIf( "AttributeBegin" in l )
 		self.failUnless( "ConcatTransform" in l )
 		self.failUnless( "string name" in l )
 		self.failUnless( "Sphere" in l )
 		self.failIf( "AttributeEnd" in l )
-		
+
 	def testRenderChildren( self ) :
-		
+
 		g = IECore.Group()
 		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
 		g.addChild( IECore.SpherePrimitive() )
-		
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			g.renderChildren( r )
-		
+
 		l = "\n".join( open( self.outputFileName ).readlines() )
-		
+
 		self.failIf( "AttributeBegin" in l )
 		self.failIf( "ConcatTransform" in l )
 		self.failIf( "string name" in l )
 		self.failUnless( "Sphere" in l )
 		self.failIf( "AttributeEnd" in l )
-		
+
 	def testRenderState( self ) :
-		
+
 		g = IECore.Group()
 		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
 		g.addChild( IECore.SpherePrimitive() )
-		
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		with IECore.WorldBlock( r ) :
-		
+
 			g.renderState( r )
-		
+
 		l = "\n".join( open( self.outputFileName ).readlines() )
-		
+
 		self.failIf( "AttributeBegin" in l )
 		self.failIf( "ConcatTransform" in l )
 		self.failUnless( "string name" in l )
 		self.failIf( "Sphere" in l )
-		self.failIf( "AttributeEnd" in l )			
+		self.failIf( "AttributeEnd" in l )
 
 if __name__ == "__main__":
     unittest.main()

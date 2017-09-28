@@ -159,7 +159,7 @@ void GR_Cortex::renderObject( const IECore::Object *object, const IECoreGL::Stat
 	renderer->worldEnd();
 	IECoreGL::ScenePtr scene = renderer->scene();
 	scene->setCamera( 0 ); // houdini will be providing the camera
-	
+
 	// now render
 	scene->render( const_cast<IECoreGL::State *>( displayState ) );
 }
@@ -174,11 +174,11 @@ void GR_Cortex::render( GU_Detail *gdp, const IECoreGL::State *displayState )
 	{
 		return;
 	}
-	
+
 	const GA_Attribute *attr = attrRef.getAttribute();
 	const GA_AIFBlindData *blindData = attr->getAIFBlindData();
 	const NodePassData passData = blindData->getValue<NodePassData>( attr, 0 );
-	
+
 	switch( passData.type() )
 	{
 		case IECoreHoudini::NodePassData::CORTEX_OPHOLDER :

@@ -81,40 +81,40 @@ GA_RWAttributeRef ToHoudiniStringVectorAttribConverter::doConversion( const IECo
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniStringVectorAttribConverter::doConversion: PrimitiveVariable \"%s\" does not contain IECore::StringVectorData." ) % name ).str() );
 	}
-	
+
 	GA_RWAttributeRef attrRef = geo->addStringTuple( range.getOwner(), name.c_str(), 1 );
 	if ( attrRef.isInvalid() )
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniStringVectorAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
 	}
-	
+
 	if ( !range.isValid() || range.empty() )
 	{
 		return attrRef;
 	}
-	
+
 	GA_Attribute *attr = attrRef.getAttribute();
-	
+
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-	
+
 	UT_StringArray strings;
 	strings.fromStdVectorOfStrings( stringVectorData->readable() );
-	
+
 	const std::vector<int> &indices = ((const IECore::IntVectorData *)m_indicesParameter->getValidatedValue())->readable();
 	if ( indices.empty() || !strings.entries() )
 	{
 		return attrRef;
 	}
-	
+
 	GA_AIFSharedStringTuple::StringBuffer handles = tuple->addStrings( attr, strings );
-	
+
 	size_t i = 0;
 	size_t numIndices = indices.size();
 	for ( GA_Iterator it=range.begin(); !it.atEnd(), i < numIndices; ++it, ++i )
 	{
 		tuple->setHandle( attr, it.getOffset(), handles.getStringIndex( indices[i] ), 0 );
 	}
-	
+
 	return attrRef;
 }
 
@@ -157,10 +157,10 @@ GA_RWAttributeRef ToHoudiniStringDetailAttribConverter::doConversion( const IECo
 	{
 		throw IECore::Exception( ( boost::format( "ToHoudiniStringDetailAttribConverter::doConversion: Invalid GA_RWAttributeRef returned for PrimitiveVariable \"%s\"." ) % name ).str() );
 	}
-	
+
 	GA_Attribute *attr = attrRef.getAttribute();
 	attr->getAIFSharedStringTuple()->setString( attr, 0, stringData->readable().c_str(), 0 );
-	
+
 	return attrRef;
 }
 

@@ -209,7 +209,7 @@ MStatus PythonCmd::doIt( const MArgList &argList )
 	}
 
 	IECorePython::ScopedGILLock gilLock;
-	
+
 	list argv;
 
 	PySys_SetObject( (char *)"argv", argv.ptr() );

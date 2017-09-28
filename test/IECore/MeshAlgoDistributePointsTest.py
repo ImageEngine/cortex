@@ -40,22 +40,22 @@ import IECore
 class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 
 	def pointTest( self, mesh, points, density, error=0.05 ) :
-		
+
 		self.failUnless( "P" in points )
 		self.assertEqual( points.numPoints, points['P'].data.size() )
 		self.failUnless( points.arePrimitiveVariablesValid() )
-		
+
 		mesh = IECore.TriangulateOp()( input = mesh )
 		meshEvaluator = IECore.MeshPrimitiveEvaluator( mesh )
 		result = meshEvaluator.createResult()
 		pointsPerFace = [ 0 ] * mesh.verticesPerFace.size()
 		positions = points["P"].data
-		
+
 		## test that the points are on the mesh
 		for p in positions :
 			self.assertAlmostEqual( meshEvaluator.signedDistance( p, result ), 0.0, 3 )
 			pointsPerFace[result.triangleIndex()] += 1
-		
+
 		## test that we have roughly the expected density per face
 		origDensity = density
 		mesh["faceArea"] = IECore.MeshAlgo.calculateFaceArea( mesh )
@@ -63,22 +63,22 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 			if "density" in mesh :
 				density = mesh["density"].data[f] * origDensity
 			self.failUnless( abs(pointsPerFace[f] - density * mesh['faceArea'].data[f]) <= density * error )
-	
+
 	def testSimple( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 100 )
 		self.pointTest( m, p, 100 )
-	
+
 	def testHighDensity( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 50000, offset = IECore.V2f( 0.0001, 0.0001 ) )
 
 		self.pointTest( m, p, 50000 )
-	
+
 	def testDensityMaskPrimVar( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		m = IECore.TriangulateOp()( input = m )
 		numFaces = m.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform )
@@ -87,9 +87,9 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.pointTest( m, p, 100, error=0.1 )
 		p = IECore.MeshAlgo.distributePoints( mesh = m, density = 1000 )
 		self.pointTest( m, p, 1000, error=0.1 )
-	
+
 	def testOffsetParameter( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		density = 500
 		p = IECore.MeshAlgo.distributePoints( mesh = m, density = density, offset = IECore.V2f( 0, 0 ) )
@@ -97,20 +97,20 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.pointTest( m, p, density )
 		self.pointTest( m, pOffset, density )
 		self.assertNotEqual( p.numPoints, pOffset.numPoints )
-		
+
 		pos = p["P"].data
 		posOffset = pOffset["P"].data
 		for i in range( 0, min(p.numPoints, pOffset.numPoints) ) :
 			self.assertNotEqual( pos[i], posOffset[i] )
-	
+
 	def testDistanceBetweenPoints( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
-		
+
 		density = 300
 		points = IECore.MeshAlgo.distributePoints( mesh = m, density = density )
 		positions = points["P"].data
-		
+
 		tree = IECore.V3fTree( points["P"].data )
 		for i in range( 0, positions.size() ) :
 			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
@@ -118,9 +118,9 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 			neighbours.remove( i )
 			for n in neighbours :
 				self.assert_( ( positions[i] - positions[n] ).length() > 1.0 / density )
-	
+
 	def testPointOrder( self ) :
-		
+
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		m2 = m.copy()
 		m2['P'].data += IECore.V3f( 0, 5, 0 )
@@ -135,19 +135,19 @@ class MeshAlgoDistributePointsTest( unittest.TestCase ) :
 		self.pointTest( m, p, density )
 		self.pointTest( m2, p2, density )
 		self.assertEqual( p.numPoints, p2.numPoints )
-		
+
 		pos = p["P"].data
 		pos2 = p2["P"].data
 		for i in range( 0, p.numPoints ) :
 			self.failUnless( pos2[i].equalWithRelError( pos[i] + IECore.V3f( 0, 5, 0 ), 1e-6 ) )
-	
+
 	def testDensityRange( self ) :
 
 		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 		self.assertRaises( RuntimeError, IECore.MeshAlgo.distributePoints, m, -1.0 )
-	
+
 	def setUp( self ) :
-	
+
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
 
 if __name__ == "__main__":

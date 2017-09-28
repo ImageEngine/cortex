@@ -58,7 +58,7 @@ class matrixParameter( Op ) :
 	def doOperation( self, args ) :
 
 		assert args["matrix"] == M44fData( M44f() )
-		
+
 		return IntData( 1 )
 
 registerRunTimeTyped( matrixParameter )

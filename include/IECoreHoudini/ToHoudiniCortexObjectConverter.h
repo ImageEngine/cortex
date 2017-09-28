@@ -52,23 +52,23 @@ class ToHoudiniCortexObjectConverter : public IECoreHoudini::ToHoudiniGeometryCo
 		ToHoudiniCortexObjectConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniCortexObjectConverter();
-		
+
 		/// We don't actually transfer any attribs during conversion, but this method can be used to
 		/// transfer PrimitiveVariables from the source Object, provided it is an IECore::Primitive,
 		/// the GA_Range contains a GU_CortexPrimitive which also holds an IECore::Primitive, and both
 		/// Primitives have the same variable sizes.
 		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
-	
+
 	protected :
-		
+
 		/// performs conversion from the IECore::Object into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
-		
+
 		// Used to apply the attributeFilter to the Object, if it is a Primitive
 		IECore::ConstObjectPtr filterAttribs( const IECore::Object *object ) const;
-		
+
 		static ToHoudiniGeometryConverter::Description<ToHoudiniCortexObjectConverter> m_description;
 };
 

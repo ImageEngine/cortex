@@ -105,7 +105,7 @@ void Group::render( State *currentState ) const
 		glPushMatrix();
 		glMultMatrixf( m_transform.getValue() );
 	}
-	
+
 	{
 		State::ScopedBinding scope( *m_state, *currentState );
 		for( ChildContainer::const_iterator it=m_children.begin(); it!=m_children.end(); it++ )
@@ -113,7 +113,7 @@ void Group::render( State *currentState ) const
 			(*it)->render( currentState );
 		}
 	}
-	
+
 	if( haveTransform )
 	{
 		glPopMatrix();

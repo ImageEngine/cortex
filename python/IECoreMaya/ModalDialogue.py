@@ -69,25 +69,25 @@ class ModalDialogue( IECoreMaya.UIElement ) :
 		ModalDialogue.__toInstantiate = cls
 		ModalDialogue.__calltimeArgs = args
 		ModalDialogue.__calltimeKwargs = kwargs
-		
+
 		title = maya.mel.eval( 'interToUI( "%s" )' % cls.__name__ )
 		mayaResult = maya.cmds.layoutDialog( ui = 'import IECoreMaya; IECoreMaya.ModalDialogue._ModalDialogue__instantiate()', title = title )
 
 		if mayaResult == 'ModalDialogueReturnObject' :
-		
+
 			stopMeLeaking = ModalDialogue.__returnObject
 			ModalDialogue.__returnObject = None
 			return stopMeLeaking
-		
+
 		elif mayaResult == 'None' :
 			return None
-		
+
 		elif mayaResult == 'True' :
 			return True
-		
+
 		elif mayaResult == 'False' :
 			return False
-		
+
 		return mayaResult
 
 	@classmethod

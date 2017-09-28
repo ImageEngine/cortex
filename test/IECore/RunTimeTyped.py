@@ -107,7 +107,7 @@ class TestRunTimeTyped( unittest.TestCase ) :
 
 				if t.staticTypeId() not in IECore.TypeId.values.keys() :
 					print "TypeID: %s  TypeName: %s" % ( t.staticTypeId(), t.staticTypeName() )
-					
+
 				self.assert_( t.staticTypeId() in IECore.TypeId.values.keys() )
 
 				# Make sure that no 2 IECore classes provide the same typeId or typeName
@@ -159,50 +159,50 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( "CompoundParameter" ) )
 		self.assert_( IECore.OptionalCompoundParameter( "", "" ).isInstanceOf( IECore.TypeId.CompoundParameter ) )
 		self.assertRaises( TypeError, IECore.OptionalCompoundParameter( "", "" ).isInstanceOf, 10 )
-	
+
 	def testTypeNameFromRunTimeTypedTypeId( self ) :
-	
+
 		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( "RunTimeTyped" ), IECore.TypeId.RunTimeTyped )
 
 	def testRunTimeTypedTypeIdFromTypeName( self ) :
-	
+
 		self.assertEqual( IECore.RunTimeTyped.typeNameFromTypeId( IECore.TypeId.RunTimeTyped ), "RunTimeTyped" )
-		
+
 	def testInheritsFromWithTwoArguments( self ) :
-	
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )		
+
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "Object", "RunTimeTyped" ) )
 
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Object ) )
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Object" ) )
-		
+
 		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Writer ) )
 		self.failIf( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Writer" ) )
 
 	def testRegisterPrefixedTypeName( self ) :
-	
+
 		class Prefixed( IECore.ParameterisedProcedural ) :
-		
+
 			def __init__( self ) :
-			
+
 				IECore.ParameterisedProcedural.__init__( self, "" )
-				
+
 		prefixedTypeName = "SomeModuleName::Prefixed"
 		IECore.registerRunTimeTyped( Prefixed, typeName = prefixedTypeName )
 
 		self.assertEqual( Prefixed.staticTypeName(), prefixedTypeName )
 		self.assertEqual( IECore.RunTimeTyped.typeIdFromTypeName( Prefixed.staticTypeName() ), Prefixed.staticTypeId() )
-		
+
 		p = Prefixed()
 		self.assertEqual( p.typeName(), prefixedTypeName )
 		self.assertEqual( p.typeId(), IECore.RunTimeTyped.typeIdFromTypeName( Prefixed.staticTypeName() ) )
-		
+
 		self.assertTrue( p.isInstanceOf( IECore.VisibleRenderable.staticTypeId() ) )
 		self.assertTrue( p.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
 		self.assertTrue( p.isInstanceOf( IECore.RunTimeTyped.staticTypeId() ) )
 
 	def testClassInPlaceOfTypeId( self ) :
-	
+
 		# check that we can pass the python class itself
 		# where C++ would like a TypeId.
 		self.assertTrue( IECore.Data.inheritsFrom( IECore.RunTimeTyped ) )

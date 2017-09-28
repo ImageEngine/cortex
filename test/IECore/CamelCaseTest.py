@@ -40,7 +40,7 @@ import IECore
 class CamelCaseTest( unittest.TestCase ) :
 
 	def testSplit( self ) :
-	
+
 		self.assertEqual( IECore.CamelCase.split( "A" ), [ "A" ] )
 		self.assertEqual( IECore.CamelCase.split( "a" ), [ "a" ] )
 		self.assertEqual( IECore.CamelCase.split( "AB" ), [ "AB" ] )
@@ -50,9 +50,9 @@ class CamelCaseTest( unittest.TestCase ) :
 		self.assertEqual( IECore.CamelCase.split( "TIFFImageReader" ), [ "TIFF", "Image", "Reader" ] )
 		self.assertEqual( IECore.CamelCase.split( "camelCase" ), [ "camel", "Case" ] )
 		self.assertEqual( IECore.CamelCase.split( "hsvToRGB" ), [ "hsv", "To", "RGB" ] )
-		
+
 	def testJoin( self ) :
-	
+
 		self.assertEqual( IECore.CamelCase.join( [ "camel", "case" ], IECore.CamelCase.Caps.Unchanged ), "camelcase" )
 		self.assertEqual( IECore.CamelCase.join( [ "camel", "case" ], IECore.CamelCase.Caps.First ), "Camelcase" )
 		self.assertEqual( IECore.CamelCase.join( [ "camel", "case" ], IECore.CamelCase.Caps.All ), "CamelCase" )
@@ -62,9 +62,9 @@ class CamelCaseTest( unittest.TestCase ) :
 		self.assertEqual( IECore.CamelCase.join( [ "TIFF", "image", "reader" ], IECore.CamelCase.Caps.First ), "TIFFimagereader" )
 		self.assertEqual( IECore.CamelCase.join( [ "TIFF", "image", "reader" ], IECore.CamelCase.Caps.All ), "TIFFImageReader" )
 		self.assertEqual( IECore.CamelCase.join( [ "TIFF", "image", "reader" ], IECore.CamelCase.Caps.AllExceptFirst ), "tiffImageReader" )
-		
+
 	def testToSpaced( self ) :
-	
+
 		self.assertEqual( IECore.CamelCase.toSpaced( "camelCase" ), "Camel Case" )
 		self.assertEqual( IECore.CamelCase.toSpaced( "camelCase", IECore.CamelCase.Caps.All ), "Camel Case" )
 		self.assertEqual( IECore.CamelCase.toSpaced( "camelCase", IECore.CamelCase.Caps.First ), "Camel case" )
@@ -74,19 +74,19 @@ class CamelCaseTest( unittest.TestCase ) :
 		self.assertEqual( IECore.CamelCase.toSpaced( "TIFFImageReader", IECore.CamelCase.Caps.All ), "TIFF Image Reader" )
 		self.assertEqual( IECore.CamelCase.toSpaced( "TIFFImageReader", IECore.CamelCase.Caps.First ), "TIFF image reader" )
 		self.assertEqual( IECore.CamelCase.toSpaced( "TIFFImageReader", IECore.CamelCase.Caps.AllExceptFirst ), "tiff Image Reader" )
-		
+
 	def testFromSpaced( self ) :
-	
+
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case" ), "CamelCase" )
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.All ), "CamelCase" )
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.First ), "Camelcase" )
 		self.assertEqual( IECore.CamelCase.fromSpaced( "camel case", IECore.CamelCase.Caps.AllExceptFirst ), "camelCase" )
-	
+
 	def testNumericCharacters( self ) :
-	
+
 		self.assertEqual( IECore.CamelCase.split( "wordsThenNumbers2346" ), [ "words", "Then", "Numbers2346" ] )
 		self.assertEqual( IECore.CamelCase.split( "Numbers2346ThenWords" ), [ "Numbers2346", "Then", "Words" ] )
-	
+
 if __name__ == "__main__":
 	unittest.main()
-	
+

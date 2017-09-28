@@ -140,7 +140,7 @@ void AlphaTexture::construct( unsigned int width, unsigned int height, const IEC
 IECoreImage::ImagePrimitivePtr AlphaTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
-	
+
 	GLint width = 0;
 	GLint height = 0;
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );

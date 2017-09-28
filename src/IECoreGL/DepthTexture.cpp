@@ -77,7 +77,7 @@ DepthTexture::~DepthTexture()
 IECoreImage::ImagePrimitivePtr DepthTexture::imagePrimitive() const
 {
 	ScopedBinding binding( *this );
-	
+
 	GLint width = 0;
 	GLint height = 0;
 	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );

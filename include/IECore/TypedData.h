@@ -64,7 +64,7 @@ template <class T>
 class IECORE_API TypedData : public Data
 {
 	public:
-	
+
 		typedef T ValueType;
 
 		/// Default constructor.
@@ -133,7 +133,7 @@ class IECORE_API TypedData : public Data
 		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
 
 		DataHolder m_data;
-		
+
 };
 
 /// Macro for the declaration of a new TypedData instantiation, holding

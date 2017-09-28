@@ -93,10 +93,10 @@ class IECOREGL_API CurvesPrimitive : public Primitive
 		void ensureVertIds() const;
 		void ensureAdjacencyVertIds() const;
 		void ensureLinearAdjacencyVertIds() const;
-		
+
 		IE_CORE_FORWARDDECLARE( MemberData );
 		MemberDataPtr m_memberData;
-	
+
 };
 
 IE_CORE_DECLAREPTR( CurvesPrimitive );

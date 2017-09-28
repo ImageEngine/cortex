@@ -83,7 +83,7 @@ LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const
 	{
 		m_readOnly = scc->readOnly();
 	}
-	
+
 	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != NULL);
 }
 
@@ -102,7 +102,7 @@ LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linke
 	{
 		m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene) != NULL);
 	}
-	
+
 }
 
 LinkedScene::~LinkedScene()
@@ -452,7 +452,7 @@ bool LinkedScene::hasAttribute( const Name &name ) const
 	{
 		return false;
 	}
-	
+
 	if ( m_linkedScene && !m_atLink )
 	{
 		return m_linkedScene->hasAttribute(name);
@@ -476,7 +476,7 @@ void LinkedScene::attributeNames( NameList &attrs ) const
 	else
 	{
 		m_mainScene->attributeNames(attrs);
-		
+
 		for ( NameList::iterator it = attrs.begin(); it != attrs.end(); it++ )
 		{
 			// \todo: remove "*it == linkAttribute" when it's no longer relevant
@@ -639,19 +639,19 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 		{
 			throw Exception( "Trying to store a broken link!" );
 		}
-		
+
 		// check for child name clashes:
 		NameList mainSceneChildren;
 		NameList linkedSceneChildren;
-		
+
 		m_mainScene->childNames( mainSceneChildren );
 		m_linkedScene->childNames( linkedSceneChildren );
 		std::sort( mainSceneChildren.begin(), mainSceneChildren.end() );
 		std::sort( linkedSceneChildren.begin(), linkedSceneChildren.end() );
-		
+
 		std::set<Name> intersection;
 		std::set_intersection(mainSceneChildren.begin(),mainSceneChildren.end(),linkedSceneChildren.begin(),linkedSceneChildren.end(), std::inserter(intersection,intersection.begin()) );
-		
+
 		if( intersection.size() )
 		{
 			std::string intersectionString;
@@ -661,7 +661,7 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			}
 			throw Exception( "Attempting to write link will cause the following child name clashes: " + intersectionString );
 		}
-		
+
 		// get the bounds of the linked scene
 		const SampledSceneInterface *sampledScene = runTimeCast< const SampledSceneInterface >(m_linkedScene.get());
 		if ( sampledScene && !timeData )
@@ -708,15 +708,15 @@ void LinkedScene::writeAttribute( const Name &name, const Object *attribute, dou
 			/// copy all descendent and local tags as descendent tags (so we can distinguish from tags added in the LinkedScene)
 			m_linkedScene->readTags(tags, SceneInterface::LocalTag|SceneInterface::DescendantTag );
 			static_cast< SceneCache *>(m_mainScene.get())->writeTags(tags, true);
-			
+
 			m_mainScene->writeAttribute( fileNameLinkAttribute, d->member< const StringData >( g_fileName ), time );
 			m_mainScene->writeAttribute( rootLinkAttribute, d->member< const InternedStringVectorData >( g_root ), time );
 		}
 
-		/// we keep the information this level has a link, so we can prevent attempts to 
+		/// we keep the information this level has a link, so we can prevent attempts to
 		/// create children or save objects at this level.
 		m_atLink = true;
-		
+
 		if( timeData )
 		{
 			m_mainScene->writeAttribute( timeLinkAttribute, timeData.get(), time );
@@ -774,7 +774,7 @@ void LinkedScene::readTags( NameList &tags, int filter ) const
 			m_mainScene->readTags( mainTags, mainFilter );
 			tags.insert( tags.end(), mainTags.begin(), mainTags.end() );
 		}
-		
+
 		// remove duplicates:
 		std::sort( tags.begin(), tags.end() );
 		tags.erase( std::unique( tags.begin(), tags.end() ), tags.end() );
@@ -1079,7 +1079,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			}
 		}
 	}
-	
+
 	if( missingBehaviour == SceneInterface::CreateIfMissing && m_atLink )
 	{
 		if( !m_mainScene->hasChild( name ) )
@@ -1094,8 +1094,8 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			}
 		}
 	}
-	
-	
+
+
 	SceneInterfacePtr c = m_mainScene->child( name, missingBehaviour );
 	if ( !c )
 	{
@@ -1134,7 +1134,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 	}
 
 	return new LinkedScene( c.get(), 0, 0, m_readOnly, false, false );
-	
+
 }
 
 ConstSceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missingBehaviour ) const
@@ -1195,14 +1195,14 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 	int linkDepth = 0;
 	bool atLink = false;
 	bool timeRemapped = false;
-	
+
 	if ( s->hasAttribute( fileNameLinkAttribute ) && s->hasAttribute( rootLinkAttribute ) )
 	{
 		atLink = true;
 		timeRemapped = s->hasAttribute( timeLinkAttribute );
 		ConstStringDataPtr fileName = runTimeCast< const StringData >( s->readAttribute( fileNameLinkAttribute, 0 ) );
 		ConstInternedStringVectorDataPtr root = runTimeCast< const InternedStringVectorData >( s->readAttribute( rootLinkAttribute, 0 ) );
-		
+
 		l = expandLink( fileName.get(), root.get(), linkDepth );
 		if (!l)
 		{

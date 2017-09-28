@@ -47,11 +47,11 @@ namespace IECore
 
 struct RefCountedThreadingTest
 {
-	
+
 	struct TestRefCount
 	{
 		public :
-			
+
 			TestRefCount( int bufferSize, bool testAssign ) : m_testAssign( testAssign )
 			{
 				for ( int i = 0; i < bufferSize; i++ )
@@ -95,7 +95,7 @@ struct RefCountedThreadingTest
 				}
 				BOOST_CHECK( error == 0 );
 			}
-			
+
 		private :
 			bool m_testAssign;
 			std::vector< RefCountedPtr > m_buffer;
