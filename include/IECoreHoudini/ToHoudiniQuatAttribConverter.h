@@ -53,9 +53,9 @@ class ToHoudiniQuatVectorAttribConverter : public ToHoudiniAttribConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniQuatVectorAttribConverter, ToHoudiniQuatVectorAttribConverterTypeId, ToHoudiniAttribConverter );
-		
+
 		ToHoudiniQuatVectorAttribConverter( const IECore::Data *data );
-		
+
 		virtual ~ToHoudiniQuatVectorAttribConverter();
 
 	protected :

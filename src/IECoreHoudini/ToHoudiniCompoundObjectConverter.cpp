@@ -60,19 +60,19 @@ bool ToHoudiniCompoundObjectConverter::doConversion( const Object *object, GU_De
 	{
 		return false;
 	}
-	
+
 	GU_DetailHandle handle;
 	handle.allocateAndSet( geo, false );
 	size_t numPrims = geo->getNumPrimitives();
-	
+
 	std::string name = nameParameter()->getTypedValue();
 	if ( name != "" )
 	{
 		name += "/";
 	}
-	
+
 	ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( object );
-	
+
 	const CompoundObject::ObjectMap &members = compound->members();
 	for ( CompoundObject::ObjectMap::const_iterator it = members.begin(); it != members.end(); ++it )
 	{
@@ -80,7 +80,7 @@ bool ToHoudiniCompoundObjectConverter::doConversion( const Object *object, GU_De
 		converter->srcParameter()->setValue( it->second );
 		converter->convert( handle );
 	}
-	
+
 	return ( (size_t)geo->getNumPrimitives() > numPrims );
 }
 

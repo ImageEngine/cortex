@@ -47,11 +47,11 @@ class TimeCodeParameterTest( unittest.TestCase ) :
 			description = "testName description",
 			defaultValue = t
 		)
-		
+
 		self.assertEqual( p.defaultValue, IECore.TimeCodeData( t ) )
 
 	def testGetSetValue( self ) :
-		
+
 		t = IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
 
 		p = IECore.TimeCodeParameter(
@@ -59,21 +59,21 @@ class TimeCodeParameterTest( unittest.TestCase ) :
 			description = "testName description",
 			defaultValue = t
 		)
-		
+
 		self.assertEqual( p.getValue(), IECore.TimeCodeData( t ) )
 		self.assertEqual( p.getTypedValue(), t )
-		
+
 		tt = IECore.TimeCode( t )
 		tt.setMinutes( 10 )
 		p.setTypedValue( tt )
-		
+
 		self.assertNotEqual( p.getValue(), IECore.TimeCodeData( t ) )
 		self.assertNotEqual( p.getTypedValue(), t )
 		self.assertEqual( p.getValue(), IECore.TimeCodeData( tt ) )
 		self.assertEqual( p.getTypedValue(), tt )
-		
+
 		p.setValue( IECore.TimeCodeData( p.defaultValue.value ) )
-		
+
 		self.assertNotEqual( p.getValue(), IECore.TimeCodeData( tt ) )
 		self.assertNotEqual( p.getTypedValue(), tt )
 		self.assertEqual( p.getValue(), IECore.TimeCodeData( t ) )

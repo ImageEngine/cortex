@@ -37,10 +37,10 @@ import IECoreGL
 class __ScopedBinding :
 
 	def __init__( self, state, currentState ) :
-	
+
 		assert( isinstance( state, IECoreGL.State ) )
 		assert( isinstance( currentState, IECoreGL.State ) )
-		
+
 		self.__state = state
 		self.__currentState = currentState
 
@@ -48,10 +48,10 @@ class __ScopedBinding :
 
 		self.__scopedBinding = IECoreGL.State._ScopedBinding( self.__state, self.__currentState )
 		return self
-		
+
 	def __exit__( self, type, value, traceBack ) :
-	
+
 		del self.__scopedBinding
-		
+
 IECoreGL.State.ScopedBinding = __ScopedBinding
 State = IECoreGL.State

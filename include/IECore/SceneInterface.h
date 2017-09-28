@@ -55,15 +55,15 @@ IE_CORE_FORWARDDECLARE( SceneInterface );
 /// Using the method child, you can explore the hierarchy (and create new transforms).
 /// Each transform on the hierarchy has a unique name and contains the 3D transformation, custom attributes, tags,
 /// a bounding box, a main object and more child transforms. All of them can be animated.
-/// Animation is stored by providing the time and the value. And it's retrieved by querying it's value at any time, and if the 
-/// animation is inherently sampled, interpolation will be applied for queries on attributes, objects, transforms and bounds. 
+/// Animation is stored by providing the time and the value. And it's retrieved by querying it's value at any time, and if the
+/// animation is inherently sampled, interpolation will be applied for queries on attributes, objects, transforms and bounds.
 /// The path to the root transform is an empty array. The name of the root transform is "/" though.
 /// The root transform by definition cannot store transformation or an object. Attributes and Tags are allowed.
 /// Tags are string labels assigned to any location in a scene and they are propagated up and down in the hierarchy
-/// when the scene is saved to files, so they can be used for efficiently filtering the hierarchy. 
+/// when the scene is saved to files, so they can be used for efficiently filtering the hierarchy.
 /// Check on the Maya and Houdini scene reader nodes for examples on how to filter by tag.
 /// \ingroup ioGroup
-/// \todo Implement a TransformStack class that can represent any custom 
+/// \todo Implement a TransformStack class that can represent any custom
 /// transformation that could be interpolated and consider using it here as the
 /// returned type as opposed to DataPtr.
 class IECORE_API SceneInterface : public RunTimeTyped
@@ -115,7 +115,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		/// \param path A file on disk. The appropriate scene interface for reading/writing is determined by the path's extension.
 		/// \param mode A bitwise-ORed combination of constants which determine how the file system should be accessed.
 		static SceneInterfacePtr create(const std::string &path, IndexedIO::OpenMode mode);
-		
+
 		/// Returns all the file extensions for which a SceneInterface implementation is
 		/// available for the given access mode(s). Extensions do not include the preceding dot character ('.').
 		static std::vector<std::string> supportedExtensions( IndexedIO::OpenMode modes = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append );
@@ -132,7 +132,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 			private :
 				static SceneInterfacePtr creator( const std::string &fileName, IndexedIO::OpenMode mode );
 		};
-		
+
 		virtual ~SceneInterface() = 0;
 
 		/// Returns the file that this scene is mapped to. Throws exception if there's no file.
@@ -140,7 +140,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 
 		/// Returns the name of the scene location which this instance is referring to. The root path returns "/".
 		virtual Name name() const = 0;
-		/// Returns the path scene this instance is referring to. 
+		/// Returns the path scene this instance is referring to.
 		virtual void path( Path &p ) const = 0;
 
 		/*
@@ -164,10 +164,10 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		 * Transform
 		 */
 
-		/// Returns the interpolated transform object of this node at the specified 
+		/// Returns the interpolated transform object of this node at the specified
 		/// point in time.
 		virtual ConstDataPtr readTransform( double time ) const = 0;
-		/// Returns the transform of this node at the specified 
+		/// Returns the transform of this node at the specified
 		/// point in time as a matrix.
 		virtual Imath::M44d readTransformAsMatrix( double time ) const = 0;
 		/// Writes the transform applied to this path within the scene.
@@ -212,7 +212,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		virtual bool hasObject() const = 0;
 		/// Reads the object stored at this path in the scene at the given time.
 		virtual ConstObjectPtr readObject( double time ) const = 0;
-		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time. 
+		/// Reads primitive variables from the object of type Primitive stored at this path in the scene at the given time.
 		/// Raises exception if it turns out not to be a Primitive object.
 		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const = 0;
 		/// Writes a geometry to this path in the scene.
@@ -229,7 +229,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		/// the scene.
 		virtual void childNames( NameList &childNames ) const = 0;
 		/// Returns an object for the specified child location in the scene.
-		/// If the child does not exist then it will behave according to the 
+		/// If the child does not exist then it will behave according to the
 		/// missingBehavior parameter. May throw and exception, may return a NULL pointer,
 		/// or may create the child (if that is possible).
 		/// Bounding boxes will be automatically propagated up from the children
@@ -243,7 +243,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		virtual SceneInterfacePtr createChild( const Name &name ) = 0;
 		/// Returns a interface for querying the scene at the given path (full path).
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) = 0;
-		/// Returns a const interface for querying the scene at the given path (full path). 
+		/// Returns a const interface for querying the scene at the given path (full path).
 		virtual ConstSceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) const = 0;
 
 		/*
@@ -251,10 +251,10 @@ class IECORE_API SceneInterface : public RunTimeTyped
 		 */
 
 		/// Computes the requested type of hash for the current location on the scene at the given time.
-		/// The hash returned is not content-based, but it uniquely identifies the queried information so that 
+		/// The hash returned is not content-based, but it uniquely identifies the queried information so that
 		/// it can be used for memory caches, for example, used by ComputationCache objects.
 		/// This function is only available when reading scenes and it raises an exception otherwise.
-		/// The base class implementation only adds the class typeId information to garantee that the hash won't 
+		/// The base class implementation only adds the class typeId information to garantee that the hash won't
 		/// collide with other Cortex objects and derived classes are responsible to call the base class implementation
 		/// as well as add the time dependency as applicable.
 		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;

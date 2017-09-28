@@ -70,7 +70,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		pts["N"] = PrimitiveVariable( vertex, self.myN() )
 		self.assertTrue( pts.arePrimitiveVariablesValid() )
 		return pts
-	
+
 	def myMN (self):
 		# face varying n
 		n = V3fVectorData( [ V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ),
@@ -202,11 +202,11 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 		o( input=mp, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = False )
 		self.assertNotEqual(mp["P"].data , self.myP())
 		self.assertEqual(mp["N"].data , self.myMN())
-		
+
 		o( input=mp, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )
 		self.assertNotEqual(mp["P"].data , self.myP())
 		self.assertNotEqual(mp["N"].data , self.myMN())
-		
+
 
 	def testDifferentVarNames( self ) :
 		# check using different var names

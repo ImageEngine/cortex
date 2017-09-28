@@ -72,7 +72,7 @@ bool FnParameterisedHolder::hasParameterised()
 			return holder->hasParameterised();
 		}
 	}
-	
+
 	return false;
 }
 
@@ -82,13 +82,13 @@ void FnParameterisedHolder::setParameterised( IECore::RunTimeTypedPtr p )
 	{
 		return;
 	}
-	
+
 	ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
 	if ( !holder )
 	{
 		return;
 	}
-	
+
 	holder->setParameterised( p );
 }
 
@@ -98,13 +98,13 @@ void FnParameterisedHolder::setParameterised( const std::string &className, int 
 	{
 		return;
 	}
-	
+
 	ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
 	if ( !holder )
 	{
 		return;
 	}
-	
+
 	holder->setParameterised( className, classVerison, seachPathEnvVar );
 }
 
@@ -118,7 +118,7 @@ IECore::RunTimeTypedPtr FnParameterisedHolder::getParameterised()
 			return holder->getParameterised();
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -128,13 +128,13 @@ void FnParameterisedHolder::setParameterisedValues( double time )
 	{
 		return;
 	}
-	
+
 	ParameterisedHolderInterface *holder = getHolder( static_cast<OP_Node*>( m_handle.node() ) );
 	if ( !holder )
 	{
 		return;
 	}
-	
+
 	holder->setParameterisedValues( time );
 }
 

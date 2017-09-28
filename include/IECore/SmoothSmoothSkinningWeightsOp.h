@@ -67,15 +67,15 @@ class IECORE_API SmoothSmoothSkinningWeightsOp : public ModifyOp
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );
-	
+
 	private :
-		
+
 		typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS > Graph;
 		typedef boost::property_map<Graph, boost::vertex_index_t>::type VertexIdMap;
 		typedef Graph::vertex_descriptor Vertex;
 		typedef Graph::adjacency_iterator NeighbourIterator;
 		typedef std::pair<NeighbourIterator, NeighbourIterator> NeighbourIteratorRange;
-		
+
 		MeshPrimitiveParameterPtr m_meshParameter;
 		FrameListParameterPtr m_vertexIdsParameter;
 		FloatParameterPtr m_smoothingRatioParameter;

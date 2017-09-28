@@ -82,7 +82,7 @@ void FileSequenceParameter::setMinSequenceSize( size_t size )
 {
 	m_minSequenceSize = size;
 }
-		
+
 bool FileSequenceParameter::valueValid( const Object *value, std::string *reason ) const
 {
 	/// we can't call PathParameter::valueValid() because that would do existence checking on
@@ -184,7 +184,7 @@ void FileSequenceParameter::setFileSequenceValue( ConstFileSequencePtr fileSeque
 FileSequencePtr FileSequenceParameter::getFileSequenceValue( const StringData *value ) const
 {
 	std::string fileSequenceStr = value->readable();
-	
+
 	if ( fileSequenceStr.find_first_of( ' ' ) == std::string::npos )
 	{
 		if ( mustExist() )
@@ -196,7 +196,7 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue( const StringData *v
 		else if ( fileSequenceStr.size() == 0 )
 		{
 			return 0;
-		}	
+		}
 	}
 	return new FileSequence( fileSequenceStr );
 }

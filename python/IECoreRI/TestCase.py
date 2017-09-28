@@ -40,11 +40,11 @@ import unittest
 class TestCase( unittest.TestCase ) :
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreRI/output" ) :
 			os.makedirs( "test/IECoreRI/output" )
-		
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreRI/output" ) :
 			shutil.rmtree( "test/IECoreRI/output", ignore_errors = True )

@@ -48,20 +48,20 @@ class NodeHandle
 {
 
 	public :
-		
+
 		NodeHandle();
 		NodeHandle( const OP_Node *node );
 
 		virtual ~NodeHandle();
-		
+
 		/// Returns True if the OP_Node represented by this handle is still alive
 		bool alive() const;
-		
+
 		/// Returns a pointer to the OP_Node represented by this handle, or 0 if alive is false.
 		OP_Node *node() const;
 
 	private :
-		
+
 		// we are using a HOM_Node because it lets us know if the OP_Node has been deleted
 		boost::shared_ptr<HOM_Node> m_homNode;
 

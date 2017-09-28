@@ -63,7 +63,7 @@ class IECOREGL_API ShaderLoader : public IECore::RefCounted
 		/// specified, then source preprocessing will be performed using boost::wave.
 		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
 		virtual ~ShaderLoader();
-		
+
 		/// Loads the GLSL source code for a shader of the specified name, by
 		/// locating and loading files named "name.vert". "name.geom" and "name.frag". If any
 		/// file is missing then the empty string will be returned, signifying that the default

@@ -74,7 +74,7 @@ void bindLensModel()
 	bind.def( "validate", &LensModel::validate );
 	bind.attr( "Undistort" ) = int(LensModel::Undistort);
 	bind.attr( "Distort" ) = int(LensModel::Distort);
-	
+
 	// Convenience methods for creating LensModel classes.
 	bind.def( "create", creator1 );
 	bind.def( "create", creator2 );

@@ -204,9 +204,9 @@ class TestParameter( unittest.TestCase ) :
 		self.assert_( p.getValue() == FloatData( 1 ) )
 		p.smartSetValue( q.getValue() )
 		self.assert_( p.getValue() == IntData( 2 ) )
-		
+
 	def testNoneIsValid( self ) :
-	
+
 		p = Parameter( "p", "description", FloatData( 1 ) )
 
 		self.failIf( p.valueValid( None )[0] )
@@ -375,14 +375,14 @@ class TestNumericParameter( unittest.TestCase ) :
 		self.assert_( p.getValue() == IntData( 3 ) )
 		p.smartSetValue( IntData(4) )
 		self.assert_( p.getValue() == IntData( 4 ) )
-		
+
 	def testDefaultValue( self ) :
-	
+
 		p = IntParameter( "p", "description", 1 )
-		
+
 		self.assertEqual( p.numericDefaultValue, 1 )
 		self.assertRaises( AttributeError, setattr, p, "numericDefaultValue", 2 )
-		
+
 
 class TestTypedParameter( unittest.TestCase ) :
 
@@ -481,7 +481,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue(), "10" )
 		p.setTypedValue( "20" )
 		self.assertEqual( p.getTypedValue(), "20" )
-		
+
 		self.assertEqual( p.typedDefaultValue, "10" )
 		self.assertRaises( AttributeError, setattr, p, "typedDefaultValue", "20" )
 
@@ -522,16 +522,16 @@ class TestTypedParameter( unittest.TestCase ) :
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )		
-	
+		self.assertEqual( p.presetValues(), ( StringData( "a" ), StringData( "b" ), StringData( "c" ), StringData( "d" ) ) )
+
 	def testInterpretation( self ) :
-		
+
 		p = V3fParameter( name="n", description="d", defaultValue = V3f( 1, 2, 3 ) )
 		self.assertEqual( p.defaultValue, V3fData( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.defaultValue.getInterpretation(), GeometricData.Interpretation.None )
 		self.assertEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
-		
+
 		value = V3fData( V3f( 12, 13, 14 ) )
 		value.setInterpretation( GeometricData.Interpretation.Vector )
 		p.setValue( value )
@@ -547,7 +547,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertNotEqual( p.getValue(), V3fData( V3f( 1, 2, 3 ) ) )
 		self.assertEqual( p.getValue(), dv )
 		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
-		
+
 		dv = V3fVectorData( [ V3f( 1, 2, 3 ) ], GeometricData.Interpretation.Normal )
 		p = V3fVectorParameter( name="n", description="d", defaultValue = dv )
 		self.assertNotEqual( p.defaultValue, V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
@@ -556,7 +556,7 @@ class TestTypedParameter( unittest.TestCase ) :
 		self.assertNotEqual( p.getValue(), V3fVectorData( [ V3f( 1, 2, 3 ) ] ) )
 		self.assertEqual( p.getValue(), dv )
 		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.Normal )
-		
+
 		p.setValue( V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
 		self.assertEqual( p.getValue(), V3fVectorData( [ V3f( 12, 13, 14 ) ] ) )
 		self.assertEqual( p.getValue().getInterpretation(), GeometricData.Interpretation.None )
@@ -985,8 +985,8 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 			description = "d",
 			defaultValue = tm,
 		)
-		p.validate()		
-		
+		p.validate()
+
 		self.assertEqual( p.name, "f" )
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
@@ -1001,19 +1001,19 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3f( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().scalePivot, V3f( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3f( 0,0,0 ) )
-		
+
 		tm = TransformationMatrixdData()
 		p = TransformationMatrixdParameter(
 			name = "f",
 			description = "d",
 			defaultValue = tm,
 		)
-		p.validate()		
+		p.validate()
 
 		self.assertEqual( p.name, "f" )
 		self.assertEqual( p.description, "d" )
 		self.assertEqual( p.valueValid()[0], True )
-		
+
 		self.failUnless( isinstance( p.getTypedValue().translate, V3d ) )
 		self.assertEqual( p.getTypedValue().translate, V3d( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotate, Eulerd( 0,0,0 ) )
@@ -1023,7 +1023,7 @@ class TestTransformationMatixParameter( unittest.TestCase ) :
 		self.assertEqual( p.getTypedValue().rotatePivot, V3d( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().rotatePivotTranslation, V3d( 0,0,0 ) )
 		self.assertEqual( p.getTypedValue().scalePivot, V3d( 0,0,0 ) )
-		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3d( 0,0,0 ) )		
+		self.assertEqual( p.getTypedValue().scalePivotTranslation, V3d( 0,0,0 ) )
 
 class TestPathVectorParameter( unittest.TestCase ) :
 

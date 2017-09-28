@@ -146,7 +146,7 @@ half PointsPrimitiveEvaluator::Result::halfPrimVar( const PrimitiveVariable &pv 
 {
 	return primVar<half>( pv );
 }
-				
+
 //////////////////////////////////////////////////////////////////////////
 // Implementation of Evaluator
 //////////////////////////////////////////////////////////////////////////
@@ -226,7 +226,7 @@ bool PointsPrimitiveEvaluator::closestPoint( const Imath::V3f &p, PrimitiveEvalu
 
 	V3fTree::Iterator it = m_tree.nearestNeighbour( p );
 	static_cast<Result *>( result )->m_pointIndex = it - m_pVector->begin();
-	
+
 	return true;
 }
 
@@ -253,14 +253,14 @@ void PointsPrimitiveEvaluator::buildTree()
 	{
 		return;
 	}
-	
+
 	TreeMutex::scoped_lock lock( m_treeMutex );
 	if( m_haveTree )
 	{
 		// another thread may have built the tree while we waited for the mutex
 		return;
 	}
-	
+
 	m_tree.init( m_pVector->begin(), m_pVector->end() );
 	m_haveTree = true;
 }

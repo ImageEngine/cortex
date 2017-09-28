@@ -62,9 +62,9 @@ bool ToMayaMatrixVectorDataConverter<F>::doConversion( IECore::ConstObjectPtr fr
 	}
 
 	MFnDoubleArrayData fnData;
-	
+
 	const typename F::ValueType &v = data->readable();
-	
+
 	MDoubleArray array;
 	array.setLength( v.size() * 16 );
 
@@ -80,7 +80,7 @@ bool ToMayaMatrixVectorDataConverter<F>::doConversion( IECore::ConstObjectPtr fr
 	}
 
 	to = fnData.create( array, &s );
-	
+
 	return s;
 }
 

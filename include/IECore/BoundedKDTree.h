@@ -86,7 +86,7 @@ class BoundedKDTree
 
 		/// Retrieve the node associated with a given index
 		const Node& node( NodeIndex idx ) const;
-		
+
 		/// Returns the index for the root node
 		NodeIndex rootIndex() const;
 

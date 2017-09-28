@@ -34,7 +34,7 @@
 
 #ifndef IECORERI_RAYALGO_H
 #define IECORERI_RAYALGO_H
-	
+
 /// Intersections between a ray and a sphere centred at the origin.
 float ieRaySphereIntersection(
 	point rayOrigin;
@@ -112,21 +112,21 @@ float ieRayConeIntersection(
 	output float t1;
 )
 {
-	
+
 	// multiply the z coordinate by this factor to get the desired cone angle:
 	float k = tan( coneAngle / 2 );
 	k = k * k;
-	
+
 	// ok - we're working out an intersection with the double cone defined by x^2 + y^2 - k^2 z^2 = 0
 	float c = rayOrigin[0] * rayOrigin[0] + rayOrigin[1] * rayOrigin[1] - k * rayOrigin[2] * rayOrigin[2];
 	float b = 2 * ( rayOrigin[0] * rayDirection[0] + rayOrigin[1] * rayDirection[1] - k * rayOrigin[2] * rayDirection[2] );
 	float a = rayDirection[0] * rayDirection[0] + rayDirection[1] * rayDirection[1] - k * rayDirection[2] * rayDirection[2];
-	
+
 	if( a == 0 )
 	{
 		// b t + c == 0
 		t0 = - c / b;
-		
+
 		if( t0 > epsilon )
 		{
 			return 1;
@@ -136,17 +136,17 @@ float ieRayConeIntersection(
 			return 0;
 		}
 	}
-	
+
 	// a t * t + b t + c == 0
     	float discrim = b * b - 4 * a * c;
-	
+
 	float solutions = 0;
-	
+
 	if( discrim < 0 )
 	{
 		return 0;
 	}
-	
+
 	discrim = sqrt( discrim );
 
 	t0 = (-discrim - b) / ( 2 * a );
@@ -214,7 +214,7 @@ float ieRayConeIntersection(
 				}
 				else
 				{
-					// only the foremost hit is valid: 
+					// only the foremost hit is valid:
 					t0 = t1;
 					return 1;
 				}
@@ -225,8 +225,8 @@ float ieRayConeIntersection(
 			}
 		}
 	}
-		
-	
+
+
 }
 
 

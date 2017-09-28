@@ -63,7 +63,7 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 			( "gl:smoothing:lines", IECore.BoolData( True ), IECoreGL.LineSmoothingStateComponent( True ) ),
 			( "gl:smoothing:polygons", IECore.BoolData( True ), IECoreGL.PolygonSmoothingStateComponent( True ) ),
 		]
-		
+
 		for name, value, component in attributes :
 			a = IECore.CompoundObject()
 			a[name] = value
@@ -71,9 +71,9 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 			c = s.get( component.typeId() )
 			self.assertEqual( c.typeId(), component.typeId() )
 			self.assertEqual( c.value, component.value )
-		
+
 	def testShaderAttribute( self ) :
-	
+
 		vertexSource = """
 		void main()
 		{
@@ -87,16 +87,16 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 			gl_FragColor = vec4( 1, 0.5, 0.25, 1 );
 		}
 		"""
-		
+
 		shader = IECore.Shader( "test", "surface", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : fragmentSource } )
 		attributes = IECore.CompoundObject( { "gl:surface" : shader } )
 		state = IECoreGL.ToGLStateConverter( attributes ).convert()
-		
+
 		shaderState = state.get( IECoreGL.ShaderStateComponent )
 		self.assertTrue( isinstance( shaderState, IECoreGL.ShaderStateComponent ) )
 		glShader = shaderState.shaderSetup().shader()
 		self.assertTrue( glShader.vertexSource(), vertexSource )
 		self.assertTrue( glShader.fragmentSource(), fragmentSource )
-		
+
 if __name__ == "__main__":
     unittest.main()

@@ -160,7 +160,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual(len(v1), 4)
 		prev = v1.popitem()
 		self.assertEqual(len(v1), 3)
-		
+
 		self.assertEqual(v1.pop("x", IECore.UIntData(10)), IECore.UIntData(10))
 		self.assertEqual(len(v1), 3)
 
@@ -173,7 +173,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual( set( v1.keys() ), set( ['0', '1', '2'] ) )
 		vals = v1.values()
 		self.assertEqual( set( [ x.value for x in vals ] ), set( [ 1, 2, 3 ] ) )
-		items = v1.items()		
+		items = v1.items()
 		self.assertEqual( set( [ ( x[0], x[1].value ) for x in items ] ), set( [ ( "0", 1 ), ( "1", 2 ), ( "2", 3 ) ] ) )
 
 	def testEquality(self):
@@ -256,7 +256,7 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual( eval(repr(v1)), v1 )
 
 	def testConstructionFromNestedDict( self ) :
-	
+
 		c = IECore.CompoundData( {
 			"a" : 10,
 			"b" : IECore.BoolData( True ),
@@ -267,7 +267,7 @@ class CompoundDataTest(unittest.TestCase):
 				"dd" : IECore.IntData( 5 ),
 			} )
 		} )
-		
+
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c["a"], IECore.IntData( 10 ) )
 		self.assertEqual( c["b"], IECore.BoolData( True ) )
@@ -277,12 +277,12 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual( c["d"]["dd"], IECore.IntData( 5 ) )
 
 	def testUpdateFromNestedDict( self ) :
-	
+
 		c = IECore.CompoundData( {
 			"a" : IECore.IntData( 30 )
 			}
 		)
-		
+
 		d = {
 			"a" : 10,
 			"b" : IECore.BoolData( True ),
@@ -293,9 +293,9 @@ class CompoundDataTest(unittest.TestCase):
 				"dd" : IECore.IntData( 5 ),
 			} )
 		}
-		
+
 		c.update( d )
-		
+
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c["a"], IECore.IntData( 10 ) )
 		self.assertEqual( c["b"], IECore.BoolData( True ) )
@@ -303,61 +303,61 @@ class CompoundDataTest(unittest.TestCase):
 		self.assertEqual( c["c"]["cc"], IECore.IntData( 20 ) )
 		self.assertEqual( len( c["d"] ), 1 )
 		self.assertEqual( c["d"]["dd"], IECore.IntData( 5 ) )
-		
+
 	def testHash( self ) :
-	
+
 		o1 = IECore.CompoundData()
 		o2 = IECore.CompoundData()
-		
+
 		o1["a"] = IECore.StringData( "a" )
 		o1["b"] = IECore.StringData( "b" )
-		
+
 		o2["b"] = IECore.StringData( "b" )
 		o2["a"] = IECore.StringData( "a" )
-		
+
 		self.assertEqual( o1.hash(), o2.hash() )
-		
+
 		o2["c"] = IECore.StringData( "c" )
-		
+
 		self.assertNotEqual( o1.hash(), o2.hash() )
 
 	def testHashIndependentFromOrderOfConstruction( self ) :
-	
+
 		# CompoundData internally uses a map from InternedString to Data.
 		# a naive iteration over this might yield a different order in each
 		# process as it's dependent on the addresses of the InternedStrings.
 		# we need to keep hashes consistent between processes.
-		
+
 		commands = [
 			"import IECore; IECore.InternedString( 'a' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
 			"import IECore; IECore.InternedString( 'b' ); print IECore.CompoundData( { 'a' : IECore.IntData( 10 ), 'b' : IECore.IntData( 20 ) } ).hash()",
 		]
-		
+
 		hashes = set()
 		for command in commands :
 			p = subprocess.Popen( [ sys.executable, "-c", command ], stdout=subprocess.PIPE )
 			hash, nothing = p.communicate()
 			hashes.add( hash )
-			
+
 		self.assertEqual( len( hashes ), 1 )
-	
+
 	def testHash( self ) :
-		
+
 		thingsToAdd = [
 			( "a", IECore.IntData( 1 ), True ),
 			( "a", IECore.UIntData( 1 ), True ),
 			( "a", IECore.IntData( 1 ), True ),
 			( "a", IECore.IntData( 1 ), False ),
 			( "b", IECore.StringVectorData( [ "a", "b", "c" ] ), True ),
-			( "b", IECore.StringVectorData( [ "a", "b" ] ), True ),		
+			( "b", IECore.StringVectorData( [ "a", "b" ] ), True ),
 			( "b", IECore.StringVectorData( [ "a", "c" ] ), True ),
 			( "b", IECore.StringVectorData( [ "a", "c" ] ), False ),
 			( "d", IECore.StringVectorData( [ "a", "c" ] ), True ),
 			( "d", None, True ),
 		]
-		
+
 		o = IECore.CompoundData()
-		
+
 		for t in thingsToAdd :
 			h = o.hash()
 			for i in range( 0, 10 ) :

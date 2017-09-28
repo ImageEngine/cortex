@@ -121,19 +121,19 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage()+oo.memoryUsage() )
 		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 		self.assertEqual( o, o2 )
-		
+
 		# test clear after failed load
 		self.assertRaises( RuntimeError, r.read, "/i/dont/exist" )
 		r.clear( "/i/dont/exist" )
 
 	def testRepeatedFailures( self ) :
-	
+
 		def check( fileName ) :
-		
+
 			r = CachedReader( SearchPath( "./", ":" ), ObjectPool(100 * 1024 * 1024) )
 			firstException = None
 			try :
-				r.read( fileName )		
+				r.read( fileName )
 			except Exception, e :
 				firstException = str( e )
 
@@ -141,7 +141,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 			secondException = None
 			try :
-				r.read( fileName )		
+				r.read( fileName )
 			except Exception, e :
 				secondException = str( e )
 
@@ -151,32 +151,32 @@ class CachedReaderTest( unittest.TestCase ) :
 			# shouldn't be wasting time attempting to load files again when
 			# it failed the first time
 			self.assertNotEqual( firstException, secondException )
-			
+
 		check( "iDontExist" )
 		check( "include/IECore/IECore.h" )
 
 	def testChangeSearchPaths( self ) :
-	
+
 		# read a file from one path
 		r = CachedReader( SearchPath( "./test/IECore/data/cachedReaderPath1", ":" ), ObjectPool(100 * 1024 * 1024) )
-		
+
 		o1 = r.read( "file.cob" )
-		
+
 		self.assertEqual( o1.value, 1 )
 		self.failUnless( r.cached( "file.cob" ) )
-		
+
 		# read a file of the same name from a different path
 		r.searchPath = SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
 		self.failIf( r.cached( "file.cob" ) )
-		
+
 		o2 = r.read( "file.cob" )
-		
+
 		self.assertEqual( o2.value, 2 )
 		self.failUnless( r.cached( "file.cob" ) )
-		
+
 		# set the paths to the same as before and check we didn't obliterate the cache unecessarily
 		r.searchPath = SearchPath( "./test/IECore/data/cachedReaderPath2", ":" )
-		self.failUnless( r.cached( "file.cob" ) )		
+		self.failUnless( r.cached( "file.cob" ) )
 
 	def testDefault( self ) :
 
@@ -187,9 +187,9 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assert_( r.isSame( r2 ) )
 		self.assertTrue( r.objectPool().isSame( ObjectPool.defaultObjectPool() ) )
 		self.assertEqual( r.searchPath, SearchPath( "a:test:path", ":" ) )
-		
+
 	def testPostProcessing( self ) :
-	
+
 		r = CachedReader( SearchPath( "./test/IECore/data/cobFiles", ":" ), ObjectPool(100 * 1024 * 1024) )
 		m = r.read( "polySphereQuads.cob" )
 		self.failUnless( 4 in m.verticesPerFace )
@@ -198,75 +198,75 @@ class CachedReaderTest( unittest.TestCase ) :
 		m = r.read( "polySphereQuads.cob" )
 		for v in m.verticesPerFace :
 			self.assertEqual( v, 3 )
-			
+
 	def testPostProcessingFailureMode( self ) :
-	
+
 		class PostProcessor( ModifyOp ) :
-		
+
 			def __init__( self ) :
-			
+
 				ModifyOp.__init__( self, "", Parameter( "result", "", NullObject() ), Parameter( "input", "", NullObject() ) )
-				
+
 			def modify( self, obj, args ) :
-			
+
 				raise Exception( "I am a very naughty op" )
-				
+
 		r = CachedReader( SearchPath( "./test/IECore/data/cobFiles", ":" ), PostProcessor(), ObjectPool(100 * 1024 * 1024) )
-		
+
 		firstException = None
 		try :
 			m = r.read( "polySphereQuads.cob" )
 		except Exception, e :
 			firstException = str( e )
-		
+
 		self.failUnless( firstException is not None )
-				
+
 		secondException = None
 		try :
 			m = r.read( "polySphereQuads.cob" )
 		except Exception, e :
 			secondException = str( e )
-		
+
 		self.failUnless( secondException is not None )
-		
+
 		# we want the second exception to be different, as the CachedReader
 		# shouldn't be wasting time attempting to load files again when
 		# it failed the first time
 		self.assertNotEqual( firstException, secondException )
-		
+
 	def testThreadingAndClear( self ) :
-		
+
 		# this tests a fix to the clear() method in the LRU cache,
 		# which was causing a crash (or at least a spurious "Previous attempt
 		# to get item failed" exception)
-		
+
 		def func1( r, files ):
 			for i in range( 0,10000 ):
 				r.read( files[ i % len( files ) ] )
-			
+
 		def func2( r ):
 			for i in range( 0,10000 ):
 				r.clear()
-		
+
 		files = [
 			"test/IECore/data/cobFiles/compoundData.cob",
 			"test/IECore/data/pdcFiles/particleShape1.250.pdc",
 			"test/IECore/data/cobFiles/polySphereQuads.cob",
 			"test/IECore/data/cachedReaderPath2/file.cob",
 		]
-		
+
 		r = CachedReader( SearchPath( "./", ":" ), ObjectPool(100 * 1024 * 1024) )
-		
+
 		t1 = threading.Thread( target=func1, args = [ r, files ] )
 		t2 = threading.Thread( target=func1, args = [ r, files ] )
 		t3 = threading.Thread( target=func2, args = [ r ] )
 		t1.start()
 		t2.start()
 		t3.start()
-		
+
 		t1.join()
 		t2.join()
 		t3.join()
-		
+
 if __name__ == "__main__":
     unittest.main()

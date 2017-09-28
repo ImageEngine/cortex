@@ -39,23 +39,23 @@
 #
 #=====
 
-from IECore import * 
+from IECore import *
 
-class meshRender(ParameterisedProcedural) : 
+class meshRender(ParameterisedProcedural) :
 
-        def __init__(self) : 
+        def __init__(self) :
                 ParameterisedProcedural.__init__( self, "Renders a mesh." )
                 path = PathParameter( "path", "Path", "" )
                 self.parameters().addParameter( path )
 
-        def doBound(self, args) : 
+        def doBound(self, args) :
                 geo = Reader.create( args['path'].value ).read()
                 return geo.bound()
 
-        def doRenderState(self, renderer, args) : 
+        def doRenderState(self, renderer, args) :
                 pass
 
-        def doRender(self, renderer, args) : 
+        def doRender(self, renderer, args) :
                 geo = Reader.create( args['path'].value ).read()
                 geo.render( renderer )
 

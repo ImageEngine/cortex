@@ -55,10 +55,10 @@ struct PythonInitialiser
 		// start python
 		Py_Initialize();
 		PyEval_InitThreads();
-		
+
 			try
 			{
-			
+
 				mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
 				mainModuleNamespace = mainModule.attr( "__dict__" );
 
@@ -72,11 +72,11 @@ struct PythonInitialiser
 					"import IECore\n"
 					"import IECoreRI\n";
 
-				handle<> ignored( PyRun_String( 
+				handle<> ignored( PyRun_String(
 					toExecute.c_str(),
 					Py_file_input, mainModuleNamespace.ptr(),
 					mainModuleNamespace.ptr() ) );
-					
+
 			}
 			catch( const error_already_set &e )
 			{
@@ -90,10 +90,10 @@ struct PythonInitialiser
 			{
 				cerr << "ERROR : Python procedural initialiser : caught unknown exception" << endl;
 			}
-		
+
 		PyEval_ReleaseThread( PyThreadState_Get() );
 	}
-	
+
 	object mainModule;
 	object mainModuleNamespace;
 };
@@ -111,7 +111,7 @@ RtPointer DLLEXPORT ConvertParameters( RtString paramstr )
 RtVoid DLLEXPORT Subdivide( RtPointer data, float detail )
 {
 	PyGILState_STATE gilState = PyGILState_Ensure();
-	
+
 		try
 		{
 
@@ -133,7 +133,7 @@ RtVoid DLLEXPORT Subdivide( RtPointer data, float detail )
 		{
 			cerr << "ERROR : Python procedural : caught unknown exception" << endl;
 		}
-		
+
 	PyGILState_Release( gilState );
 }
 

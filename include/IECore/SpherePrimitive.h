@@ -85,7 +85,7 @@ class IECORE_API SpherePrimitive : public Primitive
 		virtual Imath::Box3f bound() const;
 		/// Render the sphere
 		virtual void render( Renderer *renderer ) const;
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:

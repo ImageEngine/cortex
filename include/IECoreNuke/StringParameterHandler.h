@@ -44,25 +44,25 @@ class StringParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		StringParameterHandler();
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
 
 	protected :
-		
-		/// May be overridden by derived classes to define the main knob. Defaults to calling String_knob().		
+
+		/// May be overridden by derived classes to define the main knob. Defaults to calling String_knob().
 		virtual DD::Image::Knob *knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage );
 
 	private :
-	
+
 		const char *m_storage;
 		DD::Image::Knob *m_knob;
-	
+
 		static Description<StringParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

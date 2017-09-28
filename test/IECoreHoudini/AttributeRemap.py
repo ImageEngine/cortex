@@ -72,7 +72,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assert_( fn )
 		self.assert_( fn )
 		return (op, attribute)
-	
+
 	def testNormalBehaviour(self):
 		(op, attr) = self.testCreateObjects()
 		op.cook()
@@ -87,7 +87,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.failUnless( 'Cs' in object )
 		self.assertEqual( object['Cs'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['Cs'].data.typeId(), IECore.TypeId.Color3fVectorData )
-		
+
 	def testBasicRemapping(self):
 		(op, attr) = self.testCreateObjects()
 		attr.parm("ridefault").set(True)
@@ -182,7 +182,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo['point_test'].data), 100 )
 		self.assertEqual( geo['prim_test'].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( len(geo['prim_test'].data), 100 )
-		
+
 	def testPrimAttributes(self):
 		(op, attr) = self.testCreateObjects()
 		top = attr.inputs()[0]
@@ -208,6 +208,6 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assertEqual( geo.keys(), ['Cs', 'P', 'rixlate', 'test', 'uv', 'varmap'] )
 		self.assertEqual( geo['test'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( len(geo['test'].data), 100 )
-		
+
 if __name__ == "__main__":
 	unittest.main()

@@ -41,94 +41,94 @@ import IECore
 class PointDistributionTest( unittest.TestCase ) :
 
 	def testNoFunctors( self ) :
-		
+
 		pd = IECore.PointDistribution.defaultInstance()
-		
+
 		bound = IECore.Box2f( IECore.V2f( 0.25 ), IECore.V2f( 0.75 ) )
 		points = pd( bound, 20000, None )
-	
+
 		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
 		self.assert_( abs( len( points ) - 5000 ) < 50 )
 		for p in points :
 			self.assert_( bound.intersects( p ) )
 
 	def testDensityOnly( self ) :
-	
+
 		pd = IECore.PointDistribution.defaultInstance()
-		
+
 		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
-		
+
 		def density( p ) :
-		
+
 			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0
-		
+
 		points = pd( bound, 20000, density )
-	
+
 		self.assert_( points.isInstanceOf( IECore.V2fVectorData.staticTypeId() ) )
 		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
 			self.assert_( bound.intersects( p ) )
 			self.assert_( (p - IECore.V2f( 0.5 )).length() < 0.5 )
-		
+
 	def testEmitterOnly( self ) :
-	
+
 		pd = IECore.PointDistribution.defaultInstance()
-		
+
 		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
-		
+
 		points = []
 		def emit( p ) :
 			points.append( p )
-			
+
 		result = pd( bound, 1000, None, emit )
 		self.assert_( result is None )
 		self.assert_( abs( len( points ) - 1000 ) < 50 )
 
 	def testEmitterAndDensity( self ) :
-	
+
 		pd = IECore.PointDistribution.defaultInstance()
-		
+
 		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
-		
+
 		def density( p ) :
-		
+
 			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0
-		
+
 		points = []
 		def emit( p ) :
 			points.append( p )
-			
+
 		result = pd( bound, 20000, density, emit )
-		
+
 		self.assert_( result is None )
 		self.assert_( abs( len( points ) - math.pi * .5 * .5 * 20000 ) < 50 )
 		for p in points :
 			self.assert_( bound.intersects( p ) )
 			self.assert_( (p - IECore.V2f( 0.5 )).length() < 0.5 )
-	
+
 	def testDistanceBetweenPoints( self ) :
-		
+
 		pd = IECore.PointDistribution.defaultInstance()
-		
+
 		bound = IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) )
-		
+
 		def density( p ) :
-		
+
 			if (p - IECore.V2f( 0.5 )).length() < 0.5 :
 				return 1
 			else :
 				return 0
-		
+
 		positions = pd( bound, 20000, density )
-		
+
 		tree = IECore.V2fTree( positions )
-		
+
 		for i in range( 0, positions.size() ) :
 			neighbours = list(tree.nearestNNeighbours( positions[i], 6 ))
 			self.failUnless( i in neighbours )
@@ -137,9 +137,9 @@ class PointDistributionTest( unittest.TestCase ) :
 				self.failUnless( ( positions[i] - positions[n] ).length() > 0.004 )
 
 	def setUp( self ) :
-	
+
 		os.environ["CORTEX_POINTDISTRIBUTION_TILESET"] = "test/IECore/data/pointDistributions/pointDistributionTileSet2048.dat"
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

@@ -210,10 +210,10 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 		if ( e.dataType() == IndexedIO::InternedStringArray )
 		{
 			pathParts.resize( e.arrayLength() );
-			InternedString *p = &(pathParts[0]); 
+			InternedString *p = &(pathParts[0]);
 			container->read( name, p, e.arrayLength() );
 		}
-		else 
+		else
 		{
 			// for backward compatibility...
 			string path;
@@ -339,7 +339,7 @@ void Object::copyFrom( const Object *toCopy )
 	{
 		throw InvalidArgumentException( ( boost::format( "\"%s\" is not an instance of \"%s\"" ) % toCopy->typeName() % typeName() ).str() );
 	}
-	
+
 	CopyContext context;
 	copyFrom( toCopy, &context );
 }

@@ -53,11 +53,11 @@ class IECOREGL_API CachedConverter : public IECore::RefCounted
 		/// Max memory specified in bytes.
 		CachedConverter( size_t maxMemory );
 		virtual ~CachedConverter();
-		
+
 		/// Returns the object converted to an appropriate IECoreGL type, reusing
 		/// a previous conversion where possible.
 		IECore::ConstRunTimeTypedPtr convert( const IECore::Object *object );
-		
+
 		/// Returns the maximum amount of memory (in bytes) the cache will use.
 		size_t getMaxMemory() const;
 		/// Sets the maximum amount of memory the cache will use. If this

@@ -142,7 +142,7 @@ void LuminanceTexture::construct( unsigned int width, unsigned int height, const
 
 	glGenTextures( 1, &m_texture );
 	ScopedBinding binding( *this );
-	
+
 	Constructor c;
 	c.alpha = a;
 	c.width = width;

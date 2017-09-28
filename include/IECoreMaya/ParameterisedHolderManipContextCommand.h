@@ -63,21 +63,21 @@ namespace IECoreMaya
 
 class ParameterisedHolderManipContextCommand : public MPxContextCommand
 {
-	public: 
+	public:
 
 		ParameterisedHolderManipContextCommand();
-		
+
 		virtual MStatus doEditFlags();
 		virtual MStatus doQueryFlags();
-		
+
 		virtual MPxContext* makeObj();
-		
+
 		virtual MStatus appendSyntax();
-		
+
 		static void* creator();
 
 	protected:
-  		
+
 		ParameterisedHolderManipContext *m_context;
 };
 

@@ -51,7 +51,7 @@ class ClassParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.userData(), IECore.CompoundObject() )
 		self.assertEqual( c.getClass(), None )
 		self.assertEqual( c.getClass( True ), ( None, "", 0, "IECORE_OP_PATHS" ) )
-		
+
 		c = IECore.ClassParameter(
 			"n",
 			"d",
@@ -60,15 +60,15 @@ class ClassParameterTest( unittest.TestCase ) :
 				"a" : IECore.IntData( 10 ),
 			}
 		)
-		
+
 		self.assertEqual( c.name, "n" )
 		self.assertEqual( c.description, "d" )
 		self.assertEqual( c.userData(), IECore.CompoundObject( { "a" : IECore.IntData( 10 ) } ) )
 		self.assertEqual( c.getClass(), None )
 		self.assertEqual( c.getClass( True ), ( None, "", 0, "IECORE_OP_PATHS" ) )
-		
+
 	def testGetClass( self ) :
-	
+
 		c = IECore.ClassParameter(
 			"n",
 			"d",
@@ -76,22 +76,22 @@ class ClassParameterTest( unittest.TestCase ) :
 			"maths/multiply",
 			2
 		)
-		
+
 		cl = c.getClass()
 		self.assertEqual( c.getClass( True ), ( cl, "maths/multiply", 2, "IECORE_OP_PATHS" ) )
-		
+
 		self.assertEqual( c.keys(), [ "a", "b" ] )
-		
+
 		self.assert_( c["a"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
 		self.assert_( c["b"].isInstanceOf( IECore.IntParameter.staticTypeId() ) )
 
 		c["a"].setNumericValue( 10 )
 		c["b"].setNumericValue( 20 )
-		
+
 		self.assertEqual( cl(), IECore.IntData( 200 ) )
-		
+
 	def testSetClass( self ) :
-	
+
 		c = IECore.ClassParameter(
 			"n",
 			"d",
@@ -99,15 +99,15 @@ class ClassParameterTest( unittest.TestCase ) :
 			"maths/multiply",
 			2
 		)
-				
+
 		self.assertEqual( c.keys(), [ "a", "b" ] )
-		
+
 		c.setClass( "stringParsing", 1 )
-		
+
 		self.assertEqual( c.keys(), [ "emptyString", "normalString", "stringWithSpace", "stringWithManySpaces" ] )
-	
+
 	def testSetNoClass( self ) :
-	
+
 		c = IECore.ClassParameter(
 			"n",
 			"d",
@@ -115,16 +115,16 @@ class ClassParameterTest( unittest.TestCase ) :
 			"maths/multiply",
 			2
 		)
-				
+
 		self.assertEqual( c.keys(), [ "a", "b" ] )
-		
+
 		c.setClass( "", 0 )
-		
+
 		self.assertEqual( c.keys(), [] )
 		self.assertEqual( c.getClass( True ), ( None, "", 0, "IECORE_OP_PATHS" ) )
-		
+
 	def testSerialiseAndParse( self ) :
-	
+
 		p = IECore.CompoundParameter( "", "d" )
 		c = IECore.ClassParameter(
 			"n",
@@ -136,16 +136,16 @@ class ClassParameterTest( unittest.TestCase ) :
 		c["a"] = 10
 		c["b"] = 20
 		p.addParameter( c )
-		
+
 		s = IECore.ParameterParser().serialise( p )
-		
+
 		c.setClass( "stringParsing", 1 )
-		
+
 		IECore.ParameterParser().parse( s, p )
-		
+
 		self.assertEqual( c.keys(), [ "a", "b" ] )
 		self.assertEqual( c["a"].getNumericValue(), 10 )
 		self.assertEqual( c["b"].getNumericValue(), 20 )
-	
+
 if __name__ == "__main__" :
 	unittest.main()

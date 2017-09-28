@@ -2,7 +2,7 @@
 //
 //  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
 //  Redistribution and use in source and binary forms, with or without

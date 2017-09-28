@@ -78,28 +78,28 @@ class DisplayTest( unittest.TestCase ) :
 		IECore.Writer.create( cc, self.fileName ).write()
 		ccc = IECore.Reader.create( self.fileName ).read()
 		self.assertEqual( ccc, c )
-		
+
 	def testHash( self ) :
-	
+
 		d = IECore.Display()
 		h = d.hash()
-		
+
 		d.setName( "somethingElse" )
 		self.assertNotEqual( h, d.hash() )
 		h = d.hash()
-		
+
 		d.setType( "tif" )
 		self.assertNotEqual( h, d.hash() )
 		h = d.hash()
-		
+
 		d.setData( "a" )
 		self.assertNotEqual( h, d.hash() )
 		h = d.hash()
-		
+
 		d.parameters()["something"] = IECore.StringData( "a" )
 		self.assertNotEqual( h, d.hash() )
 		h = d.hash()
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile( self.fileName ) :

@@ -48,7 +48,7 @@ namespace IECoreMaya
 
 /// A shape derived from a SceneShapeInterface which implements
 /// a shape which can read an IECore::SceneInterface using a file (.scc) and a root path
-/// It also registers itself in the LiveScene class so that the node is seen as a link to 
+/// It also registers itself in the LiveScene class so that the node is seen as a link to
 /// an external file through the LinkedScene mechanism.
 class SceneShape : public SceneShapeInterface
 {
@@ -56,29 +56,29 @@ class SceneShape : public SceneShapeInterface
 
 		SceneShape();
 		virtual ~SceneShape();
-		
+
 		/*
 		 * For Maya
 		 */
-		
+
 		virtual void postConstructor();
 		static void *creator();
 		static MStatus initialize();
 		MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
-		
+
 		static MTypeId id;
-		
+
 		/*
 		 * Custom
 		 */
 
 		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
-		
+
 	private :
-		
+
 		static MObject aSceneFilePlug;
 		static MObject aSceneRootPlug;
-		
+
 		bool m_sceneDirty;
 		IECore::ConstSceneInterfacePtr m_scene;
 

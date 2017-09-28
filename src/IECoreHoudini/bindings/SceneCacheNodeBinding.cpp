@@ -71,16 +71,16 @@ class SceneCacheNodeHelper
 				IECore::msg( IECore::MessageHandler::Error, "SceneCacheNode", path.toStdString() + " was not a valid SceneCacheNode" );
 			}
 		}
-		
+
 		~SceneCacheNodeHelper()
 		{
 		}
-		
+
 		bool hasNode() const
 		{
 			return m_handle.alive();
 		}
-		
+
 		SceneCacheNode<OP_Node> *sceneNode( OP_Node *node ) const
 		{
 			// make sure its a SceneCacheNode
@@ -88,17 +88,17 @@ class SceneCacheNodeHelper
 			{
 				return 0;
 			}
-			
+
 			return reinterpret_cast<SceneCacheNode<OP_Node>* >( node );
 		}
-		
+
 		IECore::SceneInterfacePtr scene() const
 		{
 			if ( !hasNode() )
 			{
 				return 0;
 			}
-			
+
 			if ( SceneCacheNode<OP_Node> *node = sceneNode( m_handle.node() ) )
 			{
 				if ( IECore::ConstSceneInterfacePtr s = node->scene() )
@@ -106,12 +106,12 @@ class SceneCacheNodeHelper
 					return const_cast<IECore::SceneInterface*>( s.get() );
 				}
 			}
-			
+
 			return 0;
 		}
-	
+
 	private :
-		
+
 		NodeHandle m_handle;
 
 };
@@ -122,30 +122,30 @@ void IECoreHoudini::bindSceneCacheNode()
 		.def( init<OP_Node*>() )
 		.def( "scene", &SceneCacheNodeHelper::scene )
 	;
-	
+
 	enum_<SceneCacheNode<OP_Node>::Space>( "Space" )
 		.value( "World", SceneCacheNode<OP_Node>::World )
 		.value( "Path", SceneCacheNode<OP_Node>::Path )
 		.value( "Local", SceneCacheNode<OP_Node>::Local )
 		.value( "Object", SceneCacheNode<OP_Node>::Object )
 	;
-	
+
 	enum_<SceneCacheNode<OP_Node>::GeometryType>( "GeometryType" )
 		.value( "Cortex", SceneCacheNode<OP_Node>::Cortex )
 		.value( "Houdini", SceneCacheNode<OP_Node>::Houdini )
 		.value( "BoundingBox", SceneCacheNode<OP_Node>::BoundingBox )
 		.value( "PointCloud", SceneCacheNode<OP_Node>::PointCloud )
 	;
-	
+
 	enum_<OBJ_SceneCacheTransform::Hierarchy>( "Hierarchy" )
 		.value( "SubNetworks", OBJ_SceneCacheTransform::SubNetworks )
 		.value( "Parenting", OBJ_SceneCacheTransform::Parenting )
 		.value( "FlatGeometry", OBJ_SceneCacheTransform::FlatGeometry )
 	;
-	
+
 	enum_<OBJ_SceneCacheTransform::Depth>( "Depth" )
 		.value( "AllDescendants", OBJ_SceneCacheTransform::AllDescendants )
 		.value( "Children", OBJ_SceneCacheTransform::Children )
 	;
-	
+
 }

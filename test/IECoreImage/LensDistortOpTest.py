@@ -38,9 +38,9 @@ import IECore
 import IECoreImage
 
 class LensDistortOpTest(unittest.TestCase):
-	
+
 	def testDistortOpWithStandardLensModel(self):
-		
+
 		# The lens model and parameters to use.
 		o = IECore.CompoundObject()
 		o["lensModel"] = IECore.StringData( "StandardRadialLensModel" )
@@ -49,22 +49,22 @@ class LensDistortOpTest(unittest.TestCase):
 		o["curvatureX"] = IECore.DoubleData( 0.2 )
 		o["curvatureY"] = IECore.DoubleData( 0.5 )
 		o["quarticDistortion"] = IECore.DoubleData( .1 )
-		
+
 		# The input image to read.
 		r = IECore.Reader.create("test/IECoreImage/data/exr/uvMapWithDataWindow.100x100.exr")
 		img = r.read()
-		
+
 		# Create the Op and set it's parameters.
 		op = IECoreImage.LensDistortOp()
 		op["input"] = img
 		op["mode"] = IECore.LensModel.Undistort
 		op['lensModel'].setValue(o)
-		
+
 		# Run the Op.
 		out = op()
-		
+
 		r = IECore.Reader.create("test/IECoreImage/data/exr/uvMapWithDataWindowDistorted.100x100.exr")
-		img2 = r.read()		
+		img2 = r.read()
 
 		self.assertEqual( img.displayWindow, img2.displayWindow )
-		
+

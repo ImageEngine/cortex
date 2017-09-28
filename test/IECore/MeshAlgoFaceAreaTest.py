@@ -50,13 +50,13 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		self.assertEqual( faceArea.data[0], 8 )
 
 	def testRandomTriangles( self ) :
-	
+
 		r = IECore.Rand32()
 		for i in range( 0, 1000 ) :
-		
+
 			p = IECore.V3fVectorData( [ r.nextV3f(), r.nextV3f(), r.nextV3f() ] )
 			m = IECore.MeshPrimitive( IECore.IntVectorData( [ 3 ] ), IECore.IntVectorData( [ 0, 1, 2 ] ), "linear", p )
-			
+
 			uv = IECore.V2fVectorData( [ IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ), IECore.V2f( r.nextf(), r.nextf() ) ] )
 			m["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, uv )
 
@@ -65,11 +65,11 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 
 			self.assertAlmostEqual( faceArea.data[0], IECore.triangleArea( p[0], p[1], p[2] ), 4 )
 			self.assertAlmostEqual( textureArea.data[0], IECore.triangleArea( IECore.V3f( uv[0][0], uv[0][1], 0 ), IECore.V3f( uv[1][0], uv[1][1], 0 ), IECore.V3f( uv[2][0], uv[2][1], 0 ) ), 4 )
-	
+
 	def testTwoFaces( self ) :
-	
+
 		v = IECore.V3f
-	
+
 		# P
 		#  _ _
 		# |   |\
@@ -81,7 +81,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		# |     |  |\
 		# |_ _ _|  |_\
 		#
-		
+
 		p = IECore.V3fVectorData(
 			[
 				v( 0, 0, 0 ),
@@ -91,7 +91,7 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 				v( 3, 0, 0 ),
 			]
 		)
-		
+
 		uvs = IECore.V2fVectorData(
 			[
 				IECore.V2f( 0, 0 ),
@@ -114,12 +114,12 @@ class MeshAlgoFaceAreaTest( unittest.TestCase ) :
 		self.assertEqual( len( faceAreas ), 2 )
 		self.assertEqual( faceAreas[0], 4 )
 		self.assertEqual( faceAreas[1], 1 )
-		
+
 		textureAreas = textureArea.data
 		self.assertEqual( len( textureAreas ), 2 )
 		self.assertEqual( textureAreas[0], 6 )
 		self.assertEqual( textureAreas[1], 1 )
-		
-		
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -102,7 +102,7 @@ int OversamplesCalculator::nearestTick( int tick ) const
 float OversamplesCalculator::tickInterval( float frame, int &tickLow, int &tickHigh ) const
 {
 	float step = ( float )m_ticksPerSecond / ( m_frameRate * m_samplesPerFrame );
-	
+
 	float tickF = frame * m_ticksPerSecond /  m_frameRate ;
 	int tick = ( int )( tickF );
 

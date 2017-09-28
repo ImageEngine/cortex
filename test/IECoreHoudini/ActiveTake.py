@@ -39,68 +39,68 @@ import IECoreHoudini
 import unittest
 
 class TestActiveTake( IECoreHoudini.TestCase ) :
-	
+
 	# testing a take can be set with the context
 	def testSetTake( self ) :
-		
+
 		take = "take1"
 		hou.hscript( "takeadd %s" % take )
-		
+
 		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		with IECoreHoudini.ActiveTake( take ) :
-			
+
 			self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 	# testing the current take can still be used
 	def testSetCurrentTake( self ) :
-		
+
 		take = IECoreHoudini.ActiveTake.name()
-		
+
 		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		with IECoreHoudini.ActiveTake( take ) :
-			
+
 			self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
 
 	# testing a non-existant take won't break anything
 	def testFakeTake( self ) :
-		
+
 		take = "fake"
 		origTake = IECoreHoudini.ActiveTake.name()
-		
+
 		self.assert_( take not in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		with IECoreHoudini.ActiveTake( take ) :
-			
+
 			self.assertEqual( origTake, IECoreHoudini.ActiveTake.name() )
 			self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		self.assertEqual( origTake, IECoreHoudini.ActiveTake.name() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 	# testing deleting a take in the context
 	def testDeleteTake( self ) :
-		
+
 		take = "take1"
 		hou.hscript( "takeadd %s" % take )
-		
+
 		self.assert_( take in IECoreHoudini.ActiveTake.ls() )
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		with IECoreHoudini.ActiveTake( take ) :
-			
+
 			self.assertEqual( take, IECoreHoudini.ActiveTake.name() )
 			hou.hscript( "takerm %s" % take )
 			self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
-		
+
 		self.assertNotEqual( take, IECoreHoudini.ActiveTake.name() )
 
 if __name__ == "__main__":

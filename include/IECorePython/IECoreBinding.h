@@ -82,12 +82,12 @@ IECOREPYTHON_API std::string repr( T &x );
 IECOREPYTHON_API inline ssize_t len( const boost::python::object &obj )
 {
 	ssize_t result = PyObject_Length( obj.ptr() );
-	
+
 	if( PyErr_Occurred() )
 	{
 		boost::python::throw_error_already_set();
 	}
-	
+
 	return result;
 }
 

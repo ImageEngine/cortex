@@ -307,14 +307,14 @@ static RunTimeTypedClass<GeometricTypedData<T > > bindSimpleGeometricData()
 {
 	typedef TypedData<T> ParentClass;
 	typedef GeometricTypedData<T> ThisClass;
-	
+
 	RunTimeTypedClass<ParentClass>();
-	
+
 	RunTimeTypedClass<ThisClass> result = bindSimpleData<ThisClass>();
 	result.def( "__init__", make_constructor( &constructWithValueAndInterpretation<ThisClass> ), "Construct with the specified value and interpretation." );
 	result.def("getInterpretation", &ThisClass::getInterpretation, "Returns the geometric interpretation of this data.");
 	result.def("setInterpretation", &ThisClass::setInterpretation, "Sets the geometric interpretation of this data.");
-	
+
 	return result;
 }
 
@@ -340,7 +340,7 @@ void bindAllSimpleTypedData()
 	sdc.def( "__le__", &lessThanOrEqualTo<StringData> );
 	sdc.def( "__gt__", &greaterThan<StringData> );
 	sdc.def( "__ge__", &greaterThanOrEqualTo<StringData> );
-	
+
 	bindSimpleData<InternedStringData>();
 
 	bindSimpleData<BoolData>();
@@ -388,7 +388,7 @@ void bindAllSimpleTypedData()
 	RunTimeTypedClass<UInt64Data> ui64dc = bindSimpleData<UInt64Data>();
 	bindNumericMethods( ui64dc );
 	ui64dc.def( "__long__", &getValue<UInt64Data> );
-	
+
 	bindSimpleGeometricData<V2i>();
 	bindSimpleGeometricData<V3i>();
 	bindSimpleGeometricData<V2f>();

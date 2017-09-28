@@ -40,9 +40,9 @@ import IECoreMaya
 class BoolParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-		
+
 		IECoreMaya.ParameterUI.__init__(
-			
+
 			self,
 			node,
 			parameter,
@@ -51,7 +51,7 @@ class BoolParameterUI( IECoreMaya.ParameterUI ) :
 				columnWidth2 = [ IECoreMaya.ParameterUI.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3 ]
 			),
 			**kw
-		
+
 		)
 
 		maya.cmds.text(

@@ -54,14 +54,14 @@ class FromHoudiniCompoundObjectConverter : public IECoreHoudini::FromHoudiniGeom
 
 		FromHoudiniCompoundObjectConverter( const GU_DetailHandle &handle );
 		FromHoudiniCompoundObjectConverter( const SOP_Node *sop );
-		
+
 		virtual ~FromHoudiniCompoundObjectConverter();
-		
+
 		/// Determines if the given GU_Detail can be converted
 		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
-	
+
 	protected :
-		
+
 		/// performs conversion to an IECore::Object
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 

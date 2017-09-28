@@ -72,7 +72,7 @@ DrawableHolder::~DrawableHolder()
 void DrawableHolder::knobs( DD::Image::Knob_Callback f )
 {
 	ParameterisedHolderOp::knobs( f );
-	
+
 	DD::Image::Tab_knob( f, "Transform" );
 
 	m_transformKnob = DD::Image::Axis_knob( f, &m_transform, "transform", "Transform" );
@@ -85,15 +85,15 @@ void DrawableHolder::build_handles( DD::Image::ViewerContext *ctx )
 	{
 		return;
 	}
-	
+
 	if( m_transformKnob->build_handle( ctx ) )
 	{
 		m_transformKnob->add_draw_handle( ctx );
 	}
-	
+
 	DD::Image::Matrix4 parentMatrix = ctx->modelmatrix;
 	ctx->modelmatrix *= m_transform;
-	
+
 		buildParameterKnobHandles( ctx );
 
 		IECoreGL::ConstScenePtr s = scene();
@@ -105,9 +105,9 @@ void DrawableHolder::build_handles( DD::Image::ViewerContext *ctx )
 				ctx->expand_bbox( node_selected(), IECore::convert<DD::Image::Box3>( b ) );
 			}
 		}
-		
+
 		add_draw_handle( ctx );
-	
+
 	ctx->modelmatrix = parentMatrix;
 }
 
@@ -118,7 +118,7 @@ void DrawableHolder::draw_handle( DD::Image::ViewerContext *ctx )
 		IECoreGL::ConstScenePtr s = scene();
 		if( s )
 		{
-					
+
 			// nuke apparently uses the name stack to determine which handle is under
 			// the mouse. the IECoreGL::NameStateComponent will ruin this by overwriting
 			// the current name. we work around this by pushing another name onto the stack.
@@ -136,9 +136,9 @@ void DrawableHolder::draw_handle( DD::Image::ViewerContext *ctx )
 				}
 
 			glPopName();
-	
+
 		}
-	}	
+	}
 }
 
 IECoreGL::ConstScenePtr DrawableHolder::scene()
@@ -147,9 +147,9 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 	{
 		return m_scene;
 	}
-	
+
 	m_scene = 0;
-	
+
 	IECore::ConstRunTimeTypedPtr drawable = parameterised();
 	if( drawable )
 	{
@@ -188,8 +188,8 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			IECore::msg( IECore::Msg::Error, "DrawableHolder::scene", "Caught unknown exception" );
 		}
 
-	}	
-	
+	}
+
 	m_sceneHash = hash();
 	return m_scene;
 }

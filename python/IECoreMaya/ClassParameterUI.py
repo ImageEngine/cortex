@@ -100,19 +100,19 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 			maya.cmds.iconTextStaticLabel( self.__menuParent, edit=True, label=self.__menuParentLabel() )
 
 		self.__currentClassInfo = newClassInfo
-	
-	## We add support for the 'lazy' keyword argument. If True, then the layout 
+
+	## We add support for the 'lazy' keyword argument. If True, then the layout
 	# will not expand if the parameter doesn't contain a class.
 	def setCollapsed( self, collapsed, propagateToChildren=0, **kw ) :
-	
-		lazy = kw["lazy"] if "lazy" in kw else False 
-		
+
+		lazy = kw["lazy"] if "lazy" in kw else False
+
 		if not collapsed :
 			if lazy and not self.parameter.getClass( False ) :
 				collapsed = True
-				
+
 		IECoreMaya.CompoundParameterUI.setCollapsed( self, collapsed, propagateToChildren, **kw )
-		
+
 	def __classNameFilter( self ) :
 
 		with IECore.IgnoredExceptions( KeyError ) :
@@ -206,7 +206,7 @@ class ClassParameterUI( IECoreMaya.CompoundParameterUI ) :
 	# callback( menuDefinition, parameter, holderNode ).
 	@classmethod
 	def registerClassMenuCallback( cls, callback ) :
-	
+
 		cls.__classMenuCallbacks.append( callback )
 
 IECoreMaya.FnParameterisedHolder.addSetClassParameterClassCallback( ClassParameterUI._classSetCallback )

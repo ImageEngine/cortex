@@ -56,7 +56,7 @@ class IECORE_API AddSmoothSkinningInfluencesOp : public ModifyOp
 
 		AddSmoothSkinningInfluencesOp();
 		virtual ~AddSmoothSkinningInfluencesOp();
-	
+
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );

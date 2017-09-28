@@ -53,9 +53,9 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 
 		GEO_CobIOTranslator();
 		virtual ~GEO_CobIOTranslator();
-		
+
 		virtual GEO_IOTranslator *duplicate() const;
-		
+
 		virtual const char *formatName() const;
 
 		virtual int checkExtension( const char *fileName );
@@ -71,19 +71,19 @@ class GEO_CobIOTranslator : public GEO_IOTranslator
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
 		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, const char *fileName );
 		//@}
-		
+
 		/// This is the Houdini 13 interface
 		// \todo: remove when we drop support for Houdini 13 and older.
 		////////////////////////////////////////////////////////////
 		//@{
 		/// Loads a cob if the content of the cob has a registered ToHoudiniGeometryConverter
-		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );		
+		virtual GA_Detail::IOStatus fileLoad( GEO_Detail *geo, UT_IStream &is, int ate_magic );
 		/// Saves a cob by attempting to find a FromHoudiniGeometryConverter matching the given GEO_Detail
 		virtual GA_Detail::IOStatus fileSaveToFile( const GEO_Detail *geo, std::ostream &os, const char *fileName );
 		//@}
 
 		//@{
-		/// Reads only header of the file, 
+		/// Reads only header of the file,
 		virtual bool fileStat( const char *fileName, GA_Stat &stat, uint level );
 		//@}
 

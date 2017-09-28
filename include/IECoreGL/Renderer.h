@@ -319,7 +319,7 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// Alpha test comparison value for glAlphaFunc
 		///
 		/// \li <b>"gl:alphaTest:mode" StringData "always"</b><br>
-		/// Alpha test comparison mode for glAlphaFunc. 
+		/// Alpha test comparison mode for glAlphaFunc.
 		/// Valid values are listed below, and map directly onto the corresponding
 		/// GLenum values.<br><br>
 		/// "never"<br>
@@ -480,7 +480,7 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
-		
+
 		/// \todo Implement the existing editing commands in this new form.
 		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();

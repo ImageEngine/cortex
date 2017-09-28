@@ -48,12 +48,12 @@ namespace IECoreHoudini
 /// automatically using the default ObjectPool;
 class UT_ObjectPoolCache : public UT_Cache
 {
-	
+
 	public :
-		
+
 		UT_ObjectPoolCache( const std::string &name, IECore::ObjectPoolPtr objectPool );
 		virtual ~UT_ObjectPoolCache();
-		
+
 		virtual const char *utGetCacheName() const;
 		virtual int64 utGetCurrentSize() const;
 		virtual int64 utReduceCacheSizeBy( int64 amount );
@@ -61,11 +61,11 @@ class UT_ObjectPoolCache : public UT_Cache
 		virtual int64 utGetMaxSize() const;
 		virtual void utSetMaxSize( int64 amount );
 		virtual bool utHasMinSize() const;
-		
+
 		static UT_ObjectPoolCache *defaultObjectPoolCache();
-	
+
 	private :
-		
+
 		const std::string m_name;
 		IECore::ObjectPoolPtr m_pool;
 

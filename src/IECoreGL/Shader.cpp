@@ -71,7 +71,7 @@ class Shader::Implementation : public IECore::RefCounted
 			:	m_vertexSource( vertexSource ), m_geometrySource( geometrySource ), m_fragmentSource( fragmentSource ),
 				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 ),
 				m_csParameter( NULL )
-		{		
+		{
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
 			if( vertexSource == "" )
@@ -118,7 +118,7 @@ class Shader::Implementation : public IECore::RefCounted
 				vector<char> log( logLength, ' ' );
 				glGetProgramInfoLog( m_program, logLength, 0, &log[0] );
 				message = &log[0];
-				
+
 				// os x spews warnings rather overzealously, so we split them
 				// into warnings and debug messages. the debug messages will generally
 				// be filtered out by the message level, but they're still there
@@ -138,7 +138,7 @@ class Shader::Implementation : public IECore::RefCounted
 						warning += *it + "\n";
 					}
 				}
-				
+
 				if( debug.size() )
 				{
 					IECore::msg( IECore::Msg::Debug, "IECoreGL::Shader", debug );
@@ -161,7 +161,7 @@ class Shader::Implementation : public IECore::RefCounted
 					Parameter p;
 					glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &p.size, &p.type, &nameChars[0] );
 					p.location = glGetUniformLocation( m_program, &nameChars[0] );
-					
+
 					std::string name = &nameChars[0];
 
 					// ignore native parameters
@@ -193,7 +193,7 @@ class Shader::Implementation : public IECore::RefCounted
 					}
 
 					m_uniformParameters[name] = p;
-					
+
 					if( name == "Cs" )
 					{
 						m_csParameter = &(m_uniformParameters[name]);
@@ -219,7 +219,7 @@ class Shader::Implementation : public IECore::RefCounted
 						Parameter p;
 						glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &p.size, &p.type, &nameChars[0] );
 						p.location = glGetAttribLocation( m_program, &nameChars[0] );
-						
+
 						std::string name = &nameChars[0];
 
 						// ignore native parameters
@@ -233,38 +233,38 @@ class Shader::Implementation : public IECore::RefCounted
 						{
 							continue;
 						}
-						
+
 						m_vertexAttributes[name] = p;
 					}
 				}
 			}
 		}
-		
+
 		virtual ~Implementation()
 		{
 			release();
 		}
-		
+
 		GLuint program() const
 		{
 			return m_program;
 		}
-		
+
 		const std::string &vertexSource() const
 		{
 			return m_vertexSource;
 		}
-		
+
 		const std::string &geometrySource() const
 		{
 			return m_geometrySource;
 		}
-		
+
 		const std::string &fragmentSource() const
 		{
 			return m_fragmentSource;
 		}
-		
+
 		void uniformParameterNames( std::vector<std::string> &names ) const
 		{
 			for( ParameterMap::const_iterator it = m_uniformParameters.begin(); it != m_uniformParameters.end(); it++ )
@@ -272,7 +272,7 @@ class Shader::Implementation : public IECore::RefCounted
 				names.push_back( it->first );
 			}
 		}
-		
+
 		const Shader::Parameter *uniformParameter( const std::string &name ) const
 		{
 			ParameterMap::const_iterator it = m_uniformParameters.find( name );
@@ -284,13 +284,13 @@ class Shader::Implementation : public IECore::RefCounted
 		}
 
 		void vertexAttributeNames( std::vector<std::string> &names ) const
-		{	
+		{
 			for( ParameterMap::const_iterator it = m_vertexAttributes.begin(); it != m_vertexAttributes.end(); it++ )
 			{
 				names.push_back( it->first );
 			}
 		}
-		
+
 		const Shader::Parameter *vertexAttribute( const std::string &name ) const
 		{
 			ParameterMap::const_iterator it = m_vertexAttributes.find( name );
@@ -300,16 +300,16 @@ class Shader::Implementation : public IECore::RefCounted
 			}
 			return 0;
 		}
-	
+
 		const Shader::Parameter *csParameter() const
 		{
 			return m_csParameter;
 		}
-	
+
 	private :
-	
+
 		friend class Shader::Setup;
-		
+
 		std::string m_vertexSource;
 		std::string m_geometrySource;
 		std::string m_fragmentSource;
@@ -323,16 +323,16 @@ class Shader::Implementation : public IECore::RefCounted
 		typedef std::map<std::string, Shader::Parameter> ParameterMap;
 		ParameterMap m_uniformParameters;
 		ParameterMap m_vertexAttributes;
-		
+
 		const Shader::Parameter *m_csParameter;
-		
+
 		void compile( const std::string &source, GLenum type, GLuint &shader )
 		{
 			if( source == "" )
 			{
 				return;
 			}
-			
+
 			const char *s = source.c_str();
 			shader = glCreateShader( type );
 			glShaderSource( shader, 1, &s, 0 );
@@ -342,7 +342,7 @@ class Shader::Implementation : public IECore::RefCounted
 			GLint logLength = 0;
 			glGetShaderiv( shader, GL_INFO_LOG_LENGTH, &logLength );
 			if( !compileStatus )
-			{			
+			{
 				std::string message = "Unknown compilation error.";
 				if( logLength )
 				{
@@ -374,7 +374,7 @@ class Shader::Implementation : public IECore::RefCounted
 		}
 
 };
-	
+
 //////////////////////////////////////////////////////////////////////////
 // Shader
 //////////////////////////////////////////////////////////////////////////
@@ -414,7 +414,7 @@ const std::string &Shader::fragmentSource() const
 {
 	return m_implementation->fragmentSource();
 }
-		
+
 void Shader::uniformParameterNames( std::vector<std::string> &names ) const
 {
 	m_implementation->uniformParameterNames( names );
@@ -442,7 +442,7 @@ const Shader::Parameter *Shader::csParameter() const
 
 bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
 {
-	return 
+	return
 		type == other.type &&
 		size == other.size &&
 		location == other.location &&
@@ -455,14 +455,14 @@ bool Shader::Parameter::operator == ( const Shader::Parameter &other ) const
 
 class Shader::Setup::MemberData : public IECore::RefCounted
 {
-	
+
 	public :
-	
+
 		MemberData( ConstShaderPtr &s )
 			:	shader( s ), hasCsValue( false )
 		{
 		}
-	
+
 		// base class for objects which can bind a value of some sort
 		// to a shader, and later unbind it.
 		struct Value : public IECore::RefCounted
@@ -471,16 +471,16 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			virtual void unbind() = 0;
 		};
 		IE_CORE_DECLAREPTR( Value );
-	
+
 		// value class for specifying vertex attributes
 		struct VertexValue : public Value
 		{
-	
+
 			VertexValue( GLuint attributeIndex, GLenum type, GLint size, ConstBufferPtr buffer, GLuint divisor )
 				:	m_attributeIndex( attributeIndex ), m_type( type ), m_size( size ), m_buffer( buffer ), m_divisor( divisor )
 			{
 			}
-		
+
 			virtual void bind()
 			{
 				Buffer::ScopedBinding binding( *m_buffer );
@@ -488,32 +488,32 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
 				glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 			}
-		
+
 			virtual void unbind()
 			{
 				glVertexAttribDivisorARB( m_attributeIndex, 0 );
 				glDisableVertexAttribArrayARB( m_attributeIndex );
 			}
-		
+
 			private :
-		
+
 				GLuint m_attributeIndex;
 				GLenum m_type;
 				GLint m_size;
 				ConstBufferPtr m_buffer;
 				GLuint m_divisor;
-			
+
 		};
-	
+
 		// value class for specifying textures
 		struct TextureValue : public Value
 		{
-	
+
 			TextureValue( GLuint uniformIndex, GLuint textureUnit, ConstTexturePtr texture )
 				:	m_uniformIndex( uniformIndex ), m_textureUnit( textureUnit ), m_texture( texture )
 			{
 			}
-		
+
 			virtual void bind()
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
@@ -528,86 +528,86 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				}
 				glUniform1i( m_uniformIndex, m_textureUnit );
 			}
-		
+
 			virtual void unbind()
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
 			}
-		
+
 			private :
-		
+
 				GLuint m_uniformIndex;
 				GLuint m_textureUnit;
 				ConstTexturePtr m_texture;
 				GLint m_previousTexture;
-	
+
 		};
-	
+
 		// value class for specifying uniform values
 		struct UniformFloatValue : public Value
 		{
-	
+
 			UniformFloatValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, GLsizei count, std::vector<GLfloat> &values )
 				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_count( count ), m_values( values )
 			{
 				m_previousValues.resize( m_values.size() );
 			}
-	
+
 			virtual void bind()
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
-		
+
 			virtual void unbind()
 			{
 				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
-	
+
 			private :
-		
+
 				GLuint m_program;
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions;
 				GLsizei m_count;
 				std::vector<GLfloat> m_values;
 				std::vector<GLfloat> m_previousValues;
-			
+
 		};
-	
+
 		// value class for specifying uniform values
 		struct UniformIntegerValue : public Value
 		{
-	
+
 			UniformIntegerValue( GLuint program, GLuint uniformIndex, unsigned char dimensions, GLsizei count, std::vector<GLint> &values )
 				:	m_program( program ), m_uniformIndex( uniformIndex ), m_dimensions( dimensions ), m_count( count ), m_values( values )
 			{
 				m_previousValues.resize( m_values.size() );
 			}
-	
+
 			virtual void bind()
 			{
 				glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
-		
+
 			virtual void unbind()
 			{
 				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
-	
+
 			private :
-		
+
 				GLuint m_program;
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions;
 				GLsizei m_count;
 				std::vector<GLint> m_values;
 				std::vector<GLint> m_previousValues;
-			
+
 		};
-	
+
 		struct UniformMatrixValue : public Value
 		{
 			UniformMatrixValue( GLuint program, GLuint uniformIndex, unsigned char dimensions0, unsigned char dimensions1, GLsizei count, std::vector<GLfloat> &values )
@@ -615,20 +615,20 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			{
 				m_previousValues.resize( m_values.size(), 0 );
 			}
-		
+
 			virtual void bind()
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_values[0]) );
 			}
-		
+
 			virtual void unbind()
 			{
 				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_previousValues[0]) );
 			}
-		
+
 			private :
-		
+
 				GLuint m_program;
 				GLuint m_uniformIndex;
 				unsigned char m_dimensions0;
@@ -636,13 +636,13 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				GLsizei m_count;
 				std::vector<GLfloat> m_values;
 				std::vector<GLfloat> m_previousValues;
-				
+
 		};
-	
+
 		ConstShaderPtr shader;
 		vector<ValuePtr> values;
 		bool hasCsValue;
-	
+
 };
 
 Shader::Setup::Setup( ConstShaderPtr shader )
@@ -666,7 +666,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, ConstTexturePt
 	{
 		return;
 	}
-	
+
 	m_memberData->values.push_back( new MemberData::TextureValue( p->location, p->textureUnit, value ) );
 }
 
@@ -674,7 +674,7 @@ template<typename Container>
 struct UniformDataConverter
 {
 	typedef bool ReturnType;
-	
+
 	UniformDataConverter( Container &container )
 		:	m_container( container )
 	{
@@ -693,7 +693,7 @@ struct UniformDataConverter
 	}
 
 	private :
-		
+
 		Container &m_container;
 
 };
@@ -705,8 +705,8 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 	{
 		return;
 	}
-	
-	
+
+
 	if( p->type == GL_BOOL || p->type == GL_INT || p->type == GL_INT_VEC2 || p->type == GL_INT_VEC3 )
 	{
 		// integer value
@@ -737,7 +737,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 					dimensions = 2;
 					break;
 				case GL_INT_VEC3 :
-					dimensions = 3;	
+					dimensions = 3;
 			}
 			m_memberData->values.push_back( new MemberData::UniformIntegerValue( m_memberData->shader->program(), p->location, dimensions, p->size, integers ) );
 		}
@@ -747,8 +747,8 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		// float value
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
-		
-		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
+
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );
 		if( !floats.size() )
 		{
 			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsuitable data type \%s\"" ) % name % value->typeName() );
@@ -774,7 +774,7 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 			}
 			m_memberData->values.push_back( new MemberData::UniformFloatValue( m_memberData->shader->program(), p->location, dimensions, p->size, floats ) );
 		}
-		
+
 		if( name == "Cs" )
 		{
 			m_memberData->hasCsValue = true;
@@ -794,16 +794,16 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 				dimensions0 = dimensions1 = 4;
 				break;
 		};
-				
+
 		vector<GLfloat> floats;
 		UniformDataConverter<vector<GLfloat> > converter( floats );
-		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );	
+		IECore::despatchTypedData< UniformDataConverter<vector<GLfloat> >, IECore::TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<IECore::Data *>( value.get() ), converter );
 		if( int( floats.size() ) != dimensions0 * dimensions1 * p->size )
 		{
 			IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Matrix parameter \"%s\" requires %d values but value of type \%s\" provided %d" ) % name % (dimensions0 * dimensions1) % value->typeName() % floats.size() );
 			return;
 		}
-		
+
 		m_memberData->values.push_back( new MemberData::UniformMatrixValue( m_memberData->shader->program(), p->location, dimensions0, dimensions1, p->size, floats ) );
 	}
 	else
@@ -811,9 +811,9 @@ void Shader::Setup::addUniformParameter( const std::string &name, IECore::ConstD
 		IECore::msg( IECore::Msg::Warning, "Shader::Setup::addUniformParameter", format( "Uniform parameter \"%s\" has unsupported OpenGL type \%d\"" ) % name % p->type );
 	}
 }
-				
+
 void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor )
-{	
+{
 	const Parameter *p = m_memberData->shader->vertexAttribute( name );
 	if( !p )
 	{
@@ -856,7 +856,7 @@ void Shader::Setup::addVertexAttribute( const std::string &name, IECore::ConstDa
 
 	CachedConverterPtr converter = CachedConverter::defaultCachedConverter();
 	ConstBufferPtr buffer = IECore::runTimeCast<const Buffer>( converter->convert( value.get() ) );
-	
+
 	m_memberData->values.push_back( new MemberData::VertexValue( p->location, dataGLType, size, buffer, divisor ) );
 }
 
@@ -876,14 +876,14 @@ Shader::Setup::ScopedBinding::ScopedBinding( const Setup &setup )
 	{
 		(*it)->bind();
 	}
-	
-	
+
+
 	if( Selector *currentSelector = Selector::currentSelector() )
 	{
 		if( currentSelector->mode() == Selector::IDRender )
 		{
 			currentSelector->pushIDShader( m_setup.shader() );
-		}	
+		}
 	}
 }
 
@@ -894,14 +894,14 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 	{
 		(*it)->unbind();
 	}
-	
+
 	glUseProgram( m_previousProgram );
 	if( Selector *currentSelector = Selector::currentSelector() )
 	{
 		if( currentSelector->mode() == Selector::IDRender )
 		{
 			currentSelector->popIDShader();
-		}	
+		}
 	}
 }
 
@@ -912,7 +912,7 @@ Shader::Setup::ScopedBinding::~ScopedBinding()
 const std::string &Shader::defaultVertexSource()
 {
 	static string s =
-		
+
 		"#version 120\n"
 		""
 		"#if __VERSION__ <= 120\n"
@@ -964,7 +964,7 @@ const std::string &Shader::defaultVertexSource()
 		"	fragmentuv = geometryuv;"
 		"	fragmentCs = geometryCs;"
 		"}";
-		
+
 	return s;
 }
 
@@ -976,8 +976,8 @@ const std::string &Shader::defaultGeometrySource()
 
 const std::string &Shader::defaultFragmentSource()
 {
-	static string s = 
-	
+	static string s =
+
 		"#if __VERSION__ <= 120\n"
 		"#define in varying\n"
 		"#endif\n"
@@ -992,14 +992,14 @@ const std::string &Shader::defaultFragmentSource()
 		"	float f = dot( normalize( fragmentI ), normalize(Nf) );"
 		"	gl_FragColor = vec4( f * fragmentCs, 1 );"
 		"}";
-		
+
 	return s;
 }
 
 const std::string &Shader::constantFragmentSource()
 {
-	static string s = 
-	
+	static string s =
+
 		"#if __VERSION__ <= 120\n"
 		"#define in varying\n"
 		"#endif\n"
@@ -1010,14 +1010,14 @@ const std::string &Shader::constantFragmentSource()
 		"{"
 		"	gl_FragColor = vec4( fragmentCs, 1 );"
 		"}";
-	
+
 	return s;
 }
 
 const std::string &Shader::lambertFragmentSource()
 {
-	static string s = 
-	
+	static string s =
+
 		"#if __VERSION__ <= 120\n"
 		"#define in varying\n"
 		"#endif\n"
@@ -1043,7 +1043,7 @@ const std::string &Shader::lambertFragmentSource()
 		""
 		"	gl_FragColor = vec4( Cdiffuse, 1.0 );"
 		"}";
-	
+
 	return s;
 }
 

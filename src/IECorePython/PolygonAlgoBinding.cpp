@@ -95,7 +95,7 @@ void bindPolygonAlgo()
 	def( "polygonBound", &polygonBoundBinding<V3fVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V2dVectorData> );
 	def( "polygonBound", &polygonBoundBinding<V3dVectorData> );
-	
+
 	def( "polygonArea", &polygonAreaBinding<V3fVectorData> );
 	def( "polygonArea", &polygonAreaBinding<V3dVectorData> );
 }

@@ -132,7 +132,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 	{
 		const Primitive *x0 = assertedStaticCast<const Primitive>( y0 );
 		const Primitive *x1 = assertedStaticCast<const Primitive>( y1 );
-		
+
 		if( x0->variableSize( PrimitiveVariable::Uniform ) == x1->variableSize( PrimitiveVariable::Uniform ) &&
 			x0->variableSize( PrimitiveVariable::Varying ) == x1->variableSize( PrimitiveVariable::Varying ) &&
 			x0->variableSize( PrimitiveVariable::Vertex ) == x1->variableSize( PrimitiveVariable::Vertex ) &&
@@ -145,7 +145,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 			const Object *bd0 = x0->blindData();
 			const Object *bd1 = x1->blindData();
 			ObjectPtr bdr = xRes->blindData();
-			LinearInterpolator<Object>()( bd0, bd1, x, bdr );			
+			LinearInterpolator<Object>()( bd0, bd1, x, bdr );
 			// interpolate primitive variables
 			for( PrimitiveVariableMap::const_iterator it0 = x0->variables.begin(); it0 != x0->variables.end(); it0++ )
 			{
@@ -167,7 +167,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 		else
 		{
 			// primitive topologies don't match
-			result = 0;		
+			result = 0;
 		}
 	}
 	else if ( result->isInstanceOf( DataTypeId ) )

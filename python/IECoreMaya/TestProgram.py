@@ -42,11 +42,11 @@ class TestProgram( unittest.TestProgram ) :
 	def __init__( self, module='__main__', defaultTest=None, argv=None, testRunner=None, testLoader=unittest.defaultTestLoader, plugins = [] ) :
 
 		self.__plugins = plugins
-		
+
 		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
 
 	def runTests( self ) :
-	
+
 		try:
 			import maya.standalone
 			maya.standalone.initialize( name='IECoreMayaTest' )

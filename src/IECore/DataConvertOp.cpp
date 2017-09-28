@@ -59,18 +59,18 @@ DataConvertOp::DataConvertOp()
 		)
 {
 	parameters()->addParameter(
-	
+
 		new ObjectParameter(
 			g_dataName,
 			"The data to be converted.",
 			new NullObject(),
 			Data::staticTypeId()
 		)
-	
+
 	);
-	
+
 	parameters()->addParameter(
-	
+
 		new IntParameter(
 			g_targetTypeName,
 			"The data type to convert to.",
@@ -78,7 +78,7 @@ DataConvertOp::DataConvertOp()
 			0,
 			Imath::limits<int>::max()
 		)
-		
+
 	);
 }
 
@@ -108,7 +108,7 @@ const IntParameter *DataConvertOp::targetTypeParameter() const
 
 struct DataConvertOp::ConvertFnStage1
 {
-	
+
 	typedef DataPtr ReturnType;
 
 	ConvertFnStage1( TypeId resultType )
@@ -120,14 +120,14 @@ struct DataConvertOp::ConvertFnStage1
 	ReturnType operator()( typename From::ConstPtr data )
 	{
 		typedef typename From::BaseType FromBaseType;
-		
+
 		ConvertFnStage2<FromBaseType> fn( data->baseReadable(), data->baseSize() );
-		
+
 		DataPtr result = boost::static_pointer_cast<Data>( Object::create( m_resultType ) );
-	
+
 		return despatchTypedData<ConvertFnStage2<FromBaseType>, TypeTraits::IsNumericBasedVectorTypedData>( result.get(), fn );
 	}
-	
+
 	TypeId m_resultType;
 
 };
@@ -137,7 +137,7 @@ struct DataConvertOp::ConvertFnStage2
 {
 
 	typedef DataPtr ReturnType;
-	
+
 	ConvertFnStage2( const FromBaseType *rawData, size_t arrayLength )
 		:	m_rawData( rawData ), m_arrayLength( arrayLength )
 	{
@@ -148,31 +148,31 @@ struct DataConvertOp::ConvertFnStage2
 	{
 		typedef typename To::BaseType BaseType;
 		typedef typename To::ValueType::value_type ValueType;
-			
+
 		const size_t dimensions = sizeof( ValueType ) / sizeof( BaseType );
 		if( m_arrayLength % dimensions )
 		{
 			throw InvalidArgumentException( "Input data must have length equal to a multiple of the dimension of the output data" );
 		}
-		
+
 		typename To::ValueType &writable = data->writable();
 		writable.resize( m_arrayLength / dimensions );
-		
+
 		BaseType *baseWritable = data->baseWritable();
-		
+
 		ScaledDataConversion<FromBaseType, BaseType> converter;
-		
+
 		for( size_t i=0; i<m_arrayLength; ++i )
 		{
 			baseWritable[i] = converter( m_rawData[i] );
 		}
-	
+
 		return data;
 	}
-	
+
 	const FromBaseType *m_rawData;
 	const size_t m_arrayLength;
-	
+
 };
 
 ObjectPtr DataConvertOp::doOperation( const CompoundObject *operands )
@@ -182,11 +182,11 @@ ObjectPtr DataConvertOp::doOperation( const CompoundObject *operands )
 	{
 		throw InvalidArgumentException( "Target type must derive from data" );
 	}
-	
+
 	ConstDataPtr data = operands->member<Data>( g_dataName );
-	
+
 	ConvertFnStage1 fn( targetType );
-	
+
 	DataPtr result = despatchTypedData<ConvertFnStage1, TypeTraits::IsNumericBasedVectorTypedData>( const_cast<Data *>( data.get() ), fn );
 
 	return result;

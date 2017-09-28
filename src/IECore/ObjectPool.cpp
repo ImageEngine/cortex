@@ -147,7 +147,7 @@ ObjectPool *ObjectPool::defaultObjectPool()
 	return c.get();
 }
 
-/// make sure the default pool is created at load time and avoid 
+/// make sure the default pool is created at load time and avoid
 /// running conditions on multi-threaded environments.
 static ObjectPoolPtr initializer = ObjectPool::defaultObjectPool();
 

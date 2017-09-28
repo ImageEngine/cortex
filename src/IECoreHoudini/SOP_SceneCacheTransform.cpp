@@ -68,18 +68,18 @@ OP_TemplatePair *SOP_SceneCacheTransform::buildParameters()
 	{
 		return templatePair;
 	}
-	
+
 	PRM_Template *mainTemplate = SOP_SceneCacheTransform::buildMainParameters()->myTemplate;
 	unsigned numMainParms = PRM_Template::countTemplates( mainTemplate );
 	static PRM_Template *thisTemplate = new PRM_Template[ numMainParms + 3 ];
-	
+
 	// add the generic SceneCacheNode parms
 	unsigned totalParms = 0;
 	for ( unsigned i = 0; i < numMainParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = mainTemplate[i];
 	}
-	
+
 	thisTemplate[totalParms] = PRM_Template(
 		PRM_INT, 1, &pMode, &modeDefault, &modeList, 0, 0, 0, 0,
 		"The transformation mode. \"Name\" mode transforms each named primitive range by the "
@@ -88,13 +88,13 @@ OP_TemplatePair *SOP_SceneCacheTransform::buildParameters()
 		"specified by the \"root\" parameter."
 	);
 	totalParms++;
-	
+
 	thisTemplate[totalParms] = PRM_Template(
 		PRM_TOGGLE, 1, &pInvert, 0, 0, 0, 0, 0, 0,
 		"Invert the transformation matrix before applying it to the geometry."
 	);
 	totalParms++;
-	
+
 	templatePair = new OP_TemplatePair( thisTemplate );
 	return templatePair;
 }
@@ -128,12 +128,12 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 		sceneChanged();
 		return error();
 	}
-	
+
 	std::string path = getPath();
 	Space space = getSpace();
 	Mode mode = (Mode)this->evalInt( pMode.getToken(), 0, 0 );
 	bool invert = this->evalInt( pInvert.getToken(), 0, 0 );
-	
+
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
@@ -142,25 +142,25 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 		sceneChanged();
 		return error();
 	}
-	
+
 	MurmurHash hash;
 	hash.append( file );
 	hash.append( path );
 	hash.append( space );
-	
+
 	if ( !m_loaded || m_hash != hash )
 	{
 		sceneChanged();
 	}
-	
+
 	if ( lockInputs( context ) >= UT_ERROR_ABORT )
 	{
 		return error();
 	}
-	
+
 	gdp->stashAll();
 	duplicatePointSource( 0, context );
-	
+
 	UT_Interrupt *progress = UTgetInterrupt();
 	if ( !progress->opStart( "Transforming objects" ) )
 	{
@@ -169,11 +169,11 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 		unlockInputs();
 		return error();
 	}
-	
+
 	m_static = boost::indeterminate;
-	
+
 	double readTime = time( context );
-	
+
 	if ( mode == Root )
 	{
 		UT_Matrix4 transform = getTransform( scene.get(), scene.get(), readTime, space, invert );
@@ -187,13 +187,13 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 	{
 		addError( SOP_ATTRIBUTE_INVALID, "Invalid Mode" );
 	}
-	
+
 	flags().setTimeDep( bool( !m_static ) );
-	
+
 	if ( progress->opInterrupt( 100 ) )
 	{
 		addError( SOP_ATTRIBUTE_INVALID, "Cooking interrupted" );
-		gdp->clearAndDestroy();		
+		gdp->clearAndDestroy();
 		m_loaded = false;
 		m_hash = MurmurHash();
 	}
@@ -202,9 +202,9 @@ OP_ERROR SOP_SceneCacheTransform::cookMySop( OP_Context &context )
 		m_loaded = true;
 		m_hash = hash;
 	}
-	
+
 	progress->opEnd();
-	
+
 	unlockInputs();
 	return error();
 }
@@ -220,7 +220,7 @@ void SOP_SceneCacheTransform::transformByName( const SceneInterface *scene, doub
 	{
 		const GA_Attribute *attr = nameAttrRef.getAttribute();
 		const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-		
+
 		std::map<std::string, GA_OffsetList> offsets;
 		GA_Range primRange = gdp->getPrimitiveRange();
 		for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
@@ -230,33 +230,33 @@ void SOP_SceneCacheTransform::transformByName( const SceneInterface *scene, doub
 			{
 				current = value;
 			}
-			
+
 			std::map<std::string, GA_OffsetList>::iterator oIt = offsets.find( current );
 			if ( oIt == offsets.end() )
 			{
 				oIt = offsets.insert( std::pair<std::string, GA_OffsetList>( current, GA_OffsetList() ) ).first;
 			}
-			
+
 			oIt->second.append( it.getOffset() );
 		}
-		
+
 		for ( std::map<std::string, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
 		{
 			namedRanges[oIt->first] = GA_Range( gdp->getPrimitiveMap(), oIt->second );
 		}
 	}
-	
+
 	std::string rootPathStr;
 	SceneInterface::Path rootPath;
 	scene->path( rootPath );
 	SceneInterface::pathToString( rootPath, rootPathStr );
-	
+
 	for ( std::map<std::string, GA_Range>::iterator it = namedRanges.begin(); it != namedRanges.end(); ++it )
 	{
 		std::string fullPathStr = rootPathStr + it->first;
 		SceneInterface::Path fullPath;
 		SceneInterface::stringToPath( fullPathStr, fullPath );
-		
+
 		if ( ConstSceneInterfacePtr leaf = scene->scene( fullPath, SceneInterface::NullIfMissing ) )
 		{
 			UT_Matrix4 transform = getTransform( scene, leaf.get(), time, space, invert );
@@ -280,7 +280,7 @@ UT_Matrix4 SOP_SceneCacheTransform::getTransform( const SceneInterface *rootScen
 	{
 		transform = relativeTransform( rootScene, scene, time );
 	}
-	
+
 	// we don't need to update if we've already confirmed it is animated
 	if ( m_static || boost::indeterminate( m_static ) )
 	{
@@ -301,24 +301,24 @@ UT_Matrix4 SOP_SceneCacheTransform::getTransform( const SceneInterface *rootScen
 			m_static = true;
 		}
 	}
-	
+
 	UT_Matrix4 matrix = UT_Matrix4( IECore::convert<UT_Matrix4D>( transform ) );
 	if ( invert )
 	{
 		matrix.invert();
 	}
-	
+
 	return matrix;
 }
 
 Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECore::SceneInterface *rootScene, const IECore::SceneInterface *scene, double time )
 {
 	Imath::M44d result;
-	
+
 	SceneInterface::Path p, rootPath;
 	scene->path( p );
 	rootScene->path( rootPath );
-	
+
 	ConstSceneInterfacePtr current = rootScene;
 	for ( SceneInterface::Path::const_iterator it = p.begin() + rootPath.size(); current && it != p.end(); ++it )
 	{
@@ -328,7 +328,7 @@ Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECore::SceneInter
 			m_static = false;
 			break;
 		}
-		
+
 		if ( const SampledSceneInterface *sampledCurrent = IECore::runTimeCast<const SampledSceneInterface>( current.get() ) )
 		{
 			if ( sampledCurrent->numTransformSamples() > 1 )
@@ -340,17 +340,17 @@ Imath::M44d SOP_SceneCacheTransform::relativeTransform( const IECore::SceneInter
 		{
 			m_static = false;
 		}
-		
+
 		result = current->readTransformAsMatrix( time ) * result;
 	}
-	
+
 	return result;
 }
 
 void SOP_SceneCacheTransform::getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms )
 {
 	SceneCacheNode<SOP_Node>::getNodeSpecificInfoText( context, parms );
-	
+
 	// add type descriptions for the Cortex Objects
 	GEO_CortexPrimitive::infoText( getCookedGeo( context ), context, parms );
 }

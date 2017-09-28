@@ -79,7 +79,7 @@ class TemporaryAttributeValues :
 			origValue = maya.cmds.getAttr( attr )
 			if isinstance( origValue, list ) and isinstance( origValue[0], tuple ) :
 				origValue = origValue[0]
-			
+
 			self.__restoreCommands.append( IECore.curry( handler, attr, origValue ) )
 
 			# and change the attribute value
@@ -88,7 +88,7 @@ class TemporaryAttributeValues :
 	def __exit__( self, type, value, traceBack ) :
 
 		for cmd in self.__restoreCommands :
-			
+
 			cmd()
 
 	def __simpleAttrHandler( self, attr, value ) :

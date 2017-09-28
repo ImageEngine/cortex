@@ -71,5 +71,5 @@ class FnOpHolder( FnParameterisedHolder ) :
 	## Returns the maya node type that this function set operates on
 	@classmethod
 	def _mayaNodeType( cls ):
-		
+
 		return "ieOpHolderNode"

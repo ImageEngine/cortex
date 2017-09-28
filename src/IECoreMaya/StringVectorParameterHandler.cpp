@@ -102,10 +102,10 @@ MPlug StringVectorParameterHandler::doCreate( IECore::ConstParameterPtr paramete
 
 	MFnTypedAttribute fnTAttr;
 	MObject attribute = fnTAttr.create( plugName, plugName, MFnData::kStringArray, MFnStringArrayData().create( defaultValue ) );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 

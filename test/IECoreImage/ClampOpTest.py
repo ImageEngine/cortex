@@ -40,97 +40,97 @@ import IECoreImage
 class ClampOpTest( unittest.TestCase ) :
 
 	def test( self ) :
-			
+
 		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
-			
+
 		self.failUnless( minInputValue < 0.25 )
 		self.failUnless( maxInputValue > 0.5 )
-		
+
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5 )
-		
+
 		minOutputValue = min( image2["R"] )
 		maxOutputValue = max( image2["R"] )
-	
+
 		self.assertEqual( minOutputValue, 0.25 )
 		self.assertEqual( maxOutputValue, 0.5 )
-		
+
 	def testMinTo( self ) :
-	
+
 		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
-			
+
 		self.failUnless( minInputValue < 0.125 )
 		self.failUnless( maxInputValue > 0.5 )
-		
+
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMinTo=True, minTo=0.125 )
-		
+
 		minOutputValue = min( image2["R"] )
 		maxOutputValue = max( image2["R"] )
-	
+
 		self.assertEqual( minOutputValue, 0.125 )
 		self.assertEqual( maxOutputValue, 0.5 )
-		
+
 		intermediateValues = False
 		for v in image2["R"] :
 			if v > 0.125 and v < 0.25 :
 				print v
 				intermediateValues = True
-				
+
 		self.failIf( intermediateValues )
-		
+
 	def testMaxTo( self ) :
-	
+
 		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
-			
+
 		self.failUnless( minInputValue < 0.125 )
 		self.failUnless( maxInputValue > 0.5 )
-		
+
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMaxTo=True, maxTo=0.75 )
-		
+
 		minOutputValue = min( image2["R"] )
 		maxOutputValue = max( image2["R"] )
-	
+
 		self.assertEqual( minOutputValue, 0.25 )
 		self.assertEqual( maxOutputValue, 0.75 )
-		
+
 		intermediateValues = False
 		for v in image2["R"] :
 			if v > 0.5 and v < 0.75 :
 				intermediateValues = True
-				
-		self.failIf( intermediateValues )	
+
+		self.failIf( intermediateValues )
 
 	def testMinToAndMaxTo( self ) :
-	
+
 		image = IECore.Reader.create( "test/IECoreImage/data/exr/ramp.exr" ).read()
 		minInputValue = min( image["R"] )
 		maxInputValue = max( image["R"] )
-			
+
 		self.failUnless( minInputValue < 0.125 )
 		self.failUnless( maxInputValue > 0.5 )
-		
+
 		image2 = IECoreImage.ClampOp()( input=image, min=0.25, max=0.5, enableMinTo=True, minTo=0.125, enableMaxTo=True, maxTo=0.75 )
-		
+
 		minOutputValue = min( image2["R"] )
 		maxOutputValue = max( image2["R"] )
-	
+
 		self.assertEqual( minOutputValue, 0.125 )
 		self.assertEqual( maxOutputValue, 0.75 )
-		
+
 		intermediateValues = False
 		for v in image2["R"] :
 			if v > 0.5 and v < 0.75 :
 				intermediateValues = True
 			elif v > 0.5 and v < 0.75 :
 				intermediateValues = True
-				
-		self.failIf( intermediateValues )	
-				
+
+		self.failIf( intermediateValues )
+
 if __name__ == "__main__":
 	unittest.main()
 

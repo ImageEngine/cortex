@@ -34,7 +34,7 @@
 
 import IECore
 
-class colorSplineInput( IECore.Op ) : 
+class colorSplineInput( IECore.Op ) :
 
 	def __init__( self ) :
 
@@ -66,7 +66,7 @@ class colorSplineInput( IECore.Op ) :
 		)
 
 	def doOperation( self, args ) :
-	
+
 		return IECore.IntData( len( args["spline"].value.points() ) )
 
 IECore.registerRunTimeTyped( colorSplineInput )

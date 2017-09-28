@@ -78,7 +78,7 @@ class ParameterisedHolder : public BaseType
 		/// Implemented to store the knob values into the held Parameters.
 		virtual void _validate( bool forReal );
 		//@}
-		
+
 		/// Returns the class instance held by this DD::Image::Op instance.
 		/// Note that this is not a copy as with FnParameterisedHolder::getParameterised but is
 		/// instead the internal class ready for use in processing in c++.
@@ -87,17 +87,17 @@ class ParameterisedHolder : public BaseType
 		IECore::ConstRunTimeTypedPtr parameterised();
 		/// Convenience method to return dynamic_cast<const IECore::ParameterisedInterface *>( parameterised().get() )
 		const IECore::ParameterisedInterface *parameterisedInterface();
-	
+
 	protected :
-	
+
 		void setParameterValuesFromInputs();
 		void setParameterValues();
 		void setKnobValues();
-		
+
 		/// Equivalent to DD::Image::Op::build_knob_handles(), but only processes
 		/// knobs that represent parameters.
 		void buildParameterKnobHandles( DD::Image::ViewerContext *ctx ) const;
-		
+
 	private :
 
 		// class specification
@@ -107,7 +107,7 @@ class ParameterisedHolder : public BaseType
 		DD::Image::Knob *m_classReloadKnob; // for user to trigger reloading
 		DD::Image::Knob *m_classDividerKnob;
 		void updateVersionChooser();
-		
+
 		// class loading
 		////////////////////////////////////////////////////
 		IECore::RunTimeTypedPtr m_parameterised;
@@ -118,25 +118,25 @@ class ParameterisedHolder : public BaseType
 		// makes sure that m_parameterised is up to date with the class and state dictated by
 		// m_classSpecifierKnob, and also makes sure that m_parameterHandler is valid.
 		void updateParameterised( bool reload );
-		
+
 		// knob creation
 		////////////////////////////////////////////////////
 		ParameterHandlerPtr m_parameterHandler;
 		size_t m_numParameterKnobs;
 		void replaceKnobs();
 		static void parameterKnobs( void *that, DD::Image::Knob_Callback f );
-		
+
 		// FnParameterisedHolder support
 		////////////////////////////////////////////////////
-		
+
 		DD::Image::Knob *m_getParameterisedKnob; // this knob triggers a simulated getParameterised function.
 		static IECore::RunTimeTypedPtr getParameterisedResult(); // and this function retrieves the result
-		
+
 		DD::Image::Knob *m_modifiedParametersKnob; // this knob triggers a simulated function call to do the work of FnParameterisedHolder.parameterModificationContext()
 		static void setModifiedParametersInput( IECore::RunTimeTypedPtr parameterised ); // and this function specifies the parameter values to set the knobs from
-		
+
 		friend void bindFnParameterisedHolder();
-				
+
 };
 
 typedef ParameterisedHolder<DD::Image::Op> ParameterisedHolderOp;

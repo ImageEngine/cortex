@@ -46,7 +46,7 @@
 namespace IECore
 {
 
-/// The ContrastSmoothSkinningWeightsOp applies a parameterised step function on the weights of SmoothSkinningData 
+/// The ContrastSmoothSkinningWeightsOp applies a parameterised step function on the weights of SmoothSkinningData
 /// to increase the contrast between the most important joints from the lesser ones.
 /// The shape of the step function varies from linear to a hard step function with the contrast ratio parameter and the
 /// middle contrast point is defined by contrast center parameter.
@@ -63,7 +63,7 @@ class IECORE_API ContrastSmoothSkinningWeightsOp : public ModifyOp
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );
-	
+
 	private :
 
 		class ContrastSmoothStep;

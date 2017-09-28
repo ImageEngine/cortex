@@ -40,75 +40,75 @@ import unittest
 import IECore
 
 class SceneInterfaceTest( unittest.TestCase ) :
-	
+
 	__testFile = "/tmp/test.scc"
-	
+
 	def writeSCC( self ) :
-		
+
 		m = IECore.SceneCache( SceneInterfaceTest.__testFile, IECore.IndexedIO.OpenMode.Write )
 		m.writeAttribute( "w", IECore.BoolData( True ), 1.0 )
-		
+
 		t = m.createChild( "t" )
 		t.writeTransform( IECore.M44dData(IECore.M44d.createTranslated(IECore.V3d( 1, 0, 0 ))), 1.0 )
 		t.writeAttribute( "wuh", IECore.BoolData( True ), 1.0 )
-		
+
 		s = t.createChild( "s" )
 		s.writeObject( IECore.SpherePrimitive( 1 ), 1.0 )
 		s.writeAttribute( "glah", IECore.BoolData( True ), 1.0 )
-	
+
 	def testGet( self ) :
-		
+
 		self.writeSCC()
-		
+
 		instance1 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		instance2 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
-		
+
 		self.assertTrue( instance1.isSame( instance2 ) )
-		
+
 		instance3 = IECore.SceneInterface.create( SceneInterfaceTest.__testFile, IECore.IndexedIO.OpenMode.Read )
 		instance4 = IECore.SceneInterface.create( SceneInterfaceTest.__testFile, IECore.IndexedIO.OpenMode.Read )
-		
+
 		self.assertFalse( instance3.isSame( instance4 ) )
 		self.assertFalse( instance3.isSame( instance1 ) )
 		self.assertFalse( instance3.isSame( instance2 ) )
-	
+
 	def testErase( self ) :
-		
+
 		self.writeSCC()
-		
+
 		instance1 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		instance2 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertTrue( instance1.isSame( instance2 ) )
-		
+
 		IECore.SharedSceneInterfaces.erase( SceneInterfaceTest.__testFile )
-		
+
 		instance3 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertFalse( instance3.isSame( instance1 ) )
-		
+
 		instance4 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertFalse( instance4.isSame( instance1 ) )
 		self.assertTrue( instance4.isSame( instance3 ) )
-	
+
 	def testClear( self ) :
-		
+
 		self.writeSCC()
-		
+
 		instance1 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		instance2 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertTrue( instance1.isSame( instance2 ) )
-		
+
 		IECore.SharedSceneInterfaces.clear()
-		
+
 		instance3 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertFalse( instance3.isSame( instance1 ) )
-		
+
 		instance4 = IECore.SharedSceneInterfaces.get( SceneInterfaceTest.__testFile )
 		self.assertFalse( instance4.isSame( instance1 ) )
 		self.assertTrue( instance4.isSame( instance3 ) )
-	
+
 	def testVisibilityName( self ) :
 		self.assertEqual( IECore.SceneInterface.visibilityName, "scene:visible" )
-	
+
 if __name__ == "__main__":
 	unittest.main()
 

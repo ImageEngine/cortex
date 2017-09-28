@@ -18,11 +18,11 @@ class swapAttribute( Op ) :
 			PrimitiveParameter(
 				name = "destination",
 				description = "The primitive with an attribute to be added/replaced.",
-				defaultValue = PointsPrimitive(V3fVectorData()) ),		
+				defaultValue = PointsPrimitive(V3fVectorData()) ),
 			PrimitiveParameter(
 				name = "source",
 				description = "The primitive with an attribute to use.",
-				defaultValue = PointsPrimitive(V3fVectorData()) ),		
+				defaultValue = PointsPrimitive(V3fVectorData()) ),
 			StringParameter(
 				name = "name",
 				description = "The name of the attribute to copy from input2 onto input1.",
@@ -34,9 +34,9 @@ class swapAttribute( Op ) :
 		dst = args['destination'].copy()
 		src = args['source']
 		attribute = args['name'].value
-		
+
 		# check for attribute on source
-		if not attribute in src: 
+		if not attribute in src:
 			raise Exception("Must have primvar '%s' in source primitive!" % attribute)
 
 		dst[attribute] = src[attribute]

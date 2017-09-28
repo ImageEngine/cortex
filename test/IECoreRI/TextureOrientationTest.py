@@ -76,7 +76,7 @@ class TextureOrientationTest( IECoreRI.TestCase ) :
 	def tearDown( self ) :
 
 		IECoreRI.TestCase.tearDown( self )
-		
+
 		files = [
 			"test/IECoreRI/shaders/tex.sdl",
 		]

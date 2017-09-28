@@ -67,7 +67,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "The source object is not an IECore::Camera." );
 		return false;
 	}
-	
+
 	// check if incoming object is a cameraShape itself
 	MObject camObj;
 	MFnCamera fnCamera;
@@ -75,7 +75,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	{
 		camObj = to;
 	}
-	
+
 	// check if incoming object is a parent of an existing cameraShape
 	if ( camObj.isNull() )
 	{
@@ -90,7 +90,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			}
 		}
 	}
-	
+
 	// make a new cameraShape and parent it to the incoming object
 	if ( camObj.isNull() )
 	{
@@ -99,7 +99,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "Unable to create a camera as a child of the input object." );
 			return false;
 		}
-		
+
 		MDagModifier dagMod;
 		camObj = dagMod.createNode( "camera", to );
 		dagMod.renameNode( camObj, camera->getName().c_str() );
@@ -110,19 +110,19 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			return false;
 		}
 	}
-	
+
 	if ( camObj.isNull() )
 	{
 		IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "Unable to find or create a camera from the input object." );
 		return false;
 	}
-	
+
 	MDagPath camDag;
 	MFnDagNode( camObj ).getPath( camDag );
 	fnCamera.setObject( camDag );
-	
+
 	double fov = fnCamera.horizontalFieldOfView();
-	
+
 	MCommonRenderSettingsData renderSettings;
 	MRenderUtil::getCommonRenderSettings( renderSettings );
 	Imath::V2i resolution( renderSettings.width, renderSettings.height );
@@ -132,7 +132,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		resolution = boost::static_pointer_cast<V2iData>( resIt->second )->readable();
 	}
 	double aspectRatio = (double)resolution.x / (double)resolution.y;
-	
+
 	const MatrixTransform *transform = IECore::runTimeCast<const MatrixTransform>( camera->getTransform() );
 	if ( transform )
 	{
@@ -140,14 +140,14 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		MPoint pos = IECore::convert<MPoint>( mat.translation() );
 		MVector view = IECore::convert<MVector>( -Imath::V3f( mat[2][0], mat[2][1], mat[2][2] ) );
 		MVector up = IECore::convert<MVector>( Imath::V3f( mat[1][0], mat[1][1], mat[1][2] ) );
-		
+
 		if ( !fnCamera.set( pos, view, up, fov, aspectRatio ) )
 		{
 			IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "Unable to modify the Camera settings." );
 			return false;
 		}
 	}
-	
+
 	const CompoundData *mayaData = camera->blindData()->member<CompoundData>( "maya" );
 	if ( mayaData )
 	{
@@ -158,7 +158,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			fnCamera.setHorizontalFilmAperture( aperture[0] );
 			fnCamera.setVerticalFilmAperture( aperture[1] );
 		}
-		
+
 		const V2fData *filmOffsetData = mayaData->member<V2fData>( "filmOffset" );
 		if ( filmOffsetData )
 		{
@@ -167,7 +167,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 			fnCamera.setVerticalFilmOffset( filmOffset[1] );
 		}
 	}
-	
+
 	CompoundDataMap::const_iterator clippingIt = camera->parameters().find( "clippingPlanes" );
 	if ( clippingIt != camera->parameters().end() && clippingIt->second->isInstanceOf( V2fDataTypeId ) )
 	{
@@ -175,7 +175,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 		fnCamera.setNearClippingPlane( clippingPlanes[0] );
 		fnCamera.setFarClippingPlane( clippingPlanes[1] );
 	}
-	
+
 	std::string projection = "";
 	CompoundDataMap::const_iterator projectionIt = camera->parameters().find( "projection" );
 	if ( projectionIt != camera->parameters().end() && projectionIt->second->isInstanceOf( StringDataTypeId ) )
@@ -189,28 +189,28 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	else
 	{
 		fnCamera.setIsOrtho( true );
-		
+
 		Imath::Box2f screenWindow;
 		CompoundDataMap::const_iterator screenWindowIt = camera->parameters().find( "screenWindow" );
 		if ( screenWindowIt != camera->parameters().end() && screenWindowIt->second->isInstanceOf( Box2fDataTypeId ) )
 		{
 			screenWindow = boost::static_pointer_cast<Box2fData>( screenWindowIt->second )->readable();
 		}
-		
+
 		if ( !screenWindow.isEmpty() )
 		{
 			fnCamera.setOrthoWidth( screenWindow.max.x - screenWindow.min.x );
 		}
 	}
-	
+
 	CompoundDataMap::const_iterator fovIt = camera->parameters().find( "projection:fov" );
 	if ( fovIt != camera->parameters().end() && fovIt->second->isInstanceOf( FloatDataTypeId ) )
 	{
 		fov = degreesToRadians( boost::static_pointer_cast<FloatData>( fovIt->second )->readable() );
 	}
-	
+
 	// setting field of view last as some of the other commands alter it
 	fnCamera.setHorizontalFieldOfView( fov );
-	
+
 	return true;
 }

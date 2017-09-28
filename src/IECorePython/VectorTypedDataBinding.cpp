@@ -172,10 +172,10 @@ void bindAllVectorTypedData()
 	BIND_VECTOR_TYPEDDATA (
 		std::string,
 		"string")
-		
+
 	BIND_VECTOR_TYPEDDATA (
 		InternedString,
-		"InternedString")	
+		"InternedString")
 
 	// Imath types
 	bindImathMatrixVectorTypedData();

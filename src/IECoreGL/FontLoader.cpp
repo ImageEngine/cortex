@@ -72,10 +72,10 @@ FontPtr FontLoader::load( const std::string &name )
 		m_fonts[name] = 0; // to save us trying over and over again
 		return 0;
 	}
-	
+
 	FontPtr result = new Font( coreFont );
 	m_fonts[name] = result;
-	
+
 	return result;
 }
 

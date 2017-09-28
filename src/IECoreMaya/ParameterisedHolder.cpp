@@ -135,7 +135,7 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 		m_failedToLoad = false;
 	}
 	else
-	{	
+	{
 		// if the plug represents a parameter then we add that parameter to a list
 		// of dirty parameters. this lets us optimise setParameterisedValues so we only
 		// set the values of parameters whose plugs have changed since last time.
@@ -168,7 +168,7 @@ MStatus ParameterisedHolder<B>::setDependentsDirty( const MPlug &plug, MPlugArra
 			}
 		}
 	}
-	
+
 	return B::setDependentsDirty( plug, plugArray );
 }
 
@@ -214,7 +214,7 @@ MStatus ParameterisedHolder<B>::shouldSave( const MPlug &plug, bool &isSaving )
 		// NOTE: This is not very clear in the documentation, but for most
 		// parameters, the default behaviour is to not touch isSaving,
 		// and return kUnknownParameter, which Maya interprets as meaning
-		// that we're not doing anything special, so use the default 
+		// that we're not doing anything special, so use the default
 		// behaviour.  Maya then checks whether the plug has changed from
 		// default, and exports it if it has
 		return B::shouldSave( plug, isSaving );
@@ -265,7 +265,7 @@ MStatus ParameterisedHolder<B>::initialize()
 
 	s = B::addAttribute( aParameterisedSearchPathEnvVar );
 	assert(s);
-	
+
 	MPxManipContainer::addToManipConnectTable( id );
 
 	return MS::kSuccess;
@@ -458,7 +458,7 @@ MStatus ParameterisedHolder<B>::setParameterisedValues( bool lazy )
 	{
 		return MS::kFailure;
 	}
-	
+
 	MStatus s;
 	setParameterisedValuesWalk( lazy, parameterisedInterface->parameters(), s );
 	return s;
@@ -468,9 +468,9 @@ template<typename B>
 bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::ParameterPtr parameter, MStatus &status )
 {
 	MFnDependencyNode fnDN( B::thisMObject() );
-	
+
 	// traverse child parameters if we have them
-	
+
 	bool childParametersWereSet = false;
 	if( parameter->isInstanceOf( CompoundParameter::staticTypeId() ) )
 	{
@@ -484,7 +484,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 	}
 
 	// then set this parameter if necessary
-	
+
 	bool thisParameterWasSet = false;
 	if( parameter->name()!="" && (!lazy || m_dirtyParameters.find( parameter )!=m_dirtyParameters.end()) )
 	{
@@ -496,7 +496,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 		}
 		else
 		{
-		
+
 			MPlug p = fnDN.findPlug( nIt->second );
 			if( p.isNull() )
 			{
@@ -532,9 +532,9 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 			}
 		}
 	}
-	
+
 	// increment the updateCount if necessary
-	
+
 	if( thisParameterWasSet || childParametersWereSet )
 	{
 		CompoundObjectPtr userData = parameter->userData();
@@ -549,7 +549,7 @@ bool ParameterisedHolder<B>::setParameterisedValuesWalk( bool lazy, IECore::Para
 			updateCount->writable()++;
 		}
 	}
-	
+
 	return childParametersWereSet || thisParameterWasSet;
 }
 
@@ -702,7 +702,7 @@ MStatus ParameterisedHolder<B>::createAttributesWalk( IECore::ConstCompoundParam
 		if( !s )
 		{
 			return s;
-		}	
+		}
 
 		// recurse to the children if this is a compound child
 		CompoundParameterPtr compoundChild = runTimeCast<CompoundParameter>( children[i] );
@@ -736,7 +736,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		{
 			ParameterHandler::restore( plug, parameter );
 		}
-	
+
 		if( s )
 		{
 			s = IECoreMaya::ParameterHandler::update( parameter, plug );
@@ -745,7 +745,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 				return MS::kSuccess;
 			}
 		}
-		
+
 		// failed to restore and/or update (parameter type probably changed).
 		// remove the current attribute and fall through to the create
 		// code
@@ -754,7 +754,7 @@ MStatus ParameterisedHolder<B>::createOrUpdateAttribute( IECore::ParameterPtr pa
 		// attribute. we have to be careful to only store non-networked plugs as
 		// networked plugs are invalidated by the removal of the attribute.
 		nonNetworkedConnections( plug, connectionsFromMe, connectionsToMe );
-		
+
 		fnDN.removeAttribute( plug.attribute() );
 	}
 
@@ -833,7 +833,7 @@ void ParameterisedHolder<B>::nonNetworkedConnections( const MPlug &plug, MPlugAr
 {
 	MPlugArray from;
 	MPlugArray to;
-	
+
 	// the MPlug.connectedTo() method is documented as always returning networked plugs.
 	plug.connectedTo( from, false, true );
 	plug.connectedTo( to, true, false );
@@ -846,7 +846,7 @@ void ParameterisedHolder<B>::nonNetworkedConnections( const MPlug &plug, MPlugAr
 		// the MPlug( node, attribute ) constructor is documented as always returning non-networked plugs.
 		connectionsFromPlug.set( MPlug( from[i].node(), from[i].attribute() ), i );
 	}
-	
+
 	for( unsigned i=0; i<to.length(); i++ )
 	{
 		connectionsToPlug.set( MPlug( to[i].node(), to[i].attribute() ), i );

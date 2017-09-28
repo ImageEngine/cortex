@@ -241,11 +241,11 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 	MDrawData drawData = request.drawData();
 	ProceduralHolder *proceduralHolder = (ProceduralHolder *)drawData.geometry();
 	assert( proceduralHolder );
-	
+
 	view.beginGL();
-	
+
 	LightingState lightingState;
-	bool restoreLightState = cleanupLights( request, view, &lightingState );	
+	bool restoreLightState = cleanupLights( request, view, &lightingState );
 
 	// maya can sometimes leave an error from it's own code,
 	// and we don't want that to confuse us in our drawing code.
@@ -308,9 +308,9 @@ void ProceduralHolderUI::draw( const MDrawRequest &request, M3dView &view ) cons
 
 	if( restoreLightState )
 	{
-		restoreLights( &lightingState );	
+		restoreLights( &lightingState );
 	}
-	
+
 	view.endGL();
 }
 
@@ -337,38 +337,38 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	{
 		return false;
 	}
-	
+
 	// we want to perform the selection using an IECoreGL::Selector, so we
 	// can avoid the performance penalty associated with using GL_SELECT mode.
 	// that means we don't really want to call view.beginSelect(), but we have to
 	// call it just to get the projection matrix for our own selection, because as far
 	// as i can tell, there is no other way of getting it reliably.
-	
+
 	M3dView view = selectInfo.view();
 	view.beginSelect();
 	Imath::M44d projectionMatrix;
 	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
 	view.endSelect();
-	
+
 	view.beginGL();
-	
+
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixd( projectionMatrix.getValue() );
-		
+
 		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::IDRender;
 		if( selectInfo.displayStatus() == M3dView::kHilite && !selectInfo.singleSelection() )
 		{
 			selectionMode = IECoreGL::Selector::OcclusionQuery;
 		}
-		
+
 		std::vector<IECoreGL::HitRecord> hits;
 		{
 			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
-				
+
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
 			scene->render( selector.baseState() );
-		
+
 			if( selectInfo.displayStatus() != M3dView::kHilite )
 			{
 				// we're not in component selection mode. we'd like to be able to select the procedural
@@ -382,9 +382,9 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 				}
 			}
 		}
-						
+
 	view.endGL();
-	
+
 	if( !hits.size() )
 	{
 		return false;
@@ -396,30 +396,30 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 	float depthMin = std::numeric_limits<float>::max();
 	int depthMinIndex = -1;
 	for( int i=0, e = hits.size(); i < e; i++ )
-	{		
+	{
 		if( hits[i].depthMin < depthMin )
 		{
 			depthMin = hits[i].depthMin;
 			depthMinIndex = componentIndices.length();
 		}
-		
+
 		ProceduralHolder::ComponentsMap::const_iterator compIt = proceduralHolder->m_componentsMap.find(
 			IECoreGL::NameStateComponent::nameFromGLName( hits[i].name )
 		);
 		assert( compIt != proceduralHolder->m_componentsMap.end() );
-		componentIndices.append( compIt->second.first );		
+		componentIndices.append( compIt->second.first );
 	}
-	
+
 	assert( depthMinIndex >= 0 );
 
 	// figure out the world space location of the closest hit
-	
+
 	MDagPath camera;
 	view.getCamera( camera );
 	MFnCamera fnCamera( camera.node() );
 	float near = fnCamera.nearClippingPlane();
 	float far = fnCamera.farClippingPlane();
-	
+
 	float z = -1;
 	if( fnCamera.isOrtho() )
 	{
@@ -431,26 +431,26 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 		float a = far / ( far - near );
 		float b = far * near / ( near - far );
 		z = b / ( depthMin - a );
-	}	
-	
+	}
+
 	MPoint localRayOrigin;
 	MVector localRayDirection;
 	selectInfo.getLocalRay( localRayOrigin, localRayDirection );
-	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();	
+	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();
 	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
 	MVector cameraRayDirection = localRayDirection * localToCamera;
-	
+
 	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
 	MPoint worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
-	
+
 	// turn the processed hits into appropriate changes to the current selection
-				
+
 	if( selectInfo.displayStatus() == M3dView::kHilite )
 	{
 		// selecting components
 		MFnSingleIndexedComponent fnComponent;
 		MObject component = fnComponent.create( MFn::kMeshPolygonComponent, &s ); assert( s );
-	
+
 		if( selectInfo.singleSelection() )
 		{
 			fnComponent.addElement( componentIndices[depthMinIndex] );
@@ -459,16 +459,16 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 		{
 			fnComponent.addElements( componentIndices );
 		}
-		
+
 		MSelectionList items;
 		items.add( selectInfo.multiPath(), component );
-		
+
 		selectInfo.addSelection(
 			items, worldIntersectionPoint,
 			selectionList, worldSpaceSelectPts,
 			MSelectionMask::kSelectMeshFaces,
 			true
-		);		
+		);
 	}
 	else
 	{
@@ -483,7 +483,7 @@ bool ProceduralHolderUI::select( MSelectInfo &selectInfo, MSelectionList &select
 			false
 		);
 	}
-	
+
 	return true;
 }
 
@@ -515,7 +515,7 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 {
 	assert( base );
 	assert( group );
-	
+
 	/// Add state so that the group hilite state doesn't propogate down the hierarchy past the given name
 	IECoreGL::ConstNameStateComponentPtr n = group->getState()->get< IECoreGL::NameStateComponent >();
 	if ( n && n->name() != name )
@@ -526,7 +526,7 @@ void ProceduralHolderUI::unhiliteGroupChildren( const std::string &name, IECoreG
 			assert( oldState );
 			m_stateMap[ group.get() ] = oldState;
 		}
-		
+
 		// don't bother if the group's already been explicitly highlighted
 		if( !group->getState()->get( IECoreGL::WireframeColorStateComponent::staticTypeId() ) )
 		{
@@ -558,23 +558,23 @@ void ProceduralHolderUI::resetHilites() const
 	m_stateMap.clear();
 }
 
-// Currently, Maya leaves lights in GL when you reduce the number of active lights in 
-// your scene. It fills the GL light space from 0 with the visible lights, so, we simply 
-// need to reset the potentially 'old' state of lights after the last one we know to be 
-// visible. We'll put it all back as we found it though. For the moment, this assumes 
-// Maya is filling GL consecutively, if they stop doing that, we'll need to get the 
+// Currently, Maya leaves lights in GL when you reduce the number of active lights in
+// your scene. It fills the GL light space from 0 with the visible lights, so, we simply
+// need to reset the potentially 'old' state of lights after the last one we know to be
+// visible. We'll put it all back as we found it though. For the moment, this assumes
+// Maya is filling GL consecutively, if they stop doing that, we'll need to get the
 // actual light indexes from the view. Its just a bit quicker to assume this, whilst we can.
 bool ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &view, LightingState *s ) const
 {
-		
+
 	if( !(request.displayStyle()==M3dView::kFlatShaded || request.displayStyle()==M3dView::kGouraudShaded) )
 	{
 		return false;
 	}
-	
+
 	M3dView::LightingMode mode;
 	view.getLightingMode(mode);
-	
+
 	if (mode == M3dView::kLightDefault)
 	{
 		s->numMayaLights = 1;
@@ -583,43 +583,43 @@ bool ProceduralHolderUI::cleanupLights( const MDrawRequest &request, M3dView &vi
 	{
 		view.getLightCount( s->numMayaLights );
 	}
-	
+
 	int sGlMaxLights = 0;
 	glGetIntegerv( GL_MAX_LIGHTS, &sGlMaxLights );
-	s->numGlLights = sGlMaxLights;	
+	s->numGlLights = sGlMaxLights;
 
 	if( s->numMayaLights >= s->numGlLights || s->numGlLights == 0 )
 	{
 		return false;
-	}		
-	
+	}
+
 	unsigned int vectorSize = s->numGlLights - s->numMayaLights;
-	
+
 	s->diffuses.resize( vectorSize );
 	s->specs.resize( vectorSize );
 	s->ambients.resize( vectorSize );
 
 	static float s_defaultColor[] = { 0.0, 0.0, 0.0, 1.0 };
-	
+
 	GLenum light;
 	unsigned int j = 0;
-	
+
 	for( unsigned int i = s->numMayaLights; i < s->numGlLights; i++ )
-	{		
+	{
 		light = GL_LIGHT0 + i;
-		
+
 		glGetLightfv( light, GL_DIFFUSE, s->diffuses[j].getValue() );
 		glLightfv( light, GL_DIFFUSE, s_defaultColor );
-			
+
 		glGetLightfv( light, GL_SPECULAR, s->specs[j].getValue() );
 		glLightfv( light, GL_SPECULAR, s_defaultColor );
-			
+
 		glGetLightfv( light, GL_AMBIENT, s->ambients[j].getValue() );
 		glLightfv( light, GL_AMBIENT, s_defaultColor );
-		
+
 		j++;
 	}
-	
+
 	return true;
 }
 
@@ -627,15 +627,15 @@ void ProceduralHolderUI::restoreLights( LightingState *s ) const
 {
 	GLenum light;
 	unsigned int j = 0;
-	
+
 	for( unsigned int i = s->numMayaLights; i < s->numGlLights; i++ )
-	{	
+	{
 		light = GL_LIGHT0 + i;
-		
+
 		glLightfv( light, GL_DIFFUSE, s->diffuses[j].getValue() );
 		glLightfv( light, GL_SPECULAR, s->specs[j].getValue() );
 		glLightfv( light, GL_AMBIENT, s->ambients[j].getValue() );
-		
+
 		j++;
 	}
 }

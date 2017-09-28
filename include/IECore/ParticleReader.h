@@ -129,11 +129,11 @@ class IECORE_API ParticleReader : public Reader
 		BoolParameterPtr m_convertPrimVarNamesParameter;
 
 		/// Convenience function to filter prim vars at a given percentage.
-		/// The filtering is based on the particle id or based on the 
+		/// The filtering is based on the particle id or based on the
 		/// particle index if no id is provided.
 		template<typename T, typename F>
 		typename T::Ptr filterAttr( const F * attr, float percentage, const Data *idAttr ) const;
-		
+
 		/// Returns the name of the original position primVar should we need to convert it to "P"
 		virtual std::string positionPrimVarName() = 0;
 

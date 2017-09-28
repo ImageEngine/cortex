@@ -42,7 +42,7 @@ class UndoState :
 
 	## state should be True to enable undo, and False to disable it.
 	def __init__( self, state ) :
-	
+
 		self.__state = state
 
 	def __enter__( self ) :
@@ -66,7 +66,7 @@ class UndoState :
 class UndoDisabled( UndoState ) :
 
 	def __init__( self ) :
-	
+
 		UndoState.__init__( self, False )
 
 ## A context object intended for use with python's "with" block. It ensures
@@ -75,7 +75,7 @@ class UndoDisabled( UndoState ) :
 class UndoEnabled( UndoState ) :
 
 	def __init__( self ) :
-	
+
 		UndoState.__init__( self, True )
 
 ## A context object intended for use with python's "with" block. It groups a
@@ -83,10 +83,10 @@ class UndoEnabled( UndoState ) :
 class UndoBlock :
 
 	def __enter__( self ) :
-	
+
 		nuke.Undo.begin()
-		
+
 	def __exit__( self, type, value, traceBack ) :
 
 		nuke.Undo.end()
-		
+

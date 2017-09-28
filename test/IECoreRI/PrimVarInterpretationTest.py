@@ -76,7 +76,7 @@ class PrimVarInterpretationTest( IECoreRI.TestCase ) :
 		self.assert_( '"constant color testColorArray[2]" [ 0 0 0 1 1 1 ]' in rib )
 
 		# Note that this triggers a special case PrimitiveVariableList::PrimitiveVariableList, since we can't have a type of float[3][2]
-		self.assert_( '"constant vector testNumericArray[2]" [ 0 0 0 1 1 1 ]' in rib )  
+		self.assert_( '"constant vector testNumericArray[2]" [ 0 0 0 1 1 1 ]' in rib )
 
 if __name__ == "__main__":
     unittest.main()

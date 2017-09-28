@@ -45,9 +45,9 @@ namespace IECoreGL
 
 class SelectorContext
 {
-	
+
 	public :
-	
+
 		SelectorContext( const Imath::Box2f &region, Selector::Mode mode, boost::python::list hits )
 			:	m_region( region ), m_mode( mode ), m_hitsList( hits ), m_selector()
 		{
@@ -57,7 +57,7 @@ class SelectorContext
 		{
 			m_selector = boost::shared_ptr<Selector>( new Selector( m_region, m_mode, m_hitsVector ) );
 		}
-		
+
 		void loadName( GLuint name )
 		{
 			if( m_selector )
@@ -81,14 +81,14 @@ class SelectorContext
 		}
 
 	private :
-	
+
 		Imath::Box2f m_region;
 		Selector::Mode m_mode;
 		std::vector<HitRecord> m_hitsVector;
 		boost::python::list m_hitsList;
 		boost::shared_ptr<Selector> m_selector;
-		
-		
+
+
 };
 
 void bindSelector()
@@ -97,9 +97,9 @@ void bindSelector()
 		.def( "loadName", &SelectorContext::loadName )
 		.def( "baseState", &SelectorContext::baseState )
 		.def( "__enter__", &SelectorContext::enter, return_self<>())
-		.def( "__exit__", &SelectorContext::exit )		
+		.def( "__exit__", &SelectorContext::exit )
 	;
-	
+
 	enum_<Selector::Mode>( "Mode" )
 		.value( "GLSelect", Selector::GLSelect )
 		.value( "OcclusionQuery", Selector::OcclusionQuery )

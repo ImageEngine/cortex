@@ -50,7 +50,7 @@ class TypeIdTest( unittest.TestCase ) :
 
 			v = getattr( IECore.TypeId, i )
 			if type( v ) is IECore.TypeId :
-				
+
 				if v in ids :
 
 					raise RuntimeError ("TypeId for %s is a duplicate of %s" % ( i, ids[v] ) )

@@ -43,29 +43,29 @@ namespace IECore
 template<class T>
 class SimpleDataHolder
 {
-	
+
 	public :
-	
+
 		SimpleDataHolder()
 			: m_data()
 		{
 		}
-		
+
 		SimpleDataHolder( const T &data )
 			: m_data( data )
 		{
 		}
-		
+
 		const T &readable() const
 		{
 			return m_data;
 		}
-		
+
 		T &writable()
 		{
 			return m_data;
 		}
-		
+
 		bool operator == ( const SimpleDataHolder<T> &other ) const
 		{
 			return m_data == other.m_data;
@@ -75,9 +75,9 @@ class SimpleDataHolder
 		{
 			h.append( readable() );
 		}
-		
+
 	private :
-	
+
 		T m_data;
 
 };
@@ -87,23 +87,23 @@ class SharedDataHolder
 {
 
 	public :
-	
+
 		SharedDataHolder()
 			: m_data( new Shareable )
 		{
 		}
-		
+
 		SharedDataHolder( const T &data )
 			: m_data( new Shareable( data ) )
 		{
 		}
-		
+
 		const T &readable() const
-		{	
+		{
 			assert( m_data );
 			return m_data->data;
 		}
-		
+
 		T &writable()
 		{
 			assert( m_data );
@@ -115,7 +115,7 @@ class SharedDataHolder
 			m_data->hashValid = false;
 			return m_data->data;
 		}
-		
+
 		bool operator == ( const SharedDataHolder<T> &other ) const
 		{
 			if( m_data==other.m_data )
@@ -126,7 +126,7 @@ class SharedDataHolder
 			// pointers ain't the same - do a potentially slow comparison
 			return readable()==other.readable();
 		}
-		
+
 		// The method called by the TypedData class when it wants to
 		// append the hash for the internal data into h. This is recomputed
 		// lazily only after writable() has been called. Rather than modify this
@@ -143,7 +143,7 @@ class SharedDataHolder
 		}
 
 	protected :
-	
+
 		MurmurHash hash() const
 		{
 			MurmurHash result;
@@ -152,20 +152,20 @@ class SharedDataHolder
 		}
 
 	private :
-	
+
 		class Shareable : public RefCounted
 		{
 			public :
-			
+
 				Shareable() : data(), hashValid( false ) {}
 				Shareable( const T &initData ) : data( initData ), hashValid( false ) {}
-				
+
 				T data;
 				MurmurHash hash;
 				volatile bool hashValid;
-				
+
 		};
-		
+
 		IE_CORE_DECLAREPTR( Shareable )
 		ShareablePtr m_data;
 

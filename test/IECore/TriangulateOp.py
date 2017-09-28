@@ -256,12 +256,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 	def testInterpolationShouldntChange( self ) :
-	
+
 		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
-		
+
 		TriangulateOp()( input = m, copyInput = False )
-	
+
 		self.assertEqual( m.interpolation, "catmullClark" )
 
 	def testFaceVaryingIndices( self ) :

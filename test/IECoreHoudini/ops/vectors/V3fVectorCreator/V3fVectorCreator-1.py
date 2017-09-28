@@ -14,7 +14,7 @@ class V3fVectorCreator( Op ) :
 			)
 		)
 
-		self.parameters().addParameters([ 
+		self.parameters().addParameters([
 			IntParameter(
 				name = "size",
 				description = "The number of elements to put in the result vector.",

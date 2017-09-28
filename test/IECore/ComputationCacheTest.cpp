@@ -90,7 +90,7 @@ struct ComputationCacheTest
 		/// cache should return NULL on never computed values (hash is unknown)
 		res = cache.get( ComputationParams(2), Cache::NullIfMissing );
 		BOOST_CHECK( !res );
-		// this is weird, but because we are using LRUCache with a dummie and we don't 
+		// this is weird, but because we are using LRUCache with a dummie and we don't
 		/// want to do two queries, it ends up registering that computation with the default hash...
 		BOOST_CHECK_EQUAL( size_t(1), cache.cachedComputations() );
 
@@ -164,12 +164,12 @@ struct ComputationCacheTest
 	struct GetFromCache
 	{
 		public :
-		
+
 			GetFromCache( Cache &cache )
 				:	m_cache( cache )
 			{
 			}
-				
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -182,18 +182,18 @@ struct ComputationCacheTest
 					assert( k->readable() == value );
 				}
 			}
-			
+
 		private :
-		
+
 			Cache &m_cache;
-			
+
 	};
 
 	void testThreadedGet()
 	{
 
 		Cache cache( get, hash, 10000, new ObjectPool(10000) );
-		
+
 		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ) );
 
 		BOOST_CHECK_EQUAL( size_t(500), cache.cachedComputations() );

@@ -37,7 +37,7 @@
 #include "GU/GU_Detail.h"
 #include "OBJ/OBJ_Node.h"
 #include "OP/OP_Bundle.h"
-#include "OP/OP_Director.h" 
+#include "OP/OP_Director.h"
 #include "PRM/PRM_Include.h"
 #include "PRM/PRM_Parm.h"
 #include "PRM/PRM_SpareData.h"
@@ -90,32 +90,32 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 	{
 		PRM_Template *baseTemplate = ROP_Node::getROPbaseTemplate();
 		PRM_Template *scriptTemplate = ROP_Node::getROPscriptTemplate();
-		
+
 		unsigned numBaseParms = PRM_Template::countTemplates( baseTemplate );
 		unsigned numScriptParms = PRM_Template::countTemplates( scriptTemplate );
-		
+
 		thisTemplate = new PRM_Template[ numBaseParms + numScriptParms + 4 ];
-		
+
 		// add the ROP base parms
 		unsigned totalParms = 0;
 		for ( unsigned i = 0; i < numBaseParms; ++i, ++totalParms )
 		{
 			thisTemplate[totalParms] = baseTemplate[i];
 		}
-		
+
 		// add the SceneCache parms
 		thisTemplate[totalParms] = PRM_Template(
 			PRM_FILE, 1, &pFile, &fileDefault, 0, 0, 0, 0, 0,
 			"An SCC file to write, based on the Houdini hierarchy defined by the Root Object provided."
 		);
 		totalParms++;
-		
+
 		thisTemplate[totalParms] = PRM_Template(
 			PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &pRootObject, &rootObjectDefault, 0, 0, 0,
 			&PRM_SpareData::objPath, 0, "The node to use as the root of the SceneCache"
 		);
 		totalParms++;
-		
+
 		forceObjectsSpareData.copyFrom( PRM_SpareData::objPath );
 		forceObjectsSpareData.setOpRelative( "/obj" );
 		thisTemplate[totalParms] = PRM_Template(
@@ -124,20 +124,20 @@ OP_TemplatePair *ROP_SceneCacheWriter::buildParameters()
 			"If this list is used, then links will be stored for any node not listed."
 		);
 		totalParms++;
-		
+
 		// add the ROP script parms
 		for ( unsigned i = 0; i < numScriptParms; ++i, ++totalParms )
 		{
 			thisTemplate[totalParms] = scriptTemplate[i];
 		}
 	}
-	
+
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
 		templatePair = new OP_TemplatePair( thisTemplate );
 	}
-	
+
 	return templatePair;
 }
 
@@ -145,11 +145,11 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 {
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
-	
+
 	UT_String value;
 	evalString( value, pFile.getToken(), 0, 0 );
 	std::string file = value.toStdString();
-	
+
 	try
 	{
 		SceneInterface::Path emptyPath;
@@ -165,11 +165,11 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		}
 	}
 	catch ( IECore::Exception &e )
-	{		
+	{
 		addError( ROP_MESSAGE, e.what() );
 		return false;
 	}
-	
+
 	try
 	{
 		m_outScene = SceneInterface::create( file, IndexedIO::Write );
@@ -179,10 +179,10 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		addError( ROP_MESSAGE, ( "Could not create a writable IECore::SceneInterface at \"" + file + "\"" ).c_str() );
 		return false;
 	}
-	
+
 	UT_String forceObjects;
 	evalString( forceObjects, pForceObjects.getToken(), 0, 0 );
-	
+
 	m_forceFilter =  0;
 	if ( linked( file ) && !forceObjects.equal( "" ) )
 	{
@@ -190,7 +190,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		const PRM_SpareData *data = getParm( pForceObjects.getToken() ).getSparePtr();
 		OBJ_Node *baseNode = OPgetDirector()->findNode( data->getOpRelative() )->castToOBJNode();
 		OP_Bundle *bundle = getParmBundle( pForceObjects.getToken(), 0, forceObjects, baseNode, data->getOpFilter() );
-		
+
 		// add all of the parent nodes
 		UT_PtrArray<OP_Node *> nodes;
 		bundle->getMembers( nodes );
@@ -204,7 +204,7 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 				current = current->getParent();
 			}
 		}
-		
+
 		// build a matchable filter from all these nodes
 		UT_WorkBuffer buffer;
 		bundle->buildString( buffer );
@@ -212,21 +212,21 @@ int ROP_SceneCacheWriter::startRender( int nframes, fpreal s, fpreal e )
 		m_forceFilter = new UT_StringMMPattern();
 		m_forceFilter->compile( forceObjects );
 	}
-	
+
 	// We need to adjust the time for writing, because Houdini treats time starting
-	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0.
 	m_startTime = s + CHgetManager()->getSecsPerSample();
 	m_endTime = e + CHgetManager()->getSecsPerSample();
-	
+
 	return true;
 }
 
 ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *boss )
 {
 	// We need to adjust the time for writing, because Houdini treats time starting
-	// at Frame 1, while SceneInterfaces treat time starting at Frame 0. 
+	// at Frame 1, while SceneInterfaces treat time starting at Frame 0.
 	double writeTime = time + CHgetManager()->getSecsPerSample();
-	
+
 	// the interruptor passed in is null for some reason, so just get the global one
 	UT_Interrupt *progress = UTgetInterrupt();
 	if ( !progress->opStart( ( boost::format( "Writing Houdini time %f as SceneCache time %f" ) % time % writeTime ).str().c_str() ) )
@@ -234,14 +234,14 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 		addError( 0, "Cache aborted" );
 		return ROP_ABORT_RENDER;
 	}
-	
+
 	executePreFrameScript( time );
-	
+
 	// update the default evaluation time to avoid double cooking
 	m_liveHoudiniScene->setDefaultTime( writeTime );
-	
+
 	SceneInterfacePtr outScene = m_outScene;
-	
+
 	// we need to re-root the scene if its trying to cache a top level object
 	UT_String nodePath;
 	evalString( nodePath, pRootObject.getToken(), 0, 0 );
@@ -275,7 +275,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 						{
 							continue;
 						}
-						
+
 						const char *name = tuple->getTableString( nameAttr, validatedIndex );
 						if( ( name == 0 ) || ( !strcmp( name, "" ) || !strcmp( name, "/" ) ) )
 						{
@@ -294,7 +294,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 			{
 				messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
 			}
-			
+
 			if ( SOP_Node *sop = node->getRenderSopPtr() )
 			{
 				sop->getErrorMessages( msg );
@@ -304,7 +304,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 					messages += "\n\nErrors from " + nodePath.toStdString() + ":\n" + msg.toStdString();
 				}
 			}
-			
+
 			addError( 0, messages.c_str() );
 			progress->opEnd();
 			return ROP_ABORT_RENDER;
@@ -315,13 +315,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::renderFrame( fpreal time, UT_Interrupt *bo
 			outScene = m_outScene->child( node->getName().toStdString(), SceneInterface::CreateIfMissing );
 		}
 	}
-	
+
 	ROP_RENDER_CODE status = doWrite( m_liveScene.get(), outScene.get(), writeTime, progress );
 	if ( status != ROP_ABORT_RENDER )
 	{
 		executePostFrameScript( time );
 	}
-	
+
 	progress->opEnd();
 	return status;
 }
@@ -331,7 +331,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::endRender()
 	m_liveHoudiniScene = 0;
 	m_liveScene = 0;
 	m_outScene = 0;
-	
+
 	return ROP_CONTINUE_RENDER;
 }
 
@@ -343,12 +343,12 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		addError( 0, ( "Cache aborted during " + liveScene->name().string() ).c_str() );
 		return ROP_ABORT_RENDER;
 	}
-	
+
 	if ( liveScene != m_liveScene )
 	{
 		outScene->writeTransform( liveScene->readTransform( time ).get(), time );
 	}
-	
+
 	Mode mode = NaturalExpand;
 	const LiveScene *hScene = IECore::runTimeCast<const LiveScene>( liveScene );
 	if ( hScene && m_forceFilter )
@@ -357,7 +357,7 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		hScene->node()->getFullPath( nodePath );
 		mode = ( nodePath.multiMatch( *m_forceFilter ) ) ? ForcedExpand : ForcedLink;
 	}
-	
+
 	SceneInterface::NameList attrs;
 	liveScene->attributeNames( attrs );
 	for ( SceneInterface::NameList::iterator it = attrs.begin(); it != attrs.end(); ++it )
@@ -368,16 +368,16 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			{
 				continue;
 			}
-			
+
 			mode = NaturalLink;
 		}
-		
+
 		if ( ConstObjectPtr data = liveScene->readAttribute( *it, time ) )
 		{
 			outScene->writeAttribute( *it, data.get(), time );
 		}
 	}
-	
+
 	if ( mode == ForcedLink )
 	{
 		if ( const SceneCacheNode<OP_Node> *sceneNode = static_cast< const SceneCacheNode<OP_Node>* >( hScene->node() ) )
@@ -389,16 +389,16 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			}
 		}
 	}
-	
+
 	if ( mode == NaturalLink )
 	{
 		return ROP_CONTINUE_RENDER;
 	}
-	
+
 	SceneInterface::NameList tags;
 	liveScene->readTags( tags );
 	outScene->writeTags( tags );
-	
+
 	if ( liveScene->hasObject() )
 	{
 		try
@@ -411,13 +411,13 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			return ROP_ABORT_RENDER;
 		}
 	}
-	
+
 	SceneInterface::NameList children;
 	liveScene->childNames( children );
 	for ( SceneInterface::NameList::iterator it = children.begin(); it != children.end(); ++it )
 	{
 		ConstSceneInterfacePtr liveChild = liveScene->child( *it );
-		
+
 		SceneInterfacePtr outChild = 0;
 		if ( outScene->hasChild( *it ) )
 		{
@@ -426,26 +426,26 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 		else
 		{
 			outChild = outScene->createChild( *it );
-			
+
 			if ( time != m_startTime )
 			{
 				outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
 				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time - 1e-6 );
 			}
 		}
-		
+
 		if ( outChild->hasAttribute( changingHierarchyAttribute ) )
 		{
 			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time );
 		}
-		
+
 		ROP_RENDER_CODE status = doWrite( liveChild.get(), outChild.get(), time, progress );
 		if ( status != ROP_CONTINUE_RENDER )
 		{
 			return status;
 		}
 	}
-	
+
 	// turn visibility off if the child disappears
 	SceneInterface::NameList outChildren;
 	outScene->childNames( outChildren );
@@ -458,12 +458,12 @@ ROP_RENDER_CODE ROP_SceneCacheWriter::doWrite( const SceneInterface *liveScene, 
 			{
 				outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( true ), time - 1e-6 );
 			}
-			
+
 			outChild->writeAttribute( changingHierarchyAttribute, new BoolData( true ), time );
 			outChild->writeAttribute( IECore::SceneInterface::visibilityName, new BoolData( false ), time );
 		}
 	}
-	
+
 	return ROP_CONTINUE_RENDER;
 }
 

@@ -39,7 +39,7 @@
 # a specified number of points, within a specified bounding box.
 #
 #=====
-from IECore import * 
+from IECore import *
 from random import *
 
 #generate a points primitive filling the bbox with npoints
@@ -55,7 +55,7 @@ def generatePoints( bbox, npoints ):
 
 #our point render procedural
 class pointRender(ParameterisedProcedural) :
-        def __init__(self) : 
+        def __init__(self) :
                 ParameterisedProcedural.__init__( self, "Description here." )
                 bbox = Box3fParameter( "bbox", "Bounds for points.", Box3f(V3f(0), V3f(1)) )
                 npoints = IntParameter( "npoints", "Number of points.", 100, minValue=0, maxValue=10000 )
@@ -65,21 +65,21 @@ class pointRender(ParameterisedProcedural) :
                 self.__npoints = None
                 self.__bbox = None
 
-        def generatePoints(self, args): 
+        def generatePoints(self, args):
                 if args['npoints'].value!=self.__npoints or args['bbox'].value!=self.__bbox:
                         self.__points = generatePoints( args['bbox'].value, args['npoints'].value )
                         self.__npoints = args['npoints'].value
                         self.__bbox = args['bbox'].value
                 return self.__points
 
-        def doBound(self, args) : 
+        def doBound(self, args) :
                 self.generatePoints(args)
                 return self.__points.bound()
 
-        def doRenderState(self, renderer, args) : 
+        def doRenderState(self, renderer, args) :
                 pass
 
-        def doRender(self, renderer, args) : 
+        def doRender(self, renderer, args) :
                 self.generatePoints(args)
                 self.__points['width'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, args['width'] )
                 self.__points.render( renderer )

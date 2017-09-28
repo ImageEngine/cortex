@@ -47,12 +47,12 @@ template<typename T>
 class TypedPrimitiveOp : public ModifyOp
 {
 	public :
-	
+
 		typedef T PrimitiveType;
 
 		TypedPrimitiveOp( const std::string &description );
 		virtual ~TypedPrimitiveOp();
-		
+
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );
 
 	protected :

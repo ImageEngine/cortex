@@ -68,7 +68,7 @@ class UserAtributesTest( unittest.TestCase ) :
 		r.worldEnd()
 
 	def performProceduralTest( self, threaded ) :
-	
+
 		errors = list()
 
 		class SimpleProcedural( IECore.ParameterisedProcedural ):
@@ -88,18 +88,18 @@ class UserAtributesTest( unittest.TestCase ) :
 							renderer.setAttribute( "user:myTestAttribute", IECore.IntData(11) )
 							# rendering a child procedural
 							SimpleProcedural( 1 ).render( renderer )
-							self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )	
+							self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
 							# rendering child procedural from inside a Group
 							g = IECore.Group()
 							g.addChild( SimpleProcedural( 2 ) )
 							g.render( renderer )
-							
+
 					elif s.__level == 1 :
-						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )	
-						
+						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
+
 					elif s.__level == 2 :
-						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )	
-						
+						self.assertEqual( renderer.getAttribute( "user:myTestAttribute" ), IECore.IntData(11) )
+
 				except Exception, e :
 					errors.append( IECore.exceptionInfo()[1] )
 
@@ -109,16 +109,16 @@ class UserAtributesTest( unittest.TestCase ) :
 			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( threaded ) )
 			p = SimpleProcedural()
 			p.render( r )
-		
+
 		if errors :
 			raise Exception, "ERRORS:\n".join( errors )
 
 	def testUserAttributesInSingleThreadedProcedural( self ) :
 
 		self.performProceduralTest( False )
-		
+
 	def testUserAttributesInMultiThreadedProcedural( self ) :
-	
+
 		self.performProceduralTest( True )
 
 	def testUserAttributesInImmediateMode( self ) :

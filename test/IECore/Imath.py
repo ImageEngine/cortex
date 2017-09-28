@@ -495,9 +495,9 @@ class ImathV3f(unittest.TestCase):
 
 		v1.normalize()
 		self.assertEqual( v1, V3f(1.0, 0.0, 0.0) )
-		
+
 	def testRepr( self ) :
-	
+
 		v1 = IECore.V3f( 0.091242323423 )
 		v2 = eval( repr( v1 ) )
 		self.assertEqual( v1, v2 )
@@ -580,26 +580,26 @@ class ImathBox3f(unittest.TestCase):
 		self.assert_( not b1.contains( b3 ) )
 
 	def testSplit( self ) :
-	
+
 		r = Rand32()
 		for i in range( 0, 100 ) :
-		
+
 			b = Box3f()
 			b.extendBy( r.nextV3f() )
 			b.extendBy( r.nextV3f() )
-			
+
 			major = b.majorAxis()
-			
+
 			low, high = b.split()
 			low2, high2 = b.split( major )
-			
+
 			self.assertEqual( low, low2 )
 			self.assertEqual( high, high2 )
-			
+
 			b2 = Box3f()
 			b2.extendBy( low )
 			b2.extendBy( high )
-			
+
 			self.assertEqual( b, b2 )
 
 class ImathQuatf(unittest.TestCase):
@@ -760,9 +760,9 @@ class ImathM33f(unittest.TestCase):
 
 	def testIndexing(self):
 		"""Test M33f indexing via [] operator"""
-		
+
 		m = IECore.M33f()
-		
+
 		# test tuple indexing:
 		m[(0,0)] = 10.0
 		m[(0,1)] = 11.0
@@ -773,7 +773,7 @@ class ImathM33f(unittest.TestCase):
 		m[(2,0)] = 16.0
 		m[(2,1)] = 17.0
 		m[(2,2)] = 18.0
-		
+
 		# test __getitem__( tuple ):
 		self.assertEqual( m[(0,0)], 10.0 )
 		self.assertEqual( m[(0,1)], 11.0 )
@@ -884,17 +884,17 @@ class ImathM33f(unittest.TestCase):
 
 			mt = m.transposed()
 			self.assertAlmostEqual( d, mt.determinant(), 3 )
-			
+
 	def testConstructFromOtherType( self ) :
-	
+
 		md = M33d( 1, 2, 3, 4, 5, 6, 7, 8, 9 )
 		mf = M33f( 1, 2, 3, 4, 5, 6, 7, 8, 9 )
-		
+
 		mf2 = M33f( md )
 		self.assertEqual( mf2, mf )
-		
+
 		md2 = M33d( mf )
-		self.assertEqual( md2, md )		
+		self.assertEqual( md2, md )
 
 class ImathM44f(unittest.TestCase):
 	def testConstructors(self):
@@ -937,7 +937,7 @@ class ImathM44f(unittest.TestCase):
 	def testIndexing(self):
 		"""Test M44f indexing via [] operator"""
 		m = IECore.M44f()
-		
+
 		# test tuple indexing:
 		m[(0,0)] = 10.0
 		m[(0,1)] = 11.0
@@ -955,7 +955,7 @@ class ImathM44f(unittest.TestCase):
 		m[(3,1)] = 23.0
 		m[(3,2)] = 24.0
 		m[(3,3)] = 25.0
-		
+
 		# test __getitem__( tuple ):
 		self.assertEqual( m[(0,0)], 10.0 )
 		self.assertEqual( m[(0,1)], 11.0 )
@@ -1102,18 +1102,18 @@ class ImathM44f(unittest.TestCase):
 			m = M44f()
 			m.translate( V3f( r(), r(), r() ) )
 			self.assertAlmostEqual( m.determinant(), 1, 10 )
-			
+
 	def testConstructFromOtherType( self ) :
-	
+
 		md = M44d( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 )
 		mf = M44f( 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 )
-		
+
 		mf2 = M44f( md )
 		self.assertEqual( mf2, mf )
-		
+
 		md2 = M44d( mf )
 		self.assertEqual( md2, md )
-		
+
 class ImathColor3Test( unittest.TestCase ) :
 
 	def test( self ) :
@@ -1157,20 +1157,20 @@ class ImathColor3Test( unittest.TestCase ) :
 		self.assertEqual( c.dimensions(), 3 )
 
 	def testHSVTransforms( self ) :
-	
+
 		c = Color3f( 0.1, 0.2, 0.3 )
-		
+
 		chsv = c.rgbToHSV()
 		self.assertEqual( c, Color3f( 0.1, 0.2, 0.3 ) )
 		self.failUnless( isinstance( chsv, Color3f ) )
 		self.failUnless( chsv.equalWithAbsError( Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
-		
+
 		crgb = chsv.hsvToRGB()
 		self.failUnless( chsv.equalWithAbsError( Color3f( 0.5833, 0.6667, 0.3 ), 0.001 ) )
 		self.failUnless( crgb.equalWithAbsError( c, 0.001 ) )
 
 	def testRepr( self ) :
-	
+
 		c1 = IECore.Color3f( 0.091242323423 )
 		c2 = eval( repr( c1 ) )
 		self.assertEqual( c1, c2 )

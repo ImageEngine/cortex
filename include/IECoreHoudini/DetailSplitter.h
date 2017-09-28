@@ -51,33 +51,33 @@ namespace IECoreHoudini
 /// attribute, but any primitive string attribute could be used.
 class DetailSplitter : public IECore::RefCounted
 {
-	
+
 	public :
-		
+
 		IE_CORE_DECLAREMEMBERPTR( DetailSplitter );
-		
+
 		/// Create a DetailSplitter which will split the handle by the given key.
 		/// @param key The name of a primitive string attribute on the GU_Detail.
 		DetailSplitter( const GU_DetailHandle &handle, const std::string &key = "name" );
-		
+
 		virtual ~DetailSplitter();
-		
+
 		/// Creates and returns a handle to a new GU_Detail which contains only
 		/// the primitives that match the value requested.
 		const GU_DetailHandle split( const std::string &value );
-		
+
 		/// Fills the result vector with all valid values in the GU_Detail
 		void values( std::vector<std::string> &result );
-		
+
 		/// Returns the handle held by the splitter
 		const GU_DetailHandle &handle() const;
-	
+
 	private :
-		
+
 		bool validate();
-		
+
 		typedef std::map<std::string, GU_DetailHandle> Cache;
-		
+
 		int m_lastMetaCount;
 		const std::string m_key;
 		const GU_DetailHandle m_handle;

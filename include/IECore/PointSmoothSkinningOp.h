@@ -123,7 +123,7 @@ class IECORE_API PointSmoothSkinningOp : public ModifyOp
 		IntVectorParameterPtr m_refIndicesParameter;
 
 		ConstSmoothSkinningDataPtr m_prevSmoothSkinningData;
-		
+
 		struct DeformPositions;
 		struct DeformNormals;
 };

@@ -44,18 +44,18 @@ class MeshPrimitiveParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		MeshPrimitiveParameterHandler();
-		
+
 		virtual int minimumInputs( const IECore::Parameter *parameter );
 		virtual int maximumInputs( const IECore::Parameter *parameter );
 		virtual bool testInput( const IECore::Parameter *parameter, int input, const DD::Image::Op *op );
 		virtual void setParameterValue( IECore::Parameter *parameter, InputIterator first, InputIterator last );
-		
+
 	protected :
-	
+
 		static Description<MeshPrimitiveParameterHandler> g_description;
-	
+
 };
 
 } // namespace IECoreNuke

@@ -78,7 +78,7 @@ std::string repr<Imf::TimeCode>( Imf::TimeCode &x )
 template<>
 std::string str<Imf::TimeCode>( Imf::TimeCode &x )
 {
-	
+
 	return ( boost::format( "%02d:%02d:%02d:%02d" ) % x.hours() % x.minutes() % x.seconds() % x.frame() ).str();
 }
 
@@ -95,10 +95,10 @@ bool notEqual( Imf::TimeCode &x, Imf::TimeCode &y )
 void bindImfTimeCode()
 {
 	scope timeCodeScope = class_<Imf::TimeCode>( "TimeCode" )
-		
+
 		.def( init<>() )
 		.def( init<const Imf::TimeCode &>() )
-		
+
 		.def(
 			init< int, optional< int, Imf::TimeCode::Packing > >
 			(
@@ -109,7 +109,7 @@ void bindImfTimeCode()
 				)
 			)
 		)
-		
+
 		.def(
 			init< int, int, int, int, optional< bool, bool, bool, bool, bool, bool, int, int, int, int, int, int, int, int > >
 			(
@@ -135,7 +135,7 @@ void bindImfTimeCode()
 				)
 			)
 		)
-		
+
 		.def( "hours",  &Imf::TimeCode::hours )
 		.def( "minutes",  &Imf::TimeCode::minutes )
 		.def( "seconds",  &Imf::TimeCode::seconds )
@@ -148,7 +148,7 @@ void bindImfTimeCode()
 		.def( "bgf2",  &Imf::TimeCode::bgf2 )
 		.def( "binaryGroup",  &Imf::TimeCode::binaryGroup )
 		.def( "userData",  &Imf::TimeCode::userData )
-		
+
 		.def( "setHours",  &Imf::TimeCode::setHours )
 		.def( "setMinutes",  &Imf::TimeCode::setMinutes )
 		.def( "setSeconds",  &Imf::TimeCode::setSeconds )
@@ -161,13 +161,13 @@ void bindImfTimeCode()
 		.def( "setBgf2",  &Imf::TimeCode::setBgf2 )
 		.def( "setBinaryGroup",  &Imf::TimeCode::setBinaryGroup )
 		.def( "setUserData",  &Imf::TimeCode::setUserData )
-		
+
 		.def( "__str__", &str<Imf::TimeCode> )
 		.def( "__repr__", &repr<Imf::TimeCode> )
 		.def( "__eq__", &equal )
 		.def( "__ne__", &notEqual )
 	;
-	
+
 	enum_< Imf::TimeCode::Packing >( "Packing" )
 		.value( "TV60", Imf::TimeCode::TV60_PACKING )
 		.value( "TV50", Imf::TimeCode::TV50_PACKING )

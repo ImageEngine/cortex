@@ -126,7 +126,7 @@ ObjectPtr OBJReader::doOperation(const CompoundObject * operands)
 	if( sTextureCoordinates->readable().size() )
 	{
 		mesh->variables.insert(PrimitiveVariableMap::value_type("s", PrimitiveVariable( PrimitiveVariable::FaceVarying, sTextureCoordinates)));
-	
+
 	}
 	if( tTextureCoordinates->readable().size() )
 	{

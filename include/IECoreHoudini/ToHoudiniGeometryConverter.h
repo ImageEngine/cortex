@@ -64,46 +64,46 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 		/// and false otherwise. Implemented to aquire the write lock on the GU_Detail held by the
 		/// GU_DetailHandle, call doConversion(), and finally unlock the GU_Detail.
 		bool convert( GU_DetailHandle handle ) const;
-		
+
 		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail. This is
 		/// usually called by convert(), but is also provided here so attribs may be transfered onto
 		/// existing topology.
 		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
-		
+
 		/// Creates a converter which will convert the given IECore::Object to a Houdini GU_Detail.
 		/// Returns 0 if no such converter can be found.
 		static ToHoudiniGeometryConverterPtr create( const IECore::Object *object );
-		
+
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a ToHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
-		
+
 		IECore::StringParameter *nameParameter();
 		const IECore::StringParameter *nameParameter() const;
-		
+
 		IECore::StringParameter *attributeFilterParameter();
 		const IECore::StringParameter *attributeFilterParameter() const;
-		
+
 		IECore::BoolParameter *convertStandardAttributesParameter();
 		const IECore::BoolParameter *convertStandardAttributesParameter() const;
-	
+
 	protected :
 
 		ToHoudiniGeometryConverter( const IECore::Object *object, const std::string &description );
-		
+
 		virtual ~ToHoudiniGeometryConverter();
-		
+
 		/// Must be implemented by derived classes to fill the given GU_Detail with data from the IECore::Object
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const = 0;
-		
+
 		/// Utility to name the primitives based on the name parameter. This is called by the default
 		/// implementation of transferAttribs(), and should be called by any overriding implementation.
 		void setName( GU_Detail *geo, const GA_Range &prims ) const;
-		
+
 		/// May be implemented by derived classes to pre-process PrimitiveVariables before conversion.
 		/// Default implementation simply returns a shallow copy of the input variable.
 		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
-		
+
 		typedef ToHoudiniGeometryConverterPtr (*CreatorFn)( const IECore::Object *object );
 
 		static void registerConverter( IECore::TypeId fromType, CreatorFn creator );
@@ -118,10 +118,10 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 			private :
 				static ToHoudiniGeometryConverterPtr creator( const IECore::Object *object );
 		};
-		
+
 		/// Appends points to the GA_Detail. Returns a GA_Range containing the GA_Offsets for the newly added points.
 		GA_Range appendPoints( GA_Detail *geo, size_t numPoints ) const;
-		
+
 		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail. In most cases,
 		/// derived classes will implement transferAttribs to call this method with the appropriate arguments.
 		void transferAttribValues(
@@ -131,19 +131,19 @@ class ToHoudiniGeometryConverter : public ToHoudiniConverter
 			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
 			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
 		) const;
-		
+
 	private :
-		
+
 		IECore::StringParameterPtr m_nameParameter;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
-		
+
 		// function to handle the special case for P
 		void transferP( const IECore::V3fVectorData *positions, GU_Detail *geo, const GA_Range &points ) const;
-		
+
 		// function to map standard IECore PrimitiveVariable names to Houdini names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;
-		
+
 		/// Struct for maintaining the registered derived classes
 		struct Types
 		{

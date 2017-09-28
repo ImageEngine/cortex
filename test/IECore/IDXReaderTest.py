@@ -41,29 +41,29 @@ class IDXReaderTest( unittest.TestCase ) :
 
 		r = IECore.IDXReader()
 		self.assertEqual( r["fileName"].getTypedValue(), "" )
-		
+
 		r = IECore.IDXReader( "test/IECore/data/idxFiles/test.idx" )
 		self.assertEqual( r["fileName"].getTypedValue(), "test/IECore/data/idxFiles/test.idx" )
-		
+
 	def testReading( self ) :
-	
+
 		r = IECore.IDXReader( "test/IECore/data/idxFiles/test.idx" )
-		
+
 		o = r.read()
-		
+
 		self.failUnless( o.isInstanceOf( IECore.Group.staticTypeId() ) )
-		
-		self.assertEqual( len(o.children()), 1 )	
-		
+
+		self.assertEqual( len(o.children()), 1 )
+
 		c = o.children()[0]
 
 		self.assertEqual( c.numPoints, 6 )
-		
+
 		# We're not order preserving
-		
+
 		for k in [ "000", "001", "002", "003", "004", "005" ] :
 			self.failUnless( k in c["PointID"].data )
-	
+
 		for p in [
 				IECore.V3f( 63.204863, 0.831837, -33.969296 ),
 				IECore.V3f( 62.345470, 0.707662, -34.099882 ),
@@ -73,14 +73,14 @@ class IDXReaderTest( unittest.TestCase ) :
 				IECore.V3f( 54.252821, 0.716216, -34.849839 ),
 			]:
 				self.failUnless( p in c["P"].data )
-			
+
 	def testCanRead( self ) :
-	
+
 		self.failUnless( IECore.IDXReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
 		self.failIf( IECore.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
-		
+
 	def testRegistration( self ) :
-	
+
 		r = IECore.Reader.create( "test/IECore/data/idxFiles/test.idx" )
 		self.failUnless( isinstance( r, IECore.IDXReader ) )
 

@@ -54,13 +54,13 @@ static list split( const std::string &camelCase )
 {
 	vector<string> s;
 	CamelCase::split( camelCase, back_insert_iterator<vector<string> >( s ) );
-	
+
 	list result;
 	for( vector<string>::const_iterator it = s.begin(), end = s.end(); it!=end; ++it )
 	{
 		result.append( *it );
 	}
-	
+
 	return result;
 }
 
@@ -74,12 +74,12 @@ static std::string join( object words, CamelCase::Caps caps, const std::string &
 void bindCamelCase()
 {
 	using boost::python::arg;
-	
+
 	class_<CamelCase> c( "CamelCase" );
-	
+
 	{
 		scope s( c );
-	
+
 		enum_<CamelCase::Caps>( "Caps" )
 			.value( "Unchanged", CamelCase::Unchanged )
 			.value( "First", CamelCase::First )
@@ -87,7 +87,7 @@ void bindCamelCase()
 			.value( "AllExceptFirst", CamelCase::AllExceptFirst )
 		;
 	}
-	
+
 	c.def( "split", &split ).staticmethod( "split" );
 	c.def( "join", &join, ( arg( "words" ), arg( "caps" ) = CamelCase::All, arg( "separator" ) = "" ) ).staticmethod( "join" );
 	c.def( "toSpaced", &CamelCase::toSpaced, ( arg( "camelCase" ), arg( "caps" ) = CamelCase::All ) ).staticmethod( "toSpaced" );

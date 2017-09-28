@@ -51,7 +51,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 		self.assertTrue( isinstance( p2, ObjectPool ) )
 
 	def testUniqueness( self ) :
-		
+
 		p = ObjectPool(500)
 		self.assertEqual( p.memoryUsage(), 0 )
 
@@ -77,7 +77,7 @@ class ObjectPoolTest( unittest.TestCase ) :
 		p.clear()
 		self.assertFalse( b.isSame( p.store( b, ObjectPool.StoreCopy ) ) )
 		self.assertEqual( b, p.retrieve(b.hash(),_copy=False) )
-		
+
 	def testRemoval( self ) :
 
 		p = ObjectPool(500)

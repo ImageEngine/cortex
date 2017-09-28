@@ -110,7 +110,7 @@ def __processUpstreamNode(data, meshDagPath, dgModifier):
 		# Duplicate mesh, mark as "intermediate", and reconnect in the DAG
 		dagNodeFn = OpenMaya.MFnDagNode( data.meshNodeShape )
 		meshNodeShapeName = dagNodeFn.name()
-		
+
 		data.upstreamNodeTransform = dagNodeFn.duplicate(False, False)
 		dagNodeFn.setObject(data.upstreamNodeTransform)
 
@@ -120,14 +120,14 @@ def __processUpstreamNode(data, meshDagPath, dgModifier):
 			raise RuntimeError( "Duplicated mesh has no shape" )
 
 		data.upstreamNodeShape = dagNodeFn.child(0)
-		
+
 		fDagModifier.reparentNode(data.upstreamNodeShape, data.meshNodeTransform)
 		fDagModifier.renameNode( data.upstreamNodeShape, meshNodeShapeName+"Orig" )
 		fDagModifier.doIt()
 
 		dagNodeFn.setObject(data.upstreamNodeShape)
 		dagNodeFn.setIntermediateObject(True)
-		
+
 		data.upstreamNodeSrcAttr = dagNodeFn.attribute("outMesh")
 		data.upstreamNodeSrcPlug = dagNodeFn.findPlug("outMesh")
 

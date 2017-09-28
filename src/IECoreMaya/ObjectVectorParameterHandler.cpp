@@ -60,14 +60,14 @@ MPlug ObjectVectorParameterHandler::doCreate( IECore::ConstParameterPtr paramete
 	MObject attribute = fnTAttr.create( plugName, plugName, ObjectData::id );
 	fnTAttr.setArray( true );
 	fnTAttr.setDisconnectBehavior( MFnAttribute::kDelete );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
-	
+
 	if( !finishUpdating( parameter, result ) )
 	{
 		return MPlug();
-	}	
-	
+	}
+
 	return result;
 }
 

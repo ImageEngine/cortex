@@ -45,7 +45,7 @@ ParameterHandler::Description<ObjectVectorParameterHandler> ObjectVectorParamete
 ObjectVectorParameterHandler::ObjectVectorParameterHandler()
 {
 }
-		
+
 int ObjectVectorParameterHandler::minimumInputs( const IECore::Parameter *parameter )
 {
 	return 0;
@@ -68,7 +68,7 @@ bool ObjectVectorParameterHandler::testInput( const IECore::Parameter *parameter
 void ObjectVectorParameterHandler::setParameterValue( IECore::Parameter *parameter, InputIterator first, InputIterator last )
 {
 	assert( last == first + 1 );
-	
+
 	IECore::ObjectVectorPtr value = new IECore::ObjectVector;
 	for( InputIterator it=first; it!=last; it++ )
 	{
@@ -79,6 +79,6 @@ void ObjectVectorParameterHandler::setParameterValue( IECore::Parameter *paramet
 			value->members().push_back( o );
 		}
 	}
-	
+
 	parameter->setValue( value );
 }

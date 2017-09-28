@@ -52,19 +52,19 @@ namespace IECoreMaya
 class DelightProceduralCacheCommand : public MPxCommand
 {
 	public :
-	
+
 		DelightProceduralCacheCommand();
 		virtual ~DelightProceduralCacheCommand();
-		
+
 		static void *creator();
 		static MSyntax newSyntax();
-		
+
 		MStatus doIt( const MArgList & args );
-		
+
 	private :
-		
+
 		typedef std::map<IECore::ParameterPtr, IECore::ObjectVectorPtr> MotionValueMap;
-		
+
 		struct CachedProcedural
 		{
 			std::string className;
@@ -73,10 +73,10 @@ class DelightProceduralCacheCommand : public MPxCommand
 			IECore::ParameterisedProceduralPtr procedural;
 			IECore::ObjectPtr values;
 			std::map<IECore::ParameterPtr, IECore::ObjectVectorPtr> motionValues; // for parameters who want to be given one value per motion sample
-		};		
+		};
 		typedef std::map<std::string, CachedProcedural> ProceduralMap;
 		static ProceduralMap g_procedurals;
-		
+
 		void findMotionParameters( IECore::Parameter *parameter, MotionValueMap &values );
 		void addMotionSample( MotionValueMap &values );
 

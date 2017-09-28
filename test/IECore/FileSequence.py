@@ -126,7 +126,7 @@ class testFileSequence( unittest.TestCase ) :
 		self.assertEqual( s.fileNames(), ["seq.0.tif", "seq.1.tif", "seq.2.tif"] )
 
 	def testFrameListConstructor( self ):
-		
+
 		s = FileSequence( "seq.#.tif 0-2" )
 		self.assertEqual( s.fileNames(), ["seq.0.tif", "seq.1.tif", "seq.2.tif"] )
 
@@ -319,28 +319,28 @@ class testLs( unittest.TestCase ) :
 		self.doSequences( s )
 
 	def testUnorderedSequences( self ) :
-		
+
 		self.tearDown()
 		os.system( "mkdir -p test/sequences/lsTest" )
 
 		s = FileSequence( "a.###.b", FrameRange.parse( '100-110, 1-10' ) )
 		fileNames = s.fileNames()
-		
+
 		for f in fileNames :
 			os.system( "touch 'test/sequences/lsTest/" + f + "'" )
 
 		l = ls( "test/sequences/lsTest" )
 
 		self.assertEqual( len( l ), 1 )
-		
+
 		fileNames.sort()
 		lFileNames = l[0].fileNames()
 		lFileNames.sort()
-		
+
 		for f in fileNames :
 			i = fileNames.index( f )
 			self.assertEqual( f, lFileNames[i] )
-	
+
 	def testNumberedSequences( self ) :
 
 		s = []
@@ -373,7 +373,7 @@ class testLs( unittest.TestCase ) :
 		self.assertEqual( ls( "test/sequences/lsTest/c.####.tif" ), None )
 
 	def testAmbiguousPadding( self ):
-		
+
 		self.tearDown()
 		os.system( "mkdir -p test/sequences/lsTest" )
 
@@ -393,14 +393,14 @@ class testLs( unittest.TestCase ) :
 
 		"""Verify that single files on their own aren't treated as sequences even
 		if the name matches the something.#.ext pattern."""
-		
+
 		self.tearDown()
 		os.system( "mkdir -p test/sequences/lsTest" )
-		
+
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif" ] )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "b.####.gif", FrameRange( 10, 11 ) ) )
-		
+
 		# test minSequenceSize for findSequences
 		l = findSequences( [ "a.0001.tif", "b.0010.gif", "b.0011.gif", "c.tif" ], 1 )
 		self.assertEqual( len( l ), 2 )
@@ -420,7 +420,7 @@ class testLs( unittest.TestCase ) :
 
 		l = ls( "test/sequences/lsTest/a.#.tif", 1 )
 		self.assertEqual( s1, l )
-		
+
 	def testSpecialExtensions( self ):
 		l = findSequences( [ "a.001.cr2", "b.002.cr2", "b.003.cr2" ] )
 		self.assertEqual( len( l ), 1 )
@@ -523,7 +523,7 @@ class testCp( unittest.TestCase ) :
 		l = ls( "test/sequences/cpTest" )
 		self.assertEqual( len( l ), 1 )
 		self.assertEqual( l[0], FileSequence( "t.####.tif", FrameRange( 50, 150 ) ) )
-	
+
 	def tearDown( self ) :
 
 		if os.path.exists( "test/sequences" ) :

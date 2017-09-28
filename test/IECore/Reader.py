@@ -66,23 +66,23 @@ class TestReader(unittest.TestCase):
 		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/empty' )
 		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null' )
 		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null.cin' )
-		
+
 	def testCanRead( self ) :
-	
+
 		# every reader subclass should have a canRead() static method, unless it's an abstract base class
-		
+
 		def isReader( x ) :
-		
+
 			abstractReaders = ( IECore.Reader, IECore.ParticleReader )
-		
+
 			try :
 				return issubclass( x, IECore.Reader ) and x not in abstractReaders
 			except TypeError :
 				return False
-				
+
 		allIECore = [ getattr( IECore, x ) for x in dir( IECore ) ]
 		allReaders = [ x for x in allIECore if isReader( x ) ]
-	
+
 		for reader in allReaders :
 			self.failUnless( hasattr( reader, "canRead" ) )
 

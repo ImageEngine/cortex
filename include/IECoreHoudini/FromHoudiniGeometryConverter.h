@@ -80,15 +80,15 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, IECore::TypeId resultType=IECore::InvalidTypeId );
 		static FromHoudiniGeometryConverterPtr create( const GU_DetailHandle &handle, const std::set<IECore::TypeId> &resultTypes );
 		//@}
-		
+
 		/// Fills the passed vector with all the IECore::TypeIds for which
 		/// a FromHoudiniGeometryConverter is available.
 		static void supportedTypes( std::set<IECore::TypeId> &types );
-		
+
 		/// Convenience function to extract the named shapes from the given GU_Detail. This can be used before
 		/// calling the factory create mechanism, when only the named portion of the detail is of interest.
 		static GU_DetailHandle extract( const GU_Detail *geo, const UT_StringMMPattern &nameFilter );
-		
+
 		enum Convertability
 		{
 			Inapplicable = 0,
@@ -97,21 +97,21 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			Admissible,
 			InvalidValue,
 		};
-		
+
 	protected :
 
 		FromHoudiniGeometryConverter( const GU_DetailHandle &handle, const std::string &description );
 		FromHoudiniGeometryConverter( const SOP_Node *sop, const std::string &description );
 
 		virtual ~FromHoudiniGeometryConverter();
-		
+
 		/// Implemented to aquire the read lock on the GU_Detail held by the GU_DetailHandle,
 		/// call doDetailConversion(), and finally unlock the GU_Detail. Derived classes need
 		/// not reimplement this function, but should instead implement doDetailConversion().
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;
 		/// Must be implemented by derived classes to return an IECore::Object created to represent the specified GU_Detail.
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const = 0;
-		
+
 		typedef FromHoudiniGeometryConverterPtr (*CreatorFn)( const GU_DetailHandle &handle );
 		typedef Convertability (*ConvertabilityFn)( const GU_DetailHandle &handle );
 
@@ -128,12 +128,12 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 				static FromHoudiniGeometryConverterPtr creator( const GU_DetailHandle &handle );
 				static Convertability canConvert( const GU_DetailHandle &handle );
 		};
-		
+
 		/// returns a reference to the GU_DetailHandle
 		const GU_DetailHandle &handle() const;
 		/// extracts the GU_DetailHandle from a SOP_Node
 		static const GU_DetailHandle handle( const SOP_Node *sop );
-		
+
 		/// Extracts position and attribs from the GU_Detail and stores them as primitive variables on the IECore::Primitive provided.
 		/// In most cases, this is the only transfer function that derived classes will need to use
 		void transferAttribs(
@@ -143,7 +143,7 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			IECore::PrimitiveVariable::Interpolation pointInterpolation = IECore::PrimitiveVariable::Vertex,
 			IECore::PrimitiveVariable::Interpolation detailInterpolation = IECore::PrimitiveVariable::Constant
 		) const;
-		
+
 		/// This simple class is used to describe the destination mapping for point or primitive
 		/// attributes that have been remapped using the 'attribute' sop.
 		struct RemapInfo
@@ -167,39 +167,39 @@ class FromHoudiniGeometryConverter : public FromHoudiniConverter
 			const GU_Detail *geo, const GA_Range &range, const GA_AttributeDict &attribs, const UT_StringMMPattern &attribFilter,
 			AttributeMap &attributeMap, IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation
 		) const;
-		
+
 		void transferAttribData(
 			IECore::Primitive *result, IECore::PrimitiveVariable::Interpolation interpolation,
 			const GA_ROAttributeRef &attrRef, const GA_Range &range, const RemapInfo *remapInfo = 0
 		) const;
-		
+
 		/// Utility functions for extracting attrib data from Houdini and storing it as a DataPtr of type T
 		/// @parm index allows a single component to be extracted from a larger container
 		template <typename T>
 		typename T::Ptr extractData( const GA_Attribute *attr, const GA_Range &range, int elementIndex = -1 ) const;
-		
+
 		template <typename T>
 		typename T::Ptr extractData( const GA_Attribute *attr ) const;
-		
+
 		IECore::DataPtr extractStringVectorData( const GA_Attribute *attr, const GA_Range &range, IECore::IntVectorDataPtr &indexData ) const;
 		IECore::DataPtr extractStringData( const GU_Detail *geo, const GA_Attribute *attr ) const;
 
 	private :
-		
+
 		void constructCommon();
-		
+
 		// This extra factory function is provided for the python bindings
 		friend void bindFromHoudiniGeometryConverter();
 		static FromHoudiniGeometryConverterPtr create( const SOP_Node *sop, const std::string &nameFilter = "", IECore::TypeId resultType=IECore::InvalidTypeId );
-		
+
 		// function to map standard Houdini names to IECore PrimitiveVariable names
 		const std::string processPrimitiveVariableName( const std::string &name ) const;
-		
+
 		// the handle to the GU_Detail
 		GU_DetailHandle m_geoHandle;
 		IECore::StringParameterPtr m_attributeFilterParameter;
 		IECore::BoolParameterPtr m_convertStandardAttributesParameter;
-		
+
 		struct Types
 		{
 			Types( IECore::TypeId result );

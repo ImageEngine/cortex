@@ -62,7 +62,7 @@ class IECOREGL_API DiskPrimitive : public Primitive
 		float m_z;
 		float m_thetaMax;
 		GLuint m_nPoints;
-		
+
 };
 
 IE_CORE_DECLAREPTR( DiskPrimitive );

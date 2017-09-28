@@ -400,13 +400,13 @@ void bindTypeId()
 		.value( "TransferSmoothSkinningWeightsOp", TransferSmoothSkinningWeightsOpTypeId )
 		.value( "ExternalProcedural", ExternalProceduralTypeId )
 	;
-	
+
 	converter::registry::push_back(
 		&TypeIdFromPython::convertible,
 		&TypeIdFromPython::construct,
 		type_id<IECore::TypeId>()
 	);
-	
+
 }
 
 }

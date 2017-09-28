@@ -65,13 +65,13 @@ class IECOREGL_API SplineToGLTextureConverter : public ToGLConverter
 
 		IECore::V2iParameterPtr m_resolutionParameter;
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
-	
+
 	private :
-	
+
 		static ConverterDescription<SplineToGLTextureConverter> g_descriptionff;
 		static ConverterDescription<SplineToGLTextureConverter> g_descriptionfColor3f;
 		static ConverterDescription<SplineToGLTextureConverter> g_descriptionfColor4f;
-	
+
 };
 
 IE_CORE_DECLAREPTR( SplineToGLTextureConverter );

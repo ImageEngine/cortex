@@ -61,7 +61,7 @@ IECOREGL_API inline void glTranslate( const Imath::V3f &t );
 class IECOREGL_API PushAttrib
 {
 	public :
-	
+
 		PushAttrib( GLbitfield mask )
 		{
 			glPushAttrib( mask );
@@ -71,7 +71,7 @@ class IECOREGL_API PushAttrib
 		{
 			glPopAttrib();
 		}
-		
+
 };
 
 } // namespace IECoreGL

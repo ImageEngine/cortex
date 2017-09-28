@@ -82,9 +82,9 @@ void ProceduralHolderComponentBoundIterator::reset()
 MPoint ProceduralHolderComponentBoundIterator::point() const
 {
 	MPoint ret;
-	
+
 	Imath::Box3f bbox = m_proceduralHolder->componentBound( index() );
-	
+
 	switch( m_idx % 8 )
 	{
 		case 0: ret = MPoint( bbox.min[0], bbox.min[1], bbox.min[2] ); break;
@@ -97,7 +97,7 @@ MPoint ProceduralHolderComponentBoundIterator::point() const
 		case 7: ret = MPoint( bbox.max[0], bbox.max[1], bbox.max[2] ); break;
 		default: break;
 	}
-	
+
 	return ret;
 }
 

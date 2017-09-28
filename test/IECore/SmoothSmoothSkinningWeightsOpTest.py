@@ -39,9 +39,9 @@ from IECore import *
 
 
 class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
-	
+
 	def mesh( self ) :
-		
+
 		vertsPerFace = IntVectorData( [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ] )
 		vertexIds = IntVectorData( [
 			0, 1, 3, 2, 2, 3, 5, 4, 4, 5, 7, 6, 6, 7, 9, 8,
@@ -49,42 +49,42 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 			1, 15, 13, 3, 3, 13, 11, 5, 5, 11, 9, 7, 14, 0, 2, 12,
 			12, 2, 4, 10, 10, 4, 6, 8
 		] )
-		
+
 		return MeshPrimitive( vertsPerFace, vertexIds )
-	
+
 	def createSSD( self, offsets, counts, indices, weights ) :
-		
+
 		names = StringVectorData( [ "|joint1", "|joint1|joint2", "|joint1|joint2|joint3" ] )
 		poses = M44fVectorData( [
 			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 2, -0, 1 ),
 			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
 			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 )
 		] )
-		
+
 		return SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-	
+
 	def original( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 16, 17, 18, 20, 22, 23 ] )
 		counts = IntVectorData( [ 1, 1, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1 ] )
 		indices = IntVectorData( [ 0, 0, 0, 1, 0, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 1, 0, 1, 0, 0 ] )
-		
+
 		weights = FloatVectorData( [
 			1, 1, 0.8, 0.2, 0.8, 0.2, 1, 1, 0.5, 0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5, 0.5, 1, 1, 0.8, 0.2, 0.8, 0.2, 1, 1
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def smooth1_50( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 2, 4, 6, 8, 11, 14, 16, 18, 20, 22, 25, 28, 30, 32, 34 ] )
 		counts = IntVectorData( [ 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2 ] )
 		indices = IntVectorData( [
 			0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 2, 0, 1, 2, 1, 2, 1, 2,
 			1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1
 		] )
-		
+
 		weights = FloatVectorData( [
 			0.966667, 0.0333333, 0.966667, 0.0333333, 0.725, 0.275, 0.725, 0.275,
 			0.1, 0.8375, 0.0625, 0.1, 0.8375, 0.0625, 0.583333, 0.416667,
@@ -94,16 +94,16 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def smooth1_100( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 2, 4, 6, 8, 11, 14, 16, 18, 20, 22, 25, 28, 30, 32, 34 ] )
 		counts = IntVectorData( [ 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2 ] )
 		indices = IntVectorData( [
 			0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 2, 0, 1, 2, 1, 2, 1, 2,
 			1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 1, 0, 1
 		] )
-		
+
 		weights = FloatVectorData( [
 			0.933333, 0.0666667, 0.933333, 0.0666667, 0.65, 0.35, 0.65, 0.35,
 			0.2, 0.675, 0.125, 0.2, 0.675, 0.125, 0.666667, 0.333333,
@@ -113,16 +113,16 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def smooth3_30( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33, 36, 39, 42, 45 ] )
 		counts = IntVectorData( [ 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 ] )
 		indices = IntVectorData( [
 			0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2,
 			0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 2
 		] )
-		
+
 		weights = FloatVectorData( [
 			0.933725, 0.0659938, 0.00028125, 0.933725, 0.0659938, 0.00028125, 0.691672, 0.301016,
 			0.0073125, 0.691672, 0.301016, 0.0073125, 0.145912, 0.767439, 0.0866484, 0.145912,
@@ -133,16 +133,16 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def smoothSelectVerts( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 1, 2, 4, 6, 9, 10, 12, 14, 16, 18, 21, 24, 26, 28, 29 ] )
 		counts = IntVectorData( [ 1, 1, 2, 2, 3, 1, 2, 2, 2, 2, 3, 3, 2, 2, 1, 1 ] )
 		indices = IntVectorData( [
 			0, 0, 0, 1, 0, 1, 0, 1, 2, 1, 1, 2, 1, 2, 1, 2,
 			1, 2, 0, 1, 2, 0, 1, 2, 0, 1, 0, 1, 0, 0
 		] )
-		
+
 		weights = FloatVectorData( [
 			1, 1, 0.725, 0.275, 0.725, 0.275, 0.1, 0.8375, 0.0625,
 			1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.1,
@@ -150,16 +150,16 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def smoothWithLocks( self ) :
-		
+
 		offsets = IntVectorData( [ 0, 1, 2, 5, 8, 10, 12, 14, 16, 18, 20, 22, 24, 27, 30, 31 ] )
 		counts = IntVectorData( [ 1, 1, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 1, 1 ] )
 		indices = IntVectorData( [
 			0, 0, 0, 1, 2, 0, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
 			1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 2, 0, 1, 2, 0, 0
 		] )
-		
+
 		weights = FloatVectorData( [
 			1, 1, 0.8, 0.193898, 0.00610161, 0.8, 0.193898, 0.00610161,
 			0.902086, 0.0979137, 0.902086, 0.0979137, 0.624712, 0.375288, 0.624712, 0.375288,
@@ -168,10 +168,10 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		] )
 
 		return self.createSSD( offsets, counts, indices, weights )
-	
+
 	def testTypes( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp types"""
-		
+
 		ssd = self.original()
 
 		op = SmoothSmoothSkinningWeightsOp()
@@ -182,7 +182,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSmooth1_0( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp with 1 iteration and 0.0 smooth-ratio"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -190,7 +190,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['smoothingRatio'].setValue( 0.0 )
 		op.parameters()['iterations'].setValue( 1 )
 		op.parameters()['applyLocks'].setValue( False )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -202,7 +202,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSmooth1_100( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp with 1 iteration and 1.0 smooth-ratio"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -210,7 +210,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['smoothingRatio'].setValue( 1.0 )
 		op.parameters()['iterations'].setValue( 1 )
 		op.parameters()['applyLocks'].setValue( False )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -219,7 +219,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		smooth = self.smooth1_100()
 		self.assertEqual( result.influenceNames(), smooth.influenceNames() )
 		self.assertEqual( result.influencePose(), smooth.influencePose() )
@@ -233,7 +233,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSmooth1_50( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp with 1 iteration and 0.5 smooth-ratio"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -241,7 +241,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['smoothingRatio'].setValue( 0.5 )
 		op.parameters()['iterations'].setValue( 1 )
 		op.parameters()['applyLocks'].setValue( False )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -250,7 +250,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		smooth = self.smooth1_50()
 		self.assertEqual( result.influenceNames(), smooth.influenceNames() )
 		self.assertEqual( result.influencePose(), smooth.influencePose() )
@@ -264,7 +264,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSmooth3_30( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp with 3 iterations and 0.3 smooth-ratio"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -272,7 +272,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['smoothingRatio'].setValue( 0.3 )
 		op.parameters()['iterations'].setValue( 3 )
 		op.parameters()['applyLocks'].setValue( False )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -281,7 +281,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		smooth = self.smooth3_30()
 		self.assertEqual( result.influenceNames(), smooth.influenceNames() )
 		self.assertEqual( result.influencePose(), smooth.influencePose() )
@@ -295,7 +295,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testLocks( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp locking mechanism"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -304,7 +304,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['iterations'].setValue( 3 )
 		op.parameters()['applyLocks'].setValue( True )
 		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -313,7 +313,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		smooth = self.smoothWithLocks()
 		self.assertEqual( result.influenceNames(), smooth.influenceNames() )
 		self.assertEqual( result.influencePose(), smooth.influencePose() )
@@ -324,7 +324,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		smoothWeights = smooth.pointInfluenceWeights()
 		for i in range( 0, resultWeights.size() ) :
 			self.assertAlmostEqual( resultWeights[i], smoothWeights[i], 6 )
-		
+
 		# make sure locked weights did not change
 		dop = DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
@@ -337,7 +337,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		for i in range( 0, resultWeights.size() ) :
 			if resultIndices[i] == 0 :
 				self.assertAlmostEqual( resultWeights[i], origWeights[i], 6 )
-		
+
 		# make sure the result is normalized
 		nop = NormalizeSmoothSkinningWeightsOp()
 		nop.parameters()['input'].setValue( result )
@@ -354,7 +354,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testVertexSelection( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp using selected vertices"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
@@ -363,7 +363,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['iterations'].setValue( 1 )
 		op.parameters()['applyLocks'].setValue( False )
 		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "2-4,10-12" ) )
-		
+
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -372,7 +372,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		smooth = self.smoothSelectVerts()
 		self.assertEqual( result.influenceNames(), smooth.influenceNames() )
 		self.assertEqual( result.influencePose(), smooth.influencePose() )
@@ -383,7 +383,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		smoothWeights = smooth.pointInfluenceWeights()
 		for i in range( 0, resultWeights.size() ) :
 			self.assertAlmostEqual( resultWeights[i], smoothWeights[i], 6 )
-		
+
 		# make sure only selected vertices changed
 		dop = DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
@@ -403,25 +403,25 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testErrorStates( self ) :
 		""" Test SmoothSmoothSkinningWeightsOp with various error states"""
-		
+
 		ssd = self.original()
 		op = SmoothSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
-		
+
 		# bad mesh
 		op.parameters()['mesh'].setValue( IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# wrong number of verts
 		op.parameters()['mesh'].setValue( op.parameters()['mesh'].defaultValue )
 		self.assertRaises( RuntimeError, op.operate )
-				
+
 		# wrong number of locks
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['applyLocks'].setValue( True )
 		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, True, False ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# invalid vertex ids
 		op.parameters()['applyLocks'].setValue( False )
 		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "10-18" ) )

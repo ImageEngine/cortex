@@ -57,7 +57,7 @@ static IECore::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
 		IECore::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
 		return const_cast<IECore::SceneInterface*>( scnInterface.get() );
 	}
-	
+
 	// failed
 	throw IECore::Exception( ( MString("Node \"") + fnDN->name() + "\" is not a SceneShape" ).asChar() );
 }
@@ -70,13 +70,13 @@ static list componentNames( MFnDependencyNode *fnDN )
 	if( sc )
 	{
 		std::vector<IECore::InternedString> names = sc->componentNames();
-	
+
 		list result;
 		for( std::vector<IECore::InternedString>::const_iterator it = names.begin(); it!=names.end(); it++ )
 		{
 			result.append( (*it).value() );
 		}
-				
+
 		return result;
 	}
 	// failed

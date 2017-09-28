@@ -205,10 +205,10 @@ class LineSegmentTest( unittest.TestCase ) :
 		self.assertEqual( repr(l), "IECore.LineSegment3f( " + repr(p0) + ", " + repr(p1) + " )" )
 
 	def testDimensions( self ) :
-	
+
 		self.assertEqual( LineSegment3f.dimensions(), 3 )
 		self.assertEqual( LineSegment3d.dimensions(), 3 )
-		
+
 
 if __name__ == "__main__":
     unittest.main()

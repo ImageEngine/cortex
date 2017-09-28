@@ -53,26 +53,26 @@ class ToHoudiniStringVectorAttribConverter : public ToHoudiniAttribConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniStringVectorAttribConverter, ToHoudiniStringVectorAttribConverterTypeId, ToHoudiniAttribConverter );
-		
+
 		ToHoudiniStringVectorAttribConverter( const IECore::Data *data );
-		
+
 		virtual ~ToHoudiniStringVectorAttribConverter();
-		
+
 		IECore::IntVectorParameterPtr indicesParameter();
 		IECore::ConstIntVectorParameterPtr indicesParameter() const;
-		
+
 		/// Utility method to set a single string for all elements in the given range
 		static GA_RWAttributeRef convertString( std::string name, std::string value, GU_Detail *geo, GA_Range range );
-		
+
 	protected :
-		
+
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
-		
+
 	private :
-			
+
 		static ToHoudiniAttribConverter::Description<ToHoudiniStringVectorAttribConverter> m_description;
-		
+
 		/// \todo: replace this parameter with IECore::IndexedData once it exists...
 		IECore::IntVectorParameterPtr m_indicesParameter;
 
@@ -88,18 +88,18 @@ class ToHoudiniStringDetailAttribConverter : public ToHoudiniAttribConverter
 	public :
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniStringDetailAttribConverter, ToHoudiniStringDetailAttribConverterTypeId, ToHoudiniAttribConverter );
-		
+
 		ToHoudiniStringDetailAttribConverter( const IECore::Data *data );
-		
+
 		virtual ~ToHoudiniStringDetailAttribConverter();
-		
+
 	protected :
-		
+
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
 
 	private :
-				
+
 		static ToHoudiniAttribConverter::Description<ToHoudiniStringDetailAttribConverter> m_description;
 
 };

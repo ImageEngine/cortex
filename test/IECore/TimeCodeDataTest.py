@@ -39,21 +39,21 @@ import IECore
 import datetime
 
 class TimeCodeDataTest( unittest.TestCase ) :
-	
+
 	def testConstructor( self ) :
-		
+
 		self.failUnless( IECore.TimeCodeData().isInstanceOf( IECore.TypeId.TimeCodeData ) )
 		self.assertEqual( IECore.TimeCodeData().typeId(), IECore.TypeId.TimeCodeData )
 		self.assertEqual( IECore.TimeCodeData().staticTypeId(), IECore.TypeId.TimeCodeData )
-		
+
 		t = IECore.TimeCode( 1, 2, 3, 4 )
 		td = IECore.TimeCodeData( t )
 		self.failUnless( td.isInstanceOf( IECore.TypeId.TimeCodeData ) )
 		self.assertEqual( td.typeId(), IECore.TypeId.TimeCodeData )
 		self.assertEqual( td.staticTypeId(), IECore.TypeId.TimeCodeData )
-	
+
 	def testValueAccess( self ) :
-		
+
 		t = IECore.TimeCode(
 			hours = 12,
 			minutes = 23,
@@ -75,7 +75,7 @@ class TimeCodeDataTest( unittest.TestCase ) :
 			binaryGroup8 = 8,
 		)
 		td = IECore.TimeCodeData( t )
-		
+
 		self.assertEqual( td.value.hours(), 12 )
 		self.assertEqual( td.value.minutes(), 23 )
 		self.assertEqual( td.value.seconds(), 49 )
@@ -99,7 +99,7 @@ class TimeCodeDataTest( unittest.TestCase ) :
 		self.assertEqual( td.value.timeAndFlags( IECore.TimeCode.Packing.TV50 ), 2460207381 )
 		self.assertEqual( td.value.timeAndFlags( IECore.TimeCode.Packing.FILM24  ), 2460207381 )
 		self.assertEqual( td.value.userData(), 2271560481 )
-		
+
 		tCopy = td.value
 		tCopy.setHours( 8 )
 		tCopy.setMinutes( 15 )
@@ -120,7 +120,7 @@ class TimeCodeDataTest( unittest.TestCase ) :
 		tCopy.setBinaryGroup( 7, 2 )
 		tCopy.setBinaryGroup( 8, 1 )
 		td.value = tCopy
-		
+
 		self.assertEqual( td.value.hours(), 8 )
 		self.assertEqual( td.value.minutes(), 15 )
 		self.assertEqual( td.value.seconds(), 30 )
@@ -144,74 +144,74 @@ class TimeCodeDataTest( unittest.TestCase ) :
 		self.assertEqual( td.value.timeAndFlags( IECore.TimeCode.Packing.TV50 ), 1209348227 )
 		self.assertEqual( td.value.timeAndFlags( IECore.TimeCode.Packing.FILM24  ), 1209348099 )
 		self.assertEqual( td.value.userData(), 305419896 )
-	
+
 	def testCopy( self ) :
-		
+
 		t = IECore.TimeCodeData( IECore.TimeCode( 1, 2, 3, 4 ) )
 		tt = t.copy()
-		
+
 		self.assertEqual( t, tt )
-		
+
 		tCopy = t.value
 		tCopy.setHours( t.value.hours() + 12 )
 		t.value = tCopy
-		
+
 		self.assertNotEqual( t, tt )
-	
+
 	def testIO( self ) :
-		
+
 		t = IECore.TimeCodeData()
 		IECore.ObjectWriter( t, "test/IECore/TimeCodeData.cob" ).write()
 		tt = IECore.ObjectReader( "test/IECore/TimeCodeData.cob" ).read()
 		self.assertEqual( t, tt )
-		
+
 		t = IECore.TimeCodeData( IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 ) )
 		IECore.ObjectWriter( t, "test/IECore/TimeCodeData.cob" ).write()
 		tt = IECore.ObjectReader( "test/IECore/TimeCodeData.cob" ).read()
 		self.assertEqual( t, tt )
-	
+
 	def testRepr( self ) :
-		
+
 		t = IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
 		tt = IECore.TimeCodeData( t )
-		
+
 		self.assertEqual( repr(tt), "IECore.TimeCodeData( " + repr(t) + " )" )
 		self.assertEqual( tt, eval( repr(tt) ) )
-	
+
 	def testStr( self ) :
-		
+
 		t = IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
 		tt = IECore.TimeCodeData( t )
 		self.assertEqual( str(tt), str(t) )
-	
+
 	def testHash( self ) :
-		
+
 		t = IECore.TimeCode( 12, 24, 12, 15, dropFrame = True, bgf1 = True, binaryGroup6 = 12 )
-		
+
 		self.assertEqual(
 			IECore.TimeCodeData( t ).hash(),
 			IECore.TimeCodeData( t ).hash()
 		)
-		
+
 		tt = IECore.TimeCode( t )
 		tt.setSeconds( t.seconds() + 5 )
-		
+
 		self.assertNotEqual(
 			IECore.TimeCodeData( t ).hash(),
 			IECore.TimeCodeData( tt ).hash()
 		)
-	
+
 	def testHasBase( self ) :
-		
+
 		self.assertTrue( IECore.TimeCodeData.hasBase() )
 
 	def setUp( self ) :
-		
+
 		if os.path.isfile( "test/IECore/TimeCodeData.cob" ) :
 			os.remove( "test/IECore/TimeCodeData.cob" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isfile( "test/IECore/TimeCodeData.cob" ) :
 			os.remove( "test/IECore/TimeCodeData.cob" )
 

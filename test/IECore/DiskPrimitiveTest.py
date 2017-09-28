@@ -40,42 +40,42 @@ import IECore
 class DiskPrimitiveTest( unittest.TestCase ) :
 
 	def testConstructorAndAccessors( self ) :
-	
+
 		p = IECore.DiskPrimitive()
 		self.assertEqual( p.getRadius(), 1 )
 		self.assertEqual( p.getZ(), 0 )
 		self.assertEqual( p.getThetaMax(), 360 )
-		
+
 		p = IECore.DiskPrimitive( 2, 1, 180 )
 		self.assertEqual( p.getRadius(), 2 )
 		self.assertEqual( p.getZ(), 1 )
 		self.assertEqual( p.getThetaMax(), 180 )
-		
+
 		p.setRadius( 1 )
 		p.setZ( 0 )
 		p.setThetaMax( 360 )
 		self.assertEqual( p.getRadius(), 1 )
 		self.assertEqual( p.getZ(), 0 )
 		self.assertEqual( p.getThetaMax(), 360 )
-		
+
 	def testCopyAndEquality( self ) :
-	
+
 		p = IECore.DiskPrimitive( 2, 1, 180 )
 		pp = p.copy()
 		self.assertEqual( p, pp )
 
 	def testSaveAndLoad( self ) :
-	
+
 		p = IECore.DiskPrimitive( 2, 1, 180 )
-		
+
 		io = IECore.IndexedIO.create( "test/IECore/disk.fio", IECore.IndexedIO.OpenMode.Write )
 		p.save( io, "test" )
 		pp = IECore.Object.load( io, "test" )
-		
+
 		self.assertEqual( p, pp )
-		
+
 	def tearDown( self ) :
-	
+
 		if os.path.isfile( "test/IECore/disk.fio" ) :
 			os.remove( "test/IECore/disk.fio" )
 

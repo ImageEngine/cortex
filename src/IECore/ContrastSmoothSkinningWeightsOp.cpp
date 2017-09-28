@@ -64,13 +64,13 @@ ContrastSmoothSkinningWeightsOp::ContrastSmoothSkinningWeightsOp()
 		"The mesh primitive corresponding to the input SmoothSkinningData",
 		new MeshPrimitive
 	);
-	
+
 	m_vertexIdsParameter = new FrameListParameter(
 		"vertexIndices",
 		"The indices of the vertices to smooth. All vertices will be smoothed if this parameter is empty",
 		""
 	);
-	
+
 	m_contrastRatioParameter = new FloatParameter(
 		"contrastRatio",
 		"Controls the level of contrast. Interpolates between linear function and smooth step function.",
@@ -86,7 +86,7 @@ ContrastSmoothSkinningWeightsOp::ContrastSmoothSkinningWeightsOp()
 		1e-3,
 		1.0 - 1e-3
 	);
-	
+
 	m_iterationsParameter = new IntParameter(
 		"iterations",
 		"The number of iterations to perform the contrast operation.",
@@ -99,13 +99,13 @@ ContrastSmoothSkinningWeightsOp::ContrastSmoothSkinningWeightsOp()
 		"Whether or not influenceLocks should be applied",
 		true
 	);
-	
+
 	m_influenceLocksParameter = new BoolVectorParameter(
 		"influenceLocks",
 		"A per-influence list of lock values",
 		new BoolVectorData
 	);
-	
+
 	parameters()->addParameter( m_meshParameter );
 	parameters()->addParameter( m_vertexIdsParameter );
 	parameters()->addParameter( m_contrastRatioParameter );
@@ -164,52 +164,52 @@ void ContrastSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	// \todo: remove decompression/compression.
 	// decompress
 	DecompressSmoothSkinningDataOp decompressionOp;
 	decompressionOp.inputParameter()->setValidatedValue( skinningData );
 	decompressionOp.copyParameter()->setTypedValue( false );
 	decompressionOp.operate();
-	
+
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
 	int numSsdVerts = pointIndexOffsets.size();
-	
+
 	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
-	
+
 	const MeshPrimitive *mesh = runTimeCast<const MeshPrimitive>( m_meshParameter->getValidatedValue() );
 	if ( !mesh )
 	{
 		throw IECore::Exception( "ContrastSmoothSkinningWeightsOp: The given mesh is not valid" );
 	}
 	int numMeshVerts = mesh->variableSize( PrimitiveVariable::Vertex );
-	
+
 	// make sure the mesh matches the skinning data
 	if ( numMeshVerts != numSsdVerts )
 	{
 		throw IECore::Exception( "ContrastSmoothSkinningWeightsOp: The input SmoothSkinningData and mesh have a different number of vertices" );
 	}
-	
+
 	bool useLocks = m_useLocksParameter->getTypedValue();
 	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
-		
+
 	// make sure there is one lock per influence
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) )
 	{
 		throw IECore::Exception( "ContrastSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
 	}
-	
+
 	if ( !useLocks )
 	{
 		locks.clear();
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
-	
+
 	std::vector<int64_t> vertexIds;
 	m_vertexIdsParameter->getFrameListValue()->asList( vertexIds );
-	
+
 	// make sure all vertex ids are valid
 	for ( unsigned i=0; i < vertexIds.size(); i++ )
 	{
@@ -218,13 +218,13 @@ void ContrastSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 			throw IECore::Exception( ( boost::format( "ContrastSmoothSkinningWeightsOp: VertexId \"%d\" is outside the range of the SmoothSkinningData and mesh" ) % vertexIds[i] ).str() );
 		}
 	}
-	
+
 	float contrastRatio = m_contrastRatioParameter->getNumericValue();
 	float contrastCenter = m_contrastCenterParameter->getNumericValue();
 	int numIterations = m_iterationsParameter->getNumericValue();
 
 	ContrastSmoothStep contrastFunction( numIterations, contrastRatio, contrastCenter );
-	
+
 	// an empty vertexId list means we operate over all vertices
 	if ( vertexIds.size() == 0 )
 	{
@@ -253,7 +253,7 @@ void ContrastSmoothSkinningWeightsOp::modify( Object * object, const CompoundObj
 			}
 		}
 	}
-	
+
 	// re-compress
 	CompressSmoothSkinningDataOp compressionOp;
 	compressionOp.inputParameter()->setValidatedValue( skinningData );

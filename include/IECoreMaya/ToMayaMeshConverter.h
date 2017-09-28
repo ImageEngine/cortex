@@ -70,7 +70,7 @@ class ToMayaMeshConverter : public ToMayaObjectConverter
 		static Description g_meshDescription;
 
 	private:
-		
+
 		void assignDefaultShadingGroup( MObject &shape ) const;
 		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECore::MeshPrimitive *mesh, IECore::PrimitiveVariableMap::const_iterator &uvIt ) const;
 

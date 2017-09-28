@@ -41,9 +41,9 @@ import IECoreMaya
 class GeometryCombinerTest( IECoreMaya.TestCase ) :
 
 	def test( self ) :
-		
+
 		combiner = maya.cmds.createNode( "ieGeometryCombiner" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( combiner + ".convertPrimVars" ), 0 )
 		self.assertEqual( maya.cmds.getAttr( combiner + ".convertBlindData" ), 0 )
 
@@ -55,61 +55,61 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.connectAttr( sphere + ".worldMesh", combiner + ".inputGeometry", nextAvailable=True )
 		maya.cmds.connectAttr( circle + ".worldSpace", combiner + ".inputGeometry", nextAvailable=True )
-		
+
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
-		
+
 		self.failUnless( isinstance( combined, IECore.Group ) )
 		self.assertEqual( len( combined.children() ), 2 )
-		
+
 		self.failUnless( isinstance( combined.children()[0], IECore.MeshPrimitive ) )
 		self.failUnless( isinstance( combined.children()[1], IECore.CurvesPrimitive ) )
-		
+
 	def testPrimVars( self ) :
-		
+
 		combiner = maya.cmds.createNode( "ieGeometryCombiner" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( combiner + ".convertPrimVars" ), 0 )
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 		maya.cmds.addAttr( sphere, attributeType="float", longName="delightTest", defaultValue=1 )
-		
+
 		maya.cmds.connectAttr( sphere + ".worldMesh", combiner + ".inputGeometry", nextAvailable=True )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
-		
+
 		self.failIf( "Test" in combined.children()[0] )
-		
+
 		maya.cmds.setAttr( combiner + ".convertPrimVars", 1 )
-		
+
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 		primVar = combined.children()[0]["Test"]
 
 		self.assertEqual( primVar.interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( primVar.data, IECore.FloatData( 1 ) )
-		
+
 	def testBlindData( self ) :
-	
+
 		combiner = maya.cmds.createNode( "ieGeometryCombiner" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( combiner + ".convertBlindData" ), 0 )
 
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 		maya.cmds.addAttr( sphere, dataType="string", longName="ieString" )
 		maya.cmds.setAttr( sphere + ".ieString", "banana", type="string" )
-		
+
 		maya.cmds.connectAttr( sphere + ".worldMesh", combiner + ".inputGeometry", nextAvailable=True )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 
 		self.failIf( "ieString" in combined.children()[0].blindData() )
-		
+
 		maya.cmds.setAttr( combiner + ".convertBlindData", 1 )
 		maya.cmds.setAttr( combiner + ".blindDataAttrPrefix", "ie", type="string" )
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
-		
+
 		self.assertEqual( combined.children()[0].blindData()["ieString"].value, "banana" )
 
 	def testSpaces( self ) :

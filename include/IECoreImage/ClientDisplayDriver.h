@@ -69,7 +69,7 @@ class IECOREIMAGE_API ClientDisplayDriver : public DisplayDriver
 		std::string port() const;
 
 		virtual bool scanLineOrderOnly() const;
-		
+
 		virtual bool acceptsRepeatedData() const;
 
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );

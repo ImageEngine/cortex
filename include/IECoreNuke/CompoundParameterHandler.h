@@ -44,29 +44,29 @@ class CompoundParameterHandler : public ParameterHandler
 {
 
 	public :
-				
+
 		CompoundParameterHandler();
 
 		virtual int minimumInputs( const IECore::Parameter *parameter );
 		virtual int maximumInputs( const IECore::Parameter *parameter );
 		virtual bool testInput( const IECore::Parameter *parameter, int input, const DD::Image::Op *op );
 		virtual void setParameterValue( IECore::Parameter *parameter, InputIterator first, InputIterator last );
-		
+
 		virtual void knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		virtual void setParameterValue( IECore::Parameter *parameter, ValueSource valueSource = Storage );
 		virtual void setKnobValue( const IECore::Parameter *parameter );
 		virtual void setState( IECore::Parameter *parameter, const IECore::Object *state );
 		virtual IECore::ObjectPtr getState( const IECore::Parameter *parameter );
-		
+
 	protected :
-	
+
 		void beginGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void childKnobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		void endGroup( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f );
 		std::string knobLabel( const IECore::Parameter *parameter ) const;
-						
+
 	private :
-	
+
 		enum ContainerType
 		{
 			Collapsible,
@@ -74,15 +74,15 @@ class CompoundParameterHandler : public ParameterHandler
 			Toolbar
 		};
 		ContainerType containerType( const IECore::Parameter *parameter );
-	
+
 		void inputs( const IECore::Parameter *parameter, int &minimum, int &maximum, bool &error );
-	
+
 		ParameterHandlerPtr handler( const IECore::Parameter *child, bool createIfMissing );
 		typedef std::map<IECore::InternedString, ParameterHandlerPtr> HandlerMap;
 		HandlerMap m_handlers;
-		
+
 		static Description<CompoundParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

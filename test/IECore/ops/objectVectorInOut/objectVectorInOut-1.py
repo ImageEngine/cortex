@@ -44,21 +44,21 @@ class objectVectorInOut( IECore.Op ) :
 				"result", "",
 				defaultValue = IECore.ObjectVector()
 			)
-							
+
 		)
-		
+
 		self.parameters().addParameter(
-		
+
 			IECore.ObjectVectorParameter(
 				"input",
 				"",
 				defaultValue = IECore.ObjectVector(),
 			),
-		
+
 		)
 
 	def doOperation( self, args ):
-		
+
 		return args["input"].copy()
 
 IECore.registerRunTimeTyped( objectVectorInOut )

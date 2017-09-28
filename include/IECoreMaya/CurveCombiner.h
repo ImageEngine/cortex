@@ -54,7 +54,7 @@ class CurveCombiner : public MPxNode
 		static MStatus initialize();
 		static const MTypeId id;
 		static const MString typeName;
-		
+
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
 
 		static MObject aInputCurves;

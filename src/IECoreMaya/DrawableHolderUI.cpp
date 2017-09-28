@@ -78,31 +78,31 @@ void DrawableHolderUI::getDrawRequests( const MDrawInfo &info, bool objectAndAct
 	{
 		return;
 	}
-	
+
 	// the node we're meant to be drawing
 	DrawableHolder *drawableHolder = dynamic_cast<DrawableHolder *>( surfaceShape() );
 	if( !drawableHolder )
 	{
 		return;
 	}
-	
+
 	// do we actually want to draw it?
 	MPlug pDraw( drawableHolder->thisMObject(), DrawableHolder::aDraw );
 	bool draw = true;
 	pDraw.getValue( draw );
-	
+
 	if( !draw )
 	{
 		return;
 	}
-	
+
 	// draw data encapsulating that node
 	MDrawData drawData;
 	getDrawData( drawableHolder, drawData );
 
 	MDrawRequest request = info.getPrototype( *this );
 	request.setDrawData( drawData );
-	
+
 	// set correct drawing colour:
 	switch( info.displayStatus() )
 	{
@@ -129,7 +129,7 @@ void DrawableHolderUI::getDrawRequests( const MDrawInfo &info, bool objectAndAct
 			request.setColor( 4, M3dView::kDormantColors );
 			break;
 	}
-	
+
 	requests.add( request );
 }
 
@@ -144,9 +144,9 @@ void DrawableHolderUI::draw( const MDrawRequest &request, M3dView &view ) const
 	{
 		return;
 	}
-	
+
 	view.beginGL();
-		
+
 		// maya can sometimes leave an error from it's own code,
 		// and we don't want that to confuse us in our drawing code.
 		while( glGetError()!=GL_NO_ERROR )
@@ -166,7 +166,7 @@ void DrawableHolderUI::draw( const MDrawRequest &request, M3dView &view ) const
 		{
 			// do the main render
 			s->render( m_displayStyle.baseState( request.displayStyle() ) );
-		
+
 			// do a wireframe render over the top if we're selected and we just did a solid
 			// draw.
 			bool selected = request.displayStatus()==M3dView::kActive || request.displayStatus()==M3dView::kLead;
@@ -180,7 +180,7 @@ void DrawableHolderUI::draw( const MDrawRequest &request, M3dView &view ) const
 		{
 			IECore::msg( IECore::Msg::Error, "DrawableHolderUI::draw", e.what() );
 		}
-			
+
 	view.endGL();
 }
 
@@ -207,41 +207,41 @@ bool DrawableHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectio
 	{
 		return false;
 	}
-	
+
 	// we want to perform the selection using an IECoreGL::Selector, so we
 	// can avoid the performance penalty associated with using GL_SELECT mode.
 	// that means we don't really want to call view.beginSelect(), but we have to
 	// call it just to get the projection matrix for our own selection, because as far
 	// as i can tell, there is no other way of getting it reliably.
-	
+
 	M3dView view = selectInfo.view();
 	view.beginSelect();
 	Imath::M44d projectionMatrix;
 	glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix.getValue() );
 	view.endSelect();
-	
+
 	view.beginGL();
-	
+
 		glMatrixMode( GL_PROJECTION );
 		glLoadMatrixd( projectionMatrix.getValue() );
-		
+
 		IECoreGL::Selector::Mode selectionMode = IECoreGL::Selector::IDRender;
 		if( selectInfo.displayStatus() == M3dView::kHilite && !selectInfo.singleSelection() )
 		{
 			selectionMode = IECoreGL::Selector::OcclusionQuery;
 		}
-		
+
 		std::vector<IECoreGL::HitRecord> hits;
 		{
 			IECoreGL::Selector selector( Imath::Box2f( Imath::V2f( 0 ), Imath::V2f( 1 ) ), selectionMode, hits );
-				
+
 			IECoreGL::State::bindBaseState();
 			selector.baseState()->bind();
 			scene->render( selector.baseState() );
 		}
-						
+
 	view.endGL();
-	
+
 	if( !hits.size() )
 	{
 		return false;
@@ -251,22 +251,22 @@ bool DrawableHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectio
 	MIntArray componentIndices;
 	float depthMin = std::numeric_limits<float>::max();
 	for( int i=0, e = hits.size(); i < e; i++ )
-	{		
+	{
 		if( hits[i].depthMin < depthMin )
 		{
 			depthMin = hits[i].depthMin;
 		}
 	}
-	
+
 
 	// figure out the world space location of the closest hit
-	
+
 	MDagPath camera;
 	view.getCamera( camera );
 	MFnCamera fnCamera( camera.node() );
 	float near = fnCamera.nearClippingPlane();
 	float far = fnCamera.farClippingPlane();
-	
+
 	float z = -1;
 	if( fnCamera.isOrtho() )
 	{
@@ -278,28 +278,28 @@ bool DrawableHolderUI::select( MSelectInfo &selectInfo, MSelectionList &selectio
 		float a = far / ( far - near );
 		float b = far * near / ( near - far );
 		z = b / ( depthMin - a );
-	}	
-	
+	}
+
 	MPoint localRayOrigin;
 	MVector localRayDirection;
 	selectInfo.getLocalRay( localRayOrigin, localRayDirection );
-	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();	
+	MMatrix localToCamera = selectInfo.selectPath().inclusiveMatrix() * camera.inclusiveMatrix().inverse();
 	MPoint cameraRayOrigin = localRayOrigin * localToCamera;
 	MVector cameraRayDirection = localRayDirection * localToCamera;
-	
+
 	MPoint cameraIntersectionPoint = cameraRayOrigin + cameraRayDirection * ( -( z - near ) / cameraRayDirection.z );
 	MPoint worldIntersectionPoint = cameraIntersectionPoint * camera.inclusiveMatrix();
-		
+
 	MSelectionList item;
 	item.add( selectInfo.selectPath() );
-	
+
 	selectInfo.addSelection(
 		item, worldIntersectionPoint,
 		selectionList, worldSpaceSelectPts,
 		MSelectionMask::kSelectMeshes,
 		false
 	);
-	
+
 	return true;
 }
 

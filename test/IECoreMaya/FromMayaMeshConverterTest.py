@@ -51,28 +51,28 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 	def testConstructor( self ) :
-	
+
 		sphere = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 
 		converter = IECoreMaya.FromMayaMeshConverter( sphere )
-		
+
 		m = converter.convert()
-		
+
 		self.failUnless( isinstance( m, IECore.MeshPrimitive ) )
 
 	def testParameters( self ) :
@@ -244,35 +244,35 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( IECore.Box3f( IECore.V3f( -1.0001 ) + IECore.V3f( 1, 2, 3 ), IECore.V3f( 1.0001 ) + IECore.V3f( 1, 2, 3 ) ).contains( m.bound() ) )
 
 	def testSharedUVIndices( self ) :
-	
+
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSharedUVs.ma", force = True, open = True )
-		
+
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
-		
+
 		self.failUnless( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 2, 2, 1, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
-		
+
 	def testSplitUVIndices( self ) :
-			
+
 		maya.cmds.file( os.path.dirname( __file__ ) + "/scenes/twoTrianglesWithSplitUVs.ma", force = True, open = True )
-		
+
 		mesh = IECoreMaya.FromMayaShapeConverter.create( "pPlaneShape1" ).convert()
-		
+
 		self.failUnless( "uv" in mesh )
 		self.assertEqual( mesh["uv"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( mesh["uv"].indices, IECore.IntVectorData( [ 0, 1, 5, 2, 4, 3 ] ) )
 		self.assertEqual( mesh["uv"].data.getInterpretation(), IECore.GeometricData.Interpretation.UV )
 
 	def testExtraSTs( self ) :
-	
+
 		plane = maya.cmds.polyPlane( ch=False, subdivisionsX=1, subdivisionsY=1 )
 		plane = maya.cmds.listRelatives( plane, shapes=True )[0]
-		
+
 		converter = IECoreMaya.FromMayaShapeConverter.create( plane, IECore.MeshPrimitive.staticTypeId() )
 		m = converter.convert()
-		
+
 		self.assert_( "uv" in m )
 		# map1 is the default set
 		self.assert_( "map1" not in m )
@@ -302,30 +302,30 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertTrue( coreMesh.arePrimitiveVariablesValid() )
 
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
-		
+
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
 		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
-		
+
 		op = fn.getOp()
 		with fn.parameterModificationContext() :
 			op["input"].setValue( coreMesh )
-		
+
 		maya.cmds.file( rename="/tmp/test.ma" )
 		maya.cmds.file( save=True )
 		maya.cmds.file( new=True, f=True )
 		maya.cmds.file( "/tmp/test.ma", open=True )
-		
+
 		result = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
-		
+
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 400 )
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1560 )
-		
+
 		self.assertEqual( coreMesh["uv"], result["uv"] )
-		
+
 		for i in range( 0, 7 ) :
 			self.assertEqual( coreMesh[ "testUVSet%d" % i ], result[ "testUVSet%d" %  i ] )
-	
+
 	def testColors( self ):
 
 		# test alpha to rgb conversion

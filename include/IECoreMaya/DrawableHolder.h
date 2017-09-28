@@ -61,16 +61,16 @@ class DrawableHolder : public ParameterisedHolderSurfaceShape
 		static MStatus initialize();
 		static const MTypeId id;
 		static const MString typeName;
-		
+
 		virtual bool isBounded() const;
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 
 		/// Returns an up to date scene created by calling draw() on the held class.
 		IECoreGL::ConstScenePtr scene();
-		
+
 		static MObject aDraw;
-	
+
 	private :
 
 		IECoreGL::ScenePtr m_scene;

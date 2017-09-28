@@ -43,7 +43,7 @@ class TestCase( unittest.TestCase ) :
 	## Derived classes may override this, but they should call the
 	# base class implementation too.
 	def setUp( self ) :
-	
+
 		nuke.scriptClear()
 		nuke.Undo.undoTruncate( 0 )
 		nuke.Undo.redoTruncate( 0 )

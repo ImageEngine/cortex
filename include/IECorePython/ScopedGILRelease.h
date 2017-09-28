@@ -48,17 +48,17 @@ namespace IECorePython
 /// a thread which currently holds the GIL.
 class IECOREPYTHON_API ScopedGILRelease : boost::noncopyable
 {
-	
+
 	public :
-	
+
 		ScopedGILRelease();
 		~ScopedGILRelease();
 
 	private :
-	
+
 		bool m_threadsInitialised;
 		PyThreadState *m_state;
-		
+
 };
 
 } // namespace IECorePython

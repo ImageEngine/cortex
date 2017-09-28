@@ -44,52 +44,52 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 	def testFactory( self ) :
-	
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( IECore.CoordinateSystem() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.ToMayaLocatorConverter.staticTypeId() ) )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaLocatorConverter ) ) )
 
 	def testNewLocator( self ) :
-		
+
 		m = IECore.M44f.createScaled(IECore.V3f(1,2,3)) * IECore.M44f.createTranslated(IECore.V3f(10,20,30))
 		coordSys = IECore.CoordinateSystem( "myNamedCoordSys", IECore.MatrixTransform( m ) )
-		
+
 		parent = maya.cmds.createNode( "transform" )
 		self.failUnless( IECoreMaya.ToMayaLocatorConverter( coordSys ).convert( parent ) )
-		
+
 		locators = maya.cmds.listRelatives( parent, children=True, fullPath=True, type="locator" )
 		self.assertEqual( len(locators), 1 )
 		self.assertEqual( locators[0].split( "|" )[-1], "myNamedCoordSys" )
 		self.assertEqual( maya.cmds.getAttr( locators[0] + ".localPosition" )[0], (10,20,30) )
 		self.assertEqual( maya.cmds.getAttr( locators[0] + ".localScale" )[0], (1,2,3) )
-		
+
 		newCoordSys = IECoreMaya.FromMayaLocatorConverter( locators[0] ).convert()
 		self.assertEqual( coordSys.getName(), newCoordSys.getName() )
 		self.assertEqual( coordSys.getTransform(), newCoordSys.getTransform() )
-	
+
 	def testWrongIECoreObject( self ) :
-		
+
 		converter = IECoreMaya.ToMayaLocatorConverter( IECore.MeshPrimitive() )
-		
+
 		parent = maya.cmds.createNode( "transform" )
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
 			self.assertFalse( converter.convert( parent ) )
-		
+
 		self.assertEqual( len( messageHandler.messages ), 1 )
 		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
 		self.assertEqual( messageHandler.messages[0].context, "ToMayaLocatorConverter::doConversion" )
-	
+
 	def testWrongMayaNode( self ) :
-		
+
 		maya.cmds.polySphere( name="pSphere" )
 		coordSys = IECore.CoordinateSystem( "myNamedCoordSys", IECore.MatrixTransform( IECore.M44f() ) )
 		converter = IECoreMaya.ToMayaLocatorConverter( coordSys )
-		
+
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
 			self.assertFalse( converter.convert( "pSphereShape" ) )
-		
+
 		self.assertEqual( len( messageHandler.messages ), 1 )
 		self.assertEqual( messageHandler.messages[0].level, IECore.MessageHandler.Level.Warning )
 		self.assertEqual( messageHandler.messages[0].context, "ToMayaLocatorConverter::doConversion" )

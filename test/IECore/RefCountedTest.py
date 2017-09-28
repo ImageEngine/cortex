@@ -45,26 +45,26 @@ class RefCountedTest( unittest.TestCase ) :
 
 		r1a = IECore.RefCounted()
 		r1b = r1a
-		
+
 		r2a = IECore.RefCounted()
 		r2b = r2a
-		
+
 		self.assertEqual( r1a, r1b )
 		self.assertEqual( r2a, r2b )
-		
+
 		self.assertNotEqual( r2a, r1a )
 		self.assertNotEqual( r2b, r1a )
-	
+
 	def testEqualityAgainstDifferentTypes( self ) :
-	
+
 		r = IECore.RefCounted()
 		self.assertNotEqual( r, 10 )
 		self.assertNotEqual( r, "10" )
 		self.assertNotEqual( r, None )
 		self.assertNotEqual( r, [] )
-		
+
 	def testEqualityAfterRetrievalFromCPP( self ) :
-	
+
 		# Equality should be preserved even when
 		# two python objects refer to the same underlying
 		# RefCounted object because we failed to preserve
@@ -73,27 +73,27 @@ class RefCountedTest( unittest.TestCase ) :
 		# and doesn't derive from Object, which defines its
 		# own equality operator - ObjectParameters are one
 		# of the few classes that fit this bill.
-	
+
 		p1 = IECore.ObjectParameter( "p1", "", IECore.IntData(), IECore.IntData.staticTypeId() )
 		p2 = IECore.ObjectParameter( "p2", "", IECore.IntData(), IECore.IntData.staticTypeId() )
-		
+
 		self.assertEqual( p1, p1 )
 		self.assertEqual( p2, p2 )
 		self.assertNotEqual( p1, p2 )
-		
+
 		c = IECore.CompoundParameter( "c" )
 		c.addParameter( p1 )
 		c.addParameter( p2 )
-		
+
 		self.assertEqual( p1, c["p1"] )
 		self.assertEqual( c["p1"], p1 )
-		
+
 		self.assertEqual( p2, c["p2"] )
 		self.assertEqual( c["p2"], p2 )
-		
+
 		self.assertNotEqual( p1, c["p2"] )
 		self.assertNotEqual( p1, c["p2"] )
-	
+
 	def testHashAfterRetrievalFromCPP( self ) :
 
 		p1 = IECore.ObjectParameter( "p1", "", IECore.IntData(), IECore.IntData.staticTypeId() )
@@ -102,7 +102,7 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertEqual( hash( p1 ), hash( p1 ) )
 		self.assertEqual( hash( p2 ), hash( p2 ) )
 		self.assertNotEqual( hash( p1 ), hash( p2 ) )
-		
+
 		c = IECore.CompoundParameter( "c" )
 		c.addParameter( p1 )
 		c.addParameter( p2 )
@@ -110,27 +110,27 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertEqual( hash( p1 ), hash( c["p1"] ) )
 		self.assertEqual( hash( p2 ), hash( c["p2"] ) )
 		self.assertNotEqual( hash( c["p1"] ), hash( c["p2"] ) )
-	
+
 	def testUseAsKey( self ) :
-	
+
 		p1 = IECore.ObjectParameter( "p1", "", IECore.IntData(), IECore.IntData.staticTypeId() )
 		p2 = IECore.ObjectParameter( "p2", "", IECore.IntData(), IECore.IntData.staticTypeId() )
 
 		c = IECore.CompoundParameter( "c" )
 		c.addParameter( p1 )
 		c.addParameter( p2 )
-		
+
 		d = {}
 		d[p1] = "p1"
-		
+
 		self.assertTrue( p1 in d )
 		self.assertFalse( p2 in d )
 		self.assertEqual( d[p1], "p1" )
-		
+
 		self.assertTrue( c["p1"] in d )
 		self.assertFalse( c["p2"] in d )
 		self.assertEqual( d[c["p1"]], "p1" )
-		
+
 		d[p2] = "p2"
 
 		self.assertTrue( p1 in d )
@@ -152,15 +152,15 @@ class RefCountedTest( unittest.TestCase ) :
 		self.assertEqual( d[c["p2"]], "p2" )
 
 	def testRefCount( self ) :
-	
+
 		c = IECore.CompoundData()
 		i = IECore.IntData( 10 )
-		
+
 		r = i.refCount()
-		
+
 		c["i"] = i
 		self.assertEqual( i.refCount(), r + 1 )
-		
+
 		del c["i"]
 		self.assertEqual( i.refCount(), r )
 

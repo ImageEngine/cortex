@@ -40,18 +40,18 @@ import IECoreMaya
 class FromMayaUnitPlugConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
-	
+
 		locator = maya.cmds.spaceLocator()[0]
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.DoubleData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.FloatData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterf.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaPlugConverter.create( str( locator ) + ".translateX", IECore.Data.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaUnitPlugConverterd.staticTypeId() ) )
 

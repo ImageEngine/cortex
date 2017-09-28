@@ -174,7 +174,7 @@ void writeTags( SceneInterface &m, list tagList )
 {
 	SceneInterface::NameList v;
 	listToSceneInterfaceNameList( tagList, v );
-	m.writeTags(v);	
+	m.writeTags(v);
 }
 
 DataPtr readTransform( SceneInterface &m, double time )
@@ -217,10 +217,10 @@ static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashTyp
 void bindSceneInterface()
 {
 	SceneInterfacePtr (SceneInterface::*nonConstChild)(const SceneInterface::Name &, SceneInterface::MissingBehaviour) = &SceneInterface::child;
-	
+
 	// make the SceneInterface class first
 	IECorePython::RunTimeTypedClass<SceneInterface> sceneInterfaceClass;
-	
+
 	{
 		// then define all the nested types
 		scope s( sceneInterfaceClass );
@@ -253,9 +253,9 @@ void bindSceneInterface()
 	}
 
 	// now we've defined the nested types, we're able to define the methods for
-	// the IndexedIO class itself (we need the definitions for the nested types 
+	// the IndexedIO class itself (we need the definitions for the nested types
 	// to exist for defining default values).
-	
+
 	sceneInterfaceClass.def( "path", path )
 		.def( "fileName", &SceneInterface::fileName )
 		.def( "pathAsString", pathAsString )
@@ -288,7 +288,7 @@ void bindSceneInterface()
 		.def( "stringToPath", stringToPath ).staticmethod("stringToPath")
 		.def( "create", SceneInterface::create ).staticmethod( "create" )
 		.def( "supportedExtensions", supportedExtensions, ( arg("modes") = IndexedIO::Read|IndexedIO::Write|IndexedIO::Append ) ).staticmethod( "supportedExtensions" )
-		
+
 		.def_readonly("visibilityName", &SceneInterface::visibilityName )
 	;
 }

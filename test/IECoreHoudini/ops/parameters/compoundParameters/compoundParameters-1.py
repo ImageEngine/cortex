@@ -52,7 +52,7 @@ class compoundParameters( Op ) :
 		)
 
 		self.parameters().addParameters( [
-										
+
 			CompoundParameter(
 				name = "compound_1",
 				description = "a compound parameter",
@@ -71,8 +71,8 @@ class compoundParameters( Op ) :
 						userData = { "UI" : { "label" : StringData( "A Colour" ) } },
 					),
 				]
-			),		
-										
+			),
+
 			CompoundParameter(
 				name = "compound_2",
 				description = "a compound parameter",
@@ -94,8 +94,8 @@ class compoundParameters( Op ) :
 						defaultValue = V2f(1,1)
 					),
 				]
-			),		
-										
+			),
+
 			CompoundParameter(
 				name = "compound_3",
 				description = "a compound parameter",
@@ -116,13 +116,13 @@ class compoundParameters( Op ) :
 					)
 				]
 			),
-						
+
 			FloatParameter(
 				name="blah",
 				description="blah",
 				defaultValue = 123.0
 			),
-										
+
 			CompoundParameter(
 				name = "compound_5",
 				description = "a compound parameter",

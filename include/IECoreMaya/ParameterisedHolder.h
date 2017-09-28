@@ -113,7 +113,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		//@}
 
 	protected :
-	
+
 		/// As for setParameterisedValues(), but when lazy==true, the work is only done for parameters whose
 		/// plug value has changed since the last time the value was set.
 		MStatus setParameterisedValues( bool lazy );
@@ -123,7 +123,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 	private:
 
 		IECore::RunTimeTypedPtr loadClass( const MString &className, int classVersion, const MString &searchPathEnvVar );
-	
+
 		/// Creates (or updates existing) attributes for each parameter. Removes any old attributes no longer
 		/// needed.
 		MStatus createAndRemoveAttributes( bool callRestore = false );
@@ -137,7 +137,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 		AttributeNameToParameterMap	m_attributeNamesToParameters;
 
 		MStatus removeUnecessaryAttributes();
-		
+
 		void nonNetworkedConnections( const MPlug &plug, MPlugArray &connectionsFromPlug, MPlugArray &connectionsToPlug ) const;
 
 		typedef std::set<IECore::ParameterPtr> ParameterSet;
@@ -167,7 +167,7 @@ class ParameterisedHolder : public BaseType, public ParameterisedHolderInterface
 
 		IECore::RunTimeTypedPtr m_parameterised;
 		bool m_failedToLoad; // to avoid constantly trying to reload things that aren't there
-		
+
 		static const std::string g_attributeNamePrefix; // a prefix used to denote attributes that represent parameters
 
 };

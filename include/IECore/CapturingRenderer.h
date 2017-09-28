@@ -74,7 +74,7 @@ class IECORE_API CapturingRenderer : public Renderer
 		/// "/root/wheel*Rim/bolt", "/root/torso/rib*", and "/root/*", the last of which
 		/// will output "/root" and all its descendants.
 		virtual void setOption( const std::string &name, ConstDataPtr value );
-		
+
 		virtual ConstDataPtr getOption( const std::string &name ) const;
 
 		virtual void camera( const std::string &name, const CompoundDataMap &parameters );
@@ -120,7 +120,7 @@ class IECORE_API CapturingRenderer : public Renderer
 		virtual void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars );
 		virtual void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars );
 		virtual void geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars );
-		
+
 		virtual void procedural( ProceduralPtr proc );
 
 		virtual void instanceBegin( const std::string &name, const CompoundDataMap &parameters );
@@ -131,14 +131,14 @@ class IECORE_API CapturingRenderer : public Renderer
 
 		virtual void editBegin( const std::string &editType, const CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 		/// Returns the world that was captured.
 		/// \todo If we had a class for representing whole Scenes (including stuff before worldBegin)
 		/// then we could have a scene() method instead.
 		ConstGroupPtr world();
 
 	private :
-		
+
 		class Implementation;
 
 		boost::shared_ptr<Implementation> m_implementation;

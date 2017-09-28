@@ -50,9 +50,9 @@ void bindRemoveSmoothSkinningInfluencesOp()
 	object o = RunTimeTypedClass<RemoveSmoothSkinningInfluencesOp>()
 		.def( init<>() )
 	;
-	
+
 	scope s( o );
-	
+
 	enum_< RemoveSmoothSkinningInfluencesOp::Mode >( "Mode" )
 		.value( "Named", RemoveSmoothSkinningInfluencesOp::Named )
 		.value( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed )

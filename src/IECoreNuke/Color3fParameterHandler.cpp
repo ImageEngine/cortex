@@ -46,16 +46,16 @@ ParameterHandler::Description<Color3fParameterHandler> Color3fParameterHandler::
 Color3fParameterHandler::Color3fParameterHandler()
 {
 }
-		
+
 void Color3fParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const Color3fParameter *color3fParameter = static_cast<const Color3fParameter *>( parameter );
-	
+
 	if( f.makeKnobs() )
 	{
 		m_storage = color3fParameter->typedDefaultValue();
 	}
-			
+
 	std::string label = knobLabel( parameter );
 	m_knob = Color_knob( f, &m_storage.x, knobName, label.c_str() );
 	setKnobProperties( parameter, f, m_knob );
@@ -74,7 +74,7 @@ void Color3fParameterHandler::setParameterValue( Parameter *parameter, ValueSour
 		value[1] = m_knob->get_value( 1 );
 		value[2] = m_knob->get_value( 2 );
 	}
-	
+
 	static_cast<Color3fParameter *>( parameter )->setTypedValue( value );
 }
 

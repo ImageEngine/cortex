@@ -43,7 +43,7 @@ PresetsOnlyParameterHandler::PresetsOnlyParameterHandler()
 	:	m_knob( 0 )
 {
 }
-		
+
 void PresetsOnlyParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	if( f.makeKnobs() )
@@ -62,10 +62,10 @@ void PresetsOnlyParameterHandler::knobs( const IECore::Parameter *parameter, con
 		}
 		m_names.push_back( 0 );
 	}
-	
+
 	std::string label = knobLabel( parameter );
 	m_knob = Enumeration_knob( f, &m_storage, &(m_names[0]), knobName, label.c_str() );
-	
+
 	setKnobProperties( parameter, f, m_knob );
 }
 
@@ -80,7 +80,7 @@ void PresetsOnlyParameterHandler::setParameterValue( IECore::Parameter *paramete
 	{
 		presetIndex = (int)m_knob->get_value();
 	}
-	
+
 	parameter->setValue( parameter->getPresets()[presetIndex].second );
 }
 

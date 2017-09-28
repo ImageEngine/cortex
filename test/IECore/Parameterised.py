@@ -69,15 +69,15 @@ class TestParameterised( unittest.TestCase ) :
 	def testAttributeAccessRemoval( self ) :
 
 		b = derived()
-		
+
 		self.assert_( hasattr( b, "objectAttribute1" ) )
 		self.failIf( hasattr( b, "doesNotExist" ) )
 		self.assertEqual( b.objectAttribute1, 1 )
-	
+
 		self.assertRaises( AttributeError, getattr, b, "number" )
 		b.number = 10
 		self.assertEqual( b.number, 10 )
-		self.assertEqual( b["number"].getNumericValue(), 0 )		
-		
+		self.assertEqual( b["number"].getNumericValue(), 0 )
+
 if __name__ == "__main__":
         unittest.main()

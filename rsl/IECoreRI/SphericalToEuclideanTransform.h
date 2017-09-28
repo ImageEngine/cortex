@@ -37,15 +37,15 @@
 
 /// A function to convert Spherical coordinates to Euclidean coordinates.
 /// Spherical coordinates are defined by two angles: phi and theta stored
-/// in x and y components of a vector. The z component species the radius. 
-/// The phi component ranges from 0 to 2*PI and represents the angle of 
+/// in x and y components of a vector. The z component species the radius.
+/// The phi component ranges from 0 to 2*PI and represents the angle of
 /// rotation on the XY plane.
-/// The theta ranges from 0 to PI and it represents the angle from Z axis. 
+/// The theta ranges from 0 to PI and it represents the angle from Z axis.
 point ieSphericalToEuclideanTransform( varying point spherical )
-{	
+{
 	varying float sinTheta = sin( spherical[1] );
-	
-	return point ( spherical[2] * ( 
+
+	return point ( spherical[2] * (
 		sinTheta * cos( spherical[0] ),
 		sinTheta * sin( spherical[0] ),
 		cos( spherical[1] )

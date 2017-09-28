@@ -50,9 +50,9 @@ class MessageHandler : public IECore::MessageHandler
 		IE_CORE_DECLAREMEMBERPTR( MessageHandler );
 
 		virtual void handle( Level level, const std::string &context, const std::string &message );
-		
+
 	private :
-	
+
 		typedef tbb::mutex MsgMutex;
 		mutable MsgMutex m_mutex;
 

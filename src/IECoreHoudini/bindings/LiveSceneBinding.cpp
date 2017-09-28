@@ -55,7 +55,7 @@ static void listToPath( const list &l, IECore::SceneInterface::Path &p )
 		{
 			throw IECore::InvalidArgumentException( std::string( "Invalid path! Should be a list of strings!" ) );
 		}
-		p.push_back( ex() );	
+		p.push_back( ex() );
 	}
 }
 
@@ -65,7 +65,7 @@ static LiveScenePtr constructor( const std::string n, const list &c, const list 
 	IECore::SceneInterface::Path contentPath, rootPath;
 	listToPath( c, contentPath );
 	listToPath( r, rootPath );
-	
+
 	return new LiveScene( nodePath, contentPath, rootPath, defaultTime );
 }
 
@@ -77,10 +77,10 @@ static std::string getNodePath( LiveScene *scene )
 	{
 		return 0;
 	}
-	
+
 	UT_String path;
 	node->getFullPath( path );
-	
+
 	return path.toStdString();
 }
 
@@ -90,7 +90,7 @@ IECore::DataPtr readWorldTransform( LiveScene &scene, double time )
 	{
 		return t->copy();
 	}
-	
+
 	return 0;
 }
 
@@ -108,7 +108,7 @@ class CustomTagReader
 			IECorePython::ScopedGILLock gilLock;
 			return m_has( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), tag, filter );
 		}
-		
+
 		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &tags, int filter )
 		{
 			UT_String path;
@@ -120,10 +120,10 @@ class CustomTagReader
 			{
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
-			
+
 			IECorePython::listToSceneInterfaceNameList( l(), tags );
 		}
-		
+
 		object m_has;
 		object m_read;
 };
@@ -148,7 +148,7 @@ class CustomAttributeReader
 			IECorePython::ScopedGILLock gilLock;
 			return extract<IECore::ConstObjectPtr>( m_read( CoreHoudini::evalPython( "hou.node( \"" + path.toStdString() + "\" )" ), attr, time ) );
 		}
-		
+
 		void operator() ( const OP_Node *node, IECore::SceneInterface::NameList &attributes )
 		{
 			UT_String path;
@@ -160,7 +160,7 @@ class CustomAttributeReader
 			{
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
-			
+
 			IECorePython::listToSceneInterfaceNameList( l(), attributes );
 		}
 

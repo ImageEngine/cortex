@@ -86,7 +86,7 @@ void bindObjectKnob()
 		.def( "setValue", &setValue )
 		.def( "getValue", &getValue )
 	;
-	
+
 }
 
 } // namespace IECoreNuke

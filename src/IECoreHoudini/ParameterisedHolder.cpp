@@ -113,7 +113,7 @@ template<typename BaseType>
 ParameterisedHolder<BaseType>::ParameterisedHolder( OP_Network *net, const char *name, OP_Operator *op ) : BaseType( net, name, op )
 {
 	CoreHoudini::initPython();
-	
+
 	this->getParm( "__evaluateParameters" ).setExpression( 0, "val = 0\nreturn val", CH_PYTHON, 0 );
 	this->getParm( "__evaluateParameters" ).setLockedFlag( 0, 1 );
 }
@@ -131,7 +131,7 @@ void ParameterisedHolder<BaseType>::buildClassCategoryMenu( void *data, PRM_Name
 	{
 		return;
 	}
-	
+
 	menu[0].setToken( "" );
 	menu[0].setLabel( "< No Category Selected >" );
 	unsigned int pos = 1;
@@ -140,13 +140,13 @@ void ParameterisedHolder<BaseType>::buildClassCategoryMenu( void *data, PRM_Name
 	holder->evalString( value, pMatchString.getToken(), 0, 0 );
 	std::string matchString( value.toStdString() );
 	size_t padding = matchString.length();
-	
+
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
-	
+
 	std::vector<std::string> names;
 	classNames( searchPathEnvVar, matchString, names );
-	
+
 	std::set<std::string> categories;
 	for ( std::vector<std::string>::const_iterator it=names.begin(); it != names.end(); it++ )
 	{
@@ -156,7 +156,7 @@ void ParameterisedHolder<BaseType>::buildClassCategoryMenu( void *data, PRM_Name
 			categories.insert( (*it).substr( 0, divider ) );
 		}
 	}
-	
+
 	for ( std::set<std::string>::const_iterator it=categories.begin(); it != categories.end(); it++, pos++ )
 	{
 		menu[pos].setToken( (*it).c_str() );
@@ -175,7 +175,7 @@ void ParameterisedHolder<BaseType>::buildClassNameMenu( void *data, PRM_Name *me
 	{
 		return;
 	}
-	
+
 	menu[0].setToken( "" );
 	menu[0].setLabel( "< No Class Loaded >" );
 	unsigned int pos = 1;
@@ -183,19 +183,19 @@ void ParameterisedHolder<BaseType>::buildClassNameMenu( void *data, PRM_Name *me
 	UT_String value;
 	holder->evalString( value, pMatchString.getToken(), 0, 0 );
 	std::string matchString( value.toStdString() );
-	
+
 	holder->evalString( value, pParameterisedClassCategory.getToken(), 0, 0 );
 	std::string category( value.toStdString() );
 	if ( category != "" )
 	{
 		matchString = category + "/*";
 	}
-	
+
 	size_t padding = matchString.length();
-	
+
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
-	
+
 	std::vector<std::string> names;
 	classNames( searchPathEnvVar, matchString, names );
 
@@ -219,16 +219,16 @@ void ParameterisedHolder<BaseType>::buildVersionMenu( void *data, PRM_Name *menu
 	}
 
 	unsigned int pos = 0;
-	
+
 	UT_String value;
 	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
 	std::string className( value.toStdString() );
-	
+
 	if ( className != "" )
 	{
 		holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 		std::string searchPathEnvVar( value.toStdString() );
-	
+
 		std::vector<int> versions;
 		classVersions( className, searchPathEnvVar, versions );
 		for ( std::vector<int>::iterator it=versions.begin(); it != versions.end(); it++, pos++ )
@@ -263,31 +263,31 @@ int ParameterisedHolder<BaseType>::reloadClassCallback( void *data, int index, f
 	UT_String value;
 	holder->evalString( value, pParameterisedClassCategory.getToken(), 0, 0 );
 	std::string category( value.toStdString() );
-	
+
 	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
 	std::string className( value.toStdString() );
-	
+
 	holder->evalString( value, pParameterisedVersion.getToken(), 0, 0 );
 	int version = -1;
 	if ( value != "" )
 	{
 		version = boost::lexical_cast<int>( value.buffer() );
 	}
-	
+
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
-	
+
 	size_t divider = holder->m_loadedClassName.rfind( "/" );
 	if ( holder->m_loadedClassName != ""  && divider != std::string::npos && category != holder->m_loadedClassName.substr( 0, divider ) )
 	{
 		className = "";
 	}
-	
+
 	if ( className != holder->m_loadedClassName )
 	{
 		version = -1;
 	}
-	
+
 	if ( className == "" )
 	{
 		version = -1;
@@ -316,14 +316,14 @@ int ParameterisedHolder<BaseType>::reloadButtonCallback( void *data, int index, 
 	UT_String value;
 	holder->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
 	std::string className( value.toStdString() );
-	
+
 	holder->evalString( value, pParameterisedVersion.getToken(), 0, 0 );
 	int version = -1;
 	if ( value != "" )
 	{
 		version = boost::lexical_cast<int>( value.buffer() );
 	}
-	
+
 	holder->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
 
@@ -340,7 +340,7 @@ const char *ParameterisedHolder<BaseType>::inputLabel( unsigned pos ) const
 	{
 		return "";
 	}
-	
+
 	const Parameter *parm = m_inputParameters[pos].get();
 	return ( parm->name() + ": " + parm->description() ).c_str();
 }
@@ -361,7 +361,7 @@ unsigned ParameterisedHolder<BaseType>::maxInputs() const
 	{
 		return 4;
 	}
-	
+
 	return m_inputParameters.size();
 }
 
@@ -373,9 +373,9 @@ bool ParameterisedHolder<BaseType>::setNodeValues()
 	{
 		return false;
 	}
-	
+
 	IECore::MessageHandler::Scope handlerScope( getMessageHandler() );
-	
+
 	UT_String path;
 	this->getFullPath( path );
 	std::string cmd = "IECoreHoudini.FnParameterisedHolder( hou.node( \"";
@@ -394,7 +394,7 @@ bool ParameterisedHolder<BaseType>::setNodeValues()
 			PyErr_Print();
 		}
 	}
-	
+
 	return true;
 }
 
@@ -406,10 +406,10 @@ void ParameterisedHolder<BaseType>::setParameterisedValues( double time )
 	{
 		return;
 	}
-	
+
 	// push the input values into the associated parameters
 	setInputParameterValues( time );
-	
+
 	// update the remaining parameters to match the node values
 	updateParameter( parameterised->parameters(), time, "", true );
 }
@@ -428,7 +428,7 @@ void ParameterisedHolder<BaseType>::setParameterised( IECore::RunTimeTypedPtr p 
 
 	m_parameterised = p;
 	m_loadedClassName = "";
-	
+
 	refreshInputConnections();
 }
 
@@ -441,10 +441,10 @@ void ParameterisedHolder<BaseType>::setParameterised( const std::string &classNa
 	this->setString( className.c_str(), CH_STRING_LITERAL, pParameterisedClassName.getToken(), 0, 0 );
 	this->setString( boost::lexical_cast<std::string>( classVersion ).c_str(), CH_STRING_LITERAL, pParameterisedVersion.getToken(), 0, 0 );
 	this->setString( searchPathEnvVar.c_str(), CH_STRING_LITERAL, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
-	
+
 	m_parameterised = loadParameterised( className, classVersion, searchPathEnvVar );
 	m_loadedClassName = m_parameterised ? className : "";
-	
+
 	refreshInputConnections();
 }
 
@@ -494,12 +494,12 @@ void ParameterisedHolder<BaseType>::load( const std::string &className, int clas
 	}
 
 	m_dirty = true;
-	
+
 	if ( !updateGui )
 	{
 		return;
 	}
-	
+
 	setNodeValues();
 }
 
@@ -511,22 +511,22 @@ bool ParameterisedHolder<BaseType>::load( UT_IStream &is, const char *ext, const
 	UT_String value;
 	this->evalString( value, pParameterisedClassName.getToken(), 0, 0 );
 	std::string className( value.toStdString() );
-	
+
 	this->evalString( value, pParameterisedVersion.getToken(), 0, 0 );
 	int version = -1;
 	if ( value != "" )
 	{
 		version = boost::lexical_cast<int>( value.buffer() );
 	}
-	
+
 	this->evalString( value, pParameterisedSearchPathEnvVar.getToken(), 0, 0 );
 	std::string searchPathEnvVar( value.toStdString() );
-	
+
 	if ( className != "" && version != -1 && searchPathEnvVar != "" )
 	{
 		load( className, version, searchPathEnvVar, false );
 	}
-	
+
 	/// \todo: not entirely certain this is returning the correct thing
 	return loaded;
 }
@@ -587,7 +587,7 @@ void ParameterisedHolder<BaseType>::updateParameter( ParameterPtr parm, float no
 			case IECore::IntParameterTypeId:
 			{
 				int val = static_cast<const IntData *>( parm->defaultValue() )->readable();
-				
+
 				// horrible hack to accomodate Houdini's MenuParmTemplate for IntParameters
 				// We really need ParameterHandlers in c++ and Houdini really needs to
 				// support proper menus on any ParmTemplate.
@@ -599,14 +599,14 @@ void ParameterisedHolder<BaseType>::updateParameter( ParameterPtr parm, float no
 					{
 						throw IECore::InvalidArgumentException( "Attempt to set IntParameter " + parm->name() + " to a non-int value " + hStr.toStdString() );
 					}
-					
+
 					val = hStr.toInt();
 				}
 				else
 				{
 					val = this->evalInt( parm_name.c_str(), 0, now );
 				}
-				
+
 				checkForUpdate<int, IntData>( do_update, val, parm );
 				parm->setValue( new IECore::IntData(val) );
 				break;
@@ -891,7 +891,7 @@ void ParameterisedHolder<BaseType>::classNames( const std::string searchPathEnvV
 		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).classNames(\"\%s\")" ) % searchPathEnvVar % matchString );
 		object result = CoreHoudini::evalPython( pythonCmd );
 		boost::python::list extractedNames = extract<boost::python::list>( result )();
-		
+
 		names.clear();
 		for ( unsigned i=0; i < extractedNames.attr( "__len__" )(); i++ )
 		{
@@ -913,7 +913,7 @@ void ParameterisedHolder<BaseType>::classVersions( const std::string className, 
 		std::string pythonCmd = boost::str( boost::format( "IECore.ClassLoader.defaultLoader( \"%s\" ).versions( \"%s\" )" ) % searchPathEnvVar % className );
 		object result = CoreHoudini::evalPython( pythonCmd );
 		boost::python::list extractedVersions = extract<boost::python::list>( result )();
-		
+
 		versions.clear();
 		for ( unsigned i=0; i < extractedVersions.attr( "__len__" )(); i++ )
 		{
@@ -931,7 +931,7 @@ int ParameterisedHolder<BaseType>::defaultClassVersion( const std::string classN
 {
 	std::vector<int> versions;
 	classVersions( className, searchPathEnvVar, versions );
-	
+
 	return versions.empty() ? -1 : versions[versions.size()-1];
 }
 

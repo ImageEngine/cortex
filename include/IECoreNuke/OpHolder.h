@@ -68,20 +68,20 @@ class OpHolder : public ParameterisedHolderOp, public DD::Image::Executable
 		virtual bool isExecuteThreadSafe() const;
 		virtual bool isWrite();
 		//@}
-		
+
 		/// Executes the held IECore::Op and returns the result.
 		virtual IECore::ObjectPtr engine();
 
 	private :
-	
+
 		static const Description g_description;
 		static DD::Image::Op *build( Node *node );
-		
+
 		IECore::ObjectPtr m_result;
 		DD::Image::Hash m_resultHash;
-		
+
 		static IECore::ObjectPtr executeResult();
-		
+
 		friend void bindFnOpHolder();
 
 };

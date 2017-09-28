@@ -354,7 +354,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 	for( it=names.begin(); it!=names.end(); it++ )
 	{
 		ConstIndexedIOPtr ioPrimVar = ioVariables->subdirectory( *it );
-		int i; 
+		int i;
 		ioPrimVar->read( g_interpolationEntry, i );
 
 		IntVectorDataPtr indices = nullptr;
@@ -363,7 +363,7 @@ void Primitive::load( IECore::Object::LoadContextPtr context )
 			indices = context->load<IntVectorData>( ioPrimVar.get(), g_indicesEntry );
 		}
 
-		variables.insert( 
+		variables.insert(
 			PrimitiveVariableMap::value_type( *it, PrimitiveVariable( (PrimitiveVariable::Interpolation)i, context->load<Data>( ioPrimVar.get(), g_dataEntry ), indices ) )
 		);
 	}
@@ -406,7 +406,7 @@ PrimitiveVariableMap Primitive::loadPrimitiveVariables( const IndexedIO *ioInter
 		{
 			continue;
 		}
-		int i; 
+		int i;
 		ioPrimVar->read( g_interpolationEntry, i );
 
 		IntVectorDataPtr indices = nullptr;
@@ -466,7 +466,7 @@ void Primitive::hash( MurmurHash &h ) const
 			it->second.indices->hash( h );
 		}
 	}
-	
+
 	topologyHash( h );
 }
 

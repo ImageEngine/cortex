@@ -84,28 +84,28 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( not gg.state()[0].isSame(ggg.state()[0] ) )
 
 	def testStateAndChildOrder( self ) :
-		
+
 		# check the state/children don't get reordered when a group is written out to disk
 		# and read back in again:
 		g = Group()
-		
+
 		for i in range( 100 ):
 			g.addState( Shader("%d" % i,"ddyup") )
-			
+
 			child = Group()
 			child.blindData()["id"] = IntData( i )
 			g.addChild( child )
-		
+
 		ObjectWriter( g, "test/group.cob" ).write()
-		
+
 		ggg = ObjectReader( "test/group.cob" ).read()
-		
+
 		for i in range( 100 ):
-			
+
 			self.assertEqual( g.state()[i].name, ggg.state()[i].name )
 			self.assertEqual( g.children()[i].blindData()["id"].value, ggg.children()[i].blindData()["id"].value )
-			
-		
+
+
 
 	def testParent( self ) :
 
@@ -132,73 +132,73 @@ class TestGroup( unittest.TestCase ) :
 
 		del g
 		self.assert_( g2.parent() is None )
-	
+
 	def testAttributes( self ) :
-		
+
 		# create a little hierarchy
 		g = Group()
 		g2 = Group()
 		g3 = Group()
-		
+
 		g.addChild( g2 )
 		g2.addChild( g3 )
-		
+
 		# define an attribute at the top of the hierarchy
 		g.setAttribute( "toptest", BoolData( False ) )
 		self.assertEqual( g.getAttribute( "toptest" ), BoolData( False ) )
-		
+
 		# change our mind and set it to true:
 		g.setAttribute( "toptest", BoolData( True ) )
 		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
-		
+
 		# add another attribute
 		g.setAttribute( "toptest2", BoolData( True ) )
 		self.assertEqual( g.getAttribute( "toptest2" ), BoolData( True ) )
-		
-		
+
+
 		# make sure there's only one AttributeState on the group:
 		self.assertEqual( len( g.state() ), 1 )
-		
+
 		# define one in the middle
 		g2.setAttribute( "middletest", BoolData( True ) )
-		
+
 		# override the one at the top
 		g2.setAttribute( "toptest", BoolData( False ) )
-		
+
 		# define one at the bottom
 		g3.setAttribute( "bottomtest", BoolData( False ) )
-		
+
 		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
 		self.assertEqual( g.getAttribute( "middletest" ), None )
 		self.assertEqual( g.getAttribute( "bottomtest" ), None )
-		
+
 		self.assertEqual( g2.getAttribute( "toptest" ), BoolData( False ) )
 		self.assertEqual( g2.getAttribute( "middletest" ), BoolData( True ) )
 		self.assertEqual( g2.getAttribute( "bottomtest" ), None )
-		
+
 		self.assertEqual( g3.getAttribute( "toptest" ), BoolData( False ) )
 		self.assertEqual( g3.getAttribute( "middletest" ), BoolData( True ) )
 		self.assertEqual( g3.getAttribute( "bottomtest" ), BoolData( False ) )
-		
-		
+
+
 		# check that the final attribute state is returned by getAttribute:
 		g = Group()
 		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
 		g.addState( AttributeState( {"toptest": BoolData( True ) } ) )
-		
+
 		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
-		
+
 		# make sure attributes get added to existing attributeStates:
 		g = Group()
 		g.addState( Shader("yup","ddyup", {}) )
 		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
 		g.addState( Shader("yup","yup", {}) )
 		g.setAttribute( "blahblah", BoolData( True ) )
-		
+
 		self.assertEqual( len( g.state() ), 3 )
-		
-		
-	
+
+
+
 	def testExceptions( self ) :
 
 		g = Group()
@@ -246,17 +246,17 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( s[2].isSame( a3 ) )
 
 	def testAddNullState( self ) :
-	
+
 		g = Group()
 		self.assertRaises( Exception, g.addState, None )
 
 	def testAddNullChild( self ) :
-	
+
 		g = Group()
 		self.assertRaises( Exception, g.addChild, None )
 
 	def testNoneRefcount( self ) :
-	
+
 		# exercises a bug whereby we weren't incrementing the reference
 		# count for Py_None when returning it to represent a null pointer.
 		# this led to "Fatal Python error: deallocating None" type crashes
@@ -265,51 +265,51 @@ class TestGroup( unittest.TestCase ) :
 			p = g.parent()
 
 	def testMemoryUsage( self ) :
-	
+
 		# this used to crash if the group didn't have a transform
 		g = Group()
 		self.failUnless( g.memoryUsage() > 0 )
-	
+
 	def testHash( self ) :
-	
+
 		g = Group()
 		h = g.hash()
-		
+
 		g.addChild( SpherePrimitive() )
 		self.assertNotEqual( g.hash(), h )
 		h = g.hash()
-		
+
 		g.addState( AttributeState() )
 		self.assertNotEqual( g.hash(), h )
 		h = g.hash()
-		
+
 		g.setTransform( MatrixTransform( M44f() ) )
 		self.assertNotEqual( g.hash(), h )
-	
+
 	def testGlobalTransform( self ) :
-	
+
 		g = Group()
 		childGroup = Group()
-		
+
 		g.addChild( childGroup )
-		
+
 		parentTransform = TransformationMatrixf()
 		parentTransform.rotate = Eulerf( 0,3.1415926/2,0 )
-		
+
 		childTransform = TransformationMatrixf()
 		childTransform.translate = V3f( 1, 0, 2 )
-		
+
 		childGroup.setTransform( MatrixTransform( childTransform.transform ) )
 		g.setTransform( MatrixTransform( parentTransform.transform ) )
-		
+
 		# child group's translation should have been rotated 90 degrees about the y axis:
 		childGroupGlobalTranslation = childGroup.globalTransformMatrix().extractSHRT()[3]
 		self.assertAlmostEqual( childGroupGlobalTranslation.x, 2, 4 )
 		self.assertAlmostEqual( childGroupGlobalTranslation.y, 0, 4 )
 		self.assertAlmostEqual( childGroupGlobalTranslation.z, -1, 4 )
-		
-		
-		
+
+
+
 	def tearDown( self ) :
 
 		if os.path.isfile("test/group.cob"):

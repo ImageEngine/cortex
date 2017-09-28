@@ -55,7 +55,7 @@ FaceVaryingPromotionOp::FaceVaryingPromotionOp() : MeshPrimitiveOp( "Calculates 
 			new StringVectorData()
 		)
 	);
-	
+
 	parameters()->addParameter(
 		new BoolParameter(
 			"promoteUniform",
@@ -63,7 +63,7 @@ FaceVaryingPromotionOp::FaceVaryingPromotionOp() : MeshPrimitiveOp( "Calculates 
 			true
 		)
 	);
-	
+
 	parameters()->addParameter(
 		new BoolParameter(
 			"promoteVarying",
@@ -71,7 +71,7 @@ FaceVaryingPromotionOp::FaceVaryingPromotionOp() : MeshPrimitiveOp( "Calculates 
 			true
 		)
 	);
-	
+
 	parameters()->addParameter(
 		new BoolParameter(
 			"promoteVertex",
@@ -141,10 +141,10 @@ struct FaceVaryingPromotionOp::Promoter
 
 	template<typename T>
 	ReturnType operator()( T *data )
-	{	
+	{
 		typedef typename T::ValueType Container;
 		typedef typename Container::const_iterator ConstIterator;
-		
+
 		typename T::Ptr result = new T;
 		result->writable().reserve( m_vertIds.size() );
 		std::back_insert_iterator<Container> inserter( result->writable() );
@@ -156,7 +156,7 @@ struct FaceVaryingPromotionOp::Promoter
 				for( std::vector<int>::const_iterator it=m_vertsPerFace.begin(); it!=m_vertsPerFace.end(); ++it, ++dataIt )
 				{
 					std::fill_n( inserter, *it, *dataIt );
-				}				
+				}
 				break;
 			}
 			case PrimitiveVariable::Vertex :
@@ -166,15 +166,15 @@ struct FaceVaryingPromotionOp::Promoter
 					PolygonVertexIterator<ConstIterator>( m_vertIds.begin(), data->readable().begin() ),
 					PolygonVertexIterator<ConstIterator>( m_vertIds.end(), data->readable().begin() ),
 					inserter
-				);					
+				);
 				break;
 			}
 			default :
 				assert( 0 ); // shouldn't get here
 		}
-		
+
 		assert( result->readable().size() == m_vertIds.size() );
-		
+
 		return result;
 	}
 
@@ -187,14 +187,14 @@ struct FaceVaryingPromotionOp::Promoter
 };
 
 void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const CompoundObject *operands )
-{	
+{
 	const std::vector<std::string> &names = operands->member<StringVectorData>( "primVarNames" )->readable();
 	std::vector<boost::regex> regexes;
 	for( std::vector<std::string>::const_iterator it=names.begin(); it!=names.end(); ++it )
 	{
 		regexes.push_back( boost::regex( *it ) );
 	}
-	
+
 	bool promoteUniform = operands->member<BoolData>( "promoteUniform" )->readable();
 	bool promoteVarying = operands->member<BoolData>( "promoteVarying" )->readable();
 	bool promoteVertex = operands->member<BoolData>( "promoteVertex" )->readable();
@@ -227,7 +227,7 @@ void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const Co
 				}
 				break;
 		}
-	
+
 		if( regexes.size() )
 		{
 			bool matched = false;
@@ -239,18 +239,18 @@ void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const Co
 					break;
 				}
 			}
-		
+
 			if( !matched )
 			{
 				continue;
-			}			
+			}
 		}
-		
+
 		if( !mesh->isPrimitiveVariableValid( it->second ) )
 		{
 			throw Exception( boost::str( boost::format( "Primitive variable \"%s\" is not valid." ) % it->first ) );
 		}
-		
+
 		promoter.setInterpolation( it->second.interpolation );
 
 		if( it->second.indices )
@@ -263,7 +263,7 @@ void FaceVaryingPromotionOp::modifyTypedPrimitive( MeshPrimitive *mesh, const Co
 		}
 
 		it->second.interpolation = PrimitiveVariable::FaceVarying;
-		
+
 		assert( mesh->isPrimitiveVariableValid( it->second ) );
 	}
 }

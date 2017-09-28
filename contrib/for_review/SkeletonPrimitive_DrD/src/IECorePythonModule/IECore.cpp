@@ -548,7 +548,7 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRemoveSmoothSkinningInfluencesOp();
 	bindLookup();
 	bindPointsPrimitiveEvaluator();
-		
+
 	def( "majorVersion", &IECore::majorVersion );
 	def( "minorVersion", &IECore::minorVersion );
 	def( "patchVersion", &IECore::patchVersion );

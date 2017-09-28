@@ -485,7 +485,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( fnOH.parameterPlug( p["f"] ).asInt(), 2 )
 
 	def testExcessReferenceEdits( self ) :
-		
+
 		IECoreMaya.FnOpHolder.create( "testOp", "maths/multiply", 2 )
 
 		# Save the scene out so we can reference it
@@ -495,187 +495,187 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		# New scene, and read it in.
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		# Check there are no reference edits
-		
+
 		fnOH = IECoreMaya.FnOpHolder( 'ns1:testOp' )
 		op = fnOH.getOp()
-		
+
 		aPath = fnOH.parameterPlugPath( op["a"] )
 		bPath = fnOH.parameterPlugPath( op["b"] )
 		self.assertEqual( maya.cmds.getAttr( aPath ), 1 )
 		self.assertEqual( maya.cmds.getAttr( bPath ), 2 )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
 
 		# set values, but with no changes
-		
+
 		with fnOH.parameterModificationContext() :
 			op["a"].setNumericValue( 1 )
 			op["b"].setNumericValue( 2 )
-		
+
 		# Check the values are the same, and there are still no reference edits
-		
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 1 )
 		self.assertEqual( maya.cmds.getAttr( bPath ), 2 )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
-				
+
 		# change a value to a genuinely new value
 		with fnOH.parameterModificationContext() :
 			op["a"].setNumericValue( 100 )
-		
+
 		# Check the maya value is updated and there is 1 reference edit
-		
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 100 )
 		self.assertEqual( maya.cmds.getAttr( bPath ), 2 )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 1 )
-		
+
 		# Undo and check there is still 1 reference edit. Ideally there would be none but
 		# maya isn't that clever.
-		
+
 		maya.cmds.undo()
-		
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 1 )
 		self.assertEqual( maya.cmds.getAttr( bPath ), 2 )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 1 )
-		
+
 	def testExcessClassParameterReferenceEdits( self ) :
-	
+
 		# Save a scene with a ClassParameter in it
-		
+
 		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
 		op = fnOH.getOp()
-		
+
 		with fnOH.parameterModificationContext() :
-			
+
 			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
-			
+
 		self.assertEqual( op["cp"].getClass( True )[1:], ( "maths/multiply", 1, "IECORE_OP_PATHS" ) )
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceEditCounts.ma" ) )
 		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		# And reference it back in to a new scene
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
 
 		# Make a modification which does nothing and check that there are no reference edits
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
 		with fnOH.parameterModificationContext() :
 			pass
-			
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
-		
+
 		# Make a modification which happens to set things to the values they're already at and
 		# check that there are no reference edits
-		
+
 		op = fnOH.getOp()
 		with fnOH.parameterModificationContext() :
 			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
-			
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
-		
+
 	def testExcessClassVectorParameterReferenceEdits( self ) :
-	
+
 		# Save a scene with a ClassParameter in it
-		
+
 		fnOH = IECoreMaya.FnOpHolder.create( "node", "classVectorParameterTest", 1 )
 		op = fnOH.getOp()
-		
+
 		with fnOH.parameterModificationContext() :
-			
+
 			op["cv"].setClasses(
-			
+
 				[
 					( "mult", "maths/multiply", 1 ),
 					( "coIO", "compoundObjectInOut", 1 ),
 				]
-				
+
 			)
-					
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "referenceEditCounts.ma" ) )
 		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		# And reference it back in to a new scene
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
 
 		# Make a modification which does nothing and check that there are no reference edits
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:node" )
 		with fnOH.parameterModificationContext() :
 			pass
-			
-		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )	
-		
+
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+
 		# Make a modification which happens to set things to the values they're already at and
 		# check that there are no reference edits
-		
+
 		with fnOH.parameterModificationContext() :
-			
+
 			op["cv"].setClasses(
-			
+
 				[
 					( "mult", "maths/multiply", 1 ),
 					( "coIO", "compoundObjectInOut", 1 ),
 				]
-				
+
 			)
-			
-		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )			
-		
+
+		self.assertEqual( len(maya.cmds.referenceQuery( referenceScene, editStrings=True )), 0 )
+
 	def testSetParameterValuesUsingContext( self ) :
-	
+
 		fnOH = IECoreMaya.FnOpHolder.create( "testOp", "maths/multiply", 2 )
 		op = fnOH.getOp()
 		aPath = fnOH.parameterPlugPath( op["a"] )
-		
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 1 )
 
 		with fnOH.parameterModificationContext() :
-		
+
 			op["a"].setNumericValue( 10023 )
-					
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 10023 )
-		
+
 		maya.cmds.undo()
-		
+
 		self.assertEqual( maya.cmds.getAttr( aPath ), 1 )
 
 		maya.cmds.redo()
 
 		self.assertEqual( maya.cmds.getAttr( aPath ), 10023 )
-	
+
 	def testSetParameterValuesAndClassesUsingContext( self ) :
-	
+
 		fnOH = IECoreMaya.FnOpHolder.create( "node", "classParameterTest", 1 )
-		
+
 		with fnOH.parameterModificationContext() as op :
 			op["cp"].setClass( "maths/multiply", 1, "IECORE_OP_PATHS" )
 			op["cp"]["a"].setNumericValue( 10101 )
-			
+
 		aPath = fnOH.parameterPlugPath( op["cp"]["a"] )
 		self.assertEqual( maya.cmds.getAttr( aPath ), 10101 )
-		
+
 		maya.cmds.undo()
-		
+
 		self.assertEqual( op["cp"].getClass(), None )
-		
+
 		maya.cmds.redo()
-		
+
 		self.assertEqual( op["cp"].getClass( True )[1:], ( "maths/multiply", 1, "IECORE_OP_PATHS" ) )
-		
-		self.assertEqual( maya.cmds.getAttr( aPath ), 10101 )		
+
+		self.assertEqual( maya.cmds.getAttr( aPath ), 10101 )
 
 	def testBoxDefaultValue( self ) :
 
@@ -686,7 +686,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		op.parameters().removeParameter( "m" ) # no color4f support in maya
 
 		fnPH.setParameterised( op )
-		
+
 		node, plug = fnPH.parameterPlugPath( op["s"] ).split( "." )
 		self.assertEqual( maya.cmds.attributeQuery( plug + "Min", listDefault=True, node=node ), [ -1.0, -1.0 ] )
 		self.assertEqual( maya.cmds.attributeQuery( plug + "Max", listDefault=True, node=node ), [ 1.0, 1.0 ] )
@@ -709,10 +709,10 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 			IECore.M44fVectorParameter( 'm44fVector', '', IECore.M44fVectorData() ),
 			IECore.M44dVectorParameter( 'm44dVector', '', IECore.M44dVectorData() ),
 		] )
-		
+
 		node = maya.cmds.createNode( 'ieOpHolderNode' )
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
-		
+
 		self.assert_( not maya.cmds.objExists( node+'.parm_v3fVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_v3dVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_stringVector' ) )
@@ -722,9 +722,9 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assert_( not maya.cmds.objExists( node+'.parm_boolVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_m44fVector' ) )
 		self.assert_( not maya.cmds.objExists( node+'.parm_m44dVector' ) )
-		
+
 		fnPH.setParameterised( op )
-		
+
 		self.assert_( maya.cmds.objExists( node+'.parm_v3fVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_v3dVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_stringVector' ) )
@@ -734,7 +734,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assert_( maya.cmds.objExists( node+'.parm_boolVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_m44fVector' ) )
 		self.assert_( maya.cmds.objExists( node+'.parm_m44dVector' ) )
-				
+
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3fVector', type=True ), 'vectorArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_v3dVector', type=True ), 'vectorArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_stringVector', type=True ), 'stringArray' )
@@ -744,32 +744,32 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_boolVector', type=True ), 'Int32Array' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_m44fVector', type=True ), 'doubleArray' )
 		self.assertEqual( maya.cmds.getAttr( node+'.parm_m44dVector', type=True ), 'doubleArray' )
-	
+
 	def testMatrixVectorPlugs( self ) :
 
 		m44fVector = IECore.M44fVectorData( [ IECore.M44f( 1 ), IECore.M44f( 2 ), IECore.M44f( 3 ) ] )
 		m44dVector = IECore.M44dVectorData( [ IECore.M44d( 1 ), IECore.M44d( 2 ), IECore.M44d( 3 ) ] )
 		reverseM44fVector = IECore.M44fVectorData( [ IECore.M44f( 3 ), IECore.M44f( 2 ), IECore.M44f( 1 ) ] )
 		reverseM44dVector = IECore.M44dVectorData( [ IECore.M44d( 3 ), IECore.M44d( 2 ), IECore.M44d( 1 ) ] )
-		
+
 		mayaArray = []
 		for i in range( 0, 3 ) :
 			for j in range( 0, 16 ) :
 				mayaArray.append( i+1 )
-		
+
 		reverseMayaArray = list(mayaArray)
 		reverseMayaArray.reverse()
-		
+
 		op = IECore.Op( 'test op', IECore.IntParameter( 'result', '', 0 ) )
 		op.parameters().addParameters( [
 			IECore.M44fVectorParameter( 'm44fVector', '', IECore.M44fVectorData() ),
 			IECore.M44dVectorParameter( 'm44dVector', '', IECore.M44dVectorData() ),
 		] )
-		
+
 		node = maya.cmds.createNode( 'ieOpHolderNode' )
 		fnPH = IECoreMaya.FnParameterisedHolder( node )
 		fnPH.setParameterised( op )
-		
+
 		# set from cortex to maya
 		self.assertNotEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44fVector' ) )
 		self.assertNotEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44dVector' ) )
@@ -778,25 +778,25 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		fnPH.setNodeValues()
 		self.assertEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44fVector' ) )
 		self.assertEqual( mayaArray, maya.cmds.getAttr( node+'.parm_m44dVector' ) )
-		
+
 		# set from maya to cortex
 		self.assertNotEqual( reverseM44fVector, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
 		self.assertNotEqual( reverseM44dVector, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
 		maya.cmds.setAttr( node+'.parm_m44fVector', reverseMayaArray, type="doubleArray" )
 		maya.cmds.setAttr( node+'.parm_m44dVector', reverseMayaArray, type="doubleArray" )
-		fnPH.setParameterisedValues()		
+		fnPH.setParameterisedValues()
 		self.assertEqual( reverseM44fVector, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
 		self.assertEqual( reverseM44dVector, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
-		
+
 		# set to incorrect length from maya
 		maya.cmds.setAttr( node+'.parm_m44fVector', [0,1,2], type="doubleArray" )
 		maya.cmds.setAttr( node+'.parm_m44dVector', [0,1,2], type="doubleArray" )
 		fnPH.setParameterisedValues()
 		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44fVector'].getValue() )
 		self.assertEqual( None, fnPH.getParameterised()[0].parameters()['m44dVector'].getValue() )
-	
+
 	def testResultAttrSaveLoad( self ) :
-		
+
 		node = maya.cmds.createNode( "ieOpHolderNode" )
 		fnPH = IECoreMaya.FnOpHolder( node )
 		fnPH.setOp( "floatParameter" )
@@ -812,16 +812,16 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( testScene, f = True, o  = True )
 		self.assertEqual( maya.cmds.getAttr( node + ".parm_f" ), 50.5 )
 		self.assertEqual( maya.cmds.getAttr( node + ".result" ), 50.5 )
-	
+
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Inactive node state causes a seg fault prior to Maya 2016" )
 	def testResultAttrSaveLoadMeshConnections( self ) :
-		
+
 		box = maya.cmds.listRelatives( maya.cmds.polyCube(), shapes=True )[0]
 		torus = maya.cmds.listRelatives( maya.cmds.polyTorus(), shapes=True )[0]
 		node = maya.cmds.createNode( "ieOpHolderNode" )
 		fnPH = IECoreMaya.FnOpHolder( node )
 		fnPH.setOp( "meshMerge" )
-		
+
 		maya.cmds.connectAttr( box + ".outMesh", node + ".parm_input" )
 		maya.cmds.connectAttr( torus + ".outMesh", node + ".parm_mesh" )
 		mesh = maya.cmds.createNode( "mesh" )
@@ -829,79 +829,79 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		quads = maya.cmds.polyQuad( mesh )[0]
 		joint = maya.cmds.createNode( "joint" )
 		cluster = maya.cmds.skinCluster( mesh, joint )
-		
+
 		fnMesh = maya.OpenMaya.MFnMesh( IECoreMaya.dependencyNodeFromString( mesh ) )
 		self.assertEqual( fnMesh.numVertices(), 408 )
 		self.assertEqual( fnMesh.numPolygons(), 406 )
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "resultAttrLoadTest.ma" ) )
 		testScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
 		maya.cmds.file( testScene, f = True, o  = True )
-		
+
 		fnMesh = maya.OpenMaya.MFnMesh( IECoreMaya.dependencyNodeFromString( mesh ) )
 		self.assertEqual( fnMesh.numVertices(), 408 )
 		self.assertEqual( fnMesh.numPolygons(), 406 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( quads + ".nodeState" ), 0 )
-	
+
 	def testParameterPlugForMissingPlug( self ) :
-	
+
 		## Make sure that null plugs are returned from the parameterPlug() method
 		# if no plug exists.
-	
+
 		node = maya.cmds.createNode( "ieOpHolderNode" )
 		fnPH = IECoreMaya.FnOpHolder( node )
 		fnPH.setOp( "floatParameter" )
-		
+
 		op = fnPH.getOp()
-		
+
 		plug = fnPH.parameterPlug( op.parameters() )
 		self.failUnless( isinstance( plug, maya.OpenMaya.MPlug ) )
 		self.failUnless( plug.isNull() )
-	
+
 	def testLsMethods( self ) :
-	
+
 		# create a couple of holders:
 		opHolderNode = maya.cmds.createNode( "ieOpHolderNode" )
 		fnOH = IECoreMaya.FnOpHolder( opHolderNode )
 		fnOH.setOp( "floatParameter" )
-		
+
 		converterHolderNode = maya.cmds.createNode( "ieConverterHolder" )
 		fnCH = IECoreMaya.FnConverterHolder( converterHolderNode )
 		#fnCH.setOp( "floatParameter" )
-		
+
 		node = maya.cmds.createNode( "ieProceduralHolder" )
-		
+
 		node2 = maya.cmds.createNode( "ieProceduralHolder" )
-		
+
 		fnPH = IECoreMaya.FnProceduralHolder( node )
 		proc = IECore.ReadProcedural()
 		fnPH.setParameterised( proc )
-		
+
 		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
-		
+
 		# do an ls on the op holders: should only be one
 		opHolders = IECoreMaya.FnOpHolder.ls()
 		self.assertEqual( len( opHolders ), 1 )
 		self.failUnless( isinstance( opHolders[0], IECoreMaya.FnOpHolder ) )
 		self.assertEqual( opHolders[0].fullPathName(), opHolderNode )
-		
+
 		# do an ls on the procedural holders: should be two
 		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls() ), 2 )
-		
+
 		# do an ls on the procedural holders containing IECore.ReadProcedurals: should be one
 		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural ) ), 1 )
-		
+
 		# find full path name of node holding ReadProcedural, and check it's the same as the one returned by ls:
 		node = maya.cmds.ls( node, l=True )[0]
 		self.assertEqual( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural )[0].fullPathName(), node )
-		
+
 		# do an ls on the converter holders, this time just returning node names:
 		converterHolders = IECoreMaya.FnConverterHolder.ls( fnSets=False )
 		self.assertEqual( len( converterHolders ), 1 )
 		self.assertEqual( converterHolders[0], converterHolderNode )
-		
-	
+
+
 	def tearDown( self ) :
 
 		for f in [
@@ -912,6 +912,6 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 
 			if os.path.exists( f ) :
 				os.remove( f )
-				
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

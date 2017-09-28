@@ -54,7 +54,7 @@ ToHoudiniGroupConverter::ToHoudiniGroupConverter( const IECore::Object *object )
 		"The matrix used to transform the children.",
 		new M44fData()
 	);
-	
+
 	parameters()->addParameter( m_transformParameter );
 }
 
@@ -79,18 +79,18 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 	{
 		return false;
 	}
-	
+
 	Imath::M44f transform = ( runTimeCast<const M44fData>( m_transformParameter->getValue() ) )->readable();
 	const Transform *groupTransform = group->getTransform();
 	if ( groupTransform )
 	{
 		transform = transform * groupTransform->transform();
 	}
-	
+
 	TransformOpPtr transformOp = new TransformOp();
 	M44fDataPtr transformData = new M44fData( transform );
 	transformOp->matrixParameter()->setValue( transformData );
-	
+
 	std::string groupName = nameParameter()->getTypedValue();
 	if ( groupName == "" )
 	{
@@ -100,29 +100,29 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 			groupName = groupNameData->readable();
 		}
 	}
-	
+
 	const std::string &attribFilter = attributeFilterParameter()->getTypedValue();
 	bool convertStandardAttributes = convertStandardAttributesParameter()->getTypedValue();
-	
+
 	size_t i = 0;
 	const Group::ChildContainer &children = group->children();
 	for ( Group::ChildContainer::const_iterator it=children.begin(); it != children.end(); ++it, ++i )
 	{
 		ConstVisibleRenderablePtr child = *it;
-		
+
 		ConstPrimitivePtr primitive = runTimeCast<const Primitive>( child );
 		if ( primitive )
 		{
 			transformOp->inputParameter()->setValue( boost::const_pointer_cast<Primitive>( primitive ) );
 			child = boost::static_pointer_cast<VisibleRenderable>( transformOp->operate() );
 		}
-		
+
 		ToHoudiniGeometryConverterPtr converter = ToHoudiniGeometryConverter::create( child.get() );
 		if ( !converter )
 		{
 			continue;
 		}
-		
+
 		std::string name = groupName;
 		if ( const StringData *childNameData = child->blindData()->member<StringData>( "name" ) )
 		{
@@ -133,29 +133,29 @@ bool ToHoudiniGroupConverter::doConversion( const IECore::Object *object, GU_Det
 				{
 					name += "/";
 				}
-				
+
 				name += childName;
 			}
 		}
-		
+
 		converter->nameParameter()->setTypedValue( name );
 		converter->attributeFilterParameter()->setTypedValue( attribFilter );
 		converter->convertStandardAttributesParameter()->setTypedValue( convertStandardAttributes );
-		
+
 		ToHoudiniGroupConverter *groupConverter = runTimeCast<ToHoudiniGroupConverter>( converter.get() );
 		if ( groupConverter )
 		{
 			groupConverter->transformParameter()->setValue( transformData );
 		}
-		
+
 		GU_DetailHandle handle;
 		handle.allocateAndSet( geo, false );
-		
+
 		if ( !converter->convert( handle ) )
 		{
 			continue;
 		}
 	}
-	
+
 	return true;
 }

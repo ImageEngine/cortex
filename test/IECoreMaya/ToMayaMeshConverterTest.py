@@ -64,9 +64,9 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 
 		self.assertTrue( "uv" in coreMesh )
-		
+
 		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
-		
+
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaConverter.staticTypeId() ) )
@@ -101,95 +101,95 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-		
+
 		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
 		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
-		
+
 		fnMesh.getUVs( u, v, "testUVSet" )
 
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
-	
+
 		self.assertEqual( u[12], coreMesh[ "testUVSet" ].data[12][0] )
 		self.assertEqual( v[12], coreMesh[ "testUVSet" ].data[12][1] )
 
 	def testUVConversionFromPlug( self ) :
-		
+
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		
+
 		self.assertTrue( "uv" in coreMesh )
 
 		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
-		
+
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		op = fn.getOp()
 		with fn.parameterModificationContext() :
 			op["input"].setValue( coreMesh )
-		
+
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
 		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
-		
+
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
-		
+
 		bb = maya.cmds.polyEvaluate( mayaMesh, boundingBox=True )
-		
+
 		self.assertAlmostEqual( bb[0][0], -1, 4 )
 		self.assertAlmostEqual( bb[0][1],  1, 4 )
 		self.assertAlmostEqual( bb[1][0], -1, 4 )
 		self.assertAlmostEqual( bb[1][1],  1, 4 )
 		self.assertAlmostEqual( bb[2][0], -1, 4 )
 		self.assertAlmostEqual( bb[2][1],  1, 4 )
-		
+
 		l = OpenMaya.MSelectionList()
 		l.add( mayaMesh )
 		p = OpenMaya.MDagPath()
 		l.getDagPath( 0, p )
-		
+
 		fnMesh = OpenMaya.MFnMesh( p )
 		u = OpenMaya.MFloatArray()
 		v = OpenMaya.MFloatArray()
-		
+
 		fnMesh.getUVs( u, v )
-		
+
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 
 		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
 		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
-		
+
 		fnMesh.getUVs( u, v, "testUVSet" )
-		
+
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 
 		self.assertEqual( u[12], coreMesh[ "testUVSet" ].data[12][0] )
 		self.assertEqual( v[12], coreMesh[ "testUVSet" ].data[12][1] )
-	
+
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() < 201600, "Invisible meshes with 6+ UV sets cause seg faults prior to Maya 2016" )
 	def testManyUVConversionsFromPlug( self ) :
-		
+
 		coreMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
-		
+
 		self.assertTrue( "uv" in coreMesh )
-		
+
 		for i in range( 0, 7 ) :
 			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
-		
+
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
-		
+
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
 		maya.cmds.connectAttr( fn.name()+".result", mayaMesh+".inMesh", force=True )
-		
+
 		op = fn.getOp()
 		with fn.parameterModificationContext() :
 			op["input"].setValue( coreMesh )
-		
+
 		maya.cmds.file( rename="/tmp/test.ma" )
 		maya.cmds.file( save=True )
 		maya.cmds.file( new=True, f=True )
 		maya.cmds.file( "/tmp/test.ma", open=True )
-		
+
 		fnMesh = OpenMaya.MFnMesh( IECoreMaya.dagPathFromString( mayaMesh ) )
 		self.assertEqual( fnMesh.numPolygons(), 760 )
 		# When calling fnMesh.numFaceVertices() (and other MFnMesh API calls), given a mesh with 6
@@ -203,33 +203,33 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( fnMesh.numFaceVertices(), 2280 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, vertex=True ), 382 )
 		self.assertEqual( maya.cmds.polyEvaluate( mayaMesh, face=True ), 760 )
-		
+
 		u = OpenMaya.MFloatArray()
 		v = OpenMaya.MFloatArray()
-		
+
 		fnMesh.getUVs( u, v )
 		self.assertEqual( u.length(), 2280 )
 		self.assertEqual( v.length(), 2280 )
 		self.assertEqual( u[0], coreMesh[ "uv" ].data[0][0] )
 		self.assertEqual( v[0], coreMesh[ "uv" ].data[0][1] )
-		
+
 		for i in range( 0, 7 ) :
-			
+
 			fnMesh.getUVs( u, v, "testUVSet%d" % i )
 			self.assertEqual( u.length(), 2280 )
 			self.assertEqual( v.length(), 2280 )
 			self.assertEqual( u[12], coreMesh[ "testUVSet%d" % i ].data[12][0] )
 			self.assertEqual( v[12], coreMesh[ "testUVSet%d" % i ].data[12][1] )
-	
+
 	def testUVConversionFromMayaMesh( self ) :
-		
+
 		mayaMesh = maya.cmds.ls( maya.cmds.polyPlane(), dag=True, type="mesh" )[0]
 		coreMesh = IECoreMaya.FromMayaMeshConverter( mayaMesh ).convert()
-		
+
 		transform = maya.cmds.createNode( "transform" )
 		self.failUnless( IECoreMaya.ToMayaMeshConverter( coreMesh ).convert( transform ) )
 		mayaMesh2 = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		l = OpenMaya.MSelectionList()
 		l.add( mayaMesh )
 		l.add( mayaMesh2 )
@@ -237,24 +237,24 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		p2 = OpenMaya.MDagPath()
 		l.getDagPath( 0, p )
 		l.getDagPath( 1, p2 )
-		
+
 		uvSets = []
 		fnMesh = OpenMaya.MFnMesh( p )
 		fnMesh.getUVSetNames( uvSets )
-		
+
 		uvSets2 = []
 		fnMesh2 = OpenMaya.MFnMesh( p2 )
 		fnMesh2.getUVSetNames( uvSets2 )
-		
+
 		self.assertEqual( uvSets, uvSets2 )
-		
+
 		# Check uvIndices
 		coreMesh2 = IECoreMaya.FromMayaMeshConverter( mayaMesh2 ).convert()
 		# self.assertEqual( coreMesh["uv"].data, coreMesh2["uv"].data )
 		self.assertEqual( coreMesh["uv"].indices, coreMesh2["uv"].indices )
 
 	def testShadingGroup( self ) :
-	
+
 		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
@@ -262,18 +262,18 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mayaMesh = maya.cmds.listRelatives( transform, shapes=True )[0]
 
 		self.failUnless( mayaMesh in maya.cmds.sets( "initialShadingGroup", query=True ) )
-		
+
 	def testConstructor( self ) :
-	
+
 		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
-		
+
 		converter = IECoreMaya.ToMayaMeshConverter( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
 		converter.convert( transform )
 		self.assertEqual( maya.cmds.nodeType( maya.cmds.listRelatives( transform, shapes=True )[0] ), "mesh" )
-	
+
 	def testNormals( self ) :
-		
+
 		sphere = maya.cmds.polySphere( subdivisionsX=4, subdivisionsY=3, constructionHistory=False )
 		sphere = maya.cmds.listRelatives( sphere, shapes=True )[0]
 		maya.cmds.polySoftEdge( sphere, angle=145 )
@@ -283,21 +283,21 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.failUnless( mesh.arePrimitiveVariablesValid() )
 		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
-		
+
 		transform = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform )
 		newSphere = maya.cmds.listRelatives( transform, shapes=True )[0]
-		
+
 		normals3d = IECore.DataConvertOp()( data=mesh["N"].data, targetType=IECore.TypeId.V3dVectorData )
 		del mesh["N"]
 		mesh["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, normals3d )
 		self.failUnless( mesh.arePrimitiveVariablesValid() )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3dVectorData ) )
-		
+
 		transform2 = maya.cmds.createNode( "transform" )
 		IECoreMaya.ToMayaObjectConverter.create( mesh ).convert( transform2 )
 		newSphere2 = maya.cmds.listRelatives( transform2, shapes=True )[0]
-		
+
 		for i in range( 0, len(maya.cmds.ls( sphere+'.vtx[*]', fl=True )) ) :
 			origNormal = maya.cmds.polyNormalPerVertex( sphere+'.vtx['+str(i)+']', query=True, xyz=True )
 			normal3f = maya.cmds.polyNormalPerVertex( newSphere+'.vtx['+str(i)+']', query=True, xyz=True )

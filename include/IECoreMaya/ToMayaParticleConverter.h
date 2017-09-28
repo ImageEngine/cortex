@@ -61,7 +61,7 @@ class ToMayaParticleConverter : public ToMayaObjectConverter
 	private:
 
 		void addAttribute( const IECore::Data *data, MFnParticleSystem &fnPS, const MString &attrName ) const;
-		
+
 		typedef ToMayaObjectConverterDescription<ToMayaParticleConverter> Description;
 		static Description g_description;
 };

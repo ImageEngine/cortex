@@ -54,7 +54,7 @@ class IECORE_API DataInterleaveOp : public Op
 
 		DataInterleaveOp();
 		virtual ~DataInterleaveOp();
-	
+
 		/// The data to be interleaved. This is specified
 		/// as an ObjectVector containing Data objects of
 		/// identical type and length.
@@ -69,13 +69,13 @@ class IECORE_API DataInterleaveOp : public Op
 	protected :
 
 		virtual ObjectPtr doOperation( const CompoundObject *operands );
-		
+
 	private :
-	
+
 		struct InterleaveFnStage1;
 		template<class FromBaseType>
 		struct InterleaveFnStage2;
-	
+
 		static InternedString g_dataName;
 		static InternedString g_targetTypeName;
 

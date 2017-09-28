@@ -45,15 +45,15 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 
 	## \param obj - MObject, This can also be a string or an MObjectHandle.
 	def __init__( self, obj ) :
-	
+
 		if isinstance( obj, str ) or isinstance( obj, unicode ) :
-		
+
 			obj = StringUtil.dependencyNodeFromString( obj )
-		
+
 		elif isinstance( obj, maya.OpenMaya.MObjectHandle ) :
-		
+
 			assert( obj.isValid() )
-			obj = obj.object()		
+			obj = obj.object()
 
 		maya.OpenMaya.MFnDagNode.__init__( self, obj )
 
@@ -63,13 +63,13 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 	# shape.
 	@staticmethod
 	def createShapeWithParent( parentName, shapeNodeType ) :
-	
+
 		parentNode = maya.cmds.createNode( "transform", name=parentName, skipSelect=True )
-		
+
 		shapeName = FnDagNode.defaultShapeName( parentNode )
 		shapeNode = maya.cmds.createNode( shapeNodeType, name=shapeName, parent=parentNode, skipSelect=True )
-		
-		return FnDagNode( shapeNode )	
+
+		return FnDagNode( shapeNode )
 
 	## Determines whether the DAG node is actually hidden in Maya.
 	# This includes the effect of any parents visibility.
@@ -85,42 +85,42 @@ class FnDagNode( maya.OpenMaya.MFnDagNode ) :
 	def hiddenPathNames( self, includeSelf=True ) :
 
 		hidden = []
-		
-		# Maya always returns a list from listRelatives.
-		parent = [] 
 
-		if includeSelf :			
+		# Maya always returns a list from listRelatives.
+		parent = []
+
+		if includeSelf :
 			parent = [ self.fullPathName() ]
 		else :
 			parent	= maya.cmds.listRelatives( self.fullPathName(), parent=True )
-	
+
 		while parent :
-			
+
 			assert( len(parent) == 1 )
-			
-			o = parent[0]	
+
+			o = parent[0]
 			attr = "%s.visibility" % o
-		
+
 			if maya.cmds.objExists( attr ) and not maya.cmds.getAttr( attr ) :
 				hidden.append( o )
-		
+
 			parent	= maya.cmds.listRelatives( o, parent=True )
 
 		return hidden
-	
-	## Returns the default shape name maya uses when creating a shape under a transform. 
+
+	## Returns the default shape name maya uses when creating a shape under a transform.
 	@staticmethod
 	def defaultShapeName( transformNode ):
-		
+
 		parentShort = transformNode.rpartition( "|" )[-1]
-		
+
 		numbersMatch = re.search( "[0-9]+$", parentShort )
 		if numbersMatch is not None :
 			numbers = numbersMatch.group()
 			shapeName = parentShort[:-len(numbers)] + "Shape" + numbers
 		else :
 			shapeName = parentShort + "Shape"
-		
+
 		return shapeName
 
 

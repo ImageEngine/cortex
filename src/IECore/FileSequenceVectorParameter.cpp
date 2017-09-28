@@ -197,9 +197,9 @@ void FileSequenceVectorParameter::setFileSequenceValues( const std::vector<FileS
 
 void FileSequenceVectorParameter::getFileSequenceValues( const StringVectorData *value, std::vector<FileSequencePtr> &fileSequences ) const
 {
-	
+
 	fileSequences.clear();
-	
+
 	const std::vector< std::string > &sequences = value->readable();
 	//const std::vector< std::string > &sequences = getTypedValue();
 

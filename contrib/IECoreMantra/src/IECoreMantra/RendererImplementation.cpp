@@ -118,16 +118,16 @@ IECore::ConstDataPtr IECoreMantra::RendererImplementation::getVelocityBlurAttrib
 IECoreMantra::RendererImplementation::RendererImplementation()
 {
 	constructCommon( Render );
-	
+
 	if ( !(m_fpipe = popen("mantra", "w")) )
-	{  
-		msg( Msg::Error, "IECoreMantra::RendererImplementation:RendererImplementation", 
+	{
+		msg( Msg::Error, "IECoreMantra::RendererImplementation:RendererImplementation",
 			 "Failed to open mantra program" );
 	}
-	
+
 	fputs("# IFD created by IECoreMantra\n", m_fpipe);
 	fputs("ray_time 0\n", m_fpipe);
-	
+
 	fflush( m_fpipe );
 }
 
@@ -149,7 +149,7 @@ IECoreMantra::RendererImplementation::RendererImplementation( ProceduralPrimitiv
 	: m_vrayproc( (ProceduralPrimitive *)procedural )
 {
 	constructCommon( Procedural );
-	m_vrayproc->m_renderer = this; 
+	m_vrayproc->m_renderer = this;
 	m_preWorld = false;
 }
 
@@ -157,7 +157,7 @@ IECoreMantra::RendererImplementation::RendererImplementation(RendererImplementat
 	: m_vrayproc( new ProceduralPrimitive() )
 {
 	constructCommon( Procedural );
-	if ( parent ) 
+	if ( parent )
 	{
 		m_transformStack.push( parent->m_transformStack.top() );
 		m_attributeStack.push( AttributeState( parent->m_attributeStack.top() ) );
@@ -169,23 +169,23 @@ void IECoreMantra::RendererImplementation::constructCommon( Mode mode )
 {
 	m_mode = mode;
 	m_preWorld = true;
-	
+
 	m_world = new Group;
-	
+
 	m_camera = new Camera;
 	m_camera->addStandardParameters();
-	
-	m_camera->parameters()["screenWindow"] = new Box2fData( Box2f(V2f(0,0), V2f(1,1)) ); 
+
+	m_camera->parameters()["screenWindow"] = new Box2fData( Box2f(V2f(0,0), V2f(1,1)) );
 
 	m_camera->setTransform( new MatrixTransform() );
 
 	m_transformStack.push( M44f() );
 	m_attributeStack.push( AttributeState() );
-	
+
 	m_inMotion = false;
 	m_motionType = Unknown;
 	m_motionSize = 0;
-	
+
 	m_getOptionHandlers["shutter"] = &IECoreMantra::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:shutter"] = &IECoreMantra::RendererImplementation::getShutterOption;
 	m_getOptionHandlers["camera:resolution"] = &IECoreMantra::RendererImplementation::getResolutionOption;
@@ -266,7 +266,7 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 				ConstM33fDataPtr m = runTimeCast<const M33fData>( value );
 				ifd = boost::str( boost::format( "%g %g %g %g %g %g %g %g %g") %
 									m->readable()[0][0] % m->readable()[0][1] % m->readable()[0][2] %
-									m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] %  
+									m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] %
 									m->readable()[2][0] % m->readable()[2][1] % m->readable()[2][2] );
 				type = "matrix3";
 			}
@@ -275,9 +275,9 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 			{
 				ConstM44fDataPtr m = runTimeCast<const M44fData>( value );
 				ifd = boost::str( boost::format( "%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g")  %
-								m->readable()[0][0] % m->readable()[0][1] % m->readable()[0][2] % m->readable()[0][3] % 
-								m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] % m->readable()[1][3] % 
-								m->readable()[2][0] % m->readable()[2][1] % m->readable()[2][2] % m->readable()[2][3] % 
+								m->readable()[0][0] % m->readable()[0][1] % m->readable()[0][2] % m->readable()[0][3] %
+								m->readable()[1][0] % m->readable()[1][1] % m->readable()[1][2] % m->readable()[1][3] %
+								m->readable()[2][0] % m->readable()[2][1] % m->readable()[2][2] % m->readable()[2][3] %
 								m->readable()[3][0] % m->readable()[3][1] % m->readable()[3][2] % m->readable()[3][3] );
 				type = "matrix4";
 			}
@@ -292,7 +292,7 @@ void IECoreMantra::RendererImplementation::ifdString( IECore::ConstDataPtr value
 		default:
 			ifd = "0";
 			type = "int";
-	}	
+	}
 }
 
 void IECoreMantra::RendererImplementation::setOption( const std::string &name, IECore::ConstDataPtr value )
@@ -304,13 +304,13 @@ void IECoreMantra::RendererImplementation::setOption( const std::string &name, I
 			msg( Msg::Warning, "IECoreMantra::RendererImplementation::camera", "Method invalid after worldBegin()" );
 			return;
 		}
-		
+
 		if ( !m_fpipe )
 		{
 			msg( Msg::Error, "IECoreMantra::RendererImplementation::setOption", "Broken pipe" );
 			return;
 		}
-		
+
 		std::string ifd, type;
 		ifdString( value, ifd, type );
 		fprintf( m_fpipe, "ray_declare global %s %s %s\n", type.c_str(), name.c_str(), ifd.c_str() );
@@ -348,53 +348,53 @@ void IECoreMantra::RendererImplementation::outputCamera( IECore::CameraPtr camer
 	{
 		return;
 	}
-	
+
 	if ( !m_fpipe )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::outputCamera", "Broken pipe" );
 		return;
 	}
-	
+
 	CompoundDataMap::const_iterator it = camera->parameters().find( "resolution" );
 	ConstV2iDataPtr resolution = runTimeCast<const V2iData>( it->second );
-	fprintf( m_fpipe, "ray_property image resolution %i %i\n", 
+	fprintf( m_fpipe, "ray_property image resolution %i %i\n",
 			 resolution->readable().x, resolution->readable().y );
-	
+
 	it = camera->parameters().find( "projection" );
 	ConstStringDataPtr projection = runTimeCast<const StringData>( it->second );
-	fprintf( m_fpipe, "ray_property camera projection  \"%s\"\n", 
-			 (char *)projection->readable().c_str() ); 
+	fprintf( m_fpipe, "ray_property camera projection  \"%s\"\n",
+			 (char *)projection->readable().c_str() );
 
 	it = camera->parameters().find( "clippingPlanes" );
 	ConstV2fDataPtr clip = runTimeCast<const V2fData>( it->second );
-	fprintf( m_fpipe, "ray_property camera clip  %g %g\n", 
-			 clip->readable().x, clip->readable().y ); 
+	fprintf( m_fpipe, "ray_property camera clip  %g %g\n",
+			 clip->readable().x, clip->readable().y );
 
 	it = camera->parameters().find( "screenWindow" );
 	ConstBox2fDataPtr window = runTimeCast<const Box2fData>( it->second );
-	fprintf( m_fpipe, "ray_property image window  %g %g %g %g\n", 
-			 window->readable().min.x, window->readable().max.x, 
-			 window->readable().min.y, window->readable().max.y ); 
-	
+	fprintf( m_fpipe, "ray_property image window  %g %g %g %g\n",
+			 window->readable().min.x, window->readable().max.x,
+			 window->readable().min.y, window->readable().max.y );
+
 	it = camera->parameters().find( "cropWindow" );
 	ConstBox2fDataPtr crop = runTimeCast<const Box2fData>( it->second );
-	fprintf( m_fpipe, "ray_property image crop  %g %g %g %g\n", 
-			 crop->readable().min.x, crop->readable().max.x, 
-			 crop->readable().min.y, crop->readable().max.y ); 
+	fprintf( m_fpipe, "ray_property image crop  %g %g %g %g\n",
+			 crop->readable().min.x, crop->readable().max.x,
+			 crop->readable().min.y, crop->readable().max.y );
 
-	it = camera->parameters().find( "shutter" );									  
+	it = camera->parameters().find( "shutter" );
 	ConstV2fDataPtr shutter = runTimeCast<const V2fData>( it->second );
 	fprintf( m_fpipe, "ray_declare global vector2 camera:shutter %g %g\n",
 			 shutter->readable().x, shutter->readable().y);
-	
+
 	M44f m = camera->getTransform()->transform();
 	m.invert();
-	fprintf( m_fpipe, "ray_transform %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", 
+	fprintf( m_fpipe, "ray_transform %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
 		m[0][0], m[0][1], m[0][2], m[0][3],
 		m[1][0], m[1][1], m[1][2], m[1][3],
 		m[2][0], m[2][1], m[2][2], m[2][3],
 		m[3][0], m[3][1], m[3][2], m[3][3]);
-	
+
 	fflush( m_fpipe );
 }
 
@@ -410,7 +410,7 @@ void IECoreMantra::RendererImplementation::camera( const std::string &name, cons
 		msg( Msg::Warning, "IECoreMantra::RendererImplementation::camera", "Method invalid after worldBegin()" );
 		return;
 	}
-	
+
 	if ( !m_fpipe )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera", "Broken pipe" );
@@ -420,27 +420,27 @@ void IECoreMantra::RendererImplementation::camera( const std::string &name, cons
 	CompoundDataPtr parameterData = (new CompoundData( parameters ))->copy();
 	CameraPtr camera = new Camera( name, 0, parameterData );
 	camera->addStandardParameters();
-	// addStandardMantraParameters.. 
-	camera->parameters()["screenWindow"] = new Box2fData( Box2f(V2f(0,0), V2f(1,1)) ); 
-	
+	// addStandardMantraParameters..
+	camera->parameters()["screenWindow"] = new Box2fData( Box2f(V2f(0,0), V2f(1,1)) );
+
 	CompoundDataMap::const_iterator transformIt=parameters.find( "transform" );
 	if( transformIt!=parameters.end() )
 	{
-		if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )										
+		if( M44fDataPtr m = runTimeCast<M44fData>( transformIt->second ) )
 		{
-			camera->setTransform( new MatrixTransform( m->readable() ) );										 
-		}																										 
-		else																									  
+			camera->setTransform( new MatrixTransform( m->readable() ) );
+		}
+		else
 		{
-			msg( Msg::Error, "IECoreRI::RendererImplementation::camera", 
+			msg( Msg::Error, "IECoreRI::RendererImplementation::camera",
 				 "\"transform\" parameter should be of type M44fData." );
 		}
-	}																											 
-	else
-	{																											 
-		camera->setTransform( new MatrixTransform( getTransform() ) );											
 	}
-	m_camera = camera;		 	
+	else
+	{
+		camera->setTransform( new MatrixTransform( getTransform() ) );
+	}
+	m_camera = camera;
 }
 
 void IECoreMantra::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
@@ -455,20 +455,20 @@ void IECoreMantra::RendererImplementation::display( const std::string &name, con
 		msg( Msg::Warning, "IECoreMantra::RendererImplementation::camera", "Method invalid after worldBegin()" );
 		return;
 	}
-	
+
 	if ( !m_fpipe )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera", "Broken pipe" );
 		return;
 	}
-	
+
 	CompoundDataMap::const_iterator var_it = parameters.find( "variable" );
 	CompoundDataMap::const_iterator vex_it = parameters.find( "vextype" );
 	CompoundDataMap::const_iterator chn_it = parameters.find( "channel" );
-	
+
 	if ( var_it == parameters.end() || vex_it == parameters.end() || chn_it == parameters.end() )
 	{
-		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera", 
+		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera",
 			"Parameters must define 'variable', 'vextype' and 'channel' values." );
 		return;
 	}
@@ -476,22 +476,22 @@ void IECoreMantra::RendererImplementation::display( const std::string &name, con
 	ConstStringDataPtr var = runTimeCast<const StringData>( var_it->second );
 	ConstStringDataPtr vex = runTimeCast<const StringData>( vex_it->second );
 	ConstStringDataPtr chn = runTimeCast<const StringData>( chn_it->second );
-	
+
 	if ( !var || !vex || !chn )
 	{
-		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera", 
+		msg( Msg::Error, "IECoreMantra::RendererImplementation::camera",
 			"Invalid parameters." );
 		return;
 	}
-		
+
 	fprintf( m_fpipe, "ray_image \"%s\"\n", (char *)name.c_str() );
-	
+
 	fputs( "ray_start plane\n", m_fpipe );
 	fprintf( m_fpipe, "\tray_property plane variable \"%s\"\n", (char *)var->readable().c_str() );
 	fprintf( m_fpipe, "\tray_property plane vextype \"%s\"\n", (char *)vex->readable().c_str() );
 	fprintf( m_fpipe, "\tray_property plane channel \"%s\"\n", (char *)chn->readable().c_str() );
 	fputs( "ray_end\n", m_fpipe );
-	
+
 	fflush( m_fpipe );
 }
 
@@ -501,7 +501,7 @@ void IECoreMantra::RendererImplementation::worldBegin()
 	{
 		return;
 	}
-	
+
 	if ( m_mode == Render )
 	{
 		// if rendering put it somewhere temporary
@@ -522,7 +522,7 @@ void IECoreMantra::RendererImplementation::worldBegin()
 	outputCamera( m_camera );
 	m_transformStack.top() = M44f();
 	m_preWorld = false;
-	
+
 	// add world procedural
 	CompoundDataMap dummyTopology;
 	PrimitiveVariableMap dummyPrimVars;
@@ -535,19 +535,19 @@ void IECoreMantra::RendererImplementation::worldEnd()
 	{
 		return;
 	}
-	
+
 	if ( m_preWorld )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "Invalid world block nesting" );
 		return;
 	}
-	
+
 	if ( !m_fpipe )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "Broken pipe" );
 		return;
 	}
-	
+
 	// write world to disk
 	try
 	{
@@ -558,15 +558,15 @@ void IECoreMantra::RendererImplementation::worldEnd()
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "World cache write failed" );
 	}
-	
+
 	fputs( "ray_raytrace\n\n", m_fpipe );
 	fputs( "ray_quit\n", m_fpipe );
-	
+
 	fflush( m_fpipe );
-	
+
 	// close mantra
 	if ( pclose(m_fpipe) == -1 )
-	{	
+	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::worldEnd", "pclose error" );
 	}
 	m_fpipe = NULL;
@@ -581,11 +581,11 @@ void IECoreMantra::RendererImplementation::transformEnd()
 {
 	if( m_transformStack.size() <= 1 )
 	{
-		msg( Msg::Warning, "IECoreMantra::RendererImplementation::transformEnd", 
+		msg( Msg::Warning, "IECoreMantra::RendererImplementation::transformEnd",
 			 "No matching transformBegin() call." );
 		return;
 	}
-	m_transformStack.pop(); 
+	m_transformStack.pop();
 }
 
 void IECoreMantra::RendererImplementation::setTransform( const Imath::M44f &m )
@@ -594,7 +594,7 @@ void IECoreMantra::RendererImplementation::setTransform( const Imath::M44f &m )
 	{
 		if ( m_mode != Procedural )
 		{
-			msg( Msg::Warning, "IECoreMantra::RendererImplementation::setTransform", 
+			msg( Msg::Warning, "IECoreMantra::RendererImplementation::setTransform",
 				 "Motion blur not currently supported in Render or IfdGen mode" );
 		}
 		else
@@ -605,7 +605,7 @@ void IECoreMantra::RendererImplementation::setTransform( const Imath::M44f &m )
 			}
 			if ( m_motionType != SetTransform ) // subsequent calls must comply
 			{
-				msg( Msg::Warning, "IECoreMantra::RendererImplementation:setTransform", 
+				msg( Msg::Warning, "IECoreMantra::RendererImplementation:setTransform",
 					 "Render methods inside a motion block must be consistent.");
 				return;
 			}
@@ -651,7 +651,7 @@ void IECoreMantra::RendererImplementation::concatTransform( const Imath::M44f &m
 	{
 		if ( m_mode != Procedural )
 		{
-			msg( Msg::Warning, "IECoreMantra::RendererImplementation::concatTransform", 
+			msg( Msg::Warning, "IECoreMantra::RendererImplementation::concatTransform",
 				 "Motion blur not currently supported in Render or IfdGen mode" );
 		}
 		else
@@ -662,7 +662,7 @@ void IECoreMantra::RendererImplementation::concatTransform( const Imath::M44f &m
 			}
 			if ( m_motionType != ConcatTransform ) // subsequent calls must comply
 			{
-				msg( Msg::Warning, "IECoreMantra::RendererImplementation:concatTransform", 
+				msg( Msg::Warning, "IECoreMantra::RendererImplementation:concatTransform",
 					 "Render methods inside a motion block must be consistent.");
 				return;
 			}
@@ -736,9 +736,9 @@ void IECoreMantra::RendererImplementation::shader( const std::string &type, cons
 			parms.push_back( string(" ") );
 		}
 		std::string parmstring  = accumulate( parms.begin(), parms.end(), string("") );
-		
-		StringDataPtr shader = 0; 
-		if ( parmstring.empty() ) 
+
+		StringDataPtr shader = 0;
+		if ( parmstring.empty() )
 		{
 			shader = new StringData( name );
 		}
@@ -755,7 +755,7 @@ void IECoreMantra::RendererImplementation::shader( const std::string &type, cons
 		{
 			m_attributeStack.top().attributes->writable()[":displacement"] = shader;
 		}
-		
+
 		if ( m_mode != Procedural )
 		{
 			IECore::AttributeStatePtr state = new IECore::AttributeState( m_attributeStack.top().attributes );
@@ -854,7 +854,7 @@ void IECoreMantra::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr v
 		}
 		if ( m_motionType != Geometry )
 		{
-			msg( Msg::Warning, "IECoreMantra::RendererImplementation:mesh", 
+			msg( Msg::Warning, "IECoreMantra::RendererImplementation:mesh",
 				 "Render methods inside a motion block must be consistent.");
 			return;
 		}
@@ -869,12 +869,12 @@ void IECoreMantra::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr v
 	MeshPrimitivePtr mesh = new IECore::MeshPrimitive( vertsPerFace, vertIds, interpolation );
 	mesh->variables = primVars;
 	VisibleRenderablePtr renderable = runTimeCast<VisibleRenderable>( mesh );
-	
+
 	if ( m_mode != Procedural )
 	{
 		m_world->addChild( renderable );
 	}
-	else 
+	else
 	{
 		m_vrayproc->addVisibleRenderable( renderable );
 	}
@@ -896,7 +896,7 @@ void IECoreMantra::RendererImplementation::geometry( const std::string &type, co
 	{
 		return;
 	}
-	
+
 	if ( !m_fpipe )
 	{
 		msg( Msg::Error, "IECoreMantra::RendererImplementation::geometry", "Broken pipe" );
@@ -921,7 +921,7 @@ void IECoreMantra::RendererImplementation::geometry( const std::string &type, co
 		CompoundDataMap::const_iterator version_it = topology.find( "classVersion");
 		CompoundDataMap::const_iterator parameters_it = topology.find( "parameterString");
 		CompoundDataMap::const_iterator bound_it = topology.find( "bound" );
-		
+
 		ConstStringDataPtr className = 0;
 		ConstIntDataPtr classVersion = new IntData(1);
 		ConstStringDataPtr parameterString = new StringData("");
@@ -940,7 +940,7 @@ void IECoreMantra::RendererImplementation::geometry( const std::string &type, co
 				return;
 			}
 		}
-		
+
 		if ( version_it != topology.end() )
 		{
 			ConstIntDataPtr argClassVersion = runTimeCast<const IntData>( version_it->second );
@@ -949,7 +949,7 @@ void IECoreMantra::RendererImplementation::geometry( const std::string &type, co
 				classVersion = argClassVersion;
 			}
 		}
-		
+
 		if ( parameters_it != topology.end() )
 		{
 			ConstStringDataPtr argParameters = runTimeCast<const StringData>( parameters_it->second );
@@ -965,24 +965,24 @@ void IECoreMantra::RendererImplementation::geometry( const std::string &type, co
 			ConstBox3fDataPtr argBound = runTimeCast<const Box3fData>( bound_it->second );
 			b = argBound->readable();
 		}
-		
+
 		fputs( "ray_start object\n", m_fpipe );
-		
+
 		M44f m = getTransform();
-		
-		fprintf( m_fpipe, "\tray_transform %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n", 
+
+		fprintf( m_fpipe, "\tray_transform %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
 			m[0][0], m[0][1], m[0][2], m[0][3],
 			m[1][0], m[1][1], m[1][2], m[1][3],
 			m[2][0], m[2][1], m[2][2], m[2][3],
 			m[3][0], m[3][1], m[3][2], m[3][3]);
-		
+
 		fprintf( m_fpipe, "\tray_procedural -m %g %g %g -M %g %g %g ieprocedural"
-				 " className \"%s\" classVersion %i parameterString \"%s\"\n", 
+				 " className \"%s\" classVersion %i parameterString \"%s\"\n",
 				 b.min.x, b.min.y, b.min.z, b.max.x, b.max.y, b.max.z,
-				 (char *)className->readable().c_str(), 
-				 classVersion->readable(), 
+				 (char *)className->readable().c_str(),
+				 classVersion->readable(),
 				 (char *)parameterString->readable().c_str() );
-		
+
 		fputs( "ray_end\n", m_fpipe );
 
 		fflush( m_fpipe );
@@ -1026,7 +1026,7 @@ void IECoreMantra::RendererImplementation::instance( const std::string &name )
 	msg( Msg::Warning, "IECoreMantra::RendererImplementation::instance", "Not implemented" );
 }
 
-IECore::DataPtr 
+IECore::DataPtr
 IECoreMantra::RendererImplementation::command( const std::string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreMantra::RendererImplementation::command", "Not implemented" );

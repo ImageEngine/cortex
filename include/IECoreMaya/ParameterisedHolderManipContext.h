@@ -50,7 +50,7 @@ namespace IECoreMaya
 /// This Class provides a generic manipulator context, that allows
 /// Parameters on any node derived from IECore::ParameterisedHolder
 /// to be manipulated.
-/// 
+///
 /// When a node is in the selection, and this context is used as a tool,
 /// the selection is recursively walked for supported dependency/DAG nodes.
 /// When one is found, its parameters are traversed, and depending on the
@@ -60,7 +60,7 @@ namespace IECoreMaya
 /// must first be registered. This is done in a way similar to Maya's
 /// 'Show Manipulator Tool'. The name of registered manipulator should
 /// take the following form:
-///       
+///
 ///      ie[<manipulatorTypeHint>]<parameterTypeName>ParameterManipulator
 ///
 /// The optional <em>manipulatorTypeHint</em>, used for specialisation,
@@ -70,7 +70,7 @@ namespace IECoreMaya
 /// If the manipulator derives from IECore::ParameterManipulatorContainer
 /// then two additional methods are called after creation to specify
 /// which parameter the manipulator should target, and wether a label has
-/// been specified by the optional StringData member "manipLabel" in 
+/// been specified by the optional StringData member "manipLabel" in
 /// the "UI" CompoundObject in the Parameters userData().
 ///
 /// \see ParameterisedManipContainer for more information.
@@ -79,10 +79,10 @@ namespace IECoreMaya
 /// display, you may set parameter->userData()["UI"]["disableManip"] to
 /// BoolData( true ), and the context will skip that Parameter.
 
-class ParameterisedHolderManipContext : public MPxSelectionContext 
+class ParameterisedHolderManipContext : public MPxSelectionContext
 {
 	public:
-	
+
 		/// The context supports three modes of operation. These can be
 		/// managed by the ParameterisedHolderManipContextCmd
 		/// \see ParameterisedHolderManipContextCmd
@@ -94,37 +94,37 @@ class ParameterisedHolderManipContext : public MPxSelectionContext
 			/// The attribute name set in the context is drawn, if present.
 			Targeted
 		};
-	
+
 		/// Used to set the target plug name for the context when in Targeted mode.
 		/// \param plugName The Maya attribute name, without the node prefix. This
 		/// should be the name of the Parameter plug itself, rather than any children.
 		void setTarget( MString &plugName );
 		/// \return The Maya attribute name the context is currently operating on.
 		MString getTarget();
-		
+
 		/// Sets the Context's mode to one of the above.
 		void setMode( Mode m );
 		/// \return The Context's current mode.
 		Mode getMode();
-		
-		
+
+
 		ParameterisedHolderManipContext();
 
 		virtual void toolOnSetup( MEvent &event );
 		virtual void toolOffCleanup();
-				
+
 		static void updateManipulators( void *blindData );
-		
+
 	private:
-		
+
 		MCallbackId selectionChangeCallback;
-	
-		bool m_toolOn;	
-		Mode m_mode;		
+
+		bool m_toolOn;
+		Mode m_mode;
 		MString m_targetPlugPath;
-		
+
 		void updateManipulators();
-		
+
 		void dagWalk( MObject &node );
 		void processNode( MObject &node );
 		MPxManipContainer *createManipulatorWalk( IECore::ParameterPtr parameter, MFnDependencyNode &nodeFn );

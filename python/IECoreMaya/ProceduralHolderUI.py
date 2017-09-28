@@ -48,7 +48,7 @@ def addDagMenuCallback( callback ) :
 	if not callback in __dagMenuCallbacks :
 		__dagMenuCallbacks.append( callback )
 
-## Removes a callback previously added with addDagMenuCallback.		
+## Removes a callback previously added with addDagMenuCallback.
 def removeDagMenuCallback( callback ) :
 
 	__dagMenuCallbacks.remove( callback )
@@ -75,13 +75,13 @@ def _dagMenu( menu, proceduralHolder ) :
 		radialPosition = "W",
 		command = IECore.curry( __objectCallback, proceduralHolder ),
 	)
-	
+
 	maya.cmds.menuItem(
 		label = "Print Component Names",
 		radialPosition = "NE",
 		command = IECore.curry( __printComponents, proceduralHolder )
 	)
-	
+
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	if fnPH.selectedComponentNames() :
 		maya.cmds.menuItem(
@@ -89,57 +89,57 @@ def _dagMenu( menu, proceduralHolder ) :
 			radialPosition = "E",
 			command = IECore.curry( __printSelectedComponents, proceduralHolder )
 		)
-		
+
 	if fnPH.selectedComponentNames() :
-		
+
 		maya.cmds.menuItem(
 			label = "Create Locator",
 			radialPosition = "SE",
 			subMenu = True,
 		)
-		
+
 		maya.cmds.menuItem(
 			label = "At Bound Min",
 			radialPosition = "N",
 			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Min" ] ),
 		)
-		
+
 		maya.cmds.menuItem(
 			label = "At Bound Max",
 			radialPosition = "NE",
 			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Max" ] ),
 		)
-		
+
 		maya.cmds.menuItem(
 			label = "At Bound Min And Max",
 			radialPosition = "E",
 			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Min", "Max" ] ),
 		)
-		
+
 		maya.cmds.menuItem(
 			label = "At Bound Centre",
 			radialPosition = "SE",
 			command = IECore.curry( __createLocatorAtPoints, proceduralHolder, [ "Center" ] ),
 		)
-		
+
 		maya.cmds.menuItem(
 			label = "At Transform Origin",
 			radialPosition = "S",
 			command = IECore.curry( __createLocatorWithTransform, proceduralHolder ),
 		)
-		
-	maya.cmds.setParent( menu, menu=True )	
-	
+
+	maya.cmds.setParent( menu, menu=True )
+
 	maya.cmds.menuItem(
 		label = "Convert To Geometry",
 		radialPosition = "S",
 		command = "import IECoreMaya; IECoreMaya.ProceduralHolderUI._convertToGeometry( \"" + proceduralHolder + "\" )",
 	)
-	
+
 	for c in __dagMenuCallbacks :
-	
+
 		c( menu, proceduralHolder )
-	
+
 def __componentCallback( proceduralHolder, *unused ) :
 
 	parent = maya.cmds.listRelatives( proceduralHolder, parent=True, fullPath=True )[0]
@@ -175,30 +175,30 @@ def __printSelectedComponents( proceduralHolder, *unused ) :
 def _convertToGeometry( proceduralHolder, *unused ) :
 
 	fnP = IECoreMaya.FnProceduralHolder( proceduralHolder )
-	
+
 	proceduralParent = maya.cmds.listRelatives( fnP.fullPathName(), parent=True, fullPath=True )[0]
 	geometryParent = maya.cmds.createNode( "transform", name = "convertedProcedural", skipSelect=True )
-	
+
 	proceduralTransform = maya.cmds.xform( proceduralParent, query=True, worldSpace=True, matrix=True )
 	maya.cmds.xform( geometryParent, worldSpace=True, matrix=proceduralTransform )
-	
-	fnP.convertToGeometry( parent=geometryParent )	
+
+	fnP.convertToGeometry( parent=geometryParent )
 
 	maya.cmds.select( geometryParent, replace=True )
 
 def __createLocatorAtPoints( proceduralHolder, childPlugSuffixes, *unused ) :
-	
+
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	selectedNames = fnPH.selectedComponentNames()
 
 	locators = []
 	for name in selectedNames :
 		locators.extend( fnPH.createLocatorAtPoints( name, childPlugSuffixes ) )
-		
+
 	maya.cmds.select( locators, replace=True )
 
 def __createLocatorWithTransform( proceduralHolder, *unused ) :
-	
+
 	fnPH = IECoreMaya.FnProceduralHolder( proceduralHolder )
 	selectedNames = fnPH.selectedComponentNames()
 

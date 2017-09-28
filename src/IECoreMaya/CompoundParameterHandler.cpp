@@ -70,14 +70,14 @@ MPlug CompoundParameterHandler::doCreate( IECore::ConstParameterPtr parameter, c
 
 	MFnMessageAttribute fnMAttr;
 	MObject attribute = fnMAttr.create( plugName, plugName );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
-	
+
 	if( !finishUpdating( parameter, result ) )
 	{
 		return MPlug();
-	}	
-	
+	}
+
 	return result;
 }
 

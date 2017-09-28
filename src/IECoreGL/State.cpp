@@ -47,7 +47,7 @@ class State::Implementation : public IECore::RefCounted
 {
 
 	public :
-	
+
 		Implementation( bool complete )
 			:	m_userAttributes( 0 )
 		{
@@ -65,11 +65,11 @@ class State::Implementation : public IECore::RefCounted
 			:	m_components( other.m_components ), m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
 		{
 		}
-		
+
 		virtual ~Implementation()
 		{
 		}
-	
+
 		void bind() const
 		{
 			for( ComponentMap::const_iterator it=m_components.begin(); it!=m_components.end(); it++ )
@@ -77,7 +77,7 @@ class State::Implementation : public IECore::RefCounted
 				it->second.component->bind();
 			}
 		}
-		
+
 		void add( Implementation *s )
 		{
 			for( ComponentMap::iterator it=s->m_components.begin(); it!=s->m_components.end(); it++ )
@@ -110,7 +110,7 @@ class State::Implementation : public IECore::RefCounted
 			}
 			return it->second.component.get();
 		}
-			
+
 		const StateComponent *get( IECore::TypeId componentType ) const
 		{
 			ComponentMap::const_iterator it = m_components.find( componentType );
@@ -130,7 +130,7 @@ class State::Implementation : public IECore::RefCounted
 			}
 			m_components.erase( it );
 		}
-		
+
 		bool isComplete() const
 		{
 			return m_components.size()==creators()->size();
@@ -155,16 +155,16 @@ class State::Implementation : public IECore::RefCounted
 		}
 
 	private :
-	
+
 		friend class ScopedBinding;
-	
+
 		struct Component
 		{
 			Component()
 				: component( 0 ), override( false )
 			{
 			}
-			
+
 			Component( StateComponentPtr c, bool o )
 				:	component( c ), override( o )
 			{
@@ -172,7 +172,7 @@ class State::Implementation : public IECore::RefCounted
 			StateComponentPtr component;
 			bool override;
 		};
-	
+
 		typedef std::map<IECore::TypeId, Component> ComponentMap;
 		ComponentMap m_components;
 		mutable IECore::CompoundDataPtr m_userAttributes;
@@ -212,7 +212,7 @@ void State::ScopedBinding::init( const State &s, bool bind )
 			m_savedComponents.push_back( cIt->second.component );
 			it->second.component->bind();
 			cIt->second = it->second;
-		}		
+		}
 	}
 }
 

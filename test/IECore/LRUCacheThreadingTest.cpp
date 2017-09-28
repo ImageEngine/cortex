@@ -50,16 +50,16 @@ namespace IECore
 
 struct LRUCacheThreadingTest
 {
-		
+
 	struct GetFromCache
 	{
 		public :
-		
+
 			GetFromCache( LRUCache<int, IntDataPtr> &cache )
 				:	m_cache( cache )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -69,11 +69,11 @@ struct LRUCacheThreadingTest
 					assert( k->readable() == (int)i );
 				}
 			}
-			
+
 		private :
-		
+
 			LRUCache<int, IntDataPtr> &m_cache;
-			
+
 	};
 
 	static IntDataPtr get( int key, size_t &cost )
@@ -85,7 +85,7 @@ struct LRUCacheThreadingTest
 	void test()
 	{
 		LRUCache<int, IntDataPtr> cache( get, 1000 );
-		
+
 		parallel_for( blocked_range<size_t>( 0, 10000 ), GetFromCache( cache ) );
 	}
 };

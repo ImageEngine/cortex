@@ -64,10 +64,10 @@ class IECORE_API MeshMergeOp : public MeshPrimitiveOp
 
 		struct AppendPrimVars;
 		struct PrependPrimVars;
-		
+
 		template<class T>
 		struct DefaultValue;
-		
+
 		template<class T>
 		struct DefaultValue<Imath::Vec3<T> >;
 

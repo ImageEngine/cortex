@@ -39,44 +39,44 @@ import IECoreHoudini
 import unittest
 
 class TestUpdateMode( IECoreHoudini.TestCase ) :
-	
+
 	def testSetMode( self ) :
-		
+
 		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-		
+
 		with IECoreHoudini.UpdateMode( hou.updateMode.Manual ) :
-			
+
 			self.assertEqual( hou.updateModeSetting(), hou.updateMode.Manual )
-			
+
 			with IECoreHoudini.UpdateMode( hou.updateMode.AutoUpdate ) :
-				
+
 				self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-			
+
 			self.assertEqual( hou.updateModeSetting(), hou.updateMode.Manual )
-		
+
 		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-	
+
 	def testSetCurrentMode( self ) :
-		
+
 		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-		
+
 		with IECoreHoudini.UpdateMode( hou.updateMode.AutoUpdate ) :
-			
+
 			self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-		
+
 		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-	
+
 	def testRaising( self ) :
-		
+
 		self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
-		
+
 		try :
 			with IECoreHoudini.UpdateMode( hou.updateMode.Manual ) :
-				
+
 				raise RuntimeError, "This error is intentional"
-		
+
 		except RuntimeError:
-			
+
 			self.assertEqual( hou.updateModeSetting(), hou.updateMode.AutoUpdate )
 
 if __name__ == "__main__":

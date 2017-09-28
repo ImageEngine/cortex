@@ -68,12 +68,12 @@ class OpHolder : public ParameterisedHolder<BaseType>
 		virtual IECore::OpPtr getOp( std::string *className = 0, int *classVersion = 0, std::string *searchPathEnvVar = 0 );
 
 	private :
-	
+
 		static MObject aResultDependency;
-	
+
 		IE_CORE_FORWARDDECLARE( PostLoadCallback );
 		PostLoadCallbackPtr m_postLoadCallback;
-		
+
 		MStatus createResultAttribute();
 
 };

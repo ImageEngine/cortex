@@ -82,19 +82,19 @@ class IECORE_API PointsPrimitiveEvaluator : public PrimitiveEvaluator
 				const std::string &stringPrimVar( const PrimitiveVariable &pv ) const override;
 				Imath::Color3f colorPrimVar( const PrimitiveVariable &pv ) const override;
 				half halfPrimVar( const PrimitiveVariable &pv ) const override;
-				
+
 			private :
-			
+
 				friend class PointsPrimitiveEvaluator;
-			
+
 				Result( PointsPrimitiveEvaluator::ConstPtr evaluator );
-												
+
 				template<typename T>
 				const T &primVar( const PrimitiveVariable &pv ) const;
-				
+
 				size_t m_pointIndex;
 				PointsPrimitiveEvaluator::ConstPtr m_evaluator;
-				
+
 		};
 		IE_CORE_DECLAREPTR( Result );
 
@@ -102,7 +102,7 @@ class IECORE_API PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual ~PointsPrimitiveEvaluator();
 
 		virtual ConstPrimitivePtr primitive() const;
-		
+
 		virtual PrimitiveEvaluator::ResultPtr createResult() const;
 		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
 
@@ -119,16 +119,16 @@ class IECORE_API PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
 		/// Not yet implemented.
 		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
-		/// Not yet implemented.	
+		/// Not yet implemented.
 		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
 			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
-		/// Not yet implemented.	
+		/// Not yet implemented.
 		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
 			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
 		//@}
 
 	protected :
-		
+
 		/// \todo It would be much better if PrimitiveEvaluator::Description didn't require these create()
 		/// functions and instead just called the constructors that have to exist anyway.
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
@@ -143,13 +143,13 @@ class IECORE_API PointsPrimitiveEvaluator : public PrimitiveEvaluator
 		PointsPrimitivePtr m_pointsPrimitive;
 		PrimitiveVariable m_p;
 		const std::vector<Imath::V3f> *m_pVector;
-		
+
 		void buildTree();
 		bool m_haveTree;
 		typedef tbb::mutex TreeMutex;
 		TreeMutex m_treeMutex;
-		V3fTree m_tree;		
-		
+		V3fTree m_tree;
+
 };
 
 IE_CORE_DECLAREPTR( PointsPrimitiveEvaluator );

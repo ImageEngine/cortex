@@ -95,7 +95,7 @@ class KDTree
 		/// See enclosedPoints for an example of this form.
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
 		unsigned int nearestNeighbours( const Point &p, BaseType r, std::vector<PointIterator> &nearNeighbours ) const;
-		
+
 		class Neighbour;
 		/// Populates the passed vector with the N closest neighbours to p, sorted with the closest first. Returns the number found.
 		/// \threading May be called by multiple concurrent threads provided they are each using a different vector for the result.
@@ -138,7 +138,7 @@ class KDTree
 
 		template<typename Box, typename OutputIterator>
 		void enclosedPointsWalk( NodeIndex nodeIndex, const Box &bound, OutputIterator it ) const;
-	
+
 		void nearestNNeighboursWalk( NodeIndex nodeIndex, const Point &p, unsigned int numNeighbours, std::vector<Neighbour> &nearNeighbours, BaseType &maxDistSquared ) const;
 
 		Permutation m_perm;
@@ -201,15 +201,15 @@ class KDTree<PointIterator>::Neighbour
 			:	point( p ), distSquared( d2 )
 		{
 		}
-		
+
 		Iterator point;
 		BaseType distSquared;
-	
+
 		bool operator < ( const Neighbour &other ) const
 		{
 			return distSquared < other.distSquared;
 		}
-		
+
 };
 
 typedef KDTree<std::vector<Imath::V2f>::const_iterator> V2fTree;

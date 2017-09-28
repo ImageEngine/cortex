@@ -38,7 +38,7 @@ import IECore
 class SubstitutedDictTest( unittest.TestCase ) :
 
 	def test( self ) :
-	
+
 		d = {
 			"a" : "hello ${name}",
 			"b" : IECore.CompoundObject(
@@ -47,9 +47,9 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				}
 			)
 		}
-		
+
 		ds = IECore.SubstitutedDict( d, { "name" : "john", "place" : "london" } )
-		
+
 		self.assertEqual( ds["a"], "hello john" )
 		self.assertEqual( ds["b"]["c"], IECore.StringData( "goodbye london" ) )
 		self.failUnless( isinstance( ds["b"], IECore.SubstitutedDict ) )
@@ -60,28 +60,28 @@ class SubstitutedDictTest( unittest.TestCase ) :
 		self.assertEqual( ds.get( "b", substituted=False )["c"], IECore.StringData( "goodbye ${place}" ) )
 		self.failUnless( ds.get( "b", substituted=False ).isInstanceOf( IECore.CompoundObject.staticTypeId() ) )
 		self.assertEqual( ds.get( "notThere", substituted=False ), None )
-		
+
 		self.assertEqual( ds, ds )
-		
+
 		keys = ds.keys()
 		self.assertEqual( len( keys ), 2 )
 		self.failUnless( "a" in keys )
 		self.failUnless( "b" in keys )
-		
+
 		values = ds.values()
 		self.assertEqual( len( values ), len( keys ) )
 		self.assertEqual( values[keys.index( "a" )], "hello john" )
 		self.failUnless( isinstance( values[keys.index( "b" )], IECore.SubstitutedDict ) )
-		
+
 		values = ds.values( substituted=False )
 		self.assertEqual( len( values ), len( keys ) )
 		self.assertEqual( values[keys.index( "a" )], "hello ${name}" )
 		self.failUnless( isinstance( values[keys.index( "b" )], IECore.CompoundObject ) )
-		
+
 		self.assertEqual( zip( *(ds.items()) ), [ tuple( ds.keys() ), tuple( ds.values() ) ] )
-	
+
 	def testEquality( self ) :
-	
+
 		d = IECore.SubstitutedDict(
 			{
 				"a" : "aa",
@@ -91,7 +91,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				"b" : "x",
 			}
 		)
-		
+
 		d2 = IECore.SubstitutedDict(
 			{
 				"a" : "aa",
@@ -101,7 +101,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				"b" : "x",
 			}
 		)
-		
+
 		d3 = IECore.SubstitutedDict(
 			{
 				"a" : "aa",
@@ -111,7 +111,7 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				"b" : "x",
 			}
 		)
-		
+
 		d4 = IECore.SubstitutedDict(
 			{
 				"a" : "aa",
@@ -121,12 +121,12 @@ class SubstitutedDictTest( unittest.TestCase ) :
 				"b" : "xxx",
 			}
 		)
-		
+
 		self.assertEqual( d, d )
 		self.assertEqual( d, d2 )
 		self.assertNotEqual( d, d3 )
 		self.assertNotEqual( d, d4 )
-				
+
 if __name__ == "__main__":
     unittest.main()
 

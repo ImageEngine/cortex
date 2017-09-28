@@ -56,9 +56,9 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 {
 
 	public :
-	
+
 		Implementation()
-			:	m_shaderLoader( ShaderLoader::defaultShaderLoader() ), m_textureLoader( TextureLoader::defaultTextureLoader() ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ), 
+			:	m_shaderLoader( ShaderLoader::defaultShaderLoader() ), m_textureLoader( TextureLoader::defaultTextureLoader() ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ),
 				m_parameterMap( 0 ), m_shaderSetup( 0 )
 		{
 			initHash();
@@ -85,13 +85,13 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 		{
 			return m_hash;
 		}
-		
+
 		Shader::Setup *shaderSetup()
 		{
 			ensureShaderSetup();
 			return m_shaderSetup.get();
 		}
-		
+
 		const Shader::Setup *shaderSetup() const
 		{
 			ensureShaderSetup();
@@ -141,7 +141,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 					shaderSetup->addUniformParameter( it->first.value(), boost::static_pointer_cast<const IECore::Data>( it->second ) );
 				}
 			}
-		
+
 		}
 
 	private :

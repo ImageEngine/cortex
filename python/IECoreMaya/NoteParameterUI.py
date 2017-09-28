@@ -44,20 +44,20 @@ import IECoreMaya
 class NoteParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ):
-		
-		
+
+
 		IECoreMaya.ParameterUI.__init__( self, node, parameter, maya.cmds.rowLayout( numberOfColumns = 3, columnWidth3 = [ 30, 300, 30 ] ), **kw )
-		
+
 		self.__editWindow = ""
-		
+
 		maya.cmds.text( label = "" )
-		
+
 		self.__label = maya.cmds.text(
 			font = "smallPlainLabelFont",
 			align = "left",
 			annotation = "Notes",
 		)
-		
+
 		maya.cmds.iconTextButton(
 			label = "",
 			image = "ie_editTextIcon.xpm",
@@ -65,46 +65,46 @@ class NoteParameterUI( IECoreMaya.ParameterUI ) :
 			height = 23,
 			style = "iconOnly"
 		)
-		
+
 		maya.cmds.setParent("..")
-		
+
 		self.replace( self.node(), self.parameter )
 
 	def replace( self, node, parameter ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
-		
+
 		maya.cmds.text(
 			self.__label,
 			e = True,
 			label = str( parameter.getValue() ),
 		)
-		
+
 	def _launchEditWindow( self ):
-		
+
 		if not maya.cmds.window( self.__editWindow, exists=True ):
-			
+
 			self.__editWindow = maya.cmds.window(
 				title = "Edit Annotation",
 				iconName = "Edit Annotation",
 				width = 400,
 				height = 500
 			)
-			
+
 			form = maya.cmds.formLayout(numberOfDivisions=100)
-			
+
 			button = maya.cmds.button(
 				label='Edit',
 				command = self._editText,
 			)
-		
+
 			self.__textField = maya.cmds.scrollField(
 				editable = True,
 				height = 50,
 				wordWrap = True,
 				text = str( self.parameter.getValue() ),
 			)
-			
+
 			maya.cmds.formLayout(
 				form,
 				edit=True,
@@ -113,26 +113,26 @@ class NoteParameterUI( IECoreMaya.ParameterUI ) :
 				#attachPosition=[ ( self.__textField, 'right', 5, 75 ) ],
 				attachNone=(button, 'top'),
 			)
-		
+
 			maya.cmds.showWindow( self.__editWindow )
-	
+
 	def _editText( self, state ):
-		
+
 		newStr = maya.cmds.scrollField(
 			self.__textField,
 			q = True,
 			text = True,
 		)
-		
+
 		self.parameter.setValue( IECore.StringData( newStr ) )
-		
+
 		maya.cmds.deleteUI( self.__editWindow , window=True )
-		
+
 		maya.cmds.text(
 			self.__label,
 			e = True,
 			label = str( self.parameter.getValue() ),
 		)
-		
-		
+
+
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.StringParameter, NoteParameterUI, "note" )

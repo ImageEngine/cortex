@@ -55,7 +55,7 @@ class FromNukeTileConverter : public FromNukeConverter
 		/// for as long as the converter is.
 		FromNukeTileConverter( const DD::Image::Tile *tile );
 		virtual ~FromNukeTileConverter();
-		
+
 	protected :
 
 		virtual IECore::ObjectPtr doConversion( IECore::ConstCompoundObjectPtr operands ) const;

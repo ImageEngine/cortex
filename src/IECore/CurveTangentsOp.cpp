@@ -89,41 +89,41 @@ struct CurveTangentsOp::CalculateTangents
 		typedef typename T::ValueType VecContainer;
 
 		const VecContainer &points = data->readable();
-		
+
 		unsigned numElements = points.size();
-		
+
 		typename T::Ptr vD = new T();
 		vTangentsData = vD;
-		
+
 		VecContainer &vTangents = vD->writable();
 		vTangents.resize( numElements );
-		
+
 		PrimitiveEvaluator::ResultPtr result = m_evaluator->createResult();
-		
+
 		unsigned pIndex = 0;
 		for( size_t curveIndex = 0; curveIndex < m_vertsPerCurve.size() ; curveIndex++ )
 		{
 			float v;
 			float vStep = 1.0f / m_vertsPerCurve[curveIndex];
-			
-			for( int i = 0; i < m_vertsPerCurve[curveIndex]; i++ ) 
+
+			for( int i = 0; i < m_vertsPerCurve[curveIndex]; i++ )
 			{
-				v = min( 1.0f, i * vStep );			
+				v = min( 1.0f, i * vStep );
 				m_evaluator->pointAtV( curveIndex, v, result.get() );
 				vTangents[ pIndex + i ] = result->vTangent().normalized();
 			}
 			pIndex += m_vertsPerCurve[curveIndex];
-		}	
+		}
 	}
-	
+
 	// this is the data filled in by operator() above, ready to be added onto the primitive
 	DataPtr vTangentsData;
-	
+
 	private :
 
 		const vector<int> &m_vertsPerCurve;
 		CurvesPrimitiveEvaluatorPtr m_evaluator;
-		
+
 };
 
 struct CurveTangentsOp::HandleErrors
@@ -142,7 +142,7 @@ void CurveTangentsOp::modifyTypedPrimitive( CurvesPrimitive *curves, const Compo
 	{
 		throw InvalidArgumentException( "CurveTangentsOp : CurvesPrimitive variables are invalid." );
 	}
-	
+
 	// The CurvesPrimitiveEvaluator currently only supports "P".
 	Data * pData = curves->variableData<Data>( "P", PrimitiveVariable::Vertex );
 	if( !pData )
@@ -151,7 +151,7 @@ void CurveTangentsOp::modifyTypedPrimitive( CurvesPrimitive *curves, const Compo
 	}
 
 	const IntVectorData *vertsPerCurve = curves->verticesPerCurve();
-		
+
 	DataCastOpPtr dco = new DataCastOp();
 	dco->targetTypeParameter()->setNumericValue( FloatVectorDataTypeId );
 

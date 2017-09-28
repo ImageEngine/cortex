@@ -247,7 +247,7 @@ void SXRenderer::editEnd()
 {
 	m_implementation->editEnd();
 }
-		
+
 IECore::CompoundDataPtr SXRenderer::shade( const IECore::CompoundData *points ) const
 {
 	return m_implementation->shade( points );

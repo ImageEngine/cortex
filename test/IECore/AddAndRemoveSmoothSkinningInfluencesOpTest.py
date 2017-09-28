@@ -39,49 +39,49 @@ from IECore import *
 
 
 class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
-	
+
 	def createSSD( self, names, poses, indices ) :
-		
+
 		offsets = IntVectorData( [0, 2, 5, 6, 8] )
 		counts = IntVectorData( [2, 3, 1, 2, 3] )
 		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8, 0.4, 0.6, 0.4] )
-		
+
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def original( self ) :
-		
+
 		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
 		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
 		indices = IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2, 0, 1, 2] )
-		
+
 		return self.createSSD( names, poses, indices )
-	
+
 	def added( self ) :
-		
+
 		names = StringVectorData( [ 'newA', 'jointA', 'newC', 'newB', 'jointB', 'jointC', 'newD' ] )
 		poses = M44fVectorData( [ M44f(4), M44f(1), M44f(6), M44f(5), M44f(2), M44f(3), M44f(7) ] )
 		indices = IntVectorData( [1, 4, 1, 4, 5, 4, 4, 5, 1, 4, 5] )
-		
+
 		return self.createSSD( names, poses, indices )
-	
+
 	def removed( self ) :
-		
+
 		names = StringVectorData( [ 'jointA', 'newC', 'newB', 'jointC' ] )
 		poses = M44fVectorData( [ M44f(1), M44f(6), M44f(5), M44f(3) ] )
 		offsets = IntVectorData( [0, 1, 3, 3, 4] )
 		counts = IntVectorData( [1, 2, 0, 1, 2] )
 		indices = IntVectorData( [0, 0, 3, 3, 0, 3] )
 		weights = FloatVectorData( [0.7, 0.2, 0.0, 0.8, 0.4, 0.4] )
-		
+
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def testTypes( self ) :
 		""" Test AddSmoothSkinningInfluencesOp and RemoveSmoothSkinningInfluencesOp types"""
-		
+
 		ssd = self.original()
 
 		op = AddSmoothSkinningInfluencesOp()
@@ -89,7 +89,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( op.typeId(), TypeId.AddSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		self.assertEqual( type(op), RemoveSmoothSkinningInfluencesOp )
 		self.assertEqual( op.typeId(), TypeId.RemoveSmoothSkinningInfluencesOp )
@@ -98,13 +98,13 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testAddingNothing( self ) :
 		""" Test AddSmoothSkinningInfluencesOp with no new influences"""
-		
+
 		ssd = self.original()
-		
+
 		op = AddSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
-		
+
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -112,19 +112,19 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertEqual( result, ssd )
-		
+
 	def testAdding( self ) :
 		""" Test AddSmoothSkinningInfluencesOp"""
-		
+
 		ssd = self.original()
-		
+
 		op = AddSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "newA", "newB", "newC", "newD" ] ) )
 		op.parameters()['influencePose'].setValue( M44fVectorData( [ M44f(4), M44f(5), M44f(6), M44f(7) ] ) )
 		op.parameters()['indices'].setValue( IntVectorData( [ 0, 2, 2, 6 ] ) )
 		result = op.operate()
-		
+
 		self.assertNotEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertNotEqual( result.influencePose(), ssd.influencePose() )
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -132,7 +132,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		added = self.added()
 		self.assertEqual( result.influenceNames(), added.influenceNames() )
 		self.assertEqual( result.influencePose(), added.influencePose() )
@@ -144,13 +144,13 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testRemovingNothing( self ) :
 		""" Test RemoveSmoothSkinningInfluencesOp with no new influences"""
-		
+
 		ssd = self.original()
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
-		
+
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
 		self.assertEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -158,18 +158,18 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertEqual( result, ssd )
-		
+
 	def testRemovingNamedMode( self ) :
 		""" Test RemoveSmoothSkinningInfluencesOp in named mode"""
-		
+
 		ssd = self.added()
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Named )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "newA", "jointB", "newD" ] ) )
 		result = op.operate()
-		
+
 		self.assertNotEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertNotEqual( result.influencePose(), ssd.influencePose() )
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -177,7 +177,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		removed = self.removed()
 		self.assertEqual( result.influenceNames(), removed.influenceNames() )
 		self.assertEqual( result.influencePose(), removed.influencePose() )
@@ -189,15 +189,15 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testRemovingIndexedMode( self ) :
 		""" Test RemoveSmoothSkinningInfluencesOp in index mode"""
-		
+
 		ssd = self.added()
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Indexed )
 		op.parameters()['indices'].setValue( IntVectorData( [ 0, 4, 6 ] ) )
 		result = op.operate()
-		
+
 		self.assertNotEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertNotEqual( result.influencePose(), ssd.influencePose() )
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -205,7 +205,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		removed = self.removed()
 		self.assertEqual( result.influenceNames(), removed.influenceNames() )
 		self.assertEqual( result.influencePose(), removed.influencePose() )
@@ -214,17 +214,17 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), removed.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), removed.pointInfluenceWeights() )
 		self.assertEqual( result, removed )
-	
+
 	def testRemovingWeightlessMode( self ) :
 		""" Test RemoveSmoothSkinningInfluencesOp in weightless mode"""
-		
+
 		ssd = self.added()
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Weightless )
 		result = op.operate()
-		
+
 		self.assertNotEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertNotEqual( result.influencePose(), ssd.influencePose() )
 		self.assertNotEqual( result.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
@@ -232,7 +232,7 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		removed = self.original()
 		self.assertEqual( result.influenceNames(), removed.influenceNames() )
 		self.assertEqual( result.influencePose(), removed.influencePose() )
@@ -241,48 +241,48 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), removed.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), removed.pointInfluenceWeights() )
 		self.assertEqual( result, removed )
-	
+
 	def testAddOpErrorStates( self ) :
 		""" Test AddSmoothSkinningInfluencesOp with various error states"""
-		
+
 		ssd = self.original()
-		
+
 		op = AddSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "newA", "newB", "newC" ] ) )
 		op.parameters()['influencePose'].setValue( M44fVectorData( [ M44f(1), M44f(2) ] ) )
 		op.parameters()['indices'].setValue( IntVectorData( [ 1, 3 ] ) )
-		
+
 		# wrong number of pose matrices
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# wrong number of indices
 		op.parameters()['influencePose'].setValue( M44fVectorData( [ M44f(1), M44f(2), M44f(3) ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# index validity
 		op.parameters()['indices'].setValue( IntVectorData( [ 1, 3, 6 ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# existing influenceName
 		op.parameters()['indices'].setValue( IntVectorData( [ 1, 2, 3 ] ) )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "jointA", "newB", "newC" ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-	
+
 	def testRemoveOpErrorStates( self ) :
 		""" Test RemoveSmoothSkinningInfluencesOp with various error states"""
-		
+
 		ssd = self.original()
-		
+
 		op = RemoveSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "newA", "newB", "newC" ] ) )
-		
+
 		# index validity
 		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Indexed )
 		op.parameters()['indices'].setValue( IntVectorData( [ 1, 3 ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		# name validity
 		op.parameters()['mode'].setValue( RemoveSmoothSkinningInfluencesOp.Mode.Named )
 		op.parameters()['influenceNames'].setValue( StringVectorData( [ "jointFAKE", "newB", "newC" ] ) )

@@ -50,12 +50,12 @@ struct Python
 	Python()
 	{
 		IECorePython::ScopedGILLock gilLock;
-	
+
 		object mainModule = object( handle<>( borrowed( PyImport_AddModule( "__main__" ) ) ) );
 		object mainModuleNamespace = mainModule.attr( "__dict__" );
-	
+
 		std::string toExecute = "import IECore\nimport IECoreNuke";
-		
+
 		try
 		{
 			handle<> resultHandle( PyRun_String(

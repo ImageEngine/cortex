@@ -109,7 +109,7 @@ class IECORE_API Reader : public Op
 		/// the ReaderDescription registration utility class below.
 		static void registerReader( const std::string &extensions, CanReadFn canRead, CreatorFn creator, TypeId typeId );
 		//@}
-		
+
 	protected :
 
 		/// If resultParameter is not specified then creates a resultParameter

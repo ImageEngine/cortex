@@ -228,10 +228,10 @@ bool ToMayaPlugConverter::convert( MPlug &plug ) const
 	// simple types failed - see if it'll accept ObjectData
 	MFnAttribute fnAttr( attr );
 	if( fnAttr.accepts( ObjectData::id ) )
-	{		
+	{
 		MFnPluginData fnData;
 		MObject data = fnData.create( ObjectData::id );
-		
+
 		ObjectData *oData = dynamic_cast<ObjectData *>( fnData.data() );
 		oData->setObject( toConvert->copy() );
 

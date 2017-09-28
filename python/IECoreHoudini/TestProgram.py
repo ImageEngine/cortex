@@ -43,7 +43,7 @@ class TestProgram( unittest.TestProgram ) :
 		unittest.TestProgram.__init__( self, module, defaultTest, argv, testRunner, testLoader )
 
 	def runTests( self ) :
-	
+
 		if not self.testRunner :
 			self.testRunner = unittest.TextTestRunner( verbosity = 2 )
 

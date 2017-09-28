@@ -88,7 +88,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assert_( abs( p.z ) < 0.020 )
 
 		self.assertEqual( c["nParticleShape1_id"].data, IECore.DoubleVectorData( range( 0, 4 ) ) )
-	
+
 	def testReadNoPrimVarConversion( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleFrame2.mc" )
@@ -131,21 +131,21 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
 		r.parameters()["realType"].setValue( "native" )
-		
+
 		self.assertTrue( r.parameters()["convertPrimVarNames"].getTypedValue() )
 		self.assertEqual( len(r.frameTimes()), 10 )
-		
+
 		self.assertEqual( r.numParticles(), 0 )
 		attrNames = r.attributeNames()
 		self.assertEqual( len( attrNames ), 0 )
-		
+
 		c = r.read()
 		self.assertEqual( type( c ), IECore.PointsPrimitive )
 		self.assertEqual( len( c ), 0 )
 		self.assertEqual( c.numPoints, 0 )
-		
+
 		r.parameters()['frameIndex'].setValue( 5 )
-		
+
 		self.assertEqual( r.numParticles(), 20 )
 		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {
@@ -163,7 +163,7 @@ class TestNParticleReader( unittest.TestCase ) :
 		c = r.read()
 		self.assertEqual( type( c ), IECore.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
-		
+
 		expectedConvertedAttrNamesAndTypes = {
 			"testParticleShape_id" : IECore.DoubleVectorData,
 			"testParticleShape_birthTime" : IECore.DoubleVectorData,
@@ -172,7 +172,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			"testParticleShape_finalLifespanPP" : IECore.DoubleVectorData,
 			"testParticleShape_velocity" : IECore.V3dVectorData,
 		}
-		
+
 		for i in expectedConvertedAttrNamesAndTypes.keys() :
 			self.assert_( i in c )
 			self.assertEqual( type(c[i].data), expectedConvertedAttrNamesAndTypes[i] )
@@ -182,11 +182,11 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assert_( abs( p.x ) < 0.159 )
 			self.assert_( abs( p.y ) < 0.145 )
 			self.assert_( abs( p.z ) < 0.138 )
-	
+
 	def testFiltering( self ) :
 
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nParticleMultipleFrames.mc" )
-		
+
 		r.parameters()['frameIndex'].setValue( 5 )
 		attributesToLoad = [ "testParticleShape_birthTime", "testParticleShape_position" ]
 		r.parameters()["percentage"].setValue( IECore.FloatData( 50 ) )
@@ -212,7 +212,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		r.parameters()["realType"].setValue( "float" )
 		r.parameters()['frameIndex'].setValue( 5 )
-		
+
 		attrNames = r.attributeNames()
 		expectedAttrNamesAndTypes = {
 			"testParticleShape_id" : IECore.FloatVectorData,
@@ -254,7 +254,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		r.parameters()["realType"].setValue( "float" )
 		r.parameters()['frameIndex'].setValue( 5 )
-		
+
 		expectedAttrNamesAndTypes = {
 			"testParticleShape_id" : IECore.FloatVectorData,
 			"testParticleShape_birthTime" : IECore.FloatVectorData,
@@ -278,10 +278,10 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assert_( abs( p.z ) < 0.138 )
 
 		r["fileName"].setValue( IECore.StringData( "test/IECore/data/iffFiles/nParticleFrame2.mc" ) )
-		
+
 		r.parameters()['frameIndex'].setValue( 0 )
 		self.assertEqual( r.numParticles(), 4 )
-		
+
 		expectedAttrNamesAndTypes = {
 			"nParticleShape1_id" : IECore.FloatVectorData,
 			"nParticleShape1_birthTime" : IECore.FloatVectorData,
@@ -290,7 +290,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			"nParticleShape1_finalLifespanPP" : IECore.FloatVectorData,
 			"nParticleShape1_velocity" : IECore.V3fVectorData,
 		}
-		
+
 		c = r.read()
 		self.assertEqual( type( c ), IECore.PointsPrimitive )
 		self.assertEqual( len( c ), len( expectedAttrNamesAndTypes ) )
@@ -303,13 +303,13 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assert_( abs( p.x ) < 0.022 )
 			self.assert_( abs( p.y ) < 0.017 )
 			self.assert_( abs( p.z ) < 0.020 )
-	
+
 	def testNClothAsParticles( self ) :
-		
+
 		r = IECore.Reader.create( "test/IECore/data/iffFiles/nClothFrame3.mc" )
 		self.assertEqual( type( r ), IECore.NParticleReader )
 		r.parameters()["realType"].setValue( "native" )
-		
+
 		self.assertEqual( r.numParticles(), 349 )
 		self.assertEqual( len(r.frameTimes()), 1 )
 		attrNames = r.attributeNames()
@@ -332,7 +332,7 @@ class TestNParticleReader( unittest.TestCase ) :
 			self.assert_( abs( p.x ) < 320.50 )
 			self.assert_( abs( p.y ) < 119.41 )
 			self.assert_( abs( p.z ) < 554.64 )
-	
+
 	def testParameterTypes( self ) :
 
 		p = IECore.NParticleReader()

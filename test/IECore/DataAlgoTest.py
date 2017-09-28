@@ -71,7 +71,7 @@ class DataAlgoTest( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, setGeometricInterpretation, FloatData( 5 ), GeometricData.Interpretation.Normal )
 		self.assertRaises( RuntimeError, setGeometricInterpretation, StringData( "foo" ), GeometricData.Interpretation.Point )
 
-				
+
 
 if __name__ == "__main__":
 	unittest.main()

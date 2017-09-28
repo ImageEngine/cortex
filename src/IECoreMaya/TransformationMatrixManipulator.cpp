@@ -43,8 +43,8 @@
 #include "IECoreMaya/TransformationMatrixManipulator.h"
 #include "IECoreMaya/ParameterisedHolderInterface.h"
 
-#include <maya/MString.h> 
-#include <maya/MTypeId.h> 
+#include <maya/MString.h>
+#include <maya/MTypeId.h>
 #include <maya/MPlug.h>
 #include <maya/MVector.h>
 #include <maya/MTransformationMatrix.h>
@@ -71,7 +71,7 @@ TransformationMatrixManipulator::~TransformationMatrixManipulator()
 {
 }
 
-void *TransformationMatrixManipulator::creator() 
+void *TransformationMatrixManipulator::creator()
 {
 	return new TransformationMatrixManipulator();
 }
@@ -80,9 +80,9 @@ MStatus TransformationMatrixManipulator::initialize()
 {
 	return MPxManipContainer::initialize();
 }
-    
+
 MStatus TransformationMatrixManipulator::createChildren()
-{	
+{
 	m_translateManip = addFreePointTriadManip( "Manipulates the 'translate' component of the parameter.", "translate" );
 	m_rotateManip = addRotateManip( "Manipulates the 'rotate' component of the parameter", "rotate" );
 	m_scaleManip = addScaleManip( "Manipulates the 'scale' component of the parameter", "scale" );
@@ -91,26 +91,26 @@ MStatus TransformationMatrixManipulator::createChildren()
 }
 
 MStatus TransformationMatrixManipulator::connectToDependNode( const MObject & node )
-{	
+{
 	MFnDagNode dagFn( node );
 	dagFn.getPath( m_nodePath );
-	
+
 	if( !findPlugs( dagFn ) )
 	{
 		return MStatus::kFailure;
 	}
-		
+
 	MFnFreePointTriadManip translateFn( m_translateManip );
 	translateFn.connectToPointPlug( m_translatePlug );
-	
+
 	MFnRotateManip rotateFn( m_rotateManip );
 	rotateFn.setRotateMode( MFnRotateManip::kObjectSpace );
 	rotateFn.connectToRotationPlug( m_rotatePlug );
 	rotateFn.connectToRotationCenterPlug( m_translatePlug );
-	// The Callback is used to update the orientation of the scale 
+	// The Callback is used to update the orientation of the scale
 	// manip as rotation changes. It dosn't actually alter the returned value.
 	addManipToPlugConversionCallback(
-		m_rotatePlug, 
+		m_rotatePlug,
 		(manipToPlugConversionCallback)&TransformationMatrixManipulator::rotationToPlugConversion
 	);
 
@@ -122,13 +122,13 @@ MStatus TransformationMatrixManipulator::connectToDependNode( const MObject & no
 	{
 		return MStatus::kFailure;
 	}
-	
+
 	MPxManipContainer::connectToDependNode( node );
-	
+
 	// Find the matrix of the node we're manipulating so
 	// we can 'parent' the manips to it.
 	MDagPath transformPath = m_nodePath;
-	transformPath.pop(); 
+	transformPath.pop();
 	m_localMatrix = transformPath.inclusiveMatrix();
 	m_localMatrixInv = transformPath.inclusiveMatrixInverse();
 
@@ -136,24 +136,24 @@ MStatus TransformationMatrixManipulator::connectToDependNode( const MObject & no
 	MPxTransformationMatrix m( m_localMatrix );
 	MEulerRotation r = m.eulerRotation();
 	MVector t = m.translation();
-	
+
 	translateFn.setRotation( r );
 	scaleFn.setRotation( r );
-	rotateFn.setRotation( r );	
-		
+	rotateFn.setRotation( r );
+
 	translateFn.setTranslation( t, MSpace::kTransform );
 	scaleFn.setTranslation( t, MSpace::kTransform );
-	rotateFn.setTranslation( t, MSpace::kTransform );	
-	
+	rotateFn.setTranslation( t, MSpace::kTransform );
+
 	// Update any local t/r on the scale manip
 	MPoint localT = getPlugValues( m_translatePlug );
 	MPoint localR = getPlugValues( m_rotatePlug );
 	scaleFn.translateBy( MVector( localT.x, localT.y, localT.z), MSpace::kObject );
 	scaleFn.rotateBy( MEulerRotation( localR.x, localR.y, localR.z), MSpace::kObject );
-	
+
 	return stat;
 }
-	
+
 void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & path, M3dView::DisplayStyle style, M3dView::DisplayStatus status )
 {
 	MPxManipContainer::draw( view, path, style, status);
@@ -161,7 +161,7 @@ void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & pat
 	/// \todo Is it not a bit crazy that the parameter isn't just available
 	/// as a piece of member data along with m_plug? And that we instead have
 	/// to jump through these hoops?
-	
+
 	MFnDependencyNode fnDN( m_plug.node() );
 	ParameterisedHolderInterface *holder = dynamic_cast<ParameterisedHolderInterface *>( fnDN.userNode() );
 	if( !holder )
@@ -173,20 +173,20 @@ void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & pat
 	{
 		return;
 	}
-	
+
 	const CompoundObject *uiUserData = parameter->userData()->member<CompoundObject>( "UI" );
 	if( !uiUserData )
 	{
 		return;
 	}
-	
+
 	const Box3fData *box = uiUserData->member<Box3fData>( "manipulatorBox" );
 	if( box )
 	{
 		holder->setParameterisedValue( parameter );
 		TransformationMatrixf t = parameter->getTypedValue();
 		M44f m = t.transform();
-		
+
 		view.beginGL();
 			glPushMatrix();
 				glMultMatrixf( m.getValue() );
@@ -200,21 +200,21 @@ void TransformationMatrixManipulator::draw( M3dView & view, const MDagPath & pat
 }
 
 MManipData TransformationMatrixManipulator::rotationToPlugConversion( unsigned int plugIndex )
-{		
+{
 	MFnRotateManip rotateFn( m_rotateManip );
 	MFnFreePointTriadManip translateFn( m_translateManip );
 	MFnScaleManip scaleFn( m_scaleManip );
-	
+
 	MEulerRotation r;
 	getConverterManipValue( rotateFn.rotationIndex(), r );
-	
-	MFnNumericData numericData;	
+
+	MFnNumericData numericData;
 	MObject returnData = numericData.create( MFnNumericData::k3Double );
 	numericData.setData( r.x, r.y, r.z );
-		
-	// we need to update the position/rotation of the scale manip	
+
+	// we need to update the position/rotation of the scale manip
 	MVector t;
-	getConverterManipValue( translateFn.pointIndex(), t );	
+	getConverterManipValue( translateFn.pointIndex(), t );
 	MPxTransformationMatrix m( m_localMatrix );
 	scaleFn.setTranslation( m.translation(), MSpace::kTransform );
 	scaleFn.setRotation( m.eulerRotation() );
@@ -226,7 +226,7 @@ MManipData TransformationMatrixManipulator::rotationToPlugConversion( unsigned i
 
 
 bool TransformationMatrixManipulator::findPlugs( MFnDagNode &dagFn )
-{	
+{
 	MString translatePlugName = m_plug.partialName() + "translate";
 	MString rotatePlugName = m_plug.partialName() + "rotate";
 	MString scalePlugName = m_plug.partialName() + "scale";
@@ -243,7 +243,7 @@ bool TransformationMatrixManipulator::findPlugs( MFnDagNode &dagFn )
 		m_scalePlugName = "";
 		return false;
 	}
-	
+
 	m_translatePlugName = translatePlugName;
 	m_rotatePlugName = rotatePlugName;
 	m_scalePlugName = scalePlugName;
@@ -275,7 +275,7 @@ void TransformationMatrixManipulator::getPlugValues( MPlug &plug, double *values
 void TransformationMatrixManipulator::getPlugValues( MPlug &plug, MFnNumericData &data )
 {
 	double values[3];
-	getPlugValues( plug, values ); 
+	getPlugValues( plug, values );
 	data.setData( values[0], values[1], values[2] );
 }
 

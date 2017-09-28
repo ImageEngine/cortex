@@ -67,11 +67,11 @@ unsigned char *DisplayDriverServerHeader::buffer()
 
 bool DisplayDriverServerHeader::valid()
 {
-	if ( m_header[orderMagicNumber] != magicNumber || 
+	if ( m_header[orderMagicNumber] != magicNumber ||
 		 m_header[orderProtocolVersion] != currentProtocolVersion ||
-		( m_header[orderMessageType] != imageOpen && 
+		( m_header[orderMessageType] != imageOpen &&
 			m_header[orderMessageType] != imageData &&
-			m_header[orderMessageType] != imageClose && 
+			m_header[orderMessageType] != imageClose &&
 			m_header[orderMessageType] != exception ) )
 	{
 		return false;

@@ -64,7 +64,7 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 	}
 
 	fnNAttr.setDefault( p->typedDefaultValue() );
-	
+
 	bool keyable = true;
 	bool channelBox = true;
 
@@ -96,7 +96,7 @@ MStatus BoolParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 	{
 		fnNAttr.setChannelBox( channelBox );
 	}
-	
+
 	return finishUpdating( parameter, plug );
 }
 
@@ -110,7 +110,7 @@ MPlug BoolParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const
 
 	MFnNumericAttribute fnNAttr;
 	MObject attribute = fnNAttr.create( plugName, plugName, MFnNumericData::kBoolean, p->typedDefaultValue() );
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
 	return result;

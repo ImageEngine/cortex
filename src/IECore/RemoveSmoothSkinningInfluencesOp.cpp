@@ -58,7 +58,7 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 	modePresets.push_back( IntParameter::Preset( "Named", RemoveSmoothSkinningInfluencesOp::Named ) );
 	modePresets.push_back( IntParameter::Preset( "Indexed", RemoveSmoothSkinningInfluencesOp::Indexed ) );
 	modePresets.push_back( IntParameter::Preset( "Weightless", RemoveSmoothSkinningInfluencesOp::Weightless ) );
-	
+
 	m_modeParameter = new IntParameter(
 		"mode",
 		"The mode of influence removal. Options are to remove by name, index, or to remove influences with no weights",
@@ -68,19 +68,19 @@ RemoveSmoothSkinningInfluencesOp::RemoveSmoothSkinningInfluencesOp()
 		modePresets,
 		true
 	);
-	
+
 	m_influenceNamesParameter = new StringVectorParameter(
 		"influenceNames",
 		"Names of the influences to remove. This parameter is only used in Named mode.",
 		new StringVectorData
 	);
-	
+
 	m_indicesParameter = new IntVectorParameter(
 		"indices",
 		"Indices of the influences to remove. This parameter is only used in Indexed mode.",
 		new IntVectorData
 	);
-	
+
 	parameters()->addParameter( m_modeParameter );
 	parameters()->addParameter( m_influenceNamesParameter );
 	parameters()->addParameter( m_indicesParameter );
@@ -94,14 +94,14 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	const std::vector<std::string> &influenceNames = skinningData->influenceNames()->readable();
 	const std::vector<Imath::M44f> &influencePoseData = skinningData->influencePose()->readable();
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
 	const std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->readable();
-	
+
 	// gather the influence indices
 	std::vector<int> indicesToRemove;
 	const unsigned numInfluences = influenceNames.size();
@@ -117,7 +117,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			{
 				throw IECore::Exception( ( boost::format( "RemoveSmoothSkinningInfluencesOp: \"%d\" is not a valid influence name" ) % name ).str() );
 			}
-			
+
 			indicesToRemove.push_back( location - influenceNames.begin() );
 		}
 	}
@@ -140,19 +140,19 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 			{
 				int current = pointIndexOffsets[i] + j;
-				
+
 				if ( pointInfluenceWeights[current] > 0.0f )
 				{
 					indicesToKeep.insert( pointInfluenceIndices[current] );
 				}
 			}
-			
+
 			if ( indicesToKeep.size() == numInfluences )
 			{
 				break;
 			}
 		}
-		
+
 		for ( unsigned i=0; i < numInfluences; i++ )
 		{
 			if ( indicesToKeep.find( i ) == indicesToKeep.end() )
@@ -165,7 +165,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	{
 		throw IECore::Exception( ( boost::format( "RemoveSmoothSkinningInfluencesOp: \"%d\" is not a recognized mode" ) % mode ).str() );
 	}
-	
+
 	std::vector<int> indexMap;
 	std::vector<std::string> keepNames;
 	std::vector<Imath::M44f> keepPoseData;
@@ -173,7 +173,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 	std::vector<int> newCounts;
 	std::vector<int> newIndices;
 	std::vector<float> newWeights;
-	
+
 	// calculate the map between old and new influence indices
 	for ( int i=0; i < (int)numInfluences; i++ )
 	{
@@ -188,17 +188,17 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 			indexMap.push_back( -1 );
 		}
 	}
-	
+
 	// adjust the data vectors
 	int offset = 0;
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
 		int count = 0;
-		
+
 		for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 		{
 			int current = pointIndexOffsets[i] + j;
-			
+
 			if ( indexMap[ pointInfluenceIndices[current] ] != -1 )
 			{
 				newIndices.push_back( indexMap[ pointInfluenceIndices[current] ] );
@@ -211,7 +211,7 @@ void RemoveSmoothSkinningInfluencesOp::modify( Object * object, const CompoundOb
 		newCounts.push_back( count );
 		offset += count;
 	}
-	
+
 	// replace the vectors on the SmoothSkinningData
 	skinningData->influenceNames()->writable().swap( keepNames );
 	skinningData->influencePose()->writable().swap( keepPoseData );

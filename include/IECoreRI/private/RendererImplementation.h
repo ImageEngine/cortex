@@ -139,7 +139,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 
 		// Does things common to both constructors
 		void constructCommon();
-	
+
 		// When a procedural is processed, we make a new RendererImplementation
 		// for it to talk to. Some member data should be unique to the new RendererImplementation
 		// and other member data should be shared with the parent RendererImplementation. The
@@ -151,7 +151,7 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 			// We use this because if RiObjectBeginV doesn't exist we don't get to choose the names.
 			// It is part of the shared data so that procedurals may share instances.
 			typedef std::map<std::string, const void *> ObjectHandleMap;
-			ObjectHandleMap objectHandles;	
+			ObjectHandleMap objectHandles;
 			// We need to mutex around access to objectHandles because it will be
 			// accessed from multiple threads when running threaded procedurals
 			typedef tbb::recursive_mutex ObjectHandlesMutex;
@@ -164,28 +164,28 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 			NSI::HandleGeneratorPtr handleGenerator;
 #endif
 		};
-				
+
 		RtContextHandle m_context;
 		SharedData::Ptr m_sharedData;
-		
+
 		// All RendererImplementation instances associated with the same render must have the same SharedData
 		// object, otherwise we won't be able to share object instance handles between them. This is confounded
 		// when we call RendererImplementation() with no arguments, as it has no information about the render
 		// that called it, and hence no idea what SharedData to use.
-		
+
 		// We address this using s_contextToSharedDataMap. Whenever a RendererImplementation is created, it adds
 		// an entry associating the current context with a SharedData instance, so if the argument free constructor
 		// is called later on in the same context, it can query the map and grab the correct SharedData. This
 		// is a multimap, as multiple RendererImplementation instances can be created in a given context,
 		// and we want to be able to clean up by removing entries in ~RendererImplementation().
-		
+
 		typedef tbb::mutex ContextToSharedDataMapMutex;
 		typedef std::multimap< RtContextHandle, SharedData::Ptr > ContextToSharedDataMap;
 		static ContextToSharedDataMapMutex s_contextToSharedDataMapMutex;
 		static ContextToSharedDataMap s_contextToSharedDataMap;
-		
+
 		RtContextHandle m_contextToSharedDataMapKey;
-		
+
 		typedef void (RendererImplementation::*SetOptionHandler)( const std::string &name, IECore::ConstDataPtr d );
 		typedef IECore::ConstDataPtr (RendererImplementation::*GetOptionHandler)( const std::string &name ) const;
 		typedef std::map<std::string, SetOptionHandler> SetOptionHandlerMap;
@@ -255,12 +255,12 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		IECore::ConstDataPtr getNameAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getTextureCoordinatesAttribute( const std::string &name ) const;
 		IECore::ConstDataPtr getAutomaticInstancingAttribute( const std::string &name ) const;
-		
+
 		/// ProceduralData used to contain a smart pointer to the RendererImplementation which created it.
 		/// This normally works fine, as 3delight typically calls procFree() immediately after procSubdivide(),
 		/// meaning there are no extra references to the top level RendererImplementation lying around and it dies
 		/// when it's supposed to. Unfortunately, when "ri:hider:editable" is enabled in later versions of 3delight
-		/// (for progressive ipr rendering), calls to procFree() get deferred until RiEnd(). As RiEnd() 
+		/// (for progressive ipr rendering), calls to procFree() get deferred until RiEnd(). As RiEnd()
 		/// only gets called when the top level RendererImplementation dies, this makes it impossible to
 		/// stop the progressive render. We get round this by using smart pointers to the shared data and options
 		/// instead.
@@ -270,10 +270,10 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 			SharedData::Ptr sharedData;
 			IECore::CompoundDataPtr options;
 		};
-		
+
 		// This constructor is used to create a child renderer in procSubdivide()
 		RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options );
-		
+
 		void standardProcedural( Procedural *proc );
 		void externalProcedural( ExternalProcedural *proc );
 
@@ -298,14 +298,14 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		static tbb::queuing_rw_mutex g_nLoopsMutex;
 		static std::vector<int> g_nLoops;
 
-		bool automaticInstancingEnabled() const; // as for getAutomaticInstancingAttribute but doesn't need to allocate heap memory for the result	
-		
+		bool automaticInstancingEnabled() const; // as for getAutomaticInstancingAttribute but doesn't need to allocate heap memory for the result
+
 		void addPrimitive( IECore::ConstPrimitivePtr primitive );
-		
+
 		void emitPrimitiveAttributes( const IECore::Primitive *primitive );
 		void emitCurvesPrimitiveAttributes( const IECore::CurvesPrimitive *primitive );
 		void emitPatchMeshPrimitiveAttributes( const IECore::PatchMeshPrimitive *primitive );
-		
+
 		void emitPrimitive( const IECore::Primitive *primitive );
 		void emitPointsPrimitive( const IECore::PointsPrimitive *primitive );
 		void emitDiskPrimitive( const IECore::DiskPrimitive *primitive );
@@ -313,8 +313,8 @@ class IECORERI_API RendererImplementation : public IECore::Renderer
 		void emitMeshPrimitive( const IECore::MeshPrimitive *primitive );
 		void emitSpherePrimitive( const IECore::SpherePrimitive *primitive );
 		void emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive );
-		void emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive );		
-		
+		void emitPatchMeshPrimitive( const IECore::PatchMeshPrimitive *primitive );
+
 		/// Renderman treats curve basis as an attribute, whereas we want to treat it as
 		/// part of the topology of primitives. It makes no sense as an attribute, as it changes the
 		/// size of primitive variables - an attribute which makes a primitive invalid is dumb. This

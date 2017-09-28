@@ -67,9 +67,9 @@ namespace Detail
 // the wave preprocessor if we didn't give a helping hand, which is what this class is all about.
 class GLSLPreprocessingHooks : public boost::wave::context_policies::default_preprocessing_hooks
 {
-	
+
 	public :
-	
+
 		// Pass through "#version" and "#extension" directives unmodified so that they can
 		// be processed by the GL preprocessor itself.
 		template<typename ContextT, typename ContainerT>
@@ -80,14 +80,14 @@ class GLSLPreprocessingHooks : public boost::wave::context_policies::default_pre
 			{
 				return false;
 			}
-			
+
 			it++;
 			if( it->get_value() == "version" || it->get_value() == "extension" )
 			{
 				std::copy( line.begin(), line.end(), std::back_inserter( pending ) );
 				return true;
 			}
-			
+
 			return false;
 		}
 
@@ -105,7 +105,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 {
 
 	public :
-	
+
 		Implementation( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths )
 			:	m_searchPaths( searchPaths ),
 				m_preprocess( preprocessorSearchPaths ),
@@ -119,7 +119,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 			if( it == m_loadedSource.end() )
 			{
 				Source source;
-			
+
 				path vertexPath = m_searchPaths.find( name + ".vert" );
 				path geometryPath = m_searchPaths.find( name + ".geom" );
 				path fragmentPath = m_searchPaths.find( name + ".frag" );
@@ -132,7 +132,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				{
 					source.vertex = readFile( vertexPath.string() );
 				}
-				
+
 				if( !geometryPath.empty() )
 				{
 					source.geometry = readFile( geometryPath.string() );
@@ -142,10 +142,10 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 				{
 					source.fragment = readFile( fragmentPath.string() );
 				}
-			
+
 				it = m_loadedSource.insert( SourceMap::value_type( name, source ) ).first;
 			}
-			
+
 			vertexSource = it->second.vertex;
 			geometrySource = it->second.geometry;
 			fragmentSource = it->second.fragment;
@@ -203,7 +203,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 		}
 
 	private :
-	
+
 		struct Source
 		{
 			std::string vertex;
@@ -212,7 +212,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 		};
 		typedef std::map<std::string, Source> SourceMap;
 		SourceMap m_loadedSource; // maps from shader name to shader source
-	
+
 		typedef std::map<std::string, ShaderPtr> ShaderMap;
 		ShaderMap m_loadedShaders;
 
@@ -292,7 +292,7 @@ class ShaderLoader::Implementation : public IECore::RefCounted
 			}
 			return result;
 		}
-		
+
 };
 
 //////////////////////////////////////////////////////////////////////////

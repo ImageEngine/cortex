@@ -49,7 +49,7 @@ void IECoreHoudini::bindFromHoudiniGroupConverter()
 	scope fromHoudiniGroupConverterScope = IECorePython::RunTimeTypedClass<FromHoudiniGroupConverter>()
 		.def(init<SOP_Node*>())
 	;
-	
+
 	enum_<FromHoudiniGroupConverter::GroupingMode>( "GroupingMode" )
 		.value( "PrimitiveGroup", FromHoudiniGroupConverter::PrimitiveGroup )
 		.value( "NameAttribute", FromHoudiniGroupConverter::NameAttribute )

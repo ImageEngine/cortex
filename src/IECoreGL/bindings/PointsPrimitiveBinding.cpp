@@ -52,14 +52,14 @@ void bindPointsPrimitive()
 	scope s = IECorePython::RunTimeTypedClass<PointsPrimitive>()
 		.def( init<PointsPrimitive::Type>() )
 	;
-	
+
 	enum_<PointsPrimitive::Type>( "Type" )
 		.value( "Point", PointsPrimitive::Point )
 		.value( "Disk", PointsPrimitive::Disk )
 		.value( "Quad", PointsPrimitive::Quad )
 		.value( "Sphere", PointsPrimitive::Sphere )
 	;
-	
+
 	bindTypedStateComponent< PointsPrimitive::UseGLPoints >( "UseGLPoints" );
 	bindTypedStateComponent< PointsPrimitive::GLPointWidth >( "GLPointWidth" );
 }

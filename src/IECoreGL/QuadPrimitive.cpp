@@ -52,12 +52,12 @@ QuadPrimitive::QuadPrimitive( float width, float height )
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
 	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 	m_vertIds = new IECore::UIntVectorData;
-	
+
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
 	vector<V2f> &uvVector = uvData->writable();
 	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
-	
+
 	nVector.push_back( V3f( 0, 0, 1 ) );
 	nVector.push_back( V3f( 0, 0, 1 ) );
 	nVector.push_back( V3f( 0, 0, 1 ) );
@@ -72,22 +72,22 @@ QuadPrimitive::QuadPrimitive( float width, float height )
 	uvVector.push_back( V2f( 1.0f, 0.0f ) );
 	uvVector.push_back( V2f( 1.0f, 1.0f ) );
 	uvVector.push_back( V2f( 0.0f, 1.0f ) );
-	
+
 	vertIdsVector.push_back( 0 );
 	vertIdsVector.push_back( 1 );
 	vertIdsVector.push_back( 2 );
-	
+
 	vertIdsVector.push_back( 0 );
 	vertIdsVector.push_back( 2 );
 	vertIdsVector.push_back( 3 );
-	
+
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
 	addVertexAttribute( "uv", uvData );
 }
 
 QuadPrimitive::~QuadPrimitive()
-{	
+{
 }
 
 void QuadPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
@@ -107,7 +107,7 @@ void QuadPrimitive::renderInstances( size_t numInstances ) const
 		CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds.get() ) );
 	}
-	
+
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
 	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
 }

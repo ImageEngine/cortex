@@ -56,17 +56,17 @@ class RefCountedWrapper : public T, public WrapperGarbageCollector
 		RefCountedWrapper( PyObject *self, Args&&... args );
 
 		virtual ~RefCountedWrapper();
-	
+
 	protected :
-				
+
 		/// You must hold the GIL before calling this method. In most cases
 		/// you should use isSubclassed() to check that it is worth calling.
 		/// However, if the method is pure virtual, and therefor is required
 		/// to be overriden in python, there is no need to call isSubclassed().
 		boost::python::object methodOverride( const char *name ) const;
-      
+
 	private :
-		
+
 		// Returns the Python type this class is bound as.
 		static PyTypeObject *pyType();
 

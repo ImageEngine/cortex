@@ -60,7 +60,7 @@ class mayaUserData( IECore.Op ) :
 						}
 					}
 				),
-				
+
 				IECore.IntParameter(
 					"e",
 					"",
@@ -71,7 +71,7 @@ class mayaUserData( IECore.Op ) :
 						}
 					}
 				),
-				
+
 				IECore.StringParameter(
 					"s",
 					"",

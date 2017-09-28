@@ -47,7 +47,7 @@ class parameterTypes( Op ) :
 				defaultValue = 0,
 			)
 		)
-		
+
 		self.parameters().addParameters(
 
 			[
@@ -212,13 +212,13 @@ class parameterTypes( Op ) :
 					description = "A FrameList",
 					defaultValue = "",
 				),
-				
+
 				TransformationMatrixfParameter(
 					name = "x",
 					description = "",
 					defaultValue = TransformationMatrixf(),
 				),
-				
+
 				# We'd like to have one with a non-standard rotation order
 				# here, but they're not currently supported in Maya.
 				TransformationMatrixdParameter(
@@ -226,7 +226,7 @@ class parameterTypes( Op ) :
 					description = "",
 					defaultValue = TransformationMatrixd(),
 				),
-				
+
 				MotionPrimitiveParameter(
 					name = "p1",
 					description = "",
@@ -259,19 +259,19 @@ class parameterTypes( Op ) :
 					defaultValue = MeshPrimitive(),
 					types = [ TypeId.MeshPrimitive ]
 				),
-				
+
 				LineSegment3fParameter(
 					name = "p7",
 					description = "",
 					defaultValue = LineSegment3f( V3f( 1 ), V3f( 2 ) )
 				),
-				
+
 				LineSegment3dParameter(
 					name = "p8",
 					description = "",
 					defaultValue = LineSegment3d( V3d( 1 ), V3d( 2 ) )
 				),
-				
+
 				DateTimeParameter(
 					name = "p9",
 					description = "",

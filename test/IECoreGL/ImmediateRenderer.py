@@ -92,12 +92,12 @@ class TestImmediateRenderer( unittest.TestCase ) :
 		self.assertEqual( i["B"][index], 0 )
 
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

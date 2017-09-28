@@ -58,15 +58,15 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		return scName
 
 	def testFactory( self ) :
-	
+
 		sc = self.buildTestSetup()
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.SmoothSkinningData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
-		
+
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.Data.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 

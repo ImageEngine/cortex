@@ -54,10 +54,10 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 {
 
 	public :
-		
+
 		typedef IECore::CurvesPrimitive InputType;
 		typedef IECoreGL::CurvesPrimitive ResultType;
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCurvesConverter, ToGLCurvesConverterTypeId, ToGLConverter );
 
 		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = 0 );
@@ -68,9 +68,9 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		class ToVertexConverter;
-	
+
 		static ConverterDescription<ToGLCurvesConverter> g_description;
 
 };

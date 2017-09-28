@@ -50,39 +50,39 @@ namespace IECore
 class IECORE_API NParticleReader : public ParticleReader
 {
 	public:
-		
+
 		IE_CORE_DECLARERUNTIMETYPED( NParticleReader, ParticleReader );
-		
+
 		NParticleReader( );
 		NParticleReader( const std::string &fileName );
 		virtual ~NParticleReader();
-		
+
 		static bool canRead( const std::string &filename );
-		
+
 		virtual unsigned long numParticles();
 		virtual void attributeNames( std::vector<std::string> &names );
 		virtual DataPtr readAttribute( const std::string &name );
-		
+
 		/// returns IntVectorData of all frames contained in the nCache
 		/// the frameIndex parameter should be set using an index into this IntVectorData
 		const IntVectorData * frameTimes();
-	
+
 	protected:
-		
+
 		// Returns the name of the position primVar
 		virtual std::string positionPrimVarName();
-		
+
 	private:
-		
+
 		static const ReaderDescription<NParticleReader> m_readerDescription;
-		
+
 		// makes sure that m_iffFile is open and that m_header is full.
 		// returns true on success and false on failure.
 		bool open();
 		IFFFilePtr m_iffFile;
 		std::string m_iffFileName;
 		IntParameterPtr m_frameParameter;
-		
+
 		enum NCacheTagID
 		{
 			// header tags
@@ -100,7 +100,7 @@ class IECORE_API NParticleReader : public ParticleReader
 			kDVCA = 1146504001,
 			kFVCA = 1180058433,
 		};
-		
+
 		struct
 		{
 			bool valid;
@@ -108,10 +108,10 @@ class IECORE_API NParticleReader : public ParticleReader
 			int startTime;
 			int endTime;
 		} m_header;
-		
+
 		IntVectorDataPtr m_frames;
 		std::map<int, IFFFile::Chunk::ChunkIterator> frameToRootChildren;
-		
+
 		template<typename T, typename F>
 		typename T::Ptr filterAttr( const F * attr, float percentage );
 };

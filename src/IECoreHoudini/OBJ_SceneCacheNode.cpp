@@ -59,7 +59,7 @@ OBJ_SceneCacheNode<BaseType>::~OBJ_SceneCacheNode()
 
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pMainSwitcher( "mainSwitcher", "Main Switcher" );
-	
+
 template<typename BaseType>
 PRM_Name OBJ_SceneCacheNode<BaseType>::pExpand( "expand", "Expand" );
 
@@ -106,9 +106,9 @@ static void copyParm( PRM_Template &src, PRM_Template &dest, bool visible = true
 {
 	PRM_Name *name = new PRM_Name( src.getToken(), src.getLabel(), src.getExpressionFlag() );
 	name->harden();
-	
+
 	PRM_Type type = ( visible ) ? src.getType() : (PRM_Type) (src.getType() | PRM_TYPE_INVISIBLE);
-	
+
 	dest.initialize(
 		type,
 		src.getTypeExtended(),
@@ -134,23 +134,23 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	{
 		return thisTemplate;
 	}
-	
+
 	PRM_Template *objTemplate = BaseType::getTemplateList( OBJ_PARMS_PLAIN );
 	PRM_Template *mainTemplate = OBJ_SceneCacheNode<BaseType>::buildMainParameters()->myTemplate;
 	PRM_Template *optionTemplate = OBJ_SceneCacheNode<BaseType>::buildOptionParameters()->myTemplate;
 	PRM_Template *extraTemplate = ( extraParameters ) ? extraParameters->myTemplate : 0;
 	PRM_Template *expansionTemplate = buildExpansionParameters()->myTemplate;
 	PRM_Template *outputTemplate = buildOutputParameters()->myTemplate;
-	
+
 	unsigned numObjParms = PRM_Template::countTemplates( objTemplate );
 	unsigned numMainParms = PRM_Template::countTemplates( mainTemplate );
 	unsigned numOptionParms = PRM_Template::countTemplates( optionTemplate );
 	unsigned numExtraParms = ( extraTemplate ) ? PRM_Template::countTemplates( extraTemplate ) : 0;
 	unsigned numExpansionParms = PRM_Template::countTemplates( expansionTemplate );
 	unsigned numOutputParms = PRM_Template::countTemplates( outputTemplate );
-	
+
 	thisTemplate = new PRM_Template[ numObjParms + numMainParms + numOptionParms + numExtraParms + numExpansionParms + numOutputParms + 3 ];
-	
+
 	// add the SceneCacheNode folders to the stdswitcher
 	unsigned switcherIndex = PRM_Template::getTemplateIndexByToken( objTemplate, "stdswitcher" );
 	PRM_Template &stdswitcher = objTemplate[switcherIndex];
@@ -159,7 +159,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 	folders[0] = PRM_Default( numMainParms + numExtraParms + numExpansionParms, "Main" );
 	folders[1] = PRM_Default( numOptionParms + 1, "Options" );
 	folders[2] = PRM_Default( numOutputParms, "Output" );
-	
+
 	// add the normal folders
 	PRM_Default *defaults = stdswitcher.getFactoryDefaults();
 	for ( unsigned j = 0; j < numFolders; ++j )
@@ -174,7 +174,7 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 			folders[j+3] = defaults[j];
 		}
 	}
-	
+
 	// re-init the stdswitcher so we get our new folders
 	thisTemplate[0] = stdswitcher;
 	thisTemplate[0].initialize(
@@ -192,52 +192,52 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 		(const char *)stdswitcher.getHelpText(),
 		stdswitcher.getConditionalBasePtr()
 	);
-	
+
 	// add the generic SceneCacheNode parms
 	unsigned totalParms = 1;
 	for ( unsigned i = 0; i < numMainParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = mainTemplate[i];
 	}
-	
+
 	// add the extra parms for this node
 	for ( unsigned i = 0; i < numExtraParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = extraTemplate[i];
 	}
-	
+
 	// add the generic OBJ_SceneCacheNode expansion parms
 	for ( unsigned i = 0; i < numExpansionParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = expansionTemplate[i];
 	}
-	
+
 	// add the push options button
 	thisTemplate[totalParms] = PRM_Template(
 		PRM_CALLBACK, 1, &pPush, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::pushButtonCallback, 0, 0,
 		"Push the relevant parameter values to the hierarchy below.\n"
 	);
-	totalParms++;	
-	
+	totalParms++;
+
 	// add the generic SceneCacheNode option parms
 	for ( unsigned i = 0; i < numOptionParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = optionTemplate[i];
 	}
-	
+
 	// add the OBJ_SceneCacheNode output parms
 	for ( unsigned i = 0; i < numOutputParms; ++i, ++totalParms )
 	{
 		thisTemplate[totalParms] = outputTemplate[i];
 	}
-	
+
 	// add the override parm
 	thisTemplate[totalParms] = PRM_Template(
 		PRM_TOGGLE, 1, &pOverrideTransform, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::sceneParmChangedCallback, 0, 0,
 		"Determines whether this OBJ reads from file or from the user parms."
 	);
 	totalParms++;
-	
+
 	// add the generic OBJ_Node parms
 	int transformIndex = thisTemplate[0].findSwitcherFolderWithLabel( "Transform" );
 	for ( unsigned i = 0; i < numObjParms; ++i, ++totalParms )
@@ -248,9 +248,9 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 			totalParms--;
 			continue;
 		}
-		
+
 		thisTemplate[totalParms] = objTemplate[i];
-		
+
 		int switcher, folder;
 		bool visible = true;
 		bool inFolder = PRM_Template::getEnclosingSwitcherFolder( thisTemplate, totalParms, switcher, folder );
@@ -262,10 +262,10 @@ PRM_Template *OBJ_SceneCacheNode<BaseType>::buildParameters( OP_TemplatePair *ex
 				!strcmp( thisTemplate[totalParms].getToken(), "s" )
 			);
 		}
-		
+
 		copyParm( objTemplate[i], thisTemplate[totalParms], visible );
 	}
-	
+
 	return thisTemplate;
 }
 
@@ -276,32 +276,32 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildExpansionParameters()
 	if ( !thisTemplate )
 	{
 		thisTemplate = new PRM_Template[4];
-		
+
 		thisTemplate[0] = PRM_Template(
 			PRM_CALLBACK, 1, &pExpand, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::expandButtonCallback, 0, 0,
 			"Expand the hierarchy below the specified root path.\n"
 			"Some nodes may define additional options that are used during the expansion process."
 		);
-		
+
 		thisTemplate[1] = PRM_Template(
 			PRM_CALLBACK, 1, &pCollapse, 0, 0, 0, &OBJ_SceneCacheNode<BaseType>::collapseButtonCallback, 0, 0,
 			"Clean the hierarchy below the specified root path. Note that this is a destructive operation. "
 			"All nodes contained within will be deleted."
 		);
-		
+
 		thisTemplate[2] = PRM_Template(
 			PRM_TOGGLE, 1, &pExpanded, 0, 0, 0, 0, 0, 0,
 			"A toggle to indicate whether this level is expanded or not. This does not affect cooking, "
 			"and the value may be changed by automated scripts. Expansion will be blocked when this is on."
 		);
 	}
-	
+
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
 		templatePair = new OP_TemplatePair( thisTemplate );
 	}
-	
+
 	return templatePair;
 }
 
@@ -312,34 +312,34 @@ OP_TemplatePair *OBJ_SceneCacheNode<BaseType>::buildOutputParameters()
 	if ( !thisTemplate )
 	{
 		thisTemplate = new PRM_Template[5];
-		
+
 		thisTemplate[0] = PRM_Template(
 			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutTranslate, outTranslateDefault, 0, 0, 0, 0, 0,
 			"Output translation calculated by this node. This is for user clarity only and is not editable."
 		);
-		
+
 		thisTemplate[1] = PRM_Template(
 			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutRotate, outRotateDefault, 0, 0, 0, 0, 0,
 			"Output rotation calculated by this node. This is for user clarity only and is not editable."
 		);
-		
+
 		thisTemplate[2] = PRM_Template(
 			PRM_XYZ | PRM_TYPE_NOCOOK, 3, &pOutScale, outScaleDefault, 0, 0, 0, 0, 0,
 			"Output scale calculated by this node. This is for user clarity only and is not editable."
 		);
-		
+
 		thisTemplate[3] = PRM_Template(
 			PRM_STRING | PRM_TYPE_NOCOOK, 1, &LiveScene::pTags, 0, 0, 0, 0, 0, 0,
 			"A space separated list of tags to add when caching with the SceneCache ROP."
 		);
 	}
-	
+
 	static OP_TemplatePair *templatePair = 0;
 	if ( !templatePair )
 	{
 		templatePair = new OP_TemplatePair( thisTemplate );
 	}
-	
+
 	return templatePair;
 }
 
@@ -352,11 +352,11 @@ int OBJ_SceneCacheNode<BaseType>::expandButtonCallback( void *data, int index, f
 	{
 		return 0;
 	}
-	
+
 	node->setDisplay( false );
 	node->expandHierarchy( node->scene( file, node->getPath() ).get() );
 	node->setDisplay( true );
-	
+
 	return 1;
 }
 
@@ -369,9 +369,9 @@ int OBJ_SceneCacheNode<BaseType>::pushButtonCallback( void *data, int index, flo
 	{
 		return 0;
 	}
-	
+
 	node->pushToHierarchy();
-	
+
 	return 1;
 }
 
@@ -383,9 +383,9 @@ int OBJ_SceneCacheNode<BaseType>::collapseButtonCallback( void *data, int index,
 	{
 		return 0;
 	}
-	
+
 	node->collapseHierarchy();
-	
+
 	return 1;
 }
 
@@ -397,7 +397,7 @@ void OBJ_SceneCacheNode<BaseType>::collapseHierarchy()
 	{
 		childNodes.append( this->getChild( i ) );
 	}
-	
+
 	this->destroyNodes( childNodes );
 	this->setInt( pExpanded.getToken(), 0, 0, 0 );
 }
@@ -418,21 +418,21 @@ void OBJ_SceneCacheNode<BaseType>::updateState()
 		this->m_static = boost::indeterminate;
 		return;
 	}
-	
+
 	std::string file;
 	if ( !OBJ_SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
 		this->m_static = boost::indeterminate;
 		return;
 	}
-	
+
 	std::string path = this->getPath();
-	
+
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	const SampledSceneInterface *sampledScene = IECore::runTimeCast<const SampledSceneInterface>( scene.get() );
-	
+
 	this->m_static = ( sampledScene ) ? ( sampledScene->numTransformSamples() < 2 ) : false;
-	
+
 	// only update time dependency if Houdini thinks its static
 	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
 	{
@@ -447,51 +447,51 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	std::string file = this->getFile();
 	std::string path = this->getPath();
 	OBJ_SceneCacheNode<OP_Node>::Space space = (OBJ_SceneCacheNode<OP_Node>::Space)this->getSpace();
-	
+
 	MurmurHash hash;
 	hash.append( file );
 	hash.append( path );
 	hash.append( space );
-	
+
 	// make sure the state is valid
 	if ( boost::indeterminate( this->m_static ) )
 	{
 		updateState();
 	}
-	
+
 	// only update time dependency if Houdini thinks its static
 	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
 	{
 		BaseType::flags().setTimeDep( bool( !this->m_static ) );
-		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );
 	}
-	
+
 	// do not read from file if overriding
 	if ( this->evalInt( pOverrideTransform.getToken(), 0, 0 ) )
 	{
 		BaseType::getParmTransform( context, xform );
 		return true;
 	}
-	
+
 	if ( this->m_static == true && this->m_loaded && this->m_hash == hash )
 	{
 		xform = m_xform;
 		return true;
 	}
-	
+
 	if ( !SceneCacheNode<BaseType>::ensureFile( file ) )
 	{
 		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( file + " is not a valid .scc" ).c_str() );
 		return false;
 	}
-	
+
 	ConstSceneInterfacePtr scene = this->scene( file, path );
 	if ( !scene )
 	{
 		SceneCacheNode<BaseType>::addError( OBJ_ERR_CANT_FIND_OBJ, ( path + " is not a valid location in " + file ).c_str() );
 		return false;
 	}
-	
+
 	Imath::M44d transform;
 	if ( space == SceneCacheNode<OP_Node>::World )
 	{
@@ -501,12 +501,12 @@ bool OBJ_SceneCacheNode<BaseType>::getParmTransform( OP_Context &context, UT_DMa
 	{
 		transform = scene->readTransformAsMatrix( this->time( context ) );
 	}
-	
+
 	xform = IECore::convert<UT_Matrix4D>( transform );
 	m_xform = xform;
 	this->m_hash = hash;
 	this->m_loaded = true;
-	
+
 	return true;
 }
 
@@ -514,14 +514,14 @@ template<typename BaseType>
 OP_ERROR OBJ_SceneCacheNode<BaseType>::cookMyObj( OP_Context &context )
 {
 	OP_ERROR status = BaseType::cookMyObj( context );
-	
+
 	// only update time dependency if Houdini thinks its static
 	if ( !BaseType::flags().getTimeDep() && !BaseType::getParmList()->getCookTimeDependent() )
 	{
 		BaseType::flags().setTimeDep( bool( !this->m_static ) );
-		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );	
+		BaseType::getParmList()->setCookTimeDependent( bool( !this->m_static ) );
 	}
-	
+
 	return status;
 }
 

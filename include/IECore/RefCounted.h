@@ -98,7 +98,7 @@ typedef boost::intrusive_ptr< const TYPENAME > Const ## TYPENAME ## Ptr; \
 ///
 /// When returning a pointer from a method :
 ///
-/// Return a raw (Type *) pointer if the called object will continue to maintain a reference 
+/// Return a raw (Type *) pointer if the called object will continue to maintain a reference
 /// to the returned object following the method call. For instance CompoundObject::member() returns
 /// a raw pointer, because the CompoundObject will continue to hold a reference to the returned object
 /// following the call. The caller can assign the raw pointer to an intrusive_ptr if it wishes to own

@@ -161,10 +161,10 @@ class_< Box<T> > bindBox(const char *bindName)
 
 		.def( "__str__", &IECorePython::str<Box<T> > )
 		.def( "__repr__", &IECorePython::repr<Box<T> > )
-	
+
 		.def( "split", &split1<T> )
 		.def( "split", &split2<T> )
-		
+
 
 	;
 	return myClass;

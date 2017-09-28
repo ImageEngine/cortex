@@ -65,7 +65,7 @@ class IECOREGL_API ToGLCameraConverter : public ToGLConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<ToGLCameraConverter> g_description;
 
 };

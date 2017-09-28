@@ -32,11 +32,11 @@
 #
 ##########################################################################
 
-from IECore import * 
+from IECore import *
 
-class meshRender( ParameterisedProcedural ) : 
+class meshRender( ParameterisedProcedural ) :
 
-	def __init__( self ) : 
+	def __init__( self ) :
 		ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
 		self.parameters().addParameters( [
 			MeshPrimitiveParameter(
@@ -46,7 +46,7 @@ class meshRender( ParameterisedProcedural ) :
 			),
 		] )
 
-	def doBound( self, args ) : 
+	def doBound( self, args ) :
 		return args['mesh'].bound()
 
 	def doRenderState( self, renderer, args ) :

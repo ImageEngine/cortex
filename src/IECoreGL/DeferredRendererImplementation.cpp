@@ -292,7 +292,7 @@ void DeferredRendererImplementation::addInstance( GroupPtr grp )
 	{
 		return;
 	}
-	
+
 	RenderContext *curContext = currentContext();
 
 	GroupPtr g = new Group;
@@ -357,12 +357,12 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 {
 	public:
 
-		ProceduralTask( DeferredRendererImplementation &renderer, IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr param ) : 
+		ProceduralTask( DeferredRendererImplementation &renderer, IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr param ) :
 			m_renderer(renderer), m_procedural(proc), m_param(param), m_taskList(0)
 		{
 			m_numSubtasks = 0;
 			RenderContext *curContext = m_renderer.currentContext();
-			
+
 			// create a RenderContext for a new Procedural based on the current context
 			StatePtr completeState = new State( false );
 			for ( StateStack::iterator it = curContext->stateStack.begin(); it != curContext->stateStack.end(); it++ )
@@ -380,7 +380,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 		{
 		}
 
-		task* execute() 
+		task* execute()
 		{
 			tbb::task_list taskList;
 
@@ -426,7 +426,7 @@ void DeferredRendererImplementation::addProcedural( IECore::Renderer::Procedural
 	{
 		return;
 	}
-	
+
 	bool withThreads = static_cast<ProceduralThreadingStateComponent *>( getState( ProceduralThreadingStateComponent::staticTypeId() ) )->value();
 	if( withThreads )
 	{
@@ -438,7 +438,7 @@ void DeferredRendererImplementation::addProcedural( IECore::Renderer::Procedural
 			// created for us in tbb >= 2.2. tbb documentation indicates that it is
 			// fine to create multiple instances though so we create one just in case.
 			tbb::task_scheduler_init init;
-		
+
 			// create root task.
 			ProceduralTask& a = *new( ProceduralTask::allocate_root()) ProceduralTask( *this, proc, renderer );
 			tbb::task::spawn_root_and_wait(a);
@@ -492,7 +492,7 @@ const DeferredRendererImplementation::RenderContext *DeferredRendererImplementat
 	ThreadRenderContext::reference myThreadContext = m_threadContextPool.local();
 	if ( myThreadContext.size() == 0 )
 	{
-		// The user created a new thread from the procedural render call... 
+		// The user created a new thread from the procedural render call...
 		// there's no way to know which context it should be using.
 		throw IECore::Exception( "Invalid thread used on deferred render! Procedurals should not instantiate threads!" );
 	}

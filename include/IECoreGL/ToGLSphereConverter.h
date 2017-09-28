@@ -67,7 +67,7 @@ class ToGLSphereConverter : public ToGLConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<ToGLSphereConverter> g_description;
 
 };

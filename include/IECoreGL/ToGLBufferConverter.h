@@ -70,7 +70,7 @@ class IECOREGL_API ToGLBufferConverter : public ToGLConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
-	
+
 		static ConverterDescription<ToGLBufferConverter> g_description;
 
 };

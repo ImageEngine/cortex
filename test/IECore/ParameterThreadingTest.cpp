@@ -59,16 +59,16 @@ namespace IECore
 
 struct ParameterThreadingTest
 {
-	
+
 	struct ReadCompoundChildren
 	{
 		public :
-		
+
 			ReadCompoundChildren( CompoundParameter &p )
 				:	m_compoundParameter( p )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				const CompoundParameter::ParameterMap &children = m_compoundParameter.parameters();
@@ -85,13 +85,13 @@ struct ParameterThreadingTest
 					}
 				}
 			}
-			
+
 		private :
-		
+
 			CompoundParameter &m_compoundParameter;
-	
+
 	};
-	
+
 	void testReadingCompoundChildren()
 	{
 		CompoundParameterPtr c = new CompoundParameter( "c", "" );
@@ -103,19 +103,19 @@ struct ParameterThreadingTest
 		c->addParameter( new Box3fParameter( "f", "" ) );
 		c->addParameter( new Box3fParameter( "g", "" ) );
 		c->addParameter( new ShaderParameter( "h", "", new Shader( "a", "b" ) ) );
-		
+
 		parallel_for( blocked_range<size_t>( 0, 1000000 ), ReadCompoundChildren( *c ) );
 	}
-	
+
 	struct ReadParameters
 	{
 		public :
-		
+
 			ReadParameters( std::vector<Parameter *> &parameters )
 				:	m_parameters( parameters )
 			{
 			}
-			
+
 			void operator()( const blocked_range<size_t> &r ) const
 			{
 				for( size_t i=r.begin(); i!=r.end(); ++i )
@@ -141,15 +141,15 @@ struct ParameterThreadingTest
 						case V3iParameterTypeId :
 							static_cast<V3iParameter *>( m_parameters[i] )->getTypedValue();
 							static_cast<V3iParameter *>( m_parameters[i] )->typedDefaultValue();
-							break;	
+							break;
 						default :
 							;
 					}
 				}
 			}
-			
+
 		private :
-		
+
 			std::vector<Parameter *> &m_parameters;
 	};
 
@@ -164,7 +164,7 @@ struct ParameterThreadingTest
 		parameters.push_back( new Box3fParameter( "f", "" ) );
 		parameters.push_back( new Box3fParameter( "g", "" ) );
 		parameters.push_back( new ShaderParameter( "h", "", new Shader( "a", "b" ) ) );
-				
+
 		Imath::Rand32 rand;
 		const size_t permutationSize = 1000000;
 		std::vector<Parameter *> parameterPermutation;
@@ -173,10 +173,10 @@ struct ParameterThreadingTest
 		{
 			parameterPermutation[i] = parameters[rand.nexti()%parameters.size()].get();
 		}
-		
+
 		parallel_for( blocked_range<size_t>( 0, permutationSize ), ReadParameters( parameterPermutation ) );
 	}
-	
+
 	struct CreateAndDestroyOp
 	{
 		void operator()( const blocked_range<size_t> &r ) const
@@ -187,12 +187,12 @@ struct ParameterThreadingTest
 			}
 		}
 	};
-	
+
 	void testOpCreationAndDestruction()
 	{
 		parallel_for( blocked_range<size_t>( 0, 100000 ), CreateAndDestroyOp() );
 	}
-	
+
 };
 
 

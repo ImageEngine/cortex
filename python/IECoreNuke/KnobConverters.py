@@ -62,9 +62,9 @@ def createKnobsFromParameter( knobHolder, parameter, knobName = "parm" ) :
 		knob.setValues( parameter.presetNames() )
 		knob.setValue( parameter.getCurrentPresetName() )
 		knobHolder.addKnob( knob )
-	
+
 	else :
-	
+
 		for (paramClass,knobCreator,toKnobConverter,fromKnobConverter) in __parameterKnobConverters :
 
 			if isinstance( parameter, paramClass ) :
@@ -248,7 +248,7 @@ def __numericVectorParameterFromKnob( knobHolder, parameter, knobName ) :
 		parameter.setValue( dataVectorType( dataValues ) )
 	else :
 		parameter.setValue( dataVectorType() )
-	
+
 # \todo: Implement data types V2f, V3f, Color...
 # \todo: Implement vector data types: V2f, V3f...
 registerParameterKnobConverters( IECore.CompoundParameter, __createCompoundParameterKnob, __compoundParameterToKnob, __compoundParameterFromKnob )

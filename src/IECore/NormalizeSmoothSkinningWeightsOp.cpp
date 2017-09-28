@@ -59,13 +59,13 @@ NormalizeSmoothSkinningWeightsOp::NormalizeSmoothSkinningWeightsOp()
 		"Whether or not influenceLocks should be applied",
 		false
 	);
-	
+
 	m_influenceLocksParameter = new BoolVectorParameter(
 		"influenceLocks",
 		"A per-influence list of lock values",
 		new BoolVectorData
 	);
-	
+
 	parameters()->addParameter( m_useLocksParameter );
 	parameters()->addParameter( m_influenceLocksParameter );
 }
@@ -82,25 +82,25 @@ void NormalizeSmoothSkinningWeightsOp::modify( Object * object, const CompoundOb
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
-	
+
 	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
-	
+
 	bool useLocks = m_useLocksParameter->getTypedValue();
 	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
 	std::vector<int> unlockedIndices;
-		
+
 	// make sure there is one lock per influence
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) )
 	{
 		throw IECore::Exception( "NormalizeSmoothSkinningWeightsOp: There must be exactly one lock per influence" );
 	}
-	
+
 	if ( !useLocks )
 	{
 		locks.clear();
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
-	
+
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
 		unlockedIndices.clear();

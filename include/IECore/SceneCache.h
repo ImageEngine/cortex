@@ -69,8 +69,8 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		SceneCache( const std::string &fileName, IndexedIO::OpenMode mode );
 		/// Constructor which uses an already-opened IndexedIO, this
 		/// can be used if you wish to use an alternative IndexedIO
-		/// implementation for the backend. The given IndexedIO should be 
-		/// pointing to the root location on the file. The open mode will 
+		/// implementation for the backend. The given IndexedIO should be
+		/// pointing to the root location on the file. The open mode will
 		/// be the same from the given IndexedIO object. Append mode is not
 		/// supported.
 		SceneCache( IECore::IndexedIOPtr indexedIO );
@@ -126,19 +126,19 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		virtual SceneInterfacePtr createChild( const Name &name );
 		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
 		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
-		
+
 		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;
 
 		/// tells you if this scene cache is read only or writable:
 		bool readOnly() const;
-		
+
 		// The attribute names used to mark animated topology and primitive variables
 		// when SceneCache objects are Primitives.
 		static const Name &animatedObjectTopologyAttribute;
 		static const Name &animatedObjectPrimVarsAttribute;
 
 	protected:
-	
+
 		IE_CORE_FORWARDDECLARE( Implementation );
 		virtual SceneCachePtr duplicate( ImplementationPtr& implementation ) const;
 		SceneCache( ImplementationPtr& implementation );
@@ -148,14 +148,14 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		void writeTags( const NameList &tags,  bool descendentTags );
 
 		friend class LinkedScene;
-		
+
 	private :
 
 		ImplementationPtr m_implementation;
 
 		class ReaderImplementation;
 		class WriterImplementation;
-	
+
 };
 
 } // namespace IECore

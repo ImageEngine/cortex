@@ -82,35 +82,35 @@ MSyntax DelightProceduralCacheCommand::newSyntax()
 {
 	MSyntax syn;
 	MStatus s;
-  
+
 	s = syn.addFlag( "-a", "-addstep" );
 	assert(s);
-	
+
 	s = syn.addFlag( "-e", "-emit" );
 	assert(s);
-	
+
 	s = syn.addFlag( "-f", "-flush" );
 	assert(s);
-	
+
 	s = syn.addFlag( "-r", "-remove" );
 	assert(s);
-	
+
 	s = syn.addFlag( "-l", "-list" );
 	assert(s);
-	
+
 	s = syn.addFlag( "-st", "-sampleTime", MSyntax::kDouble );
 	assert(s);
-	
+
 	syn.setObjectType( MSyntax::kStringObjects );
-	
+
 	return syn;
 }
-		
+
 MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 {
 	MArgParser parser( syntax(), args );
 	MStatus s;
-	
+
 	if( parser.isFlagSet( "-a" ) )
 	{
 		MStringArray objectNames;
@@ -120,7 +120,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : unable to get object name argument." );
 			return s;
 		}
-		
+
 		MSelectionList sel;
 		sel.add( objectNames[0] );
 		MObject oDepNode;
@@ -137,7 +137,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : \"" + objectNames[0] + "\" is not a procedural holder node." );
 			return MStatus::kFailure;
 		}
-		
+
 		ProceduralMap::iterator pIt = g_procedurals.find( objectNames[0].asChar() );
 		if( pIt!=g_procedurals.end() )
 		{
@@ -150,7 +150,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		else
 		{
 			pHolder->setParameterisedValues();
-			
+
 			CachedProcedural cachedProcedural;
 			cachedProcedural.procedural = pHolder->getProcedural( &cachedProcedural.className, &cachedProcedural.classVersion );
 			if( !cachedProcedural.procedural )
@@ -166,10 +166,10 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				return MStatus::kFailure;
 			}
 			cachedProcedural.values = values->copy();
-			
+
 			findMotionParameters( cachedProcedural.procedural->parameters(), cachedProcedural.motionValues );
 			addMotionSample( cachedProcedural.motionValues );
-			
+
 			g_procedurals[objectNames[0].asChar()] = cachedProcedural;
 		}
 
@@ -195,7 +195,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : unable to get object name argument." );
 			return s;
 		}
-		
+
 		// get the cached procedural
 		ProceduralMap::const_iterator it = g_procedurals.find( objectNames[0].asChar() );
 		if( it==g_procedurals.end() )
@@ -203,11 +203,11 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			displayError( "DelightProceduralCacheCommand::doIt : unable to emit \"" + objectNames[0] + "\" as object has not been cached." );
 			return MS::kFailure;
 		}
-		
+
 		// and output it
 		try
 		{
-			IECore::ObjectPtr currentValues = it->second.procedural->parameters()->getValue();			
+			IECore::ObjectPtr currentValues = it->second.procedural->parameters()->getValue();
 			it->second.procedural->parameters()->setValue( it->second.values );
 			for( MotionValueMap::const_iterator aIt=it->second.motionValues.begin(); aIt!=it->second.motionValues.end(); aIt++ )
 			{
@@ -216,9 +216,9 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 					aIt->first->setValue( aIt->second );
 				}
 			}
-						
+
 			std::string pythonString;
-			try 
+			try
 			{
 				IECorePython::ScopedGILLock gilLock;
 				// we first get an object referencing the serialise result and then make an extractor for it.
@@ -227,24 +227,24 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 				// strings, and therefore malformed ribs.
 				object serialisedResultObject = PythonCmd::globalContext()["IECore"].attr("ParameterParser")().attr("serialise")( it->second.procedural->parameters() );
 				object serialisedResultStringObject = serialisedResultObject.attr( "__str__" )();
-				
+
 				extract<std::string> serialisedResultExtractor( serialisedResultStringObject );
-				
+
 				std::string serialisedParameters = serialisedResultExtractor();
 				pythonString = boost::str( boost::format( "IECoreRI.executeProcedural( \"%s\", %d, %s )" ) % it->second.className % it->second.classVersion % serialisedParameters );
 			}
 			catch( ... )
 			{
 				// Make sure we don't lose the 'current' values if we except.
-				it->second.procedural->parameters()->setValue( currentValues );			
+				it->second.procedural->parameters()->setValue( currentValues );
 				// rethrow so the error is reported appropriately in the catch
 				// blocks below.
 				throw;
 			}
-			
+
 			// Put the current values back.
-			it->second.procedural->parameters()->setValue( currentValues );	
-			
+			it->second.procedural->parameters()->setValue( currentValues );
+
 			if( it->second.bound.isEmpty() )
 			{
 				displayWarning( "DelightProceduralCacheCommand::doIt : not outputting procedural \"" + objectNames[0] + "\" because it has an empty bounding box." );
@@ -252,17 +252,17 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 			}
 			RtBound rtBound;
 			IECore::convert( it->second.bound, rtBound );
-			
+
 			IECore::RendererPtr renderer = new IECoreRI::Renderer();
 			IECore::AttributeBlock attributeBlock( renderer, 1 );
-			
+
 				it->second.procedural->render( renderer.get(), false, true, false, false );
 
 				const char **data = (const char **)malloc( sizeof( char * ) * 2 );
 				data[0] = STRINGIFY( IECORERI_RMANPROCEDURAL_NAME );
 				data[1] = pythonString.c_str();
 				RiProcedural( data, rtBound, RiProcDynamicLoad, RiProcFree );
-			
+
 		}
 		catch( error_already_set )
 		{
@@ -296,7 +296,7 @@ MStatus DelightProceduralCacheCommand::doIt( const MArgList &args )
 		g_procedurals.clear();
 		return MStatus::kSuccess;
 	}
-	
+
 	displayError( "DelightProceduralCacheCommand::doIt : No suitable flag specified." );
 	return MS::kFailure;
 }

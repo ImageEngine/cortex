@@ -62,11 +62,11 @@ class DrawableHolderUI : public MPxSurfaceShapeUI
 		virtual bool select( MSelectInfo &selectInfo, MSelectionList &selectionList, MPointArray &worldSpaceSelectPts ) const;
 
 		static void *creator();
-		
+
 	private :
-	
+
 		mutable DisplayStyle m_displayStyle;
-	
+
 };
 
 } // namespace IECoreMaya

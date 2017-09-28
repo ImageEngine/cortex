@@ -263,7 +263,7 @@ IECORE_API bool withFreeType();
 ///
 /// \section mainPageThreadingSection Threading
 ///
-/// Much of the library is not threadsafe. In general it's best to assume that thread safety doesn't exist unless specified otherwise - 
+/// Much of the library is not threadsafe. In general it's best to assume that thread safety doesn't exist unless specified otherwise -
 /// specific threading considerations are documented in paragraphs entitled "Threading" within the class documentation.
 /// The reference counting used on RefCounted class is thread safe now.
 ///

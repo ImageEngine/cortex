@@ -42,7 +42,7 @@ class TestPrimitiveEvaluator( unittest.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.PrimitiveEvaluator )
 
 	def testCreateWithNone( self ) :
-	
+
 		self.assertRaises( ValueError, IECore.PrimitiveEvaluator.create, None )
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		maya.cmds.rotate( 0, 0, -20, j4, r=True, os=True )
 		maya.cmds.rotate( 0, 0, 40, j5, r=True, os=True )
 		maya.cmds.rotate( 0, 0, -20, j6, r=True, os=True )
-		
+
 		# create geo
 		geo = maya.cmds.polyCube( n = "myGeo", w = 1, h = 4, d = 1, sx = 1, sy = 3, sz = 1, ax = [ 0, 1, 0 ],cuv = 4, ch = 0 )[0]
 		geo2 = maya.cmds.polyCube( n = "myGeo2", w = 1, h = 4, d = 1, sx = 1, sy = 3, sz = 1, ax = [ 0, 1, 0 ],cuv = 4, ch = 0 )[0]
@@ -70,9 +70,9 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		for i in range( 0, 15 ) :
 			val = r.barycentricf()
 			maya.cmds.skinPercent( sc2, '%s.vtx[%d]' % ( geo2, i ), transformValue=[(j4, val[0]), (j5, val[1]), (j6, val[2]) ])
-		
+
 		return ( sc, sc2 )
-	
+
 	def testSimple( self ) :
 		# test factory
 		ssd = IECore.SmoothSkinningData()
@@ -90,9 +90,9 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(ssd.pointInfluenceCounts()), 16 )
 		self.assertEqual( len(ssd.pointInfluenceIndices()), 32 )
 		ssd.validate()
-		
+
 		del fromConverter
-		
+
 		# make sure everything is different at first
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
@@ -108,14 +108,14 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertNotEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
 		self.assertNotEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
 		self.assertNotEqual( ssd, ssd2 )
-		
+
 		del fromConverter
 		del ssd2
-		
+
 		# convert
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		toConverter.convert( sc2 )
-		
+
 		# make sure everything is the same now
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
@@ -128,7 +128,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
 		self.assertEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
 		self.assertEqual( ssd, ssd2 )
-	
+
 	def testSSDInfluenceNotInScene( self ) :
 		( sc, sc2 ) = self.buildTestSetup()
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
@@ -136,16 +136,16 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		ssd = fromConverter.convert()
 		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['joint1', 'joint2', 'joint3'] ) )
 		ssd.validate()
-		
+
 		maya.cmds.parent( 'joint3', 'joint1' )
 		maya.cmds.delete( 'joint2' )
 		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
-		
+
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc ) )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )
 		toConverter.convert( sc )
-		
+
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Partial )
 		ssd2 = fromConverter.convert()
@@ -156,7 +156,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd2.pointInfluenceIndices(), IECore.IntVectorData( [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 ] ) )
 		newWeights = IECore.FloatVectorData( [ ssd.pointInfluenceWeights()[x] for x in range(0,ssd.pointInfluenceWeights().size()) if ssd.pointInfluenceIndices()[x] != 1 ] )
 		self.assertEqual( ssd2.pointInfluenceWeights(), newWeights )
-	
+
 	def testSSDInfluenceInSceneButNotAJoint( self ) :
 		( sc, sc2 ) = self.buildTestSetup()
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
@@ -164,17 +164,17 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		ssd = fromConverter.convert()
 		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['joint1', 'joint2', 'joint3'] ) )
 		ssd.validate()
-		
+
 		maya.cmds.parent( 'joint3', 'joint1' )
 		maya.cmds.delete( 'joint2' )
 		maya.cmds.polyCube( n = "joint2", w = 1, h = 4, d = 1, sx = 1, sy = 3, sz = 1, ax = [ 0, 1, 0 ],cuv = 4, ch = 0 )
 		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ) ] )
-		
+
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc ) )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )
 		toConverter.convert( sc )
-		
+
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Partial )
 		ssd2 = fromConverter.convert()
@@ -185,7 +185,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd2.pointInfluenceIndices(), IECore.IntVectorData( [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 ] ) )
 		newWeights = IECore.FloatVectorData( [ ssd.pointInfluenceWeights()[x] for x in range(0,ssd.pointInfluenceWeights().size()) if ssd.pointInfluenceIndices()[x] != 1 ] )
 		self.assertEqual( ssd2.pointInfluenceWeights(), newWeights )
-	
+
 	def testSkinClusterInfluencesWereRenamed( self ) :
 		( sc, sc2 ) = self.buildTestSetup()
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
@@ -193,14 +193,14 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		ssd = fromConverter.convert()
 		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['joint1', 'joint2', 'joint3'] ) )
 		ssd.validate()
-		
+
 		maya.cmds.rename( 'joint2', 'fakeJoint' )
 		newPose = IECore.M44fVectorData( [ IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[0]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[2]' ) ), IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) ] )
-		
+
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )
 		toConverter.convert( sc )
-		
+
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Partial )
 		ssd2 = fromConverter.convert()
@@ -211,7 +211,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd2.pointInfluenceIndices(), IECore.IntVectorData( [ 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0 ] ) )
 		newWeights = IECore.FloatVectorData( [ ssd.pointInfluenceWeights()[x] for x in range(0,ssd.pointInfluenceWeights().size()) if ssd.pointInfluenceIndices()[x] != 1 ] )
 		self.assertEqual( ssd2.pointInfluenceWeights(), newWeights )
-		
+
 	def testSkinClusterInfluencesWereRenamedAndOldNamesStillExist( self ) :
 		( sc, sc2 ) = self.buildTestSetup()
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
@@ -219,16 +219,16 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		ssd = fromConverter.convert()
 		self.assertEqual( ssd.influenceNames(), IECore.StringVectorData( ['joint1', 'joint2', 'joint3'] ) )
 		ssd.validate()
-		
+
 		maya.cmds.rename( 'joint2', 'fakeJoint' )
 		maya.cmds.rename( 'joint5', 'joint2' )
 		newPose = ssd.influencePose()
 		newPose.append( IECore.M44f( maya.cmds.getAttr( 'skinCluster1.bindPreMatrix[1]' ) ) )
-		
+
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		toConverter.parameters()["ignoreMissingInfluences"].setTypedValue( True )
 		toConverter.convert( sc )
-		
+
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Partial )
 		ssd2 = fromConverter.convert()
@@ -238,15 +238,15 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd2.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( ssd2.pointInfluenceIndices(), ssd.pointInfluenceIndices() )
 		self.assertEqual( ssd2.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
-	
+
 	def testIgnoreBindPose( self ) :
-		
+
 		# test conversion
 		( sc, sc2 ) = self.buildTestSetup()
-		
+
 		bindPoses = maya.cmds.ls( type="dagPose" )
 		maya.cmds.delete( bindPoses )
-		
+
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
 		ssd = fromConverter.convert()
@@ -255,9 +255,9 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len(ssd.pointInfluenceCounts()), 16 )
 		self.assertEqual( len(ssd.pointInfluenceIndices()), 32 )
 		ssd.validate()
-		
+
 		del fromConverter
-		
+
 		# make sure everything is different at first
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc2 )
 		fromConverter.parameters()["influenceName"].setValue( IECoreMaya.FromMayaSkinClusterConverter.InfluenceName.Full )
@@ -273,10 +273,10 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertNotEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
 		self.assertNotEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
 		self.assertNotEqual( ssd, ssd2 )
-		
+
 		del fromConverter
 		del ssd2
-		
+
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
 		toConverter.parameters()["ignoreBindPose"].setTypedValue( True )
@@ -294,9 +294,9 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assertEqual( ssd.pointInfluenceIndices(), ssd2.pointInfluenceIndices() )
 		self.assertEqual( ssd.pointInfluenceWeights(), ssd2.pointInfluenceWeights() )
 		self.assertEqual( ssd, ssd2 )
-	
+
 	def testErrorStates( self ) :
-		
+
 		# test converting non-skinCluster node
 		( sc, sc2 ) = self.buildTestSetup()
 		fromConverter = IECoreMaya.FromMayaSkinClusterConverter.create( sc )
@@ -305,18 +305,18 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		geo = maya.cmds.ls( "myGeo" )[0]
 		toConverter = IECoreMaya.ToMayaSkinClusterConverter.create( ssd )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, geo ) )
-		
+
 		# test invalid bindPose
 		bindPose = maya.cmds.listConnections( sc2+'.bindPose' )[0]
 		maya.cmds.delete( bindPose )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
 		maya.cmds.connectAttr( geo+'.message', sc2+'.bindPose' )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
-		
+
 		# test non-existant influences
 		maya.cmds.delete( ['joint2', 'joint3'] )
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )
-		
+
 		# test influences that aren't joints
 		ssd.influenceNames()[1] = geo
 		self.assertRaises( RuntimeError, IECore.curry( toConverter.convert, sc2 ) )

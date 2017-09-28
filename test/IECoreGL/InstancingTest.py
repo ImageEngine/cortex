@@ -42,77 +42,77 @@ IECoreGL.init( False )
 class InstancingTest( unittest.TestCase ) :
 
 	class RandomMeshProcedural( IECore.Renderer.Procedural ) :
-	
+
 		def __init__( self, meshes, name="/1", depth=0, maxDepth=8 ) :
-		
+
 			IECore.Renderer.Procedural.__init__( self )
-			
+
 			self.__meshes = meshes
 			self.__depth = depth
 			self.__maxDepth = maxDepth
 			self.__name = name
-			
+
 		def bound( self ) :
-		
+
 			b = IECore.Box3f()
 			for m in self.__meshes :
 				b.extendBy( m.bound() )
 			return b
-				
+
 		def render( self, renderer ) :
-		
+
 			with IECore.AttributeBlock( renderer ) :
-				
+
 				renderer.setAttribute( "name", IECore.StringData( self.__name ) )
-		
+
 				if self.__depth < self.__maxDepth :
-			
+
 					for n in ( "1", "2" ) :
-						renderer.procedural( 
+						renderer.procedural(
 							InstancingTest.RandomMeshProcedural(
 								self.__meshes,
 								self.__name + "/" + n,
-								self.__depth + 1, 
+								self.__depth + 1,
 								self.__maxDepth,
 							)
 						)
-				
+
 				else :
-				
+
 					mesh = self.__meshes[ int( self.__name.split( "/" )[-1] ) - 1 ]
 					mesh.render( renderer )
-		
+
 		def hash( self ):
-			
+
 			h = IECore.MurmurHash()
 			return h
 
 	def __collectMeshes( self, group, result ) :
-	
+
 		name = group.getState().get( IECoreGL.NameStateComponent.staticTypeId() )
-		
+
 		for c in group.children() :
 			if isinstance( c, IECoreGL.Group ) :
 				self.__collectMeshes( c, result )
 			else :
 				d = result.setdefault( name.name().split( "/" )[-1], [] )
 				d.append( c )
-						
+
 	def testAutomaticInstancingOn( self ) :
 
 		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.procedural( self.RandomMeshProcedural( [ m1, m2 ] ) )
 
 		meshes = {}
 		self.__collectMeshes( r.scene().root(), meshes )
-		
+
 		for meshList in meshes.values() :
 			for i in range( 0, len( meshList ) ) :
 				self.failUnless( meshList[i].isSame( meshList[0] ) )
@@ -121,22 +121,22 @@ class InstancingTest( unittest.TestCase ) :
 
 		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		
+
 		r = IECoreGL.Renderer()
 		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
 		with IECore.WorldBlock( r ) :
-		
+
 			r.setAttribute( "automaticInstancing", IECore.BoolData( False ) )
-		
+
 			r.procedural( self.RandomMeshProcedural( [ m1, m2 ] ) )
 
 		meshes = {}
 		self.__collectMeshes( r.scene().root(), meshes )
-		
+
 		for meshList in meshes.values() :
 			for i in range( 1, len( meshList ) ) :
 				self.failIf( meshList[i].isSame( meshList[0] ) )
-		
+
 if __name__ == "__main__":
     unittest.main()

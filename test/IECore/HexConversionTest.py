@@ -43,53 +43,53 @@ class HexConversionTest( unittest.TestCase ) :
 
 		hs = set()
 		for i in range( 0, 256 ) :
-		
+
 			h = IECore.decToHexChar( chr( i ) )
 			self.failUnless( isinstance( h, str ) )
 			self.assertEqual( len( h ), 2 )
 			self.failUnless( h[0] in "0123456789ABCDEF" )
 			self.failUnless( h[1] in "0123456789ABCDEF" )
-						
+
 			d = IECore.hexToDecChar( h )
 			self.assertEqual( ord( d ), i )
-			
+
 			hs.add( h )
 
 		self.assertEqual( len( hs ), 256 )
-	
+
 	def testUInt( self ) :
-	
+
 		hs = set()
 		m = 2 ** 32 - 1
 		i = 0
 		numTested = 0
 		while i < m :
-				
+
 			h = IECore.decToHexUInt( i )
 			self.failUnless( isinstance( h, str ) )
 			self.assertEqual( len( h ), 8 )
 			for c in h :
 				self.failUnless( c in "0123456789ABCDEF" )
-			
+
 			d = IECore.hexToDecUInt( h )
 			self.assertEqual(d, i )
-			
+
 			hs.add( h )
-			
+
 			i += random.randint( 10000, 100000 )
 			numTested += 1
 
 		self.assertEqual( len( hs ), numTested )
-			
+
 	def testCharVector( self ) :
-	
+
 		cv = IECore.CharVectorData( [ chr( x ) for x in range( 0, 256 ) ] )
 
 		h = IECore.decToHexCharVector( cv )
-		
+
 		self.failUnless( isinstance( h, str ) )
 		self.assertEqual( len( h ), 512 )
-		
+
 		cv2 = IECore.hexToDecCharVector( h )
 		self.assertEqual( cv, cv2 )
 

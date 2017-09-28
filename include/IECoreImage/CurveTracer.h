@@ -91,33 +91,33 @@ class IECOREIMAGE_API CurveTracer : public IECore::Op
 
 		IECore::IntParameter *outputSpaceParameter();
 		const IECore::IntParameter *outputSpaceParameter() const;
-		
+
 	protected :
 
 		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
-		
+
 	private :
-	
+
 		// lots and lots of typedefs for types used to represent the graph of connections.
 		typedef std::vector<Imath::V2i> PixelVector;
 		typedef boost::adjacency_list<boost::listS, boost::listS, boost::bidirectionalS, boost::property<boost::vertex_name_t, Imath::V2i>, boost::property<boost::edge_name_t, PixelVector> > Graph;
 		typedef Graph::vertex_descriptor Vertex;
 		typedef Graph::vertex_iterator VertexIterator;
 		typedef std::pair<VertexIterator, VertexIterator> VertexIteratorRange;
-	
+
 		typedef std::map<Imath::V2i, Vertex> VertexMap;
-	
+
 		typedef Graph::edge_descriptor Edge;
 		typedef Graph::edge_iterator EdgeIterator;
 		typedef std::pair<EdgeIterator, EdgeIterator> EdgeIteratorRange;
 		typedef std::pair<Edge, bool> EdgeBool;
-	
+
 		typedef Graph::out_edge_iterator OutEdgeIterator;
 		typedef std::pair<OutEdgeIterator, OutEdgeIterator> OutEdgeIteratorRange;
-	
+
 		typedef Graph::in_edge_iterator InEdgeIterator;
 		typedef std::pair<InEdgeIterator, InEdgeIterator> InEdgeIteratorRange;
-		
+
 		void buildGraph( const std::vector<float> &channel, const Imath::V2i &size, Graph &graph ) const;
 		void removeSpurs( Graph &graph, float minimumLength ) const;
 		void mergeVertices( Graph &graph, float mergeDistance ) const;

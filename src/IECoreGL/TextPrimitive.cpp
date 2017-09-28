@@ -127,7 +127,7 @@ void TextPrimitive::renderSprites( State *state ) const
 	{
 		return;
 	}
-				
+
 	glPushAttrib( GL_TEXTURE_BIT | GL_ENABLE_BIT );
 	glPushMatrix();
 
@@ -136,7 +136,7 @@ void TextPrimitive::renderSprites( State *state ) const
 		GLint oldProgram = 0;
 		glGetIntegerv( GL_CURRENT_PROGRAM, &oldProgram );
 		glUseProgram( 0 );
-		
+
 		glEnable( GL_TEXTURE_2D );
 		glDisable( GL_LIGHTING ); /// \todo Perhaps we could support lighting even in this mode?
 		glActiveTexture( GL_TEXTURE0 );

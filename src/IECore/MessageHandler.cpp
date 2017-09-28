@@ -97,7 +97,7 @@ MessageHandler::Scope::Scope( MessageHandler *handler )
 		HandlerStack &stack = g_threadHandlers.local();
 		stack.push( handler );
 	}
-	
+
 	m_handler = handler;
 }
 

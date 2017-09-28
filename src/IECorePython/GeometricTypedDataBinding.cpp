@@ -51,7 +51,7 @@ class GeometricTypedDataHelper
 void bindGeometricTypedData()
 {
 	scope geometricTypedDataScope = class_<GeometricTypedDataHelper>( "GeometricData" );
-	
+
 	enum_<GeometricData::Interpretation>( "Interpretation" )
 		.value( "None", GeometricData::None )
 		.value( "Numeric", GeometricData::Numeric )

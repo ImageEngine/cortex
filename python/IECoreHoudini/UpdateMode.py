@@ -38,7 +38,7 @@ import hou
 # that all operations in the with block are performed in the given hou.updateMode,
 # and that the updateMode is restored when the block exits.
 class UpdateMode :
-	
+
 	def __init__( self, mode ) :
 
 		self.__mode = mode
@@ -49,5 +49,5 @@ class UpdateMode :
 		hou.setUpdateMode( self.__mode )
 
 	def __exit__( self, type, value, traceBack ) :
-		
+
 		hou.setUpdateMode( self.__prevMode )

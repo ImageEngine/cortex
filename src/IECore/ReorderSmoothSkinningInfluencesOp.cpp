@@ -71,46 +71,46 @@ void ReorderSmoothSkinningInfluencesOp::modify( Object * object, const CompoundO
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	const std::vector<std::string> &newOrder = m_reorderedInfluencesParameter->getTypedValue();
 	const std::vector<std::string> &originalOrder = skinningData->influenceNames()->readable();
 	const std::vector<Imath::M44f> &originalPoseData = skinningData->influencePose()->readable();
-	
+
 	std::vector<int> orderMap( originalOrder.size() );
 	std::vector<std::string> finalOrder;
 	std::vector<Imath::M44f> finalPoseData;
 	std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->writable();
-	
+
 	if ( newOrder.size() != originalOrder.size() )
 	{
 		throw IECore::Exception( "ReorderSmoothSkinningInfluencesOp: reorderedInfluenceNames and input.influenceNames must contain the same names" );
 	}
-	
+
 	// create the mapping between originalOrder and newOrder
 	for ( unsigned i=0; i < newOrder.size(); i++ )
 	{
 		std::string name = newOrder[i];
-		
+
 		const std::vector<std::string>::const_iterator location = find( originalOrder.begin(), originalOrder.end(), name );
 		if ( location == originalOrder.end() )
 		{
 			throw IECore::Exception( ( boost::format( "ReorderSmoothSkinningInfluencesOp: \"%s\" is not an original influenceName" ) % name ).str() );
 		}
-		
+
 		unsigned originalIndex = location - originalOrder.begin();
 		orderMap[originalIndex] = i;
 		finalOrder.push_back( name );
 		finalPoseData.push_back( originalPoseData[originalIndex] );
 	}
-	
+
 	// update the pointInfluenceIndices
 	for ( unsigned i=0; i < pointInfluenceIndices.size(); i++ )
 	{
 		int newIndex = orderMap[ pointInfluenceIndices[i] ];
 		pointInfluenceIndices[i] = newIndex;
-		
+
 	}
-	
+
 	// swap the names and poses
 	skinningData->influenceNames()->writable().swap( finalOrder );
 	skinningData->influencePose()->writable().swap( finalPoseData );

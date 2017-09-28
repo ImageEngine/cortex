@@ -61,7 +61,7 @@ class PolygonVertexIterator
 		/// Uninitialised.
 		PolygonVertexIterator();
 		PolygonVertexIterator( VertexIndexIterator vertexIndexIterator, VertexValueIterator vertexValuesBegin );
-	
+
 		PolygonVertexIterator &operator++();
 		PolygonVertexIterator operator++( int );
 
@@ -72,7 +72,7 @@ class PolygonVertexIterator
 		bool operator!=( const PolygonVertexIterator &rhs ) const;
 
 		PolygonVertexIterator &operator=( const PolygonVertexIterator &rhs );
-		
+
 	private :
 
 		VertexValueIterator m_vertexValuesBegin;

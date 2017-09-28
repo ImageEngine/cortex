@@ -70,24 +70,24 @@ void DecompressSmoothSkinningDataOp::modify( Object * object, const CompoundObje
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
 	const std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->readable();
-	
+
 	std::vector<int> newOffsets;
 	std::vector<int> newCounts;
 	std::vector<int> newIndices;
 	std::vector<float> newWeights;
-	
+
 	int offset = 0;
 	int numInfluences = influenceNames.size();
-	
+
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
 		const std::vector<int>::const_iterator first = pointInfluenceIndices.begin() + pointIndexOffsets[i];
 		const std::vector<int>::const_iterator last = first + pointInfluenceCounts[i];
-		
+
 		for ( int j=0; j < numInfluences; j++ )
-		{			
+		{
 			newIndices.push_back( j );
-			
+
 			const std::vector<int>::const_iterator location = find( first, last, j );
 			if ( location != last )
 			{
@@ -103,7 +103,7 @@ void DecompressSmoothSkinningDataOp::modify( Object * object, const CompoundObje
 		newCounts.push_back( numInfluences );
 		offset += numInfluences;
 	}
-	
+
 	// replace the vectors on the SmoothSkinningData
 	if ( newWeights.size() != pointInfluenceWeights.size() )
 	{

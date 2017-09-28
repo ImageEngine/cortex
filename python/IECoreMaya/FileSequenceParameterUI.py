@@ -51,40 +51,40 @@ class FileSequenceParameterUI( IECoreMaya.PathParameterUI ) :
 			filter = tools.filter,
 			validate = tools.validate,
 		)
-		
+
 	class FileSequenceFilter :
 
 		def __init__( self, extensions=None ) :
-		
+
 			if extensions:
 				self.__extensions = IECore.StringVectorData( extensions )
 			else:
 				self.__extensions = IECore.StringVectorData()
 
 		def filter( self, path, items ) :
-		
+
 			fsOp = IECore.SequenceLsOp()
-		
+
 			oldItems = list( items )
 			del items[:]
-			
+
 			for i in oldItems:
 				if os.path.isdir( i["path"] ) :
 					items.append( i )
-										
-			sequences = fsOp( 
+
+			sequences = fsOp(
 				dir=path,
-				type="files", 
-				resultType="stringVector", 
+				type="files",
+				resultType="stringVector",
 				format="<PREFIX><#PADDING><SUFFIX> <FRAMES>",
 				extensions=self.__extensions,
 			)
 
 			for s in sequences :
-				
+
 				firstFrame = IECore.FileSequence( s ).fileNames()[0]
-				stat = os.stat( firstFrame )		
-				
+				stat = os.stat( firstFrame )
+
 				seqItem = {
 					"path" : s,
 					"name" : s.replace( "%s/" % path, "" ),
@@ -96,22 +96,22 @@ class FileSequenceParameterUI( IECoreMaya.PathParameterUI ) :
 					"mtime" :  stat[8],
 					"ctime" :  stat[9],
 				}
-			
+
 				items.append( seqItem )
-	
+
 		# FileExtensionFilter will get confused by the extra info on
 		# the end of the sequence string.
 		def validate( self, path, items ):
-			
+
 			if not items:
 				return False
-				
+
 			for i in items:
 				if os.path.isdir( "%s/%s" % ( path, i["name"] ) ) :
 					return False
-				
+
 			return True
-				
-		
-			
+
+
+
 IECoreMaya.ParameterUI.registerUI( IECore.TypeId.FileSequenceParameter, FileSequenceParameterUI )

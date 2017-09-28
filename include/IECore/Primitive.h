@@ -114,7 +114,7 @@ class IECORE_API Primitive : public VisibleRenderable
 		/// Returns the number of values a piece of data must provide for the given
 		/// interpolation type. Must be implemented in all derived classes.
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const = 0;
-		
+
 		/// Hash representing the topology only
 		virtual void topologyHash( MurmurHash &h ) const = 0;
 

@@ -53,25 +53,25 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 	:	m_radius( radius ), m_zMin( zMin ), m_zMax( zMax ), m_thetaMax( thetaMax ), m_vertIdsBuffer( 0 )
 {
 	// figure out bounding box
-	
+
 	thetaMax = m_thetaMax/180.0f * M_PI;
 	float minX = m_radius * ( thetaMax < M_PI ? Math<float>::cos( thetaMax ) : -1.0f );
 	float maxY = m_radius * ( thetaMax < M_PI/2 ? Math<float>::sin( thetaMax ) : 1.0f );
 	float minY = m_radius * ( thetaMax > 3 * M_PI/2 ? -1.0f : min( 0.0f, Math<float>::sin( thetaMax ) ) );
 	m_bound = Imath::Box3f( V3f( minX, minY, m_zMin * m_radius ), V3f( m_radius, maxY, m_zMax * m_radius ) );
-	
+
 	// build vertex attributes for P, N and st, and indexes for triangles.
-	
+
 	IECore::V3fVectorDataPtr pData = new IECore::V3fVectorData;
 	IECore::V3fVectorDataPtr nData = new IECore::V3fVectorData;
 	IECore::V2fVectorDataPtr uvData = new IECore::V2fVectorData;
 	m_vertIds = new IECore::UIntVectorData;
-	
+
 	vector<V3f> &pVector = pData->writable();
 	vector<V3f> &nVector = nData->writable();
 	vector<V2f> &uvVector = uvData->writable();
 	vector<unsigned int> &vertIdsVector = m_vertIds->writable();
-	
+
 	float oMin = Math<float>::asin( m_zMin );
 	float oMax = Math<float>::asin( m_zMax );
 	const unsigned int nO = max( 4u, (unsigned int)( 20.0f * (oMax - oMin) / M_PI ) );
@@ -109,7 +109,7 @@ SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float th
 			}
 		}
 	}
-	
+
 	addVertexAttribute( "P", pData );
 	addVertexAttribute( "N", nData );
 	addVertexAttribute( "uv", uvData );
@@ -142,7 +142,7 @@ void SpherePrimitive::renderInstances( size_t numInstances ) const
 		CachedConverterPtr cachedConverter = CachedConverter::defaultCachedConverter();
 		m_vertIdsBuffer = IECore::runTimeCast<const Buffer>( cachedConverter->convert( m_vertIds.get() ) );
 	}
-	
+
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
 	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
 }

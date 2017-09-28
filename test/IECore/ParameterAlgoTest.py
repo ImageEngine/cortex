@@ -41,20 +41,20 @@ class ParameterAlgoTest( unittest.TestCase ) :
 	def testFindClasses( self ) :
 
 		p = IECore.CompoundParameter(
-			
+
 			name = "p",
 			description = "",
-			
+
 			members = [
-			
+
 				IECore.CompoundParameter(
-					
+
 					name = "q",
 					description = "",
 					members = [
-					
+
 						IECore.ClassVectorParameter(
-						
+
 							"cv",
 							"d",
 							"IECORE_OP_PATHS",
@@ -62,86 +62,86 @@ class ParameterAlgoTest( unittest.TestCase ) :
 								( "mult", "maths/multiply", 2 ),
 								( "coIO", "compoundObjectInOut", 2 ),
 							]
-						
+
 						),
-						
+
 						IECore.ClassParameter(
-						
+
 							"c",
 							"d",
 							"IECORE_OP_PATHS",
 							"classParameterTest", 1
-							
+
 						)
-					
+
 					]
-				
+
 				),
-			
-			
+
+
 			]
-		
+
 		)
-		
+
 		p["q"]["c"]["cp"].setClass( "classVectorParameterTest", 1 )
-		
+
 		p["q"]["c"]["cp"]["cv"].setClasses( [
 			( "mult", "maths/multiply", 2 ),
 			( "coIO", "compoundObjectInOut", 2 )
 		] )
 
 		c = IECore.ParameterAlgo.findClasses( p )
-		
+
 		expected = [
-			
+
 			{
 				"parent" : p["q"]["cv"],
 				"parameterPath" : [ "q", "cv", "mult" ],
 				"uiPath" : [ "q", "cv", "mult" ],
 				"classInstance" : p["q"]["cv"].getClasses()[0],
 			},
-			
+
 			{
 				"parent" : p["q"]["cv"],
 				"parameterPath" : [ "q", "cv", "coIO" ],
 				"uiPath" : [ "q", "cv", "iAmALabel" ],
 				"classInstance" : p["q"]["cv"].getClasses()[1],
 			},
-			
+
 			{
 				"parent" : p["q"]["c"],
 				"parameterPath" : [ "q", "c" ],
 				"uiPath" : [ "q", "c" ],
 				"classInstance" : p["q"]["c"].getClass(),
 			},
-			
+
 			{
 				"parent" : p["q"]["c"]["cp"],
 				"parameterPath" : [ "q", "c", "cp" ],
 				"uiPath" : [ "q", "c", "cp" ],
 				"classInstance" : p["q"]["c"]["cp"].getClass(),
 			},
-			
+
 			{
 				"parent" : p["q"]["c"]["cp"]["cv"],
 				"parameterPath" : [ "q", "c", "cp", "cv", "mult" ],
 				"uiPath" : [ "q", "c", "cp", "cv", "mult" ],
 				"classInstance" : p["q"]["c"]["cp"]["cv"].getClasses()[0],
 			},
-			
+
 			{
 				"parent" : p["q"]["c"]["cp"]["cv"],
 				"parameterPath" : [ "q", "c", "cp", "cv", "coIO" ],
 				"uiPath" : [ "q", "c", "cp", "cv", "iAmALabel" ],
 				"classInstance" : p["q"]["c"]["cp"]["cv"].getClasses()[1],
 			},
-		
+
 		]
-		
+
 		self.assertEqual( expected, c )
 
 		filteredExpected = [ expected[0], expected[4] ]
-	
+
 		c = IECore.ParameterAlgo.findClasses( p, classNameFilter="maths/*" )
 
 		self.assertEqual( filteredExpected, c )
@@ -149,7 +149,7 @@ class ParameterAlgoTest( unittest.TestCase ) :
 	def testCopyClasses( self ) :
 
 		p = IECore.CompoundParameter(
-		
+
 			name = "q",
 			description = "",
 			members = [
@@ -178,16 +178,16 @@ class ParameterAlgoTest( unittest.TestCase ) :
 			]
 
 		)
-		
+
 		p["c"]["cp"].setClass( "classVectorParameterTest", 1 )
-		
+
 		p["c"]["cp"]["cv"].setClasses( [
 			( "mult", "maths/multiply", 2 ),
 			( "coIO", "compoundObjectInOut", 2 )
 		] )
-		
+
 		p2 = IECore.CompoundParameter(
-		
+
 			name = "q",
 			description = "",
 			members = [
@@ -209,24 +209,24 @@ class ParameterAlgoTest( unittest.TestCase ) :
 				)
 
 			]
-		
+
 		)
-		
+
 		IECore.ParameterAlgo.copyClasses( p, p2 )
-		
+
 		cl = [ c[1:] for c in p2["cv"].getClasses( True ) ]
 		self.assertEqual( cl, [
 				( "mult", "maths/multiply", 2 ),
 				( "coIO", "compoundObjectInOut", 2 )
 			]
 		)
-		
+
 		cl = [ c[1:] for c in p2["c"]["cp"]["cv"].getClasses( True ) ]
 		self.assertEqual( cl, [
 				( "mult", "maths/multiply", 2 ),
 				( "coIO", "compoundObjectInOut", 2 )
 			]
 		)
-		
+
 if __name__ == "__main__":
 	unittest.main()

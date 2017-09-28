@@ -63,12 +63,12 @@ class IECORE_API DiskPrimitive : public Primitive
 		float getThetaMax() const;
 		void setThetaMax( float degrees );
 		//@}
-		
+
 		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
 
 		virtual Imath::Box3f bound() const;
 		virtual void render( Renderer *renderer ) const;
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:

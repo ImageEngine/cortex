@@ -66,7 +66,7 @@ class UIElement :
 
 	## Returns the UIElement which forms the parent for this one.
 	def parent( self ) :
-	
+
 		melUI = self._topLevelUI()
 		while 1 :
 			melUI = melUI.rpartition( "|" )[0]
@@ -119,16 +119,16 @@ class UIElement :
 	## Returns a list of all the active instances derived from the specified type.
 	@staticmethod
 	def instances( type = None ) :
-	
+
 		if type is None :
 			type = UIElement
-	
+
 		result = []
 		for v in UIElement.__instances.values() :
 			instance = v.instance
 			if isinstance( instance, type ) :
 				result.append( instance )
-				
+
 		return result
 
 	@staticmethod

@@ -53,7 +53,7 @@ namespace IECoreMaya
 //
 // 1) It is used by FnParameterisedHolder.setParameterised() to implement
 // changing of the held class in an undoable way.
-// 
+//
 // 2) It is used by FnParameterisedHolder.parameterModificationContext()
 // for the changing of the classes held by ClassParameter and ClassVectorParameter,
 // and the setting of Parameter values. It must be implemented here as a command
@@ -80,7 +80,7 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		virtual MStatus redoIt();
 
 	private :
-		
+
 		void restoreClassParameterStates( const IECore::CompoundData *classes, IECore::Parameter *parameter, const std::string &parentParameterPath );
 		void storeParametersWithNewValues( const IECore::Object *originalValue, const IECore::Object *newValue,  const std::string &parameterPath );
 		void setNodeValuesForParametersWithNewValues() const;
@@ -88,26 +88,26 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		void despatchSetParameterisedCallbacks() const;
 		void despatchClassSetCallbacks() const;
 		IECore::Parameter *parameterFromPath( IECore::ParameterisedInterface *parameterised, const std::string &path ) const;
-		
+
 		MObject m_node;
 		ParameterisedHolderInterface *m_parameterisedHolder;
-		
+
 		IECore::ConstCompoundDataPtr m_originalClasses;
 		IECore::ConstCompoundDataPtr m_newClasses;
-		
+
 		IECore::ConstObjectPtr m_originalValues;
 		IECore::ConstObjectPtr m_newValues;
 		std::set<std::string> m_parametersWithNewValues;
-		
+
 		bool m_changingClass;
 		MString m_originalClassName;
 		int m_originalClassVersion;
 		MString m_originalSearchPathEnvVar;
-		
+
 		MString m_newClassName;
 		int m_newClassVersion;
 		MString m_newSearchPathEnvVar;
-		
+
 		// When using FnParameterisedHolder.classParameterModificationContext(), it is too late
 		// to calculate the state to undo back to in this command, so that state
 		// is passed in from the context manager instead. we also pass in the new values and
@@ -116,7 +116,7 @@ class ParameterisedHolderModificationCmd : public MPxCommand
 		static IECore::ConstCompoundDataPtr g_originalClasses;
 		static IECore::ConstObjectPtr g_newValue;
 		static IECore::ConstCompoundDataPtr g_newClasses;
-		friend void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );	
+		friend void IECoreMaya::parameterisedHolderAssignModificationState( IECore::ObjectPtr originalValue, IECore::CompoundDataPtr originalClasses, IECore::ObjectPtr newValue, IECore::CompoundDataPtr newClasses );
 };
 
 }

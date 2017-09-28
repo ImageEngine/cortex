@@ -73,7 +73,7 @@ class TestIndexedIO(unittest.TestCase):
 			del io
 
 	def testEntryConstructor( self ) :
-	
+
 		e = IndexedIO.Entry( "n", IndexedIO.EntryType.Directory, IndexedIO.DataType.Invalid, 0 )
 		self.assertEqual( e.id(), "n" )
 		self.assertEqual( e.entryType(), IndexedIO.EntryType.Directory )
@@ -107,7 +107,7 @@ class TestMemoryIndexedIO(unittest.TestCase):
 	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
 	def testRmStress(self) :
 		"""Test MemoryIndexedIO rm (stress test)"""
-		
+
 		random.seed( 19 )
 
 		dataPresent = set()
@@ -255,7 +255,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		g = f.subdirectory("sub2")
 		self.assertEqual( g.path(), ["sub2"] )
 		self.assertEqual( g.currentEntryId() , "sub2" )
-		
+
 		e = g.subdirectory("sub2.1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		self.assertEqual( e.path(), ["sub2","sub2.1"] )
 		self.assertEqual( e.currentEntryId() , "sub2.1" )
@@ -334,7 +334,7 @@ class TestFileIndexedIO(unittest.TestCase):
 	@unittest.skipIf( IECore.isDebug(), "Skip performance testing in debug builds" )
 	def testRmStress(self) :
 		"""Test FileIndexedIO rm (stress test)"""
-		
+
 		random.seed( 19 )
 
 		dataPresent = set()
@@ -486,7 +486,7 @@ class TestFileIndexedIO(unittest.TestCase):
 
 		for n in range(0, 1000):
 			self.assertEqual(str(fv[n]), str(gv[n]))
-			
+
 	def testReadWriteStringVector(self):
 		"""Test FileIndexedIO read/write(InternedStringVector)"""
 
@@ -507,7 +507,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		self.assertEqual(len(fv), len(gv))
 
 		for n in range(0, 1000):
-			self.assertEqual(str(fv[n]), str(gv[n]))		
+			self.assertEqual(str(fv[n]), str(gv[n]))
 
 	def testReadWriteFloat(self):
 		"""Test FileIndexedIO read/write(Float/Double)"""
@@ -566,7 +566,7 @@ class TestFileIndexedIO(unittest.TestCase):
 		f = FileIndexedIO("./test/FileIndexedIO.fio", [], IndexedIO.OpenMode.Write)
 		g = f.subdirectory("sub1", IndexedIO.MissingBehaviour.CreateIfMissing )
 		h = g.subdirectory("sub2", IndexedIO.MissingBehaviour.CreateIfMissing )
-		
+
 		fv = InternedStringVectorData( h.path() )
 
 		name = "myLink"

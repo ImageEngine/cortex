@@ -42,59 +42,59 @@ import IECore
 class SubstitutedDict :
 
 	def __init__( self, dict, substitutions, dictClasses = set( [ dict, IECore.CompoundObject, IECore.CompoundParameter, IECore.LayeredDict ] ) ) :
-	
+
 		self.__dict = dict
 		self.__substitutions = substitutions
 		self.__dictClasses = dictClasses
-				
+
 	def __getitem__( self, key ) :
-	
+
 		value = self.__dict[key]
-				
+
 		if value.__class__ in self.__dictClasses :
 			return SubstitutedDict( value, self.__substitutions, self.__dictClasses )
-			
+
 		if isinstance( value, basestring ) :
 			return string.Template( value ).safe_substitute( self.__substitutions )
 		elif isinstance( value, IECore.StringData ) :
 			return IECore.StringData( string.Template( value.value ).safe_substitute( self.__substitutions ) )
-	
+
 		return value
-		
+
 	def __contains__( self, key ) :
-	
+
 		return self.__dict.__contains__( key )
-	
+
 	def __eq__( self, other ) :
-	
+
 		if not isinstance( other, SubstitutedDict ) :
 			return False
-			
-		return (	self.__dict == other.__dict and 
+
+		return (	self.__dict == other.__dict and
 					self.__substitutions == other.__substitutions and
 					self.__dictClasses == other.__dictClasses 	)
-	
+
 	def __ne__( self, other ) :
-	
+
 		return not self.__eq__( other )
-				
+
 	def keys( self ) :
-	
+
 		return self.__dict.keys()
-		
+
 	def values( self, substituted=True ) :
-	
+
 		if substituted :
 			return [ self.get( k ) for k in self.__dict.keys() ]
 		else :
 			return self.__dict.values()
 
 	def items( self, substituted=True ) :
-	
+
 		return zip( self.keys(), self.values() )
 
 	def get( self, key, defaultValue=None, substituted=True ) :
-	
+
 		try :
 			if substituted :
 				return self.__getitem__( key )
@@ -104,5 +104,5 @@ class SubstitutedDict :
 			return defaultValue
 
 	def substitutions( self ) :
-	
+
 		return self.__substitutions

@@ -232,7 +232,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// Renders interpolation types of "linear" as RiPointsGeneralPolygons and "catmullClark" as RiSubdivisionMesh.
 		/// Supports an optional "tags" primitive variable of type CompoundData and interpolation Constant, which is used to specify tags
 		/// for the RiSubdivisionMesh call. This should contain the following children :
-		/// 
+		///
 		///		StringVectorData "names"
 		///		IntVectorData "nArgs"
 		///		FloatVectorData "floats"
@@ -284,7 +284,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		virtual void editEnd();
 
 	private :
-		
+
 		friend class RendererImplementation;
 		// Constructor used by RendererImplementation when rendering procedurals.
 		Renderer( RendererImplementationPtr implementation );

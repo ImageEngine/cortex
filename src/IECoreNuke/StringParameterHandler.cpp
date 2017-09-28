@@ -47,7 +47,7 @@ StringParameterHandler::StringParameterHandler()
 	:	m_storage( 0 ), m_knob( 0 )
 {
 }
-		
+
 void StringParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	if( f.makeKnobs() )
@@ -81,7 +81,7 @@ void StringParameterHandler::setParameterValue( IECore::Parameter *parameter, Va
 void StringParameterHandler::setKnobValue( const IECore::Parameter *parameter )
 {
 	const StringParameter *stringParameter = static_cast<const StringParameter *>( parameter );
-	m_knob->set_text( stringParameter->getTypedValue().c_str() );	
+	m_knob->set_text( stringParameter->getTypedValue().c_str() );
 }
 
 DD::Image::Knob *StringParameterHandler::knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage )

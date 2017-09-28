@@ -39,46 +39,46 @@ from IECore import *
 
 
 class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
-	
+
 	def createSSD( self, weights, indices, offsets, counts ) :
 
 		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
 		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
 
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def original( self ) :
-		
+
 		weights = FloatVectorData( [0.1, 0.1, 0.1, 0.2, 0.2, 0.3] )
 		indices = IntVectorData( [0, 1, 0, 1, 2, 1] )
 		offsets = IntVectorData( [0, 2, 5] )
 		counts = IntVectorData( [2, 3, 1] )
-		
+
 		return self.createSSD( weights, indices, offsets, counts )
-	
+
 	def transferredA( self ) :
-		
+
 		weights = FloatVectorData( [0.2, 0.3, 0.2, 0.3] )
 		indices = IntVectorData( [1, 1, 2, 1] )
 		offsets = IntVectorData( [0, 1, 3] )
 		counts = IntVectorData( [1, 2, 1] )
-		
+
 		return self.createSSD( weights, indices, offsets, counts )
-		
+
 	def transferredAC( self ) :
-		
+
 		weights = FloatVectorData( [0.2, 0.5, 0.3] )
 		indices = IntVectorData( [1, 1, 1] )
 		offsets = IntVectorData( [0, 1, 2] )
 		counts = IntVectorData( [1, 1, 1] )
-		
+
 		return self.createSSD( weights, indices, offsets, counts )
-	
+
 	def testTypes( self ) :
 		""" Test TransferSmoothSkinningWeightsOp types"""
-		
+
 		ssd = self.original()
 
 		op = TransferSmoothSkinningWeightsOp()
@@ -89,7 +89,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testSameNames( self ) :
 		""" Test TransferSmoothSkinningWeightsOp with same names"""
-		
+
 		ssd = self.original()
 
 		op = TransferSmoothSkinningWeightsOp()
@@ -100,10 +100,10 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testTransferredSingle( self ) :
 		""" Test TransferSmoothSkinningWeightsOp with one transferred influence"""
-		
+
 		ssd = self.original()
 		transferred = self.transferredA()
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData(["jointA"]) )
@@ -116,7 +116,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		self.assertEqual( result.influenceNames(), transferred.influenceNames() )
 		self.assertEqual( result.influencePose(), transferred.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), transferred.pointIndexOffsets() )
@@ -124,13 +124,13 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceIndices(), transferred.pointInfluenceIndices() )
 		self.assertEqual( result.pointInfluenceWeights(), transferred.pointInfluenceWeights() )
 		self.assertEqual( result, transferred )
-	
+
 	def testTransferredMultiple( self ) :
 		""" Test TransferSmoothSkinningWeightsOp with multiple transferred influences"""
-		
+
 		ssd = self.original()
 		transferred = self.transferredAC()
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData(["jointA", "jointC"]) )
@@ -143,7 +143,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertNotEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		self.assertEqual( result.influenceNames(), transferred.influenceNames() )
 		self.assertEqual( result.influencePose(), transferred.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), transferred.pointIndexOffsets() )
@@ -154,15 +154,15 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testWrongNames( self ) :
 		""" Test TransferSmoothSkinningWeightsOp with wrong names"""
-		
+
 		ssd = self.original()
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData( [ 'jointA', 'badName', 'jointC' ] ) )
 		op.parameters()['targetInfluenceName'].setValue( StringVectorData( [ 'jointB' ] ) )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData( [ 'jointA', 'jointB' ] ) )
@@ -171,7 +171,7 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def testNoNames( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with no new names"""
-		
+
 		ssd = self.original()
 
 		op = TransferSmoothSkinningWeightsOp()
@@ -179,13 +179,13 @@ class TransferSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData([]) )
 		op.parameters()['targetInfluenceName'].setValue( StringData("jointB") )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData(["jointA", ""]) )
 		op.parameters()['targetInfluenceName'].setValue( StringData("jointB") )
 		self.assertRaises( RuntimeError, op.operate )
-		
+
 		op = TransferSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['sourceInfluenceNames'].setValue( StringVectorData(['jointA', 'jointB']) )

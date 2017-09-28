@@ -107,21 +107,21 @@ void newSopOperator(OP_OperatorTable *table)
 		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
 	opHolder->setIconName( "CortexLogoMini" );
-	
+
 	OP_Operator *proceduralHolder = new OP_Operator(
 		"ieProceduralHolder", "Cortex Procedural",
 		SOP_ProceduralHolder::create, SOP_ParameterisedHolder::parameters, 0, 4,
     		SOP_ParameterisedHolder::variables, OP_FLAG_GENERATOR
 	);
 	proceduralHolder->setIconName( "CortexLogoMini" );
-	
+
 	OP_Operator *converter = new OP_Operator(
 		SOP_CortexConverter::typeName, "Cortex Convert",
 		SOP_CortexConverter::create, SOP_CortexConverter::parameters, 1,	1,
 		SOP_CortexConverter::variables, OP_FLAG_GENERATOR
 	);
 	converter->setIconName( "CortexLogoMini" );
-	
+
 	OP_Operator *sceneCacheSource = new OP_Operator(
 		SOP_SceneCacheSource::typeName, "SceneCache Source",
 		SOP_SceneCacheSource::create, SOP_SceneCacheSource::buildParameters(), 0, 0,
@@ -129,20 +129,20 @@ void newSopOperator(OP_OperatorTable *table)
 	);
 	/// \todo: get a new icon
 	sceneCacheSource->setIconName( "SOP_ieCortexConverter" );
-	
+
 	OP_Operator *sceneCacheTransform = new OP_Operator(
 		SOP_SceneCacheTransform::typeName, "SceneCache Xform",
 		SOP_SceneCacheTransform::create, SOP_SceneCacheTransform::buildParameters(), 1, 1, NULL
 	);
 	/// \todo: get a new icon
 	sceneCacheTransform->setIconName( "SOP_xform" );
-	
+
 	table->addOperator( proceduralHolder );
 	table->addOperator( opHolder );
 	table->addOperator( converter );
 	table->addOperator( sceneCacheSource );
 	table->addOperator( sceneCacheTransform );
-	
+
 	table->addOpHidden( opHolder->getName() );
 	table->addOpHidden( proceduralHolder->getName() );
 	table->addOpHidden( converter->getName() );
@@ -163,7 +163,7 @@ void newObjectOperator( OP_OperatorTable *table )
 	);
 	/// \todo: get a new icon
 	sceneCacheTransform->setIconName( "SOP_ieCortexConverter" );
-	
+
 	OP_Operator *sceneCacheGeometry = new OP_Operator(
 		OBJ_SceneCacheGeometry::typeName, "SceneCache GEO",
 		OBJ_SceneCacheGeometry::create,
@@ -175,10 +175,10 @@ void newObjectOperator( OP_OperatorTable *table )
 	);
 	/// \todo: get a new icon
 	sceneCacheGeometry->setIconName( "SOP_ieProceduralHolder" );
-	
+
 	table->addOperator( sceneCacheTransform );
 	table->addOperator( sceneCacheGeometry );
-	
+
 	table->addOpHidden( sceneCacheTransform->getName() );
 	table->addOpHidden( sceneCacheGeometry->getName() );
 }
@@ -196,9 +196,9 @@ void newDriverOperator( OP_OperatorTable *table )
 		OP_FLAG_GENERATOR
 	);
 	sceneCacheWriter->setIconName( "CortexLogoMini" );
-	
+
 	table->addOperator( sceneCacheWriter );
-	
+
 	table->addOpHidden( sceneCacheWriter->getName() );
 }
 
@@ -218,7 +218,7 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 		CortexPrimitive::typeName, CortexPrimitive::create,
 		GA_FAMILY_NONE, ( std::string( CortexPrimitive::typeName ) + "s" ).c_str()
 	);
-	
+
 	if ( !primDef )
 	{
 		std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
@@ -230,7 +230,7 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 	primDef->setMergeConstructor( CortexPrimitive::create );
 #endif
 	primDef->setHasLocalTransform( true );
-	
+
 	/// \todo: This method is silly. Should we just give up and do the whole registration in CortexPrimitive?
 	CortexPrimitive::setTypeDef( primDef );
 
@@ -250,7 +250,7 @@ void newGeometryPrim( GA_PrimitiveFactory *factory )
 void newGeometryIO( void * )
 {
 	GU_Detail::registerIOTranslator( new GEO_CobIOTranslator() );
-	
+
 	UT_ExtensionList *geoextension = UTgetGeoExtensions();
 	if ( !geoextension->findExtension( "cob" ) )
 	{

@@ -70,7 +70,7 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		a = i["A"]
 		for i in range( a.size() ) :
 			self.assertEqual( a[i], 0 )
-			
+
 	def testVisualisation( self ) :
 
 		r = IECoreGL.Renderer()
@@ -100,14 +100,14 @@ class CoordinateSystemTest( unittest.TestCase ) :
 		self.failUnless( a[127] > 0 )
 		self.assertEqual( a[200*127 + 127], 0 )
 		self.assertEqual( a[120*127 + 127], 0 )
-			
+
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

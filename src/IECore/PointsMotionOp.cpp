@@ -143,7 +143,7 @@ struct PointsMotionOp::PrimVarBuilder
 {
 	typedef DataPtr ReturnType;
 
-	template< typename T > 
+	template< typename T >
 	struct CompatibleTypedData : boost::mpl::or_< IECore::TypeTraits::IsNumericVectorTypedData<T>, IECore::TypeTraits::IsVecVectorTypedData<T>, IECore::TypeTraits::IsColor< typename IECore::TypeTraits::VectorValueType<T>::type > > {};
 
 	const std::string &m_primVarName;
@@ -153,7 +153,7 @@ struct PointsMotionOp::PrimVarBuilder
 	const PointsMotionOp::IdMap &m_map;
 	const std::vector<ObjectPtr> &m_objectVector;
 
-	PrimVarBuilder( const std::string &primVarName, bool masked, int snapshot, ConstIntVectorDataPtr ids, PointsMotionOp::IdMap &map, const std::vector<ObjectPtr> &objectVector ) : 
+	PrimVarBuilder( const std::string &primVarName, bool masked, int snapshot, ConstIntVectorDataPtr ids, PointsMotionOp::IdMap &map, const std::vector<ObjectPtr> &objectVector ) :
 					m_primVarName(primVarName), m_masked(masked), m_snapshot(snapshot), m_ids(ids), m_map(map), m_objectVector(objectVector)
 	{
 	}
@@ -184,7 +184,7 @@ struct PointsMotionOp::PrimVarBuilder
 				assert( primVarData );
 				snapshots.push_back( &primVarData->readable() );
 			}
-			
+
 			// Now process missing values by setting them to the "closest" known value
 			// For each id on the map:
 			for ( IdMap::const_iterator mapIt = m_map.begin(); mapIt != m_map.end(); mapIt++ )
@@ -250,7 +250,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Invalid primvars in given PointsPrimitive object." );
 		}
-	
+
 		ConstIntVectorDataPtr ids = points->variableData< IntVectorData >( idPrimVarName );
 		if ( !ids )
 		{
@@ -328,8 +328,8 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 				ConstIntVectorDataPtr ids = points->variableData< IntVectorData >( idPrimVarName );
 				bool masked = ( maskedPrimvarsSet.find( pIt->first ) != maskedPrimvarsSet.end() );
 				PrimVarBuilder primVarBuilder( pIt->first, masked, snapshot, ids, idMap, objectVector );
-				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation, 
-						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data.get(), primVarBuilder ) 
+				primitive->variables[ pIt->first ] = PrimitiveVariable( pIt->second.interpolation,
+						IECore::despatchTypedData< PrimVarBuilder, PrimVarBuilder::CompatibleTypedData >( pIt->second.data.get(), primVarBuilder )
 				);
 			}
 		}

@@ -52,27 +52,27 @@ class SOP_CortexConverter : public SOP_Node
 		static OP_Node *create( OP_Network *net, const char *name, OP_Operator *op );
 
 		static const char *typeName;
-		
+
 		static PRM_Template parameters[];
 		static CH_LocalVariable variables[];
-		
+
 		enum ResultType
 		{
 			Cortex = 0,
 			Houdini
 		};
-		
+
 		static PRM_Name pNameFilter;
 		static PRM_Name pAttributeFilter;
 		static PRM_Name pResultType;
 		static PRM_Name pConvertStandardAttributes;
-		
+
 		static PRM_Default convertStandardAttributesDefault;
 		static PRM_Default filterDefault;
 		static PRM_Default resultTypeDefault;
-		
+
 		static PRM_ChoiceList resultTypeList;
-		
+
 		virtual void getNodeSpecificInfoText( OP_Context &context, OP_NodeInfoParms &parms );
 
 	protected :
@@ -81,9 +81,9 @@ class SOP_CortexConverter : public SOP_Node
 		virtual ~SOP_CortexConverter();
 
 		virtual OP_ERROR cookMySop( OP_Context &context );
-	
+
 	private :
-		
+
 		void doConvert( const GU_DetailHandle &handle, const std::string &name, ResultType type, const std::string &attributeFilter, bool convertStandardAttributes );
 		void doPassThrough( const GU_DetailHandle &handle, const std::string &name );
 

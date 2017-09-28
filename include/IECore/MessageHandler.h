@@ -98,7 +98,7 @@ class IECORE_API MessageHandler : public RefCounted
 		static void setDefaultHandler( const MessageHandlerPtr &handler );
 		static MessageHandler *getDefaultHandler();
 		//@}
-		
+
 		/// Each thread has its own stack of message handlers which
 		/// may be pushed and popped to provide message handling specific
 		/// to particular contexts. The Scope class is used to install
@@ -108,9 +108,9 @@ class IECORE_API MessageHandler : public RefCounted
 		/// installing and uninstalling MessageHandlers.
 		class IECORE_API Scope : boost::noncopyable
 		{
-		
+
 			public :
-				
+
 				/// Pushes the specified handler, making it
 				/// the currentHandler() for this thread. It is
 				/// the caller's responsibility to keep the handler
@@ -119,13 +119,13 @@ class IECORE_API MessageHandler : public RefCounted
 				/// Pops the handler pushed in the constructor,
 				/// reverting to the previous handler.
 				~Scope();
-			
+
 			private :
-				
+
 				MessageHandler *m_handler;
-		
+
 		};
-		
+
 		/// Returns the current handler for this thread, reverting
 		/// to the result of getDefaultHandler() if no thread-local
 		/// handler has been installed.

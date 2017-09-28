@@ -75,7 +75,7 @@ IECore::ObjectPtr FromMayaLocatorConverter::doConversion( const MDagPath &dagPat
 	{
 		throw Exception( "Not a locator!" );
 	}
-	
+
 	MFnDagNode fnLocator( locatorObj );
 
 	CoordinateSystemPtr result = new CoordinateSystem;

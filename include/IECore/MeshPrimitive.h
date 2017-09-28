@@ -96,7 +96,7 @@ class IECORE_API MeshPrimitive : public Primitive
 		static MeshPrimitivePtr createPlane( const Imath::Box2f &b, const Imath::V2i &divisions = Imath::V2i( 1 ) );
 		/// Creates a sphere
 		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ) );
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	private:
@@ -107,7 +107,7 @@ class IECORE_API MeshPrimitive : public Primitive
 		IntVectorDataPtr m_vertexIds;
 		size_t m_numVertices;
 		std::string m_interpolation;
-		
+
 		void computeMinMaxVertsPerFace() const;
 		mutable int m_minVerticesPerFace;
 		mutable int m_maxVerticesPerFace;

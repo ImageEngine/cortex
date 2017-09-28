@@ -110,23 +110,23 @@ class IECORERI_API SXRendererImplementation : public IECore::Renderer
 		virtual void instance( const std::string &name );
 
 		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
-		
+
 		virtual void editBegin( const std::string &editType, const IECore::CompoundDataMap &parameters );
 		virtual void editEnd();
-		
+
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points ) const;
 		IECore::CompoundDataPtr shade( const IECore::CompoundData *points, const Imath::V2i &gridSize ) const;
 		IECore::CompoundDataPtr shadePlane( const Imath::V2i &resolution ) const;
 		IECoreImage::ImagePrimitivePtr shadePlaneToImage( const Imath::V2i &resolution ) const;
-	
+
 	private :
-	
+
 		SxShader createShader( const char *name, const char *handle, const IECore::CompoundDataMap &parameters ) const;
-		
+
 		SXRenderer *m_parent;
-		
+
 		typedef boost::shared_ptr<void> SxContextPtr;
-		
+
 		struct State
 		{
 			State();
@@ -140,11 +140,11 @@ class IECORERI_API SXRendererImplementation : public IECore::Renderer
 			SxShader imagerShader;
 			SXExecutor::ShaderVector coshaders;
 			SXExecutor::ShaderVector lights;
-			
+
 			Imath::M44f transform;
 		};
 		typedef std::stack<State> StateStack;
-		
+
 		bool m_inWorld;
 		StateStack m_stateStack;
 

@@ -50,28 +50,28 @@ import maya.cmds
 __all__ = [ 'manipulateParameter' ]
 
 def __manupulateMenuModifier( menuDefinition, parameter, node, parent=None ) :
-		
+
 	with IECore.IgnoredExceptions( KeyError ) :
 		if not parameter.userData()['UI']['disableManip'].value :
 			return
-			
+
 	typeHint = ""
 	with IECore.IgnoredExceptions( KeyError ) :
 		typeHint = parameter.userData()['UI']['manipTypeHint'].value
-	
+
 	parameterManip = "ie%s%sManipulator" % ( typeHint, parameter.staticTypeName() )
-		
+
 	if parameterManip not in maya.cmds.listNodeTypes( 'ieParameterManipulator' ) :
 		return
 
 	if len( menuDefinition.items() ):
 		menuDefinition.append( "/ManipulateDivider", { "divider" : True } )
-	
-	menuDefinition.append( 
+
+	menuDefinition.append(
 		"/Manipulate...",
 		{
-			"command" : IECore.curry( manipulateParameter, node, parameter ),		
-		}	
+			"command" : IECore.curry( manipulateParameter, node, parameter ),
+		}
 	)
 
 IECoreMaya.ParameterUI.registerPopupMenuCallback( __manupulateMenuModifier )
@@ -81,8 +81,8 @@ IECoreMaya.ParameterUI.registerPopupMenuCallback( __manupulateMenuModifier )
 ## \param parameter IECore.Parameter the parameter to manipulate
 ## \param contextName An optional context to use, if multiple manipulators
 ## need controlling simultaneously.
-## If there is no manipulator registered for the specified parameter, 
-## the tool will be activated but no manipulator will show. 
+## If there is no manipulator registered for the specified parameter,
+## the tool will be activated but no manipulator will show.
 def manipulateParameter( node, parameter, contextName="ieParameterManipulatorContext" ) :
 
 	fnPH = IECoreMaya.FnParameterisedHolder( node )
@@ -90,13 +90,13 @@ def manipulateParameter( node, parameter, contextName="ieParameterManipulatorCon
 
 	if not maya.cmds.contextInfo( contextName, exists=True ) :
 		maya.cmds.ieParameterisedHolderManipContext( contextName )
-		
-	maya.cmds.ieParameterisedHolderManipContext( 
-		contextName, 
-		edit=True, 
-		mode="targeted", 
+
+	maya.cmds.ieParameterisedHolderManipContext(
+		contextName,
+		edit=True,
+		mode="targeted",
 		targetPlug=plugPath.split(".")[-1]
 	)
-	
+
 	maya.cmds.setToolTo( contextName )
-	
+

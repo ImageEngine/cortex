@@ -146,12 +146,12 @@ struct IndexedIOHelper
 		p->entryIds(l, type);
 		return IndexedIOHelper::entryIDsToList( l );
 	}
-	
+
 	static std::string currentEntryId( IndexedIOPtr p )
 	{
 		return p->currentEntryId().value();
 	}
-	
+
 	static list path(IndexedIOPtr p)
 	{
 		assert(p);
@@ -245,7 +245,7 @@ struct IndexedIOHelper
 			case IndexedIO::UInt64:
 				return object( readSingle<uint64_t>(p, name, entry) );
 			case IndexedIO::UInt64Array:
-				return object( readArray<uint64_t>(p, name, entry) );		
+				return object( readArray<uint64_t>(p, name, entry) );
 			case IndexedIO::InternedStringArray:
 				return object( readArray<InternedString>(p, name, entry) );
 			default:
@@ -294,12 +294,12 @@ void bindIndexedIOBase()
 #endif
 
 	// make the indexed io class first
-	IECorePython::RunTimeTypedClass<IndexedIO> indexedIOClass;	
+	IECorePython::RunTimeTypedClass<IndexedIO> indexedIOClass;
 	{
 		// then define all the nested types
-		
+
 		scope s( indexedIOClass );
-		
+
 		enum_< IndexedIO::OpenModeFlags>("OpenMode")
 			.value("Read", IndexedIO::Read)
 			.value("Write", IndexedIO::Write)
@@ -346,14 +346,14 @@ void bindIndexedIOBase()
 			.value("InternedStringArray", IndexedIO::InternedStringArray)
 			.export_values()
 		;
-	
+
 		enum_< IndexedIO::MissingBehaviour > ("MissingBehaviour")
 			.value("ThrowIfMissing", IndexedIO::ThrowIfMissing)
 			.value("NullIfMissing", IndexedIO::NullIfMissing)
 			.value("CreateIfMissing", IndexedIO::CreateIfMissing)
 			.export_values()
 		;
-		
+
 		class_< IndexedIO::Entry>( "Entry", no_init)
 			.def( init<const IndexedIO::EntryID &, IndexedIO::EntryType, IndexedIO::DataType, unsigned long>() )
 			.def("id", &IndexedIO::Entry::id, return_value_policy<copy_const_reference>())
@@ -361,13 +361,13 @@ void bindIndexedIOBase()
 			.def("dataType", &IndexedIO::Entry::dataType)
 			.def("arrayLength", &IndexedIO::Entry::arrayLength)
 		;
-	
+
 	}
 
 	// now we've defined the nested types, we're able to define the methods for
-	// the IndexedIO class itself (we need the definitions for the nested types 
+	// the IndexedIO class itself (we need the definitions for the nested types
 	// to exist for defining default values).
-	
+
 	indexedIOClass.def("openMode", &IndexedIO::openMode)
 		.def("parentDirectory", nonConstParentDirectory)
 		.def("directory",  &IndexedIOHelper::directory, ( arg( "path" ), arg( "missingBehaviour" ) = IndexedIO::ThrowIfMissing ) )

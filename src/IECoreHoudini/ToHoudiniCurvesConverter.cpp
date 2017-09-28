@@ -63,36 +63,36 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 	{
 		return false;
 	}
-	
+
 	bool periodic = curves->periodic();
 	bool duplicatedEnds = !periodic && ( curves->basis() == CubicBasisf::bSpline() );
-	
+
 	size_t numPoints = curves->variableSize( PrimitiveVariable::Vertex );
 	if ( duplicatedEnds )
 	{
 		numPoints -= 4 * curves->numCurves();
 	}
-	
+
 	GA_Range newPoints = appendPoints( geo, numPoints );
 	if ( !newPoints.isValid() || newPoints.empty() )
 	{
 		return false;
 	}
-	
+
 	GA_OffsetList pointOffsets;
 	pointOffsets.reserve( newPoints.getEntries() );
 	for ( GA_Iterator it=newPoints.begin(); !it.atEnd(); ++it )
 	{
 		pointOffsets.append( it.getOffset() );
 	}
-	
+
 	const std::vector<int> &verticesPerCurve = curves->verticesPerCurve()->readable();
 	int order = ( curves->basis() == CubicBasisf::bSpline() ) ? 4 : 2;
 	bool interpEnds = !(periodic && ( curves->basis() == CubicBasisf::bSpline() ));
-	
+
 	GA_OffsetList offsets;
 	offsets.reserve( verticesPerCurve.size() );
-	
+
 	size_t vertCount = 0;
 	size_t numPrims = geo->getNumPrimitives();
 	for ( size_t c=0; c < verticesPerCurve.size(); c++ )
@@ -103,20 +103,20 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 		{
 			return false;
 		}
-		
+
 		offsets.append( geo->primitiveOffset( numPrims + c ) );
-		
+
 		for ( size_t v=0; v < numVerts; v++ )
 		{
 			curve->setVertexPoint( v, pointOffsets.get( vertCount + v ) );
 		}
-		
+
 		vertCount += numVerts;
 	}
-	
+
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
 	transferAttribs( geo, newPoints, newPrims );
-	
+
 	return true;
 }
 
@@ -127,7 +127,7 @@ PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECo
 	{
 		return primVar;
 	}
-	
+
 	// adjust for duplicated end points
 	bool duplicatedEnds = !curves->periodic() && ( curves->basis() == CubicBasisf::bSpline() );
 	if ( duplicatedEnds && primVar.interpolation == IECore::PrimitiveVariable::Vertex )
@@ -136,7 +136,7 @@ PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECo
 		DataPtr data = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( primVar.data.get(), func );
 		return PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
 	}
-	
+
 	return primVar;
 }
 
@@ -147,7 +147,7 @@ void ToHoudiniCurvesConverter::transferAttribs( GU_Detail *geo, const GA_Range &
 	{
 		transferAttribValues( primitive, geo, points, prims, PrimitiveVariable::Vertex );
 	}
-	
+
 	setName( geo, prims );
 }
 
@@ -167,7 +167,7 @@ ToHoudiniCurvesConverter::RemoveDuplicateEnds::ReturnType ToHoudiniCurvesConvert
 	typename T::Ptr result = new T();
 	std::vector<ValueType> &newValues = result->writable();
 	newValues.reserve( origValues.size() );
-	
+
 	size_t index = 0;
 	for ( size_t i=0; i < m_vertsPerCurve.size(); i++ )
 	{
@@ -179,6 +179,6 @@ ToHoudiniCurvesConverter::RemoveDuplicateEnds::ReturnType ToHoudiniCurvesConvert
 			}
 		}
 	}
-	
+
 	return result;
 }

@@ -101,10 +101,10 @@ static void *extractNodeFromHOM( PyObject *o )
 	{
 		return 0;
 	}
-	
+
 	/// \todo: here we 'assume' we have a HOM_Node object, when it really could be anything...
 	HOM_Node *homNode = static_cast<HOM_Node*>(((IECorePython::Detail::PySwigObject*)thisAttr)->ptr);
-	
+
 	return OPgetDirector()->findNode( homNode->path().c_str() );
 }
 
@@ -115,7 +115,7 @@ static void *extractNodeFromHOM( PyObject *o )
 // See GafferUI/GLWidget.py for an example of the hideous abuse this allows.
 static uint64_t sharedGLWidget()
 {
-	return (uint64_t)RE_Visual::getSharedGLWidget();	
+	return (uint64_t)RE_Visual::getSharedGLWidget();
 }
 
 #elif UT_MAJOR_VERSION_INT >= 14
@@ -180,11 +180,11 @@ BOOST_PYTHON_MODULE(_IECoreHoudini)
 	bindToHoudiniCortexObjectConverter();
 	bindFromHoudiniCompoundObjectConverter();
 	bindToHoudiniCompoundObjectConverter();
-	
+
 	// register our node converter functions
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<OP_Node>() );
 	boost::python::converter::registry::insert( &extractNodeFromHOM, boost::python::type_id<SOP_Node>() );
-	
+
 	IECorePython::PointerFromSWIG<HOM_Geometry>();
 
 #if UT_MAJOR_VERSION_INT >= 14

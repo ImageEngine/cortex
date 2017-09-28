@@ -46,23 +46,23 @@ namespace IECoreHoudini
 class ToHoudiniCompoundObjectConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 {
 	public :
-		
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ToHoudiniCompoundObjectConverter, ToHoudiniCompoundObjectConverterTypeId, IECoreHoudini::ToHoudiniGeometryConverter );
-		
+
 		ToHoudiniCompoundObjectConverter( const IECore::Object *object );
-		
+
 		virtual ~ToHoudiniCompoundObjectConverter();
-		
+
 		/// We don't actually transfer any attribs in this case, so overriding as a no-op
 		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
-	
+
 	protected :
-		
+
 		/// performs conversion from the IECore::CompoundObject into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
-	
+
 	private :
-		
+
 		static ToHoudiniGeometryConverter::Description<ToHoudiniCompoundObjectConverter> m_description;
 };
 

@@ -41,7 +41,7 @@
 #
 #=====
 
-from IECore import * 
+from IECore import *
 from random import *
 
 #generate a points primitive filling the bbox with npoints
@@ -58,7 +58,7 @@ def generatePoints( bbox, npoints ):
 #our primitive variable render procedural
 class primitiveVariables(ParameterisedProcedural) :
 
-        def __init__(self): 
+        def __init__(self):
                 ParameterisedProcedural.__init__( self, "Description here." )
                 bbox = Box3fParameter( "bbox", "Bounds for points.", Box3f(V3f(0), V3f(1)) )
                 npoints = IntParameter( "npoints", "Number of points.", 100, minValue=0, maxValue=10000 )
@@ -68,35 +68,35 @@ class primitiveVariables(ParameterisedProcedural) :
                 self.__npoints = None
                 self.__bbox = None
 
-        def generatePoints(self, args): 
+        def generatePoints(self, args):
                 if args['npoints'].value!=self.__npoints or args['bbox'].value!=self.__bbox:
                         self.__points = generatePoints( args['bbox'].value, args['npoints'].value )
                         self.__npoints = args['npoints'].value
                         self.__bbox = args['bbox'].value
                 return self.__points
 
-        def doBound(self, args): 
+        def doBound(self, args):
                 self.generatePoints(args)
                 return self.__points.bound()
 
         def doRenderState(self, renderer, args):
-                pass 
+                pass
 
-        def doRender(self, renderer, args): 
+        def doRender(self, renderer, args):
                 self.generatePoints(args)
                 self.__points['width'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, args['width'] )
 
-                # create an array of colours, one per point 
+                # create an array of colours, one per point
                 colours = []
                 for i in range( self.__points['P'].data.size() ):
                         colours.append( Color3f( random(), random(), random() ) )
                         print colours[-1]
                 colour_data = Color3fVectorData( colours )
 
-                # attach as a Cs primitive variable 
+                # attach as a Cs primitive variable
                 self.__points['Cs'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, colour_data )
 
-                # render 
+                # render
                 self.__points.render( renderer )
 
 #register

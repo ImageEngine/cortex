@@ -42,16 +42,16 @@ import IECoreMaya
 class ObjectDataTest( IECoreMaya.TestCase ) :
 
 	def setUp( self ) :
-	
+
 		IECoreMaya.TestCase.setUp( self )
-		
+
 		if not maya.cmds.pluginInfo( "ObjectDataTestNode.py", query=True, loaded=True ) :
 			maya.cmds.loadPlugin( "ObjectDataTestNode.py" )
 
 	def testReadWrite( self ) :
-	
+
 		node = maya.cmds.createNode( "ieObjectDataTestNode" )
-		
+
 		compoundData = IECore.CompoundData( {
 			"val1" : IECore.FloatData( 1 ),
 			"val2" : IECore.StringData( "val2Data" ),
@@ -59,46 +59,46 @@ class ObjectDataTest( IECoreMaya.TestCase ) :
 				"val3.val1" : IECore.IntData( 100 ),
 			},
 		} )
-		
+
 		IECoreMaya.ToMayaPlugConverter.create( compoundData ).convert( node + ".objectData" )
 		plugValue = IECoreMaya.FromMayaPlugConverter.create( node + ".objectData" ).convert()
 		self.assertEqual( plugValue, compoundData )
-		
+
 		# try saving and loading an ascii file
-		
+
 		maya.cmds.file( rename = os.getcwd() + "/test/IECoreMaya/objectDataTest.ma" )
 		sceneFileName = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		maya.cmds.file( new=True, force=True )
 		maya.cmds.file( sceneFileName, force=True, open=True )
-		
+
 		loadedCompoundData = IECoreMaya.FromMayaPlugConverter.create( node + ".objectData" ).convert()
 		self.assertEqual( loadedCompoundData, compoundData )
 
 		# try saving and loading a binary file
-	
+
 		maya.cmds.file( rename = os.getcwd() + "/test/IECoreMaya/objectDataTest.mb" )
 		sceneFileName = maya.cmds.file( force = True, type = "mayaBinary", save = True )
-		
+
 		maya.cmds.file( new=True, force=True )
 		maya.cmds.file( sceneFileName, force=True, open=True )
 
 		loadedCompoundData = IECoreMaya.FromMayaPlugConverter.create( node + ".objectData" ).convert()
 		self.assertEqual( loadedCompoundData, compoundData )
-		
+
 	def tearDown( self ) :
-	
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.flushUndo()
 		maya.cmds.unloadPlugin( "ObjectDataTestNode.py" )
-				
+
 		for f in [
 			"./test/IECoreMaya/objectDataTest.ma",
 			"./test/IECoreMaya/objectDataTest.mb",
 		] :
-		
+
 			if os.path.exists( f ) :
 				os.remove( f )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

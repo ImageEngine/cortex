@@ -2,7 +2,7 @@
 //
 //  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -86,10 +86,10 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		const std::string &geometrySource() const;
 		const std::string &fragmentSource() const;
 		//@}
-		
+
 		struct IECOREGL_API Parameter
 		{
-			
+
 			/// Type as reported by glGetActiveUnifom() or
 			/// glGetActiveAttrib().
 			GLenum type;
@@ -104,11 +104,11 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 			/// This does not store an enum but instead an index
 			/// (so 0 represents GL_TEXTURE0).
 			GLuint textureUnit;
-			
+
 			bool operator == ( const Parameter &other ) const;
-			
+
 		};
-		
+
 		/// Fills the passed vector with the names of all uniform shader parameters.
 		/// Structures will use the struct.component convention used in GLSL.
 		/// Arrays will be returned as a single name, rather than the list array[0],
@@ -117,15 +117,15 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		/// Returns the details of the named uniform parameter, or 0 if no such
 		/// parameter exists. The return value directly references data held within
 		/// the Shader, and will die when the Shader dies.
-		const Parameter *uniformParameter( const std::string &name ) const; 
-				
+		const Parameter *uniformParameter( const std::string &name ) const;
+
 		/// Fills the passed vector with the names of all vertex shader parameters.
-		void vertexAttributeNames( std::vector<std::string> &names ) const;		
+		void vertexAttributeNames( std::vector<std::string> &names ) const;
 		/// Returns the details of the named vertex attribute, or 0 if no such
 		/// parameter exists. The return value directly references data held within
 		/// the Shader, and will die when the Shader dies.
-		const Parameter *vertexAttribute( const std::string &name ) const; 
-		
+		const Parameter *vertexAttribute( const std::string &name ) const;
+
 		//! @name Standard parameters
 		/// Cortex defines a set of standard shader parameters which
 		/// are used to pass state to the shaders. These functions
@@ -139,7 +139,7 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		/// constant colours to the shader.
 		const Parameter *csParameter() const;
 		//@}
-		
+
 		/// Shaders are only useful when associated with a set of values for
 		/// their uniform parameters and vertex attributes, and to render
 		/// different objects in different forms different sets of values
@@ -148,33 +148,33 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		/// Shader using them.
 		class IECOREGL_API Setup : public IECore::RefCounted
 		{
-		
+
 			public :
-		
+
 				IE_CORE_DECLAREMEMBERPTR( Setup )
-				
+
 				Setup( ConstShaderPtr shader );
 				virtual ~Setup();
-				
+
 				const Shader *shader() const;
-		
+
 				void addUniformParameter( const std::string &name, ConstTexturePtr value );
 				void addUniformParameter( const std::string &name, IECore::ConstDataPtr value );
 				/// Binds the specified value to the named vertex attribute. The divisor will be passed to
-				/// glVertexAttribDivisor(). 
+				/// glVertexAttribDivisor().
 				void addVertexAttribute( const std::string &name, IECore::ConstDataPtr value, GLuint divisor = 0 );
-				
+
 				/// Returns true if this setup specifies a value for the standard "Cs" parameter.
 				bool hasCsValue() const;
-					
+
 				/// The ScopedBinding class cleanly binds and unbinds the shader
 				/// Setup, making the shader current and setting the uniform
 				/// and vertex values as necessary.
 				class IECOREGL_API ScopedBinding
 				{
-				
+
 					public :
-					
+
 						/// Binds the setup. It is the responsibility of the
 						/// caller to ensure the setup remains alive for
 						/// the lifetime of the ScopedBinding. The setup will
@@ -183,24 +183,24 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 						ScopedBinding( const Setup &setup );
 						/// Unbinds the setup, reverting to the previous state.
 						~ScopedBinding();
-				
+
 					private :
-					
+
 						GLint m_previousProgram;
 						const Setup &m_setup;
-				
+
 				};
-		
+
 			private :
-		
+
 				IE_CORE_FORWARDDECLARE( MemberData );
-				
+
 				MemberDataPtr m_memberData;
-					
+
 		};
-		
+
 		IE_CORE_DECLAREPTR( Setup );
-		
+
 		//! @name Common shader sources.
 		/// These functions return some common shader sources which
 		/// may be useful in many situations.
@@ -223,7 +223,7 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		/// This passes fragmentP and fragmentN to ieDiffuse.
 		static const std::string &lambertFragmentSource();
 		//@}
-		
+
 		//! @name Built in shaders
 		/// These functions provide access to static instances of
 		/// various simple but useful shaders.

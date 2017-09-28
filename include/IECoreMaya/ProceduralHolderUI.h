@@ -88,7 +88,7 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
-		
+
 		struct LightingState {
 			unsigned int numMayaLights;
 			unsigned int numGlLights;
@@ -96,10 +96,10 @@ class ProceduralHolderUI : public MPxSurfaceShapeUI
 			std::vector<Imath::Color4f> specs;
 			std::vector<Imath::Color4f> ambients;
 		};
-		
+
 		bool cleanupLights( const MDrawRequest &request, M3dView &view, LightingState *s ) const;
-		void restoreLights( LightingState *s ) const;	
-		
+		void restoreLights( LightingState *s ) const;
+
 };
 
 } // namespace IECoreMaya

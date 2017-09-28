@@ -50,7 +50,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 
 		t = IECoreGL.ToGLTextureConverter( i ).convert()
 		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
-		
+
 		ii = t.imagePrimitive()
 
 		res = IECoreImage.ImageDiffOp()(
@@ -59,12 +59,12 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 			maxError = 0.01,
 			skipMissingChannels = False
 		)
-		
+
 		self.failIf( res.value )
-	
+
 	def testFromCompoundData( self ) :
 		""" Test conversion from a CompoundData representation of an ImagePrimitive """
-		
+
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		cd = IECore.CompoundData()
@@ -79,7 +79,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 
 		t = IECoreGL.ToGLTextureConverter( cd ).convert()
 		self.failIf( not t.isInstanceOf( IECoreGL.Texture.staticTypeId() ) )
-		
+
 		ii = t.imagePrimitive()
 
 		res = IECoreImage.ImageDiffOp()(
@@ -93,7 +93,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 
 	def testMissingChannelCreation( self ) :
 		""" Test the creation of missing channels """
-		
+
 		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/images/colorBarsWithAlphaF512x512.exr" ).read()
 
 		cd = IECore.CompoundData()
@@ -105,7 +105,7 @@ class TestToGLTexureConverter( unittest.TestCase ) :
 
 		cd["channels"] = cnd
 
-		# We are missing a channel and so an exception should be thrown if we try to convert it with the default arguments.	
+		# We are missing a channel and so an exception should be thrown if we try to convert it with the default arguments.
 		self.assertRaises( RuntimeError, IECoreGL.ToGLTextureConverter( cd ).convert )
 
 		t = IECoreGL.ToGLTextureConverter( cd, True ).convert()

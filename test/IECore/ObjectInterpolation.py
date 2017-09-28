@@ -136,21 +136,21 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		obj4 = Camera()
 		self.assertEqual( linearObjectInterpolation( obj1, obj2, 0.5), None )
 		self.assertEqual( cubicObjectInterpolation( obj1, obj2, obj3, obj4, 0.5), None )
-		
+
 	def testPrimitiveInterpolation( self ) :
-	
+
 		m1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m2 = TransformOp()( input=m1, matrix = M44fData( M44f.createScaled( V3f( 2 ) ) ) )
-		
+
 		m3 = linearObjectInterpolation( m1, m2, 0.5 )
 		self.assertEqual( m3, TransformOp()( input=m1, matrix = M44fData( M44f.createScaled( V3f( 1.5 ) ) ) ) )
 
 	def testPrimitiveInterpolationMaintainsUninterpolableValuesFromFirstPrimitive( self ) :
-	
+
 		m1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m1["c"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringData( "hi" ) )
 		m2 = m1.copy()
-		
+
 		m3 = linearObjectInterpolation( m1, m2, 0.5 )
 		self.assertEqual( m3["c"], PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringData( "hi" ) ) )
 
@@ -160,35 +160,35 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		self.assertEqual( m3["c"], PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringData( "hi" ) ) )
 
 	def testPrimitiveInterpolationMaintainsValuesMissingFromSecondPrimitive( self ) :
-	
+
 		m1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m2 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
-		
+
 		m1["v"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) )
-		
-		m3 = linearObjectInterpolation( m1, m2, 0.5 )		
+
+		m3 = linearObjectInterpolation( m1, m2, 0.5 )
 		self.assertEqual( m3["v"], PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 1, 2, 3, 4 ] ) ) )
-		
+
 	def testPrimitiveInterpolationWithBlindData( self ) :
-	
+
 		m1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m2 = m1.copy()
-		
+
 		m1.blindData()["a"] = FloatData( 10 )
 		m2.blindData()["a"] = FloatData( 20 )
-		
+
 		m3 = linearObjectInterpolation( m1, m2, 0.5 )
 		self.assertEqual( m3.blindData()["a"], FloatData( 15 ) )
-		
+
 	def testPrimitiveInterpolationWithBlindDataMaintainsValuesMissingFromSecondPrimitive( self ) :
-	
+
 		m1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
 		m2 = m1.copy()
-		
+
 		m1.blindData()["a"] = FloatData( 10 )
-		
+
 		m3 = linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3.blindData()["a"], FloatData( 10 ) )	
+		self.assertEqual( m3.blindData()["a"], FloatData( 10 ) )
 
 if __name__ == "__main__":
     unittest.main()

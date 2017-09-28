@@ -58,13 +58,13 @@ const GU_DetailHandle DetailSplitter::split( const std::string &value )
 	{
 		return GU_DetailHandle();
 	}
-	
+
 	Cache::const_iterator it = m_cache.find( value );
 	if ( it != m_cache.end() )
 	{
 		return it->second;
 	}
-	
+
 	return GU_DetailHandle();
 }
 
@@ -76,59 +76,59 @@ bool DetailSplitter::validate()
 	{
 		return false;
 	}
-	
+
 	if ( geo->getMetaCacheCount() == m_lastMetaCount )
 	{
 		return true;
 	}
-	
+
 	m_cache.clear();
 	m_lastMetaCount = geo->getMetaCacheCount();
-	
+
 	GA_ROAttributeRef attrRef = geo->findStringTuple( GA_ATTRIB_PRIMITIVE, m_key.c_str() );
 	if ( !attrRef.isValid() )
 	{
 		m_cache[""] = m_handle;
 		return true;
 	}
-	
+
 	const GA_Attribute *attr = attrRef.getAttribute();
 	const GA_AIFSharedStringTuple *tuple = attr->getAIFSharedStringTuple();
-	
+
 	std::map<GA_StringIndexType, GA_OffsetList> offsets;
 	GA_Range primRange = geo->getPrimitiveRange();
 	for ( GA_Iterator it = primRange.begin(); !it.atEnd(); ++it )
 	{
 		GA_StringIndexType currentHandle = tuple->getHandle( attr, it.getOffset() );
-		
+
 		std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.find( currentHandle );
 		if ( oIt == offsets.end() )
 		{
 			oIt = offsets.insert( std::pair<GA_StringIndexType, GA_OffsetList>( currentHandle, GA_OffsetList() ) ).first;
 		}
-		
+
 		oIt->second.append( it.getOffset() );
 	}
-	
+
 	for ( std::map<GA_StringIndexType, GA_OffsetList>::iterator oIt = offsets.begin(); oIt != offsets.end(); ++oIt )
 	{
 		GU_Detail *newGeo = new GU_Detail();
 		GA_Range matchPrims( geo->getPrimitiveMap(), oIt->second );
 		newGeo->mergePrimitives( *geo, matchPrims );
 		newGeo->incrementMetaCacheCount();
-		
+
 		GU_DetailHandle handle;
 		handle.allocateAndSet( newGeo, true );
-		
+
 		std::string current = "";
 		if ( const char *value = tuple->getTableString( attr, oIt->first ) )
 		{
 			current = value;
 		}
-		
+
 		m_cache[current] = handle;
 	}
-	
+
 	return !m_cache.empty();
 }
 
@@ -139,10 +139,10 @@ void DetailSplitter::values( std::vector<std::string> &result )
 	{
 		return;
 	}
-	
+
 	result.clear();
 	result.reserve( m_cache.size() );
-	
+
 	for ( Cache::iterator it = m_cache.begin(); it != m_cache.end(); ++it )
 	{
 		result.push_back( it->first );

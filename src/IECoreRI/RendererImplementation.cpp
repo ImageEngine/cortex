@@ -98,19 +98,19 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 	}
 	else
 	{
-#ifdef PRMANEXPORT	
+#ifdef PRMANEXPORT
 		RiBegin( "launch:prman? -t" );
 #else
 		RiBegin( 0 );
-#endif		
+#endif
 	}
 	m_context = RiGetContext();
-	
+
 	// Add a correspondance between the current context and this object's SharedData instance,
 	// in case RendererImplementation() gets called later on with no arguments. This creates a
 	// RendererImplementation in the current context, which must have access to this object's
 	// SharedData instance.
-	
+
 	m_contextToSharedDataMapKey = m_context;
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
@@ -127,7 +127,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 	// in case RendererImplementation() gets called later on with no arguments. This creates a
 	// RendererImplementation in the current context, which must have access to this object's
 	// SharedData instance.
-	
+
 	m_contextToSharedDataMapKey = RiGetContext();
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 	s_contextToSharedDataMap.insert( std::make_pair( m_contextToSharedDataMapKey, m_sharedData ) );
@@ -135,7 +135,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 	constructCommon();
 }
 
-// This constructor creates a RendererImplementation using the current RtContext. The SharedData is acquired by 
+// This constructor creates a RendererImplementation using the current RtContext. The SharedData is acquired by
 // querying m_contextToSharedDataMap in one of two ways:
 //
 // 1)	If there's an entry for the current RtContext, this means the user's manually called Renderer() with no arguments
@@ -243,7 +243,7 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 			RiContext( c );
 		}
 	}
-	
+
 	// A null m_contextToSharedDataMapKey means this was launched straight from a rib. In this case we don't
 	// remove its entry from the map, as this could lead to the global shared data getting destroyed and recreated
 	// multiple times.
@@ -285,7 +285,7 @@ void IECoreRI::RendererImplementation::setOption( const std::string &name, IECor
 		}
 		return;
 	}
-	
+
 	// we need to group related options together into a single RiOption or RiHider call, so we
 	// just accumulate the options until worldBegin() where we'll emit them.
 	m_options->writable()[name] = value->copy();
@@ -317,11 +317,11 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::str
 	}
 	else if( name.compare( 0, 5, "user:" )==0 )
 	{
-#ifdef PRMANEXPORT	
+#ifdef PRMANEXPORT
 		return getRxOption( name.c_str() + 5 );
-#else		
-		return getRxOption( name.c_str() );		
-#endif		
+#else
+		return getRxOption( name.c_str() );
+#endif
 	}
 	else if( name.compare( 0, 3, "ri:" )==0 )
 	{
@@ -472,10 +472,10 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 
 	// then transform
 	outputPreWorldTransform( /* forCamera = */ true );
-	
+
 	// then camera itself
 	RiCamera( name.c_str(), RI_NULL );
-	
+
 	if( m_inEdit )
 	{
 		if( name == m_lastCamera )
@@ -498,16 +498,16 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 void IECoreRI::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
-	
+
 	std::string prefixedName = name;
 	if( m_numDisplays )
 	{
 		prefixedName = "+" + prefixedName;
 	}
-	
+
 	ParameterList pl( parameters );
 	RiDisplayV( (char *)prefixedName.c_str(), (char *)type.c_str(), (char *)data.c_str(), pl.n(), pl.tokens(), pl.values() );
-	
+
 	m_numDisplays++;
 }
 
@@ -532,11 +532,11 @@ void IECoreRI::RendererImplementation::worldBegin()
 	}
 
 	ScopedContext scopedContext( m_context );
-	
+
 	// we implement the "editable" option by specifying the raytrace hider with
 	// an "editable" parameter. preprocess our options to reflect that, warning
 	// the user if they were trying to use any hider other than the raytrace one.
-	
+
 	const BoolData *editableData = m_options->member<BoolData>( "editable" );
 	if( editableData && editableData->readable() )
 	{
@@ -549,23 +549,23 @@ void IECoreRI::RendererImplementation::worldBegin()
 		m_options->writable()["ri:hider:editable"] = new BoolData( true );
 		m_options->writable()["ri:hider:progressive"] = new BoolData( true );
 	}
-	
+
 	// output all our stored options
-	
+
 	std::set<std::string> categoriesDone;
 	for( CompoundDataMap::const_iterator it = m_options->readable().begin(), eIt = m_options->readable().end(); it != eIt; it++ )
 	{
 		const std::string &name = it->first.string();
 		bool processed = false;
-		
+
 		if( name.compare( 0, 8, "ri:hider" ) == 0 )
 		{
 			if( categoriesDone.find( "hider" ) == categoriesDone.end() )
-			{		
+			{
 				const StringData *hiderData = m_options->member<StringData>( "ri:hider" );
 				const string hider = hiderData ? hiderData->readable() : "hidden";
 				ParameterList pl( m_options->readable(), "ri:hider:" );
-				RiHiderV( (char *)hider.c_str(), pl.n(), pl.tokens(), pl.values() ); 
+				RiHiderV( (char *)hider.c_str(), pl.n(), pl.tokens(), pl.values() );
 				categoriesDone.insert( "hider" );
 			}
 			processed = true;
@@ -603,7 +603,7 @@ void IECoreRI::RendererImplementation::worldBegin()
 		{
 			processed = true;
 		}
-		
+
 		// we might have custom handlers in addition to the default
 		// handling above. invoke those.
 		SetOptionHandlerMap::iterator hIt = m_setOptionHandlers.find( name );
@@ -612,7 +612,7 @@ void IECoreRI::RendererImplementation::worldBegin()
 			(this->*(hIt->second))( name, it->second );
 			processed = true;
 		}
-		
+
 		if(
 			!processed &&
 			( name.find_first_of( ":" )==string::npos || name.compare( 0, 3, "ri:" ) == 0 ) &&
@@ -622,35 +622,35 @@ void IECoreRI::RendererImplementation::worldBegin()
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::setOption", format( "Unknown option \"%s\"." ) % name );
 		}
 	}
-	
+
 	// output a frame block if ri:frame has been specified
-	
+
 	if( const IntData *frame = m_options->member<IntData>( "ri:frame" ) )
 	{
 		RiFrameBegin( frame->readable() );
 	}
-	
+
 	// get the world fired up
-	
+
 	RiWorldBegin();
 	m_inWorld = true;
 }
 
 void IECoreRI::RendererImplementation::worldEnd()
-{	
+{
 	if( !m_inWorld )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::worldEnd", "Not in a world block." );
 		return;
 	}
-	
+
 	// we can't simply use ScopedContext here to manage our context
 	// as we do in the other methods, because 3delight versions >= 11.0.0
 	// actually change context in RiWorldEnd when rerendering. the old
 	// context disappears off onto some background thread which performs
 	// rerendering and we must now talk to a new context which is current
 	// when RiWorldEnd returns.
-	
+
 	// remember the previous context so we can restore it after doing
 	// the work we want in our context.
 	RtContextHandle previousContext = RiGetContext();
@@ -661,21 +661,21 @@ void IECoreRI::RendererImplementation::worldEnd()
 		// another thread.
 		previousContext = 0;
 	}
-	
+
 	RiContext( m_context );
 	RiWorldEnd();
 	m_inWorld = false;
-	
+
 	if( m_options->member<IntData>( "ri:frame" ) )
 	{
 		RiFrameEnd();
 	}
-	
+
 	// get our new context which we can emit edits on. we can no longer make
 	// calls to our original context, and we must call RiEnd() with the new one
 	// rather than the old.
 	m_context = RiGetContext();
-	
+
 	if( previousContext )
 	{
 		// restore whatever context was current when we entered this method
@@ -1005,7 +1005,7 @@ void IECoreRI::RendererImplementation::setDetailAttribute( const std::string &na
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailAttribute", format( "%s attribute expects a Box3fData value." ) % name );
 		return;
 	}
-	
+
 	RtBound bound;
 	convert( b->readable(), bound );
 	RiDetail( bound );
@@ -1019,14 +1019,14 @@ void IECoreRI::RendererImplementation::setDetailRangeAttribute( const std::strin
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailRangeAttribute", format( "%s attribute expects a FloatVectorData value." ) % name );
 		return;
 	}
-	
+
 	const vector<float> &values = f->readable();
 	if( values.size()!=4 )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setDetailRangeAttribute", format( "Value must contain 4 elements (found %d)." ) %  values.size() );
 		return;
 	}
-	
+
 	RiDetailRange( values[0], values[1], values[2], values[3] );
 }
 
@@ -1038,14 +1038,14 @@ void IECoreRI::RendererImplementation::setTextureCoordinatesAttribute( const std
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "%s attribute expects a FloatVectorData value." ) % name );
 		return;
 	}
-	
+
 	const vector<float> &values = f->readable();
 	if( values.size()!=8 )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setTextureCoordinatesAttribute", format( "Value must contain 8 elements (found %d)." ) %  values.size() );
 		return;
 	}
-	
+
 	RiTextureCoordinates( values[0], values[1], values[2], values[3], values[4], values[5], values[6], values[7] );
 }
 
@@ -1057,7 +1057,7 @@ void IECoreRI::RendererImplementation::setAutomaticInstancingAttribute( const st
 		msg( Msg::Error, "IECoreRI::RendererImplementation::setAutomaticInstancingAttribute", format( "%s attribute expects a BoolData value." ) % name );
 		return;
 	}
-	
+
 	ParameterList pl( "cortexAutomaticInstancing", b );
 	RiAttributeV( "user", pl.n(), pl.tokens(), pl.values() );
 
@@ -1257,10 +1257,10 @@ void IECoreRI::RendererImplementation::outputPreWorldTransform( bool forCamera )
 		}
 		RiMotionBeginV( sampleTimes.size(), &sampleTimes.front() );
 	}
-	
+
 	for( size_t i = 0; i < numSamples; ++i )
 	{
-		M44f m = m_preWorldTransform.sample( i );	
+		M44f m = m_preWorldTransform.sample( i );
 		if( forCamera )
 		{
 			m.scale( V3f( 1.0f, 1.0f, -1.0f ) );
@@ -1277,7 +1277,7 @@ void IECoreRI::RendererImplementation::outputPreWorldTransform( bool forCamera )
 			RiConcatTransform( mm );
 		}
 	}
-	
+
 	if( numSamples > 1 )
 	{
 		RiMotionEnd();
@@ -1469,7 +1469,7 @@ void IECoreRI::RendererImplementation::motionBegin( const std::set<float> &times
 void IECoreRI::RendererImplementation::delayedMotionBegin( MotionType type )
 {
 	assert( type == Transform || type == Primitive );
-	
+
 	if( m_motionType == Pending )
 	{
 		if( m_inWorld )
@@ -1488,7 +1488,7 @@ void IECoreRI::RendererImplementation::delayedMotionBegin( MotionType type )
 void IECoreRI::RendererImplementation::motionEnd()
 {
 	ScopedContext scopedContext( m_context );
-	
+
 	if( m_motionType == Transform )
 	{
 		if( m_inWorld )
@@ -1509,7 +1509,7 @@ void IECoreRI::RendererImplementation::motionEnd()
 		}
 		else
 		{
-		
+
 			MurmurHash h;
 			for( std::vector<float>::const_iterator it = m_delayedMotionTimes.begin(); it!=m_delayedMotionTimes.end(); it++ )
 			{
@@ -1519,9 +1519,9 @@ void IECoreRI::RendererImplementation::motionEnd()
 			{
 				(*it)->hash( h );
 			}
-		
+
 			std::string instanceName = "cortexAutomaticInstance" + h.toString();
-			
+
 			SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex);
 
 			SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );
@@ -1534,7 +1534,7 @@ void IECoreRI::RendererImplementation::motionEnd()
 				instanceBegin( instanceName, CompoundDataMap() );
 					emitPrimitiveAttributes( m_motionPrimitives[0].get() );
 					RiMotionBeginV( m_delayedMotionTimes.size(), &*(m_delayedMotionTimes.begin() ) );
-						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )					
+						for( std::vector<IECore::ConstPrimitivePtr>::const_iterator it = m_motionPrimitives.begin(); it!=m_motionPrimitives.end(); it++ )
 						{
 							emitPrimitive( it->get() );
 						}
@@ -1558,7 +1558,7 @@ void IECoreRI::RendererImplementation::points( size_t numPoints, const IECore::P
 	PointsPrimitivePtr points = new PointsPrimitive( numPoints );
 	points->variables = primVars;
 	addPrimitive( points );
-	
+
 }
 
 void IECoreRI::RendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
@@ -1636,13 +1636,13 @@ void IECoreRI::RendererImplementation::mesh( IECore::ConstIntVectorDataPtr verts
 		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Trying to render a mesh without \"P\"" );
 		return;
 	}
-		
+
 	IECore::V3fVectorDataPtr pData = runTimeCast< IECore::V3fVectorData >( it->second.data );
 	if( !pData )
 	{
 		IECore::msg( IECore::Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mesh \"P\" variable has incorrect type" );
 	}
-		
+
 	mesh->setTopologyUnchecked( vertsPerFace, vertIds, pData->readable().size(), interpolation );
 	mesh->variables = primVars;
 
@@ -1666,7 +1666,7 @@ void IECoreRI::RendererImplementation::patchMesh( const CubicBasisf &uBasis, con
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::mesh", "Mismatched u/v basis.");
 		return;
 	}
-	
+
 	PatchMeshPrimitivePtr mesh = new PatchMeshPrimitive( nu, nv, uBasis, vBasis, uPeriodic, vPeriodic );
 	mesh->variables = primVars;
 	addPrimitive( mesh );
@@ -1694,12 +1694,12 @@ void IECoreRI::RendererImplementation::geometry( const std::string &type, const 
 void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr primitive )
 {
 	ScopedContext scopedContext( m_context );
-	
+
 	if( !automaticInstancingEnabled() )
 	{
 		if( m_motionType == None || m_motionType == Pending )
 		{
-			emitPrimitiveAttributes( primitive.get() );		
+			emitPrimitiveAttributes( primitive.get() );
 		}
 		delayedMotionBegin( Primitive );
 		emitPrimitive( primitive.get() );
@@ -1714,7 +1714,7 @@ void IECoreRI::RendererImplementation::addPrimitive( IECore::ConstPrimitivePtr p
 			std::string instanceName = "cortexAutomaticInstance" + h.toString();
 
 			SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
-			
+
 			SharedData::ObjectHandleMap::const_iterator it = m_sharedData->objectHandles.find( instanceName );
 			if( it != m_sharedData->objectHandles.end() )
 			{
@@ -1789,7 +1789,7 @@ void IECoreRI::RendererImplementation::emitPrimitive( const IECore::Primitive *p
 			break;
 		case SpherePrimitiveTypeId :
 			emitSpherePrimitive( static_cast<const SpherePrimitive *>( primitive ) );
-			break;	
+			break;
 		case NURBSPrimitiveTypeId :
 			emitNURBSPrimitive( static_cast<const NURBSPrimitive *>( primitive ) );
 			break;
@@ -1898,7 +1898,7 @@ void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrim
 		const int *nArgs = defaultNArgs;
 		const float *floats = 0;
 		const int *integers = 0;
-		
+
 		IECore::PrimitiveVariableMap::const_iterator tagIt = mesh->variables.find( "tags" );
 		if( tagIt != primitive->variables.end() )
 		{
@@ -1975,10 +1975,10 @@ void IECoreRI::RendererImplementation::emitSpherePrimitive( const IECore::Sphere
 void IECoreRI::RendererImplementation::emitNURBSPrimitive( const IECore::NURBSPrimitive *primitive )
 {
 	PrimitiveVariableList pv( primitive->variables, &( m_attributeStack.top().primVarTypeHints ) );
-	
+
 	const std::vector<float> &uKnot = primitive->uKnot()->readable();
 	const std::vector<float> &vKnot = primitive->vKnot()->readable();
-	
+
 	RiNuPatchV(
 		uKnot.size() - primitive->uOrder(), // nu
 		primitive->uOrder(),
@@ -2042,11 +2042,11 @@ void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
 	data->procedural = proc;
 	data->sharedData = m_sharedData;
 	data->options = m_options;
-	
+
 #ifdef IECORERI_WITH_PROCEDURALV
-	
+
 	IECore::MurmurHash h = proc->hash();
-	
+
 	if( h == IECore::MurmurHash() )
 	{
 		// empty hash => no procedural level instancing
@@ -2063,11 +2063,11 @@ void IECoreRI::RendererImplementation::standardProcedural( Procedural *proc )
 
 		RiProceduralV( data, riBound, procSubdivide, procFree, 1, tokens, values );
 	}
-	
+
 #else
 
 	RiProcedural( data, riBound, procSubdivide, procFree );
-	
+
 #endif
 
 }
@@ -2218,7 +2218,7 @@ void IECoreRI::RendererImplementation::instanceEnd()
 void IECoreRI::RendererImplementation::instance( const std::string &name )
 {
 	ScopedContext scopedContext( m_context );
-	
+
 	SharedData::ObjectHandlesMutex::scoped_lock objectHandlesLock( m_sharedData->objectHandlesMutex );
 	SharedData::ObjectHandleMap::const_iterator hIt = m_sharedData->objectHandles.find( name );
 	if( hIt==m_sharedData->objectHandles.end() )
@@ -2250,12 +2250,12 @@ IECore::DataPtr IECoreRI::RendererImplementation::clippingPlaneCommand( const st
 {
 	ScopedContext scopedContext( m_context );
 	RiTransformBegin();
-	
+
 		outputPreWorldTransform( /* forCamera = */ false );
 		RiClippingPlane( 0, 0, 0, 0, 0, 1 );
-	
+
 	RiTransformEnd();
-	return NULL;	
+	return NULL;
 }
 
 IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -2317,10 +2317,10 @@ IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const st
 void RendererImplementation::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
 	ScopedContext scopedContext( m_context );
-	
+
 	ParameterList p( parameters );
 	RiEditBeginV( name.c_str(), p.n(), p.tokens(), p.values() );
-	
+
 	m_inWorld = name != "option";
 	m_inEdit = true;
 }
@@ -2329,7 +2329,7 @@ void RendererImplementation::editEnd()
 {
 	ScopedContext scopedContext( m_context );
 	RiEditEnd();
-	
+
 	m_inWorld = false;
 	m_inEdit = false;
 }

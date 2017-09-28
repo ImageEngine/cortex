@@ -62,12 +62,12 @@ struct VectorPointEmitter
 		:	points( p )
 	{
 	}
-	
+
 	void operator() ( const Imath::V2f &pos )
 	{
 		points.push_back( pos );
 	}
-	
+
 	std::vector<Imath::V2f> &points;
 };
 

@@ -62,7 +62,7 @@ static void appendInt( MurmurHash &hash, int64_t v )
 	// \todo Consider removing this function in Cortex 8
 	if ( v == int64_t(int(v)) )
 	{
-		hash.append( int(v) ); 
+		hash.append( int(v) );
 	}
 	else
 	{

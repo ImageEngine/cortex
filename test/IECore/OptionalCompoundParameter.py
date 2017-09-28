@@ -167,22 +167,22 @@ class TestOptionalCompoundParameter( unittest.TestCase ) :
 		self.assert_( p["i"].getTypedValue() == 20 )
 		p["i"] = IntData(30)
 		self.assert_( p["i"].getTypedValue() == 30 )
-		
+
 	def testSetValueWithMissingData( self ) :
 
 		c = CompoundParameter()
-		
+
 		c1 = StringParameter( "child1", "child1", "child1" )
 		c.addParameter( c1 )
-		
+
 		preset = c.getValue()
-		
+
 		c2 = StringParameter( "child2", "child2", "child2" )
-		c2value = c2.getValue()		
+		c2value = c2.getValue()
 		c.addParameter( c2 )
-		
+
 		c.setValue( preset )
-			
+
 		self.assertEqual( c2value, c["child2"].getValue() )
 
 

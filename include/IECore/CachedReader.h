@@ -56,7 +56,7 @@ IE_CORE_FORWARDDECLARE( CachedReader );
 /// The CachedReader class provides a means of loading files
 /// using the Reader subclasses, but caching them in memory to
 /// allow fast repeated loads. It uses a ObjectPool to store the images.
-/// It's recomended using the defaultObjectPool for sharing objects, which 
+/// It's recomended using the defaultObjectPool for sharing objects, which
 /// limits the memory used by the IECORE_OBJECTPOOL_MEMORY
 /// environment variable.
 /// \todo We probably need a way of setting parameters for the
@@ -113,9 +113,9 @@ class IECORE_API CachedReader : public RefCounted
 		/// Returns a static CachedReader instance to be used by anything
 		/// wishing to share it's cache with others. It makes sense to use
 		/// this wherever possible to conserve memory. This initially
-		/// has searchPaths set from the IECORE_CACHEDREADER_PATHS 
-		/// environment variable. If it needs changing it's recommended to do 
-		/// that from a config file loaded by the ConfigLoader, to avoid multiple 
+		/// has searchPaths set from the IECORE_CACHEDREADER_PATHS
+		/// environment variable. If it needs changing it's recommended to do
+		/// that from a config file loaded by the ConfigLoader, to avoid multiple
 		/// clients fighting over the same set of settings.
 		static CachedReader *defaultCachedReader();
 

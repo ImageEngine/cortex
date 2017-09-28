@@ -41,7 +41,7 @@ import IECore
 class SWAReader( IECore.Reader ) :
 
 	def __init__( self, fileName=None ) :
-	
+
 		IECore.Reader.__init__(
 			self,
 			"Reads SpeedTree SWA files"
@@ -52,7 +52,7 @@ class SWAReader( IECore.Reader ) :
 
 	@staticmethod
 	def canRead( fileName ) :
-	
+
 		try :
 			f = open( fileName, "r" )
 			treeName = f.readline()
@@ -63,11 +63,11 @@ class SWAReader( IECore.Reader ) :
 			return True
 		except :
 			return False
-		
+
 	def doOperation( self, args ) :
-		
+
 		f = open( args["fileName"].value, "r" )
-		
+
 		p = IECore.V3fVectorData()
 		xAxis = IECore.V3fVectorData()
 		yAxis = IECore.V3fVectorData()
@@ -75,17 +75,17 @@ class SWAReader( IECore.Reader ) :
 		scale = IECore.FloatVectorData()
 		treeNameIndices = IECore.IntVectorData()
 		treeName = IECore.StringVectorData()
-		
+
 		currentTreeName = ""
 		currentTreeIndex = 0
 		expectedTreeCount = None
 		currentTreeCount = 0
 		for line in f.readlines() :
-		
+
 			line = line.strip()
 			if not line :
 				continue
-				
+
 			if not currentTreeName :
 				currentTreeName = line.strip( "\"\'" )
 				treeName.append( currentTreeName )
@@ -111,7 +111,7 @@ class SWAReader( IECore.Reader ) :
 					currentTreeIndex += 1
 
 		assert( currentTreeCount == expectedTreeCount )
-				
+
 		result = IECore.PointsPrimitive( len( p ) )
 		result["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
 		result["xAxis"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, xAxis )
@@ -120,11 +120,11 @@ class SWAReader( IECore.Reader ) :
 		result["scale"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, scale )
 		result["treeNameIndices"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, treeNameIndices )
 		result["treeName"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, treeName )
-		
+
 		result["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "gl:point" ) )
-		
+
 		return result
-		
+
 IECore.registerRunTimeTyped( SWAReader )
 IECore.Reader.registerReader( "swa", SWAReader.canRead, SWAReader, SWAReader.staticTypeId() )
 

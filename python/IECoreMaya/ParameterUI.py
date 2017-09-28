@@ -78,10 +78,10 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 	## Returns the Maya node associated with this UI in the form of an OpenMaya.MObject
 	def node( self ) :
-		
+
 		if not self.__node.isValid() :
 			raise RuntimeError, "IECoreMaya.ParameterUI.node(): The requested node is not valid"
-		
+
 		return self.__node.object()
 
 	## Returns an umambiguous full path for the Maya node associated with this UI.
@@ -125,7 +125,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 	## Computes a wrapped annotation/tooltip for the ui
 	def description( self ):
-		
+
 		extended = "%s\n\n%s" % ( self.plugName().split(".")[1], self.parameter.description )
 		return IECore.StringUtil.wrap( extended, 48 )
 
@@ -157,7 +157,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 				maya.cmds.deleteUI( m, menu=True )
 
 		IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI )
-		
+
 		if "button1" in kw and kw["button1"] :
 			IECoreMaya.Menu( definition = IECore.curry( self.__popupMenuDefinition, **kw ), parent = parentUI, button = 1 )
 
@@ -176,13 +176,13 @@ class ParameterUI( IECoreMaya.UIElement ) :
 				# make menu items for all presets and for the default value
 
 				for k in self.parameter.presetNames() :
-					definition.append( "/" + k, { "command" : IECore.curry( self.__selectValue, selection = k ) } )					
+					definition.append( "/" + k, { "command" : IECore.curry( self.__selectValue, selection = k ) } )
 
 				if len( self.parameter.presetNames() ) > 0 :
 					definition.append( "/PresetDivider", { "divider" : True } )
 
 				definition.append( "/Default", { "command" : IECore.curry( self.__selectValue, selection = self.parameter.defaultValue ) } )
-				
+
 				definition.append( "/ValueDivider", { "divider" : True } )
 
 			attrType = cmds.getAttr( kw["attributeName"], type=True )
@@ -190,7 +190,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 
 				if cmds.getAttr( kw['attributeName'], keyable=True) and settable :
 					definition.append( "/Set Key", { "command" : IECore.curry( self.__setKey, **kw ) } )
-					
+
 				expressions = cmds.listConnections(
 					kw['attributeName'],
 					d = False,
@@ -233,17 +233,17 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			connections = True,
 			skipConversionNodes = True
 		)
-		
+
 		definition.append( "/Connection Editor...", { "command" : IECore.curry( self.__connectionEditor ) } )
 
 		if connections :
-			
+
 			definition.append( "/Open AE...",
 				{ "command" : IECore.curry( self.__showEditor, attributeName = connections[1] ) }
-			)				
+			)
 
 			definition.append( "/Break Connection",
-				{ 
+				{
 					"command" : IECore.curry(
 						self.__disconnect,
 						source = connections[1],
@@ -252,18 +252,18 @@ class ParameterUI( IECoreMaya.UIElement ) :
 					)
 				}
 			)
-						
+
 			return True
 
 		else:
 
 			return False
-	
+
 	def __popupMenuDefinition( self, **kw ) :
-	
+
 		# call the protected function which can be overridden by
 		# derived classes. then let the callbacks do what they want.
-		definition = self._popupMenuDefinition( **kw )	
+		definition = self._popupMenuDefinition( **kw )
 		for cb in self.__popupMenuCallbacks :
 			cb( definition, self.parameter, self.node() )
 
@@ -293,7 +293,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 		maya.mel.eval( melCmd.encode('ascii') )
 
 	def __connectionEditor( self ) :
-	
+
 		maya.mel.eval(
 				str("ConnectionEditor;"+
 				"nodeOutliner -e -replace %(right)s connectWindow|tl|cwForm|connectWindowPane|rightSideCW;"+
@@ -302,7 +302,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 	def __disconnect( self, source = None, destination = None, refreshAE = None ) :
 
 		cmds.disconnectAttr( source, destination )
-		
+
 		if refreshAE :
 			maya.mel.eval( 'evalDeferred( "updateAE %s;")' % refreshAE )
 
@@ -372,7 +372,7 @@ class ParameterUI( IECoreMaya.UIElement ) :
 			if handlerType is not None :
 				break
 			typeId = IECore.RunTimeTyped.baseTypeId( typeId )
-				
+
 		if handlerType is None :
 			IECore.msg( IECore.Msg.Level.Warning, "ParameterUI.create", "No UI registered for parameters of type \"%s\"" % parameter.typeName() )
 			return None
@@ -394,6 +394,6 @@ class ParameterUI( IECoreMaya.UIElement ) :
 	# callback( menuDefinition, parameter, holderNode ).
 	@classmethod
 	def registerPopupMenuCallback( cls, callback ) :
-	
+
 		cls.__popupMenuCallbacks.append( callback )
- 		
+

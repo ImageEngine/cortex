@@ -54,19 +54,19 @@ class ToHoudiniGroupConverter : public IECoreHoudini::ToHoudiniGeometryConverter
 		ToHoudiniGroupConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniGroupConverter();
-		
+
 		IECore::M44fParameter *transformParameter();
 		const IECore::M44fParameter *transformParameter() const;
-	
+
 	protected :
-		
+
 		/// performs conversion from the IECore::Group into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 	private :
 
 		static ToHoudiniGeometryConverter::Description<ToHoudiniGroupConverter> m_description;
-		
+
 		IECore::M44fParameterPtr m_transformParameter;
 
 };

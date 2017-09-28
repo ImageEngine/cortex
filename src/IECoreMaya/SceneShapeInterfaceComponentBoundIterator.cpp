@@ -82,9 +82,9 @@ void SceneShapeInterfaceComponentBoundIterator::reset()
 MPoint SceneShapeInterfaceComponentBoundIterator::point() const
 {
 	MPoint ret;
-	
+
 	Imath::Box3d bbox = m_sceneShapeInterface->componentBound( index() );
-	
+
 	switch( m_idx % 8 )
 	{
 		case 0: ret = MPoint( bbox.min[0], bbox.min[1], bbox.min[2] ); break;
@@ -97,7 +97,7 @@ MPoint SceneShapeInterfaceComponentBoundIterator::point() const
 		case 7: ret = MPoint( bbox.max[0], bbox.max[1], bbox.max[2] ); break;
 		default: break;
 	}
-	
+
 	return ret;
 }
 

@@ -25,10 +25,10 @@ class multiTypeObject( Op ) :
 
 	def doOperation( self, args ) :
 		obj = args['input']
-		
+
 		if isinstance( obj, V3fVectorData ) :
 			return PointsPrimitive( obj )
-		
+
 		return obj
 
 registerRunTimeTyped( multiTypeObject )

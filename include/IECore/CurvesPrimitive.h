@@ -76,7 +76,7 @@ class IECORE_API CurvesPrimitive : public Primitive
 
 		/// Creates a wireframe box of the specified size.
 		static Ptr createBox( const Imath::Box3f &b );
-		
+
 		virtual void topologyHash( MurmurHash &h ) const;
 
 	protected :

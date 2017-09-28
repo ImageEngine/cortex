@@ -52,7 +52,7 @@ class TestTypedData( unittest.TestCase ) :
 		self.assertEqual( c["c"], IECore.StringData( "hello" ) )
 		self.assertEqual( c["d"], IECore.FloatData( 10.1 ) )
 		self.assertEqual( c["e"], IECore.V3fData( IECore.V3f( 1, 2, 3 ) ) )
-		
+
 	def testInterpretation( self ) :
 
 		self.assertNotEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point ))
@@ -60,19 +60,19 @@ class TestTypedData( unittest.TestCase ) :
 		self.assertEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ), IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Numeric ))
 
 	def testHash( self ) :
-	
+
 		# although the underlying data is identical, these objects
 		# must not hash equal because they have different types.
-	
+
 		self.assertNotEqual( IECore.V3fData( IECore.V3f( 1, 2, 3 ) ).hash(), IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) ).hash() )
 		self.assertNotEqual( IECore.IntVectorData( [ 0, 0, 0 ] ).hash(), IECore.UIntVectorData( [ 0, 0, 0 ] ).hash() )
-		
+
 		a = IECore.V3fData( IECore.V3f( 1, 2, 3 ), IECore.GeometricData.Interpretation.Point )
 		b = a.copy()
 		self.assertEqual( a.hash(), b.hash() )
 		b.setInterpretation( IECore.GeometricData.Interpretation.None )
 		self.assertNotEqual( a.hash(), b.hash() )
-		
+
 		a = IECore.V2dVectorData( [ IECore.V2d( 1, 2 ) ] )
 		b = a.copy()
 		self.assertEqual( a.hash(), b.hash() )

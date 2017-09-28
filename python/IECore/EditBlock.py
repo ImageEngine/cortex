@@ -39,7 +39,7 @@ class EditBlock :
 		self.__renderer = renderer
 		self.__editType = editType
 		self.__parameters = parameters
-		
+
 	def __enter__( self ) :
 
 		if self.__renderer is not None :

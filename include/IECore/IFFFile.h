@@ -56,12 +56,12 @@ class IECORE_API IFFFile : public RefCounted
 
 		IFFFile( const std::string &fileName );
 		virtual ~IFFFile();
-		
+
 		class Tag;
 		class Chunk;
-		
+
 		Chunk *root();
-		
+
 		/// A Tag is a 4 char sequence that identifies the type of Chunk at this point in the file
 		/// For efficient comparision Tags store the integer equivalent of the 4 char sequence as an id
 		/// Common tag ids may be predefined by the interface that recognizes them. Default tags are defined by GroupTagID
@@ -96,7 +96,7 @@ class IECORE_API IFFFile : public RefCounted
 				char m_d;
 				int m_id;
 		};
-		
+
 		/// A Chunk is the most basic structure in an IFF file.
 		/// It consists of a Tag, an integer representing it's data size, and dataSize number of bytes of arbitrary data.
 		/// If the Chunk is a group, it will have an additional Tag indicating the group name.
@@ -107,7 +107,7 @@ class IECORE_API IFFFile : public RefCounted
 			public :
 
 				friend class IFFFile;
-				
+
 				Tag type();
 				unsigned int dataSize();
 
@@ -134,10 +134,10 @@ class IECORE_API IFFFile : public RefCounted
 				size_t read( std::vector<Imath::Vec3<T> > &data );
 
 			private :
-				
+
 				Chunk( );
 				Chunk( std::string type, unsigned int dataSize, IFFFilePtr file, std::streampos filePosition, int alignmentQuota );
-				
+
 				Tag m_type;
 				unsigned int m_dataSize;
 
@@ -164,15 +164,15 @@ class IECORE_API IFFFile : public RefCounted
 				// returns the number of bytes that can be skipped to fill the group's alignment quota
 				int skippableBytes();
 		};
-	
+
 	private :
-		
+
 		bool open();
 		std::ifstream *m_iStream;
 		std::string m_streamFileName;
-		
+
 		Chunk *m_root;
-		
+
 		// reads data from the char buffer into a more specific buffer, accounting for byte order
 		template<typename T>
 		static void readData( const char *dataBuffer, T *attrBuffer, unsigned long n );

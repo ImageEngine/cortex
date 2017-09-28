@@ -42,12 +42,12 @@ IECoreGL.init( False )
 class ShaderStateComponentTest( unittest.TestCase ) :
 
 	def testDefaultConstructor( self ) :
-	
+
 		s = IECoreGL.ShaderStateComponent()
-		
+
 		self.failUnless( s.textureLoader().isSame( IECoreGL.TextureLoader.defaultTextureLoader() ) )
 		self.failUnless( s.shaderLoader().isSame( IECoreGL.ShaderLoader.defaultShaderLoader() ) )
-		
+
 		ss = s.shaderSetup().shader()
 		self.failUnless( ss.vertexSource() == "" )
 		self.failUnless( ss.geometrySource() == "" )

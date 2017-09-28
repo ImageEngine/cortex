@@ -57,7 +57,7 @@ class FromNukeCameraConverter : public FromNukeConverter
 		/// for as long as the converter is.
 		FromNukeCameraConverter( const DD::Image::CameraOp *camera );
 		virtual ~FromNukeCameraConverter();
-		
+
 		IECore::V2iParameter *resolutionParameter();
 		const IECore::V2iParameter *resolutionParameter() const;
 

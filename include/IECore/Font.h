@@ -108,7 +108,7 @@ class IECORE_API Font : public RunTimeTyped
 		ImplementationPtr m_implementation;
 
 		class Mesher;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Font );

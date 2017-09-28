@@ -74,7 +74,7 @@ DisplayDriverPtr DisplayDriver::create( const std::string &typeName, const Imath
 	{
 		return it->second( displayWindow, dataWindow, channelNames, parameters );
 	}
-	
+
 	throw Exception( boost::str( boost::format( "Display driver \"%s\" not registered" ) % typeName ) );
 }
 

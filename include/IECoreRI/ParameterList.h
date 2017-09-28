@@ -92,7 +92,7 @@ class IECORERI_API ParameterList
 		inline int numPlaces( size_t n );
 		inline void appendInt( char *&str, size_t n );
 		inline void appendString( char *&str, const char* toAppend, size_t len );
-		inline void appendString( char *&str, const std::string &toAppend );		
+		inline void appendString( char *&str, const std::string &toAppend );
 		inline void buildPositionsString( char*& str, const std::string& name, size_t arraySize );
 		inline void buildColorValuesString( char*& str, const std::string& name, size_t arraySize );
 		inline void buildFloatValuesString( char*& str, const std::string& name, size_t arraySize );
@@ -108,7 +108,7 @@ class IECORERI_API ParameterList
 		std::vector<float> m_floats;
 		std::vector<char *> m_tokens;
 		std::vector<const void *> m_values;
-		
+
 		static const IECore::InternedString g_handleParameterName;
 
 };

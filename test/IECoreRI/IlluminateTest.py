@@ -43,32 +43,32 @@ class IlluminateTest( IECoreRI.TestCase ) :
 	outputFileName = os.path.dirname( __file__ ) + "/output/illuminate.rib"
 
 	def test( self ) :
-	
+
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		r.worldBegin()
-		
+
 		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ) } )
-		
+
 		r.illuminate( "myLightHandle", 0 )
-		
+
 		r.worldEnd()
 
 		l = "".join( file( self.outputFileName ).readlines() )
 
 		self.assert_( "LightSource \"spotlight\" \"myLightHandle\"" in l )
-		self.assert_( '"color colour" [ 1 0 0 ]' in l ) 
-		self.assert_( '"int intensity" [ 2 ]' in l ) 
+		self.assert_( '"color colour" [ 1 0 0 ]' in l )
+		self.assert_( '"int intensity" [ 2 ]' in l )
 		self.assert_( "Illuminate \"myLightHandle\" 0" in l )
 
 	def testAreaLight( self ) :
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		r.worldBegin()
-		
+
 		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "ri:areaLight" : True } )
 		r.light( "spotlight", "myLightHandle2", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "ri:areaLight" : False } )
-		
+
 		r.worldEnd()
 
 		l = "".join( file( self.outputFileName ).readlines() )
@@ -78,12 +78,12 @@ class IlluminateTest( IECoreRI.TestCase ) :
 
 	def testAreaLightNew( self ) :
 		r = IECoreRI.Renderer( self.outputFileName )
-		
+
 		r.worldBegin()
-		
+
 		r.light( "spotlight", "myLightHandle", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "__areaLight" : True } )
 		r.light( "spotlight", "myLightHandle2", { "intensity" : 2, "colour" : IECore.Color3f( 1, 0, 0 ), "__areaLight" : False } )
-		
+
 		r.worldEnd()
 
 		l = "".join( file( self.outputFileName ).readlines() )

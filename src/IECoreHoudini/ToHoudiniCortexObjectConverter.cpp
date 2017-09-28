@@ -71,15 +71,15 @@ ToHoudiniCortexObjectConverter::~ToHoudiniCortexObjectConverter()
 bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Detail *geo ) const
 {
 	ConstObjectPtr result = filterAttribs( object );
-	
+
 	size_t numPrims = geo->getNumPrimitives();
 
 	CortexPrimitive::build( geo, result.get() );
-	
+
 	GA_OffsetList offsets;
 	offsets.append( geo->primitiveOffset( numPrims ) );
 	GA_Range newPrims( geo->getPrimitiveMap(), offsets );
-	
+
 	if ( nameParameter()->getTypedValue() != "" )
 	{
 		setName( geo, newPrims );
@@ -92,7 +92,7 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 			ToHoudiniStringVectorAttribConverter::convertString( "name", nameData->readable(), geo, newPrims );
 		}
 	}
-	
+
 	return ( (size_t)geo->getNumPrimitives() > numPrims );
 }
 
@@ -104,7 +104,7 @@ void ToHoudiniCortexObjectConverter::transferAttribs( GU_Detail *geo, const GA_R
 	{
 		return;
 	}
-	
+
 	const Primitive *input = IECore::runTimeCast<const Primitive>( srcParameter()->getValue() );
 
 	Primitive *output = IECore::runTimeCast<Primitive>( ((CortexPrimitive *)hPrim)->getObject() );
@@ -113,7 +113,7 @@ void ToHoudiniCortexObjectConverter::transferAttribs( GU_Detail *geo, const GA_R
 	{
 		return;
 	}
-	
+
 	const char *filter = attributeFilterParameter()->getTypedValue().c_str();
 	for ( PrimitiveVariableMap::const_iterator it = input->variables.begin() ; it != input->variables.end(); ++it )
 	{
@@ -121,13 +121,13 @@ void ToHoudiniCortexObjectConverter::transferAttribs( GU_Detail *geo, const GA_R
 		{
 			continue;
 		}
-		
+
 		if ( output->isPrimitiveVariableValid( it->second ) )
 		{
 			output->variables[it->first] = it->second;
 		}
 	}
-	
+
 	if ( UT_String( "P" ).multiMatch( filter ) )
 	{
 		geo->setPos3( points.begin().getOffset(), IECore::convert<UT_Vector3>( input->bound().center() ) );
@@ -141,9 +141,9 @@ ConstObjectPtr ToHoudiniCortexObjectConverter::filterAttribs( const Object *obje
 	{
 		return object;
 	}
-	
+
 	const char *filter = attributeFilterParameter()->getTypedValue().c_str();
-	
+
 	std::vector<InternedString> variablesToErase;
 	const PrimitiveVariableMap &variables = primitive->variables;
 	for ( PrimitiveVariableMap::const_iterator it = variables.begin(); it != variables.end(); ++it )
@@ -153,18 +153,18 @@ ConstObjectPtr ToHoudiniCortexObjectConverter::filterAttribs( const Object *obje
 			variablesToErase.push_back( it->first );
 		}
 	}
-	
+
 	if ( variablesToErase.empty() )
 	{
 		return object;
 	}
-	
+
 	PrimitivePtr result = primitive->copy();
 	PrimitiveVariableMap &resultVariables = result->variables;
 	for ( size_t i = 0; i < variablesToErase.size(); ++i )
 	{
 		resultVariables.erase( variablesToErase[i] );
 	}
-	
+
 	return result;
 }

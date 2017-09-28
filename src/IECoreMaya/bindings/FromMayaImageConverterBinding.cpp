@@ -44,9 +44,9 @@ using namespace boost::python;
 
 void IECoreMaya::bindFromMayaImageConverter()
 {
-	
+
 	IECorePython::RunTimeTypedClass<FromMayaImageConverter>()
 		.def( init<MImage &>() )
 	;
-	
+
 }

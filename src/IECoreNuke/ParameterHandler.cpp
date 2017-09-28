@@ -79,7 +79,7 @@ void ParameterHandler::setParameterValue( IECore::Parameter *parameter, ValueSou
 void ParameterHandler::setKnobValue( const IECore::Parameter *parameter )
 {
 }
-		
+
 void ParameterHandler::setState( IECore::Parameter *parameter, const IECore::Object *state )
 {
 	assert( 0 ); // shouldn't get called because we don't return a state in getState()
@@ -89,7 +89,7 @@ IECore::ObjectPtr ParameterHandler::getState( const IECore::Parameter *parameter
 {
 	return 0;
 }
-		
+
 ParameterHandlerPtr ParameterHandler::create( const IECore::Parameter *parameter )
 {
 	if( parameter->presetsOnly() )
@@ -105,7 +105,7 @@ ParameterHandlerPtr ParameterHandler::create( const IECore::Parameter *parameter
 		if( it!=creators.end() )
 		{
 			return it->second();
-		}	
+		}
 		typeId = RunTimeTyped::baseTypeId( typeId );
 	}
 	return 0;
@@ -126,7 +126,7 @@ void ParameterHandler::setKnobProperties( const IECore::Parameter *parameter, DD
 {
 	const CompoundObject *userData = parameter->userData();
 	const CompoundObject *ui = userData->member<CompoundObject>( "UI" );
-	
+
 	int flags = 0;
 	if( ui )
 	{
@@ -136,10 +136,10 @@ void ParameterHandler::setKnobProperties( const IECore::Parameter *parameter, DD
 			flags |= Knob::INVISIBLE;
 		}
 	}
-	
+
 	SetFlags( f, flags );
 	Tooltip( f, parameter->description() );
-	
+
 	if( f.makeKnobs() )
 	{
 		const CompoundObject *nuke = userData->member<CompoundObject>( "nuke" );

@@ -89,7 +89,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 	{
 		return 0;
 	}
-	
+
 	if ( m_dirty || !m_scene )
 	{
 		IECorePython::ScopedGILLock gilLock;
@@ -114,7 +114,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 
 		m_dirty = false;
 	}
-	
+
 	return m_scene;
 }
 
@@ -124,7 +124,7 @@ IECoreGL::ConstScenePtr SOP_ProceduralHolder::scene()
 OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 {
 	IECore::MessageHandler::Scope handlerScope( getMessageHandler() );
-	
+
 	// some defaults and useful variables
 	float now = context.getTime();
 
@@ -141,25 +141,25 @@ OP_ERROR SOP_ProceduralHolder::cookMySop( OP_Context &context )
 		addError( SOP_MESSAGE, msg );
 		return error();
 	}
-	
+
 	if( lockInputs(context) >= UT_ERROR_ABORT )
 	{
 		return error();
 	}
-	
+
 	// start our work
 	UT_Interrupt *boss = UTgetInterrupt();
 	boss->opStart("Building ProceduralHolder Geometry...");
 	gdp->clearAndDestroy();
-	
+
 	setParameterisedValues( now );
-	
+
 	ToHoudiniCortexObjectConverterPtr converter = new ToHoudiniCortexObjectConverter( procedural.get() );
 	if ( !converter->convert( myGdpHandle ) )
 	{
 		addError( SOP_MESSAGE, "Unable to store procedural on gdp" );
 	}
-	
+
 	// tidy up & go home!
 	boss->opEnd();
 	unlockInputs();

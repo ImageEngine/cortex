@@ -39,25 +39,25 @@ import IECore
 class NullObjectTest( unittest.TestCase ) :
 
 	def testEquality( self ) :
-	
+
 		o1 = IECore.NullObject()
 		o2 = IECore.NullObject()
 		self.assertEqual( o1, o2 )
-		
+
 		self.assertEqual( IECore.NullObject.defaultNullObject(), IECore.NullObject.defaultNullObject() )
-		
+
 	def testIdentity( self ) :
-	
+
 		self.failUnless( IECore.NullObject.defaultNullObject().isSame( IECore.NullObject.defaultNullObject() ) )
-		
+
 	def testRepr( self ) :
-	
+
 		o = IECore.NullObject.defaultNullObject()
 		self.failUnless( eval( repr( o ) ).isSame( o ) )
-		
+
 		o = IECore.NullObject()
 		self.assertEqual( eval( repr( o ) ), o )
-		
+
 if __name__ == "__main__":
 	unittest.main()
 

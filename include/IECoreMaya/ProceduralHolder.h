@@ -85,7 +85,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		virtual MBoundingBox boundingBox() const;
 		virtual MStatus setDependentsDirty( const MPlug &plug, MPlugArray &plugArray );
 		virtual MStatus compute( const MPlug &plug, MDataBlock &dataBlock );
-		
+
 		virtual void componentToPlugs( MObject &component, MSelectionList &selectionList ) const;
 		virtual MatchResult matchComponent( const MSelectionList &item, const MAttributeSpecArray &spec, MSelectionList &list );
 
@@ -103,9 +103,9 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		static MObject aDrawBound;
 		static MObject aDrawCoordinateSystems;
 		static MObject aProceduralComponents;
-		
+
 		static MObject aComponentQueries;
-		
+
 		static MObject aComponentTransform;
 		static MObject aComponentTranslate;
 		static MObject aComponentTranslateX;
@@ -119,7 +119,7 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		static MObject aComponentScaleX;
 		static MObject aComponentScaleY;
 		static MObject aComponentScaleZ;
-		
+
 		static MObject aComponentBound;
 		static MObject aComponentBoundMin;
 		static MObject aComponentBoundMinX;
@@ -133,36 +133,36 @@ class ProceduralHolder : public ParameterisedHolderComponentShape
 		static MObject aComponentBoundCenterX;
 		static MObject aComponentBoundCenterY;
 		static MObject aComponentBoundCenterZ;
-		
+
 		/// This method is overridden to supply a geometry iterator, which maya uses to work out
 		/// the bounding boxes of the components you've selected in the viewport
 		virtual MPxGeometryIterator* geometryIteratorSetup( MObjectArray&, MObject&, bool );
-		
+
 		/// This is a blank override, to stop maya offering you a rotation manipulator for the
 		/// procedural components, then crashing when you try and use it (maya 2013)
 		virtual void transformUsing( const MMatrix &mat, const MObjectArray &componentList, MPxSurfaceShape::MVertexCachingMode cachingMode, MPointArray *pointCache );
-		
+
 	private :
 
 		mutable bool m_boundDirty;
 		mutable MBoundingBox m_bound;
-		
+
 		bool m_sceneDirty;
 		IECoreGL::ScenePtr m_scene;
 		IECoreGL::RendererPtr m_lastRenderer;
-		
+
 		/// \todo Use a boost::multi_index jobby to replace both. It could store a nice
 		/// struct with named fields instead of the hard to understand std::pairs.
 		typedef std::map<IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr > > ComponentsMap;
 		typedef std::map< int, std::set< std::pair< std::string, IECoreGL::GroupPtr > > > ComponentToGroupMap;
 		typedef std::map< int, Imath::Box3f > ComponentToBoundMap;
 		typedef std::map<IECore::InternedString, Imath::M44f> ComponentTransformsMap;
-		
+
 		void buildComponents();
 		void buildComponents( IECoreGL::ConstNameStateComponentPtr nameState, IECoreGL::GroupPtr group, const Imath::M44f &parentTransform );
-		
+
 		Imath::Box3f componentBound( int idx ) const;
-		
+
 		ComponentsMap m_componentsMap;
 		ComponentToGroupMap m_componentToGroupMap;
 		ComponentTransformsMap m_componentTransforms;

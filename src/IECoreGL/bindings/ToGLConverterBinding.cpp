@@ -50,7 +50,7 @@ void bindToGLConverter()
 	IECorePython::RunTimeTypedClass<ToGLConverter>()
 		.def( "convert", &ToGLConverter::convert )
 		.def( "create", &ToGLConverter::create,
-			( 
+			(
 				boost::python::arg_( "object" ),
 				boost::python::arg_( "resultType" ) = IECore::RunTimeTypedTypeId
 			)

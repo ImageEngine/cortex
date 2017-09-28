@@ -83,9 +83,9 @@ class NukeDisplayDriver : public IECoreImage::ImageDisplayDriver
 {
 
 	public :
-	
+
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NukeDisplayDriver, NukeDisplayDriverTypeId, IECoreImage::ImageDisplayDriver );
-		
+
 		NukeDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, ConstCompoundDataPtr parameters )
 			:	ImageDisplayDriver( displayWindow, dataWindow, channelNames, parameters )
 		{
@@ -97,10 +97,10 @@ class NukeDisplayDriver : public IECoreImage::ImageDisplayDriver
 			{
 				m_parameters = new CompoundData;
 			}
-			
+
 			instanceCreatedSignal( this );
 		}
-		
+
 		virtual ~NukeDisplayDriver()
 		{
 		}
@@ -115,22 +115,22 @@ class NukeDisplayDriver : public IECoreImage::ImageDisplayDriver
 		/// Updates the current image, and then emits the dataReceivedSignal.
 		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize )
 		{
-			ImageDisplayDriver::imageData( box, data, dataSize );			
+			ImageDisplayDriver::imageData( box, data, dataSize );
 			dataReceivedSignal( this, box );
 		}
-		
+
 		/// This signal is emitted when a new NukeDisplayDriver has been created.
 		/// This allows nuke nodes to pick up the new DisplayDrivers even when they're
 		/// created in some other code, such as a DisplayDriverServer.
 		typedef boost::signal<void( NukeDisplayDriver * )> InstanceCreatedSignal;
 		static InstanceCreatedSignal instanceCreatedSignal;
-		
+
 		/// This signal is emitted when this NukeDisplayDriver instance receives new data.
 		typedef boost::signal<void( NukeDisplayDriver *, const Imath::Box2i &box )> DataReceivedSignal;
 		DataReceivedSignal dataReceivedSignal;
-		
+
 	private :
-	
+
 		static const DisplayDriverDescription<NukeDisplayDriver> g_description;
 
 		ConstCompoundDataPtr m_parameters;
@@ -175,7 +175,7 @@ const char *DisplayIop::node_help() const
 void DisplayIop::knobs( DD::Image::Knob_Callback f )
 {
 	Iop::knobs( f );
-	
+
 	Int_knob( f, &m_portNumber, "portNumber", "Port Number" );
 	// we must have KNOB_CHANGED_RECURSIVE set otherwise nuke doesn't give us knob_changed()
 	// calls when the knob value is changed from a knobChanged method of a PythonPanel.
@@ -185,26 +185,26 @@ void DisplayIop::knobs( DD::Image::Knob_Callback f )
 		"The port on which to receive images. This must match "
 		"the port being used by the renderer to send images."
 	);
-	
+
 }
 
 int DisplayIop::knob_changed( DD::Image::Knob *knob )
-{	
+{
 	if( knob->is( "portNumber" ) )
 	{
 	 	int portNumber = (int)this->knob( "portNumber" )->get_value();
 		m_server = g_servers.get( portNumber );
 		return 1;
 	}
-	
+
 	return Iop::knob_changed( knob );
 }
 
 void DisplayIop::append( DD::Image::Hash &hash )
 {
 	Iop::append( hash );
-	
-	hash.append( __DATE__ ); 
+
+	hash.append( __DATE__ );
 	hash.append( __TIME__ );
 	hash.append( firstDisplayIop()->m_updateCount );
 }
@@ -212,7 +212,7 @@ void DisplayIop::append( DD::Image::Hash &hash )
 void DisplayIop::_validate( bool forReal )
 {
 	Box2i displayWindow( V2i( 0, 0 ), V2i( 255, 255 ) );
-	
+
 	if( firstDisplayIop()->m_driver )
 	{
 		displayWindow = firstDisplayIop()->m_driver->image()->getDisplayWindow();
@@ -224,7 +224,7 @@ void DisplayIop::_validate( bool forReal )
 	info_.format( m_format );
 	info_.full_size_format( m_fullSizeFormat );
 	info_.set( m_format );
-	
+
 	info_.channels( Mask_RGBA );
 }
 
@@ -232,7 +232,7 @@ void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &chann
 {
 	Channel outputChannels[4] = { Chan_Red, Chan_Green, Chan_Blue, Chan_Alpha };
 	const char *inputChannels[] = { "R", "G", "B", "A", nullptr };
-	
+
 	const ImagePrimitive *image = nullptr;
 	Box2i inputDataWindow;
 	Box2i inputDisplayWindow;
@@ -242,7 +242,7 @@ void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &chann
 		inputDataWindow = image->getDataWindow();
 		inputDisplayWindow = image->getDisplayWindow();
 	}
-	
+
 	int i = 0;
 	while( inputChannels[i] )
 	{
@@ -261,7 +261,7 @@ void DisplayIop::engine( int y, int x, int r, const DD::Image::ChannelSet &chann
 			row.erase( outputChannels[i] );
 		}
 		i++;
-	}    
+	}
 }
 
 DD::Image::Op *DisplayIop::build( Node *node )
@@ -291,13 +291,13 @@ void DisplayIop::connectToDriver( NukeDisplayDriver *driver )
 	{
 		m_driver->dataReceivedSignal.disconnect( boost::bind( &DisplayIop::driverDataReceived, this, _1, _2 ) );
 	}
-	
+
 	m_driver = driver;
 	if( m_driver )
 	{
-		m_driver->dataReceivedSignal.connect( boost::bind( &DisplayIop::driverDataReceived, this, _1, _2 ) );	
+		m_driver->dataReceivedSignal.connect( boost::bind( &DisplayIop::driverDataReceived, this, _1, _2 ) );
 	}
-	
+
 	m_updateCount++;
 	asapUpdate();
 }

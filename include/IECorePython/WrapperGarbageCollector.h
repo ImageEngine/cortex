@@ -70,12 +70,12 @@ class IECOREPYTHON_API WrapperGarbageCollector
 		static void setCollectThreshold( size_t t );
 		/// Returns the collection threshold.
 		static size_t getCollectThreshold();
-		
+
 		/// Collects any wrapped objects which exist only because
 		/// of a circular reference between the python wrapper
 		/// and the C++ object.
 		static void collect();
-		
+
 		/// Returns the python object holding the specified
 		/// object, or 0 if no python object is associated
 		/// with that object.
@@ -112,7 +112,7 @@ class IECOREPYTHON_API WrapperGarbageCollector
 		{
 			return m_pyObject;
 		}
-		
+
 		/// Returns an overridden method for this instance if one exists. The GIL must
 		/// be held before calling this method. See isSubclassed() for an important means of
 		/// avoiding this overhead where it isn't necessary. Also see RefCountedWrapper::methodOverride()

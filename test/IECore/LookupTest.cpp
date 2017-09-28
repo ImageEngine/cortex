@@ -67,23 +67,23 @@ struct LookupTest
 	void test1()
 	{
 		Lookupff l( LinearFunctor(), -10.0f, 10.0f, 20 );
-		
+
 		const unsigned testPoints = 250;
 		for( unsigned i=0; i<testPoints; i++ )
 		{
 			float x = (float)i/(float)( testPoints-1 );
 			BOOST_CHECK( fabs( x - l( x ) ) < 0.00001f );
 		}
-		
+
 		BOOST_CHECK( fabs( -10.0f - l( -11.0f ) ) < 0.00001f );
 		BOOST_CHECK( fabs( 10.0f - l( 11.0f ) ) < 0.00001f );
 	}
-	
+
 	void test2()
 	{
 		Lookupff l( NanFunctor(), 0.0f, 1.0f, 50 );
 		l.init( LinearFunctor(), 0.0f, 1.0f, 25 );
-	
+
 		BOOST_CHECK( fabs( 1.0f - l( 1.0f ) ) < 0.00001f );
 	}
 

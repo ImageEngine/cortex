@@ -47,7 +47,7 @@ def addDagMenuCallback( callback ) :
 	if not callback in __dagMenuCallbacks :
 		__dagMenuCallbacks.append( callback )
 
-## Removes a callback previously added with addDagMenuCallback.		
+## Removes a callback previously added with addDagMenuCallback.
 def removeDagMenuCallback( callback ) :
 
 	__dagMenuCallbacks.remove( callback )
@@ -59,30 +59,30 @@ def _dagMenu( menu, sceneShape ) :
 	sceneShapes = __selectedSceneShapes()
 	if not sceneShapes:
 		return
-	
+
 	fnScS = []
 	for target in sceneShapes:
 		fnScS.append( IECoreMaya.FnSceneShape( target ) )
-	
+
 	maya.cmds.setParent( menu, menu=True )
 
 	invalidSceneShapes = __invalidSceneShapes( sceneShapes )
-	
+
 	if invalidSceneShapes:
 		maya.cmds.menuItem(
 		label = "Invalid Inputs for selected SceneShapes!",
 		radialPosition = "N",
 		)
-		
+
 	# Component mode
 	elif fnScS[0].selectedComponentNames():
-		
+
 			maya.cmds.menuItem(
 			label = "Object",
 			radialPosition = "N",
 			command = IECore.curry( __objectCallback, sceneShapes[0] ),
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "Print Component Names",
 				radialPosition = "NW",
@@ -94,7 +94,7 @@ def _dagMenu( menu, sceneShape ) :
 				radialPosition = "NE",
 				command = IECore.curry( __printSelectedComponents, sceneShapes[0] )
 			)
-		
+
 			maya.cmds.menuItem(
 				label = "Expand...",
 				radialPosition = "SE",
@@ -113,41 +113,41 @@ def _dagMenu( menu, sceneShape ) :
 				radialPosition = "SW",
 				subMenu = True,
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "At Bound Min",
 				radialPosition = "N",
 				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min" ] ),
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "At Bound Max",
 				radialPosition = "NE",
 				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Max" ] ),
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "At Bound Min And Max",
 				radialPosition = "E",
 				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Min", "Max" ] ),
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "At Bound Centre",
 				radialPosition = "SE",
 				command = IECore.curry( __createLocatorAtPoints, sceneShapes[0], [ "Center" ] ),
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "At Transform Origin",
 				radialPosition = "S",
 				command = IECore.curry( __createLocatorWithTransform, sceneShapes[0] ),
 			)
 			maya.cmds.setParent( "..", menu=True )
-	
+
 	# Object mode
 	else:
-		
+
 		if len( sceneShapes ) == 1:
 			if maya.cmds.getAttr( sceneShapes[0]+".drawGeometry" ) or maya.cmds.getAttr( sceneShapes[0]+".drawChildBounds" ):
 				maya.cmds.menuItem(
@@ -159,39 +159,39 @@ def _dagMenu( menu, sceneShape ) :
 		maya.cmds.menuItem(
 			label = "Preview...",
 			radialPosition = "NW",
-			subMenu = True		
+			subMenu = True
 		)
-	
+
 		maya.cmds.menuItem(
 				label = "All Geometry On",
 				radialPosition = "E",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawGeometry", True )
 			)
-		
+
 		maya.cmds.menuItem(
 				label = "All Child Bounds On",
 				radialPosition = "SE",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawChildBounds", True )
 			)
-		
+
 		maya.cmds.menuItem(
 				label = "All Root Bound On",
 				radialPosition = "NE",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawRootBound", True )
 			)
-		
+
 		maya.cmds.menuItem(
 				label = "All Geometry Off",
 				radialPosition = "W",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawGeometry", False )
 			)
-		
+
 		maya.cmds.menuItem(
 				label = "All Child Bounds Off",
 				radialPosition = "SW",
 				command = IECore.curry( __setChildrenPreviewAttributes, sceneShapes, "drawChildBounds", False )
 			)
-		
+
 		maya.cmds.menuItem(
 				label = "All Root Bound Off",
 				radialPosition = "NW",
@@ -200,7 +200,7 @@ def _dagMenu( menu, sceneShape ) :
 
 		maya.cmds.setParent( "..", menu=True )
 
-		
+
 		commonTags = None
 		for fn in fnScS:
 			scene = fn.sceneInterface()
@@ -209,7 +209,7 @@ def _dagMenu( menu, sceneShape ) :
 				commonTags = set( tmpTags )
 			else:
 				commonTags.intersection_update( set(tmpTags) )
-				
+
 		tagTree = dict()
 		if not commonTags is None:
 			tags = list(commonTags)
@@ -232,7 +232,7 @@ def _dagMenu( menu, sceneShape ) :
 				copiedTagTree = copy.deepcopy( tagTree )
 
 				for tag in tags :
-					
+
 					subtags = copiedTagTree[tag]
 					subtags.sort()
 
@@ -242,7 +242,7 @@ def _dagMenu( menu, sceneShape ) :
 							command = IECore.curry( command, sceneShapes, tag )
 						)
 						subtags.remove("")
-					
+
 					if subtags:
 						maya.cmds.menuItem(
 							label = tag,
@@ -254,7 +254,7 @@ def _dagMenu( menu, sceneShape ) :
 								label = tagSuffix,
 								command = IECore.curry( command, sceneShapes, tag + ":" + tagSuffix )
 							)
-						maya.cmds.setParent( "..", menu=True )	
+						maya.cmds.setParent( "..", menu=True )
 
 			maya.cmds.menuItem(
 				label = "Tags filter...",
@@ -268,15 +268,15 @@ def _dagMenu( menu, sceneShape ) :
 			)
 
 			addTagSubMenuItems( __setTagsFilterPreviewAttributes )
-					
-			maya.cmds.setParent( "..", menu=True )			
-			
+
+			maya.cmds.setParent( "..", menu=True )
+
 		maya.cmds.menuItem(
 			label = "Expand...",
 			radialPosition = "SE",
 			subMenu = True
 		)
-	
+
 		maya.cmds.menuItem(
 				label = "Recursive Expand As Geometry",
 				radialPosition = "W",
@@ -284,19 +284,19 @@ def _dagMenu( menu, sceneShape ) :
 			)
 
 		if any( map(lambda x: x.canBeExpanded(), fnScS) ):
-			
+
 			maya.cmds.menuItem(
 				label = "Expand One Level",
 				radialPosition = "E",
 				command = IECore.curry( __expandOnce, sceneShapes )
 			)
-			
+
 			maya.cmds.menuItem(
 				label = "Recursive Expand",
 				radialPosition = "N",
 				command = IECore.curry( __expandAll, sceneShapes )
 			)
-			
+
 			if len( sceneShapes ) == 1:
 				if fnScS[0].selectedComponentNames() :
 					maya.cmds.menuItem(
@@ -304,55 +304,55 @@ def _dagMenu( menu, sceneShape ) :
 						radialPosition = "S",
 						command = IECore.curry( __expandToSelected, sceneShapes[0] )
 					)
-			
+
 		if tagTree :
 			maya.cmds.menuItem(
 				label = "Expand by Tag...",
 				radialPosition = "S",
 				subMenu = True
 			)
-		
+
 			addTagSubMenuItems( __expandAll )
-					
-			maya.cmds.setParent( "..", menu=True )			
+
+			maya.cmds.setParent( "..", menu=True )
 
 		maya.cmds.setParent( "..", menu=True )
 
 		parentSceneShape = __parentSceneShape( sceneShapes )
 
 		if any( map(lambda x: x.canBeCollapsed(), fnScS) ) or ( parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed() ):
-			
+
 			maya.cmds.menuItem(
 					label = "Collapse...",
 					radialPosition = "SW",
 					subMenu = True
 				)
-			
+
 			if parentSceneShape and IECoreMaya.FnSceneShape( parentSceneShape ).canBeCollapsed():
-				
+
 				parentName = maya.cmds.listRelatives( parentSceneShape, p=True )[0]
 				maya.cmds.menuItem(
 						label = "Collapse to Parent: "+parentName,
 						radialPosition = "N",
 						command = IECore.curry( __collapseChildren, [parentSceneShape] )
 					)
-			
+
 			if any( map(lambda x: x.canBeCollapsed(), fnScS) ):
 				maya.cmds.menuItem(
 						label = "Collapse Children",
 						radialPosition = "W",
 						command = IECore.curry( __collapseChildren, sceneShapes )
 					)
-				
+
 			maya.cmds.setParent( "..", menu=True )
 
 	for c in __dagMenuCallbacks :
-	
+
 		c( menu, sceneShape )
 
 ## Returns all the sceneShapes that do not have a valid scene interface
 def __invalidSceneShapes( sceneShapes ):
-	
+
 	invalid = []
 	for sceneShape in sceneShapes:
 		fn = IECoreMaya.FnSceneShape( sceneShape )
@@ -362,12 +362,12 @@ def __invalidSceneShapes( sceneShapes ):
 
 ## Returns all the selected scene shapes
 def __selectedSceneShapes() :
-	
+
 	allSceneShapes = []
-	
+
 	selectedSceneShapes = maya.cmds.ls( sl=True, l=True )
 	for shape in selectedSceneShapes:
-		# Make sure we have the shape name, it could be a component 
+		# Make sure we have the shape name, it could be a component
 		shapeName = shape.split(".f[")[0]
 		if maya.cmds.nodeType( shapeName ) == "ieSceneShape" and not shapeName in allSceneShapes:
 			allSceneShapes.append( shapeName )
@@ -384,7 +384,7 @@ def __componentCallback( sceneShape, *unused ) :
 	parent = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
 	maya.cmds.selectType( ocm=True, alc=False, facet=True )
 	maya.cmds.hilite( parent )
-	
+
 ## Switches to object mode
 def __objectCallback( sceneShape, *unused ) :
 
@@ -421,7 +421,7 @@ def __printSelectedComponents( sceneShape, *unused ) :
 
 ## Expand each scene shape one level down
 def __expandOnce( sceneShapes, *unused ) :
-	
+
 	toSelect = []
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
@@ -432,19 +432,19 @@ def __expandOnce( sceneShapes, *unused ) :
 
 ## Recursively expand the scene shapes
 def __expandAll( sceneShapes, tagName=None, *unused ) :
-	
+
 	toSelect = []
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
 		newFn = fnS.expandAll( preserveNamespace=True, tagName=tagName )
-		
+
 		toSelect.extend( map( lambda x: x.fullPathName(), newFn ) )
 	if toSelect:
 		maya.cmds.select( toSelect, replace=True )
 
 ## Recursively expand the scene shapes and converts objects to geometry
 def __expandAsGeometry( sceneShapes, *unused ) :
-	
+
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
 		fnS.convertAllToGeometry( True )
@@ -457,19 +457,19 @@ def __expandToSelected( sceneShape, *unused ) :
 	selectedNames = fnScS.selectedComponentNames()
 	if not selectedNames:
 		return
-	
+
 	if "/" in selectedNames:
 		selectedNames.remove("/")
-	
+
 	# Go back to object mode
 	parent =  maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )[0]
 	maya.cmds.hilite( parent, unHilite=True )
 	maya.cmds.selectMode( object=True )
-	
+
 	if selectedNames == []:
 		return
-	
-	toSelect = []	
+
+	toSelect = []
 
 	for selected in selectedNames:
 		transformName = parent
@@ -478,19 +478,19 @@ def __expandToSelected( sceneShape, *unused ) :
 			transformName = transformName + "|" + item
 			if not transformName in transformNames:
 				transformNames.append( transformName )
-		
+
 		for transform in transformNames:
 			shape = maya.cmds.listRelatives( transform, fullPath=True, type = "ieSceneShape" )[0]
 			fnS = IECoreMaya.FnSceneShape( shape )
 			fnS.expandOnce()
-		
+
 		toSelect.append( transformNames[-1] )
 	if toSelect:
 		maya.cmds.select( toSelect, replace=True )
 
 ## Collapse all the children of the scene shapes
 def __collapseChildren( sceneShapes, *unused ) :
-	
+
 	for sceneShape in sceneShapes:
 		fnS = IECoreMaya.FnSceneShape( sceneShape )
 		fnS.collapse()
@@ -498,7 +498,7 @@ def __collapseChildren( sceneShapes, *unused ) :
 ## Returns the first common parent scene shape for the given scene shapes
 # Returns None if no parent found.
 def __parentSceneShape( sceneShapes ):
-	
+
 	def getParentShapes( transform, allParentShapes ):
 		parent = maya.cmds.listRelatives( transform, p=True, fullPath=True )
 		if parent:
@@ -506,7 +506,7 @@ def __parentSceneShape( sceneShapes ):
 			if parentShape:
 			    allParentShapes.append( parentShape[0] )
 			    getParentShapes( parent[0], allParentShapes )
-		
+
 	parents = None
 	for sceneShape in sceneShapes:
 		transform = maya.cmds.listRelatives( sceneShape, parent=True, fullPath=True )
@@ -548,18 +548,18 @@ def __setTagsFilterPreviewAttributes( sceneShapes, tagName, *unused ) :
 				maya.cmds.setAttr( node+".drawTagsFilter", tagName, type = "string" )
 
 def __createLocatorAtPoints( sceneShape, childPlugSuffixes, *unused ) :
-	
+
 	fnSc = IECoreMaya.FnSceneShape( sceneShape )
 	selectedNames = fnSc.selectedComponentNames()
 
 	locators = []
 	for name in selectedNames :
 		locators.extend( fnSc.createLocatorAtPoints( name, childPlugSuffixes ) )
-		
+
 	maya.cmds.select( locators, replace=True )
 
 def __createLocatorWithTransform( sceneShape, *unused ) :
-	
+
 	fnSc = IECoreMaya.FnSceneShape( sceneShape )
 	selectedNames = fnSc.selectedComponentNames()
 

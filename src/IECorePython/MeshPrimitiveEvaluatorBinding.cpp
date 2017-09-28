@@ -57,7 +57,7 @@ void bindMeshPrimitiveEvaluator()
 	object m = RunTimeTypedClass<MeshPrimitiveEvaluator>()
 		.def( init< MeshPrimitivePtr > () )
 		.def( "barycentricPosition", &barycentricPosition )
-		.def( "uvBound", &MeshPrimitiveEvaluator::uvBound )	
+		.def( "uvBound", &MeshPrimitiveEvaluator::uvBound )
 	;
 
 	{

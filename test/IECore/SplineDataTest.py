@@ -117,7 +117,7 @@ class SplineDataTest( unittest.TestCase ) :
 		self.assertEqual( sd, eval( repr(sd) ) )
 
 	def testHash( self ) :
-	
+
 		s = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
 		s[0] = IECore.Color3f( 1 )
 		s[1] = IECore.Color3f( 2 )
@@ -126,21 +126,21 @@ class SplineDataTest( unittest.TestCase ) :
 		s = IECore.SplinefColor3fData( s )
 
 		h = s.hash()
-		
+
 		s.value[4] = IECore.Color3f( 5 )
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
-		
+
 		del s.value[4]
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
-		
+
 		s.value.basis.step = 2
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
 
 	def testSplineConversion( self ) :
-	
+
 		d = IECore.CompoundData()
 		d["s"] = IECore.SplinefColor3f( IECore.CubicBasisf.linear() )
 		self.assertEqual( d["s"].value, IECore.SplinefColor3f( IECore.CubicBasisf.linear() ) )

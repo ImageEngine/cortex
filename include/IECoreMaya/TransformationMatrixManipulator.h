@@ -49,10 +49,10 @@ namespace IECoreMaya
 {
 
 /// This class provides a manipulator for TransformationMatrixf Parameters.
-class TransformationMatrixManipulator : public ParameterManipContainer 
+class TransformationMatrixManipulator : public ParameterManipContainer
 {
 	public:
-	
+
 		TransformationMatrixManipulator();
 		virtual ~TransformationMatrixManipulator();
 
@@ -62,35 +62,35 @@ class TransformationMatrixManipulator : public ParameterManipContainer
 		virtual MStatus createChildren();
     	virtual MStatus connectToDependNode( const MObject &node);
 
-		virtual void draw( M3dView & view, 
-						   const MDagPath & path, 
+		virtual void draw( M3dView & view,
+						   const MDagPath & path,
 						   M3dView::DisplayStyle style,
 						   M3dView::DisplayStatus status );
-						   
+
 		MManipData rotationToPlugConversion( unsigned int plugIndex );
 
 		static MTypeId id;
 		static const MString typeName;
 
 	private:
-		
+
 		MDagPath m_nodePath;
-	
-		bool findPlugs( MFnDagNode &dagFn );		
+
+		bool findPlugs( MFnDagNode &dagFn );
 		MString m_translatePlugName;
 		MString m_rotatePlugName;
 		MString m_scalePlugName;
 		MPlug m_translatePlug;
 		MPlug m_rotatePlug;
 		MPlug m_scalePlug;
-										
+
 		MPoint getPlugValues( MPlug &plug );
 		void getPlugValues( MPlug &plug, double *values );
 		void getPlugValues( MPlug &plug, MFnNumericData &data );
-				
-		MMatrix m_localMatrix; 
+
+		MMatrix m_localMatrix;
 		MMatrix m_localMatrixInv;
-			
+
 		MDagPath m_translateManip;
 		MDagPath m_rotateManip;
 		MDagPath m_scaleManip;

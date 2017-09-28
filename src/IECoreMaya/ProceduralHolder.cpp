@@ -178,7 +178,7 @@ MStatus ProceduralHolder::initialize()
 
 	s = addAttribute( aDrawBound );
 	assert( s );
-	
+
 	aDrawCoordinateSystems = nAttr.create( "drawCoordinateSystems", "dcs", MFnNumericData::kBoolean, 1, &s );
 	assert( s );
 	nAttr.setReadable( true );
@@ -191,7 +191,7 @@ MStatus ProceduralHolder::initialize()
 	assert( s );
 
 	// component attributes
-	
+
 	IECoreGL::ConstStatePtr defaultState = IECoreGL::State::defaultState();
 	assert( defaultState );
 	assert( defaultState->isComplete() );
@@ -211,9 +211,9 @@ MStatus ProceduralHolder::initialize()
 
 	s = addAttribute( aProceduralComponents );
 	assert( s );
-	
+
 	// component queries attribute
-	
+
 	aComponentQueries = tAttr.create( "componentQueries", "cmqy", MFnData::kString, fnSData.create( "" ), &s );
 	assert( s );
 	tAttr.setReadable( true );
@@ -226,24 +226,24 @@ MStatus ProceduralHolder::initialize()
 
 	s = addAttribute( aComponentQueries );
 	assert( s );
-	
+
 	// component transform attributes
-	
+
 	aComponentTranslateX = nAttr.create( "componentTranslateX", "ctx", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentTranslateY = nAttr.create( "componentTranslateY", "cty", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentTranslateZ = nAttr.create( "componentTranslateZ", "ctz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
-	nAttr.setStorable( false );	
-		
+	nAttr.setStorable( false );
+
 	aComponentTranslate = nAttr.create( "componentTranslate", "ct", aComponentTranslateX, aComponentTranslateY, aComponentTranslateZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
@@ -253,37 +253,37 @@ MStatus ProceduralHolder::initialize()
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentRotateY = nAttr.create( "componentRotateY", "cry", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentRotateZ = nAttr.create( "componentRotateZ", "crz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
-	nAttr.setStorable( false );	
-		
+	nAttr.setStorable( false );
+
 	aComponentRotate = nAttr.create( "componentRotate", "cr", aComponentRotateX, aComponentRotateY, aComponentRotateZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentScaleX = nAttr.create( "componentScaleX", "csx", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentScaleY = nAttr.create( "componentScaleY", "csy", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentScaleZ = nAttr.create( "componentScaleZ", "csz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
-	nAttr.setStorable( false );	
-		
+	nAttr.setStorable( false );
+
 	aComponentScale = nAttr.create( "componentScale", "cs", aComponentScaleX, aComponentScaleY, aComponentScaleZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
@@ -296,7 +296,7 @@ MStatus ProceduralHolder::initialize()
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
-	
+
 	s = addAttribute( aComponentTransform );
 	assert( s );
 
@@ -306,62 +306,62 @@ MStatus ProceduralHolder::initialize()
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentBoundMinY = nAttr.create( "componentBoundMinY", "cbminy", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundMinZ = nAttr.create( "componentBoundMinZ", "cbminz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundMin = nAttr.create( "componentBoundMin", "cbmin", aComponentBoundMinX, aComponentBoundMinY, aComponentBoundMinZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundMaxX = nAttr.create( "componentBoundMaxX", "cbmaxx", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentBoundMaxY = nAttr.create( "componentBoundMaxY", "cbmaxy", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundMaxZ = nAttr.create( "componentBoundMaxZ", "cbmaxz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundMax = nAttr.create( "componentBoundMax", "cbmax", aComponentBoundMaxX, aComponentBoundMaxY, aComponentBoundMaxZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundCenterX = nAttr.create( "componentBoundCenterX", "cbcx", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-		
+
 	aComponentBoundCenterY = nAttr.create( "componentBoundCenterY", "cbcy", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundCenterZ = nAttr.create( "componentBoundCenterZ", "cbcz", MFnNumericData::kFloat, 0, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBoundCenter = nAttr.create( "componentBoundCenter", "cbc", aComponentBoundCenterX, aComponentBoundCenterY, aComponentBoundCenterZ, &s );
 	assert( s );
 	nAttr.setWritable( false );
 	nAttr.setStorable( false );
-	
+
 	aComponentBound = cAttr.create( "componentBound", "cb" );
 	cAttr.addChild( aComponentBoundMin );
 	cAttr.addChild( aComponentBoundMax );
@@ -369,15 +369,15 @@ MStatus ProceduralHolder::initialize()
 	cAttr.setArray( true );
 	cAttr.setIndexMatters( true );
 	cAttr.setUsesArrayDataBuilder( true );
-	
+
 	s = addAttribute( aComponentBound );
 	assert( s );
-	
+
 	// dependencies
-	
+
 	attributeAffects( aComponentQueries, aComponentTransform );
 	attributeAffects( aComponentQueries, aComponentBound );
-	
+
 	return MS::kSuccess;
 }
 
@@ -451,7 +451,7 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 		m_boundDirty = m_sceneDirty = true;
 		m_componentToBoundMap.clear();
 		childChanged( kBoundingBoxChanged ); // this is necessary to cause maya to redraw
-		
+
 		MPlug pComponentTransform( thisMObject(), aComponentTransform );
 		for( unsigned i=0; i<pComponentTransform.numElements(); i++ )
 		{
@@ -464,7 +464,7 @@ MStatus ProceduralHolder::setDependentsDirty( const MPlug &plug, MPlugArray &plu
 				plugArray.append( p.child( j ).child( 2 ) );
 			}
 		}
-		
+
 		MPlug pComponentBound( thisMObject(), aComponentBound );
 		for( unsigned i=0; i<pComponentBound.numElements(); i++ )
 		{
@@ -490,16 +490,16 @@ Imath::Box3f ProceduralHolder::componentBound( int idx ) const
 	{
 		return boundIt->second;
 	}
-	
+
 	Imath::Box3f componentBound;
-	
+
 	ComponentToGroupMap::const_iterator it = m_componentToGroupMap.find( idx );
-	
+
 	if( it == m_componentToGroupMap.end() )
 	{
 		return componentBound;
 	}
-	
+
 	const std::set< std::pair< std::string, IECoreGL::GroupPtr > >& groups = it->second;
 	std::set< std::pair< std::string, IECoreGL::GroupPtr > >::const_iterator groupIt = groups.begin();
 	for( ; groupIt != groups.end(); ++groupIt )
@@ -517,14 +517,14 @@ Imath::Box3f ProceduralHolder::componentBound( int idx ) const
 
 		componentBound.extendBy( bound );
 	}
-	
+
 	m_componentToBoundMap[ idx ] = componentBound;
-	
+
 	return componentBound;
 }
 
 MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
-{	
+{
 	MPlug topLevelPlug = plug;
 	while( topLevelPlug.isChild() || topLevelPlug.isElement() )
 	{
@@ -542,33 +542,33 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 	{
 
 		scene(); // to get the component maps up to date
-				
+
 		MArrayDataHandle queryHandle = dataBlock.inputArrayValue( aComponentQueries );
 
 		MArrayDataHandle transformHandle = dataBlock.outputArrayValue( aComponentTransform );
 		MArrayDataBuilder transformBuilder = transformHandle.builder();
-		
+
 		MArrayDataHandle boundHandle = dataBlock.outputArrayValue( aComponentBound );
 		MArrayDataBuilder boundBuilder = boundHandle.builder();
-		
+
 		for( unsigned i=0; i<queryHandle.elementCount(); i++, queryHandle.next() )
 		{
-		
+
 			MString name = queryHandle.inputValue().asString();
-			
+
 			ComponentTransformsMap::const_iterator tIt = m_componentTransforms.find( name.asChar() );
 			ComponentsMap::const_iterator cIt = m_componentsMap.find( name.asChar() );
 			if( tIt!=m_componentTransforms.end() && cIt!=m_componentsMap.end() )
-			{				
+			{
 				Imath::V3f translate( 0 ), shear( 0 ), rotate( 0 ), scale( 1 );
 				Imath::extractSHRT( convert<Imath::M44f>( tIt->second ), scale, shear, rotate, translate );
 				rotate = radiansToDegrees( rotate );
-				
+
 				MDataHandle transformElementHandle = transformBuilder.addElement( queryHandle.elementIndex() );
 				transformElementHandle.child( aComponentTranslate ).set3Float( translate[0], translate[1], translate[2] );
 				transformElementHandle.child( aComponentRotate ).set3Float( rotate[0], rotate[1], rotate[2] );
 				transformElementHandle.child( aComponentScale ).set3Float( scale[0], scale[1], scale[2] );
-				
+
 				IECoreGL::GroupPtr group = cIt->second.second;
 				Imath::Box3f bound;
 				for( IECoreGL::Group::ChildContainer::const_iterator it=group->children().begin(); it!=group->children().end(); it++ )
@@ -576,28 +576,28 @@ MStatus ProceduralHolder::compute( const MPlug &plug, MDataBlock &dataBlock )
 					bound.extendBy( (*it)->bound() );
 				}
 				bound = Imath::transform( bound, tIt->second );
-		
+
 				MDataHandle boundElementHandle = boundBuilder.addElement( queryHandle.elementIndex() );
 				boundElementHandle.child( aComponentBoundMin ).set3Float( bound.min[0],  bound.min[1],  bound.min[2] );
 				boundElementHandle.child( aComponentBoundMax ).set3Float( bound.max[0],  bound.max[1],  bound.max[2] );
 				Imath::V3f boundCenter = bound.center();
-				boundElementHandle.child( aComponentBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );	
+				boundElementHandle.child( aComponentBoundCenter ).set3Float( boundCenter[0], boundCenter[1], boundCenter[2] );
 			}
-		
+
 		}
-	
+
 		transformHandle.set( transformBuilder );
 		boundHandle.set( boundBuilder );
-		
-		dataBlock.setClean( aComponentTransform );     
+
+		dataBlock.setClean( aComponentTransform );
 		dataBlock.setClean( aComponentTranslate );
 		dataBlock.setClean( aComponentRotate );
 		dataBlock.setClean( aComponentScale );
-		dataBlock.setClean( aComponentBound );     
+		dataBlock.setClean( aComponentBound );
 		dataBlock.setClean( aComponentBoundMin );
 		dataBlock.setClean( aComponentBoundMax );
 		dataBlock.setClean( aComponentBoundCenter );
-		
+
 		return MS::kSuccess;
 	}
 
@@ -651,7 +651,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 				p->render( rendererToReuse.get() );
 				m_scene = rendererToReuse->scene();
-				
+
 				rendererToReuse->command( "editEnd", CompoundDataMap() );
 			}
 			else
@@ -684,7 +684,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 
 				m_lastRenderer = renderer;
 			}
-			
+
 			buildComponents();
 		}
 		catch( boost::python::error_already_set )
@@ -800,7 +800,7 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 	{
 		nameState = group->getState()->get< IECoreGL::NameStateComponent >();
 	}
-	
+
 	Imath::M44f groupTransform = group->getTransform() * parentTransform;
 
 	const std::string &name = nameState->name();
@@ -815,7 +815,7 @@ void ProceduralHolder::buildComponents( IECoreGL::ConstNameStateComponentPtr nam
 		m_componentsMap[name] = ComponentsMap::mapped_type( 0, group );
 		m_componentTransforms[name] = groupTransform;
 	}
-	
+
 	const IECoreGL::Group::ChildContainer &children = group->children();
 
 	for ( IECoreGL::Group::ChildContainer::const_iterator it = children.begin(); it != children.end(); ++it )

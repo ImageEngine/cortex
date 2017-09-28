@@ -82,7 +82,7 @@ const std::string &NameStateComponent::nameFromGLName( GLuint glName )
 	if( it==index.end() )
 	{
 		throw IECore::InvalidArgumentException( boost::str(
-				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName 
+				boost::format( "NameStateComponent::nameFromGLName : Invalid glName (%1%)" ) % glName
 			)
 		);
 	}
@@ -113,7 +113,7 @@ NameStateComponent::ConstNameIterator NameStateComponent::iteratorFromName( cons
 		else
 		{
 			throw IECore::InvalidArgumentException( boost::str(
-					boost::format( "NameStateComponent::iteratorFromName : Invalid name (%1%)" ) % name 
+					boost::format( "NameStateComponent::iteratorFromName : Invalid name (%1%)" ) % name
 				)
 			);
 		}

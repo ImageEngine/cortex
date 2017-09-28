@@ -101,12 +101,12 @@ MPlug FloatSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parame
 	MObject attribute = fnRAttr.createCurveRamp( plugName, plugName );
 
 	MPlug result = finishCreating( parameter, attribute, node );
-	
+
 	if( !finishUpdating( parameter, result ) )
 	{
 		return MPlug();
-	}	
-	
+	}
+
 	return result;
 }
 
@@ -132,7 +132,7 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 	MIntArray indicesToReuse;
 	plug.getExistingArrayAttributeIndices( indicesToReuse, &s );
 	assert( s );
-	
+
 	int nextNewLogicalIndex = 0;
 	if( indicesToReuse.length() )
 	{
@@ -165,15 +165,15 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 		{
 			// this creates us a new spline point for us, and avoids the bug in MRampAttribute::addEntries which
 			// somehow manages to create duplicate logical indexes.
-			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );			
+			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );
 		}
-		
+
 		s = pointPlug.child( 0 ).setValue( it->first ); assert( s );
 		s = pointPlug.child( 1 ).setValue( it->second ); assert( s );
 		// hardcoding interpolation of 3 (spline) because the MRampAttribute::MInterpolation enum values don't actually
 		// correspond to the necessary plug values at all.
 		s = pointPlug.child( 2 ).setValue( 3 ); assert( s );
-	
+
 		numExpectedPoints++;
 	}
 
@@ -200,13 +200,13 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 			}
 		}
 	}
-	
+
 #ifndef NDEBUG
 	{
 		MIntArray allLogicalIndices; plug.getExistingArrayAttributeIndices( allLogicalIndices );
 		assert( fnRAttr.getNumEntries() == numExpectedPoints );
 		assert( fnRAttr.getNumEntries() == allLogicalIndices.length() );
-		
+
 		// the MRampAttribute has the wonderful "feature" that addEntries() is somehow capable
 		// of creating duplicate logical array indices, which causes no end of trouble
 		// down the line. check that we've managed to avoid this pitfall.
@@ -276,8 +276,8 @@ MStatus FloatSplineParameterHandler<S>::doSetValue( const MPlug &plug, IECore::P
 	}
 
 	MIntArray indices;
-	(const_cast<MPlug &>( plug )).getExistingArrayAttributeIndices( indices, &s );	
-	
+	(const_cast<MPlug &>( plug )).getExistingArrayAttributeIndices( indices, &s );
+
 	for( unsigned i = 0; i < indices.length(); i++ )
 	{
 		MPlug pointPlug = plug.elementByLogicalIndex( indices[i] );

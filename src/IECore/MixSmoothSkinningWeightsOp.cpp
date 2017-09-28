@@ -61,13 +61,13 @@ MixSmoothSkinningWeightsOp::MixSmoothSkinningWeightsOp()
 		"The SmoothSkinningData to mix with the input SmoothSkinningData",
 		new SmoothSkinningData
 	);
-	
+
 	m_mixingWeightsParameter = new FloatVectorParameter(
 		"mixingWeights",
 		"The per-influence weights for mixing input with skinningDataToMix",
 		new FloatVectorData
 	);
-	
+
 	parameters()->addParameter( m_skinningDataParameter );
 	parameters()->addParameter( m_mixingWeightsParameter );
 }
@@ -80,29 +80,29 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	SmoothSkinningData *origMixingData = runTimeCast<SmoothSkinningData>( m_skinningDataParameter->getValidatedValue() );
 	if ( !origMixingData )
 	{
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix is not valid" );
 	}
-	
+
 	assert( origMixingData );
-	
+
 	// make sure the number of influences matches
 	if ( origMixingData->influenceNames()->readable().size() != skinningData->influenceNames()->readable().size() )
 	{
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix and input have different numbers of influences" );
 	}
-	
+
 	std::vector<float> &mixingWeights = m_mixingWeightsParameter->getTypedValue();
-	
+
 	// make sure there is one mixing weight per influence
 	if ( mixingWeights.size() != skinningData->influenceNames()->readable().size() )
 	{
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: There must be exactly one mixing weight per influence" );
 	}
-	
+
 	// decompress both sets of skinning data
 	DecompressSmoothSkinningDataOp decompressionOp;
 	decompressionOp.inputParameter()->setValidatedValue( skinningData );
@@ -116,7 +116,7 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 	{
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix did not decompress correctly" );
 	}
-	
+
 	// make sure everything matches except the weights
 	if ( *(mixingData->pointIndexOffsets()) != *(skinningData->pointIndexOffsets()) )
 	{
@@ -130,27 +130,27 @@ void MixSmoothSkinningWeightsOp::modify( Object * object, const CompoundObject *
 	{
 		throw IECore::Exception( "MixSmoothSkinningWeightsOp: skinningDataToMix and input have different pointInfluenceIndices when decompressed" );
 	}
-	
+
 	const std::vector<int> &inputIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &inputInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &inputInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
-	
+
 	std::vector<float> &inputInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
 	const std::vector<float> &mixingInfluenceWeights = mixingData->pointInfluenceWeights()->readable();
-	
+
 	LinearInterpolator<float> lerp;
-	
+
 	// mix the weights
 	for ( unsigned i=0; i < inputIndexOffsets.size(); i++ )
 	{
 		for ( int j=0; j < inputInfluenceCounts[i]; j++ )
 		{
 			int current = inputIndexOffsets[i] + j;
-			
+
 			lerp( mixingInfluenceWeights[current], inputInfluenceWeights[current], mixingWeights[ inputInfluenceIndices[current] ], inputInfluenceWeights[current] );
 		}
 	}
-	
+
 	// re-compress the input data
 	CompressSmoothSkinningDataOp compressionOp;
 	compressionOp.inputParameter()->setValidatedValue( skinningData );

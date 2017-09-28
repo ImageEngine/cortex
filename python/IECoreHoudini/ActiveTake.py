@@ -38,7 +38,7 @@ import hou
 # that all operations in the with block are performed in the given take,
 # and that the previous take is restored if it still exists when the block exits.
 class ActiveTake :
-	
+
 	def __init__( self, take ) :
 
 		self.__take = take
@@ -50,18 +50,18 @@ class ActiveTake :
 			hou.hscript( "takeset %s" % self.__take )
 
 	def __exit__( self, type, value, traceBack ) :
-		
+
 		if self.__prevTake in ActiveTake.ls() :
 			hou.hscript( "takeset %s" % self.__prevTake )
-	
+
 	## \todo: remove this method when the hscript take commands are available in python
 	@staticmethod
 	def name() :
-		
+
 		return hou.hscript( "takeset" )[0].strip()
-	
+
 	## \todo: remove this method when the hscript take commands are available in python
 	@staticmethod
 	def ls() :
-		
+
 		return [ x.strip() for x in hou.hscript( "takels" )[0].strip().split( "\n" ) ]

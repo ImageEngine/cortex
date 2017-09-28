@@ -14,7 +14,7 @@ class V3fVectorAdder( Op ) :
 			)
 		)
 
-		self.parameters().addParameters([ 
+		self.parameters().addParameters([
 			ObjectParameter(
 				name = "vector1",
 				description = "The first V3fVectorData object.",

@@ -515,14 +515,14 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( c2value, c["child2"].getValue() )
 
 	def testItems( self ) :
-	
+
 		a = CompoundParameter( "a", "a desc",
 			members = [
 				StringParameter( "b", "b desc", "test 1 ok!"),
 				StringParameter( "d", "d desc", "test 2 failed!"),
 			]
 		)
-		
+
 		items = a.items()
 		self.assertEqual( len( items ), 2 )
 		self.assertEqual( len( items[0] ), 2 )
@@ -531,9 +531,9 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( items[1][0], "d" )
 		self.failUnless( items[0][1].isSame( a["b"] ) )
 		self.failUnless( items[1][1].isSame( a["d"] ) )
-		
+
 	def testValueValidReason( self ) :
-	
+
 		i = IntParameter( "i", "", 1, 0, 10 )
 		c = CompoundParameter(
 			"c",
@@ -541,26 +541,26 @@ class CompoundParameterTest( unittest.TestCase ) :
 				i
 			]
 		)
-		
+
 		childReason = i.valueValid( IntData( 20 ) )[1]
 		compoundReason = c.valueValid( CompoundObject( { "i" : IntData( 20 ) } ) )[1]
-		
+
 		self.assertEqual( compoundReason, "i : " + childReason )
-		
+
 		cc = CompoundParameter(
 			members = [
 				c
 			]
 		)
-		
+
 		compoundCompoundReason = cc.valueValid( CompoundObject( { "c" : { "i" : IntData( 20 ) } } ) )[1]
-		
+
 		self.assertEqual( compoundCompoundReason, "c.i : " + childReason )
-		
+
 	def testAdoptChildPresets( self ) :
-	
+
 		# backward compatible behaviour
-		
+
 		c = CompoundParameter(
 			"c",
 			members = [
@@ -586,12 +586,12 @@ class CompoundParameterTest( unittest.TestCase ) :
 				),
 			],
 		)
-		
+
 		self.assertEqual( len( c.getPresets() ), 2 )
 		self.assertEqual( c.presetsOnly, True )
-		
+
 		# no adoption of presets
-		
+
 		c = CompoundParameter(
 			"c",
 			members = [
@@ -618,12 +618,12 @@ class CompoundParameterTest( unittest.TestCase ) :
 			],
 			adoptChildPresets = False,
 		)
-		
+
 		self.assertEqual( len( c.getPresets() ), 0 )
 		self.assertEqual( c.presetsOnly, False )
-		
+
 		# no adoption of presets without use of keyword parameters
-		
+
 		c = CompoundParameter(
 			"c",
 			"description",
@@ -652,7 +652,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 			CompoundObject( { "ud" : IntData( 10 ) } ),
 			False,
 		)
-		
+
 		self.assertEqual( len( c.getPresets() ), 0 )
 		self.assertEqual( c.presetsOnly, False )
 		self.assertEqual( c.userData()["ud"].value, 10 )
@@ -681,21 +681,21 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( c.getValue(), p1 )
 		c.setValue("p2")
 		self.assertEqual( c.getValue(), p2 )
-		
+
 	def testDerivingInPython( self ) :
-	
+
 		class DerivedCompoundParameter( CompoundParameter ) :
-		
+
 			def __init__( self, name, description, userData = None ) :
-			
+
 				CompoundParameter.__init__( self, name, description, userData = userData )
-		
+
 		registerRunTimeTyped( DerivedCompoundParameter )
-						
+
 		c = CompoundParameter()
 		c.addParameter( DerivedCompoundParameter( "d", "" ) )
 		c["d"].addParameter( IntParameter( "i", "", 1 ) )
-		
+
 		self.assertEqual( c.parameterPath( c["d"]["i"] ), [ "d", "i" ] )
 
 if __name__ == "__main__":

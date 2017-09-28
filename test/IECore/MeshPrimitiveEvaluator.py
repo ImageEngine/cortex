@@ -155,7 +155,7 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 		uvb = Box2f()
 		for i in range( 0, len( uv ) ) :
 			uvb.extendBy( uv[i] )
-			
+
 		self.assertEqual( mpe.uvBound(), uvb )
 
 	def testSphereMesh( self ) :
@@ -354,15 +354,15 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 
 
 					self.assert_( (r.point() - closestHit.point() ).length() < 1.e-4 )
-					
+
 					barycentricQuerySucceeded = mpe.barycentricPosition( r.triangleIndex(), r.barycentricCoordinates(), r2 )
 					self.failUnless( barycentricQuerySucceeded )
 					self.failUnless( r.point().equalWithAbsError( r2.point(), 0.00001 ) )
 					self.failUnless( r.normal().equalWithAbsError( r2.normal(), 0.00001 ) )
 					self.failUnless( r.barycentricCoordinates().equalWithAbsError( r2.barycentricCoordinates(), 0.00001 ) )
 					self.assertEqual( r.triangleIndex(), r2.triangleIndex() )
-					
-					
+
+
 				else:
 
 					hits = mpe.intersectionPoints( origin, direction )

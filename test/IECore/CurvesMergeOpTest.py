@@ -42,12 +42,12 @@ class CurvesMergeOpTest( unittest.TestCase ) :
 		v = IECore.V3f
 		p1 = IECore.V3fVectorData( [ v( 0 ), v( 1 ), v( 2 ), v( 3 ) ], IECore.GeometricData.Interpretation.Point )
 		p2 = IECore.V3fVectorData( [ v( 4 ), v( 5 ), v( 6 ), v( 7 ), v( 8 ), v( 9 ), v( 10 ), v( 11 ) ] )
-	
+
 		c1 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4 ] ), IECore.CubicBasisf.catmullRom(), False, p1 )
 		c2 = IECore.CurvesPrimitive( IECore.IntVectorData( [ 4, 4 ] ), IECore.CubicBasisf.catmullRom(), False, p2 )
-				
+
 		merged = IECore.CurvesMergeOp()( input=c1, curves=c2 )
-		
+
 		for v in IECore.PrimitiveVariable.Interpolation.values :
 			i = IECore.PrimitiveVariable.Interpolation( v )
 			if i!=IECore.PrimitiveVariable.Interpolation.Invalid and i!=IECore.PrimitiveVariable.Interpolation.Constant :

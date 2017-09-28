@@ -37,9 +37,9 @@ from IECore import *
 import math
 
 class CurveTangentsOpTest( unittest.TestCase ) :
-	
+
 	def testTangentsGeneration( self ) :
-		
+
 		i = IntVectorData( [ 4 ] )
 		p = V3fVectorData( [ V3f( 0.0 ), V3f( 1.0, 0.0, 0.0 ), V3f( 2.0, 0.0, 0.0 ), V3f( 3.0, 0.0, 0.0 ) ] )
 		c = CurvesPrimitive( i, CubicBasisf.bSpline(), False, p )
@@ -50,14 +50,14 @@ class CurveTangentsOpTest( unittest.TestCase ) :
 			input = c,
 			vTangentPrimVarName = "myTangent",
 		)
-		
+
 		self.assert_( "myTangent" in curves )
 		self.assert_( curves.arePrimitiveVariablesValid() )
-		
-		self.assertEqual( curves["myTangent"].interpolation, PrimitiveVariable.Interpolation.Vertex )	
-				
+
+		self.assertEqual( curves["myTangent"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+
 		for v in curves["myTangent"].data :
-			self.failUnless( v.equalWithAbsError( V3f( 1, 0, 0 ), 0.000001 ) )					
-		
+			self.failUnless( v.equalWithAbsError( V3f( 1, 0, 0 ), 0.000001 ) )
+
 if __name__ == "__main__":
     unittest.main()

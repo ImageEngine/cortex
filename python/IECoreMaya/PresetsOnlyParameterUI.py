@@ -43,7 +43,7 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 	def __init__( self, node, parameter, **kw  ) :
 
 		IECoreMaya.ParameterUI.__init__(
-		
+
 			self,
 			node,
 			parameter,
@@ -51,9 +51,9 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 				numberOfColumns = 2,
 			),
 			**kw
-			
+
 		)
-		
+
 		maya.cmds.text(
 			label = self.label(),
 			font = "smallPlainLabelFont",
@@ -69,7 +69,7 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 		)
 
 		self.replace( node, parameter )
-				
+
 	def replace( self, node, parameter ) :
 
 		IECoreMaya.ParameterUI.replace( self, node, parameter )
@@ -77,38 +77,38 @@ class PresetsOnlyParameterUI( IECoreMaya.ParameterUI ) :
 		self.__updateLabel()
 
 		self._addPopupMenu( parentUI=self.__popupControl, attributeName = self.plugName(), button1=True )
-		
+
 		self.__attributeChangedCallbackId = IECoreMaya.CallbackId(
 			maya.OpenMaya.MNodeMessage.addAttributeChangedCallback( self.node(), self.__attributeChanged )
 		)
-	
+
 	def _topLevelUIDeleted( self ) :
-	
+
 		self.__attributeChangedCallbackId = None
-	
+
 	def __attributeChanged( self, changeType, plug, otherPlug, userData ) :
-				
+
 		if not ( changeType & maya.OpenMaya.MNodeMessage.kAttributeSet ) :
 			return
-		
+
 		try :
 			myPlug = self.plug()
 		except :
 			# this situation can occur when our parameter has been removed but the
 			# ui we represent is not quite yet dead
 			return
-		
+
 		if plug == myPlug :
 			self.__updateLabel()
 			return
-		
+
 		if plug.isChild():
 			if plug.parent() == myPlug :
 				self.__updateLabel()
 				return
-		
+
 	def __updateLabel( self ) :
-	
+
 		IECoreMaya.FnParameterisedHolder( self.node() ).setParameterisedValues()
 
 		maya.cmds.iconTextStaticLabel(

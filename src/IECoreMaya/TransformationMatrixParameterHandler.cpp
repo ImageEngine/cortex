@@ -62,7 +62,7 @@ using namespace Imath;
 // We keep this in an array to allow a bunch of tasks to be done in a loop later.
 // The order here should correlate with the defines above.
 template<typename T>
-MString TransformationMatrixParameterHandler<T>::g_attributeNames[] = { 
+MString TransformationMatrixParameterHandler<T>::g_attributeNames[] = {
 	"translate",
 	"rotate",
 	"scale",
@@ -91,7 +91,7 @@ MStatus TransformationMatrixParameterHandler<T>::doUpdate( IECore::ConstParamete
 	{
 		return MS::kFailure;
 	}
-	
+
 	if( plug.numChildren() != 8 )
 	{
 		return MS::kFailure;
@@ -99,39 +99,39 @@ MStatus TransformationMatrixParameterHandler<T>::doUpdate( IECore::ConstParamete
 
 	MStatus stat;
 	MPlug tmpPlug;
-	
+
 	for( unsigned int i=0; i<8; i++ )
 	{
 		tmpPlug = plug.child( i, &stat );
-		
+
 		// Verify the naming of the child plugs.
-		
+
 		const MString name = tmpPlug.partialName();
 		const unsigned int len = name.length() - 1;
 		const unsigned int nlen = g_attributeNames[i].length() - 1;
 		const MString nameEnd = name.substringW( len - nlen, len );
-	
+
 		if( !stat || nameEnd != g_attributeNames[i] )
 		{
 			return MS::kFailure;
 		}
-	
+
 		MObject attr = tmpPlug.attribute();
 		fnCAttr.setObject( attr );
 		if( !fnCAttr.hasObj( attr ) )
 		{
 			return MS::kFailure;
-		}			
+		}
 	}
-	
+
 	IECore::TransformationMatrix<T> tMatrix = p->typedDefaultValue();
-	
+
 	if( !setUnitVecDefaultValues( plug.child( TRANSLATE_INDEX ), tMatrix.translate ) )
-		return MS::kFailure;	
-		
+		return MS::kFailure;
+
 	if( !setUnitVecDefaultValues( plug.child( ROTATE_INDEX ), tMatrix.rotate ) )
 		return MS::kFailure;
-	
+
 	if( !setVecDefaultValues( plug.child( SCALE_INDEX ), tMatrix.scale ) )
 		return MS::kFailure;
 
@@ -161,13 +161,13 @@ MPlug TransformationMatrixParameterHandler<T>::doCreate( IECore::ConstParameterP
 	{
 		return MPlug();
 	}
-	
+
 	MFnCompoundAttribute fnCAttr;
 	MObject attribute = fnCAttr.create( plugName, plugName );
-	
+
 	MFnNumericAttribute fnNAttr;
 	MFnUnitAttribute fnUAttr;
-	
+
 	// As TransformationMatrix embodies a fairly comprehensive rotation model, were going to be a little
 	// more basic here, and just supply a V3f rotation and pretend that the Quartonean isn't there.
 	///\todo Expose rotation order and rotationOrientation.
@@ -177,7 +177,7 @@ MPlug TransformationMatrixParameterHandler<T>::doCreate( IECore::ConstParameterP
 	MObject p2 = fnUAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ] + "1", plugName + g_attributeNames[ TRANSLATE_INDEX ] + "1", MFnUnitAttribute::kDistance );
 	MObject p3 = fnUAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ] + "2", plugName + g_attributeNames[ TRANSLATE_INDEX ] + "2", MFnUnitAttribute::kDistance );
 	fnCAttr.addChild( fnNAttr.create( plugName + g_attributeNames[ TRANSLATE_INDEX ], plugName + g_attributeNames[ TRANSLATE_INDEX ], p1, p2, p3 ) );
-	
+
 	p1 = fnUAttr.create( plugName + g_attributeNames[ ROTATE_INDEX ] + "0", plugName + g_attributeNames[ ROTATE_INDEX ] + "0", MFnUnitAttribute::kAngle );
 	p2 = fnUAttr.create( plugName + g_attributeNames[ ROTATE_INDEX ] + "1", plugName + g_attributeNames[ ROTATE_INDEX ] + "1", MFnUnitAttribute::kAngle );
 	p3 = fnUAttr.create( plugName + g_attributeNames[ ROTATE_INDEX ] + "2", plugName + g_attributeNames[ ROTATE_INDEX ] + "2", MFnUnitAttribute::kAngle );
@@ -187,19 +187,19 @@ MPlug TransformationMatrixParameterHandler<T>::doCreate( IECore::ConstParameterP
 	{
 		fnCAttr.addChild( fnNAttr.create( plugName + g_attributeNames[i], plugName + g_attributeNames[i], NumericTraits<Imath::Vec3<T> >::dataType() ) );
 	}
-	
+
 	MPlug result = finishCreating( parameter, attribute, node );
-	
+
 	if( !doUpdate( parameter, result ) )
 	{
 		return MPlug(); // failure
 	}
-	
+
 	if( !finishUpdating( parameter, result ) )
 	{
 		return MPlug(); // failure
 	}
-	
+
 	return result;
 }
 
@@ -211,40 +211,40 @@ MStatus TransformationMatrixParameterHandler<T>::doSetValue( IECore::ConstParame
 	{
 		return MS::kFailure;
 	}
-	
+
 	IECore::TransformationMatrix<T> tMatrix = p->getTypedValue();
-	
+
 	if( tMatrix.rotate.order() != Imath::Euler<T>::XYZ )
-	{	
-		IECore::msg( 
-			IECore::Msg::Error, 
-			"TransformationMatrixParameterHandler::doSetValue", 
+	{
+		IECore::msg(
+			IECore::Msg::Error,
+			"TransformationMatrixParameterHandler::doSetValue",
 			"The rotation order of the parameter '"+parameter->name()+"' is not XYZ, unable to set value."
 		);
 		return MS::kFailure;
 	}
-		
+
 	if( !setVecValues( plug.child( TRANSLATE_INDEX ), tMatrix.translate ) )
-		return MS::kFailure; 
-	
+		return MS::kFailure;
+
 	if( !setVecValues( plug.child( ROTATE_INDEX ), tMatrix.rotate ) )
 		return MS::kFailure;
-	
+
 	if( !setVecValues( plug.child( SCALE_INDEX ), tMatrix.scale ) )
 		return MS::kFailure;
-		
+
 	if( !setVecValues( plug.child( SHEAR_INDEX ), tMatrix.shear ) )
 		return MS::kFailure;
-	
+
 	if( !setVecValues( plug.child( SCALEPIVOT_INDEX ), tMatrix.scalePivot ) )
 		return MS::kFailure;
-	
+
 	if( !setVecValues( plug.child( SCALEPIVOTTRANS_INDEX ), tMatrix.scalePivotTranslation ) )
 		return MS::kFailure;
-	
+
 	if( !setVecValues( plug.child( ROTATEPIVOT_INDEX ), tMatrix.rotatePivot ) )
-		return MS::kFailure; 
-	
+		return MS::kFailure;
+
 	if( !setVecValues( plug.child( ROTATEPIVOTTRANS_INDEX ), tMatrix.rotatePivotTranslation ) )
 		return MS::kFailure;
 
@@ -259,28 +259,28 @@ MStatus TransformationMatrixParameterHandler<T>::doSetValue( const MPlug &plug, 
 	{
 		return MS::kFailure;
 	}
-	
+
 	IECore::TransformationMatrix<T> tMatrix = p->getTypedValue();
-	
+
 	if( tMatrix.rotate.order() != Imath::Euler<T>::XYZ )
 	{
-		IECore::msg( 
-			IECore::Msg::Error, 
-			"TransformationMatrixParameterHandler::doSetValue", 
+		IECore::msg(
+			IECore::Msg::Error,
+			"TransformationMatrixParameterHandler::doSetValue",
 			"The rotation order of the parameter '"+parameter->name()+"' is not XYZ, unable to set value."
 		);
 		return MS::kFailure;
 	}
-	
+
 	std::vector<Imath::Vec3<T> > v;
 	v.resize(8);
-	
+
 	for( unsigned int i=0; i<8; i++ )
 	{
 		if( !getVecValues( plug.child(i), v[i] ) )
 			return MS::kFailure;
-	}	
-	
+	}
+
 	tMatrix.translate = v[ TRANSLATE_INDEX ];
 	tMatrix.rotate = Imath::Euler<T>(v[ ROTATE_INDEX ]);
 	tMatrix.scale = v[ SCALE_INDEX ];
@@ -289,9 +289,9 @@ MStatus TransformationMatrixParameterHandler<T>::doSetValue( const MPlug &plug, 
 	tMatrix.scalePivotTranslation = v[ SCALEPIVOTTRANS_INDEX ];
 	tMatrix.rotatePivot = v[ ROTATEPIVOT_INDEX ];
 	tMatrix.rotatePivotTranslation = v[ ROTATEPIVOTTRANS_INDEX ];
-	
+
 	p->setTypedValue( tMatrix );
-	
+
 	return MS::kSuccess;
 }
 
@@ -302,15 +302,15 @@ MStatus TransformationMatrixParameterHandler<T>::setVecValues( MPlug vecPlug, Im
 	{
 		return MS::kFailure;
 	}
-	
+
 	for( unsigned int i=0; i<3; i++ )
-	{	
+	{
 		if( !vecPlug.child(i).setValue( values[i] ) )
 		{
 			return MS::kFailure;
 		}
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -321,15 +321,15 @@ MStatus TransformationMatrixParameterHandler<T>::getVecValues( MPlug vecPlug, Im
 	{
 		return MS::kFailure;
 	}
-	
+
 	for( unsigned int i=0; i<3; i++ )
-	{	
+	{
 		if( !vecPlug.child(i).getValue( values[i] ) )
 		{
 			return MS::kFailure;
 		}
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -341,7 +341,7 @@ MStatus TransformationMatrixParameterHandler<T>::setVecDefaultValues( MPlug vecP
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnNumericAttribute fnN;
 	for( unsigned int i=0; i<3; i++ )
 	{
@@ -351,7 +351,7 @@ MStatus TransformationMatrixParameterHandler<T>::setVecDefaultValues( MPlug vecP
 			return MS::kFailure;
 		}
 	}
-	
+
 	return MS::kSuccess;
 }
 
@@ -362,7 +362,7 @@ MStatus TransformationMatrixParameterHandler<T>::setUnitVecDefaultValues( MPlug 
 	{
 		return MS::kFailure;
 	}
-	
+
 	MFnUnitAttribute fnU;
 	for( unsigned int i=0; i<3; i++ )
 	{
@@ -372,6 +372,6 @@ MStatus TransformationMatrixParameterHandler<T>::setUnitVecDefaultValues( MPlug 
 			return MS::kFailure;
 		}
 	}
-	
+
 	return MS::kSuccess;
 }

@@ -58,7 +58,7 @@ class SceneShapeInterfaceComponentBoundIterator : public MPxGeometryIterator
 		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObjectArray &components );
 		SceneShapeInterfaceComponentBoundIterator( void *userGeometry, MObject &components );
 		~SceneShapeInterfaceComponentBoundIterator();
-		
+
 		virtual bool isDone() const;
 		virtual void next();
 		virtual void reset();
@@ -71,16 +71,16 @@ class SceneShapeInterfaceComponentBoundIterator : public MPxGeometryIterator
 		virtual int index() const;
 		virtual bool hasNormals() const;
 		virtual int indexUnsimplified() const;
-		
+
 	private:
-		
+
 		void computeNumComponents();
-		
+
 		SceneShapeInterface* m_sceneShapeInterface;
 		unsigned m_idx;
 		MObjectArray m_components;
 		unsigned m_numComponents;
-	
+
 };
 
 } // namespace IECoreMaya

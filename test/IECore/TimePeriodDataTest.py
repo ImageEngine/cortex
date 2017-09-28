@@ -89,15 +89,15 @@ class TimePeriodDataTest( unittest.TestCase ) :
 		self.assertEqual( dd, eval( repr(dd) ) )
 
 	def testHash( self ) :
-	
+
 		self.assertEqual(
 			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
-			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),		
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
 		)
 
 		self.assertNotEqual(
 			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 3, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
-			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 4, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),		
+			IECore.TimePeriodData( IECore.TimePeriod( datetime.datetime( 2009, 4, 12 ), datetime.timedelta( days = 1 ) ) ).hash(),
 		)
 
 	def setUp(self):

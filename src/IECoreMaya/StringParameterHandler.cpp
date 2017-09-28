@@ -76,13 +76,13 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 	{
 		return MS::kFailure;
 	}
-	
+
 	MObject attribute = plug.attribute();
-	
+
 	switch( getValueProvider(parameter) )
 	{
 		case ConnectedNodeNameValueProvider :
-		{	
+		{
 			MFnMessageAttribute fnMAttr( attribute );
 			if( !fnMAttr.hasObj( attribute ) )
 			{
@@ -90,9 +90,9 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 			}
 			break;
 		}
-		
+
 		default :
-		{	
+		{
 			// we'd like to be setting the default value here, but as maya doesn't save the default value
 			// for dynamic string attributes in scene files, it'll be lost when the scene is reloaded. it's
 			// best therefore that we don't set the default at all, so that the default is "", which is what
@@ -116,9 +116,9 @@ MStatus StringParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, M
 					return MS::kFailure;
 				}
 			}
-		}	
+		}
 	}
-	
+
 	return finishUpdating( parameter, plug );
 }
 
@@ -131,7 +131,7 @@ MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, con
 	}
 
 	MObject attribute;
-	
+
 	switch( getValueProvider(parameter) )
 	{
 		case ConnectedNodeNameValueProvider :
@@ -140,7 +140,7 @@ MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, con
 			attribute = fnMAttr.create( plugName, plugName );
 			break;
 		}
-		
+
 		default :
 		{
 			MFnTypedAttribute fnTAttr;
@@ -148,12 +148,12 @@ MPlug StringParameterHandler::doCreate( IECore::ConstParameterPtr parameter, con
 		}
 	}
 
-	MPlug thePlug = finishCreating( parameter, attribute, node );	
+	MPlug thePlug = finishCreating( parameter, attribute, node );
 	if( finishUpdating( parameter, thePlug ) )
 	{
 		return thePlug;
 	}
-	
+
 	return MPlug();
 }
 
@@ -164,14 +164,14 @@ MStatus StringParameterHandler::doSetValue( IECore::ConstParameterPtr parameter,
 	{
 		return MS::kFailure;
 	}
-	
+
 	switch( getValueProvider(parameter) )
 	{
 		case ConnectedNodeNameValueProvider :
 		{
 			return MS::kSuccess;
 		}
-		
+
 		default :
 			return plug.setValue( p->getTypedValue().c_str() );
 	}
@@ -179,7 +179,7 @@ MStatus StringParameterHandler::doSetValue( IECore::ConstParameterPtr parameter,
 
 MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const
 {
-	
+
 	IECore::StringParameterPtr p = IECore::runTimeCast<IECore::StringParameter>( parameter );
 	if( !p )
 	{
@@ -192,14 +192,14 @@ MStatus StringParameterHandler::doSetValue( const MPlug &plug, IECore::Parameter
 	{
 		p->setTypedValue( v.asChar() );
 	}
-	
+
 	return result;
 }
 
 MStatus StringParameterHandler::getPlugValue( const MPlug &plug, IECore::ConstStringParameterPtr parameter, MString &value ) const
 {
-	MStatus result;	
-	
+	MStatus result;
+
 	switch( getValueProvider(parameter) )
 	{
 		case NodeNameValueProvider :
@@ -207,7 +207,7 @@ MStatus StringParameterHandler::getPlugValue( const MPlug &plug, IECore::ConstSt
 			MObject node = plug.node();
 			return getPathOrNameFromNode( node, value );
 		}
-		
+
 		case ConnectedNodeNameValueProvider :
 		{
 			MPlugArray connections;
@@ -217,13 +217,13 @@ MStatus StringParameterHandler::getPlugValue( const MPlug &plug, IECore::ConstSt
 				value = "";
 				return MS::kSuccess;
 			}
-			
+
 			MObject node = connections[0].node();
 			return getPathOrNameFromNode( node, value );
 		}
-		
+
 		default :
-			return plug.getValue( value );	
+			return plug.getValue( value );
 	}
 
 	return MS::kFailure;
@@ -254,7 +254,7 @@ MStatus StringParameterHandler::getPathOrNameFromNode( const MObject &node, MStr
 	}
 	return MS::kSuccess;
 }
-	
+
 StringParameterHandler::ValueProvider StringParameterHandler::getValueProvider( const IECore::ConstParameterPtr parameter )
 {
 	const IECore::ConstCompoundObjectPtr userData = parameter->userData();
@@ -263,7 +263,7 @@ StringParameterHandler::ValueProvider StringParameterHandler::getValueProvider( 
 	{
 		return InvalidValueProvider;
 	}
-	
+
 	const IECore::ConstStringDataPtr valueProvider = maya->member<const IECore::StringData>("valueProvider");
 	if (!valueProvider)
 	{
@@ -275,10 +275,10 @@ StringParameterHandler::ValueProvider StringParameterHandler::getValueProvider( 
 		return NodeNameValueProvider;
 	}
 	else if( valueProvider->readable() == "connectedNodeName" )
-	{		
+	{
 		return ConnectedNodeNameValueProvider;
 	}
-	
+
 	return InvalidValueProvider;
 }
 

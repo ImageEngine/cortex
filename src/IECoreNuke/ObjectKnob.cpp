@@ -47,15 +47,15 @@ using namespace boost::python;
 ObjectKnob::ObjectKnob( DD::Image::Knob_Closure *f, IECore::ObjectPtr *storage, const char *name, const char *label )
 	:	DD::Image::Knob( f, name, label ), m_defaultValue( 0 ), m_value( 0 )
 {
-	
+
 	set_flag( NO_ANIMATION );
-	
+
 	if( storage && *storage )
 	{
 		m_defaultValue = (*storage)->copy();
 		m_value = m_defaultValue;
 	}
-	
+
 	// set up the object that will provide the python binding
 	IECorePython::ScopedGILLock gilLock;
 	Detail::PythonObjectKnobPtr pythonKnob = new Detail::PythonObjectKnob;
@@ -72,7 +72,7 @@ ObjectKnob::~ObjectKnob()
 	object pythonKnobObject( handle<>( borrowed( (PyObject *)pyObject() ) ) );
 	Detail::PythonObjectKnobPtr pythonKnob = extract<Detail::PythonObjectKnobPtr>( pythonKnobObject );
 	pythonKnob->objectKnob = 0;
-	Py_DECREF( pythonKnobObject.ptr() );	
+	Py_DECREF( pythonKnobObject.ptr() );
 }
 
 bool ObjectKnob::setValue( IECore::ConstObjectPtr value )
@@ -84,7 +84,7 @@ bool ObjectKnob::setValue( IECore::ConstObjectPtr value )
 		changed();
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -95,7 +95,7 @@ IECore::ConstObjectPtr ObjectKnob::getValue() const
 
 ObjectKnob *ObjectKnob::objectKnob( DD::Image::Knob_Callback f, IECore::ObjectPtr *storage, const char *name, const char *label )
 {
-	return CustomKnob2( ObjectKnob, f, storage, name, label ); 
+	return CustomKnob2( ObjectKnob, f, storage, name, label );
 }
 
 const char *ObjectKnob::Class() const
@@ -109,7 +109,7 @@ void ObjectKnob::to_script( std::ostream &os, const DD::Image::OutputContext *co
 	{
 		os << "{";
 	}
-	
+
 		if( m_value )
 		{
 			IECore::MemoryIndexedIOPtr io = new IECore::MemoryIndexedIO( IECore::ConstCharVectorDataPtr(), IECore::IndexedIO::rootPath, IECore::IndexedIO::Exclusive | IECore::IndexedIO::Write );
@@ -117,7 +117,7 @@ void ObjectKnob::to_script( std::ostream &os, const DD::Image::OutputContext *co
 			IECore::ConstCharVectorDataPtr buffer = io->buffer();
 			os << IECore::decToHex( buffer->readable().begin(), buffer->readable().end() );
 		}
-		
+
 	if( quote )
 	{
 		os << "}";
@@ -125,11 +125,11 @@ void ObjectKnob::to_script( std::ostream &os, const DD::Image::OutputContext *co
 }
 
 bool ObjectKnob::from_script( const char *value )
-{	
-	IECore::ObjectPtr object = m_defaultValue;	
+{
+	IECore::ObjectPtr object = m_defaultValue;
 	if( value && strlen( value ) )
 	{
-	
+
 		size_t n = strlen( value );
 		IECore::CharVectorDataPtr buffer = new IECore::CharVectorData;
 		buffer->writable().resize( n / 2 );
@@ -146,7 +146,7 @@ bool ObjectKnob::from_script( const char *value )
 		}
 
 	}
-	
+
 	return setValue( object );
 }
 
@@ -163,7 +163,7 @@ void ObjectKnob::store( DD::Image::StoreType storeType, void *storage, DD::Image
 		*((IECore::ObjectPtr *)storage) = m_value;
 	}
 }
-		
+
 bool ObjectKnob::valuesEqual( const IECore::Object *value1, const IECore::Object *value2 ) const
 {
 	bool equal = true;
@@ -175,6 +175,6 @@ bool ObjectKnob::valuesEqual( const IECore::Object *value1, const IECore::Object
 	{
 		equal = !value1;
 	}
-	
+
 	return equal;
 }

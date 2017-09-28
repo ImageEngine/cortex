@@ -58,7 +58,7 @@ class IECORE_API PolygonIterator
 		/// Uninitialised.
 		inline PolygonIterator();
 		inline PolygonIterator( NumVerticesIterator numVerticesIterator, VertexIndexIterator vertexIndexIterator, int faceVaryingOffset );
-	
+
 		inline PolygonIterator &operator++();
 		inline PolygonIterator operator++( int );
 
@@ -66,7 +66,7 @@ class IECORE_API PolygonIterator
 		inline bool operator!=( const PolygonIterator &rhs ) const;
 
 		inline PolygonIterator &operator=( const PolygonIterator &rhs );
-		
+
 		/// Returns an iterator to the beginning of the range of vertex interpolated values
 		/// for this polygon. Typically you should pass PrimitiveVariable::data::readable()::begin()
 		/// for the primitive variable you're interested in.
@@ -75,7 +75,7 @@ class IECORE_API PolygonIterator
 		/// Returns the matching end of range iterator for vertexBegin.
 		template<typename ValueIterator>
 		PolygonVertexIterator<ValueIterator> vertexEnd( ValueIterator valuesBegin ) const;
-		
+
 		/// Returns an iterator to the beginning of the range of facevarying interpolated
 		/// values for this polygon. Typically you should pass PrimitiveVariable::data::readable()::begin()
 		/// for the primitive variable you're interested in.
@@ -84,15 +84,15 @@ class IECORE_API PolygonIterator
 		/// Returns the matching end of range iterator for faceVaryingBegin.
 		template<typename ValueIterator>
 		ValueIterator faceVaryingEnd( ValueIterator valuesBegin ) const;
-		
+
 	private :
 
 		typedef boost::counting_iterator<int> FaceVaryingVertexIndexIterator;
-		
+
 		NumVerticesIterator m_numVerticesIterator;
 		VertexIndexIterator m_vertexIndexIterator;
 		int m_faceVaryingOffset;
-		
+
 };
 
 } // namespace IECore

@@ -63,7 +63,7 @@ class IECORE_API FileSequence : public RunTimeTyped
 		/// fileName must be a string containing a single sequence of at least # character - this
 		/// represents the location and padding of the frame numbers.
 		FileSequence( const std::string &fileName, FrameListPtr frameList );
-	
+
 		/// Constructs a new FileSequence object by parsing the given string.
 		/// Find the longest space-delimited tail substring that is a parseable FrameList and
 		/// creates a FileSequence instance which contains that FrameList. Everything before that is considered to

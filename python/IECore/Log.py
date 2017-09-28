@@ -70,7 +70,7 @@ def setLogLevel( level ):
 		return
 
 	current.setLevel( level )
-	
+
 	debug("setLogLevel(", level, ")")
 
 def __getCallStr(frame):

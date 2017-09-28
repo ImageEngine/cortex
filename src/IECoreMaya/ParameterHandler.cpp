@@ -132,7 +132,7 @@ ConstParameterHandlerPtr ParameterHandler::create( IECore::ConstObjectPtr object
 ConstParameterHandlerPtr ParameterHandler::create( IECore::TypeId id )
 {
 	const HandlerMap &h = handlers();
-	
+
 	do {
 		HandlerMap::const_iterator it = h.find( id );
 		if( it!=h.end() )
@@ -141,7 +141,7 @@ ConstParameterHandlerPtr ParameterHandler::create( IECore::TypeId id )
 		}
 		id = IECore::RunTimeTyped::baseTypeId( id );
 	} while( id!=IECore::InvalidTypeId );
-	
+
 	return 0;
 }
 
@@ -179,7 +179,7 @@ MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MPl
 		{
 			nodeName = fnDAGN.fullPathName();
 		}
-	
+
 		IECore::ConstStringDataPtr defaultConnection = mayaUserData->member<IECore::StringData>( "defaultConnection" );
 		if( defaultConnection )
 		{
@@ -196,8 +196,8 @@ MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MPl
 			expFn.create( cmd );
 		}
 	}
-	
-	
+
+
 	return plug;
 }
 
@@ -212,7 +212,7 @@ MPlug ParameterHandler::finishCreating( IECore::ConstParameterPtr parameter, MOb
 MStatus ParameterHandler::finishUpdating( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
 	MStatus status = MS::kSuccess;
-	
+
 	IECore::ConstCompoundObjectPtr mayaUserData = parameter->userData()->member<IECore::CompoundObject>( "maya" );
 	if( mayaUserData )
 	{
@@ -223,7 +223,7 @@ MStatus ParameterHandler::finishUpdating( IECore::ConstParameterPtr parameter, M
 			status = fnA.setStorable( storable->readable() );
 		}
 	}
-	
+
 	return status;
 }
 

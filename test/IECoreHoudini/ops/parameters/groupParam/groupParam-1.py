@@ -12,7 +12,7 @@ class groupParam( IECore.Op ) :
 				defaultValue = IECore.MeshPrimitive()
 			)
 		)
-		
+
 		self.parameters().addParameter(
 			IECore.GroupParameter(
 				name = "input",
@@ -22,11 +22,11 @@ class groupParam( IECore.Op ) :
 		)
 
 	def doOperation( self, args ) :
-		
+
 		for child in args["input"].children() :
 			if child.isInstanceOf( IECore.TypeId.Primitive ) :
 				return child.copy()
-		
+
 		return IECore.PointsPrimitive( 0 )
 
 IECore.registerRunTimeTyped( groupParam )

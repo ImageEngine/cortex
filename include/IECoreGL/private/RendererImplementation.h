@@ -87,7 +87,7 @@ class RendererImplementation : public IECore::RunTimeTyped
 
 		virtual void addState( StateComponentPtr state ) = 0;
 		virtual StateComponent *getState( IECore::TypeId type ) = 0;
-		template <class T> 
+		template <class T>
 		T *getState();
 
 		// Set a custom state

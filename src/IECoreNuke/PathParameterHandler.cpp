@@ -46,7 +46,7 @@ ParameterHandler::Description<PathParameterHandler> PathParameterHandler::g_desc
 PathParameterHandler::PathParameterHandler()
 {
 }
-		
+
 DD::Image::Knob *PathParameterHandler::knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage )
 {
 	std::string label = knobLabel( parameter );

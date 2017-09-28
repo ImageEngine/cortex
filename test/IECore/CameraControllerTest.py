@@ -46,17 +46,17 @@ class CameraControllerTest( unittest.TestCase ) :
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) )
 		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
 		camera.parameters()["projection"] = "orthographic"
-		
+
 		controller = IECore.CameraController( camera )
-		
+
 		near, far = controller.unproject( IECore.V2f( 0, 0 ) )
 		self.assertEqual( near, IECore.V3f( -2, 1, -.1 ) )
 		self.assertEqual( far, IECore.V3f( -2, 1, -10 ) )
-		
+
 		near, far = controller.unproject( IECore.V2f( 500, 250 ) )
 		self.assertEqual( near, IECore.V3f( 2, -1, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 2, -1, -10 ) )
-		
+
 		near, far = controller.unproject( IECore.V2f( 250, 125 ) )
 		self.assertEqual( near, IECore.V3f( 0, 0, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 0, 0, -10 ) )
@@ -69,31 +69,31 @@ class CameraControllerTest( unittest.TestCase ) :
 		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
 		camera.parameters()["projection"] = "perspective"
 		camera.parameters()["projection:fov"] = 90
-		
+
 		controller = IECore.CameraController( camera )
-				
+
 		near, far = controller.unproject( IECore.V2f( 0, 0 ) )
 		self.assertEqual( near, IECore.V3f( -.1, .05, -.1 ) )
 		self.assertEqual( far, IECore.V3f( -10, 5, -10 ) )
-		
+
 		near, far = controller.unproject( IECore.V2f( 500, 250 ) )
 		self.assertEqual( near, IECore.V3f( .1, -.05, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 10, -5, -10 ) )
-		
+
 		near, far = controller.unproject( IECore.V2f( 250, 125 ) )
 		self.assertEqual( near, IECore.V3f( 0, 0, -.1 ) )
 		self.assertEqual( far, IECore.V3f( 0, 0, -10 ) )
 
 	def testProjectOrthographic( self ) :
-	
+
 		camera = IECore.Camera()
 		camera.parameters()["clippingPlanes"] = IECore.V2f( .1, 10 )
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) )
 		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
 		camera.parameters()["projection"] = IECore.StringData( "orthographic" )
-		
+
 		controller = IECore.CameraController( camera )
-	
+
 		r = IECore.Rand48()
 		for i in range( 0, 100 ) :
 			rasterPosition = IECore.V2f( r.nexti() % 500, r.nexti() % 250 )
@@ -106,18 +106,18 @@ class CameraControllerTest( unittest.TestCase ) :
 					nearProjected, 0.0001
 				)
 			)
-	
+
 	def testProjectPerspective( self ) :
-	
+
 		camera = IECore.Camera()
 		camera.parameters()["clippingPlanes"] = IECore.V2f( .1, 10 )
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -1, -.5 ), IECore.V2f( 1, .5 ) )
 		camera.parameters()["resolution"] = IECore.V2i( 500, 250 )
 		camera.parameters()["projection"] = IECore.StringData( "perspective" )
 		camera.parameters()["projection:fov"] = IECore.FloatData( 50 )
-		
+
 		controller = IECore.CameraController( camera )
-	
+
 		r = IECore.Rand48()
 		for i in range( 0, 100 ) :
 			rasterPosition = IECore.V2f( r.nexti() % 500, r.nexti() % 250 )
@@ -130,62 +130,62 @@ class CameraControllerTest( unittest.TestCase ) :
 					nearProjected, 0.0001
 				)
 			)
-	
+
 	def testCameraWithExistingTransform( self ) :
-	
+
 		camera = IECore.Camera()
 		transform = IECore.MatrixTransform( IECore.M44f() )
 		originalMatrix = transform.transform()
 		camera.setTransform( transform )
-		
+
 		controller = IECore.CameraController( camera )
-		
+
 		controller.motionStart( controller.MotionType.Track, IECore.V2f( 0 ) )
 		controller.motionEnd( IECore.V2f( 10 ) )
-		
+
 		self.assertNotEqual( transform.transform(), originalMatrix )
-	
+
 	def testSetResolutionScaling( self ) :
-	
+
 		camera = IECore.Camera()
 		camera.parameters()["resolution"] = IECore.V2i( 200, 100 )
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) )
-		
+
 		controller = IECore.CameraController( camera )
-		
+
 		controller.setResolution( IECore.V2i( 200, 200 ) )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
-		
+
 		controller.setResolution( IECore.V2i( 200, 100 ), controller.ScreenWindowAdjustment.ScaleScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) ) )
-		
+
 	def testSetResolutionCropping( self ) :
-	
+
 		camera = IECore.Camera()
 		camera.parameters()["resolution"] = IECore.V2i( 200, 100 )
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 2, 1 ) )
-		
+
 		controller = IECore.CameraController( camera )
-		
+
 		controller.setResolution( IECore.V2i( 100, 100 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		
+
 		controller.setResolution( IECore.V2i( 100, 200 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1, -2 ), IECore.V2f( 1, 2 ) ) )
 
 	def testSetResolutionCroppingWithOffsetCenter( self ) :
-	
+
 		camera = IECore.Camera()
 		camera.parameters()["resolution"] = IECore.V2i( 200, 100 )
 		camera.parameters()["screenWindow"] = IECore.Box2f( IECore.V2f( -2, -1 ), IECore.V2f( 0, 0 ) )
-		
+
 		controller = IECore.CameraController( camera )
-		
+
 		controller.setResolution( IECore.V2i( 100, 100 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1.5, -1 ), IECore.V2f( -0.5, 0  ) ) )
-		
+
 		controller.setResolution( IECore.V2i( 100, 200 ), controller.ScreenWindowAdjustment.CropScreenWindow )
 		self.assertEqual( camera.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1.5, -1.5 ), IECore.V2f( -0.5, 0.5 ) ) )
-		
+
 if __name__ == "__main__":
         unittest.main()

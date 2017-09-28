@@ -71,30 +71,30 @@ void CompressSmoothSkinningDataOp::modify( Object * object, const CompoundObject
 {
 	SmoothSkinningData *skinningData = static_cast<SmoothSkinningData *>( object );
 	assert( skinningData );
-	
+
 	const float threshold = m_thresholdParameter->getNumericValue();
-	
+
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
 	const std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->readable();
-	
+
 	std::vector<int> newOffsets;
 	std::vector<int> newCounts;
 	std::vector<int> newIndices;
 	std::vector<float> newWeights;
-	
+
 	int offset = 0;
-	
+
 	for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 	{
 		int count = 0;
-		
+
 		for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 		{
 			int current = pointIndexOffsets[i] + j;
 			float weight = pointInfluenceWeights[current];
-			
+
 			if ( weight > threshold )
 			{
 				newIndices.push_back( pointInfluenceIndices[current] );
@@ -107,7 +107,7 @@ void CompressSmoothSkinningDataOp::modify( Object * object, const CompoundObject
 		newCounts.push_back( count );
 		offset += count;
 	}
-	
+
 	// replace the vectors on the SmoothSkinningData
 	if (  newWeights.size() != pointInfluenceWeights.size() )
 	{

@@ -94,10 +94,10 @@ float ieSolveNormalizedCubic( float A; float B; float C; output float roots[] )
 	{
 		// We're solving x^3 + A x^2 + Bx = 0. That's got a root where x = 0,
 		// and potentially two more where x^2 + A x + B = 0:
-		
+
 		// find quadratic roots, if they exist:
 		rootCount = ieSolveQuadratic( 1, A, B, roots );
-		
+
 		// add x = 0 root:
 		roots[ rootCount ] = 0;
 		rootCount = rootCount + 1;

@@ -69,7 +69,7 @@ class IECOREGL_API Renderable : public IECore::RunTimeTyped
 		virtual void render( State *currentState ) const = 0;
 		/// Returns the bounding box for the Renderable.
 		virtual Imath::Box3f bound() const = 0;
-		
+
 };
 
 IE_CORE_DECLAREPTR( Renderable );

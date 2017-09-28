@@ -41,7 +41,7 @@
 	in vec3 geometryCs[];\
 	\
 	out vec3 fragmentCs;
-	
+
 #define IECOREGL_CURVESPRIMITIVE_DECLARE_CUBIC_LINES_PARAMETERS \
 	\
 	layout( lines_adjacency ) in;\
@@ -86,7 +86,7 @@
 
 # define IECOREGL_ASSIGN_VERTEX_PASS_THROUGH \
 	fragmentCs = geometryCs[1];
-	
+
 void ieCurvesPrimitiveCoefficients( in mat4x4 basis, in float t, out float c0, out float c1, out float c2, out float c3 )
 {
 	float t2 = t * t;
@@ -115,7 +115,7 @@ void ieCurvesPrimitiveCoefficients(
 
 	float twoT = 2.0 * t;
 	float threeT2 = 3.0 * t2;
-	
+
 	d0 = basis[0][0] * threeT2 + basis[1][0] * twoT + basis[2][0];
 	d1 = basis[0][1] * threeT2 + basis[1][1] * twoT + basis[2][1];
 	d2 = basis[0][2] * threeT2 + basis[1][2] * twoT + basis[2][2];
@@ -125,7 +125,7 @@ void ieCurvesPrimitiveCoefficients(
 vec4 ieCurvesPrimitivePosition( in float c0, in float c1, in float c2, in float c3 )
 {
 	return
-		
+
 		gl_in[0].gl_Position * c0 +
 		gl_in[1].gl_Position * c1 +
 		gl_in[2].gl_Position * c2 +
@@ -136,7 +136,7 @@ vec4 ieCurvesPrimitivePosition( in mat4x4 basis, in float t )
 {
 	float c0, c1, c2, c3;
 	ieCurvesPrimitiveCoefficients( basis, t, c0, c1, c2, c3 );
-	return ieCurvesPrimitivePosition( c0, c1, c2, c3 );	
+	return ieCurvesPrimitivePosition( c0, c1, c2, c3 );
 }
 
 void ieCurvesPrimitiveUTangentAndNormal( in vec4 p, in vec4 vTangent, out vec4 uTangent, out vec4 normal )
@@ -150,7 +150,7 @@ void ieCurvesPrimitiveUTangentAndNormal( in vec4 p, in vec4 vTangent, out vec4 u
 	{
 		view = vec3( 0, 0, 1 );
 	}
-	
+
 	uTangent = normalize( vec4( cross( view.xyz, vTangent.xyz ), 0 ) );
 	normal = vec4( cross( uTangent.xyz, vTangent.xyz ), 0 );
 }
@@ -182,23 +182,23 @@ void ieCurvesPrimitiveCubicFrame(
 {
 	float c0, c1, c2, c3, d0, d1, d2, d3;
 	ieCurvesPrimitiveCoefficients( basis, t, c0, c1, c2, c3, d0, d1, d2, d3 );
-	
+
 	p =
-	
+
 		gl_in[0].gl_Position * c0 +
 		gl_in[1].gl_Position * c1 +
 		gl_in[2].gl_Position * c2 +
 		gl_in[3].gl_Position * c3;
-	
+
 	vTangent =
 
 		gl_in[0].gl_Position * d0 +
 		gl_in[1].gl_Position * d1 +
 		gl_in[2].gl_Position * d2 +
 		gl_in[3].gl_Position * d3;
-		
+
 	vTangent = normalize( vTangent );
-	
+
 	ieCurvesPrimitiveUTangentAndNormal( p, vTangent, uTangent, n );
 }
 

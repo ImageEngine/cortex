@@ -45,13 +45,13 @@ class unstorable( IECore.Op ) :
 				defaultValue = IECore.CompoundObject(),
 				type=IECore.CompoundObject.staticTypeId()
 			)
-							
+
 		)
-		
+
 		self.parameters().addParameters(
-		
+
 			[
-		
+
 				IECore.StringParameter(
 					"label",
 					"A label for use with ClassVectorParameterUI",
@@ -65,13 +65,13 @@ class unstorable( IECore.Op ) :
 					type=IECore.CompoundObject.staticTypeId(),
 					userData=IECore.CompoundObject( { "maya" : { "storable" : IECore.BoolData( False ) } } ),
 				),
-				
+
 			]
-		
+
 		)
 
 	def doOperation( self, args ):
-		
+
 		return IECore.CompoundObject()
 
 IECore.registerRunTimeTyped( unstorable )

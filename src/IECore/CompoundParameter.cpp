@@ -95,7 +95,7 @@ const Parameter::PresetsContainer &CompoundParameter::getPresets() const
 	{
 		childPresets.push_back( &(m_parameters[i]->getPresets()) );
 	}
-	
+
 	// find the intersection of all the child preset names
 	set<string> names;
 	for( PresetsContainer::const_iterator it=childPresets[0]->begin(); it!=childPresets[0]->end(); it++ )
@@ -111,7 +111,7 @@ const Parameter::PresetsContainer &CompoundParameter::getPresets() const
 					break;
 				}
 			}
-			
+
 			if( cIt==childPresets[i]->end() )
 			{
 				ok = false;
@@ -123,11 +123,11 @@ const Parameter::PresetsContainer &CompoundParameter::getPresets() const
 			names.insert( it->first );
 		}
 	}
-	
+
  	for( set<string>::const_iterator nIt=names.begin(); nIt!=names.end(); nIt++ )
 	{
 		CompoundObjectPtr o = new CompoundObject;
-		
+
 		for( size_t i=0; i<m_parameters.size(); i++ )
 		{
 			PresetsContainer::const_iterator cIt;
@@ -142,7 +142,7 @@ const Parameter::PresetsContainer &CompoundParameter::getPresets() const
 		}
 		pr.push_back( Preset( *nIt, o ) );
 	}
-	
+
 	return pr;
 }
 
@@ -161,7 +161,7 @@ bool CompoundParameter::presetsOnly() const
 	{
 		return false;
 	}
-	
+
 	for( ParameterVector::const_iterator it=m_parameters.begin(); it!=m_parameters.end(); it++ )
 	{
 		if( !(*it)->presetsOnly() )
@@ -241,7 +241,7 @@ bool CompoundParameter::valueValid( const Object *value, std::string *reason ) c
 		}
 		return false;
 	}
-		
+
 	CompoundObject::ObjectMap::const_iterator it;
 	for( it=tValue->members().begin(); it!=tValue->members().end(); it++ )
 	{

@@ -128,7 +128,7 @@ class FromMayaObjectConverter : public FromMayaConverter
 		typedef std::pair<MFn::Type, IECore::TypeId> Types;
 		typedef std::map<Types, CreatorFn> TypesToFnsMap;
 		typedef std::map<MFn::Type, TypesToFnsMap::const_iterator> DefaultConvertersMap;
-		
+
 		static TypesToFnsMap &typesToFns();
 		static DefaultConvertersMap &defaultConverters();
 

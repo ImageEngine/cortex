@@ -59,7 +59,7 @@ DisplayStyle::DisplayStyle()
 	m_data->pointsState = new IECoreGL::State( true );
 	m_data->boundsState = new IECoreGL::State( true );
 	m_data->litState = new IECoreGL::State( true );
-	
+
 	m_data->wireframeState->add( new IECoreGL::Primitive::DrawSolid( false ) );
 	m_data->wireframeState->add( new IECoreGL::Primitive::DrawWireframe( true ) );
 

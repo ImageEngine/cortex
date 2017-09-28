@@ -117,7 +117,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assert_( "P" in p )
 		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ], GeometricData.Interpretation.Point ) )
 		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		
+
 		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ), FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p.numPoints, 1 )
 		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
@@ -141,20 +141,20 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		self.assertEqual( p.numPoints, 40 )
 
 	def testHash( self ) :
-	
+
 		p = PointsPrimitive( 1 )
 		p2 = PointsPrimitive( 2 )
-		
+
 		self.assertNotEqual( p.hash(), p2.hash() )
 		self.assertNotEqual( p.topologyHash(), p2.topologyHash() )
-		
+
 		p3 = p2.copy()
 		self.assertEqual( p3.hash(), p2.hash() )
 		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
 		p3["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
 		self.assertNotEqual( p3.hash(), p2.hash() )
 		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
-	
+
 	def testBound( self ) :
 
 		p = PointsPrimitive( 2 )
@@ -176,7 +176,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 		# constantwidth overrides the default
 		p["constantwidth"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
-		
+
 		self.assertEqual(
 			p.bound(),
 			Box3f(
@@ -214,7 +214,7 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		# but it should take effect when type is "patch"
 
 		p["type"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, "patch" )
-		
+
 		diagonal = math.sqrt( 1 ** 2 + 0.5 ** 2 )
 
 		self.assertEqual(

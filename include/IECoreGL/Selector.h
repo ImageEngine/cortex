@@ -93,17 +93,17 @@ class IECOREGL_API Selector : boost::noncopyable
 		/// Completes the selection operation, filling in the vector
 		/// of hits that was passed to the constructor.
 		virtual ~Selector();
-		
+
 		/// Returns the mode this Selector is operating in.
 		Mode mode() const;
-		
+
 		/// The post-projection matrix being used to perform
 		/// the selection. This is applied automatically by
 		/// the constructor, but if the projection matrix is
 		/// changed after construction, then this matrix must
 		/// be multiplied with it.
 		const Imath::M44d &postProjectionMatrix();
-		
+
 		/// Call this to set the name attached to subsequently rendered objects.
 		/// If rendering a Scene, this will be called automatically
 		/// by the NameStateComponents within the Scene.
@@ -112,11 +112,11 @@ class IECOREGL_API Selector : boost::noncopyable
 		/// loads and returns it. No guarantee is made that generated names
 		/// will not clash with names loaded explicitly with the method above.
 		GLuint loadName();
-		
+
 		/// A State that should be used as the base state for
 		/// selection drawing.
 		State *baseState();
-		
+
 		/// The IDRender mode requires a shader which takes a name
 		/// via a "uniform uint ieCoreGLName" parameter and outputs it
 		/// via an "out uint ieCoreGLNameOut" fragment output. The
@@ -131,18 +131,18 @@ class IECOREGL_API Selector : boost::noncopyable
 
 		/// A shader suitable for use in IDRender mode.
 		static const Shader *defaultIDShader();
-		
+
 		/// Returns the currently active Selector - this may be used
 		/// in drawing code to retrieve a selector to call loadName()
 		/// on. The NameStateComponent is an example of a class which
 		/// does this.
 		static Selector *currentSelector();
-		
+
 	private :
-		
+
 		IE_CORE_FORWARDDECLARE( Implementation )
 		ImplementationPtr m_implementation;
-						
+
 };
 
 } // namespace IECoreGL

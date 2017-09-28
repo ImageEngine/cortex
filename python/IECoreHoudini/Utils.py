@@ -133,7 +133,7 @@ def syncSopParametersWithProcedural(n):
 	for p in parms:
 		if n.parm("parm_%s"%p.name):
 			setHoudiniParm( n, p )
-			
+
 def syncSopParametersWithOp(n):
 	fn = IECoreHoudini.FnOpHolder( n )
 	parms = fn.getParameterised().parameters().values()

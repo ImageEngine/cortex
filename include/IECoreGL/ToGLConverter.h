@@ -76,7 +76,7 @@ class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 		/// created. If no matching converters exist then returns 0.
 		static ToGLConverterPtr create( IECore::ConstObjectPtr object, IECore::TypeId resultType=IECore::RunTimeTypedTypeId );
 		//@}
-		
+
 	protected :
 
 		ToGLConverter( const std::string &description, IECore::TypeId supportedType );
@@ -87,7 +87,7 @@ class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 		template<class T>
 		class ConverterDescription
 		{
-			public :			
+			public :
 				ConverterDescription();
 				ConverterDescription( IECore::TypeId inputType, IECore::TypeId resultType );
 			private :
@@ -101,18 +101,18 @@ class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const = 0;
 
 	private :
-	
+
 		typedef ToGLConverterPtr (*CreatorFn)( IECore::ConstObjectPtr object );
-		
+
 		struct Registration
 		{
 			IECore::TypeId resultType;
 			CreatorFn creator;
 		};
-		
+
 		typedef std::multimap<IECore::TypeId, Registration> Registrations;
 		static Registrations &registrations();
-		
+
 };
 
 } // namespace IECoreGL

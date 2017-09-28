@@ -121,7 +121,7 @@ class IECORE_API Group : public VisibleRenderable
 		/// parent exists.
 		Group *parent();
 		const Group *parent() const;
-		
+
 		/// Renders all the children in an attribute block along
 		/// with the transform and state.
 		virtual void render( Renderer *renderer ) const;
@@ -133,15 +133,15 @@ class IECORE_API Group : public VisibleRenderable
 		void renderState( Renderer *renderer ) const;
 		/// Renders all the held children, without any attributeBegin/End.
 		void renderChildren( Renderer *renderer ) const;
-		
+
 		/// Returns the union of the bounds of the children, transformed
 		/// by transformMatrix().
 		virtual Imath::Box3f bound() const;
 
 	private:
-		
+
 		static bool entryListCompare( const IECore::IndexedIO::EntryID& a, const IECore::IndexedIO::EntryID& b );
-		
+
 		static const unsigned int m_ioVersion;
 
 		TransformPtr m_transform;

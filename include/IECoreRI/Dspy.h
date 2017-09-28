@@ -49,7 +49,7 @@ namespace IECoreRI
 /// as well.
 class IECORERI_API Dspy
 {
-	
+
 	public :
 
 		/// A function suitable for implementing DspyImageOpen. This uses IECore::DisplayDriver::create() to make a driver. The reference count is incremented on the
@@ -63,7 +63,7 @@ class IECORERI_API Dspy
 		static PtDspyError imageClose( PtDspyImageHandle image );
 
 	private :
-	
+
 		class Registration;
 		static Registration g_registration;
 

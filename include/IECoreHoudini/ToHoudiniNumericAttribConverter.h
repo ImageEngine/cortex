@@ -52,18 +52,18 @@ class ToHoudiniNumericVectorAttribConverter : public ToHoudiniAttribConverter
 	public :
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( ToHoudiniNumericVectorAttribConverter, ToHoudiniAttribConverter );
-		
+
 		ToHoudiniNumericVectorAttribConverter( const IECore::Data *data );
-		
+
 		virtual ~ToHoudiniNumericVectorAttribConverter();
-		
+
 	protected :
-		
+
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
-		
+
 	private :
-			
+
 		static ToHoudiniAttribConverter::Description<ToHoudiniNumericVectorAttribConverter> m_description;
 
 };
@@ -77,18 +77,18 @@ class ToHoudiniNumericDetailAttribConverter : public ToHoudiniAttribConverter
 	public :
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( ToHoudiniNumericDetailAttribConverter, ToHoudiniAttribConverter );
-		
+
 		ToHoudiniNumericDetailAttribConverter( const IECore::Data *data );
-		
+
 		virtual ~ToHoudiniNumericDetailAttribConverter();
-		
+
 	protected :
-		
+
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo ) const;
 		virtual GA_RWAttributeRef doConversion( const IECore::Data *data, std::string name, GU_Detail *geo, const GA_Range &range ) const;
 
 	private :
-				
+
 		static ToHoudiniAttribConverter::Description<ToHoudiniNumericDetailAttribConverter> m_description;
 
 };

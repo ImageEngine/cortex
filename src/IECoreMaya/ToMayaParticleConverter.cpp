@@ -89,7 +89,7 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	{
 		return false;
 	}
-	
+
 	// get/make a particle shape.
 	// if we've been passed a particle system then we'll update it.
 	// if we're passed a parent then we'll create one under it.
@@ -99,11 +99,11 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	{
 		to = fnPS.create( to );
 	}
-	
+
 	// emit a particle for each position. it is much faster to emit
 	// them all at once from an array than to call the emit( MPoint ) method
 	// many times.
-		
+
 	MPointArray mp( primitive->variableSize( PrimitiveVariable::Vertex ) );
 	if( p->isInstanceOf( V3fVectorDataTypeId ) )
 	{
@@ -117,9 +117,9 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 	}
 
 	fnPS.emit( mp );
-	
+
 	// add all other vertex primvars as per-particle attributes
-	
+
 	for( PrimitiveVariableMap::const_iterator it=primitive->variables.begin(); it!=primitive->variables.end(); it++ )
 	{
 		if( it->second.interpolation!=PrimitiveVariable::Vertex )
@@ -130,7 +130,7 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 		{
 			continue;
 		}
-		
+
 		if( it->first=="Cs" )
 		{
 			addAttribute( it->second.data.get(), fnPS, "rgbPP" );
@@ -140,22 +140,22 @@ bool ToMayaParticleConverter::doConversion( IECore::ConstObjectPtr from, MObject
 			addAttribute( it->second.data.get(), fnPS, it->first.c_str() );
 		}
 	}
-	
+
 	// make sure it can be rendered.
 	// it would perhaps be preferable to use MFnSet::addMember() instead but at the time of
 	// writing (maya 2010) that seems to print out "Result : initialParticleSE" totally unnecessarily.
 	MGlobal::executeCommand( "sets -addElement initialParticleSE " + fnPS.fullPathName() );
-	
+
 	// freeze everything
 	fnPS.saveInitialState();
-	
+
 	// connect it to time so it can be used for simulation
 	MSelectionList selection;
 	selection.add( "time1" );
 	MObject time1;
 	selection.getDependNode( 0, time1 );
 	MFnDependencyNode fnTime1( time1 );
-	
+
 	MDGModifier dgMod;
 	dgMod.connect( fnTime1.findPlug( "outTime" ), fnPS.findPlug( "currentTime" ) );
 	dgMod.doIt();
@@ -182,7 +182,7 @@ void ToMayaParticleConverter::addAttribute( const IECore::Data *data, MFnParticl
 		default :
 			return;
 	}
-		
+
 	MPlug plug = fnPS.findPlug( attrName );
 	if( plug.isNull() )
 	{

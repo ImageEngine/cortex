@@ -41,13 +41,13 @@ import IECore
 import IECoreHoudini
 
 class FnProceduralHolder( IECoreHoudini.FnParameterisedHolder ) :
-	
+
 	_nodeType = "ieProceduralHolder"
-	
+
 	@staticmethod
 	# see FnParameterisedHolder for a description of the parameters
 	def create( name, type, version=None, path="IECORE_PROCEDURAL_PATHS", parent=None, contextArgs={} ) :
-		
+
 		return IECoreHoudini.FnParameterisedHolder._doCreate( FnProceduralHolder._nodeType, name, type, version, path, parent, contextArgs )
 
 	## Convenience method to call setParameterised with the environment variable
@@ -57,5 +57,5 @@ class FnProceduralHolder( IECoreHoudini.FnParameterisedHolder ) :
 		self.setParameterised( className, classVersion, "IECORE_PROCEDURAL_PATHS", updateGui )
 
 	def getProcedural( self ) :
-		
+
 		return self.getParameterised()

@@ -58,9 +58,9 @@ class IECORE_API NormalizeSmoothSkinningWeightsOp : public ModifyOp
 	protected :
 
 		virtual void modify( Object *object, const CompoundObject *operands );
-	
+
 	private :
-		
+
 		BoolParameterPtr m_useLocksParameter;
 		BoolVectorParameterPtr m_influenceLocksParameter;
 };

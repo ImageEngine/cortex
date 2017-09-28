@@ -39,23 +39,23 @@ import unittest
 import os
 
 class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
-	
+
 	if hou.applicationVersion()[0] >= 16:
 		PointPositionAttribs = ['P']
 	else:
 		PointPositionAttribs = ['P', 'Pw']
-		
+
 	__testScene = "test/converterTest.hip"
-	
+
 	def points( self ) :
 		pData = IECore.V3fVectorData( [
 			IECore.V3f( 0, 1, 2 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 3 ),
 			IECore.V3f( 4 ), IECore.V3f( 5 ), IECore.V3f( 6 ), IECore.V3f( 7 ),
 			IECore.V3f( 8 ), IECore.V3f( 9 ), IECore.V3f( 10 ), IECore.V3f( 11 ),
 		] )
-		
+
 		points = IECore.PointsPrimitive( pData )
-		
+
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
 		v3fData = IECore.V3fData( IECore.V3f( 1.5, 2.5, 3.5 ) )
@@ -67,7 +67,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		stringData = IECore.StringData( "this is a string" )
 		m33fData = IECore.M33fData( IECore.M33f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0) )
 		m44fData = IECore.M44fData( IECore.M44f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0) )
-		
+
 		intRange = range( 1, 13 )
 		floatVectorData = IECore.FloatVectorData( [ x+0.5 for x in intRange ] )
 		v2fVectorData = IECore.V2fVectorData( [ IECore.V2f( x, x+0.5 ) for x in intRange ] )
@@ -80,11 +80,11 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 		m33fVectorData = IECore.M33fVectorData( [ IECore.M33f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0) for x in intRange ] )
 		m44fVectorData = IECore.M44fVectorData( [ IECore.M44f(1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0,16.0) for x in intRange ] )
-		
+
 		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
 		uniformInterpolation = IECore.PrimitiveVariable.Interpolation.Uniform
 		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
-		
+
 		# add all valid detail attrib types
 		points["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
 		points["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
@@ -96,7 +96,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
 		points["m33fDetail"] = IECore.PrimitiveVariable( detailInterpolation, m33fData )
 		points["m44fDetail"] = IECore.PrimitiveVariable( detailInterpolation, m44fData )
-		
+
 		# add all valid prim attrib types
 		points["floatPrim"] = IECore.PrimitiveVariable( uniformInterpolation, floatVectorData[:1] )
 		points["v2fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, v2fVectorData[:1] )
@@ -109,7 +109,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["stringPrim"] = IECore.PrimitiveVariable( uniformInterpolation, stringVectorData[:1], IECore.IntVectorData( [ 0 ] ) )
 		points["m33fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m33fVectorData[:1] )
 		points["m44fPrim"] = IECore.PrimitiveVariable( uniformInterpolation, m44fVectorData[:1] )
-		
+
 		# add all valid point attrib types
 		points["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData )
 		points["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData )
@@ -122,14 +122,14 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData, IECore.IntVectorData( range( 0, 12 ) ) )
 		points["m33fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m33fVectorData )
 		points["m44fPoint"] = IECore.PrimitiveVariable( pointInterpolation, m44fVectorData )
-		
+
 		return points
-	
+
 	def emptySop( self ) :
 		obj = hou.node( "/obj" )
 		geo = obj.createNode( "geo", run_init_scripts=False )
 		null = geo.createNode( "null" )
-		
+
 		return null
 
 	def pointsSop( self ) :
@@ -139,14 +139,14 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		facet = box.createOutputNode( "facet" )
 		facet.parm( "postnml" ).set(True)
 		points = facet.createOutputNode( "scatter" )
-		
+
 		return points
 
 	def comparePrimAndSop( self, prim, sop ) :
 		geo = sop.geometry()
 		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
 			self.assertEqual( prim[key].data.value, geo.attribValue( key ) )
-		
+
 		def toTuple( v ):
 			if isinstance( v, IECore.M33f ):
 				return (
@@ -163,43 +163,43 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 				)
 			else:
 				return tuple( v )
-		
+
 		for key in [ "v2fDetail", "v3fDetail", "color3fDetail", "v2iDetail", "v3iDetail", "m33fDetail", "m44fDetail" ] :
 			self.assertEqual( toTuple(prim[key].data.value), geo.attribValue( key ) )
-		
+
 		sopPrims = geo.prims()
 		for key in [ "floatPrim", "intPrim", "stringPrim" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( data[i], sopPrims[i].attribValue( key ) )
-		
+
 		for key in [ "v2fPrim", "v3fPrim", "color3fPrim", "v2iPrim", "v3iPrim", "m33fPrim", "m44fPrim" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( toTuple(data[i]), sopPrims[i].attribValue( key ) )
-		
+
 		self.assertEqual( geo.findPrimAttrib( "quatPrim" ).qualifier(), "Quaternion" )
 		data = prim["quatPrim"].data
 		for i in range( 0, data.size() ) :
 			components = ( data[i][1], data[i][2], data[i][3], data[i][0] )
 			self.assertEqual( components, sopPrims[i].attribValue( "quatPrim" ) )
-		
+
 		data = prim["stringPrim"].data
 		dataIndices = prim["stringPrim"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPrims[i].attribValue( "stringPrim" ) )
-		
+
 		sopPoints = geo.points()
 		for key in [ "floatPoint", "intPoint" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( data[i], sopPoints[i].attribValue( key ) )
-		
+
 		for key in [ "P", "v2fPoint", "v3fPoint", "color3fPoint", "v2iPoint", "v3iPoint", "m33fPoint", "m44fPoint" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( toTuple(data[i]), sopPoints[i].attribValue( key ) )
-		
+
 		self.assertEqual( geo.findPointAttrib( "quatPoint" ).qualifier(), "Quaternion" )
 		data = prim["quatPoint"].data
 		for i in range( 0, data.size() ) :
@@ -210,7 +210,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		dataIndices = prim["stringPoint"].indices
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPoints[i].attribValue( "stringPoint" ) )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.keys(), prim.keys() )
 		for key in prim.keys() :
@@ -218,13 +218,13 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 				print result[key].interpolation, result[key].data, prim[key].interpolation, prim[key].data
 			self.assertEqual( result[key], prim[key] )
 		self.assertEqual( result, prim )
-			
+
 	def comparePrimAndAppendedSop( self, prim, sop, origSopPrim, multipleConversions=0 ) :
 		geo = sop.geometry()
 		# verify detail attribs
 		for key in [ "floatDetail", "intDetail", "stringDetail" ] :
 			self.assertEqual( prim[key].data.value, geo.attribValue( key ) )
-		
+
 		def toTuple( v ):
 			if isinstance( v, IECore.M33f ):
 				return (
@@ -241,54 +241,54 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 				)
 			else:
 				return tuple( v )
-		
+
 		for key in [ "v2fDetail", "v3fDetail", "color3fDetail", "v2iDetail", "v3iDetail", "m33fDetail", "m44fDetail" ] :
 			self.assertEqual( toTuple(prim[key].data.value), geo.attribValue( key ) )
-		
+
 		# verify prim attribs
 		sopPrims = geo.prims()
 		numPrims = multipleConversions + 1
 		self.assertEqual( len(sopPrims), numPrims )
-		
+
 		for key in [ "floatPrim", "intPrim" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				for sopPrim in sopPrims :
 					self.assertEqual( data[i], sopPrim.attribValue( key ) )
-		
+
 		for key in [ "v2fPrim", "v3fPrim", "color3fPrim", "v2iPrim", "v3iPrim", "m33fPrim", "m44fPrim" ] :
 			data = prim[key].data
 			for i in range( 0, data.size() ) :
 				for sopPrim in sopPrims :
 					self.assertEqual( toTuple(data[i]), sopPrim.attribValue( key ) )
-		
+
 		data = prim["stringPrim"].data
 		dataIndices = prim["stringPrim"].indices
 		for i in range( 0, data.size() ) :
 			for sopPrim in sopPrims :
 				self.assertEqual( data[ dataIndices[i] ], sopPrim.attribValue( "stringPrim" ) )
-		
+
 		# verify points attribs
 		sopPoints = geo.points()
 		self.assertEqual( len(sopPoints), origSopPrim.numPoints + prim.numPoints )
-		
+
 		for key in [ "floatPoint", "intPoint" ] :
 			data = prim[key].data
-			
+
 			if multipleConversions :
 				defaultValue = origSopPrim[key].data
 			else :
 				defaultValue = [ 0 ] * origSopPrim.numPoints
-			
+
 			for i in range( 0, origSopPrim.numPoints ) :
 				self.assertEqual( defaultValue[i], sopPoints[ i ].attribValue( key ) )
-			
+
 			for i in range( 0, data.size() ) :
 				self.assertEqual( data[i], sopPoints[ origSopPrim.numPoints + i ].attribValue( key ) )
-			
+
 		for key in [ "P", "v2fPoint", "v3fPoint", "color3fPoint", "v2iPoint", "v3iPoint", "m33fPoint", "m44fPoint" ] :
 			data = prim[key].data
-			
+
 			if multipleConversions or key is "P" :
 				defaultValue = origSopPrim[key].data
 			else :
@@ -297,16 +297,16 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 					defaultValue = [ [ 0 ] * d[0] * d[1] ] * origSopPrim.numPoints
 				else:
 					defaultValue = [ [ 0 ] * data[0].dimensions() ] * origSopPrim.numPoints
-			
+
 			for i in range( 0, origSopPrim.numPoints ) :
 				self.assertEqual( toTuple(defaultValue[i]), sopPoints[ i ].attribValue( key ) )
-			
+
 			for i in range( 0, data.size() ) :
 				self.assertEqual( toTuple(data[i]), sopPoints[ origSopPrim.numPoints + i ].attribValue( key ) )
-		
+
 		data = prim["stringPoint"].data
 		dataIndices = prim["stringPoint"].indices
-		
+
 		if multipleConversions :
 			defaultData = origSopPrim["stringPoint"].data
 			defaultIndices = origSopPrim["stringPoint"].indices
@@ -320,13 +320,13 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 
 		for i in range( 0, data.size() ) :
 			self.assertEqual( data[ dataIndices[i] ], sopPoints[ origSopPrim.numPoints + i ].attribValue( "stringPoint" ) )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		for key in prim.keys() :
 			# prim attribs don't make it through on multiple conversions because the interpolation size is incorrect
 			if not( multipleConversions and "Prim" in key ) :
 				self.assert_( key in result.keys() )
-		
+
 	def testCreateConverter( self )  :
 		converter = IECoreHoudini.ToHoudiniPointsConverter( self.points() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPointsConverter ) ) )
@@ -339,36 +339,36 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testConversionIntoEmptySop( self ) :
 		points = self.points()
 		sop = self.emptySop()
-		
+
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
-		
+
 		self.comparePrimAndSop( points, sop )
 
 	def testConversionIntoExistingSop( self ) :
 		points = self.points()
 		sop = self.pointsSop()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, False ) )
-		
+
 		self.comparePrimAndSop( points, sop )
 
 	def testAppendingIntoExistingSop( self ) :
 		points = self.points()
 		sop = self.pointsSop()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		self.assert_( not sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
@@ -379,118 +379,118 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.numPoints, orig.numPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
-	
+
 	def testAppendingIntoLockedSop( self ) :
 		points = self.points()
 		sop = self.pointsSop()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		sop.setHardLocked( True )
 		self.assert_( sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
-		
+
 		sop.setHardLocked( False )
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
-	
+
 	def testSaveLoad( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
-		
+
 		points = self.points()
 		sop = self.pointsSop()
 		sopPath = sop.path()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		self.assert_( not sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
-		
+
 		hou.hipFile.save( TestToHoudiniPointsConverter.__testScene )
 		hou.hipFile.clear( suppress_save_prompt=True )
 		hou.hipFile.load( TestToHoudiniPointsConverter.__testScene )
-		
+
 		newSop = hou.node( sopPath )
-		
+
 		self.assert_( newSop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, newSop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( newSop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
-		
+
 	def testSaveLoadWithLockedSop( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
-		
+
 		points = self.points()
 		sop = self.pointsSop()
 		sopPath = sop.path()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		sop.setHardLocked( True )
 		self.assert_( sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
-		
+
 		hou.hipFile.save( TestToHoudiniPointsConverter.__testScene )
 		hou.hipFile.clear( suppress_save_prompt=True )
 		hou.hipFile.load( TestToHoudiniPointsConverter.__testScene )
-		
+
 		newSop = hou.node( sopPath )
-		
+
 		self.assert_( newSop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, newSop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( newSop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
-	
+
 	def testMultipleConversions( self ) :
 		points = self.points()
 		sop = self.pointsSop()
-		
+
 		orig = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( orig, points )
-		
+
 		self.assert_( not sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, orig )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
@@ -499,21 +499,21 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, result, multipleConversions=1 )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + 2*points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ orig.numPoints + i ], points["P"].data[i] )
 			self.assertEqual( result["P"].data[ orig.numPoints + points.numPoints + i ], points["P"].data[i] )
-		
+
 		self.assert_( sop.isHardLocked() )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop, True ) )
 		self.assert_( sop.isHardLocked() )
-		
+
 		self.comparePrimAndAppendedSop( points, sop, result, multipleConversions=2 )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertEqual( result.numPoints, orig.numPoints + 3*points.numPoints )
 		for i in range( 0, points["P"].data.size() ) :
@@ -524,17 +524,17 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testObjectWasDeleted( self ) :
 		points = self.points()
 		sop = self.pointsSop()
-		
+
 		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
-		
+
 		self.assert_( converter.convert( sop, False ) )
-		
+
 		self.comparePrimAndSop( points, sop )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
-		
+
 		del points
-		
+
 		sop.setHardLocked( False )
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), result )
 		self.assert_( converter.convert( sop, False ) )
@@ -545,18 +545,18 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points["badDetail"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
 		points["badPoint"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
-		
+
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
-		
+
 		self.assert_( "badDetail" not in [ x.name() for x in sop.geometry().globalAttribs() ] )
 		self.assert_( "badPoint" not in [ x.name() for x in sop.geometry().pointAttribs() ] )
-		
+
 		result = IECoreHoudini.FromHoudiniPointsConverter( sop ).convert()
 		self.assertNotEqual( result, points )
 		self.assert_( "badDetail" not in result )
 		self.assert_( "badPoint" not in result )
-		
+
 		del points["badDetail"]
 		del points["badPoint"]
 		self.comparePrimAndSop( points, sop )
@@ -570,14 +570,14 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "type" ).set( 0 ) # float
 		detailAttr.parm( "size" ).set( 1 ) # 1 element
 		detailAttr.parm( "value1" ).set( 123.456 )
-		
+
 		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
 		pointAttr.parm( "type" ).set( 0 ) # float
 		pointAttr.parm( "size" ).set( 1 ) # 1 element
 		pointAttr.parm( "value1" ).set( 123.456 )
-		
+
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( pointAttr ).convert(), points )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( pointAttr ) )
 		self.comparePrimAndSop( points, pointAttr )
@@ -593,7 +593,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		detailAttr.parm( "value1" ).set( 10 )
 		detailAttr.parm( "value2" ).set( 11 )
 		detailAttr.parm( "value3" ).set( 12 )
-		
+
 		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm( "name" ).set( "floatPoint" )
 		pointAttr.parm( "class" ).set( 2 ) # point
@@ -602,7 +602,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		pointAttr.parm( "value1" ).set( 10 )
 		pointAttr.parm( "value2" ).set( 11 )
 		pointAttr.parm( "value3" ).set( 12 )
-		
+
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( pointAttr ).convert(), points )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( pointAttr ) )
 		self.comparePrimAndSop( points, pointAttr )
@@ -611,88 +611,88 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points = self.points()
 		points["floatVert"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
 		sop = self.emptySop()
-		
+
 		self.assertNotEqual( IECoreHoudini.FromHoudiniPointsConverter( sop ).convert(), points )
 		self.assert_( IECoreHoudini.ToHoudiniPointsConverter( points ).convert( sop ) )
-		
+
 		allAttribs = [ x.name() for x in sop.geometry().globalAttribs() ]
 		allAttribs.extend( [ x.name() for x in sop.geometry().pointAttribs() ] )
 		allAttribs.extend( [ x.name() for x in sop.geometry().primAttribs() ] )
 		allAttribs.extend( [ x.name() for x in sop.geometry().vertexAttribs() ] )
 		self.assert_( "floatVert" not in allAttribs )
-		
+
 		del points["floatVert"]
-		
+
 		self.comparePrimAndSop( points, sop )
-		
+
 	def testAttributeFilter( self ) :
-		
+
 		points = self.points()
 		sop = self.emptySop()
-		
+
 		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPointsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'intPoint', 'm33fPoint', 'm44fPoint', 'quatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'floatPrim', 'intPrim', 'm33fPrim', 'm44fPrim', 'quatPrim', 'stringPrim', 'v2fPrim', 'v2iPrim', 'v3fPrim', 'v3iPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'floatDetail', 'intDetail', 'm33fDetail', 'm44fDetail', 'stringDetail', 'v2fDetail', 'v2iDetail', 'v3fDetail', 'v3iDetail'] )
-		
+
 		converter.parameters()["attributeFilter"].setTypedValue( "P *3f*" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPointsConverter.PointPositionAttribs + ['color3fPoint', 'm33fPoint', 'v3fPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), ['color3fPrim', 'm33fPrim', 'v3fPrim'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), ['color3fDetail', 'm33fDetail', 'v3fDetail'] )
-		
+
 		converter.parameters()["attributeFilter"].setTypedValue( "* ^*Detail ^int* ^*Prim" )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPointsConverter.PointPositionAttribs + ['color3fPoint', 'floatPoint', 'm33fPoint', 'm44fPoint', 'quatPoint', 'stringPoint', 'v2fPoint', 'v2iPoint', 'v3fPoint', 'v3iPoint'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
-	
+
 	def testStandardAttributeConversion( self ) :
-		
+
 		sop = self.emptySop()
 		points = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] * 10 ) )
 		points["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 10, IECore.GeometricData.Interpretation.Color ) )
 		points["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 10 ) )
 		points["Pref"] = points["P"]
-		
+
 		self.assertTrue( points.arePrimitiveVariablesValid() )
-		
+
 		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPointsConverter.PointPositionAttribs + ['Cd', 'pscale', 'rest'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
-		
+
 		converter["convertStandardAttributes"].setTypedValue( False )
 		self.assertTrue( converter.convert( sop ) )
 		self.assertItemsEqual( sorted([ x.name() for x in sop.geometry().pointAttribs() ]), TestToHoudiniPointsConverter.PointPositionAttribs + ['Cs', 'Pref', 'width'] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().primAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().vertexAttribs() ]), [] )
 		self.assertEqual( sorted([ x.name() for x in sop.geometry().globalAttribs() ]), [] )
-	
+
 	def testName( self ) :
-		
+
 		sop = self.emptySop()
 		points = self.points()
 		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
-		
+
 		# unnamed unless we set the parameter
 		self.assert_( converter.convert( sop ) )
 		geo = sop.geometry()
 		self.assertEqual( sop.geometry().findPrimAttrib( "name" ), None )
-		
+
 		converter["name"].setTypedValue( "testPoints" )
 		self.assert_( converter.convert( sop ) )
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testPoints" ] ) )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
-		
+
 		# blindData still works for backwards compatibility
 		points.blindData()["name"] = IECore.StringData( "blindPoints" )
 		converter = IECoreHoudini.ToHoudiniPointsConverter( points )
@@ -701,7 +701,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindPoints" ] ) )
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
-		
+
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testPoints" )
 		self.assert_( converter.convert( sop ) )
@@ -711,7 +711,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testPoints" ]), points.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 
 	def tearDown( self ) :
-		
+
 		if os.path.isfile( TestToHoudiniPointsConverter.__testScene ) :
 			os.remove( TestToHoudiniPointsConverter.__testScene )
 

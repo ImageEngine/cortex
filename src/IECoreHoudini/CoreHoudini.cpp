@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "CH/CH_Manager.h" 
+#include "CH/CH_Manager.h"
 
 #include "IECore/MessageHandler.h"
 

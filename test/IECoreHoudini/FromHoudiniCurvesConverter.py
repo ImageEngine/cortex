@@ -46,26 +46,26 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		"2.42892,0,-1.04096 2.21995,0,-4.51254 4.77513,0,-4.50183 6.32944,0,-2.78439 7.231,0,1.53021 6.20965,-9.53674e-07,3.7489 2.72012,0,2.5738 1.76971,0,0.780965",
 		"5.83427,0,-1.04096 2.21995,0,-4.51254 6.14141,0,-4.50183 7.48932,0,-2.78439 9.0197,0,1.53021 6.20965,-9.53674e-07,1.2141 2.72012,0,2.5738 3.23728,0,0.780965"
 	]
-	
+
 	def createCurve( self, order=2, periodic=False, parent=None, coordIndex=0 ) :
-		
+
 		if not parent :
 			obj = hou.node("/obj")
 			parent = obj.createNode("geo", run_init_scripts=False)
-		
+
 		curve = parent.createNode( "curve" )
 		curve.parm( "type" ).set( 1 ) # NURBS
 		curve.parm( "order" ).set( order )
 		curve.parm( "close" ).set( periodic )
 		curve.parm( "coords" ).set( TestFromHoudiniCurvesConverter.__curveCoordinates[coordIndex] )
-		
+
 		detailAttr = curve.createOutputNode( "attribcreate", exact_type_name=True )
 		detailAttr.parm("name").set( "detailAttribute" )
 		detailAttr.parm("class").set( 0 ) # detail attribute
 		detailAttr.parm("type").set( 0 ) # float
 		detailAttr.parm("size").set( 1 ) # 1 element
 		detailAttr.parm("value1").set( 123.456 )
-		
+
 		pointAttr = detailAttr.createOutputNode( "attribcreate", exact_type_name=True )
 		pointAttr.parm("name").set( "pointAttribute" )
 		pointAttr.parm("class").set( 2 ) # point
@@ -93,44 +93,44 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		return vertexAttr
 
 	def createCurves( self, numCurves, order=2, periodic=False ) :
-		
+
 		curves = [ self.createCurve( order, periodic ) ]
-		
+
 		geo = curves[0].parent()
-		
+
 		for i in range( 0, numCurves-1 ) :
 			curves.append( self.createCurve( order, periodic, geo, i%4 ) )
-		
+
 		merge = geo.createNode( "merge" )
-		
+
 		for i in range( 0, len(curves) ) :
 			merge.setInput( i, curves[i] )
-		
+
 		return merge
 
 	def testCreateConverter( self )  :
 		curve = self.createCurve()
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( curve )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		return converter
 
 	def testFactory( self ) :
 		curve = self.createCurve()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
-		
+
 		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.CurvesPrimitive ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
@@ -138,10 +138,10 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		geo = self.createCurve().geometry()
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
-		
+
 		result = converter.convert()
 		self.failUnless( result.isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
-		
+
 		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.CurvesPrimitive )
 		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
@@ -149,206 +149,206 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.CurvesPrimitive )
 		self.assert_( result.arePrimitiveVariablesValid() )
-		
+
 		geo = sop.geometry()
 		bBox = result.bound()
 		hBBox = geo.boundingBox()
 		for i in range( 0, 3 ) :
 			self.assertAlmostEqual( bBox.min[i], hBBox.minvec()[i] )
 			self.assertAlmostEqual( bBox.max[i], hBBox.maxvec()[i] )
-		
+
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
 		index = 0
 		for i in range( len( result.verticesPerCurve() ) ) :
 			self.assertEqual( result.verticesPerCurve()[i], geo.prims()[i].numVertices() )
-			
+
 			hVertices = geo.prims()[i].vertices()
 			for j in range( len(hVertices) ) :
 				self.assertEqual( tuple(result["P"].data[index+j]), tuple(hVertices[j].point().position()) )
-			
+
 			index += result.verticesPerCurve()[i]
-		
+
 		self.assertEqual( result.basis(), IECore.CubicBasisf.linear() )
-		
+
 		for attr in geo.globalAttribs() :
 			if attr.name() == "varmap" :
 				continue
-			
+
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 			self.assertEqual( result[attr.name()].data.value, geo.attribValue( attr.name() ) )
-		
+
 		sopPoints = geo.points()
 		for attr in geo.pointAttribs() :
 			if attr.name() == "Pw" :
 				continue
-			
+
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-			
+
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPoints[i].attribValue( attr.name() ) )
-		
+
 		sopPrims = geo.prims()
 		self.assertEqual( len(sopPrims), len(result.verticesPerCurve()) )
-		
+
 		for attr in geo.primAttribs() :
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-			
+
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPrims[i].attribValue( attr.name() ) )
-		
+
 		sopVerts = []
 		for i in range( 0, len(sopPrims) ) :
 			verts = list(sopPrims[i].vertices())
 			self.assertEqual( len(verts), result.verticesPerCurve()[i] )
 			sopVerts.extend( verts )
-		
+
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		self.assertEqual( len(sopVerts), result["P"].data.size() )	
+		self.assertEqual( len(sopVerts), result["P"].data.size() )
 		for attr in geo.vertexAttribs() :
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( data[i], sopVerts[i].attribValue( attr.name() ) )
-	
+
 	def testOneLinearCurve( self ) :
 		self.verifyLinearCurves( self.createCurve() )
 
 	def testOneLinearPeriodicCurve( self ) :
 		self.verifyLinearCurves( self.createCurve( periodic=True ) )
-	
+
 	def testFourLinearCurves( self ) :
 		self.verifyLinearCurves( self.createCurves( 4 ) )
-	
+
 	def testFourLinearPeriodicCurves( self ) :
 		self.verifyLinearCurves( self.createCurves( 4, periodic=True ) )
-	
+
 	def testManyLinearCurves( self ) :
 		self.verifyLinearCurves( self.createCurves( 100 ) )
-	
+
 	def testManyLinearPeriodicCurves( self ) :
 		self.verifyLinearCurves( self.createCurves( 100, periodic=True ) )
-	
+
 	def verifyBSplineCurves( self, sop ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
 		self.assertEqual( result.typeId(), IECore.TypeId.CurvesPrimitive )
 		self.assert_( result.arePrimitiveVariablesValid() )
-		
+
 		geo = sop.geometry()
 		bBox = result.bound()
 		hBBox = geo.boundingBox()
 		for i in range( 0, 3 ) :
 			self.assertAlmostEqual( bBox.min[i], hBBox.minvec()[i] )
 			self.assertAlmostEqual( bBox.max[i], hBBox.maxvec()[i] )
-		
+
 		if result.periodic() :
 			extraPoints = 0
 		else :
 			extraPoints = 4
-		
+
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) + extraPoints*len(geo.prims()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		
+
 		pIndex = 0
 		for i in range( len( result.verticesPerCurve() ) ) :
 			self.assertEqual( result.verticesPerCurve()[i], geo.prims()[i].numVertices() + extraPoints )
-			
+
 			hVertices = geo.prims()[i].vertices()
 			for j in range( len(hVertices) ) :
-				
+
 				if not result.periodic() and ( j == 0 or j == len(hVertices)-1 ) :
 					self.assertEqual( tuple(result["P"].data[pIndex]), tuple(hVertices[j].point().position()) )
 					self.assertEqual( tuple(result["P"].data[pIndex+1]), tuple(hVertices[j].point().position()) )
 					pIndex += 2
-				
+
 				self.assertEqual( tuple(result["P"].data[pIndex]), tuple(hVertices[j].point().position()) )
 				pIndex += 1
-		
+
 		self.assertEqual( result.basis(), IECore.CubicBasisf.bSpline() )
-		
+
 		for attr in geo.globalAttribs() :
 			if attr.name() == "varmap" :
 				continue
-			
+
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
 			self.assertEqual( result[attr.name()].data.value, geo.attribValue( attr.name() ) )
-		
+
 		sopPoints = geo.points()
 		for attr in geo.pointAttribs() :
 			if attr.name() == "Pw" :
 				continue
-			
+
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		
+
 		for attr in geo.vertexAttribs() :
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		
+
 		sopPrims = geo.prims()
 		self.assertEqual( len(sopPrims), len(result.verticesPerCurve()) )
-		
+
 		for attr in geo.primAttribs() :
 			self.assert_( attr.name() in result )
 			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-			
+
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( tuple(data[i]), sopPrims[i].attribValue( attr.name() ) )
-		
+
 		pIndex = 0
 		for i in range( len( result.verticesPerCurve() ) ) :
 			hVertices = sopPrims[i].vertices()
 			self.assertEqual( len(hVertices) + extraPoints, result.verticesPerCurve()[i] )
 			for j in range( len(hVertices) ) :
-				
+
 				for attr in geo.pointAttribs() :
 					if attr.name() == "Pw" :
 						continue
-					
+
 					data = result[attr.name()].data
 					self.assertEqual( tuple(data[pIndex]), hVertices[j].point().attribValue( attr.name() ) )
-					
+
 					if not result.periodic() and ( j == 0 or j == len(hVertices)-1 ) :
 						self.assertEqual( tuple(data[pIndex+1]), hVertices[j].point().attribValue( attr.name() ) )
 						self.assertEqual( tuple(data[pIndex+2]), hVertices[j].point().attribValue( attr.name() ) )
-				
+
 				for attr in geo.vertexAttribs() :
 					data = result[attr.name()].data
 					self.assertEqual( data[pIndex], hVertices[j].attribValue( attr.name() ) )
-					
+
 					if not result.periodic() and ( j == 0 or j == len(hVertices)-1 ) :
 						self.assertEqual( data[pIndex+1], hVertices[j].attribValue( attr.name() ) )
 						self.assertEqual( data[pIndex+2], hVertices[j].attribValue( attr.name() ) )
-				
+
 				if not result.periodic() and ( j == 0 or j == len(hVertices)-1 ) :
 					pIndex += 3
 				else :
 					pIndex += 1
-	
+
 	def testOneBSplineCurve( self ) :
 		self.verifyBSplineCurves( self.createCurve( order=4 ) )
 
 	def testOneBSplinePeriodicCurve( self ) :
 		self.verifyBSplineCurves( self.createCurve( order=4, periodic=True ) )
-	
+
 	def testFourBSplineCurves( self ) :
 		self.verifyBSplineCurves( self.createCurves( 4, order=4 ) )
-	
+
 	def testFourBSplinePeriodicCurves( self ) :
 		self.verifyBSplineCurves( self.createCurves( 4, order=4, periodic=True ) )
-	
+
 	def testManyBSplineCurves( self ) :
 		self.verifyBSplineCurves( self.createCurves( 100, order=4 ) )
-	
+
 	def testManyBSplinePeriodicCurves( self ) :
 		self.verifyBSplineCurves( self.createCurves( 100, order=4, periodic=True ) )
 
@@ -367,9 +367,9 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		result2 = converter.convert()
 		self.assertNotEqual( result1["P"].data, result2["P"].data )
 		self.assertNotEqual( result1, result2 )
-	
+
 	def testName( self ) :
-		
+
 		curves = self.createCurves( 4 )
 		name = curves.createOutputNode( "name" )
 		name.parm( "name1" ).set( "curvesA" )
@@ -378,7 +378,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		name2.parm( "name1" ).set( "curvesB" )
 		merge = name.createOutputNode( "merge" )
 		merge.setInput( 1, name2 )
-		
+
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
 		result = converter.convert()
 		# names are not stored on the object at all
@@ -387,7 +387,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# all curves were converted as one CurvesPrimitive
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 5 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesA" )
 		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
@@ -397,7 +397,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# only the named curves were converted
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 4 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
-		
+
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesB" )
 		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 		result = converter.convert()
@@ -407,9 +407,9 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		# only the named curves were converted
 		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
-	
+
 	def testAttributeFilter( self ) :
-		
+
 		curves = self.createCurves( 4 )
 		uvunwrap = curves.createOutputNode( "uvunwrap" )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( uvunwrap )
@@ -427,34 +427,34 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( sorted(converter.convert().keys()), [ "P" ] )
 
 	def testErrorStates( self ) :
-		
+
 		# no prims
 		merge = self.createCurves( 4 )
 		add = merge.createOutputNode( "add" )
 		add.parm( "keep" ).set( True ) # deletes primitive and leaves points
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( add )
 		self.assertRaises( RuntimeError, converter.convert )
-		
+
 		# non-curve prims
 		merge = self.createCurves( 4 )
 		merge.createInputNode( 5, "box" )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
 		self.assertRaises( RuntimeError, converter.convert )
-		
+
 		# many curves, different orders
 		merge = self.createCurves( 4 )
 		hou.parm( "/obj/geo3/curve3/order" ).set( 3 )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
 		self.assertRaises( RuntimeError, converter.convert )
-		
+
 		# many curves, different periodicity
 		merge = self.createCurves( 4 )
 		hou.parm( "/obj/geo4/curve3/close" ).set( True )
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( merge )
 		self.assertRaises( RuntimeError, converter.convert )
-	
+
 	def testStandardAttributeConversion( self ) :
-		
+
 		curves = self.createCurves( 4 )
 		color = curves.createOutputNode( "color" )
 		color.parm( "colortype" ).set( 2 )
@@ -463,18 +463,18 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		scale.parm( "name1" ).set( "pscale" )
 		scale.parm( "value1v1" ).setExpression( "$PT" )
 		uvunwrap = scale.createOutputNode( "uvunwrap" )
-		
+
 		converter = IECoreHoudini.FromHoudiniCurvesConverter( uvunwrap )
 		result = converter.convert()
 		self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "detailAttribute", "pointAttribute", "primAttribute", "uv", "varmap", "vertexAttribute", "width" ] )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		
+
 		uvData = result["uv"].data
 		geo = uvunwrap.geometry()
 		uvs = geo.findVertexAttrib( "uv" )
-		
+
 		i = 0
 		for prim in geo.prims() :
 			for vert in prim.vertices() :
@@ -482,18 +482,18 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				self.assertAlmostEqual( uvValues[0], uvData[i][0] )
 				self.assertAlmostEqual( uvValues[1], uvData[i][1] )
 				i += 1
-		
+
 		converter["convertStandardAttributes"].setTypedValue( False )
 		result = converter.convert()
 		self.assertEqual( result.keys(), [ "Cd", "P", "detailAttribute", "pointAttribute", "primAttribute", "pscale", "rest", "uv", "varmap", "vertexAttribute" ] )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		
+
 		uvData = result["uv"].data
 		geo = uvunwrap.geometry()
 		uvs = geo.findVertexAttrib( "uv" )
-		
+
 		i = 0
 		for prim in geo.prims() :
 			for vert in prim.vertices() :

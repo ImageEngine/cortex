@@ -58,13 +58,13 @@ ParameterHandler::Description<ClassParameterHandler> ClassParameterHandler::g_de
 ClassParameterHandler::ClassParameterHandler()
 {
 }
-		
+
 void ClassParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
-{	
+{
 	beginGroup( parameter, knobName, f );
-		
+
 		classChooserKnob( parameter, knobName, f );
-		
+
 		childKnobs( parameter, knobName, f );
 
 	endGroup( parameter, knobName, f );
@@ -78,7 +78,7 @@ void ClassParameterHandler::setParameterValue( IECore::Parameter *parameter, Val
 void ClassParameterHandler::setState( IECore::Parameter *parameter, const IECore::Object *state )
 {
 	const CompoundObject *d = static_cast<const CompoundObject *>( state );
-	
+
 	const std::string &className = d->member<StringData>( "__className" )->readable();
 	int classVersion = d->member<IntData>( "__classVersion" )->readable();
 	const std::string &classSearchPathEnvVar = d->member<StringData>( "__searchPathEnvVar" )->readable();
@@ -100,8 +100,8 @@ void ClassParameterHandler::setState( IECore::Parameter *parameter, const IECore
 	{
 		msg( Msg::Error, "ClassParameterHandler::setState", e.what() );
 	}
-	
-	CompoundParameterHandler::setState( parameter, state );	
+
+	CompoundParameterHandler::setState( parameter, state );
 }
 
 IECore::ObjectPtr ClassParameterHandler::getState( const IECore::Parameter *parameter )
@@ -111,17 +111,17 @@ IECore::ObjectPtr ClassParameterHandler::getState( const IECore::Parameter *para
 	{
 		result = new CompoundObject;
 	}
-	
+
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		boost::python::tuple classInfo = extract<boost::python::tuple>( pythonParameter.attr( "getClass" )( true ) );
-		
+
 		std::string className = extract<const char *>( classInfo[1] )();
 		int classVersion = extract<int>( classInfo[2] )();
 		std::string searchPathEnvVar = extract<const char *>( classInfo[3] )();
-		
+
 		result->members()["__className"] = new IECore::StringData( className );
 		result->members()["__classVersion"] = new IECore::IntData( classVersion );
 		result->members()["__searchPathEnvVar"] = new IECore::StringData( searchPathEnvVar );
@@ -141,28 +141,28 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 {
 
 	std::string classChooserName = string( knobName ) + "__classChooser";
-	
+
 	static const char *emptyMenu[] = { " ", "", 0 };
 	DD::Image::Knob *classChooser = PyPulldown_knob( f, emptyMenu, classChooserName.c_str(), "No class loaded" );
-	
+
 	if( !f.makeKnobs() )
 	{
 		// making the menu is slow, and only needs doing when we're making knobs (not storing for instance),
 		// so early out now to avoid massive slowdown.
 		return;
 	}
-	
+
 	vector<string> menuItems;
 	menuItems.push_back( " " );
 	menuItems.push_back( "" );
-	
+
 	std::string label = "No class loaded";
-	
+
 	IECorePython::ScopedGILLock gilLock;
 	try
 	{
 		// get current class name, and set label from it
-		
+
 		boost::python::object pythonParameter( ParameterPtr( const_cast<Parameter *>( parameter ) ) );
 		boost::python::tuple classInfo = extract<boost::python::tuple>( pythonParameter.attr( "getClass" )( true ) );
 
@@ -172,25 +172,25 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 			int classVersion = extract<int>( classInfo[2] )();
 			label = className + " v" + lexical_cast<string>( classVersion );
 		}
-		
+
 		// if there is a current class, then add a menu item
 		// to allow it to be removed.
-		
+
 		std::string parameterPath = knobName + 5; // naughty! we're not meant to know the knob name format
-		replace_all( parameterPath, "_", "']['" );		
+		replace_all( parameterPath, "_", "']['" );
 		boost::format setClassFormat(
 			"with IECoreNuke.FnParameterisedHolder( nuke.thisNode() ).parameterModificationContext() as parameters :"
 			"	parameters['%s'].setClass( '%s', %d )"
 		);
-		
+
 		if( className!="" )
-		{		
+		{
 			menuItems.push_back( "Remove" );
 			menuItems.push_back( ( setClassFormat % parameterPath % "" % 0 ).str() );
 		}
-		
+
 		// find alternative classes which could be loaded
-		
+
 		std::string classNameFilter = "*";
 		const CompoundObject *userData = parameter->userData();
 		if( const CompoundObject *ui = userData->member<CompoundObject>( "UI" ) )
@@ -200,21 +200,21 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 				classNameFilter = classNameFilterData->readable();
 			}
 		}
-						
+
 		std::string searchPathEnvVar = extract<const char *>( classInfo[3] )();
 		object ieCore = import( "IECore" );
 		object classLoader = ieCore.attr( "ClassLoader" ).attr( "defaultLoader" )( searchPathEnvVar );
 		object classNames = classLoader.attr( "classNames" )( classNameFilter );
-		
+
 		// and build menu items to allow each of the alternative classes to be loaded
-		
+
 		int numClasses = len( classNames );
 		for( int i=0; i<numClasses; i++ )
 		{
 			string className = extract<string>( classNames[i] )();
 			object classVersions = classLoader.attr( "versions" )( object( classNames[i] ) );
 			int numVersions = len( classVersions );
-			
+
 			for( int j=0; j<numVersions; j++ )
 			{
 				string versionString = extract<const char *>( classVersions[j].attr( "__str__" )() )();
@@ -228,11 +228,11 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 				{
 					menuItems.push_back( className );
 				}
-				
+
 				menuItems.push_back( ( setClassFormat % parameterPath % className % versionString ).str() );
 			}
 		}
-		
+
 	}
 	catch( boost::python::error_already_set )
 	{
@@ -242,7 +242,7 @@ void ClassParameterHandler::classChooserKnob( const IECore::Parameter *parameter
 	{
 		msg( Msg::Error, "ClassParameterHandler::classChooserKnob", e.what() );
 	}
-	
+
 	classChooser->label( label.c_str() );
 	classChooser->enumerationKnob()->menu( menuItems );
 }

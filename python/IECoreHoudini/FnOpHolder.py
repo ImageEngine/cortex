@@ -41,15 +41,15 @@ import IECore
 import IECoreHoudini
 
 class FnOpHolder( IECoreHoudini.FnParameterisedHolder ) :
-	
+
 	_nodeType = "ieOpHolder"
-	
+
 	@staticmethod
 	# see FnParameterisedHolder for a description of the parameters
 	def create( name, type, version=None, path="IECORE_OP_PATHS", parent=None, contextArgs={} ) :
-		
+
 		return IECoreHoudini.FnParameterisedHolder._doCreate( FnOpHolder._nodeType, name, type, version, path, parent, contextArgs )
-	
+
 	## Convenience method to call setParameterised with the environment variable
 	# for the searchpaths set to "IECORE_OP_PATHS".
 	def setOp( self, className, classVersion=None, updateGui=True ) :
@@ -57,5 +57,5 @@ class FnOpHolder( IECoreHoudini.FnParameterisedHolder ) :
 		self.setParameterised( className, classVersion, "IECORE_OP_PATHS", updateGui )
 
 	def getOp( self ) :
-		
+
 		return self.getParameterised()

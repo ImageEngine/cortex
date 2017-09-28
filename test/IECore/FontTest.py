@@ -61,7 +61,7 @@ class FontTest( unittest.TestCase ) :
 			self.assertEqual( len( c.children() ), 1 )
 			self.assert_( c.children()[0].isInstanceOf( MeshPrimitive.staticTypeId() ) )
 			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
-			
+
 			v += c.children()[0]["P"].data.size()
 
 		self.assertEqual( v, m["P"].data.size() )

@@ -80,7 +80,7 @@ ToGLBufferConverter::~ToGLBufferConverter()
 IECore::RunTimeTypedPtr ToGLBufferConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
 	IECore::ConstDataPtr data = boost::static_pointer_cast<const IECore::Data>( src ); // safe because the parameter validated it for us
-		
+
 	const void *address = despatchTypedData<TypedDataAddress, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
 	size_t size = despatchTypedData<Detail::TypedDataBytes, TypeTraits::IsNumericBasedTypedData, DespatchTypedDataIgnoreError>( const_cast<Data *>( data.get() ) );
 

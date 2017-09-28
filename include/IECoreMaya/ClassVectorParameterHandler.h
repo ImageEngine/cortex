@@ -46,8 +46,8 @@ class ClassVectorParameterHandler : public ParameterHandler
 {
 
 	public :
-	
-		
+
+
 		/// Convenience function for setting the class held by parameter. This makes no changes to the maya representation
 		/// of the parameter whatsoever.
 		static MStatus setClasses( IECore::ParameterPtr parameter, const MStringArray &parameterNames, const MStringArray &classNames, const MIntArray &classVersions );
@@ -60,7 +60,7 @@ class ClassVectorParameterHandler : public ParameterHandler
 		/// Again, this function typically shouldn't be called directly, as a combination of direct access
 		/// to parameters and IECoreMaya.FnParameterisedHolder should be enough to achieve most things.
 		static void currentClasses( const MPlug &plug, MStringArray &parameterNames, MStringArray &classNames, MIntArray &classVersions );
-	
+
 	protected:
 
 		virtual MPlug doCreate( IECore::ConstParameterPtr parameter, const MString &plugName, MObject &node ) const;
@@ -68,12 +68,12 @@ class ClassVectorParameterHandler : public ParameterHandler
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
 		virtual MStatus doRestore( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-		
+
 	private :
-		
+
 		static MStatus storeClasses( IECore::ConstParameterPtr parameter, MPlug &plug );
 
-				
+
 };
 
 } // namespace IECoreMaya

@@ -50,22 +50,22 @@ struct StringAlgoTest
 
 	void noElements()
 	{
-		std::vector<std::string> v;	
+		std::vector<std::string> v;
 		std::string sep = " ";
-		
+
 		std::string result = join( v.begin(), v.end(), sep );
-		
+
 		BOOST_CHECK( result == "" );
 	}
-	
+
 	void singleElement()
 	{
 		std::vector<std::string> v;
 		v.push_back( "tif" );
 		std::string sep = " ";
-		
+
 		std::string result = join( v.begin(), v.end(), sep );
-		
+
 		BOOST_CHECK( result == "tif" );
 	}
 
@@ -77,9 +77,9 @@ struct StringAlgoTest
 		v.push_back( "foobar" );
 		v.push_back( "string with spaces" );
 		std::string sep = " ";
-		
+
 		std::string result = join( v.begin(), v.end(), sep );
-		
+
 		BOOST_CHECK( result == "tif exr foobar string with spaces"  );
 	}
 
@@ -91,17 +91,17 @@ struct StringAlgoTest
 		v.push_back( "foobar" );
 		v.push_back( "string with spaces" );
 		std::string sep = " ";
-		
+
 		std::vector<std::string>::const_iterator start = v.begin();
 		std::vector<std::string>::const_iterator end = v.end();
 		start++;
 		end--;
-		
+
 		std::string result = join( start, end, sep );
-		
+
 		BOOST_CHECK( result == "exr foobar" );
 	}
-	
+
 	void separator()
 	{
 		std::vector<std::string> v;
@@ -110,12 +110,12 @@ struct StringAlgoTest
 		v.push_back( "foobar" );
 		v.push_back( "string with spaces" );
 		std::string sep = ".";
-		
+
 		std::string result = join( v.begin(), v.end(), sep );
-		
+
 		BOOST_CHECK( result == "tif.exr.foobar.string with spaces" );
 	}
-	
+
 	void containers()
 	{
 		std::list<std::string> l;
@@ -124,28 +124,28 @@ struct StringAlgoTest
 		l.push_back( "foobar" );
 		l.push_back( "string with spaces" );
 		std::string sep = ".";
-		
+
 		std::set<std::string> s;
 		s.insert( "tif" );
 		s.insert( "exr" );
 		s.insert( "foobar" );
 		s.insert( "tif" );
 		s.insert( "string with spaces" );
-		
+
 		std::string lResult = join( l.begin(), l.end(), sep );
 		std::string sResult = join( s.begin(), s.end(), sep );
-		
+
 		BOOST_CHECK( lResult == "tif.exr.foobar.string with spaces" );
 		BOOST_CHECK( sResult == "exr.foobar.string with spaces.tif" );
 	}
-	
+
 	void notJustForStrings()
 	{
 		std::vector<float> v( 4, 2.5f );
 		float sep = 0.0f;
-		
+
 		float result = join( v.begin(), v.end(), sep );
-		
+
 		BOOST_CHECK( result == 10.0f );
 	}
 };

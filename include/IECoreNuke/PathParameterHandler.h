@@ -44,17 +44,17 @@ class PathParameterHandler : public StringParameterHandler
 {
 
 	public :
-				
+
 		PathParameterHandler();
-	
+
 	protected :
-	
+
 		virtual DD::Image::Knob *knob( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f, const char **storage );
-	
+
 	private :
-	
+
 		static Description<PathParameterHandler> g_description;
-		
+
 };
 
 } // namespace IECoreNuke

@@ -53,7 +53,7 @@ class StringUtilTest( unittest.TestCase ) :
 		self.assertEqual( "''", IECore.StringUtil.quoteCmdLineArg( "" ) )
 
 	def testCmdLineQuotingReversibility( self ) :
-		
+
 		args = [ "test", "", "-flag", "%", "<minor>", ".", "*", "&&", '"', "'", "python:ls", "read:/tmp/test file name.txt" ]
 
 		self.assertEqual( IECore.StringUtil.unquoteCmdLine( IECore.StringUtil.quotedCmdLine( args ) ), args )

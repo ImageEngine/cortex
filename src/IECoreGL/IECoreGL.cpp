@@ -2,7 +2,7 @@
 //
 //  Copyright (c) 2007-2013, Image Engine Design Inc. All rights reserved.
 //
-//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios), 
+//  Copyright 2010 Dr D Studios Pty Limited (ACN 127 184 954) (Dr. D Studios),
 //  its affiliates and/or its licensors.
 //
 //  Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h> 
+#include <stdio.h>
 
 #include "IECoreGL/GL.h"
 #include "IECoreGL/IECoreGL.h"
@@ -83,11 +83,11 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			CGLSetCurrentContext( context );
 
 #elif defined( __linux__ )
-						
+
 			int numFBConfigs = 0;
 			Display *display = XOpenDisplay( NULL );
 			GLXFBConfig *fbConfigs = glXChooseFBConfig( display, DefaultScreen( display ), NULL, &numFBConfigs );
-			
+
 			int contextAttribs[] =
 			{
     			GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
@@ -95,12 +95,12 @@ void IECoreGL::init( bool glAlreadyInitialised )
     			GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
     			None
 			};
-			
+
 			typedef GLXContext (*glXCreateContextAttribsARBProc)( Display *, GLXFBConfig, GLXContext, Bool, const int * );
 			glXCreateContextAttribsARBProc glXCreateContextAttribsARB = (glXCreateContextAttribsARBProc) glXGetProcAddressARB( (const GLubyte *) "glXCreateContextAttribsARB" );
-			
+
 			GLXContext openGLContext = glXCreateContextAttribsARB( display, fbConfigs[0], 0, True, contextAttribs );
-			
+
 			int pbufferAttribs[] = {
     			GLX_PBUFFER_WIDTH,  32,
     			GLX_PBUFFER_HEIGHT, 32,
@@ -124,12 +124,12 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			IECore::msg( IECore::Msg::Error, "IECoreGL::init", boost::format( "GLEW initialisation failed (%s)." ) % glewGetErrorString( initStatus ) );
 		}
 		init = true;
-		
+
 		const char *s = (const char *)glGetString( GL_SHADING_LANGUAGE_VERSION );
 		int major = 0; int minor = 0;
 		sscanf( s, "%d.%d", &major, &minor );
 		g_glslVersion = major * 100 + minor;
-	
+
 #if defined( __APPLE__ )
 
 		if( !glAlreadyInitialised )
@@ -143,7 +143,7 @@ void IECoreGL::init( bool glAlreadyInitialised )
 		}
 
 #endif
-		
+
 	}
 }
 

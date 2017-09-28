@@ -66,7 +66,7 @@ class CoreHoudini
 		{
 			return g_globalContext;
 		}
-		
+
 		/// Run misc python command
 		static boost::python::object evalPython( const std::string &cmd );
 

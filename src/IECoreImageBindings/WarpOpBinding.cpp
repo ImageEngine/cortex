@@ -56,7 +56,7 @@ void bindWarpOp()
 		.value( "Clamp", WarpOp::Clamp )
 		.value( "SetToBlack", WarpOp::SetToBlack )
 	;
-	
+
 	enum_<WarpOp::FilterType>( "FilterType" )
 		.value( "Bilinear", WarpOp::Bilinear )
 		.value( "None", WarpOp::None )

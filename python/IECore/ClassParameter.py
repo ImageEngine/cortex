@@ -41,47 +41,47 @@ import IECore
 class ClassParameter( IECore.CompoundParameter ) :
 
 	def __init__( self, name, description, searchPathEnvVar, className="", classVersion=0, userData=None ) :
-	
+
 		IECore.CompoundParameter.__init__( self, name, description, userData=userData )
-		
+
 		self.__classInstance = None
 		self.__className = ""
 		self.__classVersion = 0
 		self.__searchPathEnvVar = searchPathEnvVar
-		
+
 		self.setClass( className, classVersion, searchPathEnvVar )
-	
+
 	## Return the class being held. If withClassLoaderArgs is True then a tuple is returned
-	# in the following form : ( class, className, classVersion, searchPathEnvVar ).	
+	# in the following form : ( class, className, classVersion, searchPathEnvVar ).
 	def getClass( self, withClassLoaderArgs=False ) :
-	
+
 		if withClassLoaderArgs :
 			return ( self.__classInstance, self.__className, self.__classVersion, self.__searchPathEnvVar )
-		else :	
+		else :
 			return self.__classInstance
-	
+
 	## Sets the class being held. The specified class is loaded using a ClassLoader and
-	# the class' parameters are added to this parameter as children.		
+	# the class' parameters are added to this parameter as children.
 	def setClass( self, className, classVersion, searchPathEnvVar=None ) :
-	
+
 		searchPathToUse = searchPathEnvVar if searchPathEnvVar is not None else self.__searchPathEnvVar
 
 		if ( className, classVersion, searchPathToUse ) == ( self.__className, self.__classVersion, self.__searchPathEnvVar ) :
 			return
-			
+
 		self.__classInstance = None
 		self.clearParameters()
-		
+
 		if className!="" :
-		
+
 			loader = IECore.ClassLoader.defaultLoader( searchPathToUse )
-			
+
 			self.__classInstance = loader.load( className, classVersion )()
-		
+
 			self.addParameters(
 				self.__classInstance.parameters().values()
 			)
-		
+
 		self.__className = className
 		self.__classVersion = classVersion
 		self.__searchPathEnvVar = searchPathToUse
@@ -102,7 +102,7 @@ class ClassParameter( IECore.CompoundParameter ) :
 
 		parameter.setClass( args[0], int( args[1] ), args[2] )
 		del args[0:3]
-					
+
 IECore.registerRunTimeTyped( ClassParameter, IECore.TypeId.ClassParameter )
-			
+
 IECore.ParameterParser.registerType( ClassParameter.staticTypeId(), ClassParameter._parse, ClassParameter._serialise )

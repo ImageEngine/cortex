@@ -48,16 +48,16 @@ FloatParameterHandler::FloatParameterHandler()
 		m_knob( 0 )
 {
 }
-		
+
 void FloatParameterHandler::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
 	const FloatParameter *floatParameter = static_cast<const FloatParameter *>( parameter );
-	
+
 	if( f.makeKnobs() )
 	{
 		m_storage = floatParameter->numericDefaultValue();
 	}
-			
+
 	std::string label = knobLabel( parameter );
 	DD::Image::IRange range( floatParameter->minValue(), floatParameter->maxValue() );
 	m_knob = Float_knob( f, &m_storage, range, knobName, label.c_str() );

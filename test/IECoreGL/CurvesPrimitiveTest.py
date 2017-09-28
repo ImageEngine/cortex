@@ -60,26 +60,26 @@ except AttributeError :
 			def callFunction( f ) :
 				return f
 			return callFunction
-		
+
 class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	outputFileName = os.path.dirname( __file__ ) + "/output/testCurves.tif"
 
 	def showColorShader( self ) :
-	
+
 		fs = """
 		#include "IECoreGL/FragmentShader.h"
-		
+
 		IECOREGL_FRAGMENTSHADER_IN vec3 fragmentCs;
 		void main()
 		{
 			gl_FragColor = vec4( fragmentCs, 1 );
 		}
 		"""
-		
+
 		s = IECore.Shader( "showColor", "surface" )
 		s.parameters["gl:fragmentSource"] = IECore.StringData( fs )
-		
+
 		return s
 
 	def performTest( self, curvesPrimitive, attributes=[], testPixels=[], testImage=None, shader=None, diffImage=None ) :
@@ -146,13 +146,13 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					self.assertEqual( a[i], 1 )
 				elif r2[i] < 0.5 :
 					self.assertEqual( a[i], 0 )
-		
+
 		if diffImage :
 
 			expectedImage = IECore.Reader.create( diffImage ).read()
 
 			self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = i, maxError = 0.05 ).value, False )
-		
+
 
 	def testAttributes( self ) :
 
@@ -657,7 +657,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 					IECore.Color3f( 0, 1, 0 ),
 					IECore.Color3f( 0, 0, 1 ),
 					IECore.Color3f( 0, 1, 0 ),
-					
+
 					IECore.Color3f( 1, 0, 0 ),
 					IECore.Color3f( 0, 1, 0 ),
 					IECore.Color3f( 0, 0, 1 ),
@@ -746,14 +746,14 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			diffImage = os.path.dirname( __file__ ) + "/expectedOutput/linearLinesWithConstantColor.tif",
 			shader = self.showColorShader(),
 		)
-		
+
 	def setUp( self ) :
-		
+
 		if not os.path.isdir( "test/IECoreGL/output" ) :
 			os.makedirs( "test/IECoreGL/output" )
-	
+
 	def tearDown( self ) :
-		
+
 		if os.path.isdir( "test/IECoreGL/output" ) :
 			shutil.rmtree( "test/IECoreGL/output" )
 

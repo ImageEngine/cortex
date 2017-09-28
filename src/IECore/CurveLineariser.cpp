@@ -55,7 +55,7 @@ CurveLineariser::CurveLineariser()
 		10.0f,
 		0.0f
 	);
-	
+
 	parameters()->addParameter( verticesPerSegmentParameter );
 }
 
@@ -72,17 +72,17 @@ const FloatParameter * CurveLineariser::verticesPerSegmentParameter() const
 {
 	return parameters()->parameter<FloatParameter>( "verticesPerSegment" );
 }
-		
+
 void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const CompoundObject * operands )
 {
 	if( curves->basis()==CubicBasisf::linear() )
 	{
 		return;
 	}
-	
+
 	CurvesPrimitiveEvaluatorPtr evaluator = new CurvesPrimitiveEvaluator( curves );
 	PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
-	
+
 	std::vector<PrimitiveVariable> primitiveVariables;
 	std::vector<TypeId> primitiveVariableTypes;
 	std::vector<void *> primitiveVariableVectors;
@@ -99,7 +99,7 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 				// fall through to process the variable
 				;
 		}
-		
+
 		switch( it->second.data->typeId() )
 		{
 			case V3fVectorDataTypeId :
@@ -146,21 +146,21 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 				);
 		}
 	}
-	
+
 	size_t numCurves = curves->numCurves();
 	bool periodic = curves->periodic();
-	
+
 	IntVectorDataPtr newVerticesPerCurveData = new IntVectorData();
 	std::vector<int> &newVerticesPerCurve = newVerticesPerCurveData->writable();
 	newVerticesPerCurve.resize( numCurves );
-	
+
 	float verticesPerSegment = operands->member<FloatData>( "verticesPerSegment" )->readable();
-	
+
 	for( size_t curveIndex=0; curveIndex<numCurves; curveIndex++ )
 	{
 		int numVertices = fastFloatFloor( verticesPerSegment * (float)curves->numSegments( curveIndex ) );
 		numVertices = std::max( numVertices, periodic ? 3 : 2 );
-		
+
 		float vStep = periodic ? ( 1.0f / (float)( numVertices ) ) : ( 1.0f / (float)( numVertices - 1 ) );
 		for( int i=0; i<numVertices; i++ )
 		{
@@ -187,9 +187,9 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 				}
 			}
 		}
-		
+
 		newVerticesPerCurve[curveIndex] = numVertices;
 	}
-	
+
 	curves->setTopology( newVerticesPerCurveData, CubicBasisf::linear(), periodic );
 }

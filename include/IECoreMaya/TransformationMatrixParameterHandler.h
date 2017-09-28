@@ -54,15 +54,15 @@ class TransformationMatrixParameterHandler : public ParameterHandler
 		virtual MStatus doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( IECore::ConstParameterPtr parameter, MPlug &plug ) const;
 		virtual MStatus doSetValue( const MPlug &plug, IECore::ParameterPtr parameter ) const;
-	
+
 	private:
-	
+
 		static MString g_attributeNames[];
-		
+
 		MStatus setVecValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
 		MStatus getVecValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
 		MStatus setVecDefaultValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
-		MStatus setUnitVecDefaultValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;	
+		MStatus setUnitVecDefaultValues( MPlug vecPlug, Imath::Vec3<T> &values ) const;
 };
 
 } // namespace IECoreMaya

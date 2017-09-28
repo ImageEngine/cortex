@@ -64,7 +64,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 	{
 		return Ideal;
 	}
-	
+
 	if ( numPrims == 1 )
 	{
 		const GA_PrimitiveList &primitives = geo->getPrimitiveList();
@@ -74,15 +74,15 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPointsConverter::canConv
 			return Ideal;
 		}
 	}
-	
+
 	return Admissible;
 }
 
 ObjectPtr FromHoudiniPointsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	PointsPrimitivePtr result = new PointsPrimitive( geo->getNumPoints() );
-	
+
 	transferAttribs( geo, result.get(), operands, PrimitiveVariable::Vertex );
-	
+
 	return result;
 }

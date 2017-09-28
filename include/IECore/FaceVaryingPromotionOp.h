@@ -75,7 +75,7 @@ class IECORE_API FaceVaryingPromotionOp : public MeshPrimitiveOp
 		virtual void modifyTypedPrimitive( MeshPrimitive *mesh, const CompoundObject *operands );
 
 	private :
-	
+
 		struct Promoter;
 
 };

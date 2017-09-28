@@ -77,11 +77,11 @@ class CubicTest( unittest.TestCase ) :
 		c = b.coefficients( 1 )
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c, ( 0, 0, 0, 1 ) )
-		
+
 	def testDerivativeCoefficients( self ) :
-	
+
 		b = CubicBasisf.bezier()
-		
+
 		c = b.derivativeCoefficients( 0 )
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c, ( -3, 3, 0, 0 ) )
@@ -89,9 +89,9 @@ class CubicTest( unittest.TestCase ) :
 		c = b.derivativeCoefficients( 1 )
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c, ( 0, 0, -3, 3 ) )
-		
+
 		b = CubicBasisf.linear()
-		
+
 		c = b.derivativeCoefficients( 0 )
 		self.assertEqual( len( c ), 4 )
 		self.assertEqual( c, ( -1, 1, 0, 0 ) )
@@ -161,52 +161,52 @@ class CubicTest( unittest.TestCase ) :
 		b = IECore.CubicBasisf.bezier()
 		bb = eval( repr( b ) )
 		self.assertEqual( b, bb )
-		
+
 	def testLinearCoefficients( self ) :
-		
+
 		b = CubicBasisf.linear()
 		for i in range( 0, 100 ) :
 			t = i / 99.0
 			c = b.coefficients( t )
-			
+
 			self.assertAlmostEqual( c[0], 1-t )
 			self.assertAlmostEqual( c[1], t )
 			self.assertAlmostEqual( c[2], 0 )
 			self.assertAlmostEqual( c[3], 0 )
 
 	def testIntegral( self ) :
-	
+
 		random.seed( 200 )
-	
+
 		b = CubicBasisf.catmullRom()
 		for i in range( 0, 1000 ) :
-		
+
 			p0 = random.random()
 			p1 = random.random()
 			p2 = random.random()
 			p3 = random.random()
-			
+
 			t0 = random.random()
 			t1 = random.random()
-				
+
 			steps = 1000
 			tStep = (t1 - t0) / (steps-1)
 			a = 0
 			prevV = None
 			for j in range( 0, steps ) :
-			
+
 				t = t0 + j * tStep
-				
+
 				v =  b( t, p0, p1, p2, p3 )
-				
+
 				if prevV is not None :
 					a += tStep * ( v + prevV ) / 2.0
-				
+
 				prevV = v
-			
+
 			self.assertAlmostEqual( a, b.integral( t0, t1, p0, p1, p2, p3 ), 6 )
-			
-			
+
+
 if __name__ == "__main__":
     unittest.main()
 

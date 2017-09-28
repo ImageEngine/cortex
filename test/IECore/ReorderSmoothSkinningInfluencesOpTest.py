@@ -39,36 +39,36 @@ from IECore import *
 
 
 class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
-	
+
 	def createSSD( self, names, poses, indices ) :
-		
+
 		offsets = IntVectorData( [0, 2, 5] )
 		counts = IntVectorData( [2, 3, 1] )
 		weights = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
 
 		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
-		
+
 		return ssd
-	
+
 	def original( self ) :
-		
+
 		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
 		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
 		indices = IntVectorData( [0, 1, 0, 1, 2, 1] )
-		
+
 		return self.createSSD( names, poses, indices )
-	
+
 	def reordered( self ) :
-		
+
 		names = StringVectorData( [ 'jointB', 'jointC', 'jointA' ] )
 		poses = M44fVectorData( [M44f(2),M44f(3),M44f(1)] )
 		indices = IntVectorData( [2, 0, 2, 0, 1, 0] )
 
 		return self.createSSD( names, poses, indices )
-	
+
 	def testTypes( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp types"""
-		
+
 		ssd = self.original()
 
 		op = ReorderSmoothSkinningInfluencesOp()
@@ -79,14 +79,14 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testSameNames( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with same names"""
-		
+
 		ssd = self.original()
 
 		op = ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['reorderedInfluenceNames'].setValue( ssd.influenceNames() )
 		result = op.operate()
-		
+
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), ssd.pointIndexOffsets() )
@@ -97,10 +97,10 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testReordering( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with reordered names"""
-		
+
 		ssd = self.original()
 		reordered = self.reordered()
-		
+
 		op = ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['reorderedInfluenceNames'].setValue( reordered.influenceNames() )
@@ -112,7 +112,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result.pointInfluenceCounts(), ssd.pointInfluenceCounts() )
 		self.assertEqual( result.pointInfluenceWeights(), ssd.pointInfluenceWeights() )
 		self.assertNotEqual( result, ssd )
-		
+
 		self.assertEqual( result.influenceNames(), reordered.influenceNames() )
 		self.assertEqual( result.influencePose(), reordered.influencePose() )
 		self.assertEqual( result.pointIndexOffsets(), reordered.pointIndexOffsets() )
@@ -123,9 +123,9 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testWrongNames( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with wrong names"""
-		
+
 		ssd = self.original()
-		
+
 		op = ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['reorderedInfluenceNames'].setValue( StringVectorData( [ 'jointA', 'badName', 'jointC' ] ) )
@@ -133,7 +133,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testExtraNames( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with extra names"""
-		
+
 		ssd = self.original()
 
 		op = ReorderSmoothSkinningInfluencesOp()
@@ -143,7 +143,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def testNoNames( self ) :
 		""" Test ReorderSmoothSkinningInfluencesOp with no new names"""
-		
+
 		ssd = self.original()
 
 		op = ReorderSmoothSkinningInfluencesOp()

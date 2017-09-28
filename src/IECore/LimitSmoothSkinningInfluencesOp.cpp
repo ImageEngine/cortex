@@ -59,7 +59,7 @@ LimitSmoothSkinningInfluencesOp::LimitSmoothSkinningInfluencesOp()
 	modePresets.push_back( IntParameter::Preset( "WeightLimit", LimitSmoothSkinningInfluencesOp::WeightLimit ) );
 	modePresets.push_back( IntParameter::Preset( "MaxInfluences", LimitSmoothSkinningInfluencesOp::MaxInfluences ) );
 	modePresets.push_back( IntParameter::Preset( "Indexed", LimitSmoothSkinningInfluencesOp::Indexed ) );
-	
+
 	m_modeParameter = new IntParameter(
 		"mode",
 		"The mode of influence limiting. Options are to impose a minimum weight, a maximum number of influences per point, or to zero specific influences for all points",
@@ -69,45 +69,45 @@ LimitSmoothSkinningInfluencesOp::LimitSmoothSkinningInfluencesOp()
 		modePresets,
 		true
 	);
-	
+
 	m_compressionParameter = new BoolParameter(
 		"compressResult",
 		"True if the result should be compressed using the CompressSmoothSkinningDataOp",
 		true
 	);
-	
+
 	m_minWeightParameter = new FloatParameter(
 		"minWeight",
 		"The minimum weight an influence is allowed per point. This parameter is only used in WeightLimit mode",
 		0.001f,
 		0.0f
 	);
-	
+
 	m_maxInfluencesParameter = new IntParameter(
 		"maxInfluences",
 		"The maximum number of influences per point. This parameter is only used in MaxInfluences mode",
 		3,
 		0
 	);
-	
+
 	m_influenceIndicesParameter = new FrameListParameter(
 		"influenceIndices",
 		"The indices of influences to zero corresponding to the names in input.influenceNames(). This parameter is only used in Indexed mode",
 		""
 	);
-	
+
 	m_useLocksParameter = new BoolParameter(
 		"applyLocks",
 		"Whether or not influenceLocks should be applied",
 		true
 	);
-	
+
 	m_influenceLocksParameter = new BoolVectorParameter(
 		"influenceLocks",
 		"A per-influence list of lock values",
 		new BoolVectorData
 	);
-	
+
 	parameters()->addParameter( m_modeParameter );
 	parameters()->addParameter( m_compressionParameter );
 	parameters()->addParameter( m_minWeightParameter );
@@ -129,37 +129,37 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	const std::vector<int> &pointIndexOffsets = skinningData->pointIndexOffsets()->readable();
 	const std::vector<int> &pointInfluenceCounts = skinningData->pointInfluenceCounts()->readable();
 	const std::vector<int> &pointInfluenceIndices = skinningData->pointInfluenceIndices()->readable();
-	
+
 	std::vector<float> &pointInfluenceWeights = skinningData->pointInfluenceWeights()->writable();
-	
+
 	bool useLocks = m_useLocksParameter->getTypedValue();
 	std::vector<bool> &locks = m_influenceLocksParameter->getTypedValue();
-	
+
 	int mode = m_modeParameter->getNumericValue();
-	
+
 	// make sure there is one lock per influence
 	if ( useLocks && ( locks.size() != skinningData->influenceNames()->readable().size() ) && ( mode != LimitSmoothSkinningInfluencesOp::Indexed ) )
 	{
 		throw IECore::Exception( "LimitSmoothSkinningInfluencesOp: There must be exactly one lock per influence" );
 	}
-	
+
 	if ( !useLocks )
 	{
 		locks.clear();
 		locks.resize( skinningData->influenceNames()->readable().size(), false );
 	}
-	
+
 	// Limit influences based on minumum allowable weight
 	if ( mode == LimitSmoothSkinningInfluencesOp::WeightLimit )
 	{
 		float minWeight = m_minWeightParameter->getNumericValue();
-		
+
 		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 		{
 			for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 			{
 				int current = pointIndexOffsets[i] + j;
-				
+
 				if ( !locks[ pointInfluenceIndices[current] ] && (pointInfluenceWeights[current] < minWeight) )
 				{
 					pointInfluenceWeights[current] = 0.0f;
@@ -172,7 +172,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	{
 		int maxInfluences = m_maxInfluencesParameter->getNumericValue();
 		std::vector<int> influencesToLimit;
-		
+
 		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 		{
 			int numToLimit = pointInfluenceCounts[i] - maxInfluences;
@@ -180,40 +180,40 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 			{
 				continue;
 			}
-			
+
 			influencesToLimit.clear();
-			
+
 			for ( int j=0; j < numToLimit; j++ )
-			{				
+			{
 				int indexOfMin = -1;
 				float minWeight = Imath::limits<float>::max();
-				
+
 				for ( int k=0; k < pointInfluenceCounts[i]; k++ )
 				{
 					int current = pointIndexOffsets[i] + k;
-					
+
 					if ( locks[ pointInfluenceIndices[current] ] || find( influencesToLimit.begin(), influencesToLimit.end(), current ) != influencesToLimit.end() )
 					{
 						continue;
 					}
-					
+
 					float weight = pointInfluenceWeights[current];
-					
+
 					if ( weight < minWeight )
 					{
 						minWeight = weight;
 						indexOfMin = current;
 					}
 				}
-				
+
 				if ( indexOfMin == -1 )
 				{
 					break;
 				}
-				
+
 				influencesToLimit.push_back( indexOfMin );
 			}
-			
+
 			for ( unsigned j=0; j < influencesToLimit.size(); j++ )
 			{
 				pointInfluenceWeights[ influencesToLimit[j] ] = 0.0f;
@@ -230,13 +230,13 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 		{
 			limitIndex[ indicesToLimit[i] ] = true;
 		}
-		
+
 		for ( unsigned i=0; i < pointIndexOffsets.size(); i++ )
 		{
 			for ( int j=0; j < pointInfluenceCounts[i]; j++ )
 			{
 				int current = pointIndexOffsets[i] + j;
-				
+
 				if ( limitIndex[ pointInfluenceIndices[current] ] )
 				{
 					pointInfluenceWeights[current] = 0.0f;
@@ -248,7 +248,7 @@ void LimitSmoothSkinningInfluencesOp::modify( Object * object, const CompoundObj
 	{
 		throw IECore::Exception( ( boost::format( "LimitSmoothSkinningInfluencesOp: \"%d\" is not a recognized mode" ) % mode ).str() );
 	}
-	
+
 	if ( m_compressionParameter->getTypedValue() )
 	{
 		CompressSmoothSkinningDataOp compressionOp;

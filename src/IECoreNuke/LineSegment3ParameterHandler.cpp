@@ -49,7 +49,7 @@ LineSegment3ParameterHandler<T>::LineSegment3ParameterHandler()
 	:	m_startKnob( 0 ), m_endKnob( 0 )
 {
 }
-		
+
 template<typename T>
 void LineSegment3ParameterHandler<T>::knobs( const IECore::Parameter *parameter, const char *knobName, DD::Image::Knob_Callback f )
 {
@@ -59,9 +59,9 @@ void LineSegment3ParameterHandler<T>::knobs( const IECore::Parameter *parameter,
 		m_storage.p0 = defaultValue.p0;
 		m_storage.p1 = defaultValue.p1 - defaultValue.p0; // second value in nuke is relative to first
 	}
-	
+
 	std::string label = knobLabel( parameter );
-	
+
 	std::string startKnobName = std::string( knobName ) + "Start";
 	std::string startKnobLabel = label + " Start";
 	m_startKnob = XYZ_knob( f, (float *)&(m_storage.p0), startKnobName.c_str(), startKnobLabel.c_str() );
@@ -94,7 +94,7 @@ void LineSegment3ParameterHandler<T>::setParameterValue(IECore::Parameter *param
 		value.p1.z = m_endKnob->get_value( 2 );
 		value.p1 += value.p0; // second value in nuke is relative to first
 	}
-	
+
 	lineParameter->setTypedValue( value );
 }
 

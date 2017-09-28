@@ -58,12 +58,12 @@ class FnParameterisedHolder
 
 		void setParameterised( IECore::RunTimeTypedPtr p );
 		void setParameterised( const std::string &className, int classVerison, const std::string &seachPathEnvVar );
-		
+
 		/// Sets the values of the parameters of the held Parameterised object
 		/// to reflect the values of the attributes of the node.
 		/// \todo: add setNodeValues as well
 		void setParameterisedValues( double time );
-		
+
 		IECore::RunTimeTypedPtr getParameterised();
 
 	private :

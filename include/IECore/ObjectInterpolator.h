@@ -47,9 +47,9 @@ template<>
 struct LinearInterpolator< Object >
 {
 	void operator()(const Object *y0, const Object *y1, double x, ObjectPtr &result ) const;
-	
+
 	private :
-	
+
 		struct Adaptor;
 };
 
@@ -57,9 +57,9 @@ template<>
 struct CubicInterpolator< Object >
 {
 	void operator()(const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x, ObjectPtr &result ) const;
-	
+
 	private :
-	
+
 		struct Adaptor;
 };
 

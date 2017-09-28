@@ -202,25 +202,25 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 
 				self.assert_( ( v1 - v2 ).length() < 1.e-4 )
-	
+
 	def testRoundTripAfterSerialisation( self ) :
-	
+
 		# make a scene with an OpHolder holding an op with a spline parameter
 		fnOH = IECoreMaya.FnOpHolder.create( "test", "splineInput", 1 )
 		opNode = fnOH.fullPathName()
 		op = fnOH.getOp()
-		
-		# save it		
+
+		# save it
 		maya.cmds.file( rename = os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma" )
 		sceneFileName = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		# load it
 		maya.cmds.file( new=True, force=True )
 		maya.cmds.file( sceneFileName, force=True, open=True )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( opNode )
 		op = fnOH.getOp()
-		
+
 		# stick a new value on
 		splineData = IECore.SplineffData(
 			IECore.Splineff(
@@ -233,19 +233,19 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				)
 			)
 		)
-		
+
 		op["spline"].setValue( splineData )
-		
+
 		# convert the value to maya
 		fnOH.setNodeValue( op["spline"] )
-		
+
 		# convert it back
 		fnOH.setParameterisedValue( op["spline"] )
 
 		# make sure it worked
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
-		
+
 		# do it all again just for kicks
 		op["spline"].setValue( splineData )
 		fnOH.setNodeValue( op["spline"] )
@@ -254,13 +254,13 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 		self.assertEqual( splineData, splineData2 )
 
 	def testSparseEntries( self ) :
-		
+
 		# load a scene where we have a spline parameter with sparse entries.
 		maya.cmds.file( os.getcwd() + "/test/IECoreMaya/scenes/splineWithSparseEntries.ma", force=True, open=True )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "test" )
 		op = fnOH.getOp()
-		
+
 		# stick a new value on
 		splineData = IECore.SplineffData(
 			IECore.Splineff(
@@ -273,48 +273,48 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				)
 			)
 		)
-		
+
 		op["spline"].setValue( splineData )
-		
+
 		# convert the value to maya
 		fnOH.setNodeValue( op["spline"] )
-		
+
 		# convert it back
 		fnOH.setParameterisedValue( op["spline"] )
 
 		# make sure it worked
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
-		
+
 		# do it all again just for kicks
 		op["spline"].setValue( splineData )
 		fnOH.setNodeValue( op["spline"] )
 		fnOH.setParameterisedValue( op["spline"] )
 		splineData2 = op["spline"].getValue()
 		self.assertEqual( splineData, splineData2 )
-		
+
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() >= 201500, "Reference edits for splines don't work in Maya 2016" )
 	def testAddColorSplineToReferencedNode( self ) :
-	
+
 		# make a scene with an empty op holder
 		######################################
-		
+
 		maya.cmds.createNode( "ieOpHolderNode" )
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ) )
 		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
 
 		# reference it in and add an op with a color spline
 		###################################################
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
 		fnOH.setOp( "colorSplineInput", 1 )
-		
+
 		fnOH.setParameterisedValues()
-		
+
 		self.assertEqual(
 			fnOH.getOp()["spline"].getValue().value,
 			IECore.SplinefColor3f(
@@ -327,21 +327,21 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				),
 			)
 		)
-		
+
 		# save the scene, and reload it. check that we've worked
 		# around another wonderful maya referencing bug
 		########################################################
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ) )
 		referencerScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referencerScene, force = True, open = True )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
-				
+
 		fnOH.setParameterisedValues()
-				
+
 		self.assertEqual(
 			fnOH.getOp()["spline"].getValue().value,
 			IECore.SplinefColor3f(
@@ -357,26 +357,26 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 
 	@unittest.skipIf( maya.OpenMaya.MGlobal.apiVersion() >= 201500, "Reference edits for splines don't work in Maya 2016" )
 	def testAddFloatSplineToReferencedNode( self ) :
-	
+
 		# make a scene with an empty op holder
 		######################################
-		
+
 		maya.cmds.createNode( "ieOpHolderNode" )
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ) )
 		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
 
 		# reference it in and add an op with a color spline
 		###################################################
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
 		fnOH.setOp( "splineInput", 1 )
-		
+
 		fnOH.setParameterisedValues()
-		
+
 		self.assertEqual(
 			fnOH.getOp()["spline"].getValue().value,
 			IECore.Splineff(
@@ -389,21 +389,21 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				),
 			)
 		)
-		
+
 		# save the scene, and reload it. check that we've worked
 		# around another wonderful maya referencing bug
 		########################################################
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ) )
 		referencerScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
-		
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referencerScene, force = True, open = True )
-		
+
 		fnOH = IECoreMaya.FnOpHolder( "ns1:ieOpHolderNode1" )
-				
+
 		fnOH.setParameterisedValues()
-				
+
 		self.assertEqual(
 			fnOH.getOp()["spline"].getValue().value,
 			IECore.Splineff(
@@ -416,18 +416,18 @@ class SplineParameterHandlerTest( IECoreMaya.TestCase ) :
 				),
 			)
 		)
-		
+
 	def tearDown( self ) :
-	
+
 		paths = [
 			os.getcwd() + "/test/IECoreMaya/splineParameterHandlerTest.ma",
 			os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReference.ma" ),
 			os.path.join( os.getcwd(), "test", "IECoreMaya", "opHolderReferencer.ma" ),
 		]
-		
+
 		for path in paths :
 			if os.path.exists( path ) :
 				os.remove( path )
-		
+
 if __name__ == "__main__":
 	IECoreMaya.TestProgram( plugins = [ "ieCore" ] )

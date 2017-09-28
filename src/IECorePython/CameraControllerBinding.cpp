@@ -60,21 +60,21 @@ void bindCameraController()
 
 	class_<CameraController, boost::noncopyable> cls( "CameraController", init<CameraPtr>() );
 	scope s( cls );
-	
+
 	// define enums first, because they are needed for default argument definitions
-	
+
 	enum_<CameraController::ScreenWindowAdjustment>( "ScreenWindowAdjustment" )
 		.value( "CropScreenWindow", CameraController::CropScreenWindow )
 		.value( "ScaleScreenWindow", CameraController::ScaleScreenWindow )
 	;
-	
+
 	enum_<CameraController::MotionType>( "MotionType" )
 		.value( "None", CameraController::None )
 		.value( "Track", CameraController::Track )
 		.value( "Tumble", CameraController::Tumble )
 		.value( "Dolly", CameraController::Dolly )
 	;
-	
+
 	cls.def( "setCamera", &CameraController::setCamera )
 		.def( "getCamera", (CameraPtr (CameraController::*)())&CameraController::getCamera )
 		.def( "setCentreOfInterest", &CameraController::setCentreOfInterest )

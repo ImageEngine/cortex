@@ -69,7 +69,7 @@ class TestObjectWriter( unittest.TestCase ) :
 		self.assertEqual( h["host"]["nodeName"].value, socket.gethostname() )
 		self.assertEqual( h["ieCoreVersion"].value, IECore.versionString() )
 		self.assertEqual( h["typeName"].value, "IntData" )
-	
+
 	def testBoundInHeader( self ) :
 
 		o = IECore.SpherePrimitive()
@@ -81,7 +81,7 @@ class TestObjectWriter( unittest.TestCase ) :
 		self.assertEqual( h["bound"].value, o.bound() )
 
 	def tearDown( self ) :
-		
+
 		for f in ( "test/compoundData.cob", "test/intData.cob", "test/spherePrimitive.cob" ) :
 			if os.path.isfile( f ) :
 				os.remove( f )

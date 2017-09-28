@@ -175,7 +175,7 @@ static boost::python::list items( const CompoundObject &o )
 	}
 	return result;
 }
-		
+
 class CompoundObjectFromPythonDict
 {
 	public :

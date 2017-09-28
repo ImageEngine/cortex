@@ -53,21 +53,21 @@ class FromHoudiniCortexObjectConverter : public IECoreHoudini::FromHoudiniGeomet
 
 		FromHoudiniCortexObjectConverter( const GU_DetailHandle &handle );
 		FromHoudiniCortexObjectConverter( const SOP_Node *sop );
-		
+
 		virtual ~FromHoudiniCortexObjectConverter();
-		
+
 		/// Determines if the given GU_Detail can be converted
 		static FromHoudiniGeometryConverter::Convertability canConvert( const GU_Detail *geo );
-	
+
 	protected :
-		
+
 		/// performs conversion to an IECore::Object
 		virtual IECore::ObjectPtr doDetailConversion( const GU_Detail *geo, const IECore::CompoundObject *operands ) const;
 
 	private :
-		
+
 		IECore::ObjectPtr filterAttribs( const IECore::Object *object, const char *filter ) const;
-		
+
 		static FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> m_description;
 		static FromHoudiniGeometryConverter::Description<FromHoudiniCortexObjectConverter> m_universalDescription;
 };

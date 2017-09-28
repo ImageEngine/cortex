@@ -92,7 +92,7 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 		self.failUnless( t.isInstanceOf( IECore.ParameterisedProcedural.staticTypeName() ) )
 
 	def testMissingDoRender( self ) :
-		
+
 		## This test exercises a problem in boost::python::wrapper::get_override
 		# whereby failing to find an override would incorrectly set python error
 		# flags (PyErr_Occurred() would return True), and we'd get really bizarre
@@ -101,24 +101,24 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 		# be present, we don't want to confuse people with really off the wall errors,
 		# and outside of cortex we have other code where it's perfectly reasonable
 		# not to provide an override - this is where the problem was first found.
-		
+
 		class MyProcedural( IECore.ParameterisedProcedural ) :
-		
+
 			def __init__( self ) :
-			
+
 				IECore.ParameterisedProcedural.__init__( self, "" )
-		
+
 			## oops! we forgot the doRender() method.
-		
+
 		IECore.registerRunTimeTyped( MyProcedural )
-								
+
 		c = IECore.CapturingRenderer()
-		
+
 		g = IECore.Group()
 		g.addChild( MyProcedural() )
-		
+
 		with IECore.WorldBlock( c ) :
 			g.render( c )
-		
+
 if __name__ == "__main__":
         unittest.main()

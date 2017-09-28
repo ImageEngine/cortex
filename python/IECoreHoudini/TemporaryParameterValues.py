@@ -47,7 +47,7 @@ class TemporaryParameterValues :
 		self.__parametersAndValues.update( kw )
 
 	def __enter__( self ) :
-		
+
 		handlers = {
 			"Int" : self.__simpleParmHandler,
 			"Float" : self.__simpleParmHandler,
@@ -56,12 +56,12 @@ class TemporaryParameterValues :
 
 		self.__restoreCommands = []
 		for parmName, value in self.__parametersAndValues.items() :
-			
+
 			# check we can handle this type
 			parm = hou.parm( parmName ) or hou.parmTuple( parmName )
 			if not parm :
 				raise TypeError( "Parameter \"%s\" does not exist." % parmName )
-			
+
 			parmType = parm.parmTemplate().dataType().name()
 			handler = handlers.get( parmType, None )
 			if not handler :
@@ -74,14 +74,14 @@ class TemporaryParameterValues :
 			handler( parm, value )
 
 	def __exit__( self, type, value, traceBack ) :
-		
+
 		for command in self.__restoreCommands :
 			exec( command )
 
 	def __simpleParmHandler( self, parm, value ) :
-		
+
 		if isinstance( parm, hou.ParmTuple ) and not isinstance( value, tuple ) :
 			value = value,
-		
+
 		parm.deleteAllKeyframes()
 		parm.set( value )

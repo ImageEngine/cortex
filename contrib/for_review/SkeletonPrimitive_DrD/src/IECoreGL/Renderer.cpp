@@ -189,7 +189,7 @@ IECoreGL::Renderer::Renderer()
 	const char *texturePath = getenv( "IECOREGL_TEXTURE_PATHS" );
 	m_data->options.textureSearchPath = m_data->options.textureSearchPathDefault = texturePath ? texturePath : "";
 	m_data->options.drawCoordinateSystems = false;
-	
+
 	m_data->transformStack.push( M44f() );
 
 	m_data->inWorld = false;
@@ -672,7 +672,7 @@ void IECoreGL::Renderer::coordinateSystem( const std::string &name )
 		numVertices.push_back( 2 );
 		numVertices.push_back( 2 );
 		numVertices.push_back( 2 );
-		
+
 		V3fVectorDataPtr pointsData = new V3fVectorData();
 		std::vector<V3f> &points = pointsData->writable();
 		points.push_back( V3f( 0 ) );
@@ -681,10 +681,10 @@ void IECoreGL::Renderer::coordinateSystem( const std::string &name )
 		points.push_back( V3f( 0, 1, 0 ) );
 		points.push_back( V3f( 0 ) );
 		points.push_back( V3f( 0, 0, 1 ) );
-		
+
 		PrimitiveVariableMap primVars;
 		primVars["P"] = PrimitiveVariable( PrimitiveVariable::Vertex, pointsData );
-		
+
 		attributeBegin();
 			setAttribute( "name", new StringData( "coordinateSystem:" + name ) );
 			setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
@@ -1027,14 +1027,14 @@ static IECore::ConstDataPtr textPrimitiveTypeGetter( const std::string &name, co
 			msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
 			return new StringData( "invalid" );
 	}
-	
+
 #else
 
 	IECore::msg( IECore::Msg::Warning, "Renderer::getAttribute", "IECore was not built with FreeType support." );
 	return 0;
 
 #endif // IECORE_WITH_FREETYPE
-	
+
 }
 
 static void textPrimitiveTypeSetter( const std::string &name, IECore::ConstDataPtr value, IECoreGL::Renderer::MemberData *memberData )
@@ -1209,7 +1209,7 @@ void IECoreGL::Renderer::attributeBegin()
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::attributeBegin", "Unsupported attributeBegin outside world begin/end blocks." );
-		return;	
+		return;
 	}
 	m_data->implementation->attributeBegin();
 }
@@ -1219,7 +1219,7 @@ void IECoreGL::Renderer::attributeEnd()
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::attributeBegin", "Unsupported attributeBegin outside world begin/end blocks." );
-		return;	
+		return;
 	}
 	m_data->implementation->attributeEnd();
 }
@@ -1229,7 +1229,7 @@ void IECoreGL::Renderer::setAttribute( const std::string &name, IECore::ConstDat
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::setAttribute", "Unsupported setAttribute outside world begin/end blocks." );
-		return;	
+		return;
 	}
 	const AttributeSetterMap *s = attributeSetters();
 	AttributeSetterMap::const_iterator it = s->find( name );
@@ -1256,7 +1256,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::getAttribute", "Unsupported getAttribute outside world begin/end blocks." );
-		return 0;	
+		return 0;
 	}
 
 	const AttributeGetterMap *g = attributeGetters();
@@ -1286,7 +1286,7 @@ void IECoreGL::Renderer::shader( const std::string &type, const std::string &nam
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::shader", "Unsupported shader call outside world begin/end blocks." );
-		return;	
+		return;
 	}
 
 	if( type=="surface" || type=="gl:surface" )
@@ -1530,7 +1530,7 @@ void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float the
 static const std::string &imageFragmentShader()
 {
 	// fragment shader
-	static const std::string shaderCode = 
+	static const std::string shaderCode =
 		"uniform sampler2D texture;"
 		""
 		"void main()"
@@ -1689,7 +1689,7 @@ void IECoreGL::Renderer::instanceBegin( const std::string &name, const IECore::C
 	if ( m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::instanceBegin", "Unsupported instanceBegin call after worldBegin." );
-		return;	
+		return;
 	}
 	if ( m_data->currentInstance )
 	{
@@ -1711,7 +1711,7 @@ void IECoreGL::Renderer::instanceEnd()
 	if ( m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::instanceEnd", "Unsupported instanceEnd call after worldBegin." );
-		return;	
+		return;
 	}
 	if ( !m_data->currentInstance )
 	{
@@ -1769,7 +1769,7 @@ bool removeObjectWalk( IECoreGL::GroupPtr parent, IECoreGL::GroupPtr child, cons
 		}
 		return true;
 	}
-	
+
 	bool result = false;
 	IECoreGL::Group::Mutex::scoped_lock lock( child->mutex() );
 	IECoreGL::Group::ChildContainer::const_iterator it = child->children().begin();
@@ -1799,14 +1799,14 @@ IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::Comp
 		msg( Msg::Warning, "Renderer::command", "removeObject command operates only in deferred mode" );
 		return 0;
 	}
-	
+
 	string objectName = parameterValue<string>( "name", parameters, "" );
 	if( objectName=="" )
 	{
 		msg( Msg::Warning, "Renderer::command", "removeObject command expects StringData parameter \"name\"" );
 		return 0;
 	}
-	
+
 	ScenePtr scene = r->scene();
 	bool result = removeObjectWalk( 0, r->scene()->root(), objectName );
 
@@ -1821,7 +1821,7 @@ IECore::DataPtr editBeginCommand( const std::string &name, const IECore::Compoun
 		msg( Msg::Warning, "Renderer::command", "editBeginCommand command operates only in deferred mode" );
 		return 0;
 	}
-		
+
 	memberData->inWorld = true;
 	return new IECore::BoolData( true );
 }
@@ -1834,7 +1834,7 @@ IECore::DataPtr editEndCommand( const std::string &name, const IECore::CompoundD
 		msg( Msg::Warning, "Renderer::command", "editEndCommand command operates only in deferred mode" );
 		return 0;
 	}
-	
+
 	memberData->inWorld = false;
 	return new IECore::BoolData( true );
 }
@@ -1864,7 +1864,7 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	{
 		return it->second( name, parameters, m_data );
 	}
-	
+
 	if( name.compare( 0, 3, "gl:" )==0 || name.find( ':' )==string::npos )
 	{
 		msg( Msg::Warning, "Renderer::command", boost::format( "Unsuppported command \"%s\"." ) % name );

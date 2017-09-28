@@ -139,18 +139,18 @@ class TestSLOReader( unittest.TestCase ) :
 			self.assertEqual( s.parameters[p[0]], p[1] )
 
 	def testThreading( self ) :
-	
+
 		shaders = [
 			"spotlight.sdl",
 			"plastic.sdl",
 			"matte.sdl",
 			"distantlight.sdl",
 		]
-		
+
 		def read( shader ) :
-		
+
 			SLOReader( shader ).read()
-		
+
 		for i in range( 0, 100 ) :
 
 			threads = []
@@ -162,33 +162,33 @@ class TestSLOReader( unittest.TestCase ) :
 				t.start()
 
 			for t in threads :
-				t.join()	
+				t.join()
 
 	def testCantReadEmpty( self ) :
-	
+
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/empty' )
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
 		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
 
 	def testBlindData( self ) :
-	
+
 		r = SLOReader( os.path.join( self.shaderPath(), "matte.sdl" ) )
 		s = r.read()
-		
+
 		self.assertEqual( s.blindData()["ri:orderedParameterNames"], StringVectorData( [ "Ka", "Kd" ] ) )
 
 	def testAnnotations( self ) :
-	
+
 		self.assertEqual( os.system( "shaderdl -o test/IECoreRI/shaders/types.sdl test/IECoreRI/shaders/types.sl" ), 0 )
 
 		r = SLOReader( "test/IECoreRI/shaders/types.sdl" )
 		s = r.read()
-		
+
 		self.assertTrue( "ri:annotations" in s.blindData() )
-		
+
 		self.assertEqual( s.blindData()["ri:annotations"]["author"], StringData( "JohnJohn" ) )
 		self.assertEqual( s.blindData()["ri:annotations"]["version"], StringData( "1.0" ) )
-	
+
 	def tearDown( self ) :
 
 		for f in [ "test/IECoreRI/shaders/types.sdl" ] :

@@ -48,7 +48,7 @@ ParameterHandler::Description<MeshPrimitiveParameterHandler> MeshPrimitiveParame
 MeshPrimitiveParameterHandler::MeshPrimitiveParameterHandler()
 {
 }
-		
+
 int MeshPrimitiveParameterHandler::minimumInputs( const IECore::Parameter *parameter )
 {
 	return 1;
@@ -84,7 +84,7 @@ void MeshPrimitiveParameterHandler::setParameterValue( IECore::Parameter *parame
 			return;
 		}
 	}
-	
+
 	// no input, or conversion failed. set parameter to default value.
 	parameter->setValue( parameter->defaultValue()->copy() );
 }

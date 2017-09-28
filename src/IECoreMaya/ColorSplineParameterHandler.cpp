@@ -107,7 +107,7 @@ MPlug ColorSplineParameterHandler<S>::doCreate( IECore::ConstParameterPtr parame
 
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 
@@ -139,7 +139,7 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 	{
 		nextNewLogicalIndex = 1 + *std::max_element( MArrayIter<MIntArray>::begin( indicesToReuse ), MArrayIter<MIntArray>::end( indicesToReuse ) );
 	}
-	
+
 	assert( indicesToReuse.length() == fnRAttr.getNumEntries() );
 
 	size_t pointsSizeMinus2 = spline.points.size() - 2;
@@ -164,9 +164,9 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( IECore::ConstParameterPtr pa
 		}
 		else
 		{
-			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );		
+			pointPlug = plug.elementByLogicalIndex( nextNewLogicalIndex++ );
 		}
-		
+
 		s = pointPlug.child( 0 ).setValue( it->first ); assert( s );
 		MPlug colorPlug = pointPlug.child( 1 );
 		colorPlug.child( 0 ).setValue( it->second[0] );
@@ -270,12 +270,12 @@ MStatus ColorSplineParameterHandler<S>::doSetValue( const MPlug &plug, IECore::P
 	{
 		MPlug pointPlug = plug.elementByLogicalIndex( indices[i] );
 		MPlug colorPlug = pointPlug.child( 1 );
-				
+
 		typename S::YType y( 1 );
 		y[0] = colorPlug.child( 0 ).asDouble();
 		y[1] = colorPlug.child( 1 ).asDouble();
 		y[2] = colorPlug.child( 2 ).asDouble();
-		
+
 		spline.points.insert(
 			typename S::PointContainer::value_type( pointPlug.child( 0 ).asDouble(), y )
 		);

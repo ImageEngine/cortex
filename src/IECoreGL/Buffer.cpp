@@ -62,8 +62,8 @@ Buffer::ScopedBinding::ScopedBinding( const Buffer &buffer, GLenum target )
 		default :
 			throw IECore::Exception( "IECoreGL::Buffer::ScopedBinding : Unknown target type" );
 	}
-	
-	glBindBuffer( m_target, m_buffer );	
+
+	glBindBuffer( m_target, m_buffer );
 }
 
 Buffer::ScopedBinding::~ScopedBinding()
@@ -98,7 +98,7 @@ size_t Buffer::size() const
 {
 	ScopedBinding binding( *this, GL_ARRAY_BUFFER );
 	int result = 0;
-	glGetBufferParameteriv( GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &result );	
+	glGetBufferParameteriv( GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &result );
 	return result;
 }
 

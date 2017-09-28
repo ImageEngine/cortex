@@ -62,7 +62,7 @@ FromHoudiniPolygonsConverter::~FromHoudiniPolygonsConverter()
 FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canConvert( const GU_Detail *geo )
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	
+
 	for ( GA_Iterator it=geo->getPrimitiveRange().begin(); !it.atEnd(); ++it )
 	{
 		const GA_Primitive *prim = primitives.get( it.getOffset() );
@@ -71,7 +71,7 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 			return Inapplicable;
 		}
 	}
-	
+
 	// is there a single named shape?
 	GA_ROAttributeRef attrRef = geo->findPrimitiveAttribute( "name" );
 	if ( attrRef.isValid() && attrRef.isString() )
@@ -85,16 +85,16 @@ FromHoudiniGeometryConverter::Convertability FromHoudiniPolygonsConverter::canCo
 			return Ideal;
 		}
 	}
-	
+
 	return Suitable;
 }
 
 ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo, const CompoundObject *operands ) const
 {
 	const GA_PrimitiveList &primitives = geo->getPrimitiveList();
-	
+
 	MeshPrimitivePtr result = new MeshPrimitive();
-	
+
 	GA_Iterator firstPrim = geo->getPrimitiveRange().begin();
 	for ( GA_Iterator it=firstPrim; !it.atEnd(); ++it )
 	{
@@ -104,7 +104,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 			throw std::runtime_error( "FromHoudiniPolygonsConverter: Geometry contains non-polygon primitives" );
 		}
 	}
-	
+
 	// loop over primitives gathering mesh data
 	std::vector<int> vertIds;
 	std::vector<int> vertsPerFace;
@@ -119,7 +119,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 			vertIds.push_back( geo->pointIndex( prim->getPointOffset( numPrimVerts - 1 - j ) ) );
 		}
 	}
-	
+
 	// try to get the interpolation type from the geo
 	CompoundObjectPtr modifiedOperands = 0;
 	std::string interpolation = "linear";
@@ -129,7 +129,7 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 		modifiedOperands = operands->copy();
 		std::string &attributeFilter = modifiedOperands->member<StringData>( "attributeFilter" )->writable();
 		attributeFilter += " ^ieMeshInterpolation";
-		
+
 		GA_Range primRange = geo->getPrimitiveRange();
 		for ( GA_Iterator it=primRange.begin(); !it.atEnd(); ++it )
 		{
@@ -152,13 +152,13 @@ ObjectPtr FromHoudiniPolygonsConverter::doDetailConversion( const GU_Detail *geo
 			}
 		}
 	}
-	
+
 	result->setTopology( new IntVectorData( vertsPerFace ), new IntVectorData( vertIds ), interpolation );
-	
+
 	if ( geo->getNumVertices() )
 	{
 		transferAttribs( geo, result.get(), modifiedOperands ? modifiedOperands.get() : operands );
 	}
-	
+
 	return result;
 }

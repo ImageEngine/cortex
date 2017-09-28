@@ -53,9 +53,9 @@ class ToHoudiniPolygonsConverter : public IECoreHoudini::ToHoudiniGeometryConver
 		ToHoudiniPolygonsConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniPolygonsConverter();
-	
+
 	protected :
-		
+
 		/// performs conversion from the IECore::MeshPrimitive into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 

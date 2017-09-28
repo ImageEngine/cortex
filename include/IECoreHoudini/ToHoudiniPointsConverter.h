@@ -53,12 +53,12 @@ class ToHoudiniPointsConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 		ToHoudiniPointsConverter( const IECore::Object *object );
 
 		virtual ~ToHoudiniPointsConverter();
-		
+
 		/// Transfers the primitive variables from the IECore::Primitive to the GU_Detail.
 		virtual void transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const;
-	
+
 	protected :
-		
+
 		/// performs conversion from the IECore::PointsPrimitive into the given GU_Detail
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 

@@ -60,21 +60,21 @@ class TestWriter( unittest.TestCase ) :
 		self.assert_( not "obj" in e )
 
 	def testCanWriter( self ) :
-	
+
 		# every writer subclass should have a canWrite() static method, unless it's an abstract base class
-		
+
 		def isWriter( x ) :
-		
+
 			abstractWriters = ( IECore.Writer )
-		
+
 			try :
 				return issubclass( x, IECore.Writer ) and x not in abstractWriters
 			except TypeError :
 				return False
-				
+
 		allIECore = [ getattr( IECore, x ) for x in dir( IECore ) ]
 		allWriters = [ x for x in allIECore if isWriter( x ) ]
-	
+
 		for writer in allWriters :
 			hasCanWrite = False
 			with IECore.IgnoredExceptions( AttributeError ) :
@@ -83,7 +83,7 @@ class TestWriter( unittest.TestCase ) :
 			self.failUnless( hasCanWrite )
 
 	def testCreateWithoutObject( self ) :
-	
+
 		w = IECore.Writer.create( "/tmp/test.cob" )
 		self.assertTrue( isinstance( w, IECore.ObjectWriter ) )
 		self.assertEqual( w["fileName"].getTypedValue(), "/tmp/test.cob" )

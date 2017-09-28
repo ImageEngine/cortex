@@ -61,7 +61,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		op.cook()
 		self.assertEqual( cl.resultParameter().getValue().typeId(), IECore.TypeId.MeshPrimitive )
 		return (op, fn)
-	
+
 	# check it works for points
 	def testPointConversion(self):
 		(op,fn) = self.testCreateCortexConverter()
@@ -83,7 +83,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( attrNames, TestCortexConverterSop.PointPositionAttribs + ["testAttribute"] )
 		self.assertEqual( len(geo.points()), 5000 )
 		self.assertEqual( len(geo.prims()), 1 )
-	
+
 	# check it works for polygons
 	def testPolygonConversion(self):
 		(op,fn) = self.testCreateCortexConverter()
@@ -104,7 +104,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		h_geo = h_torus.geometry()
 		self.assertEqual( len(geo.pointAttribs()), len(h_geo.pointAttribs()) )
 		self.assertEqual( len(geo.prims()), len(h_geo.prims()) )
-	
+
 	# test converting a procedural
 	def testProceduralConversion( self ) :
 		obj = hou.node( "/obj" )
@@ -125,9 +125,9 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len(geo.prims()), 100 )
 		self.assertEqual( sorted([ x.name() for x in geo.pointAttribs() ]), [ "N" ] + TestCortexConverterSop.PointPositionAttribs )
 		self.assertTrue( geo.findPointAttrib( "N" ).isTransformedAsNormal() )
-	
+
 	def scene( self ) :
-		
+
 		geo = hou.node( "/obj" ).createNode( "geo", run_init_scripts=False )
 		boxA = geo.createNode( "box" )
 		nameA = boxA.createOutputNode( "name" )
@@ -144,13 +144,13 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		merge.setInput( 0, nameA )
 		merge.setInput( 1, nameB )
 		merge.setInput( 2, nameC )
-		
+
 		return merge.createOutputNode( "ieCortexConverter" )
-	
+
 	def testNameFilter( self ) :
-		
+
 		node = self.scene()
-		
+
 		# it all converts to Cortex prims
 		node.parm( "resultType" ).set( 0 )
 		geo = node.geometry()
@@ -162,7 +162,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		# filter the middle shape only
 		node.parm( "nameFilter" ).set( "* ^boxB" )
 		geo = node.geometry()
@@ -174,7 +174,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		# filters work on Cortex Prims as well
 		back = node.createOutputNode( "ieCortexConverter" )
 		back.parm( "nameFilter" ).set( "* ^torus" )
@@ -187,7 +187,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		# test unnamed shapes
 		delname = back.createOutputNode( "attribute" )
 		delname.parm( "primdel" ).set( "name" )
@@ -197,7 +197,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		prims = geo.prims()
 		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 112 )
 		self.assertEqual( geo.findPrimAttrib( "name" ), None )
-		
+
 		# unnamed with no filter is just a pass through
 		unnamed.parm( "nameFilter" ).set( "" )
 		geo = unnamed.geometry()
@@ -205,11 +205,11 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len(prims), 13 )
 		self.assertEqual( [ x.type() for x in prims ], [ hou.primType.Polygon ] * 12 + [ hou.primType.Custom ] )
 		self.assertEqual( geo.findPrimAttrib( "name" ), None )
-	
+
 	def testResultType( self ) :
-		
+
 		node = self.scene()
-		
+
 		# it all passes through
 		geo = node.geometry()
 		prims = geo.prims()
@@ -220,7 +220,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
-		
+
 		# it all converts to Cortex prims
 		node.parm( "resultType" ).set( 0 )
 		geo = node.geometry()
@@ -232,7 +232,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		# it all converts back to Houdini geo
 		back = node.createOutputNode( "ieCortexConverter" )
 		geo = back.geometry()
@@ -244,9 +244,9 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 6 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 100 )
-	
+
 	def testAttributeFilter( self ) :
-		
+
 		torus = hou.node("/obj").createNode("geo", run_init_scripts=False).createNode( "torus" )
 		color = torus.createOutputNode( "color" )
 		color.parm( "class" ).set( 3 )
@@ -260,7 +260,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder( opHolder )
 		fn.setOp( "parameters/primitives/polyParam" )
 		out = opHolder.createOutputNode( "ieCortexConverter" )
-		
+
 		# verify input
 		inGeo = uvunwrap.geometry()
 		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
@@ -270,7 +270,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in inGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in inGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
@@ -280,7 +280,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verify intermediate op result
 		result = fn.getOp().resultParameter().getValue()
 		if hou.applicationVersion()[0] >= 15 :
@@ -288,7 +288,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		else :
 			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "uv", "varmap", "width" ] )
 		self.assertTrue( result.arePrimitiveVariablesValid() )
-		
+
 		# make sure P is forced
 		out.parm( "attributeFilter" ).set( "* ^P" )
 		outGeo = out.geometry()
@@ -299,7 +299,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# have to filter the source attrs
 		out.parm( "attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
 		outGeo = out.geometry()
@@ -310,7 +310,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		out.parm( "attributeFilter" ).set( "* ^uv  ^width ^Pref" )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs )
@@ -320,7 +320,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# make sure we can filter on both ends
 		opHolder.parm( "parm_input_attributeFilter" ).set( "* ^uv  ^width ^Pref" )
 		result = fn.getOp().resultParameter().getValue()
@@ -337,7 +337,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		opHolder.parm( "parm_input_attributeFilter" ).set( "* ^uv  ^pscale ^rest" )
 		opHolder.cook( True )
 		result = fn.getOp().resultParameter().getValue()
@@ -345,7 +345,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( result.keys(), [ "Cs", "P" ] )
 		else :
 			self.assertEqual( result.keys(), [ "Cs", "P", "varmap" ] )
-		
+
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]),  TestCortexConverterSop.PointPositionAttribs )
@@ -355,7 +355,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# since the vars never made it to the op, the never make it out
 		out.parm( "attributeFilter" ).set( "*" )
 		outGeo = out.geometry()
@@ -366,9 +366,9 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-	
+
 	def testStandardAttributeConversion( self ) :
-		
+
 		torus = hou.node("/obj").createNode("geo", run_init_scripts=False).createNode( "torus" )
 		color = torus.createOutputNode( "color" )
 		color.parm( "class" ).set( 3 )
@@ -382,7 +382,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder( opHolder )
 		fn.setOp( "parameters/primitives/polyParam" )
 		out = opHolder.createOutputNode( "ieCortexConverter" )
-		
+
 		# verify input
 		inGeo = uvunwrap.geometry()
 		self.assertEqual( sorted([ x.name() for x in inGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
@@ -392,7 +392,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in inGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in inGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
@@ -402,23 +402,23 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verify intermediate op result
 		result = fn.getOp().resultParameter().getValue()
 		if hou.applicationVersion()[0] >= 15 :
 			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "uv", "width" ] )
 		else :
 			self.assertEqual( result.keys(), [ "Cs", "P", "Pref", "uv", "varmap", "width" ] )
-		
+
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["Pref"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		
+
 		uvData = result["uv"].data
 		uvIndices = result["uv"].indices
 		inUvs = inGeo.findVertexAttrib( "uv" )
 		outUvs = outGeo.findVertexAttrib( "uv" )
-		
+
 		i = 0
 		for prim in inGeo.prims() :
 			verts = list(prim.vertices())
@@ -428,7 +428,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvValues[0], uvData[ uvIndices[i] ][0] )
 				self.assertAlmostEqual( uvValues[1], uvData[ uvIndices[i] ][1] )
 				i += 1
-		
+
 		i = 0
 		for prim in outGeo.prims() :
 			verts = list(prim.vertices())
@@ -438,10 +438,10 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvValues[0], uvData[ uvIndices[i] ][0] )
 				self.assertAlmostEqual( uvValues[1], uvData[ uvIndices[i] ][1] )
 				i += 1
-		
+
 		# turn off half the conversion
 		opHolder.parm( "parm_input_convertStandardAttributes" ).set( False )
-		
+
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( sorted([ x.name() for x in outGeo.pointAttribs() ]), TestCortexConverterSop.PointPositionAttribs + ['pscale', 'rest'] )
@@ -451,7 +451,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verify intermediate op result
 		result = fn.getOp().resultParameter().getValue()
 		if hou.applicationVersion()[0] >= 15 :
@@ -461,12 +461,12 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertTrue( result.arePrimitiveVariablesValid() )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( result["rest"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
-		
+
 		uvData = result["uv"].data
 		uvIndices = result["uv"].indices
 		inUvs = inGeo.findVertexAttrib( "uv" )
 		outUvs = outGeo.findVertexAttrib( "uv" )
-		
+
 		i = 0
 		for prim in inGeo.prims() :
 			verts = list(prim.vertices())
@@ -476,7 +476,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
 				i += 1
-		
+
 		i = 0
 		for prim in outGeo.prims() :
 			verts = list(prim.vertices())
@@ -486,11 +486,11 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
 				i += 1
-		
+
 		# turn off the other half of the conversion
 		opHolder.parm( "parm_input_convertStandardAttributes" ).set( True )
 		out.parm( "convertStandardAttributes" ).set( False )
-		
+
 		# verifty output
 		outGeo = out.geometry()
 		self.assertEqual( set([ x.name() for x in outGeo.pointAttribs() ]), set(TestCortexConverterSop.PointPositionAttribs + ['Pref', 'width']) )
@@ -500,7 +500,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), [] )
 		else :
 			self.assertEqual( sorted([ x.name() for x in outGeo.globalAttribs() ]), ['varmap'] )
-		
+
 		# verify intermediate op result
 		result = fn.getOp().resultParameter().getValue()
 		if hou.applicationVersion()[0] >= 15 :
@@ -515,7 +515,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		uvIndices = result["uv"].indices
 		inUvs = inGeo.findVertexAttrib( "uv" )
 		outUvs = outGeo.findVertexAttrib( "uv" )
-		
+
 		i = 0
 		for prim in inGeo.prims() :
 			verts = list(prim.vertices())
@@ -525,7 +525,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
 				i += 1
-		
+
 		i = 0
 		for prim in outGeo.prims() :
 			verts = list(prim.vertices())
@@ -535,11 +535,11 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][0], uvValues[0] )
 				self.assertAlmostEqual( uvData[ uvIndices[i] ][1], uvValues[1] )
 				i += 1
-	
+
 	def testSameName( self ) :
-		
+
 		node = self.scene()
-		
+
 		# it all converts to Cortex prims
 		node.parm( "resultType" ).set( 0 )
 		geo = node.geometry()
@@ -551,11 +551,11 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxB' ]), 1 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		rename = node.createOutputNode( "name" )
 		rename.parm( "group1" ).set( "@name=boxB" )
 		rename.parm( "name1" ).set( "boxA" )
-		
+
 		# still have 3 CortexObjects
 		geo = rename.geometry()
 		prims = geo.prims()
@@ -565,7 +565,7 @@ class TestCortexConverterSop( IECoreHoudini.TestCase ):
 		self.assertEqual( nameAttr.strings(), tuple( [ 'boxA', 'torus' ] ) )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'boxA' ]), 2 )
 		self.assertEqual( len([ x for x in prims if x.attribValue( "name" ) == 'torus' ]), 1 )
-		
+
 		# turns into 2 named Houdini objects since 2 of the names were the same
 		toHoudini = rename.createOutputNode( "ieCortexConverter" )
 		toHoudini.parm( "resultType" ).set( 1 )

@@ -68,7 +68,7 @@ class IECORE_API MurmurHash
 
 		MurmurHash();
 		MurmurHash( const MurmurHash &other );
-		
+
 		inline MurmurHash &append( char data );
 		inline MurmurHash &append( unsigned char data );
 		inline MurmurHash &append( short data );
@@ -106,7 +106,7 @@ class IECORE_API MurmurHash
 		inline MurmurHash &append( const Imath::Quatf &data );
 		inline MurmurHash &append( const Imath::Quatd &data );
 		inline MurmurHash &append( const MurmurHash &data );
-		
+
 		inline MurmurHash &append( const char *data, size_t numElements );
 		inline MurmurHash &append( const unsigned char *data, size_t numElements );
 		inline MurmurHash &append( const short *data, size_t numElements );
@@ -142,23 +142,23 @@ class IECORE_API MurmurHash
 		inline MurmurHash &append( const Imath::Box3d *data, size_t numElements );
 		inline MurmurHash &append( const Imath::Quatf *data, size_t numElements );
 		inline MurmurHash &append( const Imath::Quatd *data, size_t numElements );
-		
+
 		inline const MurmurHash &operator = ( const MurmurHash &other );
-		
+
 		inline bool operator == ( const MurmurHash &other ) const;
 		inline bool operator != ( const MurmurHash &other ) const;
 
 		inline bool operator < ( const MurmurHash &other ) const;
-		
+
 		std::string toString() const;
 
 	private :
 
 		inline void append( const void *data, size_t bytes, int elementSize );
-	
+
 		uint64_t m_h1;
 		uint64_t m_h2;
-		
+
 		friend size_t tbb_hasher( const MurmurHash &h );
 		friend size_t hash_value( const MurmurHash &h );
 

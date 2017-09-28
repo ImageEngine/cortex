@@ -36,9 +36,9 @@
 #define IECORERI_EUCLIDEANTOSPHERICALTRANSFORM_H
 
 /// A function to convert Euclidean to Spherical coordinates.
-/// The Spherical coordinate structure uses the third component 
-/// to specify the radius. 
-/// Check documentation for SphericalToEuclideanTransform for 
+/// The Spherical coordinate structure uses the third component
+/// to specify the radius.
+/// Check documentation for SphericalToEuclideanTransform for
 /// more details on spherical coordinates.
 point ieEuclideanToSphericalTransform( varying point euclidean )
 {

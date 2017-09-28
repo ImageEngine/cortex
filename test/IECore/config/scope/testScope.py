@@ -37,7 +37,7 @@ import ctypes
 def myFunction() :
 
 	hasattr( ctypes, "something" )
-	
+
 myFunction()
 
 functionToCallLater = myFunction

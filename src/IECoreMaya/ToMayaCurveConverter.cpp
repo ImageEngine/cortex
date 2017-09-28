@@ -76,40 +76,40 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 	MStatus s;
 
 	IECore::ConstCurvesPrimitivePtr curves = IECore::runTimeCast<const IECore::CurvesPrimitive>( from );
-	
+
 	assert( curves );
 
 	if ( !curves->arePrimitiveVariablesValid() || !curves->numCurves() )
 	{
 		return false;
 	}
-	
+
 	int curveIndex = indexParameter()->getNumericValue();
 	if( curveIndex < 0 || curveIndex >= (int)curves->numCurves() )
 	{
 		IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  boost::format(  "Invalid curve index \"%d\"") % curveIndex );
 		return false;
 	}
-	
+
 	IECore::ConstV3fVectorDataPtr p = curves->variableData< IECore::V3fVectorData >( "P", IECore::PrimitiveVariable::Vertex );
 	if( !p )
 	{
 		IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  "Curve has no \"P\" data" );
 		return false;
-		
+
 	}
-	
+
 	const std::vector<int>& verticesPerCurve = curves->verticesPerCurve()->readable();
 	int curveBase = 0;
 	for( int i=0; i<curveIndex; ++i )
 	{
 		curveBase += verticesPerCurve[i];
 	}
-	
+
 	MPointArray vertexArray;
-	
+
 	int numVertices = verticesPerCurve[curveIndex];
-	
+
 	int cvOffset = 0;
 	if( curves->basis() != IECore::CubicBasisf::linear() && !curves->periodic() )
 	{
@@ -120,24 +120,24 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 			IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  "The Curve Primitive does not have enough CVs to be converted into a Maya Curve. Needs at least 8." );
 			return false;
 		}
-		
+
 		cvOffset = 2;
 	}
-	
+
 	const std::vector<Imath::V3f>& pts = p->readable();
-	
+
 	// triple up the start points for cubic periodic curves:
 	if( curves->periodic() && curves->basis() != IECore::CubicBasisf::linear() )
 	{
 		vertexArray.append( IECore::convert<MPoint, Imath::V3f>( pts[curveBase] ) );
 		vertexArray.append( vertexArray[0] );
 	}
-	
+
 	for( int i = cvOffset; i < numVertices-cvOffset; ++i )
 	{
 		vertexArray.append( IECore::convert<MPoint, Imath::V3f>( pts[i + curveBase] ) );
 	}
-	
+
 	// if the curve is periodic, the first N cvs must be identical to the last N cvs, where N is the degree
 	// of the curve:
 	if( curves->periodic() )
@@ -155,9 +155,9 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 			vertexArray.append( vertexArray[2] );
 		}
 	}
-	
+
 	unsigned vertexArrayLength = vertexArray.length();
-	
+
 	MDoubleArray knotSequences;
 	if( curves->basis() == IECore::CubicBasisf::linear() )
 	{
@@ -190,7 +190,7 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 			knotSequences.append( vertexArrayLength-3 );
 		}
 	}
-	
+
 	MFnNurbsCurve fnCurve;
 	fnCurve.create( vertexArray, knotSequences, curves->basis() == IECore::CubicBasisf::linear() ? 1 : 3, curves->periodic() ? MFnNurbsCurve::kPeriodic : MFnNurbsCurve::kOpen, false, false, to, &s );
 	if (!s)
@@ -198,6 +198,6 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  s.errorString().asChar() );
 		return false;
 	}
-	
+
 	return true;
 }

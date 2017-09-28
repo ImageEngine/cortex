@@ -136,66 +136,66 @@ class TemporaryAttributeValuesTest( IECoreMaya.TestCase ) :
 		self.assertEqual( maya.cmds.getAttr( s + ".float3TestY" ), 20 )
 		self.assertEqual( maya.cmds.getAttr( s + ".float3TestZ" ), 30 )
 		self.assertEqual( maya.cmds.getAttr( s + ".stringTest" ), "hi" )
-	
+
 	def testNameSpaceAttributes( self ) :
-		
+
 		maya.cmds.namespace( add="ns1" )
 		s = maya.cmds.spaceLocator()[0]
 		maya.cmds.addAttr( s, at="enum", sn="enumTest", enumName="A:B:C", defaultValue = 1 )
 		s = maya.cmds.rename( s, "ns1:"+s )
 		plugPath = s + ".enumTest"
 		maya.cmds.namespace( set=":" )
-		
+
 		self.assertEqual( plugPath, "ns1:locator1.enumTest" )
 		self.assertEqual( maya.cmds.namespace( exists="ns1" ), True )
 		self.assertEqual( maya.cmds.namespaceInfo( currentNamespace=True ), ":" )
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
-		
+
 		with IECoreMaya.TemporaryAttributeValues( { plugPath : 2 } ) :
 			self.assertEqual( maya.cmds.getAttr( plugPath ), 2 )
-		
-		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )		
-	
+
+		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
+
 	def testReferenceAttributes( self ) :
-		
+
 		s = maya.cmds.spaceLocator()[0]
-		
+
 		maya.cmds.addAttr( s, at="enum", sn="enumTest", enumName="A:B:C", defaultValue = 1 )
-		
+
 		plugPath = s + ".enumTest"
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
-		
+
 		with IECoreMaya.TemporaryAttributeValues( { plugPath : 2 } ) :
 			self.assertEqual( maya.cmds.getAttr( plugPath ), 2 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
-		
+
 		# save it to a file
 		#######################################################################
-		
+
 		maya.cmds.file( rename = os.path.join( os.getcwd(), "test", "IECoreMaya", "temporaryAttributeReference.ma" ) )
 		referenceScene = maya.cmds.file( force = True, type = "mayaAscii", save = True )
 
 		# make a new scene referencing that file
 		#######################################################################
-	
+
 		maya.cmds.file( new = True, force = True )
 		maya.cmds.file( referenceScene, reference = True, namespace = "ns1" )
-		
+
 		plugPath = "ns1:" + s + ".enumTest"
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
-		
+
 		with IECoreMaya.TemporaryAttributeValues( { plugPath : 2 } ) :
 			self.assertEqual( maya.cmds.getAttr( plugPath ), 2 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
-		
+
 		with IECoreMaya.TemporaryAttributeValues( { plugPath : 0 } ) :
 			self.assertEqual( maya.cmds.getAttr( plugPath ), 0 )
-		
+
 		self.assertEqual( maya.cmds.getAttr( plugPath ), 1 )
 
 	def tearDown( self ) :

@@ -152,9 +152,9 @@ void bindColorCommon( class_<T> &c )
 	c.def( "negate", &T::negate, return_self<>() );
 
 	c.def( self *= self );
-	
+
 	c.def( self *= typename T::BaseType() );
-	
+
 	c.def( self * self );
 	c.def( self * typename T::BaseType() );
 	c.def( typename T::BaseType() * self );

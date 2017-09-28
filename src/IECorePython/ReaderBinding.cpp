@@ -82,8 +82,8 @@ struct ReaderCreator
 		:	m_fn( fn )
 	{
 	}
-	
-	ReaderPtr operator()( const std::string &fileName ) 
+
+	ReaderPtr operator()( const std::string &fileName )
 	{
 		ScopedGILLock gilLock;
 		ReaderPtr result = extract<ReaderPtr>( m_fn( fileName ) );
@@ -91,7 +91,7 @@ struct ReaderCreator
 	}
 
 	private :
-	
+
 		object m_fn;
 
 };
@@ -103,8 +103,8 @@ struct ReaderCanRead
 		:	m_fn( fn )
 	{
 	}
-	
-	bool operator()( const std::string &fileName ) 
+
+	bool operator()( const std::string &fileName )
 	{
 		ScopedGILLock gilLock;
 		bool result = m_fn( fileName );
@@ -112,7 +112,7 @@ struct ReaderCanRead
 	}
 
 	private :
-	
+
 		object m_fn;
 
 };

@@ -43,33 +43,33 @@ class IgnoredExceptionsTest( unittest.TestCase ) :
 	def test( self ) :
 
 		def f( toRaise, toIgnore ) :
-		
+
 			with IECore.IgnoredExceptions( toIgnore ) :
 				raise toRaise
-			
+
 		self.assertRaises( RuntimeError, f, RuntimeError, KeyError )
 		self.assertRaises( RuntimeError, f, RuntimeError, ( KeyError, IndexError ) )
-		
+
 		f( KeyError, KeyError )
 		f( KeyError, ( KeyError, IndexError ) )
 		f( IndexError, ( KeyError, IndexError ) )
-		
+
 		c = IECore.CompoundObject()
 		with IECore.IgnoredExceptions( KeyError ) :
 			c["d"]
-	
+
 		with IECore.IgnoredExceptions( Exception ) :
 			c["d"]
-			
+
 		p = IECore.Parameterised( "" )
 		with IECore.IgnoredExceptions( Exception ) :
 			p["d"]
-			
+
 	def testNoExceptions( self ) :
-	
+
 		with IECore.IgnoredExceptions( Exception ) :
 			pass
-					
+
 if __name__ == "__main__":
 	unittest.main()
 

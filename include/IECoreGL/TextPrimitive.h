@@ -81,7 +81,7 @@ class IECOREGL_API TextPrimitive : public Primitive
 		FontPtr m_font;
 		std::string m_text;
 		Imath::Box3f m_bound;
-	
+
 		void renderMeshes( State *state ) const;
 		void renderSprites( State *state ) const;
 

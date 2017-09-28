@@ -40,7 +40,7 @@ class CapturingMessageHandlerTest( unittest.TestCase ) :
 	def test( self ) :
 
 		with IECore.CapturingMessageHandler() as mh :
-		
+
 			IECore.msg( IECore.Msg.Level.Error, "A", "AAA" )
 			IECore.msg( IECore.Msg.Level.Error, "B", "BBB" )
 			IECore.msg( IECore.Msg.Level.Error, "C", "CCC" )

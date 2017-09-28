@@ -72,7 +72,7 @@ MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPl
 	// for a second dummy datatype to ensure that the attribute will still be a generic attribute
 	// when saved and loaded.
 	fnGAttr.addAccept( DummyDataId );
-	
+
 	return finishUpdating( parameter, plug );
 }
 
@@ -90,7 +90,7 @@ MPlug MeshParameterHandler::doCreate( IECore::ConstParameterPtr parameter, const
 
 	MPlug result = finishCreating( parameter, attribute, node );
 	doUpdate( parameter, result );
-	
+
 	return result;
 }
 

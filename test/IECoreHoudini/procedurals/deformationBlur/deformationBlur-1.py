@@ -61,7 +61,7 @@
 #      renderer.motionEnd()
 #
 #=====
-from IECore import * 
+from IECore import *
 
 class deformationBlur(ParameterisedProcedural):
 

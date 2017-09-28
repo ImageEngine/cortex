@@ -80,7 +80,7 @@ bool ParameterisedHolderSetValueCmd::isUndoable() const
 MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 {
 	MArgDatabase args( syntax(), argList );
-	
+
 	// get the node we're operating on
 	MSelectionList objects;
 	//args.getObjects( objects ); // leaving for further investigation
@@ -91,7 +91,7 @@ MStatus ParameterisedHolderSetValueCmd::doIt( const MArgList &argList )
 	MString objectStr;
 	argList.get( 0, objectStr );
 	objects.add( objectStr );
-	
+
 	MStringArray selStr; objects.getSelectionStrings( selStr );
 	assert( objects.length()==1 );
 	MObject node;

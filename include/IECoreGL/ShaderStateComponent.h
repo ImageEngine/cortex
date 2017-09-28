@@ -97,7 +97,7 @@ class IECOREGL_API ShaderStateComponent : public StateComponent
 		ImplementationPtr m_implementation;
 
 		static Description<ShaderStateComponent> g_description;
-		
+
 };
 
 IE_CORE_DECLAREPTR( ShaderStateComponent );

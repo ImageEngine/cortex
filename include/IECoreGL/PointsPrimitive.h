@@ -92,7 +92,7 @@ class IECOREGL_API PointsPrimitive : public Primitive
 		Type effectiveType( const State *state ) const;
 
 		static std::string &instancingVertexSource();
-		
+
 		void depthSort() const;
 
 		IE_CORE_FORWARDDECLARE( MemberData );

@@ -56,7 +56,7 @@ TransformOp::TransformOp()
 		"The names of primitive variables which should be transformed according to their Geometric Interpretation.",
 		defaultPrimVars
 	);
-	
+
 	parameters()->addParameter( m_multiplyOp->matrixParameter() );
 	parameters()->addParameter( m_primVarsParameter );
 }
@@ -91,20 +91,20 @@ void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 		{
 			continue;
 		}
-		
+
 		// We need to take a copy of the data in case other
 		// primitive variables were referencing the same data,
 		// and are not in the list of variables to modify.
 		pIt->second.data = pIt->second.data->copy();
-		
+
 		Data *data = pIt->second.data.get();
-		
+
 		// fix for old files that don't store Interpretation properly
 		V3fVectorData *v3fData = runTimeCast<V3fVectorData>( data );
 		if ( v3fData )
 		{
 			GeometricData::Interpretation interp = v3fData->getInterpretation();
-			
+
 			if ( interp == GeometricData::None )
 			{
 				if ( *it == "P" )
@@ -119,7 +119,7 @@ void TransformOp::modifyPrimitive( Primitive * primitive, const CompoundObject *
 				}
 			}
 		}
-		
+
 		m_multiplyOp->inputParameter()->setValue( pIt->second.data );
 		m_multiplyOp->operate();
 	}

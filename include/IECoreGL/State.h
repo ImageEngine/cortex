@@ -56,9 +56,9 @@ class IECOREGL_API State : public Bindable
 		/// sure that the previous state is reverted to.
 		class IECOREGL_API ScopedBinding : private boost::noncopyable
 		{
-		
+
 			public :
-			
+
 				/// Binds the state s, updating currentState to reflect the
 				/// new bindings. It is the caller's responsibility to keep both arguments
 				/// alive until after destruction of the ScopedBinding.
@@ -87,11 +87,11 @@ class IECOREGL_API State : public Bindable
 
 		// Binds this state
 		virtual void bind() const;
-		
+
 		/// Adds all the StateComponents and user attributes from s
 		/// into this State.
 		void add( StatePtr s );
-		
+
 		/// Adds a component to this state. If override is true,
 		/// then the component will not be replaced by ScopedBinding
 		/// when this state is used as the currentState - this feature
@@ -108,7 +108,7 @@ class IECOREGL_API State : public Bindable
 		void remove( IECore::TypeId componentType );
 
 		bool isComplete() const;
-		
+
 		/// Arbitrary state attributes for user manipulation.
 		IECore::CompoundData *userAttributes();
 		const IECore::CompoundData *userAttributes() const;

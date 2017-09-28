@@ -69,9 +69,9 @@ class CameraController::MemberData : public IECore::RefCounted
 		Imath::M44f motionMatrix;
 		float motionCentreOfInterest;
 		Imath::Box2f motionScreenWindow;
-		
+
 };
-		
+
 CameraController::CameraController( CameraPtr camera )
 	:	m_data( new MemberData )
 {
@@ -98,7 +98,7 @@ void CameraController::setCamera( CameraPtr camera )
 	{
 		m_data->fov = 0;
 	}
-	
+
 	TransformPtr transform = m_data->camera->getTransform();
 	m_data->transform = runTimeCast<MatrixTransform>( transform );
 	if( !m_data->transform )
@@ -139,7 +139,7 @@ void CameraController::setResolution( const Imath::V2i &resolution, ScreenWindow
 {
 	const V2i oldResolution = m_data->resolution->readable();
 	const Box2f oldScreenWindow = m_data->screenWindow->readable();
-	
+
 	m_data->resolution->writable() = resolution;
 
 	Box2f newScreenWindow;
@@ -160,7 +160,7 @@ void CameraController::setResolution( const Imath::V2i &resolution, ScreenWindow
 		newScreenWindow.min = screenWindowCenter + (oldScreenWindow.min - screenWindowCenter) * scale;
 		newScreenWindow.max = screenWindowCenter + (oldScreenWindow.max - screenWindowCenter) * scale;
 	}
-	
+
 	m_data->screenWindow->writable() = newScreenWindow;
 }
 
@@ -259,7 +259,7 @@ Imath::V2f CameraController::project( const Imath::V3f &worldPosition ) const
 {
 	M44f inverseCameraMatrix = m_data->transform->matrix.inverse();
 	V3f cameraPosition = worldPosition * inverseCameraMatrix;
-	
+
 	const V2i &resolution = m_data->resolution->readable();
 	const Box2f &screenWindow = m_data->screenWindow->readable();
 	if( m_data->projection->readable() == "perspective" )
@@ -270,7 +270,7 @@ Imath::V2f CameraController::project( const Imath::V3f &worldPosition ) const
 		screenPosition /= d;
 		V2f ndcPosition(
 			lerpfactor( screenPosition.x, screenWindow.max.x, screenWindow.min.x ),
-			lerpfactor( screenPosition.y, screenWindow.min.y, screenWindow.max.y )	
+			lerpfactor( screenPosition.y, screenWindow.min.y, screenWindow.max.y )
 		);
 		return V2f(
 			ndcPosition.x * resolution.x,
@@ -281,7 +281,7 @@ Imath::V2f CameraController::project( const Imath::V3f &worldPosition ) const
 	{
 		V2f ndcPosition(
 			lerpfactor( cameraPosition.x, screenWindow.min.x, screenWindow.max.x ),
-			lerpfactor( cameraPosition.y, screenWindow.max.y, screenWindow.min.y )	
+			lerpfactor( cameraPosition.y, screenWindow.max.y, screenWindow.min.y )
 		);
 		return V2f(
 			ndcPosition.x * resolution.x,
@@ -388,10 +388,10 @@ void CameraController::dolly( const Imath::V2f &p )
 	{
 		// perspective
 		m_data->centreOfInterest = m_data->motionCentreOfInterest * expf( -1.9f * d );
-		
+
 		M44f t = m_data->motionMatrix;
 		t.translate( V3f( 0, 0, m_data->centreOfInterest - m_data->motionCentreOfInterest ) );
-		
+
 		m_data->transform->matrix = t;
 	}
 	else
@@ -409,10 +409,10 @@ void CameraController::dolly( const Imath::V2f &p )
 		newWidth = std::max( newWidth, 0.01f );
 
 		float scale = newWidth / screenWindow.size().x;
-		
+
 		screenWindow.min = (screenWindow.min - centre) * scale + centre;
 		screenWindow.max = (screenWindow.max - centre) * scale + centre;
 		m_data->screenWindow->writable() = screenWindow;
-	}	
+	}
 }
 

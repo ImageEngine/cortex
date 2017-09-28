@@ -80,11 +80,11 @@ def __findClassesWalk( parameter, parameterPath, uiPath, classTypeFilter, classN
 		cls = parameter.getClasses( True )
 		for cl in cls :
 			if isinstance( cl[0], classTypeFilter ) and classNameFilter.match( cl[0].path )  :
-			
+
 				label = cl[1]
 				if cl[0].parameters().has_key( "label" ) :
 					label = cl[0]["label"].getTypedValue()
-			
+
 				result.append(
 					{
 						"parent" : parameter,
@@ -93,14 +93,14 @@ def __findClassesWalk( parameter, parameterPath, uiPath, classTypeFilter, classN
 						"classInstance" : cl[0]
 					}
 				)
-	
+
 	if isinstance( parameter, IECore.CompoundParameter ) :
 		for n, p in parameter.items() :
 			newParameterPath = parameterPath[:] + [ n ]
 			newUIPath = parameterPath[:] + [ n ]
 			__findClassesWalk( p, newParameterPath, newUIPath, classTypeFilter, classNameFilter, result )
 
-## Recurses down from srcParameter and dstParameter simultaneously, syncing the dstParameter tree to 
+## Recurses down from srcParameter and dstParameter simultaneously, syncing the dstParameter tree to
 # srcParameter by making sure the ClassParameters and ClassVectorParameters there hold instances of the same classes
 # that are held on the srcParameter side.
 def copyClasses( srcParameter, dstParameter ) :
@@ -108,7 +108,7 @@ def copyClasses( srcParameter, dstParameter ) :
 	if isinstance( srcParameter, IECore.ClassParameter ) and isinstance( dstParameter, IECore.ClassParameter ) :
 		c = srcParameter.getClass( True )
 		dstParameter.setClass( *c[1:] )
-		
+
 	if isinstance( srcParameter, IECore.ClassVectorParameter ) and isinstance( dstParameter, IECore.ClassVectorParameter ) :
 		c = srcParameter.getClasses( True )
 		dstParameter.setClasses( [ cc[1:] for cc in c ] )

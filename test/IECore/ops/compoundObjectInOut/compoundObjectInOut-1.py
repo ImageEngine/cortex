@@ -45,22 +45,22 @@ class compoundObjectInOut( IECore.Op ) :
 				defaultValue = IECore.CompoundObject(),
 				type=IECore.CompoundObject.staticTypeId()
 			)
-							
+
 		)
-		
+
 		self.parameters().addParameter(
-		
+
 			IECore.ObjectParameter(
 				"input",
 				"",
 				defaultValue = IECore.CompoundObject(),
 				type=IECore.CompoundObject.staticTypeId()
 			)
-		
+
 		)
 
 	def doOperation( self, args ):
-		
+
 		return IECore.CompoundObject()
 
 IECore.registerRunTimeTyped( compoundObjectInOut )

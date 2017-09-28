@@ -41,23 +41,23 @@ import IECore
 class TestBasicPreset( unittest.TestCase ) :
 
 	def testCopy( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.FloatParameter( "b", "", 1.0 ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.FloatParameter( "b", "", 1.0 ),
 			]
 		)
-			
+
 		testObj2 = IECore.Parameterised( "testParameterised2" )
 		testObj2.parameters().addParameters(
 			[
 				IECore.BoolParameter( "a", "", False ),
-				IECore.FloatParameter( "c", "", 0.0	),	
+				IECore.FloatParameter( "c", "", 0.0	),
 			]
 		)
-		
+
 		p = IECore.BasicPreset( testObj, testObj.parameters() )
 
 		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
@@ -67,80 +67,80 @@ class TestBasicPreset( unittest.TestCase ) :
 		testObj.parameters()["b"].setTypedValue( 0.0 )
 
 		p( testObj, testObj.parameters() )
-		
+
 		self.assertEqual( testObj.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj.parameters()["b"].getTypedValue(), 1.0 )
 
 		p2 = IECore.BasicPreset( testObj, testObj.parameters(), parameters=( testObj.parameters()["a"], ) )
-		
+
 		self.failUnless( p2.applicableTo( testObj, testObj.parameters() ) )
 		self.failUnless( p2.applicableTo( testObj2, testObj.parameters() ) )
-		
+
 		p2( testObj2, testObj2.parameters() )
-		
+
 		self.assertEqual( testObj2.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj2.parameters()["c"].getTypedValue(), 0.0 )
 
 	def testLoad( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.FloatParameter( "b", "", 1.0 ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.FloatParameter( "b", "", 1.0 ),
 			]
 		)
-			
+
 		testObj2 = IECore.Parameterised( "testParameterised1" )
 		testObj2.parameters().addParameters(
 			[
 				IECore.BoolParameter( "a", "", False ),
-				IECore.FloatParameter( "c", "", 0.0	),	
+				IECore.FloatParameter( "c", "", 0.0	),
 			]
 		)
-		
+
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
-		
+
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
-		
+
 			p = IECore.BasicPreset( "%s/%s" % ( savePath, "basicPresetLoadTest/basicPresetLoadTest-1.cob" ) )
-		
+
 		self.assertEqual( len( messageHandler.messages ), 0 )
-		
+
 		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
-	
+
 		testObj.parameters()["a"].setTypedValue( False )
 		testObj.parameters()["b"].setTypedValue( 0.0 )
-	
+
 		p( testObj, testObj.parameters() )
-		
+
 		self.assertEqual( testObj.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj.parameters()["b"].getTypedValue(), 1.0 )
-		
+
 	def testSave( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.FloatParameter( "b", "", 1.0 ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.FloatParameter( "b", "", 1.0 ),
 			]
 		)
-			
+
 		testObj2 = IECore.Parameterised( "testParameterised1" )
 		testObj2.parameters().addParameters(
 			[
 				IECore.BoolParameter( "a", "", False ),
-				IECore.FloatParameter( "c", "", 0.0	),	
+				IECore.FloatParameter( "c", "", 0.0	),
 			]
 		)
-		
+
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
-		
+
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
-		
+
 		# Save for the classLoader and check its there, we test the 'loadability' later...
 		preset.save( savePath, "basicPresetTest" )
 		self.failUnless( os.path.isfile( "%s/basicPresetTest/basicPresetTest-1.cob" % savePath ) )
@@ -149,10 +149,10 @@ class TestBasicPreset( unittest.TestCase ) :
 		# save without the classLoader and check its there
 		preset.save( savePath, "basicPresetTest", classLoadable=False )
 		self.failUnless( os.path.isfile( "%s/basicPresetTest.cob" % savePath ) )
-		
+
 		# reload
 		p = IECore.BasicPreset( "%s/basicPresetTest.cob" % savePath )
-		
+
 		self.failUnless( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failIf( p.applicableTo( testObj2, testObj2.parameters() ) )
 
@@ -160,125 +160,125 @@ class TestBasicPreset( unittest.TestCase ) :
 		testObj.parameters()["b"].setTypedValue( 0.0 )
 
 		p( testObj, testObj.parameters() )
-		
+
 		self.assertEqual( testObj.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj.parameters()["b"].getTypedValue(), 1.0 )
 
 		preset2 = IECore.BasicPreset( testObj, testObj.parameters(), parameters=( testObj.parameters()["a"], ) )
 		preset2.save( savePath, "basicPresetTest2", classLoadable=False )
-		
+
 		#reload
 		p2 = IECore.BasicPreset( "%s/basicPresetTest2.cob" % savePath )
-		
+
 		self.failUnless( p2.applicableTo( testObj, testObj.parameters() ) )
 		self.failUnless( p2.applicableTo( testObj2, testObj.parameters() ) )
-		
+
 		p2( testObj2, testObj2.parameters() )
-		
+
 		self.assertEqual( testObj2.parameters()["a"].getTypedValue(), True )
 		self.assertEqual( testObj2.parameters()["c"].getTypedValue(), 0.0 )
 
 	def testClassLoader( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.FloatParameter( "b", "", 1.0 ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.FloatParameter( "b", "", 1.0 ),
 			]
 		)
-		
+
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		preset = IECore.BasicPreset( testObj, testObj.parameters() )
 		preset.save( savePath, "basicPresetTestClassLoader" )
-		
+
 		# make sure that no messages are emitted during loading
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :
-		
+
 			loader = IECore.ClassLoader( IECore.SearchPath( savePath, ":" ) )
 			p = loader.load( "basicPresetTestClassLoader" )()
-		
+
 		self.assertEqual( len( messageHandler.messages ), 0 )
-		
+
 		self.failUnless( isinstance( p, IECore.BasicPreset ) )
-		
+
 		p.metadata()
-		
+
 	def testClasses( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.ClassParameter( "b", "", "IECORE_OP_PATHS", "maths/multiply", 2 ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.ClassParameter( "b", "", "IECORE_OP_PATHS", "maths/multiply", 2 ),
 			]
 		)
-		
+
 		testObj2 = IECore.Parameterised( "testParameterised2" )
 		testObj2.parameters().addParameters(
 			[
-				IECore.ClassParameter( "c", "",	"IECORE_OP_PATHS" ),	
+				IECore.ClassParameter( "c", "",	"IECORE_OP_PATHS" ),
 			]
 		)
-		
+
 		classes1 = testObj.parameters()["b"].getClass( True )
 		classes2 = testObj2.parameters()["c"].getClass( True )
 		self.assertNotEqual( classes1[1:], classes2[1:] )
-		
+
 		p = IECore.BasicPreset( testObj, testObj.parameters()["b"] )
-		
+
 		self.failUnless( p.applicableTo( testObj, testObj.parameters()["b"] ) )
 		self.failIf( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failUnless( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
 
 		p( testObj2, testObj2.parameters()["c"] )
-		
+
 		classes1 = testObj.parameters()["b"].getClass( True )
 		classes2 = testObj2.parameters()["c"].getClass( True )
-		
+
 		self.assertEqual( classes1[1:], classes2[1:] )
 
 	def testClassVectors( self ) :
-	
+
 		testObj = IECore.Parameterised( "testParameterised1" )
 		testObj.parameters().addParameters(
 			[
-				IECore.BoolParameter( "a", "", True ),	
-				IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+				IECore.BoolParameter( "a", "", True ),
+				IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
 			]
 		)
-		
+
 		testObj.parameters()["b"].setClasses(
 			[
 				( "mult", "maths/multiply", 2 ),
 				( "coIO", "compoundObjectInOut", 1 ),
 			]
 		)
-				
+
 		testObj2 = IECore.Parameterised( "testParameterised2" )
 		testObj2.parameters().addParameters(
 			[
-				IECore.ClassVectorParameter( "c", "", "IECORE_OP_PATHS" ),	
+				IECore.ClassVectorParameter( "c", "", "IECORE_OP_PATHS" ),
 			]
 		)
-		
+
 		classes1 = [ c[1:] for c in testObj.parameters()["b"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["c"].getClasses( True ) ]
-		
+
 		self.assertNotEqual( classes1, classes2 )
-		
+
 		p = IECore.BasicPreset( testObj, testObj.parameters()["b"] )
-		
+
 		self.failUnless( p.applicableTo( testObj, testObj.parameters()["b"] ) )
 		self.failIf( p.applicableTo( testObj, testObj.parameters() ) )
 		self.failUnless( p.applicableTo( testObj2, testObj2.parameters()["c"] ) )
 
 		p( testObj2, testObj2.parameters()["c"] )
-		
+
 		classes1 = [ c[1:] for c in testObj.parameters()["b"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["c"].getClasses( True ) ]
-		
+
 		self.assertEqual( classes1, classes2 )
 
 	def testEnforceClassesOrder( self ):
@@ -287,7 +287,7 @@ class TestBasicPreset( unittest.TestCase ) :
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			testObj.parameters()["b"].setClasses(
@@ -308,15 +308,15 @@ class TestBasicPreset( unittest.TestCase ) :
 				( "p0", "maths/multiply", 2 ),
 			]
 		)
-		
+
 		p = IECore.BasicPreset( testObj, testObj.parameters() )
 		p['enforceClassesOrder'] = True
 		p['forceAddingClasses'] = False
 		p( testObj2, testObj2.parameters() )
-		
+
 		classes1 = [ c[1:] for c in testObj.parameters()["b"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["b"].getClasses( True ) ]
-		
+
 		self.assertEqual( classes1, classes2 )
 
 	def testRemovePreviousClasses( self ):
@@ -325,7 +325,7 @@ class TestBasicPreset( unittest.TestCase ) :
 			testObj = IECore.Parameterised( "testParameterised1" )
 			testObj.parameters().addParameters(
 				[
-					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),	
+					IECore.ClassVectorParameter( "b", "", "IECORE_OP_PATHS" ),
 				]
 			)
 			testObj.parameters()["b"].setClasses(
@@ -339,19 +339,19 @@ class TestBasicPreset( unittest.TestCase ) :
 		testObj = createTestObj()
 		testObj2 = createTestObj()
 		testObj2["b"].setClass( "p2", "floatParameter", 1 )
-		
+
 		p = IECore.BasicPreset( testObj, testObj.parameters() )
 		p['removePreviousClasses'] = True
 		p['forceAddingClasses'] = False
 		p( testObj2, testObj2.parameters() )
-		
+
 		classes1 = [ c[1:] for c in testObj.parameters()["b"].getClasses( True ) ]
 		classes2 = [ c[1:] for c in testObj2.parameters()["b"].getClasses( True ) ]
-		
+
 		self.assertEqual( classes1, classes2 )
-		
+
 	def tearDown( self ) :
-		
+
 		savePath = os.path.abspath( "%s/%s" % ( os.path.dirname( __file__ ), "data/basicPreset" ) )
 		paths = (
 			savePath+"/basicPresetTest",
@@ -360,11 +360,11 @@ class TestBasicPreset( unittest.TestCase ) :
 			savePath+"/basicPresetTestClassLoader",
 		)
 
-		for p in paths :		
+		for p in paths :
 			if os.path.isdir( p ) :
 				shutil.rmtree( p )
 			elif os.path.isfile( p ) :
 				os.remove( p )
-				
+
 if __name__ == "__main__":
 	unittest.main()

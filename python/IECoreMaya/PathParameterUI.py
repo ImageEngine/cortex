@@ -43,9 +43,9 @@ import IECoreMaya
 class PathParameterUI( IECoreMaya.ParameterUI ) :
 
 	def __init__( self, node, parameter, **kw ) :
-	
+
 		IECoreMaya.ParameterUI.__init__(
-			
+
 			self,
 			node,
 			parameter,
@@ -54,7 +54,7 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 				columnWidth3 = [ IECoreMaya.ParameterUI.textColumnWidthIndex, IECoreMaya.ParameterUI.singleWidgetWidthIndex * 3, 26 ]
 			),
 			**kw
-		
+
 		)
 
 		self.__label = maya.cmds.text(
@@ -84,13 +84,13 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 		# We can't see the menu if its on the field...
 		self._addPopupMenu( parentUI=self.__label, attributeName = self.plugName() )
 		maya.cmds.connectControl( self.__textField, self.plugName() )
-	
+
 	## This can be implemented in derived classes to show a customised file picker.
 	## Typically, you would call the base class passing additional kw arguments,
 	## which are passed to the FileDialog call. If omitted, "path", "key" and
 	## "callback" will be set to appropriate values depending on the parameter.
 	def _fileDialog( self, **kw ) :
-		
+
 		# Allow a class to enforce a path if the default behaviour for
 		# using existing paths or the default userData path is not desired.
 		if "path" not in kw:
@@ -108,16 +108,16 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 			kw["callback"] = self.__defaultFileDialogCallback
 
 		IECoreMaya.FileDialog( **kw )
-	
+
 	# Simply sets the parameter value
 	def __defaultFileDialogCallback( self, selection ) :
-		
+
 		if selection:
 
 			self.parameter.setValue( IECore.StringData( selection[0] ) )
 			fnPH = IECoreMaya.FnParameterisedHolder( self.node() )
 			fnPH.setNodeValue( self.parameter )
-	
+
 	## Returns the initial path for a FileDialog, implied by the current
 	## parameter value, and the status of the following userData["UI"] entries:
 	##  - defaultPath (IECore.StringData()) A path to use as a default.
@@ -125,18 +125,18 @@ class PathParameterUI( IECoreMaya.ParameterUI ) :
 	##     be used, regardless of the curent parameter value. Otherwise, the
 	##     parent directory of the current path is used.
 	def _initialPath( self, parameter=None ) :
-		
+
 		if not parameter:
 			parameter = self.parameter
-		
+
 		uiUserData = parameter.userData().get( 'UI', {} )
 		dialogPath = uiUserData.get( 'defaultPath', IECore.StringData() ).value
 		obeyDefaultPath = uiUserData.get( 'obeyDefaultPath', IECore.BoolData( False ) ).value
 		currentPath = parameter.getTypedValue()
-		
+
 		if currentPath and not obeyDefaultPath :
 			dialogPath = os.path.dirname( currentPath )
-			
+
 		return dialogPath
-		
-		
+
+

@@ -85,7 +85,7 @@ class IECORE_API FileSequenceParameter : public PathParameter
 		/// If the parameter is not set to MustExist and no frame list is defined, then it returns a
 		/// FileSequence with EmptyFrameList object.
 		FileSequencePtr getFileSequenceValue( const StringData *value ) const;
-		
+
 		/// Returns a FileSequence using the internal StringData value
 		FileSequencePtr getFileSequenceValue() const;
 

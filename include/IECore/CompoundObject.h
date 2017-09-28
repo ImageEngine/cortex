@@ -68,10 +68,10 @@ class IECORE_API CompoundObject : public Object
 		T *member( const InternedString &name, bool throwExceptions = false );
 		template<typename T>
 		const T *member( const InternedString &name, bool throwExceptions = false ) const;
-		
+
 		/// A Convenience function to find an object in members().
 		/// If the named object doesn't exist, if createIfMissing is true, an object will be added
-		/// with the type's object factory create method. If false, or the named entry does not match the 
+		/// with the type's object factory create method. If false, or the named entry does not match the
 		/// type specified as the template argument, behavior is defined by the throwExceptions parameter.
 		/// When this parameter is true a descriptive Exception is thrown, and when false 0 is returned.
 		template<typename T>

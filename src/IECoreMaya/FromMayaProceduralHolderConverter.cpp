@@ -54,13 +54,13 @@ FromMayaProceduralHolderConverter::FromMayaProceduralHolderConverter( const MDag
 IECore::ObjectPtr FromMayaProceduralHolderConverter::doConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnDagNode nodeFn( dagPath );
-	
+
 	ProceduralHolder* node = dynamic_cast< ProceduralHolder* >( nodeFn.userNode() );
-	
+
 	if( !node )
 	{
 		throw Exception( std::string( "FromMayaProceduralHolderConverter::doConversion: Couldn't find a ProceduralHolder node at " ) + dagPath.fullPathName().asChar() );
 	}
-	
+
 	return node->getProcedural();
 }

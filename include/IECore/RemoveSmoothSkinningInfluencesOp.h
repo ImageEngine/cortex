@@ -54,7 +54,7 @@ class IECORE_API RemoveSmoothSkinningInfluencesOp : public ModifyOp
 
 		RemoveSmoothSkinningInfluencesOp();
 		virtual ~RemoveSmoothSkinningInfluencesOp();
-		
+
 		enum Mode
 		{
 			Named = 0,

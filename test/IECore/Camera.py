@@ -111,10 +111,10 @@ class TestCamera( unittest.TestCase ) :
 		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( -1000, 1000 ) )
 
 	def testHash( self ) :
-	
+
 		c = Camera()
 		h = c.hash()
-		
+
 		c.setName( "summink" )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
@@ -127,14 +127,14 @@ class TestCamera( unittest.TestCase ) :
 		self.assertNotEqual( c.hash(), h )
 
 	def testAddStandardParametersWithNonSquarePixels( self ) :
-		
+
 		c = Camera()
 		c.parameters()["resolution"] = V2i( 100, 200 )
 		c.parameters()["pixelAspectRatio"] = 2.0
-		
+
 		c.addStandardParameters()
 		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -1 ), V2f( 1 ) ) )
-		
+
 	def tearDown( self ) :
 
 		if os.path.isfile( "test/IECore/data/camera.cob" ) :
