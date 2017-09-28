@@ -47,7 +47,7 @@ class DspyTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 
 		# write one image direct to memory
-		r.display( "test", "ie", "rgba",
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
 				"handle" : IECore.StringData( "myLovelySphere" ),
@@ -86,7 +86,7 @@ class DspyTest( IECoreRI.TestCase ) :
 		rib = """
 		Option "searchpath" "string display" "@:./src/rmanDisplays/ieDisplay"
 
-		Display "test" "ieTestDisplay" "rgba"
+		Display "test" "ieDisplay" "rgba"
 			"quantize" [ 0 0 0 0 ]
 			"string driverType" "ClientDisplayDriver"
 			"string displayHost" "localhost"

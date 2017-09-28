@@ -141,7 +141,7 @@ class InstancingTest( IECoreRI.TestCase ) :
 		# test doing an actual render
 
 		r = IECoreRI.Renderer( "" )
-		r.display( "test", "ie", "rgba",
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : StringData( "ImageDisplayDriver" ),
 				"handle" : StringData( "myLovelySphere" ),

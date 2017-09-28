@@ -1649,7 +1649,6 @@ riDisplayDriverEnv.Append(
 	LIBS = (
 		os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 		os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
-		os.path.basename( riEnv.subst( "$INSTALL_LIB_NAME" ) ),
 	)
 )
 
@@ -1778,7 +1777,6 @@ if doConfigure :
 		riDisplayDriverEnv.AddPostAction( riDisplayDriverInstall, lambda target, source, env : makeLibSymLinks( riDisplayDriverEnv, libNameVar="INSTALL_RMANDISPLAY_NAME" ) )
 		riDisplayDriverEnv.Alias( "install", riDisplayDriverInstall )
 		riDisplayDriverEnv.Alias( "installRI", riDisplayDriverInstall )
-		riDisplayDriverForTest = riDisplayDriverEnv.Command( "src/rmanDisplays/ieDisplay/ieTestDisplay$SHLIBSUFFIX", riDisplayDriver, Copy( "$TARGET", "$SOURCE" ) )
 
 		# rsl headers
 		rslHeaders = glob.glob( "rsl/IECoreRI/*.h" ) + glob.glob( "rsl/IECoreRI/*.inl" )
@@ -1821,7 +1819,7 @@ if doConfigure :
 
 		riTest = riTestEnv.Command( "test/IECoreRI/results.txt", riPythonModule, pythonExecutable + " $TEST_RI_SCRIPT" )
 		NoCache( riTest )
-		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest + riDisplayDriverForTest ] )
+		riTestEnv.Depends( riTest, [ corePythonModule + riPythonProceduralForTest + riDisplayDriver ] )
 		riTestEnv.Depends( riTest, glob.glob( "test/IECoreRI/*.py" ) )
 		riTestEnv.Alias( "testRI", riTest )
 
