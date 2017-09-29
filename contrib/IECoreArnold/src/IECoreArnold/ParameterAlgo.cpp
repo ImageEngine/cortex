@@ -92,6 +92,16 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 					AiNodeSetInt( node, name, data->readable() );
 				}
 				break;
+			case AI_TYPE_UINT :
+				if( const IntData *data = runTimeCast<const IntData>( value ) )
+				{
+					AiNodeSetUInt( node, name, std::max( 0, data->readable() ) );
+				}
+				else if( const UIntData *data = dataCast<UIntData>( name, value ) )
+				{
+					AiNodeSetUInt( node, name, data->readable() );
+				}
+				break;
 			case AI_TYPE_BYTE :
 				if( const IntData *data = dataCast<IntData>( name, value ) )
 				{
@@ -246,6 +256,8 @@ IECore::DataPtr arrayToData( AtArray *array )
 			return arrayToDataInternal<bool>( array, AiArrayGetBoolFunc );
 		case AI_TYPE_INT :
 			return arrayToDataInternal<int>( array, AiArrayGetIntFunc );
+		case AI_TYPE_UINT :
+			return arrayToDataInternal<uint32_t>( array, AiArrayGetUIntFunc );
 		case AI_TYPE_FLOAT :
 			return arrayToDataInternal<float>( array, AiArrayGetFltFunc );
 		case AI_TYPE_STRING :
@@ -263,6 +275,8 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 			return new BoolData( AiNodeGetBool( node, name ) );
 		case AI_TYPE_INT :
 			return new IntData( AiNodeGetInt( node, name ) );
+		case AI_TYPE_UINT :
+			return new UIntData( AiNodeGetUInt( node, name ) );
 		case AI_TYPE_FLOAT :
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
@@ -429,6 +443,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case IntDataTypeId :
 			array = false;
 			return AI_TYPE_INT;
+		case UIntDataTypeId :
+			array = false;
+			return AI_TYPE_UINT;
 		case FloatDataTypeId :
 		case DoubleDataTypeId :
 			array = false;
@@ -463,6 +480,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case IntVectorDataTypeId :
 			array = true;
 			return AI_TYPE_INT;
+		case UIntVectorDataTypeId :
+			array = true;
+			return AI_TYPE_UINT;
 		case FloatVectorDataTypeId :
 			array = true;
 			return AI_TYPE_FLOAT;

@@ -78,6 +78,28 @@ class ParameterAlgoTest( unittest.TestCase ) :
 				IECore.StringData( "testString" ),
 			)
 
+	def testIntData( self ) :
+
+		with IECoreArnold.UniverseBlock( writable = True ) :
+
+			n = arnold.AiNode( "standard_surface" )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customInt", IECore.IntData( 42 ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customUInt", IECore.UIntData( 43 ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customIntVectorData", IECore.IntVectorData( [ 5, 6, 7 ] ) )
+			IECoreArnold.ParameterAlgo.setParameter( n, "customUIntVectorData", IECore.UIntVectorData( [ 12, 2147483649 ] ) )
+
+			self.assertEqual( arnold.AiNodeGetInt( n, "customInt" ), 42 )
+			self.assertEqual( arnold.AiNodeGetUInt( n, "customUInt" ), 43 )
+			a = arnold.AiNodeGetArray( n, "customIntVectorData" )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 3 )
+			self.assertEqual( arnold.AiArrayGetInt( a, 0 ), 5 )
+			self.assertEqual( arnold.AiArrayGetInt( a, 1 ), 6 )
+			self.assertEqual( arnold.AiArrayGetInt( a, 2 ), 7 )
+			a = arnold.AiNodeGetArray( n, "customUIntVectorData" )
+			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 2 )
+			self.assertEqual( arnold.AiArrayGetUInt( a, 0 ), 12 )
+			self.assertEqual( arnold.AiArrayGetUInt( a, 1 ), 2147483649 )
+
 	def testDoubleData( self ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
