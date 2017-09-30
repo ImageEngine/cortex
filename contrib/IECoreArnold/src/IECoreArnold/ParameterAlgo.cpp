@@ -95,7 +95,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 			case AI_TYPE_UINT :
 				if( const IntData *data = runTimeCast<const IntData>( value ) )
 				{
-					AiNodeSetUInt( node, name, data->readable() );
+					AiNodeSetUInt( node, name, std::max( 0, data->readable() ) );
 				}
 				else if( const UIntData *data = dataCast<UIntData>( name, value ) )
 				{
