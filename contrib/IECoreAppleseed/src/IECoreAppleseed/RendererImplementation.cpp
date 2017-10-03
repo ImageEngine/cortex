@@ -145,6 +145,8 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	params->insert( "tile_renderer", "generic" );
 	params->insert( "frame_renderer", "progressive" );
 	params->insert( "lighting_engine", "pt" );
+	params->insert( "sampling_mode", "qmc" );
+	params->insert( "spectrum_mode", "rgb" );
 	params->insert_path( "progressive_frame_renderer.max_fps", "5" );
 
 	// Insert some config params needed by the final renderer.
@@ -156,7 +158,8 @@ void IECoreAppleseed::RendererImplementation::constructCommon()
 	params->insert( "frame_renderer", "generic" );
 	params->insert( "lighting_engine", "pt" );
 	params->insert( "pixel_renderer", "uniform" );
-	params->insert( "sampling_mode", "rng" );
+	params->insert( "sampling_mode", "qmc" );
+	params->insert( "spectrum_mode", "rgb" );
 	params->insert_path( "uniform_pixel_renderer.samples", "1" );
 
 	// create some basic project entities.
