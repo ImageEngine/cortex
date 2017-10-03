@@ -81,10 +81,10 @@ RendererImplementation::AttributeState::AttributeState()
 	attributes = new CompoundData;
 	attributes->writable()["ai:visibility:camera"] = new BoolData( true );
 	attributes->writable()["ai:visibility:shadow"] = new BoolData( true );
-	attributes->writable()["ai:visibility:diffuseReflect"] = new BoolData( true );
-	attributes->writable()["ai:visibility:specularReflect"] = new BoolData( true );
-	attributes->writable()["ai:visibility:diffuseTransmit"] = new BoolData( true );
-	attributes->writable()["ai:visibility:specularTransmit"] = new BoolData( true );
+	attributes->writable()["ai:visibility:diffuse_reflect"] = new BoolData( true );
+	attributes->writable()["ai:visibility:specular_reflect"] = new BoolData( true );
+	attributes->writable()["ai:visibility:diffuse_transmit"] = new BoolData( true );
+	attributes->writable()["ai:visibility:specular_transmit"] = new BoolData( true );
 	attributes->writable()["ai:visibility:volume"] = new BoolData( true );
 	attributes->writable()["ai:visibility:subsurface"] = new BoolData( true );
 }
@@ -895,25 +895,25 @@ void IECoreArnold::RendererImplementation::applyVisibilityToNode( AtNode *node )
 		visibility |= AI_RAY_SHADOW;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuseReflect" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse_reflect" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_DIFFUSE_REFLECT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specularReflect" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specular_reflect" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_SPECULAR_REFLECT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuseTransmit" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:diffuse_transmit" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_DIFFUSE_TRANSMIT;
 	}
 
-	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specularTransmit" );
+	visData = m_attributeStack.top().attributes->member<BoolData>( "ai:visibility:specular_transmit" );
 	if( visData->readable() )
 	{
 		visibility |= AI_RAY_SPECULAR_TRANSMIT;
