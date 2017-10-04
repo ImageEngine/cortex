@@ -95,10 +95,10 @@ class IECOREARNOLD_API Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ai:visibility:camera" BoolData( true )</b>
 		/// \li <b>"ai:visibility:shadow" BoolData( true )</b>
-		/// \li <b>"ai:visibility:diffuseReflect" BoolData( true )</b>
-		/// \li <b>"ai:visibility:specularReflect" BoolData( true )</b>
-		/// \li <b>"ai:visibility:diffuseTransmit" BoolData( true )</b>
-		/// \li <b>"ai:visibility:specularTransmit" BoolData( true )</b>
+		/// \li <b>"ai:visibility:diffuse_reflect" BoolData( true )</b>
+		/// \li <b>"ai:visibility:specular_reflect" BoolData( true )</b>
+		/// \li <b>"ai:visibility:diffuse_transmit" BoolData( true )</b>
+		/// \li <b>"ai:visibility:specular_transmit" BoolData( true )</b>
 		/// \li <b>"ai:visibility:volume" BoolData( true )</b>
 		/// \li <b>"ai:visibility:subsurface" BoolData( true )</b>
 		///
