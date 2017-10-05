@@ -53,7 +53,7 @@ class RerenderingTest( unittest.TestCase ) :
 
 		r.setOption( "editable", True )
 
-		r.display( "test", "ie", "rgba",
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
 				"handle" : IECore.StringData( "myLovelySphere" ),
@@ -116,7 +116,7 @@ class RerenderingTest( unittest.TestCase ) :
 
 		r.setOption( "editable", True )
 
-		r.display( "test", "ie", "rgba",
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
 				"handle" : IECore.StringData( "myLovelySphere" ),
@@ -192,7 +192,8 @@ class RerenderingTest( unittest.TestCase ) :
 
 		r.setOption( "editable", True )
 
-		r.display( "test", "ie", "rgba",
+
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
 				"handle" : IECore.StringData( "myLovelySphere" ),
@@ -249,7 +250,7 @@ class RerenderingTest( unittest.TestCase ) :
 
 		r.setOption( "editable", True )
 
-		r.display( "test", "ie", "rgba",
+		r.display( "test", "ieDisplay", "rgba",
 			{
 				"driverType" : IECore.StringData( "ImageDisplayDriver" ),
 				"handle" : IECore.StringData( "myLovelySphere" ),
