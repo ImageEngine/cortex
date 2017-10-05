@@ -1,3 +1,75 @@
+10.0.0-a3
+=========
+
+Breaking Changes
+----------------
+
+- Switched UVs to be represented as a single "uv" V2fVectorData PrimitiveVariable with optional
+  indices. Old caches are converted automatically on loading but code which deals with UVs directly
+  will need to be updated (#621).
+- IECoreRI :
+  - Removed Dspy.h. The ieDisplay.so RenderMan display driver is now independent
+    of libIECoreRI, making it suitable for use in 3delight NSI renders (#622).
+  - Removed GXEvaluator (#621).
+- Houdini cache loaders : Changed filtering (#616).
+- Removed MeshFaceFilterOp. Use `MeshAlgo::deleteFaces()` instead (#621).
+- Removed MeshTangentsOp. Use `MeshAlgo::calculateTangents()` instead (#621).
+- Removed FaceAreaOp. Use `MeshAlgo::calculateFaceArea()` and `MeshAlgo::calculateFaceTextureArea()`
+  instead (#621).
+- Removed PointDistributionOp. Use `MeshAlgo::distributePoints()` instead (#621).
+- Removed MeshDistortionsOp. Use `MeshAlgo::calculateDistortion()` instead (#621).
+- FromMayaMeshConverter (#621) :
+  - Removed unused parameters.
+  - Made some methods private.
+
+Features
+--------
+
+- PointsAlgo : Added `mergePoints()` function (#616).
+- MeshAlgo (#621) :
+  - Added `calculateFaceArea()` function
+  - Added `calculateFaceTextureArea()` function
+  - Added `distributePoints()` function
+  - Added `calculateDistortion()` function
+
+Improvements
+------------
+
+- PrimitiveVariable (#621) :
+  - Added optional IntVectorData indices. This allows a compact representation
+    to be stored in PrimitiveVariable::data, with the indices being used to map
+    to the full Vertex/Uniform/FaceVarying size requirement.
+  - Added `expandedData()` method to convert data from indexed to non-indexed
+    form.
+  - Added `Primitive::expandedVariableData()` method to simplify access to
+    indexed data.
+- Improved UV representation :
+  - UVs are specified as a single V2fVectorData PrimitiveVariable
+  - Connectivity of UVs is preserved using the optional
+    PrimitiveVariable::indices field
+  - The default UV set is now called "uv" rather than the previous
+    pair of "s" and "t"
+  - Additional UV sets are identified unambiguously using the GeometricData::UV
+    interpretation.
+- Houdini cache loaders : Improved filtering (#616).
+- PrimitiveEvaluator : Added Result::vec2PrimVar() accessor (#621).
+- OpenImageIO::DataView : Added support for V2[if]VectorData (#621).
+- LRUCache : Reduced overhead of `setMaxCost()` when the limit is not being reduced (#617).
+- Python Wrapper classes : Added support for arbitrary numbers of constructor parameters (#618).
+
+Fixes
+-----
+
+- ToGLMeshConverter : Fixed orientation of UV cooordinates (#624).
+- IECoreNuke::CurveLookup : Fixed memory corruption (#616).
+- MurmurHash : Fixed bug when appending arrays larger than `sizeof( int )` (#620).
+
+Build
+-----
+
+- Added DEBUGINFO build option, for including debug symbols in release builds (#616).
+- Improved Travis test output.
+
 10.0.0-a2
 =========
 
