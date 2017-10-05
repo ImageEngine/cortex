@@ -227,6 +227,48 @@ class MeshPrimitiveTest( unittest.TestCase ) :
 		self.assertEqual( image["G"][index], 0 )
 		self.assertEqual( image["B"][index], 1 )
 
+	def testIndexedUV( self ) :
+
+		fragmentSource = """
+		varying vec2 fragmentuv;
+
+		void main()
+		{
+			gl_FragColor = vec4( fragmentuv.x, fragmentuv.y, 0, 1 );
+		}
+		"""
+
+		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ), imath.V2i( 100 ) )
+		self.assertTrue( m["uv"].indices is not None )
+
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+
+		r.camera( "main", {
+				"projection" : IECore.StringData( "orthographic" ),
+				"resolution" : IECore.V2iData( imath.V2i( 64 ) ),
+				"clippingPlanes" : IECore.V2fData( imath.V2f( 1, 1000 ) ),
+				"screenWindow" : IECore.Box2fData( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+			}
+		)
+		r.display( os.path.dirname( __file__ ) + "/output/testMesh.exr", "exr", "rgba", {} )
+
+		with IECoreScene.WorldBlock( r ) :
+
+			r.concatTransform( imath.M44f().translate( imath.V3f( 0, 0, -15 ) ) )
+			r.shader( "surface", "showUV",
+				{
+					"gl:fragmentSource" : IECore.StringData( fragmentSource ),
+				}
+			)
+
+			m.render( r )
+
+		expectedImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/expectedOutput/meshIndexedUVs.exr" ).read()
+		actualImage = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testMesh.exr" ).read()
+
+		self.assertEqual( IECoreImage.ImageDiffOp()( imageA = expectedImage, imageB = actualImage, maxError = 0.05 ).value, False )
+
 	def setUp( self ) :
 
 		if not os.path.isdir( "test/IECoreGL/output" ) :
