@@ -370,6 +370,72 @@ class TestMeshPrimitiveEvaluator( unittest.TestCase ) :
 					hits = mpe.intersectionPoints( origin, direction )
 					self.failIf( hits )
 
+	def testEvaluateIndexedPrimitiveVariables( self ) :
+
+		m = IECoreScene.MeshPrimitive(
+			# Two triangles
+			IECore.IntVectorData( [ 3, 3 ] ),
+			# Winding counter clockwise
+			IECore.IntVectorData( [ 0, 1, 2, 0, 2, 3 ] ),
+			# Linear interpolation
+			"linear",
+			# Points in shape of a square
+			IECore.V3fVectorData( [
+				imath.V3f( 0, 0, 0 ),
+				imath.V3f( 1, 0, 0 ),
+				imath.V3f( 1, 1, 0 ),
+				imath.V3f( 0, 1, 0 )
+			] )
+		)
+
+		m["uniform"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Uniform,
+			IECore.IntVectorData( [ 123, 321 ] ),
+			IECore.IntVectorData( [ 1, 0 ] ),
+		)
+
+		m["vertex"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
+			IECore.FloatVectorData( [ 314, 271 ] ),
+			IECore.IntVectorData( [ 0, 1, 1, 0] ),
+		)
+
+		m["faceVarying"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.FloatVectorData( [ 10, 20, 30 ] ),
+			IECore.IntVectorData( [ 0, 1, 2, 0, 1, 2 ] ),
+		)
+
+		evaluator = IECoreScene.PrimitiveEvaluator.create( m )
+		result = evaluator.createResult()
+
+		# Test each corner of each triangle
+
+		for triangleIndex in ( 0, 1 ) :
+
+			for corner in ( 0, 1, 2 ) :
+
+				bary = imath.V3f( 0 )
+				bary[corner] = 1
+
+				self.assertTrue( evaluator.barycentricPosition( triangleIndex, bary, result ) )
+
+				self.assertEqual(
+					result.intPrimVar( m["uniform"] ),
+					m["uniform"].data[m["uniform"].indices[triangleIndex]]
+				)
+
+				vertexIndex = m.vertexIds[triangleIndex*3+corner]
+				self.assertEqual(
+					result.floatPrimVar( m["vertex"] ),
+					m["vertex"].data[m["vertex"].indices[vertexIndex]]
+				)
+
+				self.assertEqual(
+					result.floatPrimVar( m["faceVarying"] ),
+					m["faceVarying"].data[m["faceVarying"].indices[triangleIndex*3+corner]]
+				)
+
 if __name__ == "__main__":
 	unittest.main()
 

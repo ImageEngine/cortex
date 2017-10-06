@@ -154,44 +154,38 @@ T MeshPrimitiveEvaluator::Result::getPrimVar( const PrimitiveVariable &pv ) cons
 		}
 	}
 
-	typedef TypedData< std::vector<T> > VectorData;
-	const VectorData *data = runTimeCast< VectorData >( pv.data.get() );
-
-	if (!data)
-	{
-		throw InvalidArgumentException( "Could not retrieve primvar data for MeshPrimitiveEvaluator" );
-	}
+	PrimitiveVariable::IndexedRange<T> range( pv );
 
 	switch ( pv.interpolation )
 	{
 		case PrimitiveVariable::Constant :
-			assert( data->readable().size() == 1 );
+			assert( range.size() == 1 );
 
-			return data->readable()[0];
+			return range[0];
 
 		case PrimitiveVariable::Uniform :
-			assert( m_triangleIdx < data->readable().size() );
+			assert( m_triangleIdx < range.size() );
 
-			return data->readable()[ m_triangleIdx ];
+			return range[ m_triangleIdx ];
 
 		case PrimitiveVariable::Vertex :
 		case PrimitiveVariable::Varying:
-			assert( m_vertexIds[0] < (int)data->readable().size() );
-			assert( m_vertexIds[1] < (int)data->readable().size() );
-			assert( m_vertexIds[2] < (int)data->readable().size() );
+			assert( m_vertexIds[0] < (int)range.size() );
+			assert( m_vertexIds[1] < (int)range.size() );
+			assert( m_vertexIds[2] < (int)range.size() );
 
-			return static_cast<T>( data->readable()[ m_vertexIds[0] ] * m_bary[0] + data->readable()[ m_vertexIds[1] ] * m_bary[1] + data->readable()[ m_vertexIds[2] ] * m_bary[2] );
+			return static_cast<T>( range[ m_vertexIds[0] ] * m_bary[0] + range[ m_vertexIds[1] ] * m_bary[1] + range[ m_vertexIds[2] ] * m_bary[2] );
 
 		case PrimitiveVariable::FaceVarying:
 
-			assert( (m_triangleIdx * 3) + 0 < data->readable().size() );
-			assert( (m_triangleIdx * 3) + 1 < data->readable().size() );
-			assert( (m_triangleIdx * 3) + 2 < data->readable().size() );
+			assert( (m_triangleIdx * 3) + 0 < range.size() );
+			assert( (m_triangleIdx * 3) + 1 < range.size() );
+			assert( (m_triangleIdx * 3) + 2 < range.size() );
 
 			return static_cast<T>(
-				  data->readable()[ (m_triangleIdx * 3) + 0 ] * m_bary[0]
-				+ data->readable()[ (m_triangleIdx * 3) + 1 ] * m_bary[1]
-				+ data->readable()[ (m_triangleIdx * 3) + 2 ] * m_bary[2]
+				  range[ (m_triangleIdx * 3) + 0 ] * m_bary[0]
+				+ range[ (m_triangleIdx * 3) + 1 ] * m_bary[1]
+				+ range[ (m_triangleIdx * 3) + 2 ] * m_bary[2]
 			);
 
 		default :
@@ -1309,7 +1303,8 @@ const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree()
 
 void MeshPrimitiveEvaluator::triangleUVs( size_t triangleIndex, const Imath::V3i &vertexIds, Imath::V2f uv[3] ) const
 {
-	const std::vector<Imath::V2f> &uvs = ((V2fVectorData *)(m_uv.data.get()))->readable();
+	PrimitiveVariable::IndexedRange<V2f> uvs( m_uv );
+
 	if( m_uv.interpolation==PrimitiveVariable::FaceVarying )
 	{
 		size_t index = triangleIndex * 3;
