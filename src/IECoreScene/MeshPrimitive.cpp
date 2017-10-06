@@ -354,14 +354,22 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	V3fVectorDataPtr pData = new V3fVectorData;
 	std::vector<V3f> &p = pData->writable();
 
+	V2fVectorDataPtr uvData = new V2fVectorData;
+	uvData->setInterpretation( GeometricData::UV );
+	std::vector<Imath::V2f> &uvs = uvData->writable();
+
 	// add vertices
-	float xStep = b.size().x / (float)divisions.x;
-	float yStep = b.size().y / (float)divisions.y;
+
+	const float xStep = b.size().x / (float)divisions.x;
+	const float yStep = b.size().y / (float)divisions.y;
+	const float uStep = 1.0f / (float)divisions.x;
+	const float vStep = 1.0f / (float)divisions.y;
 	for ( int i = 0; i <= divisions.y; ++i )
 	{
 		for ( int j = 0; j <= divisions.x; ++j )
 		{
 			p.push_back( V3f( b.min.x + j * xStep, b.min.y + i * yStep, 0 ) );
+			uvs.push_back( V2f( j * uStep, i * vStep ) );
 		}
 	}
 
@@ -369,13 +377,6 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 	IntVectorDataPtr verticesPerFace = new IntVectorData;
 	std::vector<int> &vpf = verticesPerFace->writable();
 	std::vector<int> &vIds = vertexIds->writable();
-
-	V2fVectorDataPtr uvData = new V2fVectorData;
-	uvData->setInterpretation( GeometricData::UV );
-	std::vector<Imath::V2f> &uvs = uvData->writable();
-
-	float uStep = 1.0f / (float)divisions.x;
-	float vStep = 1.0f / (float)divisions.y;
 
 	// add faces
 	int v0, v1, v2, v3;
@@ -393,16 +394,19 @@ MeshPrimitivePtr MeshPrimitive::createPlane( const Box2f &b, const Imath::V2i &d
 			vIds.push_back( v1 );
 			vIds.push_back( v2 );
 			vIds.push_back( v3 );
-
-			uvs.emplace_back( j * uStep, i * vStep );
-			uvs.emplace_back( (j+1) * uStep, i * vStep );
-			uvs.emplace_back( (j+1) * uStep, (i+1) * vStep );
-			uvs.emplace_back( j * uStep, (i+1) * vStep );
 		}
 	}
 
 	MeshPrimitivePtr result = new MeshPrimitive( verticesPerFace, vertexIds, "linear", pData );
-	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData );
+	// We could use Vertex interpolation here, since that's logicaly the same
+	// as FaceVarying interpolation using `vertexIds` as the indices. We don't
+	// do that for a few reasons :
+	//
+	//   - Most DCCs represent UVs using explicit indices anyway
+	//   - Some of our code is currently incompatible with Vertex UVs
+	//   - This gives us extra test coverage for indexed UVs "for free",
+	//     since several tests use `createPlane()`.
+	result->variables["uv"] = PrimitiveVariable( PrimitiveVariable::FaceVarying, uvData, vertexIds );
 
 	return result;
 }

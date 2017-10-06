@@ -49,6 +49,7 @@ class MeshTest( unittest.TestCase ) :
 	def testUVs( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
+		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].expandedData() )
 		uvData = m["uv"].data
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
@@ -69,7 +70,6 @@ class MeshTest( unittest.TestCase ) :
 	def testIndexedUVs( self ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
-		m["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 		uvData = m["uv"].data
 		uvIds = m["uv"].indices
 
@@ -95,7 +95,8 @@ class MeshTest( unittest.TestCase ) :
 
 		m = IECoreScene.MeshPrimitive.createPlane( imath.Box2f( imath.V2f( -1 ), imath.V2f( 1 ) ) )
 		m["myMap"] = m["uv"]
-		uvData = m["uv"].data
+		uvData = m["myMap"].data
+		indicesData = m["myMap"].indices
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
@@ -110,7 +111,7 @@ class MeshTest( unittest.TestCase ) :
 			for i in range( 0, 4 ) :
 				p = arnold.AiArrayGetVec2( uvs, i )
 				self.assertEqual( arnold.AiArrayGetVec2( uvs, i ), arnold.AtVector2( uvData[i][0], uvData[i][1] ) )
-				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), i )
+				self.assertEqual( arnold.AiArrayGetInt( uvIndices, i ), indicesData[i] )
 
 	def testNormals( self ) :
 

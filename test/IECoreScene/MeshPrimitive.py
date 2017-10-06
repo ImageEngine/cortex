@@ -263,7 +263,12 @@ class TestMeshPrimitive( unittest.TestCase ) :
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 
 		# verify uvs
+		self.assertEqual( m["uv"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( len( m["uv"].data ), len( m["P"].data ) )
+		self.assertEqual( m["uv"].indices, m.vertexIds )
+
 		e = IECoreScene.MeshPrimitiveEvaluator( IECoreScene.TriangulateOp()( input = m ) )
+
 		r = e.createResult()
 		self.assertTrue( e.pointAtUV( imath.V2f( 0, 0 ), r ) )
 		self.assertEqual( r.point(), m["P"].data[0] )
