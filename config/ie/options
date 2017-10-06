@@ -89,6 +89,7 @@ if targetApp :
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
+	usdVersion = tagetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
@@ -103,6 +104,7 @@ else :
 	hdf5Version = cortexReg["hdf5Version"]
 	glewVersion = cortexReg["glewVersion"]
 	tbbVersion = cortexReg["tbbVersion"]
+	usdVersion = cortexReg.get("usdVersion", None)
 	boostVersion = cortexReg["boostVersion"]
 	oiioVersion = cortexReg["OpenImageIOVersion"]
 
@@ -311,6 +313,15 @@ if targetApp=="houdini" :
 # find alembic:
 ALEMBIC_INCLUDE_PATH = os.path.join( "/software/tools/include/", platform, "Alembic", alembicVersion )
 ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
+
+# find USD:
+
+if usdVersion:
+    USD_INCLUDE_PATH = os.path.join( "/software/apps/usdgaffer/", usdVersion, platform, "include" )
+    USD_LIB_PATH = os.path.join( "/software/apps/usdgaffer/", usdVersion, platform, "lib" )
+else:
+    USD_INCLUDE_PATH = None
+    USD_LIB_PATH = None
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )

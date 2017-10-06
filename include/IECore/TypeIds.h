@@ -487,6 +487,9 @@ enum TypeId
 	FirstCoreAppleseedTypeId = 115000,
 	LastCoreAppleseedTypeId = 115999,
 
+	FirstCoreUSDTypeId = 116000,
+	LastCoreUSDTypeId = 116999,
+
 	// TypeIds dynamically allocated by registerRunTimeTyped (IECore Python)
 	FirstDynamicTypeId = 300000,
 	LastDynamicTypeId = 399999,

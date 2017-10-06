@@ -432,6 +432,19 @@ o.Add(
 	"/usr/local",
 )
 
+
+o.Add(
+	"USD_INCLUDE_PATH",
+	"The path to the USD include directory.",
+	"/usr/local/include",
+)
+
+o.Add(
+	"USD_LIB_PATH",
+	"The path to the USD lib directory.",
+	"/usr/local/lib",
+)
+
 # Alembic options
 
 o.Add(
@@ -931,6 +944,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"contrib/IECoreAlembic/test/IECoreAlembic/All.py"
+)
+
+o.Add(
+	"TEST_USD_SCRIPT",
+	"The python script to run for the USD tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"contrib/IECoreUSD/test/IECoreUSD/All.py"
 )
 
 o.Add(
@@ -2962,6 +2983,119 @@ if doConfigure and haveMaya and haveArnold :
 		mtoaEnv.Alias( "installMtoA", mtoaExtensionInstall )
 
 		Default( [ mtoaExtension ] )
+
+###########################################################################################
+# Build, install and test the IECoreUSD library and bindings
+###########################################################################################
+
+usdEnv = coreEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdEnvAppends = {
+	"CXXFLAGS" : [
+		"-isystem", "$USD_INCLUDE_PATH",
+		"-isystem", corePythonEnv.subst("$PYTHON_INCLUDE_PATH"),
+		"-isystem", usdEnv.subst("$USD_INCLUDE_PATH"),
+		"-DBUILD_COMPONENT_SRC_PREFIX=",
+		"-DBUILD_OPTLEVEL_DEV",
+		"-Wno-deprecated"
+	],
+	"CPPPATH" : [
+		"contrib/IECoreUSD/include"
+	],
+	"LIBPATH" : [
+		"$USD_LIB_PATH"
+	],
+	"LIBS" : [
+		"usdGeom",
+		"sdf",
+		"tf",
+		"pcp",
+		"arch",
+		"gf",
+		"js",
+		"vt", 
+		"ar",
+		"plug",
+		"tracelite",
+		"kind",
+		"work"
+	]
+}
+
+usdEnv.Append( **usdEnvAppends )
+
+usdPythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreUSD" )
+usdPythonModuleEnv.Append( **usdEnvAppends )
+
+if doConfigure :
+
+	c = Configure( usdEnv )
+
+	haveUSD = False
+	if c.CheckLibWithHeader( "usd", "pxr/usd/usd/api.h", "CXX" ) :
+		haveUSD = True
+	else :
+		sys.stderr.write( "WARNING : no USD library found, not building IECoreUSD - check USD_INCLUDE_PATH, USD_LIB_PATH and config.log.\n" )
+
+	c.Finish()
+
+	if haveUSD :
+
+		usdSources = sorted( glob.glob( "contrib/IECoreUSD/src/IECoreUSD/*.cpp" ) )
+		usdHeaders = glob.glob( "contrib/IECoreUSD/include/IECoreUSD/*.h" ) + glob.glob( "contrib/IECoreUSD/include/IECoreUSD/*.inl" )
+		usdPythonScripts = glob.glob( "contrib/IECoreUSD/python/IECoreUSD/*.py" )
+		usdPythonSources = sorted( glob.glob( "contrib/IECoreUSD/src/IECoreUSD/bindings/*.cpp" ) )
+
+		# we can't append this before configuring, as then it gets built as
+		# part of the configure process
+		usdEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+		# library
+		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdSources )
+		usdLibraryInstall = usdEnv.Install( os.path.dirname( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdLibrary )
+		usdEnv.NoCache( usdLibraryInstall )
+		usdEnv.AddPostAction( usdLibraryInstall, lambda target, source, env : makeLibSymLinks( usdEnv ) )
+		usdEnv.Alias( "install", usdLibraryInstall )
+		usdEnv.Alias( "installUSD", usdLibraryInstall )
+		usdEnv.Alias( "installLib", [ usdLibraryInstall ] )
+
+		# headers
+		usdHeaderInstall = usdEnv.Install( "$INSTALL_HEADER_DIR/IECoreUSD", usdHeaders )
+		usdEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdEnv, usdEnv["INSTALL_HEADER_DIR"] ) )
+		usdEnv.Alias( "install", usdHeaderInstall )
+		usdEnv.Alias( "installUSD", usdHeaderInstall )
+
+		# python module
+		usdPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( usdEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		usdPythonModule = usdPythonModuleEnv.SharedLibrary( "contrib/IECoreUSD/python/IECoreUSD/_IECoreUSD", usdPythonSources )
+		usdPythonModuleEnv.Depends( usdPythonModule, usdLibrary )
+
+		usdPythonModuleInstall = usdPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreUSD", usdPythonScripts + usdPythonModule )
+		usdPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreUSD", lambda target, source, env : makeSymLinks( usdPythonModuleEnv, usdPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+		usdPythonModuleEnv.Alias( "install", usdPythonModuleInstall )
+		usdPythonModuleEnv.Alias( "installUSD", usdPythonModuleInstall )
+
+		Default( [ usdLibrary, usdPythonModule ] )
+
+		# tests
+		usdTestEnv = testEnv.Clone()
+		usdTestEnv["ENV"]["PYTHONPATH"] += ":./contrib/IECoreUSD/python"
+
+		usdLibPath = coreEnv.subst("$USD_LIB_PATH")
+		usdPythonPath = os.path.join(usdLibPath, "python")
+
+		usdTestEnv["ENV"]["PYTHONPATH"] += ":" + usdPythonPath
+		usdTestEnv["ENV"][testEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + usdLibPath
+
+		usdTest = usdTestEnv.Command( "contrib/IECoreUSD/test/IECoreUSD/results.txt", usdPythonModule, pythonExecutable + " $TEST_USD_SCRIPT" )
+		NoCache( usdTest )
+		usdTestEnv.Alias( "testUSD", usdTest )
+
 
 ###########################################################################################
 # Build, install and test the IECoreAlembic library and bindings
