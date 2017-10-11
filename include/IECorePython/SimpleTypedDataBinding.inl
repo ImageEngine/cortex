@@ -56,7 +56,7 @@ void *TypedDataFromType<T>::convertible( PyObject *obj )
 	{
 		return obj;
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T>
@@ -89,7 +89,7 @@ struct TypedDataFromType<IECore::BoolData>
 		{
 			return obj;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	static void construct( PyObject *obj, boost::python::converter::rvalue_from_python_stage1_data *data )

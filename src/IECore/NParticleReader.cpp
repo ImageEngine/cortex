@@ -59,14 +59,14 @@ IE_CORE_DEFINERUNTIMETYPED( NParticleReader );
 const Reader::ReaderDescription<NParticleReader> NParticleReader::m_readerDescription( "mc" );
 
 NParticleReader::NParticleReader()
-	:	ParticleReader( "Reads Maya .mc format nCaches" ), m_iffFile( 0 ), m_frames( new IntVectorData )
+	:	ParticleReader( "Reads Maya .mc format nCaches" ), m_iffFile( nullptr ), m_frames( new IntVectorData )
 {
 	m_frameParameter = new IntParameter( "frameIndex", "Index of the desired frame to be loaded", 0 );
 	parameters()->addParameter( m_frameParameter );
 }
 
 NParticleReader::NParticleReader( const std::string &fileName )
-	:	ParticleReader( "Reads Maya .mc format nCaches" ), m_iffFile( 0 ), m_frames( new IntVectorData )
+	:	ParticleReader( "Reads Maya .mc format nCaches" ), m_iffFile( nullptr ), m_frames( new IntVectorData )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 
@@ -240,7 +240,7 @@ const IntVectorData * NParticleReader::frameTimes()
 	if ( !open() )
 	{
 		msg( Msg::Error, "NParticleReader::attributeNames()", boost::format( "Failed to open '%s'." ) % m_iffFileName );
-		return 0;
+		return nullptr;
 	}
 
 	return m_frames.get();
@@ -288,7 +288,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 {
 	if( !open() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	int frameIndex = m_frameParameter->getNumericValue();
@@ -297,7 +297,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 	if( frameIt == frameToRootChildren.end() )
 	{
 		msg( Msg::Warning, "NParticleReader::readAttribute()", boost::format( "Frame '%d' (index '%d') does not exist in '%s'." ) % frame % frameIndex % m_iffFileName );
-		return 0;
+		return nullptr;
 	}
 
 	bool foundAttr = false;
@@ -323,7 +323,7 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 
 	if ( !foundAttr )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	for ( it++; it < attrIt+2 && it != cache->childrenEnd(); it++ )
@@ -332,11 +332,11 @@ DataPtr NParticleReader::readAttribute( const std::string &name )
 		if ( id != kSIZE && id != kDBLA && id != kDVCA && id != kFVCA )
 		{
 			msg( Msg::Warning, "NParticleReader::readAttribute()", boost::format( "CHNM '%s' found, but was followed by invalid Tag '%s'." ) % name % it->type().name() );
-			return 0;
+			return nullptr;
 		}
 	}
 
-	DataPtr result = 0;
+	DataPtr result = nullptr;
 
 	int numParticles = 0;
 	(attrIt+1)->read( numParticles );

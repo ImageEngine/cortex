@@ -68,7 +68,7 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 			}
 			else
 			{
-				return 0;
+				return nullptr;
 			}
 		}
 	}
@@ -80,10 +80,10 @@ const T *CompoundData::member( const InternedString &name, bool throwExceptions 
 		}
 		else
 		{
-			return 0;
+			return nullptr;
 		}
 	}
-	return 0; // shouldn't get here anyway
+	return nullptr; // shouldn't get here anyway
 }
 
 template<typename T>
@@ -105,7 +105,7 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 			}
 			else
 			{
-				return 0;
+				return nullptr;
 			}
 		}
 	}
@@ -123,10 +123,10 @@ T *CompoundData::member( const InternedString &name, bool throwExceptions, bool 
 		}
 		else
 		{
-			return 0;
+			return nullptr;
 		}
 	}
-	return 0; // shouldn't get here anyway
+	return nullptr; // shouldn't get here anyway
 }
 
 

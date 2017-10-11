@@ -95,7 +95,7 @@ class RefCountedClass : public boost::python::class_<T, Detail::GILReleasePtr<TW
 
 		typedef boost::python::class_<T, Detail::GILReleasePtr<TWrapper>, boost::noncopyable, boost::python::bases<Base> > BaseClass;
 
-		RefCountedClass( const char *className, const char *docString = 0 );
+		RefCountedClass( const char *className, const char *docString = nullptr );
 
 };
 

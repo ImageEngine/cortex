@@ -110,7 +110,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 		return false;
 	}
 
-	FileSequencePtr fileSequence = 0;
+	FileSequencePtr fileSequence = nullptr;
 	try
 	{
 		fileSequence = new FileSequence( stringValue );
@@ -146,7 +146,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 
 	if ( mustExist() )
 	{
-		FileSequencePtr s = 0;
+		FileSequencePtr s = nullptr;
 		ls( fileSequence->getFileName(), s, m_minSequenceSize );
 
 		if ( !s )
@@ -160,7 +160,7 @@ bool FileSequenceParameter::valueValid( const Object *value, std::string *reason
 	}
 	else if ( mustNotExist() )
 	{
-		FileSequencePtr s = 0;
+		FileSequencePtr s = nullptr;
 		ls( fileSequence->getFileName(), s, m_minSequenceSize );
 
 		if ( s )
@@ -189,13 +189,13 @@ FileSequencePtr FileSequenceParameter::getFileSequenceValue( const StringData *v
 	{
 		if ( mustExist() )
 		{
-			FileSequencePtr result = 0;
+			FileSequencePtr result = nullptr;
 			ls( fileSequenceStr, result, m_minSequenceSize );
 			return result;
 		}
 		else if ( fileSequenceStr.size() == 0 )
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 	return new FileSequence( fileSequenceStr );

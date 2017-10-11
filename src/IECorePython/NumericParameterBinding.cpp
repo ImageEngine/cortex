@@ -57,7 +57,7 @@ class NumericParameterWrapper : public ParameterWrapper<NumericParameter<T> >
 
 		NumericParameterWrapper(
 			PyObject *self, const std::string &n, const std::string &d, T v = T(), T minValue = Imath::limits<T>::min(),
-			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0
+			T maxValue = Imath::limits<T>::max(), const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr
 		)
 			: ParameterWrapper<NumericParameter<T> >( self, n, d, v, minValue, maxValue, parameterPresets<typename NumericParameter<T>::PresetsContainer>( p ), po, ud )
 		{
@@ -87,7 +87,7 @@ static void bindNumericParameter()
 					arg( "maxValue" ) = Imath::limits<T>::max(),
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( nullptr )
 				)
 			)
 		)

@@ -44,7 +44,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-	static ShaderPtr construct( const std::string &name="defaultsurface", const std::string &type="surface", CompoundDataPtr parameters = 0 )
+	static ShaderPtr construct( const std::string &name="defaultsurface", const std::string &type="surface", CompoundDataPtr parameters = nullptr )
 	{
 		return new Shader( name, type, parameters ? parameters->readable() : CompoundDataMap() );
 	}

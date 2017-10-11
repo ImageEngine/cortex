@@ -53,7 +53,7 @@ class IECORE_API PointsPrimitive : public Primitive
 	public:
 
 		PointsPrimitive( size_t numPoints = 0 );
-		PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr radii = 0 );
+		PointsPrimitive( V3fVectorDataPtr points, FloatVectorDataPtr radii = nullptr );
 		virtual ~PointsPrimitive();
 
 		IE_CORE_DECLAREOBJECT( PointsPrimitive, Primitive );

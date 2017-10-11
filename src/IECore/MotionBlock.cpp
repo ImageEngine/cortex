@@ -37,7 +37,7 @@
 using namespace IECore;
 
 MotionBlock::MotionBlock( RendererPtr renderer, const std::set<float> &times, bool active )
-	:	m_renderer( ( active && times.size() > 1 ) ? renderer : 0 )
+	:	m_renderer( ( active && times.size() > 1 ) ? renderer : nullptr )
 {
 	if( m_renderer )
 	{

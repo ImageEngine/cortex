@@ -116,7 +116,7 @@ class IECORE_API Reader : public Op
 		/// which is a simple Parameter instance. If a derived class provides
 		/// more concrete constraints on the type of the result it should
 		/// pass an appropriate resultParameter in its initialiser.
-		Reader( const std::string &description, ParameterPtr resultParameter = 0 );
+		Reader( const std::string &description, ParameterPtr resultParameter = nullptr );
 
 		/// This utility class is provided to help with Reader registration. By having a private static
 		/// const instance of one of these in your class, it will call registerReader() for you when

@@ -55,7 +55,7 @@ class IECORE_API NURBSPrimitive : public Primitive
 		NURBSPrimitive();
 		/// Copies of all data are taken.
 		NURBSPrimitive( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax,
-			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, ConstV3fVectorDataPtr p = 0 );
+			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, ConstV3fVectorDataPtr p = nullptr );
 
 		//! @name Topology access
 		/// These functions allow access to get and set topology after construction.

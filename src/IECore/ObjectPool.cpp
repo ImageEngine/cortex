@@ -55,7 +55,7 @@ struct ObjectPool::MemberData
 	static ConstObjectPtr getter( const MurmurHash &h, size_t &cost )
 	{
 		cost = 0;
-		return NULL;
+		return nullptr;
 	}
 };
 
@@ -137,7 +137,7 @@ size_t ObjectPool::memoryUsage() const
 
 ObjectPool *ObjectPool::defaultObjectPool()
 {
-	static ObjectPoolPtr c = 0;
+	static ObjectPoolPtr c = nullptr;
 	if( !c )
 	{
 		const char *m = getenv( "IECORE_OBJECTPOOL_MEMORY" );

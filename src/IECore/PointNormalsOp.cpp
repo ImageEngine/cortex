@@ -137,7 +137,7 @@ ObjectPtr PointNormalsOp::doOperation( const CompoundObject *operands )
 	const int numNeighbours = m_numNeighboursParameter->getNumericValue();
 
 	const Object * points = pointParameter()->getValue();
-	ObjectPtr result = 0;
+	ObjectPtr result = nullptr;
 	switch( points->typeId() )
 	{
 		case V3fVectorDataTypeId :

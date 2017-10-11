@@ -59,7 +59,7 @@ struct TypeIdFromPython
 		{
 			return obj;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	static void construct( PyObject *obj, converter::rvalue_from_python_stage1_data *data )

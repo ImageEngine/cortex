@@ -37,7 +37,7 @@
 using namespace IECore;
 
 WorldBlock::WorldBlock( RendererPtr renderer, bool active )
-	:	m_renderer( active ? renderer : 0 )
+	:	m_renderer( active ? renderer : nullptr )
 {
 	if( m_renderer )
 	{

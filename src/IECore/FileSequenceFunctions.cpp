@@ -205,7 +205,7 @@ void IECore::ls( const std::string &path, std::vector< FileSequencePtr > &sequen
 
 void IECore::ls( const std::string &sequencePath, FileSequencePtr &sequence, size_t minSequenceSize )
 {
-	sequence = 0;
+	sequence = nullptr;
 	boost::smatch matches;
 	bool m = boost::regex_match( sequencePath, matches, FileSequence::fileNameValidator() );
 	if ( !m )

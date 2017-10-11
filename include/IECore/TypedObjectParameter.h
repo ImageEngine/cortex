@@ -70,12 +70,12 @@ class TypedObjectParameter : public ObjectParameter
 		typedef std::pair<std::string, ObjectTypePtr> ObjectPreset;
 		typedef std::vector<ObjectPreset> ObjectPresetsContainer;
 
-		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
+		TypedObjectParameter( const std::string &name, const std::string &description, typename T::Ptr defaultValue, const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=nullptr );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedObjectParameter<T>, ObjectParameter );
 
 		/// Implemented to return true only if value is of type T.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 	protected:
 

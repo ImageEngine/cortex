@@ -105,5 +105,5 @@ FrameListPtr ReversedFrameList::parse( const std::string &frameList )
 		return new ReversedFrameList( l );
 	}
 
-	return 0;
+	return nullptr;
 }

@@ -189,7 +189,7 @@ class IECORE_API Object : public RunTimeTyped
 		typedef ObjectPtr (*CreatorFn)( void *data );
 
 		/// Register a new Object-derived type with the system. The specified void* data is passed into the creator function
-		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data = 0 );
+		static void registerType( TypeId typeId, const std::string &typeName, CreatorFn creator, void *data = nullptr );
 
 
 	protected :
@@ -209,7 +209,7 @@ class IECORE_API Object : public RunTimeTyped
 				/// Registers the object using a specified typeId and typename
 				TypeDescription( TypeId alternateTypeId, const std::string &alternateTypeName );
 			private :
-				static ObjectPtr creator( void *data = 0 );
+				static ObjectPtr creator( void *data = nullptr );
 		};
 		/// As for TypeDescription, but for registering abstract classes.
 		/// \todo Hopefully find a way of not needing a separate

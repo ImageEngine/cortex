@@ -72,7 +72,7 @@ class ObjectParameterWrapper : public ParameterWrapper<ObjectParameter>
 
 		ObjectParameterWrapper(
 			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, TypeId t,
-			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0
+			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = nullptr
 		)
 			: ParameterWrapper<ObjectParameter>( self, n, d, dv, t, parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
 		{
@@ -80,7 +80,7 @@ class ObjectParameterWrapper : public ParameterWrapper<ObjectParameter>
 
 		ObjectParameterWrapper(
 			PyObject *self, const std::string &n, const std::string &d, ObjectPtr dv, const boost::python::list &ts,
-			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0
+			const object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = nullptr
 		)
 			: ParameterWrapper<ObjectParameter>( self, n, d, dv, makeTypes( ts ), parameterPresets<Parameter::PresetsContainer>( p ), po, ud )
 		{
@@ -118,7 +118,7 @@ void bindObjectParameter()
 					arg( "type" ),
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( nullptr )
 				)
 			)
 		)
@@ -132,7 +132,7 @@ void bindObjectParameter()
 					arg( "types" ),
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( nullptr )
 				)
 			)
 		)

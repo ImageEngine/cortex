@@ -49,14 +49,14 @@ class IECORE_API FrameListParameter : public StringParameter
 		IE_CORE_DECLARERUNTIMETYPED( FrameListParameter, StringParameter );
 
 		FrameListParameter( const std::string &name, const std::string &description, const std::string &defaultValue = std::string(), bool allowEmptyList = true,
-			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		FrameListParameter( const std::string &name, const std::string &description, StringDataPtr defaultValue, bool allowEmptyList = true,
-			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		virtual ~FrameListParameter();
 
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 		void setFrameListValue( ConstFrameListPtr frameList );
 

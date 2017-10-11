@@ -54,7 +54,7 @@ class CompoundParameterWrapper : public ParameterWrapper< CompoundParameter >
 
 		IE_CORE_DECLAREMEMBERPTR( CompoundParameterWrapper );
 
-		CompoundParameterWrapper( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = 0, bool adoptChildPresets = true )
+		CompoundParameterWrapper( PyObject *self, const std::string &name = "", const std::string &description = "", const list &members = list(), CompoundObjectPtr userData = nullptr, bool adoptChildPresets = true )
 			: ParameterWrapper< CompoundParameter >( self, name, description, userData, adoptChildPresets )
 		{
 			addParametersFromMembers( members );
@@ -176,7 +176,7 @@ void bindCompoundParameter()
 					arg( "name" ) = std::string(""),
 					arg( "description" ) = std::string(""),
 					arg( "members" ) = list(),
-					arg( "userData" ) = CompoundObject::Ptr( 0 ),
+					arg( "userData" ) = CompoundObject::Ptr( nullptr ),
 					arg( "adoptChildPresets" ) = true
 				)
 			)

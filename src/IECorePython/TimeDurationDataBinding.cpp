@@ -87,7 +87,7 @@ struct TimeDurationFromPythonDelta
 	{
 		if ( !PyDelta_Check( obj_ptr ) )
 		{
-			return 0;
+			return nullptr;
 		}
 		return obj_ptr;
 	}

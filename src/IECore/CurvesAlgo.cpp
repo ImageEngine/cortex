@@ -243,7 +243,7 @@ struct  CurvesVertexToVarying
 
 		trg.reserve( m_curves->variableSize( PrimitiveVariable::Varying ) );
 
-		const PrimitiveVariable *primVar = NULL;
+		const PrimitiveVariable *primVar = nullptr;
 		for( PrimitiveVariableMap::const_iterator it = m_curves->variables.begin(); it != m_curves->variables.end(); ++it )
 		{
 			if( it->second.data->isEqualTo( data ) )
@@ -255,14 +255,14 @@ struct  CurvesVertexToVarying
 
 		if( !primVar )
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		IECore::ConstCurvesPrimitiveEvaluatorPtr evaluator =  runTimeCast<CurvesPrimitiveEvaluator>(IECore::PrimitiveEvaluator::create( m_curves )) ;
 
 		if( !evaluator )
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
@@ -301,7 +301,7 @@ struct  CurvesVaryingToVertex
 		trg.reserve( m_curves->variableSize( PrimitiveVariable::Vertex ) );
 
 
-		const PrimitiveVariable *primVar = NULL;
+		const PrimitiveVariable *primVar = nullptr;
 		for( PrimitiveVariableMap::const_iterator it = m_curves->variables.begin(); it != m_curves->variables.end(); ++it )
 		{
 			if( it->second.data->isEqualTo( data ) )
@@ -313,13 +313,13 @@ struct  CurvesVaryingToVertex
 
 		if( !primVar )
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		IECore::ConstCurvesPrimitiveEvaluatorPtr evaluator =  runTimeCast<CurvesPrimitiveEvaluator>(IECore::PrimitiveEvaluator::create( m_curves )) ;
 		if( !evaluator )
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();

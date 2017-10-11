@@ -83,7 +83,7 @@ struct FileSequenceFunctionsHelper
 	{
 		if ( boost::regex_match( path, FileSequence::fileNameValidator() ) )
 		{
-			FileSequencePtr sequence = 0;
+			FileSequencePtr sequence = nullptr;
 			IECore::ls( path, sequence, minSequenceSize );
 
 			if ( sequence )

@@ -49,7 +49,7 @@ class OpClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
 {
 	public :
 
-		OpClass( const char *docString = 0 )
+		OpClass( const char *docString = nullptr )
 			:	IECorePython::RunTimeTypedClass<T, TWrapper>( docString )
 		{
 		}

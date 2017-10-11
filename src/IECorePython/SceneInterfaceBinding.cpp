@@ -184,7 +184,7 @@ DataPtr readTransform( SceneInterface &m, double time )
 	{
 		return t->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, double time )
@@ -194,7 +194,7 @@ ObjectPtr readAttribute( SceneInterface &m, const SceneInterface::Name &name, do
 	{
 		return o->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 ObjectPtr readObject( SceneInterface &m, double time )
@@ -204,7 +204,7 @@ ObjectPtr readObject( SceneInterface &m, double time )
 	{
 		return o->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 static MurmurHash sceneHash( SceneInterface &m, SceneInterface::HashType hashType, double time )

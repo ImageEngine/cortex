@@ -65,8 +65,8 @@ template<class BoundIterator>
 BoundedKDTree<BoundIterator>::Node::Node() : m_cutAxisAndLeaf(0)
 {
 	BoxTraits<Bound>::makeEmpty( m_bound );
-	m_perm.first = 0;
-	m_perm.last = 0;
+	m_perm.first = nullptr;
+	m_perm.last = nullptr;
 }
 
 template<class BoundIterator>

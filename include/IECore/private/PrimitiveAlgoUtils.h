@@ -66,7 +66,7 @@ struct  AverageValueFromVector
 		{
 			return new TypedData< typename From::ValueType::value_type >( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
 		}
-		return NULL;
+		return nullptr;
 	}
 };
 
@@ -74,7 +74,7 @@ struct  AverageValueFromVector
 inline DataPtr createArrayData(PrimitiveVariable& primitiveVariable, const Primitive *primitive, PrimitiveVariable::Interpolation interpolation)
 {
 	if ( primitiveVariable.interpolation != PrimitiveVariable::Constant )
-		return NULL;
+		return nullptr;
 
 	size_t len = primitive->variableSize( interpolation );
 	switch( primitiveVariable.data->typeId() )
@@ -115,10 +115,10 @@ inline DataPtr createArrayData(PrimitiveVariable& primitiveVariable, const Primi
 		}
 			break;
 		default:
-			return NULL;
+			return nullptr;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 } // namespace Detail

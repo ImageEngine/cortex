@@ -49,7 +49,7 @@ class TypedObjectParameterWrapper : public ParameterWrapper< IECore::TypedObject
 {
 	public:
 
-		TypedObjectParameterWrapper( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = 0 )
+		TypedObjectParameterWrapper( PyObject *self, const std::string &n, const std::string &d, typename T::Ptr dv, const boost::python::object &p = boost::python::tuple(), bool po = false, IECore::CompoundObjectPtr ud = nullptr )
 			: ParameterWrapper< IECore::TypedObjectParameter<T> >( self, n, d, dv, parameterPresets<typename IECore::TypedObjectParameter<T>::ObjectPresetsContainer>( p ), po, ud )
 		{
 		};

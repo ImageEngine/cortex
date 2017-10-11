@@ -45,7 +45,7 @@ BOOST_STATIC_ASSERT( sizeof(int) == 4 );
 BOOST_STATIC_ASSERT( sizeof(unsigned int) == 4 );
 BOOST_STATIC_ASSERT( sizeof(float) == 4 );
 
-RadixSort::RadixSort() : m_currentSize( 0 ), m_ranks( 0 ), m_ranks2( 0 )
+RadixSort::RadixSort() : m_currentSize( 0 ), m_ranks( nullptr ), m_ranks2( nullptr )
 {
 	m_ranks = new UIntVectorData();
 	m_ranks2 = new UIntVectorData();
@@ -127,7 +127,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 		if ( j != 3 )
 		{
 			unsigned char uniqueVal = 0;
-			unsigned int *curCount = 0;
+			unsigned int *curCount = nullptr;
 
 			bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
@@ -170,7 +170,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<float>
 		else
 		{
 			unsigned char uniqueVal = 0;
-			unsigned int *curCount = 0;
+			unsigned int *curCount = nullptr;
 			bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 			if ( performPass )
@@ -277,7 +277,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<unsign
 	for ( unsigned int j = 0; j < 4; j ++ )
 	{
 		unsigned char uniqueVal = 0;
-		unsigned int *curCount = 0;
+		unsigned int *curCount = nullptr;
 		bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 		if ( performPass )
@@ -348,7 +348,7 @@ const std::vector<unsigned int> &RadixSort::operator()( const std::vector<int> &
 	for ( unsigned int j = 0; j < 4; j ++ )
 	{
 		unsigned char uniqueVal = 0;
-		unsigned int *curCount = 0;
+		unsigned int *curCount = nullptr;
 		bool performPass = checkPassValidity( input2, j, curCount, uniqueVal );
 
 		if ( performPass )

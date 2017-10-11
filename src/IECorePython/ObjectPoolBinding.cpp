@@ -58,7 +58,7 @@ ObjectPtr retrieve( const ObjectPool &pool, MurmurHash key, bool _copy )
 
 	if ( !o )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if ( _copy )

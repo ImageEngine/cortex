@@ -41,7 +41,7 @@
 
 using namespace IECore;
 
-IFFFile::IFFFile( const std::string &fileName ) : m_iStream( 0 ), m_streamFileName( fileName ), m_root( 0 )
+IFFFile::IFFFile( const std::string &fileName ) : m_iStream( nullptr ), m_streamFileName( fileName ), m_root( nullptr )
 {
 }
 
@@ -86,7 +86,7 @@ bool IFFFile::open()
 }
 
 IFFFile::Chunk::Chunk()
-	: m_type(), m_dataSize( 0 ), m_file( 0 ), m_filePosition( 0 ), m_groupName(), m_alignmentQuota( 0 ), m_children()
+	: m_type(), m_dataSize( 0 ), m_file( nullptr ), m_filePosition( 0 ), m_groupName(), m_alignmentQuota( 0 ), m_children()
 {
 }
 

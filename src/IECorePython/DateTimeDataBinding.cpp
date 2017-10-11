@@ -87,7 +87,7 @@ struct ptime_from_python_datetime
 	{
 		if ( !PyDateTime_Check( obj_ptr ) )
 		{
-			return 0;
+			return nullptr;
 		}
 		return obj_ptr;
 	}

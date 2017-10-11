@@ -51,7 +51,7 @@ class IECORE_API ValidatedStringParameter : public StringParameter
 
 		ValidatedStringParameter( const std::string &name, const std::string &description,
 			const std::string &regex, const std::string &regexDescription = "", const std::string &defaultValue = "", bool allowEmptyString = true,
-			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		const std::string &regex() const;
 		const std::string &regexDescription() const;
@@ -59,7 +59,7 @@ class IECORE_API ValidatedStringParameter : public StringParameter
 
 		/// Implemented to return true only if value is an instance of StringData and
 		/// the contained string matches the regular expression specified in the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 	private :
 

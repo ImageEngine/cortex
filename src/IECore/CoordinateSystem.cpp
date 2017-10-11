@@ -47,7 +47,7 @@ const unsigned int CoordinateSystem::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( CoordinateSystem );
 
 CoordinateSystem::CoordinateSystem()
-	: m_name( "unspecified" ), m_transform( 0 )
+	: m_name( "unspecified" ), m_transform( nullptr )
 {
 }
 
@@ -140,7 +140,7 @@ void CoordinateSystem::copyFrom( const Object *other, CopyContext *context )
 	}
 	else
 	{
-		m_transform = 0;
+		m_transform = nullptr;
 	}
 }
 
@@ -161,7 +161,7 @@ void CoordinateSystem::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 	container->read( g_nameEntry, m_name );
-	m_transform = 0;
+	m_transform = nullptr;
 	try
 	{
 		m_transform = context->load<Transform>( container.get(), g_transformEntry );

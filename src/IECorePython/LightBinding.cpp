@@ -44,7 +44,7 @@ using namespace IECore;
 namespace IECorePython
 {
 
-	static LightPtr construct( const std::string &name="distantlight", const std::string &handle="", CompoundDataPtr parameters = 0 )
+	static LightPtr construct( const std::string &name="distantlight", const std::string &handle="", CompoundDataPtr parameters = nullptr )
 	{
 		return new Light( name, handle, parameters ? parameters->readable() : CompoundDataMap() );
 	}

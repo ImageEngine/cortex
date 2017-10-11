@@ -68,7 +68,7 @@ bool ObjectReader::canRead( const std::string &fileName )
 	// see if that succeeds. We could possibly query the structure of the database and
 	// check that it matches the signature of a one-object cache without needing to
 	// actually read the data.
-	IndexedIOPtr io = 0;
+	IndexedIOPtr io = nullptr;
 
 	try
 	{
@@ -85,7 +85,7 @@ bool ObjectReader::canRead( const std::string &fileName )
 		return false;
 	}
 
-	return io != 0;
+	return io != nullptr;
 }
 
 ObjectPtr ObjectReader::doOperation( const CompoundObject * operands )

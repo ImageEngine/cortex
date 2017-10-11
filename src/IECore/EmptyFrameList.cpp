@@ -72,5 +72,5 @@ FrameListPtr EmptyFrameList::parse( const std::string &frameList )
 		return new EmptyFrameList();
 	}
 
-	return 0;
+	return nullptr;
 }

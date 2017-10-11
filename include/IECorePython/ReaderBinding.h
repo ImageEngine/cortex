@@ -50,7 +50,7 @@ class ReaderClass : public OpClass<T, TWrapper>
 {
 	public :
 
-		ReaderClass( const char *docString = 0 );
+		ReaderClass( const char *docString = nullptr );
 
 };
 

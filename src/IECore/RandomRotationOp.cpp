@@ -162,7 +162,7 @@ ObjectPtr RandomRotationOp::doOperation( const CompoundObject * operands )
 		case UIntVectorDataTypeId :
 			return doOp<UIntVectorData>( static_cast<const UIntVectorData *>( seed ), time, minSpeed, maxSpeed );
 		default :
-			return 0; // shouldn't get here
+			return nullptr; // shouldn't get here
 	}
-	return 0;
+	return nullptr;
 }

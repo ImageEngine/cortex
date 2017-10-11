@@ -215,8 +215,8 @@ struct MeshPrimitiveShrinkWrapOp::ShrinkWrapFn
 		op->toleranceParameter()->setNumericValue( m_tolerance );
 		MeshPrimitivePtr triangulatedSourcePrimitive = runTimeCast< MeshPrimitive > ( op->operate() );
 
-		PrimitiveEvaluatorPtr sourceEvaluator = 0;
-		PrimitiveEvaluator::ResultPtr sourceResult = 0;
+		PrimitiveEvaluatorPtr sourceEvaluator = nullptr;
+		PrimitiveEvaluator::ResultPtr sourceResult = nullptr;
 
 		if ( m_method == Normal )
 		{
@@ -376,9 +376,9 @@ void MeshPrimitiveShrinkWrapOp::modifyTypedPrimitive( MeshPrimitive * mesh, cons
 	Direction direction = static_cast<Direction>( m_directionParameter->getNumericValue() );
 	Method method = static_cast<Method>( m_methodParameter->getNumericValue() );
 
-	MeshPrimitivePtr directionMesh = 0;
+	MeshPrimitivePtr directionMesh = nullptr;
 
-	ConstDataPtr directionVerticesData = 0;
+	ConstDataPtr directionVerticesData = nullptr;
 	if ( method == DirectionMesh )
 	{
 		directionMesh = directionMeshParameter()->getTypedValue< MeshPrimitive >( );

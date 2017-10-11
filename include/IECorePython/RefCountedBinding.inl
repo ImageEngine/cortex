@@ -69,7 +69,7 @@ class GILReleasePtr : public boost::intrusive_ptr<T>
 		~GILReleasePtr()
 		{
 			IECorePython::ScopedGILRelease gilRelease;
-			Base::reset( NULL );
+			Base::reset( nullptr );
 		}
 		
 	private :
@@ -216,7 +216,7 @@ RefCountedClass<T, Base, TWrapper>::RefCountedClass( const char *className, cons
 
 	// register casts between T and Base
 	boost::python::objects::register_dynamic_id<T>();
-	boost::mpl::for_each( boost::python::objects::register_base_of<T>(), (typename BaseClass::metadata::bases*)0, (boost::add_pointer<boost::mpl::_>*) 0 );
+	boost::mpl::for_each( boost::python::objects::register_base_of<T>(), (typename BaseClass::metadata::bases*)nullptr, (boost::add_pointer<boost::mpl::_>*) nullptr );
 
 	// implicit conversions
 	boost::python::implicitly_convertible<boost::intrusive_ptr<T> , boost::intrusive_ptr<Base> >();

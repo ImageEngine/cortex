@@ -48,7 +48,7 @@ class IECORE_API Camera : public PreWorldRenderable
 	public:
 
 		Camera( const std::string &name = "default",
-			TransformPtr transform = 0, CompoundDataPtr parameters = new CompoundData );
+			TransformPtr transform = nullptr, CompoundDataPtr parameters = new CompoundData );
 		virtual ~Camera();
 
 		IE_CORE_DECLAREOBJECT( Camera, PreWorldRenderable );

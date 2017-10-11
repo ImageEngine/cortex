@@ -47,7 +47,7 @@ FrameListPtr ReorderedFrameList::parseForChildList( const std::string &frameList
 
 	if ( frameList.size() < suffix.size() || frameList.rfind( suffix, frameList.size() - 1 ) != frameList.size() - suffix.size() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	std::string s = frameList.substr( 0, frameList.size() - suffix.size() );
@@ -58,7 +58,7 @@ FrameListPtr ReorderedFrameList::parseForChildList( const std::string &frameList
 		return FrameList::parse( s );
 	}
 
-	return 0;
+	return nullptr;
 }
 
 } // namespace IECore

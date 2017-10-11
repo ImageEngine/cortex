@@ -336,7 +336,7 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 	it = curves->variables.find( "constantwidth" );
 	if ( it != curves->variables.end() )
 	{
-		ConstFloatDataPtr widthData = 0;
+		ConstFloatDataPtr widthData = nullptr;
 		if ( it->second.interpolation == PrimitiveVariable::Constant )
 		{
 			widthData = runTimeCast< const FloatData >( it->second.data );
@@ -352,8 +352,8 @@ PatchMeshPrimitivePtr CurveExtrudeOp::buildPatchMesh( const CurvesPrimitive * cu
 		}
 	}
 
-	ConstFloatVectorDataPtr varyingWidthData = 0;
-	ConstFloatVectorDataPtr vertexWidthData = 0;
+	ConstFloatVectorDataPtr varyingWidthData = nullptr;
+	ConstFloatVectorDataPtr vertexWidthData = nullptr;
 	it = curves->variables.find( "width" );
 	if ( it != curves->variables.end() )
 	{

@@ -178,7 +178,7 @@ ObjectPtr DataCastOp::doOperation( const CompoundObject * operands )
 		return data->copy();
 	}
 
-	ObjectPtr result = 0;
+	ObjectPtr result = nullptr;
 	switch( data->typeId() )
 	{
 		case BoolDataTypeId:

@@ -184,7 +184,7 @@ static DataPtr getOption( Renderer &r, const std::string &name )
 	{
 		return d->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 static void camera( Renderer &r, const std::string &name, const dict &parameters )
@@ -208,7 +208,7 @@ static DataPtr getAttribute( Renderer &r, const std::string &name )
 	{
 		return d->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 static void shader( Renderer &r, const std::string &type, const std::string &name, const dict &parameters )

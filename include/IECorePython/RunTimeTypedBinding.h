@@ -78,7 +78,7 @@ class RunTimeTypedClass : public RefCountedClass<T, typename T::BaseClass, TWrap
 
 		typedef RefCountedClass<T, typename T::BaseClass, TWrapper> BaseClass;
 
-		RunTimeTypedClass( const char *docString = 0 );
+		RunTimeTypedClass( const char *docString = nullptr );
 
 };
 

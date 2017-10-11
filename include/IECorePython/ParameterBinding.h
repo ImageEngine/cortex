@@ -57,7 +57,7 @@ class ParameterClass : public IECorePython::RunTimeTypedClass<T, TWrapper>
 {
 	public :
 
-		ParameterClass( const char *docString = 0 );
+		ParameterClass( const char *docString = nullptr );
 
 };
 
@@ -70,7 +70,7 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 
 		ParameterWrapper(
 			PyObject *self, const std::string &name, const std::string &description, IECore::ObjectPtr defaultValue,
-			const boost::python::object &presets = boost::python::tuple(), bool presetsOnly = false, IECore::CompoundObjectPtr userData = 0
+			const boost::python::object &presets = boost::python::tuple(), bool presetsOnly = false, IECore::CompoundObjectPtr userData = nullptr
 		)
 			:	RunTimeTypedWrapper<T>( self, name, description, defaultValue, parameterPresets<typename T::PresetsContainer>( presets ), presetsOnly, userData )
 		{
@@ -87,7 +87,7 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 		{
 		}
 
-		virtual bool valueValid( const IECore::Object *value, std::string *reason = NULL ) const
+		virtual bool valueValid( const IECore::Object *value, std::string *reason = nullptr ) const
 		{
 			if( this->isSubclassed() )
 			{
