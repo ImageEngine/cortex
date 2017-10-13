@@ -50,7 +50,7 @@ namespace EntityAlgo
 template<class Container, class T>
 std::string insertEntityWithUniqueName( Container &container, foundation::auto_release_ptr<T> entity, const std::string &name )
 {
-	if( container.get_by_name( name.c_str() ) == 0 )
+	if( container.get_by_name( name.c_str() ) == nullptr )
 	{
 		entity->set_name( name.c_str() );
 		container.insert( entity );
@@ -63,7 +63,7 @@ std::string insertEntityWithUniqueName( Container &container, foundation::auto_r
 	while( true )
 	{
 		std::string new_name = ( fmt % i++ ).str();
-		if( container.get_by_name( new_name.c_str() ) == 0 )
+		if( container.get_by_name( new_name.c_str() ) == nullptr )
 		{
 			entity->set_name( new_name.c_str() );
 			container.insert( entity );

@@ -84,7 +84,7 @@ AtNode *convert( const IECore::Object *object )
 	Registry::const_iterator it = r.find( object->typeId() );
 	if( it == r.end() )
 	{
-		return NULL;
+		return nullptr;
 	}
 	return it->second.converter( object );
 }
@@ -93,7 +93,7 @@ AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::
 {
 	if( samples.empty() )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	const IECore::Object *firstSample = samples.front();
@@ -110,7 +110,7 @@ AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::
 	Registry::const_iterator it = r.find( firstSampleTypeId );
 	if( it == r.end() )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	if( it->second.motionConverter )

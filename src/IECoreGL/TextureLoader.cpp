@@ -58,16 +58,16 @@ TexturePtr TextureLoader::load( const std::string &name )
 	if( path.empty() )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
-		m_loadedTextures[name] = 0; // to save us trying over and over again
-		return 0;
+		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		return nullptr;
 	}
 
 	IECore::ReaderPtr r = IECore::Reader::create( path.string() );
 	if( !r )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "Couldn't create a Reader for \"%s\"." ) % path.string() );
-		m_loadedTextures[name] = 0; // to save us trying over and over again
-		return 0;
+		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		return nullptr;
 	}
 
 	IECore::ObjectPtr o = r->read();
@@ -75,11 +75,11 @@ TexturePtr TextureLoader::load( const std::string &name )
 	if( !i )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::TextureLoader::load", boost::format( "\"%s\" is not an image." ) % path.string() );
-		m_loadedTextures[name] = 0; // to save us trying over and over again
-		return 0;
+		m_loadedTextures[name] = nullptr; // to save us trying over and over again
+		return nullptr;
 	}
 
-	TexturePtr t = 0;
+	TexturePtr t = nullptr;
 	try
 	{
 		ToGLTextureConverterPtr converter = new ToGLTextureConverter( i );
@@ -100,7 +100,7 @@ void TextureLoader::clear()
 
 TextureLoader *TextureLoader::defaultTextureLoader()
 {
-	static TextureLoaderPtr t = 0;
+	static TextureLoaderPtr t = nullptr;
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_TEXTURE_PATHS" );

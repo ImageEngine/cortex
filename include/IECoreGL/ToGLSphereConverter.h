@@ -59,7 +59,7 @@ class ToGLSphereConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLSphereConverter, ToGLSphereConverterTypeId, ToGLConverter );
 
-		ToGLSphereConverter( IECore::ConstSpherePrimitivePtr toConvert = 0 );
+		ToGLSphereConverter( IECore::ConstSpherePrimitivePtr toConvert = nullptr );
 		virtual ~ToGLSphereConverter();
 
 	protected :

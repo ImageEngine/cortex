@@ -65,7 +65,7 @@ extern "C"
 PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, const char *fileName, int width, int height, int paramcount, const UserParameter *parameters, int formatCount, PtDspyDevFormat *format, PtFlagStuff *flags )
 {
 
-	*image = 0;
+	*image = nullptr;
 
 	// get channel names
 

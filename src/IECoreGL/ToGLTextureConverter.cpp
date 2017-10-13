@@ -72,7 +72,7 @@ ToGLTextureConverter::~ToGLTextureConverter()
 IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
 
-	TexturePtr t = 0;
+	TexturePtr t = nullptr;
 	IECoreImage::ImagePrimitive::ConstPtr image;
 
 	image = IECore::runTimeCast<const IECoreImage::ImagePrimitive>( src );
@@ -127,15 +127,15 @@ IECore::RunTimeTypedPtr ToGLTextureConverter::doConversion( IECore::ConstObjectP
 IECoreImage::ImagePrimitivePtr ToGLTextureConverter::createMissingChannels( const IECoreImage::ImagePrimitive *image ) const
 {
 	IECoreImage::ImagePrimitivePtr newImage = image->copy();
-	if( newImage->getChannel<float>( "R" ) == 0)
+	if( newImage->getChannel<float>( "R" ) == nullptr)
 	{
 		newImage->createChannel<float>( "R" );
 	}
-	if( newImage->getChannel<float>( "G" ) == 0)
+	if( newImage->getChannel<float>( "G" ) == nullptr)
 	{
 		newImage->createChannel<float>( "G" );
 	}
-	if( newImage->getChannel<float>( "B" ) == 0)
+	if( newImage->getChannel<float>( "B" ) == nullptr)
 	{
 		newImage->createChannel<float>( "B" );
 	}
@@ -150,7 +150,7 @@ IECoreImage::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECo
 		throw IECore::Exception( "No CompoundData supplied." );
 	}
 
-	IECore::Box2iDataPtr dataWindow = 0;
+	IECore::Box2iDataPtr dataWindow = nullptr;
 
 	IECore::CompoundDataMap::const_iterator itData = data->readable().find( "dataWindow" );
 	if ( itData == data->readable().end() )
@@ -159,7 +159,7 @@ IECoreImage::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECo
 	}
 	dataWindow = IECore::runTimeCast<IECore::Box2iData>( itData->second );
 
-	IECore::Box2iDataPtr screenWindow = 0;
+	IECore::Box2iDataPtr screenWindow = nullptr;
 	itData = data->readable().find( "displayWindow" );
 	if ( itData == data->readable().end() )
 	{
@@ -167,7 +167,7 @@ IECoreImage::ImagePrimitivePtr ToGLTextureConverter::imageFromCompoundData( IECo
 	}
 	screenWindow = IECore::runTimeCast<IECore::Box2iData>( itData->second );
 
-	IECore::CompoundDataPtr channels = 0;
+	IECore::CompoundDataPtr channels = nullptr;
 	itData = data->readable().find( "channels" );
 	if ( itData == data->readable().end() )
 	{

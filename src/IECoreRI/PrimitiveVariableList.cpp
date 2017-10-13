@@ -196,7 +196,7 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 				// not complaining for "tags" of type CompoundData as this currently has
 				// special meaning to the Renderer::mesh() method.
 			}
-			return 0;
+			return nullptr;
 	}
 }
 
@@ -215,7 +215,7 @@ const char *PrimitiveVariableList::interpolation( IECore::PrimitiveVariable::Int
 		case PrimitiveVariable::FaceVarying :
 			return "facevarying";
 		default :
-			return 0;
+			return nullptr;
 	}
 }
 

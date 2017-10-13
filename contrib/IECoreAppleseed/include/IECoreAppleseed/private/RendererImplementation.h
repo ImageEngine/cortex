@@ -154,7 +154,7 @@ class RendererImplementation : public IECore::Renderer
 				}
 			}
 
-			return 0;
+			return nullptr;
 		}
 
 		bool insideMotionBlock() const;

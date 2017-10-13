@@ -101,7 +101,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 #ifdef PRMANEXPORT
 		RiBegin( "launch:prman? -t" );
 #else
-		RiBegin( 0 );
+		RiBegin( nullptr );
 #endif
 	}
 	m_context = RiGetContext();
@@ -121,7 +121,7 @@ IECoreRI::RendererImplementation::RendererImplementation( const std::string &nam
 // This constructor gets called in procSubdivide(), and inherits the SharedData from the RendererImplementation
 // that launched the procedural
 IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr sharedData, IECore::CompoundDataPtr options )
-	:	m_context( 0 ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true ), m_inEdit( false )
+	:	m_context( nullptr ), m_sharedData( sharedData ), m_options( options ), m_inWorld( true ), m_inEdit( false )
 {
 	// Add a correspondance between the current context and this object's SharedData instance,
 	// in case RendererImplementation() gets called later on with no arguments. This creates a
@@ -145,7 +145,7 @@ IECoreRI::RendererImplementation::RendererImplementation( SharedData::Ptr shared
 //	set m_sharedData to that entry, otherwise we set it to a new SharedData.
 //
 IECoreRI::RendererImplementation::RendererImplementation()
-	:	m_context( 0 ), m_options( 0 ), m_inWorld( true ), m_inEdit( false )
+	:	m_context( nullptr ), m_options( nullptr ), m_inWorld( true ), m_inEdit( false )
 {
 	m_contextToSharedDataMapKey = RiGetContext();
 	ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
@@ -153,7 +153,7 @@ IECoreRI::RendererImplementation::RendererImplementation()
 	ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
 	if( it == s_contextToSharedDataMap.end() )
 	{
-		m_contextToSharedDataMapKey = 0;
+		m_contextToSharedDataMapKey = nullptr;
 		it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
 		if( it == s_contextToSharedDataMap.end() )
 		{
@@ -247,7 +247,7 @@ IECoreRI::RendererImplementation::~RendererImplementation()
 	// A null m_contextToSharedDataMapKey means this was launched straight from a rib. In this case we don't
 	// remove its entry from the map, as this could lead to the global shared data getting destroyed and recreated
 	// multiple times.
-	if( m_contextToSharedDataMapKey != 0 )
+	if( m_contextToSharedDataMapKey != nullptr )
 	{
 		ContextToSharedDataMapMutex::scoped_lock l( s_contextToSharedDataMapMutex );
 		ContextToSharedDataMap::iterator it = s_contextToSharedDataMap.find( m_contextToSharedDataMapKey );
@@ -330,13 +330,13 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getOption( const std::str
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
 		// silently ignore options prefixed for some other RendererImplementation
-		return 0;
+		return nullptr;
 	}
 	else
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::getOption", format( "Unknown option \"%s\"." ) % name );
 	}
-	return 0;
+	return nullptr;
 }
 
 void IECoreRI::RendererImplementation::setShaderSearchPathOption( const std::string &name, IECore::ConstDataPtr d )
@@ -394,7 +394,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getShutterOption( const s
 			return new V2fData( V2f( shutter[0], shutter[1] ) );
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( const std::string &name ) const
@@ -410,7 +410,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getResolutionOption( cons
 			return new V2iData( V2i( (int)format[0], (int)format[1] ) );
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getRxOption( const char *name ) const
@@ -423,7 +423,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getRxOption( const char *
 	{
 		return convert( result, resultType, resultCount );
 	}
-	return 0;
+	return nullptr;
 }
 
 void IECoreRI::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -431,7 +431,7 @@ void IECoreRI::RendererImplementation::camera( const std::string &name, const IE
 	ScopedContext scopedContext( m_context );
 	CompoundDataPtr parameterData = (new CompoundData( parameters ))->copy();
 
-	CameraPtr camera = new Camera( name, 0, parameterData );
+	CameraPtr camera = new Camera( name, nullptr, parameterData );
 	camera->addStandardParameters(); // it simplifies things to know that the camera is complete
 
 	// output shutter
@@ -659,7 +659,7 @@ void IECoreRI::RendererImplementation::worldEnd()
 		// we don't want to restore the previous context if it is actually
 		// our own - because after RiWorldEnd it might have disappeared off onto
 		// another thread.
-		previousContext = 0;
+		previousContext = nullptr;
 	}
 
 	RiContext( m_context );
@@ -1077,7 +1077,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 		if( i==string::npos )
 		{
 			msg( Msg::Warning, "IECoreRI::RendererImplementation::getAttribute", format( "Expected attribute name matching \"ri:*:*\" but got \"%s\"." ) % name );
-			return 0;
+			return nullptr;
 		}
 		char result[16 * sizeof( RtFloat )]; // enough room for a matrix return type
 		memset( result, 0, 16 * sizeof( RtFloat ) ); // 3delight has a bug where it'll try to free some random part of memory if this is not null (v 7.0.54)
@@ -1101,13 +1101,13 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getAttribute( const std::
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
 		// silently ignore attributes prefixed for some other RendererImplementation
-		return 0;
+		return nullptr;
 	}
 	else
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::getAttribute", format( "Unknown attribute \"%s\"." ) % name );
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getShadingRateAttribute( const std::string &name ) const
@@ -1122,7 +1122,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getShadingRateAttribute( 
 			return new FloatData( result );
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getMatteAttribute( const std::string &name ) const
@@ -1137,7 +1137,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getMatteAttribute( const 
 			return new BoolData( result > 0.0f );
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( const std::string &name ) const
@@ -1159,12 +1159,12 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getDoubleSidedAttribute( 
 			}
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getRightHandedOrientationAttribute( const std::string &name ) const
 {
-	char *result = 0;
+	char *result = nullptr;
 	RxInfoType_t resultType;
 	int resultCount;
 	if( 0==RxAttribute( "Ri:Orientation", &result, sizeof( char * ), &resultType, &resultCount ) )
@@ -1195,12 +1195,12 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getRightHandedOrientation
 			}
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const std::string &name ) const
 {
-	char *result = 0;
+	char *result = nullptr;
 	RxInfoType_t resultType;
 	int resultCount;
 	if( 0==RxAttribute( "identifier:name", (char *)&result, sizeof( char * ), &resultType, &resultCount ) )
@@ -1210,7 +1210,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getNameAttribute( const s
 			return new StringData( result );
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 
@@ -1228,7 +1228,7 @@ IECore::ConstDataPtr IECoreRI::RendererImplementation::getTextureCoordinatesAttr
 			return result;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 IECore::ConstDataPtr IECoreRI::RendererImplementation::getAutomaticInstancingAttribute( const std::string &name ) const
@@ -1303,7 +1303,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 	}
 #endif
 
-	ConstShaderPtr s = 0;
+	ConstShaderPtr s = nullptr;
 	try
 	{
 		s = runTimeCast<const Shader>( m_shaderCache->read( name + ".sdl" ) );
@@ -1375,7 +1375,7 @@ void IECoreRI::RendererImplementation::shader( const std::string &type, const st
 	}
 	else if( type=="shader" || type=="ri:shader" )
 	{
-		const StringData *handleData = 0;
+		const StringData *handleData = nullptr;
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
@@ -1579,7 +1579,7 @@ void IECoreRI::RendererImplementation::curves( const IECore::CubicBasisf &basis,
 void IECoreRI::RendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
 {
 #ifdef IECORE_WITH_FREETYPE
-	IECore::FontPtr f = 0;
+	IECore::FontPtr f = nullptr;
 	FontMap::const_iterator it = m_fonts.find( font );
 	if( it!=m_fonts.end() )
 	{
@@ -1893,11 +1893,11 @@ void IECoreRI::RendererImplementation::emitMeshPrimitive( const IECore::MeshPrim
 	if( primitive->interpolation()=="catmullClark" )
 	{
 		int numNames = 1;
-		const char *names[] = { "interpolateboundary", 0, 0, 0, 0, 0 };
+		const char *names[] = { "interpolateboundary", nullptr, nullptr, nullptr, nullptr, nullptr };
 		int defaultNArgs[] = { 0, 0 };
 		const int *nArgs = defaultNArgs;
-		const float *floats = 0;
-		const int *integers = 0;
+		const float *floats = nullptr;
+		const int *integers = nullptr;
 
 		IECore::PrimitiveVariableMap::const_iterator tagIt = mesh->variables.find( "tags" );
 		if( tagIt != primitive->variables.end() )
@@ -2241,7 +2241,7 @@ IECore::DataPtr IECoreRI::RendererImplementation::command( const std::string &na
 	if( it==m_commandHandlers.end() )
 	{
 		msg( Msg::Warning, "IECoreRI::RendererImplementation::command", boost::format( "Unknown command \"%s\"" ) % name );
-		return 0;
+		return nullptr;
 	}
 	return (this->*(it->second))( name, parameters );
 }
@@ -2255,7 +2255,7 @@ IECore::DataPtr IECoreRI::RendererImplementation::clippingPlaneCommand( const st
 		RiClippingPlane( 0, 0, 0, 0, 0, 1 );
 
 	RiTransformEnd();
-	return NULL;
+	return nullptr;
 }
 
 IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -2271,10 +2271,10 @@ IECore::DataPtr IECoreRI::RendererImplementation::readArchiveCommand( const std:
 	if( !nameData )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:readArchive command expects a StringData value called \"name\"." );
-		return 0;
+		return nullptr;
 	}
-	RiReadArchiveV( (char *)nameData->readable().c_str(), 0, 0, 0, 0 );
-	return 0;
+	RiReadArchiveV( (char *)nameData->readable().c_str(), nullptr, 0, nullptr, nullptr );
+	return nullptr;
 }
 
 IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -2297,7 +2297,7 @@ IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const st
 	if( !(typeData && recordData) )
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord command expects StringData values called \"type\" and \"record\"." );
-		return 0;
+		return nullptr;
 	}
 
 	// if there are printf style format specifiers in the record then we're in trouble - we're about to pass them through a c interface which
@@ -2311,7 +2311,7 @@ IECore::DataPtr IECoreRI::RendererImplementation::archiveRecordCommand( const st
 	{
 		msg( Msg::Error, "IECoreRI::RendererImplementation::command", "ri:archiveRecord \"record\" parameter appears to contain printf format specifiers." );
 	}
-	return 0;
+	return nullptr;
 }
 
 void RendererImplementation::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )

@@ -178,7 +178,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
-	if ( AiNodeEntryLookUpParameter(	entry, name ) != NULL ){
+	if ( AiNodeEntryLookUpParameter(	entry, name ) != nullptr ){
 		msg(
 			Msg::Warning,
 			"ShapeAlgo::convertPrimitiveVariable",

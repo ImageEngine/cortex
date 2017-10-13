@@ -162,11 +162,11 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 
 	// grab the PTCParticleIO and variableTypes map.
 	ConstCompoundDataPtr blindData = particleObject()->blindData();
-	ConstCompoundDataPtr variableTypes = 0;
+	ConstCompoundDataPtr variableTypes = nullptr;
 	CompoundDataMap::const_iterator itBlind = blindData->readable().find( "PTCParticleIO" );
 	if ( itBlind == blindData->readable().end() )
 	{
-		blindData = 0;
+		blindData = nullptr;
 	} else {
 		if ( itBlind->second->typeId() == CompoundDataTypeId )
 		{
@@ -182,7 +182,7 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 		}
 		else
 		{
-			blindData = 0;
+			blindData = nullptr;
 		}
 	}
 
@@ -363,7 +363,7 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 	}
 
 	/// preparing standart PTC information: point, normal and radius.
-	float *userData = 0;
+	float *userData = nullptr;
 	float point[ 3 ];
 	float normal[ 3 ];
 	float radius;
@@ -371,8 +371,8 @@ void PTCParticleWriter::doWrite( const IECore::CompoundObject *operands )
 	PrimitiveVariableMap::const_iterator pointsIt = pv.find( "P" );
 	DataPtr pointVector = pointsIt->second.data;
 
-	DataPtr normalVector = 0;
-	DataPtr radiusVector = 0;
+	DataPtr normalVector = nullptr;
+	DataPtr radiusVector = nullptr;
 
 	PrimitiveVariableMap::const_iterator normalVectorIt = pv.find( "N" );
 	if ( normalVectorIt != pv.end() )

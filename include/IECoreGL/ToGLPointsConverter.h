@@ -60,7 +60,7 @@ class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
 
-		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = 0 );
+		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = nullptr );
 		virtual ~ToGLPointsConverter();
 
 	protected :

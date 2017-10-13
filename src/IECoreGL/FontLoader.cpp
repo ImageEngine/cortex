@@ -57,11 +57,11 @@ FontPtr FontLoader::load( const std::string &name )
 	if( path.empty() )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::FontLoader::load", boost::format( "Couldn't find \"%s\"." ) % name );
-		m_fonts[name] = 0; // to save us trying over and over again
-		return 0;
+		m_fonts[name] = nullptr; // to save us trying over and over again
+		return nullptr;
 	}
 
-	IECore::FontPtr coreFont = 0;
+	IECore::FontPtr coreFont = nullptr;
 	try
 	{
 		coreFont = new IECore::Font( path.string() );
@@ -69,8 +69,8 @@ FontPtr FontLoader::load( const std::string &name )
 	catch( const std::exception &e )
 	{
 		IECore::msg( IECore::Msg::Error, "IECoreGL::Font::load", boost::format( "Failed to load \"%s\" ( %s )." ) % path.string() % e.what() );
-		m_fonts[name] = 0; // to save us trying over and over again
-		return 0;
+		m_fonts[name] = nullptr; // to save us trying over and over again
+		return nullptr;
 	}
 
 	FontPtr result = new Font( coreFont );
@@ -86,7 +86,7 @@ void FontLoader::clear()
 
 FontLoader *FontLoader::defaultFontLoader()
 {
-	static FontLoaderPtr l = 0;
+	static FontLoaderPtr l = nullptr;
 	if( !l )
 	{
 		const char *e = getenv( "IECORE_FONT_PATHS" );

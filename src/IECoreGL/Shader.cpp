@@ -70,7 +70,7 @@ class Shader::Implementation : public IECore::RefCounted
 		Implementation( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource )
 			:	m_vertexSource( vertexSource ), m_geometrySource( geometrySource ), m_fragmentSource( fragmentSource ),
 				m_vertexShader( 0 ), m_geometryShader( 0 ), m_fragmentShader( 0 ), m_program( 0 ),
-				m_csParameter( NULL )
+				m_csParameter( nullptr )
 		{
 			string actualVertexSource = vertexSource;
 			string actualFragmentSource = fragmentSource;
@@ -106,7 +106,7 @@ class Shader::Implementation : public IECore::RefCounted
 				if( logLength )
 				{
 					vector<char> log( logLength );
-					glGetProgramInfoLog( m_program, logLength, 0, &log[0] );
+					glGetProgramInfoLog( m_program, logLength, nullptr, &log[0] );
 					message = &log[0];
 				}
 				release();
@@ -116,7 +116,7 @@ class Shader::Implementation : public IECore::RefCounted
 			{
 				std::string message;
 				vector<char> log( logLength, ' ' );
-				glGetProgramInfoLog( m_program, logLength, 0, &log[0] );
+				glGetProgramInfoLog( m_program, logLength, nullptr, &log[0] );
 				message = &log[0];
 
 				// os x spews warnings rather overzealously, so we split them
@@ -159,7 +159,7 @@ class Shader::Implementation : public IECore::RefCounted
 				for( int i=0; i<numUniforms; i++ )
 				{
 					Parameter p;
-					glGetActiveUniform( m_program, i, maxUniformNameLength, 0, &p.size, &p.type, &nameChars[0] );
+					glGetActiveUniform( m_program, i, maxUniformNameLength, nullptr, &p.size, &p.type, &nameChars[0] );
 					p.location = glGetUniformLocation( m_program, &nameChars[0] );
 
 					std::string name = &nameChars[0];
@@ -217,7 +217,7 @@ class Shader::Implementation : public IECore::RefCounted
 					for( int i=0; i<numVertexs; i++ )
 					{
 						Parameter p;
-						glGetActiveAttrib( m_program, i, maxVertexNameLength, 0, &p.size, &p.type, &nameChars[0] );
+						glGetActiveAttrib( m_program, i, maxVertexNameLength, nullptr, &p.size, &p.type, &nameChars[0] );
 						p.location = glGetAttribLocation( m_program, &nameChars[0] );
 
 						std::string name = &nameChars[0];
@@ -280,7 +280,7 @@ class Shader::Implementation : public IECore::RefCounted
 			{
 				return &(it->second);
 			}
-			return 0;
+			return nullptr;
 		}
 
 		void vertexAttributeNames( std::vector<std::string> &names ) const
@@ -298,7 +298,7 @@ class Shader::Implementation : public IECore::RefCounted
 			{
 				return &(it->second);
 			}
-			return 0;
+			return nullptr;
 		}
 
 		const Shader::Parameter *csParameter() const
@@ -335,7 +335,7 @@ class Shader::Implementation : public IECore::RefCounted
 
 			const char *s = source.c_str();
 			shader = glCreateShader( type );
-			glShaderSource( shader, 1, &s, 0 );
+			glShaderSource( shader, 1, &s, nullptr );
 			glCompileShader( shader );
 			GLint compileStatus = 0;
 			glGetShaderiv( shader, GL_COMPILE_STATUS, &compileStatus );
@@ -485,7 +485,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			{
 				Buffer::ScopedBinding binding( *m_buffer );
 				glEnableVertexAttribArrayARB( m_attributeIndex );
-				glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, 0 );
+				glVertexAttribPointerARB( m_attributeIndex, m_size, m_type, false, 0, nullptr );
 				glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 			}
 

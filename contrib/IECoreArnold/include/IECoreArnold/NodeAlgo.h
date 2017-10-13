@@ -65,7 +65,7 @@ typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
 /// this, since it provides additional type safety.
-void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter = NULL );
+void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter = nullptr );
 
 /// Class which registers a converter for type T automatically
 /// when instantiated.
@@ -79,7 +79,7 @@ class ConverterDescription
 		typedef AtNode *(*Converter)( const T * );
 		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, const std::vector<float> & );
 
-		ConverterDescription( Converter converter, MotionConverter motionConverter = NULL )
+		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
 		{
 			registerConverter(
 				T::staticTypeId(),

@@ -46,7 +46,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( Scene );
 
 Scene::Scene()
-	:	m_root( new Group ), m_camera( 0 )
+	:	m_root( new Group ), m_camera( nullptr )
 {
 }
 

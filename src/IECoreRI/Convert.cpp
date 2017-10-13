@@ -119,7 +119,7 @@ DataPtr convert( const char *data, RxInfoType_t type, RtInt count )
 				) );
 			}
 		default :
-			return 0;
+			return nullptr;
 	}
 }
 

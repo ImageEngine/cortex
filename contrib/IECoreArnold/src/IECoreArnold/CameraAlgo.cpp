@@ -59,7 +59,7 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 
 	// Use projection to decide what sort of camera node to create
 	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
-	AtNode *result = 0;
+	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
 		result = AiNode( "persp_camera" );

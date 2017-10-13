@@ -62,7 +62,7 @@ class IECOREGL_API ToGLBufferConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLBufferConverter, ToGLBufferConverterTypeId, ToGLConverter );
 
-		ToGLBufferConverter( IECore::ConstDataPtr toConvert = 0 );
+		ToGLBufferConverter( IECore::ConstDataPtr toConvert = nullptr );
 		virtual ~ToGLBufferConverter();
 
 	protected :

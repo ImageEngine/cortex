@@ -65,7 +65,7 @@ bool ShaderState::shader( const std::string &type, const std::string &name, cons
 		return false;
 	}
 
-	const StringData *handleData = NULL;
+	const StringData *handleData = nullptr;
 	CompoundDataMap::const_iterator handleIt = parameters.find( "__handle" );
 	if( handleIt != parameters.end() )
 	{
@@ -80,7 +80,7 @@ bool ShaderState::shader( const std::string &type, const std::string &name, cons
 		nsiHandle.c_str(),
 		"shader", // type
 		0, // nparams
-		NULL // params
+		nullptr // params
 	);
 
 	const char *fileName = name.c_str();

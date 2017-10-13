@@ -57,7 +57,7 @@ Display::Display( const std::string &name, const std::string &type, const std::s
 
 void Display::display( ConstFrameBufferPtr frameBuffer ) const
 {
-	IECoreImage::ImagePrimitivePtr image = 0;
+	IECoreImage::ImagePrimitivePtr image = nullptr;
 	if( m_data=="rgba" )
 	{
 		image = frameBuffer->getColor()->imagePrimitive();

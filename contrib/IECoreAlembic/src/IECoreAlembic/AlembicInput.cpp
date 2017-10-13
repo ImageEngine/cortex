@@ -210,7 +210,7 @@ bool AlembicInput::hasStoredBound() const
 	const MetaData &md = m_data->object.getMetaData();
 	if( !m_data->object.getParent() )
 	{
-		return m_data->object.getProperties().getPropertyHeader( ".childBnds" ) != 0x0;
+		return m_data->object.getProperties().getPropertyHeader( ".childBnds" ) != nullptr;
 	}
 	else if( IXform::matches( md ) )
 	{
@@ -387,7 +387,7 @@ IECore::ObjectPtr AlembicInput::objectAtTime( double time, IECore::TypeId result
 		{
 			return linearObjectInterpolation( object0.get(), object1.get(), lerpFactor );
 		}
-		return NULL;
+		return nullptr;
 	}
 }
 

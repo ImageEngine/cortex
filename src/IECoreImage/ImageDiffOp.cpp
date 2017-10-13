@@ -306,8 +306,8 @@ ObjectPtr ImageDiffOp::doOperation( const CompoundObject * operands )
 		assert( aData );
 		assert( bData );
 
-		FloatVectorDataPtr aFloatData = 0;
-		FloatVectorDataPtr bFloatData = 0;
+		FloatVectorDataPtr aFloatData = nullptr;
+		FloatVectorDataPtr bFloatData = nullptr;
 
 		try
 		{

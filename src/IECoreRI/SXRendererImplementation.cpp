@@ -67,8 +67,8 @@ using namespace boost;
 SXRendererImplementation::State::State()
 	:	attributes( new CompoundData() ),
 		context( SxContextPtr( SxCreateContext(), SxDestroyContext ) ),
-		displacementShader( 0 ), surfaceShader( 0 ),
-		atmosphereShader( 0 ), imagerShader( 0 )
+		displacementShader( nullptr ), surfaceShader( nullptr ),
+		atmosphereShader( nullptr ), imagerShader( nullptr )
 
 {
 }
@@ -194,7 +194,7 @@ void IECoreRI::SXRendererImplementation::setOption( const std::string &name, IEC
 IECore::ConstDataPtr IECoreRI::SXRendererImplementation::getOption( const std::string &name ) const
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::getOption", "Not implemented" );
-	return 0;
+	return nullptr;
 }
 
 void IECoreRI::SXRendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -325,23 +325,23 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 
 	if( type=="displacement" || type=="ri:displacement" )
 	{
-		m_stateStack.top().displacementShader = createShader( name.c_str(), 0, parameters );
+		m_stateStack.top().displacementShader = createShader( name.c_str(), nullptr, parameters );
 	}
 	else if( type=="surface" || type=="ri:surface" )
 	{
-		m_stateStack.top().surfaceShader = createShader( name.c_str(), 0, parameters );
+		m_stateStack.top().surfaceShader = createShader( name.c_str(), nullptr, parameters );
 	}
 	else if( type=="atmosphere"	|| type=="ri:atmosphere" )
 	{
-		m_stateStack.top().atmosphereShader = createShader( name.c_str(), 0, parameters );
+		m_stateStack.top().atmosphereShader = createShader( name.c_str(), nullptr, parameters );
 	}
 	else if( type=="imager"	|| type=="ri:imager" )
 	{
-		m_stateStack.top().imagerShader = createShader( name.c_str(), 0, parameters );
+		m_stateStack.top().imagerShader = createShader( name.c_str(), nullptr, parameters );
 	}
 	else if( type=="shader" || type=="ri:shader" )
 	{
-		const StringData *handleData = 0;
+		const StringData *handleData = nullptr;
 		CompoundDataMap::const_iterator it = parameters.find( "__handle" );
 		if( it!=parameters.end() )
 		{
@@ -368,7 +368,7 @@ void IECoreRI::SXRendererImplementation::shader( const std::string &type, const 
 
 void IECoreRI::SXRendererImplementation::light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters )
 {
-	SxShader s = createShader( name.c_str(), 0, parameters );
+	SxShader s = createShader( name.c_str(), nullptr, parameters );
 	m_stateStack.top().lights.push_back( s );
 }
 
@@ -476,7 +476,7 @@ void IECoreRI::SXRendererImplementation::instance( const std::string &name )
 IECore::DataPtr IECoreRI::SXRendererImplementation::command( const std::string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::command", boost::format( "Unknown command \"%s\"" ) % name );
-	return 0;
+	return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -505,11 +505,11 @@ SxShader IECoreRI::SXRendererImplementation::createShader( const char *name, con
 
 	boost::shared_ptr<void> tmpContext( SxCreateContext( m_stateStack.top().context.get() ), SxDestroyContext );
 
-	SxShader shaderInfo = SxCreateShader( tmpContext.get(), 0, name, 0 );
+	SxShader shaderInfo = SxCreateShader( tmpContext.get(), nullptr, name, nullptr );
 	if( !shaderInfo )
 	{
 		// 3delight will have printed a warning already.
-		return 0;
+		return nullptr;
 	}
 
 	// convert the parameter list for the shader

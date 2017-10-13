@@ -109,7 +109,7 @@ void QuadPrimitive::renderInstances( size_t numInstances ) const
 	}
 
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
+	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, nullptr, numInstances );
 }
 
 Imath::Box3f QuadPrimitive::bound() const

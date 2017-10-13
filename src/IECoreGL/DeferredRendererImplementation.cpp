@@ -256,7 +256,7 @@ IECore::Data *DeferredRendererImplementation::getUserAttribute( const IECore::In
 			return attrIt->second.get();
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 void DeferredRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )
@@ -358,7 +358,7 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 	public:
 
 		ProceduralTask( DeferredRendererImplementation &renderer, IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr param ) :
-			m_renderer(renderer), m_procedural(proc), m_param(param), m_taskList(0)
+			m_renderer(renderer), m_procedural(proc), m_param(param), m_taskList(nullptr)
 		{
 			m_numSubtasks = 0;
 			RenderContext *curContext = m_renderer.currentContext();
@@ -392,8 +392,8 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 			set_ref_count( m_numSubtasks + 1 );
 			spawn_and_wait_for_all(taskList);
 			taskList.clear();
-			m_taskList = 0;
-			return NULL;
+			m_taskList = nullptr;
+			return nullptr;
 		}
 
 		void addSubtask( ProceduralTask& subtask )

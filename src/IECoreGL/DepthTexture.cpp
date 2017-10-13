@@ -60,7 +60,7 @@ DepthTexture::DepthTexture( unsigned int width, unsigned height, const IECore::D
 	if( !z )
 	{
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT,
-			GL_FLOAT, 0 );
+			GL_FLOAT, nullptr );
 	}
 	else
 	{

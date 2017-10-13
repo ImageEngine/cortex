@@ -65,7 +65,7 @@ class IECOREGL_API ToGLStateConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLStateConverter, ToGLStateConverterTypeId, ToGLConverter );
 
-		ToGLStateConverter( IECore::ConstCompoundObjectPtr toConvert = NULL );
+		ToGLStateConverter( IECore::ConstCompoundObjectPtr toConvert = nullptr );
 		virtual ~ToGLStateConverter();
 
 	protected :

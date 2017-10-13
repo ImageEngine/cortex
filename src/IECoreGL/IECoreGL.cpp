@@ -77,7 +77,7 @@ void IECoreGL::init( bool glAlreadyInitialised )
 			CGLChoosePixelFormat( attributes, &pixelFormat, &numVirtualScreens );
 
 			CGLContextObj context;
-			CGLCreateContext( pixelFormat, 0, &context );
+			CGLCreateContext( pixelFormat, nullptr, &context );
 			CGLDestroyPixelFormat( pixelFormat );
 
 			CGLSetCurrentContext( context );

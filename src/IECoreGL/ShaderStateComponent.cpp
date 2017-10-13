@@ -59,14 +59,14 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 
 		Implementation()
 			:	m_shaderLoader( ShaderLoader::defaultShaderLoader() ), m_textureLoader( TextureLoader::defaultTextureLoader() ), m_fragmentSource( "" ), m_geometrySource( "" ), m_vertexSource( "" ),
-				m_parameterMap( 0 ), m_shaderSetup( 0 )
+				m_parameterMap( nullptr ), m_shaderSetup( nullptr )
 		{
 			initHash();
 		}
 
 		Implementation( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues )
 			:	m_shaderLoader( shaderLoader ), m_textureLoader( textureLoader ), m_fragmentSource( fragmentSource ), m_geometrySource( geometrySource ),
-				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( 0 )
+				m_vertexSource( vertexSource ), m_parameterMap( parameterValues->copy() ), m_shaderSetup( nullptr )
 		{
 			initHash();
 		}
@@ -115,7 +115,7 @@ class ShaderStateComponent::Implementation : public IECore::RefCounted
 
 				if( p->type == GL_SAMPLER_2D )
 				{
-					ConstTexturePtr texture = 0;
+					ConstTexturePtr texture = nullptr;
 					if(
 						it->second->typeId() == (IECore::TypeId)IECoreImage::ImagePrimitiveTypeId ||
 						it->second->typeId() == IECore::CompoundDataTypeId ||

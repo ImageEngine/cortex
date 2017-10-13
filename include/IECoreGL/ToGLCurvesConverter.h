@@ -60,7 +60,7 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCurvesConverter, ToGLCurvesConverterTypeId, ToGLConverter );
 
-		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = 0 );
+		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = nullptr );
 		virtual ~ToGLCurvesConverter();
 
 	protected :

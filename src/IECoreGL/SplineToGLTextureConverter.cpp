@@ -72,7 +72,7 @@ SplineToGLTextureConverter::~SplineToGLTextureConverter()
 IECore::RunTimeTypedPtr SplineToGLTextureConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
 
-	TexturePtr t = 0;
+	TexturePtr t = nullptr;
 	IECoreImage::SplineToImagePtr op = new IECoreImage::SplineToImage();
 	op->splineParameter()->setValue( boost::const_pointer_cast< IECore::Object >(src) );
 	op->resolutionParameter()->setValue( m_resolutionParameter->getValue() );

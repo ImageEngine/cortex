@@ -60,7 +60,7 @@ class IECOREGL_API ToGLMeshConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
 
-		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = 0 );
+		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = nullptr );
 		virtual ~ToGLMeshConverter();
 
 	protected :

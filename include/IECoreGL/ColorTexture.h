@@ -56,7 +56,7 @@ class IECOREGL_API ColorTexture : public Texture
 		/// Constructs a new ColorTexture. All channels must be of the same type, and must
 		/// be some form of numeric VectorData.
 		ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
-			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a = 0 );
+			const IECore::Data *g, const IECore::Data *b, const IECore::Data *a = nullptr );
 
 		/// Creates a ColorTexture from the specified image. Accepts channels with names
 		/// "r", "R", "red", "g", "G", "green", "b", "B", "blue", "a", "A" and "alpha".

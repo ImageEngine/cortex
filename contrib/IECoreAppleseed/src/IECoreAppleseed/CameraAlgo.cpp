@@ -64,7 +64,7 @@ renderer::Camera *convert( IECore::Camera *camera )
 	cameraParams.insert( "shutter_close_time", shutter.y );
 
 	asr::CameraFactoryRegistrar cameraFactories;
-	const asr::ICameraFactory *cameraFactory = 0;
+	const asr::ICameraFactory *cameraFactory = nullptr;
 
 	const std::string &projection = cameraCopy->parametersData()->member<StringData>( "projection", true )->readable();
 

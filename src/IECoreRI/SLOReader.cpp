@@ -123,7 +123,7 @@ ObjectPtr SLOReader::doOperation( const CompoundObject * operands )
 	int numArgs = Slo_GetNArgs();
 	for( int i=1; i<=numArgs; i++ )
 	{
-		DataPtr data = 0;
+		DataPtr data = nullptr;
 
 		SLO_VISSYMDEF *arg = Slo_GetArgById( i );
 

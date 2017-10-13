@@ -120,7 +120,7 @@ void ImmediateRendererImplementation::worldEnd()
 	}
 
 	delete m_frameBufferBinding;
-	m_frameBufferBinding = 0;
+	m_frameBufferBinding = nullptr;
 }
 
 void ImmediateRendererImplementation::transformBegin()
@@ -193,7 +193,7 @@ IECore::Data *ImmediateRendererImplementation::getUserAttribute( const IECore::I
 	{
 		return attrIt->second.get();
 	}
-	return 0;
+	return nullptr;
 }
 
 void ImmediateRendererImplementation::addPrimitive( ConstPrimitivePtr primitive )

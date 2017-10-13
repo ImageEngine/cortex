@@ -86,7 +86,7 @@ struct LocalData
 			// just causes aborts.
 			msg( Msg::Error, "ieOutputDriver:driverClose", e.what() );
 		}
-		displayDriver = NULL;
+		displayDriver = nullptr;
 	}
 
 };
@@ -96,8 +96,8 @@ void driverParameters( AtList *params, AtMetaDataStore *metaData )
 	AiParameterSTR( "driverType", "" );
 
 	// we need to specify this metadata to keep MtoA happy.
-	AiMetaDataSetStr( metaData, 0, "maya.attr_prefix", "" );
-	AiMetaDataSetStr( metaData, 0, "maya.translator", "ie" );
+	AiMetaDataSetStr( metaData, nullptr, "maya.attr_prefix", "" );
+	AiMetaDataSetStr( metaData, nullptr, "maya.translator", "ie" );
 }
 
 void driverInitialize( AtNode *node, AtParamValue *parameters )
@@ -126,7 +126,7 @@ bool driverSupportsPixelType( const AtNode *node, AtByte pixelType )
 
 const char **driverExtension()
 {
-   return 0;
+   return nullptr;
 }
 
 void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displayWindow, AtBBox2 dataWindow, int bucketSize )
@@ -139,9 +139,9 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	CompoundDataPtr parameters = new CompoundData();
 	ParameterAlgo::getParameters( node, parameters->writable() );
 
-	const char *name = 0;
+	const char *name = nullptr;
 	int pixelType = 0;
-	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, 0 ) )
+	while( AiOutputIteratorGetNext( iterator, &name, &pixelType, nullptr ) )
 	{
 		std::string namePrefix;
 		if( strcmp( name, "RGB" ) && strcmp( name, "RGBA" ) )
@@ -266,7 +266,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 	{
 		// Data already has the layout we need.
 		const void *bucketData;
-		AiOutputIteratorGetNext( iterator, NULL, NULL, &bucketData );
+		AiOutputIteratorGetNext( iterator, nullptr, nullptr, &bucketData );
 		imageData = (float *)bucketData;
 	}
 	else
@@ -278,7 +278,7 @@ void driverWriteBucket( AtNode *node, struct AtOutputIterator *iterator, struct 
 		int pixelType = 0;
 		const void *bucketData;
 		int outChannelOffset = 0;
-		while( AiOutputIteratorGetNext( iterator, 0, &pixelType, &bucketData ) )
+		while( AiOutputIteratorGetNext( iterator, nullptr, &pixelType, &bucketData ) )
 		{
 			int numChannels = 0;
 			switch( pixelType )

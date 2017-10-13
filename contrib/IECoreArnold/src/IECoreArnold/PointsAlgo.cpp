@@ -85,7 +85,7 @@ AtNode *convertCommon( const IECore::PointsPrimitive *points )
 
 	// arbitrary user parameters
 
-	const char *ignore[] = { "P", "width", "radius", 0 };
+	const char *ignore[] = { "P", "width", "radius", nullptr };
 	ShapeAlgo::convertPrimitiveVariables( points, result, ignore );
 
 	return result;
