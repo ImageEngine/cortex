@@ -65,7 +65,7 @@ class IECORE_API MeshPrimitive : public Primitive
 		/// Construct a MeshPrimitive. The number of faces specified by verticesPerFace->readable()->size().
 		/// Copies of the IntVectorData objects are taken rather than references to the initial data.
 		MeshPrimitive( ConstIntVectorDataPtr verticesPerFace, ConstIntVectorDataPtr vertexIds,
-			const std::string &interpolation = "linear", V3fVectorDataPtr p = 0 );
+			const std::string &interpolation = "linear", V3fVectorDataPtr p = nullptr );
 
 		//! @name Topology access
 		/// These functions allow access to get and set topology after construction.

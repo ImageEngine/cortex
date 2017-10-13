@@ -208,7 +208,7 @@ static InternedString g_zero((int64_t)0);
 const InternedString &InternedString::numberString( int64_t number )
 {
 	typedef tbb::concurrent_hash_map< int64_t, InternedString > NumbersMap;
-	static NumbersMap *g_numbers = 0;
+	static NumbersMap *g_numbers = nullptr;
 	if ( !g_numbers )
 	{
 		g_numbers = new NumbersMap;

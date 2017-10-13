@@ -139,7 +139,7 @@ Imath::Box3f PointsPrimitive::bound() const
 	// sizes.
 
 	size_t count = getNumPoints();
-	const V3f *p = NULL;
+	const V3f *p = nullptr;
 	if( const V3fVectorData *pData = variableData<V3fVectorData>( "P" ) )
 	{
 		p = &pData->readable().front();
@@ -167,7 +167,7 @@ Imath::Box3f PointsPrimitive::bound() const
 		count = min( count, widthData->readable().size() );
 	}
 
-	const float *aspectRatio = NULL;
+	const float *aspectRatio = nullptr;
 	size_t aspectRatioStep = 0;
 	if( const StringData *typeData = variableData<StringData>( "type" ) )
 	{

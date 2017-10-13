@@ -48,7 +48,7 @@ namespace IECorePython
 {
 
 template<typename T>
-static typename TypedData<vector<typename T::Value> >::Ptr noiseVector( const T &n, typename TypedData<vector<typename T::Point> >::Ptr p, typename TypedData<vector<typename T::Value> >::Ptr v = 0 )
+static typename TypedData<vector<typename T::Value> >::Ptr noiseVector( const T &n, typename TypedData<vector<typename T::Point> >::Ptr p, typename TypedData<vector<typename T::Value> >::Ptr v = nullptr )
 {
 	if( !v )
 	{

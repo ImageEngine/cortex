@@ -93,7 +93,7 @@ struct TriangleDataRemap
 {
 	typedef void ReturnType;
 
-	TriangleDataRemap( const std::vector<int> &indices ) : m_other(0), m_indices( indices )
+	TriangleDataRemap( const std::vector<int> &indices ) : m_other(nullptr), m_indices( indices )
 	{
 	}
 

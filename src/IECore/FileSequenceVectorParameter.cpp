@@ -111,7 +111,7 @@ bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *
 			return false;
 		}
 
-		FileSequencePtr fileSequence = 0;
+		FileSequencePtr fileSequence = nullptr;
 		try
 		{
 			fileSequence = parseFileSequence( *it );
@@ -147,7 +147,7 @@ bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *
 
 		if ( mustExist() )
 		{
-			FileSequencePtr s = 0;
+			FileSequencePtr s = nullptr;
 			ls( fileSequence->getFileName(), s );
 
 			if ( !s )
@@ -161,7 +161,7 @@ bool FileSequenceVectorParameter::valueValid( const Object *value, std::string *
 		}
 		else if ( mustNotExist() )
 		{
-			FileSequencePtr s = 0;
+			FileSequencePtr s = nullptr;
 			ls( fileSequence->getFileName(), s );
 
 			if ( s )

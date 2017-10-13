@@ -52,7 +52,7 @@ class IECORE_API CurvesPrimitive : public Primitive
 
 		CurvesPrimitive();
 		/// Copies of vertsPerCurve and p are taken.
-		CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis=CubicBasisf::linear(), bool periodic = false, ConstV3fVectorDataPtr p = 0 );
+		CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis=CubicBasisf::linear(), bool periodic = false, ConstV3fVectorDataPtr p = nullptr );
 		virtual ~CurvesPrimitive();
 
 		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );

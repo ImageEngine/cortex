@@ -85,7 +85,7 @@ CircularIterator<Iterator, Container>::CircularIterator( BaseIterator begin, Bas
 
 template<typename Iterator, typename Container>
 CircularIterator<Iterator, Container>::CircularIterator( BaseIterator begin, BaseIterator end, BaseIterator position )
-	:	m_container( 0 ), m_begin( begin ), m_end( end ), m_it( position )
+	:	m_container( nullptr ), m_begin( begin ), m_end( end ), m_it( position )
 {
 }
 

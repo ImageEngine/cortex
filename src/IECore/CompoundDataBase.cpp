@@ -144,7 +144,7 @@ void CompoundDataBase::load( LoadContextPtr context )
 {
 	Data::load( context );
 	unsigned int v = 0;
-	ConstIndexedIOPtr container = 0;
+	ConstIndexedIOPtr container = nullptr;
 
 	try
 	{

@@ -75,7 +75,7 @@ class CompoundDataFromPythonDict
 		{
 			if ( !PyDict_Check( obj_ptr ) )
 			{
-				return 0;
+				return nullptr;
 			}
 			return obj_ptr;
 		}
@@ -215,7 +215,7 @@ class CompoundDataFunctions
 			PyErr_SetString( PyExc_SyntaxError, "Binary operator not supported for this class." );
 			throw_error_already_set();
 			assert( false );
-			return 0;
+			return nullptr;
 		}
 
 		/// binding for map clear method

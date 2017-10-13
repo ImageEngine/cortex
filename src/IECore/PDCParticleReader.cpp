@@ -58,12 +58,12 @@ IE_CORE_DEFINERUNTIMETYPED( PDCParticleReader );
 const Reader::ReaderDescription<PDCParticleReader> PDCParticleReader::m_readerDescription( "pdc" );
 
 PDCParticleReader::PDCParticleReader( )
-	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
+	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( nullptr ), m_idAttribute( nullptr )
 {
 }
 
 PDCParticleReader::PDCParticleReader( const std::string &fileName )
-	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( 0 ), m_idAttribute( 0 )
+	:	ParticleReader( "Reads Maya .pdc format particle caches" ), m_iStream( nullptr ), m_idAttribute( nullptr )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }
@@ -203,7 +203,7 @@ bool PDCParticleReader::open()
 
 		m_header.valid = m_iStream->good();
 		m_streamFileName = fileName();
-		m_idAttribute = 0;
+		m_idAttribute = nullptr;
 	}
 	return m_iStream->good() && m_header.valid;
 }
@@ -250,13 +250,13 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 {
 	if( !open() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	map<string, Record>::const_iterator it = m_header.attributes.find( name );
 	if( it==m_header.attributes.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	const Data *idAttr = idAttribute();
@@ -265,7 +265,7 @@ DataPtr PDCParticleReader::readAttribute( const std::string &name )
 		msg( Msg::Warning, "PDCParticleReader::filterAttr", format( "Percentage filtering requested but file \"%s\" contains no particle Id attribute." ) % fileName() );
 	}
 
-	DataPtr result = 0;
+	DataPtr result = nullptr;
 	switch( it->second.type )
 	{
 		case Integer :
@@ -374,7 +374,7 @@ const Data * PDCParticleReader::idAttribute()
 {
 	if( !open() )
 	{
-		return 0;
+		return nullptr;
 	}
 	if( !m_idAttribute )
 	{

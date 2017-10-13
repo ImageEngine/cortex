@@ -148,7 +148,7 @@ ObjectPtr PointDensitiesOp::doOperation( const CompoundObject * operands )
 	const double multiplier = m_multiplierParameter->getNumericValue();
 
 	const Object * points = pointParameter()->getValue();
-	ObjectPtr result = 0;
+	ObjectPtr result = nullptr;
 	switch( points->typeId() )
 	{
 		case V3fVectorDataTypeId :

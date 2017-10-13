@@ -61,11 +61,11 @@ class IECORE_API FileSequenceVectorParameter : public PathVectorParameter
 		IE_CORE_DECLARERUNTIMETYPED( FileSequenceVectorParameter, PathVectorParameter );
 
 		FileSequenceVectorParameter( const std::string &name, const std::string &description, const std::vector< std::string > &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-			const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
+			const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr,
 			const ExtensionList &extensions = ExtensionList() );
 
 		FileSequenceVectorParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-			const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
+			const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr,
 			const ExtensionList &extensions = ExtensionList() );
 
 		virtual ~FileSequenceVectorParameter();
@@ -76,7 +76,7 @@ class IECORE_API FileSequenceVectorParameter : public PathVectorParameter
 		/// Returns true only if the value is StringVectorData and each string matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequences exist or don't exist based on the CheckType passed to
  		/// the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 		void setFileSequenceValues( const std::vector< FileSequencePtr > &sequences );
 

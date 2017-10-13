@@ -53,7 +53,7 @@ class IECORE_API BinaryFrameList : public ReorderedFrameList
 
 		IE_CORE_DECLARERUNTIMETYPED( BinaryFrameList, ReorderedFrameList );
 
-		BinaryFrameList( FrameListPtr frameList = 0 );
+		BinaryFrameList( FrameListPtr frameList = nullptr );
 
 		virtual ~BinaryFrameList();
 

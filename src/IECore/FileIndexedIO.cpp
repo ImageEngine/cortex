@@ -165,7 +165,7 @@ FileIndexedIO::StreamFile::~StreamFile()
 		{
 			/// Close the file before truncation
 			delete m_stream;
-			m_stream = 0;
+			m_stream = nullptr;
 
 			/// Truncate the file at the end of the index
 			fs::resize_file( m_filename, m_endPosition );

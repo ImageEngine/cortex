@@ -51,7 +51,7 @@ class IECORE_API CoordinateSystem : public StateRenderable
 	public:
 
 		CoordinateSystem();
-		CoordinateSystem( const std::string &name, TransformPtr transform=0 );
+		CoordinateSystem( const std::string &name, TransformPtr transform=nullptr );
 		virtual ~CoordinateSystem();
 
 		IE_CORE_DECLAREOBJECT( CoordinateSystem, StateRenderable );

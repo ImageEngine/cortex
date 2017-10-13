@@ -96,7 +96,7 @@ void CameraController::setCamera( CameraPtr camera )
 	}
 	else
 	{
-		m_data->fov = 0;
+		m_data->fov = nullptr;
 	}
 
 	TransformPtr transform = m_data->camera->getTransform();

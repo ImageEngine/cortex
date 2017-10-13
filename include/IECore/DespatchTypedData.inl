@@ -515,7 +515,7 @@ struct TypedDataAddress
 		ReturnType operator()( const T *data ) const
 		{
 			BOOST_STATIC_ASSERT( sizeof(T) == 0 );
-			return 0;
+			return nullptr;
 		}
 	};
  	

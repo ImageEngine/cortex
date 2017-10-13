@@ -129,7 +129,7 @@ class FileSequenceParameterWrapper : public ParameterWrapper<FileSequenceParamet
 
 	public :
 
-		FileSequenceParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = 0, object extensions = list(), size_t minSequenceSize = 2 )
+		FileSequenceParameterWrapper( PyObject *self, const std::string &n, const std::string &d, object dv = object( std::string("") ), bool allowEmptyString = true, FileSequenceParameter::CheckType check = FileSequenceParameter::DontCare, const object &p = boost::python::tuple(), bool po = false, CompoundObjectPtr ud = nullptr, object extensions = list(), size_t minSequenceSize = 2 )
 			: ParameterWrapper<FileSequenceParameter>( self, n, d, makeDefault( dv ), allowEmptyString, check, parameterPresets<FileSequenceParameter::PresetsContainer>( p ), po, ud, makeExtensions( extensions ), minSequenceSize )
 		{
 		};
@@ -179,7 +179,7 @@ void bindFileSequenceParameter()
 					arg( "check" ) = FileSequenceParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 ),
+					arg( "userData" ) = CompoundObject::Ptr( nullptr ),
 					arg( "extensions" ) = list(),
 					arg( "minSequenceSize" ) = 2
 				)

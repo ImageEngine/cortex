@@ -348,7 +348,7 @@ class Parallel
 		{
 
 			Handle()
-				:	m_item( NULL ), m_writable( false )
+				:	m_item( nullptr ), m_writable( false )
 			{
 			}
 
@@ -372,7 +372,7 @@ class Parallel
 				if( m_item )
 				{
 					m_itemLock.release();
-					m_item = NULL;
+					m_item = nullptr;
 				}
 			}
 

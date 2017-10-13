@@ -52,7 +52,7 @@ IE_CORE_DEFINERUNTIMETYPED( Parameter );
 Parameter::Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
 	const PresetsContainer &presets, bool presetsOnly, ConstCompoundObjectPtr userData )
 	:	m_name( name ), m_description( description ), m_defaultValue( defaultValue ), m_presetsOnly( presetsOnly ),
-		m_userData( userData ? userData->copy() : 0 )
+		m_userData( userData ? userData->copy() : nullptr )
 {
 	if ( !defaultValue )
 	{

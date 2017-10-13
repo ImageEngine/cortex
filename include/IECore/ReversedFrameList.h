@@ -53,7 +53,7 @@ class IECORE_API ReversedFrameList : public ReorderedFrameList
 
 		IE_CORE_DECLARERUNTIMETYPED( ReversedFrameList, ReorderedFrameList );
 
-		ReversedFrameList( FrameListPtr frameList = 0 );
+		ReversedFrameList( FrameListPtr frameList = nullptr );
 
 		virtual ~ReversedFrameList();
 

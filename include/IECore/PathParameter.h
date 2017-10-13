@@ -57,7 +57,7 @@ class IECORE_API PathParameter : public StringParameter
 
 		PathParameter( const std::string &name, const std::string &description,
 			const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
-			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		bool allowEmptyString() const;
 		bool mustExist() const;
@@ -69,7 +69,7 @@ class IECORE_API PathParameter : public StringParameter
 		/// * The value does not form a valid path name.
 		/// * mustExist() is true and the file/dir doesn't exist.
 		/// * mustNotExist() is true and the file/dir exists.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 	private :
 

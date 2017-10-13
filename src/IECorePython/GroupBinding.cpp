@@ -102,7 +102,7 @@ static DataPtr getAttribute( Group &g, const std::string &name )
 	{
 		return d->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 

@@ -73,7 +73,7 @@ void ObjectVector::copyFrom( const Object *other, CopyContext *context )
 	{
 		if( !tOther->m_members[i] )
 		{
-			m_members[i] = 0;
+			m_members[i] = nullptr;
 		}
 		else
 		{
@@ -114,7 +114,7 @@ void ObjectVector::load( LoadContextPtr context )
 	container->read( g_sizeEntry, size );
 
 	m_members.resize( size );
-	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)0 );
+	std::fill( m_members.begin(), m_members.end(), (IECore::Object*)nullptr );
 
 	ConstIndexedIOPtr ioMembers = container->subdirectory( g_membersEntry );
 

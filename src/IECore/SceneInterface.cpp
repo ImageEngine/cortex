@@ -98,7 +98,7 @@ std::vector<std::string> SceneInterface::supportedExtensions( IndexedIO::OpenMod
 
 SceneInterfacePtr SceneInterface::create( const std::string &path, IndexedIO::OpenMode mode )
 {
-	SceneInterfacePtr result = 0;
+	SceneInterfacePtr result = nullptr;
 
 	std::string extension = boost::filesystem::extension(path);
 	IndexedIO::OpenModeFlags openMode = IndexedIO::OpenModeFlags( mode & (IndexedIO::Read|IndexedIO::Write|IndexedIO::Append) );

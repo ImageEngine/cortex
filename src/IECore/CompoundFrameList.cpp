@@ -170,7 +170,7 @@ FrameListPtr CompoundFrameList::parse( const std::string &frameList )
 				FrameListPtr f = FrameList::parse( *it );
 				if ( !f )
 				{
-					return 0;
+					return nullptr;
 				}
 
 				frameLists.push_back( f );
@@ -180,9 +180,9 @@ FrameListPtr CompoundFrameList::parse( const std::string &frameList )
 		}
 		catch ( Exception & )
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 
-	return 0;
+	return nullptr;
 }

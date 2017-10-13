@@ -57,7 +57,7 @@ static MeshPrimitivePtr mesh( Font &f, char c )
 	{
 		return m->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 } // namespace

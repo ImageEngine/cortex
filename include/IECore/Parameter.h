@@ -65,7 +65,7 @@ class IECORE_API Parameter : public RunTimeTyped
 		/// Creates a new Parameter. If presetsOnly is true then the parameter acts somewhat
 		/// like an enum and only accepts values if they are present in the presets map.
 		Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
-			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		virtual ~Parameter();
 
@@ -112,9 +112,9 @@ class IECORE_API Parameter : public RunTimeTyped
 		/// it returns false. The default implementation returns false only if
 		/// presetsOnly() is true and value is not present in
 		/// the presets() map, or if value is a NullObject instance.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 		/// Calls valueValid( getValue(), reason )
-		bool valueValid( std::string *reason = 0 ) const;
+		bool valueValid( std::string *reason = nullptr ) const;
 		/// Throws an Exception if valueValid( getValue() ) is false, otherwise
 		/// does nothing.
 		void validate() const;

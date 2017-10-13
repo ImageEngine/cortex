@@ -59,7 +59,7 @@ class IECORE_API FileSequenceParameter : public PathParameter
 		/// Constructs a FileSequenceParameter
 		/// \param minSequenceSize Specifies how many files must exist on the file sequence in order to validate the parameter (only used if check type is MustExist).
 		FileSequenceParameter( const std::string &name, const std::string &description,	const std::string &defaultValue = "", bool allowEmptyString = true, CheckType check = PathParameter::DontCare,
-			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0,
+			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr,
 			const ExtensionList &extensions = ExtensionList(), size_t minSequenceSize = 2 );
 
 		virtual ~FileSequenceParameter();
@@ -73,7 +73,7 @@ class IECORE_API FileSequenceParameter : public PathParameter
 		/// Returns true only if the value is StringData and matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
  		/// the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 		/// Sets the internal StringData with the textual representation of the given file sequence object.
 		void setFileSequenceValue( ConstFileSequencePtr fileSequence );

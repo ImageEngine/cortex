@@ -45,13 +45,13 @@ boost::intrusive_ptr<T> runTimeCast( const boost::intrusive_ptr<S> &src )
 {
 	if( !src )
 	{
-		return 0;
+		return nullptr;
 	}
 	if( src->isInstanceOf( T::staticTypeId() ) )
 	{
 		return boost::static_pointer_cast<T>( src );
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T, typename S>
@@ -59,13 +59,13 @@ T *runTimeCast( S *src )
 {
 	if( !src )
 	{
-		return 0;
+		return nullptr;
 	}
 	if( src->isInstanceOf( T::staticTypeId() ) )
 	{
 		return static_cast<T *>( src );
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T, typename S>

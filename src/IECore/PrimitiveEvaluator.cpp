@@ -69,7 +69,7 @@ PrimitiveEvaluatorPtr PrimitiveEvaluator::create( ConstPrimitivePtr primitive )
 	CreatorMap::const_iterator it = createFns.find( primitive->typeId() );
 	if (it == createFns.end())
 	{
-		return 0;
+		return nullptr;
 	}
 
 	return (it->second)(primitive);

@@ -74,7 +74,7 @@ class CapturingRenderer::Implementation
 	public :
 
 		Implementation()
-			:	m_mainContext( 0 )
+			:	m_mainContext( nullptr )
 		{
 			m_topLevelProceduralParent = new( tbb::task::allocate_root() ) tbb::empty_task;
 		}
@@ -101,7 +101,7 @@ class CapturingRenderer::Implementation
 			std::map<std::string, ConstDataPtr>::const_iterator it = m_options.find( name );
 			if( it==m_options.end() )
 			{
-				return 0;
+				return nullptr;
 			}
 			return it->second;
 		}
@@ -115,7 +115,7 @@ class CapturingRenderer::Implementation
 				return;
 			}
 			contextStack.push( new Context );
-			m_world = 0;
+			m_world = nullptr;
 			m_mainContext = contextStack.top().get();
 			m_topLevelProceduralParent->set_ref_count( 1 ); // for the wait_for_all() in worldEnd()
 		}
@@ -139,7 +139,7 @@ class CapturingRenderer::Implementation
 			collapseGroups( contextStack.top()->stack.back() );
 			m_world = contextStack.top()->stack.back().group;
 			contextStack.pop();
-			m_mainContext = 0;
+			m_mainContext = nullptr;
 		}
 
 		void attributeBegin()
@@ -240,7 +240,7 @@ class CapturingRenderer::Implementation
 			ContextPtr context = currentContext();
 			if( !context )
 			{
-				return 0;
+				return nullptr;
 			}
 
 			const Context::StateStack &stack = context->stack;
@@ -439,7 +439,7 @@ class CapturingRenderer::Implementation
 
 					contextStack.pop();
 
-					return 0;
+					return nullptr;
 				}
 
 			private :
@@ -464,7 +464,7 @@ class CapturingRenderer::Implementation
 			if( stack.size() == 0 )
 			{
 				msg( Msg::Error, "CapturingRenderer::Implementation::currentContext", "No context for this thread." );
-				return 0;
+				return nullptr;
 			}
 			return stack.top();
 		}
@@ -896,7 +896,7 @@ void CapturingRenderer::instance( const std::string &name )
 DataPtr CapturingRenderer::command( const std::string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "CapturingRenderer::command", "Not implemented" );
-	return 0;
+	return nullptr;
 }
 
 void CapturingRenderer::editBegin( const std::string &editType, const CompoundDataMap &parameters )

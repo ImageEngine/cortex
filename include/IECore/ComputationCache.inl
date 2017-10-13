@@ -85,7 +85,7 @@ size_t ComputationCache<T>::cachedComputations() const
 template< typename T >
 ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::MissingBehaviour missingBehaviour )
 {
-	ConstObjectPtr obj(0);
+	ConstObjectPtr obj(nullptr);
 	MurmurHash computationHash = m_hashFn(args);
 	MurmurHash objectHash = m_cache.get(computationHash);
 
@@ -98,7 +98,7 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 		}
 		else if ( missingBehaviour == NullIfMissing )
 		{
-			return 0;
+			return nullptr;
 		}
 		obj = m_computeFn(args);
 		if ( obj )
@@ -119,7 +119,7 @@ ConstObjectPtr ComputationCache<T>::get( const T &args, ComputationCache::Missin
 			}
 			else if ( missingBehaviour == NullIfMissing )
 			{
-				return 0;
+				return nullptr;
 			}
 			obj = m_computeFn(args);
 			if ( obj )

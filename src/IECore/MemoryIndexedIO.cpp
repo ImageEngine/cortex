@@ -128,7 +128,7 @@ MemoryIndexedIO::StreamFile::~StreamFile()
 
 MemoryIndexedIO::MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode)
 {
-	const char *bufPtr = 0;
+	const char *bufPtr = nullptr;
 	size_t size = 0;
 	if ( buf )
 	{

@@ -65,7 +65,7 @@ T *CompoundParameter::parameter( const std::string &name )
 	{
 		return runTimeCast<T>( it->second.get() );
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T>
@@ -76,7 +76,7 @@ const T *CompoundParameter::parameter( const std::string &name ) const
 	{
 		return runTimeCast<const T>( it->second.get() );
 	}
-	return 0;
+	return nullptr;
 }
 
 }; // namespace IECore

@@ -43,7 +43,7 @@ size_t WrapperGarbageCollector::g_allocThreshold = 50;
 WrapperGarbageCollector::InstanceMap WrapperGarbageCollector::g_refCountedToPyObject;
 
 WrapperGarbageCollector::WrapperGarbageCollector( PyObject *self, IECore::RefCounted *wrapped, PyTypeObject *wrappedType )
-	:	m_pyObject( NULL )
+	:	m_pyObject( nullptr )
 {
 	assert( self );
 	assert( wrapped );
@@ -120,7 +120,7 @@ PyObject *WrapperGarbageCollector::pyObject( IECore::RefCounted *refCountedObjec
 	InstanceMap::const_iterator it = g_refCountedToPyObject.find( refCountedObject );
 	if( it==g_refCountedToPyObject.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	return it->second;
 }

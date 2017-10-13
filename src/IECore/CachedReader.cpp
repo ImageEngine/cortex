@@ -108,7 +108,7 @@ struct CachedReader::MemberData
 				}
 			}
 
-			ObjectPtr result(0);
+			ObjectPtr result(nullptr);
 			try
 			{
 				path resolvedPath = data->m_searchPaths.find( filePath );
@@ -176,7 +176,7 @@ struct CachedReader::MemberData
 //////////////////////////////////////////////////////////////////////////
 
 CachedReader::CachedReader( const SearchPath &paths, ObjectPoolPtr objectPool  )
-	:	m_data( new MemberData( paths, 0, objectPool ) )
+	:	m_data( new MemberData( paths, nullptr, objectPool ) )
 {
 }
 
@@ -243,7 +243,7 @@ ObjectPool *CachedReader::objectPool() const
 
 CachedReader *CachedReader::defaultCachedReader()
 {
-	static CachedReaderPtr c = 0;
+	static CachedReaderPtr c = nullptr;
 	if( !c )
 	{
 		const char *sp = getenv( "IECORE_CACHEDREADER_PATHS" );

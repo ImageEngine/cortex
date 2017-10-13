@@ -147,8 +147,8 @@ FrameListPtr ExclusionFrameList::parse( const std::string &frameList )
 		}
 		catch ( Exception & )
 		{
-			return 0;
+			return nullptr;
 		}
 	}
-	return 0;
+	return nullptr;
 }

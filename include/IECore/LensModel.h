@@ -157,7 +157,7 @@ class IECORE_API LensModel : public Parameterised
 
 			private:
 				/// Returns a new instance of the LensModel class.
-				static LensModelPtr creator( ConstCompoundObjectPtr data = 0 );
+				static LensModelPtr creator( ConstCompoundObjectPtr data = nullptr );
 		};
 
 	private:

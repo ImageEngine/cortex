@@ -59,7 +59,7 @@ static ObjectPtr read( CachedReader &r, const std::string &f )
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 

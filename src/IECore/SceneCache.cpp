@@ -292,7 +292,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 		IE_CORE_DECLAREPTR( ReaderImplementation )
 
-		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sharedData(0), m_boundSampleTimes(0), m_transformSampleTimes(0), m_objectSampleTimes(0)
+		ReaderImplementation( IndexedIOPtr io, SceneCache::Implementation *parent = nullptr) : SceneCache::Implementation( io ), m_parent(static_cast< ReaderImplementation* >( parent )), m_sharedData(nullptr), m_boundSampleTimes(nullptr), m_transformSampleTimes(nullptr), m_objectSampleTimes(nullptr)
 		{
 			if ( m_parent )
 			{
@@ -480,7 +480,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 
 			lock.upgrade_to_writer();
 
-			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< IndexedIO::EntryID, SampleTimes* >( name, NULL ) );
+			std::pair< AttributeSamplesMap::iterator, bool > it = m_attributeSampleTimes.insert( std::pair< IndexedIO::EntryID, SampleTimes* >( name, nullptr ) );
 			if ( it.second )
 			{
 				it.first->second = restoreSampleTimes( attributesEntry, false, &name );
@@ -596,12 +596,12 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			IndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, (IndexedIO::MissingBehaviour)missingBehaviour );
 			if ( !children )
 			{
-				return 0;
+				return nullptr;
 			}
 			IndexedIOPtr childIO = children->subdirectory( name, (IndexedIO::MissingBehaviour)missingBehaviour );
 			if ( !childIO )
 			{
-				return 0;
+				return nullptr;
 			}
 			return new ReaderImplementation( childIO, this );
 		}
@@ -860,7 +860,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			return m_indexedIO->parentDirectory()->subdirectory( sampleTimesEntry );
 		}
 
-		const SampleTimes *restoreSampleTimes( const IndexedIO::EntryID &childName, bool throwExceptions = false, const IndexedIO::EntryID *attribName = 0 ) const
+		const SampleTimes *restoreSampleTimes( const IndexedIO::EntryID &childName, bool throwExceptions = false, const IndexedIO::EntryID *attribName = nullptr ) const
 		{
 			IndexedIOPtr location = m_indexedIO->subdirectory( childName, IndexedIO::NullIfMissing );
 			if ( location && attribName )
@@ -873,7 +873,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 				{
 					throw Exception( (boost::format("No %s samples available") % childName.value()).str() );
 				}
-				return 0;
+				return nullptr;
 			}
 
 			uint64_t sampleTimesIndex = 0;
@@ -1032,7 +1032,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 
 		IE_CORE_DECLAREPTR( WriterImplementation )
 
-		WriterImplementation( IndexedIOPtr io, Implementation *parent = 0) : SceneCache::Implementation( io ), m_parent(static_cast< WriterImplementation* >( parent ))
+		WriterImplementation( IndexedIOPtr io, Implementation *parent = nullptr) : SceneCache::Implementation( io ), m_parent(static_cast< WriterImplementation* >( parent ))
 		{
 			if ( m_parent )
 			{
@@ -1179,7 +1179,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 				return;
 			}
 			writable();
-			IndexedIOPtr io(0);
+			IndexedIOPtr io(nullptr);
 			if ( tagLocation == SceneInterface::LocalTag )
 			{
 				io = m_indexedIO->subdirectory( localTagsEntry, IndexedIO::CreateIfMissing );
@@ -1313,12 +1313,12 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			IndexedIOPtr children = m_indexedIO->subdirectory( childrenEntry, (IndexedIO::MissingBehaviour)missingBehaviour );
 			if ( !children )
 			{
-				return 0;
+				return nullptr;
 			}
 			IndexedIOPtr childIO = children->subdirectory( name, (IndexedIO::MissingBehaviour)missingBehaviour );
 			if ( !childIO )
 			{
-				return 0;
+				return nullptr;
 			}
 			WriterImplementationPtr result = new WriterImplementation( childIO, this );
 			this->m_children[ name ] = result;
@@ -1776,7 +1776,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 					SharedSceneInterfaces::erase( static_cast< FileIndexedIO * >( m_indexedIO.get() )->fileName() );
 				}
 			}
-			m_sampleTimesMap = 0;
+			m_sampleTimesMap = nullptr;
 		}
 
 		/// This functions transforms the bounding boxes with the animated transforms and also scales the bounding boxes in a way that it
@@ -1806,7 +1806,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			double previousTransformTime = *ttIt;
 			Imath::M44d previousTransformMatrix = dataToMatrix( previousTransform.get() );
 			Imath::Box3d previousTransformedBox;
-			TransformSample nextTransform = 0;
+			TransformSample nextTransform = nullptr;
 			ttIt++;
 			tsIt++;
 
@@ -2232,7 +2232,7 @@ SceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingBehavi
 
 	if ( !impl )
 	{
-        	return 0;
+        	return nullptr;
 	}
 
 	return duplicate( impl );
@@ -2244,7 +2244,7 @@ ConstSceneInterfacePtr SceneCache::child( const Name &name, SceneCache::MissingB
 	ImplementationPtr impl = reader->child( name, missingBehaviour );
 	if ( !impl )
 	{
-        	return 0;
+        	return nullptr;
 	}
 
 	return duplicate( impl );
@@ -2268,7 +2268,7 @@ SceneInterfacePtr SceneCache::scene( const Path &path, MissingBehaviour missingB
 	ImplementationPtr impl = reader->scene( path, missingBehaviour );
 	if ( !impl )
 	{
-        	return 0;
+        	return nullptr;
 	}
 
 	return duplicate( impl );
@@ -2280,7 +2280,7 @@ ConstSceneInterfacePtr SceneCache::scene( const Path &path, SceneCache::MissingB
 	ImplementationPtr impl = reader->scene( path, missingBehaviour );
 	if ( !impl )
 	{
-        	return 0;
+        	return nullptr;
 	}
 
 	return duplicate( impl );
@@ -2301,5 +2301,5 @@ SceneCachePtr SceneCache::duplicate( ImplementationPtr& impl ) const
 
 bool SceneCache::readOnly() const
 {
-	return dynamic_cast< const ReaderImplementation* >( m_implementation.get() ) != NULL;
+	return dynamic_cast< const ReaderImplementation* >( m_implementation.get() ) != nullptr;
 }

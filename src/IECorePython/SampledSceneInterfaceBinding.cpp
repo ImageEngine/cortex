@@ -82,7 +82,7 @@ DataPtr readTransformAtSample( SampledSceneInterface &m, size_t sampleIndex )
 	{
 		return d->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 ObjectPtr readAttributeAtSample( SampledSceneInterface &m, const SceneInterface::Name &name, size_t sampleIndex )
@@ -92,7 +92,7 @@ ObjectPtr readAttributeAtSample( SampledSceneInterface &m, const SceneInterface:
 	{
 		return o->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 ObjectPtr readObjectAtSample( SampledSceneInterface &m, size_t sampleIndex )
@@ -102,7 +102,7 @@ ObjectPtr readObjectAtSample( SampledSceneInterface &m, size_t sampleIndex )
 	{
 		return o->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 void bindSampledSceneInterface()

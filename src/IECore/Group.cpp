@@ -56,7 +56,7 @@ const unsigned int Group::m_ioVersion = 0;
 IE_CORE_DEFINEOBJECTTYPEDESCRIPTION( Group );
 
 Group::Group()
-	:	m_transform( 0 ), m_parent( 0 )
+	:	m_transform( nullptr ), m_parent( nullptr )
 {
 }
 
@@ -152,7 +152,7 @@ const Data *Group::getAttribute( const std::string &name ) const
 		return m_parent->getAttribute( name );
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void Group::setAttribute( const std::string &name, ConstDataPtr value )
@@ -215,7 +215,7 @@ void Group::removeChild( VisibleRenderablePtr child )
 	GroupPtr gChild = runTimeCast<Group>( child );
 	if( gChild )
 	{
-		gChild->m_parent = 0;
+		gChild->m_parent = nullptr;
 	}
 
 	m_children.erase( it );
@@ -254,7 +254,7 @@ void Group::copyFrom( const Object *other, CopyContext *context )
 	}
 	else
 	{
-		m_transform = 0;
+		m_transform = nullptr;
 	}
 	clearState();
 	for( StateContainer::const_iterator it=tOther->state().begin(); it!=tOther->state().end(); it++ )
@@ -323,7 +323,7 @@ void Group::load( LoadContextPtr context )
 	unsigned int v = m_ioVersion;
 
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
-	m_transform = 0;
+	m_transform = nullptr;
 	try
 	{
 		m_transform = context->load<Transform>( container.get(), g_transformEntry );

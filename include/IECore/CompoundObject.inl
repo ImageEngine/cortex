@@ -98,7 +98,7 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 			}
 			else
 			{
-				return 0;
+				return nullptr;
 			}	
 		}
 	}
@@ -110,10 +110,10 @@ const T *CompoundObject::member( const InternedString &name, bool throwException
 		}
 		else
 		{
-			return 0;
+			return nullptr;
 		}
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename T>

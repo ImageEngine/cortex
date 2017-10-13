@@ -37,7 +37,7 @@
 using namespace IECore;
 
 TransformBlock::TransformBlock( RendererPtr renderer, bool active )
-	:	m_renderer( active ? renderer : 0 )
+	:	m_renderer( active ? renderer : nullptr )
 {
 	if( m_renderer )
 	{

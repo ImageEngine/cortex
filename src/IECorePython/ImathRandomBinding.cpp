@@ -122,7 +122,7 @@ struct Vectoriser
 			default :
 				throw Exception( "Unsupported type for seeds parameter." );
 		}
-		return 0;
+		return nullptr;
 	}
 
 };

@@ -53,13 +53,13 @@ class IECORE_API ObjectParameter : public Parameter
 
 		typedef std::set<TypeId> TypeIdSet;
 
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=0 );
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, TypeId type, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false,ConstCompoundObjectPtr userData=nullptr );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeIdSet &types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 		/// types must be an array of TypeIds terminated with InvalidTypeId.
-		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		/// Returns false if isn't an instance of any type in validTypes(), or any type derived from those types
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 		/// Returns a set containing the valid types.
 		const TypeIdSet &validTypes() const;

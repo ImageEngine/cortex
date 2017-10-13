@@ -51,7 +51,7 @@ struct ExtractStringFromUnicode
 		}
 		else
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 

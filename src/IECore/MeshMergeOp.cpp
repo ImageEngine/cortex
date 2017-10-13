@@ -224,7 +224,7 @@ struct MeshMergeOp::PrependPrimVars
 		PrimitiveVariableMap::iterator it = m_mesh->variables.find( m_name );
 		if ( it == m_mesh->variables.end() && !m_remove )
 		{
-			typename T::Ptr data2 = 0;
+			typename T::Ptr data2 = nullptr;
 
 			std::map<ConstDataPtr, DataPtr>::iterator dataIt = m_visitedData.find( data );
 			if ( dataIt != m_visitedData.end() )

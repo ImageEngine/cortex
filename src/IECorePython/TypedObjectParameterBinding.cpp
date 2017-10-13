@@ -82,7 +82,7 @@ static void bindTypedObjectParameter()
 					arg( "defaultValue" ),
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false ,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( nullptr )
 				)
 			)
 		)

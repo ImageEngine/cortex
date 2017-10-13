@@ -58,12 +58,12 @@ class IECORE_API CompoundParameter : public Parameter
 		/// Creates an empty CompoundParameter. If adoptChildPresets is true, then the presets
 		/// for this parameter will be the intersection of the presets of the child parameters.
 		/// If adoptChildPresets is false, then the CompoundParameter itself will have no presets.
-		CompoundParameter( const std::string &name = "", const std::string &description = "", ConstCompoundObjectPtr userData=0, bool adoptChildPresets=true );
+		CompoundParameter( const std::string &name = "", const std::string &description = "", ConstCompoundObjectPtr userData=nullptr, bool adoptChildPresets=true );
 		/// Create a CompoundParameter containing all the parameters in the range specified
 		/// by the forward iterators membersBegin and membersEnd, which are expected to point
 		/// to ParameterPtr objects.
 		template<typename I>
-		CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData=0, bool adoptChildPresets=true );
+		CompoundParameter( const std::string &name, const std::string &description, I membersBegin, I membersEnd, ConstCompoundObjectPtr userData=nullptr, bool adoptChildPresets=true );
 
 		//! @name Parameter method overrides.
 		////////////////////////////////////////////////////////////////////////
@@ -86,7 +86,7 @@ class IECORE_API CompoundParameter : public Parameter
 		virtual bool presetsOnly() const;
 		/// Values are only valid if they are a CompoundObject with a valid member
 		/// for each child parameter, and no additional values.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 		/// Sets the values of child parameters using the matching child objects of the passed CompoundObject.
 		/// In the case of missing values (or if the value isn't even a CompoundParameter) sets the child parameter
 		/// value to a NullObject instance to signify it's invalidity.

@@ -184,7 +184,7 @@ ConstIndexedIOPtr Object::LoadContext::container( const std::string &typeName, u
 	ConstIndexedIOPtr typeIO = m_ioInterface->subdirectory( typeName, throwIfMissing ? IndexedIO::ThrowIfMissing : IndexedIO::NullIfMissing );
 	if ( !typeIO )
 	{
-		return 0;
+		return nullptr;
 	}
 	unsigned int v;
 	typeIO->read( g_ioVersionEntry, v );
@@ -228,7 +228,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 				pathParts.push_back( *t );
 			}
 		}
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// jump to the path..
@@ -245,7 +245,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 		IndexedIO::EntryIDList pathParts;
 		ioObject->path( pathParts );
 
-		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, NULL ) );
+		std::pair< LoadedObjectMap::iterator,bool > ret = m_loadedObjects->insert( std::pair<IndexedIO::EntryIDList, ObjectPtr>( pathParts, nullptr ) );
 		if ( ret.second )
 		{
 			// add the loaded object to the map.
@@ -259,7 +259,7 @@ ObjectPtr Object::LoadContext::loadObjectOrReference( const IndexedIO *container
 // objects. path is relative to the root of m_ioInterface
 ObjectPtr Object::LoadContext::loadObject( const IndexedIO *container )
 {
-	ObjectPtr result = 0;
+	ObjectPtr result = nullptr;
 	string type = "";
 	container->read( g_typeEntry, type );
 	ConstIndexedIOPtr dataIO = container->subdirectory( g_dataEntry );

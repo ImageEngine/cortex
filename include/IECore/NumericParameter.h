@@ -58,10 +58,10 @@ class NumericParameter : public Parameter
 
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue = T(),
 			T minValue = Imath::limits<T>::min(), T maxValue = Imath::limits<T>::max(),
-			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		NumericParameter( const std::string &name, const std::string &description, T defaultValue,
-			const PresetsContainer &presets, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets, ConstCompoundObjectPtr userData = nullptr );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( NumericParameter<T>, Parameter );
 
@@ -89,7 +89,7 @@ class NumericParameter : public Parameter
 
 		/// Implemented to return true only if value is of type TypedData<T> and if
 		/// min <= value->readable() <= max.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 	private :
 

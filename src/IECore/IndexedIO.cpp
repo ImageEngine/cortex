@@ -51,7 +51,7 @@ const IndexedIO::EntryIDList IndexedIO::rootPath;
 
 IndexedIOPtr IndexedIO::create( const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode )
 {
-	IndexedIOPtr result = 0;
+	IndexedIOPtr result = nullptr;
 
 	std::string extension = fs::extension(path);
 

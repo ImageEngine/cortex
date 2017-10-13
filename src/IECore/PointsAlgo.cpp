@@ -182,7 +182,7 @@ struct CollectDataFn
 	template<typename T>
 	ReturnType operator()( const T *data )
 	{
-		T *container = NULL;
+		T *container = nullptr;
 		if( !outputData )
 		{
 			container = new T();

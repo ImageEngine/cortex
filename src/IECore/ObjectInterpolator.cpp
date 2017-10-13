@@ -167,7 +167,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 		else
 		{
 			// primitive topologies don't match
-			result = 0;
+			result = nullptr;
 		}
 	}
 	else if ( result->isInstanceOf( DataTypeId ) )
@@ -183,7 +183,7 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 	}
 	else
 	{
-		result = 0;
+		result = nullptr;
 	}
 }
 
@@ -331,7 +331,7 @@ void CubicInterpolator<Object>::operator()( const Object *y0, const Object *y1, 
 	}
 	else
 	{
-		result = 0;
+		result = nullptr;
 	}
 }
 

@@ -149,5 +149,5 @@ FrameListPtr BinaryFrameList::parse( const std::string &frameList )
 		return new BinaryFrameList( l );
 	}
 
-	return 0;
+	return nullptr;
 }

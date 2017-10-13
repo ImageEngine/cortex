@@ -174,6 +174,6 @@ FrameListPtr FrameRange::parse( const std::string &frameList )
 		return new FrameRange( start, end, step );
 	}
 
-	return 0;
+	return nullptr;
 }
 

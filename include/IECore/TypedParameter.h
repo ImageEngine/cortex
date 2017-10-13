@@ -61,15 +61,15 @@ class TypedParameter : public Parameter
 
 		/// Constructs a new ObjectType object to hold the default value.
 		TypedParameter( const std::string &name, const std::string &description, const T &defaultValue = T(),
-			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 		/// Takes a copy of defaultValue for use as the default value.
 		TypedParameter( const std::string &name, const std::string &description, ObjectTypePtr defaultValue,
-			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = 0 );
+			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedParameter<T>, Parameter );
 
 		/// Implemented to return true only if value is of type TypedData<T>.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 		/// Convenience function for getting the default value, which avoids all the hoop jumping
 		/// needed to extract the value from the Object returned by Parameter::defaultValue().

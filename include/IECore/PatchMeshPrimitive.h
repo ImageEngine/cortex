@@ -59,7 +59,7 @@ class IECORE_API PatchMeshPrimitive : public Primitive
 		        const CubicBasisf &vBasis=CubicBasisf::linear(),
 		        bool uPeriodic = false,
 		        bool vPeriodic = false,
-		        ConstV3fVectorDataPtr p = 0
+		        ConstV3fVectorDataPtr p = nullptr
 		);
 
 		virtual ~PatchMeshPrimitive();

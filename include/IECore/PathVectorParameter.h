@@ -58,11 +58,11 @@ class IECORE_API PathVectorParameter : public StringVectorParameter
 
 		PathVectorParameter( const std::string &name, const std::string &description,
 		                     const std::vector<std::string> &defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-		                     const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		                     const StringVectorParameter::PresetsContainer &presets = StringVectorParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		PathVectorParameter( const std::string &name, const std::string &description,
 		                     ObjectTypePtr defaultValue, bool allowEmptyList = true, CheckType check = PathVectorParameter::DontCare,
-		                     const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=0 );
+		                     const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		bool allowEmptyList() const;
 		bool mustExist() const;
@@ -74,7 +74,7 @@ class IECORE_API PathVectorParameter : public StringVectorParameter
 		/// * The value does not form a valid path name.
 		/// * mustExist() is true and the file/dir doesn't exist.
 		/// * mustNotExist() is true and the file/dir exists.
-		virtual bool valueValid( const Object *value, std::string *reason = 0 ) const;
+		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
 
 	private :
 

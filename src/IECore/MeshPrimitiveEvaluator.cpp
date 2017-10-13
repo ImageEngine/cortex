@@ -210,7 +210,7 @@ const V3i &MeshPrimitiveEvaluator::Result::vertexIds() const
 	return m_vertexIds;
 }
 
-MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m_uvTree(0), m_haveMassProperties( false ), m_haveSurfaceArea( false ), m_haveAverageNormals( false )
+MeshPrimitiveEvaluator::MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh ) : m_uvTree(nullptr), m_haveMassProperties( false ), m_haveSurfaceArea( false ), m_haveAverageNormals( false )
 {
 	if (! mesh )
 	{
@@ -318,10 +318,10 @@ MeshPrimitiveEvaluator::~MeshPrimitiveEvaluator()
 	assert( m_tree );
 
 	delete m_tree;
-	m_tree = 0;
+	m_tree = nullptr;
 
 	delete m_uvTree;
-	m_uvTree = 0;
+	m_uvTree = nullptr;
 }
 
 ConstPrimitivePtr MeshPrimitiveEvaluator::primitive() const
@@ -1292,7 +1292,7 @@ const MeshPrimitiveEvaluator::TriangleBoundTree *MeshPrimitiveEvaluator::triangl
 
 const MeshPrimitiveEvaluator::UVBoundVector *MeshPrimitiveEvaluator::uvBounds() const
 {
-	return m_uvTree ? &m_uvTriangles : 0;
+	return m_uvTree ? &m_uvTriangles : nullptr;
 }
 
 const MeshPrimitiveEvaluator::UVBoundTree *MeshPrimitiveEvaluator::uvBoundTree() const

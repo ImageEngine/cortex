@@ -103,7 +103,7 @@ PointDistribution::PointDistribution( const std::string &tileSet )
 
 const PointDistribution &PointDistribution::defaultInstance()
 {
-	static PointDistribution *p = 0;
+	static PointDistribution *p = nullptr;
 	if( !p )
 	{
 		const char *f = getenv( "CORTEX_POINTDISTRIBUTION_TILESET" );

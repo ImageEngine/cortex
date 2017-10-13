@@ -67,7 +67,7 @@ const InternedString LinkedScene::g_root("root");
 const InternedString LinkedScene::g_time("time");
 
 
-LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(0), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true), m_timeRemapped(false)
+LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode ) : m_mainScene(nullptr), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(mode & IndexedIO::Read), m_atLink(false), m_sampled(true), m_timeRemapped(false)
 {
 	if( mode & IndexedIO::Append )
 	{
@@ -77,14 +77,14 @@ LinkedScene::LinkedScene( const std::string &fileName, IndexedIO::OpenMode mode 
 	m_mainScene = new SceneCache( fileName, mode );
 }
 
-LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(0), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
+LinkedScene::LinkedScene( ConstSceneInterfacePtr mainScene ) : m_mainScene(const_cast<SceneInterface*>(mainScene.get())), m_linkedScene(nullptr), m_rootLinkDepth(0), m_readOnly(true), m_atLink(false), m_timeRemapped(false)
 {
 	if( SceneCachePtr scc = runTimeCast<SceneCache>( m_mainScene ) )
 	{
 		m_readOnly = scc->readOnly();
 	}
 
-	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != NULL);
+	m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene.get()) != nullptr);
 }
 
 LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linkedScene, int rootLinkDepth, bool readOnly, bool atLink, bool timeRemapped ) : m_mainScene(mainScene), m_linkedScene(linkedScene), m_rootLinkDepth(rootLinkDepth), m_readOnly(readOnly), m_atLink(atLink), m_timeRemapped(timeRemapped)
@@ -96,11 +96,11 @@ LinkedScene::LinkedScene( SceneInterface *mainScene, const SceneInterface *linke
 
 	if ( linkedScene )
 	{
-		m_sampled = (runTimeCast<const SampledSceneInterface>(linkedScene) != NULL);
+		m_sampled = (runTimeCast<const SampledSceneInterface>(linkedScene) != nullptr);
 	}
 	else
 	{
-		m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene) != NULL);
+		m_sampled = (runTimeCast<const SampledSceneInterface>(mainScene) != nullptr);
 	}
 
 }
@@ -971,7 +971,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 {
 	if ( fileName && root )
 	{
-		ConstSceneInterfacePtr l = 0;
+		ConstSceneInterfacePtr l = nullptr;
 		try
 		{
 			l = SharedSceneInterfaces::get( fileName->readable() );
@@ -980,7 +980,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 		{
 			IECore::msg( IECore::MessageHandler::Error, "LinkedScene::expandLink", std::string( e.what() ) + " when expanding link from file \"" + m_mainScene->fileName() + "\"" );
 			linkDepth = 0;
-			return 0;
+			return nullptr;
 		}
 
 		linkDepth = root->readable().size();
@@ -993,7 +993,7 @@ ConstSceneInterfacePtr LinkedScene::expandLink( const StringData *fileName, cons
 		return l;
 	}
 	linkDepth = 0;
-	return 0;
+	return nullptr;
 }
 
 double LinkedScene::remappedLinkTime( double time ) const
@@ -1075,7 +1075,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			}
 			else if( missingBehaviour == SceneInterface::NullIfMissing )
 			{
-				return 0;
+				return nullptr;
 			}
 		}
 	}
@@ -1099,7 +1099,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 	SceneInterfacePtr c = m_mainScene->child( name, missingBehaviour );
 	if ( !c )
 	{
-		return 0;
+		return nullptr;
 	}
 	if ( m_readOnly )
 	{
@@ -1124,7 +1124,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 			ConstCompoundDataPtr d = runTimeCast< const CompoundData >( c->readAttribute( linkAttribute, 0 ) );
 			/// we found the link attribute...
 			int linkDepth;
-			bool timeRemapped = ( d->member<DoubleData>( g_time ) != NULL );
+			bool timeRemapped = ( d->member<DoubleData>( g_time ) != nullptr );
 			ConstSceneInterfacePtr l = expandLink( d->member< const StringData >( g_fileName ), d->member< const InternedStringVectorData >( g_root ), linkDepth );
 			if ( l )
 			{
@@ -1133,7 +1133,7 @@ SceneInterfacePtr LinkedScene::child( const Name &name, MissingBehaviour missing
 		}
 	}
 
-	return new LinkedScene( c.get(), 0, 0, m_readOnly, false, false );
+	return new LinkedScene( c.get(), nullptr, 0, m_readOnly, false, false );
 
 }
 
@@ -1191,7 +1191,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 		}
 		s = n;
 	}
-	ConstSceneInterfacePtr l = 0;
+	ConstSceneInterfacePtr l = nullptr;
 	int linkDepth = 0;
 	bool atLink = false;
 	bool timeRemapped = false;
@@ -1227,7 +1227,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 		{
 			if ( missingBehaviour == SceneInterface::NullIfMissing )
 			{
-				return 0;
+				return nullptr;
 			}
 			throw Exception( "Could not find child '" + pIt->value() + "'"  );
 		}
@@ -1237,7 +1237,7 @@ SceneInterfacePtr LinkedScene::scene( const Path &path, MissingBehaviour missing
 			l = l->child( *pIt, missingBehaviour );
 			if ( !l )
 			{
-				return 0;
+				return nullptr;
 			}
 		}
 		atLink = false;

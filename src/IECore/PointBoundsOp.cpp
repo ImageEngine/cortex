@@ -142,7 +142,7 @@ static Box3fDataPtr bound3( const P *pData, const R *rData, float rMult, typenam
 	const typename P::ValueType &pVector = pData->readable();
 
 	size_t vLength = 0;
-	const Vector *v = 0;
+	const Vector *v = nullptr;
 	if( vData && vData->readable().size() )
 	{
 		vLength = vData->readable().size();
@@ -150,7 +150,7 @@ static Box3fDataPtr bound3( const P *pData, const R *rData, float rMult, typenam
 	}
 
 	size_t rLength = 0;
-	const Radius *r = 0;
+	const Radius *r = nullptr;
 	if( rData && rData->readable().size() )
 	{
 		rLength = rData->readable().size();
@@ -191,7 +191,7 @@ static Box3fDataPtr bound2( const P *pData, const R *rData, float rMult, const O
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
-	return 0;
+	return nullptr;
 }
 
 template<typename P>
@@ -206,7 +206,7 @@ static Box3fDataPtr bound1( const P * pData, const Object * rData, float rMult, 
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
-	return 0;
+	return nullptr;
 }
 
 ObjectPtr PointBoundsOp::doOperation( const CompoundObject * operands )
@@ -225,5 +225,5 @@ ObjectPtr PointBoundsOp::doOperation( const CompoundObject * operands )
 		default :
 			assert( 0 ); // parameter validation should prevent us getting here
 	}
-	return 0;
+	return nullptr;
 }

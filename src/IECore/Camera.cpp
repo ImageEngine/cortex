@@ -69,7 +69,7 @@ void Camera::copyFrom( const Object *other, CopyContext *context )
 	}
 	else
 	{
-		m_transform = 0;
+		m_transform = nullptr;
 	}
 	m_parameters = context->copy<CompoundData>( tOther->m_parameters.get() );
 }
@@ -93,7 +93,7 @@ void Camera::load( LoadContextPtr context )
 	ConstIndexedIOPtr container = context->container( staticTypeName(), v );
 
 	container->read( g_nameEntry, m_name );
-	m_transform = 0;
+	m_transform = nullptr;
 	try
 	{
 		m_transform = context->load<Transform>( container.get(), g_transformEntry );

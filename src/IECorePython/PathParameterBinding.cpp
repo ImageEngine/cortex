@@ -95,7 +95,7 @@ void bindPathParameter()
 					arg( "check" ) = PathParameter::DontCare,
 					arg( "presets" ) = boost::python::tuple(),
 					arg( "presetsOnly" ) = false,
-					arg( "userData" ) = CompoundObject::Ptr( 0 )
+					arg( "userData" ) = CompoundObject::Ptr( nullptr )
 				)
 			)
 		)

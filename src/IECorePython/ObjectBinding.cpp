@@ -68,7 +68,7 @@ static void registerType( TypeId typeId, const std::string &typeName, PyObject *
 
 static void registerAbstractType( TypeId typeId, const std::string &typeName )
 {
-	Object::registerType( typeId, typeName, 0, (void*)0 );
+	Object::registerType( typeId, typeName, nullptr, (void*)nullptr );
 }
 
 void bindObject()
