@@ -60,9 +60,9 @@ class IECOREGL_API LuminanceTexture : public Texture
 		/// "A" channel must be of the same type.
 		LuminanceTexture( const IECoreImage::ImagePrimitive *image, bool mipMap=true );
 
-		virtual ~LuminanceTexture();
+		~LuminanceTexture() override;
 
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 	private :
 

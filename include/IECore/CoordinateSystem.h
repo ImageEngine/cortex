@@ -52,7 +52,7 @@ class IECORE_API CoordinateSystem : public StateRenderable
 
 		CoordinateSystem();
 		CoordinateSystem( const std::string &name, TransformPtr transform=nullptr );
-		virtual ~CoordinateSystem();
+		~CoordinateSystem() override;
 
 		IE_CORE_DECLAREOBJECT( CoordinateSystem, StateRenderable );
 
@@ -72,7 +72,7 @@ class IECORE_API CoordinateSystem : public StateRenderable
 		/// has been applied then also scopes this in a
 		/// transformBegin/transformEnd with the appropriate
 		/// transformation.
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

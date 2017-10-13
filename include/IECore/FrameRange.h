@@ -51,12 +51,12 @@ class IECORE_API FrameRange : public FrameList
 		IE_CORE_DECLARERUNTIMETYPED( FrameRange, FrameList );
 
 		FrameRange( Frame start, Frame end, Frame step = 1 );
-		virtual ~FrameRange();
+		~FrameRange() override;
 
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const ;
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;
-		virtual FrameListPtr copy() const;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override ;
+		bool isEqualTo( ConstFrameListPtr other ) const override;
+		FrameListPtr copy() const override;
 
 		static FrameListPtr parse( const std::string &frameList );
 

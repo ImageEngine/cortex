@@ -78,7 +78,7 @@ class OpWrapper : public IECorePython::RunTimeTypedWrapper<T>
 		{
 		}
 
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands )
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands ) override
 		{
 			ScopedGILLock gilLock;
 			boost::python::object o = this->methodOverride( "doOperation" );

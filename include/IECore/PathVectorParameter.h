@@ -74,7 +74,7 @@ class IECORE_API PathVectorParameter : public StringVectorParameter
 		/// * The value does not form a valid path name.
 		/// * mustExist() is true and the file/dir doesn't exist.
 		/// * mustNotExist() is true and the file/dir exists.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 	private :
 

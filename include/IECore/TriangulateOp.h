@@ -54,7 +54,7 @@ class IECORE_API TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 	public:
 
 		TriangulateOp();
-		virtual ~TriangulateOp();
+		~TriangulateOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( TriangulateOp, MeshPrimitiveOp );
 
@@ -68,7 +68,7 @@ class IECORE_API TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 
 		struct TriangulateFn;
 
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
+		void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands ) override;
 
 		BoolParameterPtr m_throwExceptionsParameter;
 		FloatParameterPtr m_toleranceParameter;

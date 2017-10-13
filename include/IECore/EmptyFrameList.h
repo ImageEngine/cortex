@@ -51,11 +51,11 @@ class IECORE_API EmptyFrameList : public FrameList
 		IE_CORE_DECLARERUNTIMETYPED( EmptyFrameList, FrameList );
 
 		EmptyFrameList();
-		virtual ~EmptyFrameList();
+		~EmptyFrameList() override;
 
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const ;
-		virtual FrameListPtr copy() const ;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override ;
+		FrameListPtr copy() const override ;
 
 		static FrameListPtr parse( const std::string &frameList );
 

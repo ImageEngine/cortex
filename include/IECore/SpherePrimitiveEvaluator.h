@@ -92,31 +92,31 @@ class IECORE_API SpherePrimitiveEvaluator : public PrimitiveEvaluator
 
 		SpherePrimitiveEvaluator( ConstSpherePrimitivePtr sphere );
 
-		virtual ~SpherePrimitiveEvaluator();
+		~SpherePrimitiveEvaluator() override;
 
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
 
-		ConstPrimitivePtr primitive() const;
+		ConstPrimitivePtr primitive() const override;
 
-		virtual PrimitiveEvaluator::ResultPtr createResult() const;
+		PrimitiveEvaluator::ResultPtr createResult() const override;
 
-		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
+		void validateResult( PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
+		bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
+		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
+		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
 
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
+		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
 
-		virtual float volume() const;
+		float volume() const override;
 
-		virtual Imath::V3f centerOfGravity() const;
+		Imath::V3f centerOfGravity() const override;
 
-		virtual float surfaceArea() const;
+		float surfaceArea() const override;
 
 	protected:
 

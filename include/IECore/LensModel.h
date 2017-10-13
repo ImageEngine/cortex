@@ -140,7 +140,7 @@ class IECORE_API LensModel : public Parameterised
 		/// should be used to instantiate a new LensModel instead. This is the
 		/// only way that we can ensure that the LensModel is initialized correctly.
 		LensModel();
-		virtual ~LensModel();
+		~LensModel() override;
 
 		/// Instantiating an instance of LensModelRegistration<YourLensModelClass>
 		/// registers your model to a mapping of LensModel names

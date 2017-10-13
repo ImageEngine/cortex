@@ -114,19 +114,19 @@ class ParameterisedProcedural::Forwarder : public Renderer::Procedural
 		{
 		}
 
-		virtual Imath::Box3f bound() const
+		Imath::Box3f bound() const override
 		{
 			return parameterisedProcedural->doBound( validatedArgs );
 		}
 
-		virtual void render( Renderer *renderer ) const
+		void render( Renderer *renderer ) const override
 		{
 			parameterisedProcedural->doRender( renderer, validatedArgs );
 		}
 
 		/// returns a hash of the parameters, so the renderer can instance procedurals with
 		/// identical parameters
-		virtual MurmurHash hash() const
+		MurmurHash hash() const override
 		{
 			MurmurHash h;
 			parameterisedProcedural->hash( h );

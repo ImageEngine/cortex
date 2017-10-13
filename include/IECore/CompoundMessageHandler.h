@@ -64,7 +64,7 @@ class IECORE_API CompoundMessageHandler : public MessageHandler
 		/// add and remove handlers.
 		std::set<MessageHandlerPtr> handlers;
 
-		virtual void handle( Level level, const std::string &context, const std::string &message );
+		void handle( Level level, const std::string &context, const std::string &message ) override;
 
 };
 

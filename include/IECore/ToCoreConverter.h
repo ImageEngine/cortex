@@ -60,7 +60,7 @@ class IECORE_API ToCoreConverter : public Converter
 	protected :
 
 		ToCoreConverter( const std::string &description );
-		virtual ~ToCoreConverter();
+		~ToCoreConverter() override;
 
 		/// Called by convert() to actually perform the operation.
 		/// operands contains the result of parameters()->getValidatedValue() -

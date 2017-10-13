@@ -62,7 +62,7 @@ class IECOREIMAGE_API MedianCutSampler : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MedianCutSampler, MedianCutSamplerTypeId, IECore::Op );
 
 		MedianCutSampler();
-		virtual ~MedianCutSampler();
+		~MedianCutSampler() override;
 
 		ImagePrimitiveParameter *imageParameter();
 		const ImagePrimitiveParameter *imageParameter() const;
@@ -85,7 +85,7 @@ class IECOREIMAGE_API MedianCutSampler : public IECore::Op
 
 	protected :
 
-		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

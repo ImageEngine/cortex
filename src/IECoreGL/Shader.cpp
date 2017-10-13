@@ -240,7 +240,7 @@ class Shader::Implementation : public IECore::RefCounted
 			}
 		}
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 			release();
 		}
@@ -481,7 +481,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			{
 			}
 
-			virtual void bind()
+			void bind() override
 			{
 				Buffer::ScopedBinding binding( *m_buffer );
 				glEnableVertexAttribArrayARB( m_attributeIndex );
@@ -489,7 +489,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				glVertexAttribDivisorARB( m_attributeIndex, m_divisor );
 			}
 
-			virtual void unbind()
+			void unbind() override
 			{
 				glVertexAttribDivisorARB( m_attributeIndex, 0 );
 				glDisableVertexAttribArrayARB( m_attributeIndex );
@@ -514,7 +514,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 			{
 			}
 
-			virtual void bind()
+			void bind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glGetIntegerv( GL_TEXTURE_BINDING_2D, &m_previousTexture );
@@ -529,7 +529,7 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				glUniform1i( m_uniformIndex, m_textureUnit );
 			}
 
-			virtual void unbind()
+			void unbind() override
 			{
 				glActiveTexture( GL_TEXTURE0 + m_textureUnit );
 				glBindTexture( GL_TEXTURE_2D, m_previousTexture );
@@ -554,13 +554,13 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				m_previousValues.resize( m_values.size() );
 			}
 
-			virtual void bind()
+			void bind() override
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
 
-			virtual void unbind()
+			void unbind() override
 			{
 				uniformFloatFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
@@ -586,13 +586,13 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				m_previousValues.resize( m_values.size() );
 			}
 
-			virtual void bind()
+			void bind() override
 			{
 				glGetUniformiv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_values[0]) );
 			}
 
-			virtual void unbind()
+			void unbind() override
 			{
 				uniformIntFunctions()[m_dimensions]( m_uniformIndex, m_count, &(m_previousValues[0]) );
 			}
@@ -616,13 +616,13 @@ class Shader::Setup::MemberData : public IECore::RefCounted
 				m_previousValues.resize( m_values.size(), 0 );
 			}
 
-			virtual void bind()
+			void bind() override
 			{
 				glGetUniformfv( m_program, m_uniformIndex, &(m_previousValues[0]) );
 				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_values[0]) );
 			}
 
-			virtual void unbind()
+			void unbind() override
 			{
 				uniformMatrixFunctions()[m_dimensions0][m_dimensions1]( m_uniformIndex, m_count, GL_FALSE, &(m_previousValues[0]) );
 			}

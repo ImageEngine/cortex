@@ -57,7 +57,7 @@ class IECORE_API CompoundFrameList : public FrameList
 		/// of FrameList objects. These can subsequently be accessed and modified
 		/// via the frameLists method
 		CompoundFrameList( const std::vector< FrameListPtr > frameLists );
-		virtual ~CompoundFrameList();
+		~CompoundFrameList() override;
 
 		std::vector< FrameListPtr > &getFrameLists();
 		const std::vector< FrameListPtr > &getFrameLists() const;
@@ -66,10 +66,10 @@ class IECORE_API CompoundFrameList : public FrameList
 		/// Returns all the frames represented by the FrameLists in self.frameLists.
 		/// Frames are returned in the order specified by self.frameLists, but duplicate
 		/// frames will be omitted.
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const;
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;
-		virtual FrameListPtr copy() const ;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override;
+		bool isEqualTo( ConstFrameListPtr other ) const override;
+		FrameListPtr copy() const override ;
 
 		static FrameListPtr parse( const std::string &frameList );
 

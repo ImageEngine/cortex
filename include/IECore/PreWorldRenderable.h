@@ -49,7 +49,7 @@ class IECORE_API PreWorldRenderable : public Renderable
 	public:
 
 		PreWorldRenderable();
-		virtual ~PreWorldRenderable();
+		~PreWorldRenderable() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( PreWorldRenderable, Renderable );
 

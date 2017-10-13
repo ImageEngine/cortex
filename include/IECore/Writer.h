@@ -98,7 +98,7 @@ class IECORE_API Writer : public Op
 		Writer( const std::string &description, const ObjectParameter::TypeIdSet &writableTypes );
 
 		/// Implemented to call doWrite(), so derived classes need only implement that.
-		ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 		/// Must be implemented by subclasses to write object() to fileName(). Implementations
 		/// should throw an Exception on failure.

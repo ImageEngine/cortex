@@ -48,7 +48,7 @@ class IECORE_API Display : public PreWorldRenderable
 	public:
 
 		Display( const std::string &name="default", const std::string &type="exr", const std::string &data="rgba", CompoundDataPtr parameters = new CompoundData );
-		virtual ~Display();
+		~Display() override;
 
 		IE_CORE_DECLAREOBJECT( Display, PreWorldRenderable );
 
@@ -68,7 +68,7 @@ class IECORE_API Display : public PreWorldRenderable
 		/// (it calls readable() or writable() for you).
 		CompoundData *parametersData();
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

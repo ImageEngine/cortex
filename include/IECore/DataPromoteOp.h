@@ -60,11 +60,11 @@ class IECORE_API DataPromoteOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( DataPromoteOp, Op );
 
 		DataPromoteOp();
-		virtual ~DataPromoteOp();
+		~DataPromoteOp() override;
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

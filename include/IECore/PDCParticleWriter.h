@@ -55,7 +55,7 @@ class IECORE_API PDCParticleWriter : public ParticleWriter
 
 	private :
 
-		virtual void doWrite( const CompoundObject *operands );
+		void doWrite( const CompoundObject *operands ) override;
 
 		static const WriterDescription<PDCParticleWriter> m_writerDescription;
 

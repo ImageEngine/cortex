@@ -60,7 +60,7 @@ class IECOREGL_API Buffer : public IECore::RunTimeTyped
 		/// Creates a buffer from the specified data.
 		Buffer( const void *data, size_t sizeInBytes, GLenum target = GL_ARRAY_BUFFER, GLenum usage = GL_STATIC_DRAW );
 		/// Deletes the buffer with glDeleteBuffers().
-		virtual ~Buffer();
+		~Buffer() override;
 
 		/// Returns the size of the buffer in bytes.
 		size_t size() const;

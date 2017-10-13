@@ -71,7 +71,7 @@ class Font::Implementation : public IECore::RefCounted
 			m_images.resize( 128 );
 		}
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 			FT_Done_Face( m_face );
 		}

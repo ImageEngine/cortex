@@ -78,7 +78,7 @@ class IECORE_API MemoryStream
 
 			Impl( char *buf, std::streamsize sz, bool ownsBuf = false );
 
-			~Impl();
+			~Impl() override;
 
 			std::streamsize read(char* s, std::streamsize n);
 

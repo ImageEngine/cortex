@@ -58,7 +58,7 @@ class IECOREIMAGE_API WarpOp : public IECore::ModifyOp
 		enum BoundMode { Clamp = 0, SetToBlack = 1 };
 
 		WarpOp( const std::string &description );
-		virtual ~WarpOp();
+		~WarpOp() override;
 
 		IECore::IntParameter *filterParameter();
 		const IECore::IntParameter *filterParameter() const;
@@ -69,7 +69,7 @@ class IECOREIMAGE_API WarpOp : public IECore::ModifyOp
 
 		/// Implemented to call begin(), warpedDataWindow(), warp() and end(). Derived classes should implement those functions rather than
 		/// this function.
-		virtual void modify( IECore::Object *object, const IECore::CompoundObject *operands );
+		void modify( IECore::Object *object, const IECore::CompoundObject *operands ) override;
 
 		/// Called once per operation before anything else. This is an opportunity to perform any preprocessing
 		/// necessary before warpedDataWindow() and many calls to warp() are made.

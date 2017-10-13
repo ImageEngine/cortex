@@ -82,7 +82,7 @@ class CurvesWriter : public PrimitiveWriter
 		{
 		}
 
-		virtual void writeSample( const IECore::Object *object )
+		void writeSample( const IECore::Object *object ) override
 		{
 			const CurvesPrimitive *curvesPrimitive = runTimeCast<const CurvesPrimitive>( object );
 			if( !curvesPrimitive )
@@ -123,7 +123,7 @@ class CurvesWriter : public PrimitiveWriter
 			m_curves.getSchema().set( sample );
 		}
 
-		virtual void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling )
+		void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling ) override
 		{
 			m_curves.getSchema().setTimeSampling( timeSampling );
 		}

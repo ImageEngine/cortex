@@ -62,7 +62,7 @@ class IECOREIMAGE_API SplineToImage : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SplineToImage, SplineToImageTypeId, IECore::Op );
 
 		SplineToImage();
-		virtual ~SplineToImage();
+		~SplineToImage() override;
 
 		IECore::ObjectParameter *splineParameter();
 		const IECore::ObjectParameter *splineParameter() const;
@@ -72,7 +72,7 @@ class IECOREIMAGE_API SplineToImage : public IECore::Op
 
 	protected :
 
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

@@ -50,7 +50,7 @@ class IECORE_API StateRenderable : public Renderable
 	public:
 
 		StateRenderable();
-		virtual ~StateRenderable();
+		~StateRenderable() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( StateRenderable, Renderable );
 

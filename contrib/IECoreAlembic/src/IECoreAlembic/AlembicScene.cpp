@@ -74,7 +74,7 @@ class AlembicScene::AlembicIO : public IECore::RefCounted
 
 	public :
 
-		virtual ~AlembicIO() {}
+		~AlembicIO() override {}
 
 		virtual std::string fileName() const = 0;
 		virtual SceneInterface::Name name() const = 0;
@@ -118,17 +118,17 @@ class AlembicScene::AlembicReader : public AlembicIO
 		// AlembicIO implementation
 		// ========================
 
-		virtual std::string fileName() const
+		std::string fileName() const override
 		{
 			return m_archive->getName();
 		}
 
-		virtual SceneInterface::Name name() const
+		SceneInterface::Name name() const override
 		{
 			return SceneInterface::Name( m_xform ? m_xform.getName() : "" );
 		}
 
-		virtual void path( SceneInterface::Path &path ) const
+		void path( SceneInterface::Path &path ) const override
 		{
 			path.clear();
 			if( !m_xform )
@@ -144,7 +144,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		virtual void childNames( IECore::SceneInterface::NameList &childNames ) const
+		void childNames( IECore::SceneInterface::NameList &childNames ) const override
 		{
 			IObject p = m_xform;
 			if( !p.valid() )
@@ -162,7 +162,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
+		AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
 		{
 			ChildMap::iterator it = m_children.find( name );
 			if( it != m_children.end() )
@@ -564,7 +564,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			m_root->archive = OArchive( ::Alembic::AbcCoreOgawa::WriteArchive(), fileName );
 		}
 
-		virtual ~AlembicWriter()
+		~AlembicWriter() override
 		{
 			/// \todo Do better. We don't want to be storing huge sample times vectors
 			/// when a long animation is being written. We need to somehow detect uniform and
@@ -596,17 +596,17 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		// AlembicIO implementation
 		// ========================
 
-		virtual std::string fileName() const
+		std::string fileName() const override
 		{
 			return m_root->archive.getName();
 		}
 
-		virtual SceneInterface::Name name() const
+		SceneInterface::Name name() const override
 		{
 			return SceneInterface::Name( haveXform() ? m_xform.getName() : "" );
 		}
 
-		virtual void path( SceneInterface::Path &path ) const
+		void path( SceneInterface::Path &path ) const override
 		{
 			path.clear();
 			if( !haveXform() )
@@ -622,7 +622,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			}
 		}
 
-		virtual void childNames( IECore::SceneInterface::NameList &childNames ) const
+		void childNames( IECore::SceneInterface::NameList &childNames ) const override
 		{
 			OObject p = m_xform;
 			if( !haveXform() )
@@ -640,7 +640,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			}
 		}
 
-		virtual AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour )
+		AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
 		{
 			ChildMap::iterator it = m_children.find( name );
 			if( it != m_children.end() )

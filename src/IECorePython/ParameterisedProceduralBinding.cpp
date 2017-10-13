@@ -63,7 +63,7 @@ class ParameterisedProceduralWrapper : public RunTimeTypedWrapper<ParameterisedP
 		{
 		}
 
-		virtual void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const
+		void doRenderState( RendererPtr renderer, ConstCompoundObjectPtr args ) const override
 		{
 			if( isSubclassed() )
 			{
@@ -98,7 +98,7 @@ class ParameterisedProceduralWrapper : public RunTimeTypedWrapper<ParameterisedP
 			ParameterisedProcedural::doRenderState( renderer, args );
 		}
 
-		virtual Imath::Box3f doBound( ConstCompoundObjectPtr args ) const
+		Imath::Box3f doBound( ConstCompoundObjectPtr args ) const override
 		{
 			ScopedGILLock gilLock;
 			try
@@ -129,7 +129,7 @@ class ParameterisedProceduralWrapper : public RunTimeTypedWrapper<ParameterisedP
 			return Imath::Box3f(); // empty
 		}
 
-		virtual void doRender( RendererPtr r, ConstCompoundObjectPtr args ) const
+		void doRender( RendererPtr r, ConstCompoundObjectPtr args ) const override
 		{
 			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.

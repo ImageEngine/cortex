@@ -60,7 +60,7 @@ class IECOREIMAGE_API CurveTracer : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveTracer, CurveTracerTypeId, IECore::Op );
 
 		CurveTracer();
-		virtual ~CurveTracer();
+		~CurveTracer() override;
 
 		ImagePrimitiveParameter *imageParameter();
 		const ImagePrimitiveParameter *imageParameter() const;
@@ -94,7 +94,7 @@ class IECOREIMAGE_API CurveTracer : public IECore::Op
 
 	protected :
 
-		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

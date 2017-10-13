@@ -55,7 +55,7 @@ class IECORE_API ObjectReader : public Reader
 		ObjectReader( );
 		/// Construct a new instance to read the given file
 		ObjectReader( const std::string &fileName );
-		virtual ~ObjectReader();
+		~ObjectReader() override;
 
 		/// Returns true if the given file is potentially readable as an Object
 		static bool canRead( const std::string &fileName );
@@ -63,11 +63,11 @@ class IECORE_API ObjectReader : public Reader
 		/// Returns the file header in the file specified by fileName(). This is intended to
 		/// give fast access to some information about the contents of the file, without
 		/// having to load the entire thing.
-		virtual CompoundObjectPtr readHeader();
+		CompoundObjectPtr readHeader() override;
 
 	protected:
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 		static IndexedIOPtr open( const std::string &fileName );
 

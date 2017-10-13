@@ -70,7 +70,7 @@ class IECORERI_API RIBWriter : public IECore::Writer
 
 	protected :
 
-		virtual void doWrite( const IECore::CompoundObject *operands );
+		void doWrite( const IECore::CompoundObject *operands ) override;
 
 	private :
 

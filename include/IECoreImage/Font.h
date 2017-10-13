@@ -59,7 +59,7 @@ class IECOREIMAGE_API Font : public IECore::RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreImage::Font, FontTypeId, IECore::RunTimeTyped );
 
 		Font( const std::string &fontFile );
-		virtual ~Font();
+		~Font() override;
 
 		const std::string &fileName() const;
 

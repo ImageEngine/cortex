@@ -127,7 +127,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glPushAttrib( GL_ALL_ATTRIB_BITS );
 		}
 
-		~Implementation()
+		~Implementation() override
 		{
 			// we don't want preexisting errors to
 			// trigger exceptions from error checking code

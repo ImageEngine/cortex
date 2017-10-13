@@ -58,11 +58,11 @@ class IECORE_API ContrastSmoothSkinningWeightsOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( ContrastSmoothSkinningWeightsOp, ModifyOp );
 
 		ContrastSmoothSkinningWeightsOp();
-		virtual ~ContrastSmoothSkinningWeightsOp();
+		~ContrastSmoothSkinningWeightsOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

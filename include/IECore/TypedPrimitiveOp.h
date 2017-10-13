@@ -51,7 +51,7 @@ class TypedPrimitiveOp : public ModifyOp
 		typedef T PrimitiveType;
 
 		TypedPrimitiveOp( const std::string &description );
-		virtual ~TypedPrimitiveOp();
+		~TypedPrimitiveOp() override;
 
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedPrimitiveOp<T>, ModifyOp );
 
@@ -63,7 +63,7 @@ class TypedPrimitiveOp : public ModifyOp
 	private :
 
 		/// Implemented to call modifyTypedPrimitive
-		void modify( Object *primitive, const CompoundObject *operands );
+		void modify( Object *primitive, const CompoundObject *operands ) override;
 
 		IE_CORE_DECLARERUNTIMETYPEDDESCRIPTION( TypedPrimitiveOp<T> );
 

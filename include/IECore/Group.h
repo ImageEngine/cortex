@@ -61,7 +61,7 @@ class IECORE_API Group : public VisibleRenderable
 		/// \todo Add a constructor taking a list of children and state
 		/// and an optional transform, and bind it.
 		Group();
-		virtual ~Group();
+		~Group() override;
 
 		IE_CORE_DECLAREOBJECT( Group, VisibleRenderable );
 
@@ -124,7 +124,7 @@ class IECORE_API Group : public VisibleRenderable
 
 		/// Renders all the children in an attribute block along
 		/// with the transform and state.
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 		/// As above, but can optionally omit the
 		/// attribute block scoping.
 		void render( Renderer *renderer, bool inAttributeBlock ) const;
@@ -136,7 +136,7 @@ class IECORE_API Group : public VisibleRenderable
 
 		/// Returns the union of the bounds of the children, transformed
 		/// by transformMatrix().
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
 	private:
 

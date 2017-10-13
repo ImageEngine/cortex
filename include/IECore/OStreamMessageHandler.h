@@ -77,11 +77,11 @@ class IECORE_API OStreamMessageHandler : public MessageHandler
 		static OStreamMessageHandler *cOutHandler();
 		//@}
 
-		virtual void handle( Level level, const std::string &context, const std::string &message );
+		void handle( Level level, const std::string &context, const std::string &message ) override;
 
 	protected :
 
-		virtual ~OStreamMessageHandler();
+		~OStreamMessageHandler() override;
 
 		std::ostream *m_stream;
 

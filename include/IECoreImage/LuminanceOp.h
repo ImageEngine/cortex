@@ -52,7 +52,7 @@ class IECOREIMAGE_API LuminanceOp : public IECore::ModifyOp
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LuminanceOp, LuminanceOpTypeId, IECore::ModifyOp );
 
 		LuminanceOp();
-		virtual ~LuminanceOp();
+		~LuminanceOp() override;
 
 		IECore::StringParameter *colorChannelParameter();
 		const IECore::StringParameter *colorChannelParameter() const;
@@ -77,7 +77,7 @@ class IECOREIMAGE_API LuminanceOp : public IECore::ModifyOp
 
 	protected :
 
-		virtual void modify( IECore::Object *object, const IECore::CompoundObject *operands );
+		void modify( IECore::Object *object, const IECore::CompoundObject *operands ) override;
 
 	private :
 

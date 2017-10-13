@@ -55,7 +55,7 @@ class IECORE_API MotionPrimitive : public VisibleRenderable
 		typedef std::map<float, PrimitivePtr> SnapshotMap;
 
 		MotionPrimitive();
-		virtual ~MotionPrimitive();
+		~MotionPrimitive() override;
 
 		IE_CORE_DECLAREOBJECT( MotionPrimitive, VisibleRenderable );
 
@@ -77,8 +77,8 @@ class IECORE_API MotionPrimitive : public VisibleRenderable
 
 		/// May throw an Exception if the contained Primitives are not
 		/// compatible with each other.
-		virtual void render( Renderer *renderer ) const;
-		virtual Imath::Box3f bound() const;
+		void render( Renderer *renderer ) const override;
+		Imath::Box3f bound() const override;
 
 	private:
 

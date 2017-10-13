@@ -61,11 +61,11 @@ class IECOREGL_API ToGLMeshConverter : public ToGLConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLMeshConverter, ToGLMeshConverterTypeId, ToGLConverter );
 
 		ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert = nullptr );
-		virtual ~ToGLMeshConverter();
+		~ToGLMeshConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

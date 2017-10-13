@@ -89,7 +89,7 @@ class NumericParameter : public Parameter
 
 		/// Implemented to return true only if value is of type TypedData<T> and if
 		/// min <= value->readable() <= max.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 	private :
 

@@ -63,7 +63,7 @@ class RendererImplementation : public IECore::RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( RendererImplementation, RendererImplementationTypeId, IECore::RunTimeTyped )
 
 		RendererImplementation();
-		virtual ~RendererImplementation();
+		~RendererImplementation() override;
 
 		/// Guaranteed to be called at least once before worldBegin(),
 		/// and never after worldBegin().

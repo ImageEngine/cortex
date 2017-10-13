@@ -56,13 +56,13 @@ class IECORERI_API PTCParticleReader : public IECore::ParticleReader
 
 		PTCParticleReader( );
 		PTCParticleReader( const std::string &fileName );
-		virtual ~PTCParticleReader();
+		~PTCParticleReader() override;
 
 		static bool canRead( const std::string &fileName );
 
-		virtual unsigned long numParticles();
-		virtual void attributeNames( std::vector<std::string> &names );
-		virtual IECore::DataPtr readAttribute( const std::string &name );
+		unsigned long numParticles() override;
+		void attributeNames( std::vector<std::string> &names ) override;
+		IECore::DataPtr readAttribute( const std::string &name ) override;
 
 	protected :
 
@@ -71,9 +71,9 @@ class IECORERI_API PTCParticleReader : public IECore::ParticleReader
 		/// with the information available in the pointcloud header file
 		/// (worldToEye, worldToNdc, boundingBox, xResolution, yResolution and aspectRatio, variableTypes).
 		/// This method overwrites the base class implementation.
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands ) override;
 
-		virtual std::string positionPrimVarName();
+		std::string positionPrimVarName() override;
 
 	private :
 

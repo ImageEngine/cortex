@@ -67,11 +67,11 @@ class IECOREGL_API ShaderStateComponent : public StateComponent
 		/// GL resource creation deferred until the drawing thread uses shaderSetup().
 		ShaderStateComponent( ShaderLoaderPtr shaderLoader, TextureLoaderPtr textureLoader, const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource, IECore::ConstCompoundObjectPtr parameterValues );
 		/// Destructor
-		virtual ~ShaderStateComponent();
+		~ShaderStateComponent() override;
 
 		/// Implemented to do nothing - it is the responsibility of the Primitive
 		/// to actually bind the shaderSetup() at an appropriate time.
-		virtual void bind() const;
+		void bind() const override;
 
 		ShaderLoader *shaderLoader();
 		TextureLoader *textureLoader();

@@ -48,10 +48,10 @@ class IECORE_API MatrixTransform : public Transform
 		IE_CORE_DECLAREOBJECT( MatrixTransform, Transform );
 
 		MatrixTransform( const Imath::M44f &matrix = Imath::M44f() );
-		virtual ~MatrixTransform();
+		~MatrixTransform() override;
 
-		virtual void render( Renderer *renderer ) const;
-		virtual Imath::M44f transform( float time = 0 ) const;
+		void render( Renderer *renderer ) const override;
+		Imath::M44f transform( float time = 0 ) const override;
 
 		/// The transform this object applies. It can
 		/// be modified freely.

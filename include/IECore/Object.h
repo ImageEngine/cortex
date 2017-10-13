@@ -64,13 +64,13 @@ class MurmurHash;
 #define IE_CORE_DECLAREOBJECTMEMBERFNS( TYPENAME )																		\
 	public :																											\
 		TYPENAME::Ptr copy() const { return boost::static_pointer_cast<TYPENAME>( IECore::Object::copy() ); }			\
-		virtual bool isEqualTo( const IECore::Object *other ) const;													\
-		virtual void hash( IECore::MurmurHash &h ) const;																		\
+		bool isEqualTo( const IECore::Object *other ) const override;													\
+		void hash( IECore::MurmurHash &h ) const override;																\
 	protected :																											\
-		virtual void copyFrom( const IECore::Object *other, IECore::Object::CopyContext *context );						\
-		virtual void save( IECore::Object::SaveContext *context ) const;								 				\
-		virtual void load( IECore::Object::LoadContextPtr context );  								   					\
-		virtual void memoryUsage( IECore::Object::MemoryAccumulator & ) const;											\
+		void copyFrom( const IECore::Object *other, IECore::Object::CopyContext *context ) override;					\
+		void save( IECore::Object::SaveContext *context ) const override;								 				\
+		void load( IECore::Object::LoadContextPtr context ) override;  								   					\
+		void memoryUsage( IECore::Object::MemoryAccumulator & ) const override;											\
 
 #define IE_CORE_DECLAREOBJECT( TYPE, BASETYPE ) 																		\
 	IE_CORE_DECLARERUNTIMETYPED( TYPE, BASETYPE ); 																		\
@@ -107,7 +107,7 @@ class IECORE_API Object : public RunTimeTyped
 
 		Object();
 
-		virtual ~Object();
+		~Object() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( Object, RunTimeTyped );
 

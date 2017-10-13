@@ -52,7 +52,7 @@ class IECOREGL_API CachedConverter : public IECore::RefCounted
 
 		/// Max memory specified in bytes.
 		CachedConverter( size_t maxMemory );
-		virtual ~CachedConverter();
+		~CachedConverter() override;
 
 		/// Returns the object converted to an appropriate IECoreGL type, reusing
 		/// a previous conversion where possible.

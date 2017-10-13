@@ -53,9 +53,9 @@ class ProgressTileCallback : public renderer::TileCallbackBase
 
 		ProgressTileCallback();
 
-		virtual void release();
+		void release() override;
 
-		virtual void post_render_tile( const renderer::Frame *frame, const size_t tileX, const size_t tileY );
+		void post_render_tile( const renderer::Frame *frame, const size_t tileX, const size_t tileY ) override;
 
 	protected :
 
@@ -72,9 +72,9 @@ class ProgressTileCallbackFactory : public renderer::ITileCallbackFactory
 
 		ProgressTileCallbackFactory();
 
-		virtual void release();
+		void release() override;
 
-		virtual renderer::ITileCallback* create();
+		renderer::ITileCallback* create() override;
 
 	private :
 

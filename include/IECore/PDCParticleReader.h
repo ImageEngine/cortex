@@ -56,18 +56,18 @@ class IECORE_API PDCParticleReader : public ParticleReader
 
 		PDCParticleReader( );
 		PDCParticleReader( const std::string &fileName );
-		virtual ~PDCParticleReader();
+		~PDCParticleReader() override;
 
 		static bool canRead( const std::string &fileName );
 
-		virtual unsigned long numParticles();
-		virtual void attributeNames( std::vector<std::string> &names );
-		virtual DataPtr readAttribute( const std::string &name );
+		unsigned long numParticles() override;
+		void attributeNames( std::vector<std::string> &names ) override;
+		DataPtr readAttribute( const std::string &name ) override;
 
 	protected:
 
 		// Returns the name of the position primVar
-		virtual std::string positionPrimVarName();
+		std::string positionPrimVarName() override;
 
 	private :
 

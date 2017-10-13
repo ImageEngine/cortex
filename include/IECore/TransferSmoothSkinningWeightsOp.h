@@ -49,11 +49,11 @@ class IECORE_API TransferSmoothSkinningWeightsOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( TransferSmoothSkinningWeightsOp, ModifyOp );
 
 		TransferSmoothSkinningWeightsOp();
-		virtual ~TransferSmoothSkinningWeightsOp();
+		~TransferSmoothSkinningWeightsOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

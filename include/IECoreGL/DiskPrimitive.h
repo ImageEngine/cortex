@@ -49,12 +49,12 @@ class IECOREGL_API DiskPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DiskPrimitive, DiskPrimitiveTypeId, Primitive );
 
 		DiskPrimitive( float radius = 1, float z = 0, float thetaMax = 360 );
-		virtual ~DiskPrimitive();
+		~DiskPrimitive() override;
 
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		Imath::Box3f bound() const override;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
 
-		virtual void renderInstances( size_t numInstances = 1 ) const;
+		void renderInstances( size_t numInstances = 1 ) const override;
 
 	private :
 

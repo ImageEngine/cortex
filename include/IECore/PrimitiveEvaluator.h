@@ -71,7 +71,7 @@ class IECORE_API PrimitiveEvaluator : public RunTimeTyped
 
 				IE_CORE_DECLAREMEMBERPTR( Result );
 
-				virtual ~Result();
+				~Result() override;
 
 				/// Returns the point computed by the query.
 				virtual Imath::V3f point() const =0;
@@ -108,7 +108,7 @@ class IECORE_API PrimitiveEvaluator : public RunTimeTyped
 		/// evaluator types which have been registered.
 		static PrimitiveEvaluatorPtr create( ConstPrimitivePtr primitive );
 
-		virtual ~PrimitiveEvaluator();
+		~PrimitiveEvaluator() override;
 
 		/// Create a result instance which is suitable for passing to one of the query methods
 		virtual ResultPtr createResult() const = 0;

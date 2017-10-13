@@ -52,9 +52,9 @@ class IECOREGL_API DepthTexture : public Texture
 
 		DepthTexture( unsigned int width, unsigned height, const IECore::Data *z = nullptr );
 
-		virtual ~DepthTexture();
+		~DepthTexture() override;
 
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 };
 

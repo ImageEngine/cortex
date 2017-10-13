@@ -62,7 +62,7 @@ class IECORE_API PatchMeshPrimitive : public Primitive
 		        ConstV3fVectorDataPtr p = nullptr
 		);
 
-		virtual ~PatchMeshPrimitive();
+		~PatchMeshPrimitive() override;
 
 		IE_CORE_DECLAREOBJECT( PatchMeshPrimitive, Primitive );
 
@@ -81,12 +81,12 @@ class IECORE_API PatchMeshPrimitive : public Primitive
 		bool uPeriodic() const;
 		bool vPeriodic() const;
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 		/// Follows the RenderMan specification for variable sizes.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		void topologyHash( MurmurHash &h ) const override;
 
 	protected :
 

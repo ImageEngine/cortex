@@ -53,7 +53,7 @@ class IECORE_API CurvesPrimitive : public Primitive
 		CurvesPrimitive();
 		/// Copies of vertsPerCurve and p are taken.
 		CurvesPrimitive( ConstIntVectorDataPtr vertsPerCurve, const CubicBasisf &basis=CubicBasisf::linear(), bool periodic = false, ConstV3fVectorDataPtr p = nullptr );
-		virtual ~CurvesPrimitive();
+		~CurvesPrimitive() override;
 
 		IE_CORE_DECLAREOBJECT( CurvesPrimitive, Primitive );
 
@@ -63,9 +63,9 @@ class IECORE_API CurvesPrimitive : public Primitive
 		bool periodic() const;
 		void setTopology( ConstIntVectorDataPtr verticesPerCurve, const CubicBasisf &basis, bool periodic );
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 		/// Follows the RenderMan specification for variable sizes.
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 		/// Returns the variable size for a single curve.
 		size_t variableSize( PrimitiveVariable::Interpolation interpolation, unsigned curveIndex ) const;
 
@@ -77,7 +77,7 @@ class IECORE_API CurvesPrimitive : public Primitive
 		/// Creates a wireframe box of the specified size.
 		static Ptr createBox( const Imath::Box3f &b );
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		void topologyHash( MurmurHash &h ) const override;
 
 	protected :
 

@@ -64,7 +64,7 @@ class IECORE_API ObjectPool : public RefCounted
 		IE_CORE_DECLAREMEMBERPTR( ObjectPool );
 
 		ObjectPool( size_t maxMemory );
-		virtual ~ObjectPool();
+		~ObjectPool() override;
 
 		// Clears all the objects in the pool
 		void clear();

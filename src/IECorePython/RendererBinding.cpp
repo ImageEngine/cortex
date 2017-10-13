@@ -63,7 +63,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 		{
 		};
 
-		virtual Imath::Box3f bound() const
+		Imath::Box3f bound() const override
 		{
 			ScopedGILLock gilLock;
 			try
@@ -93,7 +93,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 			return Imath::Box3f(); // empty
 		}
 
-		virtual void render( Renderer *r ) const
+		void render( Renderer *r ) const override
 		{
 			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.
@@ -124,7 +124,7 @@ class ProceduralWrapper : public RefCountedWrapper<Renderer::Procedural>
 			}
 		}
 
-		virtual MurmurHash hash() const
+		MurmurHash hash() const override
 		{
 			ScopedGILLock gilLock;
 			// ideally we might not do any exception handling here, and always leave it to the host.

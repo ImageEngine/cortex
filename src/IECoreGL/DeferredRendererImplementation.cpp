@@ -376,11 +376,11 @@ class DeferredRendererImplementation::ProceduralTask : public tbb::task, private
 			m_proceduralContext->groupStack.push( curContext->groupStack.top() );
 		}
 
-		virtual ~ProceduralTask()
+		~ProceduralTask() override
 		{
 		}
 
-		task* execute()
+		task* execute() override
 		{
 			tbb::task_list taskList;
 

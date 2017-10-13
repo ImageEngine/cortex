@@ -60,11 +60,11 @@ class FileIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 
 		StreamFile( const std::string &filename, IndexedIO::OpenMode mode );
 
-		virtual ~StreamFile();
+		~StreamFile() override;
 
 		static bool canRead( const std::string &path );
 
-		void flush( size_t endPosition );
+		void flush( size_t endPosition ) override;
 
 };
 

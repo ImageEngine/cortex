@@ -56,7 +56,7 @@ class IECOREGL_API Font : public IECore::RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Font, FontTypeId, IECore::RunTimeTyped );
 
 		Font( IECore::FontPtr font );
-		virtual ~Font();
+		~Font() override;
 
 		IECore::Font *coreFont();
 

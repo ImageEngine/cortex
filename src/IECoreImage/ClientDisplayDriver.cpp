@@ -58,7 +58,7 @@ class ClientDisplayDriver::PrivateData : public RefCounted
 		{
 		}
 
-		~PrivateData()
+		~PrivateData() override
 		{
 			m_socket.close();
 		}

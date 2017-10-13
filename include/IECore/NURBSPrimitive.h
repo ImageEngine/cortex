@@ -78,11 +78,11 @@ class IECORE_API NURBSPrimitive : public Primitive
 			int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax );
 		//@}
 
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		void topologyHash( MurmurHash &h ) const override;
 
 	private:
 

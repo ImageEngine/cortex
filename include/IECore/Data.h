@@ -51,7 +51,7 @@ class IECORE_API Data : public Object
 
 	protected :
 
-		virtual ~Data();
+		~Data() override;
 
 	private :
 

@@ -57,7 +57,7 @@ class LevenbergMarquardtErrorFn : public RefCounted
 		{
 		}
 
-		virtual ~LevenbergMarquardtErrorFn()
+		~LevenbergMarquardtErrorFn() override
 		{
 		}
 
@@ -91,11 +91,11 @@ class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarq
 		{
 		}
 
-		virtual ~LevenbergMarquardtErrorFnWrapper()
+		~LevenbergMarquardtErrorFnWrapper() override
 		{
 		}
 
-		virtual unsigned numErrors()
+		unsigned numErrors() override
 		{
 			ScopedGILLock gilLock;
 			object o = this->methodOverride( "numErrors" );
@@ -117,10 +117,10 @@ class LevenbergMarquardtErrorFnWrapper : public RefCountedWrapper< LevenbergMarq
 			}
 		}
 
-		virtual void computeErrors(
+		void computeErrors(
 		        typename TypedData< std::vector<T> >::Ptr parameters,
 		        typename TypedData< std::vector<T> >::Ptr errors
-		)
+		) override
 		{
 			ScopedGILLock gilLock;
 			object o = this->methodOverride( "computeErrors" );

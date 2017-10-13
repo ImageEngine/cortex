@@ -60,11 +60,11 @@ class ToGLSphereConverter : public ToGLConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLSphereConverter, ToGLSphereConverterTypeId, ToGLConverter );
 
 		ToGLSphereConverter( IECore::ConstSpherePrimitivePtr toConvert = nullptr );
-		virtual ~ToGLSphereConverter();
+		~ToGLSphereConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

@@ -52,10 +52,10 @@ class IECOREGL_API TextPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::TextPrimitive, TextPrimitiveTypeId, Primitive );
 
 		TextPrimitive( const std::string &text, FontPtr font );
-		virtual ~TextPrimitive();
+		~TextPrimitive() override;
 
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		Imath::Box3f bound() const override;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on
@@ -73,8 +73,8 @@ class IECOREGL_API TextPrimitive : public Primitive
 		IE_CORE_DECLAREPTR( Type );
 		//@}
 
-		virtual void render( State *currentState ) const;
-		virtual void renderInstances( size_t numInstances ) const;
+		void render( State *currentState ) const override;
+		void renderInstances( size_t numInstances ) const override;
 
 	private :
 

@@ -53,14 +53,14 @@ class IECOREGL_API CurvesPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
 		CurvesPrimitive( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr vertsPerCurve, float width=1.0f );
-		virtual ~CurvesPrimitive();
+		~CurvesPrimitive() override;
 
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
-		virtual void render( const State *currentState, IECore::TypeId style ) const;
+		Imath::Box3f bound() const override;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const override;
+		void render( const State *currentState, IECore::TypeId style ) const override;
 		/// Just renders each segment as linear with GL_LINES.
-		virtual void renderInstances( size_t numInstances = 1 ) const;
+		void renderInstances( size_t numInstances = 1 ) const override;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on

@@ -53,12 +53,12 @@ class IECOREGL_API SpherePrimitive : public Primitive
 		/// Z range is always 0 <= zMin < zMax <= 1. ie zMin and zMax are measured as a proportion
 		/// of radius and not absolutely as in the Renderman spec.
 		SpherePrimitive( float radius = 1, float zMin = -1, float zMax = 1, float thetaMax = 360 );
-		virtual ~SpherePrimitive();
+		~SpherePrimitive() override;
 
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		Imath::Box3f bound() const override;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
 
-		virtual void renderInstances( size_t numInstances = 1 ) const;
+		void renderInstances( size_t numInstances = 1 ) const override;
 
 	private :
 

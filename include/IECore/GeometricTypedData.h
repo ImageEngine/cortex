@@ -89,8 +89,8 @@ class GeometricTypedData : public TypedData<T>
 		////////////////////////////////////////////////////////////
 		//@{
 		typename GeometricTypedData<T>::Ptr copy() const;
-		virtual bool isEqualTo( const Object *other ) const;
-		virtual void hash( MurmurHash &h ) const;
+		bool isEqualTo( const Object *other ) const override;
+		void hash( MurmurHash &h ) const override;
 		//@}
 
 		/// Get/Set Interpretation may be used to distinguish different uses of common data types.
@@ -101,14 +101,14 @@ class GeometricTypedData : public TypedData<T>
 
 	protected :
 
-		virtual ~GeometricTypedData();
+		~GeometricTypedData() override;
 
 		static Object::TypeDescription<GeometricTypedData<T> > m_typeDescription;
 
-		virtual void copyFrom( const Object *other, Object::CopyContext *context );
-		virtual void save( Object::SaveContext *context ) const;
-		virtual void load( Object::LoadContextPtr context );
-		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
+		void copyFrom( const Object *other, Object::CopyContext *context ) override;
+		void save( Object::SaveContext *context ) const override;
+		void load( Object::LoadContextPtr context ) override;
+		void memoryUsage( Object::MemoryAccumulator &accumulator ) const override;
 
 	private :
 

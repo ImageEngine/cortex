@@ -102,7 +102,7 @@ class IECOREIMAGE_API ImagePrimitive : public IECore::BlindDataHolder
 		/// no primitive variables.
 		ImagePrimitive( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow );
 
-		virtual ~ImagePrimitive();
+		~ImagePrimitive() override;
 
 		/// Returns the data window.
 		const Imath::Box2i &getDataWindow() const;

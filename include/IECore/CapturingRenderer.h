@@ -58,7 +58,7 @@ class IECORE_API CapturingRenderer : public Renderer
 		IE_CORE_DECLARERUNTIMETYPED( CapturingRenderer, Renderer );
 
 		CapturingRenderer();
-		virtual ~CapturingRenderer();
+		~CapturingRenderer() override;
 
 		/// \par Implementation specific options :
 		////////////////////////////////////////////////////////////
@@ -73,27 +73,27 @@ class IECORE_API CapturingRenderer : public Renderer
 		/// be output. The filters also support wildcards, so you can specify things like
 		/// "/root/wheel*Rim/bolt", "/root/torso/rib*", and "/root/*", the last of which
 		/// will output "/root" and all its descendants.
-		virtual void setOption( const std::string &name, ConstDataPtr value );
+		void setOption( const std::string &name, ConstDataPtr value ) override;
 
-		virtual ConstDataPtr getOption( const std::string &name ) const;
+		ConstDataPtr getOption( const std::string &name ) const override;
 
-		virtual void camera( const std::string &name, const CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, const CompoundDataMap &parameters );
+		void camera( const std::string &name, const CompoundDataMap &parameters ) override;
+		void display( const std::string &name, const std::string &type, const std::string &data, const CompoundDataMap &parameters ) override;
 
-		virtual void worldBegin();
-		virtual void worldEnd();
+		void worldBegin() override;
+		void worldEnd() override;
 
-		virtual void transformBegin();
-		virtual void transformEnd();
-		virtual void setTransform( const Imath::M44f &m );
-		virtual void setTransform( const std::string &coordinateSystem );
-		virtual Imath::M44f getTransform() const;
-		virtual Imath::M44f getTransform( const std::string &coordinateSystem ) const;
-		virtual void concatTransform( const Imath::M44f &m );
-		virtual void coordinateSystem( const std::string &name );
+		void transformBegin() override;
+		void transformEnd() override;
+		void setTransform( const Imath::M44f &m ) override;
+		void setTransform( const std::string &coordinateSystem ) override;
+		Imath::M44f getTransform() const override;
+		Imath::M44f getTransform( const std::string &coordinateSystem ) const override;
+		void concatTransform( const Imath::M44f &m ) override;
+		void coordinateSystem( const std::string &name ) override;
 
-		virtual void attributeBegin();
-		virtual void attributeEnd();
+		void attributeBegin() override;
+		void attributeEnd() override;
 		/// \par Implementation specific procedural attributes :
 		////////////////////////////////////////////////////////////
 		///
@@ -101,36 +101,36 @@ class IECORE_API CapturingRenderer : public Renderer
 		/// When true, procedurals may be evaluated in multiple parallel threads.
 		/// When false they will be evaluated from the thread they were specified from.
 
-		virtual void setAttribute( const std::string &name, ConstDataPtr value );
-		virtual ConstDataPtr getAttribute( const std::string &name ) const;
-		virtual void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters );
-		virtual void light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters );
-		virtual void illuminate( const std::string &lightHandle, bool on );
+		void setAttribute( const std::string &name, ConstDataPtr value ) override;
+		ConstDataPtr getAttribute( const std::string &name ) const override;
+		void shader( const std::string &type, const std::string &name, const CompoundDataMap &parameters ) override;
+		void light( const std::string &name, const std::string &handle, const CompoundDataMap &parameters ) override;
+		void illuminate( const std::string &lightHandle, bool on ) override;
 
-		virtual void motionBegin( const std::set<float> &times );
-		virtual void motionEnd();
+		void motionBegin( const std::set<float> &times ) override;
+		void motionEnd() override;
 
-		virtual void points( size_t numPoints, const PrimitiveVariableMap &primVars );
-		virtual void disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars );
-		virtual void curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
-		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const PrimitiveVariableMap &primVars=PrimitiveVariableMap() );
-		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars );
-		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars );
-		virtual void mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars );
-		virtual void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars );
-		virtual void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars );
-		virtual void geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars );
+		void points( size_t numPoints, const PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const PrimitiveVariableMap &primVars ) override;
+		void curves( const CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const PrimitiveVariableMap &primVars=PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const PrimitiveVariableMap &primVars ) override;
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const PrimitiveVariableMap &primVars ) override;
+		void mesh( ConstIntVectorDataPtr vertsPerFace, ConstIntVectorDataPtr vertIds, const std::string &interpolation, const PrimitiveVariableMap &primVars ) override;
+		void nurbs( int uOrder, ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const PrimitiveVariableMap &primVars ) override;
+		void patchMesh( const CubicBasisf &uBasis, const CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const PrimitiveVariableMap &primVars ) override;
+		void geometry( const std::string &type, const CompoundDataMap &topology, const PrimitiveVariableMap &primVars ) override;
 
-		virtual void procedural( ProceduralPtr proc );
+		void procedural( ProceduralPtr proc ) override;
 
-		virtual void instanceBegin( const std::string &name, const CompoundDataMap &parameters );
-		virtual void instanceEnd();
-		virtual void instance( const std::string &name );
+		void instanceBegin( const std::string &name, const CompoundDataMap &parameters ) override;
+		void instanceEnd() override;
+		void instance( const std::string &name ) override;
 
-		virtual DataPtr command( const std::string &name, const CompoundDataMap &parameters );
+		DataPtr command( const std::string &name, const CompoundDataMap &parameters ) override;
 
-		virtual void editBegin( const std::string &editType, const CompoundDataMap &parameters );
-		virtual void editEnd();
+		void editBegin( const std::string &editType, const CompoundDataMap &parameters ) override;
+		void editEnd() override;
 
 		/// Returns the world that was captured.
 		/// \todo If we had a class for representing whole Scenes (including stuff before worldBegin)

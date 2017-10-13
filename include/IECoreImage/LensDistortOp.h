@@ -54,7 +54,7 @@ class IECOREIMAGE_API LensDistortOp : public WarpOp
 	public:
 
 		LensDistortOp();
-		virtual ~LensDistortOp();
+		~LensDistortOp() override;
 
 		IECore::ObjectParameter * lensParameter();
 		const IECore::ObjectParameter * lensParameter() const;
@@ -63,10 +63,10 @@ class IECOREIMAGE_API LensDistortOp : public WarpOp
 
 	protected :
 
-		virtual void begin( const IECore::CompoundObject * operands );
-		virtual Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const;
-		virtual Imath::V2f warp( const Imath::V2f &p ) const;
-		virtual void end();
+		void begin( const IECore::CompoundObject * operands ) override;
+		Imath::Box2i warpedDataWindow( const Imath::Box2i &dataWindow ) const override;
+		Imath::V2f warp( const Imath::V2f &p ) const override;
+		void end() override;
 
 	private :
 

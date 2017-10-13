@@ -46,11 +46,11 @@ class IECORE_API ClippingPlane : public PreWorldRenderable
 	public:
 
 		ClippingPlane();
-		virtual ~ClippingPlane();
+		~ClippingPlane() override;
 
 		IE_CORE_DECLAREOBJECT( ClippingPlane, PreWorldRenderable );
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 };
 

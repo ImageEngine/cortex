@@ -49,13 +49,13 @@ class IECOREGL_API BoxPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::BoxPrimitive, BoxPrimitiveTypeId, Primitive );
 
 		BoxPrimitive( const Imath::Box3f &box );
-		virtual ~BoxPrimitive();
+		~BoxPrimitive() override;
 
 		void setBox( const Imath::Box3f &box );
 		const Imath::Box3f getBox() const;
 
-		virtual Imath::Box3f bound() const;
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		Imath::Box3f bound() const override;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
 
 		/// Utility function which draws a box using GL_LINES.
 		static void renderWireframe( const Imath::Box3f &box );
@@ -64,7 +64,7 @@ class IECOREGL_API BoxPrimitive : public Primitive
 
 	protected :
 
-		virtual void render( const State * state, IECore::TypeId style ) const;
+		void render( const State * state, IECore::TypeId style ) const override;
 
 	private :
 

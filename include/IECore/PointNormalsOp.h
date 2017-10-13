@@ -57,7 +57,7 @@ class IECORE_API PointNormalsOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( PointNormalsOp, Op );
 
 		PointNormalsOp();
-		virtual ~PointNormalsOp();
+		~PointNormalsOp() override;
 
 		/// The Parameter for the input point cloud.
 		ObjectParameter * pointParameter();
@@ -70,7 +70,7 @@ class IECORE_API PointNormalsOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

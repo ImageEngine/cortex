@@ -53,7 +53,7 @@ class IECORE_API RemoveSmoothSkinningInfluencesOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( RemoveSmoothSkinningInfluencesOp, ModifyOp );
 
 		RemoveSmoothSkinningInfluencesOp();
-		virtual ~RemoveSmoothSkinningInfluencesOp();
+		~RemoveSmoothSkinningInfluencesOp() override;
 
 		enum Mode
 		{
@@ -64,7 +64,7 @@ class IECORE_API RemoveSmoothSkinningInfluencesOp : public ModifyOp
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

@@ -66,7 +66,7 @@ class State::Implementation : public IECore::RefCounted
 		{
 		}
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 		}
 

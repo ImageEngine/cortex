@@ -61,10 +61,10 @@ class TypedStateComponent : public StateComponent
 		//! @name RunTimeTyped interface
 		////////////////////////////////////////////////////
 		//@{
-		virtual IECore::TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( IECore::TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
+		IECore::TypeId typeId() const override;
+		const char *typeName() const override;
+		bool isInstanceOf( IECore::TypeId typeId ) const override;
+		bool isInstanceOf( const char *typeName ) const override;
 		static IECore::TypeId staticTypeId();
 		static const char *staticTypeName();
 		static bool inheritsFrom( IECore::TypeId typeId );
@@ -77,7 +77,7 @@ class TypedStateComponent : public StateComponent
 		//! @name Bindable interface
 		////////////////////////////////////////////////////
 		//@{
-		virtual void bind() const;
+		void bind() const override;
 		//@}
 
 		const T &value() const;

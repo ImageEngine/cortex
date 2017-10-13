@@ -51,7 +51,7 @@ class RendererController : public renderer::DefaultRendererController
 			m_status = ContinueRendering;
 		}
 
-		virtual Status get_status() const
+		Status get_status() const override
 		{
 			return m_status;
 		}

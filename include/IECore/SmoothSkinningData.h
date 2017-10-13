@@ -136,7 +136,7 @@ class IECORE_API SmoothSkinningData : public Data
 		/// Default constructor
 		SmoothSkinningData();
 
-		virtual ~SmoothSkinningData();
+		~SmoothSkinningData() override;
 
 		/// raises an exception if the smooth skinning data is not valid
 		void validate() const;

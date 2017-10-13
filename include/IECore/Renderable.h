@@ -50,7 +50,7 @@ class IECORE_API Renderable : public BlindDataHolder
 	public:
 
 		Renderable();
-		virtual ~Renderable();
+		~Renderable() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( Renderable, BlindDataHolder );
 

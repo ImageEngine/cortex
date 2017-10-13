@@ -53,7 +53,7 @@ class IECORE_API DataInterleaveOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( DataInterleaveOp, Op );
 
 		DataInterleaveOp();
-		virtual ~DataInterleaveOp();
+		~DataInterleaveOp() override;
 
 		/// The data to be interleaved. This is specified
 		/// as an ObjectVector containing Data objects of
@@ -68,7 +68,7 @@ class IECORE_API DataInterleaveOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		ObjectPtr doOperation( const CompoundObject *operands ) override;
 
 	private :
 

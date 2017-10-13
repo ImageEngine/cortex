@@ -64,7 +64,7 @@ class IECOREIMAGE_API DisplayDriverServer : public IECore::RunTimeTyped
 		/// automatically. Call `portNumber()` after construction
 		/// to retrieve the actual number.
 		DisplayDriverServer( int portNumber = 0 );
-		virtual ~DisplayDriverServer();
+		~DisplayDriverServer() override;
 
 		int portNumber();
 

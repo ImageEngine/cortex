@@ -69,7 +69,7 @@ class TypedParameter : public Parameter
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedParameter<T>, Parameter );
 
 		/// Implemented to return true only if value is of type TypedData<T>.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 		/// Convenience function for getting the default value, which avoids all the hoop jumping
 		/// needed to extract the value from the Object returned by Parameter::defaultValue().

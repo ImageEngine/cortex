@@ -49,7 +49,7 @@ class IECORE_API ExternalProcedural : public VisibleRenderable
 	public :
 
 		ExternalProcedural( const std::string &fileName = "", const Imath::Box3f &bound = Imath::Box3f(), const CompoundData *parameters = nullptr );
-		virtual ~ExternalProcedural();
+		~ExternalProcedural() override;
 
 		IE_CORE_DECLAREOBJECT( ExternalProcedural, VisibleRenderable );
 
@@ -62,8 +62,8 @@ class IECORE_API ExternalProcedural : public VisibleRenderable
 		CompoundData *parameters();
 		const CompoundData *parameters() const;
 
-		virtual void render( Renderer *renderer ) const;
-		virtual Imath::Box3f bound() const;
+		void render( Renderer *renderer ) const override;
+		Imath::Box3f bound() const override;
 
 	private :
 

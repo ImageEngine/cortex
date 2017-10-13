@@ -66,7 +66,7 @@ class IECOREGL_API Renderer : public IECore::Renderer
 	public :
 
 		Renderer();
-		virtual ~Renderer();
+		~Renderer() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Renderer, RendererTypeId, IECore::Renderer );
 
@@ -105,8 +105,8 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// "gl:drawCoordinateSystems" BoolData false
 		/// When this is true, coordinate systems created with the coordinateSystem() method
 		/// will be visualised.
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
-		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
+		void setOption( const std::string &name, IECore::ConstDataPtr value ) override;
+		IECore::ConstDataPtr getOption( const std::string &name ) const override;
 		/// \par Standard parameters supported :
 		///
 		/// \li <b>"resolution"</b>
@@ -115,11 +115,11 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// \li <b>"resolution"</b>
 		/// \li <b>"screenWindow"</b>
 		/// \li <b>"clippingPlanes"</b>
-		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
+		void camera( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters ) override;
 
-		virtual void worldBegin();
-		virtual void worldEnd();
+		void worldBegin() override;
+		void worldEnd() override;
 		/// When in deferred mode (see setOption above), this method will return the Scene that
 		/// was generated.
 		/// \threading The Renderer tries very hard not to need a GL context to operate in when in deferred mode. This allows it to evaluate multiple
@@ -130,17 +130,17 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// thread.
 		ScenePtr scene();
 
-		virtual void transformBegin();
-		virtual void transformEnd();
-		virtual void setTransform( const Imath::M44f &m );
-		virtual void setTransform( const std::string &coordinateSystem );
-		virtual Imath::M44f getTransform() const;
-		virtual Imath::M44f getTransform( const std::string &coordinateSystem ) const;
-		virtual void concatTransform( const Imath::M44f &m );
-		virtual void coordinateSystem( const std::string &name );
+		void transformBegin() override;
+		void transformEnd() override;
+		void setTransform( const Imath::M44f &m ) override;
+		void setTransform( const std::string &coordinateSystem ) override;
+		Imath::M44f getTransform() const override;
+		Imath::M44f getTransform( const std::string &coordinateSystem ) const override;
+		void concatTransform( const Imath::M44f &m ) override;
+		void coordinateSystem( const std::string &name ) override;
 
-		virtual void attributeBegin();
-		virtual void attributeEnd();
+		void attributeBegin() override;
+		void attributeEnd() override;
 		/// \par Standard attributes supported :
 		////////////////////////////////////////////////////////////
 		///
@@ -374,8 +374,8 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// repeatedly. This is currently implemented only for the
 		/// mesh, points and curves primitive types.
 		////////////////////////////////////////////////////////////
-		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
-		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		void setAttribute( const std::string &name, IECore::ConstDataPtr value ) override;
+		IECore::ConstDataPtr getAttribute( const std::string &name ) const override;
 		/// Supports only shader type "surface" or "gl:surface", looking for "name.vert" and  "name.frag" GLSL source files
 		/// in the paths defined by the "searchPath:shader" option. Alternatively if the parameter list contains
 		/// "gl:vertexSource" and/or a "gl:fragmentSource" StringData then a new shader is created using the source provided.
@@ -383,12 +383,12 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// to an image as StringData.
 		/// \todo Add support for "textureParameterName:filter" and "textureParameterName:wrap" parameters which set wrapping
 		/// and filtering on a ShaderStateComponent.
-		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
-		virtual void illuminate( const std::string &lightHandle, bool on );
+		void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters ) override;
+		void illuminate( const std::string &lightHandle, bool on ) override;
 
-		virtual void motionBegin( const std::set<float> &times );
-		virtual void motionEnd();
+		void motionBegin( const std::set<float> &times ) override;
+		void motionEnd() override;
 
 		/// Supports the following primitive variables :
 		///
@@ -422,15 +422,15 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// Constant|Vertex|Varying FloatData|FloatVectorData "patchaspectratio"
 		/// Constant|Vertex|Varying FloatData|FloatVectorData "patchrotation"
 		/// These two are used only by the "patch" type.
-		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
-		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
+		void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Supports the following primitive variables :
 		///
 		/// Vertex V3fVectorData "P"
 		/// Constant FloatData "width"
-		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
-		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
-		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
+		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Supports the following image formats specified as primitive variables :
 		///
 		/// 	"R", "G", "B", "A"	:	UCharVectorData
@@ -445,21 +445,21 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// appear in place of "R", "G", "B", "A".
 		///
 		/// Currently assumes dataWindow==displayWindow.
-		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// All meshes are treated as having interpolation=="linear".
 		/// \todo Support normals and st.
-		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
+		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Not implemented
-		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
+		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Not implemented
-		virtual void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars );
+		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Not implemented
-		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
-		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
+		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars ) override;
+		void procedural( IECore::Renderer::ProceduralPtr proc ) override;
 
-		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void instanceEnd();
-		virtual void instance( const std::string &name );
+		void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void instanceEnd() override;
+		void instance( const std::string &name ) override;
 
 		/// \par Commands implemented
 		///
@@ -479,11 +479,11 @@ class IECOREGL_API Renderer : public IECore::Renderer
 		/// otherwise.
 		/// \todo Consider generalising an interface for scene edits and making it a standard part of the documentation
 		/// in IECore. Any such interface should take into account support for PRMan's new rerendering API.
-		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 
 		/// \todo Implement the existing editing commands in this new form.
-		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void editEnd();
+		void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void editEnd() override;
 
 		/// Returns the internal ShaderLoader object used to load the shaders for this renderer.
 		/// If called before worldBegin it returns 0.

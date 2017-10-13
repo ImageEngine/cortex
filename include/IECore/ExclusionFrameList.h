@@ -51,7 +51,7 @@ class IECORE_API ExclusionFrameList : public FrameList
 		IE_CORE_DECLARERUNTIMETYPED( ExclusionFrameList, FrameList );
 
 		ExclusionFrameList( FrameListPtr frameList, FrameListPtr exclusionFrameList );
-		virtual ~ExclusionFrameList();
+		~ExclusionFrameList() override;
 
 		void setFrameList( FrameListPtr frameList );
 		FrameListPtr getFrameList();
@@ -59,10 +59,10 @@ class IECORE_API ExclusionFrameList : public FrameList
 		void setExclusionFrameList( FrameListPtr exclusionFrameList );
 		FrameListPtr getExclusionFrameList();
 
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const ;
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;
-		virtual FrameListPtr copy() const ;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override ;
+		bool isEqualTo( ConstFrameListPtr other ) const override;
+		FrameListPtr copy() const override ;
 
 		static FrameListPtr parse( const std::string &frameList );
 

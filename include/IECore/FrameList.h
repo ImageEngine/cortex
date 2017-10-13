@@ -58,7 +58,7 @@ class IECORE_API FrameList : public RunTimeTyped
 		IE_CORE_DECLARERUNTIMETYPED( FrameList, RunTimeTyped );
 
 		FrameList();
-		virtual ~FrameList();
+		~FrameList() override;
 
 		/// This method returns a simple list of frames. They are not guaranteed to
 		/// be in ascending order, but they are guaranteed to be non repeating - make

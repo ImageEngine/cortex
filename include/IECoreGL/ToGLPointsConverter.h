@@ -61,11 +61,11 @@ class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
 
 		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = nullptr );
-		virtual ~ToGLPointsConverter();
+		~ToGLPointsConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

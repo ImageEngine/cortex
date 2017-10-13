@@ -49,13 +49,13 @@ class IECOREIMAGE_API SummedAreaOp : public ChannelOp
 	public:
 
 		SummedAreaOp();
-		virtual ~SummedAreaOp();
+		~SummedAreaOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SummedAreaOp, SummedAreaOpTypeId, ChannelOp );
 
 	protected :
 
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+		void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) override;
 
 	private :
 

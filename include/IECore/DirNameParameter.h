@@ -58,7 +58,7 @@ class IECORE_API DirNameParameter : public PathParameter
 		///
 		/// * PathParameter.valueValid() returns false.
 		/// * The given path points to a existent file.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 };
 

@@ -51,11 +51,11 @@ class IECORE_API CompressSmoothSkinningDataOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( CompressSmoothSkinningDataOp, ModifyOp );
 
 		CompressSmoothSkinningDataOp();
-		virtual ~CompressSmoothSkinningDataOp();
+		~CompressSmoothSkinningDataOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

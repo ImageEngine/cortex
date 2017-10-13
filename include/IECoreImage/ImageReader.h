@@ -62,11 +62,11 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 		ImageReader();
 		ImageReader( const std::string &filename );
 
-		virtual ~ImageReader();
+		~ImageReader() override;
 
 		static bool canRead( const std::string &filename );
 
-		virtual IECore::CompoundObjectPtr readHeader();
+		IECore::CompoundObjectPtr readHeader() override;
 
 		//! @name Parameter accessors
 		/// These provide convenient access to the parameters controlling
@@ -106,7 +106,7 @@ class IECOREIMAGE_API ImageReader : public IECore::Reader
 	protected :
 
 		/// Implemented using displayWindow(), dataWindow(), channelNames() and readChannel().
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

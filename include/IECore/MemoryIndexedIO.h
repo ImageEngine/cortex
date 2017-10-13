@@ -52,7 +52,7 @@ class IECORE_API MemoryIndexedIO : public StreamIndexedIO
 
 		MemoryIndexedIO( ConstCharVectorDataPtr buf, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
-		virtual ~MemoryIndexedIO();
+		~MemoryIndexedIO() override;
 
 		/// Returns a copy of the internal buffer representing the entire file.
 		CharVectorDataPtr buffer();
@@ -63,7 +63,7 @@ class IECORE_API MemoryIndexedIO : public StreamIndexedIO
 
 		MemoryIndexedIO( StreamIndexedIO::Node &rootNode );
 
-		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const override;
 
 		class StreamFile;
 };

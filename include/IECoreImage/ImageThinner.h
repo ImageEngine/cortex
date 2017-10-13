@@ -64,7 +64,7 @@ class IECOREIMAGE_API ImageThinner : public ChannelOp
 	public:
 
 		ImageThinner();
-		virtual ~ImageThinner();
+		~ImageThinner() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageThinner, ImageThinnerTypeId, ChannelOp );
 
@@ -77,7 +77,7 @@ class IECOREIMAGE_API ImageThinner : public ChannelOp
 
 	protected :
 
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+		void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) override;
 
 };
 

@@ -60,16 +60,16 @@ class IECORE_API Parameterised : public RunTimeTyped, public ParameterisedInterf
 		/// Another constructor added later on that gives defines the CompoundParameter object to be hold in this Parameterised instance.
 		Parameterised( const std::string &description, CompoundParameterPtr compoundParameter );
 
-		virtual ~Parameterised();
+		~Parameterised() override;
 
 		/// Returns a description for this parameterised object.
 		const std::string &description() const;
 
 		/// Returns the parameters for editing. Subclasses should
 		/// typically add parameters to this from their constructors.
-		virtual CompoundParameter *parameters();
+		CompoundParameter *parameters() override;
 		/// Returns the parameters for query.
-		virtual const CompoundParameter *parameters() const;
+		const CompoundParameter *parameters() const override;
 
 		/// Returns an object that anyone can use for storing anything.
 		CompoundObject *userData();

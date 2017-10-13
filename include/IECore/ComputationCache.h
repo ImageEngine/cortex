@@ -64,7 +64,7 @@ class ComputationCache : public RefCounted
 		/// \param objectPool Allows overriding the ObjectPool instance to be used for holding the resulting computed objects.
 		ComputationCache( ComputeFn computeFn, HashFn hashFn, size_t maxResults = 10000, ObjectPoolPtr objectPool = ObjectPool::defaultObjectPool() );
 
-		virtual ~ComputationCache();
+		~ComputationCache() override;
 
 		/// Removes all the stored computation information from the cache.
 		void clear();

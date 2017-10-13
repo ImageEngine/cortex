@@ -54,9 +54,9 @@ class IECORE_API FrameListParameter : public StringParameter
 		FrameListParameter( const std::string &name, const std::string &description, StringDataPtr defaultValue, bool allowEmptyList = true,
 			const ObjectPresetsContainer &presets = ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData = nullptr );
 
-		virtual ~FrameListParameter();
+		~FrameListParameter() override;
 
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 		void setFrameListValue( ConstFrameListPtr frameList );
 

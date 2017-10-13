@@ -62,7 +62,7 @@ class IECOREGL_API Primitive : public Renderable
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Primitive, PrimitiveTypeId, Renderable );
 
 		Primitive();
-		virtual ~Primitive();
+		~Primitive() override;
 
 		/// Adds a primitive variable to this primitive. Derived classes should implement any filtering
 		/// or conversions that are necessary and then call addVertexAttribute() or addUniformAttribute().
@@ -71,7 +71,7 @@ class IECOREGL_API Primitive : public Renderable
 		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) = 0;
 
 		/// Returns the bounding box for the primitive.
-		virtual Imath::Box3f bound() const = 0;
+		Imath::Box3f bound() const override = 0;
 
 		/// High level rendering function which renders in the styles represented by
 		/// currentState, allowing representations such as wireframe over shaded etc to
@@ -79,7 +79,7 @@ class IECOREGL_API Primitive : public Renderable
 		/// already have been bound. Finer grained control over rendering can be achieved
 		/// by using the shaderSetup() and renderInstances() methods - in fact those methods
 		/// are used to implement this one.
-		virtual void render( State *currentState ) const;
+		void render( State *currentState ) const override;
 
 		//! @name Lower level rendering methods
 		/// These methods are used to implement the higher level render() method - they

@@ -61,7 +61,7 @@ class IECORE_API FromCoreConverter : public Converter
 		FromCoreConverter( const std::string &description, TypeId supportedType );
 		FromCoreConverter( const std::string &description, const ObjectParameter::TypeIdSet &supportedTypes );
 		FromCoreConverter( const std::string &description, const TypeId *supportedTypes );
-		virtual ~FromCoreConverter();
+		~FromCoreConverter() override;
 
 	private :
 

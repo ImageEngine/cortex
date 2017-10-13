@@ -65,7 +65,7 @@ class IECORE_API PointsMotionOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( PointsMotionOp, Op );
 
 		PointsMotionOp();
-		virtual ~PointsMotionOp();
+		~PointsMotionOp() override;
 
 		FloatVectorParameter * snapshotTimesParameter();
 		const FloatVectorParameter * snapshotTimesParameter() const;
@@ -81,7 +81,7 @@ class IECORE_API PointsMotionOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

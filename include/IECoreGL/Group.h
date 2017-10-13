@@ -65,7 +65,7 @@ class IECOREGL_API Group : public Renderable
 		/// Makes a copy of a Group - this is a shallow
 		/// copy so any State and children are just referenced.
 		Group( const Group &other );
-		virtual ~Group();
+		~Group() override;
 
 		void setTransform( const Imath::M44f &matrix );
 		const Imath::M44f &getTransform() const;
@@ -75,8 +75,8 @@ class IECOREGL_API Group : public Renderable
 		void setState( StatePtr state );
 
 		// render method ( assumes there's no threads modifying the group ).
-		virtual void render( State *currentState ) const;
-		virtual Imath::Box3f bound() const;
+		void render( State *currentState ) const override;
+		Imath::Box3f bound() const override;
 
 		void addChild( RenderablePtr child );
 		void removeChild( Renderable *child );

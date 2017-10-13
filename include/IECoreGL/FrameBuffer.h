@@ -62,7 +62,7 @@ class IECOREGL_API FrameBuffer : public IECore::RunTimeTyped
 		/// the set*() functions below to provide locations to draw to before using
 		/// it.
 		FrameBuffer();
-		virtual ~FrameBuffer();
+		~FrameBuffer() override;
 
 		/// Returns the GL handle for the framebuffer. Note that this is
 		/// owned by the FrameBuffer class and will be destroyed in the

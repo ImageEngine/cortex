@@ -59,7 +59,7 @@ class IECORE_API ValidatedStringParameter : public StringParameter
 
 		/// Implemented to return true only if value is an instance of StringData and
 		/// the contained string matches the regular expression specified in the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 	private :
 

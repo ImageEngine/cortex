@@ -55,7 +55,7 @@ class IECOREGL_API StateComponent : public Bindable
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::StateComponent, StateComponentTypeId, Bindable );
 
-		virtual ~StateComponent();
+		~StateComponent() override;
 
 	protected :
 

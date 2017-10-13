@@ -53,7 +53,7 @@ class IECORE_API VisibleRenderable : public Renderable
 	public:
 
 		VisibleRenderable();
-		virtual ~VisibleRenderable();
+		~VisibleRenderable() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( VisibleRenderable, Renderable );
 

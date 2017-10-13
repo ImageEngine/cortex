@@ -65,7 +65,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// render the scene rather than create a rib.
 		Renderer( const std::string &name );
 
-		virtual ~Renderer();
+		~Renderer() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreRI::Renderer, RendererTypeId, IECore::Renderer );
 
@@ -91,7 +91,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		///
 		/// \li <b>"ri:*:*"</b><br>
 		/// Passed to an RiOption call.
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
+		void setOption( const std::string &name, IECore::ConstDataPtr value ) override;
 		/// Currently supported options :
 		///
 		/// "camera:resolution" V2iData
@@ -100,7 +100,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// "user:*"
 		/// "ri:*" Queries of this form use the Rx API and therefore only work
 		/// for options supported by that API.
-		virtual IECore::ConstDataPtr getOption( const std::string &name ) const;
+		IECore::ConstDataPtr getOption( const std::string &name ) const override;
 
 		/// \par Standard parameters supported :
 		///
@@ -116,23 +116,23 @@ class IECORERI_API Renderer : public IECore::Renderer
 		///
 		///	\li <b>"projection:*"</b><br>
 		/// All parameters matching this naming convention are passed to the RiProjection call.
-		virtual void camera( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters );
+		void camera( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters ) override;
 
-		virtual void worldBegin();
-		virtual void worldEnd();
+		void worldBegin() override;
+		void worldEnd() override;
 
-		virtual void transformBegin();
-		virtual void transformEnd();
-		virtual void setTransform( const Imath::M44f &m );
-		virtual void setTransform( const std::string &coordinateSystem );
-		virtual Imath::M44f getTransform() const;
-		virtual Imath::M44f getTransform( const std::string &coordinateSystem ) const;
-		virtual void concatTransform( const Imath::M44f &m );
-		virtual void coordinateSystem( const std::string &name );
+		void transformBegin() override;
+		void transformEnd() override;
+		void setTransform( const Imath::M44f &m ) override;
+		void setTransform( const std::string &coordinateSystem ) override;
+		Imath::M44f getTransform() const override;
+		Imath::M44f getTransform( const std::string &coordinateSystem ) const override;
+		void concatTransform( const Imath::M44f &m ) override;
+		void coordinateSystem( const std::string &name ) override;
 
-		virtual void attributeBegin();
-		virtual void attributeEnd();
+		void attributeBegin() override;
+		void attributeEnd() override;
 		/// \par Standard attributes supported :
 		////////////////////////////////////////////////////////////////////////////
 		///
@@ -189,7 +189,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// \li <b>"ri:automaticInstancing" BoolData</b><br>
 		/// When this is true, all primitives are rendered as instances, and if a previously rendered
 		/// primitive is encountered, the instance will simply be reused.
-		virtual void setAttribute( const std::string &name, IECore::ConstDataPtr value );
+		void setAttribute( const std::string &name, IECore::ConstDataPtr value ) override;
 		/// \par Currently supported attributes :
 		///
 		/// \li <b>"doubleSided"</b>
@@ -201,7 +201,7 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// \li <b>"ri:textureCoordinates"</b><br>
 		/// \li <b>"ri:*:*"</b><br>
 		/// Supports all attributes for which the RxAttribute query works.
-		virtual IECore::ConstDataPtr getAttribute( const std::string &name ) const;
+		IECore::ConstDataPtr getAttribute( const std::string &name ) const override;
 		/// If type is "surface" or "ri:surface" then calls RiSurfaceV.
 		/// If type is "displacement" or "ri:displacement" then calls RiDisplacementV.
 		/// If type is "atmosphere" or "ri:atmosphere" then calls RiDisplacementV.
@@ -210,25 +210,25 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// If type is "deformation" or "ri:deformation" then calls RiDeformationV.
 		/// If type is "shader" or "ri:shader" then calls RiShader. In this case you must specify a handle
 		/// as a StringData parameter named "__handle".
-		virtual void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters );
+		void shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 
 		/// By default, calls RiLightSource
 		/// If the "ri:areaLight" parameter is true, calls RiAreaLightSource instead
-		virtual void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters );
-		virtual void illuminate( const std::string &lightHandle, bool on );
+		void light( const std::string &name, const std::string &handle, const IECore::CompoundDataMap &parameters ) override;
+		void illuminate( const std::string &lightHandle, bool on ) override;
 
-		virtual void motionBegin( const std::set<float> &times );
-		virtual void motionEnd();
+		void motionBegin( const std::set<float> &times ) override;
+		void motionEnd() override;
 
-		virtual void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars );
-		virtual void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
+		void points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars ) override;
+		void disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars );
+		void curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() );
-		virtual void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars );
+		void text( const std::string &font, const std::string &text, float kerning = 1.0f, const IECore::PrimitiveVariableMap &primVars=IECore::PrimitiveVariableMap() ) override;
+		void sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars );
+		void image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars ) override;
 		/// Renders interpolation types of "linear" as RiPointsGeneralPolygons and "catmullClark" as RiSubdivisionMesh.
 		/// Supports an optional "tags" primitive variable of type CompoundData and interpolation Constant, which is used to specify tags
 		/// for the RiSubdivisionMesh call. This should contain the following children :
@@ -239,13 +239,13 @@ class IECORERI_API Renderer : public IECore::Renderer
 		///		IntVectorData "integers"
 		///
 		/// \todo Consider how we might standardise a means of storing tags explicitly on the mesh rather than as primitive variables.
-		virtual void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars );
+		void mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars );
+		void nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars );
+		void patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars ) override;
 
-		virtual void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars );
+		void geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars ) override;
 
 		/// ExternalProcedurals are treated as DelayedReadArchives if their filename ends with ".rib"
 		/// and as DynamicLoad procedurals otherwise. Because RenderMan has very poor support for passing
@@ -257,11 +257,11 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// - All other parameters are serialised in a command line "--name value" style and concatenated.
 		/// This allows the convenience of arbitrary typed parameters provided that the procedural itself
 		/// uses a command line style parser.
-		virtual void procedural( IECore::Renderer::ProceduralPtr proc );
+		void procedural( IECore::Renderer::ProceduralPtr proc ) override;
 
-		virtual void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void instanceEnd();
-		virtual void instance( const std::string &name );
+		void instanceBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void instanceEnd() override;
+		void instance( const std::string &name ) override;
 
 		///
 		/// Supports the following commands :
@@ -278,10 +278,10 @@ class IECORERI_API Renderer : public IECore::Renderer
 		/// Makes a call to RiArchiveRecord(). Expects StringData parameters called "type" and
 		/// "record".
 		///
-		virtual IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters );
+		IECore::DataPtr command( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
 
-		virtual void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters );
-		virtual void editEnd();
+		void editBegin( const std::string &name, const IECore::CompoundDataMap &parameters ) override;
+		void editEnd() override;
 
 	private :
 

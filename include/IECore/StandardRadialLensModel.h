@@ -60,16 +60,16 @@ class IECORE_API StandardRadialLensModel : public LensModel
 
 		IE_CORE_DECLARERUNTIMETYPED( StandardRadialLensModel, LensModel );
 
-		virtual void validate();
-		virtual Imath::V2d distort( Imath::V2d p );
-		virtual Imath::V2d undistort( Imath::V2d p );
+		void validate() override;
+		Imath::V2d distort( Imath::V2d p ) override;
+		Imath::V2d undistort( Imath::V2d p ) override;
 
 	protected:
 
 		/// The Default Constructor is protected and the LensModel::create() method
 		/// should be used to instantiate a new LensModel instead.
 		StandardRadialLensModel();
-		virtual ~StandardRadialLensModel();
+		~StandardRadialLensModel() override;
 
 	private:
 

@@ -64,7 +64,7 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 		ImageWriter();
 		ImageWriter( IECore::ObjectPtr object, const std::string &fileName );
 
-		virtual ~ImageWriter();
+		~ImageWriter() override;
 
 		/// Checks that object is an ImagePrimitive with consistent channels
 		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );
@@ -94,7 +94,7 @@ class IECOREIMAGE_API ImageWriter : public IECore::Writer
 
 	protected :
 
-		virtual void doWrite( const IECore::CompoundObject *operands );
+		void doWrite( const IECore::CompoundObject *operands ) override;
 
 	private :
 

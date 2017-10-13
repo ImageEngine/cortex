@@ -49,7 +49,7 @@ class IECORE_API MeshNormalsOp : public MeshPrimitiveOp
 	public:
 
 		MeshNormalsOp();
-		virtual ~MeshNormalsOp();
+		~MeshNormalsOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshNormalsOp, MeshPrimitiveOp );
 
@@ -64,7 +64,7 @@ class IECORE_API MeshNormalsOp : public MeshPrimitiveOp
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
+		void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands ) override;
 
 	private :
 

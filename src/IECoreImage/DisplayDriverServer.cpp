@@ -58,7 +58,7 @@ class DisplayDriverServer::Session : public RefCounted
 	public:
 
 		Session( boost::asio::io_service& io_service );
-		~Session();
+		~Session() override;
 
 		boost::asio::ip::tcp::socket& socket();
 		void start();
@@ -103,7 +103,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 			m_success = true;
 		}
 
-		~PrivateData()
+		~PrivateData() override
 		{
 			if ( m_success )
 			{

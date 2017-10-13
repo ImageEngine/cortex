@@ -414,11 +414,11 @@ class CapturingRenderer::Implementation
 				{
 				}
 
-				virtual ~ProceduralTask()
+				~ProceduralTask() override
 				{
 				}
 
-				virtual task *execute()
+				task *execute() override
 				{
 					ContextStack &contextStack = m_renderer->m_implementation->m_threadContexts.local();
 					contextStack.push( m_context );

@@ -49,7 +49,7 @@ class IECORE_API Camera : public PreWorldRenderable
 
 		Camera( const std::string &name = "default",
 			TransformPtr transform = nullptr, CompoundDataPtr parameters = new CompoundData );
-		virtual ~Camera();
+		~Camera() override;
 
 		IE_CORE_DECLAREOBJECT( Camera, PreWorldRenderable );
 
@@ -75,7 +75,7 @@ class IECORE_API Camera : public PreWorldRenderable
 		/// parameters will be computed based on the existing parameters.
 		void addStandardParameters();
 
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

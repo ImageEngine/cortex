@@ -61,7 +61,7 @@ class IECORE_API ObjectWriter : public Writer
 
 	protected :
 
-		virtual void doWrite( const CompoundObject *operands );
+		void doWrite( const CompoundObject *operands ) override;
 
 		ObjectParameterPtr m_headerParameter;
 

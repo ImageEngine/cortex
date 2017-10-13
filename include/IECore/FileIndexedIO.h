@@ -56,7 +56,7 @@ class IECORE_API FileIndexedIO : public StreamIndexedIO
 		/// Open or create an file at the given root location
 		FileIndexedIO(const std::string &path, const IndexedIO::EntryIDList &root, IndexedIO::OpenMode mode);
 
-		virtual ~FileIndexedIO();
+		~FileIndexedIO() override;
 
 		/// Returns the full file name accessed by this object.
 		const std::string &fileName() const;
@@ -68,7 +68,7 @@ class IECORE_API FileIndexedIO : public StreamIndexedIO
 		FileIndexedIO( StreamIndexedIO::Node &rootNode );
 
 		// duplicates this object by mapping it to a different root node.
-		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const;
+		IndexedIO *duplicate(StreamIndexedIO::Node &rootNode) const override;
 
 		class StreamFile;
 };

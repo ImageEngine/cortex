@@ -80,13 +80,13 @@ class IECORE_API SpherePrimitive : public Primitive
 		//@}
 
 
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 		/// Render the sphere
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		void topologyHash( MurmurHash &h ) const override;
 
 	private:
 

@@ -67,7 +67,7 @@ class IECOREIMAGE_API DisplayDriver : public IECore::RunTimeTyped
 		/// Initializes the display driver for showing a new image according to the given parameters.
 		DisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 
-		virtual ~DisplayDriver();
+		~DisplayDriver() override;
 
 		/// Defines a sub-region of the image.
 		/// Called multiple times depending on how the channels are being computed.

@@ -68,7 +68,7 @@ class IECORE_API FileSequenceVectorParameter : public PathVectorParameter
 			const StringVectorParameter::ObjectPresetsContainer &presets = StringVectorParameter::ObjectPresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr,
 			const ExtensionList &extensions = ExtensionList() );
 
-		virtual ~FileSequenceVectorParameter();
+		~FileSequenceVectorParameter() override;
 
 		const ExtensionList &getExtensions() const;
 		void setExtensions( const ExtensionList &extensions );
@@ -76,7 +76,7 @@ class IECORE_API FileSequenceVectorParameter : public PathVectorParameter
 		/// Returns true only if the value is StringVectorData and each string matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequences exist or don't exist based on the CheckType passed to
  		/// the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 		void setFileSequenceValues( const std::vector< FileSequencePtr > &sequences );
 

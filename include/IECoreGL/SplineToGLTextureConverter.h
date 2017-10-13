@@ -59,12 +59,12 @@ class IECOREGL_API SplineToGLTextureConverter : public ToGLConverter
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::SplineToGLTextureConverter, SplineToGLTextureConverterTypeId, ToGLConverter );
 
 		SplineToGLTextureConverter( IECore::ConstObjectPtr toConvert = nullptr );
-		virtual ~SplineToGLTextureConverter();
+		~SplineToGLTextureConverter() override;
 
 	protected :
 
 		IECore::V2iParameterPtr m_resolutionParameter;
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

@@ -68,10 +68,10 @@ class IECOREGL_API ColorTexture : public Texture
 		/// value, then remove this version.
 		ColorTexture( const IECoreImage::ImagePrimitive *image, bool mipMap );
 
-		virtual ~ColorTexture();
+		~ColorTexture() override;
 
 		/// Creates an ImagePrimitive using the texture contents.
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 	private :
 

@@ -60,7 +60,7 @@ class IECORE_API FilteredMessageHandler : public MessageHandler
 
 	protected :
 
-		virtual ~FilteredMessageHandler();
+		~FilteredMessageHandler() override;
 
 
 	protected :

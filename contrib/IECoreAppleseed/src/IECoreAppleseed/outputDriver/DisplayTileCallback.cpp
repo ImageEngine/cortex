@@ -77,7 +77,7 @@ class DisplayTileCallback : public ProgressTileCallback
 			m_display_initialized = false;
 		}
 
-		virtual ~DisplayTileCallback()
+		~DisplayTileCallback() override
 		{
 			if( m_driver )
 			{
@@ -94,14 +94,14 @@ class DisplayTileCallback : public ProgressTileCallback
 			}
 		}
 
-		virtual void release()
+		void release() override
 		{
 			// We don't need to do anything here.
 			// The tile callback factory deletes this instance.
 		}
 
 		// This method is called before a region is rendered.
-		virtual void pre_render( const size_t x, const size_t y, const size_t width, const size_t height)
+		void pre_render( const size_t x, const size_t y, const size_t width, const size_t height) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -112,7 +112,7 @@ class DisplayTileCallback : public ProgressTileCallback
 		}
 
 		// This method is called after a tile is rendered (final rendering).
-		virtual void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY )
+		void post_render_tile( const asr::Frame *frame, const size_t tileX, const size_t tileY ) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -126,7 +126,7 @@ class DisplayTileCallback : public ProgressTileCallback
 		}
 
 		// This method is called after a whole frame is rendered (progressive rendering).
-		virtual void post_render( const asr::Frame *frame )
+		void post_render( const asr::Frame *frame ) override
 		{
 			boost::lock_guard<boost::mutex> guard( m_mutex );
 
@@ -314,19 +314,19 @@ class DisplayTileCallbackFactory : public asr::ITileCallbackFactory
 			m_callback = new DisplayTileCallback( params );
 		}
 
-		virtual ~DisplayTileCallbackFactory()
+		~DisplayTileCallbackFactory() override
 		{
 			delete m_callback;
 		}
 
 		// Delete this instance.
-		virtual void release()
+		void release() override
 		{
 			delete this;
 		}
 
 		// Return a new tile callback instance.
-		virtual asr::ITileCallback *create()
+		asr::ITileCallback *create() override
 		{
 			return m_callback;
 		}
