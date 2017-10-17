@@ -172,11 +172,11 @@ void Primitive::addPrimitiveVariable( const std::string &name, const IECore::Pri
 {
 	if ( primVar.interpolation == IECore::PrimitiveVariable::Constant )
 	{
-		addUniformAttribute( name, primVar.data );
+		addUniformAttribute( name, primVar.expandedData() );
 	}
 	else
 	{
-		addVertexAttribute( name, primVar.data );
+		addVertexAttribute( name, primVar.expandedData() );
 	}
 }
 
