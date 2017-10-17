@@ -99,11 +99,11 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 
 	if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
 	{
-		addVertexAttribute( name, primVar.data );
+		addVertexAttribute( name, primVar.expandedData() );
 	}
 	else if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
 	{
-		addUniformAttribute( name, primVar.data );
+		addUniformAttribute( name, primVar.expandedData() );
 	}
 	else if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
 	{
