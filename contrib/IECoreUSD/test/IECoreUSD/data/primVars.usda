@@ -1,0 +1,273 @@
+#usda 1.0
+
+def Xform "root"
+{
+    def Points "sphere"
+    {
+        bool[] primvars:test_Bool_Array_constant = [0, 1] (
+            interpolation = "constant"
+        )
+        bool primvars:test_Bool_Scalar_constant = 0 (
+            interpolation = "constant"
+        )
+        color3d[] primvars:test_color3d_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        color3d primvars:test_color3d_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        color3f[] primvars:test_color3f_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        color3f primvars:test_color3f_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        color3h[] primvars:test_color3h_Array_constant = [(1.09961, 1.2002, 1.2998), (2.09961, 2.19922, 2.30078), (3.09961, 3.19922, 3.30078)] (
+            interpolation = "constant"
+        )
+        color3h primvars:test_color3h_Scalar_constant = (0.0999756, 0.199951, 0.300049) (
+            interpolation = "constant"
+        )
+        color4d[] primvars:test_color4d_Array_constant = [(1.1, 1.2, 1.3, 1.4), (2.1, 2.2, 2.3, 2.4), (3.1, 3.2, 3.3, 3.4)] (
+            interpolation = "constant"
+        )
+        color4d primvars:test_color4d_Scalar_constant = (0.1, 0.2, 0.3, 0.4) (
+            interpolation = "constant"
+        )
+        color4f[] primvars:test_color4f_Array_constant = [(1.1, 1.2, 1.3, 1.4), (2.1, 2.2, 2.3, 2.4), (3.1, 3.2, 3.3, 3.4)] (
+            interpolation = "constant"
+        )
+        color4f primvars:test_color4f_Scalar_constant = (0.1, 0.2, 0.3, 0.4) (
+            interpolation = "constant"
+        )
+        color4h[] primvars:test_color4h_Array_constant = [(1.09961, 1.2002, 1.2998, 1.40039), (2.09961, 2.19922, 2.30078, 2.40039), (3.09961, 3.19922, 3.30078, 3.40039)] (
+            interpolation = "constant"
+        )
+        color4h primvars:test_color4h_Scalar_constant = (0.0999756, 0.199951, 0.300049, 0.399902) (
+            interpolation = "constant"
+        )
+        double2[] primvars:test_Double2_Array_constant = [(1.1, 1.2), (2.1, 2.2), (3.1, 3.2)] (
+            interpolation = "constant"
+        )
+        double2 primvars:test_Double2_Scalar_constant = (0.1, 0.2) (
+            interpolation = "constant"
+        )
+        double3[] primvars:test_Double3_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        double3 primvars:test_Double3_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        double4[] primvars:test_Double4_Array_constant = [(1.1, 1.2, 1.3, 1.4), (2.1, 2.2, 2.3, 2.4), (3.1, 3.2, 3.3, 3.4)] (
+            interpolation = "constant"
+        )
+        double4 primvars:test_Double4_Scalar_constant = (0.1, 0.2, 0.3, 0.4) (
+            interpolation = "constant"
+        )
+        double[] primvars:test_Double_Array_constant = [1.2, 1.3, 1.4] (
+            interpolation = "constant"
+        )
+        double primvars:test_Double_Scalar_constant = 1.1 (
+            interpolation = "constant"
+        )
+        float2[] primvars:test_Float2_Array_constant = [(1.1, 1.2), (2.1, 2.2), (3.1, 3.2)] (
+            interpolation = "constant"
+        )
+        float2 primvars:test_Float2_Scalar_constant = (0.1, 0.2) (
+            interpolation = "constant"
+        )
+        float3[] primvars:test_Float3_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        float3 primvars:test_Float3_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        float4[] primvars:test_Float4_Array_constant = [(1.1, 1.2, 1.3, 1.4), (2.1, 2.2, 2.3, 2.4), (3.1, 3.2, 3.3, 3.4)] (
+            interpolation = "constant"
+        )
+        float4 primvars:test_Float4_Scalar_constant = (0.1, 0.2, 0.3, 0.4) (
+            interpolation = "constant"
+        )
+        float[] primvars:test_Float_Array_constant = [0.7, 0.8, 0.9] (
+            interpolation = "constant"
+        )
+        float primvars:test_Float_Scalar_constant = 0.6 (
+            interpolation = "constant"
+        )
+        half2[] primvars:test_Half2_Array_constant = [(1.09961, 1.2002), (2.09961, 2.19922), (3.09961, 3.19922)] (
+            interpolation = "constant"
+        )
+        half2 primvars:test_Half2_Scalar_constant = (0.0999756, 0.199951) (
+            interpolation = "constant"
+        )
+        half3[] primvars:test_Half3_Array_constant = [(1.09961, 1.2002, 1.2998), (2.09961, 2.19922, 2.30078), (3.09961, 3.19922, 3.30078)] (
+            interpolation = "constant"
+        )
+        half3 primvars:test_Half3_Scalar_constant = (0.0999756, 0.199951, 0.300049) (
+            interpolation = "constant"
+        )
+        half4[] primvars:test_Half4_Array_constant = [(1.09961, 1.2002, 1.2998, 1.40039), (2.09961, 2.19922, 2.30078, 2.40039), (3.09961, 3.19922, 3.30078, 3.40039)] (
+            interpolation = "constant"
+        )
+        half4 primvars:test_Half4_Scalar_constant = (0.0999756, 0.199951, 0.300049, 0.399902) (
+            interpolation = "constant"
+        )
+        half[] primvars:test_Half_Array_constant = [0.0999756, 0.199951, 0.300049] (
+            interpolation = "constant"
+        )
+        half primvars:test_Half_Scalar_constant = 0.5 (
+            interpolation = "constant"
+        )
+        int2[] primvars:test_Int2_Array_constant = [(3, 4), (5, 6), (7, 8)] (
+            interpolation = "constant"
+        )
+        int2 primvars:test_Int2_Scalar_constant = (1, 2) (
+            interpolation = "constant"
+        )
+        int3[] primvars:test_Int3_Array_constant = [(3, 4, 5), (5, 6, 7), (7, 8, 9)] (
+            interpolation = "constant"
+        )
+        int3 primvars:test_Int3_Scalar_constant = (1, 2, 3) (
+            interpolation = "constant"
+        )
+        int4[] primvars:test_Int4_Array_constant = [(3, 4, 5, 6), (5, 6, 7, 8), (7, 8, 9, 10)] (
+            interpolation = "constant"
+        )
+        int4 primvars:test_Int4_Scalar_constant = (1, 2, 3, 4) (
+            interpolation = "constant"
+        )
+        int64[] primvars:test_Int64_Array_constant = [9223372036854775805, 9223372036854775806, 9223372036854775807] (
+            interpolation = "constant"
+        )
+        int64 primvars:test_Int64_Scalar_constant = -9223372036854775808 (
+            interpolation = "constant"
+        )
+        int[] primvars:test_Int_Array_constant = [0, -1, -2] (
+            interpolation = "constant"
+        )
+        int primvars:test_Int_Scalar_constant = -1 (
+            interpolation = "constant"
+        )
+        matrix2d[] primvars:test_matrix2d_Array_constant = [( (0, 1), (0, 0) ), ( (0, 0), (2, 0) ), ( (0, 0), (3, 0) )] (
+            interpolation = "constant"
+        )
+        matrix2d primvars:test_matrix2d_Scalar_constant = ( (1, 0), (0, 0) ) (
+            interpolation = "constant"
+        )
+        matrix3d[] primvars:test_matrix3d_Array_constant = [( (0, 0, 0), (0, 1, 0), (0, 0, 0) ), ( (0, 0, 0), (0, 0, 0), (0, 0, 2) ), ( (0, 0, 4), (0, 0, 0), (0, 0, 0) )] (
+            interpolation = "constant"
+        )
+        matrix3d primvars:test_matrix3d_Scalar_constant = ( (0, 0, 0), (0, 0, 0), (0, 0, 0) ) (
+            interpolation = "constant"
+        )
+        matrix4d[] primvars:test_matrix4d_Array_constant = [( (1, 0, 0, 0), (0, 0, 0, 0), (9, 0, 0, 0), (0, 0, 0, 0) ), ( (1, 0, 0, 0), (0, 3, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0) ), ( (1, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 2, 0) )] (
+            interpolation = "constant"
+        )
+        matrix4d primvars:test_matrix4d_Scalar_constant = ( (1, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0) ) (
+            interpolation = "constant"
+        )
+        normal3d[] primvars:test_normal3d_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        normal3d primvars:test_normal3d_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        normal3f[] primvars:test_normal3f_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        normal3f primvars:test_normal3f_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        normal3h[] primvars:test_normal3h_Array_constant = [(1.09961, 1.2002, 1.2998), (2.09961, 2.19922, 2.30078), (3.09961, 3.19922, 3.30078)] (
+            interpolation = "constant"
+        )
+        normal3h primvars:test_normal3h_Scalar_constant = (0.0999756, 0.199951, 0.300049) (
+            interpolation = "constant"
+        )
+        point3d[] primvars:test_point3d_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        point3d primvars:test_point3d_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        point3f[] primvars:test_point3f_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        point3f primvars:test_point3f_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        point3h[] primvars:test_point3h_Array_constant = [(1.09961, 1.2002, 1.2998), (2.09961, 2.19922, 2.30078), (3.09961, 3.19922, 3.30078)] (
+            interpolation = "constant"
+        )
+        point3h primvars:test_point3h_Scalar_constant = (0.0999756, 0.199951, 0.300049) (
+            interpolation = "constant"
+        )
+        quatd[] primvars:test_quatd_Array_constant = [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0)] (
+            interpolation = "constant"
+        )
+        quatd primvars:test_quatd_Scalar_constant = (0, 0, 0, 1) (
+            interpolation = "constant"
+        )
+        quatf[] primvars:test_quatf_Array_constant = [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0)] (
+            interpolation = "constant"
+        )
+        quatf primvars:test_quatf_Scalar_constant = (0, 0, 0, 1) (
+            interpolation = "constant"
+        )
+        quath[] primvars:test_quath_Array_constant = [(1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0)] (
+            interpolation = "constant"
+        )
+        quath primvars:test_quath_Scalar_constant = (0, 0, 0, 1) (
+            interpolation = "constant"
+        )
+        string[] primvars:test_String_Array_constant = ["is", "a", "test"] (
+            interpolation = "constant"
+        )
+        string primvars:test_String_Scalar_constant = "this" (
+            interpolation = "constant"
+        )
+        token[] primvars:test_Token_Array_constant = ["t-is", "t-a", "t-test"] (
+            interpolation = "constant"
+        )
+        token primvars:test_Token_Scalar_constant = "t-this" (
+            interpolation = "constant"
+        )
+        uchar[] primvars:test_UChar_Array_constant = [0, 1, 2] (
+            interpolation = "constant"
+        )
+        uchar primvars:test_UChar_Scalar_constant = 0 (
+            interpolation = "constant"
+        )
+        uint64[] primvars:test_UInt64_Array_constant = [18446744073709551613, 18446744073709551614, 18446744073709551615] (
+            interpolation = "constant"
+        )
+        uint64 primvars:test_UInt64_Scalar_constant = 18446744073709551615 (
+            interpolation = "constant"
+        )
+        uint[] primvars:test_UInt_Array_constant = [4294967293, 4294967294, 4294967295] (
+            interpolation = "constant"
+        )
+        uint primvars:test_UInt_Scalar_constant = 4294967295 (
+            interpolation = "constant"
+        )
+        vector3d[] primvars:test_vector3d_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        vector3d primvars:test_vector3d_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        vector3f[] primvars:test_vector3f_Array_constant = [(1.1, 1.2, 1.3), (2.1, 2.2, 2.3), (3.1, 3.2, 3.3)] (
+            interpolation = "constant"
+        )
+        vector3f primvars:test_vector3f_Scalar_constant = (0.1, 0.2, 0.3) (
+            interpolation = "constant"
+        )
+        vector3h[] primvars:test_vector3h_Array_constant = [(1.09961, 1.2002, 1.2998), (2.09961, 2.19922, 2.30078), (3.09961, 3.19922, 3.30078)] (
+            interpolation = "constant"
+        )
+        vector3h primvars:test_vector3h_Scalar_constant = (0.0999756, 0.199951, 0.300049) (
+            interpolation = "constant"
+        )
+    }
+}
+

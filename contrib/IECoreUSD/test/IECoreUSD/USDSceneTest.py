@@ -111,7 +111,7 @@ class USDSceneTest( unittest.TestCase ) :
 		# todo: childname & hierarchy hashes should also
 		# todo: be constant but I'm unsure how to implement this right now.
 		hashTypes = [cube.HashType.TransformHash, cube.HashType.ObjectHash, cube.HashType.BoundHash]
-		# hashTypes = IECore.SceneInterface.HashType.values.values()
+		# hashTypes = IECoreScene.SceneInterface.HashType.values.values()
 
 		hashes = [cube.hash( hashType, 0 ) for hashType in hashTypes]
 
@@ -194,6 +194,94 @@ class USDSceneTest( unittest.TestCase ) :
 		expectedMatrix = imath.M44d().translate( imath.V3d( 2.0, 0.0, 0.0 ) )
 
 		self.assertEqual( transform, expectedMatrix )
+
+	def testPrimVarTypes ( self ) :
+
+		root = IECoreScene.SceneInterface.create( os.path.dirname( __file__ ) + "/data/primVars.usda", IECore.IndexedIO.OpenMode.Read )
+
+		object = root.child("root").child("sphere").readObject(0.0)
+
+		expected = {
+			'test_Bool_Scalar_constant' : IECore.BoolData( 0 ),
+			'test_Double2_Array_constant' : IECore.V2dVectorData( [IECore.V2d( 1.1, 1.2 ), IECore.V2d( 2.1, 2.2 ), IECore.V2d( 3.1, 3.2 )] ),
+			'test_Double2_Scalar_constant' : IECore.V2dData( IECore.V2d( 0.1, 0.2 ) ),
+			'test_Double3_Array_constant' : IECore.V3dVectorData( [IECore.V3d( 1.1, 1.2, 1.3 ), IECore.V3d( 2.1, 2.2, 2.3 ), IECore.V3d( 3.1, 3.2, 3.3 )] ),
+			'test_Double3_Scalar_constant' : IECore.V3dData( IECore.V3d( 0.1, 0.2, 0.3 ) ),
+			'test_Double_Array_constant' : IECore.DoubleVectorData([1.2, 1.3, 1.4]),
+			'test_Double_Scalar_constant' : IECore.DoubleData( 1.1 ),
+			'test_Float2_Array_constant' : IECore.V2fVectorData( [IECore.V2f( 1.1, 1.2 ), IECore.V2f( 2.1, 2.2 ), IECore.V2f( 3.1, 3.2 )] ),
+			'test_Float2_Scalar_constant' : IECore.V2fData( IECore.V2f( 0.1, 0.2 ) ),
+			'test_Float3_Array_constant' : IECore.V3fVectorData( [IECore.V3f( 1.1, 1.2, 1.3 ), IECore.V3f( 2.1, 2.2, 2.3 ), IECore.V3f( 3.1, 3.2, 3.3 )] ),
+			'test_Float3_Scalar_constant' : IECore.V3fData( IECore.V3f( 0.1, 0.2, 0.3 ) ),
+			'test_Float_Array_constant' : IECore.FloatVectorData( [0.7, 0.8, 0.9] ),
+			'test_Float_Scalar_constant' : IECore.FloatData( 0.6 ),
+			'test_Half_Array_constant' : IECore.HalfVectorData( [0.0999756, 0.199951, 0.300049] ),
+			'test_Half_Scalar_constant' : IECore.HalfData( 0.5 ),
+			'test_Int2_Array_constant' : IECore.V2iVectorData( [IECore.V2i( 3, 4 ), IECore.V2i( 5, 6 ), IECore.V2i( 7, 8 )] ),
+			'test_Int2_Scalar_constant' : IECore.V2iData( IECore.V2i( 1, 2 ) ),
+			'test_Int3_Array_constant' : IECore.V3iVectorData([IECore.V3i(3, 4, 5), IECore.V3i(5, 6, 7), IECore.V3i(7, 8, 9)]),
+			'test_Int3_Scalar_constant' : IECore.V3iData(IECore.V3i(1, 2, 3)),
+			'test_Int64_Array_constant' : IECore.Int64VectorData([9223372036854775805, 9223372036854775806, 9223372036854775807]),
+			'test_Int64_Scalar_constant' : IECore.Int64Data(-9223372036854775808),
+			'test_Int_Array_constant' : IECore.IntVectorData([0, -1, -2]),
+			'test_Int_Scalar_constant' : IECore.IntData(-1),
+			'test_String_Array_constant' : IECore.StringVectorData(["is", "a", "test"]),
+			'test_String_Scalar_constant': IECore.StringData('this'),
+			'test_Token_Array_constant' : IECore.InternedStringVectorData([IECore.InternedString("t-is"), IECore.InternedString("t-a"), IECore.InternedString("t-test")]),
+			'test_Token_Scalar_constant' : IECore.InternedStringData(IECore.InternedString("t-this")),
+			'test_UChar_Array_constant' : IECore.UCharVectorData([0,1,2]),
+			'test_UChar_Scalar_constant' : IECore.UCharData(0),
+			'test_UInt64_Array_constant' : IECore.UInt64VectorData([18446744073709551613, 18446744073709551614, 18446744073709551615]),
+			'test_UInt64_Scalar_constant' : IECore.UInt64Data(18446744073709551615),
+			'test_UInt_Array_constant' : IECore.UIntVectorData([4294967293, 4294967294, 4294967295]),
+			'test_UInt_Scalar_constant' : IECore.UIntData(4294967295),
+			'test_color3d_Array_constant' : IECore.Color3dVectorData([IECore.Color3d(1.1, 1.2, 1.3), IECore.Color3d(2.1, 2.2, 2.3), IECore.Color3d(3.1, 3.2, 3.3)]),
+			'test_color3d_Scalar_constant' : IECore.Color3dData(IECore.Color3d(0.1, 0.2, 0.3)),
+			'test_color3f_Array_constant' : IECore.Color3fVectorData([IECore.Color3f(1.1, 1.2, 1.3), IECore.Color3f(2.1, 2.2, 2.3), IECore.Color3f(3.1, 3.2, 3.3)]),
+			'test_color3f_Scalar_constant' :  IECore.Color3fData(IECore.Color3f(0.1, 0.2, 0.3)),
+			'test_color4d_Array_constant' : IECore.Color4dVectorData([IECore.Color4d(1.1, 1.2, 1.3, 1.4), IECore.Color4d(2.1, 2.2, 2.3, 2.4), IECore.Color4d(3.1, 3.2, 3.3, 3.4)]),
+			'test_color4d_Scalar_constant' : IECore.Color4dData(IECore.Color4d(0.1, 0.2, 0.3, 0.4)),
+			'test_color4f_Array_constant' : IECore.Color4fVectorData([IECore.Color4f(1.1, 1.2, 1.3, 1.4), IECore.Color4f(2.1, 2.2, 2.3, 2.4), IECore.Color4f(3.1, 3.2, 3.3, 3.4)]),
+			'test_color4f_Scalar_constant' : IECore.Color4fData(IECore.Color4f(0.1, 0.2, 0.3, 0.4)),
+			'test_matrix3d_Array_constant' : IECore.M33dVectorData(
+				[
+					IECore.M33d(0, 0, 0, 0, 1, 0,0, 0, 0),
+					IECore.M33d(0, 0, 0, 0, 0, 0,0, 0, 2),
+					IECore.M33d(0, 0, 4, 0, 0, 0,0, 0, 0)
+				]
+			),
+			'test_matrix3d_Scalar_constant' : IECore.M33dData(IECore.M33d(0, 0, 0, 0, 0, 0, 0, 0, 0)),
+			'test_matrix4d_Array_constant' : IECore.M44dVectorData(
+				[
+					IECore.M44d(1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0),
+					IECore.M44d(1, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+					IECore.M44d(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0)
+				]
+			),
+			'test_matrix4d_Scalar_constant' : IECore.M44dData(IECore.M44d(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)),
+			'test_normal3d_Array_constant' : IECore.V3dVectorData([IECore.V3d( 1.1, 1.2, 1.3 ), IECore.V3d( 2.1, 2.2, 2.3 ), IECore.V3d( 3.1, 3.2, 3.3 )]),
+			'test_normal3d_Scalar_constant' : IECore.V3dData (IECore.V3d( 0.1, 0.2, 0.3 )),
+			'test_normal3f_Array_constant': IECore.V3fVectorData([IECore.V3f( 1.1, 1.2, 1.3 ), IECore.V3f( 2.1, 2.2, 2.3 ), IECore.V3f( 3.1, 3.2, 3.3 )]),
+			'test_normal3f_Scalar_constant' : IECore.V3fData (IECore.V3f( 0.1, 0.2, 0.3 )),
+			'test_point3d_Array_constant' : IECore.V3dVectorData([IECore.V3d( 1.1, 1.2, 1.3 ), IECore.V3d( 2.1, 2.2, 2.3 ), IECore.V3d( 3.1, 3.2, 3.3 )]),
+			'test_point3d_Scalar_constant' : IECore.V3dData (IECore.V3d( 0.1, 0.2, 0.3 )),
+			'test_point3f_Array_constant' : IECore.V3fVectorData([IECore.V3f( 1.1, 1.2, 1.3 ), IECore.V3f( 2.1, 2.2, 2.3 ), IECore.V3f( 3.1, 3.2, 3.3 )]),
+			'test_point3f_Scalar_constant' : IECore.V3fData(IECore.V3f(0.1, 0.2, 0.3)),
+			'test_quatd_Array_constant' : IECore.QuatdVectorData([IECore.Quatd(1, 0, 0, 0), IECore.Quatd(0, 1, 0, 0), IECore.Quatd(0, 0, 1, 0)]),
+			'test_quatd_Scalar_constant' : IECore.QuatdData(IECore.Quatd(0, 0, 0, 1)),
+			'test_quatf_Array_constant' : IECore.QuatfVectorData([IECore.Quatf(1, 0, 0, 0), IECore.Quatf(0, 1, 0, 0), IECore.Quatf(0, 0, 1, 0)]),
+			'test_quatf_Scalar_constant' : IECore.QuatfData(IECore.Quatf(0, 0, 0, 1)),
+			'test_vector3d_Array_constant' : IECore.V3dVectorData([IECore.V3d( 1.1, 1.2, 1.3 ), IECore.V3d( 2.1, 2.2, 2.3 ), IECore.V3d( 3.1, 3.2, 3.3 )]),
+			'test_vector3d_Scalar_constant' : IECore.V3dData (IECore.V3d( 0.1, 0.2, 0.3 )),
+			'test_vector3f_Array_constant' : IECore.V3fVectorData([IECore.V3f( 1.1, 1.2, 1.3 ), IECore.V3f( 2.1, 2.2, 2.3 ), IECore.V3f( 3.1, 3.2, 3.3 )]),
+			'test_vector3f_Scalar_constant' : IECore.V3fData (IECore.V3f( 0.1, 0.2, 0.3 )),
+		}
+
+
+		for primVarName, primVarExpectedValue in expected.items():
+			self.assertTrue(primVarName in object.keys())
+			p = object[primVarName]
+			self.assertEqual(p.data, primVarExpectedValue)
 
 if __name__ == "__main__":
 	unittest.main()
