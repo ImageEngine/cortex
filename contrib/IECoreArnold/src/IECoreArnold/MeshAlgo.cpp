@@ -155,9 +155,10 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 	}
 	else
 	{
-		AiNodeDeclare( node, uvSet.c_str(), "indexed POINT2" );
-		AiNodeSetArray( node, uvSet.c_str(), uvsArray );
-		AiNodeSetArray( node, (uvSet + "idxs").c_str(), indicesArray );
+		AtString uvSetName( uvSet.c_str() );
+		AiNodeDeclare( node, uvSetName, "indexed POINT2" );
+		AiNodeSetArray( node, uvSetName, uvsArray );
+		AiNodeSetArray( node, AtString( (uvSet + "idxs").c_str() ), indicesArray );
 	}
 }
 

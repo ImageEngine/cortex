@@ -189,17 +189,18 @@ void IECoreArnold::RendererImplementation::setOption( const std::string &name, I
 	if( 0 == name.compare( 0, 3, "ai:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), name.c_str() + 3 );
+		AtString arnoldName( name.c_str() + 3 );
+		const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( options ), arnoldName );
 		if( parameter )
 		{
-			ParameterAlgo::setParameter( options, name.c_str() + 3, value.get() );
+			ParameterAlgo::setParameter( options, arnoldName, value.get() );
 			return;
 		}
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		ParameterAlgo::setParameter( options, name.c_str(), value.get() );
+		ParameterAlgo::setParameter( options, AtString( name.c_str() ), value.get() );
 		return;
 	}
 	else if( name.find_first_of( ":" )!=string::npos )
@@ -216,12 +217,12 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std:
 	if( 0 == name.compare( 0, 3, "ai:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		return ParameterAlgo::getParameter( options, name.c_str() + 3 );
+		return ParameterAlgo::getParameter( options, AtString( name.c_str() + 3 ) );
 	}
 	else if( 0 == name.compare( 0, 5, "user:" ) )
 	{
 		AtNode *options = AiUniverseGetOptions();
-		return ParameterAlgo::getParameter( options, name.c_str() );
+		return ParameterAlgo::getParameter( options, AtString( name.c_str() ) );
 	}
 	else if( name == "shutter" )
 	{
@@ -242,7 +243,7 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
 
 	string nodeName = boost::str( boost::format( "ieCoreArnold:camera:%s" ) % name );
-	AiNodeSetStr( arnoldCamera, g_nameArnoldString, nodeName.c_str() );
+	AiNodeSetStr( arnoldCamera, g_nameArnoldString, AtString( nodeName.c_str() ) );
 
 	AtNode *options = AiUniverseGetOptions();
 	AiNodeSetPtr( options, g_cameraArnoldString, arnoldCamera );
@@ -260,18 +261,19 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
 	AtNode *driver = nullptr;
-	if( AiNodeEntryLookUp( type.c_str() ) )
+	AtString typeString( type.c_str() );
+	if( AiNodeEntryLookUp( typeString ) )
 	{
-		driver = AiNode( type.c_str() );
+		driver = AiNode( typeString );
 	}
 	else
 	{
 		// automatically map tiff to driver_tiff and so on, to provide a degree of
 		// compatibility with existing renderman driver names.
-		std::string prefixedType = "driver_" + type;
-		if( AiNodeEntryLookUp( prefixedType.c_str() ) )
+		AtString prefixedType( ("driver_" + type).c_str() );
+		if( AiNodeEntryLookUp( prefixedType ) )
 		{
-			driver = AiNode( prefixedType.c_str() );
+			driver = AiNode( prefixedType );
 		}
 	}
 
@@ -281,13 +283,13 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 		return;
 	}
 
-	string nodeName = boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() );
-	AiNodeSetStr( driver, g_nameArnoldString, nodeName.c_str() );
+	AtString nodeName( boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() ).c_str() );
+	AiNodeSetStr( driver, g_nameArnoldString, nodeName );
 
 	const AtParamEntry *fileNameParameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( driver ), g_filenameArnoldString );
 	if( fileNameParameter )
 	{
-		AiNodeSetStr( driver, AiParamGetName( fileNameParameter ), name.c_str() );
+		AiNodeSetStr( driver, AiParamGetName( fileNameParameter ), AtString( name.c_str() ) );
 	}
 
 	ParameterAlgo::setParameters( driver, parameters );
@@ -452,7 +454,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 		AtNode *s = nullptr;
 		if( 0 == name.compare( 0, 10, "reference:" ) )
 		{
-			s = AiNodeLookUpByName( name.c_str() + 10 );
+			s = AiNodeLookUpByName( AtString( name.c_str() + 10 ) );
 			if( !s )
 			{
 				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't find shader \"%s\"" ) % name );
@@ -461,7 +463,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 		}
 		else
 		{
-			s = AiNode( name.c_str() );
+			s = AiNode( AtString( name.c_str() ) );
 			if( !s )
 			{
 				msg( Msg::Warning, "IECoreArnold::RendererImplementation::shader", boost::format( "Couldn't load shader \"%s\"" ) % name );
@@ -469,6 +471,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 			}
 			for( CompoundDataMap::const_iterator parmIt=parameters.begin(); parmIt!=parameters.end(); parmIt++ )
 			{
+				AtString paramNameArnold( parmIt->first.value().c_str() );
 				if( parmIt->second->isInstanceOf( IECore::StringDataTypeId ) )
 				{
 					const std::string &potentialLink = static_cast<const StringData *>( parmIt->second.get() )->readable();
@@ -478,7 +481,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 						AttributeState::ShaderMap::const_iterator shaderIt = m_attributeStack.top().shaders.find( linkHandle );
 						if( shaderIt != m_attributeStack.top().shaders.end() )
 						{
-							AiNodeLinkOutput( shaderIt->second, "", s, parmIt->first.value().c_str() );
+							AiNodeLinkOutput( shaderIt->second, "", s, paramNameArnold );
 						}
 						else
 						{
@@ -487,7 +490,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 						continue;
 					}
 				}
-				ParameterAlgo::setParameter( s, parmIt->first.value().c_str(), parmIt->second.get() );
+				ParameterAlgo::setParameter( s, paramNameArnold, parmIt->second.get() );
 			}
 			addNode( s );
 		}
@@ -538,7 +541,7 @@ void IECoreArnold::RendererImplementation::light( const std::string &name, const
 		}
 	}
 
-	AtNode *l = AiNode( unprefixedName );
+	AtNode *l = AiNode( AtString( unprefixedName ) );
 	if( !l )
 	{
 		msg( Msg::Warning, "IECoreArnold::RendererImplementation::light", boost::format( "Couldn't load light \"%s\"" ) % unprefixedName );
@@ -715,13 +718,13 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		// So here we just interpret "filename" as the node type to create.
 		// \todo : Change the name of the parameter to ExternalProcedural
 		// to be just "name" instead of "filename" in Cortex 10?
-		node = AiNode( externalProc->fileName().c_str() );
+		node = AiNode( AtString( externalProc->fileName().c_str() ) );
 		ParameterAlgo::setParameters( node, externalProc->parameters() );
 		applyTransformToNode( node );
 	}
 	else
 	{
-		node = AiNode( nodeType.c_str() );
+		node = AiNode( AtString( nodeType.c_str() ) );
 
 		// we have to transform the bound, as we're not applying the current transform to the
 		// procedural node, but instead applying absolute transforms to the shapes the procedural

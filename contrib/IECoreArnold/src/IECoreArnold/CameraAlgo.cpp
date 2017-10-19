@@ -107,9 +107,10 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
 	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
 	{
-		if( AiNodeEntryLookUpParameter( nodeEntry, it->first.c_str() ) )
+		AtString paramNameArnold( it->first.c_str() );
+		if( AiNodeEntryLookUpParameter( nodeEntry, paramNameArnold ) )
 		{
-			ParameterAlgo::setParameter( result, it->first.c_str(), it->second.get() );
+			ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
 		}
 	}
 

@@ -121,7 +121,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 			case AI_TYPE_STRING :
 				if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
-					AiNodeSetStr( node, name, data->readable().c_str() );
+					AiNodeSetStr( node, name, AtString( data->readable().c_str() ) );
 				}
 				break;
 			case AI_TYPE_RGB :
@@ -149,7 +149,7 @@ void setParameterInternal( AtNode *node, AtString name, int parameterType, bool 
 				// Then try getting a string, with the usual warning if nothing has been found yet
 				else if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
-					AiNodeSetStr( node, name, data->readable().c_str() );
+					AiNodeSetStr( node, name, AtString( data->readable().c_str() ) );
 				}
 				break;
 			case AI_TYPE_BOOLEAN :
@@ -267,7 +267,7 @@ IECore::DataPtr arrayToData( AtArray *array )
 	}
 }
 
-IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parameterType )
+IECore::DataPtr getParameterInternal( AtNode *node, const AtString name, int parameterType )
 {
 	switch( parameterType )
 	{
@@ -383,7 +383,10 @@ IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter )
 
 IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter )
 {
-	return getParameterInternal( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
+	// \todo : This cast to AtString appears to be necessary only because SolidAngle missed this one while updating
+	// their API.  If they fix it in the future, AiUserParamGetName would return AtString, and this cast would
+	// be unnecessary
+	return getParameterInternal( node, AtString( AiUserParamGetName( parameter ) ), AiUserParamGetType( parameter ) );
 }
 
 IECore::DataPtr getParameter( AtNode *node, AtString name )

@@ -123,7 +123,7 @@ void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *na
 
 	AiNodeSetArray(
 		shape,
-		name,
+		AtString( name ),
 		AiArrayConvert( p->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( p->readable()[0] ) )
 	);
 }
@@ -144,7 +144,7 @@ void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *sh
 	}
 
 	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_VECTOR );
-	AiNodeSetArray( shape, name, array );
+	AiNodeSetArray( shape, AtString( name ), array );
 }
 
 void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
@@ -178,10 +178,11 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
 {
-
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
-	if ( AiNodeEntryLookUpParameter(	entry, name ) != nullptr ){
+	AtString arnoldName( name );
+	if ( AiNodeEntryLookUpParameter( entry, arnoldName ) != nullptr )
+	{
 		msg(
 			Msg::Warning,
 			"ShapeAlgo::convertPrimitiveVariable",
@@ -256,7 +257,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 
 	if( arnoldInterpolation == "constant" )
 	{
-		ParameterAlgo::setParameter( shape, name, primitiveVariable.data.get() );
+		ParameterAlgo::setParameter( shape, arnoldName, primitiveVariable.data.get() );
 		return;
 	}
 
@@ -275,16 +276,16 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	}
 
 	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
-	AiNodeDeclare( shape, name, typeString.c_str() );
+	AiNodeDeclare( shape, arnoldName, typeString.c_str() );
 	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
 	if( array )
 	{
-		AiNodeSetArray( shape, name, array );
+		AiNodeSetArray( shape, arnoldName, array );
 		if( arnoldInterpolation == "indexed" )
 		{
 			AiNodeSetArray(
 				shape,
-				(name + string("idxs")).c_str(),
+				AtString((name + string("idxs")).c_str()),
 				identityIndices( AiArrayGetNumElements( array ) )
 			);
 		}
