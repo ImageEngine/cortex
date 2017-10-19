@@ -53,6 +53,9 @@ class IECORE_API ExternalProcedural : public VisibleRenderable
 
 		IE_CORE_DECLAREOBJECT( ExternalProcedural, VisibleRenderable );
 
+		// \todo : Rename to just "name"?
+		// In renderers like Arnold, procedurals don't load files directly, instead procedural files
+		// declare new node type names, and you create a procedural using this name.
 		void setFileName( const std::string &fileName );
 		const std::string &getFileName() const;
 
