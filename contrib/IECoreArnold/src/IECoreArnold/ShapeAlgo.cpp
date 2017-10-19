@@ -53,6 +53,9 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_radiusArnoldString("radius");
+
+
 AtArray *identityIndices( size_t size )
 {
 	AtArray *result = AiArrayAllocate( size, 1, AI_TYPE_UINT );
@@ -150,7 +153,7 @@ void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
 
 	AiNodeSetArray(
 		shape,
-		"radius",
+		g_radiusArnoldString,
 		AiArrayConvert( r->readable().size(), 1, AI_TYPE_FLOAT, (void *)&( r->readable()[0] ) )
 	);
 }
@@ -170,7 +173,7 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 	}
 
 	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_FLOAT );
-	AiNodeSetArray( shape, "radius", array );
+	AiNodeSetArray( shape, g_radiusArnoldString, array );
 }
 
 void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )

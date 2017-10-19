@@ -43,6 +43,12 @@
 
 using namespace IECoreArnold;
 
+namespace
+{
+const AtString g_nodeArnoldString("node");
+const AtString g_ginstanceArnoldString("ginstance");
+}
+
 struct InstancingConverter::MemberData
 {
 	typedef tbb::concurrent_hash_map<IECore::MurmurHash, AtNode *> Cache;
@@ -79,8 +85,8 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	{
 		if( a->second )
 		{
-			AtNode *instance = AiNode( "ginstance" );
-			AiNodeSetPtr( instance, "node", a->second );
+			AtNode *instance = AiNode( g_ginstanceArnoldString );
+			AiNodeSetPtr( instance, g_nodeArnoldString, a->second );
 			return instance;
 		}
 	}
@@ -113,8 +119,8 @@ AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive 
 	{
 		if( a->second )
 		{
-			AtNode *instance = AiNode( "ginstance" );
-			AiNodeSetPtr( instance, "node", a->second );
+			AtNode *instance = AiNode( g_ginstanceArnoldString );
+			AiNodeSetPtr( instance, g_nodeArnoldString, a->second );
 			return instance;
 		}
 	}

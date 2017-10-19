@@ -54,6 +54,10 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_driverTypeArnoldString("driverType");
+const AtString g_pixelAspectRatioArnoldString("pixel_aspect_ratio");
+
+
 // Stores a Cortex DisplayDriver and the parameters
 // used to create it. This forms the private data
 // accessed via AiNodeGetLocalData.
@@ -93,7 +97,7 @@ struct LocalData
 
 void driverParameters( AtList *params, AtNodeEntry *nentry )
 {
-	AiParameterStr( "driverType", "" );
+	AiParameterStr( g_driverTypeArnoldString, "" );
 
 	// we need to specify this metadata to keep MtoA happy.
 	AiMetaDataSetStr( nentry, nullptr, "maya.attr_prefix", "" );
@@ -194,10 +198,10 @@ void driverOpen( AtNode *node, struct AtOutputIterator *iterator, AtBBox2 displa
 	// IECoreImage::Format and then use that in place of the display
 	// window.
 	parameters->writable()["pixelAspect"] = new FloatData(
-		AiNodeGetFlt( AiUniverseGetOptions(), "pixel_aspect_ratio" )
+		AiNodeGetFlt( AiUniverseGetOptions(), g_pixelAspectRatioArnoldString )
 	);
 
-	const std::string driverType = AiNodeGetStr( node, "driverType" ).c_str();
+	const std::string driverType = AiNodeGetStr( node, g_driverTypeArnoldString ).c_str();
 
 	// We reuse the previous driver if we can - this allows us to use
 	// the same driver for every stage of a progressive render.

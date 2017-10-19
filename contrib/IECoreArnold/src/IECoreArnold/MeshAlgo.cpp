@@ -59,6 +59,20 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_catclarkArnoldString("catclark");
+const AtString g_motionStartArnoldString("motion_start");
+const AtString g_motionEndArnoldString("motion_end");
+const AtString g_nidxsArnoldString("nidxs");
+const AtString g_nlistArnoldString("nlist");
+const AtString g_nsidesArnoldString("nsides");
+const AtString g_polymeshArnoldString("polymesh");
+const AtString g_smoothingArnoldString("smoothing");
+const AtString g_subdivTypeArnoldString("subdiv_type");
+const AtString g_uvidxsArnoldString("uvidxs");
+const AtString g_uvlistArnoldString("uvlist");
+const AtString g_vidxsArnoldString("vidxs");
+const AtString g_vlistArnoldString("vlist");
+
 AtArray *identityIndices( size_t size )
 {
 	AtArray *result = AiArrayAllocate( size, 1, AI_TYPE_UINT );
@@ -136,8 +150,8 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 
 	if( uvSet == "uv" )
 	{
-		AiNodeSetArray( node, "uvlist", uvsArray );
-		AiNodeSetArray( node, "uvidxs", indicesArray );
+		AiNodeSetArray( node, g_uvlistArnoldString, uvsArray );
+		AiNodeSetArray( node, g_uvidxsArnoldString, indicesArray );
 	}
 	else
 	{
@@ -152,19 +166,19 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 
 	// Make the result mesh and add topology
 
-	AtNode *result = AiNode( "polymesh" );
+	AtNode *result = AiNode( g_polymeshArnoldString );
 
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 	AiNodeSetArray(
 		result,
-		"nsides",
+		g_nsidesArnoldString,
 		AiArrayConvert( verticesPerFace.size(), 1, AI_TYPE_INT, (void *)&( verticesPerFace[0] ) )
 	);
 
 	const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 	AiNodeSetArray(
 		result,
-		"vidxs",
+		g_vidxsArnoldString,
 		AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 	);
 
@@ -172,8 +186,8 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
 
 	if( mesh->interpolation()=="catmullClark" )
 	{
-		AiNodeSetStr( result, "subdiv_type", "catclark" );
-		AiNodeSetBool( result, "smoothing", true );
+		AiNodeSetStr( result, g_subdivTypeArnoldString, g_catclarkArnoldString );
+		AiNodeSetBool( result, g_smoothingArnoldString, true );
 	}
 
 	// Convert primitive variables.
@@ -250,7 +264,7 @@ void convertNormalIndices( const IECore::MeshPrimitive *mesh, AtNode *node, Prim
 	{
 		AiNodeSetArray(
 			node,
-			"nidxs",
+			g_nidxsArnoldString,
 			identityIndices( mesh->variableSize( PrimitiveVariable::FaceVarying ) )
 		);
 	}
@@ -259,7 +273,7 @@ void convertNormalIndices( const IECore::MeshPrimitive *mesh, AtNode *node, Prim
 		const std::vector<int> &vertexIds = mesh->vertexIds()->readable();
 		AiNodeSetArray(
 			node,
-			"nidxs",
+			g_nidxsArnoldString,
 			AiArrayConvert( vertexIds.size(), 1, AI_TYPE_INT, (void *)&( vertexIds[0] ) )
 		);
 	}
@@ -277,7 +291,7 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 {
 	AtNode *result = convertCommon( mesh );
 
-	ShapeAlgo::convertP( mesh, result, "vlist" );
+	ShapeAlgo::convertP( mesh, result, g_vlistArnoldString );
 
 	// add normals
 
@@ -286,11 +300,11 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 	{
 		AiNodeSetArray(
 			result,
-			"nlist",
+			g_nlistArnoldString,
 			AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, &n->readable().front() )
 		);
 		convertNormalIndices( mesh, result, nInterpolation );
-		AiNodeSetBool( result, "smoothing", true );
+		AiNodeSetBool( result, g_smoothingArnoldString, true );
 	}
 
 	return result;
@@ -301,7 +315,7 @@ AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &sam
 	AtNode *result = convertCommon( samples.front() );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
-	ShapeAlgo::convertP( primitiveSamples, result, "vlist" );
+	ShapeAlgo::convertP( primitiveSamples, result, g_vlistArnoldString );
 
 	// add normals
 
@@ -324,17 +338,17 @@ AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &sam
 	{
 		AiNodeSetArray(
 			result,
-			"nlist",
+			g_nlistArnoldString,
 			ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR )
 		);
 		convertNormalIndices( samples.front(), result, nInterpolation );
-		AiNodeSetBool( result, "smoothing", true );
+		AiNodeSetBool( result, g_smoothingArnoldString, true );
 	}
 
 	// add time sampling
 
-	AiNodeSetFlt( result, "motion_start", motionStart );
-	AiNodeSetFlt( result, "motion_end", motionEnd );
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	return result;
 }

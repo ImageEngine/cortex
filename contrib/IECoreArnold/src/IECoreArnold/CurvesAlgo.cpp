@@ -55,17 +55,32 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_pointsArnoldString("points");
+const AtString g_basisArnoldString("basis");
+const AtString g_bezierArnoldString("bezier");
+const AtString g_bSplineArnoldString("b-spline");
+const AtString g_catmullRomArnoldString("catmull-rom");
+const AtString g_curvesArnoldString("curves");
+const AtString g_linearArnoldString("linear");
+const AtString g_modeArnoldString("mode");
+const AtString g_motionStartArnoldString("motion_start");
+const AtString g_motionEndArnoldString("motion_end");
+const AtString g_numPointsArnoldString("num_points");
+const AtString g_orientationsArnoldString("orientations");
+const AtString g_orientedArnoldString("oriented");
+
+
 NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
 
 AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 {
 
-	AtNode *result = AiNode( "curves" );
+	AtNode *result = AiNode( g_curvesArnoldString );
 
 	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
 	AiNodeSetArray(
 		result,
-		"num_points",
+		g_numPointsArnoldString,
 		AiArrayConvert( verticesPerCurve.size(), 1, AI_TYPE_INT, (void *)&( verticesPerCurve[0] ) )
 	);
 
@@ -73,19 +88,19 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 
 	if( curves->basis() == CubicBasisf::bezier() )
 	{
-		AiNodeSetStr( result, "basis", "bezier" );
+		AiNodeSetStr( result, g_basisArnoldString, g_bezierArnoldString );
 	}
 	else if( curves->basis() == CubicBasisf::bSpline() )
 	{
-		AiNodeSetStr( result, "basis", "b-spline" );
+		AiNodeSetStr( result, g_basisArnoldString, g_bSplineArnoldString );
 	}
 	else if( curves->basis() == CubicBasisf::catmullRom() )
 	{
-		AiNodeSetStr( result, "basis", "catmull-rom" );
+		AiNodeSetStr( result, g_basisArnoldString, g_catmullRomArnoldString );
 	}
 	else if( curves->basis() == CubicBasisf::linear() )
 	{
-		AiNodeSetStr( result, "basis", "linear" );
+		AiNodeSetStr( result, g_basisArnoldString, g_linearArnoldString );
 	}
 	else
 	{
@@ -106,17 +121,17 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 {
 	AtNode *result = convertCommon( curves );
-	ShapeAlgo::convertP( curves, result, "points" );
+	ShapeAlgo::convertP( curves, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( curves, result );
 
 	// Convert "N" to orientations
 
 	if( const V3fVectorData *n = curves->variableData<V3fVectorData>( "N", PrimitiveVariable::Vertex ) )
 	{
-		AiNodeSetStr( result, "mode", "oriented" );
+		AiNodeSetStr( result, g_modeArnoldString, g_orientedArnoldString );
 		AiNodeSetArray(
 			result,
-			"orientations",
+			g_orientationsArnoldString,
 			AiArrayConvert( n->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( n->readable()[0] ) )
 		);
 	}
@@ -129,7 +144,7 @@ AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> 
 	AtNode *result = convertCommon( samples.front() );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
-	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
 
 	// Convert "N" to orientations
@@ -146,17 +161,17 @@ AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> 
 
 	if( nSamples.size() == samples.size() )
 	{
-		AiNodeSetStr( result, "mode", "oriented" );
+		AiNodeSetStr( result, g_modeArnoldString, g_orientedArnoldString );
 		AtArray *array = ParameterAlgo::dataToArray( nSamples, AI_TYPE_VECTOR );
-		AiNodeSetArray( result, "orientations", array );
+		AiNodeSetArray( result, g_orientationsArnoldString, array );
 	}
 	else if( nSamples.size() )
 	{
 		IECore::msg( IECore::Msg::Warning, "CurvesAlgo::convert", "Missing sample for primitive variable \"N\" - not setting orientations." );
 	}
 
-	AiNodeSetFlt( result, "motion_start", motionStart );
-	AiNodeSetFlt( result, "motion_end", motionEnd );
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	return result;
 }

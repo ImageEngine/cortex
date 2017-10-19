@@ -51,6 +51,11 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_sphereArnoldString("sphere");
+const AtString g_radiusArnoldString("radius");
+const AtString g_motionStartArnoldString("motion_start");
+const AtString g_motionEndArnoldString("motion_end");
+
 void warnIfUnsupported( const IECore::SpherePrimitive *sphere )
 {
 	if( sphere->zMin() != -1.0f )
@@ -79,17 +84,17 @@ AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere )
 {
 	warnIfUnsupported( sphere );
 
-	AtNode *result = AiNode( "sphere" );
+	AtNode *result = AiNode( g_sphereArnoldString );
 	ShapeAlgo::convertPrimitiveVariables( sphere, result );
 
-	AiNodeSetFlt( result, "radius", sphere->radius() );
+	AiNodeSetFlt( result, g_radiusArnoldString, sphere->radius() );
 
 	return result;
 }
 
 AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd )
 {
-	AtNode *result = AiNode( "sphere" );
+	AtNode *result = AiNode( g_sphereArnoldString );
 	ShapeAlgo::convertPrimitiveVariables( samples.front(), result );
 
 	AtArray *radiusSamples = AiArrayAllocate( 1, samples.size(), AI_TYPE_FLOAT );
@@ -101,9 +106,9 @@ AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> 
 		AiArraySetKey( radiusSamples, /* key = */ it - samples.begin(), &radius );
 	}
 
-	AiNodeSetArray( result, "radius", radiusSamples );
-	AiNodeSetFlt( result, "motion_start", motionStart );
-	AiNodeSetFlt( result, "motion_end", motionEnd );
+	AiNodeSetArray( result, g_radiusArnoldString, radiusSamples );
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	return result;
 }
