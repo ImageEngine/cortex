@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECore::PointsPrimitive *points );
-AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd );
+AtNode *convert( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace PointsAlgo
 

@@ -65,12 +65,12 @@ InstancingConverter::~InstancingConverter()
 	delete m_data;
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive )
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const std::string &nodeName, const AtNode *parentNode )
 {
-	return convert( primitive, IECore::MurmurHash() );
+	return convert( primitive, IECore::MurmurHash(), nodeName, parentNode );
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash )
+AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
 {
 	IECore::MurmurHash h = primitive->::IECore::Object::hash();
 	h.append( additionalHash );
@@ -78,14 +78,14 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	MemberData::Cache::accessor a;
 	if( m_data->cache.insert( a, h ) )
 	{
-		a->second = NodeAlgo::convert( primitive );
+		a->second = NodeAlgo::convert( primitive, nodeName, parentNode );
 		return a->second;
 	}
 	else
 	{
 		if( a->second )
 		{
-			AtNode *instance = AiNode( g_ginstanceArnoldString );
+			AtNode *instance = AiNode( g_ginstanceArnoldString, AtString( nodeName.c_str() ), parentNode );
 			AiNodeSetPtr( instance, g_nodeArnoldString, a->second );
 			return instance;
 		}
@@ -94,12 +94,12 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	return nullptr;
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd )
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	return convert( samples, motionStart, motionEnd, IECore::MurmurHash() );
+	return convert( samples, motionStart, motionEnd, IECore::MurmurHash(), nodeName, parentNode );
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash )
+AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
 {
 	IECore::MurmurHash h;
 	for( std::vector<const IECore::Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
@@ -112,14 +112,14 @@ AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive 
 	if( m_data->cache.insert( a, h ) )
 	{
 		std::vector<const IECore::Object *> objectSamples( samples.begin(), samples.end() );
-		a->second = NodeAlgo::convert( objectSamples, motionStart, motionEnd );
+		a->second = NodeAlgo::convert( objectSamples, motionStart, motionEnd, nodeName, parentNode );
 		return a->second;
 	}
 	else
 	{
 		if( a->second )
 		{
-			AtNode *instance = AiNode( g_ginstanceArnoldString );
+			AtNode *instance = AiNode( g_ginstanceArnoldString, AtString( nodeName.c_str() ), parentNode );
 			AiNodeSetPtr( instance, g_nodeArnoldString, a->second );
 			return instance;
 		}

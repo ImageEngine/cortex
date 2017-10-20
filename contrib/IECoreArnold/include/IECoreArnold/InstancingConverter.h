@@ -66,14 +66,14 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// Returns the Primitive converted to an appropriate AtNode type, returning
 		/// a ginstance if an identical primitive has already been processed. Primitive
 		/// identity is determined by comparing hashes.
-		AtNode *convert( const IECore::Primitive *primitive );
+		AtNode *convert( const IECore::Primitive *primitive, const std::string &nodeName, const AtNode *parentNode = nullptr );
 		/// As above, but allowing the user to pass an additional hash representing
 		/// modifications that will be made to the AtNode after conversion.
-		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash );
+		AtNode *convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 		/// Motion blurred versions of the above conversion functions.
-		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd );
-		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash );
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+		AtNode *convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 	private :
 

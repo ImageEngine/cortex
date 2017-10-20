@@ -46,7 +46,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 		s = IECore.SpherePrimitive( 0.25 )
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s )
+			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "radius" ), 0.25 )
 
@@ -56,7 +56,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s, 0, 1 )
+			n = IECoreArnold.NodeAlgo.convert( s, 0, 1, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 
 			a = arnold.AiNodeGetArray( n, "radius" )
@@ -79,7 +79,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s )
+			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
 			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtRGB( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetStr( n, "s" ), "test" )

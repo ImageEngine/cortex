@@ -51,7 +51,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 
 			uvs = arnold.AiNodeGetArray( n, "uvlist" )
 			self.assertEqual( arnold.AiArrayGetNumElements( uvs.contents ), 4 )
@@ -73,7 +73,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 
 			uvs = arnold.AiNodeGetArray( n, "uvlist" )
 			self.assertEqual( arnold.AiArrayGetNumElements( uvs.contents ), 4 )
@@ -97,7 +97,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 
 			uvs = arnold.AiNodeGetArray( n, "myMap" )
 			self.assertEqual( arnold.AiArrayGetNumElements( uvs.contents ), 4 )
@@ -150,7 +150,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
 			v = arnold.AiNodeGetArray( n, "myV3fPrimVar" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
@@ -173,7 +173,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
 			ia = arnold.AiNodeGetArray( n, "myPrimVaridxs" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 16 )
@@ -194,7 +194,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], -0.25, 0.25 )
+			node = IECoreArnold.NodeAlgo.convert( [ m1, m2 ], -0.25, 0.25, "testMesh" )
 
 			vList = arnold.AiNodeGetArray( node, "vlist" )
 			self.assertEqual( arnold.AiArrayGetNumElements( vList.contents ), 4 )
@@ -233,7 +233,7 @@ class MeshTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock( writable = True ) :
 			msg = IECore.CapturingMessageHandler()
 			with msg :
-				IECoreArnold.NodeAlgo.convert( m )
+				IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 
 			self.assertEqual( len(msg.messages), 1 )
 			self.assertEqual( msg.messages[-1].message, expectedMsg )
@@ -252,7 +252,7 @@ class MeshTest( unittest.TestCase ) :
 		m["vectors"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, vectors )
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
-			node = IECoreArnold.NodeAlgo.convert( m )
+			node = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 			p = arnold.AiNodeGetArray( node, "points" )
 			self.assertEqual( arnold.AiArrayGetType( p.contents ), arnold.AI_TYPE_VECTOR )
 
@@ -269,7 +269,7 @@ class MeshTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( m )
+			n = IECoreArnold.NodeAlgo.convert( m, "testMesh" )
 			a = arnold.AiNodeGetArray( n, "myBoolPrimVar" )
 
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )

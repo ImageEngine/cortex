@@ -78,7 +78,6 @@ const AtString g_inheritXformArnoldString("inherit_xform");
 const AtString g_matrixArnoldString("matrix");
 const AtString g_motionStartArnoldString("motion_start");
 const AtString g_motionEndArnoldString("motion_end");
-const AtString g_nameArnoldString("name");
 const AtString g_outputsArnoldString("outputs");
 const AtString g_pixelAspectRatioArnoldString( "pixel_aspect_ratio" );
 const AtString g_shaderArnoldString("shader");
@@ -169,8 +168,7 @@ void IECoreArnold::RendererImplementation::constructCommon( Mode mode )
 		m_instancingConverter = new InstancingConverter;
 
 		// create a generic filter we can use for all displays
-		m_defaultFilter = AiNode( g_gaussianFilterArnoldString );
-		AiNodeSetStr( m_defaultFilter, g_nameArnoldString, AtString( "ieCoreArnold_defaultFilterArnoldString" ) );
+		m_defaultFilter = AiNode( g_gaussianFilterArnoldString, AtString( "ieCoreArnold_defaultFilterArnoldString" ) );
 
 		m_attributeStack.push( AttributeState() );
 	}
@@ -240,10 +238,8 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 	CameraPtr cortexCamera = new Camera( name, nullptr, new CompoundData( parameters ) );
 	cortexCamera->addStandardParameters();
 
-	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
-
 	string nodeName = boost::str( boost::format( "ieCoreArnold:camera:%s" ) % name );
-	AiNodeSetStr( arnoldCamera, g_nameArnoldString, AtString( nodeName.c_str() ) );
+	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get(), nodeName, nullptr );
 
 	AtNode *options = AiUniverseGetOptions();
 	AiNodeSetPtr( options, g_cameraArnoldString, arnoldCamera );
@@ -262,9 +258,10 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 {
 	AtNode *driver = nullptr;
 	AtString typeString( type.c_str() );
+	AtString nodeName( boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() ).c_str() );
 	if( AiNodeEntryLookUp( typeString ) )
 	{
-		driver = AiNode( typeString );
+		driver = AiNode( typeString, nodeName );
 	}
 	else
 	{
@@ -273,7 +270,7 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 		AtString prefixedType( ("driver_" + type).c_str() );
 		if( AiNodeEntryLookUp( prefixedType ) )
 		{
-			driver = AiNode( prefixedType );
+			driver = AiNode( prefixedType, nodeName );
 		}
 	}
 
@@ -283,8 +280,6 @@ void IECoreArnold::RendererImplementation::display( const std::string &name, con
 		return;
 	}
 
-	AtString nodeName( boost::str( boost::format( "ieCoreArnold:display%d" ) % m_outputDescriptions.size() ).c_str() );
-	AiNodeSetStr( driver, g_nameArnoldString, nodeName );
 
 	const AtParamEntry *fileNameParameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( driver ), g_filenameArnoldString );
 	if( fileNameParameter )
@@ -817,11 +812,11 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 			{
 				prims.push_back( it->get() );
 			}
-			shape = m_instancingConverter->convert( prims, m_motionStart, m_motionEnd, hash );
+			shape = m_instancingConverter->convert( prims, m_motionStart, m_motionEnd, hash, "", nullptr );
 		}
 		else
 		{
-			shape = m_instancingConverter->convert( primitive, hash );
+			shape = m_instancingConverter->convert( primitive, hash, "", nullptr );
 		}
 	}
 	else
@@ -833,11 +828,11 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 			{
 				prims.push_back( it->get() );
 			}
-			shape = NodeAlgo::convert( prims, m_motionStart, m_motionEnd );
+			shape = NodeAlgo::convert( prims, m_motionStart, m_motionEnd, "", nullptr );
 		}
 		else
 		{
-			shape = NodeAlgo::convert( primitive );
+			shape = NodeAlgo::convert( primitive, "", nullptr );
 		}
 	}
 

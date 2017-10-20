@@ -49,7 +49,7 @@ class PointsTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 
 			self.failUnless( type( n ) is type( arnold.AiNode( "points" ) ) )
 
@@ -59,23 +59,23 @@ class PointsTest( unittest.TestCase ) :
 
 			p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( i ) for i in range( 0, 10 ) ] ) )
 
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
 
 			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "particle" )
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
 
 			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "disk" )
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "disk" )
 
 			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "sphere" )
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "sphere" )
 
 			p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "patch" )
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "quad" )
 
 	def testDiskRendering( self ) :
@@ -118,7 +118,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetInt( n, "myPrimVar" ), 10 )
 
 	def testConstantArrayPrimitiveVariable( self ) :
@@ -128,7 +128,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			a = arnold.AiNodeGetArray( n, "myPrimVar" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
 			for i in range( 0, 10 ) :
@@ -141,7 +141,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetInt( n, "myPrimVar" ), 10 )
 
 	def testVertexPrimitiveVariable( self ) :
@@ -155,7 +155,7 @@ class PointsTest( unittest.TestCase ) :
 
 			with IECoreArnold.UniverseBlock( writable = True ) :
 
-				n = IECoreArnold.NodeAlgo.convert( p )
+				n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 				a = arnold.AiNodeGetArray( n, "myPrimVar" )
 				self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )
 				for i in range( 0, 10 ) :
@@ -169,7 +169,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( p )
+			n = IECoreArnold.NodeAlgo.convert( p, "testPoints" )
 			self.assertEqual( arnold.AiNodeGetBool( n, "truePrimVar" ), True )
 			self.assertEqual( arnold.AiNodeGetBool( n, "falsePrimVar" ), False )
 
@@ -189,7 +189,7 @@ class PointsTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( [ p1, p2 ], -0.25, 0.25 )
+			n = IECoreArnold.NodeAlgo.convert( [ p1, p2 ], -0.25, 0.25, "testPoints" )
 
 			a = arnold.AiNodeGetArray( n, "points" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 10 )

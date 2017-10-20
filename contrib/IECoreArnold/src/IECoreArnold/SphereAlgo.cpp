@@ -80,11 +80,11 @@ NodeAlgo::ConverterDescription<SpherePrimitive> g_description( SphereAlgo::conve
 // Implementation of public API
 //////////////////////////////////////////////////////////////////////////
 
-AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere )
+AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode )
 {
 	warnIfUnsupported( sphere );
 
-	AtNode *result = AiNode( g_sphereArnoldString );
+	AtNode *result = AiNode( g_sphereArnoldString, AtString( nodeName.c_str() ), parentNode );
 	ShapeAlgo::convertPrimitiveVariables( sphere, result );
 
 	AiNodeSetFlt( result, g_radiusArnoldString, sphere->radius() );
@@ -92,9 +92,9 @@ AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere )
 	return result;
 }
 
-AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd )
+AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = AiNode( g_sphereArnoldString );
+	AtNode *result = AiNode( g_sphereArnoldString, AtString( nodeName.c_str() ), parentNode );
 	ShapeAlgo::convertPrimitiveVariables( samples.front(), result );
 
 	AtArray *radiusSamples = AiArrayAllocate( 1, samples.size(), AI_TYPE_FLOAT );

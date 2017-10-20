@@ -78,7 +78,7 @@ namespace IECoreArnold
 namespace NodeAlgo
 {
 
-AtNode *convert( const IECore::Object *object )
+AtNode *convert( const IECore::Object *object, const std::string &nodeName, const AtNode *parentNode )
 {
 	const Registry &r = registry();
 	Registry::const_iterator it = r.find( object->typeId() );
@@ -86,10 +86,10 @@ AtNode *convert( const IECore::Object *object )
 	{
 		return nullptr;
 	}
-	return it->second.converter( object );
+	return it->second.converter( object, nodeName, parentNode );
 }
 
-AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd )
+AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	if( samples.empty() )
 	{
@@ -115,11 +115,11 @@ AtNode *convert( const std::vector<const IECore::Object *> &samples, float motio
 
 	if( it->second.motionConverter )
 	{
-		return it->second.motionConverter( samples, motionStart, motionEnd );
+		return it->second.motionConverter( samples, motionStart, motionEnd, nodeName, parentNode );
 	}
 	else
 	{
-		return it->second.converter( firstSample );
+		return it->second.converter( firstSample, nodeName, parentNode );
 	}
 }
 

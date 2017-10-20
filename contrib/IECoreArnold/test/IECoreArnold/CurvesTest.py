@@ -59,7 +59,7 @@ class CurvesTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], -0.25, 0.25 )
+			n = IECoreArnold.NodeAlgo.convert( [ c1, c2 ], -0.25, 0.25, "testCurve" )
 
 			a = arnold.AiNodeGetArray( n, "points" )
 			self.assertEqual( arnold.AiArrayGetNumElements( a.contents ), 4 )
@@ -85,7 +85,7 @@ class CurvesTest( unittest.TestCase ) :
 
 			# No N - should be a ribbon
 
-			n = IECoreArnold.NodeAlgo.convert( c )
+			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "ribbon" )
 			self.assertEqual( arnold.AiArrayGetNumElements( arnold.AiNodeGetArray( n, "orientations" ).contents ), 0 )
 
@@ -96,7 +96,7 @@ class CurvesTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x ), math.cos( x ) ) for x in range( 0, 4 ) ] )
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( c )
+			n = IECoreArnold.NodeAlgo.convert( c, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 			orientations = arnold.AiNodeGetArray( n, "orientations" )
 			self.assertEqual( arnold.AiArrayGetNumElements( orientations.contents ), 4 )
@@ -112,7 +112,7 @@ class CurvesTest( unittest.TestCase ) :
 				IECore.V3fVectorData( [ IECore.V3f( 0, math.sin( x + 0.2 ), math.cos( x + 0.2 ) ) for x in range( 0, 4 ) ] )
 			)
 
-			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0 )
+			n = IECoreArnold.NodeAlgo.convert( [ c, c2 ], 0.0, 1.0, "testCurve" )
 			self.assertEqual( arnold.AiNodeGetStr( n, "mode" ), "oriented" )
 
 			orientations = arnold.AiNodeGetArray( n, "orientations" )

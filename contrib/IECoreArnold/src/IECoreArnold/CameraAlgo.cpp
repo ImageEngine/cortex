@@ -62,7 +62,7 @@ const AtString g_screenWindowMaxArnoldString("screen_window_max");
 
 } // namespace
 
-AtNode *CameraAlgo::convert( const IECore::Camera *camera )
+AtNode *CameraAlgo::convert( const IECore::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
 {
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();
@@ -72,16 +72,16 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
-		result = AiNode( g_perspCameraArnoldString );
+		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 		AiNodeSetFlt( result, g_fovArnoldString, cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
 	}
 	else if( projection=="orthographic" )
 	{
-		result = AiNode( g_orthoCameraArnoldString );
+		result = AiNode( g_orthoCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
 	else
 	{
-		result = AiNode( AtString( projection.c_str() ) );
+		result = AiNode( AtString( projection.c_str() ), AtString( nodeName.c_str() ), parentNode );
 	}
 
 	// Set clipping planes

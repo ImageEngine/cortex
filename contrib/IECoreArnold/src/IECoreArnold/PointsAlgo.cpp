@@ -62,10 +62,10 @@ const AtString g_sphereArnoldString( "sphere" );
 
 NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-AtNode *convertCommon( const IECore::PointsPrimitive *points )
+AtNode *convertCommon( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
-	AtNode *result = AiNode( g_pointsArnoldString );
+	AtNode *result = AiNode( g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	// mode
 
@@ -111,9 +111,9 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECore::PointsPrimitive *points )
+AtNode *convert( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( points );
+	AtNode *result = convertCommon( points, nodeName, parentNode );
 
 	ShapeAlgo::convertP( points, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( points, result );
@@ -123,9 +123,9 @@ AtNode *convert( const IECore::PointsPrimitive *points )
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd )
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front() );
+	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );

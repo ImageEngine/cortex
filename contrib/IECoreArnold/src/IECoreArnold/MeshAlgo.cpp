@@ -162,12 +162,12 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 	}
 }
 
-AtNode *convertCommon( const IECore::MeshPrimitive *mesh )
+AtNode *convertCommon( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
 	// Make the result mesh and add topology
 
-	AtNode *result = AiNode( g_polymeshArnoldString );
+	AtNode *result = AiNode( g_polymeshArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	const std::vector<int> &verticesPerFace = mesh->verticesPerFace()->readable();
 	AiNodeSetArray(
@@ -288,9 +288,9 @@ NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert, 
 // Implementation of public API
 //////////////////////////////////////////////////////////////////////////
 
-AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
+AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( mesh );
+	AtNode *result = convertCommon( mesh, nodeName, parentNode );
 
 	ShapeAlgo::convertP( mesh, result, g_vlistArnoldString );
 
@@ -311,9 +311,9 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh )
 	return result;
 }
 
-AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd )
+AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front() );
+	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_vlistArnoldString );

@@ -46,21 +46,21 @@ namespace NodeAlgo
 {
 
 /// Converts the specified IECore::Object into an equivalent
-/// Arnold object, returning NULL if no conversion is
+/// Arnold object, returning nullptr if no conversion is
 /// available.
-AtNode *convert( const IECore::Object *object );
+AtNode *convert( const IECore::Object *object, const std::string &nodeName, const AtNode *parentNode = nullptr );
 /// Converts the specified IECore::Object samples into an
 /// equivalent moving Arnold object. If no motion converter
 /// is available, then returns a standard conversion of the
 /// first sample.
-AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd );
+AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 /// Signature of a function which can convert an IECore::Object
 /// into an Arnold object.
-typedef AtNode * (*Converter)( const IECore::Object * );
+typedef AtNode * (*Converter)( const IECore::Object *, const std::string &nodeName, const AtNode *parentNode );
 /// Signature of a function which can convert a series of IECore::Object
 /// samples into a moving Arnold object.
-typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd );
+typedef AtNode * (*MotionConverter)( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode );
 
 /// Registers a converter for a specific type.
 /// Use the ConverterDescription utility class in preference to
@@ -76,8 +76,8 @@ class ConverterDescription
 	public :
 
 		/// Type-specific conversion functions.
-		typedef AtNode *(*Converter)( const T * );
-		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, float, float );
+		typedef AtNode *(*Converter)( const T *, const std::string&, const AtNode* );
+		typedef AtNode *(*MotionConverter)( const std::vector<const T *> &, float, float, const std::string&, const AtNode* );
 
 		ConverterDescription( Converter converter, MotionConverter motionConverter = nullptr )
 		{

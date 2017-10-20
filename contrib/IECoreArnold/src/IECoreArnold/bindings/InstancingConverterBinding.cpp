@@ -55,7 +55,7 @@ using namespace IECoreArnoldBindings;
 namespace
 {
 
-object convertWrapper1( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd )
+object convertWrapper1( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd, const std::string &nodeName )
 {
 	vector<const Primitive *> samples;
 	boost::python::container_utils::extend_container( samples, pythonSamples );
@@ -63,12 +63,12 @@ object convertWrapper1( InstancingConverter &c, object pythonSamples, float moti
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( samples, motionStart, motionEnd );
+		node = c.convert( samples, motionStart, motionEnd, nodeName, nullptr );
 	}
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper2( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd, const IECore::MurmurHash &h )
+object convertWrapper2( InstancingConverter &c, object pythonSamples, float motionStart, float motionEnd, const IECore::MurmurHash &h, const std::string &nodeName )
 {
 	vector<const Primitive *> samples;
 	boost::python::container_utils::extend_container( samples, pythonSamples );
@@ -76,27 +76,27 @@ object convertWrapper2( InstancingConverter &c, object pythonSamples, float moti
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( samples, motionStart, motionEnd, h );
+		node = c.convert( samples, motionStart, motionEnd, h, nodeName, nullptr );
 	}
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper3( InstancingConverter &c, IECore::Primitive *primitive )
+object convertWrapper3( InstancingConverter &c, IECore::Primitive *primitive, const std::string &nodeName )
 {
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( primitive );
+		node = c.convert( primitive, nodeName, nullptr );
 	}
 	return atNodeToPythonObject( node );
 }
 
-object convertWrapper4( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h )
+object convertWrapper4( InstancingConverter &c, IECore::Primitive *primitive, const IECore::MurmurHash &h, const std::string &nodeName )
 {
 	AtNode *node;
 	{
 		IECorePython::ScopedGILRelease gilRelease;
-		node = c.convert( primitive, h );
+		node = c.convert( primitive, h, nodeName, nullptr );
 	}
 	return atNodeToPythonObject( node );
 }

@@ -72,10 +72,10 @@ const AtString g_orientedArnoldString("oriented");
 
 NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
 
-AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
+AtNode *convertCommon( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
 
-	AtNode *result = AiNode( g_curvesArnoldString );
+	AtNode *result = AiNode( g_curvesArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	const std::vector<int> verticesPerCurve = curves->verticesPerCurve()->readable();
 	AiNodeSetArray(
@@ -118,9 +118,9 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 
 } // namespace
 
-AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
+AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( curves );
+	AtNode *result = convertCommon( curves, nodeName, parentNode );
 	ShapeAlgo::convertP( curves, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( curves, result );
 
@@ -139,9 +139,9 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves )
 	return result;
 }
 
-AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd )
+AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front() );
+	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );

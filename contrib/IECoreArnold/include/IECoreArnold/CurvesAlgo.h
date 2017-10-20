@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace CurvesAlgo
 {
 
-AtNode *convert( const IECore::CurvesPrimitive *curves );
-AtNode *convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd );
+AtNode *convert( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CurvesAlgo
 
