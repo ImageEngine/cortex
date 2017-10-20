@@ -299,7 +299,7 @@ if targetApp=="maya" :
 	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
 	mayaMajorVersion = mayaReg["majorVersion"]
 	MAYA_ROOT = mayaReg["location"]
-	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"].get("LM_LICENSE_FILE", "")
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
 	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
