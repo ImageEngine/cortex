@@ -1,3 +1,27 @@
+10.0.0-a4
+=========
+
+Features
+--------
+
+- USDScene : Added a prototype SceneInterface for reading USD scenes (#634).
+
+Improvements
+------------
+
+- Replaced NULL/0 with `nullptr`, and added `override` to all virtual overrides (#629).
+
+Fixes
+-----
+
+- IECoreGL::ColorTexture : Fixed bug in conversion of RGBA textures to ImagePrimitive (#635).
+- IECoreGL : Fixed crashes when rendering indexed primitive variables (#631).
+
+Build
+-----
+
+- Added script to prep for run-clang-tidy.py.
+
 10.0.0-a3
 =========
 
