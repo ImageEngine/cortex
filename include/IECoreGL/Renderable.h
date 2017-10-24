@@ -56,7 +56,7 @@ class IECOREGL_API Renderable : public IECore::RunTimeTyped
 	public :
 
 		Renderable();
-		virtual ~Renderable();
+		~Renderable() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Renderable, RenderableTypeId, IECore::RunTimeTyped );
 

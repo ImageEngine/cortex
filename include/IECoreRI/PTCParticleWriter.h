@@ -57,7 +57,7 @@ class IECORERI_API PTCParticleWriter : public IECore::ParticleWriter
 
 	private :
 
-		virtual void doWrite( const IECore::CompoundObject *operands );
+		void doWrite( const IECore::CompoundObject *operands ) override;
 
 		static const WriterDescription<PTCParticleWriter> m_writerDescription;
 

@@ -107,35 +107,35 @@ class IECORE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		MeshPrimitiveEvaluator( ConstMeshPrimitivePtr mesh );
 
-		virtual ~MeshPrimitiveEvaluator();
+		~MeshPrimitiveEvaluator() override;
 
-		virtual ConstPrimitivePtr primitive() const;
+		ConstPrimitivePtr primitive() const override;
 		MeshPrimitive::ConstPtr mesh() const;
 
-		virtual PrimitiveEvaluator::ResultPtr createResult() const;
+		PrimitiveEvaluator::ResultPtr createResult() const override;
 
-		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
+		void validateResult( PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
+		bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
+		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
+		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
 
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
+		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
 
 		/// A query specific to the MeshPrimitiveEvaluator, this just chooses a barycentric position on a specific triangle.
 		bool barycentricPosition( unsigned int triangleIndex, const Imath::V3f &barycentricCoordinates, PrimitiveEvaluator::Result *result ) const;
 
-		virtual bool signedDistance( const Imath::V3f &p, float &distance, PrimitiveEvaluator::Result *result ) const;
+		bool signedDistance( const Imath::V3f &p, float &distance, PrimitiveEvaluator::Result *result ) const override;
 
-		virtual float volume() const;
+		float volume() const override;
 
-		virtual Imath::V3f centerOfGravity() const;
+		Imath::V3f centerOfGravity() const override;
 
-		virtual float surfaceArea() const;
+		float surfaceArea() const override;
 
 
 		/// Returns a bounding box covering all the uv coordinates of the mesh.

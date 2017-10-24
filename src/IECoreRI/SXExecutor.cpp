@@ -482,7 +482,7 @@ class SXExecutor::Implementation : public IECore::RefCounted
 		template<SxType sxType>
 		void getVariable( SxParameterList parameterList, const char *name, IECore::CompoundData *result ) const
 		{
-			void *d = 0;
+			void *d = nullptr;
 			int numPoints = SxGetParameter( parameterList, name, &d );
 			if( d && numPoints )
 			{

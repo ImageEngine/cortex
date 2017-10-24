@@ -63,7 +63,7 @@ class IECORE_API SampledSceneInterface : public SceneInterface
 
 		IE_CORE_DECLARERUNTIMETYPED( SampledSceneInterface, SceneInterface );
 
-		virtual ~SampledSceneInterface() = 0;
+		~SampledSceneInterface() override = 0;
 
 		/// Returns the number of bounding box samples are available for reading
 		virtual size_t numBoundSamples() const = 0;
@@ -112,13 +112,13 @@ class IECORE_API SampledSceneInterface : public SceneInterface
 		/// reimplement them again, but typically this should not
 		/// be necessary.
 
-		virtual Imath::Box3d readBound( double time ) const;
-		virtual ConstDataPtr readTransform( double time ) const;
+		Imath::Box3d readBound( double time ) const override;
+		ConstDataPtr readTransform( double time ) const override;
 		/// Implemented using readTransform() rather than readTransformMatrixAtSample(),
 		/// as it potentially provides improved interpolation.
-		virtual Imath::M44d readTransformAsMatrix( double time ) const;
-		virtual ConstObjectPtr readAttribute( const Name &name, double time ) const;
-		virtual ConstObjectPtr readObject( double time ) const;
+		Imath::M44d readTransformAsMatrix( double time ) const override;
+		ConstObjectPtr readAttribute( const Name &name, double time ) const override;
+		ConstObjectPtr readObject( double time ) const override;
 
 };
 

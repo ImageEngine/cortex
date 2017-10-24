@@ -53,7 +53,7 @@ class IECORE_API DataCastOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( DataCastOp, Op );
 
 		DataCastOp();
-		virtual ~DataCastOp();
+		~DataCastOp() override;
 
 		ObjectParameter *objectParameter();
 		const ObjectParameter *objectParameter() const;
@@ -63,7 +63,7 @@ class IECORE_API DataCastOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		ObjectPtr doOperation( const CompoundObject *operands ) override;
 
 	private :
 

@@ -55,7 +55,7 @@ class IECOREIMAGE_API ImageCropOp : public IECore::ModifyOp
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageCropOp, ImageCropOpTypeId, IECore::ModifyOp );
 
 		ImageCropOp();
-		virtual ~ImageCropOp();
+		~ImageCropOp() override;
 
 		IECore::Box2iParameter *cropBoxParameter();
 		const IECore::Box2iParameter *cropBoxParameter() const;
@@ -71,7 +71,7 @@ class IECOREIMAGE_API ImageCropOp : public IECore::ModifyOp
 
 	protected :
 
-		virtual void modify( IECore::Object *object, const IECore::CompoundObject *operands );
+		void modify( IECore::Object *object, const IECore::CompoundObject *operands ) override;
 
 	private :
 

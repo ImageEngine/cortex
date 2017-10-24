@@ -47,7 +47,7 @@ class IECORE_API ObjectVector : public Object
 	public:
 
 		ObjectVector();
-		virtual ~ObjectVector();
+		~ObjectVector() override;
 
 		IE_CORE_DECLAREOBJECT( ObjectVector, Object );
 

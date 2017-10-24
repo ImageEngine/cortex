@@ -62,12 +62,12 @@ class IECOREGL_API ToGLBufferConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLBufferConverter, ToGLBufferConverterTypeId, ToGLConverter );
 
-		ToGLBufferConverter( IECore::ConstDataPtr toConvert = 0 );
-		virtual ~ToGLBufferConverter();
+		ToGLBufferConverter( IECore::ConstDataPtr toConvert = nullptr );
+		~ToGLBufferConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

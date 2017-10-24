@@ -55,7 +55,7 @@ class IECORE_API IFFFile : public RefCounted
 	public :
 
 		IFFFile( const std::string &fileName );
-		virtual ~IFFFile();
+		~IFFFile() override;
 
 		class Tag;
 		class Chunk;

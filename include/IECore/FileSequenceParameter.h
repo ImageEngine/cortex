@@ -62,7 +62,7 @@ class IECORE_API FileSequenceParameter : public PathParameter
 			const StringParameter::PresetsContainer &presets = StringParameter::PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr,
 			const ExtensionList &extensions = ExtensionList(), size_t minSequenceSize = 2 );
 
-		virtual ~FileSequenceParameter();
+		~FileSequenceParameter() override;
 
 		const ExtensionList &getExtensions() const;
 		void setExtensions( const ExtensionList &extensions );
@@ -73,7 +73,7 @@ class IECORE_API FileSequenceParameter : public PathParameter
 		/// Returns true only if the value is StringData and matches the FileSequence::fileNameValidator
 		/// regex. Also checks that the sequence exists or doesn't exist based on the CheckType passed to
  		/// the constructor.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 		/// Sets the internal StringData with the textual representation of the given file sequence object.
 		void setFileSequenceValue( ConstFileSequencePtr fileSequence );

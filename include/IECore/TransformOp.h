@@ -66,7 +66,7 @@ class IECORE_API TransformOp : public PrimitiveOp
 
 	protected :
 
-		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands );
+		void modifyPrimitive( Primitive * primitive, const CompoundObject * operands ) override;
 
 	private :
 

@@ -15,7 +15,7 @@ import subprocess
 
 # Make SCons tell us everything it would do to build Cortex
 
-subprocess.check_call( [ "scons", "--clean" ] )
+subprocess.check_call( [ "scons", "--clean", "OPTIONS=gaffer.options", ] )
 sconsOutput = subprocess.check_output( [ "scons", "install", "OPTIONS=gaffer.options", "--dry-run", "--no-cache" ] )
 
 # Write that into a "compile_commands.json" file

@@ -50,11 +50,11 @@ class IECOREGL_API DepthTexture : public Texture
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::DepthTexture, DepthTextureTypeId, Texture );
 
-		DepthTexture( unsigned int width, unsigned height, const IECore::Data *z = 0 );
+		DepthTexture( unsigned int width, unsigned height, const IECore::Data *z = nullptr );
 
-		virtual ~DepthTexture();
+		~DepthTexture() override;
 
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 };
 

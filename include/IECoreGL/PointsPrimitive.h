@@ -60,14 +60,14 @@ class IECOREGL_API PointsPrimitive : public Primitive
 		};
 
 		PointsPrimitive( Type type );
-		virtual ~PointsPrimitive();
+		~PointsPrimitive() override;
 
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-		virtual const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const;
-		virtual void render( const State *currentState, IECore::TypeId style ) const;
-		virtual void renderInstances( size_t numInstances = 1 ) const;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		const Shader::Setup *shaderSetup( const Shader *shader, State *state ) const override;
+		void render( const State *currentState, IECore::TypeId style ) const override;
+		void renderInstances( size_t numInstances = 1 ) const override;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on

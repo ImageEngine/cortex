@@ -57,7 +57,7 @@ class PointsWriter : public PrimitiveWriter
 		{
 		}
 
-		virtual void writeSample( const IECore::Object *object )
+		void writeSample( const IECore::Object *object ) override
 		{
 			const PointsPrimitive *pointsPrimitive = runTimeCast<const PointsPrimitive>( object );
 			if( !pointsPrimitive )
@@ -102,7 +102,7 @@ class PointsWriter : public PrimitiveWriter
 			m_points.getSchema().set( sample );
 		}
 
-		virtual void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling )
+		void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling ) override
 		{
 			m_points.getSchema().setTimeSampling( timeSampling );
 		}

@@ -56,9 +56,9 @@ class IECORE_API ReorderedFrameList : public FrameList
 		FrameList *getFrameList();
 		void setFrameList( FrameListPtr frameList );
 
-		virtual ~ReorderedFrameList();
+		~ReorderedFrameList() override;
 
-		virtual bool isEqualTo( ConstFrameListPtr other ) const;
+		bool isEqualTo( ConstFrameListPtr other ) const override;
 
 	protected :
 

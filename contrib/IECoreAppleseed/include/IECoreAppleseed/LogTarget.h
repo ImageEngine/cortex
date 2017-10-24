@@ -46,9 +46,9 @@ class IECoreLogTarget : public foundation::ILogTarget
 {
 	public:
 
-		virtual void release();
+		void release() override;
 
-		virtual void write( const foundation::LogMessage::Category category, const char* file, const size_t line, const char* header, const char* message );
+		void write( const foundation::LogMessage::Category category, const char* file, const size_t line, const char* header, const char* message ) override;
 
 };
 

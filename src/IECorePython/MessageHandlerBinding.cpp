@@ -60,7 +60,7 @@ class MessageHandlerWrapper : public RefCountedWrapper<MessageHandler>
 		{
 		}
 
-		virtual void handle( MessageHandler::Level level, const std::string &context, const std::string &message )
+		void handle( MessageHandler::Level level, const std::string &context, const std::string &message ) override
 		{
 			ScopedGILLock gilLock;
 			try

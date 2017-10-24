@@ -52,7 +52,7 @@ class IECOREIMAGE_API ChannelOp : public IECore::ModifyOp
 	public:
 
 		ChannelOp( const std::string &description );
-		virtual ~ChannelOp();
+		~ChannelOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ChannelOp, ChannelOpTypeId, IECore::ModifyOp );
 
@@ -79,7 +79,7 @@ class IECOREIMAGE_API ChannelOp : public IECore::ModifyOp
 	private :
 
 		/// Implemented to call modifyChannels().
-		void modify( IECore::Object *primitive, const IECore::CompoundObject *operands );
+		void modify( IECore::Object *primitive, const IECore::CompoundObject *operands ) override;
 
 IECore::StringVectorParameterPtr m_channelNamesParameter;
 

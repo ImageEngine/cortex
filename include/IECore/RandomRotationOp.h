@@ -53,7 +53,7 @@ class IECORE_API RandomRotationOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( RandomRotationOp, Op );
 
 		RandomRotationOp();
-		virtual ~RandomRotationOp();
+		~RandomRotationOp() override;
 
 		ObjectParameter * seedParameter();
 		const ObjectParameter * seedParameter() const;
@@ -81,7 +81,7 @@ class IECORE_API RandomRotationOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

@@ -58,7 +58,7 @@ ColorTexture::ColorTexture( unsigned int width, unsigned int height )
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
 	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-		GL_FLOAT, 0 );
+		GL_FLOAT, nullptr );
 }
 
 ColorTexture::ColorTexture( unsigned int width, unsigned int height, const IECore::Data *r,
@@ -182,7 +182,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 	const std::vector<ElementType> &rr = r->readable();
 	const std::vector<ElementType> &rg = g->readable();
 	const std::vector<ElementType> &rb = b->readable();
-	const std::vector<ElementType> *ra = a ? &a->readable() : 0;
+	const std::vector<ElementType> *ra = a ? &a->readable() : nullptr;
 
 	unsigned int n = width * height;
 	if( rr.size()!=n || rg.size()!=n || rb.size()!=n || (ra && ra->size()!=n) )
@@ -198,7 +198,7 @@ void ColorTexture::templateConstruct( unsigned int width, unsigned int height, c
 		const ElementType *dr = &rr[y*width];
 		const ElementType *dg = &rg[y*width];
 		const ElementType *db = &rb[y*width];
-		const ElementType *da = ra ? &(*ra)[y*width] : 0;
+		const ElementType *da = ra ? &(*ra)[y*width] : nullptr;
 
 		for( unsigned int x=0; x<width; x++ )
 		{
@@ -266,8 +266,8 @@ IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
 	FloatVectorDataPtr bd = new FloatVectorData();
 	vector<float> &b = bd->writable(); b.resize( width * height );
 
-	FloatVectorDataPtr ad = 0;
-	vector<float> *a = 0;
+	FloatVectorDataPtr ad = nullptr;
+	vector<float> *a = nullptr;
 	// there are potentially loads of different internal formats which denote alpha.
 	// these are the only ones encountered so far, but it's not a great way of testing
 	// and i can't find another way of doing it.
@@ -283,7 +283,7 @@ IECoreImage::ImagePrimitivePtr ColorTexture::imagePrimitive() const
 		float *rr = &r[y*width];
 		float *rg = &g[y*width];
 		float *rb = &b[y*width];
-		float *ra = a ? &(*a)[y*width] : 0;
+		float *ra = a ? &(*a)[y*width] : nullptr;
 		for( int x=0; x<width; x++ )
 		{
 			rr[x] = data[i++];

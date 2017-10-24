@@ -87,7 +87,7 @@ FrameBuffer::ScopedBinding::~ScopedBinding()
 IE_CORE_DEFINERUNTIMETYPED( FrameBuffer );
 
 FrameBuffer::FrameBuffer()
-	:	m_depthAttachment( 0 )
+	:	m_depthAttachment( nullptr )
 {
 	glGenFramebuffers( 1, &m_frameBuffer );
 }
@@ -127,7 +127,7 @@ TexturePtr FrameBuffer::getColor( unsigned int index )
 {
 	if( index >= m_colorAttachments.size() )
 	{
-		return 0;
+		return nullptr;
 	}
 	return m_colorAttachments[index];
 }
@@ -136,7 +136,7 @@ ConstTexturePtr FrameBuffer::getColor( unsigned int index ) const
 {
 	if( index >= m_colorAttachments.size() )
 	{
-		return 0;
+		return nullptr;
 	}
 	return m_colorAttachments[index];
 }

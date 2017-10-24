@@ -80,13 +80,13 @@ void setAttribute( NSIContext_t context, NSIHandle_t object, const char *name, c
 {
 	NSIParam_t param = {
 		name,
-		NULL, // data
+		nullptr, // data
 		NSITypeInvalid,
 		0, // arraylength
 		1  // count
 	};
 
-	const char *charPtr = NULL;
+	const char *charPtr = nullptr;
 	switch( value->typeId() )
 	{
 		case IntDataTypeId :

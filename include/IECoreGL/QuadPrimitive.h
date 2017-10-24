@@ -51,12 +51,12 @@ class IECOREGL_API QuadPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::QuadPrimitive, QuadPrimitiveTypeId, Primitive );
 
 		QuadPrimitive( float width = 1, float height = 1 );
-		virtual ~QuadPrimitive();
+		~QuadPrimitive() override;
 
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
-		virtual Imath::Box3f bound() const;
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		Imath::Box3f bound() const override;
 
-		virtual void renderInstances( size_t numInstances ) const;
+		void renderInstances( size_t numInstances ) const override;
 
 	private :
 

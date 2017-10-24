@@ -53,11 +53,11 @@ class IECORE_API VectorDataFilterOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( VectorDataFilterOp, ModifyOp );
 
 		VectorDataFilterOp();
-		virtual ~VectorDataFilterOp();
+		~VectorDataFilterOp() override;
 
 	protected :
 
-		virtual void modify( Object * object, const CompoundObject * operands );
+		void modify( Object * object, const CompoundObject * operands ) override;
 
 		ObjectParameterPtr m_filterParameter;
 		BoolParameterPtr m_invertFilterParameter;

@@ -109,7 +109,7 @@ static int procInit( AtNode *node, void **userPtr )
 	int classVersion = AiNodeGetInt( node, "classVersion" );
 	AtArray *parameterValues = AiNodeGetArray( node, "parameterValues" );
 
-	ParameterisedProceduralPtr parameterisedProcedural = 0;
+	ParameterisedProceduralPtr parameterisedProcedural = nullptr;
 	ScopedGILLock gilLock;
 	try
 	{
@@ -167,7 +167,7 @@ static int procInit( AtNode *node, void **userPtr )
 	}
 	else
 	{
-		*userPtr = 0;
+		*userPtr = nullptr;
 	}
 
 	return 1;
@@ -192,7 +192,7 @@ static int procNumNodes( void *userPtr )
 static AtNode* procGetNode( void *userPtr, int i )
 {
 	IECoreArnold::Renderer *renderer = (IECoreArnold::Renderer *)( userPtr );
-	return renderer ? (AtNode *)renderer->proceduralNode( i ) : 0;
+	return renderer ? (AtNode *)renderer->proceduralNode( i ) : nullptr;
 }
 
 

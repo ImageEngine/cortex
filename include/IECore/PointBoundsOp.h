@@ -53,7 +53,7 @@ class IECORE_API PointBoundsOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( PointBoundsOp, Op );
 
 		PointBoundsOp();
-		virtual ~PointBoundsOp();
+		~PointBoundsOp() override;
 
 		/// The Parameter for the input point cloud.
 		ObjectParameter * pointParameter();
@@ -75,7 +75,7 @@ class IECORE_API PointBoundsOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

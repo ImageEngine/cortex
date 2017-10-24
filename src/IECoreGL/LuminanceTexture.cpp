@@ -83,7 +83,7 @@ struct LuminanceTexture::Constructor
 		typedef typename T::ValueType::value_type ElementType;
 
 		const std::vector<ElementType> &ry = y->readable();
-		const std::vector<ElementType> *ra = alpha ? &(boost::static_pointer_cast<const T>( alpha )->readable()) : 0;
+		const std::vector<ElementType> *ra = alpha ? &(boost::static_pointer_cast<const T>( alpha )->readable()) : nullptr;
 
 		unsigned int n = width * height;
 		if( ry.size()!=n || (ra && ra->size()!=n) )
@@ -97,7 +97,7 @@ struct LuminanceTexture::Constructor
 		for( int y=height-1; y>=0; y-- )
 		{
 			const ElementType *dy = &ry[y*width];
-			const ElementType *da = ra ? &(*ra)[y*width] : 0;
+			const ElementType *da = ra ? &(*ra)[y*width] : nullptr;
 
 			for( unsigned int x=0; x<width; x++ )
 			{
@@ -172,8 +172,8 @@ IECoreImage::ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
 	FloatVectorDataPtr yd = new FloatVectorData();
 	vector<float> &y = yd->writable(); y.resize( width * height );
 
-	FloatVectorDataPtr ad = 0;
-	vector<float> *a = 0;
+	FloatVectorDataPtr ad = nullptr;
+	vector<float> *a = nullptr;
 	if( aSize )
 	{
 		ad = new FloatVectorData();
@@ -184,7 +184,7 @@ IECoreImage::ImagePrimitivePtr LuminanceTexture::imagePrimitive() const
 	for( int yy=height-1; yy>=0; yy-- )
 	{
 		float *ry = &y[yy*width];
-		float *ra = a ? &(*a)[yy*width] : 0;
+		float *ra = a ? &(*a)[yy*width] : nullptr;
 		for( int x=0; x<width; x++ )
 		{
 			ry[x] = data[i++];

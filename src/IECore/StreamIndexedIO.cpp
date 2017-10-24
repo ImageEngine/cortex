@@ -599,7 +599,7 @@ class StreamIndexedIO::Index : public RefCounted
 
 		/// Construct an index from reading a file stream.
 		Index( StreamIndexedIO::StreamFilePtr stream );
-		virtual ~Index();
+		~Index() override;
 
 		/// function called right after construction
 		void openStream();

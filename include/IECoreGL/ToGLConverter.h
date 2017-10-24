@@ -80,7 +80,7 @@ class IECOREGL_API ToGLConverter : public IECore::FromCoreConverter
 	protected :
 
 		ToGLConverter( const std::string &description, IECore::TypeId supportedType );
-		virtual ~ToGLConverter();
+		~ToGLConverter() override;
 
 		/// Creating a static instance of one of these (templated on your Converter type)
 		/// within your class will register your converter with the factory mechanism.

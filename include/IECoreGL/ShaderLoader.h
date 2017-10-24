@@ -61,8 +61,8 @@ class IECOREGL_API ShaderLoader : public IECore::RefCounted
 		/// Creates a ShaderLoader which will search for
 		/// source files on the given search paths. If preprocessorSearchPaths is
 		/// specified, then source preprocessing will be performed using boost::wave.
-		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=0 );
-		virtual ~ShaderLoader();
+		ShaderLoader( const IECore::SearchPath &searchPaths, const IECore::SearchPath *preprocessorSearchPaths=nullptr );
+		~ShaderLoader() override;
 
 		/// Loads the GLSL source code for a shader of the specified name, by
 		/// locating and loading files named "name.vert". "name.geom" and "name.frag". If any

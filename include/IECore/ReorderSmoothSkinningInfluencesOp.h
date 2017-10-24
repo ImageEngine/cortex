@@ -51,11 +51,11 @@ class IECORE_API ReorderSmoothSkinningInfluencesOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( ReorderSmoothSkinningInfluencesOp, ModifyOp );
 
 		ReorderSmoothSkinningInfluencesOp();
-		virtual ~ReorderSmoothSkinningInfluencesOp();
+		~ReorderSmoothSkinningInfluencesOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

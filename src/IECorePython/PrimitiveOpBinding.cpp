@@ -60,7 +60,7 @@ class PrimitiveOpWrapper : public RunTimeTypedWrapper<PrimitiveOp>
 		{
 		};
 
-		virtual void modifyPrimitive( Primitive * object, const CompoundObject * operands )
+		void modifyPrimitive( Primitive * object, const CompoundObject * operands ) override
 		{
 			ScopedGILLock gilLock;
 			this->methodOverride( "modifyPrimitive" )( PrimitivePtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );

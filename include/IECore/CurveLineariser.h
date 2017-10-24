@@ -49,7 +49,7 @@ class IECORE_API CurveLineariser : public CurvesPrimitiveOp
 	public :
 
 		CurveLineariser();
-		virtual ~CurveLineariser();
+		~CurveLineariser() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( CurveLineariser, CurvesPrimitiveOp );
 
@@ -58,7 +58,7 @@ class IECORE_API CurveLineariser : public CurvesPrimitiveOp
 
 	protected :
 
-		virtual void modifyTypedPrimitive( CurvesPrimitive * curves, const CompoundObject * operands );
+		void modifyTypedPrimitive( CurvesPrimitive * curves, const CompoundObject * operands ) override;
 
 };
 

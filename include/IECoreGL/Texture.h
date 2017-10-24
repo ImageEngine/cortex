@@ -67,10 +67,10 @@ class IECOREGL_API Texture : public Bindable
 		/// Creates a texture object to wrap the already created
 		/// GL texture specified.
 		Texture( GLuint texture );
-		virtual ~Texture();
+		~Texture() override;
 
 		/// Binds the texture as the current GL texture.
-		virtual void bind() const;
+		void bind() const override;
 
 		class IECOREGL_API ScopedBinding
 		{

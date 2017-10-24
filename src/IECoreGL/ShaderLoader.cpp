@@ -335,13 +335,13 @@ ShaderPtr ShaderLoader::load( const std::string &name )
 
 ShaderLoader *ShaderLoader::defaultShaderLoader()
 {
-	static ShaderLoaderPtr t = 0;
+	static ShaderLoaderPtr t = nullptr;
 	if( !t )
 	{
 		const char *e = getenv( "IECOREGL_SHADER_PATHS" );
 		const char *p = getenv( "IECOREGL_SHADER_INCLUDE_PATHS" );
 		IECore::SearchPath pp( p ? p : "", ":" );
-		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : 0 );
+		t = new ShaderLoader( IECore::SearchPath( e ? e : "", ":" ), p ? &pp : nullptr );
 	}
 	return t.get();
 }

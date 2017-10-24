@@ -48,7 +48,7 @@ class IECORE_API CompoundObject : public Object
 	public:
 
 		CompoundObject();
-		virtual ~CompoundObject();
+		~CompoundObject() override;
 
 		IE_CORE_DECLAREOBJECT( CompoundObject, Object );
 

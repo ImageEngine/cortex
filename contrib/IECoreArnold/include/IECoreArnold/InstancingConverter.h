@@ -61,7 +61,7 @@ class IECOREARNOLD_API InstancingConverter : public IECore::RefCounted
 		/// InstancingConverter lifespan should be contained within a
 		/// UniverseBlock.
 		InstancingConverter();
-		virtual ~InstancingConverter();
+		~InstancingConverter() override;
 
 		/// Returns the Primitive converted to an appropriate AtNode type, returning
 		/// a ginstance if an identical primitive has already been processed. Primitive

@@ -71,32 +71,32 @@ class IECORE_API CompoundParameter : public Parameter
 		/// Implemented to return a CompoundObject representing the default values
 		/// of all the child objects.
 		/// \threading It is not safe to call this from multiple concurrent threads.
-		virtual const Object *defaultValue() const;
+		const Object *defaultValue() const override;
 		/// If true was passed to adoptChildPresets at construction, then update the presets
 		/// with the intersection of the presets of all the child parameters, otherwise returns
 		/// an empty container or the presets defined by setPresets().
 		/// Please note that the map returned may differ between one call
 		/// to presets() and the next.
-		virtual const PresetsContainer &getPresets() const;
+		const PresetsContainer &getPresets() const override;
 		/// Defines presets for this Parameter.
 		/// Throws an exception if true was passed to adoptChildPresets at construction.
-		virtual void setPresets( const PresetsContainer &presets );
+		void setPresets( const PresetsContainer &presets ) override;
 		/// Implemented to return true only if all children have presetsOnly() true and
 		/// true was passed to adoptChildPresets at construction.
-		virtual bool presetsOnly() const;
+		bool presetsOnly() const override;
 		/// Values are only valid if they are a CompoundObject with a valid member
 		/// for each child parameter, and no additional values.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 		/// Sets the values of child parameters using the matching child objects of the passed CompoundObject.
 		/// In the case of missing values (or if the value isn't even a CompoundParameter) sets the child parameter
 		/// value to a NullObject instance to signify it's invalidity.
-		virtual void setValue( ObjectPtr value );
+		void setValue( ObjectPtr value ) override;
 		/// If the last set value was a CompoundObject (as it should have been) then updates it with the current
 		/// child parameter values and returns it.
 		/// \threading It is not safe to call this from multiple concurrent threads.
-		virtual Object *getValue();
+		Object *getValue() override;
 		/// As above.
-		virtual const Object *getValue() const;
+		const Object *getValue() const override;
 		//@}
 
 		//! @name Child Parameter access

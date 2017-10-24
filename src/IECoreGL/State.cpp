@@ -49,7 +49,7 @@ class State::Implementation : public IECore::RefCounted
 	public :
 
 		Implementation( bool complete )
-			:	m_userAttributes( 0 )
+			:	m_userAttributes( nullptr )
 		{
 			if( complete )
 			{
@@ -62,11 +62,11 @@ class State::Implementation : public IECore::RefCounted
 		}
 
 		Implementation( const Implementation &other )
-			:	m_components( other.m_components ), m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : 0 )
+			:	m_components( other.m_components ), m_userAttributes( other.m_userAttributes ? other.m_userAttributes->copy() : nullptr )
 		{
 		}
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 		}
 
@@ -106,7 +106,7 @@ class State::Implementation : public IECore::RefCounted
 			ComponentMap::const_iterator it = m_components.find( componentType );
 			if( it==m_components.end() )
 			{
-				return 0;
+				return nullptr;
 			}
 			return it->second.component.get();
 		}
@@ -116,7 +116,7 @@ class State::Implementation : public IECore::RefCounted
 			ComponentMap::const_iterator it = m_components.find( componentType );
 			if( it==m_components.end() )
 			{
-				return 0;
+				return nullptr;
 			}
 			return it->second.component.get();
 		}
@@ -161,7 +161,7 @@ class State::Implementation : public IECore::RefCounted
 		struct Component
 		{
 			Component()
-				: component( 0 ), override( false )
+				: component( nullptr ), override( false )
 			{
 			}
 

@@ -52,14 +52,14 @@ class IECORE_API MatrixMultiplyOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( MatrixMultiplyOp, ModifyOp );
 
 		MatrixMultiplyOp();
-		virtual ~MatrixMultiplyOp();
+		~MatrixMultiplyOp() override;
 
 		ObjectParameter * matrixParameter();
 		const ObjectParameter * matrixParameter() const;
 
 	protected :
 
-		virtual void modify( Object * toModify, const CompoundObject * operands );
+		void modify( Object * toModify, const CompoundObject * operands ) override;
 
 	private :
 

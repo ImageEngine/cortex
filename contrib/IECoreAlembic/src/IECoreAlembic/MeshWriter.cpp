@@ -62,7 +62,7 @@ class MeshWriter : public PrimitiveWriter
 		{
 		}
 
-		virtual void writeSample( const IECore::Object *object )
+		void writeSample( const IECore::Object *object ) override
 		{
 			ConstMeshPrimitivePtr meshPrimitive;
 			if( const MeshPrimitive *typedObject = runTimeCast<const MeshPrimitive>( object ) )
@@ -116,7 +116,7 @@ class MeshWriter : public PrimitiveWriter
 
 		}
 
-		virtual void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling )
+		void writeTimeSampling( const Alembic::AbcCoreAbstract::TimeSamplingPtr &timeSampling ) override
 		{
 			switch( m_state.which() )
 			{

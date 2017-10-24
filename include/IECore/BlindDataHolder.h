@@ -50,7 +50,7 @@ class IECORE_API BlindDataHolder : public Object
 		BlindDataHolder();
 		BlindDataHolder(CompoundDataPtr data);
 
-		virtual ~BlindDataHolder();
+		~BlindDataHolder() override;
 
 		IE_CORE_DECLAREOBJECT( BlindDataHolder, Object );
 

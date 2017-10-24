@@ -53,16 +53,16 @@ class IECOREGL_API Scene : public Renderable
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Scene, SceneTypeId, Renderable );
 
 		Scene();
-		virtual ~Scene();
+		~Scene() override;
 
 		/// Renders the scene, using the passed state as
 		/// the root state - it is not necessary for this
 		/// state to already be bound.
-		virtual void render( State *state ) const;
+		void render( State *state ) const override;
 		/// Convenience function to bind a default state
 		/// and then call render() with it.
 		void render() const;
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
 		/// Fills hits with HitRecords for all primitives which are visible within the specified
 		/// region. The region is specified in NDC space (0,0 at top left) in the same

@@ -59,7 +59,7 @@ class IECOREIMAGE_API EnvMapSampler : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( EnvMapSampler, EnvMapSamplerTypeId, IECore::Op );
 
 		EnvMapSampler();
-		virtual ~EnvMapSampler();
+		~EnvMapSampler() override;
 
 		ImagePrimitiveParameter *imageParameter();
 		const ImagePrimitiveParameter *imageParameter() const;
@@ -69,7 +69,7 @@ class IECOREIMAGE_API EnvMapSampler : public IECore::Op
 
 	protected :
 
-		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

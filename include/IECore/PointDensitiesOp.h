@@ -53,7 +53,7 @@ class IECORE_API PointDensitiesOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( PointDensitiesOp, Op );
 
 		PointDensitiesOp();
-		virtual ~PointDensitiesOp();
+		~PointDensitiesOp() override;
 
 		/// The Parameter for the input point cloud.
 		ObjectParameter * pointParameter();
@@ -71,7 +71,7 @@ class IECORE_API PointDensitiesOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 	private :
 

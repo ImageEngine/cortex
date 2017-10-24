@@ -52,7 +52,7 @@ class IECOREGL_API Bindable : public IECore::RunTimeTyped
 	public :
 
 		Bindable();
-		virtual ~Bindable();
+		~Bindable() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Bindable, BindableTypeId, IECore::RunTimeTyped );
 

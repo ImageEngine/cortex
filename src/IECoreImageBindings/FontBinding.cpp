@@ -59,7 +59,7 @@ static ImagePrimitivePtr image( Font &f, char c )
 	{
 		return i->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 } // namespace

@@ -53,11 +53,11 @@ class IECORE_API NormalizeSmoothSkinningWeightsOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( NormalizeSmoothSkinningWeightsOp, ModifyOp );
 
 		NormalizeSmoothSkinningWeightsOp();
-		virtual ~NormalizeSmoothSkinningWeightsOp();
+		~NormalizeSmoothSkinningWeightsOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

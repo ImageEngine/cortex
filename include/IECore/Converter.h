@@ -59,7 +59,7 @@ class IECORE_API Converter : public Parameterised
 	protected :
 
 		Converter( const std::string &description );
-		virtual ~Converter();
+		~Converter() override;
 
 };
 

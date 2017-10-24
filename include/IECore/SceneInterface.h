@@ -133,7 +133,7 @@ class IECORE_API SceneInterface : public RunTimeTyped
 				static SceneInterfacePtr creator( const std::string &fileName, IndexedIO::OpenMode mode );
 		};
 
-		virtual ~SceneInterface() = 0;
+		~SceneInterface() override = 0;
 
 		/// Returns the file that this scene is mapped to. Throws exception if there's no file.
 		virtual std::string fileName() const = 0;

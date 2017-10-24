@@ -87,7 +87,7 @@ class ParameterWrapper : public IECorePython::RunTimeTypedWrapper<T>
 		{
 		}
 
-		virtual bool valueValid( const IECore::Object *value, std::string *reason = nullptr ) const
+		bool valueValid( const IECore::Object *value, std::string *reason = nullptr ) const override
 		{
 			if( this->isSubclassed() )
 			{

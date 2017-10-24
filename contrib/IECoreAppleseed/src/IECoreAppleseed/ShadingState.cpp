@@ -72,7 +72,7 @@ void IECoreAppleseed::ShadingState::addOSLShader( ConstShaderPtr shader )
 	if( m_surfaceShader )
 	{
 		m_shaders.clear();
-		m_surfaceShader = 0;
+		m_surfaceShader = nullptr;
 	}
 
 	m_shaders.push_back( shader );
@@ -83,7 +83,7 @@ void IECoreAppleseed::ShadingState::setOSLSurface( ConstShaderPtr surface )
 	if( m_surfaceShader )
 	{
 		m_shaders.clear();
-		m_surfaceShader = 0;
+		m_surfaceShader = nullptr;
 	}
 
 	m_surfaceShader = surface;
@@ -280,5 +280,5 @@ void IECoreAppleseed::ShadingState::addConnections( const std::string &shaderHan
 
 bool IECoreAppleseed::ShadingState::valid() const
 {
-	return m_surfaceShader.get() != 0;
+	return m_surfaceShader.get() != nullptr;
 }

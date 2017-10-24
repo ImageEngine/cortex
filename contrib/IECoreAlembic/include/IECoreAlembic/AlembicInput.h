@@ -58,7 +58,7 @@ class IECOREALEMBIC_API AlembicInput : public IECore::RefCounted
 		IE_CORE_DECLAREMEMBERPTR( AlembicInput );
 
 		AlembicInput( const std::string &fileName );
-		virtual ~AlembicInput();
+		~AlembicInput() override;
 
 		//! @name Metadata
 		////////////////////////////////////////////////////////////

@@ -56,7 +56,7 @@ class IECOREIMAGE_API HdrMergeOp : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( HdrMergeOp, HdrMergeOpTypeId, IECore::Op );
 
 		HdrMergeOp();
-		virtual ~HdrMergeOp();
+		~HdrMergeOp() override;
 
 		/// The Parameter for the vector of input images.
 		IECore::ObjectVectorParameter *inputImagesParameter();
@@ -73,7 +73,7 @@ class IECOREIMAGE_API HdrMergeOp : public IECore::Op
 
 	protected :
 
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

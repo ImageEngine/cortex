@@ -77,7 +77,7 @@ ToGLConverterPtr ToGLConverter::create( IECore::ConstObjectPtr object, IECore::T
 		}
 		objectTypeId = IECore::RunTimeTyped::baseTypeId( objectTypeId );
 	}
-	return 0;
+	return nullptr;
 }
 
 ToGLConverter::Registrations &ToGLConverter::registrations()

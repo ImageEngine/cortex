@@ -225,13 +225,13 @@ void CurvesPrimitive::render( const State *currentState, IECore::TypeId style ) 
 	{
 		ensureLinearAdjacencyVertIds();
 		Buffer::ScopedBinding indexBinding( *(m_memberData->linearAdjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numLinearAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numLinearAdjacencyVertIds, GL_UNSIGNED_INT, nullptr );
 	}
 	else
 	{
 		ensureAdjacencyVertIds();
 		Buffer::ScopedBinding indexBinding( *(m_memberData->adjacencyVertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, 0 );
+		glDrawElements( GL_LINES_ADJACENCY, m_memberData->numAdjacencyVertIds, GL_UNSIGNED_INT, nullptr );
 	}
 }
 
@@ -239,7 +239,7 @@ void CurvesPrimitive::renderInstances( size_t numInstances ) const
 {
 	ensureVertIds();
 	Buffer::ScopedBinding indexBinding( *(m_memberData->vertIdsBuffer), GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElementsInstancedARB( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, 0, numInstances );
+	glDrawElementsInstancedARB( GL_LINES, m_memberData->numVertIds, GL_UNSIGNED_INT, nullptr, numInstances );
 }
 
 void CurvesPrimitive::renderMode( const State *state, bool &linear, bool &ribbons ) const

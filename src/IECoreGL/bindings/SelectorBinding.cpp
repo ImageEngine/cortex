@@ -68,7 +68,7 @@ class SelectorContext
 
 		StatePtr baseState()
 		{
-			return StatePtr( m_selector ? m_selector->baseState() : NULL );
+			return StatePtr( m_selector ? m_selector->baseState() : nullptr );
 		}
 
 		void exit( object type, object value, object traceBack )

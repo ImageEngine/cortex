@@ -88,7 +88,7 @@ class SceneCache::Implementation : public RefCounted
 {
 	public :
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 		}
 
@@ -306,7 +306,7 @@ class SceneCache::ReaderImplementation : public SceneCache::Implementation
 			}
 		}
 
-		virtual ~ReaderImplementation()
+		~ReaderImplementation() override
 		{
 			if ( m_sharedData && !m_parent )
 			{
@@ -1046,7 +1046,7 @@ class SceneCache::WriterImplementation : public SceneCache::Implementation
 			}
 		}
 
-		virtual ~WriterImplementation()
+		~WriterImplementation() override
 		{
 			// the root location destruction triggers the flush on the file.
 			if ( !m_parent )

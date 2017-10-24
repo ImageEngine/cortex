@@ -84,10 +84,10 @@ class IECORE_API MeshPrimitive : public Primitive
 		PolygonIterator faceEnd();
 		//@}
 
-		virtual size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const;
+		size_t variableSize( PrimitiveVariable::Interpolation interpolation ) const override;
 
 		/// Render the mesh
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 		/// Creates a box mesh.
 		/// \todo Add subdivisions and texture coordinates.
@@ -97,7 +97,7 @@ class IECORE_API MeshPrimitive : public Primitive
 		/// Creates a sphere
 		static MeshPrimitivePtr createSphere( float radius, float zMin = -1.0f, float zMax = 1.0f, float thetaMax = 360.0f, const Imath::V2i &divisions = Imath::V2i( 20, 40 ) );
 
-		virtual void topologyHash( MurmurHash &h ) const;
+		void topologyHash( MurmurHash &h ) const override;
 
 	private:
 

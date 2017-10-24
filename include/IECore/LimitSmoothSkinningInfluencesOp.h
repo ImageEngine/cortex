@@ -57,7 +57,7 @@ class IECORE_API LimitSmoothSkinningInfluencesOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( LimitSmoothSkinningInfluencesOp, ModifyOp );
 
 		LimitSmoothSkinningInfluencesOp();
-		virtual ~LimitSmoothSkinningInfluencesOp();
+		~LimitSmoothSkinningInfluencesOp() override;
 
 		enum Mode
 		{
@@ -68,7 +68,7 @@ class IECORE_API LimitSmoothSkinningInfluencesOp : public ModifyOp
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

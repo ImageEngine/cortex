@@ -49,10 +49,10 @@ class IECOREGL_API UIntTexture : public Texture
 
 		/// Constructs an empty texture of the specified dimensions.
 		UIntTexture( unsigned int width, unsigned int height );
-		virtual ~UIntTexture();
+		~UIntTexture() override;
 
 		/// Creates an ImagePrimitive using the texture contents.
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 };
 

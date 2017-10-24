@@ -59,7 +59,7 @@ class IECORE_API ObjectParameter : public Parameter
 		ObjectParameter( const std::string &name, const std::string &description, ObjectPtr defaultValue, const TypeId *types, const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
 		/// Returns false if isn't an instance of any type in validTypes(), or any type derived from those types
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 		/// Returns a set containing the valid types.
 		const TypeIdSet &validTypes() const;

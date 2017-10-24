@@ -55,11 +55,11 @@ class IECORE_API BinaryFrameList : public ReorderedFrameList
 
 		BinaryFrameList( FrameListPtr frameList = nullptr );
 
-		virtual ~BinaryFrameList();
+		~BinaryFrameList() override;
 
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const;
-		virtual FrameListPtr copy() const ;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override;
+		FrameListPtr copy() const override ;
 
 		static std::string suffix();
 

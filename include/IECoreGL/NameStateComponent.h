@@ -60,7 +60,7 @@ class IECOREGL_API NameStateComponent : public StateComponent
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::NameStateComponent, NameStateComponentTypeId, StateComponent );
 
 		NameStateComponent( const std::string &name="unnamed" );
-		virtual ~NameStateComponent();
+		~NameStateComponent() override;
 
 		/// The name in string form.
 		const std::string &name() const;
@@ -69,7 +69,7 @@ class IECOREGL_API NameStateComponent : public StateComponent
 		GLuint glName() const;
 
 		/// Calls Selector::currentSelector()->loadName() as necessary.
-		virtual void bind() const;
+		void bind() const override;
 
 		/// Returns the public (string) name from the internal OpenGL name value, which
 		/// typically will come from the contents of the select buffer. Raises an Exception

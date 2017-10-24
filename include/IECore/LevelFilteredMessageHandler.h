@@ -66,9 +66,9 @@ class IECORE_API LevelFilteredMessageHandler : public FilteredMessageHandler
 		/// Creates a message handler that filter messages based on the message level,
 		///  and outputs to another message handler.
 		LevelFilteredMessageHandler( MessageHandlerPtr handler, MessageHandler::Level level );
-		virtual ~LevelFilteredMessageHandler();
+		~LevelFilteredMessageHandler() override;
 
-		virtual void handle( Level level, const std::string &context, const std::string &message );
+		void handle( Level level, const std::string &context, const std::string &message ) override;
 
 		MessageHandler::Level getLevel() const;
 		void setLevel( MessageHandler::Level level );

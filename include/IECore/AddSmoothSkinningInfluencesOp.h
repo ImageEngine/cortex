@@ -55,11 +55,11 @@ class IECORE_API AddSmoothSkinningInfluencesOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( AddSmoothSkinningInfluencesOp, ModifyOp );
 
 		AddSmoothSkinningInfluencesOp();
-		virtual ~AddSmoothSkinningInfluencesOp();
+		~AddSmoothSkinningInfluencesOp() override;
 
 	protected :
 
-		virtual void modify( Object *object, const CompoundObject *operands );
+		void modify( Object *object, const CompoundObject *operands ) override;
 
 	private :
 

@@ -59,7 +59,7 @@ class IECORE_API CurveExtrudeOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( CurveExtrudeOp, Op );
 
 		CurveExtrudeOp();
-		virtual ~CurveExtrudeOp();
+		~CurveExtrudeOp() override;
 
 		CurvesPrimitiveParameter *curvesParameter();
 		const CurvesPrimitiveParameter *curvesParameter() const;
@@ -69,7 +69,7 @@ class IECORE_API CurveExtrudeOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		ObjectPtr doOperation( const CompoundObject *operands ) override;
 
 		void buildReferenceFrames( const std::vector< Imath::V3f > &points, std::vector< Imath::V3f > &tangents, std::vector< Imath::M44f > &frames ) const;
 

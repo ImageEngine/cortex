@@ -56,7 +56,7 @@ class IECORE_API DataConvertOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( DataConvertOp, Op );
 
 		DataConvertOp();
-		virtual ~DataConvertOp();
+		~DataConvertOp() override;
 
 		/// The data to be interleaved. This is specified
 		/// as an ObjectVector containing Data objects of
@@ -71,7 +71,7 @@ class IECORE_API DataConvertOp : public Op
 
 	protected :
 
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		ObjectPtr doOperation( const CompoundObject *operands ) override;
 
 	private :
 

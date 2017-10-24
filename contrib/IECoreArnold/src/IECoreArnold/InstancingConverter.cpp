@@ -85,7 +85,7 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, const std::vector<float> &sampleTimes )
@@ -119,5 +119,5 @@ AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive 
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }

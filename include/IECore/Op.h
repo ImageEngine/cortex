@@ -66,7 +66,7 @@ class IECORE_API Op : public Parameterised
 		/// derived class from CompoundParameter.
 		Op( const std::string &description, CompoundParameterPtr compoundParameter, ParameterPtr resultParameter );
 
-		virtual ~Op();
+		~Op() override;
 
 		/// Performs the operation using the current values of parameters().
 		/// Throws an Exception if the parameter values are not valid.

@@ -64,12 +64,12 @@ IE_CORE_DEFINERUNTIMETYPED( PTCParticleReader );
 const Reader::ReaderDescription<PTCParticleReader> PTCParticleReader::m_readerDescription( "3Dbake 3DWbake ptc" );
 
 PTCParticleReader::PTCParticleReader( )
-	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
+	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( nullptr ), m_userDataBuffer( nullptr )
 {
 }
 
 PTCParticleReader::PTCParticleReader( const std::string &fileName )
-	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( 0 ), m_userDataBuffer( 0 )
+	:	ParticleReader( "Reads Renderman point cloud format" ), m_ptcFile( nullptr ), m_userDataBuffer( nullptr )
 {
 	m_fileNameParameter->setTypedValue( fileName );
 }
@@ -96,12 +96,12 @@ void PTCParticleReader::close()
 	if (m_ptcFile)
 	{
 		PtcClosePointCloudFile( m_ptcFile );
-		m_ptcFile = NULL;
+		m_ptcFile = nullptr;
 	}
 	if (m_userDataBuffer)
 	{
 		delete [] m_userDataBuffer;
-		m_userDataBuffer = NULL;
+		m_userDataBuffer = nullptr;
 	}
 }
 
@@ -342,12 +342,12 @@ DataPtr PTCParticleReader::readAttribute( const std::string &name )
 	CompoundDataPtr result = readAttributes( names );
 	if (!result)
 	{
-		return 0;
+		return nullptr;
 	}
 	CompoundDataMap::const_iterator it = result->readable().find( name );
 	if ( it == result->readable().end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	return it->second;
 }
@@ -356,17 +356,17 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 {
 	if( !open() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	CompoundDataPtr result = new CompoundData();
 
 	std::map< std::string, struct AttrInfo > attrInfo;
 
-	float *point = 0;
-	float *normal = 0;
-	float *radius = 0;
-	float *userData = 0;
+	float *point = nullptr;
+	float *normal = nullptr;
+	float *radius = nullptr;
+	float *userData = nullptr;
 	float pointBuffer[ 3 ];
 	float normalBuffer[ 3 ];
 	float radiusBuffer[ 1 ];
@@ -402,7 +402,7 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			map<string, Record>::const_iterator it = m_header.attributes.find( name );
 			if( it==m_header.attributes.end() )
 			{
-				return 0;
+				return nullptr;
 			}
 
 			userData = m_userDataBuffer;
@@ -410,10 +410,10 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			type = it->second.type;
 		}
 
-		V3fVectorDataPtr v3fVector = 0;
-		FloatVectorDataPtr floatVector = 0;
-		M44fVectorDataPtr matrixVector = 0;
-		DataPtr dataVector = 0;
+		V3fVectorDataPtr v3fVector = nullptr;
+		FloatVectorDataPtr floatVector = nullptr;
+		M44fVectorDataPtr matrixVector = nullptr;
+		DataPtr dataVector = nullptr;
 
 		switch( type )
 		{
@@ -442,7 +442,7 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			dataVector = matrixVector;
 		default:
 			msg( Msg::Error, "PTCParticleReader::readAttributes()", format( "Internal error. Unrecognized type '%d' loading attribute %s." ) % type % name );
-			return 0;
+			return nullptr;
 		}
 
 		AttrInfo info = {
@@ -460,7 +460,7 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 		if ( !PtcReadDataPoint( m_ptcFile, point, normal, radius, userData ) )
 		{
 			msg( Msg::Warning, "PTCParticleReader::readAttributes", format( "Failed to read point %d." ) % i );
-			return 0;
+			return nullptr;
 		}
 
 		std::map< std::string, struct AttrInfo >::iterator it;
@@ -499,14 +499,14 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 				}
 			default:
 				msg( Msg::Error, "PTCParticleReader::readAttributes()", format( "Internal error. Unrecognized typeId '%d'." ) % it->second.targetData->typeId() );
-				return 0;
+				return nullptr;
 			}
 		}
 	}
 
 	/// \todo do we have ids from ptc files to be used in the filtering?
-	const Data *ids = 0;
-	DataPtr filteredData = 0;
+	const Data *ids = nullptr;
+	DataPtr filteredData = nullptr;
 	// filter and convert each attribute individually.
 	std::map< std::string, struct AttrInfo >::const_iterator attrIt;
 	for( attrIt=attrInfo.begin(); attrIt!=attrInfo.end(); attrIt++ )
@@ -565,7 +565,7 @@ CompoundDataPtr PTCParticleReader::readAttributes( const std::vector<std::string
 			break;
 		default:
 			msg( Msg::Error, "PTCParticleReader::readAttributes()", format( "Internal error. Unrecognized type '%d' converting attribute %s." ) % attrIt->second.type	% attrIt->first );
-			return 0;
+			return nullptr;
 		}
 		result->writable()[attrIt->first] = filteredData;
 	}

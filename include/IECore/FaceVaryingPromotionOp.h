@@ -50,7 +50,7 @@ class IECORE_API FaceVaryingPromotionOp : public MeshPrimitiveOp
 	public :
 
 		FaceVaryingPromotionOp();
-		virtual ~FaceVaryingPromotionOp();
+		~FaceVaryingPromotionOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( FaceVaryingPromotionOp, MeshPrimitiveOp );
 
@@ -72,7 +72,7 @@ class IECORE_API FaceVaryingPromotionOp : public MeshPrimitiveOp
 
 	protected :
 
-		virtual void modifyTypedPrimitive( MeshPrimitive *mesh, const CompoundObject *operands );
+		void modifyTypedPrimitive( MeshPrimitive *mesh, const CompoundObject *operands ) override;
 
 	private :
 

@@ -59,7 +59,7 @@ class ModifyOpWrapper : public RunTimeTypedWrapper<ModifyOp>
 		{
 		};
 
-		virtual void modify( Object * object, const CompoundObject * operands )
+		void modify( Object * object, const CompoundObject * operands ) override
 		{
 			ScopedGILLock gilLock;
 			this->methodOverride( "modify" )( ObjectPtr( object ), CompoundObjectPtr( const_cast<CompoundObject *>( operands ) ) );

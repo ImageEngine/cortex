@@ -48,7 +48,7 @@ class IECORE_API Shader : public StateRenderable
 	public:
 
 		Shader( const std::string &name="defaultsurface", const std::string &type="surface", const CompoundDataMap &parameters = CompoundDataMap() );
-		virtual ~Shader();
+		~Shader() override;
 
 		IE_CORE_DECLAREOBJECT( Shader, StateRenderable );
 
@@ -67,7 +67,7 @@ class IECORE_API Shader : public StateRenderable
 		const CompoundData *parametersData() const;
 
 		/// Sets this shader as the current shader in Renderer.
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

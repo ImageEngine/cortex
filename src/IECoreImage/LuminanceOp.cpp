@@ -206,7 +206,7 @@ void LuminanceOp::modify( Object *object, const CompoundObject *operands )
 	ImagePrimitive *image = runTimeCast<ImagePrimitive>( object );
 	ImagePrimitive::ChannelMap &channels = image->channels;
 
-	DataPtr luminanceData = 0;
+	DataPtr luminanceData = nullptr;
 	int steps[3] = { 1, 1, 1 };
 
 	const auto colorIt = channels.find( m_colorChannelParameter->getTypedValue() );

@@ -56,7 +56,7 @@ class IECORE_API Primitive : public VisibleRenderable
 	public:
 
 		Primitive();
-		virtual ~Primitive();
+		~Primitive() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( Primitive, VisibleRenderable );
 
@@ -109,7 +109,7 @@ class IECORE_API Primitive : public VisibleRenderable
 
 		/// Implemented to return a box containing all the points in the variable
 		/// "P" if it exists.
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
 		/// Returns the number of values a piece of data must provide for the given
 		/// interpolation type. Must be implemented in all derived classes.

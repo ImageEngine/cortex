@@ -59,10 +59,10 @@ class RunTimeTypedWrapper : public RefCountedWrapper<T>
 		template<typename... Args>
 		RunTimeTypedWrapper( PyObject *self, Args&&... args );
 
-		virtual IECore::TypeId typeId() const;
-		virtual const char *typeName() const;
-		virtual bool isInstanceOf( IECore::TypeId typeId ) const;
-		virtual bool isInstanceOf( const char *typeName ) const;
+		IECore::TypeId typeId() const override;
+		const char *typeName() const override;
+		bool isInstanceOf( IECore::TypeId typeId ) const override;
+		bool isInstanceOf( const char *typeName ) const override;
 
 };
 

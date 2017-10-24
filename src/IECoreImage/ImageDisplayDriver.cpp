@@ -161,12 +161,12 @@ ConstImagePrimitivePtr ImageDisplayDriver::storedImage( const std::string &handl
 	{
 		return it->second;
 	}
-	return 0;
+	return nullptr;
 }
 
 ConstImagePrimitivePtr ImageDisplayDriver::removeStoredImage( const std::string &handle )
 {
-	ConstImagePrimitivePtr result = 0;
+	ConstImagePrimitivePtr result = nullptr;
 	tbb::mutex::scoped_lock lock( g_poolMutex );
 	ImagePool::iterator it = g_pool.find( handle );
 	if( it != g_pool.end() )

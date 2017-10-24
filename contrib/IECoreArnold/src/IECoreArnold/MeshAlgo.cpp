@@ -217,27 +217,27 @@ const V3fVectorData *normal( const IECore::MeshPrimitive *mesh, PrimitiveVariabl
 	PrimitiveVariableMap::const_iterator it = mesh->variables.find( "N" );
 	if( it == mesh->variables.end() )
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	const V3fVectorData *n = runTimeCast<const V3fVectorData>( it->second.data.get() );
 	if( !n )
 	{
 		msg( Msg::Warning, "MeshAlgo", boost::format( "Variable \"N\" has unsupported type \"%s\" (expected V3fVectorData)." ) % it->second.data->typeName() );
-		return NULL;
+		return nullptr;
 	}
 
 	const PrimitiveVariable::Interpolation thisInterpolation = it->second.interpolation;
 	if( interpolation != PrimitiveVariable::Invalid && thisInterpolation != interpolation )
 	{
 		msg( Msg::Warning, "MeshAlgo", "Variable \"N\" has inconsistent interpolation types - not generating normals." );
-		return NULL;
+		return nullptr;
 	}
 
 	if( thisInterpolation != PrimitiveVariable::Varying && thisInterpolation != PrimitiveVariable::Vertex && thisInterpolation != PrimitiveVariable::FaceVarying )
 	{
 		msg( Msg::Warning, "MeshAlgo", "Variable \"N\" has unsupported interpolation type - not generating normals." );
-		return NULL;
+		return nullptr;
 	}
 
 	interpolation = thisInterpolation;

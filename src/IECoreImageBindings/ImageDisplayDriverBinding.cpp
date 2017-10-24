@@ -77,7 +77,7 @@ static ImagePrimitivePtr storedImage( const std::string &handle )
 	{
 		return i->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 static ImagePrimitivePtr removeStoredImage( const std::string &handle )
@@ -87,7 +87,7 @@ static ImagePrimitivePtr removeStoredImage( const std::string &handle )
 	{
 		return i->copy();
 	}
-	return 0;
+	return nullptr;
 }
 
 } // namespace

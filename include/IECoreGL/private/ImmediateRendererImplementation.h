@@ -56,34 +56,34 @@ class ImmediateRendererImplementation : public RendererImplementation
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImmediateRendererImplementation, ImmediateRendererImplementationTypeId, RendererImplementation );
 
 		ImmediateRendererImplementation();
-		virtual ~ImmediateRendererImplementation();
+		~ImmediateRendererImplementation() override;
 
-		virtual void addCamera( CameraPtr camera );
-		virtual void addDisplay( ConstDisplayPtr display );
+		void addCamera( CameraPtr camera ) override;
+		void addDisplay( ConstDisplayPtr display ) override;
 
-		virtual void worldBegin();
-		virtual void worldEnd();
+		void worldBegin() override;
+		void worldEnd() override;
 
-		virtual void transformBegin();
-		virtual void transformEnd();
-		virtual void setTransform( const Imath::M44f &m );
-		virtual Imath::M44f getTransform() const;
-		virtual void concatTransform( const Imath::M44f &matrix );
+		void transformBegin() override;
+		void transformEnd() override;
+		void setTransform( const Imath::M44f &m ) override;
+		Imath::M44f getTransform() const override;
+		void concatTransform( const Imath::M44f &matrix ) override;
 
-		virtual void attributeBegin();
-		virtual void attributeEnd();
+		void attributeBegin() override;
+		void attributeEnd() override;
 
-		virtual void addState( StateComponentPtr state );
-		virtual StateComponent *getState( IECore::TypeId type );
+		void addState( StateComponentPtr state ) override;
+		StateComponent *getState( IECore::TypeId type ) override;
 
-		virtual void addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value );
-		virtual IECore::Data *getUserAttribute( const IECore::InternedString &name );
+		void addUserAttribute( const IECore::InternedString &name, IECore::DataPtr value ) override;
+		IECore::Data *getUserAttribute( const IECore::InternedString &name ) override;
 
-		virtual void addPrimitive( ConstPrimitivePtr primitive );
+		void addPrimitive( ConstPrimitivePtr primitive ) override;
 
-		virtual void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer );
+		void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) override;
 
-		virtual void addInstance( GroupPtr grp );
+		void addInstance( GroupPtr grp ) override;
 
 	private :
 

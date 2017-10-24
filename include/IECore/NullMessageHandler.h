@@ -58,7 +58,7 @@ class IECORE_API NullMessageHandler : public MessageHandler
 
 		NullMessageHandler();
 
-		virtual void handle( Level level, const std::string &context, const std::string &message );
+		void handle( Level level, const std::string &context, const std::string &message ) override;
 
 };
 

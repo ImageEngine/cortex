@@ -51,24 +51,24 @@ namespace IECore
 {
 
 #define IE_CORE_DECLARETYPEFNS( TYPENAME )\
-	virtual IECore::TypeId typeId() const { return TYPENAME ## TypeId; };\
-	virtual const char *typeName() const { return #TYPENAME; };\
+	IECore::TypeId typeId() const override { return TYPENAME ## TypeId; };\
+	const char *typeName() const override { return #TYPENAME; };\
 	static IECore::TypeId staticTypeId() { return TYPENAME ## TypeId; };\
 	static const char *staticTypeName() { return #TYPENAME; };\
 	static IECore::TypeId baseTypeId() { return BaseClass::staticTypeId(); };\
 	static const char *baseTypeName() { return BaseClass::staticTypeName(); };
 
 #define IE_CORE_DECLAREEXTENSIONTYPEFNS( TYPENAME, TYPEID )\
-	virtual IECore::TypeId typeId() const { return IECore::TypeId(TYPEID); };\
-	virtual const char *typeName() const { return #TYPENAME; };\
+	IECore::TypeId typeId() const override { return IECore::TypeId(TYPEID); };\
+	const char *typeName() const override { return #TYPENAME; };\
 	static IECore::TypeId staticTypeId() { return IECore::TypeId(TYPEID); };\
 	static const char *staticTypeName() { return #TYPENAME; };\
 	static IECore::TypeId baseTypeId() { return BaseClass::staticTypeId(); };\
 	static const char *baseTypeName() { return BaseClass::staticTypeName(); };
 
 #define IE_CORE_DECLARETYPEISINSTANCEFUNCTIONS()																										\
-	virtual bool isInstanceOf( IECore::TypeId typeId ) const { return typeId==staticTypeId() ? true : BaseClass::isInstanceOf( typeId ); };						\
-	virtual bool isInstanceOf( const char *typeName ) const { return !strcmp( typeName, staticTypeName() ) ? true : BaseClass::isInstanceOf( typeName ); };			\
+	bool isInstanceOf( IECore::TypeId typeId ) const override { return typeId==staticTypeId() ? true : BaseClass::isInstanceOf( typeId ); };						\
+	bool isInstanceOf( const char *typeName ) const override { return !strcmp( typeName, staticTypeName() ) ? true : BaseClass::isInstanceOf( typeName ); };			\
 
 #define IE_CORE_DECLAREINHERITSFROMFUNCTIONS()																										\
 	static bool inheritsFrom( IECore::TypeId typeId ) { return BaseClass::staticTypeId()==typeId ? true : BaseClass::inheritsFrom( typeId ); };					\
@@ -115,14 +115,14 @@ namespace IECore
 /// RunTimeTyped, instead of IE_CORE_DECLARERUNTIMETYPED.
 #define IECORE_RUNTIMETYPED_DECLARETEMPLATE( TYPENAME, BASETYPENAME )		\
 	IE_CORE_DECLAREMEMBERPTR( TYPENAME )									\
-	virtual IECore::TypeId typeId() const;									\
-	virtual const char *typeName() const;									\
+	IECore::TypeId typeId() const override;									\
+	const char *typeName() const override;									\
 	static IECore::TypeId staticTypeId();									\
 	static const char *staticTypeName();									\
 	static IECore::TypeId baseTypeId();										\
 	static const char *baseTypeName();										\
-	virtual bool isInstanceOf( IECore::TypeId typeId ) const;				\
-	virtual bool isInstanceOf( const char *typeName ) const;				\
+	bool isInstanceOf( IECore::TypeId typeId ) const override;				\
+	bool isInstanceOf( const char *typeName ) const override;				\
 	static bool inheritsFrom( IECore::TypeId typeId );						\
 	static bool inheritsFrom( const char *typeName );						\
 	typedef BASETYPENAME BaseClass;											\
@@ -218,7 +218,7 @@ class IECORE_API RunTimeTyped : public RefCounted
 		IE_CORE_DECLAREMEMBERPTR( RunTimeTyped );
 
 		RunTimeTyped();
-		virtual ~RunTimeTyped();
+		~RunTimeTyped() override;
 
 		//! @name Type identification functions.
 		/// These functions provide useful queries about the typing

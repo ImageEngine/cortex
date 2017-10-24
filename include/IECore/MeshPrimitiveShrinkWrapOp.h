@@ -74,7 +74,7 @@ class IECORE_API MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimiti
 		} Method;
 
 		MeshPrimitiveShrinkWrapOp();
-		virtual ~MeshPrimitiveShrinkWrapOp();
+		~MeshPrimitiveShrinkWrapOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshPrimitiveShrinkWrapOp, MeshPrimitiveOp );
 
@@ -97,7 +97,7 @@ class IECORE_API MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPrimiti
 
 		struct ShrinkWrapFn;
 
-		virtual void modifyTypedPrimitive( MeshPrimitive * typedPrimitive, const CompoundObject * operands );
+		void modifyTypedPrimitive( MeshPrimitive * typedPrimitive, const CompoundObject * operands ) override;
 
 	private:
 

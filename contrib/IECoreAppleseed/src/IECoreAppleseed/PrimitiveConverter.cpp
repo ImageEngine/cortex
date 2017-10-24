@@ -109,7 +109,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( Prim
 
 	if( !obj.get() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	return addObjectToScene( obj, primitiveHash, attrState, materialName, parentAssembly );
@@ -216,7 +216,7 @@ const asr::Assembly *IECoreAppleseed::PrimitiveConverter::convertPrimitive( cons
 
 	if( !obj.get() )
 	{
-		return 0;
+		return nullptr;
 	}
 
 	return addObjectToScene( obj, primitiveHash, attrState, materialName, parentAssembly );

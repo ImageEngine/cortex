@@ -58,12 +58,12 @@ class IECOREIMAGE_API ImageDisplayDriver : public DisplayDriver
 		/// Initializes the internal ImagePrimitive.
 		/// The image's blindData will keep the values given on the parameters CompoundData.
 		ImageDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
-		virtual ~ImageDisplayDriver();
+		~ImageDisplayDriver() override;
 
-		virtual bool scanLineOrderOnly() const;
-		virtual bool acceptsRepeatedData() const;
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-		virtual void imageClose();
+		bool scanLineOrderOnly() const override;
+		bool acceptsRepeatedData() const override;
+		void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override;
+		void imageClose() override;
 
 		/// Access to the image being created. This should always be valid for reading, even
 		/// before imageClose() has been called.

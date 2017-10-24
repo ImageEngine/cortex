@@ -112,31 +112,31 @@ class IECORE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 		IE_CORE_DECLAREPTR( Result );
 
 		CurvesPrimitiveEvaluator( ConstCurvesPrimitivePtr curves );
-		virtual ~CurvesPrimitiveEvaluator();
+		~CurvesPrimitiveEvaluator() override;
 
-		virtual ConstPrimitivePtr primitive() const;
+		ConstPrimitivePtr primitive() const override;
 
-		virtual PrimitiveEvaluator::ResultPtr createResult() const;
-		virtual void validateResult( PrimitiveEvaluator::Result *result ) const;
+		PrimitiveEvaluator::ResultPtr createResult() const override;
+		void validateResult( PrimitiveEvaluator::Result *result ) const override;
 
 		//! @name Standard Query Functions
 		////////////////////////////////////////////////////////////////////////////////////////
 		//@{
 		/// Not yet implemented.
-		virtual float surfaceArea() const;
+		float surfaceArea() const override;
 		/// Not yet implemented.
-		virtual float volume() const;
+		float volume() const override;
 		/// Not yet implemented.
-		virtual Imath::V3f centerOfGravity() const;
-		virtual bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const;
+		Imath::V3f centerOfGravity() const override;
+		bool closestPoint( const Imath::V3f &p, PrimitiveEvaluator::Result *result ) const override;
 		/// Returns pointAtV( 0, uv[1], result ).
-		virtual bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const;
+		bool pointAtUV( const Imath::V2f &uv, PrimitiveEvaluator::Result *result ) const override;
 		/// Not yet implemented.
-		virtual bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
-			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const;
+		bool intersectionPoint( const Imath::V3f &origin, const Imath::V3f &direction,
+			PrimitiveEvaluator::Result *result, float maxDistance = Imath::limits<float>::max() ) const override;
 		/// Not yet implemented.
-		virtual int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
-			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const;
+		int intersectionPoints( const Imath::V3f &origin, const Imath::V3f &direction,
+			std::vector<PrimitiveEvaluator::ResultPtr> &results, float maxDistance = Imath::limits<float>::max() ) const override;
 		//@}
 
 		//! @name Curve specific query functions

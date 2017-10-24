@@ -192,7 +192,7 @@ const char *ParameterList::type( const std::string &name, const IECore::Data *d,
 			return "matrix";
 		default :
 			msg( Msg::Warning, "ParameterList::type", format( "Variable \"%s\" has unsupported datatype." ) % name );
-			return 0;
+			return nullptr;
 	}
 }
 

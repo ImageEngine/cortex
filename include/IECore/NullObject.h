@@ -52,7 +52,7 @@ class IECORE_API NullObject : public Object
 	public:
 
 		NullObject();
-		virtual ~NullObject();
+		~NullObject() override;
 
 		IE_CORE_DECLAREOBJECT( NullObject, Object );
 

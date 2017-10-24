@@ -128,7 +128,7 @@ IECoreAppleseed::RendererImplementation::RendererImplementation( const string &f
 
 void IECoreAppleseed::RendererImplementation::constructCommon()
 {
-	m_mainAssembly = 0;
+	m_mainAssembly = nullptr;
 
 	m_transformStack.clear();
 	m_attributeStack.push( AttributeState() );
@@ -381,7 +381,7 @@ void IECoreAppleseed::RendererImplementation::camera( const string &name, const 
 	}
 
 	CompoundDataPtr params = new CompoundData( parameters );
-	CameraPtr cortexCamera = new Camera( name, 0, params );
+	CameraPtr cortexCamera = new Camera( name, nullptr, params );
 	cortexCamera->addStandardParameters();
 
 	asf::auto_release_ptr<asr::Camera> appleseedCamera( CameraAlgo::convert( cortexCamera.get() ) );
@@ -851,7 +851,7 @@ void IECoreAppleseed::RendererImplementation::instance( const string &name )
 DataPtr IECoreAppleseed::RendererImplementation::command( const string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreAppleseed::RendererImplementation::command", "Not implemented." );
-	return 0;
+	return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

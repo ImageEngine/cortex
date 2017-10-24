@@ -58,7 +58,7 @@ class DisplayDriverServer::Session : public RefCounted
 	public:
 
 		Session( boost::asio::io_service& io_service );
-		~Session();
+		~Session() override;
 
 		boost::asio::ip::tcp::socket& socket();
 		void start();
@@ -103,7 +103,7 @@ class DisplayDriverServer::PrivateData : public RefCounted
 			m_success = true;
 		}
 
-		~PrivateData()
+		~PrivateData() override
 		{
 			if ( m_success )
 			{
@@ -126,7 +126,7 @@ static void fixSocketFlags( int socketDesc )
 }
 
 DisplayDriverServer::DisplayDriverServer( int portNumber ) :
-		m_data( 0 )
+		m_data( nullptr )
 {
 	m_data = new DisplayDriverServer::PrivateData( portNumber );
 
@@ -177,7 +177,7 @@ void DisplayDriverServer::handleAccept( DisplayDriverServer::SessionPtr session,
  */
 
 DisplayDriverServer::Session::Session( boost::asio::io_service& io_service ) :
-	m_socket( io_service ), m_displayDriver(0), m_buffer( new CharVectorData( ) )
+	m_socket( io_service ), m_displayDriver(nullptr), m_buffer( new CharVectorData( ) )
 {
 }
 

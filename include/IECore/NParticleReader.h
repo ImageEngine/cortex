@@ -55,13 +55,13 @@ class IECORE_API NParticleReader : public ParticleReader
 
 		NParticleReader( );
 		NParticleReader( const std::string &fileName );
-		virtual ~NParticleReader();
+		~NParticleReader() override;
 
 		static bool canRead( const std::string &filename );
 
-		virtual unsigned long numParticles();
-		virtual void attributeNames( std::vector<std::string> &names );
-		virtual DataPtr readAttribute( const std::string &name );
+		unsigned long numParticles() override;
+		void attributeNames( std::vector<std::string> &names ) override;
+		DataPtr readAttribute( const std::string &name ) override;
 
 		/// returns IntVectorData of all frames contained in the nCache
 		/// the frameIndex parameter should be set using an index into this IntVectorData
@@ -70,7 +70,7 @@ class IECORE_API NParticleReader : public ParticleReader
 	protected:
 
 		// Returns the name of the position primVar
-		virtual std::string positionPrimVarName();
+		std::string positionPrimVarName() override;
 
 	private:
 

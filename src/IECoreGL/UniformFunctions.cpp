@@ -39,7 +39,7 @@ const std::vector<IECoreGL::UniformFloatFunction> &IECoreGL::uniformFloatFunctio
 	static std::vector<IECoreGL::UniformFloatFunction> t;
 	if( !t.size() )
 	{
-		t.push_back( 0 ); // so that index 1 is glUniform1fv
+		t.push_back( nullptr ); // so that index 1 is glUniform1fv
 		t.push_back( glUniform1fv );
 		t.push_back( glUniform2fv );
 		t.push_back( glUniform3fv );
@@ -53,7 +53,7 @@ const std::vector<IECoreGL::UniformIntFunction> &IECoreGL::uniformIntFunctions()
 	static std::vector<IECoreGL::UniformIntFunction> t;
 	if( !t.size() )
 	{
-		t.push_back( 0 );
+		t.push_back( nullptr );
 		t.push_back( glUniform1iv );
 		t.push_back( glUniform2iv );
 		t.push_back( glUniform3iv );
@@ -72,22 +72,22 @@ const std::vector<std::vector<IECoreGL::UniformMatrixFunction> > &IECoreGL::unif
 		t.push_back( std::vector<IECoreGL::UniformMatrixFunction>() );
 		// [2][0-4]
 		t.push_back( std::vector<IECoreGL::UniformMatrixFunction>() );
-		t[2].push_back( 0 );
-		t[2].push_back( 0 );
+		t[2].push_back( nullptr );
+		t[2].push_back( nullptr );
 		t[2].push_back( glUniformMatrix2fv );
 		t[2].push_back( glUniformMatrix2x3fv );
 		t[2].push_back( glUniformMatrix2x4fv );
 		// [3][0-4]
 		t.push_back( std::vector<IECoreGL::UniformMatrixFunction>() );
-		t[3].push_back( 0 );
-		t[3].push_back( 0 );
+		t[3].push_back( nullptr );
+		t[3].push_back( nullptr );
 		t[3].push_back( glUniformMatrix3x2fv );
 		t[3].push_back( glUniformMatrix3fv );
 		t[3].push_back( glUniformMatrix3x4fv );
 		// [4][0-4]
 		t.push_back( std::vector<IECoreGL::UniformMatrixFunction>() );
-		t[4].push_back( 0 );
-		t[4].push_back( 0 );
+		t[4].push_back( nullptr );
+		t[4].push_back( nullptr );
 		t[4].push_back( glUniformMatrix4x2fv );
 		t[4].push_back( glUniformMatrix4x3fv );
 		t[4].push_back( glUniformMatrix4fv );

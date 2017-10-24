@@ -52,13 +52,13 @@ class IECOREGL_API MeshPrimitive : public Primitive
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		MeshPrimitive( unsigned numTriangles );
-		virtual ~MeshPrimitive();
+		~MeshPrimitive() override;
 
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
-		virtual void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar );
+		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
 
-		virtual void renderInstances( size_t numInstances = 1 ) const;
+		void renderInstances( size_t numInstances = 1 ) const override;
 
 	private :
 

@@ -69,7 +69,7 @@ class IECORE_API FileSequence : public RunTimeTyped
 		/// creates a FileSequence instance which contains that FrameList. Everything before that is considered to
 		/// be part of the filename.
 		FileSequence( const std::string &fileSequenceStr );
-		virtual ~FileSequence();
+		~FileSequence() override;
 
 		const std::string &getFileName() const;
 		void setFileName( const std::string &fileName );

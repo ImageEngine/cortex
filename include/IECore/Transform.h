@@ -51,7 +51,7 @@ class IECORE_API Transform : public StateRenderable
 	public:
 
 		Transform();
-		virtual ~Transform();
+		~Transform() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( Transform, StateRenderable );
 

@@ -48,7 +48,7 @@ class IECORE_API Light : public StateRenderable
 	public:
 
 		Light( const std::string &name="distantlight", const std::string &handle="", const CompoundDataMap &parameters = CompoundDataMap() );
-		virtual ~Light();
+		~Light() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( Light, StateRenderable );
 
@@ -69,7 +69,7 @@ class IECORE_API Light : public StateRenderable
 		const CompoundDataPtr parametersData() const;
 
 		/// Sets this light in Renderer.
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

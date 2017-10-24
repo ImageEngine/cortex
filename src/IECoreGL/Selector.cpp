@@ -66,7 +66,7 @@ class Selector::Implementation : public IECore::RefCounted
 	public :
 
 		Implementation( Selector *parent, const Imath::Box2f &region, Mode mode, std::vector<HitRecord> &hits )
-			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( NULL )
+			:	m_mode( mode ), m_hits( hits ), m_baseState( new State( true /* complete */ ) ), m_currentName( 0 ), m_nextGeneratedName( 1 ), m_currentIDShader( nullptr )
 		{
 			// we don't want preexisting errors to trigger exceptions
 			// from error checking code in the begin*() methods, because
@@ -127,7 +127,7 @@ class Selector::Implementation : public IECore::RefCounted
 			glPushAttrib( GL_ALL_ATTRIB_BITS );
 		}
 
-		~Implementation()
+		~Implementation() override
 		{
 			// we don't want preexisting errors to
 			// trigger exceptions from error checking code
@@ -140,7 +140,7 @@ class Selector::Implementation : public IECore::RefCounted
 				IECore::msg( IECore::Msg::Error, "IECoreGL::Selector end", (const char *)gluErrorString( error ) );
 			}
 
-			g_currentSelector = 0;
+			g_currentSelector = nullptr;
 
 			glPopAttrib();
 
@@ -474,7 +474,7 @@ class Selector::Implementation : public IECore::RefCounted
 
 };
 
-Selector *Selector::Implementation::g_currentSelector = 0;
+Selector *Selector::Implementation::g_currentSelector = nullptr;
 
 //////////////////////////////////////////////////////////////////////////
 // Selector

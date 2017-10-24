@@ -52,12 +52,12 @@ class IECORE_API PrimitiveOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( PrimitiveOp, ModifyOp );
 
 		PrimitiveOp( const std::string &description );
-		virtual ~PrimitiveOp();
+		~PrimitiveOp() override;
 
 	protected :
 
 		/// Implemented to call modifyPrimitive()
-		virtual void modify( Object * object, const CompoundObject * operands );
+		void modify( Object * object, const CompoundObject * operands ) override;
 		/// Must be implemented by all subclasses.
 		virtual void modifyPrimitive( Primitive * primitive, const CompoundObject * operands ) = 0;
 

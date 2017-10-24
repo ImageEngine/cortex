@@ -62,7 +62,7 @@ class IECORE_API OBJReader : public Reader
 
 	protected:
 
-		ObjectPtr doOperation( const CompoundObject * operands);
+		ObjectPtr doOperation( const CompoundObject * operands) override;
 
 	private:
 

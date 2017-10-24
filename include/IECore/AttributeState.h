@@ -52,7 +52,7 @@ class IECORE_API AttributeState : public StateRenderable
 		/// Attributes is referenced directly rather than copied.
 		AttributeState( CompoundDataPtr attributes );
 		AttributeState( const CompoundDataMap &attributes = CompoundDataMap() );
-		virtual ~AttributeState();
+		~AttributeState() override;
 
 		IE_CORE_DECLAREOBJECT( AttributeState, StateRenderable );
 
@@ -64,7 +64,7 @@ class IECORE_API AttributeState : public StateRenderable
 		CompoundDataPtr attributesData();
 
 		/// Calls renderer->setAttribute() for each name, data pair in attributes()
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

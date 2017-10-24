@@ -53,13 +53,13 @@ namespace IECore
 			Exception(const char *what);
 			Exception(const std::string &what);
 
-			virtual ~Exception() throw ();
+			~Exception() throw () override;
 
 			// Return type of exception
 			virtual const char *type() const throw();
 
 			/// Return cause of exception
-			virtual const char* what() const throw();
+			const char* what() const throw() override;
 
 			/// Appends the given string to the cause of the current exception
 			Exception &append( const std::string &s );
@@ -94,7 +94,7 @@ namespace IECore
 			IOException(const char *what) : Exception(what) {};
 			IOException(const std::string &what) : Exception(what) {};
 
-			virtual const char *type() const throw() { return "I/O Exception"; }
+			const char *type() const throw() override { return "I/O Exception"; }
 	};
 
 	/// A class to represent "file not found" exceptions
@@ -104,7 +104,7 @@ namespace IECore
 			FileNotFoundIOException(const char *what) : IOException(what) {};
 			FileNotFoundIOException(const std::string &what) : IOException(what) {};
 
-			virtual const char *type() const throw() { return "File Not Found"; }
+			const char *type() const throw() override { return "File Not Found"; }
 	};
 
 	/// Base class for Invalid Argument exceptions
@@ -114,7 +114,7 @@ namespace IECore
 			InvalidArgumentException(const char *what) : Exception(what) {};
 			InvalidArgumentException(const std::string &what) : Exception(what) {};
 
-			virtual const char *type() const throw() { return "Invalid Argument"; }
+			const char *type() const throw() override { return "Invalid Argument"; }
 	};
 
 	/// A class to represent "permission denied" exceptions
@@ -124,7 +124,7 @@ namespace IECore
 			PermissionDeniedIOException(const char *what) : IOException(what) {};
 			PermissionDeniedIOException(const std::string &what) : IOException(what) {};
 
-			virtual const char *type() const throw() { return "Permission Denied"; }
+			const char *type() const throw() override { return "Permission Denied"; }
 	};
 
 	/// A class to represent "not implemented" exceptions
@@ -134,7 +134,7 @@ namespace IECore
 			NotImplementedException(const char *what) : Exception(what) {};
 			NotImplementedException(const std::string &what) : Exception(what) {};
 
-			virtual const char *type() const throw() { return "Not Implemented"; }
+			const char *type() const throw() override { return "Not Implemented"; }
 	};
 }
 

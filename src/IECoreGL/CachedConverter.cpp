@@ -57,7 +57,7 @@ struct CacheGetterKey
 {
 
 	CacheGetterKey()
-		:	object( NULL )
+		:	object( nullptr )
 	{
 	}
 
@@ -151,7 +151,7 @@ void CachedConverter::clearUnused()
 
 CachedConverter *CachedConverter::defaultCachedConverter()
 {
-	static CachedConverterPtr c = 0;
+	static CachedConverterPtr c = nullptr;
 	if( !c )
 	{
 		const char *m = getenv( "IECOREGL_CACHEDCONVERTER_MEMORY" );

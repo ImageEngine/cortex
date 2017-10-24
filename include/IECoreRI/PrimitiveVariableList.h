@@ -62,7 +62,7 @@ class IECORERI_API PrimitiveVariableList
 		///
 		/// TODO - typeHints is now unused and should be removed
 		PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars,
-			const std::map<std::string, std::string> *typeHints = 0 );
+			const std::map<std::string, std::string> *typeHints = nullptr );
 
 		/// Returns the number of primitive variables, to be passed as the
 		/// n argument to the Ri call.

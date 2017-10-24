@@ -54,13 +54,13 @@ class IECORERI_API SLOReader : public IECore::Reader
 
 		SLOReader();
 		SLOReader( const std::string &fileName );
-		virtual ~SLOReader();
+		~SLOReader() override;
 
 		static bool canRead( const std::string &fileName );
 
 	protected :
 
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject * operands ) override;
 
 	private :
 

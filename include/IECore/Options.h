@@ -50,7 +50,7 @@ class IECORE_API Options : public PreWorldRenderable
 		/// Options is referenced directly rather than copied.
 		Options( CompoundDataPtr options );
 		Options( const CompoundDataMap &options = CompoundDataMap() );
-		virtual ~Options();
+		~Options() override;
 
 		IE_CORE_DECLAREOBJECT( Options, PreWorldRenderable );
 
@@ -62,7 +62,7 @@ class IECORE_API Options : public PreWorldRenderable
 		CompoundDataPtr optionsData();
 
 		/// Calls renderer->setOptions() for each name, data pair in options()
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 
 	private:
 

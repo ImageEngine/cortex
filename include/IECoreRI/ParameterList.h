@@ -60,14 +60,14 @@ class IECORERI_API ParameterList
 		/// Renderman type token. It too is expected to exist for as long
 		/// as you still use the ParameterList.
 		ParameterList( const IECore::CompoundDataMap &parameters,
-			const std::map<std::string, std::string> *typeHints = 0 );
+			const std::map<std::string, std::string> *typeHints = nullptr );
 		/// As above but uses only parameters beginning with the specified
 		/// prefix, and strips the prefix off when creating the parameter names.
 		ParameterList( const IECore::CompoundDataMap &parameters, const std::string &prefix,
-			const std::map<std::string, std::string> *typeHints = 0 );
+			const std::map<std::string, std::string> *typeHints = nullptr );
 		/// Convenience function for constructing a ParameterList of length 1.
 		ParameterList( const std::string &name, const IECore::Data *parameter,
-			const std::map<std::string, std::string> *typeHints = 0 );
+			const std::map<std::string, std::string> *typeHints = nullptr );
 
 		~ParameterList();
 

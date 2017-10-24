@@ -62,7 +62,7 @@ inline const T *dataCast( const char *name, const IECore::Data *data )
 		return result;
 	}
 	msg( Msg::Warning, "setParameter", boost::format( "Unsupported value type \"%s\" for parameter \"%s\" (expected %s)." ) % data->typeName() % name % T::staticTypeName() );
-	return NULL;
+	return nullptr;
 }
 
 void setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value )
@@ -224,7 +224,7 @@ IECore::DataPtr arrayToData( AtArray *array )
 		/// \todo Decide how to deal with more
 		/// than one key - is it more useful to return multiple Data
 		/// objects or to put it all in one?
-		return NULL;
+		return nullptr;
 	}
 
 	switch( array->type )
@@ -238,7 +238,7 @@ IECore::DataPtr arrayToData( AtArray *array )
 		case AI_TYPE_STRING :
 			return arrayToDataInternal<string>( array, AiArrayGetStrFunc );
 		default :
-			return NULL;
+			return nullptr;
 	}
 }
 
@@ -272,7 +272,7 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 		case AI_TYPE_ARRAY :
 			return arrayToData( AiNodeGetArray( node, name ) );
 	}
-	return NULL;
+	return nullptr;
 }
 
 } // namespace
@@ -370,7 +370,7 @@ IECore::DataPtr getParameter( AtNode *node, const char *name )
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void getParameters( AtNode *node, IECore::CompoundDataMap &values )
@@ -483,7 +483,7 @@ AtArray *dataToArray( const IECore::Data *data, int aiType )
 		aiType = parameterType( data->typeId(), isArray );
 		if( aiType == AI_TYPE_NONE || !isArray )
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -526,7 +526,7 @@ IECOREARNOLD_API AtArray *dataToArray( const std::vector<const IECore::Data *> &
 		aiType = parameterType( samples.front()->typeId(), isArray );
 		if( aiType == AI_TYPE_NONE || !isArray )
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 

@@ -56,7 +56,7 @@ class IECORE_API ModifyOp : public Op
 		IE_CORE_DECLARERUNTIMETYPED( ModifyOp, Op );
 
 		ModifyOp( const std::string &description, ParameterPtr resultParameter, ParameterPtr inputParameter );
-		virtual ~ModifyOp();
+		~ModifyOp() override;
 
 		Parameter *inputParameter();
 		const Parameter *inputParameter() const;
@@ -70,7 +70,7 @@ class IECORE_API ModifyOp : public Op
 	protected :
 
 		/// Implemented to call modify() - implement modify rather than this.
-		virtual ObjectPtr doOperation( const CompoundObject *operands );
+		ObjectPtr doOperation( const CompoundObject *operands ) override;
 
 		/// Should be implemented by all subclasses to modify object.
 		/// This won't be called if the Op is not enabled.

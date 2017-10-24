@@ -67,7 +67,7 @@ class IECORE_API Parameter : public RunTimeTyped
 		Parameter( const std::string &name, const std::string &description, ObjectPtr defaultValue,
 			const PresetsContainer &presets = PresetsContainer(), bool presetsOnly = false, ConstCompoundObjectPtr userData=nullptr );
 
-		virtual ~Parameter();
+		~Parameter() override;
 
 		//! @name Basic Parameter information
 		////////////////////////////////////////////////////////////

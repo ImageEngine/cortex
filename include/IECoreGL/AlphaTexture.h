@@ -54,9 +54,9 @@ class IECOREGL_API AlphaTexture : public Texture
 		/// the data window. Image must have an "A" channel.
 		AlphaTexture( const IECoreImage::ImagePrimitive *image, bool mipMap=true );
 
-		virtual ~AlphaTexture();
+		~AlphaTexture() override;
 
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 	private :
 

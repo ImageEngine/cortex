@@ -75,59 +75,59 @@ class IECORE_API SceneCache : public SampledSceneInterface
 		/// supported.
 		SceneCache( IECore::IndexedIOPtr indexedIO );
 
-		~SceneCache();
+		~SceneCache() override;
 
 		/*
 		 * virtual functions defined in SceneInterface.
 		 */
 
-		virtual std::string fileName() const;
+		std::string fileName() const override;
 
-		virtual Name name() const;
-		virtual void path( Path &p ) const;
+		Name name() const override;
+		void path( Path &p ) const override;
 
-		virtual size_t numBoundSamples() const;
-		virtual double boundSampleTime( size_t sampleIndex ) const;
-		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual Imath::Box3d readBoundAtSample( size_t sampleIndex ) const;
-		virtual void writeBound( const Imath::Box3d &bound, double time );
+		size_t numBoundSamples() const override;
+		double boundSampleTime( size_t sampleIndex ) const override;
+		double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		Imath::Box3d readBoundAtSample( size_t sampleIndex ) const override;
+		void writeBound( const Imath::Box3d &bound, double time ) override;
 
-		virtual size_t numTransformSamples() const;
-		virtual double transformSampleTime( size_t sampleIndex ) const;
-		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ConstDataPtr readTransformAtSample( size_t sampleIndex ) const;
-		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		virtual void writeTransform( const Data *transform, double time );
+		size_t numTransformSamples() const override;
+		double transformSampleTime( size_t sampleIndex ) const override;
+		double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		ConstDataPtr readTransformAtSample( size_t sampleIndex ) const override;
+		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const override;
+		void writeTransform( const Data *transform, double time ) override;
 
-		virtual bool hasAttribute( const Name &name ) const;
-		virtual void attributeNames( NameList &attrs ) const;
-		virtual size_t numAttributeSamples( const Name &name ) const;
-		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
-		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		virtual void writeAttribute( const Name &name, const Object *attribute, double time );
+		bool hasAttribute( const Name &name ) const override;
+		void attributeNames( NameList &attrs ) const override;
+		size_t numAttributeSamples( const Name &name ) const override;
+		double attributeSampleTime( const Name &name, size_t sampleIndex ) const override;
+		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const override;
+		void writeAttribute( const Name &name, const Object *attribute, double time ) override;
 
-		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
-		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
-		virtual void writeTags( const NameList &tags );
+		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
+		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
+		void writeTags( const NameList &tags ) override;
 
-		virtual bool hasObject() const;
-		virtual size_t numObjectSamples() const;
-		virtual double objectSampleTime( size_t sampleIndex ) const;
-		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		virtual PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const;
-		virtual void writeObject( const Object *object, double time );
+		bool hasObject() const override;
+		size_t numObjectSamples() const override;
+		double objectSampleTime( size_t sampleIndex ) const override;
+		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const override;
+		PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<InternedString> &primVarNames, double time ) const override;
+		void writeObject( const Object *object, double time ) override;
 
-		virtual bool hasChild( const Name &name ) const;
-		virtual void childNames( NameList &childNames ) const;
-		virtual SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
-		virtual ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
-		virtual SceneInterfacePtr createChild( const Name &name );
-		virtual SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing );
-		virtual ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
+		bool hasChild( const Name &name ) const override;
+		void childNames( NameList &childNames ) const override;
+		SceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		ConstSceneInterfacePtr child( const Name &name, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
+		SceneInterfacePtr createChild( const Name &name ) override;
+		SceneInterfacePtr scene( const Path &path, MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		ConstSceneInterfacePtr scene( const Path &path, SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
 
-		virtual void hash( HashType hashType, double time, MurmurHash &h ) const;
+		void hash( HashType hashType, double time, MurmurHash &h ) const override;
 
 		/// tells you if this scene cache is read only or writable:
 		bool readOnly() const;

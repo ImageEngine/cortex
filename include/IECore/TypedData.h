@@ -78,8 +78,8 @@ class IECORE_API TypedData : public Data
 		////////////////////////////////////////////////////////////
 		//@{
 		typename TypedData<T>::Ptr copy() const;
-		virtual bool isEqualTo( const Object *other ) const;
-		virtual void hash( MurmurHash &h ) const;
+		bool isEqualTo( const Object *other ) const override;
+		void hash( MurmurHash &h ) const override;
 		//@}
 
 		/// Equivalent to writable() = data
@@ -120,17 +120,17 @@ class IECORE_API TypedData : public Data
 
 		typedef typename TypedDataTraits<T>::DataHolder DataHolder;
 
-		virtual ~TypedData();
+		~TypedData() override;
 
 		static Object::TypeDescription<TypedData<T> > m_typeDescription;
 
-		virtual void copyFrom( const Object *other, CopyContext *context );
-		virtual void save( SaveContext *context ) const;
-		virtual void load( LoadContextPtr context );
+		void copyFrom( const Object *other, CopyContext *context ) override;
+		void save( SaveContext *context ) const override;
+		void load( LoadContextPtr context ) override;
 		/// If the memory usage is anything other than sizeof(T) for
 		/// a given T then you must provide an accurate specialisation
 		/// for this function.
-		virtual void memoryUsage( Object::MemoryAccumulator &accumulator ) const;
+		void memoryUsage( Object::MemoryAccumulator &accumulator ) const override;
 
 		DataHolder m_data;
 

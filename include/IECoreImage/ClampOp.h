@@ -51,7 +51,7 @@ class IECOREIMAGE_API ClampOp : public ChannelOp
 	public:
 
 		ClampOp();
-		virtual ~ClampOp();
+		~ClampOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ClampOp, ClampOpTypeId, ChannelOp );
 
@@ -75,7 +75,7 @@ class IECOREIMAGE_API ClampOp : public ChannelOp
 
 	protected :
 
-		virtual void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels );
+		void modifyChannels( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, ChannelVector &channels ) override;
 
 };
 

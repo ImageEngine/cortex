@@ -71,7 +71,7 @@ class Font::Implementation : public IECore::RefCounted
 			m_images.resize( 128 );
 		}
 
-		virtual ~Implementation()
+		~Implementation() override
 		{
 			FT_Done_Face( m_face );
 		}
@@ -98,7 +98,7 @@ class Font::Implementation : public IECore::RefCounted
 				m_pixelsPerEm = pixelsPerEm;
 				for( size_t i = 0, e = m_images.size(); i < e; i++ )
 				{
-					m_images[i] = 0;
+					m_images[i] = nullptr;
 				}
 				FT_Set_Pixel_Sizes( m_face, (FT_UInt)pixelsPerEm, (FT_UInt)pixelsPerEm );
 			}

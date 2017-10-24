@@ -87,12 +87,12 @@ class IECOREGL_API ToGLTextureConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLTextureConverter, ToGLTextureConverterTypeId, ToGLConverter );
 
-		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = 0, bool createMissingRGBChannels = false );
-		virtual ~ToGLTextureConverter();
+		ToGLTextureConverter( IECore::ConstObjectPtr toConvert = nullptr, bool createMissingRGBChannels = false );
+		~ToGLTextureConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

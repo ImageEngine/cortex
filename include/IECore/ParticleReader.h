@@ -111,7 +111,7 @@ class IECORE_API ParticleReader : public Reader
 		/// requested. This is implemented using the virtual methods
 		/// defined above - there is no need to reimplement it
 		/// in derived classes.
-		virtual ObjectPtr doOperation( const CompoundObject * operands );
+		ObjectPtr doOperation( const CompoundObject * operands ) override;
 
 		/// Convenience functions to access the values held in parameters().
 		/// If called from within doOperation they will never throw, but if

@@ -75,7 +75,7 @@ class IECORE_API PointSmoothSkinningOp : public ModifyOp
 		} Blend;
 
 		PointSmoothSkinningOp();
-		virtual ~PointSmoothSkinningOp();
+		~PointSmoothSkinningOp() override;
 
 		/// parameter for the 'position' primvar to be deformed in the input primitive,
 		/// defaults to "P"
@@ -110,7 +110,7 @@ class IECORE_API PointSmoothSkinningOp : public ModifyOp
 
 	protected:
 
-        virtual void modify( Object *object, const CompoundObject * operands );
+        void modify( Object *object, const CompoundObject * operands ) override;
 
 	private:
 

@@ -65,7 +65,7 @@ class ReaderWrapper : public OpWrapper<IECore::Reader>
 		{
 		};
 
-		virtual IECore::CompoundObjectPtr readHeader()
+		IECore::CompoundObjectPtr readHeader() override
 		{
 			if( this->isSubclassed() )
 			{

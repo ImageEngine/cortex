@@ -74,7 +74,7 @@ class IECOREGL_API Camera : public Renderable
 		const Imath::V2f &getClippingPlanes() const;
 
 		/// Returns an empty box.
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
 		//! @name OpenGL query functions
 		/// These functions provide basic information about the

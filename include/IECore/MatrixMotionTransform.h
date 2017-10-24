@@ -52,10 +52,10 @@ class IECORE_API MatrixMotionTransform : public Transform
 		IE_CORE_DECLAREOBJECT( MatrixMotionTransform, Transform );
 
 		MatrixMotionTransform();
-		virtual ~MatrixMotionTransform();
+		~MatrixMotionTransform() override;
 
-		virtual void render( Renderer *renderer ) const;
-		virtual Imath::M44f transform( float time = 0 ) const;
+		void render( Renderer *renderer ) const override;
+		Imath::M44f transform( float time = 0 ) const override;
 
 		//! @name Snapshots
 		////////////////////////////////////////////

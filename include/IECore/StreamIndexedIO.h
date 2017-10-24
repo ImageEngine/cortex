@@ -59,93 +59,93 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 
 		IE_CORE_DECLARERUNTIMETYPED( StreamIndexedIO, IndexedIO );
 
-		virtual ~StreamIndexedIO();
+		~StreamIndexedIO() override;
 
-		virtual IndexedIO::OpenMode openMode() const;
+		IndexedIO::OpenMode openMode() const override;
 
-		void path( IndexedIO::EntryIDList &result ) const;
+		void path( IndexedIO::EntryIDList &result ) const override;
 
-		bool hasEntry( const IndexedIO::EntryID &name ) const;
+		bool hasEntry( const IndexedIO::EntryID &name ) const override;
 
-		const IndexedIO::EntryID &currentEntryId() const;
+		const IndexedIO::EntryID &currentEntryId() const override;
 
-		void entryIds( IndexedIO::EntryIDList &names ) const;
+		void entryIds( IndexedIO::EntryIDList &names ) const override;
 
-		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const;
+		void entryIds( IndexedIO::EntryIDList &names, IndexedIO::EntryType type ) const override;
 
-		IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
+		IndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) override;
 
-		ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
+		ConstIndexedIOPtr subdirectory( const IndexedIO::EntryID &name, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const override;
 
-		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const;
+		IndexedIO::Entry entry( const IndexedIO::EntryID &name ) const override;
 
-		IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name );
+		IndexedIOPtr createSubdirectory( const IndexedIO::EntryID &name ) override;
 
-		void remove( const IndexedIO::EntryID &name );
+		void remove( const IndexedIO::EntryID &name ) override;
 
-		void removeAll();
+		void removeAll() override;
 
-		IndexedIOPtr parentDirectory();
+		IndexedIOPtr parentDirectory() override;
 
-		ConstIndexedIOPtr parentDirectory() const;
+		ConstIndexedIOPtr parentDirectory() const override;
 
-		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing );
+		IndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) override;
 
-		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const;
+		ConstIndexedIOPtr directory( const IndexedIO::EntryIDList &path, IndexedIO::MissingBehaviour missingBehaviour = IndexedIO::ThrowIfMissing ) const override;
 
-		void commit();
+		void commit() override;
 
-		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength);
-		void write(const IndexedIO::EntryID &name, const float &x);
-		void write(const IndexedIO::EntryID &name, const double &x);
-		void write(const IndexedIO::EntryID &name, const half &x);
-		void write(const IndexedIO::EntryID &name, const int &x);
-		void write(const IndexedIO::EntryID &name, const int64_t &x);
-		void write(const IndexedIO::EntryID &name, const uint64_t &x);
-		void write(const IndexedIO::EntryID &name, const std::string &x);
-		void write(const IndexedIO::EntryID &name, const unsigned int &x);
-		void write(const IndexedIO::EntryID &name, const char &x);
-		void write(const IndexedIO::EntryID &name, const unsigned char &x);
-		void write(const IndexedIO::EntryID &name, const short &x);
-		void write(const IndexedIO::EntryID &name, const unsigned short &x);
+		void write(const IndexedIO::EntryID &name, const float *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const double *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const half *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const int *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const int64_t *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const uint64_t *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned int *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const char *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned char *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const std::string *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const short *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const unsigned short *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const InternedString *x, unsigned long arrayLength) override;
+		void write(const IndexedIO::EntryID &name, const float &x) override;
+		void write(const IndexedIO::EntryID &name, const double &x) override;
+		void write(const IndexedIO::EntryID &name, const half &x) override;
+		void write(const IndexedIO::EntryID &name, const int &x) override;
+		void write(const IndexedIO::EntryID &name, const int64_t &x) override;
+		void write(const IndexedIO::EntryID &name, const uint64_t &x) override;
+		void write(const IndexedIO::EntryID &name, const std::string &x) override;
+		void write(const IndexedIO::EntryID &name, const unsigned int &x) override;
+		void write(const IndexedIO::EntryID &name, const char &x) override;
+		void write(const IndexedIO::EntryID &name, const unsigned char &x) override;
+		void write(const IndexedIO::EntryID &name, const short &x) override;
+		void write(const IndexedIO::EntryID &name, const unsigned short &x) override;
 
-		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const;
-		void read(const IndexedIO::EntryID &name, float &x) const;
-		void read(const IndexedIO::EntryID &name, double &x) const;
-		void read(const IndexedIO::EntryID &name, half &x) const;
-		void read(const IndexedIO::EntryID &name, int &x) const;
-		void read(const IndexedIO::EntryID &name, int64_t &x) const;
-		void read(const IndexedIO::EntryID &name, uint64_t &x) const;
-		void read(const IndexedIO::EntryID &name, std::string &x) const;
-		void read(const IndexedIO::EntryID &name, unsigned int &x) const;
-		void read(const IndexedIO::EntryID &name, char &x) const;
-		void read(const IndexedIO::EntryID &name, unsigned char &x) const;
-		void read(const IndexedIO::EntryID &name, short &x) const;
-		void read(const IndexedIO::EntryID &name, unsigned short &x) const;
+		void read(const IndexedIO::EntryID &name, float *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, double *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, half *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, int *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, int64_t *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, uint64_t *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned int *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, char *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned char *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, std::string *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, short *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, unsigned short *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, InternedString *&x, unsigned long arrayLength) const override;
+		void read(const IndexedIO::EntryID &name, float &x) const override;
+		void read(const IndexedIO::EntryID &name, double &x) const override;
+		void read(const IndexedIO::EntryID &name, half &x) const override;
+		void read(const IndexedIO::EntryID &name, int &x) const override;
+		void read(const IndexedIO::EntryID &name, int64_t &x) const override;
+		void read(const IndexedIO::EntryID &name, uint64_t &x) const override;
+		void read(const IndexedIO::EntryID &name, std::string &x) const override;
+		void read(const IndexedIO::EntryID &name, unsigned int &x) const override;
+		void read(const IndexedIO::EntryID &name, char &x) const override;
+		void read(const IndexedIO::EntryID &name, unsigned char &x) const override;
+		void read(const IndexedIO::EntryID &name, short &x) const override;
+		void read(const IndexedIO::EntryID &name, unsigned short &x) const override;
 
 	protected:
 
@@ -161,7 +161,7 @@ class IECORE_API StreamIndexedIO : public IndexedIO
 		class StreamFile : public RefCounted
 		{
 			public:
-				virtual ~StreamFile();
+				~StreamFile() override;
 
 				void seekg( size_t pos, std::ios_base::seekdir dir );
 				void seekp( size_t pos, std::ios_base::seekdir dir );

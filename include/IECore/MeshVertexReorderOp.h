@@ -53,7 +53,7 @@ class IECORE_API MeshVertexReorderOp : public MeshPrimitiveOp
 	public:
 
 		MeshVertexReorderOp();
-		virtual ~MeshVertexReorderOp();
+		~MeshVertexReorderOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshVertexReorderOp, MeshPrimitiveOp );
 
@@ -62,7 +62,7 @@ class IECORE_API MeshVertexReorderOp : public MeshPrimitiveOp
 
 	protected:
 
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
+		void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands ) override;
 
 	private :
 

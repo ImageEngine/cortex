@@ -50,7 +50,7 @@ using namespace std;
 IE_CORE_DEFINERUNTIMETYPED( SpherePrimitive );
 
 SpherePrimitive::SpherePrimitive( float radius, float zMin, float zMax, float thetaMax )
-	:	m_radius( radius ), m_zMin( zMin ), m_zMax( zMax ), m_thetaMax( thetaMax ), m_vertIdsBuffer( 0 )
+	:	m_radius( radius ), m_zMin( zMin ), m_zMax( zMax ), m_thetaMax( thetaMax ), m_vertIdsBuffer( nullptr )
 {
 	// figure out bounding box
 
@@ -144,7 +144,7 @@ void SpherePrimitive::renderInstances( size_t numInstances ) const
 	}
 
 	Buffer::ScopedBinding indexBinding( *m_vertIdsBuffer, GL_ELEMENT_ARRAY_BUFFER );
-	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, 0, numInstances );
+	glDrawElementsInstancedARB( GL_TRIANGLES, m_vertIds->readable().size(), GL_UNSIGNED_INT, nullptr, numInstances );
 }
 
 Imath::Box3f SpherePrimitive::bound() const

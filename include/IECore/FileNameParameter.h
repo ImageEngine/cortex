@@ -61,7 +61,7 @@ class IECORE_API FileNameParameter : public PathParameter
 		/// * PathParameter.valueValid() returns false.
 		/// * Extensions have been specified and the values does not have an appropriate extension.
 		/// * The given path points to a existent directory.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 	private :
 

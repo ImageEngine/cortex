@@ -52,7 +52,7 @@ class IECOREGL_API LuminanceTexture : public Texture
 		/// Constructs a new LuminanceTexture. Both channels must be of the same type, and must
 		/// be some form of numeric VectorData. The alpha channel may be omitted.
 		LuminanceTexture( unsigned int width, unsigned int height, const IECore::Data *y,
-			const IECore::Data *a = 0, bool mipMap=true );
+			const IECore::Data *a = nullptr, bool mipMap=true );
 
 		/// Creates a LuminanceTexture from the specified image. Accepts channels with names
 		/// "Y" and "A". Currently ignores the display window and uses only
@@ -60,9 +60,9 @@ class IECOREGL_API LuminanceTexture : public Texture
 		/// "A" channel must be of the same type.
 		LuminanceTexture( const IECoreImage::ImagePrimitive *image, bool mipMap=true );
 
-		virtual ~LuminanceTexture();
+		~LuminanceTexture() override;
 
-		virtual IECoreImage::ImagePrimitivePtr imagePrimitive() const;
+		IECoreImage::ImagePrimitivePtr imagePrimitive() const override;
 
 	private :
 

@@ -77,7 +77,7 @@ InternedString g_automaticInstancingAttributeName( "automaticInstancing" );
 RendererImplementation::AttributeState::AttributeState()
 {
 	surfaceShader = AiNode( "utility" );
-	displacementShader = 0;
+	displacementShader = nullptr;
 	attributes = new CompoundData;
 	attributes->writable()["ai:visibility:camera"] = new BoolData( true );
 	attributes->writable()["ai:visibility:shadow"] = new BoolData( true );
@@ -102,13 +102,13 @@ RendererImplementation::AttributeState::AttributeState( const AttributeState &ot
 extern AtNodeMethods *ieDisplayDriverMethods;
 
 IECoreArnold::RendererImplementation::RendererImplementation()
-	:	m_defaultFilter( 0 )
+	:	m_defaultFilter( nullptr )
 {
 	constructCommon( Render );
 }
 
 IECoreArnold::RendererImplementation::RendererImplementation( const std::string &assFileName )
-	:	m_defaultFilter( 0 )
+	:	m_defaultFilter( nullptr )
 {
 	m_assFileName = assFileName;
 	constructCommon( AssGen );
@@ -212,12 +212,12 @@ IECore::ConstDataPtr IECoreArnold::RendererImplementation::getOption( const std:
 		return new V2fData( V2f( start, end ) );
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void IECoreArnold::RendererImplementation::camera( const std::string &name, const IECore::CompoundDataMap &parameters )
 {
-	CameraPtr cortexCamera = new Camera( name, 0, new CompoundData( parameters ) );
+	CameraPtr cortexCamera = new Camera( name, nullptr, new CompoundData( parameters ) );
 	cortexCamera->addStandardParameters();
 
 	AtNode *arnoldCamera = CameraAlgo::convert( cortexCamera.get() );
@@ -240,7 +240,7 @@ void IECoreArnold::RendererImplementation::camera( const std::string &name, cons
 
 void IECoreArnold::RendererImplementation::display( const std::string &name, const std::string &type, const std::string &data, const IECore::CompoundDataMap &parameters )
 {
-	AtNode *driver = 0;
+	AtNode *driver = nullptr;
 	if( AiNodeEntryLookUp( type.c_str() ) )
 	{
 		driver = AiNode( type.c_str() );
@@ -426,7 +426,7 @@ void IECoreArnold::RendererImplementation::shader( const std::string &type, cons
 		type=="displacement" || type=="ai:displacement"
 	)
 	{
-		AtNode *s = 0;
+		AtNode *s = nullptr;
 		if( 0 == name.compare( 0, 10, "reference:" ) )
 		{
 			s = AiNodeLookUpByName( name.c_str() + 10 );
@@ -645,7 +645,7 @@ int IECoreArnold::RendererImplementation::procInit( AtNode *node, void **userPtr
 {
 	ProceduralData *data = (ProceduralData *)( AiNodeGetPtr( node, "userptr" ) );
 	data->procedural->render( data->renderer.get() );
-	data->procedural = 0;
+	data->procedural = nullptr;
 	*userPtr = data;
 	return 1;
 }
@@ -677,7 +677,7 @@ void IECoreArnold::RendererImplementation::procedural( IECore::Renderer::Procedu
 		return;
 	}
 
-	AtNode *node = NULL;
+	AtNode *node = nullptr;
 	std::string nodeType = "procedural";
 
 	if( const ExternalProcedural *externalProc = dynamic_cast<ExternalProcedural *>( proc.get() ) )
@@ -780,7 +780,7 @@ void IECoreArnold::RendererImplementation::addPrimitive( const IECore::Primitive
 
 	const CompoundDataMap &attributes = m_attributeStack.top().attributes->readable();
 
-	AtNode *shape = NULL;
+	AtNode *shape = nullptr;
 	if( automaticInstancing() )
 	{
 		IECore::MurmurHash hash;
@@ -970,7 +970,7 @@ void IECoreArnold::RendererImplementation::instance( const std::string &name )
 IECore::DataPtr IECoreArnold::RendererImplementation::command( const std::string &name, const CompoundDataMap &parameters )
 {
 	msg( Msg::Warning, "IECoreArnold::RendererImplementation::command", "Not implemented" );
-	return 0;
+	return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

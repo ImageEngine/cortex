@@ -94,7 +94,7 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves )
 
 	// add arbitrary user parameters
 
-	const char *ignore[] = { "P", "N", "width", "radius", 0 };
+	const char *ignore[] = { "P", "N", "width", "radius", nullptr };
 	ShapeAlgo::convertPrimitiveVariables( curves, result, ignore );
 
 	return result;

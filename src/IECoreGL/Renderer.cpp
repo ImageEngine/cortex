@@ -275,9 +275,9 @@ IECoreGL::Renderer::Renderer()
 
 	m_data->inWorld = false;
 	m_data->inEdit = false;
-	m_data->currentInstance = 0;
-	m_data->implementation = 0;
-	m_data->shaderLoader = 0;
+	m_data->currentInstance = nullptr;
+	m_data->implementation = nullptr;
+	m_data->shaderLoader = nullptr;
 
 	m_data->cachedConverter = CachedConverter::defaultCachedConverter();
 }
@@ -486,16 +486,16 @@ IECore::ConstDataPtr IECoreGL::Renderer::getOption( const std::string &name ) co
 		}
 		else
 		{
-			return 0;
+			return nullptr;
 		}
 	}
 	else if( name.compare( 0, 3, "gl:" )==0 || name.find( ':' )==string::npos )
 	{
 		msg( Msg::Warning, "Renderer::getOption", boost::format( "Unsuppported option \"%s\"." ) % name );
-		return 0;
+		return nullptr;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 
@@ -514,7 +514,7 @@ void IECoreGL::Renderer::camera( const std::string &name, const IECore::Compound
 
 	try
 	{
-		IECore::CameraPtr coreCamera = new IECore::Camera( name, 0, new CompoundData( parameters ) );
+		IECore::CameraPtr coreCamera = new IECore::Camera( name, nullptr, new CompoundData( parameters ) );
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( coreCamera ).convert() );
 		// we have to store these till worldBegin, as only then are we sure what sort of renderer backend we have
 		if( camera )
@@ -659,7 +659,7 @@ ScenePtr IECoreGL::Renderer::scene()
 	{
 		return r->scene();
 	}
-	return 0;
+	return nullptr;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1096,7 +1096,7 @@ static IECore::ConstDataPtr alphaFuncGetter( const std::string &name, const IECo
 	}
 
 	msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Invalid state for \"%s\"." ) % name );
-	return 0;
+	return nullptr;
 }
 
 static IECore::ConstDataPtr blendEquationGetter( const std::string &name, const IECoreGL::Renderer::MemberData *memberData )
@@ -1485,7 +1485,7 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	if ( !m_data->inWorld )
 	{
 		msg( Msg::Warning, "Renderer::getAttribute", "Unsupported getAttribute outside world begin/end blocks." );
-		return 0;
+		return nullptr;
 	}
 
 	const AttributeGetterMap *g = attributeGetters();
@@ -1501,13 +1501,13 @@ IECore::ConstDataPtr IECoreGL::Renderer::getAttribute( const std::string &name )
 	else if( name.find_first_of( ":" )!=string::npos )
 	{
 		// prefixed for some other renderer, so we can ignore it
-		return 0;
+		return nullptr;
 	}
 	else
 	{
 		msg( Msg::Warning, "Renderer::getAttribute", boost::format( "Unsupported attribute \"%s\"." ) % name );
 	}
-	return 0;
+	return nullptr;
 }
 
 void IECoreGL::Renderer::shader( const std::string &type, const std::string &name, const IECore::CompoundDataMap &parameters )
@@ -1838,7 +1838,7 @@ void IECoreGL::Renderer::instanceEnd()
 		IECore::msg( IECore::Msg::Warning, "Renderer::instanceEnd", "instanceEnd called when no instances are being defined!" );
 		return;
 	}
-	m_data->currentInstance = 0;
+	m_data->currentInstance = nullptr;
 }
 
 void IECoreGL::Renderer::instance( const std::string &name )
@@ -1934,24 +1934,24 @@ IECore::DataPtr removeObjectCommand( const std::string &name, const IECore::Comp
 	if( !r )
 	{
 		msg( Msg::Warning, "Renderer::command", "removeObject command operates only in deferred mode" );
-		return 0;
+		return nullptr;
 	}
 
 	if( !memberData->inEdit )
 	{
 		msg( Msg::Warning, "Renderer::command", "removeObject command operates only within an editBegin/editEnd block" );
-		return 0;
+		return nullptr;
 	}
 
 	string objectName = parameterValue<string>( "name", parameters, "" );
 	if( objectName=="" )
 	{
 		msg( Msg::Warning, "Renderer::command", "removeObject command expects StringData parameter \"name\"" );
-		return 0;
+		return nullptr;
 	}
 
 	ScenePtr scene = r->scene();
-	bool result = removeObjectWalk( 0, r->scene()->root(), objectName, memberData );
+	bool result = removeObjectWalk( nullptr, r->scene()->root(), objectName, memberData );
 
 	return new IECore::BoolData( result );
 }
@@ -1962,7 +1962,7 @@ IECore::DataPtr editBeginCommand( const std::string &name, const IECore::Compoun
 	if( !r )
 	{
 		msg( Msg::Warning, "Renderer::command", "editBegin command operates only in deferred mode" );
-		return 0;
+		return nullptr;
 	}
 
 	memberData->inWorld = true;
@@ -1976,7 +1976,7 @@ IECore::DataPtr editEndCommand( const std::string &name, const IECore::CompoundD
 	if( !r )
 	{
 		msg( Msg::Warning, "Renderer::command", "editEnd command operates only in deferred mode" );
-		return 0;
+		return nullptr;
 	}
 
 	memberData->inWorld = false;
@@ -1994,7 +1994,7 @@ IECore::DataPtr editQueryCommand( const std::string &name, const IECore::Compoun
 	if( !r )
 	{
 		msg( Msg::Warning, "Renderer::command", "editQuery command operates only in deferred mode" );
-		return 0;
+		return nullptr;
 	}
 
 	return new IECore::BoolData( memberData->inEdit );
@@ -2018,7 +2018,7 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	if ( m_data->currentInstance )
 	{
 		IECore::msg( IECore::Msg::Warning, "Renderer::command", "Commands not supported inside instances." );
-		return 0;
+		return nullptr;
 	}
 	const CommandMap &c = commands();
 	CommandMap::const_iterator it = c.find( name );
@@ -2030,10 +2030,10 @@ IECore::DataPtr IECoreGL::Renderer::command( const std::string &name, const IECo
 	if( name.compare( 0, 3, "gl:" )==0 || name.find( ':' )==string::npos )
 	{
 		msg( Msg::Warning, "Renderer::command", boost::format( "Unsuppported command \"%s\"." ) % name );
-		return 0;
+		return nullptr;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 void IECoreGL::Renderer::editBegin( const std::string &name, const IECore::CompoundDataMap &parameters )

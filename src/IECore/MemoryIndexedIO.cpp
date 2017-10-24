@@ -53,9 +53,9 @@ class MemoryIndexedIO::StreamFile : public StreamIndexedIO::StreamFile
 
 		CharVectorDataPtr buffer();
 
-		virtual ~StreamFile();
+		~StreamFile() override;
 
-		void flush( size_t endPosition );
+		void flush( size_t endPosition ) override;
 
 	private:
 

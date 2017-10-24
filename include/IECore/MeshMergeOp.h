@@ -49,7 +49,7 @@ class IECORE_API MeshMergeOp : public MeshPrimitiveOp
 	public :
 
 		MeshMergeOp();
-		virtual ~MeshMergeOp();
+		~MeshMergeOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( MeshMergeOp, MeshPrimitiveOp );
 
@@ -58,7 +58,7 @@ class IECORE_API MeshMergeOp : public MeshPrimitiveOp
 
 	protected :
 
-		virtual void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands );
+		void modifyTypedPrimitive( MeshPrimitive * mesh, const CompoundObject * operands ) override;
 
 	private :
 

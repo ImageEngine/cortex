@@ -55,12 +55,12 @@ class IECORE_API ReversedFrameList : public ReorderedFrameList
 
 		ReversedFrameList( FrameListPtr frameList = nullptr );
 
-		virtual ~ReversedFrameList();
+		~ReversedFrameList() override;
 
-		virtual void asList( std::vector<Frame> &frames ) const ;
-		virtual std::string asString() const;
-		virtual bool isEqualTo( ConstFrameListPtr other ) const ;
-		virtual FrameListPtr copy() const ;
+		void asList( std::vector<Frame> &frames ) const override ;
+		std::string asString() const override;
+		bool isEqualTo( ConstFrameListPtr other ) const override ;
+		FrameListPtr copy() const override ;
 
 		static std::string suffix();
 

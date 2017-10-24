@@ -69,7 +69,7 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 		/// shader for that shader component. If geometrySource is empty then no geometry shader
 		/// will be used. Throws a descriptive Exception if the shader fails to compile.
 		Shader( const std::string &vertexSource, const std::string &geometrySource, const std::string &fragmentSource );
-		virtual ~Shader();
+		~Shader() override;
 
 		/// Returns the GL program this shader represents. Note that this is owned by the Shader,
 		/// and will be destroyed upon destruction of the Shader - you must not call glDeleteProgram() yourself.
@@ -154,7 +154,7 @@ class IECOREGL_API Shader : public IECore::RunTimeTyped
 				IE_CORE_DECLAREMEMBERPTR( Setup )
 
 				Setup( ConstShaderPtr shader );
-				virtual ~Setup();
+				~Setup() override;
 
 				const Shader *shader() const;
 

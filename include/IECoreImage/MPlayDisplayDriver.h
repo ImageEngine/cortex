@@ -49,12 +49,12 @@ class IECOREIMAGE_API MPlayDisplayDriver : public DisplayDriver
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MPlayDisplayDriver, MPlayDisplayDriverTypeId, DisplayDriver );
 
 		MPlayDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
-		virtual ~MPlayDisplayDriver();
+		~MPlayDisplayDriver() override;
 
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
-		virtual void imageClose();
-		virtual bool scanLineOrderOnly() const;
-		virtual bool acceptsRepeatedData() const;
+		void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override;
+		void imageClose() override;
+		bool scanLineOrderOnly() const override;
+		bool acceptsRepeatedData() const override;
 
 	private :
 

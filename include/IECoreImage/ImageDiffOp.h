@@ -67,7 +67,7 @@ class IECOREIMAGE_API ImageDiffOp : public IECore::Op
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ImageDiffOp, ImageDiffOpTypeId, IECore::Op );
 
 		ImageDiffOp();
-		virtual ~ImageDiffOp();
+		~ImageDiffOp() override;
 
 		ImagePrimitiveParameter *imageAParameter();
 		const ImagePrimitiveParameter *imageAParameter() const;
@@ -86,7 +86,7 @@ class IECOREIMAGE_API ImageDiffOp : public IECore::Op
 
 	protected :
 
-		virtual IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands );
+		IECore::ObjectPtr doOperation( const IECore::CompoundObject *operands ) override;
 
 	private :
 

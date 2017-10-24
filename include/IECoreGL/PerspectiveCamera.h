@@ -60,7 +60,7 @@ class IECOREGL_API PerspectiveCamera : public Camera
 
 		/// \todo Should the render() method actually draw a representation of the camera,
 		/// and some other method be used for setting the camera up?
-		virtual void render( State *currentState ) const;
+		void render( State *currentState ) const override;
 
 	protected :
 

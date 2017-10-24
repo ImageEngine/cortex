@@ -60,7 +60,7 @@ class IECOREIMAGE_API ClientDisplayDriver : public DisplayDriver
 		// Expects two StringData parameters: displayHost and displayPort.
 		ClientDisplayDriver( const Imath::Box2i &displayWindow, const Imath::Box2i &dataWindow, const std::vector<std::string> &channelNames, IECore::ConstCompoundDataPtr parameters );
 
-		virtual ~ClientDisplayDriver();
+		~ClientDisplayDriver() override;
 
 		// Get the target host name
 		std::string host() const;
@@ -68,13 +68,13 @@ class IECOREIMAGE_API ClientDisplayDriver : public DisplayDriver
 		// Get the port number or service name
 		std::string port() const;
 
-		virtual bool scanLineOrderOnly() const;
+		bool scanLineOrderOnly() const override;
 
-		virtual bool acceptsRepeatedData() const;
+		bool acceptsRepeatedData() const override;
 
-		virtual void imageData( const Imath::Box2i &box, const float *data, size_t dataSize );
+		void imageData( const Imath::Box2i &box, const float *data, size_t dataSize ) override;
 
-		virtual void imageClose();
+		void imageClose() override;
 
 	private:
 

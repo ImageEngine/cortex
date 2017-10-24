@@ -63,7 +63,7 @@ class IECORE_API ParameterisedProcedural : public VisibleRenderable, public Para
 
 		ParameterisedProcedural( const std::string &description = "" );
 
-		virtual ~ParameterisedProcedural();
+		~ParameterisedProcedural() override;
 
 		IE_CORE_DECLAREABSTRACTOBJECT( ParameterisedProcedural, VisibleRenderable );
 
@@ -71,7 +71,7 @@ class IECORE_API ParameterisedProcedural : public VisibleRenderable, public Para
 		const std::string &description() const;
 
 		/// Calls render( renderer, true, true, true, false );
-		virtual void render( Renderer *renderer ) const;
+		void render( Renderer *renderer ) const override;
 		/// An additional render method to provide finer grained control. When inAttributeBlock is true,
 		/// the rendering is all contained within an attributeBegin()/attributeEnd() pair. When withState
 		/// is specified, the doRenderState() method is called to declare the appropriate
@@ -81,10 +81,10 @@ class IECORE_API ParameterisedProcedural : public VisibleRenderable, public Para
 		void render( Renderer *renderer, bool inAttributeBlock, bool withState, bool withGeometry, bool immediateGeometry ) const;
 
 		/// Forwards to doBound().
-		virtual Imath::Box3f bound() const;
+		Imath::Box3f bound() const override;
 
-		virtual CompoundParameter *parameters();
-		virtual const CompoundParameter *parameters() const;
+		CompoundParameter *parameters() override;
+		const CompoundParameter *parameters() const override;
 
 	protected :
 

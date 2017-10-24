@@ -49,20 +49,20 @@ class BatchPrimitiveConverter : public PrimitiveConverter
 
 		BatchPrimitiveConverter( const boost::filesystem::path &projectPath, const foundation::SearchPaths &searchPaths );
 
-		virtual void setOption( const std::string &name, IECore::ConstDataPtr value );
+		void setOption( const std::string &name, IECore::ConstDataPtr value ) override;
 
 	private :
 
 		boost::filesystem::path m_projectPath;
 		std::string m_meshGeomExtension;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
+		foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+			const std::string &name ) override;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
+		foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
+			const std::string &name ) override;
 
-		virtual std::string objectEntityName( const std::string& objectName ) const;
+		std::string objectEntityName( const std::string& objectName ) const override;
 
 };
 

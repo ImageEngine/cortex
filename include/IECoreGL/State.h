@@ -81,12 +81,12 @@ class IECOREGL_API State : public Bindable
 		State( bool complete );
 		State( const State &other );
 
-		virtual ~State();
+		~State() override;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::State, StateTypeId, Bindable );
 
 		// Binds this state
-		virtual void bind() const;
+		void bind() const override;
 
 		/// Adds all the StateComponents and user attributes from s
 		/// into this State.

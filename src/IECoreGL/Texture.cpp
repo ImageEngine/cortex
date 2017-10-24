@@ -85,5 +85,5 @@ void Texture::bind() const
 
 IECoreImage::ImagePrimitivePtr Texture::imagePrimitive() const
 {
-	return 0;
+	return nullptr;
 }

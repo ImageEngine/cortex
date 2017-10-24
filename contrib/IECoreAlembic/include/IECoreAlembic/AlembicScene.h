@@ -51,59 +51,59 @@ class IECOREALEMBIC_API AlembicScene : public IECore::SampledSceneInterface
 
 		AlembicScene( const std::string &fileName, IECore::IndexedIO::OpenMode mode );
 
-		virtual ~AlembicScene();
+		~AlembicScene() override;
 
-		virtual std::string fileName() const;
+		std::string fileName() const override;
 
-		virtual Name name() const;
-		virtual void path( Path &p ) const;
+		Name name() const override;
+		void path( Path &p ) const override;
 
-		virtual bool hasBound() const;
-		virtual size_t numBoundSamples() const;
-		virtual double boundSampleTime( size_t sampleIndex ) const;
-		virtual double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual Imath::Box3d readBoundAtSample( size_t sampleIndex ) const;
-		virtual void writeBound( const Imath::Box3d &bound, double time );
+		bool hasBound() const override;
+		size_t numBoundSamples() const override;
+		double boundSampleTime( size_t sampleIndex ) const override;
+		double boundSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		Imath::Box3d readBoundAtSample( size_t sampleIndex ) const override;
+		void writeBound( const Imath::Box3d &bound, double time ) override;
 
-		virtual size_t numTransformSamples() const;
-		virtual double transformSampleTime( size_t sampleIndex ) const;
-		virtual double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual IECore::ConstDataPtr readTransformAtSample( size_t sampleIndex ) const;
-		virtual Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const;
-		virtual IECore::ConstDataPtr readTransform( double time ) const;
-		virtual Imath::M44d readTransformAsMatrix( double time ) const;
-		virtual void writeTransform( const IECore::Data *transform, double time );
+		size_t numTransformSamples() const override;
+		double transformSampleTime( size_t sampleIndex ) const override;
+		double transformSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		IECore::ConstDataPtr readTransformAtSample( size_t sampleIndex ) const override;
+		Imath::M44d readTransformAsMatrixAtSample( size_t sampleIndex ) const override;
+		IECore::ConstDataPtr readTransform( double time ) const override;
+		Imath::M44d readTransformAsMatrix( double time ) const override;
+		void writeTransform( const IECore::Data *transform, double time ) override;
 
-		virtual bool hasAttribute( const Name &name ) const;
-		virtual void attributeNames( NameList &attrs ) const;
-		virtual size_t numAttributeSamples( const Name &name ) const;
-		virtual double attributeSampleTime( const Name &name, size_t sampleIndex ) const;
-		virtual double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual IECore::ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const;
-		virtual IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const;
-		virtual void writeAttribute( const Name &name, const IECore::Object *attribute, double time );
+		bool hasAttribute( const Name &name ) const override;
+		void attributeNames( NameList &attrs ) const override;
+		size_t numAttributeSamples( const Name &name ) const override;
+		double attributeSampleTime( const Name &name, size_t sampleIndex ) const override;
+		double attributeSampleInterval( const Name &name, double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		IECore::ConstObjectPtr readAttributeAtSample( const Name &name, size_t sampleIndex ) const override;
+		IECore::ConstObjectPtr readAttribute( const Name &name, double time ) const override;
+		void writeAttribute( const Name &name, const IECore::Object *attribute, double time ) override;
 
-		virtual bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const;
-		virtual void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const;
-		virtual void writeTags( const NameList &tags );
+		bool hasTag( const Name &name, int filter = SceneInterface::LocalTag ) const override;
+		void readTags( NameList &tags, int filter = SceneInterface::LocalTag ) const override;
+		void writeTags( const NameList &tags ) override;
 
-		virtual bool hasObject() const;
-		virtual size_t numObjectSamples() const;
-		virtual double objectSampleTime( size_t sampleIndex ) const;
-		virtual double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const;
-		virtual IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const;
-		virtual IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const;
-		virtual void writeObject( const IECore::Object *object, double time );
+		bool hasObject() const override;
+		size_t numObjectSamples() const override;
+		double objectSampleTime( size_t sampleIndex ) const override;
+		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
+		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const override;
+		IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
+		void writeObject( const IECore::Object *object, double time ) override;
 
-		virtual bool hasChild( const Name &name ) const;
-		virtual void childNames( NameList &childNames ) const;
-		virtual IECore::SceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
-		virtual IECore::ConstSceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
-		virtual IECore::SceneInterfacePtr createChild( const Name &name );
-		virtual IECore::SceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing );
-		virtual IECore::ConstSceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const;
+		bool hasChild( const Name &name ) const override;
+		void childNames( NameList &childNames ) const override;
+		IECore::SceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		IECore::ConstSceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
+		IECore::SceneInterfacePtr createChild( const Name &name ) override;
+		IECore::SceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		IECore::ConstSceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
 
-		virtual void hash( HashType hashType, double time, IECore::MurmurHash &h ) const;
+		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 
 	private :
 

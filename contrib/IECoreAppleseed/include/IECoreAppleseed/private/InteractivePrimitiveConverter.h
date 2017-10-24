@@ -49,13 +49,13 @@ class InteractivePrimitiveConverter : public PrimitiveConverter
 
 	private :
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
-			const std::string &name );
+		foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+			const std::string &name ) override;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
-			const std::string &name );
+		foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
+			const std::string &name ) override;
 
-		virtual std::string objectEntityName( const std::string& objectName ) const;
+		std::string objectEntityName( const std::string& objectName ) const override;
 
 };
 

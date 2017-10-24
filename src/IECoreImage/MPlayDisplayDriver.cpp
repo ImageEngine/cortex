@@ -130,7 +130,7 @@ MPlayDisplayDriver::MPlayDisplayDriver( const Imath::Box2i &displayWindow, const
 	:	DisplayDriver( displayWindow, dataWindow, channelNames, parameters )
 {
 	// Sort out our flat list of channels into planes, based on common prefixes
-	Plane *currentPlane = 0;
+	Plane *currentPlane = nullptr;
 	for( vector<string>::const_iterator cIt = channelNames.begin(); cIt != channelNames.end(); cIt++ )
 	{
 		size_t separatorIndex = cIt->find( '.' );
@@ -263,6 +263,6 @@ void MPlayDisplayDriver::imageData( const Imath::Box2i &box, const float *data, 
 void MPlayDisplayDriver::imageClose()
 {
 	pclose( m_imDisplayStdIn );
-	m_imDisplayStdIn = 0;
+	m_imDisplayStdIn = nullptr;
 }
 

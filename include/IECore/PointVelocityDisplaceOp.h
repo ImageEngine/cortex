@@ -66,7 +66,7 @@ class IECORE_API PointVelocityDisplaceOp : public ModifyOp
 		IE_CORE_DECLARERUNTIMETYPED( PointVelocityDisplaceOp, ModifyOp );
 
 		PointVelocityDisplaceOp();
-		virtual ~PointVelocityDisplaceOp();
+		~PointVelocityDisplaceOp() override;
 
 		StringParameter * positionVarParameter();
 		const StringParameter * positionVarParameter() const;
@@ -78,7 +78,7 @@ class IECORE_API PointVelocityDisplaceOp : public ModifyOp
 		const StringParameter * sampleLengthVarParameter() const;
 
 	protected :
-		virtual void modify( Object *object, const CompoundObject * operands );
+		void modify( Object *object, const CompoundObject * operands ) override;
 
 	private :
 		StringParameterPtr m_positionVarParameter;

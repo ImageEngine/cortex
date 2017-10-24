@@ -51,7 +51,7 @@ class IECORE_API CurveTangentsOp : public CurvesPrimitiveOp
 	public:
 
 		CurveTangentsOp();
-		virtual ~CurveTangentsOp();
+		~CurveTangentsOp() override;
 
 		StringParameter *vTangentPrimVarNameParameter();
 		const StringParameter *vTangentPrimVarNameParameter() const;
@@ -60,7 +60,7 @@ class IECORE_API CurveTangentsOp : public CurvesPrimitiveOp
 
 	protected:
 
-		virtual void modifyTypedPrimitive( CurvesPrimitive *curves, const CompoundObject *operands );
+		void modifyTypedPrimitive( CurvesPrimitive *curves, const CompoundObject *operands ) override;
 
 	private :
 

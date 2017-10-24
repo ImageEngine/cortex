@@ -214,7 +214,7 @@ void Primitive::render( State *state ) const
 		// values. we are responsible for binding this setup. unless we're performing
 		// an id render for selection, in which case we're responsible for binding an
 		// id shader.
-		const Shader::Setup *uniformSetup = NULL;
+		const Shader::Setup *uniformSetup = nullptr;
 		if( currentSelector && currentSelector->mode() == Selector::IDRender )
 		{
 			uniformSetup = flatConstantShaderSetup( state, /* forIDRender = */ true );

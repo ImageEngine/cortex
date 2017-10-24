@@ -75,7 +75,7 @@ class TypedObjectParameter : public ObjectParameter
 		IECORE_RUNTIMETYPED_DECLARETEMPLATE( TypedObjectParameter<T>, ObjectParameter );
 
 		/// Implemented to return true only if value is of type T.
-		virtual bool valueValid( const Object *value, std::string *reason = nullptr ) const;
+		bool valueValid( const Object *value, std::string *reason = nullptr ) const override;
 
 	protected:
 

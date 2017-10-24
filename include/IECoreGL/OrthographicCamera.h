@@ -54,7 +54,7 @@ class IECOREGL_API OrthographicCamera : public Camera
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::OrthographicCamera, OrthographicCameraTypeId, Camera );
 
-		virtual void render( State *currentState ) const;
+		void render( State *currentState ) const override;
 
 };
 

@@ -60,12 +60,12 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCurvesConverter, ToGLCurvesConverterTypeId, ToGLConverter );
 
-		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = 0 );
-		virtual ~ToGLCurvesConverter();
+		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = nullptr );
+		~ToGLCurvesConverter() override;
 
 	protected :
 
-		virtual IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const;
+		IECore::RunTimeTypedPtr doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const override;
 
 	private :
 

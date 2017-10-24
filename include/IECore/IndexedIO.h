@@ -152,7 +152,7 @@ class IECORE_API IndexedIO : public RunTimeTyped
 			Description(const std::string &extension) { IndexedIO::registerCreator( extension, &T::create ); }
 		};
 
-		virtual ~IndexedIO();
+		~IndexedIO() override;
 
 		/// Returns the mode with which the interface was created.
 		virtual IndexedIO::OpenMode openMode() const = 0;

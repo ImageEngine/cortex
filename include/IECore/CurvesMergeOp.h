@@ -49,7 +49,7 @@ class IECORE_API CurvesMergeOp : public CurvesPrimitiveOp
 	public :
 
 		CurvesMergeOp();
-		virtual ~CurvesMergeOp();
+		~CurvesMergeOp() override;
 
 		IE_CORE_DECLARERUNTIMETYPED( CurvesMergeOp, CurvesPrimitiveOp );
 
@@ -58,7 +58,7 @@ class IECORE_API CurvesMergeOp : public CurvesPrimitiveOp
 
 	protected :
 
-		virtual void modifyTypedPrimitive( CurvesPrimitive *curves, const CompoundObject *operands );
+		void modifyTypedPrimitive( CurvesPrimitive *curves, const CompoundObject *operands ) override;
 
 	private :
 
