@@ -3012,7 +3012,7 @@ usdEnvAppends = {
 		"arch",
 		"gf",
 		"js",
-		"vt", 
+		"vt",
 		"ar",
 		"plug",
 		"tracelite",
