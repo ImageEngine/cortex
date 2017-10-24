@@ -201,25 +201,33 @@ renderer::MeshObject *convert( const IECore::Object *primitive )
 					meshEntity->push_tex_coords( asr::GVector2( uvs[i] ) );
 				}
 
-				/// \todo: handle UV Indices correctly
-				if( uvIt->second.interpolation == PrimitiveVariable::FaceVarying )
+				const vector<int> *indices = nullptr;
+				if( uvIt->second.indices )
 				{
-					for( size_t i = 0, j = 0; i < numTriangles; ++i)
-					{
-						asr::Triangle& tri = triangles[i];
-						tri.m_a0 = j++;
-						tri.m_a1 = j++;
-						tri.m_a2 = j++;
-					}
+					indices = &uvIt->second.indices->readable();
 				}
-				else
+
+				for( size_t i = 0; i < numTriangles; ++i )
 				{
-					for( size_t i = 0; i < vidx.size(); i += 3)
+					asr::Triangle& tri = triangles[i];
+					if( uvIt->second.interpolation == PrimitiveVariable::FaceVarying )
 					{
-						asr::Triangle& tri = triangles[i / 3];
-						tri.m_a0 = vidx[i];
-						tri.m_a1 = vidx[i+1];
-						tri.m_a2 = vidx[i+2];
+						tri.m_a0 = i * 3;
+						tri.m_a1 = i * 3 + 1;
+						tri.m_a2 = i * 3 + 2;
+					}
+					else
+					{
+						tri.m_a0 = vidx[i * 3];
+						tri.m_a1 = vidx[i * 3 + 1];
+						tri.m_a2 = vidx[i * 3 + 2];
+					}
+
+					if( indices )
+					{
+						tri.m_a0 = (*indices)[tri.m_a0];
+						tri.m_a1 = (*indices)[tri.m_a1];
+						tri.m_a2 = (*indices)[tri.m_a2];
 					}
 				}
 			}
