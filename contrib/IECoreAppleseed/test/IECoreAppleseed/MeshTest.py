@@ -62,5 +62,101 @@ class MeshTest( AppleseedTest.TestCase ):
 			j = quadTo2TrisIndices[i]
 			self.assertEqual( uv, uvData[j] )
 
+	def testVertexUVs( self ) :
+
+		# 2---1
+		# |  /
+		# | /
+		# 0
+
+		mesh = IECore.MeshPrimitive(
+			IECore.IntVectorData( [ 3 ] ),
+			IECore.IntVectorData( [ 0, 1, 2 ] )
+		)
+		mesh["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 0, 1, 0 ),
+			] )
+		)
+
+		mesh["uv"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V2fVectorData( [
+				IECore.V2f( 0, 0 ),
+				IECore.V2f( 1, 1 ),
+				IECore.V2f( 0, 1 )
+			] ),
+		)
+
+		renderer = IECoreAppleseed.Renderer()
+		renderer.worldBegin()
+		renderer.setAttribute( "name", IECore.StringData( "plane" ) )
+		mesh.render( renderer )
+
+		mainAss = self._getMainAssembly( renderer )
+		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
+		obj = objAss.objects().get_by_name( "plane" )
+		self.assertEqual( obj.get_tex_coords_count(), 3 )
+
+		for i in range( 0, obj.get_tex_coords_count() ):
+			self.assertEqual( mesh["uv"].data[i], obj.get_tex_coords( i ) )
+
+		tri = obj.get_triangle( 0 )
+		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 1, 2 ] )
+
+	def testFaceVaryingIndexedUVs( self ) :
+
+		# 3----2
+		# |  / |
+		# | /  |
+		# 0----1
+
+		mesh = IECore.MeshPrimitive(
+			IECore.IntVectorData( [ 3, 3 ] ),
+			IECore.IntVectorData( [ 0, 1, 2, 0, 2, 3 ] )
+		)
+		mesh["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 1, 0, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 0, 1, 0 )
+			] )
+		)
+
+		mesh["uv"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.FaceVarying,
+			IECore.V2fVectorData( [
+				IECore.V2f( 0, 0 ),
+				IECore.V2f( 1, 0 ),
+				IECore.V2f( 1, 1 ),
+				IECore.V2f( 0, 1 )
+			] ),
+			mesh.vertexIds
+		)
+
+		renderer = IECoreAppleseed.Renderer()
+		renderer.worldBegin()
+		renderer.setAttribute( "name", IECore.StringData( "plane" ) )
+		mesh.render( renderer )
+
+		mainAss = self._getMainAssembly( renderer )
+		objAss = mainAss.assemblies().get_by_name( "plane_assembly" )
+		obj = objAss.objects().get_by_name( "plane" )
+		self.assertEqual( obj.get_tex_coords_count(), 4 )
+
+		for i in range( 0, obj.get_tex_coords_count() ):
+			self.assertEqual( mesh["uv"].data[i], obj.get_tex_coords( i ) )
+
+		tri = obj.get_triangle( 0 )
+		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 1, 2 ] )
+
+		tri = obj.get_triangle( 1 )
+		self.assertEqual( [ tri.a0, tri.a1, tri.a2 ], [ 0, 2, 3 ] )
+
 if __name__ == "__main__":
 	unittest.main()
