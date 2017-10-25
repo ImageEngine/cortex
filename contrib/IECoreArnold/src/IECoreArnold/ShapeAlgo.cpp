@@ -113,7 +113,7 @@ namespace IECoreArnold
 namespace ShapeAlgo
 {
 
-void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *name )
+void convertP( const IECore::Primitive *primitive, AtNode *shape, const AtString name )
 {
 	const V3fVectorData *p = primitive->variableData<V3fVectorData>( "P", PrimitiveVariable::Vertex );
 	if( !p )
@@ -123,12 +123,12 @@ void convertP( const IECore::Primitive *primitive, AtNode *shape, const char *na
 
 	AiNodeSetArray(
 		shape,
-		AtString( name ),
+		name,
 		AiArrayConvert( p->readable().size(), 1, AI_TYPE_VECTOR, (void *)&( p->readable()[0] ) )
 	);
 }
 
-void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const char *name )
+void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *shape, const AtString name )
 {
 	vector<const Data *> dataSamples;
 	dataSamples.reserve( samples.size() );
@@ -144,7 +144,7 @@ void convertP( const std::vector<const IECore::Primitive *> &samples, AtNode *sh
 	}
 
 	AtArray *array = ParameterAlgo::dataToArray( dataSamples, AI_TYPE_VECTOR );
-	AiNodeSetArray( shape, AtString( name ), array );
+	AiNodeSetArray( shape, name, array );
 }
 
 void convertRadius( const IECore::Primitive *primitive, AtNode *shape )
@@ -176,17 +176,16 @@ void convertRadius( const std::vector<const IECore::Primitive *> &samples, AtNod
 	AiNodeSetArray( shape, g_radiusArnoldString, array );
 }
 
-void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const char *name )
+void convertPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primitiveVariable, AtNode *shape, const AtString name )
 {
 	// make sure the primitive variable doesn't clash with built-ins
 	const AtNodeEntry *entry = AiNodeGetNodeEntry( shape );
-	AtString arnoldName( name );
-	if ( AiNodeEntryLookUpParameter( entry, arnoldName ) != nullptr )
+	if ( AiNodeEntryLookUpParameter( entry, name ) != nullptr )
 	{
 		msg(
 			Msg::Warning,
 			"ShapeAlgo::convertPrimitiveVariable",
-			boost::format( "Primitive variable \"%s\" will be ignored because it clashes with Arnold's built-in parameters" ) % name
+			boost::format( "Primitive variable \"%s\" will be ignored because it clashes with Arnold's built-in parameters" ) % name.c_str()
 		);
 		return;
 	}
@@ -257,7 +256,7 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 
 	if( arnoldInterpolation == "constant" )
 	{
-		ParameterAlgo::setParameter( shape, arnoldName, primitiveVariable.data.get() );
+		ParameterAlgo::setParameter( shape, name, primitiveVariable.data.get() );
 		return;
 	}
 
@@ -276,16 +275,16 @@ void convertPrimitiveVariable( const IECore::Primitive *primitive, const Primiti
 	}
 
 	std::string typeString = arnoldInterpolation + " " + AiParamGetTypeName( type );
-	AiNodeDeclare( shape, arnoldName, typeString.c_str() );
+	AiNodeDeclare( shape, name, typeString.c_str() );
 	AtArray *array = ParameterAlgo::dataToArray( primitiveVariable.data.get(), type );
 	if( array )
 	{
-		AiNodeSetArray( shape, arnoldName, array );
+		AiNodeSetArray( shape, name, array );
 		if( arnoldInterpolation == "indexed" )
 		{
 			AiNodeSetArray(
 				shape,
-				AtString((name + string("idxs")).c_str()),
+				AtString((name.c_str() + string("idxs")).c_str()),
 				identityIndices( AiArrayGetNumElements( array ) )
 			);
 		}
@@ -321,7 +320,7 @@ void convertPrimitiveVariables( const IECore::Primitive *primitive, AtNode *shap
 			}
 		}
 
-		convertPrimitiveVariable( primitive, it->second, shape, it->first.c_str() );
+		convertPrimitiveVariable( primitive, it->second, shape, AtString( it->first.c_str() ) );
 	}
 }
 
