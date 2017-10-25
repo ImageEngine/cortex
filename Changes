@@ -1,3 +1,11 @@
+10.0.0-a5
+=========
+
+Fixes
+-----
+
+- IECoreAppleseed::MeshAlgo : Fixed conversion of indexed UVs (#639).
+
 10.0.0-a4
 =========
 
