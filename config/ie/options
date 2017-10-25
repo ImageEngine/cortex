@@ -89,7 +89,7 @@ if targetApp :
 	boostVersion = targetAppReg.get( "boostVersion", cortexReg["boostVersion"] )
 	oiioVersion = targetAppReg.get( "OpenImageIOVersion", cortexReg["OpenImageIOVersion"] )
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
-	usdVersion = tagetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
+	usdVersion = targetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
