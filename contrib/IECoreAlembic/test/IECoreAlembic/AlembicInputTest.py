@@ -146,7 +146,7 @@ class AlembicInputTest( unittest.TestCase ) :
 		self.failUnless( isinstance( m["colorSet1"].data, IECore.Color4fVectorData ) )
 		self.assertEqual( len( m["colorSet1"].data ), 4 )
 		self.assertEqual(
-			m["colorSet1"].data,
+			m["colorSet1"].expandedData(),
 			IECore.Color4fVectorData( [
 				IECore.Color4f( 1, 0, 0, 1 ),
 				IECore.Color4f( 0, 0, 0, 1 ),
