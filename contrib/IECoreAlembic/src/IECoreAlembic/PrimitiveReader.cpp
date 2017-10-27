@@ -176,6 +176,7 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
 	typedef typename IGeomParamTraits<T>::DataType DataType;
+	typedef typename T::sample_type GeomParamSample;
 
 	if( param.getArrayExtent() > 1 )
 	{
@@ -184,14 +185,13 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	}
 
 	SamplePtr sample;
-
 	Abc::UInt32ArraySamplePtr indices;
 
 	if( param.isIndexed() )
 	{
-		auto tmp = param.getIndexedValue( sampleSelector );
-		sample = tmp.getVals();
-		indices = tmp.getIndices();
+		GeomParamSample geomParamSample = param.getIndexedValue( sampleSelector );
+		sample = geomParamSample.getVals();
+		indices = geomParamSample.getIndices();
 	}
 	else
 	{
