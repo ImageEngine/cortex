@@ -186,13 +186,24 @@ void PrimitiveWriter::writeArbGeomParam( const std::string &name, const IECore::
 	GeomParamMap::iterator it = m_geomParams.find( name );
 	if( it == m_geomParams.end() )
 	{
+		bool isIndexed = (primitiveVariable.indices != nullptr);
+
 		GeomParamType geomParam(
 			arbGeomParams,
 			name,
-			/* isIndexed = */ false,
+			isIndexed,
 			geometryScope( primitiveVariable.interpolation ),
 			/* arrayExtent = */ 0
 		);
+
+		if( isIndexed )
+		{
+			const std::vector<int> &indexValues = primitiveVariable.indices->readable();
+			std::vector<unsigned int> indices = std::vector<unsigned int>( indexValues.begin(), indexValues.end() );
+			OUInt32ArrayProperty indexProperty = geomParam.getIndexProperty();
+			indexProperty.set( indices );
+		}
+
 		it = m_geomParams.insert( GeomParamMap::value_type( name, geomParam.getValueProperty() ) ).first;
 	}
 

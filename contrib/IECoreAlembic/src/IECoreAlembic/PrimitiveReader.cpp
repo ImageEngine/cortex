@@ -183,7 +183,20 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 		return;
 	}
 
-	SamplePtr sample = param.getExpandedValue( sampleSelector ).getVals();
+	SamplePtr sample;
+
+	Abc::UInt32ArraySamplePtr indices;
+
+	if( param.isIndexed() )
+	{
+		auto tmp = param.getIndexedValue( sampleSelector );
+		sample = tmp.getVals();
+		indices = tmp.getIndices();
+	}
+	else
+	{
+		sample = param.getExpandedValue( sampleSelector ).getVals();
+	}
 
 	typename DataType::Ptr data = new DataType();
 	data->writable().resize( sample->size() );
@@ -194,6 +207,14 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	PrimitiveVariable pv;
 	pv.interpolation = interpolation( param.getScope() );
 	pv.data = data;
+
+	if( param.isIndexed() )
+	{
+		IntVectorDataPtr indexData = new IntVectorData();
+		indexData->writable().resize( indices->size() );
+		std::copy( indices->get(), indices->get() + indices->size(), indexData->writable().begin() );
+		pv.indices = indexData;
+	}
 
 	primitive->variables[param.getHeader().getName()] = pv;
 }
