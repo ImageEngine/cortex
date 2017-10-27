@@ -239,7 +239,7 @@ except :
 	pass
 
 appleseedReg = None
-appleseedVersion = getOption( "APPLESEED_VERSION", os.environ["APPLESEED_VERSION"] )
+appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
 try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
 	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
