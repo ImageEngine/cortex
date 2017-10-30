@@ -506,11 +506,7 @@ void IECoreAppleseed::RendererImplementation::worldEnd()
 	}
 	else if( isProjectGen() )
 	{
-#if APPLESEED_VERSION > 10400
 		const int writeOptions = asr::ProjectFileWriter::OmitHandlingAssetFiles | asr::ProjectFileWriter::OmitWritingGeometryFiles;
-#else
-		const int writeOptions = asr::ProjectFileWriter::OmitBringingAssets | asr::ProjectFileWriter::OmitWritingGeometryFiles;
-#endif
 		asr::ProjectFileWriter::write( *m_project, m_fileName.c_str(), writeOptions );
 	}
 	else

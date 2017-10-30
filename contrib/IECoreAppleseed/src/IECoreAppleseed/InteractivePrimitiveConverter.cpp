@@ -109,63 +109,59 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 				mesh->set_vertex_pose( j, i - 1, asr::GVector3( points[j].x, points[j].y, points[j].z ) );
 			}
 
-			// motion blur for normals and tangents is only supported since appleseed 1.2.0
-			#if APPLESEED_VERSION >= 10200
-				if( mesh->get_vertex_normal_count() != 0 )
+			if( mesh->get_vertex_normal_count() != 0 )
+			{
+				PrimitiveVariableMap::const_iterator nIt = m->variables.find( "N" );
+				if( nIt == m->variables.end() )
 				{
-					PrimitiveVariableMap::const_iterator nIt = m->variables.find( "N" );
-					if( nIt == m->variables.end() )
-					{
-						throw Exception( "MeshPrimitive missing normals in motion sample." );
-					}
-
-					const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
-					if( !n )
-					{
-						throw Exception( ( boost::format( "MeshPrimitive \"N\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % nIt->second.data->typeName() ).str() );
-					}
-
-					const std::vector<V3f> &normals = n->readable();
-					size_t numNormals = normals.size();
-					if( numNormals != mesh->get_vertex_normal_count() )
-					{
-						throw Exception( "MeshPrimitive \"N\" primitive variable has different interpolation than first deformation sample." );
-					}
-
-					for( size_t j = 0 ; j < numNormals; ++j )
-					{
-						mesh->set_vertex_normal_pose( j, i - 1, asf::normalize( asr::GVector3( normals[j].x, normals[j].y, normals[j].z ) ) );
-					}
+					throw Exception( "MeshPrimitive missing normals in motion sample." );
 				}
 
-				// tangents
-				if( mesh->get_vertex_tangent_count() != 0 )
+				const V3fVectorData *n = runTimeCast<const V3fVectorData>( nIt->second.data.get() );
+				if( !n )
 				{
-					PrimitiveVariableMap::const_iterator tIt = m->variables.find( "uTangent" );
-					if( tIt == m->variables.end() )
-					{
-						throw Exception( "MeshPrimitive missing tangents in motion sample." );
-					}
-
-					const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
-					if( !t )
-					{
-						throw Exception( ( boost::format( "MeshPrimitive \"uTangent\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % tIt->second.data->typeName() ).str() );
-					}
-
-					const std::vector<V3f> &tangents = t->readable();
-					size_t numTangents = t->readable().size();
-					if( numTangents != mesh->get_vertex_tangent_count() )
-					{
-						throw Exception( "MeshPrimitive \"uTangent\" primitive variable has different interpolation than first deformation sample." );
-					}
-
-					for( size_t j = 0 ; j < numTangents; ++j )
-					{
-						mesh->set_vertex_tangent_pose( j, i - 1, asf::normalize( asr::GVector3( tangents[j].x, tangents[j].y, tangents[j].z ) ) );
-					}
+					throw Exception( ( boost::format( "MeshPrimitive \"N\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % nIt->second.data->typeName() ).str() );
 				}
-			#endif
+
+				const std::vector<V3f> &normals = n->readable();
+				size_t numNormals = normals.size();
+				if( numNormals != mesh->get_vertex_normal_count() )
+				{
+					throw Exception( "MeshPrimitive \"N\" primitive variable has different interpolation than first deformation sample." );
+				}
+
+				for( size_t j = 0 ; j < numNormals; ++j )
+				{
+					mesh->set_vertex_normal_pose( j, i - 1, asf::normalize( asr::GVector3( normals[j].x, normals[j].y, normals[j].z ) ) );
+				}
+			}
+
+			if( mesh->get_vertex_tangent_count() != 0 )
+			{
+				PrimitiveVariableMap::const_iterator tIt = m->variables.find( "uTangent" );
+				if( tIt == m->variables.end() )
+				{
+					throw Exception( "MeshPrimitive missing tangents in motion sample." );
+				}
+
+				const V3fVectorData *t = runTimeCast<const V3fVectorData>( tIt->second.data.get() );
+				if( !t )
+				{
+					throw Exception( ( boost::format( "MeshPrimitive \"uTangent\" primitive variable has unsupported type \"%s\" (expected V3fVectorData)." ) % tIt->second.data->typeName() ).str() );
+				}
+
+				const std::vector<V3f> &tangents = t->readable();
+				size_t numTangents = t->readable().size();
+				if( numTangents != mesh->get_vertex_tangent_count() )
+				{
+					throw Exception( "MeshPrimitive \"uTangent\" primitive variable has different interpolation than first deformation sample." );
+				}
+
+				for( size_t j = 0 ; j < numTangents; ++j )
+				{
+					mesh->set_vertex_tangent_pose( j, i - 1, asf::normalize( asr::GVector3( tangents[j].x, tangents[j].y, tangents[j].z ) ) );
+				}
+			}
 		}
 	}
 
