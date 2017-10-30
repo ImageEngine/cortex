@@ -98,6 +98,22 @@ class PointsAlgoTest( unittest.TestCase ) :
 		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( p.data, IECore.FloatVectorData( [ sum(range(0,10))/10. ] ) )
 
+	def testPointsVertexToUniformZeroPointCount( self ) :
+		def makeEmptyPoints() :
+			testObject = IECore.PointsPrimitive( IECore.V3fVectorData() )
+			testObject["b"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData() )
+
+			self.assertTrue( testObject.arePrimitiveVariablesValid() )
+			return testObject
+
+		points = makeEmptyPoints()
+
+		p = points["b"]
+		IECore.PointsAlgo.resamplePrimitiveVariable( points, p, IECore.PrimitiveVariable.Interpolation.Uniform )
+
+		self.assertEqual( p.interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( p.data, IECore.FloatVectorData( [] ) )
+
 	def testPointsVertexToVarying( self ) :
 		points = self.points()
 		p = points["b"]
