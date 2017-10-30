@@ -64,7 +64,10 @@ struct PointsVertexToUniform
 		typename From::ValueType &trg = result->writable();
 		const typename From::ValueType &src = data->readable();
 
-		trg.push_back( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
+		if ( !src.empty() )
+		{
+			trg.push_back( std::accumulate( src.begin() + 1, src.end(), *src.begin() ) / src.size() );
+		}
 
 		return result;
 	}
