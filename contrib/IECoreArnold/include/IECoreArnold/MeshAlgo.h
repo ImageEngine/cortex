@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace MeshAlgo
 {
 
-AtNode *convert( const IECore::MeshPrimitive *mesh );
-AtNode *convert( const std::vector<const IECore::MeshPrimitive *> &samples, const std::vector<float> &sampleTimes );
+AtNode *convert( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace MeshAlgo
 

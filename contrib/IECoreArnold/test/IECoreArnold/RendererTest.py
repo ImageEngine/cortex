@@ -67,9 +67,9 @@ class RendererTest( unittest.TestCase ) :
 		self.assertEqual( r.getOption( "ai:AA_samples" ), IECore.IntData( 11 ) )
 
 		# check we can set an already existing float
-		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .99 ) )
-		r.setOption( "ai:auto_transparency_threshold", IECore.FloatData( .9 ) )
-		self.assertEqual( r.getOption( "ai:auto_transparency_threshold" ), IECore.FloatData( .9 ) )
+		self.assertEqual( r.getOption( "ai:texture_max_sharpen" ), IECore.FloatData( 1.5 ) )
+		r.setOption( "ai:texture_max_sharpen", IECore.FloatData( .9 ) )
+		self.assertEqual( r.getOption( "ai:texture_max_sharpen" ), IECore.FloatData( .9 ) )
 
 		# check tbat trying to set nonexistent options yields a message
 		m = IECore.CapturingMessageHandler()
@@ -165,7 +165,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
+			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : IECore.Color3f( 1, 0, 0 ) } )
 			r.sphere( 1, -1, 1, 360, {} )
 
 		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
@@ -185,7 +185,7 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			shader = arnold.AiNode( "standard" )
+			shader = arnold.AiNode( "standard_surface" )
 			arnold.AiNodeSetStr( shader, "name", "red_shader" )
 			arnold.AiNodeSetFlt( shader, "emission", 1 )
 			arnold.AiNodeSetRGB( shader, "emission_color", 1, 0, 0 )
@@ -525,10 +525,12 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 		self.assertEqual( r.getAttribute( "ai:visibility:camera" ), IECore.BoolData( True ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( True ) )
-		self.assertEqual( r.getAttribute( "ai:visibility:reflected" ), IECore.BoolData( True ) )
-		self.assertEqual( r.getAttribute( "ai:visibility:refracted" ), IECore.BoolData( True ) )
-		self.assertEqual( r.getAttribute( "ai:visibility:diffuse" ), IECore.BoolData( True ) )
-		self.assertEqual( r.getAttribute( "ai:visibility:glossy" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:diffuse_reflect" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:specular_reflect" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:diffuse_transmit" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:specular_transmit" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:volume" ), IECore.BoolData( True ) )
+		self.assertEqual( r.getAttribute( "ai:visibility:subsurface" ), IECore.BoolData( True ) )
 
 		r.setAttribute( "ai:visibility:shadow", IECore.BoolData( False ) )
 		self.assertEqual( r.getAttribute( "ai:visibility:shadow" ), IECore.BoolData( False ) )
@@ -600,7 +602,7 @@ class RendererTest( unittest.TestCase ) :
 			shapes = self.__allNodes( type = arnold.AI_NODE_SHAPE )
 
 			self.assertEqual( len( shapes ), 1 )
-			self.assertEqual( arnold.AiNodeGetInt( shapes[0], "subdiv_iterations" ), 10 )
+			self.assertEqual( arnold.AiNodeGetByte( shapes[0], "subdiv_iterations" ), 10 )
 
 	def testEnumAttributes( self ) :
 
@@ -641,7 +643,7 @@ class RendererTest( unittest.TestCase ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 			r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-			r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
+			r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:myInputShader" } )
 
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
@@ -667,7 +669,7 @@ class RendererTest( unittest.TestCase ) :
 	 		m = IECore.CapturingMessageHandler()
  			with m :
 				r.shader( "shader", "flat", { "color" : IECore.Color3f( 1, 0, 0  ), "__handle" : "myInputShader" } )
-				r.shader( "surface", "standard", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
+				r.shader( "surface", "standard_surface", { "emission" : 1.0, "emission_color" : "link:oopsWrongOne" } )
 
 		self.assertEqual( len( m.messages ), 1 )
 		self.assertEqual( m.messages[0].level, IECore.Msg.Level.Warning )
@@ -681,11 +683,11 @@ class RendererTest( unittest.TestCase ) :
 
 		with IECore.WorldBlock( r ) :
 
-			r.light( "point_light", "handle", { "intensity" : 1, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
+			r.light( "point_light", "handle", { "intensity" : 1.0, "color" : IECore.Color3f( 1, 0.5, 0.25 ) } )
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -1 ) ) )
 
-			r.shader( "surface", "standard", {} )
+			r.shader( "surface", "standard_surface", {} )
 
 			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			mesh.render( r )
@@ -706,7 +708,7 @@ class RendererTest( unittest.TestCase ) :
 
 			r.procedural(
 				r.ExternalProcedural(
-					"test.so",
+					"volume",
 					IECore.Box3f(
 						IECore.V3f( 1, 2, 3 ),
 						IECore.V3f( 4, 5, 6 )
@@ -722,10 +724,7 @@ class RendererTest( unittest.TestCase ) :
 
 		ass = "".join( file( self.__assFileName ).readlines() )
 
-		self.assertTrue( "procedural" in ass )
-		self.assertTrue( "min 1 2 3" in ass )
-		self.assertTrue( "max 4 5 6" in ass )
-		self.assertTrue( "dso \"test.so\"" in ass )
+		self.assertTrue( "volume" in ass )
 		self.assertTrue( "declare stringParm constant STRING" in ass )
 		self.assertTrue( "declare floatParm constant FLOAT" in ass )
 		self.assertTrue( "declare intParm constant INT" in ass )
@@ -745,7 +744,7 @@ class RendererTest( unittest.TestCase ) :
 			pass
 
 		ass = "".join( file( self.__assFileName ).readlines() )
-		self.assertTrue( "aspect_ratio 0.5" in ass )
+		self.assertTrue( "pixel_aspect_ratio 2\n" in ass )
 
 	def testLightPrefixes( self ) :
 
@@ -768,7 +767,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
@@ -795,7 +794,7 @@ class RendererTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
-		r.setOption( "ai:AA_samples", IECore.IntData( 10 ) )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
 
 		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
 
@@ -818,18 +817,56 @@ class RendererTest( unittest.TestCase ) :
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
 
+	def testNonUniformMotionBlur( self ) :
+
+		r = IECoreArnold.Renderer()
+
+		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "test" } )
+		r.setOption( "ai:AA_samples", IECore.IntData( 20 ) )
+
+		r.camera( "main", { "resolution" : IECore.V2i( 128, 128 ), "shutter" : IECore.V2f( 0, 1 ) } )
+
+		with IECore.WorldBlock( r ) :
+
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+
+			# A motion block that has slightly non-uniform sampling, but not enough to notice
+			# We should allow it, since the user won't notice that Arnold is ignoring the non-uniformity
+			with IECore.MotionBlock( r, [ 0, 0.3333, 0.6666, 1 ] ) :
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.3333333333, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.33333333333, 0, 0 ) ) )
+				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+
+			with self.assertRaises( RuntimeError ):
+				# This block is actually non-uniform, and won't render correctly, so we should fail
+				with IECore.MotionBlock( r, [ 0, 0.333, 0.666, 2 ] ):
+					pass
+
+			mesh = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.5 ), IECore.V2f( 0.5 ) ) )
+			mesh.render( r )
+
+
+		image = IECoreImage.ImageDisplayDriver.removeStoredImage( "test" )
+
+		dimensions = image.dataWindow.size() + IECore.V2i( 1 )
+		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
+		self.assertAlmostEqual( image["A"][index], 0.5, 2 )
+
 	def testProcedural( self ) :
 
 		r = IECoreArnold.Renderer( "/tmp/test.ass" )
 
 		with IECore.WorldBlock( r ) :
 
+			# In Arnold 5, external procedurals register node types that look just like the built-in
+			# ones.  So we need to be able to use ExternalProcedural to create an arbitrary node type,
+			# instead of passing in a filename. Test with a volume, because this node type exists by default.
 			r.procedural(
 				r.ExternalProcedural(
-					"someVolumeThing.so",
+					"volume",
 					IECore.Box3f( IECore.V3f( -1, -2, -3 ), IECore.V3f( 4, 5, 6 ) ),
 					{
-						"ai:nodeType" : "volume",
 						"testFloat" : 0.5
 					}
 				)
@@ -838,9 +875,6 @@ class RendererTest( unittest.TestCase ) :
 			volume = self.__allNodes( type = arnold.AI_NODE_SHAPE )[-1]
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( volume ) ), "volume" )
 
-			self.assertEqual( arnold.AiNodeGetPnt( volume, "min" ), arnold.AtPoint( -1, -2, -3 ) )
-			self.assertEqual( arnold.AiNodeGetPnt( volume, "max" ), arnold.AtPoint( 4, 5, 6 ) )
-			self.assertEqual( arnold.AiNodeGetStr( volume, "dso" ), "someVolumeThing.so" )
 			self.assertEqual( arnold.AiNodeGetFlt( volume, "testFloat" ), 0.5 )
 
 	def tearDown( self ) :

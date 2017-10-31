@@ -50,9 +50,19 @@ namespace
 
 NodeAlgo::ConverterDescription<Camera> g_description( CameraAlgo::convert );
 
+const AtString g_perspCameraArnoldString("persp_camera");
+const AtString g_orthoCameraArnoldString("ortho_camera");
+const AtString g_fovArnoldString("fov");
+const AtString g_nearClipArnoldString("near_clip");
+const AtString g_farClipArnoldString("far_clip");
+const AtString g_shutterStartArnoldString("shutter_start");
+const AtString g_shutterEndArnoldString("shutter_end");
+const AtString g_screenWindowMinArnoldString("screen_window_min");
+const AtString g_screenWindowMaxArnoldString("screen_window_max");
+
 } // namespace
 
-AtNode *CameraAlgo::convert( const IECore::Camera *camera )
+AtNode *CameraAlgo::convert( const IECore::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
 {
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();
@@ -62,44 +72,45 @@ AtNode *CameraAlgo::convert( const IECore::Camera *camera )
 	AtNode *result = nullptr;
 	if( projection=="perspective" )
 	{
-		result = AiNode( "persp_camera" );
-		AiNodeSetFlt( result, "fov", cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
+		result = AiNode( g_perspCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
+		AiNodeSetFlt( result, g_fovArnoldString, cameraCopy->parametersData()->member<FloatData>( "projection:fov", true )->readable() );
 	}
 	else if( projection=="orthographic" )
 	{
-		result = AiNode( "ortho_camera" );
+		result = AiNode( g_orthoCameraArnoldString, AtString( nodeName.c_str() ), parentNode );
 	}
 	else
 	{
-		result = AiNode( projection.c_str() );
+		result = AiNode( AtString( projection.c_str() ), AtString( nodeName.c_str() ), parentNode );
 	}
 
 	// Set clipping planes
 	const Imath::V2f &clippingPlanes = cameraCopy->parametersData()->member<V2fData>( "clippingPlanes", true )->readable();
-	AiNodeSetFlt( result, "near_clip", clippingPlanes[0] );
-	AiNodeSetFlt( result, "far_clip", clippingPlanes[1] );
+	AiNodeSetFlt( result, g_nearClipArnoldString, clippingPlanes[0] );
+	AiNodeSetFlt( result, g_farClipArnoldString, clippingPlanes[1] );
 
 	// Set shutter
 	const Imath::V2f &shutter = cameraCopy->parametersData()->member<V2fData>( "shutter", true )->readable();
-	AiNodeSetFlt( result, "shutter_start", shutter[0] );
-	AiNodeSetFlt( result, "shutter_end", shutter[1] );
+	AiNodeSetFlt( result, g_shutterStartArnoldString, shutter[0] );
+	AiNodeSetFlt( result, g_shutterEndArnoldString, shutter[1] );
 
 	// Set screen window
 	const Imath::Box2f &screenWindow = cameraCopy->parametersData()->member<Box2fData>( "screenWindow", true )->readable();
 	const Imath::V2i &resolution = cameraCopy->parametersData()->member<V2iData>( "resolution", true )->readable();
 	const float pixelAspectRatio = cameraCopy->parametersData()->member<FloatData>( "pixelAspectRatio", true )->readable();
 	float aspect = pixelAspectRatio * (float)resolution.x / (float)resolution.y;
-	AiNodeSetPnt2( result, "screen_window_min", screenWindow.min.x, screenWindow.min.y * aspect );
-	AiNodeSetPnt2( result, "screen_window_max", screenWindow.max.x, screenWindow.max.y * aspect );
+	AiNodeSetVec2( result, g_screenWindowMinArnoldString, screenWindow.min.x, screenWindow.min.y * aspect );
+	AiNodeSetVec2( result, g_screenWindowMaxArnoldString, screenWindow.max.x, screenWindow.max.y * aspect );
 
 	// Set any Arnold-specific parameters
 
 	const AtNodeEntry *nodeEntry = AiNodeGetNodeEntry( result );
 	for( CompoundDataMap::const_iterator it = camera->parameters().begin(), eIt = camera->parameters().end(); it != eIt; ++it )
 	{
-		if( AiNodeEntryLookUpParameter( nodeEntry, it->first.c_str() ) )
+		AtString paramNameArnold( it->first.c_str() );
+		if( AiNodeEntryLookUpParameter( nodeEntry, paramNameArnold ) )
 		{
-			ParameterAlgo::setParameter( result, it->first.c_str(), it->second.get() );
+			ParameterAlgo::setParameter( result, paramNameArnold, it->second.get() );
 		}
 	}
 

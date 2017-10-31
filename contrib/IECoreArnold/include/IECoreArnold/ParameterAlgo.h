@@ -49,11 +49,13 @@ namespace ParameterAlgo
 {
 
 IECOREARNOLD_API void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Data *value );
+IECOREARNOLD_API void setParameter( AtNode *node, AtString name, const IECore::Data *value );
 IECOREARNOLD_API void setParameter( AtNode *node, const char *name, const IECore::Data *value );
 IECOREARNOLD_API void setParameters( AtNode *node, const IECore::CompoundDataMap &values );
 
 IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter );
 IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter );
+IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, AtString name );
 IECOREARNOLD_API IECore::DataPtr getParameter( AtNode *node, const char *name );
 IECOREARNOLD_API void getParameters( AtNode *node, IECore::CompoundDataMap &values );
 

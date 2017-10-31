@@ -222,27 +222,5 @@ class ProceduralTest( unittest.TestCase ) :
 
 		self.failIf( "ignoring parameter max" in self.__arnoldMessages )
 
-	def testNoBound( self ) :
-
-		r = IECoreArnold.Renderer( "/tmp/test.ass" )
-
-		with IECore.WorldBlock( r ) :
-
-			r.procedural(
-				r.ExternalProcedural(
-					"test.so",
-					r.Procedural.noBound,
-					{}
-				)
-			)
-
-		l = "".join( open( "/tmp/test.ass" ).readlines() )
-
-		self.assertTrue( "procedural" in l )
-		self.assertFalse( "inf" in l )
-		self.assertFalse( re.search( r"\bmin\b", l ) )
-		self.assertFalse( re.search( r"\bmax\b", l ) )
-		self.assertTrue( "load_at_init" in l )
-
 if __name__ == "__main__":
     unittest.main()

@@ -78,7 +78,7 @@ namespace IECoreArnold
 namespace NodeAlgo
 {
 
-AtNode *convert( const IECore::Object *object )
+AtNode *convert( const IECore::Object *object, const std::string &nodeName, const AtNode *parentNode )
 {
 	const Registry &r = registry();
 	Registry::const_iterator it = r.find( object->typeId() );
@@ -86,10 +86,10 @@ AtNode *convert( const IECore::Object *object )
 	{
 		return nullptr;
 	}
-	return it->second.converter( object );
+	return it->second.converter( object, nodeName, parentNode );
 }
 
-AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::vector<float> &sampleTimes )
+AtNode *convert( const std::vector<const IECore::Object *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	if( samples.empty() )
 	{
@@ -115,17 +115,53 @@ AtNode *convert( const std::vector<const IECore::Object *> &samples, const std::
 
 	if( it->second.motionConverter )
 	{
-		return it->second.motionConverter( samples, sampleTimes );
+		return it->second.motionConverter( samples, motionStart, motionEnd, nodeName, parentNode );
 	}
 	else
 	{
-		return it->second.converter( firstSample );
+		return it->second.converter( firstSample, nodeName, parentNode );
 	}
 }
 
 void registerConverter( IECore::TypeId fromType, Converter converter, MotionConverter motionConverter )
 {
 	registry().insert( Registry::value_type( fromType, Converters( converter, motionConverter ) ) );
+}
+
+void ensureUniformTimeSamples( const std::vector<float> &times )
+{
+	if( times.size() == 0 )
+	{
+		throw IECore::Exception( "Motion block times must not be empty" );
+	}
+
+	float motionStart = times[0];
+	float motionEnd = times[ times.size() - 1 ];
+
+	for( unsigned int i = 0; i < times.size(); i++ )
+	{
+		// Use a really coarse epsilon to check if the values are uniform - if someone is sloppy with
+		// floating point precision when computing their sample times, we don't want to stop them from rendering.
+		// But we should warn someone if they are actually trying to use a feature Arnold doesn't support.
+		const float uniformity_epsilon = 0.01;
+		float expectedTime = motionStart + ( motionEnd - motionStart ) / ( times.size() - 1 ) * i;
+		if( times[i] < expectedTime - uniformity_epsilon || times[i] > expectedTime + uniformity_epsilon )
+		{
+			std::stringstream text;
+			text << "Arnold does not support non-uniform motion blocks.\n";
+			text << "Invalid motion block: [ " << times[0];
+			for( unsigned int j = 1; j < times.size(); j++ )
+			{
+				text << ", " << times[j];
+			}
+			text << " ]\n";
+			text << "( sample " << i << ", with value " << times[i] << " does not match " << expectedTime << ")\n";
+			throw IECore::Exception( text.str() );
+
+
+		}
+	}
+
 }
 
 } // namespace NodeAlgo

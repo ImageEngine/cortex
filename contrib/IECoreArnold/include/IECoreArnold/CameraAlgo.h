@@ -45,7 +45,7 @@ namespace IECoreArnold
 namespace CameraAlgo
 {
 
-AtNode *convert( const IECore::Camera *camera );
+AtNode *convert( const IECore::Camera *camera, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace CameraAlgo
 

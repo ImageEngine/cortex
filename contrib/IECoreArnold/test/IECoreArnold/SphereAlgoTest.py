@@ -46,7 +46,7 @@ class SphereAlgoTest( unittest.TestCase ) :
 		s = IECore.SpherePrimitive( 0.25 )
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s )
+			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "radius" ), 0.25 )
 
@@ -56,16 +56,15 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s, [ 0, 1 ] )
+			n = IECoreArnold.NodeAlgo.convert( s, 0, 1, "testSphere" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "sphere" )
 
 			a = arnold.AiNodeGetArray( n, "radius" )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0.25 )
 			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 0.5 )
 
-			a = arnold.AiNodeGetArray( n, "deform_time_samples" )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 0 ), 0 )
-			self.assertEqual( arnold.AiArrayGetFlt( a, 1 ), 1 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_start" ), 0 )
+			self.assertEqual( arnold.AiNodeGetFlt( n, "motion_end" ), 1 )
 
 	def testPrimitiveVariables( self ) :
 
@@ -80,20 +79,20 @@ class SphereAlgoTest( unittest.TestCase ) :
 
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
-			n = IECoreArnold.NodeAlgo.convert( s )
+			n = IECoreArnold.NodeAlgo.convert( s, "testSphere" )
 			self.assertEqual( arnold.AiNodeGetVec( n, "v" ), arnold.AtVector( 1, 2, 3 ) )
-			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtColor( 1, 2, 3 ) )
+			self.assertEqual( arnold.AiNodeGetRGB( n, "c" ), arnold.AtRGB( 1, 2, 3 ) )
 			self.assertEqual( arnold.AiNodeGetStr( n, "s" ), "test" )
 			self.assertEqual( arnold.AiNodeGetInt( n, "i" ), 11 )
 			self.assertEqual( arnold.AiNodeGetBool( n, "b" ), True )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "f" ), 2.5 )
 
-			m = arnold.AtMatrix()
-			arnold.AiNodeGetMatrix( n, "m", m )
+			m = arnold.AiNodeGetMatrix( n, "m" )
 			self.assertEqual(
-				[ getattr( m, f[0] ) for f in m._fields_ ],
-				[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 ],
+				[ list( i ) for i in m.data ],
+				[ [1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16] ],
 			)
+
 
 if __name__ == "__main__":
     unittest.main()

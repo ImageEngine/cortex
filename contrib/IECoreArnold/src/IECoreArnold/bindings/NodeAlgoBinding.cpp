@@ -46,19 +46,17 @@ using namespace IECoreArnoldBindings;
 namespace
 {
 
-object convertWrapper( const IECore::Object *object )
+object convertWrapper( const IECore::Object *object, const std::string &nodeName )
 {
-	return atNodeToPythonObject( NodeAlgo::convert( object ) );
+	return atNodeToPythonObject( NodeAlgo::convert( object, nodeName, nullptr ) );
 }
 
-object convertWrapper2( object pythonSamples, object pythonSampleTimes )
+object convertWrapper2( object pythonSamples, float motionStart, float motionEnd, const std::string &nodeName )
 {
 	std::vector<const IECore::Object *> samples;
-	std::vector<float> sampleTimes;
 	container_utils::extend_container( samples, pythonSamples );
-	container_utils::extend_container( sampleTimes, pythonSampleTimes );
 
-	return atNodeToPythonObject( NodeAlgo::convert( samples, sampleTimes ) );
+	return atNodeToPythonObject( NodeAlgo::convert( samples, motionStart, motionEnd, nodeName, nullptr ) );
 }
 
 } // namespace

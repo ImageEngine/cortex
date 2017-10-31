@@ -53,14 +53,15 @@ class CameraAlgoTest( unittest.TestCase ) :
 						"resolution" : IECore.V2i( 512 ),
 						"screenWindow" : IECore.Box2f( IECore.V2f( -1, -0.5 ), IECore.V2f( 1, 0.5 ) )
 					}
-				)
+				),
+				"testCamera"
 			)
 
 			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "persp_camera" )
 			self.assertEqual( arnold.AiNodeGetFlt( n, "fov" ), 45.0 )
 
-			self.assertEqual( arnold.AiNodeGetPnt2( n, "screen_window_min" ), arnold.AtPoint2( -1, -0.5 ) )
-			self.assertEqual( arnold.AiNodeGetPnt2( n, "screen_window_max" ), arnold.AtPoint2( 1, 0.5 ) )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_min" ), arnold.AtVector2( -1, -0.5 ) )
+			self.assertEqual( arnold.AiNodeGetVec2( n, "screen_window_max" ), arnold.AtVector2( 1, 0.5 ) )
 
 	def testConvertCustomProjection( self ) :
 
@@ -73,7 +74,8 @@ class CameraAlgoTest( unittest.TestCase ) :
 						"horizontal_fov" : 45.0,
 						"vertical_fov" : 80.0,
 					}
-				)
+				),
+				"testCamera"
 			)
 
 			self.assertTrue( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n ) ), "cyl_camera" )

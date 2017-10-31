@@ -43,7 +43,7 @@ class ProceduralDSOTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		os.system( "kick -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
+		os.system( "kick -v 0 -dw -dp contrib/IECoreArnold/test/IECoreArnold/data/assFiles/proceduralDSO.ass" )
 
 		image = IECore.Reader.create( "testProceduralDSO.exr" ).read()
 		dimensions = image.dataWindow.size() + IECore.V2i( 1 )

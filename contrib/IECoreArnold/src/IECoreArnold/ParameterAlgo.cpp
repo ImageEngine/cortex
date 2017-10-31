@@ -65,7 +65,7 @@ inline const T *dataCast( const char *name, const IECore::Data *data )
 	return nullptr;
 }
 
-void setParameterInternal( AtNode *node, const char *name, int parameterType, bool array, const IECore::Data *value )
+void setParameterInternal( AtNode *node, AtString name, int parameterType, bool array, const IECore::Data *value )
 {
 	if( array )
 	{
@@ -75,7 +75,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 			msg( Msg::Warning, "setParameter", boost::format( "Unable to create array from data of type \"%s\" for parameter \"%s\"" ) % value->typeName() % name );
 			return;
 		}
-		if( a->type != parameterType )
+		if( AiArrayGetType( a ) != parameterType )
 		{
 			msg( Msg::Warning, "setParameter", boost::format( "Unable to create array of type %s from data of type \"%s\" for parameter \"%s\"" ) % AiParamGetTypeName( parameterType ) % value->typeName() % name );
 			return;
@@ -90,6 +90,16 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				if( const IntData *data = dataCast<IntData>( name, value ) )
 				{
 					AiNodeSetInt( node, name, data->readable() );
+				}
+				break;
+			case AI_TYPE_UINT :
+				if( const IntData *data = runTimeCast<const IntData>( value ) )
+				{
+					AiNodeSetUInt( node, name, std::max( 0, data->readable() ) );
+				}
+				else if( const UIntData *data = dataCast<UIntData>( name, value ) )
+				{
+					AiNodeSetUInt( node, name, data->readable() );
 				}
 				break;
 			case AI_TYPE_BYTE :
@@ -111,7 +121,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 			case AI_TYPE_STRING :
 				if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
-					AiNodeSetStr( node, name, data->readable().c_str() );
+					AiNodeSetStr( node, name, AtString( data->readable().c_str() ) );
 				}
 				break;
 			case AI_TYPE_RGB :
@@ -139,7 +149,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 				// Then try getting a string, with the usual warning if nothing has been found yet
 				else if( const StringData *data = dataCast<StringData>( name, value ) )
 				{
-					AiNodeSetStr( node, name, data->readable().c_str() );
+					AiNodeSetStr( node, name, AtString( data->readable().c_str() ) );
 				}
 				break;
 			case AI_TYPE_BOOLEAN :
@@ -148,32 +158,39 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 					AiNodeSetBool( node, name, data->readable() );
 				}
 				break;
-			case AI_TYPE_POINT2 :
-				if( const V2fData *data = dataCast<V2fData>( name, value ) )
+			case AI_TYPE_VECTOR2 :
+				if( const V2iData *data = runTimeCast<const V2iData>( value ) )
+				{
+					// Accept a V2i as an alternate since Arnold has
+					// no integer vector type to store these in.
+					const Imath::V2i &v = data->readable();
+					AiNodeSetVec2( node, name, v.x, v.y );
+				}
+				else if( const V2fData *data = dataCast<V2fData>( name, value ) )
 				{
 					const Imath::V2f &v = data->readable();
-					AiNodeSetPnt2( node, name, v.x, v.y );
+					AiNodeSetVec2( node, name, v.x, v.y );
 				}
 				break;
 			case AI_TYPE_VECTOR :
-				if( const V3fData *data = dataCast<V3fData>( name, value ) )
+				if( const V3iData *data = runTimeCast<const V3iData>( value ) )
+				{
+					// Accept a V3i as an alternate since Arnold has
+					// no integer vector type to store these in.
+					const Imath::V3i &v = data->readable();
+					AiNodeSetVec( node, name, v.x, v.y, v.z );
+				}
+				else if( const V3fData *data = dataCast<V3fData>( name, value ) )
 				{
 					const Imath::V3f &v = data->readable();
 					AiNodeSetVec( node, name, v.x, v.y, v.z );
-				}
-				break;
-			case AI_TYPE_POINT :
-				if( const V3fData *data = dataCast<V3fData>( name, value ) )
-				{
-					const Imath::V3f &v = data->readable();
-					AiNodeSetPnt( node, name, v.x, v.y, v.z );
 				}
 				break;
 			case AI_TYPE_MATRIX :
 				if( const M44dData *data = runTimeCast<const M44dData>( value ) )
 				{
 					const Imath::M44f v( data->readable() );
-					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+					AiNodeSetMatrix( node, name, reinterpret_cast<const AtMatrix &>( v.x ) );
 				}
 				else if( const M44fData *data = dataCast<M44fData>( name, value ) )
 				{
@@ -181,7 +198,7 @@ void setParameterInternal( AtNode *node, const char *name, int parameterType, bo
 
 					// Can't see any reason why AiNodeSetMatrix couldn't have been declared const,
 					// this const_cast seems safe
-					AiNodeSetMatrix( node, name, const_cast<float (*)[4]>( v.x ) );
+					AiNodeSetMatrix( node, name, reinterpret_cast<const AtMatrix &>( v.x ) );
 				}
 				break;
 			default :
@@ -206,8 +223,8 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 	typename DataType::Ptr data = new DataType;
 	VectorType &v = data->writable();
 
-	v.reserve( array->nelements );
-	for( size_t i = 0; i < array->nelements; ++i )
+	v.reserve( AiArrayGetNumElements(array) );
+	for( size_t i = 0; i < AiArrayGetNumElements(array); ++i )
 	{
 		v.push_back( f( array, i, __AI_FILE__, __AI_LINE__ ) );
 	}
@@ -215,11 +232,17 @@ IECore::DataPtr arrayToDataInternal( AtArray *array, F f )
 	return data;
 }
 
+const char* getStrWrapperFunc( const AtArray* a, uint32_t i, const char* file, int line )
+{
+	return AiArrayGetStrFunc( a, i, file, line ).c_str();
+}
+
+
 /// \todo Flesh this out to support more types and then
 /// consider exposing it in the public API.
 IECore::DataPtr arrayToData( AtArray *array )
 {
-	if( array->nkeys > 1 )
+	if( AiArrayGetNumKeys( array ) > 1 )
 	{
 		/// \todo Decide how to deal with more
 		/// than one key - is it more useful to return multiple Data
@@ -227,22 +250,24 @@ IECore::DataPtr arrayToData( AtArray *array )
 		return nullptr;
 	}
 
-	switch( array->type )
+	switch( AiArrayGetType( array ) )
 	{
 		case AI_TYPE_BOOLEAN :
 			return arrayToDataInternal<bool>( array, AiArrayGetBoolFunc );
 		case AI_TYPE_INT :
 			return arrayToDataInternal<int>( array, AiArrayGetIntFunc );
+		case AI_TYPE_UINT :
+			return arrayToDataInternal<uint32_t>( array, AiArrayGetUIntFunc );
 		case AI_TYPE_FLOAT :
 			return arrayToDataInternal<float>( array, AiArrayGetFltFunc );
 		case AI_TYPE_STRING :
-			return arrayToDataInternal<string>( array, AiArrayGetStrFunc );
+			return arrayToDataInternal<string>( array, getStrWrapperFunc );
 		default :
 			return nullptr;
 	}
 }
 
-IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parameterType )
+IECore::DataPtr getParameterInternal( AtNode *node, const AtString name, int parameterType )
 {
 	switch( parameterType )
 	{
@@ -250,10 +275,12 @@ IECore::DataPtr getParameterInternal( AtNode *node, const char *name, int parame
 			return new BoolData( AiNodeGetBool( node, name ) );
 		case AI_TYPE_INT :
 			return new IntData( AiNodeGetInt( node, name ) );
+		case AI_TYPE_UINT :
+			return new UIntData( AiNodeGetUInt( node, name ) );
 		case AI_TYPE_FLOAT :
 			return new FloatData( AiNodeGetFlt( node, name ) );
 		case AI_TYPE_STRING :
-			return new StringData( AiNodeGetStr( node, name ) );
+			return new StringData( AiNodeGetStr( node, name ).c_str() );
 		case AI_TYPE_RGB :
 		{
 			AtRGB rgb = AiNodeGetRGB( node, name );
@@ -293,14 +320,14 @@ void setParameter( AtNode *node, const AtParamEntry *parameter, const IECore::Da
 	int type = AiParamGetType( parameter );
 	if( type == AI_TYPE_ARRAY )
 	{
-		type = AiParamGetDefault( parameter )->ARRAY->type;
+		type = AiArrayGetType( AiParamGetDefault( parameter )->ARRAY() );
 		isArray = true;
 	}
 
 	setParameterInternal( node, AiParamGetName( parameter ), type, isArray, value );
 }
 
-void setParameter( AtNode *node, const char *name, const IECore::Data *value )
+void setParameter( AtNode *node, AtString name, const IECore::Data *value )
 {
 	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
@@ -336,6 +363,11 @@ void setParameter( AtNode *node, const char *name, const IECore::Data *value )
 	}
 }
 
+void setParameter( AtNode *node, const char* name, const IECore::Data *value )
+{
+	setParameter( node, AtString( name ), value );
+}
+
 void setParameters( AtNode *node, const IECore::CompoundDataMap &values )
 {
 	for( CompoundDataMap::const_iterator it=values.begin(); it!=values.end(); it++ )
@@ -351,10 +383,13 @@ IECore::DataPtr getParameter( AtNode *node, const AtParamEntry *parameter )
 
 IECore::DataPtr getParameter( AtNode *node, const AtUserParamEntry *parameter )
 {
-	return getParameterInternal( node, AiUserParamGetName( parameter ), AiUserParamGetType( parameter ) );
+	// \todo : This cast to AtString appears to be necessary only because SolidAngle missed this one while updating
+	// their API.  If they fix it in the future, AiUserParamGetName would return AtString, and this cast would
+	// be unnecessary
+	return getParameterInternal( node, AtString( AiUserParamGetName( parameter ) ), AiUserParamGetType( parameter ) );
 }
 
-IECore::DataPtr getParameter( AtNode *node, const char *name )
+IECore::DataPtr getParameter( AtNode *node, AtString name )
 {
 	const AtParamEntry *parameter = AiNodeEntryLookUpParameter( AiNodeGetNodeEntry( node ), name );
 	if( parameter )
@@ -371,6 +406,11 @@ IECore::DataPtr getParameter( AtNode *node, const char *name )
 	}
 
 	return nullptr;
+}
+
+IECore::DataPtr getParameter( AtNode *node, const char *name )
+{
+	return getParameter( node, AtString( name ) );
 }
 
 void getParameters( AtNode *node, IECore::CompoundDataMap &values )
@@ -406,6 +446,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case IntDataTypeId :
 			array = false;
 			return AI_TYPE_INT;
+		case UIntDataTypeId :
+			array = false;
+			return AI_TYPE_UINT;
 		case FloatDataTypeId :
 		case DoubleDataTypeId :
 			array = false;
@@ -422,7 +465,12 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolDataTypeId :
 			array = false;
 			return AI_TYPE_BOOLEAN;
+		case V2fDataTypeId :
+		case V2iDataTypeId :
+			array = false;
+			return AI_TYPE_VECTOR2;
 		case V3fDataTypeId :
+		case V3iDataTypeId :
 			array = false;
 			return AI_TYPE_VECTOR;
 		case M44fDataTypeId :
@@ -435,6 +483,9 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case IntVectorDataTypeId :
 			array = true;
 			return AI_TYPE_INT;
+		case UIntVectorDataTypeId :
+			array = true;
+			return AI_TYPE_UINT;
 		case FloatVectorDataTypeId :
 			array = true;
 			return AI_TYPE_FLOAT;
@@ -447,7 +498,12 @@ int parameterType( IECore::TypeId dataType, bool &array )
 		case BoolVectorDataTypeId :
 			array = true;
 			return AI_TYPE_BOOLEAN;
+		case V2fVectorDataTypeId :
+		case V2iVectorDataTypeId :
+			array = true;
+			return AI_TYPE_VECTOR2;
 		case V3fVectorDataTypeId :
+		case V3iVectorDataTypeId :
 			array = true;
 			return AI_TYPE_VECTOR;
 		case M44fVectorDataTypeId :
@@ -460,19 +516,7 @@ int parameterType( IECore::TypeId dataType, bool &array )
 
 int parameterType( const IECore::Data *data, bool &array )
 {
-	int type = parameterType( data->typeId(), array );
-
-	// if we have data of type vector, its interpretation matters
-	if( type == AI_TYPE_VECTOR )
-	{
-		GeometricData::Interpretation interpretation = getGeometricInterpretation( data );
-		if( interpretation == GeometricData::Point )
-		{
-			type = AI_TYPE_POINT;
-		}
-	}
-
-	return type;
+	return parameterType( data->typeId(), array );
 }
 
 AtArray *dataToArray( const IECore::Data *data, int aiType )

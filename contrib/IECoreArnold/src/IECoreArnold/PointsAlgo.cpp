@@ -53,12 +53,19 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_modeArnoldString( "mode" );
+const AtString g_motionStartArnoldString( "motion_start" );
+const AtString g_motionEndArnoldString( "motion_end" );
+const AtString g_pointsArnoldString( "points" );
+const AtString g_quadArnoldString( "quad" );
+const AtString g_sphereArnoldString( "sphere" );
+
 NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-AtNode *convertCommon( const IECore::PointsPrimitive *points )
+AtNode *convertCommon( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
-	AtNode *result = AiNode( "points" );
+	AtNode *result = AiNode( g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
 
 	// mode
 
@@ -71,11 +78,11 @@ AtNode *convertCommon( const IECore::PointsPrimitive *points )
 		}
 		else if( t->readable() == "sphere" )
 		{
-			AiNodeSetStr( result, "mode", "sphere" );
+			AiNodeSetStr( result, g_modeArnoldString, g_sphereArnoldString );
 		}
 		else if( t->readable() == "patch" )
 		{
-			AiNodeSetStr( result, "mode", "quad" );
+			AiNodeSetStr( result, g_modeArnoldString, g_quadArnoldString );
 		}
 		else
 		{
@@ -104,11 +111,11 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECore::PointsPrimitive *points )
+AtNode *convert( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( points );
+	AtNode *result = convertCommon( points, nodeName, parentNode );
 
-	ShapeAlgo::convertP( points, result, "points" );
+	ShapeAlgo::convertP( points, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( points, result );
 
 	/// \todo Aspect, rotation
@@ -116,15 +123,17 @@ AtNode *convert( const IECore::PointsPrimitive *points )
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = convertCommon( samples.front() );
+	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
 	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
-	ShapeAlgo::convertP( primitiveSamples, result, "points" );
+	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
 
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	/// \todo Aspect, rotation
 

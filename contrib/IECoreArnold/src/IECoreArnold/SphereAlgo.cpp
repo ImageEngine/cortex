@@ -51,6 +51,11 @@ using namespace IECoreArnold;
 namespace
 {
 
+const AtString g_sphereArnoldString("sphere");
+const AtString g_radiusArnoldString("radius");
+const AtString g_motionStartArnoldString("motion_start");
+const AtString g_motionEndArnoldString("motion_end");
+
 void warnIfUnsupported( const IECore::SpherePrimitive *sphere )
 {
 	if( sphere->zMin() != -1.0f )
@@ -75,21 +80,21 @@ NodeAlgo::ConverterDescription<SpherePrimitive> g_description( SphereAlgo::conve
 // Implementation of public API
 //////////////////////////////////////////////////////////////////////////
 
-AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere )
+AtNode *SphereAlgo::convert( const IECore::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode )
 {
 	warnIfUnsupported( sphere );
 
-	AtNode *result = AiNode( "sphere" );
+	AtNode *result = AiNode( g_sphereArnoldString, AtString( nodeName.c_str() ), parentNode );
 	ShapeAlgo::convertPrimitiveVariables( sphere, result );
 
-	AiNodeSetFlt( result, "radius", sphere->radius() );
+	AiNodeSetFlt( result, g_radiusArnoldString, sphere->radius() );
 
 	return result;
 }
 
-AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, const std::vector<float> &sampleTimes )
+AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
-	AtNode *result = AiNode( "sphere" );
+	AtNode *result = AiNode( g_sphereArnoldString, AtString( nodeName.c_str() ), parentNode );
 	ShapeAlgo::convertPrimitiveVariables( samples.front(), result );
 
 	AtArray *radiusSamples = AiArrayAllocate( 1, samples.size(), AI_TYPE_FLOAT );
@@ -101,8 +106,9 @@ AtNode *SphereAlgo::convert( const std::vector<const IECore::SpherePrimitive *> 
 		AiArraySetKey( radiusSamples, /* key = */ it - samples.begin(), &radius );
 	}
 
-	AiNodeSetArray( result, "radius", radiusSamples );
-	AiNodeSetArray( result, "deform_time_samples", AiArrayConvert( sampleTimes.size(), 1, AI_TYPE_FLOAT, &sampleTimes.front() ) );
+	AiNodeSetArray( result, g_radiusArnoldString, radiusSamples );
+	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
+	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 
 	return result;
 }
