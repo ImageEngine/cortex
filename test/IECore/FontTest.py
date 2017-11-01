@@ -33,34 +33,34 @@
 ##########################################################################
 
 import unittest
-from IECore import *
-import math
+
+import IECore
 
 class FontTest( unittest.TestCase ) :
 
 	def testConstructors( self ) :
 
-		f = Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECore.Font( "test/IECore/data/fonts/Vera.ttf" )
 
-		self.assertRaises( Exception, Font, "notAFont" )
+		self.assertRaises( Exception, IECore.Font, "notAFont" )
 
 	def test( self ) :
 
-		f = Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECore.Font( "test/IECore/data/fonts/Vera.ttf" )
 
 		g = f.meshGroup( "hello world" )
 		m = f.mesh( "hello world" )
 
-		self.assert_( g.isInstanceOf( Group.staticTypeId() ) )
-		self.assert_( m.isInstanceOf( MeshPrimitive.staticTypeId() ) )
+		self.assert_( g.isInstanceOf( IECore.Group.staticTypeId() ) )
+		self.assert_( m.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
 
 		v = 0
 		for c in g.children() :
 
-			self.assert_( c.isInstanceOf( Group.staticTypeId() ) )
+			self.assert_( c.isInstanceOf( IECore.Group.staticTypeId() ) )
 			self.assertEqual( len( c.children() ), 1 )
-			self.assert_( c.children()[0].isInstanceOf( MeshPrimitive.staticTypeId() ) )
-			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), GeometricData.Interpretation.Point )
+			self.assert_( c.children()[0].isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
 			v += c.children()[0]["P"].data.size()
 
@@ -68,7 +68,7 @@ class FontTest( unittest.TestCase ) :
 
 	def testCharBound( self ) :
 
-		f = Font( "test/IECore/data/fonts/Vera.ttf" )
+		f = IECore.Font( "test/IECore/data/fonts/Vera.ttf" )
 
 		b = f.bound()
 		for c in range( 0, 128 ) :
