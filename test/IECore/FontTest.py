@@ -33,6 +33,7 @@
 ##########################################################################
 
 import unittest
+import threading
 
 import IECore
 
@@ -75,6 +76,24 @@ class FontTest( unittest.TestCase ) :
 
 			bb = f.bound( chr( c ) )
 			self.assert_( b.contains( bb ) )
+
+	def testThreading( self ) :
+
+		font = IECore.Font( "test/IECore/data/fonts/Vera.ttf" )
+
+		def f() :
+
+			for i in range( 0, 100 ) :
+				font.mesh( str( i ) )
+
+		threads = []
+		for i in range( 0, 100 ) :
+			thread = threading.Thread( target = f )
+			threads.append( thread )
+			thread.start()
+
+		for thread in threads :
+			thread.join()
 
 if __name__ == "__main__":
     unittest.main()
