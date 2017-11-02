@@ -1,3 +1,31 @@
+10.0.0-a6
+=========
+
+Breaking Changes
+----------------
+
+- Requires Arnold 5 (#637).
+
+Features
+--------
+
+- Support for Arnold 5 (#637).
+
+Improvements
+------------
+
+- RenderMan display driver : Added support for "layername" parameter. This is used by 3Delight 13.x (#648).
+- IECoreArnold::ParameterAlgo (#637) :
+  - Added support for UInt parameters.
+  - Added support for converting V3i and V2i parameters to floats vectors.
+- IECoreAlembic : Added support for reading and writing indexed primvars (#642).
+
+Fixes
+-----
+
+- IECore::Font : Fixed thread safety bugs (#649).
+- PointsAlgo : Fixed vertex -> uniform resample with an empty points prim (#647).
+
 10.0.0-a5
 =========
 
