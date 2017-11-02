@@ -119,6 +119,17 @@ PtDspyError DspyImageOpen( PtDspyImageHandle *image, const char *driverName, con
 			origin.x = static_cast<const int *>(parameters[p].value)[0];
 			origin.y = static_cast<const int *>(parameters[p].value)[1];
 		}
+		else if( 0 == strcmp( parameters[p].name, "layername" ) && parameters[p].UP_VALUETYPE == 's' )
+		{
+			const string layerName = *(const char **)(parameters[p].value);
+			if( !layerName.empty() )
+			{
+				for( auto &channel : channels )
+				{
+					channel = layerName + "." + channel;
+				}
+			}
+		}
 		else
 		{
 			DataPtr newParam;
