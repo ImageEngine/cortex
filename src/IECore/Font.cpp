@@ -38,6 +38,8 @@
 #include FT_FREETYPE_H
 #include FT_OUTLINE_H
 
+#include "tbb/spin_mutex.h"
+
 #include "IECore/Font.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Triangulator.h"
@@ -282,6 +284,8 @@ class Font::Implementation : public IECore::RefCounted
 		Implementation( const std::string &fontFile )
 			:	m_fileName( fontFile ), m_kerning( 1.0f ), m_curveTolerance( 0.01 )
 		{
+			FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
+
 			FT_Error e = FT_New_Face( library(), fontFile.c_str(), 0, &m_face );
 			if( e )
 			{
@@ -293,6 +297,7 @@ class Font::Implementation : public IECore::RefCounted
 
 		~Implementation() override
 		{
+			FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
 			FT_Done_Face( m_face );
 		}
 
@@ -406,6 +411,7 @@ class Font::Implementation : public IECore::RefCounted
 			V2f a = cachedMesh( first )->advance;
 			if( m_kerning!=0.0f )
 			{
+				FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
 				FT_UInt left = FT_Get_Char_Index( m_face, first );
 				FT_UInt right = FT_Get_Char_Index( m_face, second );
 				FT_Vector kerning;
@@ -479,6 +485,8 @@ class Font::Implementation : public IECore::RefCounted
 
 		const Mesh *cachedMesh( char c ) const
 		{
+			FreeTypeMutex::scoped_lock lock( g_freeTypeMutex );
+
 			// see if we have it cached
 			if( m_meshes[c] )
 			{
@@ -511,6 +519,9 @@ class Font::Implementation : public IECore::RefCounted
 			return mesh.get();
 		}
 
+		typedef tbb::spin_mutex FreeTypeMutex;
+		static FreeTypeMutex g_freeTypeMutex;
+
 		static FT_Library library()
 		{
 			static FT_Library l;
@@ -528,6 +539,8 @@ class Font::Implementation : public IECore::RefCounted
 		}
 
 };
+
+Font::Implementation::FreeTypeMutex Font::Implementation::g_freeTypeMutex;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Font

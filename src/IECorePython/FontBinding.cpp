@@ -38,6 +38,8 @@
 
 #include "IECorePython/FontBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
+#include "IECorePython/ScopedGILRelease.h"
+
 #include "IECore/Font.h"
 #include "IECore/MeshPrimitive.h"
 #include "IECore/Group.h"
@@ -50,14 +52,21 @@ using namespace IECore;
 namespace
 {
 
-static MeshPrimitivePtr mesh( Font &f, char c )
+MeshPrimitivePtr mesh1( Font &f, char c )
 {
+	IECorePython::ScopedGILRelease gilRelease;
 	ConstMeshPrimitivePtr m = f.mesh( c );
 	if( m )
 	{
 		return m->copy();
 	}
 	return nullptr;
+}
+
+MeshPrimitivePtr mesh2( Font &f, const std::string &s )
+{
+	IECorePython::ScopedGILRelease gilRelease;
+	return f.mesh( s );
 }
 
 } // namespace
@@ -74,8 +83,8 @@ void bindFont()
 		.def( "getCurveTolerance", &Font::getCurveTolerance )
 		.def( "setKerning", &Font::setKerning )
 		.def( "getKerning", &Font::getKerning )
-		.def( "mesh", &mesh )
-		.def( "mesh", (MeshPrimitivePtr (Font::*)( const std::string &)const)&Font::mesh )
+		.def( "mesh", &mesh1 )
+		.def( "mesh", &mesh2 )
 		.def( "meshGroup", &Font::meshGroup )
 		.def( "advance", &Font::advance )
 		.def( "bound", (Imath::Box2f (Font::*)( )const)&Font::bound )
