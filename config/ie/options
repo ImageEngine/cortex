@@ -384,6 +384,9 @@ ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
 HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
 
+# enable cortex10 compatibility
+WITH_CORTEX10_COMPAT = 1
+
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
 

@@ -539,6 +539,13 @@ o.Add(
 	"/usr/local/appleseed/lib",
 )
 
+# compatibility options
+
+o.Add(
+	BoolVariable( "WITH_CORTEX10_COMPAT", "Set this to include cortex 10 compatibility modules.", False ),
+)
+
+
 # Build options
 
 o.Add(
@@ -3421,6 +3428,21 @@ if doConfigure :
 		appleseedTestEnv.Depends( appleseedTest, [ appleseedPythonModule + appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
 		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
+
+###########################################################################################
+# Install Cortex 10 forward-compatibility for IECoreImage
+###########################################################################################
+
+if env["WITH_CORTEX10_COMPAT"] :
+
+	coreImagePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreImage" )
+
+	# python module
+	coreImagePythonScripts = glob.glob( "contrib/IECoreImage/python/IECoreImage/*.py" )
+	coreImagePythonModuleInstall = coreImagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", coreImagePythonScripts )
+	coreImagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( coreImagePythonModuleEnv, coreImagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	coreImagePythonModuleEnv.Alias( "install", coreImagePythonModuleInstall )
+	coreImagePythonModuleEnv.Alias( "installCoreImage", coreImagePythonModuleInstall )
 
 ###########################################################################################
 # Documentation
