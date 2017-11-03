@@ -1,4 +1,4 @@
-9.23.2-arnold5
+9.23.3-arnold5
 =========
 
 Experimental Branch
@@ -7,6 +7,14 @@ Improvements
 ------------
 
 - IECoreArnold now compatible with Arnold 5, and not Arnold 4
+
+9.23.3
+======
+
+Fixes
+-----
+
+- Fixed crash resampling empty points vertex interpolated primitive variables to uniform.
 
 9.23.2
 ======
