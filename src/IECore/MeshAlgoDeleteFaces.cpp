@@ -51,7 +51,7 @@ class DeleteFlaggedUniformFunctor
 	public:
 		typedef DataPtr ReturnType;
 
-		DeleteFlaggedUniformFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData ) : m_flagData( flagData )
+		DeleteFlaggedUniformFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert ) : m_flagData( flagData ), m_invert( invert )
 		{
 		}
 
@@ -70,7 +70,7 @@ class DeleteFlaggedUniformFunctor
 
 			for( size_t i = 0; i < inputs.size(); ++i )
 			{
-				if( !flags[i] )
+				if( (m_invert && flags[i]) || (!m_invert && !flags[i]) )
 				{
 					filteredResult.push_back( inputs[i] );
 				}
@@ -81,6 +81,7 @@ class DeleteFlaggedUniformFunctor
 
 	private:
 		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
+		bool m_invert;
 };
 
 template<typename U>
@@ -89,7 +90,7 @@ class DeleteFlaggedFaceVaryingFunctor
 	public:
 		typedef DataPtr ReturnType;
 
-		DeleteFlaggedFaceVaryingFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, ConstIntVectorDataPtr verticesPerFaceData ) : m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData )
+		DeleteFlaggedFaceVaryingFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, ConstIntVectorDataPtr verticesPerFaceData, bool invert ) : m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData ), m_invert( invert )
 		{
 		}
 
@@ -109,7 +110,7 @@ class DeleteFlaggedFaceVaryingFunctor
 			for( size_t f = 0; f < verticesPerFace.size(); ++f )
 			{
 				int numVerts = verticesPerFace[f];
-				if( !flags[f] )
+				if( (m_invert && flags[f]) || (!m_invert && !flags[f]) )
 				{
 					for( int v = 0; v < numVerts; ++v )
 					{
@@ -125,6 +126,7 @@ class DeleteFlaggedFaceVaryingFunctor
 	private:
 		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
 		ConstIntVectorDataPtr m_verticesPerFaceData;
+		bool m_invert;
 
 };
 
@@ -134,8 +136,8 @@ class DeleteFlaggedVertexFunctor
 	public:
 		typedef DataPtr ReturnType;
 
-		DeleteFlaggedVertexFunctor( size_t maxVertexId, ConstIntVectorDataPtr vertexIdsData, ConstIntVectorDataPtr verticesPerFaceData, typename IECore::TypedData<std::vector<U> >::ConstPtr flagData )
-			: m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData )
+		DeleteFlaggedVertexFunctor( size_t maxVertexId, ConstIntVectorDataPtr vertexIdsData, ConstIntVectorDataPtr verticesPerFaceData, typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert )
+			: m_flagData( flagData ), m_verticesPerFaceData( verticesPerFaceData ), m_vertexIdsData( vertexIdsData ), m_invert( invert )
 		{
 			const std::vector<int> &vertexIds = m_vertexIdsData->readable();
 			const std::vector<int> &verticesPerFace = m_verticesPerFaceData->readable();
@@ -150,7 +152,8 @@ class DeleteFlaggedVertexFunctor
 			for( size_t f = 0; f < verticesPerFace.size(); ++f )
 			{
 				int numVerts = verticesPerFace[f];
-				if( !flags[f] )
+				
+				if( (m_invert && flags[f]) || (!m_invert && !flags[f]) )
 				{
 					for( int v = 0; v < numVerts; ++v )
 					{
@@ -212,15 +215,17 @@ class DeleteFlaggedVertexFunctor
 
 		// map from old vertex index to new
 		IntVectorDataPtr m_remappingData;
+
+		bool m_invert;
 };
 
 template<typename T>
-MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename IECore::TypedData<std::vector<T> > *deleteFlagData)
+MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename IECore::TypedData<std::vector<T> > *deleteFlagData, bool invert)
 {
 	// construct 3 functors for deleting (uniform, vertex & face varying) primvars
-	DeleteFlaggedUniformFunctor<T> uniformFunctor(deleteFlagData);
-	DeleteFlaggedFaceVaryingFunctor<T> faceVaryingFunctor(deleteFlagData, meshPrimitive->verticesPerFace());
-	DeleteFlaggedVertexFunctor<T> vertexFunctor( meshPrimitive->variableSize(PrimitiveVariable::Vertex), meshPrimitive->vertexIds(), meshPrimitive->verticesPerFace(), deleteFlagData );
+	DeleteFlaggedUniformFunctor<T> uniformFunctor(deleteFlagData, invert);
+	DeleteFlaggedFaceVaryingFunctor<T> faceVaryingFunctor(deleteFlagData, meshPrimitive->verticesPerFace(), invert);
+	DeleteFlaggedVertexFunctor<T> vertexFunctor( meshPrimitive->variableSize(PrimitiveVariable::Vertex), meshPrimitive->vertexIds(), meshPrimitive->verticesPerFace(), deleteFlagData, invert );
 
 	// filter verticesPerFace using DeleteFlaggedUniformFunctor
 	IECore::Data *inputVerticesPerFace = const_cast< IECore::Data * >( IECore::runTimeCast<const IECore::Data>( meshPrimitive->verticesPerFace() ) );
@@ -286,7 +291,7 @@ MeshPrimitivePtr deleteFaces( const MeshPrimitive* meshPrimitive, const typename
 
 } // namespace
 
-MeshPrimitivePtr IECore::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete )
+MeshPrimitivePtr IECore::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable& facesToDelete, bool invert /* =false */)
 {
 
 	if( facesToDelete.interpolation != PrimitiveVariable::Uniform )
@@ -298,21 +303,21 @@ MeshPrimitivePtr IECore::MeshAlgo::deleteFaces( const MeshPrimitive *meshPrimiti
 
 	if( intDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, intDeleteFlagData );
+		return ::deleteFaces( meshPrimitive, intDeleteFlagData, invert );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( facesToDelete.data.get() );
 
 	if( boolDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, boolDeleteFlagData );
+		return ::deleteFaces( meshPrimitive, boolDeleteFlagData, invert );
 	}
 
 	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( facesToDelete.data.get() );
 
 	if( floatDeleteFlagData )
 	{
-		return ::deleteFaces( meshPrimitive, floatDeleteFlagData );
+		return ::deleteFaces( meshPrimitive, floatDeleteFlagData, invert );
 	}
 
 	throw InvalidArgumentException( "MeshAlgo::deleteFaces requires an Uniform [Int|Bool|Float]VectorData primitiveVariable " );
