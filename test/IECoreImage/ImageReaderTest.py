@@ -60,9 +60,17 @@ class ImageReaderTest( unittest.TestCase ) :
 		r = IECoreImage.ImageReader( "thisFileDoesntExist.exr" )
 		self.assertFalse( r.isComplete() )
 
-	def testCannotReadDeepImage( self ) :
+	def testDeep( self ) :
 
-		self.assertFalse( IECoreImage.ImageReader.canRead( "test/IECoreRI/data/exr/primitives.exr" ) )
+		r = IECore.Reader.create( "test/IECoreRI/data/exr/primitives.exr" )
+		self.assertEqual( r.channelNames(), IECore.StringVectorData( [] ) )
+		h = r.readHeader()
+		self.assertEqual( h[ "deep" ], IECore.BoolData( True ) )
+
+		r = IECore.Reader.create( "test/IECoreImage/data/exr/manyChannels.exr" )
+		self.assertNotEqual( r.channelNames(), IECore.StringVectorData( [] ) )
+		h = r.readHeader()
+		self.assertTrue( h[ "deep" ], IECore.BoolData( False ) )
 
 	def testSupportedExtensions( self ) :
 
@@ -216,6 +224,7 @@ class ImageReaderTest( unittest.TestCase ) :
 			'dataWindow': IECore.Box2iData( IECore.Box2i( IECore.V2i(0,0), IECore.V2i(511,255) ) ),
 			'PixelAspectRatio': IECore.FloatData( 1 ),
 			'screenWindowWidth': IECore.FloatData( 1 ),
+			'deep': IECore.BoolData( False ),
 		}
 
 		r = IECore.Reader.create( "test/IECoreImage/data/exr/uvMap.512x256.exr" )
@@ -224,6 +233,7 @@ class ImageReaderTest( unittest.TestCase ) :
 
 		img = r.read()
 		del dictHeader['channelNames']
+		del dictHeader['deep']
 		self.assertEqual( img.blindData(), IECore.CompoundData(dictHeader) )
 
 	def testTimeCodeInHeader( self ) :
