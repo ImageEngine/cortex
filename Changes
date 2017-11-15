@@ -1,4 +1,4 @@
-9.23.3-arnold5
+9.23.4-arnold5
 =========
 
 Experimental Branch
@@ -7,6 +7,14 @@ Improvements
 ------------
 
 - IECoreArnold now compatible with Arnold 5, and not Arnold 4
+
+9.23.4
+======
+
+API
+---
+
+- IECoreImage : Forward compatibility module for cortex 10
 
 9.23.3
 ======
