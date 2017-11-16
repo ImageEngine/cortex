@@ -103,7 +103,7 @@ class DeleteFlaggedVertexFunctor
 	public:
 		typedef DataPtr ReturnType;
 
-		DeleteFlaggedVertexFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData ) : m_flagData( flagData )
+		DeleteFlaggedVertexFunctor( typename IECore::TypedData<std::vector<U> >::ConstPtr flagData, bool invert) : m_flagData( flagData ), m_invert( invert )
 		{
 		}
 
@@ -122,7 +122,7 @@ class DeleteFlaggedVertexFunctor
 
 			for( size_t i = 0; i < inputs.size(); ++i )
 			{
-				if( !flags[i] )
+				if( (m_invert && flags[i]) || (!m_invert && !flags[i]) )
 				{
 					filteredResult.push_back( inputs[i] );
 				}
@@ -133,14 +133,15 @@ class DeleteFlaggedVertexFunctor
 
 	private:
 		typename IECore::TypedData<std::vector<U> >::ConstPtr m_flagData;
+		bool m_invert;
 };
 
 template<typename T>
-PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const typename IECore::TypedData<std::vector<T> > *pointsToKeepData )
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const typename IECore::TypedData<std::vector<T> > *pointsToKeepData, bool invert )
 {
 	PointsPrimitivePtr outPointsPrimitive = new PointsPrimitive( 0 );
 
-	DeleteFlaggedVertexFunctor<T> vertexFunctor( pointsToKeepData );
+	DeleteFlaggedVertexFunctor<T> vertexFunctor( pointsToKeepData, invert );
 
 	for( PrimitiveVariableMap::const_iterator it = pointsPrimitive->variables.begin(), e = pointsPrimitive->variables.end(); it != e; ++it )
 	{
@@ -349,7 +350,7 @@ void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable
 	}
 }
 
-PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToKeep )
+PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const PrimitiveVariable &pointsToKeep, bool invert /* = false */ )
 {
 
 	if( pointsToKeep.interpolation != PrimitiveVariable::Vertex )
@@ -361,21 +362,21 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 
 	if( intDeleteFlagData )
 	{
-		return ::deletePoints( pointsPrimitive, intDeleteFlagData );
+		return ::deletePoints( pointsPrimitive, intDeleteFlagData, invert );
 	}
 
 	const BoolVectorData *boolDeleteFlagData = runTimeCast<const BoolVectorData>( pointsToKeep.data.get() );
 
 	if( boolDeleteFlagData )
 	{
-		return ::deletePoints( pointsPrimitive, boolDeleteFlagData );
+		return ::deletePoints( pointsPrimitive, boolDeleteFlagData, invert );
 	}
 
 	const FloatVectorData *floatDeleteFlagData = runTimeCast<const FloatVectorData>( pointsToKeep.data.get() );
 
 	if( floatDeleteFlagData )
 	{
-		return ::deletePoints( pointsPrimitive, floatDeleteFlagData );
+		return ::deletePoints( pointsPrimitive, floatDeleteFlagData, invert );
 	}
 
 	throw InvalidArgumentException( "PointsAlgo::deletePoints requires an Vertex [Int|Bool|Float]VectorData primitiveVariable " );

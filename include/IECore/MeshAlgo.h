@@ -64,7 +64,8 @@ std::pair<PrimitiveVariable, PrimitiveVariable> calculateDistortion( const MeshP
 void resamplePrimitiveVariable( const MeshPrimitive *mesh, PrimitiveVariable& primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 /// create a new MeshPrimitive deleting faces from the input MeshPrimitive based on the facesToDelete uniform (int|float|bool) PrimitiveVariable
-MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete );
+/// When invert is set then zeros in facesToDelete indicate which faces should be deleted
+MeshPrimitivePtr deleteFaces( const MeshPrimitive *meshPrimitive, const PrimitiveVariable &facesToDelete, bool invert = false );
 
 /// Reverses the winding order of each face by adjusting the vertex ids and updating all FaceVarying
 /// primitive variables to match.

@@ -47,7 +47,8 @@ namespace PointsAlgo
 void resamplePrimitiveVariable( const PointsPrimitive *points, PrimitiveVariable &primitiveVariable, PrimitiveVariable::Interpolation interpolation );
 
 /// create a new PointsPrimitive deleting points from the input PointsPrimitive based on the pointsToDelete vertex (int|float|bool) PrimitiveVariable
-PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete);
+/// When invert is set then zeros in pointsToDelete indicate which points should be deleted
+PointsPrimitivePtr deletePoints( const PointsPrimitive *meshPrimitive, const PrimitiveVariable &pointsToDelete, bool invert = false);
 
 /// merge points primitives - when conflicting primitive variables are encountered earlier elements in the input vector take priority.
 /// constant interpolated primitive variables: first occurance of the primitive variable is used and others ignored.
