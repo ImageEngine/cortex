@@ -38,7 +38,6 @@
 #include "IECoreImageBindings/ClampOpBinding.h"
 #include "IECoreImageBindings/ClientDisplayDriverBinding.h"
 #include "IECoreImageBindings/ColorAlgoBinding.h"
-#include "IECoreImageBindings/CurveTracerBinding.h"
 #include "IECoreImageBindings/DisplayDriverBinding.h"
 #include "IECoreImageBindings/DisplayDriverServerBinding.h"
 #include "IECoreImageBindings/EnvMapSamplerBinding.h"
@@ -71,7 +70,6 @@ BOOST_PYTHON_MODULE( _IECoreImage )
 	bindWarpOp();
 	bindClampOp();
 	bindColorAlgo();
-	bindCurveTracer();
 	bindEnvMapSampler();
 	bindHdrMergeOp();
 	bindImageCropOp();
