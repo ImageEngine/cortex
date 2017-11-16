@@ -130,65 +130,12 @@ class TestObjectInterpolation( unittest.TestCase ) :
 
 	def testNonSupportedInterpolation( self ):
 
-		obj1 = IECore.Camera()
-		obj2 = IECore.Camera()
-		obj3 = IECore.Camera()
-		obj4 = IECore.Camera()
+		obj1 = IECore.StringData()
+		obj2 = IECore.StringData()
+		obj3 = IECore.StringData()
+		obj4 = IECore.StringData()
 		self.assertEqual( IECore.linearObjectInterpolation( obj1, obj2, 0.5), None )
 		self.assertEqual( IECore.cubicObjectInterpolation( obj1, obj2, obj3, obj4, 0.5), None )
-
-	def testPrimitiveInterpolation( self ) :
-
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m2 = IECore.TransformOp()( input=m1, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3, IECore.TransformOp()( input=m1, matrix = IECore.M44fData( IECore.M44f.createScaled( IECore.V3f( 1.5 ) ) ) ) )
-
-	def testPrimitiveInterpolationMaintainsUninterpolableValuesFromFirstPrimitive( self ) :
-
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m1["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) )
-		m2 = m1.copy()
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3["c"], IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) ) )
-
-		m2["c"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "bye" ) )
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3["c"], IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "hi" ) ) )
-
-	def testPrimitiveInterpolationMaintainsValuesMissingFromSecondPrimitive( self ) :
-
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-
-		m1["v"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4 ] ) )
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3["v"], IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1, 2, 3, 4 ] ) ) )
-
-	def testPrimitiveInterpolationWithBlindData( self ) :
-
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m2 = m1.copy()
-
-		m1.blindData()["a"] = IECore.FloatData( 10 )
-		m2.blindData()["a"] = IECore.FloatData( 20 )
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3.blindData()["a"], IECore.FloatData( 15 ) )
-
-	def testPrimitiveInterpolationWithBlindDataMaintainsValuesMissingFromSecondPrimitive( self ) :
-
-		m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m2 = m1.copy()
-
-		m1.blindData()["a"] = IECore.FloatData( 10 )
-
-		m3 = IECore.linearObjectInterpolation( m1, m2, 0.5 )
-		self.assertEqual( m3.blindData()["a"], IECore.FloatData( 10 ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -69,6 +69,30 @@ IECORE_API ObjectPtr linearObjectInterpolation( const Object *y0, const Object *
 /// Utility function that applies cubic interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
 IECORE_API ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x );
 
+typedef ObjectPtr (*ObjectInterpolator)( const IECore::Object *y0, const IECore::Object *y1, double x );
+/// Registers a custom interpolator for a specific object type.
+IECORE_API void registerInterpolator( IECore::TypeId objectType, ObjectInterpolator interpolator );
+
+/// Class which registers an interpolator for type T automatically when instantiated.
+template<typename T>
+class InterpolatorDescription
+{
+
+	public :
+
+		/// Type-specific interpolation function
+		typedef typename T::Ptr (*Interpolator)( const T *y0, const T *y1, double x );
+
+		InterpolatorDescription( Interpolator interpolator )
+		{
+			registerInterpolator(
+				T::staticTypeId(),
+				reinterpret_cast<ObjectInterpolator>( interpolator )
+			);
+		}
+
+};
+
 } // namespace IECore
 
 #endif // IE_CORE_OBJECTINTERPOLATOR_H

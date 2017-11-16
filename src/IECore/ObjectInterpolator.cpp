@@ -33,15 +33,56 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
+#include <unordered_map>
+
 #include "IECore/Object.h"
 #include "IECore/Interpolator.h"
 #include "IECore/ObjectInterpolator.h"
 #include "IECore/CompoundData.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/Primitive.h"
 #include "IECore/DespatchTypedData.h"
 
 using namespace IECore;
+
+//////////////////////////////////////////////////////////////////////////
+// Internals
+//////////////////////////////////////////////////////////////////////////
+
+namespace std
+{
+
+// Specialise hash so we can use TypeId as a key
+// in unordered_map. When we move to C++14 this should
+// no longer be necessary :
+//
+// http://www.open-std.org/jtc1/sc22/wg21/docs/lwg-defects.html#2148
+template<>
+struct hash<IECore::TypeId>
+{
+	size_t operator()( IECore::TypeId v ) const
+	{
+		return hash<int>()( v );
+	}
+};
+
+} // namespace std
+
+namespace
+{
+
+typedef std::unordered_map<IECore::TypeId, ObjectInterpolator> Registry;
+
+Registry &registry()
+{
+	static Registry g_registry;
+	return g_registry;
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Public bits
+//////////////////////////////////////////////////////////////////////////
 
 namespace IECore
 {
@@ -128,48 +169,6 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 			}
 		}
 	}
-	else if ( y0->isInstanceOf( PrimitiveTypeId ) )
-	{
-		const Primitive *x0 = assertedStaticCast<const Primitive>( y0 );
-		const Primitive *x1 = assertedStaticCast<const Primitive>( y1 );
-
-		if( x0->variableSize( PrimitiveVariable::Uniform ) == x1->variableSize( PrimitiveVariable::Uniform ) &&
-			x0->variableSize( PrimitiveVariable::Varying ) == x1->variableSize( PrimitiveVariable::Varying ) &&
-			x0->variableSize( PrimitiveVariable::Vertex ) == x1->variableSize( PrimitiveVariable::Vertex ) &&
-			x0->variableSize( PrimitiveVariable::FaceVarying ) == x1->variableSize( PrimitiveVariable::FaceVarying )
-		)
-		{
-			PrimitivePtr xRes = assertedStaticCast<Primitive>( result );
-			xRes->Object::copyFrom( (const Object *)x0 ); // to get topology and suchlike copied over
-			// interpolate blindData
-			const Object *bd0 = x0->blindData();
-			const Object *bd1 = x1->blindData();
-			ObjectPtr bdr = xRes->blindData();
-			LinearInterpolator<Object>()( bd0, bd1, x, bdr );
-			// interpolate primitive variables
-			for( PrimitiveVariableMap::const_iterator it0 = x0->variables.begin(); it0 != x0->variables.end(); it0++ )
-			{
-				PrimitiveVariableMap::const_iterator it1 = x1->variables.find( it0->first );
-				if( it1 != x1->variables.end() &&
-					it0->second.data->typeId() == it1->second.data->typeId() &&
-					it0->second.interpolation == it1->second.interpolation
-				)
-				{
-					PrimitiveVariableMap::iterator itRes = xRes->variables.find( it0->first );
-					ObjectPtr resultData = linearObjectInterpolation( it0->second.data.get(), it1->second.data.get(), x );
-					if( resultData )
-					{
-						itRes->second.data = boost::static_pointer_cast<Data>( resultData );
-					}
-				}
-			}
-		}
-		else
-		{
-			// primitive topologies don't match
-			result = nullptr;
-		}
-	}
 	else if ( result->isInstanceOf( DataTypeId ) )
 	{
 		DataPtr data = runTimeCast< Data >( result );
@@ -183,7 +182,28 @@ void LinearInterpolator< Object >::operator()( const Object *y0, const Object *y
 	}
 	else
 	{
-		result = nullptr;
+		const Registry &r = registry();
+
+		ObjectInterpolator interpolator = nullptr;
+		TypeId typeId = y0->typeId();
+		while( typeId != InvalidTypeId )
+		{
+			Registry::const_iterator it = r.find( typeId );
+			if( it != r.end() )
+			{
+				interpolator = it->second;
+				break;
+			}
+			typeId = RunTimeTyped::baseTypeId( typeId );
+		}
+		if( interpolator )
+		{
+			result = interpolator( y0, y1, x );
+		}
+		else
+		{
+			result = nullptr;
+		}
 	}
 }
 
@@ -348,5 +368,11 @@ ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Ob
 	CubicInterpolator<Object>()( y0, y1, y2, y3, x, result );
 	return result;
 }
+
+void registerInterpolator( IECore::TypeId objectType, ObjectInterpolator interpolator )
+{
+	registry()[objectType] = interpolator;
+}
+
 
 }
