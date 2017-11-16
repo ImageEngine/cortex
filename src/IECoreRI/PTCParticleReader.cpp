@@ -278,7 +278,15 @@ ObjectPtr PTCParticleReader::doOperation( const CompoundObject * operands )
 
 		DataPtr d = itData->second;
 
-		PrimitiveVariable::Interpolation interp = despatchTypedData< TypedDataInterpolation, TypeTraits::IsTypedData, DespatchTypedDataIgnoreError >( const_cast<Data *>( d.get() ) );
+		PrimitiveVariable::Interpolation interp = PrimitiveVariable::Invalid;
+		if( despatchTraitsTest<TypeTraits::IsSimpleTypedData>( d.get() ) )
+		{
+			interp = PrimitiveVariable::Constant;
+		}
+		else if( despatchTraitsTest<TypeTraits::IsVectorTypedData>( d.get() ) )
+		{
+			interp = PrimitiveVariable::Vertex;
+		}
 
 		if ( interp == PrimitiveVariable::Invalid )
 		{
