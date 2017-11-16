@@ -35,43 +35,43 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		e = SpherePrimitiveEvaluator( SpherePrimitive() )
+		e = IECore.SpherePrimitiveEvaluator( IECore.SpherePrimitive() )
 
 	def testSimple( self ) :
 		""" Test SpherePrimitiveEvaluator """
 
 		random.seed( 1 )
 
-		rand = Rand48( 1 )
+		rand = IECore.Rand48( 1 )
 
 		numTests = 50
 		for i in range(0, numTests) :
 
-			center = V3f( 0, 0, 0 )
+			center = IECore.V3f( 0, 0, 0 )
 			radius = random.uniform( 0.1, 5 )
-			sphere = SpherePrimitive( radius )
+			sphere = IECore.SpherePrimitive( radius )
 
 			# Add some UV data in "bowtie" order - when we read it back it should then match the geometric UVs
 			# if we're doing everything correctly.
-			testData = V3fVectorData()
-			testData.append( V3f( 0, 0, 0 ) )
-			testData.append( V3f( 1, 0, 0 ) )
-			testData.append( V3f( 0, 1, 0 ) )
-			testData.append( V3f( 1, 1, 0 ) )
-			testPrimVar = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, testData )
+			testData = IECore.V3fVectorData()
+			testData.append( IECore.V3f( 0, 0, 0 ) )
+			testData.append( IECore.V3f( 1, 0, 0 ) )
+			testData.append( IECore.V3f( 0, 1, 0 ) )
+			testData.append( IECore.V3f( 1, 1, 0 ) )
+			testPrimVar = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, testData )
 			sphere["testPrimVar"] = testPrimVar
 
-			se = PrimitiveEvaluator.create( sphere )
+			se = IECore.PrimitiveEvaluator.create( sphere )
 
 			result = se.createResult()
 
-			testPoint = V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), random.uniform( -10, 10 ) )
+			testPoint = IECore.V3f( random.uniform( -10, 10 ), random.uniform( -10, 10 ), random.uniform( -10, 10 ) )
 
 			found = se.closestPoint( testPoint, result )
 
@@ -100,11 +100,11 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 			self.assertAlmostEqual( result.uv()[1], uv[1], 3 )
 
 			# Pick a random point inside the sphere...
-			origin = center + Rand48.solidSpheref(rand) * radius * 0.9
+			origin = center + IECore.Rand48.solidSpheref(rand) * radius * 0.9
 			self.assert_( ( origin - center ).length() < radius )
 
 			# And a random (unnormalized!) direction
-			direction = Rand48.hollowSpheref(rand)	* random.uniform( 0.5, 10 )
+			direction = IECore.Rand48.hollowSpheref(rand)	* random.uniform( 0.5, 10 )
 
 			found = se.intersectionPoint( origin, direction, result )
 			if found:
@@ -121,7 +121,7 @@ class TestSpherePrimitiveEvaluator( unittest.TestCase ) :
 				self.assert_( math.fabs( ( result.point() - center ).length() - radius ) < 0.001 )
 
 			# Pick a random point outside the sphere...
-			origin = center + Rand48.hollowSpheref(rand) * radius * 2
+			origin = center + IECore.Rand48.hollowSpheref(rand) * radius * 2
 			self.assert_( ( origin - center ).length() > radius )
 
 			found = se.intersectionPoint( origin, direction, result )

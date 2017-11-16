@@ -34,19 +34,19 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class TestShader( unittest.TestCase ) :
 
 	def test( self ) :
 
-		s = Shader()
+		s = IECore.Shader()
 		self.assertEqual( s.name, "defaultsurface" )
 		self.assertEqual( s.type, "surface" )
 		self.assertEqual( len( s.parameters ), 0 )
 		self.assertEqual( s.parameters.typeName(), "CompoundData" )
 
-		s = Shader( "marble", "surface" )
+		s = IECore.Shader( "marble", "surface" )
 		self.assertEqual( s.name, "marble" )
 		self.assertEqual( s.type, "surface" )
 
@@ -56,24 +56,24 @@ class TestShader( unittest.TestCase ) :
 
 	def testConstructWithParameters( self ) :
 
-		s = Shader( "test", "surface", CompoundData( { "a" : StringData( "a" ) } ) )
+		s = IECore.Shader( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
 
 		self.assertEqual( s.name, "test" )
 		self.assertEqual( s.type, "surface" )
 		self.assertEqual( len( s.parameters ), 1 )
-		self.assertEqual( s.parameters.typeName(), CompoundData.staticTypeName() )
-		self.assertEqual( s.parameters["a"], StringData( "a" ) )
+		self.assertEqual( s.parameters.typeName(), IECore.CompoundData.staticTypeName() )
+		self.assertEqual( s.parameters["a"], IECore.StringData( "a" ) )
 
 	def testCopy( self ) :
 
-		s = Shader( "test", "surface", CompoundData( { "a" : StringData( "a" ) } ) )
+		s = IECore.Shader( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
 		ss = s.copy()
 
 		self.assertEqual( s, ss )
 
 	def testHash( self ) :
 
-		s = Shader()
+		s = IECore.Shader()
 		h = s.hash()
 
 		s.name = "somethingElse"
@@ -84,7 +84,7 @@ class TestShader( unittest.TestCase ) :
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
 
-		s.parameters["a"] = StringData( "a" )
+		s.parameters["a"] = IECore.StringData( "a" )
 		self.assertNotEqual( s.hash(), h )
 
 if __name__ == "__main__":

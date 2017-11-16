@@ -35,38 +35,38 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 
 class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def createSSD( self, weights ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
-		offsets = IntVectorData( [0, 2, 5, 6] )
-		counts = IntVectorData( [2, 3, 1, 2] )
-		indices = IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		offsets = IECore.IntVectorData( [0, 2, 5, 6] )
+		counts = IECore.IntVectorData( [2, 3, 1, 2] )
+		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
 	def original( self ) :
 
-		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8] )
+		weights = IECore.FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8] )
 
 		return self.createSSD( weights )
 
 	def normalized( self ) :
 
-		weights = FloatVectorData( [0.5, 0.5, 0.25, 0.75, 0.0, 1.0, 0.6, 0.4] )
+		weights = IECore.FloatVectorData( [0.5, 0.5, 0.25, 0.75, 0.0, 1.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
 
 	def normalizedWithLocks( self ) :
 
-		weights = FloatVectorData( [0.7, 0.3, 0.2, 0.8, 0.0, 1.0, 0.6, 0.4] )
+		weights = IECore.FloatVectorData( [0.7, 0.3, 0.2, 0.8, 0.0, 1.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
 
@@ -75,10 +75,10 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = NormalizeSmoothSkinningWeightsOp()
-		self.assertEqual( type(op), NormalizeSmoothSkinningWeightsOp )
-		self.assertEqual( op.typeId(), TypeId.NormalizeSmoothSkinningWeightsOp )
-		op.parameters()['input'].setValue( IntData(1) )
+		op = IECore.NormalizeSmoothSkinningWeightsOp()
+		self.assertEqual( type(op), IECore.NormalizeSmoothSkinningWeightsOp )
+		self.assertEqual( op.typeId(), IECore.TypeId.NormalizeSmoothSkinningWeightsOp )
+		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testNormalizingNormalized( self ) :
@@ -86,7 +86,7 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		ssd = self.normalized()
 
-		op = NormalizeSmoothSkinningWeightsOp()
+		op = IECore.NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 
@@ -103,7 +103,7 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = NormalizeSmoothSkinningWeightsOp()
+		op = IECore.NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -129,10 +129,10 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = NormalizeSmoothSkinningWeightsOp()
+		op = IECore.NormalizeSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, False, False ] ) )
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
 		self.assertEqual( result.influencePose(), ssd.influencePose() )
@@ -153,7 +153,7 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertEqual( result, normalized )
 
 		# make sure locked weights did not change
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
 		decompressedResult = dop.operate()
 		dop.parameters()['input'].setValue( ssd )

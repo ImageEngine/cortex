@@ -37,7 +37,7 @@
 
 """Unit test for SmoothSkinningData binding"""
 
-from IECore import *
+import IECore
 
 import os
 import unittest
@@ -46,43 +46,43 @@ class TestSmoothSkinningData( unittest.TestCase ) :
 
     def testData( self ) :
         # test the object
-        s = SmoothSkinningData()
-        self.assertEqual( s.influenceNames(), StringVectorData() )
-        self.assertEqual( s.influencePose(), M44fVectorData() )
-        self.assertEqual( s.pointIndexOffsets(), IntVectorData() )
-        self.assertEqual( s.pointInfluenceCounts(), IntVectorData() )
-        self.assertEqual( s.pointInfluenceIndices(), IntVectorData() )
-        self.assertEqual( s.pointInfluenceWeights(), FloatVectorData() )
+        s = IECore.SmoothSkinningData()
+        self.assertEqual( s.influenceNames(), IECore.StringVectorData() )
+        self.assertEqual( s.influencePose(), IECore.M44fVectorData() )
+        self.assertEqual( s.pointIndexOffsets(), IECore.IntVectorData() )
+        self.assertEqual( s.pointInfluenceCounts(), IECore.IntVectorData() )
+        self.assertEqual( s.pointInfluenceIndices(), IECore.IntVectorData() )
+        self.assertEqual( s.pointInfluenceWeights(), IECore.FloatVectorData() )
         self.assertEqual( s, s )
         self.assertEqual( s, s.copy() )
-        self.assertEqual( s, SmoothSkinningData() )
+        self.assertEqual( s, IECore.SmoothSkinningData() )
         self.assertRaises( Exception, s.validate() )
 
     def testIO( self ) :
         # test fileIndexedIO, read and write
-        ok_jn = StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = M44fVectorData( [M44f(),M44f()] )
-        ok_pio = IntVectorData( [0, 2, 4] )
-        ok_pic = IntVectorData( [2, 2, 1] )
-        ok_pii = IntVectorData( [0, 1, 0, 1, 1] )
-        ok_piw = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
+        ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
+        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_pio = IECore.IntVectorData( [0, 2, 4] )
+        ok_pic = IECore.IntVectorData( [2, 2, 1] )
+        ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
+        ok_piw = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
-        s = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
-        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIO.OpenMode.Write )
+        s = IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
+        iface = IECore.IndexedIO.create( "test/IECore/ssd.fio", IECore.IndexedIO.OpenMode.Write )
 
         s.save( iface, "test" )
-        ss = Object.load( iface, "test" )
+        ss = IECore.Object.load( iface, "test" )
         self.assertEqual( s, ss )
 
     def testDataStorage(self ):
         #test the object can store data
-        ok_jn = StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = M44fVectorData( [M44f(),M44f()] )
-        ok_pio = IntVectorData( [0, 2, 4] )
-        ok_pic = IntVectorData( [2, 2, 1] )
-        ok_pii = IntVectorData( [0, 1, 0, 1, 1] )
-        ok_piw = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
-        s = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
+        ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
+        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_pio = IECore.IntVectorData( [0, 2, 4] )
+        ok_pic = IECore.IntVectorData( [2, 2, 1] )
+        ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
+        ok_piw = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
+        s = IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
 
         self.assertEqual( s.influenceNames() , ok_jn )
         self.assertEqual( s.influencePose() , ok_ip )
@@ -95,65 +95,65 @@ class TestSmoothSkinningData( unittest.TestCase ) :
         self.assertEqual( s, s.copy() )
         self.assertRaises( Exception, s.validate() )
 
-        iface = IndexedIO.create( "test/IECore/ssd.fio", IndexedIO.OpenMode.Write )
+        iface = IECore.IndexedIO.create( "test/IECore/ssd.fio", IECore.IndexedIO.OpenMode.Write )
         s.save( iface, "test" )
-        ss = Object.load( iface, "test" )
+        ss = IECore.Object.load( iface, "test" )
         self.assertEqual( s, ss )
 
     def testValidate(self):
 
         # good data
-        ok_jn = StringVectorData( [ 'jointA', 'jointB' ] )
-        ok_ip = M44fVectorData( [M44f(),M44f()] )
-        ok_pio = IntVectorData( [0, 2, 4] )
-        ok_pic = IntVectorData( [2, 2, 1] )
-        ok_pii = IntVectorData( [0, 1, 0, 1, 1] )
-        ok_piw = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
+        ok_jn = IECore.StringVectorData( [ 'jointA', 'jointB' ] )
+        ok_ip = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f()] )
+        ok_pio = IECore.IntVectorData( [0, 2, 4] )
+        ok_pic = IECore.IntVectorData( [2, 2, 1] )
+        ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1] )
+        ok_piw = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
         # data with invalid nr of elements
-        iv_jn = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        iv_ip = M44fVectorData( [M44f()] )
-        iv_pio1 = IntVectorData( [0, 2, 4, 666] )
-        iv_pic1 = IntVectorData( [2, 2 ] )
-        iv_pii1 = IntVectorData( [0, 1, 0, 1, 1, 666] )
-        iv_piw = FloatVectorData( [0.5, 0.5, 0.2] )
+        iv_jn = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+        iv_ip = IECore.M44fVectorData( [IECore.M44f()] )
+        iv_pio1 = IECore.IntVectorData( [0, 2, 4, 666] )
+        iv_pic1 = IECore.IntVectorData( [2, 2 ] )
+        iv_pii1 = IECore.IntVectorData( [0, 1, 0, 1, 1, 666] )
+        iv_piw = IECore.FloatVectorData( [0.5, 0.5, 0.2] )
 
         # data with invalid ids
-        iv_pio2 = IntVectorData( [0, 2, 666] )
-        iv_pii2 = IntVectorData( [0, 1, 666, 1, 1] )
+        iv_pio2 = IECore.IntVectorData( [0, 2, 666] )
+        iv_pii2 = IECore.IntVectorData( [0, 1, 666, 1, 1] )
 
         # data with invalid counts
-        iv_pic2 = IntVectorData( [2, 0, 1 ] )
+        iv_pic2 = IECore.IntVectorData( [2, 0, 1 ] )
 
         # data with count / index mismatch
-        iv_pio3 = IntVectorData( [0, 3, 4] )
-        iv_pic3 = IntVectorData( [3, 1, 1] )
+        iv_pio3 = IECore.IntVectorData( [0, 3, 4] )
+        iv_pic3 = IECore.IntVectorData( [3, 1, 1] )
 
         # test all is ok
-        SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate()
+        IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate()
 
         # test wrong nr of influenceNames, influencePose
-        self.assertRaises( Exception, SmoothSkinningData(iv_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, iv_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(iv_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, iv_ip, ok_pio, ok_pic, ok_pii, ok_piw).validate )
 
         # test wrong nr of pointIndexOffsets, pointInfluenceCounts
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, iv_pio1, ok_pic, ok_pii, ok_piw).validate )
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic1, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, iv_pio1, ok_pic, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic1, ok_pii, ok_piw).validate )
 
         # test wrong nr of pointInfluenceIndices, pointInfluenceWeights
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, iv_pii1, ok_piw).validate )
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, iv_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, iv_pii1, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, iv_piw).validate )
 
         # test invalid ids
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, iv_pio2, ok_pic, ok_pii, ok_piw).validate )
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, iv_pii2, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, iv_pio2, ok_pic, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, iv_pii2, ok_piw).validate )
 
         # test wrong counts
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic2, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic2, ok_pii, ok_piw).validate )
 
         # test count id mismatching
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, iv_pio3, ok_pic, ok_pii, ok_piw).validate )
-        self.assertRaises( Exception, SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic3, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, iv_pio3, ok_pic, ok_pii, ok_piw).validate )
+        self.assertRaises( Exception, IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, iv_pic3, ok_pii, ok_piw).validate )
 
 # todo: add reference test data we are happy with
 #    def testRef(self):

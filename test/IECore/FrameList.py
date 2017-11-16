@@ -34,26 +34,26 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class TestFrameList( unittest.TestCase ) :
 
 	def test( self ) :
 
-		f = FrameList.parse( "" )
-		self.assert_( isinstance( f, EmptyFrameList ) )
+		f = IECore.FrameList.parse( "" )
+		self.assert_( isinstance( f, IECore.EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
 		self.assertEqual( repr( f ), "IECore.EmptyFrameList()" )
 
-		f = FrameList.parse( " " )
-		self.assert_( isinstance( f, EmptyFrameList ) )
+		f = IECore.FrameList.parse( " " )
+		self.assert_( isinstance( f, IECore.EmptyFrameList ) )
 		self.assertEqual( len( f.asList() ), 0 )
 
 	def testReverseConstruction( self ) :
 
-		f = FrameList.parse( "1-5r" )
+		f = IECore.FrameList.parse( "1-5r" )
 		self.assertEqual( f.asList(), [ 5, 4, 3, 2, 1 ] )
-		self.assertEqual( frameListFromList( [ 5, 4, 3, 2, 1 ] ), f )
+		self.assertEqual( IECore.frameListFromList( [ 5, 4, 3, 2, 1 ] ), f )
 
 	## \todo: there should probably be a lot more tests in here...
 

@@ -34,22 +34,22 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class LightTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		s = Light()
+		s = IECore.Light()
 		self.assertEqual( s.name, "distantlight" )
 		self.assert_( len(s.handle) > 0 )
 		self.assertEqual( len( s.parameters ), 0 )
 		self.assertEqual( s.parameters.typeName(), "CompoundData" )
 
-		ss = Light()
+		ss = IECore.Light()
 		self.assertNotEqual( s.handle, ss.handle )
 
-		s = Light( "marble", "marble001" )
+		s = IECore.Light( "marble", "marble001" )
 		self.assertEqual( s.name, "marble" )
 		self.assertEqual( s.handle, "marble001" )
 
@@ -59,7 +59,7 @@ class LightTest( unittest.TestCase ) :
 
 	def testProperties( self ) :
 
-		s = Light()
+		s = IECore.Light()
 		s.handle = "myNewHandle"
 		s.name = "myNewName"
 		self.assertEqual( s.name, "myNewName" )
@@ -67,24 +67,24 @@ class LightTest( unittest.TestCase ) :
 
 	def testConstructWithParameters( self ) :
 
-		s = Light( "test", "test001", CompoundData( { "a" : StringData( "a" ) } ) )
+		s = IECore.Light( "test", "test001", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
 
 		self.assertEqual( s.name, "test" )
 		self.assertEqual( s.handle, "test001" )
 		self.assertEqual( len( s.parameters ), 1 )
-		self.assertEqual( s.parameters.typeName(), CompoundData.staticTypeName() )
-		self.assertEqual( s.parameters["a"], StringData( "a" ) )
+		self.assertEqual( s.parameters.typeName(), IECore.CompoundData.staticTypeName() )
+		self.assertEqual( s.parameters["a"], IECore.StringData( "a" ) )
 
 	def testCopy( self ) :
 
-		s = Light( "test", "surface", CompoundData( { "a" : StringData( "a" ) } ) )
+		s = IECore.Light( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
 		ss = s.copy()
 
 		self.assertEqual( s, ss )
 
 	def testHash( self ) :
 
-		s = Light( "name", "handle" )
+		s = IECore.Light( "name", "handle" )
 		h = s.hash()
 
 		s.name = "name2"
@@ -95,7 +95,7 @@ class LightTest( unittest.TestCase ) :
 		self.assertNotEqual( s.hash(), h )
 		h = s.hash()
 
-		s.parameters["a"] = StringData( "a" )
+		s.parameters["a"] = IECore.StringData( "a" )
 		self.assertNotEqual( s.hash(), h )
 
 if __name__ == "__main__":

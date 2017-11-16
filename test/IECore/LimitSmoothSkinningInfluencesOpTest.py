@@ -35,79 +35,79 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 
 class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def createSSD( self, weights ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
-		offsets = IntVectorData( [0, 2, 5, 6, 8] )
-		counts = IntVectorData( [2, 3, 1, 2, 3] )
-		indices = IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2, 0, 1, 2] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		offsets = IECore.IntVectorData( [0, 2, 5, 6, 8] )
+		counts = IECore.IntVectorData( [2, 3, 1, 2, 3] )
+		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1, 1, 2, 0, 1, 2] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
 	def original( self ) :
 
-		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8, 0.4, 0.6, 0.4] )
+		weights = IECore.FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8, 0.4, 0.6, 0.4] )
 
 		return self.createSSD( weights )
 
 	def weightLimited( self ) :
 
-		weights = FloatVectorData( [0.7, 0.7, 0.0, 0.6, 0.0, 0.0, 1.2, 0.8, 0.0, 0.6, 0.0] )
+		weights = IECore.FloatVectorData( [0.7, 0.7, 0.0, 0.6, 0.0, 0.0, 1.2, 0.8, 0.0, 0.6, 0.0] )
 
 		return self.createSSD( weights )
 
 	def weightLimitedWithLocks( self ) :
 
-		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.0, 1.2, 0.8, 0.4, 0.6, 0.0] )
+		weights = IECore.FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.0, 1.2, 0.8, 0.4, 0.6, 0.0] )
 
 		return self.createSSD( weights )
 
 	def maxInfluenced( self ) :
 
-		weights = FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8, 0.0, 0.6, 0.4] )
+		weights = IECore.FloatVectorData( [0.7, 0.7, 0.2, 0.6, 0.0, 0.1, 1.2, 0.8, 0.0, 0.6, 0.4] )
 
 		return self.createSSD( weights )
 
 	def maxInfluencedWithLocks( self ) :
 
-		weights = FloatVectorData( [0.7, 0.0, 0.2, 0.0, 0.0, 0.1, 1.2, 0.0, 0.4, 0.0, 0.0] )
+		weights = IECore.FloatVectorData( [0.7, 0.0, 0.2, 0.0, 0.0, 0.1, 1.2, 0.0, 0.4, 0.0, 0.0] )
 
 		return self.createSSD( weights )
 
 	def indexed( self ) :
 
-		weights = FloatVectorData( [0.0, 0.7, 0.0, 0.6, 0.0, 0.1, 1.2, 0.0, 0.0, 0.6, 0.0] )
+		weights = IECore.FloatVectorData( [0.0, 0.7, 0.0, 0.6, 0.0, 0.1, 1.2, 0.0, 0.0, 0.6, 0.0] )
 
 		return self.createSSD( weights )
 
 	def compressedAfterIndexed( self ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
-		offsets = IntVectorData( [0, 1, 2, 2, 3] )
-		counts = IntVectorData( [1, 1, 0, 1, 2] )
-		indices = IntVectorData( [0, 0, 2, 0, 2] )
-		weights = FloatVectorData( [0.7, 0.2, 0.8, 0.4, 0.4] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		offsets = IECore.IntVectorData( [0, 1, 2, 2, 3] )
+		counts = IECore.IntVectorData( [1, 1, 0, 1, 2] )
+		indices = IECore.IntVectorData( [0, 0, 2, 0, 2] )
+		weights = IECore.FloatVectorData( [0.7, 0.2, 0.8, 0.4, 0.4] )
 
-		return SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		return IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 	def testTypes( self ) :
 		""" Test LimitSmoothSkinningInfluencesOp types"""
 
 		ssd = self.original()
 
-		op = LimitSmoothSkinningInfluencesOp()
-		self.assertEqual( type(op), LimitSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), TypeId.LimitSmoothSkinningInfluencesOp )
-		op.parameters()['input'].setValue( IntData(1) )
+		op = IECore.LimitSmoothSkinningInfluencesOp()
+		self.assertEqual( type(op), IECore.LimitSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECore.TypeId.LimitSmoothSkinningInfluencesOp )
+		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testWeightLimitMode( self ) :
@@ -116,9 +116,9 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		weightLimited = self.weightLimited()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
 		op.parameters()['minWeight'].setValue( 0.401 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
@@ -146,13 +146,13 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		weightLimited = self.weightLimitedWithLocks()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
 		op.parameters()['minWeight'].setValue( 0.401 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, False, False ] ) )
 		result = op.operate()
 
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -172,7 +172,7 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result, weightLimited )
 
 		# make sure locked weights did not change
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
 		decompressedResult = dop.operate()
 		dop.parameters()['input'].setValue( ssd )
@@ -190,13 +190,13 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		maxInfluenced = self.maxInfluencedWithLocks()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.WeightLimit )
 		op.parameters()['minWeight'].setValue( 0.401 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, True, True ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, True, True ] ) )
 		result = op.operate()
 
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -213,9 +213,9 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		maxInfluenced = self.maxInfluenced()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
 		op.parameters()['maxInfluences'].setValue( 2 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
@@ -243,13 +243,13 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		maxInfluenced = self.maxInfluencedWithLocks()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
 		op.parameters()['maxInfluences'].setValue( 1 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, False, False ] ) )
 		result = op.operate()
 
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -269,7 +269,7 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		self.assertEqual( result, maxInfluenced )
 
 		# make sure locked weights did not change
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
 		decompressedResult = dop.operate()
 		dop.parameters()['input'].setValue( ssd )
@@ -287,13 +287,13 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		maxInfluenced = self.maxInfluencedWithLocks()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.MaxInfluences )
 		op.parameters()['maxInfluences'].setValue( 1 )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, True, True ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, True, True ] ) )
 		result = op.operate()
 
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -310,10 +310,10 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		indexed = self.indexed()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.Indexed )
-		op.parameters()['influenceIndices'].setFrameListValue( FrameList.parse( "0-2x2" ) )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.Indexed )
+		op.parameters()['influenceIndices'].setFrameListValue( IECore.FrameList.parse( "0-2x2" ) )
 		op.parameters()['compressResult'].setTypedValue( False )
 		op.parameters()['applyLocks'].setValue( False )
 		result = op.operate()
@@ -340,10 +340,10 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		compressedAfterIndexed = self.compressedAfterIndexed()
 
-		op = LimitSmoothSkinningInfluencesOp()
+		op = IECore.LimitSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['mode'].setValue( LimitSmoothSkinningInfluencesOp.Mode.Indexed )
-		op.parameters()['influenceIndices'].setFrameListValue( FrameList.parse( "1" ) )
+		op.parameters()['mode'].setValue( IECore.LimitSmoothSkinningInfluencesOp.Mode.Indexed )
+		op.parameters()['influenceIndices'].setFrameListValue( IECore.FrameList.parse( "1" ) )
 		op.parameters()['compressResult'].setTypedValue( True )
 		op.parameters()['applyLocks'].setValue( False )
 		result = op.operate()

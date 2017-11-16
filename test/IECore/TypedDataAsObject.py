@@ -33,13 +33,13 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestTypedDataAsObject( unittest.TestCase ) :
 
 	def testSimpleCopy( self ) :
 
-		o = IntData( 1 )
+		o = IECore.IntData( 1 )
 		self.assertEqual( o.value, 1 )
 		self.assertEqual( o, o )
 		o.value = 2
@@ -65,11 +65,11 @@ class TestTypedDataAsObject( unittest.TestCase ) :
 		to ensure that a genuine deep copy of the data is produced.
 		This tests that."""
 
-		a = IntData( 2 )
+		a = IECore.IntData( 2 )
 		self.assertEqual( a.value, 2 )
 		self.assertEqual( a, a )
 
-		c = CompoundData()
+		c = IECore.CompoundData()
 		c["A"] = a
 		self.assertEqual( c["A"].value, 2 )
 

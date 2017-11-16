@@ -34,43 +34,43 @@
 
 import os
 import unittest
-from IECore import *
+import IECore
 
 class TestTransform( unittest.TestCase ) :
 
 	def test( self ) :
 
-		m = MatrixTransform( M44f() )
-		self.assertEqual( m.transform(), M44f() )
-		self.assertEqual( m.transform( 1 ), M44f() )
-		self.assertEqual( m.matrix, M44f() )
+		m = IECore.MatrixTransform( IECore.M44f() )
+		self.assertEqual( m.transform(), IECore.M44f() )
+		self.assertEqual( m.transform( 1 ), IECore.M44f() )
+		self.assertEqual( m.matrix, IECore.M44f() )
 
-		m = MatrixTransform( M44f.createTranslated( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.transform(), M44f.createTranslated( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.transform( 1 ), M44f.createTranslated( V3f( 1, 2, 3 ) ) )
-		self.assertEqual( m.matrix, M44f.createTranslated( V3f( 1, 2, 3 ) ) )
+		m = IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.transform(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.transform( 1 ), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
+		self.assertEqual( m.matrix, IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
 
 		mm = m.copy()
 
 		self.assertEqual( m, mm )
 
-		Writer.create( mm, "test/transform.cob" ).write()
-		mmm = Reader.create( "test/transform.cob" ).read()
+		IECore.Writer.create( mm, "test/transform.cob" ).write()
+		mmm = IECore.Reader.create( "test/transform.cob" ).read()
 
 		self.assertEqual( mm, mmm )
 
 	def testMotionTransform( self ) :
 
-		m = MatrixMotionTransform()
-		self.assertEqual( m.transform(), M44f() )
-		self.assertEqual( m.transform( 2 ), M44f() )
+		m = IECore.MatrixMotionTransform()
+		self.assertEqual( m.transform(), IECore.M44f() )
+		self.assertEqual( m.transform( 2 ), IECore.M44f() )
 		self.assertEqual( m.keys(), [] )
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
 
-		t1 = M44f.createTranslated( V3f( 0, 1, 0 ) )
-		t2 = M44f.createTranslated( V3f( 0, 5, 0 ) )
-		tMid = M44f.createTranslated( V3f( 0, 3, 0 ) )
+		t1 = IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) )
+		t2 = IECore.M44f.createTranslated( IECore.V3f( 0, 5, 0 ) )
+		tMid = IECore.M44f.createTranslated( IECore.V3f( 0, 3, 0 ) )
 
 		m[0] = t1
 		self.assertEqual( len( m ), 1 )
@@ -95,17 +95,17 @@ class TestTransform( unittest.TestCase ) :
 
 		self.assertEqual( m, mm )
 
-		Writer.create( mm, "test/motionTransform.cob" ).write()
-		mmm = Reader.create( "test/motionTransform.cob" ).read()
+		IECore.Writer.create( mm, "test/motionTransform.cob" ).write()
+		mmm = IECore.Reader.create( "test/motionTransform.cob" ).read()
 
 		self.assertEqual( mm, mmm )
 
 	def testHash( self ) :
 
-		t = MatrixTransform( M44f() )
-		self.assertEqual( t.hash(), MatrixTransform( M44f() ).hash() )
+		t = IECore.MatrixTransform( IECore.M44f() )
+		self.assertEqual( t.hash(), IECore.MatrixTransform( IECore.M44f() ).hash() )
 
-		t2 = MatrixTransform( M44f.createTranslated( V3f( 1 ) ) )
+		t2 = IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
 		self.assertNotEqual( t.hash(), t2.hash() )
 
 	def tearDown( self ) :

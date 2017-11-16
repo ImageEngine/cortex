@@ -33,117 +33,117 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class PolygonAlgoTest( unittest.TestCase ) :
 
 	def testNormal( self ) :
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 1, 0, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 0, 1, 0 )
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 0, 1, 0 )
 		] )
 
-		self.assertEqual( polygonNormal( p ), V3f( 0, 0, 1 ) )
+		self.assertEqual( IECore.polygonNormal( p ), IECore.V3f( 0, 0, 1 ) )
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 0, 1, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 1, 0, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 0, 1, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 1, 0, 0 ),
 		] )
 
-		self.assertEqual( polygonNormal( p ), V3f( 0, 0, -1 ) )
+		self.assertEqual( IECore.polygonNormal( p ), IECore.V3f( 0, 0, -1 ) )
 
 	def testConcaveNormal( self ) :
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 1, -1, 0 ),
-			V3f( 0.2, 0, 0 ),
-			V3f( 1, 1, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, -1, 0 ),
+			IECore.V3f( 0.2, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
 		] )
 
-		self.assertEqual( polygonNormal( p ), V3f( 0, 0, 1 ) )
+		self.assertEqual( IECore.polygonNormal( p ), IECore.V3f( 0, 0, 1 ) )
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 0.2, 0, 0 ),
-			V3f( 1, -1, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 0.2, 0, 0 ),
+			IECore.V3f( 1, -1, 0 ),
 		] )
 
-		self.assertEqual( polygonNormal( p ), V3f( 0, 0, -1 ) )
+		self.assertEqual( IECore.polygonNormal( p ), IECore.V3f( 0, 0, -1 ) )
 
 	def testWinding2D( self ) :
 
-		p = V2fVectorData( [
-			V2f( 0, 0 ),
-			V2f( 1, 0 ),
-			V2f( 1, 1 ),
-			V2f( 0, 1 ),
+		p = IECore.V2fVectorData( [
+			IECore.V2f( 0, 0 ),
+			IECore.V2f( 1, 0 ),
+			IECore.V2f( 1, 1 ),
+			IECore.V2f( 0, 1 ),
 		] )
 
-		self.assertEqual( polygonWinding( p ), Winding.CounterClockwise )
-		self.assertNotEqual( polygonWinding( p ), Winding.Clockwise )
+		self.assertEqual( IECore.polygonWinding( p ), IECore.Winding.CounterClockwise )
+		self.assertNotEqual( IECore.polygonWinding( p ), IECore.Winding.Clockwise )
 
-		p = V2fVectorData( [
-			V2f( 0, 0 ),
-			V2f( 0, 1 ),
-			V2f( 1, 1 ),
-			V2f( 1, 0 ),
+		p = IECore.V2fVectorData( [
+			IECore.V2f( 0, 0 ),
+			IECore.V2f( 0, 1 ),
+			IECore.V2f( 1, 1 ),
+			IECore.V2f( 1, 0 ),
 		] )
 
-		self.assertNotEqual( polygonWinding( p ), Winding.CounterClockwise )
-		self.assertEqual( polygonWinding( p ), Winding.Clockwise )
+		self.assertNotEqual( IECore.polygonWinding( p ), IECore.Winding.CounterClockwise )
+		self.assertEqual( IECore.polygonWinding( p ), IECore.Winding.Clockwise )
 
 	def testWinding3D( self ) :
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 1, 0, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 0, 1, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 0, 1, 0 ),
 		] )
 
-		self.assertEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.CounterClockwise )
-		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.Clockwise )
-		self.assertEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.Clockwise )
-		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.CounterClockwise )
+		self.assertEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, -1 ) ), IECore.Winding.CounterClockwise )
+		self.assertNotEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, -1 ) ), IECore.Winding.Clockwise )
+		self.assertEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, 1 ) ), IECore.Winding.Clockwise )
+		self.assertNotEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, 1 ) ), IECore.Winding.CounterClockwise )
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 0, 1, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 1, 0, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 0, 1, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 1, 0, 0 ),
 		] )
 
-		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.CounterClockwise )
-		self.assertEqual( polygonWinding( p, V3f( 0, 0, -1 ) ), Winding.Clockwise )
-		self.assertEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.CounterClockwise )
-		self.assertNotEqual( polygonWinding( p, V3f( 0, 0, 1 ) ), Winding.Clockwise )
+		self.assertNotEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, -1 ) ), IECore.Winding.CounterClockwise )
+		self.assertEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, -1 ) ), IECore.Winding.Clockwise )
+		self.assertEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, 1 ) ), IECore.Winding.CounterClockwise )
+		self.assertNotEqual( IECore.polygonWinding( p, IECore.V3f( 0, 0, 1 ) ), IECore.Winding.Clockwise )
 
 	def testBound( self ) :
 
-		p = V3fVectorData( [
-			V3f( 0, 0, 0 ),
-			V3f( 1, 0, 0 ),
-			V3f( 1, 1, 0 ),
-			V3f( 0, 1, 0 ),
+		p = IECore.V3fVectorData( [
+			IECore.V3f( 0, 0, 0 ),
+			IECore.V3f( 1, 0, 0 ),
+			IECore.V3f( 1, 1, 0 ),
+			IECore.V3f( 0, 1, 0 ),
 		] )
 
-		self.assertEqual( polygonBound( p ), Box3f( V3f( 0 ), V3f( 1, 1, 0 ) ) )
+		self.assertEqual( IECore.polygonBound( p ), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1, 1, 0 ) ) )
 
 	def testArea3D( self ) :
 
-		r = Rand32()
+		r = IECore.Rand32()
 		for i in range( 0, 1000 ) :
 
-			p = V3fVectorData( [ r.nextV3f(), r.nextV3f(), r.nextV3f() ] )
-			self.assertAlmostEqual( polygonArea( p ), triangleArea( p[0], p[1], p[2] ), 4 )
+			p = IECore.V3fVectorData( [ r.nextV3f(), r.nextV3f(), r.nextV3f() ] )
+			self.assertAlmostEqual( IECore.polygonArea( p ), IECore.triangleArea( p[0], p[1], p[2] ), 4 )
 
 if __name__ == "__main__":
     unittest.main()

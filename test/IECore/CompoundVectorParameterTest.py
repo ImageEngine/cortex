@@ -34,36 +34,36 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class TestCompoundVectorParameter( unittest.TestCase ) :
 
 	def testConstruction( self ) :
 
-		c = CompoundVectorParameter( 'a', 'dest' )
+		c = IECore.CompoundVectorParameter( 'a', 'dest' )
 		# test valid parameters
-		c.addParameter( IntVectorParameter( 'a', '', IntVectorData( [ 1, 2 ] ) ) )
-		c.addParameter( BoolVectorParameter( 'b', '', BoolVectorData( [ False, False ] ) ) )
-		c.addParameters( [ V2fVectorParameter( 'c', '', V2fVectorData( [ V2f(), V2f() ] ) ),
-							StringVectorParameter( 'd', '', StringVectorData( [ 'one', 'two' ] ) ) ] )
+		c.addParameter( IECore.IntVectorParameter( 'a', '', IECore.IntVectorData( [ 1, 2 ] ) ) )
+		c.addParameter( IECore.BoolVectorParameter( 'b', '', IECore.BoolVectorData( [ False, False ] ) ) )
+		c.addParameters( [ IECore.V2fVectorParameter( 'c', '', IECore.V2fVectorData( [ IECore.V2f(), IECore.V2f() ] ) ),
+							IECore.StringVectorParameter( 'd', '', IECore.StringVectorData( [ 'one', 'two' ] ) ) ] )
 
 		self.assertEqual( len(c.keys()), 4 )
 
 		def addInvalid():
-			c.addParameter( StringParameter( 'xx', '', 'value' ) )
+			c.addParameter( IECore.StringParameter( 'xx', '', 'value' ) )
 
 		# test invalid parameters
 		self.assertRaises( TypeError, addInvalid )
 
 	def testValidation( self ):
 
-		c = CompoundVectorParameter( 'a', 'dest' )
-		c.addParameter( IntVectorParameter( 'a', '', IntVectorData( [ 1, 2 ] ) ) )
-		c.addParameter( BoolVectorParameter( 'b', '', BoolVectorData( [ False, False ] ) ) )
+		c = IECore.CompoundVectorParameter( 'a', 'dest' )
+		c.addParameter( IECore.IntVectorParameter( 'a', '', IECore.IntVectorData( [ 1, 2 ] ) ) )
+		c.addParameter( IECore.BoolVectorParameter( 'b', '', IECore.BoolVectorData( [ False, False ] ) ) )
 
 		c.validate()
 
-		c.addParameter( IntVectorParameter( 'c', '', IntVectorData( [ 1, 2,3 ] ) ) )
+		c.addParameter( IECore.IntVectorParameter( 'c', '', IECore.IntVectorData( [ 1, 2,3 ] ) ) )
 
 		self.assertRaises( Exception, c.validate )
 		try :

@@ -33,15 +33,15 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 	def testPlane( self ) :
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 
 		verticesPerFace.append( 3 )
 		vertexIds.append( 0 )
@@ -53,15 +53,15 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		vertexIds.append( 3 )
 		vertexIds.append( 2 )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
 
-		p = V3fVectorData()
-		p.append( V3f( -1, -1, 0 ) )
-		p.append( V3f(  1, -1, 0 ) )
-		p.append( V3f( -1,  1, 0 ) )
-		p.append( V3f(  1,  1, 0 ) )
+		p = IECore.V3fVectorData()
+		p.append( IECore.V3f( -1, -1, 0 ) )
+		p.append( IECore.V3f(  1, -1, 0 ) )
+		p.append( IECore.V3f( -1,  1, 0 ) )
+		p.append( IECore.V3f(  1,  1, 0 ) )
 
-		s = FloatVectorData()
+		s = IECore.FloatVectorData()
 		s.append( 0 )
 		s.append( 1 )
 		s.append( 0 )
@@ -71,7 +71,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		s.append( 0 )
 
 
-		t = FloatVectorData()
+		t = IECore.FloatVectorData()
 		t.append( 0 )
 		t.append( 0 )
 		t.append( 1 )
@@ -80,31 +80,31 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		t.append( 1 )
 		t.append( 1 )
 
-		uni = IntVectorData()
+		uni = IECore.IntVectorData()
 		uni.append( 0 )
 		uni.append( 1 )
 
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, p )
-		m["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, s )
-		m["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, t )
-		m["uni"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, uni )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
+		m["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, s )
+		m["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, t )
+		m["uni"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, uni )
 
 		self.assert_( m.arePrimitiveVariablesValid() )
 
-		op = MeshVertexReorderOp()
+		op = IECore.MeshVertexReorderOp()
 
 		result = op(
 			input = m,
-			startingVertices = V3i( 2, 3, 1 )
+			startingVertices = IECore.V3i( 2, 3, 1 )
 		)
 
-		expectedVerticesPerFace = IntVectorData()
+		expectedVerticesPerFace = IECore.IntVectorData()
 		expectedVerticesPerFace.append( 3 )
 		expectedVerticesPerFace.append( 3 )
 
 		self.assertEqual( result.verticesPerFace, expectedVerticesPerFace )
 
-		expectedVertexIds = IntVectorData()
+		expectedVertexIds = IECore.IntVectorData()
 		expectedVertexIds.append( 0 )
 		expectedVertexIds.append( 1 )
 		expectedVertexIds.append( 2 )
@@ -114,15 +114,15 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result.vertexIds, expectedVertexIds )
 
-		expectedP = V3fVectorData()
-		expectedP.append( V3f( -1,  1, 0 ) )
-		expectedP.append( V3f(  1,  1, 0 ) )
-		expectedP.append( V3f(  1, -1, 0 ) )
-		expectedP.append( V3f( -1, -1, 0 ) )
+		expectedP = IECore.V3fVectorData()
+		expectedP.append( IECore.V3f( -1,  1, 0 ) )
+		expectedP.append( IECore.V3f(  1,  1, 0 ) )
+		expectedP.append( IECore.V3f(  1, -1, 0 ) )
+		expectedP.append( IECore.V3f( -1, -1, 0 ) )
 
 		self.assertEqual( result["P"].data, expectedP )
 
-		expectedS = FloatVectorData()
+		expectedS = IECore.FloatVectorData()
 		expectedS.append( 0 )
 		expectedS.append( 1 )
 		expectedS.append( 1 )
@@ -133,7 +133,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["s"].data, expectedS )
 
-		expectedT = FloatVectorData()
+		expectedT = IECore.FloatVectorData()
 		expectedT.append( 1 )
 		expectedT.append( 1 )
 		expectedT.append( 0 )
@@ -144,7 +144,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["t"].data, expectedT )
 
-		expectedUni = IntVectorData()
+		expectedUni = IECore.IntVectorData()
 		expectedUni.append( 1 )
 		expectedUni.append( 0 )
 
@@ -154,9 +154,9 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 	def testPlaneOppositeWinding( self ) :
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 
 		verticesPerFace.append( 3 )
 		vertexIds.append( 2 )
@@ -168,15 +168,15 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		vertexIds.append( 3 )
 		vertexIds.append( 1 )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
 
-		p = V3fVectorData()
-		p.append( V3f( -1, -1, 0 ) )
-		p.append( V3f(  1, -1, 0 ) )
-		p.append( V3f( -1,  1, 0 ) )
-		p.append( V3f(  1,  1, 0 ) )
+		p = IECore.V3fVectorData()
+		p.append( IECore.V3f( -1, -1, 0 ) )
+		p.append( IECore.V3f(  1, -1, 0 ) )
+		p.append( IECore.V3f( -1,  1, 0 ) )
+		p.append( IECore.V3f(  1,  1, 0 ) )
 
-		s = FloatVectorData()
+		s = IECore.FloatVectorData()
 		s.append( 0 )
 		s.append( 1 )
 		s.append( 0 )
@@ -186,7 +186,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		s.append( 1 )
 
 
-		t = FloatVectorData()
+		t = IECore.FloatVectorData()
 		t.append( 1 )
 		t.append( 0 )
 		t.append( 0 )
@@ -195,31 +195,31 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 		t.append( 1 )
 		t.append( 0 )
 
-		uni = IntVectorData()
+		uni = IECore.IntVectorData()
 		uni.append( 1 )
 		uni.append( 0 )
 
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, p )
-		m["s"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, s )
-		m["t"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, t )
-		m["uni"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, uni )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
+		m["s"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, s )
+		m["t"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, t )
+		m["uni"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, uni )
 
 		self.assert_( m.arePrimitiveVariablesValid() )
 
-		op = MeshVertexReorderOp()
+		op = IECore.MeshVertexReorderOp()
 
 		result = op(
 			input = m,
-			startingVertices = V3i( 2, 3, 1 )
+			startingVertices = IECore.V3i( 2, 3, 1 )
 		)
 
-		expectedVerticesPerFace = IntVectorData()
+		expectedVerticesPerFace = IECore.IntVectorData()
 		expectedVerticesPerFace.append( 3 )
 		expectedVerticesPerFace.append( 3 )
 
 		self.assertEqual( result.verticesPerFace, expectedVerticesPerFace )
 
-		expectedVertexIds = IntVectorData()
+		expectedVertexIds = IECore.IntVectorData()
 		expectedVertexIds.append( 0 )
 		expectedVertexIds.append( 1 )
 		expectedVertexIds.append( 2 )
@@ -229,15 +229,15 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result.vertexIds, expectedVertexIds )
 
-		expectedP = V3fVectorData()
-		expectedP.append( V3f( -1,  1, 0 ) )
-		expectedP.append( V3f(  1,  1, 0 ) )
-		expectedP.append( V3f(  1, -1, 0 ) )
-		expectedP.append( V3f( -1, -1, 0 ) )
+		expectedP = IECore.V3fVectorData()
+		expectedP.append( IECore.V3f( -1,  1, 0 ) )
+		expectedP.append( IECore.V3f(  1,  1, 0 ) )
+		expectedP.append( IECore.V3f(  1, -1, 0 ) )
+		expectedP.append( IECore.V3f( -1, -1, 0 ) )
 
 		self.assertEqual( result["P"].data, expectedP )
 
-		expectedS = FloatVectorData()
+		expectedS = IECore.FloatVectorData()
 		expectedS.append( 0 )
 		expectedS.append( 1 )
 		expectedS.append( 1 )
@@ -248,7 +248,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["s"].data, expectedS )
 
-		expectedT = FloatVectorData()
+		expectedT = IECore.FloatVectorData()
 		expectedT.append( 1 )
 		expectedT.append( 1 )
 		expectedT.append( 0 )
@@ -259,7 +259,7 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 		self.assertEqual( result["t"].data, expectedT )
 
-		expectedUni = IntVectorData()
+		expectedUni = IECore.IntVectorData()
 		expectedUni.append( 0 )
 		expectedUni.append( 1 )
 
@@ -269,47 +269,47 @@ class MeshVertexReorderOpTest( unittest.TestCase ) :
 
 	def testQuadSphere( self ) :
 
-		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob" ).read()
 
-		op = MeshVertexReorderOp()
+		op = IECore.MeshVertexReorderOp()
 
 		result = op(
 			input = m,
-			startingVertices = V3i( 0, 1, 21 )
+			startingVertices = IECore.V3i( 0, 1, 21 )
 		)
 
 		self.assert_( result.arePrimitiveVariablesValid() )
 
-		expected = Reader.create( "test/IECore/data/expectedResults/meshVertexReorderQuadSphere.cob" ).read()
+		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderQuadSphere.cob" ).read()
 
 		self.assertEqual( result, expected )
 
 	def testSphere( self ) :
 
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 
-		op = MeshVertexReorderOp()
+		op = IECore.MeshVertexReorderOp()
 
 		result = op(
 			input = m,
-			startingVertices = V3i( 20, 1, 21 )
+			startingVertices = IECore.V3i( 20, 1, 21 )
 		)
 
 		self.assert_( result.arePrimitiveVariablesValid() )
 
-		expected = Reader.create( "test/IECore/data/expectedResults/meshVertexReorderSphere.cob" ).read()
+		expected = IECore.Reader.create( "test/IECore/data/expectedResults/meshVertexReorderSphere.cob" ).read()
 
 		self.assertEqual( result, expected )
 
 	def testCube( self ) :
 
-		m = Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pCubeShape1.cob" ).read()
 
-		op = MeshVertexReorderOp()
+		op = IECore.MeshVertexReorderOp()
 
 		result = op(
 			input = m,
-			startingVertices = V3i( 0, 1, 3 )
+			startingVertices = IECore.V3i( 0, 1, 3 )
 		)
 
 		self.assert_( result.arePrimitiveVariablesValid() )

@@ -38,15 +38,15 @@ import os
 import pwd
 import unittest
 
-from IECore import *
+import IECore
 
 class TestHeaderGenerator(unittest.TestCase):
 
 	def testHeader(self):
 		"""Test HeaderGenerator"""
 
-		header = HeaderGenerator.header()
-		self.assertEqual( header['ieCoreVersion'].value, versionString() )
+		header = IECore.HeaderGenerator.header()
+		self.assertEqual( header['ieCoreVersion'].value, IECore.versionString() )
 		( sysname, nodename, release, version, machine ) = os.uname()
 		self.assertEqual( header["host"]["systemName"].value, sysname )
 		self.assertEqual( header["host"]["nodeName"].value, nodename )

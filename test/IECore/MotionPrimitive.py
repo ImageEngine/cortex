@@ -35,13 +35,13 @@
 import os
 import unittest
 
-from IECore import *
+import IECore
 
 class TestMotionPrimitive( unittest.TestCase ) :
 
 	def test( self ) :
 
-		m = MotionPrimitive()
+		m = IECore.MotionPrimitive()
 		self.assert_( m.isInstanceOf( "MotionPrimitive" ) )
 		self.assert_( m.isInstanceOf( "VisibleRenderable" ) )
 
@@ -49,22 +49,22 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		self.assertEqual( m.values(), [] )
 		self.assertEqual( len( m ), 0 )
 
-		self.assertRaises( Exception, m.__setitem__, "notAFloat", PointsPrimitive( 1 ) )
+		self.assertRaises( Exception, m.__setitem__, "notAFloat", IECore.PointsPrimitive( 1 ) )
 
-		m[0] = PointsPrimitive( 1 )
+		m[0] = IECore.PointsPrimitive( 1 )
 		self.assertEqual( len( m ), 1 )
 		self.assertEqual( m.keys(), [ 0 ] )
-		self.assertEqual( m.values(), [ PointsPrimitive( 1 ) ] )
+		self.assertEqual( m.values(), [ IECore.PointsPrimitive( 1 ) ] )
 
-		m[1] = PointsPrimitive( 1 )
+		m[1] = IECore.PointsPrimitive( 1 )
 		self.assertEqual( len( m ), 2 )
 		self.assertEqual( m.keys(), [ 0, 1 ] )
-		self.assertEqual( m.values(), [ PointsPrimitive( 1 ), PointsPrimitive( 1 ) ] )
+		self.assertEqual( m.values(), [ IECore.PointsPrimitive( 1 ), IECore.PointsPrimitive( 1 ) ] )
 
-		iface = IndexedIO.create( "test/motionPrimitive.fio", IndexedIO.OpenMode.Write )
+		iface = IECore.IndexedIO.create( "test/motionPrimitive.fio", IECore.IndexedIO.OpenMode.Write )
 		m.save( iface, "test" )
 
-		mm = Object.load( iface, "test" )
+		mm = IECore.Object.load( iface, "test" )
 		self.assertEqual( m, mm )
 
 		mmm = m.copy()
@@ -73,7 +73,7 @@ class TestMotionPrimitive( unittest.TestCase ) :
 		del m[0]
 		self.assertEqual( len( m ), 1 )
 		self.assertEqual( m.keys(), [ 1 ] )
-		self.assertEqual( m.values(), [ PointsPrimitive( 1 ) ] )
+		self.assertEqual( m.values(), [ IECore.PointsPrimitive( 1 ) ] )
 
 		del m[1]
 		self.assertEqual( m.keys(), [] )
@@ -82,27 +82,27 @@ class TestMotionPrimitive( unittest.TestCase ) :
 
 	def testItems( self ) :
 
-		m = MotionPrimitive()
-		m[0] = PointsPrimitive( 1 )
-		m[1] = PointsPrimitive( 2 )
-		self.assertEqual( m.items(), [ ( 0, PointsPrimitive( 1 ) ), ( 1, PointsPrimitive( 2 ) ) ] )
+		m = IECore.MotionPrimitive()
+		m[0] = IECore.PointsPrimitive( 1 )
+		m[1] = IECore.PointsPrimitive( 2 )
+		self.assertEqual( m.items(), [ ( 0, IECore.PointsPrimitive( 1 ) ), ( 1, IECore.PointsPrimitive( 2 ) ) ] )
 
 	def testHash( self ) :
 
-		m = MotionPrimitive()
-		m2 = MotionPrimitive()
+		m = IECore.MotionPrimitive()
+		m2 = IECore.MotionPrimitive()
 		self.assertEqual( m.hash(), m2.hash() )
 
-		m[0] = SpherePrimitive()
+		m[0] = IECore.SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
 
-		m2[0] = SpherePrimitive()
+		m2[0] = IECore.SpherePrimitive()
 		self.assertEqual( m.hash(), m2.hash() )
 
-		m[1] = SpherePrimitive()
+		m[1] = IECore.SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
 
-		m2[2] = SpherePrimitive()
+		m2[2] = IECore.SpherePrimitive()
 		self.assertNotEqual( m.hash(), m2.hash() )
 
 	def tearDown( self ) :

@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestPointsExpressionTest( unittest.TestCase ) :
 
@@ -41,18 +41,18 @@ class TestPointsExpressionTest( unittest.TestCase ) :
 
 		numPoints = 100
 
-		points = V3fVectorData( numPoints )
-		colors = Color3fVectorData( numPoints )
-		ints = IntVectorData( numPoints )
+		points = IECore.V3fVectorData( numPoints )
+		colors = IECore.Color3fVectorData( numPoints )
+		ints = IECore.IntVectorData( numPoints )
 
-		self.p = PointsPrimitive( numPoints )
-		self.p["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, points )
-		self.p["Cs"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, colors )
-		self.p["int"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Varying, ints )
+		self.p = IECore.PointsPrimitive( numPoints )
+		self.p["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, points )
+		self.p["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, colors )
+		self.p["int"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Varying, ints )
 
 	def testRemoval( self ) :
 
-		o = PointsExpressionOp()
+		o = IECore.PointsExpressionOp()
 		p = o( input = self.p, expression = "remove = i % 2" )
 
 		self.assertEqual( p.numPoints, self.p.numPoints / 2 )
@@ -61,7 +61,7 @@ class TestPointsExpressionTest( unittest.TestCase ) :
 
 	def testAssignment( self ) :
 
-		o = PointsExpressionOp()
+		o = IECore.PointsExpressionOp()
 		p = o( input = self.p, expression = "int = i * 10" )
 
 		self.assertEqual( p.numPoints, self.p.numPoints )
@@ -71,12 +71,12 @@ class TestPointsExpressionTest( unittest.TestCase ) :
 
 	def testGlobals( self ) :
 
-		o = PointsExpressionOp()
+		o = IECore.PointsExpressionOp()
 		p = o( input = self.p, expression = "P = V3f( i )" )
 
 		points = p["P"].data
 		for i in range( p.numPoints ) :
-			self.assert_( points[i].equalWithAbsError( V3f( i ), 0.0001 ) )
+			self.assert_( points[i].equalWithAbsError( IECore.V3f( i ), 0.0001 ) )
 
 if __name__ == "__main__":
 	unittest.main()

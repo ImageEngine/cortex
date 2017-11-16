@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class TriangulatorTest( unittest.TestCase ) :
@@ -46,27 +46,27 @@ class TriangulatorTest( unittest.TestCase ) :
 		#	 _|   |
 		#	|____|
 
-		p = V3fVectorData(
+		p = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 3, 0, 0 ),
-				V3f( 3, 4, 0 ),
-				V3f( 2, 4, 0 ),
-				V3f( 2, 3, 0 ),
-				V3f( 1, 3, 0 ),
-				V3f( 1, 4, 0 ),
-				V3f( 0, 4, 0 ),
-				V3f( 0, 2, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 1, 1, 0 ),
-				V3f( 0, 1, 0 )
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 3, 0, 0 ),
+				IECore.V3f( 3, 4, 0 ),
+				IECore.V3f( 2, 4, 0 ),
+				IECore.V3f( 2, 3, 0 ),
+				IECore.V3f( 1, 3, 0 ),
+				IECore.V3f( 1, 4, 0 ),
+				IECore.V3f( 0, 4, 0 ),
+				IECore.V3f( 0, 2, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 0, 1, 0 )
 			]
 		)
 
-		inMesh = MeshPrimitive( IntVectorData( [ 12 ] ), IntVectorData( range( 0, 12 ) ), "linear", p )
+		inMesh = IECore.MeshPrimitive( IECore.IntVectorData( [ 12 ] ), IECore.IntVectorData( range( 0, 12 ) ), "linear", p )
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( p )
 
@@ -74,14 +74,14 @@ class TriangulatorTest( unittest.TestCase ) :
 
 		self.assertNotEqual( p, outMesh["P"].data )
 		pp = p.copy()
-		pp.setInterpretation( GeometricData.Interpretation.Point )
+		pp.setInterpretation( IECore.GeometricData.Interpretation.Point )
 		self.assertEqual( pp, outMesh["P"].data )
 		self.assertEqual( len( outMesh.verticesPerFace ), len( p ) - 2 )
 		for x in outMesh.verticesPerFace :
 			self.assertEqual( x, 3 )
-		self.assertEqual( outMesh.variableSize( PrimitiveVariable.Interpolation.Vertex ), 12 )
+		self.assertEqual( outMesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 12 )
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 10 )
 
 	def testOneHole( self ) :
@@ -92,32 +92,32 @@ class TriangulatorTest( unittest.TestCase ) :
 		# |_____|
 		#
 
-		outer = V3fVectorData(
+		outer = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 3, 0, 0 ),
-				V3f( 3, 3, 0 ),
-				V3f( 0, 3, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 3, 0, 0 ),
+				IECore.V3f( 3, 3, 0 ),
+				IECore.V3f( 0, 3, 0 ),
 			]
 		)
 
-		inner = V3fVectorData(
+		inner = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 2, 2, 0 ),
-				V3f( 2, 1, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 2, 2, 0 ),
+				IECore.V3f( 2, 1, 0 ),
 			]
 		)
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( [ outer, inner ] )
 
 		outMesh = builder.mesh()
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 8 )
 
 	def testTwoHoles( self ) :
@@ -128,55 +128,55 @@ class TriangulatorTest( unittest.TestCase ) :
 		# |__________|
 		#
 
-		outer = V3fVectorData(
+		outer = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 5, 0, 0 ),
-				V3f( 5, 3, 0 ),
-				V3f( 0, 3, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 5, 0, 0 ),
+				IECore.V3f( 5, 3, 0 ),
+				IECore.V3f( 0, 3, 0 ),
 			]
 		)
 
-		inner1 = V3fVectorData(
+		inner1 = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 2, 2, 0 ),
-				V3f( 2, 1, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 2, 2, 0 ),
+				IECore.V3f( 2, 1, 0 ),
 			]
 		)
 
-		inner2 = V3fVectorData(
+		inner2 = IECore.V3fVectorData(
 			[
-				V3f( 3, 1, 0 ),
-				V3f( 3, 2, 0 ),
-				V3f( 4, 2, 0 ),
-				V3f( 4, 1, 0 ),
+				IECore.V3f( 3, 1, 0 ),
+				IECore.V3f( 3, 2, 0 ),
+				IECore.V3f( 4, 2, 0 ),
+				IECore.V3f( 4, 1, 0 ),
 			]
 		)
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( [ outer, inner1, inner2 ] )
 
 		outMesh = builder.mesh()
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 13 )
 
 	def testBigCircle( self ) :
 
 		numPoints = 10000
-		loop = V3fVectorData( numPoints )
+		loop = IECore.V3fVectorData( numPoints )
 
 		for i in range( 0, numPoints ) :
 
 			t = i * math.pi * 2 / numPoints
-			loop[i] = V3f( math.cos( t ), math.sin( t ), 0 )
+			loop[i] = IECore.V3f( math.cos( t ), math.sin( t ), 0 )
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( loop )
 
@@ -186,26 +186,26 @@ class TriangulatorTest( unittest.TestCase ) :
 		# |_|  |_|
 		#
 
-		outline1 = V3fVectorData(
+		outline1 = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 1, 0, 0 ),
-				V3f( 1, 1, 0 ),
-				V3f( 0, 1, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 1, 0, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 0, 1, 0 ),
 			]
 		)
 
-		outline2 = V3fVectorData(
+		outline2 = IECore.V3fVectorData(
 			[
-				V3f( 3, 0, 0 ),
-				V3f( 4, 0, 0 ),
-				V3f( 4, 1, 0 ),
-				V3f( 3, 1, 0 ),
+				IECore.V3f( 3, 0, 0 ),
+				IECore.V3f( 4, 0, 0 ),
+				IECore.V3f( 4, 1, 0 ),
+				IECore.V3f( 3, 1, 0 ),
 			]
 		)
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( outline1 )
 		triangulator.triangulate( outline2 )
@@ -213,11 +213,11 @@ class TriangulatorTest( unittest.TestCase ) :
 		outMesh = builder.mesh()
 
 		self.assertEqual( outMesh["P"].data.size(), 8 )
-		self.assertEqual( outMesh.verticesPerFace, IntVectorData( [ 3, 3, 3, 3 ] ) )
-		self.assertEqual( outMesh.variableSize( PrimitiveVariable.Interpolation.Vertex ), 8 )
-		self.assertEqual( outMesh.bound(), Box3f( V3f( 0 ), V3f( 4, 1, 0 ) ) )
+		self.assertEqual( outMesh.verticesPerFace, IECore.IntVectorData( [ 3, 3, 3, 3 ] ) )
+		self.assertEqual( outMesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( outMesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 4, 1, 0 ) ) )
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 2 )
 
 	def testMultipleCallsWithHoles( self ) :
@@ -228,44 +228,44 @@ class TriangulatorTest( unittest.TestCase ) :
 		# |_____|  |_____|
 		#
 
-		outer1 = V3fVectorData(
+		outer1 = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 3, 0, 0 ),
-				V3f( 3, 3, 0 ),
-				V3f( 0, 3, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 3, 0, 0 ),
+				IECore.V3f( 3, 3, 0 ),
+				IECore.V3f( 0, 3, 0 ),
 			]
 		)
 
-		inner1 = V3fVectorData(
+		inner1 = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 2, 2, 0 ),
-				V3f( 2, 1, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 2, 2, 0 ),
+				IECore.V3f( 2, 1, 0 ),
 			]
 		)
 
-		outer2 = V3fVectorData(
+		outer2 = IECore.V3fVectorData(
 			[
-				V3f( 4, 0, 0 ),
-				V3f( 7, 0, 0 ),
-				V3f( 7, 3, 0 ),
-				V3f( 4, 3, 0 ),
+				IECore.V3f( 4, 0, 0 ),
+				IECore.V3f( 7, 0, 0 ),
+				IECore.V3f( 7, 3, 0 ),
+				IECore.V3f( 4, 3, 0 ),
 			]
 		)
 
-		inner2 = V3fVectorData(
+		inner2 = IECore.V3fVectorData(
 			[
-				V3f( 5, 1, 0 ),
-				V3f( 5, 2, 0 ),
-				V3f( 6, 2, 0 ),
-				V3f( 6, 1, 0 ),
+				IECore.V3f( 5, 1, 0 ),
+				IECore.V3f( 5, 2, 0 ),
+				IECore.V3f( 6, 2, 0 ),
+				IECore.V3f( 6, 1, 0 ),
 			]
 		)
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( [ outer1, inner1 ] )
 		triangulator.triangulate( [ outer2, inner2 ] )
@@ -273,10 +273,10 @@ class TriangulatorTest( unittest.TestCase ) :
 		outMesh = builder.mesh()
 
 		self.assertEqual( outMesh["P"].data.size(), 16 )
-		self.assertEqual( outMesh.variableSize( PrimitiveVariable.Interpolation.Vertex ), 16 )
-		self.assertEqual( outMesh.bound(), Box3f( V3f( 0 ), V3f( 7, 3, 0 ) ) )
+		self.assertEqual( outMesh.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 16 )
+		self.assertEqual( outMesh.bound(), IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 7, 3, 0 ) ) )
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 16 )
 
 	def testRightAlignedHoles( self ) :
@@ -288,41 +288,41 @@ class TriangulatorTest( unittest.TestCase ) :
 		# | |_| |
 		# |_____|
 
-		outer = V3fVectorData(
+		outer = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 3, 0, 0 ),
-				V3f( 3, 5, 0 ),
-				V3f( 0, 5, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 3, 0, 0 ),
+				IECore.V3f( 3, 5, 0 ),
+				IECore.V3f( 0, 5, 0 ),
 			]
 		)
 
-		inner1 = V3fVectorData(
+		inner1 = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 2, 2, 0 ),
-				V3f( 2, 1, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 2, 2, 0 ),
+				IECore.V3f( 2, 1, 0 ),
 			]
 		)
 
-		inner2 = V3fVectorData(
+		inner2 = IECore.V3fVectorData(
 			[
-				V3f( 1, 3, 0 ),
-				V3f( 1, 4, 0 ),
-				V3f( 2, 4, 0 ),
-				V3f( 2, 3, 0 ),
+				IECore.V3f( 1, 3, 0 ),
+				IECore.V3f( 1, 4, 0 ),
+				IECore.V3f( 2, 4, 0 ),
+				IECore.V3f( 2, 3, 0 ),
 			]
 		)
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( [ outer, inner1, inner2 ] )
 
 		outMesh = builder.mesh()
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 13 )
 
 	def testColinearities( self ) :
@@ -335,30 +335,30 @@ class TriangulatorTest( unittest.TestCase ) :
 		# |_._|
 		#
 
-		outer = V3fVectorData(
+		outer = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 1, 3, 0 ),
-				V3f( 0.5, 3, 0 ),
-				V3f( 0, 3, 0 ),
-				V3f( 0, 2, 0 ),
-				V3f( 0, 1, 0 ),
-				V3f( 0, 0, 0 ),
-				V3f( 0.5, 0, 0 ),
-				V3f( 1, 0, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 1, 3, 0 ),
+				IECore.V3f( 0.5, 3, 0 ),
+				IECore.V3f( 0, 3, 0 ),
+				IECore.V3f( 0, 2, 0 ),
+				IECore.V3f( 0, 1, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 0.5, 0, 0 ),
+				IECore.V3f( 1, 0, 0 ),
 			]
 		)
 
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( outer )
 
 		outMesh = builder.mesh()
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 3 )
 
 		p = outMesh["P"].data
@@ -368,7 +368,7 @@ class TriangulatorTest( unittest.TestCase ) :
 		for i in range( 0, 10 ) :
 			self.assert_( i in vertexIds )
 
-		self.assertEqual( outMesh.verticesPerFace, IntVectorData( [ 3 ] * 8 ) )
+		self.assertEqual( outMesh.verticesPerFace, IECore.IntVectorData( [ 3 ] * 8 ) )
 
 		i = 0
 		for j in range( 0, 8 ) :
@@ -377,7 +377,7 @@ class TriangulatorTest( unittest.TestCase ) :
 			p1 = p[vertexIds[i+1]]
 			p2 = p[vertexIds[i+2]]
 
-			self.assert_( triangleArea( p0, p1, p2 ) > 0 )
+			self.assert_( IECore.triangleArea( p0, p1, p2 ) > 0 )
 
 	def testHoleAlignedWithVertex( self ) :
 
@@ -388,35 +388,35 @@ class TriangulatorTest( unittest.TestCase ) :
 		#    |__|
 		#
 
-		outer = V3fVectorData(
+		outer = IECore.V3fVectorData(
 			[
-				V3f( 0, 0, 0 ),
-				V3f( 2, 0, 0 ),
-				V3f( 2, -1, 0 ),
-				V3f( 3, -1, 0 ),
-				V3f( 3, 3, 0 ),
-				V3f( 0, 3, 0 ),
+				IECore.V3f( 0, 0, 0 ),
+				IECore.V3f( 2, 0, 0 ),
+				IECore.V3f( 2, -1, 0 ),
+				IECore.V3f( 3, -1, 0 ),
+				IECore.V3f( 3, 3, 0 ),
+				IECore.V3f( 0, 3, 0 ),
 			]
 		)
 
-		inner = V3fVectorData(
+		inner = IECore.V3fVectorData(
 			[
-				V3f( 1, 1, 0 ),
-				V3f( 1, 2, 0 ),
-				V3f( 2, 2, 0 ),
-				V3f( 2, 1, 0 ),
+				IECore.V3f( 1, 1, 0 ),
+				IECore.V3f( 1, 2, 0 ),
+				IECore.V3f( 2, 2, 0 ),
+				IECore.V3f( 2, 1, 0 ),
 			]
 		)
 
 
-		builder = MeshPrimitiveBuilder()
-		triangulator = V3fTriangulator( builder )
+		builder = IECore.MeshPrimitiveBuilder()
+		triangulator = IECore.V3fTriangulator( builder )
 
 		triangulator.triangulate( [ outer, inner ] )
 
 		outMesh = builder.mesh()
 
-		e = PrimitiveEvaluator.create( outMesh )
+		e = IECore.PrimitiveEvaluator.create( outMesh )
 		self.assertEqual( e.surfaceArea(), 9 )
 
 if __name__ == "__main__":

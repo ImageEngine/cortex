@@ -35,7 +35,7 @@
 import math
 import random
 import unittest
-from IECore import *
+import IECore
 
 class TestBoundedKDTree:
 
@@ -75,37 +75,37 @@ class TestBoundedKDTree:
 class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = V3f( random.random(), random.random(), random.random() )
-		b2 = V3f( random.random(), random.random(), random.random() )
-		bound = Box3f( b1 )
+		b1 = IECore.V3f( random.random(), random.random(), random.random() )
+		b2 = IECore.V3f( random.random(), random.random(), random.random() )
+		bound = IECore.Box3f( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = V3f( -3, -3, -3 )
-		b2 = V3f( -2, -2, -2 )
-		bound = Box3f( b1, b2 )
+		b1 = IECore.V3f( -3, -3, -3 )
+		b2 = IECore.V3f( -2, -2, -2 )
+		bound = IECore.Box3f( b1, b2 )
 
 		return bound
 
 	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
-		self.bounds = Box3fVectorData()
+		self.bounds = IECore.Box3fVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeRandomBound() )
 
-		self.tree = Box3fTree( self.bounds )
+		self.tree = IECore.Box3fTree( self.bounds )
 
 	def makeTree(self, numBounds):
-		self.bounds = Box3fVectorData()
+		self.bounds = IECore.Box3fVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeBound() )
 
-		self.tree = Box3fTree( self.bounds )
+		self.tree = IECore.Box3fTree( self.bounds )
 
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox3f constructors"""
@@ -124,17 +124,17 @@ class TestBoundedKDTreeBox3f(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = V3d( random.random(), random.random(), random.random() )
-		b2 = V3d( random.random(), random.random(), random.random() )
-		bound = Box3d( b1 )
+		b1 = IECore.V3d( random.random(), random.random(), random.random() )
+		b2 = IECore.V3d( random.random(), random.random(), random.random() )
+		bound = IECore.Box3d( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = V3d( -1, -1, -1)
-		b2 = V3d( 1, 1, 1 )
-		bound = Box3d( b1, b2 )
+		b1 = IECore.V3d( -1, -1, -1)
+		b2 = IECore.V3d( 1, 1, 1 )
+		bound = IECore.Box3d( b1, b2 )
 
 		return bound
 
@@ -142,20 +142,20 @@ class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
-		self.bounds = Box3dVectorData()
+		self.bounds = IECore.Box3dVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeRandomBound() )
 
-		self.tree = Box3dTree( self.bounds )
+		self.tree = IECore.Box3dTree( self.bounds )
 
 	def makeTree(self, numBounds):
-		self.bounds = Box3dVectorData()
+		self.bounds = IECore.Box3dVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeBound() )
 
-		self.tree = Box3dTree( self.bounds )
+		self.tree = IECore.Box3dTree( self.bounds )
 
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox3d constructors"""
@@ -173,17 +173,17 @@ class TestBoundedKDTreeBox3d(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = V2f( random.random(), random.random() )
-		b2 = V2f( random.random(), random.random() )
-		bound = Box2f( b1 )
+		b1 = IECore.V2f( random.random(), random.random() )
+		b2 = IECore.V2f( random.random(), random.random() )
+		bound = IECore.Box2f( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = V2f( -1, -1 )
-		b2 = V2f( 1, 1 )
-		bound = Box2f( b1, b2 )
+		b1 = IECore.V2f( -1, -1 )
+		b2 = IECore.V2f( 1, 1 )
+		bound = IECore.Box2f( b1, b2 )
 
 		return bound
 
@@ -191,20 +191,20 @@ class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
-		self.bounds = Box2fVectorData()
+		self.bounds = IECore.Box2fVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeRandomBound() )
 
-		self.tree = Box2fTree( self.bounds )
+		self.tree = IECore.Box2fTree( self.bounds )
 
 	def makeTree(self, numBounds):
-		self.bounds = Box2fVectorData()
+		self.bounds = IECore.Box2fVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeBound() )
 
-		self.tree = Box2fTree( self.bounds )
+		self.tree = IECore.Box2fTree( self.bounds )
 
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox2f constructors"""
@@ -223,37 +223,37 @@ class TestBoundedKDTreeBox2f(unittest.TestCase, TestBoundedKDTree):
 class TestBoundedKDTreeBox2d(unittest.TestCase, TestBoundedKDTree):
 
 	def makeRandomBound( self ) :
-		b1 = V2d( random.random(), random.random() )
-		b2 = V2d( random.random(), random.random() )
-		bound = Box2d( b1 )
+		b1 = IECore.V2d( random.random(), random.random() )
+		b2 = IECore.V2d( random.random(), random.random() )
+		bound = IECore.Box2d( b1 )
 		bound.extendBy( b2 )
 
 		return bound
 
 	def makeBound( self ) :
-		b1 = V2d( -1, -1 )
-		b2 = V2d( 1, 1 )
-		bound = Box2d( b1, b2 )
+		b1 = IECore.V2d( -1, -1 )
+		b2 = IECore.V2d( 1, 1 )
+		bound = IECore.Box2d( b1, b2 )
 
 		return bound
 
 	def makeRandomTree(self, numBounds):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numBounds)
-		self.bounds = Box2dVectorData()
+		self.bounds = IECore.Box2dVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeRandomBound() )
 
-		self.tree = Box2dTree( self.bounds )
+		self.tree = IECore.Box2dTree( self.bounds )
 
 	def makeTree(self, numBounds):
-		self.bounds = Box2dVectorData()
+		self.bounds = IECore.Box2dVectorData()
 
 		for i in range(0, numBounds):
 			self.bounds.append( self.makeBound() )
 
-		self.tree = Box2dTree( self.bounds )
+		self.tree = IECore.Box2dTree( self.bounds )
 
 	def testConstructors(self):
 		"""Test BoundedKDTreeBox2d constructors"""

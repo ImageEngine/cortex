@@ -34,7 +34,7 @@
 
 import math
 import unittest
-from IECore import *
+import IECore
 import random
 import os
 
@@ -49,7 +49,7 @@ class BoolVectorDataTest( unittest.TestCase ) :
 		for i in range( 0, 100 ) :
 
 			s = random.randint( 0, 100 )
-			b = BoolVectorData( s )
+			b = IECore.BoolVectorData( s )
 			self.assertEqual( s, len( b ) )
 			for j in range( 0, len( b ) ) :
 				self.assertEqual( b[j], False )
@@ -60,20 +60,20 @@ class BoolVectorDataTest( unittest.TestCase ) :
 			bb = b.copy()
 			self.assertEqual( b, bb )
 
-			ObjectWriter( b, "test/boolVector.cob" ).write()
+			IECore.ObjectWriter( b, "test/boolVector.cob" ).write()
 
-			bbb = ObjectReader( "test/boolVector.cob" ).read()
+			bbb = IECore.ObjectReader( "test/boolVector.cob" ).read()
 
 			self.assertEqual( b, bbb )
 
 	def testStrAndRepr( self ) :
 
-		self.assertEqual( str( BoolVectorData( [True, False] ) ), "1 0" )
-		self.assertEqual( repr( BoolVectorData( [False, True] ) ), "IECore.BoolVectorData( [ 0, 1 ] )" )
+		self.assertEqual( str( IECore.BoolVectorData( [True, False] ) ), "1 0" )
+		self.assertEqual( repr( IECore.BoolVectorData( [False, True] ) ), "IECore.BoolVectorData( [ 0, 1 ] )" )
 
 	def testHasBase( self ) :
 
-		self.failIf( BoolVectorData.hasBase() )
+		self.failIf( IECore.BoolVectorData.hasBase() )
 
 	def tearDown( self ) :
 

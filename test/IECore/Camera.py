@@ -35,91 +35,91 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
 
 class TestCamera( unittest.TestCase ) :
 
 	def test( self ) :
 
-		c = Camera()
+		c = IECore.Camera()
 		self.assertEqual( c.getName(), "default" )
 		self.assertEqual( c.getTransform(), None )
-		self.assertEqual( c.parameters(), CompoundData() )
+		self.assertEqual( c.parameters(), IECore.CompoundData() )
 
 		cc = c.copy()
 		self.assertEqual( cc.getName(), "default" )
 		self.assertEqual( cc.getTransform(), None )
-		self.assertEqual( cc.parameters(), CompoundData() )
+		self.assertEqual( cc.parameters(), IECore.CompoundData() )
 		self.assertEqual( cc, c )
 
-		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
-		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
+		IECore.Writer.create( cc, "test/IECore/data/camera.cob" ).write()
+		ccc = IECore.Reader.create( "test/IECore/data/camera.cob" ).read()
 
 		self.assertEqual( c, ccc )
 
 		c.setName( "n" )
 		self.assertEqual( c.getName(), "n" )
 
-		c.setTransform( MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		self.assertEqual( c.getTransform(), MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
+		c.setTransform( IECore.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		self.assertEqual( c.getTransform(), IECore.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
 
-		c.parameters()["fov"] = FloatData( 45 )
-		self.assertEqual( c.parameters()["fov"], FloatData( 45 ) )
+		c.parameters()["fov"] = IECore.FloatData( 45 )
+		self.assertEqual( c.parameters()["fov"], IECore.FloatData( 45 ) )
 
 		# test copying and saving with some parameters and a transform
 		cc = c.copy()
 		self.assertEqual( cc, c )
 
-		Writer.create( cc, "test/IECore/data/camera.cob" ).write()
-		ccc = Reader.create( "test/IECore/data/camera.cob" ).read()
+		IECore.Writer.create( cc, "test/IECore/data/camera.cob" ).write()
+		ccc = IECore.Reader.create( "test/IECore/data/camera.cob" ).read()
 		self.assertEqual( ccc, c )
 
 	def testAddStandardParameters( self ) :
 
-		c = Camera()
+		c = IECore.Camera()
 		c.addStandardParameters()
 
-		self.assertEqual( c.parameters()["resolution"].value, V2i( 640, 480 ) )
+		self.assertEqual( c.parameters()["resolution"].value, IECore.V2i( 640, 480 ) )
 		self.assertEqual( c.parameters()["pixelAspectRatio"].value, 1.0 )
 		aspectRatio = 640.0/480.0
-		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -aspectRatio, -1 ), V2f( aspectRatio, 1 ) ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -aspectRatio, -1 ), IECore.V2f( aspectRatio, 1 ) ) )
 
-		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0, 0 ), V2f( 1, 1 ) ) )
+		self.assertEqual( c.parameters()["cropWindow"].value, IECore.Box2f( IECore.V2f( 0, 0 ), IECore.V2f( 1, 1 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "orthographic" )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 0.01, 100000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, V2f( 0 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( 0.01, 100000 ) )
+		self.assertEqual( c.parameters()["shutter"].value, IECore.V2f( 0 ) )
 
-		c = Camera()
-		c.parameters()["projection"] = StringData( "perspective" )
-		c.parameters()["resolution"] = V2iData( V2i( 500, 1000 ) )
-		c.parameters()["cropWindow"] = Box2fData( Box2f( V2f( 0.1 ), V2f( 0.9 ) ) )
-		c.parameters()["clippingPlanes"] = V2fData( V2f( 1, 1000 ) )
-		c.parameters()["shutter"] = V2fData( V2f( 1, 2 ) )
+		c = IECore.Camera()
+		c.parameters()["projection"] = IECore.StringData( "perspective" )
+		c.parameters()["resolution"] = IECore.V2iData( IECore.V2i( 500, 1000 ) )
+		c.parameters()["cropWindow"] = IECore.Box2fData( IECore.Box2f( IECore.V2f( 0.1 ), IECore.V2f( 0.9 ) ) )
+		c.parameters()["clippingPlanes"] = IECore.V2fData( IECore.V2f( 1, 1000 ) )
+		c.parameters()["shutter"] = IECore.V2fData( IECore.V2f( 1, 2 ) )
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["resolution"].value, V2i( 500, 1000 ) )
-		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -1, -2 ), V2f( 1, 2 ) ) )
-		self.assertEqual( c.parameters()["cropWindow"].value, Box2f( V2f( 0.1 ), V2f( 0.9 ) ) )
+		self.assertEqual( c.parameters()["resolution"].value, IECore.V2i( 500, 1000 ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1, -2 ), IECore.V2f( 1, 2 ) ) )
+		self.assertEqual( c.parameters()["cropWindow"].value, IECore.Box2f( IECore.V2f( 0.1 ), IECore.V2f( 0.9 ) ) )
 		self.assertEqual( c.parameters()["projection"].value, "perspective" )
 		self.assertEqual( c.parameters()["projection:fov"].value, 90 )
-		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( 1, 1000 ) )
-		self.assertEqual( c.parameters()["shutter"].value, V2f( 1, 2 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( 1, 1000 ) )
+		self.assertEqual( c.parameters()["shutter"].value, IECore.V2f( 1, 2 ) )
 
 		# Negative clip planes on ortho cameras should be supported
-		c = Camera()
-		c.parameters()["clippingPlanes"] = V2fData( V2f( -1000, 1000 ) )
+		c = IECore.Camera()
+		c.parameters()["clippingPlanes"] = IECore.V2fData( IECore.V2f( -1000, 1000 ) )
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["clippingPlanes"].value, V2f( -1000, 1000 ) )
+		self.assertEqual( c.parameters()["clippingPlanes"].value, IECore.V2f( -1000, 1000 ) )
 
 	def testHash( self ) :
 
-		c = Camera()
+		c = IECore.Camera()
 		h = c.hash()
 
 		c.setName( "summink" )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
-		c.setTransform( MatrixTransform( M44f() ) )
+		c.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		self.assertNotEqual( c.hash(), h )
 		h = c.hash()
 
@@ -128,12 +128,12 @@ class TestCamera( unittest.TestCase ) :
 
 	def testAddStandardParametersWithNonSquarePixels( self ) :
 
-		c = Camera()
-		c.parameters()["resolution"] = V2i( 100, 200 )
+		c = IECore.Camera()
+		c.parameters()["resolution"] = IECore.V2i( 100, 200 )
 		c.parameters()["pixelAspectRatio"] = 2.0
 
 		c.addStandardParameters()
-		self.assertEqual( c.parameters()["screenWindow"].value, Box2f( V2f( -1 ), V2f( 1 ) ) )
+		self.assertEqual( c.parameters()["screenWindow"].value, IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 	def tearDown( self ) :
 

@@ -35,15 +35,15 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
 
 class TestTypedPrimitiveOp( unittest.TestCase ) :
 
-	class MeshCopyOp( MeshPrimitiveOp ) :
+	class MeshCopyOp( IECore.MeshPrimitiveOp ) :
 
 		def __init__( self ):
 
-			MeshPrimitiveOp.__init__( self, "MeshCopyOp", "A simple op to copy meshes" )
+			IECore.MeshPrimitiveOp.__init__( self, "MeshCopyOp", "A simple op to copy meshes" )
 
 		def modifyTypedPrimitive( self, mesh, operands ) :
 
@@ -56,11 +56,11 @@ class TestTypedPrimitiveOp( unittest.TestCase ) :
 		""" Test TypedPrimitiveOp for use with MeshPrimitive """
 		op = TestTypedPrimitiveOp.MeshCopyOp()
 
-		inputMesh = MeshPrimitive()
+		inputMesh = IECore.MeshPrimitive()
 
 		outputMesh = op( input = inputMesh )
 
-		self.assert_( outputMesh.isInstanceOf( TypeId.MeshPrimitive ) )
+		self.assert_( outputMesh.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 		self.failIf( inputMesh is outputMesh )
 		self.assertEqual( inputMesh, outputMesh )
 

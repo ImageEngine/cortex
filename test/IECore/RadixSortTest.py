@@ -34,7 +34,7 @@
 
 import random
 import unittest
-from IECore import *
+import IECore
 
 class RadixSortTest( unittest.TestCase ) :
 
@@ -42,12 +42,12 @@ class RadixSortTest( unittest.TestCase ) :
 
 		random.seed( 12 )
 
-		s = RadixSort()
+		s = IECore.RadixSort()
 
-		d = FloatVectorData()
+		d = IECore.FloatVectorData()
 
 		for i in range( 0, 10000 ):
-			d.append( random.uniform( FloatData().minValue, FloatData().maxValue ) )
+			d.append( random.uniform( IECore.FloatData().minValue, IECore.FloatData().maxValue ) )
 
 		idx = s.sort( d )
 
@@ -61,12 +61,12 @@ class RadixSortTest( unittest.TestCase ) :
 
 		random.seed( 13 )
 
-		s = RadixSort()
+		s = IECore.RadixSort()
 
-		d = IntVectorData()
+		d = IECore.IntVectorData()
 
 		for i in range( 0, 10000 ):
-			d.append( int( random.uniform( IntData().minValue, IntData().maxValue ) ) )
+			d.append( int( random.uniform( IECore.IntData().minValue, IECore.IntData().maxValue ) ) )
 
 		idx = s.sort( d )
 
@@ -80,12 +80,12 @@ class RadixSortTest( unittest.TestCase ) :
 
 		random.seed( 14 )
 
-		s = RadixSort()
+		s = IECore.RadixSort()
 
-		d = UIntVectorData()
+		d = IECore.UIntVectorData()
 
 		for i in range( 0, 10000 ):
-			d.append( int( random.uniform( UIntData().minValue, UIntData().maxValue ) ) )
+			d.append( int( random.uniform( IECore.UIntData().minValue, IECore.UIntData().maxValue ) ) )
 
 		idx = s.sort( d )
 

@@ -35,56 +35,56 @@
 import unittest
 import random
 
-from IECore import *
+import IECore
 
 class TestVectorDataFilterOp( unittest.TestCase ) :
 
 	def test( self ) :
 
-		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-		f = BoolVectorData( [ 0, 1, 0, 1 ] )
+		i = IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		f = IECore.BoolVectorData( [ 0, 1, 0, 1 ] )
 
-		ii = VectorDataFilterOp()( input = i, filter = f, invert = False, clip = True )
-		self.assertEqual( ii, IntVectorData( [ 2, 4 ] ) )
+		ii = IECore.VectorDataFilterOp()( input = i, filter = f, invert = False, clip = True )
+		self.assertEqual( ii, IECore.IntVectorData( [ 2, 4 ] ) )
 
-		ii = VectorDataFilterOp()( input = i, filter = f, invert = True, clip = True )
-		self.assertEqual( ii, IntVectorData( [ 1, 3 ] ) )
+		ii = IECore.VectorDataFilterOp()( input = i, filter = f, invert = True, clip = True )
+		self.assertEqual( ii, IECore.IntVectorData( [ 1, 3 ] ) )
 
-		ii = VectorDataFilterOp()( input = i, filter = f, invert = False, clip = False )
-		self.assertEqual( ii, IntVectorData( [ 2, 4, 5, 6 ] ) )
+		ii = IECore.VectorDataFilterOp()( input = i, filter = f, invert = False, clip = False )
+		self.assertEqual( ii, IECore.IntVectorData( [ 2, 4, 5, 6 ] ) )
 
-		ii = VectorDataFilterOp()( input = i, filter = f, invert = True, clip = False )
-		self.assertEqual( ii, IntVectorData( [ 1, 3, 5, 6 ] ) )
+		ii = IECore.VectorDataFilterOp()( input = i, filter = f, invert = True, clip = False )
+		self.assertEqual( ii, IECore.IntVectorData( [ 1, 3, 5, 6 ] ) )
 
 	def testOperateInPlace( self ) :
 
-		f = BoolVectorData( [ 0, 1, 0, 1 ] )
+		f = IECore.BoolVectorData( [ 0, 1, 0, 1 ] )
 
-		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = True )
-		self.assertEqual( i, IntVectorData( [ 2, 4 ] ) )
+		i = IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		IECore.VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = True )
+		self.assertEqual( i, IECore.IntVectorData( [ 2, 4 ] ) )
 
-		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = True )
-		self.assertEqual( i, IntVectorData( [ 1, 3 ] ) )
+		i = IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		IECore.VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = True )
+		self.assertEqual( i, IECore.IntVectorData( [ 1, 3 ] ) )
 
-		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = False )
-		self.assertEqual( i, IntVectorData( [ 2, 4, 5, 6 ] ) )
+		i = IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		IECore.VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = False, clip = False )
+		self.assertEqual( i, IECore.IntVectorData( [ 2, 4, 5, 6 ] ) )
 
-		i = IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
-		VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = False )
-		self.assertEqual( i, IntVectorData( [ 1, 3, 5, 6 ] ) )
+		i = IECore.IntVectorData( [ 1, 2, 3, 4, 5, 6 ] )
+		IECore.VectorDataFilterOp()( input = i, copyInput = False, filter = f, invert = True, clip = False )
+		self.assertEqual( i, IECore.IntVectorData( [ 1, 3, 5, 6 ] ) )
 
 		for i in range( 0, 1000 ) :
-			m = BoolVectorData()
-			v = V3fVectorData()
+			m = IECore.BoolVectorData()
+			v = IECore.V3fVectorData()
 			n = 0
 			for j in range( 0, random.randint( 0, 1000 ) ) :
 				m.append( random.randint( 0,1 ) )
 				n += m[-1]
-				v.append( V3f( 0 ) )
-			VectorDataFilterOp()( input = v, copyInput = False, filter = m )
+				v.append( IECore.V3f( 0 ) )
+			IECore.VectorDataFilterOp()( input = v, copyInput = False, filter = m )
 			self.assertEqual( len( v ), n )
 
 if __name__ == "__main__":

@@ -33,20 +33,20 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class CurveTangentsOpTest( unittest.TestCase ) :
 
 	def testTangentsGeneration( self ) :
 
-		i = IntVectorData( [ 4 ] )
-		p = V3fVectorData( [ V3f( 0.0 ), V3f( 1.0, 0.0, 0.0 ), V3f( 2.0, 0.0, 0.0 ), V3f( 3.0, 0.0, 0.0 ) ] )
-		c = CurvesPrimitive( i, CubicBasisf.bSpline(), False, p )
+		i = IECore.IntVectorData( [ 4 ] )
+		p = IECore.V3fVectorData( [ IECore.V3f( 0.0 ), IECore.V3f( 1.0, 0.0, 0.0 ), IECore.V3f( 2.0, 0.0, 0.0 ), IECore.V3f( 3.0, 0.0, 0.0 ) ] )
+		c = IECore.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
 
 		self.assert_( "myTangent" not in c )
 
-		curves = CurveTangentsOp() (
+		curves = IECore.CurveTangentsOp() (
 			input = c,
 			vTangentPrimVarName = "myTangent",
 		)
@@ -54,10 +54,10 @@ class CurveTangentsOpTest( unittest.TestCase ) :
 		self.assert_( "myTangent" in curves )
 		self.assert_( curves.arePrimitiveVariablesValid() )
 
-		self.assertEqual( curves["myTangent"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( curves["myTangent"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
 		for v in curves["myTangent"].data :
-			self.failUnless( v.equalWithAbsError( V3f( 1, 0, 0 ), 0.000001 ) )
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
 
 if __name__ == "__main__":
     unittest.main()

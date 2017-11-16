@@ -34,7 +34,7 @@
 
 import math
 import unittest
-from IECore import *
+import IECore
 
 
 
@@ -43,36 +43,36 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testSimple( self ) :
 		""" Test TriangulateOp with a single polygon"""
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 
-		P = V3fVectorData()
-		P.append( V3f( -1, 0, -1 ) )
-		P.append( V3f( -1, 0,  1 ) )
-		P.append( V3f(  1, 0,  1 ) )
-		P.append( V3f(  1, 0, -1 ) )
+		P = IECore.V3fVectorData()
+		P.append( IECore.V3f( -1, 0, -1 ) )
+		P.append( IECore.V3f( -1, 0,  1 ) )
+		P.append( IECore.V3f(  1, 0,  1 ) )
+		P.append( IECore.V3f(  1, 0, -1 ) )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, P )
 
-		fv = IntVectorData()
+		fv = IECore.IntVectorData()
 		fv.append( 5 )
 		fv.append( 6 )
 		fv.append( 7 )
 		fv.append( 8 )
-		m["fv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, fv )
+		m["fv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, fv )
 
-		u = FloatVectorData()
+		u = IECore.FloatVectorData()
 		u.append( 1.0 )
-		m["u"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, u )
+		m["u"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, u )
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		result = op(
 			input = m
@@ -107,12 +107,12 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testQuadrangulatedSphere( self ) :
 		""" Test TriangulateOp with a quadrangulated poly sphere"""
 
-		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
 		P = m["P"].data
 
 		self.assertEqual ( len( m.vertexIds ), 1560 )
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		result = op(
 			input = m
@@ -140,9 +140,9 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testTriangulatedSphere( self ) :
 		""" Test TriangulateOp with a triangulated poly sphere"""
 
-		m = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		result = op(
 			input = m
@@ -157,25 +157,25 @@ class TestTriangulateOp( unittest.TestCase ) :
 		""" Test TriangulateOp with a nonplanar polygon"""
 
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 
-		P = V3dVectorData()
-		P.append( V3d( -1, 0, -1 ) )
-		P.append( V3d( -1, 0,  1 ) )
-		P.append( V3d(  1, 0,  1 ) )
-		P.append( V3d(  1, 1, -1 ) )
+		P = IECore.V3dVectorData()
+		P.append( IECore.V3d( -1, 0, -1 ) )
+		P.append( IECore.V3d( -1, 0,  1 ) )
+		P.append( IECore.V3d(  1, 0,  1 ) )
+		P.append( IECore.V3d(  1, 1, -1 ) )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		op["input"] = m
 
@@ -189,25 +189,25 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testConcave( self ) :
 		""" Test TriangulateOp with a concave polygon"""
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 
-		P = V3dVectorData()
-		P.append( V3d( -1, 0, -1 ) )
-		P.append( V3d( -1, 0,  1 ) )
-		P.append( V3d(  1, 0,  1 ) )
-		P.append( V3d(  -0.9, 0, -0.9 ) )
+		P = IECore.V3dVectorData()
+		P.append( IECore.V3d( -1, 0, -1 ) )
+		P.append( IECore.V3d( -1, 0,  1 ) )
+		P.append( IECore.V3d(  1, 0,  1 ) )
+		P.append( IECore.V3d(  -0.9, 0, -0.9 ) )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		op["input"] = m
 
@@ -220,25 +220,25 @@ class TestTriangulateOp( unittest.TestCase ) :
 	def testErrors( self ):
 		""" Test TriangulateOp with invalid P data """
 
-		verticesPerFace = IntVectorData()
+		verticesPerFace = IECore.IntVectorData()
 		verticesPerFace.append( 4 )
 
-		vertexIds = IntVectorData()
+		vertexIds = IECore.IntVectorData()
 		vertexIds.append( 0 )
 		vertexIds.append( 1 )
 		vertexIds.append( 2 )
 		vertexIds.append( 3 )
 
-		P = FloatVectorData()
+		P = IECore.FloatVectorData()
 		P.append( 1 )
 		P.append( 2 )
 		P.append( 3 )
 		P.append( 4 )
 
-		m = MeshPrimitive( verticesPerFace, vertexIds )
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, P )
+		m = IECore.MeshPrimitive( verticesPerFace, vertexIds )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, P )
 
-		op = TriangulateOp()
+		op = IECore.TriangulateOp()
 
 		op["input"] = m
 
@@ -247,46 +247,46 @@ class TestTriangulateOp( unittest.TestCase ) :
 
 	def testConstantPrimVars( self ) :
 
-		m = Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/polySphereQuads.cob").read()
 
-		m["constantScalar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
-		m["constantArray"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, StringVectorData( [ "one", "two" ] ) )
+		m["constantScalar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
+		m["constantArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringVectorData( [ "one", "two" ] ) )
 
-		result = TriangulateOp()( input = m )
+		result = IECore.TriangulateOp()( input = m )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 	def testInterpolationShouldntChange( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		m.setTopology( m.verticesPerFace, m.vertexIds, "catmullClark" )
 
-		TriangulateOp()( input = m, copyInput = False )
+		IECore.TriangulateOp()( input = m, copyInput = False )
 
 		self.assertEqual( m.interpolation, "catmullClark" )
 
 	def testFaceVaryingIndices( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
-		m["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, m["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 
-		m2 = TriangulateOp()( input = m, copyInput = True )
+		m2 = IECore.TriangulateOp()( input = m, copyInput = True )
 
 		self.assertTrue( m2.arePrimitiveVariablesValid() )
 
 		self.assertEqual( m2["uv"].data, m["uv"].data )
-		self.assertEqual( m2["uv"].indices, IntVectorData( [ 0, 3, 1, 0, 1, 2 ] ) )
+		self.assertEqual( m2["uv"].indices, IECore.IntVectorData( [ 0, 3, 1, 0, 1, 2 ] ) )
 
 	def testUniformIndices( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -4 ), V2f( 4 ) ), divisions = V2i( 2, 2 ) )
-		m["myString"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Uniform, StringVectorData( [ "a", "b" ] ), IntVectorData( [ 1, 0, 0, 1 ] ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -4 ), IECore.V2f( 4 ) ), divisions = IECore.V2i( 2, 2 ) )
+		m["myString"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringVectorData( [ "a", "b" ] ), IECore.IntVectorData( [ 1, 0, 0, 1 ] ) )
 
-		m2 = TriangulateOp()( input = m, copyInput = True )
+		m2 = IECore.TriangulateOp()( input = m, copyInput = True )
 
 		self.assertTrue( m2.arePrimitiveVariablesValid() )
 
 		self.assertEqual( m2["myString"].data, m["myString"].data )
-		self.assertEqual( m2["myString"].indices, IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
+		self.assertEqual( m2["myString"].indices, IECore.IntVectorData( [ 1, 1, 0, 0, 0, 0, 1, 1 ] ) )
 
 if __name__ == "__main__":
     unittest.main()

@@ -37,7 +37,7 @@
 import math
 import unittest
 
-from IECore import *
+import IECore
 
 
 class BaseVectorDataTest:
@@ -380,7 +380,7 @@ class BaseVectorDataTest:
 class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, FloatVectorData, float)
+		BaseVectorDataTest.__init__(self, IECore.FloatVectorData, float)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -446,7 +446,7 @@ class FloatVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class HalfVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, HalfVectorData, float)
+		BaseVectorDataTest.__init__(self, IECore.HalfVectorData, float)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -512,7 +512,7 @@ class HalfVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, DoubleVectorData, float)
+		BaseVectorDataTest.__init__(self, IECore.DoubleVectorData, float)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -578,7 +578,7 @@ class DoubleVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class IntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, IntVectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.IntVectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -644,7 +644,7 @@ class IntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class UIntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, UIntVectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.UIntVectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -710,7 +710,7 @@ class UIntVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class CharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, CharVectorData, chr)
+		BaseVectorDataTest.__init__(self, IECore.CharVectorData, chr)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -777,7 +777,7 @@ class CharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, UCharVectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.UCharVectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -843,7 +843,7 @@ class UCharVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, ShortVectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.ShortVectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -909,7 +909,7 @@ class ShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, UShortVectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.UShortVectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -975,7 +975,7 @@ class UShortVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, Int64VectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.Int64VectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -1041,7 +1041,7 @@ class Int64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, UInt64VectorData, int)
+		BaseVectorDataTest.__init__(self, IECore.UInt64VectorData, int)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -1107,7 +1107,7 @@ class UInt64VectorDataTest(BaseVectorDataTest,unittest.TestCase):
 class StringVectorDataTest(BaseVectorDataTest,unittest.TestCase):
 
 	def __init__(self, param1):
-		BaseVectorDataTest.__init__(self, StringVectorData, str)
+		BaseVectorDataTest.__init__(self, IECore.StringVectorData, str)
 		unittest.TestCase.__init__(self, param1)
 
 	def testConstructors(self):
@@ -1174,23 +1174,23 @@ class TestVectorDataStrRepr( unittest.TestCase ) :
 
 	def test( self ) :
 
-		l = [ V3f( 2 ), V3f( 4 ), V3f( 5 ) ]
-		d = V3fVectorData( l )
+		l = [ IECore.V3f( 2 ), IECore.V3f( 4 ), IECore.V3f( 5 ) ]
+		d = IECore.V3fVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.V3fVectorData( [ " + ", ".join( [repr( x ) for x in l] ) + " ] )", repr( d ) )
 
 		l = [ "one", "two", "three" ]
-		d = StringVectorData( l )
+		d = IECore.StringVectorData( l )
 		self.assertEqual( " ".join( l ), str( d ) )
 		self.assertEqual( "IECore.StringVectorData( [ " + ", ".join( ["'"+x+"'" for x in l] ) + " ] )", repr( d ) )
 
 		l = [ 1, 2, 3 ]
-		d = IntVectorData( l )
+		d = IECore.IntVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.IntVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 
 		l = [ 1, 2, 3 ]
-		d = ShortVectorData( l )
+		d = IECore.ShortVectorData( l )
 		self.assertEqual( " ".join( [str(x) for x in l] ), str( d ) )
 		self.assertEqual( "IECore.ShortVectorData( [ " + ", ".join( [str(x) for x in l] ) + " ] )", repr( d ) )
 
@@ -1198,7 +1198,7 @@ class TestVectorDataToString( unittest.TestCase ) :
 
 	def test( self ) :
 
-		d = UCharVectorData()
+		d = IECore.UCharVectorData()
 		for i in range( 0, 255 ) :
 			d.append( i )
 
@@ -1210,13 +1210,13 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 
 	def test( self ) :
 
-		d = IntVectorData( 100 * 1024 * 1024 )
+		d = IECore.IntVectorData( 100 * 1024 * 1024 )
 
-		t = Timer()
+		t = IECore.Timer()
 		h = d.hash()
 		firstTime = t.stop()
 
-		t = Timer()
+		t = IECore.Timer()
 		h2 = d.hash()
 		secondTime = t.stop()
 
@@ -1225,7 +1225,7 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 		self.assertLess( secondTime, 0.001 * firstTime )
 
 		d2 = d.copy()
-		t = Timer()
+		t = IECore.Timer()
 		h2 = d.hash()
 		secondTime = t.stop()
 
@@ -1234,7 +1234,7 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 		self.assertLess( secondTime, 0.001 * firstTime )
 
 		d[0] = 10
-		t = Timer()
+		t = IECore.Timer()
 		hm = d.hash()
 		secondTime = t.stop()
 
@@ -1242,7 +1242,7 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 		# should be slow this time, as the hash is being recomputed
 		self.assertGreaterEqual( secondTime, 0.8 * firstTime )
 
-		t = Timer()
+		t = IECore.Timer()
 		h2 = d2.hash()
 		secondTime = t.stop()
 
@@ -1251,7 +1251,7 @@ class TestVectorDataHashOptimisation( unittest.TestCase ) :
 		self.assertLess( secondTime, 0.001 * firstTime )
 
 		d2[0] = 10
-		t = Timer()
+		t = IECore.Timer()
 		hm2 = d2.hash()
 		secondTime = t.stop()
 
@@ -1263,19 +1263,19 @@ class TestInternedStringVectorData( unittest.TestCase ) :
 
 	def test( self ) :
 
-		d = InternedStringVectorData( [ "1", "2", "3", "4" ] )
+		d = IECore.InternedStringVectorData( [ "1", "2", "3", "4" ] )
 
-		self.assertEqual( d[0], InternedString( "1" ) )
+		self.assertEqual( d[0], IECore.InternedString( "1" ) )
 		d[0] = "20"
-		self.assertEqual( d[0], InternedString( "20" ) )
+		self.assertEqual( d[0], IECore.InternedString( "20" ) )
 
 		d2 = d.copy()
 		self.assertEqual( d, d2 )
 
-		m = MemoryIndexedIO( CharVectorData(), [], IndexedIO.OpenMode.Append )
+		m = IECore.MemoryIndexedIO( IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append )
 		d.save( m, "o" )
 
-		d2 = Object.load( m, "o" )
+		d2 = IECore.Object.load( m, "o" )
 
 		self.assertEqual( d2, d )
 

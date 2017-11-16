@@ -34,33 +34,33 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class SearchPathTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		s = SearchPath()
+		s = IECore.SearchPath()
 		self.assertEqual( s.paths, [] )
 		s.setPaths( "a:b:c", ":" )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 		s.paths = [ "one", "two", "three" ]
 		self.assertEqual( s.paths, [ "one", "two", "three" ] )
 
-		s = SearchPath( "a:b:c", ":" )
+		s = IECore.SearchPath( "a:b:c", ":" )
 		self.assertEqual( s.paths, [ "a", "b", "c" ] )
 		self.assertEqual( s.getPaths( ":" ), "a:b:c" )
 
 	def testFind( self ) :
 
-		s = SearchPath( "test/IECore/data/pdcFiles", ":" )
+		s = IECore.SearchPath( "test/IECore/data/pdcFiles", ":" )
 
 		self.assertEqual( s.find( "particleShape1.250.pdc" ), "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
 
 	def testCopyConstructor( self ) :
 
-		s = SearchPath( "a:b:c", ":" )
-		s2 = SearchPath( s )
+		s = IECore.SearchPath( "a:b:c", ":" )
+		s2 = IECore.SearchPath( s )
 
 		self.assertEqual( s, s2 )
 

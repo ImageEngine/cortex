@@ -35,47 +35,47 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 
 class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 	def compressed( self ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = M44fVectorData( [M44f(),M44f(),M44f()] )
-        	offsets = IntVectorData( [0, 2, 4] )
-        	counts = IntVectorData( [2, 2, 1] )
-        	indices = IntVectorData( [0, 1, 0, 1, 1] )
-        	weights = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	offsets = IECore.IntVectorData( [0, 2, 4] )
+        	counts = IECore.IntVectorData( [2, 2, 1] )
+        	indices = IECore.IntVectorData( [0, 1, 0, 1, 1] )
+        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 1.0] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
 	def noncompressed( self ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = M44fVectorData( [M44f(),M44f(),M44f()] )
-        	offsets = IntVectorData( [0, 2, 5] )
-        	counts = IntVectorData( [2, 3, 1] )
-        	indices = IntVectorData( [0, 1, 0, 1, 2, 1] )
-        	weights = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	offsets = IECore.IntVectorData( [0, 2, 5] )
+        	counts = IECore.IntVectorData( [2, 3, 1] )
+        	indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
+        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
 	def decompressed( self ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-        	poses = M44fVectorData( [M44f(),M44f(),M44f()] )
-        	offsets = IntVectorData( [0, 3, 6] )
-        	counts = IntVectorData( [3, 3, 3] )
-        	indices = IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] )
-        	weights = FloatVectorData( [0.5, 0.5, 0.0, 0.2, 0.8, 0.0, 0.0, 1.0, 0.0] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+        	poses = IECore.M44fVectorData( [IECore.M44f(),IECore.M44f(),IECore.M44f()] )
+        	offsets = IECore.IntVectorData( [0, 3, 6] )
+        	counts = IECore.IntVectorData( [3, 3, 3] )
+        	indices = IECore.IntVectorData( [0, 1, 2, 0, 1, 2, 0, 1, 2] )
+        	weights = IECore.FloatVectorData( [0.5, 0.5, 0.0, 0.2, 0.8, 0.0, 0.0, 1.0, 0.0] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
@@ -84,16 +84,16 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.compressed()
 
-		op = CompressSmoothSkinningDataOp()
-		self.assertEqual( type(op), CompressSmoothSkinningDataOp )
-		self.assertEqual( op.typeId(), TypeId.CompressSmoothSkinningDataOp )
-		op.parameters()['input'].setValue( IntData(1) )
+		op = IECore.CompressSmoothSkinningDataOp()
+		self.assertEqual( type(op), IECore.CompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), IECore.TypeId.CompressSmoothSkinningDataOp )
+		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
-		op = DecompressSmoothSkinningDataOp()
-		self.assertEqual( type(op), DecompressSmoothSkinningDataOp )
-		self.assertEqual( op.typeId(), TypeId.DecompressSmoothSkinningDataOp )
-		op.parameters()['input'].setValue( IntData(1) )
+		op = IECore.DecompressSmoothSkinningDataOp()
+		self.assertEqual( type(op), IECore.DecompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), IECore.TypeId.DecompressSmoothSkinningDataOp )
+		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testCompressingCompressed( self ) :
@@ -101,7 +101,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.compressed()
 
-		op = CompressSmoothSkinningDataOp()
+		op = IECore.CompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 
@@ -116,7 +116,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.noncompressed()
 
-		op = CompressSmoothSkinningDataOp()
+		op = IECore.CompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 		self.assertNotEqual( result, ssd )
@@ -134,7 +134,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.decompressed()
 
-		op = CompressSmoothSkinningDataOp()
+		op = IECore.CompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 		self.assertNotEqual( result, ssd )
@@ -151,7 +151,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.noncompressed()
 
-		op = CompressSmoothSkinningDataOp()
+		op = IECore.CompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['threshold'].setNumericValue( 0.5 )
 		result = op.operate()
@@ -162,10 +162,10 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 		for val in result.pointInfluenceWeights() :
 			self.assert_( val > 0.5 )
 
-		self.assertEqual( result.pointIndexOffsets(), IntVectorData( [0, 0, 1] ) )
-		self.assertEqual( result.pointInfluenceCounts(), IntVectorData( [0, 1, 1] ) )
-		self.assertEqual( result.pointInfluenceIndices(), IntVectorData( [1, 1] ) )
-		self.assertEqual( result.pointInfluenceWeights(), FloatVectorData( [0.8, 1.0] ) )
+		self.assertEqual( result.pointIndexOffsets(), IECore.IntVectorData( [0, 0, 1] ) )
+		self.assertEqual( result.pointInfluenceCounts(), IECore.IntVectorData( [0, 1, 1] ) )
+		self.assertEqual( result.pointInfluenceIndices(), IECore.IntVectorData( [1, 1] ) )
+		self.assertEqual( result.pointInfluenceWeights(), IECore.FloatVectorData( [0.8, 1.0] ) )
 
 		decompressed = self.decompressed()
 		op.parameters()['input'].setValue( decompressed )
@@ -178,7 +178,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.compressed()
 
-		op = DecompressSmoothSkinningDataOp()
+		op = IECore.DecompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 		self.assertNotEqual( result, ssd )
@@ -195,7 +195,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.noncompressed()
 
-		op = DecompressSmoothSkinningDataOp()
+		op = IECore.DecompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 		self.assertNotEqual( result, ssd )
@@ -212,7 +212,7 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		ssd = self.decompressed()
 
-		op = DecompressSmoothSkinningDataOp()
+		op = IECore.DecompressSmoothSkinningDataOp()
 		op.parameters()['input'].setValue( ssd )
 		result = op.operate()
 

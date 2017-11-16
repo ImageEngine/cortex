@@ -34,7 +34,7 @@
 
 import random
 import unittest
-from IECore import *
+import IECore
 
 class TestKDTree:
 	treeSizes = [0, 1, 10, 100]
@@ -134,18 +134,18 @@ class TestKDTreeV2f(unittest.TestCase, TestKDTree):
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
-		self.points = V2fVectorData()
+		self.points = IECore.V2fVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( V2f( random.random(), random.random() ) )
+			self.points.append( IECore.V2f( random.random(), random.random() ) )
 
-		self.tree = V2fTree( self.points )
+		self.tree = IECore.V2fTree( self.points )
 
 	def randomBox( self ) :
 
-		min = V2f( random.random(), random.random() )
-		max = min + V2f( random.random(), random.random() )
-		return Box2f( min, max )
+		min = IECore.V2f( random.random(), random.random() )
+		max = min + IECore.V2f( random.random(), random.random() )
+		return IECore.Box2f( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV2f constructors"""
@@ -182,18 +182,18 @@ class TestKDTreeV2d(unittest.TestCase, TestKDTree):
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
-		self.points = V2dVectorData()
+		self.points = IECore.V2dVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( V2d( random.random(), random.random() ) )
+			self.points.append( IECore.V2d( random.random(), random.random() ) )
 
-		self.tree = V2dTree( self.points )
+		self.tree = IECore.V2dTree( self.points )
 
 	def randomBox( self ) :
 
-		min = V2d( random.random(), random.random() )
-		max = min + V2d( random.random(), random.random() )
-		return Box2d( min, max )
+		min = IECore.V2d( random.random(), random.random() )
+		max = min + IECore.V2d( random.random(), random.random() )
+		return IECore.Box2d( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV2d constructors"""
@@ -230,18 +230,18 @@ class TestKDTreeV3f(unittest.TestCase, TestKDTree):
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
-		self.points = V3fVectorData()
+		self.points = IECore.V3fVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( V3f( random.random(), random.random(), random.random() ) )
+			self.points.append( IECore.V3f( random.random(), random.random(), random.random() ) )
 
-		self.tree = V3fTree( self.points )
+		self.tree = IECore.V3fTree( self.points )
 
 	def randomBox( self ) :
 
-		min = V3f( random.random(), random.random(), random.random() )
-		max = min + V3f( random.random(), random.random(), random.random() )
-		return Box3f( min, max )
+		min = IECore.V3f( random.random(), random.random(), random.random() )
+		max = min + IECore.V3f( random.random(), random.random(), random.random() )
+		return IECore.Box3f( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV3f constructors"""
@@ -278,18 +278,18 @@ class TestKDTreeV3d(unittest.TestCase, TestKDTree):
 	def makeTree(self, numPoints):
 		# Make tree creation repeatable, but different for every size
 		random.seed(100 + 5 * numPoints)
-		self.points = V3dVectorData()
+		self.points = IECore.V3dVectorData()
 
 		for i in range(0, numPoints):
-			self.points.append( V3d( random.random(), random.random(), random.random() ) )
+			self.points.append( IECore.V3d( random.random(), random.random(), random.random() ) )
 
-		self.tree = V3dTree( self.points )
+		self.tree = IECore.V3dTree( self.points )
 
 	def randomBox( self ) :
 
-		min = V3d( random.random(), random.random(), random.random() )
-		max = min + V3d( random.random(), random.random(), random.random() )
-		return Box3d( min, max )
+		min = IECore.V3d( random.random(), random.random(), random.random() )
+		max = min + IECore.V3d( random.random(), random.random(), random.random() )
+		return IECore.Box3d( min, max )
 
 	def testConstructors(self):
 		"""Test KDTreeV3d constructors"""

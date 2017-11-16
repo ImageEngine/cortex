@@ -33,56 +33,56 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestPointBoundsOp( unittest.TestCase ) :
 
 	def test( self ) :
 
-		o = PointBoundsOp()
-		b = o( points = V3fVectorData( [ V3f( 0 ) ] ) )
-		self.assert_( b.isInstanceOf( Box3fData.staticTypeId() ) )
-		self.assertEqual( b.value, Box3f( V3f( 0 ), V3f( 0 ) ) )
+		o = IECore.PointBoundsOp()
+		b = o( points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		self.assert_( b.isInstanceOf( IECore.Box3fData.staticTypeId() ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 0 ) ) )
 
-		o = PointBoundsOp()
+		o = IECore.PointBoundsOp()
 		b = o(
-			points = V3fVectorData( [ V3f( 0 ) ] ),
-			velocities = V3fVectorData( [ V3f( 1 ) ] )
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] )
 		)
-		self.assertEqual( b.value, Box3f( V3f( 0 ), V3f( 1 ) ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
 
-		o = PointBoundsOp()
+		o = IECore.PointBoundsOp()
 		b = o(
-			points = V3fVectorData( [ V3f( 0 ) ] ),
-			velocities = V3fVectorData( [ V3f( 1 ) ] ),
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
 			velocityMultiplier = 0.5
 		)
-		self.assertEqual( b.value, Box3f( V3f( 0 ), V3f( 0.5 ) ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 0.5 ) ) )
 
-		o = PointBoundsOp()
+		o = IECore.PointBoundsOp()
 		b = o(
-			points = V3fVectorData( [ V3f( 0 ) ] ),
-			velocities = V3fVectorData( [ V3f( 1 ) ] ),
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
 			velocityMultiplier = 0.5,
-			radii = FloatVectorData( [ 1 ] ),
+			radii = IECore.FloatVectorData( [ 1 ] ),
 		)
-		self.assertEqual( b.value, Box3f( V3f( -1 ), V3f( 1.5 ) ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1.5 ) ) )
 
-		o = PointBoundsOp()
+		o = IECore.PointBoundsOp()
 		b = o(
-			points = V3fVectorData( [ V3f( 0 ) ] ),
-			velocities = V3fVectorData( [ V3f( 1 ) ] ),
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
 			velocityMultiplier = 0.5,
-			radii = FloatVectorData( [ 1 ] ),
+			radii = IECore.FloatVectorData( [ 1 ] ),
 			radiusMultiplier = 0.5,
 		)
-		self.assertEqual( b.value, Box3f( V3f( -0.5 ), V3f( 1 ) ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( -0.5 ), IECore.V3f( 1 ) ) )
 
-		o = PointBoundsOp()
+		o = IECore.PointBoundsOp()
 		b = o(
-			points = V3fVectorData( [ V3f( 0, 1, 2 ), V3f( 4, 5, 6 ) ] ),
+			points = IECore.V3fVectorData( [ IECore.V3f( 0, 1, 2 ), IECore.V3f( 4, 5, 6 ) ] ),
 		)
-		self.assertEqual( b.value, Box3f( V3f( 0, 1, 2 ), V3f( 4, 5, 6 ) ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0, 1, 2 ), IECore.V3f( 4, 5, 6 ) ) )
 
 if __name__ == "__main__":
 	unittest.main()

@@ -35,38 +35,38 @@
 import os
 import sys
 import unittest
-from IECore import *
+import IECore
 
 class TestGroup( unittest.TestCase ) :
 
 	def test( self ) :
 
-		g = Group()
+		g = IECore.Group()
 		self.assertEqual( g.getTransform(), None )
-		self.assertEqual( g.transformMatrix(), M44f() )
+		self.assertEqual( g.transformMatrix(), IECore.M44f() )
 
-		g.setTransform( MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		self.assertEqual( g.getTransform(), MatrixTransform( M44f.createScaled( V3f( 2 ) ) ) )
-		self.assertEqual( g.transformMatrix(), M44f.createScaled( V3f( 2 ) ) )
+		g.setTransform( IECore.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		self.assertEqual( g.getTransform(), IECore.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		self.assertEqual( g.transformMatrix(), IECore.M44f.createScaled( IECore.V3f( 2 ) ) )
 
 		self.assertEqual( g.children(), [] )
 		self.assertEqual( g.state(), [] )
 
 		# modifying children has no effect on the primitive - children()
 		# returns the internal set copied into a list
-		g.children().append( PointsPrimitive( 1 ) )
+		g.children().append( IECore.PointsPrimitive( 1 ) )
 		self.assertEqual( g.children(), [] )
 
-		g.addChild( PointsPrimitive( 1 ) )
-		self.assertEqual( g.children(), [ PointsPrimitive( 1 ) ] )
+		g.addChild( IECore.PointsPrimitive( 1 ) )
+		self.assertEqual( g.children(), [ IECore.PointsPrimitive( 1 ) ] )
 
 		# modifying state has no effect on the primitive - state()
 		# returns the internal set copied into a list
-		g.state().append( AttributeState() )
+		g.state().append( IECore.AttributeState() )
 		self.assertEqual( g.state(), [] )
 
-		g.addState( AttributeState() )
-		self.assertEqual( g.state(), [ AttributeState() ] )
+		g.addState( IECore.AttributeState() )
+		self.assertEqual( g.state(), [ IECore.AttributeState() ] )
 
 		self.assertEqual( g, g )
 
@@ -75,9 +75,9 @@ class TestGroup( unittest.TestCase ) :
 		self.assert_( not gg.children()[0].isSame( g.children()[0] ) )
 		self.assert_( not gg.state()[0].isSame( g.state()[0] ) )
 
-		ObjectWriter( g, "test/group.cob" ).write()
+		IECore.ObjectWriter( g, "test/group.cob" ).write()
 
-		ggg = ObjectReader( "test/group.cob" ).read()
+		ggg = IECore.ObjectReader( "test/group.cob" ).read()
 
 		self.assertEqual( gg, ggg )
 		self.assert_( not gg.children()[0].isSame(ggg.children()[0] ) )
@@ -87,18 +87,18 @@ class TestGroup( unittest.TestCase ) :
 
 		# check the state/children don't get reordered when a group is written out to disk
 		# and read back in again:
-		g = Group()
+		g = IECore.Group()
 
 		for i in range( 100 ):
-			g.addState( Shader("%d" % i,"ddyup") )
+			g.addState( IECore.Shader("%d" % i,"ddyup") )
 
-			child = Group()
-			child.blindData()["id"] = IntData( i )
+			child = IECore.Group()
+			child.blindData()["id"] = IECore.IntData( i )
 			g.addChild( child )
 
-		ObjectWriter( g, "test/group.cob" ).write()
+		IECore.ObjectWriter( g, "test/group.cob" ).write()
 
-		ggg = ObjectReader( "test/group.cob" ).read()
+		ggg = IECore.ObjectReader( "test/group.cob" ).read()
 
 		for i in range( 100 ):
 
@@ -109,8 +109,8 @@ class TestGroup( unittest.TestCase ) :
 
 	def testParent( self ) :
 
-		g = Group()
-		g2 = Group()
+		g = IECore.Group()
+		g2 = IECore.Group()
 
 		self.assert_( g.parent() is None )
 		self.assert_( g2.parent() is None )
@@ -136,64 +136,64 @@ class TestGroup( unittest.TestCase ) :
 	def testAttributes( self ) :
 
 		# create a little hierarchy
-		g = Group()
-		g2 = Group()
-		g3 = Group()
+		g = IECore.Group()
+		g2 = IECore.Group()
+		g3 = IECore.Group()
 
 		g.addChild( g2 )
 		g2.addChild( g3 )
 
 		# define an attribute at the top of the hierarchy
-		g.setAttribute( "toptest", BoolData( False ) )
-		self.assertEqual( g.getAttribute( "toptest" ), BoolData( False ) )
+		g.setAttribute( "toptest", IECore.BoolData( False ) )
+		self.assertEqual( g.getAttribute( "toptest" ), IECore.BoolData( False ) )
 
 		# change our mind and set it to true:
-		g.setAttribute( "toptest", BoolData( True ) )
-		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		g.setAttribute( "toptest", IECore.BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest" ), IECore.BoolData( True ) )
 
 		# add another attribute
-		g.setAttribute( "toptest2", BoolData( True ) )
-		self.assertEqual( g.getAttribute( "toptest2" ), BoolData( True ) )
+		g.setAttribute( "toptest2", IECore.BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest2" ), IECore.BoolData( True ) )
 
 
 		# make sure there's only one AttributeState on the group:
 		self.assertEqual( len( g.state() ), 1 )
 
 		# define one in the middle
-		g2.setAttribute( "middletest", BoolData( True ) )
+		g2.setAttribute( "middletest", IECore.BoolData( True ) )
 
 		# override the one at the top
-		g2.setAttribute( "toptest", BoolData( False ) )
+		g2.setAttribute( "toptest", IECore.BoolData( False ) )
 
 		# define one at the bottom
-		g3.setAttribute( "bottomtest", BoolData( False ) )
+		g3.setAttribute( "bottomtest", IECore.BoolData( False ) )
 
-		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest" ), IECore.BoolData( True ) )
 		self.assertEqual( g.getAttribute( "middletest" ), None )
 		self.assertEqual( g.getAttribute( "bottomtest" ), None )
 
-		self.assertEqual( g2.getAttribute( "toptest" ), BoolData( False ) )
-		self.assertEqual( g2.getAttribute( "middletest" ), BoolData( True ) )
+		self.assertEqual( g2.getAttribute( "toptest" ), IECore.BoolData( False ) )
+		self.assertEqual( g2.getAttribute( "middletest" ), IECore.BoolData( True ) )
 		self.assertEqual( g2.getAttribute( "bottomtest" ), None )
 
-		self.assertEqual( g3.getAttribute( "toptest" ), BoolData( False ) )
-		self.assertEqual( g3.getAttribute( "middletest" ), BoolData( True ) )
-		self.assertEqual( g3.getAttribute( "bottomtest" ), BoolData( False ) )
+		self.assertEqual( g3.getAttribute( "toptest" ), IECore.BoolData( False ) )
+		self.assertEqual( g3.getAttribute( "middletest" ), IECore.BoolData( True ) )
+		self.assertEqual( g3.getAttribute( "bottomtest" ), IECore.BoolData( False ) )
 
 
 		# check that the final attribute state is returned by getAttribute:
-		g = Group()
-		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
-		g.addState( AttributeState( {"toptest": BoolData( True ) } ) )
+		g = IECore.Group()
+		g.addState( IECore.AttributeState( {"toptest": IECore.BoolData( False ) } ) )
+		g.addState( IECore.AttributeState( {"toptest": IECore.BoolData( True ) } ) )
 
-		self.assertEqual( g.getAttribute( "toptest" ), BoolData( True ) )
+		self.assertEqual( g.getAttribute( "toptest" ), IECore.BoolData( True ) )
 
 		# make sure attributes get added to existing attributeStates:
-		g = Group()
-		g.addState( Shader("yup","ddyup", {}) )
-		g.addState( AttributeState( {"toptest": BoolData( False ) } ) )
-		g.addState( Shader("yup","yup", {}) )
-		g.setAttribute( "blahblah", BoolData( True ) )
+		g = IECore.Group()
+		g.addState( IECore.Shader("yup","ddyup", {}) )
+		g.addState( IECore.AttributeState( {"toptest": IECore.BoolData( False ) } ) )
+		g.addState( IECore.Shader("yup","yup", {}) )
+		g.setAttribute( "blahblah", IECore.BoolData( True ) )
 
 		self.assertEqual( len( g.state() ), 3 )
 
@@ -201,22 +201,22 @@ class TestGroup( unittest.TestCase ) :
 
 	def testExceptions( self ) :
 
-		g = Group()
+		g = IECore.Group()
 
-		self.assertRaises( Exception, g.removeChild, Group() )
-		self.assertRaises( Exception, g.removeState, AttributeState() )
+		self.assertRaises( Exception, g.removeChild, IECore.Group() )
+		self.assertRaises( Exception, g.removeState, IECore.AttributeState() )
 
 	def testTransformsNotState( self ) :
 
-		g = Group()
-		self.assertRaises( Exception, g.addState, MatrixTransform( M44f() ) )
+		g = IECore.Group()
+		self.assertRaises( Exception, g.addState, IECore.MatrixTransform( IECore.M44f() ) )
 
 	def testChildOrdering( self ) :
 
-		g = Group()
-		c1 = PointsPrimitive( 1 )
-		c2 = PointsPrimitive( 2 )
-		c3 = PointsPrimitive( 3 )
+		g = IECore.Group()
+		c1 = IECore.PointsPrimitive( 1 )
+		c2 = IECore.PointsPrimitive( 2 )
+		c3 = IECore.PointsPrimitive( 3 )
 
 		g.addChild( c1 )
 		g.addChild( c2 )
@@ -230,10 +230,10 @@ class TestGroup( unittest.TestCase ) :
 
 	def testStateOrdering( self ) :
 
-		g = Group()
-		a1 = AttributeState()
-		a2 = AttributeState()
-		a3 = AttributeState()
+		g = IECore.Group()
+		a1 = IECore.AttributeState()
+		a2 = IECore.AttributeState()
+		a3 = IECore.AttributeState()
 
 		g.addState( a1 )
 		g.addState( a2 )
@@ -247,12 +247,12 @@ class TestGroup( unittest.TestCase ) :
 
 	def testAddNullState( self ) :
 
-		g = Group()
+		g = IECore.Group()
 		self.assertRaises( Exception, g.addState, None )
 
 	def testAddNullChild( self ) :
 
-		g = Group()
+		g = IECore.Group()
 		self.assertRaises( Exception, g.addChild, None )
 
 	def testNoneRefcount( self ) :
@@ -260,47 +260,47 @@ class TestGroup( unittest.TestCase ) :
 		# exercises a bug whereby we weren't incrementing the reference
 		# count for Py_None when returning it to represent a null pointer.
 		# this led to "Fatal Python error: deallocating None" type crashes
-		g = Group()
+		g = IECore.Group()
 		for i in range( 0, sys.getrefcount( None ) + 100 ) :
 			p = g.parent()
 
 	def testMemoryUsage( self ) :
 
 		# this used to crash if the group didn't have a transform
-		g = Group()
+		g = IECore.Group()
 		self.failUnless( g.memoryUsage() > 0 )
 
 	def testHash( self ) :
 
-		g = Group()
+		g = IECore.Group()
 		h = g.hash()
 
-		g.addChild( SpherePrimitive() )
+		g.addChild( IECore.SpherePrimitive() )
 		self.assertNotEqual( g.hash(), h )
 		h = g.hash()
 
-		g.addState( AttributeState() )
+		g.addState( IECore.AttributeState() )
 		self.assertNotEqual( g.hash(), h )
 		h = g.hash()
 
-		g.setTransform( MatrixTransform( M44f() ) )
+		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
 		self.assertNotEqual( g.hash(), h )
 
 	def testGlobalTransform( self ) :
 
-		g = Group()
-		childGroup = Group()
+		g = IECore.Group()
+		childGroup = IECore.Group()
 
 		g.addChild( childGroup )
 
-		parentTransform = TransformationMatrixf()
-		parentTransform.rotate = Eulerf( 0,3.1415926/2,0 )
+		parentTransform = IECore.TransformationMatrixf()
+		parentTransform.rotate = IECore.Eulerf( 0,3.1415926/2,0 )
 
-		childTransform = TransformationMatrixf()
-		childTransform.translate = V3f( 1, 0, 2 )
+		childTransform = IECore.TransformationMatrixf()
+		childTransform.translate = IECore.V3f( 1, 0, 2 )
 
-		childGroup.setTransform( MatrixTransform( childTransform.transform ) )
-		g.setTransform( MatrixTransform( parentTransform.transform ) )
+		childGroup.setTransform( IECore.MatrixTransform( childTransform.transform ) )
+		g.setTransform( IECore.MatrixTransform( parentTransform.transform ) )
 
 		# child group's translation should have been rotated 90 degrees about the y axis:
 		childGroupGlobalTranslation = childGroup.globalTransformMatrix().extractSHRT()[3]

@@ -33,55 +33,55 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class MeshNormalsOpTest( unittest.TestCase ) :
 
 	def testPlane( self ) :
 
-		p = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
+		p = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 		if "N" in p :
 			del p["N"]
 		self.assert_( not "N" in p )
 
-		pp = MeshNormalsOp()( input=p )
+		pp = IECore.MeshNormalsOp()( input=p )
 
 		self.assert_( "N" in pp )
-		self.assertEqual( pp["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( pp["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
 		normals = pp["N"].data
-		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
-		self.assertEqual( normals.size(), pp.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
-		self.assertEqual( normals.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assert_( normals.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
+		self.assertEqual( normals.size(), pp.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( normals.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		for n in normals :
 
-			self.assertEqual( n, V3f( 0, 0, 1 ) )
+			self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
 
 	def testOnlyNAdded( self ) :
 
-		p = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ) )
-		pp = MeshNormalsOp()( input=p )
+		p = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		pp = IECore.MeshNormalsOp()( input=p )
 		del pp["N"]
 
 		self.assertEqual( pp, p )
 
 	def testSphere( self ) :
 
-		s = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		s = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
 		del s["N"]
 		self.assert_( not "N" in s )
 
-		ss = MeshNormalsOp()( input=s )
+		ss = IECore.MeshNormalsOp()( input=s )
 
 		self.assert_( "N" in ss )
-		self.assertEqual( ss["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( ss["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
 		normals = ss["N"].data
-		self.assert_( normals.isInstanceOf( V3fVectorData.staticTypeId() ) )
-		self.assertEqual( normals.size(), ss.variableSize( PrimitiveVariable.Interpolation.Vertex ) )
-		self.assertEqual( normals.getInterpretation(), GeometricData.Interpretation.Normal )
+		self.assert_( normals.isInstanceOf( IECore.V3fVectorData.staticTypeId() ) )
+		self.assertEqual( normals.size(), ss.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( normals.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		points = ss["P"].data
 		for i in range( 0, normals.size() ) :
@@ -94,15 +94,15 @@ class MeshNormalsOpTest( unittest.TestCase ) :
 
 	def testUniformInterpolation( self ) :
 
-		m = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 1 ) ), V2i( 10 ) )
+		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ), IECore.V2i( 10 ) )
 		self.assertTrue( "N" not in m )
 
-		m2 = MeshNormalsOp()( input = m, interpolation = PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( m2["N"].interpolation, PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( len( m2["N"].data ), m2.variableSize( PrimitiveVariable.Interpolation.Uniform ) )
+		m2 = IECore.MeshNormalsOp()( input = m, interpolation = IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( m2["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( len( m2["N"].data ), m2.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
 
 		for n in m2["N"].data :
-			self.assertEqual( n, V3f( 0, 0, 1 ) )
+			self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
 
 if __name__ == "__main__":
     unittest.main()

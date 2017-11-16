@@ -35,33 +35,33 @@
 import math
 import unittest
 
-from IECore import *
+import IECore
 
 class TestPointsPrimitive( unittest.TestCase ) :
 
 	def testPrimitiveVariable( self ) :
 
-		v = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) )
-		self.assertEqual( v.interpolation, PrimitiveVariable.Interpolation.Constant )
-		self.assertEqual( v.data, FloatData( 1 ) )
+		v = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) )
+		self.assertEqual( v.interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( v.data, IECore.FloatData( 1 ) )
 
-		v.interpolation = PrimitiveVariable.Interpolation.Vertex
-		self.assertEqual( v.interpolation, PrimitiveVariable.Interpolation.Vertex )
-		v.data = IntVectorData( [ 1, 2, 3, 4 ] )
-		self.assertEqual( v.data, IntVectorData( [ 1, 2, 3, 4 ] ) )
+		v.interpolation = IECore.PrimitiveVariable.Interpolation.Vertex
+		self.assertEqual( v.interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		v.data = IECore.IntVectorData( [ 1, 2, 3, 4 ] )
+		self.assertEqual( v.data, IECore.IntVectorData( [ 1, 2, 3, 4 ] ) )
 
 	def testPrimitive( self ) :
 
 		"""This test mainly tests the Primitive aspects of the PointPrimitive"""
 
-		p = PointsPrimitive( 10 )
+		p = IECore.PointsPrimitive( 10 )
 
 		self.assertEqual( p.numPoints, 10 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 10 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 10 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 10 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 10 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 10 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 10 )
 
 		self.assertEqual( p, p )
 		self.assertEqual( p, p.copy() )
@@ -69,27 +69,27 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		# try adding a primvar
 		self.assertEqual( len( p ), 0 )
 		self.assert_( not "P" in p )
-		p["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
+		p["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
 		self.assertEqual( p, p )
 		self.assertEqual( p, p.copy() )
 		self.assertEqual( len( p ), 1 )
 		self.assert_( "P" in p )
-		self.assertEqual( p["P"].data, V3fVectorData() )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData() )
 
 		# and removing it
-		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 		del p["P"]
 		self.assertEqual( len( p ), 0 )
 		self.assert_( not "P" in p )
 
 		# and adding it and another
-		p["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
+		p["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
 		self.assert_( not "N" in p )
-		p["N"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData() )
+		p["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
 		self.assert_( "N" in p )
 		self.assertEqual( len( p ), 2 )
-		self.assertEqual( p["N"].data, V3fVectorData() )
-		self.assertEqual( p["N"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p["N"].data, IECore.V3fVectorData() )
+		self.assertEqual( p["N"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
 		# and overwriting one with the other
 		p["N"] = p["P"]
@@ -97,53 +97,53 @@ class TestPointsPrimitive( unittest.TestCase ) :
 
 	def testConstructors( self ) :
 
-		p = PointsPrimitive( 20 )
+		p = IECore.PointsPrimitive( 20 )
 		self.assertEqual( p.numPoints, 20 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 20 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 20 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 20 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 20 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 20 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 20 )
 		self.assertEqual( len( p ), 0 )
 
-		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ) )
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
 		self.assertEqual( p.numPoints, 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 1 )
 		self.assert_( "P" in p )
-		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ], GeometricData.Interpretation.Point ) )
-		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( p["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
-		p = PointsPrimitive( V3fVectorData( [ V3f( 1 ) ] ), FloatVectorData( [ 1 ] ) )
+		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ), IECore.FloatVectorData( [ 1 ] ) )
 		self.assertEqual( p.numPoints, 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Varying ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.Vertex ), 1 )
-		self.assertEqual( p.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 1 )
+		self.assertEqual( p.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 1 )
 		self.assertEqual( len( p ), 2 )
 		self.assert_( "P" in p )
 		self.assert_( "r" in p )
-		self.assertEqual( p["P"].data, V3fVectorData( [ V3f( 1 ) ], GeometricData.Interpretation.Point ) )
-		self.assertEqual( p["P"].interpolation, PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( p["r"].data, FloatVectorData( [ 1 ] ) )
-		self.assertEqual( p["r"].interpolation, PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData( [ IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		self.assertEqual( p["P"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( p["r"].data, IECore.FloatVectorData( [ 1 ] ) )
+		self.assertEqual( p["r"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
 
 	def testNumPointsAccess( self ) :
 
-		p = PointsPrimitive( 20 )
+		p = IECore.PointsPrimitive( 20 )
 		self.assertEqual( p.numPoints, 20 )
 		p.numPoints = 40
 		self.assertEqual( p.numPoints, 40 )
 
 	def testHash( self ) :
 
-		p = PointsPrimitive( 1 )
-		p2 = PointsPrimitive( 2 )
+		p = IECore.PointsPrimitive( 1 )
+		p2 = IECore.PointsPrimitive( 2 )
 
 		self.assertNotEqual( p.hash(), p2.hash() )
 		self.assertNotEqual( p.topologyHash(), p2.topologyHash() )
@@ -151,101 +151,101 @@ class TestPointsPrimitive( unittest.TestCase ) :
 		p3 = p2.copy()
 		self.assertEqual( p3.hash(), p2.hash() )
 		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
-		p3["primVar"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, IntData( 10 ) )
+		p3["primVar"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 10 ) )
 		self.assertNotEqual( p3.hash(), p2.hash() )
 		self.assertEqual( p3.topologyHash(), p2.topologyHash() )
 
 	def testBound( self ) :
 
-		p = PointsPrimitive( 2 )
-		self.assertEqual( p.bound(), Box3f() )
+		p = IECore.PointsPrimitive( 2 )
+		self.assertEqual( p.bound(), IECore.Box3f() )
 
-		p["P"] = PrimitiveVariable(
-			PrimitiveVariable.Interpolation.Vertex,
-			V3fVectorData( [ V3f( 1, 2, 3 ), V3f( 12, 13, 14 ) ] )
+		p["P"] = IECore.PrimitiveVariable(
+			IECore.PrimitiveVariable.Interpolation.Vertex,
+			IECore.V3fVectorData( [ IECore.V3f( 1, 2, 3 ), IECore.V3f( 12, 13, 14 ) ] )
 		)
 
 		# when no width is specified, it defaults to 1
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 1 ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 1 ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 1 ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 1 ) / 2.0
 			)
 		)
 
 		# constantwidth overrides the default
-		p["constantwidth"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
+		p["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.0 )
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 2 ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 2 ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 ) / 2.0
 			)
 		)
 
 		# vertex width works too, and multiplies with constantwidth
 
-		p["width"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 2, 4 ] ) )
+		p["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 2, 4 ] ) )
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 2 * 2 ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 2 * 4 ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * 2 ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * 4 ) / 2.0
 			)
 		)
 
 		# aspect ratio should have no effect whatsoever if type is not "patch"
 
-		p["patchaspectratio"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
+		p["patchaspectratio"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.0 )
 		del p["width"]
 		del p["constantwidth"]
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 1 ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 1 ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 1 ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 1 ) / 2.0
 			)
 		)
 
 		# but it should take effect when type is "patch"
 
-		p["type"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, "patch" )
+		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, "patch" )
 
 		diagonal = math.sqrt( 1 ** 2 + 0.5 ** 2 )
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( diagonal ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( diagonal ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( diagonal ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( diagonal ) / 2.0
 			)
 		)
 
 		# and "constantwidth" should still be taken into account for patches
 
-		p["constantwidth"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, 2.0 )
+		p["constantwidth"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, 2.0 )
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 2 * diagonal ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 2 * diagonal ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * diagonal ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * diagonal ) / 2.0
 			)
 		)
 
 		# as should "width"
 
-		p["width"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, FloatVectorData( [ 2, 4 ] ) )
+		p["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 2, 4 ] ) )
 
 		self.assertEqual(
 			p.bound(),
-			Box3f(
-				V3f( 1, 2, 3 ) - V3f( 2 * 2 * diagonal ) / 2.0,
-				V3f( 12, 13, 14 ) + V3f( 2 * 4 * diagonal ) / 2.0
+			IECore.Box3f(
+				IECore.V3f( 1, 2, 3 ) - IECore.V3f( 2 * 2 * diagonal ) / 2.0,
+				IECore.V3f( 12, 13, 14 ) + IECore.V3f( 2 * 4 * diagonal ) / 2.0
 			)
 		)
 

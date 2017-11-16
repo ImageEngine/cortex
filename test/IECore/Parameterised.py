@@ -34,16 +34,16 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
-class derived( Parameterised ):
+class derived( IECore.Parameterised ):
 
 	def __init__( self ):
 		self.objectAttribute1 = 1
-		Parameterised.__init__( self, "description" )
+		IECore.Parameterised.__init__( self, "description" )
 		a = self.parameters()
 		self.objectAttribute2 = 2
-		a.addParameter( IntParameter( "number", "number parameter", 0 ) )
+		a.addParameter( IECore.IntParameter( "number", "number parameter", 0 ) )
 
 class TestParameterised( unittest.TestCase ) :
 
@@ -53,8 +53,8 @@ class TestParameterised( unittest.TestCase ) :
 
 	def testUserData( self ) :
 
-		a = Parameterised( "description" )
-		self.assertEqual( a.userData(), CompoundObject() )
+		a = IECore.Parameterised( "description" )
+		self.assertEqual( a.userData(), IECore.CompoundObject() )
 
 	def testSmartAssignment( self ):
 

@@ -34,88 +34,88 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestPointVelocityDisplaceOp( unittest.TestCase ) :
 
 	def test( self ) :
 
-		pts = PointsPrimitive(0)
-		vertex = PrimitiveVariable.Interpolation.Vertex
+		pts = IECore.PointsPrimitive(0)
+		vertex = IECore.PrimitiveVariable.Interpolation.Vertex
 
 		# check calling with no arguments
-		o = PointVelocityDisplaceOp()
+		o = IECore.PointVelocityDisplaceOp()
 		self.assertRaises( RuntimeError, o )
 
 		# check not passing v is a passthru
-		o = PointVelocityDisplaceOp()
-		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0) ] ) )
+		o = IECore.PointVelocityDisplaceOp()
+		pts["P"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0) ] ) )
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True )
 
 		# check it works
-		o = PointVelocityDisplaceOp()
-		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0) ] ) )
-		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(1) ] ) )
+		o = IECore.PointVelocityDisplaceOp()
+		pts["P"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0) ] ) )
+		pts["v"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(1) ] ) )
 		p = o(input=pts)
 		self.assertNotEqual( pts["P"].data, p["P"].data )
-		self.assertEqual( p["P"].data[0], V3f(1) )
+		self.assertEqual( p["P"].data[0], IECore.V3f(1) )
 		p = o(input=pts, copyInput=False)
 		self.assertEqual( pts["P"].data, p["P"].data )
-		self.assertEqual( pts["P"].data[0], V3f(1) )
+		self.assertEqual( pts["P"].data[0], IECore.V3f(1) )
 
 		# slightly more interesting example
-		o = PointVelocityDisplaceOp()
-		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1,2,3 ), V3f( 4,5,6 ) ] ) )
-		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1 ), V3f( 2, 1, 3 ) ] ) )
+		o = IECore.PointVelocityDisplaceOp()
+		pts["P"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1,2,3 ), IECore.V3f( 4,5,6 ) ] ) )
+		pts["v"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2, 1, 3 ) ] ) )
 		p = o(input=pts)
-		self.assertEqual( p["P"].data, V3fVectorData([ V3f(2,3,4), V3f(6,6,9) ] ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData([ IECore.V3f(2,3,4), IECore.V3f(6,6,9) ] ) )
 
 		# check samplelength works
-		o = PointVelocityDisplaceOp()
-		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1,2,3 ), V3f( 4,5,6 ) ] ) )
-		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1 ), V3f( 2, 1, 3 ) ] ) )
+		o = IECore.PointVelocityDisplaceOp()
+		pts["P"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1,2,3 ), IECore.V3f( 4,5,6 ) ] ) )
+		pts["v"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ), IECore.V3f( 2, 1, 3 ) ] ) )
 		p = o(input=pts, sampleLength=0.5)
-		self.assertEqual( p["P"].data, V3fVectorData([ V3f(1.5,2.5,3.5), V3f(5,5.5,7.5) ] ) )
+		self.assertEqual( p["P"].data, IECore.V3fVectorData([ IECore.V3f(1.5,2.5,3.5), IECore.V3f(5,5.5,7.5) ] ) )
 
 		# check that len(p)!=len(v) raises exception
-		o = PointVelocityDisplaceOp()
-		pts["P"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0), V3f(1), V3f(2) ] ) )
-		pts["v"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f( 1 ) ] ) )
+		o = IECore.PointVelocityDisplaceOp()
+		pts["P"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0), IECore.V3f(1), IECore.V3f(2) ] ) )
+		pts["v"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ) )
 		self.assertRaises( RuntimeError, o, input=pts )
 
 		# check that it works with other primitives
-		o = PointVelocityDisplaceOp()
-		c = MeshPrimitive.createBox( Box3f( V3f(0), V3f(1) ) )
+		o = IECore.PointVelocityDisplaceOp()
+		c = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(0), IECore.V3f(1) ) )
 		self.assertEqual( len(c['P'].data), 8 )
-		v = V3fVectorData( [] )
-		v.resize( 8, V3f(1) )
-		c['v'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, v )
+		v = IECore.V3fVectorData( [] )
+		v.resize( 8, IECore.V3f(1) )
+		c['v'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, v )
 		c2 = o(input=c)
 		for i in range(8):
 			self.assertEqual( c2['P'].data[i], c['P'].data[i] + c['v'].data[i] )
 
 		# check that it works with pervertex samplelength
-		o = PointVelocityDisplaceOp()
-		s = FloatVectorData( [] )
+		o = IECore.PointVelocityDisplaceOp()
+		s = IECore.FloatVectorData( [] )
 		for i in range(8):
 			s.append( 0.1 * i )
-		c['s'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, s )
+		c['s'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, s )
 		c2 = o(input=c, sampleLengthVar="s")
 		for i in range(8):
 			self.assertEqual( c2['P'].data[i], c['P'].data[i] + (c['v'].data[i] * c['s'].data[i]) )
 
 		# check that samplelength array length check raises
-		o = PointVelocityDisplaceOp()
-		s = FloatVectorData( [] )
+		o = IECore.PointVelocityDisplaceOp()
+		s = IECore.FloatVectorData( [] )
 		for i in range(4):
 			s.append( 0.1 * i )
-		c['s'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, s )
+		c['s'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, s )
 		self.assertRaises( RuntimeError, o, input=pts, sampleLengthVar="s" )
 
 		# check that it works with different var names
-		o = PointVelocityDisplaceOp()
-		c = MeshPrimitive.createBox( Box3f( V3f(0), V3f(1) ) )
-		MeshNormalsOp()( input=c, copyInput=False )
+		o = IECore.PointVelocityDisplaceOp()
+		c = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(0), IECore.V3f(1) ) )
+		IECore.MeshNormalsOp()( input=c, copyInput=False )
 		self.assertTrue( "N" in c )
 		c['bob'] = c['P']
 		del c['P']

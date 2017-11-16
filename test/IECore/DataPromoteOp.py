@@ -35,7 +35,7 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
 
 class TestDataPromoteOp( unittest.TestCase ) :
 
@@ -53,21 +53,21 @@ class TestDataPromoteOp( unittest.TestCase ) :
 
 		v = range( 0, 100 )
 
-		op = DataPromoteOp()
+		op = IECore.DataPromoteOp()
 
-		self.assertEqual( op( object = self.__makeVectorSourceData( IntVectorData ), targetType=int(TypeId.V3fVectorData) ), V3fVectorData( [ V3f( x ) for x in v ] ) )
-		self.assertEqual( op( object = self.__makeVectorSourceData( ShortVectorData ), targetType=int(TypeId.V3dVectorData) ), V3dVectorData( [ V3d( x ) for x in v ] ) )
-		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f( x ) for x in v ] ) )
-		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.Color3fVectorData) ), Color3fVectorData( [ Color3f( x ) for x in v ] ) )
-		self.assertEqual( op( object = self.__makeVectorSourceData( HalfVectorData ), targetType=int(TypeId.V2fVectorData) ), V2fVectorData( [ V2f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( IECore.IntVectorData ), targetType=int(IECore.TypeId.V3fVectorData) ), IECore.V3fVectorData( [ IECore.V3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( IECore.ShortVectorData ), targetType=int(IECore.TypeId.V3dVectorData) ), IECore.V3dVectorData( [ IECore.V3d( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( IECore.HalfVectorData ), targetType=int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( IECore.HalfVectorData ), targetType=int(IECore.TypeId.Color3fVectorData) ), IECore.Color3fVectorData( [ IECore.Color3f( x ) for x in v ] ) )
+		self.assertEqual( op( object = self.__makeVectorSourceData( IECore.HalfVectorData ), targetType=int(IECore.TypeId.V2fVectorData) ), IECore.V2fVectorData( [ IECore.V2f( x ) for x in v ] ) )
 
 	def testSimple( self ) :
 
-		op = DataPromoteOp()
+		op = IECore.DataPromoteOp()
 
-		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.V3fData) ), V3fData( V3f(2.0) ) )
-		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.V3dData) ), V3dData( V3d(2.0) ) )
-		self.assertEqual( op( object = IntData(2), targetType=int(TypeId.Color3fData) ), Color3fData( Color3f(2.0) ) )
+		self.assertEqual( op( object = IECore.IntData(2), targetType=int(IECore.TypeId.V3fData) ), IECore.V3fData( IECore.V3f(2.0) ) )
+		self.assertEqual( op( object = IECore.IntData(2), targetType=int(IECore.TypeId.V3dData) ), IECore.V3dData( IECore.V3d(2.0) ) )
+		self.assertEqual( op( object = IECore.IntData(2), targetType=int(IECore.TypeId.Color3fData) ), IECore.Color3fData( IECore.Color3f(2.0) ) )
 
 if __name__ == "__main__":
         unittest.main()

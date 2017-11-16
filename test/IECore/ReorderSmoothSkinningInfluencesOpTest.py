@@ -35,34 +35,34 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 
 class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 	def createSSD( self, names, poses, indices ) :
 
-		offsets = IntVectorData( [0, 2, 5] )
-		counts = IntVectorData( [2, 3, 1] )
-		weights = FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
+		offsets = IECore.IntVectorData( [0, 2, 5] )
+		counts = IECore.IntVectorData( [2, 3, 1] )
+		weights = IECore.FloatVectorData( [0.5, 0.5, 0.2, 0.8, 0.0, 1.0] )
 
-		ssd = SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		ssd = IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 		return ssd
 
 	def original( self ) :
 
-		names = StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
-		poses = M44fVectorData( [M44f(1),M44f(2),M44f(3)] )
-		indices = IntVectorData( [0, 1, 0, 1, 2, 1] )
+		names = IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC' ] )
+		poses = IECore.M44fVectorData( [IECore.M44f(1),IECore.M44f(2),IECore.M44f(3)] )
+		indices = IECore.IntVectorData( [0, 1, 0, 1, 2, 1] )
 
 		return self.createSSD( names, poses, indices )
 
 	def reordered( self ) :
 
-		names = StringVectorData( [ 'jointB', 'jointC', 'jointA' ] )
-		poses = M44fVectorData( [M44f(2),M44f(3),M44f(1)] )
-		indices = IntVectorData( [2, 0, 2, 0, 1, 0] )
+		names = IECore.StringVectorData( [ 'jointB', 'jointC', 'jointA' ] )
+		poses = IECore.M44fVectorData( [IECore.M44f(2),IECore.M44f(3),IECore.M44f(1)] )
+		indices = IECore.IntVectorData( [2, 0, 2, 0, 1, 0] )
 
 		return self.createSSD( names, poses, indices )
 
@@ -71,10 +71,10 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = ReorderSmoothSkinningInfluencesOp()
-		self.assertEqual( type(op), ReorderSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), TypeId.ReorderSmoothSkinningInfluencesOp )
-		op.parameters()['input'].setValue( IntData(1) )
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
+		self.assertEqual( type(op), IECore.ReorderSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECore.TypeId.ReorderSmoothSkinningInfluencesOp )
+		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testSameNames( self ) :
@@ -82,7 +82,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = ReorderSmoothSkinningInfluencesOp()
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['reorderedInfluenceNames'].setValue( ssd.influenceNames() )
 		result = op.operate()
@@ -101,7 +101,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 		ssd = self.original()
 		reordered = self.reordered()
 
-		op = ReorderSmoothSkinningInfluencesOp()
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['reorderedInfluenceNames'].setValue( reordered.influenceNames() )
 		result = op.operate()
@@ -126,9 +126,9 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = ReorderSmoothSkinningInfluencesOp()
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['reorderedInfluenceNames'].setValue( StringVectorData( [ 'jointA', 'badName', 'jointC' ] ) )
+		op.parameters()['reorderedInfluenceNames'].setValue( IECore.StringVectorData( [ 'jointA', 'badName', 'jointC' ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testExtraNames( self ) :
@@ -136,9 +136,9 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = ReorderSmoothSkinningInfluencesOp()
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['reorderedInfluenceNames'].setValue( StringVectorData( [ 'jointA', 'jointB', 'jointC', 'jointD' ] ) )
+		op.parameters()['reorderedInfluenceNames'].setValue( IECore.StringVectorData( [ 'jointA', 'jointB', 'jointC', 'jointD' ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 
 	def testNoNames( self ) :
@@ -146,9 +146,9 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		ssd = self.original()
 
-		op = ReorderSmoothSkinningInfluencesOp()
+		op = IECore.ReorderSmoothSkinningInfluencesOp()
 		op.parameters()['input'].setValue( ssd )
-		op.parameters()['reorderedInfluenceNames'].setValue( StringVectorData([]) )
+		op.parameters()['reorderedInfluenceNames'].setValue( IECore.StringVectorData([]) )
 		self.assertRaises( RuntimeError, op.operate )
 
 if __name__ == "__main__":

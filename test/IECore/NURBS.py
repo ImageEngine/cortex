@@ -35,48 +35,48 @@
 import os
 import unittest
 
-from IECore import *
+import IECore
 
 class TestNURBSPrimitive( unittest.TestCase ) :
 
 	def test( self ) :
 
-		n = NURBSPrimitive()
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Uniform ), 1 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Vertex ), 16 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Varying ), 4 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 4 )
-		ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
-		nn = ObjectReader( "test/IECore/nurbs.fio" ).read()
+		n = IECore.NURBSPrimitive()
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 16 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 4 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 4 )
+		IECore.ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
+		nn = IECore.ObjectReader( "test/IECore/nurbs.fio" ).read()
 		self.assertEqual( n, nn )
 
-		n = NURBSPrimitive( 3, FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
-			2, FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Constant ), 1 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Uniform ), 7 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Vertex ), 18 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.Varying ), 16 )
-		self.assertEqual( n.variableSize( PrimitiveVariable.Interpolation.FaceVarying ), 16 )
+		n = IECore.NURBSPrimitive( 3, IECore.FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
+			2, IECore.FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Constant ), 1 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 7 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 18 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.Varying ), 16 )
+		self.assertEqual( n.variableSize( IECore.PrimitiveVariable.Interpolation.FaceVarying ), 16 )
 		self.assertEqual( n.uOrder(), 3 )
-		self.assertEqual( n.uKnot(), FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ) )
+		self.assertEqual( n.uKnot(), IECore.FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ) )
 		self.assertEqual( n.uMin(), 0 )
 		self.assertEqual( n.uMax(), 4 )
 		self.assertEqual( n.vOrder(), 2 )
-		self.assertEqual( n.vKnot(), FloatVectorData( [ 0, 0, 1, 1 ] ) )
+		self.assertEqual( n.vKnot(), IECore.FloatVectorData( [ 0, 0, 1, 1 ] ) )
 		self.assertEqual( n.vMin(), 0 )
 		self.assertEqual( n.vMax(), 1 )
-		ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
-		nn = ObjectReader( "test/IECore/nurbs.fio" ).read()
+		IECore.ObjectWriter( n, "test/IECore/nurbs.fio" ).write()
+		nn = IECore.ObjectReader( "test/IECore/nurbs.fio" ).read()
 		self.assertEqual( n, nn )
 		nnn = nn.copy()
 		self.assertEqual( nnn, n )
 
 	def testHash( self ) :
 
-		n = NURBSPrimitive()
-		n2 = NURBSPrimitive( 3, FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
-			2, FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
+		n = IECore.NURBSPrimitive()
+		n2 = IECore.NURBSPrimitive( 3, IECore.FloatVectorData( [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 4 ] ), 0, 4,
+			2, IECore.FloatVectorData( [ 0, 0, 1, 1 ] ), 0, 1 )
 
 		self.assertNotEqual( n.hash(), n2.hash() )
 

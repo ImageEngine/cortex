@@ -34,80 +34,80 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 
 class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def mySSD (self):
 		# return an ssd for testing
-		ok_jn = StringVectorData( [ 'joint1', 'joint2', 'joint3' ] )
-		ok_ip = M44fVectorData( [M44f().translate(V3f(0,2,0)), M44f(), M44f().translate(V3f(0,-2,0))] )
-		ok_pio = IntVectorData( [0, 2, 4, 6, 8, 10, 12, 14] )
-		ok_pic = IntVectorData( [2, 2, 2, 2, 2, 2, 2, 2] )
-		ok_pii = IntVectorData( [0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 0, 1] )
-		ok_piw = FloatVectorData( [1, 0, 1, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 0, 1, 0] )
-		ssd = SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
+		ok_jn = IECore.StringVectorData( [ 'joint1', 'joint2', 'joint3' ] )
+		ok_ip = IECore.M44fVectorData( [IECore.M44f().translate(IECore.V3f(0,2,0)), IECore.M44f(), IECore.M44f().translate(IECore.V3f(0,-2,0))] )
+		ok_pio = IECore.IntVectorData( [0, 2, 4, 6, 8, 10, 12, 14] )
+		ok_pic = IECore.IntVectorData( [2, 2, 2, 2, 2, 2, 2, 2] )
+		ok_pii = IECore.IntVectorData( [0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 0, 1, 0, 1] )
+		ok_piw = IECore.FloatVectorData( [1, 0, 1, 0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1, 0, 1, 0] )
+		ssd = IECore.SmoothSkinningData(ok_jn, ok_ip, ok_pio, ok_pic, ok_pii, ok_piw)
 		ssd.validate()
 		return ssd
 
 	def myN (self):
 		# return an n for testing
-		n = V3fVectorData( [ V3f(0, -1, 0), V3f(0, -1, 0 ), V3f(0, 1, 0 ), V3f(0, 1, 0  ),
-							V3f(0, 1, 0 ), V3f(0, 1, 0  ), V3f(0, -1, 0), V3f(0, -1, 0)] )
+		n = IECore.V3fVectorData( [ IECore.V3f(0, -1, 0), IECore.V3f(0, -1, 0 ), IECore.V3f(0, 1, 0 ), IECore.V3f(0, 1, 0  ),
+							IECore.V3f(0, 1, 0 ), IECore.V3f(0, 1, 0  ), IECore.V3f(0, -1, 0), IECore.V3f(0, -1, 0)] )
 		return n
 
 	def myP (self):
 		# return an p for testing
-		p = V3fVectorData( [ V3f(-0.5, -2, 0.5), V3f(0.5, -2, 0.5 ), V3f(-0.5, 2, 0.5 ), V3f(0.5, 2, 0.5 ),
-							V3f(-0.5, 2, -0.5), V3f(0.5, 2, -0.5 ), V3f(-0.5, -2, -0.5), V3f(0.5, -2, -0.5)] )
+		p = IECore.V3fVectorData( [ IECore.V3f(-0.5, -2, 0.5), IECore.V3f(0.5, -2, 0.5 ), IECore.V3f(-0.5, 2, 0.5 ), IECore.V3f(0.5, 2, 0.5 ),
+							IECore.V3f(-0.5, 2, -0.5), IECore.V3f(0.5, 2, -0.5 ), IECore.V3f(-0.5, -2, -0.5), IECore.V3f(0.5, -2, -0.5)] )
 		return p
 
 	def myPP (self):
 		# return a point primitive for testing
-		pts = PointsPrimitive( self.myP() )
-		vertex = PrimitiveVariable.Interpolation.Vertex
-		pts["N"] = PrimitiveVariable( vertex, self.myN() )
+		pts = IECore.PointsPrimitive( self.myP() )
+		vertex = IECore.PrimitiveVariable.Interpolation.Vertex
+		pts["N"] = IECore.PrimitiveVariable( vertex, self.myN() )
 		self.assertTrue( pts.arePrimitiveVariablesValid() )
 		return pts
 
 	def myMN (self):
 		# face varying n
-		n = V3fVectorData( [ V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ), V3f( 0, 0, 1 ),
-							V3f( 0, 1, 0 ), V3f( 0, 1, 0 ), V3f( 0, 1, 0 ), V3f( 0, 1, 0 ),
-							V3f( 0, 0, -1 ), V3f( 0, 0, -1 ), V3f( 0, 0, -1 ), V3f( 0, 0, -1 ),
-							V3f( 0, -1, 0 ), V3f( 0, -1, 0 ), V3f( 0, -1, 0 ), V3f( 0, -1, 0 ),
-							V3f( 1, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 0, 0 ), V3f( 1, 0, 0 ),
-							V3f( -1, 0, 0 ), V3f( -1, 0, 0 ), V3f( -1, 0, 0 ), V3f( -1, 0, 0 ) ] )
+		n = IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ), IECore.V3f( 0, 0, 1 ),
+							IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ), IECore.V3f( 0, 1, 0 ),
+							IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ), IECore.V3f( 0, 0, -1 ),
+							IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ), IECore.V3f( 0, -1, 0 ),
+							IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ), IECore.V3f( 1, 0, 0 ),
+							IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ), IECore.V3f( -1, 0, 0 ) ] )
 		return n
 
 	def myMP (self):
-		vertsPerFace = IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
-		vertexIds = IntVectorData( [ 0, 1, 3, 2, 2, 3, 5, 4, 4, 5, 7, 6, 6, 7, 1, 0, 1, 7, 5, 3, 6, 0, 2, 4 ] )
-		m = MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
-		m["P"] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, self.myP() )
-		m["N"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, self.myMN() )
+		vertsPerFace = IECore.IntVectorData( [ 4, 4, 4, 4, 4, 4 ] )
+		vertexIds = IECore.IntVectorData( [ 0, 1, 3, 2, 2, 3, 5, 4, 4, 5, 7, 6, 6, 7, 1, 0, 1, 7, 5, 3, 6, 0, 2, 4 ] )
+		m = IECore.MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
+		m["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, self.myP() )
+		m["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, self.myMN() )
 		self.assertTrue( m.arePrimitiveVariablesValid() )
 		return m
 
 	def myDP (self):
 		# return a deformation pose for testing (2nd joint roated by 90deg in z)
-		dp = M44fVectorData( [ M44f( 1, 0, 0, 0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ),
-							M44f( 0, 1, 0, -0, -1, 0, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
-							M44f( 0, 1, 0, 0, -1, 0, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ) ] )
+		dp = IECore.M44fVectorData( [ IECore.M44f( 1, 0, 0, 0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ),
+							IECore.M44f( 0, 1, 0, -0, -1, 0, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
+							IECore.M44f( 0, 1, 0, 0, -1, 0, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 ) ] )
 		return dp
 
 
 	def testNoArg( self ) :
 		# check calling with no arguments
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o )
 
 	def testDeformation( self ) :
 		# check that it deforms P and N as expected
 		pts = self.myPP()
 
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		o( input = pts, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals=True)
 		self.assertNotEqual(pts["P"].data , self.myP())
 		self.assertNotEqual(pts["N"].data , self.myN())
@@ -120,42 +120,42 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def testMissingP( self ) :
 		# check not passing p is a passthru
-		pts = PointsPrimitive(0)
-		vertex = PrimitiveVariable.Interpolation.Vertex
-		o = PointSmoothSkinningOp()
+		pts = IECore.PointsPrimitive(0)
+		vertex = IECore.PrimitiveVariable.Interpolation.Vertex
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						deformationPose = self.myDP(), smoothSkinningData = self.mySSD() )
 
 	def testMissingN( self ) :
-		pts = PointsPrimitive(0)
-		vertex = PrimitiveVariable.Interpolation.Vertex
-		pts["P"] = PrimitiveVariable( vertex, self.myP() )
-		o = PointSmoothSkinningOp()
+		pts = IECore.PointsPrimitive(0)
+		vertex = IECore.PrimitiveVariable.Interpolation.Vertex
+		pts["P"] = IECore.PrimitiveVariable( vertex, self.myP() )
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )
 
 	def testMissingSSD( self ) :
 		# test if the ssd is missing
 		pts = self.myPP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						deformationPose = self.myDP() )
 
 	def testMissingDeformationPose( self ) :
 		# test if the def pose is missing
 		pts = self.myPP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						smoothSkinningData = self.mySSD())
 #
 	def testBadSSD( self ) :
 		pts = self.myPP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 
 		# test if the ssd is not matching the deformationPose
 		ssd = self.mySSD()
 		a = ssd.influencePose()
-		a.append(M44f())
+		a.append(IECore.M44f())
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						smoothSkinningData = ssd, deformationPose = self.myDP())
 
@@ -175,29 +175,29 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 
 	def testBadDeformationPose( self ) :
 		pts = self.myPP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 
 		# test if the ssd is not matching the deformationPose
 		dp = self.myDP()
-		dp.append(M44f())
+		dp.append(IECore.M44f())
 
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						smoothSkinningData = self.mySSD(), deformationPose = dp)
 
 	def testPrimVarLengthMismatch( self ) :
 		# check that len(p)!=len(n) raises exception
-		pts = PointsPrimitive(0)
-		vertex = PrimitiveVariable.Interpolation.Vertex
-		pts["P"] = PrimitiveVariable( vertex, self.myP() )
-		pts["N"] = PrimitiveVariable( vertex, V3fVectorData( [ V3f(0, -1, 0)] ) )
-		o = PointSmoothSkinningOp()
+		pts = IECore.PointsPrimitive(0)
+		vertex = IECore.PrimitiveVariable.Interpolation.Vertex
+		pts["P"] = IECore.PrimitiveVariable( vertex, self.myP() )
+		pts["N"] = IECore.PrimitiveVariable( vertex, IECore.V3fVectorData( [ IECore.V3f(0, -1, 0)] ) )
+		o = IECore.PointSmoothSkinningOp()
 		self.assertRaises( RuntimeError, o, input=pts, copyInput=True,
 						deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = True )
 
 	def testOtherPrimitives( self ) :
 		# check that it works with other primitives, meshPrim
 		mp = self.myMP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		# test it works
 		o( input=mp, copyInput=False, deformationPose = self.myDP(), smoothSkinningData = self.mySSD(), deformNormals = False )
 		self.assertNotEqual(mp["P"].data , self.myP())
@@ -211,7 +211,7 @@ class PointSmoothSkinningOpTest( unittest.TestCase ) :
 	def testDifferentVarNames( self ) :
 		# check using different var names
 		pts = self.myPP()
-		o = PointSmoothSkinningOp()
+		o = IECore.PointSmoothSkinningOp()
 		pts['bob'] = pts['P']
 		del pts['P']
 		self.assertEqual( len(pts.keys()), 2 )

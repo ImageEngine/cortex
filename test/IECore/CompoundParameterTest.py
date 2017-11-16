@@ -34,7 +34,7 @@
 
 import unittest
 
-from IECore import *
+import IECore
 
 class CompoundParameterTest( unittest.TestCase ) :
 
@@ -42,69 +42,69 @@ class CompoundParameterTest( unittest.TestCase ) :
 		import gc
 		# test if garbage collection is still working after all tests with compound parameters.
 		gc.collect()
-		RefCounted.collectGarbage()
+		IECore.RefCounted.collectGarbage()
 
-		self.assertEqual( RefCounted.numWrappedInstances(), 0 )
+		self.assertEqual( IECore.RefCounted.numWrappedInstances(), 0 )
 
 	def testUserData( self ):
 
-		p = CompoundParameter( "n", "d", [], userData = CompoundObject( { "test": StringData("hi"), "test2": IntData(2), "test3": CompoundObject( { "test4": FloatData( 1.0 ) } ) } ) )
+		p = IECore.CompoundParameter( "n", "d", [], userData = IECore.CompoundObject( { "test": IECore.StringData("hi"), "test2": IECore.IntData(2), "test3": IECore.CompoundObject( { "test4": IECore.FloatData( 1.0 ) } ) } ) )
 
-		p2 = CompoundParameter( "n", "d", [], userData = { "test": StringData("hi"), "test2": IntData(2), "test3": { "test4": FloatData( 1.0 ) } } )
+		p2 = IECore.CompoundParameter( "n", "d", [], userData = { "test": IECore.StringData("hi"), "test2": IECore.IntData(2), "test3": { "test4": IECore.FloatData( 1.0 ) } } )
 
 		self.assertEqual( p.userData(), p2.userData() )
 
 	def testDerivedClassElement( self ):
 
-		class DerivedStringParameter( StringParameter ):
+		class DerivedStringParameter( IECore.StringParameter ):
 			pass
 
 		p = DerivedStringParameter( "a", "a", "contents" )
-		c = CompoundParameter( "n", "d", members = [ p ] )
+		c = IECore.CompoundParameter( "n", "d", members = [ p ] )
 		self.assertEqual( type( c[ "a" ] ), DerivedStringParameter )
 
 	def testDerivedClass( self ):
 
-		class DerivedCompoundParameter( CompoundParameter ):
+		class DerivedCompoundParameter( IECore.CompoundParameter ):
 
 			def valueValid( self, value ) :
 				return ( True, "" )
 
-		p = DerivedCompoundParameter( "n", "d", members = [ StringParameter( "a", "a", "", presets = ( ( "b", StringData( "b" ) ), ), presetsOnly = True ) ] )
+		p = DerivedCompoundParameter( "n", "d", members = [ IECore.StringParameter( "a", "a", "", presets = ( ( "b", IECore.StringData( "b" ) ), ), presetsOnly = True ) ] )
 		p.validate()
 
 	def testConstructor( self ) :
-		p = CompoundParameter( "n", "d" )
+		p = IECore.CompoundParameter( "n", "d" )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, CompoundObject() )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( len( p.keys() ), 0 )
 		self.assertEqual( len( p.values() ), 0 )
 		self.assertEqual( len( p ), 0 )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
-		p = CompoundParameter( "n", "d", [] )
+		p = IECore.CompoundParameter( "n", "d", [] )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, CompoundObject() )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( len( p.keys() ), 0 )
 		self.assertEqual( len( p.values() ), 0 )
 		self.assertEqual( len( p ), 0 )
-		self.assertEqual (p.userData(), CompoundObject() )
+		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "compound",
 			description = "innit nice",
 			members = [
-				IntParameter( "i", "d", 1 ),
-				FloatParameter( "f", "d", 2 ),
+				IECore.IntParameter( "i", "d", 1 ),
+				IECore.FloatParameter( "f", "d", 2 ),
 			]
 		)
 
 
-		d = CompoundObject()
-		d["i"] = IntData( 1 )
-		d["f"] = FloatData( 2 )
+		d = IECore.CompoundObject()
+		d["i"] = IECore.IntData( 1 )
+		d["f"] = IECore.FloatData( 2 )
 		self.assertEqual( p.name, "compound" )
 		self.assertEqual( p.description, "innit nice" )
 		self.assertEqual( p.defaultValue, d )
@@ -116,9 +116,9 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( p.values()[1].name, "f" )
 
 	def testConstDefaultValue( self ):
-		a = CompoundParameter( "a", "a desc",
+		a = IECore.CompoundParameter( "a", "a desc",
 			members = [
-				StringParameter( "b", "b desc", "ok"),
+				IECore.StringParameter( "b", "b desc", "ok"),
 			]
 		)
 		c = a.getValue()
@@ -126,25 +126,25 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( a["b"].defaultValue.value, "ok")
 
 	def testUserData( self ):
-		compound = CompoundObject()
-		compound["first"] = IntData()
-		compound["second"] = QuatfData()
-		compound["third"] = StringData("test")
-		p = CompoundParameter( "n", "d", [], userData = compound )
+		compound = IECore.CompoundObject()
+		compound["first"] = IECore.IntData()
+		compound["second"] = IECore.QuatfData()
+		compound["third"] = IECore.StringData("test")
+		p = IECore.CompoundParameter( "n", "d", [], userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
-		data["fourth"] = CharData('1')
+		data["fourth"] = IECore.CharData('1')
 		data["first"] = data["fourth"]
 
 	def testAccess( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "compound",
 			description = "innit nice",
 			members = [
-				IntParameter( "i", "d", 1 ),
-				FloatParameter( "f", "d", 2 ),
+				IECore.IntParameter( "i", "d", 1 ),
+				IECore.FloatParameter( "f", "d", 2 ),
 			]
 		)
 
@@ -153,11 +153,11 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testPresets( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, presets = (
+				IECore.IntParameter( "i", "d", 1, presets = (
 						( "one", 1 ),
 						( "two", 2 ),
 						( "ambiguous", 4 ),
@@ -166,7 +166,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 					),
 					presetsOnly = True,
 				),
-				FloatParameter( "f", "d", 2, presets = (
+				IECore.FloatParameter( "f", "d", 2, presets = (
 						( "one", 1 ),
 						( "two", 2 ),
 						( "three", 3 ),
@@ -193,17 +193,17 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( p.getCurrentPresetName(), "four" )
 		self.assertRaises( RuntimeError, p.setPresets, [] )		# CompoundParameter created with adoptChildPresets=True does not allow overriding presets
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, presets = (
+				IECore.IntParameter( "i", "d", 1, presets = (
 						( "one", 1 ),
 						( "two", 2 ),
 					),
 					presetsOnly = True,
 				),
-				FloatParameter( "f", "d", 1, presets = (
+				IECore.FloatParameter( "f", "d", 1, presets = (
 						( "one", 1 ),
 						( "two", 2 ),
 						( "three", 3 ),
@@ -215,7 +215,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		self.assertEqual( p.presetsOnly, True )
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 		)
@@ -225,28 +225,28 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testLateValidation( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1 ),
-				FloatParameter( "f", "d", 2 )
+				IECore.IntParameter( "i", "d", 1 ),
+				IECore.FloatParameter( "f", "d", 2 )
 			]
 		)
 
 		p.validate()
-		p.setValue( CompoundObject( { "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
+		p.setValue( IECore.CompoundObject( { "i" : IECore.IntData( 10 ), "f" : IECore.FloatData( 20 ) } ) )
 		p.validate()
-		self.assertEqual( p["i"].getValue(),  IntData( 10 ) )
-		self.assertEqual( p["f"].getValue(),  FloatData( 20 ) )
+		self.assertEqual( p["i"].getValue(),  IECore.IntData( 10 ) )
+		self.assertEqual( p["f"].getValue(),  IECore.FloatData( 20 ) )
 
-		p.setValue( CompoundObject( { "i" : IntData( 10 ) } ) )
+		p.setValue( IECore.CompoundObject( { "i" : IECore.IntData( 10 ) } ) )
 		p.validate()
 		p.getValidatedValue()
-		p["f"].setValue( FloatData( 20 ) )
+		p["f"].setValue( IECore.FloatData( 20 ) )
 		p.validate()
 
-		p.setValue( CompoundObject( { "idontbelong" : IntData( 10 ), "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
+		p.setValue( IECore.CompoundObject( { "idontbelong" : IECore.IntData( 10 ), "i" : IECore.IntData( 10 ), "f" : IECore.FloatData( 20 ) } ) )
 		self.assertRaises( RuntimeError, p.validate )
 		self.assertRaises( RuntimeError, p.getValidatedValue )
 		del p.getValue()["idontbelong"]
@@ -254,7 +254,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testAddParameters( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = []
@@ -264,8 +264,8 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		p.addParameters(
 			[
-				IntParameter( "i", "d", 1 ),
-				FloatParameter( "f", "d", 2 )
+				IECore.IntParameter( "i", "d", 1 ),
+				IECore.FloatParameter( "f", "d", 2 )
 			]
 		)
 
@@ -273,29 +273,29 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testAddParametersDefault( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = []
 		)
 
-		self.assertEqual( p.defaultValue, CompoundObject() )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 
-		p.addParameter( IntParameter( name = "i", description = "d", defaultValue = 10 ) )
+		p.addParameter( IECore.IntParameter( name = "i", description = "d", defaultValue = 10 ) )
 
 		self.assertEqual( len( p.defaultValue ), 1 )
-		self.assertEqual( p.defaultValue, CompoundObject( { "i" : IntData( 10 ) } ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject( { "i" : IECore.IntData( 10 ) } ) )
 
-		p.addParameter( FloatParameter( name = "f", description = "d", defaultValue = 20 ) )
+		p.addParameter( IECore.FloatParameter( name = "f", description = "d", defaultValue = 20 ) )
 
 		self.assertEqual( len( p.defaultValue ), 2 )
-		self.assertEqual( p.defaultValue, CompoundObject( { "i" : IntData( 10 ), "f" : FloatData( 20 ) } ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject( { "i" : IECore.IntData( 10 ), "f" : IECore.FloatData( 20 ) } ) )
 
 	def testRemoveParameters( self ) :
-		a = CompoundParameter( "a", "a desc",
+		a = IECore.CompoundParameter( "a", "a desc",
 				members = [
-					StringParameter( "b", "b desc", "test 1 ok!"),
-					StringParameter( "d", "d desc", "test 2 failed!"),
+					IECore.StringParameter( "b", "b desc", "test 1 ok!"),
+					IECore.StringParameter( "d", "d desc", "test 2 failed!"),
 				]
 			)
 		c = a.getValue()
@@ -319,10 +319,10 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testDelParameters( self ) :
 
-		a = CompoundParameter( "a", "a desc",
+		a = IECore.CompoundParameter( "a", "a desc",
 				members = [
-					StringParameter( "b", "b desc", "test 1 ok!"),
-					StringParameter( "d", "d desc", "test 2 failed!"),
+					IECore.StringParameter( "b", "b desc", "test 1 ok!"),
+					IECore.StringParameter( "d", "d desc", "test 2 failed!"),
 				]
 			)
 
@@ -341,7 +341,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testAddParametersPresets( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = []
@@ -349,49 +349,49 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		self.assertEqual( p.getPresets(), {} )
 
-		p.addParameter( IntParameter( name = "i", description = "d", defaultValue = 10, presets = ( ( "one", 1 ), ( "two", 2 ) ) ) )
+		p.addParameter( IECore.IntParameter( name = "i", description = "d", defaultValue = 10, presets = ( ( "one", 1 ), ( "two", 2 ) ) ) )
 
 		self.assertEqual( len( p.getPresets() ), 2 )
-		self.assertEqual( p.getPresets(), { "one" : CompoundObject( { "i" : IntData( 1 ) } ), "two" : CompoundObject( { "i" : IntData( 2 ) } ) } )
+		self.assertEqual( p.getPresets(), { "one" : IECore.CompoundObject( { "i" : IECore.IntData( 1 ) } ), "two" : IECore.CompoundObject( { "i" : IECore.IntData( 2 ) } ) } )
 
-		fParam = FloatParameter( name = "f", description = "d", defaultValue = 20, presets = ( ( "one", 1 ), ) )
+		fParam = IECore.FloatParameter( name = "f", description = "d", defaultValue = 20, presets = ( ( "one", 1 ), ) )
 		p.addParameter( fParam )
 
 		self.assertEqual( len( p.getPresets() ), 1 )
-		self.assertEqual( p.getPresets(), { "one" : CompoundObject( { "i" : IntData( 1 ), "f" : FloatData( 1 ) } ) } )
+		self.assertEqual( p.getPresets(), { "one" : IECore.CompoundObject( { "i" : IECore.IntData( 1 ), "f" : IECore.FloatData( 1 ) } ) } )
 
-		p.insertParameter( IntParameter( name = "x", description = "x", defaultValue = 10 ), fParam )
+		p.insertParameter( IECore.IntParameter( name = "x", description = "x", defaultValue = 10 ), fParam )
 		self.assertEqual( p.keys(), [ "i", "x", "f" ] )
 
 	def testSmartSetValue( self ):
 		"""Test python overwriting: smartSetValue()"""
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1 ),
-				FloatParameter( "f", "d", 2 )
+				IECore.IntParameter( "i", "d", 1 ),
+				IECore.FloatParameter( "f", "d", 2 )
 			],
-			userData = CompoundObject( { "a": BoolData( False ) } )
+			userData = IECore.CompoundObject( { "a": IECore.BoolData( False ) } )
 		)
 
-		q = CompoundParameter(
+		q = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 10 ),
-				FloatParameter( "f", "d", 20 )
+				IECore.IntParameter( "i", "d", 10 ),
+				IECore.FloatParameter( "f", "d", 20 )
 			],
 		)
 
 		self.assert_( p["i"].getTypedValue() == 1 )
-		self.assert_( p["f"].getValue() == FloatData( 2 ) )
-		p.smartSetValue( CompoundObject( { "i": IntData(10), "f": FloatData(20) } ) )
+		self.assert_( p["f"].getValue() == IECore.FloatData( 2 ) )
+		p.smartSetValue( IECore.CompoundObject( { "i": IECore.IntData(10), "f": IECore.FloatData(20) } ) )
 		self.assert_( p["i"].getTypedValue() == 10 )
-		self.assert_( p["f"].getValue() == FloatData( 20 ) )
+		self.assert_( p["f"].getValue() == IECore.FloatData( 20 ) )
 		p.smartSetValue( { "i": 4, "f": 4 } )
 		self.assert_( p["i"].getTypedValue() == 4 )
-		self.assert_( p["f"].getValue() == FloatData( 4 ) )
+		self.assert_( p["f"].getValue() == IECore.FloatData( 4 ) )
 
 		# adding another CompoundParameter
 		p.addParameter( q )
@@ -402,23 +402,23 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assert_( p['c']['i'].getTypedValue() == 15 )
 		p.smartSetValue( { 'i': 1, 'f': 2, 'c': { 'i': 3, 'f': 4 } } )
 		self.assert_( p['i'].getTypedValue() == 1 )
-		self.assert_( p['f'].getValue() == FloatData( 2 ) )
+		self.assert_( p['f'].getValue() == IECore.FloatData( 2 ) )
 		self.assert_( p['c']['i'].getTypedValue() == 3 )
-		self.assert_( p['c']['f'].getValue() == FloatData( 4 ) )
+		self.assert_( p['c']['f'].getValue() == IECore.FloatData( 4 ) )
 
 	def testSmartSetItem( self ):
 		"""Test smart __setitem__"""
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1 ),
+				IECore.IntParameter( "i", "d", 1 ),
 			],
 		)
 		self.assert_( p["i"].getTypedValue() == 1 )
 		p["i"] = 20
 		self.assert_( p["i"].getTypedValue() == 20 )
-		p["i"] = IntData(30)
+		p["i"] = IECore.IntData(30)
 		self.assert_( p["i"].getTypedValue() == 30 )
 
 	def testAttributeAccessRemoval( self ) :
@@ -428,11 +428,11 @@ class CompoundParameterTest( unittest.TestCase ) :
 		# after deprecating it in version 4 we removed it
 		# in version 5. check that it's removed.
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1 ),
+				IECore.IntParameter( "i", "d", 1 ),
 			],
 		)
 
@@ -440,14 +440,14 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testParameterPath( self ) :
 
-		p = CompoundParameter(
+		p = IECore.CompoundParameter(
 			name = "c",
 			description = "d",
 			members = [
-				IntParameter( "i", "d", 1, ),
-				FloatParameter( "f", "d", 2, ),
-				CompoundParameter( "c", "d", members = [
-						IntParameter( "j", "d", 10 ),
+				IECore.IntParameter( "i", "d", 1, ),
+				IECore.FloatParameter( "f", "d", 2, ),
+				IECore.CompoundParameter( "c", "d", members = [
+						IECore.IntParameter( "j", "d", 10 ),
 					]
 				)
 			]
@@ -456,20 +456,20 @@ class CompoundParameterTest( unittest.TestCase ) :
 		self.assertEqual( p.parameterPath( p["i"] ), [ "i" ] )
 		self.assertEqual( p.parameterPath( p["f"] ), [ "f" ] )
 		self.assertEqual( p.parameterPath( p["c"]["j"] ), [ "c", "j" ] )
-		self.assertEqual( p.parameterPath( IntParameter( "i", "d", 10 ) ), [] )
+		self.assertEqual( p.parameterPath( IECore.IntParameter( "i", "d", 10 ) ), [] )
 		self.assertEqual( p["c"].parameterPath( p["c"]["j"] ), [ "j" ] )
 
 	def testParameterPathBug( self ) :
 
-		p = CompoundParameter( name="c", description="" )
+		p = IECore.CompoundParameter( name="c", description="" )
 		p.addParameter(
 
-			CompoundParameter(
+			IECore.CompoundParameter(
 				name = "n",
 				description = "",
 				members = [
-					IntParameter( name="i", description="", defaultValue = 1 ),
-					CompoundParameter( name="j", description="", members = [ IntParameter( "k", "", 10 ) ] )
+					IECore.IntParameter( name="i", description="", defaultValue = 1 ),
+					IECore.CompoundParameter( name="j", description="", members = [ IECore.IntParameter( "k", "", 10 ) ] )
 				]
 			)
 
@@ -480,10 +480,10 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testClearParameters( self ) :
 
-		a = CompoundParameter( "a", "a desc",
+		a = IECore.CompoundParameter( "a", "a desc",
 			members = [
-				StringParameter( "b", "b desc", "test 1 ok!"),
-				StringParameter( "d", "d desc", "test 2 failed!"),
+				IECore.StringParameter( "b", "b desc", "test 1 ok!"),
+				IECore.StringParameter( "d", "d desc", "test 2 failed!"),
 			]
 		)
 
@@ -499,14 +499,14 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testSetValueWithMissingData( self ) :
 
-		c = CompoundParameter()
+		c = IECore.CompoundParameter()
 
-		c1 = StringParameter( "child1", "child1", "child1" )
+		c1 = IECore.StringParameter( "child1", "child1", "child1" )
 		c.addParameter( c1 )
 
 		preset = c.getValue()
 
-		c2 = StringParameter( "child2", "child2", "child2" )
+		c2 = IECore.StringParameter( "child2", "child2", "child2" )
 		c2value = c2.getValue()
 		c.addParameter( c2 )
 
@@ -516,10 +516,10 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testItems( self ) :
 
-		a = CompoundParameter( "a", "a desc",
+		a = IECore.CompoundParameter( "a", "a desc",
 			members = [
-				StringParameter( "b", "b desc", "test 1 ok!"),
-				StringParameter( "d", "d desc", "test 2 failed!"),
+				IECore.StringParameter( "b", "b desc", "test 1 ok!"),
+				IECore.StringParameter( "d", "d desc", "test 2 failed!"),
 			]
 		)
 
@@ -534,26 +534,26 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testValueValidReason( self ) :
 
-		i = IntParameter( "i", "", 1, 0, 10 )
-		c = CompoundParameter(
+		i = IECore.IntParameter( "i", "", 1, 0, 10 )
+		c = IECore.CompoundParameter(
 			"c",
 			members = [
 				i
 			]
 		)
 
-		childReason = i.valueValid( IntData( 20 ) )[1]
-		compoundReason = c.valueValid( CompoundObject( { "i" : IntData( 20 ) } ) )[1]
+		childReason = i.valueValid( IECore.IntData( 20 ) )[1]
+		compoundReason = c.valueValid( IECore.CompoundObject( { "i" : IECore.IntData( 20 ) } ) )[1]
 
 		self.assertEqual( compoundReason, "i : " + childReason )
 
-		cc = CompoundParameter(
+		cc = IECore.CompoundParameter(
 			members = [
 				c
 			]
 		)
 
-		compoundCompoundReason = cc.valueValid( CompoundObject( { "c" : { "i" : IntData( 20 ) } } ) )[1]
+		compoundCompoundReason = cc.valueValid( IECore.CompoundObject( { "c" : { "i" : IECore.IntData( 20 ) } } ) )[1]
 
 		self.assertEqual( compoundCompoundReason, "c.i : " + childReason )
 
@@ -561,10 +561,10 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		# backward compatible behaviour
 
-		c = CompoundParameter(
+		c = IECore.CompoundParameter(
 			"c",
 			members = [
-				IntParameter(
+				IECore.IntParameter(
 					"a",
 					"description",
 					1,
@@ -574,7 +574,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 					),
 					presetsOnly = True,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					"b",
 					"description",
 					1,
@@ -592,10 +592,10 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		# no adoption of presets
 
-		c = CompoundParameter(
+		c = IECore.CompoundParameter(
 			"c",
 			members = [
-				IntParameter(
+				IECore.IntParameter(
 					"a",
 					"description",
 					1,
@@ -605,7 +605,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 					),
 					presetsOnly = True,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					"b",
 					"description",
 					1,
@@ -624,11 +624,11 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 		# no adoption of presets without use of keyword parameters
 
-		c = CompoundParameter(
+		c = IECore.CompoundParameter(
 			"c",
 			"description",
 			[
-				IntParameter(
+				IECore.IntParameter(
 					"a",
 					"description",
 					1,
@@ -638,7 +638,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 					),
 					presetsOnly = True,
 				),
-				IntParameter(
+				IECore.IntParameter(
 					"b",
 					"description",
 					1,
@@ -649,7 +649,7 @@ class CompoundParameterTest( unittest.TestCase ) :
 					presetsOnly = True,
 				),
 			],
-			CompoundObject( { "ud" : IntData( 10 ) } ),
+			IECore.CompoundObject( { "ud" : IECore.IntData( 10 ) } ),
 			False,
 		)
 
@@ -684,17 +684,17 @@ class CompoundParameterTest( unittest.TestCase ) :
 
 	def testDerivingInPython( self ) :
 
-		class DerivedCompoundParameter( CompoundParameter ) :
+		class DerivedCompoundParameter( IECore.CompoundParameter ) :
 
 			def __init__( self, name, description, userData = None ) :
 
-				CompoundParameter.__init__( self, name, description, userData = userData )
+				IECore.CompoundParameter.__init__( self, name, description, userData = userData )
 
-		registerRunTimeTyped( DerivedCompoundParameter )
+		IECore.registerRunTimeTyped( DerivedCompoundParameter )
 
-		c = CompoundParameter()
+		c = IECore.CompoundParameter()
 		c.addParameter( DerivedCompoundParameter( "d", "" ) )
-		c["d"].addParameter( IntParameter( "i", "", 1 ) )
+		c["d"].addParameter( IECore.IntParameter( "i", "", 1 ) )
 
 		self.assertEqual( c.parameterPath( c["d"]["i"] ), [ "d", "i" ] )
 

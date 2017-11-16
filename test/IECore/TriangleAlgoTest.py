@@ -34,31 +34,31 @@
 
 import unittest
 import math
-from IECore import *
+import IECore
 
 class TriangleAlgoTest( unittest.TestCase ) :
 
 	def testContainsPoint( self ) :
 
-		r = Rand32()
-		v0 = V3f( 0, 0, 0 )
-		v1 = V3f( 1, 0, 0 )
-		v2 = V3f( 0, 1, 0 )
+		r = IECore.Rand32()
+		v0 = IECore.V3f( 0, 0, 0 )
+		v1 = IECore.V3f( 1, 0, 0 )
+		v2 = IECore.V3f( 0, 1, 0 )
 		for i in range( 0, 10000 ) :
 
-			p = V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
+			p = IECore.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
-				self.failIf( triangleContainsPoint( v0, v1, v2, p ) )
+				self.failIf( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 			else :
-				self.failUnless( triangleContainsPoint( v0, v1, v2, p ) )
+				self.failUnless( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 
-		r = Rand32()
+		r = IECore.Rand32()
 		for i in range( 0, 10000 ) :
 
 			v0 = r.nextV3f()
 			v1 = r.nextV3f()
 			v2 = r.nextV3f()
-			if triangleArea( v0, v1, v2 ) > 0.01 :
+			if IECore.triangleArea( v0, v1, v2 ) > 0.01 :
 
 				u = r.nextf( 0, 1 )
 				v = r.nextf( 0, 1 )
@@ -66,33 +66,33 @@ class TriangleAlgoTest( unittest.TestCase ) :
 
 					w = 1 - ( u + v )
 					p = u * v0 + v * v1 + w * v2
-					self.failUnless( triangleContainsPoint( v0, v1, v2, p ) )
+					self.failUnless( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 
 	def testNormal( self ) :
 
-		v0 = V3f( 0, 0, 0 )
-		v1 = V3f( 1, 0, 0 )
-		v2 = V3f( 0, 1, 0 )
+		v0 = IECore.V3f( 0, 0, 0 )
+		v1 = IECore.V3f( 1, 0, 0 )
+		v2 = IECore.V3f( 0, 1, 0 )
 
-		n = triangleNormal( v0, v1, v2 )
-		self.assertEqual( n, V3f( 0, 0, 1 ) )
+		n = IECore.triangleNormal( v0, v1, v2 )
+		self.assertEqual( n, IECore.V3f( 0, 0, 1 ) )
 
 	def testContainsPointWithBarycentric( self ) :
 
-		r = Rand32()
-		v0 = V3f( 0, 0, 0 )
-		v1 = V3f( 1, 0, 0 )
-		v2 = V3f( 0, 1, 0 )
+		r = IECore.Rand32()
+		v0 = IECore.V3f( 0, 0, 0 )
+		v1 = IECore.V3f( 1, 0, 0 )
+		v2 = IECore.V3f( 0, 1, 0 )
 
 		for i in range( 0, 10000 ) :
 
-			b = V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
+			b = IECore.V3f( r.nextf( -1, 1 ), r.nextf( -1, 1 ), 0 )
 			b.z = 1 - ( b.x + b.y )
-			p = trianglePoint( v0, v1, v2, b )
+			p = IECore.trianglePoint( v0, v1, v2, b )
 			if p.x < 0 or p.y < 0 or p.x + p.y > 1 :
-				self.failIf( triangleContainsPoint( v0, v1, v2, p ) )
+				self.failIf( IECore.triangleContainsPoint( v0, v1, v2, p ) )
 			else :
-				bb = triangleContainsPoint( v0, v1, v2, p )
+				bb = IECore.triangleContainsPoint( v0, v1, v2, p )
 				self.failUnless( bb.equalWithAbsError( b, 0.0001 ) )
 
 

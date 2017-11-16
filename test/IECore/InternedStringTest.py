@@ -33,48 +33,48 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class InternedStringTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		originalSize = InternedString.numUniqueStrings()
+		originalSize = IECore.InternedString.numUniqueStrings()
 
-		s1 = InternedString( "nothingElseIsUsingThisStringYet" )
-		s2 = InternedString( "nothingElseIsUsingThisStringYet" )
+		s1 = IECore.InternedString( "nothingElseIsUsingThisStringYet" )
+		s2 = IECore.InternedString( "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( s1, s2 )
 		self.assertEqual( str( s1 ), "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( str( s1 ), str( s2 ) )
-		self.assertEqual( InternedString.numUniqueStrings(), originalSize + 1 )
+		self.assertEqual( IECore.InternedString.numUniqueStrings(), originalSize + 1 )
 
-		s3 = InternedString( "nothingElseIsUsingThisStringYetEither" )
+		s3 = IECore.InternedString( "nothingElseIsUsingThisStringYetEither" )
 		self.assertNotEqual( s1, s3 )
 		self.assertEqual( str( s3 ), "nothingElseIsUsingThisStringYetEither" )
 		self.assertEqual( str( s1 ), "nothingElseIsUsingThisStringYet" )
 		self.assertEqual( str( s2 ), "nothingElseIsUsingThisStringYet" )
-		self.assertEqual( InternedString.numUniqueStrings(), originalSize + 2 )
+		self.assertEqual( IECore.InternedString.numUniqueStrings(), originalSize + 2 )
 
-		s4 = InternedString( s1 )
+		s4 = IECore.InternedString( s1 )
 		self.assertEqual( s1, s4 )
 		self.assertEqual( s2, s4 )
 		self.assertNotEqual( s3, s4 )
-		self.assertEqual( InternedString.numUniqueStrings(), originalSize + 2 )
+		self.assertEqual( IECore.InternedString.numUniqueStrings(), originalSize + 2 )
 
 	def testDefaultConstructor( self ) :
 
-		self.assertEqual( InternedString(), InternedString( "" ) )
+		self.assertEqual( IECore.InternedString(), IECore.InternedString( "" ) )
 
 	def testNumberConstructor( self ) :
 
-		self.assertEqual( InternedString(0), InternedString("0") )
-		self.assertEqual( InternedString(-1), InternedString("-1") )
-		self.assertEqual( InternedString(1), InternedString("1") )
+		self.assertEqual( IECore.InternedString(0), IECore.InternedString("0") )
+		self.assertEqual( IECore.InternedString(-1), IECore.InternedString("-1") )
+		self.assertEqual( IECore.InternedString(1), IECore.InternedString("1") )
 
 	def testHashForSetsAndDicts( self ) :
 
 		def makeStrings( r ) :
-			return map( lambda i: InternedString("unique%d"%i), r )
+			return map( lambda i: IECore.InternedString("unique%d"%i), r )
 
 		# create a list of unique interned strings
 		strings = makeStrings( xrange(0,30000) )

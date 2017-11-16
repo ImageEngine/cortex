@@ -33,7 +33,7 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 import math
 
 class MeshMergeOpTest( unittest.TestCase ) :
@@ -44,9 +44,9 @@ class MeshMergeOpTest( unittest.TestCase ) :
 		self.failUnless( mesh2.arePrimitiveVariablesValid() )
 		self.failUnless( merged.arePrimitiveVariablesValid() )
 
-		for v in PrimitiveVariable.Interpolation.values :
-			i = PrimitiveVariable.Interpolation( v )
-			if i!=PrimitiveVariable.Interpolation.Invalid and i!=PrimitiveVariable.Interpolation.Constant :
+		for v in IECore.PrimitiveVariable.Interpolation.values :
+			i = IECore.PrimitiveVariable.Interpolation( v )
+			if i!=IECore.PrimitiveVariable.Interpolation.Invalid and i!=IECore.PrimitiveVariable.Interpolation.Constant :
 				self.assertEqual( merged.variableSize( i ), mesh1.variableSize( i ) + mesh2.variableSize( i ) )
 
 		self.verifyData( mesh1, mesh2, merged )
@@ -117,66 +117,66 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testPlanes( self ) :
 
-		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 	def testDifferentPrimVars( self ) :
 
-		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
-		MeshNormalsOp()( input=p1, copyInput=False )
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		p1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		IECore.MeshNormalsOp()( input=p1, copyInput=False )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
-		TriangulateOp()( input=p2, copyInput=False )
-		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
+		IECore.TriangulateOp()( input=p2, copyInput=False )
+		p2['myInt'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
+		uTangent, vTangent = IECore.MeshAlgo.calculateTangents( p2 )
 		p2["uTangent"] = uTangent
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 	def testSamePrimVarNamesWithDifferentInterpolation( self ) :
 
-		plane = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
+		plane = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
 		del plane["uv"]
-		MeshNormalsOp()( input=plane, copyInput=False )
-		box = MeshPrimitive.createBox( Box3f( V3f( 0 ), V3f( 1 ) ) )
-		MeshNormalsOp()( input=box, copyInput=False )
-		FaceVaryingPromotionOp()( input=box, copyInput=False, primVarNames=StringVectorData( [ "N" ] ) )
+		IECore.MeshNormalsOp()( input=plane, copyInput=False )
+		box = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
+		IECore.MeshNormalsOp()( input=box, copyInput=False )
+		IECore.FaceVaryingPromotionOp()( input=box, copyInput=False, primVarNames=IECore.StringVectorData( [ "N" ] ) )
 		self.assertEqual( plane.keys(), box.keys() )
-		merged = MeshMergeOp()( input=plane, mesh=box )
+		merged = IECore.MeshMergeOp()( input=plane, mesh=box )
 		del box["N"]
 		self.verifyMerge( plane, box, merged )
 
 	def testRemovePrimVars( self ) :
 
-		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
-		MeshNormalsOp()( input=p1, copyInput=False )
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		p1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		IECore.MeshNormalsOp()( input=p1, copyInput=False )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
 		self.failUnless( "N" in merged )
-		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
 		self.failUnless( "N" not in merged )
 		del p1["N"]
 		self.verifyMerge( p1, p2, merged )
 
-		TriangulateOp()( input=p2, copyInput=False )
-		p2['myInt'] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
-		uTangent, vTangent = MeshAlgo.calculateTangents( p2 )
+		IECore.TriangulateOp()( input=p2, copyInput=False )
+		p2['myInt'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.IntVectorData( [ 0, 1, 2, 3, 4 ,5 ] ) )
+		uTangent, vTangent = IECore.MeshAlgo.calculateTangents( p2 )
 		p2["uTangent"] = uTangent
 		p2["vTangent"] = vTangent
 		self.assertNotEqual( p1.keys(), p2.keys() )
-		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=False )
 		self.failUnless( "uTangent" in merged )
 		self.failUnless( "vTangent" in merged )
 		self.failUnless( "myInt" in merged )
-		merged = MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2, removeNonMatchingPrimVars=True )
 		self.failUnless( "uTangent" not in merged )
 		self.failUnless( "vTangent" not in merged )
 		self.failUnless( "myInt" not in merged )
@@ -187,56 +187,56 @@ class MeshMergeOpTest( unittest.TestCase ) :
 
 	def testReferencedData( self ) :
 
-		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
+		p1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
 		p1["Pref"] = p1["P"]
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.failUnless( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
 
 		del p1["Pref"]
 		p2["Pref"] = p2["P"]
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.failUnless( "Pref" in merged )
 		self.verifyMerge( p1, p2, merged )
 
 	def testIndexedPrimVars( self ) :
 
-		p1 = MeshPrimitive.createPlane( Box2f( V2f( -1 ), V2f( 0 ) ) )
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
+		p1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 0 ) ) )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
 
 		# both meshes have indexed UVs
-		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
-		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p1["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
+		p2["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 		# meshA has indexed UVs, meshB has expanded UVs
-		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, None )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p2["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, None )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 		# both meshes have expanded UVs
-		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, None )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p1["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, None )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 		# meshA has expanded UVs, meshB has indexed UVs
-		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p2["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 		# meshA has indexed UVs, meshB has no UVs
-		p1["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IntVectorData( [ 0, 3, 1, 2 ] ) )
+		p1["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p1["uv"].data, IECore.IntVectorData( [ 0, 3, 1, 2 ] ) )
 		del p2["uv"]
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 		# meshA has no UVs, meshB has indexed UVs
 		del p1["uv"]
-		p2 = MeshPrimitive.createPlane( Box2f( V2f( 0 ), V2f( 1 ) ) )
-		p2["uv"] = PrimitiveVariable( PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IntVectorData( [ 2, 1, 0, 3 ] ) )
-		merged = MeshMergeOp()( input=p1, mesh=p2 )
+		p2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0 ), IECore.V2f( 1 ) ) )
+		p2["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, p2["uv"].data, IECore.IntVectorData( [ 2, 1, 0, 3 ] ) )
+		merged = IECore.MeshMergeOp()( input=p1, mesh=p2 )
 		self.verifyMerge( p1, p2, merged )
 
 if __name__ == "__main__":

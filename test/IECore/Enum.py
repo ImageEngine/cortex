@@ -33,13 +33,13 @@
 ##########################################################################
 
 import unittest
-from IECore import *
+import IECore
 
 class TestEnum( unittest.TestCase ) :
 
 	def test( self ) :
 
-		E = Enum.create( "Red", "Green", "Blue" )
+		E = IECore.Enum.create( "Red", "Green", "Blue" )
 		self.assertNotEqual( E.Red, E.Green )
 		self.assertEqual( E.Red, E( 0 ) )
 		self.assertEqual( E.Green, E( 1 ) )
@@ -64,8 +64,8 @@ class TestEnum( unittest.TestCase ) :
 
 	def testHash( self ) :
 
-		E = Enum.create( "Red", "Green", "Blue" )
-		E2 = Enum.create( "Red", "Green", "Blue" )
+		E = IECore.Enum.create( "Red", "Green", "Blue" )
+		E2 = IECore.Enum.create( "Red", "Green", "Blue" )
 
 		self.assertEqual( hash( E.Red ), hash( E.Red ) )
 		self.assertEqual( hash( E2.Red ), hash( E2.Red ) )

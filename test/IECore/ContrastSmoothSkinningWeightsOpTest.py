@@ -35,41 +35,41 @@
 import math
 import unittest
 import random
-from IECore import *
+import IECore
 
 
 class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 	def mesh( self ) :
 
-		vertsPerFace = IntVectorData( [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ] )
-		vertexIds = IntVectorData( [
+		vertsPerFace = IECore.IntVectorData( [ 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4 ] )
+		vertexIds = IECore.IntVectorData( [
 			0, 1, 3, 2, 2, 3, 5, 4, 4, 5, 7, 6, 6, 7, 9, 8,
 			8, 9, 11, 10, 10, 11, 13, 12, 12, 13, 15, 14, 14, 15, 1, 0,
 			1, 15, 13, 3, 3, 13, 11, 5, 5, 11, 9, 7, 14, 0, 2, 12,
 			12, 2, 4, 10, 10, 4, 6, 8
 		] )
 
-		return MeshPrimitive( vertsPerFace, vertexIds )
+		return IECore.MeshPrimitive( vertsPerFace, vertexIds )
 
 	def createSSD( self, offsets, counts, indices, weights ) :
 
-		names = StringVectorData( [ "|joint1", "|joint1|joint2", "|joint1|joint2|joint3" ] )
-		poses = M44fVectorData( [
-			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 2, -0, 1 ),
-			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
-			M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 )
+		names = IECore.StringVectorData( [ "|joint1", "|joint1|joint2", "|joint1|joint2|joint3" ] )
+		poses = IECore.M44fVectorData( [
+			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 2, -0, 1 ),
+			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, 0, -0, 1 ),
+			IECore.M44f( 1, -0, 0, -0, -0, 1, -0, 0, 0, -0, 1, -0, -0, -2, -0, 1 )
 		] )
 
-		return SmoothSkinningData( names, poses, offsets, counts, indices, weights )
+		return IECore.SmoothSkinningData( names, poses, offsets, counts, indices, weights )
 
 	def original( self ) :
 
-		offsets = IntVectorData( [ 0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 16, 17, 18, 20, 22, 23 ] )
-		counts = IntVectorData( [ 1, 1, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1 ] )
-		indices = IntVectorData( [ 0, 0, 0, 1, 0, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 1, 0, 1, 0, 0 ] )
+		offsets = IECore.IntVectorData( [ 0, 1, 2, 4, 6, 7, 8, 10, 12, 14, 16, 17, 18, 20, 22, 23 ] )
+		counts = IECore.IntVectorData( [ 1, 1, 2, 2, 1, 1, 2, 2, 2, 2, 1, 1, 2, 2, 1, 1 ] )
+		indices = IECore.IntVectorData( [ 0, 0, 0, 1, 0, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 2, 1, 1, 0, 1, 0, 1, 0, 0 ] )
 
-		weights = FloatVectorData( [
+		weights = IECore.FloatVectorData( [
 			1, 1, 0.8, 0.2, 0.8, 0.2, 1, 1, 0.5, 0.5, 0.5, 0.5,
 			0.5, 0.5, 0.5, 0.5, 1, 1, 0.8, 0.2, 0.8, 0.2, 1, 1
 		] )
@@ -79,13 +79,13 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 	def __testContrast( self, center ) :
 
 		ssd = self.original()
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( ssd )
 		decompressedOrig = dop.operate()
 		origWeights = decompressedOrig.pointInfluenceWeights()
 
 		# ratio 0.2 iterations 1
-		op = ContrastSmoothSkinningWeightsOp()
+		op = IECore.ContrastSmoothSkinningWeightsOp()
 		op.parameters()['copyInput'].setValue( True )
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mesh'].setValue( self.mesh() )
@@ -194,13 +194,13 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		""" Test ContrastSmoothSkinningWeightsOp locking mechanism"""
 
 		ssd = self.original()
-		op = ContrastSmoothSkinningWeightsOp()
+		op = IECore.ContrastSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['contrastRatio'].setValue( 1.0 )
 		op.parameters()['iterations'].setValue( 3 )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, False ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, False, False ] ) )
 
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -212,7 +212,7 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result, ssd )
 
 		# make sure locked weights did not change and the rest has changed.
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
 		decompressedResult = dop.operate()
 		dop.parameters()['input'].setValue( ssd )
@@ -230,13 +230,13 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		""" Test ContrastSmoothSkinningWeightsOp using selected vertices"""
 
 		ssd = self.original()
-		op = ContrastSmoothSkinningWeightsOp()
+		op = IECore.ContrastSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['contrastRatio'].setValue( 0.5 )
 		op.parameters()['iterations'].setValue( 2 )
 		op.parameters()['applyLocks'].setValue( False )
-		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "2-4,10-12" ) )
+		op.parameters()['vertexIndices'].setFrameListValue( IECore.FrameList.parse( "2-4,10-12" ) )
 
 		result = op.operate()
 		self.assertEqual( result.influenceNames(), ssd.influenceNames() )
@@ -248,7 +248,7 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		self.assertNotEqual( result, ssd )
 
 		# make sure only selected vertices changed and the rest is unchanged.
-		dop = DecompressSmoothSkinningDataOp()
+		dop = IECore.DecompressSmoothSkinningDataOp()
 		dop.parameters()['input'].setValue( result )
 		decompressedResult = dop.operate()
 		dop.parameters()['input'].setValue( ssd )
@@ -276,11 +276,11 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		""" Test ContrastSmoothSkinningWeightsOp with various error states"""
 
 		ssd = self.original()
-		op = ContrastSmoothSkinningWeightsOp()
+		op = IECore.ContrastSmoothSkinningWeightsOp()
 		op.parameters()['input'].setValue( ssd )
 
 		# bad mesh
-		op.parameters()['mesh'].setValue( IntData(1) )
+		op.parameters()['mesh'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 		# wrong number of verts
@@ -290,12 +290,12 @@ class ContrastSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 		# wrong number of locks
 		op.parameters()['mesh'].setValue( self.mesh() )
 		op.parameters()['applyLocks'].setValue( True )
-		op.parameters()['influenceLocks'].setValue( BoolVectorData( [ True, False, True, False ] ) )
+		op.parameters()['influenceLocks'].setValue( IECore.BoolVectorData( [ True, False, True, False ] ) )
 		self.assertRaises( RuntimeError, op.operate )
 
 		# invalid vertex ids
 		op.parameters()['applyLocks'].setValue( False )
-		op.parameters()['vertexIndices'].setFrameListValue( FrameList.parse( "10-18" ) )
+		op.parameters()['vertexIndices'].setFrameListValue( IECore.FrameList.parse( "10-18" ) )
 		self.assertRaises( RuntimeError, op.operate )
 
 if __name__ == "__main__":
