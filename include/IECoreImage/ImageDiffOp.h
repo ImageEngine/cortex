@@ -39,7 +39,6 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
-#include "IECore/TypedPrimitiveParameter.h"
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/ImagePrimitiveParameter.h"

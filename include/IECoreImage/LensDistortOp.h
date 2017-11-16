@@ -38,6 +38,7 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/RunTimeTyped.h"
 #include "IECore/LensModel.h"
+#include "IECore/VectorTypedData.h"
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"

@@ -35,8 +35,8 @@
 #ifndef IECOREIMAGE_IMAGECROPOP_H
 #define IECOREIMAGE_IMAGECROPOP_H
 
-#include "IECore/TypedPrimitiveOp.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECore/ModifyOp.h"
 
 #include "IECoreImage/Export.h"
 #include "IECoreImage/TypeIds.h"
