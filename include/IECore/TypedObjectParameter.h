@@ -45,17 +45,7 @@
 namespace IECore
 {
 
-IE_CORE_FORWARDDECLARE( Renderable )
-IE_CORE_FORWARDDECLARE( StateRenderable )
-IE_CORE_FORWARDDECLARE( AttributeState )
-IE_CORE_FORWARDDECLARE( Shader )
-IE_CORE_FORWARDDECLARE( Transform )
-IE_CORE_FORWARDDECLARE( MatrixMotionTransform )
-IE_CORE_FORWARDDECLARE( MatrixTransform )
-IE_CORE_FORWARDDECLARE( VisibleRenderable )
-IE_CORE_FORWARDDECLARE( Group )
 IE_CORE_FORWARDDECLARE( ObjectVector )
-IE_CORE_FORWARDDECLARE( SmoothSkinningData )
 
 /// The TypedObjectParameter class implements an ObjectParameter which rigidly only
 /// accepts one type of Object
@@ -87,31 +77,11 @@ class TypedObjectParameter : public ObjectParameter
 
 };
 
-typedef TypedObjectParameter<Renderable> RenderableParameter;
-typedef TypedObjectParameter<StateRenderable> StateRenderableParameter;
-typedef TypedObjectParameter<AttributeState> AttributeStateParameter;
-typedef TypedObjectParameter<Shader> ShaderParameter;
-typedef TypedObjectParameter<Transform> TransformParameter;
-typedef TypedObjectParameter<MatrixMotionTransform> MatrixMotionTransformParameter;
-typedef TypedObjectParameter<MatrixTransform> MatrixTransformParameter;
-typedef TypedObjectParameter<VisibleRenderable> VisibleRenderableParameter;
-typedef TypedObjectParameter<Group> GroupParameter;
 typedef TypedObjectParameter<CompoundObject> CompoundObjectParameter;
 typedef TypedObjectParameter<ObjectVector> ObjectVectorParameter;
-typedef TypedObjectParameter<SmoothSkinningData> SmoothSkinningDataParameter;
 
-IE_CORE_DECLAREPTR( RenderableParameter );
-IE_CORE_DECLAREPTR( StateRenderableParameter );
-IE_CORE_DECLAREPTR( AttributeStateParameter );
-IE_CORE_DECLAREPTR( ShaderParameter );
-IE_CORE_DECLAREPTR( TransformParameter );
-IE_CORE_DECLAREPTR( MatrixMotionTransformParameter );
-IE_CORE_DECLAREPTR( MatrixTransformParameter );
-IE_CORE_DECLAREPTR( VisibleRenderableParameter );
-IE_CORE_DECLAREPTR( GroupParameter );
 IE_CORE_DECLAREPTR( CompoundObjectParameter );
 IE_CORE_DECLAREPTR( ObjectVectorParameter );
-IE_CORE_DECLAREPTR( SmoothSkinningDataParameter );
 
 } // namespace IECore
 

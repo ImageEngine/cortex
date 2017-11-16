@@ -39,22 +39,7 @@
 
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
-#include "IECore/Renderable.h"
-#include "IECore/StateRenderable.h"
-#include "IECore/AttributeState.h"
-#include "IECore/Shader.h"
-#include "IECore/Transform.h"
-#include "IECore/MatrixMotionTransform.h"
-#include "IECore/MatrixTransform.h"
-#include "IECore/VisibleRenderable.h"
-#include "IECore/Group.h"
-#include "IECore/MotionPrimitive.h"
-#include "IECore/Primitive.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
 #include "IECore/ObjectVector.h"
-#include "IECore/SmoothSkinningData.h"
 
 #include "IECorePython/TypedObjectParameterBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -91,23 +76,8 @@ static void bindTypedObjectParameter()
 
 void bindTypedObjectParameter()
 {
-	bindTypedObjectParameter<Renderable>();
-	bindTypedObjectParameter<StateRenderable>();
-	bindTypedObjectParameter<AttributeState>();
-	bindTypedObjectParameter<Shader>();
-	bindTypedObjectParameter<Transform>();
-	bindTypedObjectParameter<MatrixMotionTransform>();
-	bindTypedObjectParameter<MatrixTransform>();
-	bindTypedObjectParameter<VisibleRenderable>();
-	bindTypedObjectParameter<Group>();
-	bindTypedObjectParameter<MotionPrimitive>();
-	bindTypedObjectParameter<Primitive>();
-	bindTypedObjectParameter<MeshPrimitive>();
-	bindTypedObjectParameter<CurvesPrimitive>();
-	bindTypedObjectParameter<PointsPrimitive>();
 	bindTypedObjectParameter<CompoundObject>();
 	bindTypedObjectParameter<ObjectVector>();
-	bindTypedObjectParameter<SmoothSkinningData>();
 }
 
 } // namespace IECorePython
