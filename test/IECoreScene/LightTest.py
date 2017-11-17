@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -35,34 +35,69 @@
 import unittest
 
 import IECore
+import IECoreScene
 
-class TestWrapperToPython( unittest.TestCase ) :
+class LightTest( unittest.TestCase ) :
 
 	def test( self ) :
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.CompoundParameter(
-			members = [
-				f
-			]
-		)
+		s = IECoreScene.Light()
+		self.assertEqual( s.name, "distantlight" )
+		self.assert_( len(s.handle) > 0 )
+		self.assertEqual( len( s.parameters ), 0 )
+		self.assertEqual( s.parameters.typeName(), "CompoundData" )
 
-		self.assertTrue( c["f"].isSame( f ) )
-		self.assertEqual( c["f"], f )
+		ss = IECoreScene.Light()
+		self.assertNotEqual( s.handle, ss.handle )
 
-	def testWrapped( self ) :
+		s = IECoreScene.Light( "marble", "marble001" )
+		self.assertEqual( s.name, "marble" )
+		self.assertEqual( s.handle, "marble001" )
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
-		c2 = IECore.CompoundParameter( members = [ c ] )
+		ss = s.copy()
+		self.assertEqual( ss.name, s.name )
+		self.assertEqual( ss.handle, s.handle )
 
-		self.assertTrue( c2["c"].isSame( c ) )
-		# since OptionalCompoundParameter is a python type,
-		# we can assert its the same PyObject
-		self.assertTrue( c2["c"] is c )
-		self.assertEqual( c2["c"], c )
-		self.assertTrue( c2["c"]["f"].isSame( f ) )
-		self.assertEqual( c2["c"]["f"], f )
+	def testProperties( self ) :
+
+		s = IECoreScene.Light()
+		s.handle = "myNewHandle"
+		s.name = "myNewName"
+		self.assertEqual( s.name, "myNewName" )
+		self.assertEqual( s.handle, "myNewHandle" )
+
+	def testConstructWithParameters( self ) :
+
+		s = IECoreScene.Light( "test", "test001", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
+
+		self.assertEqual( s.name, "test" )
+		self.assertEqual( s.handle, "test001" )
+		self.assertEqual( len( s.parameters ), 1 )
+		self.assertEqual( s.parameters.typeName(), IECore.CompoundData.staticTypeName() )
+		self.assertEqual( s.parameters["a"], IECore.StringData( "a" ) )
+
+	def testCopy( self ) :
+
+		s = IECoreScene.Light( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
+		ss = s.copy()
+
+		self.assertEqual( s, ss )
+
+	def testHash( self ) :
+
+		s = IECoreScene.Light( "name", "handle" )
+		h = s.hash()
+
+		s.name = "name2"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+
+		s.handle = "handle2"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+
+		s.parameters["a"] = IECore.StringData( "a" )
+		self.assertNotEqual( s.hash(), h )
 
 if __name__ == "__main__":
-	unittest.main()
+    unittest.main()

@@ -164,17 +164,6 @@ class TestObject( unittest.TestCase ) :
 		self.assertNotEqual( i, f )
 		self.assertRaises( RuntimeError, IECore.curry( ii.copyFrom, f ) )
 
-		vertsPerFace = IECore.IntVectorData( [ 3, 3 ] )
-		vertexIds = IECore.IntVectorData( [ 0, 1, 2, 1, 2, 3 ] )
-		m = IECore.MeshPrimitive( vertsPerFace, vertexIds, "catmullClark" )
-		mm = IECore.MeshPrimitive()
-		self.assertNotEqual( m, mm )
-		mm.copyFrom( m )
-		self.assertEqual( m, mm )
-
-		p = IECore.PointsPrimitive( 3 )
-		self.assertRaises( RuntimeError, IECore.curry( p.copyFrom, m ) )
-
 		b = IECore.BlindDataHolder()
 		b.blindData()["floatData"] = IECore.FloatData( 1.0 )
 		b.blindData()["intData"] = IECore.IntData( -5 )
@@ -182,11 +171,6 @@ class TestObject( unittest.TestCase ) :
 		self.assertNotEqual( b, bb )
 		bb.copyFrom( b )
 		self.assertEqual( b, bb )
-
-		m.blindData()["floatData"] = IECore.FloatData( 3.0 )
-		b.copyFrom( m )
-		self.assertNotEqual( b, bb )
-		self.assertEqual( b.blindData(), m.blindData() )
 
 	def testHash( self ) :
 

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2012, John Haddon. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,43 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import IECore
+import IECoreScene
+
+class OptionsTest( unittest.TestCase ) :
+
+	def testCopy( self ) :
+
+		o = IECoreScene.Options()
+		o.options["test"] = IECore.FloatData( 10 )
+
+		oo = o.copy()
+		self.assertEqual( o, oo )
+
+	def testConstructFromDict( self ) :
+
+		o = IECoreScene.Options( {
+			"a" : IECore.StringData( "a" ),
+			"b" : IECore.IntData( 10 ),
+		} )
+
+		self.assertEqual( len( o.options ), 2 )
+		self.assertEqual( o.options["a"], IECore.StringData( "a" ) )
+		self.assertEqual( o.options["b"], IECore.IntData( 10 ) )
+
+	def testHash( self ) :
+
+		o1 = IECoreScene.Options()
+		o2 = IECoreScene.Options()
+
+		self.assertEqual( o1.hash(), o2.hash() )
+
+		o1.options["a"] = IECore.StringData( "a" )
+		self.assertNotEqual( o1.hash(), o2.hash() )
+
+		o2.options["a"] = IECore.StringData( "a" )
+		self.assertEqual( o1.hash(), o2.hash() )
+
+if __name__ == "__main__":
+	unittest.main()

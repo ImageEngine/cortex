@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,40 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import IECore
+import IECoreScene
+
+class TestRemovePrimVar( unittest.TestCase ) :
+
+	def test( self ) :
+
+		r = IECore.Reader.create( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		p = r.read()
+		numPrimVars = len( p )
+
+		toRemove = [ "particleId", "mass", "lastWorldVelocity", "worldVelocityInObjectSpace" ]
+		for n in toRemove :
+			self.assert_( n in p )
+
+		o = IECoreScene.RemovePrimitiveVariables()
+		o["input"].setValue( p )
+		o["names"].setValue( IECore.StringVectorData( toRemove ) )
+
+		pp = o()
+		self.assertEqual( len( pp ), numPrimVars - len( toRemove ) )
+		for n in toRemove :
+			self.assert_( not n in pp )
+
+		for n in toRemove :
+			self.assert_( not n in pp )
+
+		self.assert_( not pp.isSame( p ) )
+
+		o["copyInput"].setValue( IECore.BoolData( False ) )
+		ppp = o()
+		self.assert_( ppp.isSame( p ) )
+
+if __name__ == "__main__":
+	unittest.main()
+

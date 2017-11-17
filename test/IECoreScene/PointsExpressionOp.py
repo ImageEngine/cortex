@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,53 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import IECore
+import IECoreScene
+
+class TestPointsExpressionTest( unittest.TestCase ) :
+
+	def setUp( self ) :
+
+		numPoints = 100
+
+		points = IECore.V3fVectorData( numPoints )
+		colors = IECore.Color3fVectorData( numPoints )
+		ints = IECore.IntVectorData( numPoints )
+
+		self.p = IECoreScene.PointsPrimitive( numPoints )
+		self.p["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, points )
+		self.p["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, colors )
+		self.p["int"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Varying, ints )
+
+	def testRemoval( self ) :
+
+		o = IECoreScene.PointsExpressionOp()
+		p = o( input = self.p, expression = "remove = i % 2" )
+
+		self.assertEqual( p.numPoints, self.p.numPoints / 2 )
+		for k in p.keys() :
+			self.assertEqual( len( p[k].data ), len( self.p[k].data ) / 2 )
+
+	def testAssignment( self ) :
+
+		o = IECoreScene.PointsExpressionOp()
+		p = o( input = self.p, expression = "int = i * 10" )
+
+		self.assertEqual( p.numPoints, self.p.numPoints )
+		ints = p["int"].data
+		for i in range( p.numPoints ) :
+			self.assertEqual( i * 10, ints[i] )
+
+	def testGlobals( self ) :
+
+		o = IECoreScene.PointsExpressionOp()
+		p = o( input = self.p, expression = "P = IECore.V3f( i )" )
+
+		points = p["P"].data
+		for i in range( p.numPoints ) :
+			self.assert_( points[i].equalWithAbsError( IECore.V3f( i ), 0.0001 ) )
+
+if __name__ == "__main__":
+	unittest.main()
+

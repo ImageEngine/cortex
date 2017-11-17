@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,59 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import IECore
+import IECoreScene
+
+class IDXReaderTest( unittest.TestCase ) :
+
+	def testConstruction( self ) :
+
+		r = IECoreScene.IDXReader()
+		self.assertEqual( r["fileName"].getTypedValue(), "" )
+
+		r = IECoreScene.IDXReader( "test/IECore/data/idxFiles/test.idx" )
+		self.assertEqual( r["fileName"].getTypedValue(), "test/IECore/data/idxFiles/test.idx" )
+
+	def testReading( self ) :
+
+		r = IECoreScene.IDXReader( "test/IECore/data/idxFiles/test.idx" )
+
+		o = r.read()
+
+		self.failUnless( o.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+
+		self.assertEqual( len(o.children()), 1 )
+
+		c = o.children()[0]
+
+		self.assertEqual( c.numPoints, 6 )
+
+		# We're not order preserving
+
+		for k in [ "000", "001", "002", "003", "004", "005" ] :
+			self.failUnless( k in c["PointID"].data )
+
+		for p in [
+				IECore.V3f( 63.204863, 0.831837, -33.969296 ),
+				IECore.V3f( 62.345470, 0.707662, -34.099882 ),
+				IECore.V3f( 63.104346, 0.708060, -34.025762 ),
+				IECore.V3f( 63.096101, -0.973316, -34.031914 ),
+				IECore.V3f( 62.338136, -0.974567, -34.112893 ),
+				IECore.V3f( 54.252821, 0.716216, -34.849839 ),
+			]:
+				self.failUnless( p in c["P"].data )
+
+	def testCanRead( self ) :
+
+		self.failUnless( IECoreScene.IDXReader.canRead( "test/IECore/data/idxFiles/test.idx" ) )
+		self.failIf( IECoreScene.IDXReader.canRead( "test/IECore/data/cobFiles/ball.cob" ) )
+
+	def testRegistration( self ) :
+
+		r = IECore.Reader.create( "test/IECore/data/idxFiles/test.idx" )
+		self.failUnless( isinstance( r, IECoreScene.IDXReader ) )
+
+if __name__ == "__main__":
+	unittest.main()
+

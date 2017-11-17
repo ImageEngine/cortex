@@ -112,21 +112,6 @@ class TestBlindDataHolder(unittest.TestCase):
 		b1 = IECore.Object.load( iface, "test" )
 		self.assertEqual( b1, IECore.BlindDataHolder() )
 
-		# thirt test: saving a derived class with some blind data
-		g1 = IECore.Group()
-		g1.blindData()["floatData"] = IECore.FloatData(1.0)
-		g1.blindData()["intData"] = IECore.IntData(-5)
-		g1.save( iface, "test" )
-		g2 = IECore.Object.load( iface, "test" )
-		self.assertEqual( g1, g2 )
-
-		# fourth test: overriding with no blind data
-		g1 = IECore.Group()
-		g1.blindData()
-		g1.save( iface, "test" )
-		g2 = IECore.Object.load( iface, "test" )
-		self.assertEqual( g1, g2 )
-
 		# "blindData" entry should be excluded from the IndexedIO hierarchy
 		self.assertEqual( iface.directory( ["test","data","BlindDataHolder"], IECore.IndexedIO.MissingBehaviour.NullIfMissing ), None )
 

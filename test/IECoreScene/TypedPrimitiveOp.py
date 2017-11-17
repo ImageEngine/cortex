@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,38 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import os.path
+
+import IECore
+import IECoreScene
+
+class TestTypedPrimitiveOp( unittest.TestCase ) :
+
+	class MeshCopyOp( IECoreScene.MeshPrimitiveOp ) :
+
+		def __init__( self ):
+
+			IECoreScene.MeshPrimitiveOp.__init__( self, "MeshCopyOp", "A simple op to copy meshes" )
+
+		def modifyTypedPrimitive( self, mesh, operands ) :
+
+			# ModifyOp should automatically copy the input for us, so we can just
+			# return it.
+
+			return mesh
+
+	def testMeshPrimitiveOp( self ) :
+		""" Test TypedPrimitiveOp for use with MeshPrimitive """
+		op = TestTypedPrimitiveOp.MeshCopyOp()
+
+		inputMesh = IECoreScene.MeshPrimitive()
+
+		outputMesh = op( input = inputMesh )
+
+		self.assert_( outputMesh.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.failIf( inputMesh is outputMesh )
+		self.assertEqual( inputMesh, outputMesh )
+
+if __name__ == "__main__":
+        unittest.main()

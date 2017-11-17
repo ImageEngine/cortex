@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -33,36 +33,58 @@
 ##########################################################################
 
 import unittest
-
 import IECore
+import IECoreScene
 
-class TestWrapperToPython( unittest.TestCase ) :
+class TestPointBoundsOp( unittest.TestCase ) :
 
 	def test( self ) :
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.CompoundParameter(
-			members = [
-				f
-			]
+		o = IECoreScene.PointBoundsOp()
+		b = o( points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		self.assert_( b.isInstanceOf( IECore.Box3fData.staticTypeId() ) )
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 0 ) ) )
+
+		o = IECoreScene.PointBoundsOp()
+		b = o(
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] )
 		)
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 1 ) ) )
 
-		self.assertTrue( c["f"].isSame( f ) )
-		self.assertEqual( c["f"], f )
+		o = IECoreScene.PointBoundsOp()
+		b = o(
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
+			velocityMultiplier = 0.5
+		)
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 0.5 ) ) )
 
-	def testWrapped( self ) :
+		o = IECoreScene.PointBoundsOp()
+		b = o(
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
+			velocityMultiplier = 0.5,
+			radii = IECore.FloatVectorData( [ 1 ] ),
+		)
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1.5 ) ) )
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
-		c2 = IECore.CompoundParameter( members = [ c ] )
+		o = IECoreScene.PointBoundsOp()
+		b = o(
+			points = IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ),
+			velocities = IECore.V3fVectorData( [ IECore.V3f( 1 ) ] ),
+			velocityMultiplier = 0.5,
+			radii = IECore.FloatVectorData( [ 1 ] ),
+			radiusMultiplier = 0.5,
+		)
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( -0.5 ), IECore.V3f( 1 ) ) )
 
-		self.assertTrue( c2["c"].isSame( c ) )
-		# since OptionalCompoundParameter is a python type,
-		# we can assert its the same PyObject
-		self.assertTrue( c2["c"] is c )
-		self.assertEqual( c2["c"], c )
-		self.assertTrue( c2["c"]["f"].isSame( f ) )
-		self.assertEqual( c2["c"]["f"], f )
+		o = IECoreScene.PointBoundsOp()
+		b = o(
+			points = IECore.V3fVectorData( [ IECore.V3f( 0, 1, 2 ), IECore.V3f( 4, 5, 6 ) ] ),
+		)
+		self.assertEqual( b.value, IECore.Box3f( IECore.V3f( 0, 1, 2 ), IECore.V3f( 4, 5, 6 ) ) )
 
 if __name__ == "__main__":
 	unittest.main()
+

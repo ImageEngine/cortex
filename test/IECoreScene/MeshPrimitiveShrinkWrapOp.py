@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2009, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,53 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import math
+import unittest
+import random
+import IECore
+import IECoreScene
+
+
+
+class TestMeshPrimitiveShrinkWrapOp( unittest.TestCase ) :
+
+	def testSimple( self ) :
+		""" Test MeshPrimitiveShrinkWrapOp """
+
+		random.seed( 1011 )
+
+		# Load poly sphere of radius 1
+		m = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob" ).read()
+		radius = 1.0
+
+		# Duplicate and scale to radius 3, jitter slightly
+		targetRadius = 3.0
+		target = m.copy()
+
+		pData = m["P"].data
+
+		target["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData() )
+		for p in pData:
+			target["P"].data.append( p * targetRadius + 0.01 * IECore.V3f( random.random(), random.random(), random.random() ) )
+
+		self.assertEqual( len( target["P"].data ), len( m["P"].data ) )
+
+		# Shrink wrap smaller mesh to larger mesh
+		op = IECoreScene.MeshPrimitiveShrinkWrapOp()
+		res = op(
+			target = target,
+			input = m,
+
+			method =  IECoreScene.MeshPrimitiveShrinkWrapOp.Method.Normal,
+			direction = IECoreScene.MeshPrimitiveShrinkWrapOp.Direction.Both
+		)
+
+		pData = res["P"].data
+		for p in pData:
+			self.assert_( math.fabs( p.length() - targetRadius ) < 0.1 )
+
+
+
+
+if __name__ == "__main__":
+    unittest.main()

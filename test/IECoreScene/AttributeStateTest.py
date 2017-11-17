@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,44 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import os
+import unittest
+import IECore
+import IECoreScene
+
+class AttributeStateTest( unittest.TestCase ) :
+
+	def testCopy( self ) :
+
+		a = IECoreScene.AttributeState()
+		a.attributes["test"] = IECore.FloatData( 10 )
+
+		aa = a.copy()
+		self.assertEqual( a, aa )
+
+	def testConstructFromDict( self ) :
+
+		a = IECoreScene.AttributeState( {
+			"a" : IECore.StringData( "a" ),
+			"b" : IECore.IntData( 10 ),
+		} )
+
+		self.assertEqual( len( a.attributes ), 2 )
+		self.assertEqual( a.attributes["a"], IECore.StringData( "a" ) )
+		self.assertEqual( a.attributes["b"], IECore.IntData( 10 ) )
+
+	def testHash( self ) :
+
+		a1 = IECoreScene.AttributeState()
+		a2 = IECoreScene.AttributeState()
+
+		self.assertEqual( a1.hash(), a2.hash() )
+
+		a1.attributes["a"] = IECore.StringData( "a" )
+		self.assertNotEqual( a1.hash(), a2.hash() )
+
+		a2.attributes["a"] = IECore.StringData( "a" )
+		self.assertEqual( a1.hash(), a2.hash() )
+
+if __name__ == "__main__":
+	unittest.main()

@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,33 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import IECore
+import IECoreScene
+import math
+
+class CurveTangentsOpTest( unittest.TestCase ) :
+
+	def testTangentsGeneration( self ) :
+
+		i = IECore.IntVectorData( [ 4 ] )
+		p = IECore.V3fVectorData( [ IECore.V3f( 0.0 ), IECore.V3f( 1.0, 0.0, 0.0 ), IECore.V3f( 2.0, 0.0, 0.0 ), IECore.V3f( 3.0, 0.0, 0.0 ) ] )
+		c = IECoreScene.CurvesPrimitive( i, IECore.CubicBasisf.bSpline(), False, p )
+
+		self.assert_( "myTangent" not in c )
+
+		curves = IECoreScene.CurveTangentsOp() (
+			input = c,
+			vTangentPrimVarName = "myTangent",
+		)
+
+		self.assert_( "myTangent" in curves )
+		self.assert_( curves.arePrimitiveVariablesValid() )
+
+		self.assertEqual( curves["myTangent"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+
+		for v in curves["myTangent"].data :
+			self.failUnless( v.equalWithAbsError( IECore.V3f( 1, 0, 0 ), 0.000001 ) )
+
+if __name__ == "__main__":
+    unittest.main()

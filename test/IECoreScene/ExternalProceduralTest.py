@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2014, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,62 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+
+import IECore
+import IECoreScene
+
+class ExternalProceduralTest( unittest.TestCase ) :
+
+	def test( self ) :
+
+		p = IECoreScene.ExternalProcedural(
+			"yeti.so",
+			IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ),
+			IECore.CompoundData( {
+				"one" : 1,
+				"two" : 2,
+			} )
+		)
+
+		self.assertEqual( p.getFileName(), "yeti.so" )
+		self.assertEqual( p.getBound(), IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
+		self.assertEqual(
+			p.parameters(),
+			IECore.CompoundData( {
+				"one" : 1,
+				"two" : 2,
+			} )
+		)
+
+		p2 = p.copy()
+
+		self.assertEqual( p2.getFileName(), "yeti.so" )
+		self.assertEqual( p2.getBound(), IECore.Box3f( IECore.V3f( 1, 2, 3 ), IECore.V3f( 4, 5, 6 ) ) )
+		self.assertEqual(
+			p2.parameters(),
+			IECore.CompoundData( {
+				"one" : 1,
+				"two" : 2,
+			} )
+		)
+
+		self.assertEqual( p, p2 )
+		self.assertEqual( p.hash(), p2.hash() )
+
+		p2.setFileName( "yeti2.so" )
+		self.assertEqual( p2.getFileName(), "yeti2.so" )
+
+		self.assertNotEqual( p, p2 )
+		self.assertNotEqual( p.hash(), p2.hash() )
+
+		m = IECore.MemoryIndexedIO( IECore.CharVectorData(), [], IECore.IndexedIO.OpenMode.Append )
+
+		p.save( m, "test" )
+
+		p3 = IECore.Object.load( m, "test" )
+
+		self.assertEqual( p3, p )
+
+if __name__ == "__main__":
+    unittest.main()

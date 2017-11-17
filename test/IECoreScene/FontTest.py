@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2008-2013, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,69 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+import threading
+
+import IECore
+import IECoreScene
+
+class FontTest( unittest.TestCase ) :
+
+	def testConstructors( self ) :
+
+		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+
+		self.assertRaises( Exception, IECoreScene.Font, "notAFont" )
+
+	def test( self ) :
+
+		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+
+		g = f.meshGroup( "hello world" )
+		m = f.mesh( "hello world" )
+
+		self.assert_( g.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+		self.assert_( m.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+
+		v = 0
+		for c in g.children() :
+
+			self.assert_( c.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
+			self.assertEqual( len( c.children() ), 1 )
+			self.assert_( c.children()[0].isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+			self.assertEqual( c.children()[0]["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
+
+			v += c.children()[0]["P"].data.size()
+
+		self.assertEqual( v, m["P"].data.size() )
+
+	def testCharBound( self ) :
+
+		f = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+
+		b = f.bound()
+		for c in range( 0, 128 ) :
+
+			bb = f.bound( chr( c ) )
+			self.assert_( b.contains( bb ) )
+
+	def testThreading( self ) :
+
+		font = IECoreScene.Font( "test/IECore/data/fonts/Vera.ttf" )
+
+		def f() :
+
+			for i in range( 0, 100 ) :
+				font.mesh( str( i ) )
+
+		threads = []
+		for i in range( 0, 100 ) :
+			thread = threading.Thread( target = f )
+			threads.append( thread )
+			thread.start()
+
+		for thread in threads :
+			thread.join()
+
+if __name__ == "__main__":
+    unittest.main()

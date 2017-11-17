@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2007-2011, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,4 +32,61 @@
 #
 ##########################################################################
 
-from IECoreScene import ReadProcedural as read
+import unittest
+
+import IECore
+import IECoreScene
+
+class TestShader( unittest.TestCase ) :
+
+	def test( self ) :
+
+		s = IECoreScene.Shader()
+		self.assertEqual( s.name, "defaultsurface" )
+		self.assertEqual( s.type, "surface" )
+		self.assertEqual( len( s.parameters ), 0 )
+		self.assertEqual( s.parameters.typeName(), "CompoundData" )
+
+		s = IECoreScene.Shader( "marble", "surface" )
+		self.assertEqual( s.name, "marble" )
+		self.assertEqual( s.type, "surface" )
+
+		ss = s.copy()
+		self.assertEqual( ss.name, s.name )
+		self.assertEqual( ss.type, s.type )
+
+	def testConstructWithParameters( self ) :
+
+		s = IECoreScene.Shader( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
+
+		self.assertEqual( s.name, "test" )
+		self.assertEqual( s.type, "surface" )
+		self.assertEqual( len( s.parameters ), 1 )
+		self.assertEqual( s.parameters.typeName(), IECore.CompoundData.staticTypeName() )
+		self.assertEqual( s.parameters["a"], IECore.StringData( "a" ) )
+
+	def testCopy( self ) :
+
+		s = IECoreScene.Shader( "test", "surface", IECore.CompoundData( { "a" : IECore.StringData( "a" ) } ) )
+		ss = s.copy()
+
+		self.assertEqual( s, ss )
+
+	def testHash( self ) :
+
+		s = IECoreScene.Shader()
+		h = s.hash()
+
+		s.name = "somethingElse"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+
+		s.type = "somethingElse"
+		self.assertNotEqual( s.hash(), h )
+		h = s.hash()
+
+		s.parameters["a"] = IECore.StringData( "a" )
+		self.assertNotEqual( s.hash(), h )
+
+if __name__ == "__main__":
+    unittest.main()

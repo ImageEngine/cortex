@@ -33,36 +33,70 @@
 ##########################################################################
 
 import unittest
-
+import sys
 import IECore
+import IECoreScene
 
-class TestWrapperToPython( unittest.TestCase ) :
+class TestOBJReader( unittest.TestCase ) :
 
-	def test( self ) :
+	def testRead( self ) :
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.CompoundParameter(
-			members = [
-				f
-			]
-		)
+		self.testfile = 'test/IECore/data/obj/triangle.obj'
 
-		self.assertTrue( c["f"].isSame( f ) )
-		self.assertEqual( c["f"], f )
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECoreScene.OBJReader)
 
-	def testWrapped( self ) :
+		mesh = r.read()
 
-		f = IECore.FileSequenceParameter( "f", "d" )
-		c = IECore.OptionalCompoundParameter( "c", members = [ f ] )
-		c2 = IECore.CompoundParameter( members = [ c ] )
+		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 1 )
+		self.failUnless( "P" in mesh )
 
-		self.assertTrue( c2["c"].isSame( c ) )
-		# since OptionalCompoundParameter is a python type,
-		# we can assert its the same PyObject
-		self.assertTrue( c2["c"] is c )
-		self.assertEqual( c2["c"], c )
-		self.assertTrue( c2["c"]["f"].isSame( f ) )
-		self.assertEqual( c2["c"]["f"], f )
+	def testReadNormals( self ) :
+
+		self.testfile = 'test/IECore/data/obj/triangle_normals.obj'
+
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECoreScene.OBJReader)
+
+		mesh = r.read()
+
+		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 4 )
+		self.failUnless( "P" in mesh )
+		self.failUnless( "N" in mesh )
+		self.failUnless( "s" in mesh )
+		self.failUnless( "t" in mesh )
+
+	def testReadNoTexture( self ) :
+
+		self.testfile = 'test/IECore/data/obj/triangle_no_texture.obj'
+
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECoreScene.OBJReader)
+
+		mesh = r.read()
+
+		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
+		self.assertEqual( len( mesh ), 2 )
+		self.failUnless( "P" in mesh )
+		self.failUnless( "N" in mesh )
+
+	def testGroups( self ) :
+
+		self.testfile = 'test/IECore/data/obj/groups.obj'
+
+		r = IECore.Reader.create(self.testfile)
+		self.assertEqual(type(r), IECoreScene.OBJReader)
+
+		mesh = r.read()
+
+		self.failUnless( mesh.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
+		self.failUnless( mesh.arePrimitiveVariablesValid() )
 
 if __name__ == "__main__":
+
 	unittest.main()

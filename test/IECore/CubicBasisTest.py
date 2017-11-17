@@ -130,25 +130,6 @@ class CubicTest( unittest.TestCase ) :
 		p = b( 1, p0, p1, p2, p3 )
 		self.assertEqual( p, p3 )
 
-	## This test isn't very useful as it doesn't assert anything,
-	# but it can be handy for making a visual verification.
-	def testPoints( self ) :
-
-		b = IECore.CubicBasisf.bezier()
-
-		p0 = IECore.V3f( 0 )
-		p1 = IECore.V3f( 0, 1, 0 )
-		p2 = IECore.V3f( 1, 1, 0 )
-		p3 = IECore.V3f( 1, 0, 0 )
-
-		p = IECore.V3fVectorData()
-		for i in range( 0, 1000 ) :
-
-			t = i / 999.0
-			p.append( b( t, p0, p1, p2, p3 ) * 100 )
-
-		pp = IECore.PointsPrimitive( p )
-
 	def testEquality( self ) :
 
 		self.assertEqual( IECore.CubicBasisf.bezier(), IECore.CubicBasisf.bezier() )
