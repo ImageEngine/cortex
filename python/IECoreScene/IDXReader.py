@@ -35,6 +35,7 @@
 import re
 
 import IECore
+import IECoreScene
 
 class IDXReader( IECore.Reader ) :
 
@@ -104,7 +105,7 @@ class IDXReader( IECore.Reader ) :
 		projInfo = self.__extractFields( projMatch.group(1) )
 
 		# We're going to return  a group of PointsPrimitives, one for each station.
-		g = IECore.Group()
+		g = IECoreScene.Group()
 
 		for s in setupSlopeMatch:
 
@@ -149,7 +150,7 @@ class IDXReader( IECore.Reader ) :
 				else :
 					annotations.append( "" )
 
-			primitive = IECore.PointsPrimitive( p )
+			primitive = IECoreScene.PointsPrimitive( p )
 
 			# Extract any available station info from the SETUP block
 			stnInfo = self.__extractFields( s.group(1) )
@@ -174,11 +175,11 @@ class IDXReader( IECore.Reader ) :
 			for f in projInfo:
 				primitive.blindData()["PROJECT_%s" % f] = IECore.StringData( projInfo[f] )
 
-			primitive["PointID"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, ids )
-			primitive["PointNo"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, nos )
-			primitive["Date"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, dates )
-			primitive["Code"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, codes )
-			primitive["Annotation"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, annotations )
+			primitive["PointID"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, ids )
+			primitive["PointNo"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, nos )
+			primitive["Date"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, dates )
+			primitive["Code"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, codes )
+			primitive["Annotation"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, annotations )
 
 			if primitive.numPoints > 0 :
 				g.addChild( primitive )

@@ -65,8 +65,6 @@ import StringUtil
 from DataTraits import *
 from FileSequenceFunctions import *
 from ClassLoader import ClassLoader
-from RemovePrimitiveVariables import RemovePrimitiveVariables
-from RenamePrimitiveVariables import RenamePrimitiveVariables
 from SequenceCpOp import SequenceCpOp
 from SequenceLsOp import SequenceLsOp
 from SequenceMvOp import SequenceMvOp
@@ -75,10 +73,8 @@ from SequenceCatOp import SequenceCatOp
 from SequenceRenumberOp import SequenceRenumberOp
 from SequenceConvertOp import SequenceConvertOp
 from FormattedParameterHelp import formatParameterHelp
-from ReadProcedural import ReadProcedural
 from ClassLsOp import ClassLsOp
 from OptionalCompoundParameter import OptionalCompoundParameter
-from PointsExpressionOp import PointsExpressionOp
 from Struct import Struct
 import Enum
 from LsHeaderOp import LsHeaderOp
@@ -92,22 +88,14 @@ from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
 from FileSequenceGraphOp import FileSequenceGraphOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
-from AttributeBlock import AttributeBlock
-from TransformBlock import TransformBlock
-from WorldBlock import WorldBlock
-from EditBlock import EditBlock
 from SequenceMergeOp import SequenceMergeOp
 from DateTimeParameterParser import *
-from MotionBlock import MotionBlock
 from SubstitutedDict import SubstitutedDict
-from VisualiserProcedural import VisualiserProcedural
-from IDXReader import IDXReader
 from ClassParameter import ClassParameter
 from ClassVectorParameter import ClassVectorParameter
 from CompoundStream import CompoundStream
 from IgnoredExceptions import IgnoredExceptions
 import ParameterAlgo
-from SWAReader import SWAReader
 
 # importing internal utility modules and class overwrites
 from ObjectOverwriting import *

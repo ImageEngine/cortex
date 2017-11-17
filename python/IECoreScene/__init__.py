@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2017, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,41 +32,19 @@
 #
 ##########################################################################
 
-import IECore
+__import__( "IECore" )
 
-## An incredibly simple procedural which just renders an object
-# passed to it via a Parameter. This is of most use for visualising
-# things in Maya using the IECoreMaya.ProceduralHolder.
-class VisualiserProcedural( IECore.ParameterisedProcedural ) :
+from _IECoreScene import *
 
-	def __init__( self ) :
-
-		IECore.ParameterisedProcedural.__init__( self )
-
-		self.parameters().addParameters(
-
-			[
-
-				IECore.VisibleRenderableParameter(
-					"renderable",
-					"The object to visualise",
-					IECore.Group()
-				)
-
-			]
-
-		)
-
-	def doBound( self, args ) :
-
-		return args["renderable"].bound()
-
-	def doRenderState( self, renderer, args ) :
-
-		pass
-
-	def doRender( self, renderer, args ) :
-
-		args["renderable"].render( renderer )
-
-IECore.registerObject( VisualiserProcedural, 100027 )
+from RemovePrimitiveVariables import RemovePrimitiveVariables
+from RenamePrimitiveVariables import RenamePrimitiveVariables
+from ReadProcedural import ReadProcedural
+from PointsExpressionOp import PointsExpressionOp
+from AttributeBlock import AttributeBlock
+from TransformBlock import TransformBlock
+from WorldBlock import WorldBlock
+from EditBlock import EditBlock
+from MotionBlock import MotionBlock
+from VisualiserProcedural import VisualiserProcedural
+from IDXReader import IDXReader
+from SWAReader import SWAReader

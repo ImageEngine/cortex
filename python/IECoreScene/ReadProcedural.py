@@ -32,52 +32,54 @@
 #
 ##########################################################################
 
-from IECore import *
 import math
 
-class ReadProcedural( ParameterisedProcedural ) :
+import IECore
+import IECoreScene
+
+class ReadProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		ParameterisedProcedural.__init__( self )
+		IECoreScene.ParameterisedProcedural.__init__( self )
 
 		self.parameters().addParameters(
 
 			[
-				CompoundParameter(
+				IECore.CompoundParameter(
 					name = "files",
 					description = "Parameters controlling what files are rendered.",
 					members = [
-						FileNameParameter(
+						IECore.FileNameParameter(
 							name = "name",
 							description = "The filename. This can include a series of one or more # characters to specify a file sequence. It may also include a @ character which will be substituted with each of the file numbers specified in the parameter below.",
 							defaultValue = "",
 							allowEmptyString = True,
-							check = PathParameter.CheckType.DontCare,
+							check = IECore.PathParameter.CheckType.DontCare,
 						),
-						StringParameter(
+						IECore.StringParameter(
 							name = "numbers",
 							description = "A list of numbers to be substituted for the @ in the name above, to specify multiple files to render. This uses the same syntax as for frame ranges - e.g 1-10, 13, 15, 20-40x2.",
 							defaultValue = "",
 						),
-						IntParameter(
+						IECore.IntParameter(
 							name = "frame",
 							description = "The frame number of the files to render. This is substituted for any # characters in the filename.",
 							defaultValue = 1,
-							userData = CompoundObject( {
+							userData = IECore.CompoundObject( {
 								"maya" : {
-									"defaultConnection" : StringData( "time1.outTime" ),
+									"defaultConnection" : IECore.StringData( "time1.outTime" ),
 								}
 							} ),
 						)
 					]
 				),
 
-				CompoundParameter(
+				IECore.CompoundParameter(
 					name = "bounds",
 					description = "Parameters controlling how the bounds are calculated for the particles.",
 					members = [
-						StringParameter(
+						IECore.StringParameter(
 							name = "mode",
 							description = "How the bounds are calculated.",
 							defaultValue = "calculated",
@@ -87,18 +89,18 @@ class ReadProcedural( ParameterisedProcedural ) :
 							),
 							presetsOnly = True,
 						),
-						Box3fParameter(
+						IECore.Box3fParameter(
 							name = "specified",
 							description = "The bounding box to use when bounding box mode is set to 'specified'.",
-							defaultValue = Box3f( V3f( -1 ), V3f( 1 ) ),
+							defaultValue = IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ),
 						)
 					]
 				),
-				CompoundParameter(
+				IECore.CompoundParameter(
 					name = "motion",
 					description = "Parameters controlling motion.",
 					members = [
-						BoolParameter(
+						IECore.BoolParameter(
 							name = "blur",
 							description = "When this is on, motion blur is applied by loading two files per frame.",
 							defaultValue = True
@@ -117,7 +119,7 @@ class ReadProcedural( ParameterisedProcedural ) :
 
 		else :
 
-			bound = Box3f()
+			bound = IECore.Box3f()
 			fileNames = self.__allFileNames( args )
 			for fileName in fileNames :
 
@@ -184,8 +186,8 @@ class ReadProcedural( ParameterisedProcedural ) :
 		frame = args["files"]["frame"].value
 
 		result = []
-		if FileSequence.fileNameValidator().match( args["files"]["name"].value ) :
-			sequence = FileSequence( args["files"]["name"].value, FrameRange( frame, frame ) )
+		if IECore.FileSequence.fileNameValidator().match( args["files"]["name"].value ) :
+			sequence = IECore.FileSequence( args["files"]["name"].value, IECore.FrameRange( frame, frame ) )
 			if args["motion"]["blur"].value :
 				result.append( ( sequence.fileNameForFrame( frame ), sequence.fileNameForFrame( frame + 1 ) ) )
 			else :
@@ -195,7 +197,7 @@ class ReadProcedural( ParameterisedProcedural ) :
 
 		if "@" in args["files"]["name"].value :
 
-			numbers = FrameList.parse( args["files"]["numbers"].value ).asList()
+			numbers = IECore.FrameList.parse( args["files"]["numbers"].value ).asList()
 
 			newResult = []
 			for f in result :
@@ -216,16 +218,16 @@ class ReadProcedural( ParameterisedProcedural ) :
 
 	def __readFile( self, fileName ) :
 
-		reader = Reader.create( fileName )
+		reader = IECore.Reader.create( fileName )
 		if not reader :
-			msg( Msg.Level.Error, "Read procedural", "Unable to create a Reader for '%s'." % fileName )
+			IECore.msg( IECore.Msg.Level.Error, "Read procedural", "Unable to create a Reader for '%s'." % fileName )
 			return None
 
 		o = reader.read()
 		if o is None or not o.isInstanceOf( "VisibleRenderable" ) :
-			msg( Msg.Level.Error, "Read procedural", "Failed to load an object of type VisibleRenderable for '%s'." % fileName )
+			IECore.msg( IECore.Msg.Level.Error, "Read procedural", "Failed to load an object of type VisibleRenderable for '%s'." % fileName )
 			return None
 
 		return o
 
-registerObject( ReadProcedural, 100026 )
+IECore.registerObject( ReadProcedural, 100026 )

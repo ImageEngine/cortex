@@ -35,6 +35,7 @@
 import re
 
 import IECore
+import IECoreScene
 
 ## The SWAReader class reads SpeedTree .swa files in the form of
 # IECore.PointsPrimitives.
@@ -112,16 +113,16 @@ class SWAReader( IECore.Reader ) :
 
 		assert( currentTreeCount == expectedTreeCount )
 
-		result = IECore.PointsPrimitive( len( p ) )
-		result["P"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, p )
-		result["xAxis"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, xAxis )
-		result["yAxis"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, yAxis )
-		result["zAxis"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, zAxis )
-		result["scale"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, scale )
-		result["treeNameIndices"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, treeNameIndices )
-		result["treeName"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, treeName )
+		result = IECoreScene.PointsPrimitive( len( p ) )
+		result["P"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, p )
+		result["xAxis"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, xAxis )
+		result["yAxis"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, yAxis )
+		result["zAxis"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, zAxis )
+		result["scale"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, scale )
+		result["treeNameIndices"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, treeNameIndices )
+		result["treeName"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, treeName )
 
-		result["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "gl:point" ) )
+		result["type"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.StringData( "gl:point" ) )
 
 		return result
 

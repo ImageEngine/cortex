@@ -32,34 +32,48 @@
 #
 ##########################################################################
 
-from IECore import *
 from fnmatch import fnmatchcase
 
-class RenamePrimitiveVariables( PrimitiveOp ) :
+import IECore
+import IECoreScene
+
+class RemovePrimitiveVariables( IECoreScene.PrimitiveOp ) :
 
 	def __init__( self ) :
 
-		PrimitiveOp.__init__( self, "Renames primitive variables" )
+		IECoreScene.PrimitiveOp.__init__( self, "Removes variables from primitives" )
 
 		self.parameters().addParameters(
 			[
-				StringVectorParameter(
+				IECore.StringParameter(
+					name = "mode",
+					description = """This chooses whether or not the names parameter specifies the names of
+						variables to keep or the names of variables to remove.""",
+					defaultValue = "remove",
+					presets = (
+						( "keep", "keep" ),
+						( "remove", "remove" )
+					),
+					presetsOnly = True
+				),
+				IECore.StringVectorParameter(
 					name = "names",
-					description = "The names of variables and their new names, separated by spaces.",
-					defaultValue = StringVectorData()
+					description = "The names of variables. These can include * or ? characters to match many names.",
+					defaultValue = IECore.StringVectorData()
 				)
 			]
 		)
 
 	def modifyPrimitive( self, primitive, args ) :
 
-		for name in args["names"] :
+		keep = args["mode"].value == "keep"
 
-			ns = name.split()
-			if len(ns)!=2 :
-				raise Exception( "\"%s\" should be of the form \"oldName newName\"" )
+		for key in primitive.keys() :
 
-			primitive[ns[1]] = primitive[ns[0]]
-			del primitive[ns[0]]
+			for n in args["names"] :
 
-registerRunTimeTyped( RenamePrimitiveVariables )
+				m = fnmatchcase( key, n )
+				if (m and not keep) or (not m and keep) :
+					del primitive[key]
+
+IECore.registerRunTimeTyped( RemovePrimitiveVariables )

@@ -32,31 +32,32 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
+import IECoreScene
 
-class PointsExpressionOp( ModifyOp ) :
+class PointsExpressionOp( IECore.ModifyOp ) :
 
 	def __init__( self ) :
 
-		ModifyOp.__init__( self, "Modifies the primitive variables of a PointsPrimitive using a python expression.",
-			ObjectParameter(
+		IECore.ModifyOp.__init__( self, "Modifies the primitive variables of a PointsPrimitive using a python expression.",
+			IECore.ObjectParameter(
 				name = "result",
 				description = "The modified points primitive.",
-				defaultValue = PointsPrimitive( 0 ),
-				type = PointsPrimitive.staticTypeId(),
+				defaultValue = IECoreScene.PointsPrimitive( 0 ),
+				type = IECoreScene.PointsPrimitive.staticTypeId(),
 			),
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "input",
 				description = "The points primitive to modify.",
-				defaultValue = PointsPrimitive( 0 ),
-				type = PointsPrimitive.staticTypeId(),
+				defaultValue = IECoreScene.PointsPrimitive( 0 ),
+				type = IECoreScene.PointsPrimitive.staticTypeId(),
 			)
 		)
 
 		self.parameters().addParameters(
 
 			[
-				StringParameter(
+				IECore.StringParameter(
 					name = "expression",
 					description = "A python expression applied on a per point basis. This may read from or assign to any of the per point"
 						"primitive variables, and also assign any True value to the variable \"remove\" to have the point removed. The variable \"i\""
@@ -84,7 +85,7 @@ class PointsExpressionOp( ModifyOp ) :
 					except :
 						pass
 
-				self.__vectors["remove"] = BoolVectorData( p.numPoints )
+				self.__vectors["remove"] = IECore.BoolVectorData( p.numPoints )
 				self.__haveRemovals = False
 
 			def __getitem__( self, n ) :
@@ -133,7 +134,7 @@ class PointsExpressionOp( ModifyOp ) :
 				try :
 					primVar = pointsPrim[k]
 					if len( primVar.data )==pointsPrim.numPoints :
-						primVar.data = VectorDataFilterOp()( input = primVar.data, filter = removals, invert=True )
+						primVar.data = IECore.VectorDataFilterOp()( input = primVar.data, filter = removals, invert=True )
 						pointsPrim[k] = primVar
 						newNumPoints = primVar.data.size()
 				except :
@@ -142,4 +143,4 @@ class PointsExpressionOp( ModifyOp ) :
 
 			pointsPrim.numPoints = newNumPoints
 
-registerRunTimeTyped( PointsExpressionOp )
+IECore.registerRunTimeTyped( PointsExpressionOp )

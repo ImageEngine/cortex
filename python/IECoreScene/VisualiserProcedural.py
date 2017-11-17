@@ -1,6 +1,6 @@
 ##########################################################################
 #
-#  Copyright (c) 2007-2010, Image Engine Design Inc. All rights reserved.
+#  Copyright (c) 2009-2010, Image Engine Design Inc. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -32,46 +32,42 @@
 #
 ##########################################################################
 
-from IECore import *
-from fnmatch import fnmatchcase
+import IECore
+import IECoreScene
 
-class RemovePrimitiveVariables( PrimitiveOp ) :
+## An incredibly simple procedural which just renders an object
+# passed to it via a Parameter. This is of most use for visualising
+# things in Maya using the IECoreMaya.ProceduralHolder.
+class VisualiserProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		PrimitiveOp.__init__( self, "Removes variables from primitives" )
+		IECoreScene.ParameterisedProcedural.__init__( self )
 
 		self.parameters().addParameters(
+
 			[
-				StringParameter(
-					name = "mode",
-					description = """This chooses whether or not the names parameter specifies the names of
-						variables to keep or the names of variables to remove.""",
-					defaultValue = "remove",
-					presets = (
-						( "keep", "keep" ),
-						( "remove", "remove" )
-					),
-					presetsOnly = True
-				),
-				StringVectorParameter(
-					name = "names",
-					description = "The names of variables. These can include * or ? characters to match many names.",
-					defaultValue = StringVectorData()
+
+				IECore.VisibleRenderableParameter(
+					"renderable",
+					"The object to visualise",
+					IECoreScene.Group()
 				)
+
 			]
+
 		)
 
-	def modifyPrimitive( self, primitive, args ) :
+	def doBound( self, args ) :
 
-		keep = args["mode"].value == "keep"
+		return args["renderable"].bound()
 
-		for key in primitive.keys() :
+	def doRenderState( self, renderer, args ) :
 
-			for n in args["names"] :
+		pass
 
-				m = fnmatchcase( key, n )
-				if (m and not keep) or (not m and keep) :
-					del primitive[key]
+	def doRender( self, renderer, args ) :
 
-registerRunTimeTyped( RemovePrimitiveVariables )
+		args["renderable"].render( renderer )
+
+IECore.registerObject( VisualiserProcedural, 100027 )
