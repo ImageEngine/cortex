@@ -41,7 +41,7 @@
 
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
@@ -50,6 +50,7 @@
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 //////////////////////////////////////////////////////////////////////////
@@ -162,7 +163,7 @@ void convertUVSet( const std::string &uvSet, const PrimitiveVariable &uvVariable
 	}
 }
 
-AtNode *convertCommon( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr )
+AtNode *convertCommon( const IECoreScene::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
 	// Make the result mesh and add topology
@@ -227,7 +228,7 @@ AtNode *convertCommon( const IECore::MeshPrimitive *mesh, const std::string &nod
 	return result;
 }
 
-const V3fVectorData *normal( const IECore::MeshPrimitive *mesh, PrimitiveVariable::Interpolation &interpolation )
+const V3fVectorData *normal( const IECoreScene::MeshPrimitive *mesh, PrimitiveVariable::Interpolation &interpolation )
 {
 	PrimitiveVariableMap::const_iterator it = mesh->variables.find( "N" );
 	if( it == mesh->variables.end() )
@@ -259,7 +260,7 @@ const V3fVectorData *normal( const IECore::MeshPrimitive *mesh, PrimitiveVariabl
 	return n;
 }
 
-void convertNormalIndices( const IECore::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
+void convertNormalIndices( const IECoreScene::MeshPrimitive *mesh, AtNode *node, PrimitiveVariable::Interpolation interpolation )
 {
 	if( interpolation == PrimitiveVariable::FaceVarying )
 	{
@@ -288,7 +289,7 @@ NodeAlgo::ConverterDescription<MeshPrimitive> g_description( MeshAlgo::convert, 
 // Implementation of public API
 //////////////////////////////////////////////////////////////////////////
 
-AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode )
+AtNode *MeshAlgo::convert( const IECoreScene::MeshPrimitive *mesh, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( mesh, nodeName, parentNode );
 
@@ -311,11 +312,11 @@ AtNode *MeshAlgo::convert( const IECore::MeshPrimitive *mesh, const std::string 
 	return result;
 }
 
-AtNode *MeshAlgo::convert( const std::vector<const IECore::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *MeshAlgo::convert( const std::vector<const IECoreScene::MeshPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
-	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_vlistArnoldString );
 
 	// add normals

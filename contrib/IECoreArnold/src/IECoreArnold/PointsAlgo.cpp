@@ -34,9 +34,9 @@
 
 #include "ai.h"
 
-#include "IECore/PointsPrimitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
@@ -44,6 +44,7 @@
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 //////////////////////////////////////////////////////////////////////////
@@ -62,7 +63,7 @@ const AtString g_sphereArnoldString( "sphere" );
 
 NodeAlgo::ConverterDescription<PointsPrimitive> g_description( PointsAlgo::convert, PointsAlgo::convert );
 
-AtNode *convertCommon( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr )
+AtNode *convertCommon( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode = nullptr )
 {
 
 	AtNode *result = AiNode( g_pointsArnoldString, AtString( nodeName.c_str() ), parentNode );
@@ -111,7 +112,7 @@ namespace IECoreArnold
 namespace PointsAlgo
 {
 
-AtNode *convert( const IECore::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convert( const IECoreScene::PointsPrimitive *points, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( points, nodeName, parentNode );
 
@@ -123,15 +124,15 @@ AtNode *convert( const IECore::PointsPrimitive *points, const std::string &nodeN
 	return result;
 }
 
-AtNode *convert( const std::vector<const IECore::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convert( const std::vector<const IECoreScene::PointsPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
-	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
 
-	
+
 	AiNodeSetFlt( result, g_motionStartArnoldString, motionStart );
 	AiNodeSetFlt( result, g_motionEndArnoldString, motionEnd );
 

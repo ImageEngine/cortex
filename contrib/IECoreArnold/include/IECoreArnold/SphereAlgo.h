@@ -37,7 +37,7 @@
 
 #include "ai.h"
 
-#include "IECore/SpherePrimitive.h"
+#include "IECoreScene/SpherePrimitive.h"
 
 namespace IECoreArnold
 {
@@ -45,8 +45,8 @@ namespace IECoreArnold
 namespace SphereAlgo
 {
 
-AtNode *convert( const IECore::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode = nullptr );
-AtNode *convert( const std::vector<const IECore::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const IECoreScene::SpherePrimitive *sphere, const std::string &nodeName, const AtNode *parentNode = nullptr );
+AtNode *convert( const std::vector<const IECoreScene::SpherePrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode = nullptr );
 
 } // namespace SphereAlgo
 

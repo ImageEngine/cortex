@@ -182,57 +182,57 @@ void Renderer::motionEnd()
 	m_implementation->motionEnd();
 }
 
-void Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->points( numPoints, primVars );
 }
 
-void Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->disk( radius, z, thetaMax, primVars );
 }
 
-void Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->curves( basis, periodic, numVertices, primVars );
 }
 
-void Renderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->text( font, text, kerning, primVars );
 }
 
-void Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->sphere( radius, zMin, zMax, thetaMax, primVars );
 }
 
-void Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->image( dataWindow, displayWindow, primVars );
 }
 
-void Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->mesh( vertsPerFace, vertIds, interpolation, primVars );
 }
 
-void Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->nurbs( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax, primVars );
 }
 
-void Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->patchMesh( uBasis, vBasis, nu, uPeriodic, nv, vPeriodic, primVars );
 }
 
-void Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )
+void Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->geometry( type, topology, primVars );
 }
 
-void Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
+void Renderer::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	m_implementation->procedural( proc );
 }

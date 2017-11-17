@@ -36,8 +36,8 @@
 // by TBB define macros which conflict with the inline functions in ai_types.h.
 #include "ai.h"
 
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/ShapeAlgo.h"
@@ -46,6 +46,7 @@
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,7 +73,7 @@ const AtString g_orientedArnoldString("oriented");
 
 NodeAlgo::ConverterDescription<CurvesPrimitive> g_description( CurvesAlgo::convert, CurvesAlgo::convert );
 
-AtNode *convertCommon( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
+AtNode *convertCommon( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
 
 	AtNode *result = AiNode( g_curvesArnoldString, AtString( nodeName.c_str() ), parentNode );
@@ -118,7 +119,7 @@ AtNode *convertCommon( const IECore::CurvesPrimitive *curves, const std::string 
 
 } // namespace
 
-AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
+AtNode *CurvesAlgo::convert( const IECoreScene::CurvesPrimitive *curves, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( curves, nodeName, parentNode );
 	ShapeAlgo::convertP( curves, result, g_pointsArnoldString );
@@ -139,11 +140,11 @@ AtNode *CurvesAlgo::convert( const IECore::CurvesPrimitive *curves, const std::s
 	return result;
 }
 
-AtNode *CurvesAlgo::convert( const std::vector<const IECore::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *CurvesAlgo::convert( const std::vector<const IECoreScene::CurvesPrimitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	AtNode *result = convertCommon( samples.front(), nodeName, parentNode );
 
-	std::vector<const IECore::Primitive *> primitiveSamples( samples.begin(), samples.end() );
+	std::vector<const IECoreScene::Primitive *> primitiveSamples( samples.begin(), samples.end() );
 	ShapeAlgo::convertP( primitiveSamples, result, g_pointsArnoldString );
 	ShapeAlgo::convertRadius( primitiveSamples, result );
 

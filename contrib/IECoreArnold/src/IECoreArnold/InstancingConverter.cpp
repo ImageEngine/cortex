@@ -65,12 +65,12 @@ InstancingConverter::~InstancingConverter()
 	delete m_data;
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const std::string &nodeName, const AtNode *parentNode )
+AtNode *InstancingConverter::convert( const IECoreScene::Primitive *primitive, const std::string &nodeName, const AtNode *parentNode )
 {
 	return convert( primitive, IECore::MurmurHash(), nodeName, parentNode );
 }
 
-AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
+AtNode *InstancingConverter::convert( const IECoreScene::Primitive *primitive, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
 {
 	IECore::MurmurHash h = primitive->::IECore::Object::hash();
 	h.append( additionalHash );
@@ -94,15 +94,15 @@ AtNode *InstancingConverter::convert( const IECore::Primitive *primitive, const 
 	return nullptr;
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
+AtNode *InstancingConverter::convert( const std::vector<const IECoreScene::Primitive *> &samples, float motionStart, float motionEnd, const std::string &nodeName, const AtNode *parentNode )
 {
 	return convert( samples, motionStart, motionEnd, IECore::MurmurHash(), nodeName, parentNode );
 }
 
-AtNode *InstancingConverter::convert( const std::vector<const IECore::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
+AtNode *InstancingConverter::convert( const std::vector<const IECoreScene::Primitive *> &samples, float motionStart, float motionEnd, const IECore::MurmurHash &additionalHash, const std::string &nodeName, const AtNode *parentNode )
 {
 	IECore::MurmurHash h;
-	for( std::vector<const IECore::Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
+	for( std::vector<const IECoreScene::Primitive *>::const_iterator it = samples.begin(), eIt = samples.end(); it != eIt; ++it )
 	{
 		(*it)->hash( h );
 	}

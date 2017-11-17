@@ -35,14 +35,15 @@
 
 #include "ai.h"
 
-#include "IECore/Camera.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/Camera.h"
 
 #include "IECoreArnold/NodeAlgo.h"
 #include "IECoreArnold/CameraAlgo.h"
 #include "IECoreArnold/ParameterAlgo.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreArnold;
 
 namespace
@@ -62,7 +63,7 @@ const AtString g_screenWindowMaxArnoldString("screen_window_max");
 
 } // namespace
 
-AtNode *CameraAlgo::convert( const IECore::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
+AtNode *CameraAlgo::convert( const IECoreScene::Camera *camera, const std::string &nodeName, const AtNode *parentNode )
 {
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();
