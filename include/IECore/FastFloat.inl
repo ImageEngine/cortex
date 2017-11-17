@@ -35,6 +35,8 @@
 #ifndef IE_CORE_FASTFLOAT_INL
 #define IE_CORE_FASTFLOAT_INL
 
+#include <math.h>
+
 namespace IECore
 {
 #define IECORE_DOUBLEMAGICROUNDEPS	(.5-1.4e-11)
@@ -115,7 +117,7 @@ namespace IECore
 	{
 		return 1.0f / sqrtf(x);
 	}
-	
+
 #endif
 
 } // namespace IECore
