@@ -32,24 +32,64 @@
 #
 ##########################################################################
 
-# Fixers to help in the transition from Cortex 9 to Cortex 10.
-# These are not bullet proof - use with caution!
-#
-# Preview a fix :
-#
-# `gaffer env python 9to10 fileToFix.py`
-#
-# Fix a file in place :
-#
-# `gaffer env python 9to10 -w -n fileToFix.py`
-#
-# Get help :
-#
-# `gaffer env python 9to10 --help`
-#
-# See http://python3porting.com/fixers.html for some basic
-# documentation on how to write a fixer.
+from lib2to3.fixer_base import BaseFix
+from lib2to3.pgen2 import token
+from lib2to3.fixer_util import Name, Newline
+from lib2to3.pytree import Leaf, Node
+from lib2to3.pygram import python_symbols as syms
 
-import fix_import_star
-import fix_scene
+import IECoreScene
 
+class FixScene( BaseFix ) :
+
+	PATTERN = """
+		coreImport=simple_stmt< import_name< 'import' 'IECore' > "\\n" >
+		|
+		sceneImport=simple_stmt< import_name< 'import' 'IECoreScene' > "\\n" >
+		|
+		power< module='IECore' trailer<'.' name=any > any* >
+	"""
+
+	def start_tree( self, tree, filename ) :
+
+		self.__coreImport = None
+		self.__haveSceneImport = False
+
+	def transform( self, node, results ) :
+
+		if "coreImport" in results and node.depth() == 1 :
+
+			self.__coreImport = results["coreImport"]
+
+		elif "sceneImport" in results and node.depth() == 1 :
+
+			self.__haveSceneImport = True
+
+		elif "name" in results and hasattr( IECoreScene, results["name"].value ) :
+
+			results["module"].value = "IECoreScene"
+			node.changed()
+
+			if not self.__haveSceneImport and self.__coreImport is not None :
+
+				sceneImport = Node(
+					syms.import_name,
+					[
+						Leaf( token.NAME, u"import" ),
+						Leaf( token.NAME, "IECoreScene", prefix=" " )
+					]
+				)
+				sceneImportLine = Node(
+					syms.simple_stmt,
+					[
+						sceneImport,
+						Newline()
+					]
+				)
+
+				self.__coreImport.parent.insert_child(
+					self.__coreImport.parent.children.index( self.__coreImport ) + 1,
+					sceneImportLine
+				)
+
+				self.__haveSceneImport = True
