@@ -258,13 +258,7 @@ struct  CurvesVertexToVarying
 			return nullptr;
 		}
 
-		IECore::ConstCurvesPrimitiveEvaluatorPtr evaluator =  runTimeCast<CurvesPrimitiveEvaluator>(IECore::PrimitiveEvaluator::create( m_curves )) ;
-
-		if( !evaluator )
-		{
-			return nullptr;
-		}
-
+		ConstCurvesPrimitiveEvaluatorPtr evaluator = new CurvesPrimitiveEvaluator( m_curves );
 		PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
 
 		size_t numCurves = m_curves->numCurves();
@@ -316,12 +310,7 @@ struct  CurvesVaryingToVertex
 			return nullptr;
 		}
 
-		IECore::ConstCurvesPrimitiveEvaluatorPtr evaluator =  runTimeCast<CurvesPrimitiveEvaluator>(IECore::PrimitiveEvaluator::create( m_curves )) ;
-		if( !evaluator )
-		{
-			return nullptr;
-		}
-
+		ConstCurvesPrimitiveEvaluatorPtr evaluator = new CurvesPrimitiveEvaluator( m_curves );
 		PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
 
 		size_t numCurves = m_curves->numCurves();
