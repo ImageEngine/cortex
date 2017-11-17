@@ -754,32 +754,32 @@ o.Add(
 		( "IECore.SequenceRenumberOp", "common/fileSystem/seqRenumber" ),
 		( "IECore.SequenceConvertOp", "common/fileSystem/seqConvert" ),
 		( "IECore.SequenceCatOp", "common/fileSystem/seqCat" ),
-		( "IECore.RemovePrimitiveVariables", "common/primitive/removeVariables" ),
-		( "IECore.RenamePrimitiveVariables", "common/primitive/renameVariables" ),
-		( "IECore.PointsExpressionOp", "common/primitive/pointsExpression" ),
+		( "IECoreScene.RemovePrimitiveVariables", "common/primitive/removeVariables" ),
+		( "IECoreScene.RenamePrimitiveVariables", "common/primitive/renameVariables" ),
+		( "IECoreScene.PointsExpressionOp", "common/primitive/pointsExpression" ),
 		( "IECore.ClassLsOp", "common/classes/classLs" ),
 		( "IECore.LsHeaderOp", "common/fileSystem/lsHeader" ),
 		( "IECore.SearchReplaceOp", "common/fileSystem/searchReplace" ),
 		( "IECore.CheckImagesOp", "common/fileSystem/checkImages" ),
 		( "IECore.FileSequenceGraphOp", "common/fileSystem/fileSequenceGraph" ),
-		( "IECore.TriangulateOp", "common/primitive/mesh/triangulate" ),
-		( "IECore.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
-		( "IECore.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
-		( "IECore.MeshMergeOp", "common/primitive/mesh/merge" ),
-		( "IECore.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
-		( "IECore.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
-		( "IECore.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
-		( "IECore.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
-		( "IECore.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
-		( "IECore.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
-		( "IECore.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
-		( "IECore.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
-		( "IECore.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
-		( "IECore.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
-		( "IECore.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
-		( "IECore.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
-		( "IECore.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
-		( "IECore.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
+		( "IECoreScene.TriangulateOp", "common/primitive/mesh/triangulate" ),
+		( "IECoreScene.MeshNormalsOp", "common/primitive/mesh/addNormals" ),
+		( "IECoreScene.MeshTangentsOp", "common/primitive/mesh/addTangents" ),
+		( "IECoreScene.MeshMergeOp", "common/primitive/mesh/merge" ),
+		( "IECoreScene.MeshVertexReorderOp", "common/primitive/mesh/vertexReorder" ),
+		( "IECoreScene.MeshPrimitiveShrinkWrapOp", "common/primitive/mesh/shrinkWrap" ),
+		( "IECoreScene.MeshDistortionsOp", "common/primitive/mesh/calculateDistortions" ),
+		( "IECoreScene.PointDistributionOp", "common/primitive/mesh/pointDistribution" ),
+		( "IECoreScene.AddSmoothSkinningInfluencesOp", "rigging/smoothSkinning/addInfluences" ),
+		( "IECoreScene.RemoveSmoothSkinningInfluencesOp", "rigging/smoothSkinning/removeInfluences" ),
+		( "IECoreScene.CompressSmoothSkinningDataOp", "rigging/smoothSkinning/compress" ),
+		( "IECoreScene.DecompressSmoothSkinningDataOp", "rigging/smoothSkinning/decompress" ),
+		( "IECoreScene.NormalizeSmoothSkinningWeightsOp", "rigging/smoothSkinning/normalizeWeights" ),
+		( "IECoreScene.ReorderSmoothSkinningInfluencesOp", "rigging/smoothSkinning/reorderInfluences" ),
+		( "IECoreScene.SmoothSmoothSkinningWeightsOp", "rigging/smoothSkinning/smoothWeights" ),
+		( "IECoreScene.ContrastSmoothSkinningWeightsOp", "rigging/smoothSkinning/contrastWeights" ),
+		( "IECoreScene.LimitSmoothSkinningInfluencesOp", "rigging/smoothSkinning/limitInfluences" ),
+		( "IECoreScene.TransferSmoothSkinningWeightsOp", "rigging/smoothSkinning/transferWeights" ),
 	]
 )
 
@@ -862,6 +862,14 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreImage/All.py"
+)
+
+o.Add(
+	"TEST_SCENE_SCRIPT",
+	"The python script to run for the scene tests. The default will run all the tests, "
+	"but it can be useful to override this to run just the test for the functionality "
+	"you're working on.",
+	"test/IECoreScene/All.py"
 )
 
 o.Add(
@@ -1425,18 +1433,17 @@ corePythonSources = sorted( glob.glob( "src/IECorePython/*.cpp" ) )
 corePythonModuleSources = sorted( glob.glob( "src/IECorePythonModule/*.cpp" ) )
 corePythonScripts = glob.glob( "python/IECore/*.py" )
 
-# configure checks
+# shared configure checks
 if doConfigure :
 
-	c = Configure( coreEnv )
+	freetypeEnv = coreEnv.Clone()
+	c = Configure( freetypeEnv )
 
 	if c.CheckLibWithHeader( "freetype", ["ft2build.h"], "CXX" ) :
 		for e in allCoreEnvs :
 			e.Append( CPPFLAGS = "-DIECORE_WITH_FREETYPE" )
 	else :
 		sys.stderr.write( "WARNING: no FreeType library found, no font support, check FREETYPE_INCLUDE_PATH and FREETYPE_LIB_PATH.\n" )
-		coreSources.remove( "src/IECore/Font.cpp" )
-		corePythonSources.remove( "src/IECorePython/FontBinding.cpp" )
 
 	c.Finish()
 
@@ -1575,6 +1582,12 @@ if doConfigure :
 		imagePythonModuleSources = sorted( glob.glob( "src/IECoreImageModule/*.cpp" ) )
 		imagePythonScripts = glob.glob( "python/IECoreImage/*.py" )
 
+		if "-DIECORE_WITH_FREETYPE" in imageEnv["CPPFLAGS"] :
+			imageEnv.Append( LIBS = "freetype" )
+		else :
+			imageSources.remove( "src/IECoreImage/Font.cpp" )
+			imagePythonSources.remove( "src/IECoreImageBindings/FontBinding.cpp" )
+
 		# library
 		imageLibrary = imageEnv.SharedLibrary( "lib/" + os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageSources )
 		imageLibraryInstall = imageEnv.Install( os.path.dirname( imageEnv.subst( "$INSTALL_LIB_NAME" ) ), imageLibrary )
@@ -1624,6 +1637,63 @@ if doConfigure :
 		imageTestEnv.Depends( imageTest, [ corePythonModule + imagePythonModule ]  )
 		imageTestEnv.Depends( imageTest, glob.glob( "test/IECoreImage/*.py" ) )
 		imageTestEnv.Alias( "testImage", imageTest )
+
+###########################################################################################
+# Build, install and test the scene library and bindings
+###########################################################################################
+
+sceneEnv = coreEnv.Clone( IECORE_NAME="IECoreScene" )
+scenePythonModuleEnv = corePythonModuleEnv.Clone( IECORE_NAME="IECoreScene" )
+
+sceneSources = sorted( glob.glob( "src/IECoreScene/*.cpp" ) )
+sceneHeaders = glob.glob( "include/IECoreScene/*.h" ) + glob.glob( "include/IECoreScene/*.inl" )
+scenePythonModuleSources = sorted( glob.glob( "src/IECoreScene/bindings/*.cpp" ) )
+scenePythonScripts = glob.glob( "python/IECoreScene/*.py" )
+
+if doConfigure :
+
+	sceneEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+
+	if "-DIECORE_WITH_FREETYPE" in sceneEnv["CPPFLAGS"] :
+		sceneEnv.Append( LIBS = "freetype" )
+	else :
+		sceneSources.remove( "src/IECoreScene/Font.cpp" )
+		scenePythonModuleSources.remove( "src/IECoreScene/bindings/FontBinding.cpp" )
+
+	# library
+	sceneLibrary = sceneEnv.SharedLibrary( "lib/" + os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneSources )
+	sceneLibraryInstall = sceneEnv.Install( os.path.dirname( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ), sceneLibrary )
+	sceneEnv.NoCache( sceneLibraryInstall )
+	sceneEnv.AddPostAction( sceneLibraryInstall, lambda target, source, env : makeLibSymLinks( sceneEnv ) )
+	sceneEnv.Alias( "install", [ sceneLibraryInstall ] )
+	sceneEnv.Alias( "installScene", [ sceneLibraryInstall ] )
+	sceneEnv.Alias( "installSceneLib", [ sceneLibraryInstall ] )
+
+	# headers
+	sceneHeaderInstall = sceneEnv.Install( "$INSTALL_HEADER_DIR/IECoreScene", sceneHeaders )
+	sceneEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreScene", lambda target, source, env : makeSymLinks( sceneEnv, sceneEnv["INSTALL_HEADER_DIR"] ) )
+	sceneEnv.Alias( "install", sceneHeaderInstall )
+	sceneEnv.Alias( "installScene", sceneHeaderInstall )
+
+	# python module
+	scenePythonModuleEnv.Append( LIBS = os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+	scenePythonModule = scenePythonModuleEnv.SharedLibrary( "python/IECoreScene/_IECoreScene", scenePythonModuleSources )
+	scenePythonModuleEnv.Depends( scenePythonModule, coreLibrary )
+	scenePythonModuleEnv.Depends( scenePythonModule, corePythonLibrary )
+
+	scenePythonModuleInstall = scenePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreScene", scenePythonScripts + scenePythonModule )
+	scenePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreScene", lambda target, source, env : makeSymLinks( scenePythonModuleEnv, scenePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	scenePythonModuleEnv.Alias( "install", scenePythonModuleInstall )
+	scenePythonModuleEnv.Alias( "installScene", scenePythonModuleInstall )
+
+	Default( sceneLibrary, scenePythonModule )
+
+	# testing
+
+	sceneTestEnv = testEnv.Clone()
+	sceneTest = coreTestEnv.Command( "test/IECoreScene/results.txt", scenePythonModule, pythonExecutable + " $TEST_SCENE_SCRIPT" )
+	NoCache( sceneTest )
+	sceneTestEnv.Alias( "testScene", sceneTest )
 
 ###########################################################################################
 # Build, install and test the coreRI library and bindings
@@ -1738,8 +1808,18 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		riEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		riPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		riEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
+		riPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		riLibrary = riEnv.SharedLibrary( "lib/" + os.path.basename( riEnv.subst( "$INSTALL_RMANLIB_NAME" ) ), riSources )
@@ -1857,8 +1937,13 @@ if env["WITH_GL"] and doConfigure :
 		c.Finish()
 
 		# we can't add this earlier as then it's built during the configure stage, and that's no good
-		glEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		glEnv.Append( LIBS = os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		glEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		if env["PLATFORM"]=="darwin" :
 			glEnv.Append(
@@ -1876,7 +1961,9 @@ if env["WITH_GL"] and doConfigure :
 
 		glSources = sorted( glob.glob( "src/IECoreGL/*.cpp" ) )
 		glPythonSources = sorted( glob.glob( "src/IECoreGL/bindings/*.cpp" ) )
-		if not "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
+		if "-DIECORE_WITH_FREETYPE" in glEnv["CPPFLAGS"] :
+			glEnv.Append( LIBS = "freetype" )
+		else :
 			glSources.remove( "src/IECoreGL/Font.cpp" )
 			glSources.remove( "src/IECoreGL/FontLoader.cpp" )
 			glSources.remove( "src/IECoreGL/TextPrimitive.cpp" )
@@ -1917,6 +2004,7 @@ if env["WITH_GL"] and doConfigure :
 				os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 				os.path.basename( imageEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		glPythonModule = glPythonModuleEnv.SharedLibrary( "python/IECoreGL/_IECoreGL", glPythonSources )
@@ -2486,10 +2574,15 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		houdiniEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		houdiniEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+			]
+		)
 		if env['WITH_GL'] :
 			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		#=====
 		# build library
@@ -2533,6 +2626,7 @@ if doConfigure :
 		houdiniPythonModuleEnv.Append(
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( houdiniEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
 			]
@@ -2692,7 +2786,8 @@ if doConfigure :
 		arnoldEnv.Append(
 			LIBS = [
 				"ai",
-				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) )
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		 )
 		arnoldPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
@@ -2734,6 +2829,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( arnoldEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 		arnoldPythonModule = arnoldPythonModuleEnv.SharedLibrary( "contrib/IECoreArnold/python/IECoreArnold/_IECoreArnold", arnoldPythonSources )
@@ -2875,7 +2971,12 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		usdEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		usdEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		usdLibrary = usdEnv.SharedLibrary( "lib/" + os.path.basename( usdEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), usdSources )
@@ -3003,7 +3104,12 @@ if doConfigure :
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
-		alembicEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
+		alembicEnv.Append(
+			LIBS = [
+				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		# library
 		alembicLibrary = alembicEnv.SharedLibrary( "lib/" + os.path.basename( alembicEnv.subst( "$INSTALL_ALEMBICLIB_NAME" ) ), alembicSources )
@@ -3025,6 +3131,7 @@ if doConfigure :
 			LIBS = [
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 				os.path.basename( alembicEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
@@ -3137,10 +3244,16 @@ if doConfigure :
 				# We can't append this before configuring, as then it gets built as
 				# part of the configure process
 				os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
 			]
 		)
 
-		appleseedPythonModuleEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
+		appleseedPythonModuleEnv.Append(
+			LIBS = [
+				os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
+				os.path.basename( sceneEnv.subst( "$INSTALL_LIB_NAME" ) ),
+			]
+		)
 
 		appleseedDriverEnv.Append(
 			LIBS = [
