@@ -173,7 +173,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 
 	std::string path = getPath();
 	Space space = getSpace();
-	GeometryType geometryType = (GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
+	SOP_SceneCacheSource::GeometryType geometryType = (SOP_SceneCacheSource::GeometryType)this->evalInt( pGeometryType.getToken(), 0, 0 );
 
 	UT_String tagFilterStr;
 	getTagFilter( tagFilterStr );

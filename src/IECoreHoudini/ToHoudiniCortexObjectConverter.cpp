@@ -73,7 +73,7 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 {
 	ConstObjectPtr result = filterAttribs( object );
 
-	size_t numPrims = geo->getNumPrimitives();
+	GA_Size numPrims = geo->getNumPrimitives();
 
 	CortexPrimitive::build( geo, result.get() );
 
@@ -94,7 +94,7 @@ bool ToHoudiniCortexObjectConverter::doConversion( const Object *object, GU_Deta
 		}
 	}
 
-	return ( (size_t)geo->getNumPrimitives() > numPrims );
+	return ( (GA_Size)geo->getNumPrimitives() > numPrims );
 }
 
 void ToHoudiniCortexObjectConverter::transferAttribs( GU_Detail *geo, const GA_Range &points, const GA_Range &prims ) const
