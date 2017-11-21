@@ -33,6 +33,8 @@
 #
 ##########################################################################
 
+__import__( "IECoreScene" )
+
 from _IECoreAlembic import *
 
 from AlembicProcedural import AlembicProcedural

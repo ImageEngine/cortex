@@ -33,13 +33,14 @@
 ##########################################################################
 
 import IECore
+import IECoreScene
 import IECoreAlembic
 
-class AlembicProcedural( IECore.ParameterisedProcedural ) :
+class AlembicProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
 
-		IECore.ParameterisedProcedural.__init__( self )
+		IECoreScene.ParameterisedProcedural.__init__( self )
 
 		self.parameters().addParameters(
 
@@ -107,11 +108,11 @@ class AlembicProcedural( IECore.ParameterisedProcedural ) :
 
 		return self.__input
 
-class _ChildProcedural( IECore.Renderer.Procedural ) :
+class _ChildProcedural( IECoreScene.Renderer.Procedural ) :
 
 	def __init__( self, alembicInput, time ) :
 
-		IECore.Renderer.Procedural.__init__( self )
+		IECoreScene.Renderer.Procedural.__init__( self )
 
 		self.__alembicInput = alembicInput
 		self.__time = time
@@ -124,7 +125,7 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 
 	def render( self, renderer ) :
 
-		with IECore.AttributeBlock( renderer ) :
+		with IECoreScene.AttributeBlock( renderer ) :
 
 			renderer.setAttribute( "name", self.__alembicInput.fullName() )
 
@@ -138,7 +139,7 @@ class _ChildProcedural( IECore.Renderer.Procedural ) :
 				)
 				renderer.concatTransform( transform )
 
-			primitive = self.__alembicInput.objectAtTime( self.__time, IECore.Primitive.staticTypeId() )
+			primitive = self.__alembicInput.objectAtTime( self.__time, IECoreScene.Primitive.staticTypeId() )
 			if primitive is not None :
 				primitive.render( renderer )
 
