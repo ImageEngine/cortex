@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreScene
 import IECoreImage
 
 import IECoreGL
@@ -77,7 +78,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		}
 		"""
 
-		s = IECore.Shader( "showColor", "surface" )
+		s = IECoreScene.Shader( "showColor", "surface" )
 		s.parameters["gl:fragmentSource"] = IECore.StringData( fs )
 
 		return s
@@ -98,7 +99,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			for a in attributes :
 				r.setAttribute( a[0], a[1] )
@@ -180,7 +181,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.performTest(
 
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4, 4 ] ),
 				IECore.CubicBasisf.linear(),
@@ -225,7 +226,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.performTest(
 
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.bSpline(),
@@ -271,7 +272,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.performTest(
 
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.bSpline(),
@@ -311,7 +312,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.performTest(
 
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.linear(),
@@ -353,7 +354,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 		self.performTest(
 
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4 ] ),
 				IECore.CubicBasisf.bSpline(),
@@ -380,7 +381,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testBSplinePeriodicAsRibbons( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -395,7 +396,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest(
 
@@ -411,7 +412,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testBezierAsRibbons( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bezier(),
@@ -426,7 +427,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest(
 			c,
@@ -441,7 +442,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearRibbons( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -456,7 +457,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
 
 		self.performTest(
 			c,
@@ -471,7 +472,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearPeriodicRibbons( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -486,7 +487,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest(
 			c,
@@ -501,7 +502,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testSeveralBSplineRibbons( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4, 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -521,7 +522,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.035 ) )
 
 		self.performTest(
 			c,
@@ -537,7 +538,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	def testSeveralBSplineLines( self ) :
 
 		self.performTest(
-			IECore.CurvesPrimitive(
+			IECoreScene.CurvesPrimitive(
 
 				IECore.IntVectorData( [ 4, 4 ] ),
 				IECore.CubicBasisf.bSpline(),
@@ -569,7 +570,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testRibbonWindingOrder( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.bSpline(),
@@ -584,7 +585,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 
 		self.performTest(
@@ -600,7 +601,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 	@skipIf( IECoreGL.glslVersion() < 150, "Insufficient GLSL version" )
 	def testLinearRibbonWindingOrder( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -615,7 +616,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
+		c["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0.05 ) )
 
 		self.performTest(
 			c,
@@ -629,7 +630,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testLinearLinesWithVertexColor( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4, 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -649,8 +650,8 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["Cs"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		c["Cs"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.Color3fVectorData(
 				[
 					IECore.Color3f( 1, 0, 0 ),
@@ -679,7 +680,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testLinearLinesWithUniformColor( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4, 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -699,7 +700,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) )
+		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.Color3fVectorData( [ IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 0, 1, 0 ) ] ) )
 
 		self.performTest(
 
@@ -714,7 +715,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 
 	def testLinearLinesWithConstantColor( self ) :
 
-		c = IECore.CurvesPrimitive(
+		c = IECoreScene.CurvesPrimitive(
 
 			IECore.IntVectorData( [ 4, 4 ] ),
 			IECore.CubicBasisf.linear(),
@@ -734,7 +735,7 @@ class CurvesPrimitiveTest( unittest.TestCase ) :
 			)
 
 		)
-		c["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
+		c["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
 
 		self.performTest(
 

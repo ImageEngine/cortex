@@ -37,6 +37,7 @@ import os.path
 import shutil
 
 import IECore
+import IECoreScene
 import IECoreImage
 
 import IECoreGL
@@ -61,7 +62,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -105,7 +106,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
@@ -133,7 +134,7 @@ class DiskPrimitiveTest( unittest.TestCase ) :
 		)
 		r.display( self.outputFileName, "tif", "rgba", {} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.setAttribute( "doubleSided", IECore.BoolData( False ) )

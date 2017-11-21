@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+__import__( "IECoreScene" )
+
 from _IECoreGL import *
 
 from State import State

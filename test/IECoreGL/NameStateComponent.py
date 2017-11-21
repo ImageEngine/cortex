@@ -35,7 +35,7 @@
 import unittest
 import os.path
 
-from IECore import *
+import IECore
 
 from IECoreGL import *
 init( False )

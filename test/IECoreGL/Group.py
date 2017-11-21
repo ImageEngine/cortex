@@ -34,24 +34,25 @@
 
 import unittest
 
-from IECore import *
+import IECore
+import IECoreScene
 
-from IECoreGL import *
-init( False )
+import IECoreGL
+IECoreGL.init( False )
 
 class TestGroup( unittest.TestCase ) :
 
 	def test( self ) :
 
-		g = Group()
+		g = IECoreGL.Group()
 
-		self.assertEqual( g.getTransform(), M44f() )
-		g.setTransform( M44f.createScaled( V3f( 3 ) ) )
-		self.assertEqual( g.getTransform(), M44f.createScaled( V3f( 3 ) ) )
+		self.assertEqual( g.getTransform(), IECore.M44f() )
+		g.setTransform( IECore.M44f.createScaled( IECore.V3f( 3 ) ) )
+		self.assertEqual( g.getTransform(), IECore.M44f.createScaled( IECore.V3f( 3 ) ) )
 
 		self.assertEqual( g.children(), [] )
 
-		g2 = Group()
+		g2 = IECoreGL.Group()
 
 		g.addChild( g2 )
 		self.assertEqual( len( g.children() ), 1 )

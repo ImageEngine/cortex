@@ -38,6 +38,7 @@ import shutil
 import inspect
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreGL
 
@@ -49,13 +50,13 @@ class ShadingTest( unittest.TestCase ) :
 
 	def mesh( self ) :
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
-		m["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 4 ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) )
+		m["N"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 4 ) )
 		return m
 
 	def constantShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 			#include "IECoreGL/FragmentShader.h"
@@ -72,7 +73,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def colorShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 
@@ -102,7 +103,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def textureShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 
@@ -120,7 +121,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def geometryShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:geometrySource"] = """
 #version 150
@@ -149,7 +150,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def floatArrayShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 
@@ -170,7 +171,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def intArrayShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 
@@ -190,7 +191,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def matrixShader( self ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:fragmentSource"] = """
 
@@ -211,7 +212,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def offsetShader( self, offset ) :
 
-		s = IECore.Shader( "test", "gl:surface" )
+		s = IECoreScene.Shader( "test", "gl:surface" )
 
 		s.parameters["gl:vertexSource"] = inspect.cleandoc( """
 
@@ -264,7 +265,7 @@ class ShadingTest( unittest.TestCase ) :
 		r.setOption( "gl:searchPath:texture", IECore.StringData( "./" ) )
 		r.setOption( "gl:searchPath:shader", IECore.StringData( "./test/IECoreGL/shaders" ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
@@ -307,7 +308,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testBasicPositioning( self ) :
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( self.mesh() )
 
 		image = self.renderImage( g )
@@ -322,17 +323,17 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniformBoolParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["rB"] = IECore.BoolData( 1 )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -348,17 +349,17 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniformFloatParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["rF"] = IECore.FloatData( 1 )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -374,17 +375,17 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniformIntParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["gI"] = IECore.FloatData( 1 )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -400,7 +401,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniform2fParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
@@ -408,10 +409,10 @@ class ShadingTest( unittest.TestCase ) :
 		c1.state()[0].parameters["rgF"] = IECore.V2fData( IECore.V2f( 0, 1 ) )
 		c2.state()[0].parameters["rgF"] = IECore.V2fData( IECore.V2f( 1, 0 ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -427,7 +428,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniform2iParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
@@ -435,10 +436,10 @@ class ShadingTest( unittest.TestCase ) :
 		c1.state()[0].parameters["rgF"] = IECore.V2iData( IECore.V2i( 0, 1 ) )
 		c2.state()[0].parameters["rgF"] = IECore.V2iData( IECore.V2i( 1, 0 ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -454,7 +455,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniform3fParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
@@ -462,10 +463,10 @@ class ShadingTest( unittest.TestCase ) :
 		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )
 		c2.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 1, 1, 0 ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -481,7 +482,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniform3iParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
@@ -489,10 +490,10 @@ class ShadingTest( unittest.TestCase ) :
 		c1.state()[0].parameters["rgbI"] = IECore.V3iData( IECore.V3i( 0, 1, 1 ) )
 		c2.state()[0].parameters["rgbI"] = IECore.V3iData( IECore.V3i( 1, 1, 0 ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -508,18 +509,18 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testConstantPrimVarTemporarilyOverridesShaderParameter( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["rgbF"] = IECore.V3iData( IECore.V3i( 0, 1, 1 ) )
-		c1.children()[0]["rgbF"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 1, 1, 0 ) ) )
+		c1.children()[0]["rgbF"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 1, 1, 0 ) ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -535,17 +536,17 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testSplineAsTexture( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = self.splineGradient( IECore.Color3f( 1, 0, 0 ), IECore.Color3f( 1, 0, 0 ) )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -561,17 +562,17 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testImageFileAsTexture( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
 
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -588,7 +589,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testCompoundDataAsTexture( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.textureShader() )
 
@@ -607,10 +608,10 @@ class ShadingTest( unittest.TestCase ) :
 		c2 = c1.copy()
 		c1.state()[0].parameters["sampler"] = yellowCompoundData
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -626,11 +627,11 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testWireframe( self ) :
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( self.mesh() )
 
 		g.addState(
-			IECore.AttributeState(
+			IECoreScene.AttributeState(
 				{
 					"gl:primitive:solid" : IECore.BoolData( False ),
 					"gl:primitive:wireframe" : IECore.BoolData( True ),
@@ -652,20 +653,20 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testSameMeshTwoShaders( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.colorShader() )
 		c1.state()[0].parameters["rgbF"] = IECore.V3fData( IECore.V3f( 0, 1, 1 ) )
 
-		c2 = IECore.Group()
+		c2 = IECoreScene.Group()
 		c2.addChild( self.mesh() )
 		c2.addState( self.textureShader() )
 		c2.state()[0].parameters["sampler"] = IECore.StringData( os.path.dirname( __file__ ) + "/images/yellow.exr" )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 
@@ -685,13 +686,13 @@ class ShadingTest( unittest.TestCase ) :
 			# no point testing unavailable functionality
 			return
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 
-		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
-		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		p["type"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 		g.addChild( p )
 
-		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
+		g.addState( IECoreScene.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
 		g.addState( self.geometryShader() )
 
 		image = self.renderImage( g )
@@ -715,14 +716,14 @@ class ShadingTest( unittest.TestCase ) :
 			# no point testing unavailable functionality
 			return
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 
-		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
-		p["type"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) )
+		p["type"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.StringData( "gl:point" ) )
 		g.addChild( p )
 
-		g.addState( IECore.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
-		g.addState( IECore.Shader( "pointTripler", "gl:surface" ) )
+		g.addState( IECoreScene.AttributeState( { "gl:pointsPrimitive:glPointWidth" : IECore.FloatData( 4 ) } ) )
+		g.addState( IECoreScene.Shader( "pointTripler", "gl:surface" ) )
 
 		image = self.renderImage( g )
 
@@ -744,10 +745,10 @@ class ShadingTest( unittest.TestCase ) :
 		# if there is no Cs parameter value specified then we should get
 		# Cs from the attribute state.
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( self.mesh() )
 
-		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
+		g.addState( IECoreScene.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
 		g.addState( self.constantShader() )
 
 		image = self.renderImage( g )
@@ -756,10 +757,10 @@ class ShadingTest( unittest.TestCase ) :
 		# but if there is a Cs parameter, it should override the colour
 		# from the attribute state.
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( self.mesh() )
 
-		g.addState( IECore.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
+		g.addState( IECoreScene.AttributeState( { "color" : IECore.Color3f( 1, 0, 0 ) } ) )
 
 		s = self.constantShader()
 		s.parameters["Cs"] = IECore.Color3f( 0, 1, 0 )
@@ -770,11 +771,11 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testColorAttributeDoesntAffectWireframe( self ) :
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( self.mesh() )
 
 		g.addState(
-			IECore.AttributeState(
+			IECoreScene.AttributeState(
 				{
 					"color" : IECore.Color3f( 1, 0, 0 ),
 					"gl:primitive:solid" : IECore.BoolData( False ),
@@ -797,18 +798,18 @@ class ShadingTest( unittest.TestCase ) :
 	def testVertexCsDoesntAffectWireframe( self ) :
 
 		m = self.mesh()
-		m["Cs"] = IECore.PrimitiveVariable(
-			IECore.PrimitiveVariable.Interpolation.Vertex,
+		m["Cs"] = IECoreScene.PrimitiveVariable(
+			IECoreScene.PrimitiveVariable.Interpolation.Vertex,
 			IECore.Color3fVectorData(
 				[ IECore.Color3f( 0 ) ] * len( m["P"].data )
 			)
 		)
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( m )
 
 		g.addState(
-			IECore.AttributeState(
+			IECoreScene.AttributeState(
 				{
 					"gl:primitive:solid" : IECore.BoolData( True ),
 					"gl:primitive:wireframe" : IECore.BoolData( True ),
@@ -830,7 +831,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniformFloatArrayParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.floatArrayShader() )
 
@@ -842,12 +843,12 @@ class ShadingTest( unittest.TestCase ) :
 		c3.state()[0].parameters["f3"] = IECore.V3fVectorData( [ IECore.V3f( i, 100.0 / 16, 100 * 0.5 ** ( i + 2 )) for i in range( 8 ) ] )
 		c4.state()[0].parameters["f4"] = IECore.Color4fVectorData( [ IECore.Color4f( i, 100.0 / 32, 100 * 0.5 ** ( i + 2), 0.0 ) for i in range( 8 ) ] )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
-		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
-		c4.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
+		c3.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
+		c4.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
@@ -867,7 +868,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testUniformIntArrayParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.intArrayShader() )
 
@@ -877,11 +878,11 @@ class ShadingTest( unittest.TestCase ) :
 		c2.state()[0].parameters["i2"] = IECore.V2fVectorData( [ IECore.V2f( i, 100.0 / 16) for i in range( 8 ) ] )
 		c3.state()[0].parameters["i3"] = IECore.V3fVectorData( [ IECore.V3f( i, 100.0 / 16, 100 * 0.5 ** ( i + 2 )) for i in range( 8 ) ] )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
-		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
+		c3.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
@@ -900,7 +901,7 @@ class ShadingTest( unittest.TestCase ) :
 
 	def testMatrixParameters( self ) :
 
-		c1 = IECore.Group()
+		c1 = IECoreScene.Group()
 		c1.addChild( self.mesh() )
 		c1.addState( self.matrixShader() )
 
@@ -912,12 +913,12 @@ class ShadingTest( unittest.TestCase ) :
 		c3.state()[0].parameters["m3v"] = IECore.M33fVectorData( [ IECore.M33f( [0,0,0, i * 0.01, i * 0.02, i * 0.03, 0,0,0] ) for i in range( 8 ) ] )
 		c4.state()[0].parameters["m4v"] = IECore.M44fVectorData( [ IECore.M44f( [0,0,0,0, i * 0.005, i * 0.01, i * 0.02, 0, 0,0,0,0,0,0,0,0 ] ) for i in range( 8 ) ] )
 
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
-		c3.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
-		c4.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0.2, 0 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0.2, 0 ) ) ) )
+		c3.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, -0.2, 0 ) ) ) )
+		c4.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, -0.2, 0 ) ) ) )
 
-		g = IECore.Group()
+		g = IECoreScene.Group()
 		g.addChild( c1 )
 		g.addChild( c2 )
 		g.addChild( c3 )
@@ -941,11 +942,11 @@ class ShadingTest( unittest.TestCase ) :
 
 			m = self.mesh()
 
-			g = IECore.Group()
+			g = IECoreScene.Group()
 			g.addChild( m )
 
 			g.addState(
-				IECore.AttributeState(
+				IECoreScene.AttributeState(
 					{
 						"gl:primitive:solid" : IECore.BoolData( True ),
 						"gl:primitive:wireframe" : IECore.BoolData( True ),

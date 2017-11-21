@@ -36,6 +36,7 @@ import unittest
 import threading
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreGL
 
@@ -47,16 +48,16 @@ class CachedConverterTest( unittest.TestCase ) :
 
 		c = IECoreGL.CachedConverter( 500 * 1024 * 1024 ) # 500 megs
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
 		gm = c.convert( m )
 
-		m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
 		gm2 = c.convert( m2 )
 
 		self.failUnless( gm.isSame( gm2 ) )
 
-		m3 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
-		m3["a"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 1 ) )
+		m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( -1 ) ) )
+		m3["a"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.IntData( 1 ) )
 
 		gm3 = c.convert( m3 )
 
@@ -76,10 +77,10 @@ class CachedConverterTest( unittest.TestCase ) :
 		for i in range( 0, 10000 ) :
 			pv.append( r.nextV3f() )
 
-		p = IECore.PointsPrimitive( pv.copy() )
+		p = IECoreScene.PointsPrimitive( pv.copy() )
 
 		pv.append( r.nextV3f() )
-		p2 = IECore.PointsPrimitive( pv.copy() )
+		p2 = IECoreScene.PointsPrimitive( pv.copy() )
 
 		self.assertNotEqual( p, p2 )
 
@@ -116,10 +117,10 @@ class CachedConverterTest( unittest.TestCase ) :
 		for i in range( 0, 10000 ) :
 			pv.append( r.nextV3f() )
 
-		p = IECore.PointsPrimitive( pv.copy() )
+		p = IECoreScene.PointsPrimitive( pv.copy() )
 
 		pv.append( r.nextV3f() )
-		p2 = IECore.PointsPrimitive( pv.copy() )
+		p2 = IECoreScene.PointsPrimitive( pv.copy() )
 
 		self.assertNotEqual( p, p2 )
 
@@ -147,7 +148,7 @@ class CachedConverterTest( unittest.TestCase ) :
 
 		i1 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 1, 0.5, 0.25 ), dataWindow, dataWindow )
 		i2 = IECoreImage.ImagePrimitive.createRGBFloat( IECore.Color3f( 0.75, 0.65, 0.55 ), dataWindow, dataWindow )
-		p = IECore.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 10 ) )
+		p = IECoreScene.PointsPrimitive( IECore.V3fVectorData( [ IECore.V3f( 0 ) ] * 10 ) )
 
 		for i in range( 0, 1 ) :
 

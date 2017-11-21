@@ -35,6 +35,7 @@
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreGL
 
 IECoreGL.init( False )
@@ -88,7 +89,7 @@ class ToGLStateConverterTest( unittest.TestCase ) :
 		}
 		"""
 
-		shader = IECore.Shader( "test", "surface", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : fragmentSource } )
+		shader = IECoreScene.Shader( "test", "surface", { "gl:vertexSource" : vertexSource, "gl:fragmentSource" : fragmentSource } )
 		attributes = IECore.CompoundObject( { "gl:surface" : shader } )
 		state = IECoreGL.ToGLStateConverter( attributes ).convert()
 

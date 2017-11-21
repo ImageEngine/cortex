@@ -40,12 +40,12 @@ import threading
 import math
 import shutil
 
-from IECore import *
 import IECore
+import IECoreScene
 import IECoreImage
+import IECoreGL
 
-from IECoreGL import *
-init( False )
+IECoreGL.init( False )
 
 class TestRenderer( unittest.TestCase ) :
 
@@ -54,173 +54,173 @@ class TestRenderer( unittest.TestCase ) :
 		os.environ["IECOREGL_TEXTURE_PATHS"] = "textureDefault"
 		os.environ["IECOREGL_SHADER_PATHS"] = "shaderDefault"
 
-		r = Renderer()
+		r = IECoreGL.Renderer()
 
 		self.assertEqual( r.typeName(), "IECoreGL::Renderer" )
 
-		self.assertEqual( r.getOption( "searchPath:texture" ), StringData( "textureDefault" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:texture" ), StringData( "textureDefault" ) )
+		self.assertEqual( r.getOption( "searchPath:texture" ), IECore.StringData( "textureDefault" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:texture" ), IECore.StringData( "textureDefault" ) )
 
-		r.setOption( "searchPath:texture", StringData( "a" ) )
-		self.assertEqual( r.getOption( "searchPath:texture" ), StringData( "a" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:texture" ), StringData( "a" ) )
+		r.setOption( "searchPath:texture", IECore.StringData( "a" ) )
+		self.assertEqual( r.getOption( "searchPath:texture" ), IECore.StringData( "a" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:texture" ), IECore.StringData( "a" ) )
 
-		r.setOption( "gl:searchPath:texture", StringData( "b" ) )
-		self.assertEqual( r.getOption( "searchPath:texture" ), StringData( "b" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:texture" ), StringData( "b" ) )
+		r.setOption( "gl:searchPath:texture", IECore.StringData( "b" ) )
+		self.assertEqual( r.getOption( "searchPath:texture" ), IECore.StringData( "b" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:texture" ), IECore.StringData( "b" ) )
 
-		self.assertEqual( r.getOption( "searchPath:shader" ), StringData( "shaderDefault" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:shader" ), StringData( "shaderDefault" ) )
+		self.assertEqual( r.getOption( "searchPath:shader" ), IECore.StringData( "shaderDefault" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:shader" ), IECore.StringData( "shaderDefault" ) )
 
-		r.setOption( "searchPath:shader", StringData( "s" ) )
-		self.assertEqual( r.getOption( "searchPath:shader" ), StringData( "s" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:shader" ), StringData( "s" ) )
+		r.setOption( "searchPath:shader", IECore.StringData( "s" ) )
+		self.assertEqual( r.getOption( "searchPath:shader" ), IECore.StringData( "s" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:shader" ), IECore.StringData( "s" ) )
 
-		r.setOption( "gl:searchPath:shader", StringData( "t" ) )
-		self.assertEqual( r.getOption( "searchPath:shader" ), StringData( "t" ) )
-		self.assertEqual( r.getOption( "gl:searchPath:shader" ), StringData( "t" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( "t" ) )
+		self.assertEqual( r.getOption( "searchPath:shader" ), IECore.StringData( "t" ) )
+		self.assertEqual( r.getOption( "gl:searchPath:shader" ), IECore.StringData( "t" ) )
 
-		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 0 ) ) )
-		r.setOption( "shutter", V2fData( V2f( 1, 2 ) ) )
-		self.assertEqual( r.getOption( "shutter" ), V2fData( V2f( 1, 2 ) ) )
+		self.assertEqual( r.getOption( "shutter" ), IECore.V2fData( IECore.V2f( 0 ) ) )
+		r.setOption( "shutter", IECore.V2fData( IECore.V2f( 1, 2 ) ) )
+		self.assertEqual( r.getOption( "shutter" ), IECore.V2fData( IECore.V2f( 1, 2 ) ) )
 
-		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( False ) )
-		r.setOption( "gl:drawCoordinateSystems", BoolData( True ) )
-		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), BoolData( True ) )
+		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), IECore.BoolData( False ) )
+		r.setOption( "gl:drawCoordinateSystems", IECore.BoolData( True ) )
+		self.assertEqual( r.getOption( "gl:drawCoordinateSystems" ), IECore.BoolData( True ) )
 
 	def testAttributes( self ) :
 
-		deferred = Renderer()
-		deferred.setOption( "gl:mode", StringData( "deferred" ) )
+		deferred = IECoreGL.Renderer()
+		deferred.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		immediate = Renderer()
-		immediate.setOption( "gl:mode", StringData( "immediate" ) )
+		immediate = IECoreGL.Renderer()
+		immediate.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
 
 		for r in [ deferred, immediate ] :
 
 			r.worldBegin()
 
-			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 1 ) ) )
-			self.assertEqual( r.getAttribute( "opacity" ), Color3fData( Color3f( 1 ) ) )
-			self.assertEqual( r.getAttribute( "gl:color" ), Color4fData( Color4f( 1 ) ) )
-			self.assertEqual( r.getAttribute( "gl:blend:color" ), Color4fData( Color4f( 1 ) ) )
-			self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), StringData( "srcAlpha" ) )
-			self.assertEqual( r.getAttribute( "gl:blend:dstFactor" ), StringData( "oneMinusSrcAlpha" ) )
-			self.assertEqual( r.getAttribute( "gl:blend:equation" ), StringData( "add" ) )
-			self.assertEqual( r.getAttribute( "gl:shade:transparent" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:primitive:sortForTransparency" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "name" ), StringData( "unnamed" ) )
-			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), BoolData( True ) )
-			if withFreeType() :
-				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "mesh" ) )
-			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( False ) )
+			self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
+			self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 1 ) ) )
+			self.assertEqual( r.getAttribute( "gl:color" ), IECore.Color4fData( IECore.Color4f( 1 ) ) )
+			self.assertEqual( r.getAttribute( "gl:blend:color" ), IECore.Color4fData( IECore.Color4f( 1 ) ) )
+			self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), IECore.StringData( "srcAlpha" ) )
+			self.assertEqual( r.getAttribute( "gl:blend:dstFactor" ), IECore.StringData( "oneMinusSrcAlpha" ) )
+			self.assertEqual( r.getAttribute( "gl:blend:equation" ), IECore.StringData( "add" ) )
+			self.assertEqual( r.getAttribute( "gl:shade:transparent" ), IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:primitive:sortForTransparency" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "name" ), IECore.StringData( "unnamed" ) )
+			self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), IECore.BoolData( True ) )
+			if IECore.withFreeType() :
+				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), IECore.StringData( "mesh" ) )
+			self.assertEqual( r.getAttribute( "gl:depthTest" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:depthMask" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest" ), IECore.BoolData( False ) )
 
-			self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( "always" ) )
-			self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( 0.0 ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), IECore.StringData( "always" ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), IECore.FloatData( 0.0 ) )
 
-			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), IECore.BoolData( True ) )
 
-			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), IECore.BoolData( True ) )
 
-			r.setAttribute( "color", Color3fData( Color3f( 0, 1, 2 ) ) )
-			self.assertEqual( r.getAttribute( "color" ), Color3fData( Color3f( 0, 1, 2 ) ) )
+			r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 0, 1, 2 ) ) )
+			self.assertEqual( r.getAttribute( "color" ), IECore.Color3fData( IECore.Color3f( 0, 1, 2 ) ) )
 
 			# opacity is an odd one - it's set as a color but as it's averaged internally
 			# the result you get should be a greyscale value.
-			r.setAttribute( "opacity", Color3fData( Color3f( 3, 1, 2 ) ) )
-			self.assertEqual( r.getAttribute( "opacity" ), Color3fData( Color3f( 2 ) ) )
+			r.setAttribute( "opacity", IECore.Color3fData( IECore.Color3f( 3, 1, 2 ) ) )
+			self.assertEqual( r.getAttribute( "opacity" ), IECore.Color3fData( IECore.Color3f( 2 ) ) )
 
-			self.assertEqual( r.getAttribute( "gl:color" ), Color4fData( Color4f( 0, 1, 2, 2 ) ) )
-			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
-			self.assertEqual( r.getAttribute( "gl:color" ), Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			self.assertEqual( r.getAttribute( "gl:color" ), IECore.Color4fData( IECore.Color4f( 0, 1, 2, 2 ) ) )
+			r.setAttribute( "gl:color", IECore.Color4fData( IECore.Color4f( 1, 2, 3, 4 ) ) )
+			self.assertEqual( r.getAttribute( "gl:color" ), IECore.Color4fData( IECore.Color4f( 1, 2, 3, 4 ) ) )
 
-			r.setAttribute( "gl:blend:color", Color4fData( Color4f( 0, 1, 0, 1 ) ) )
-			self.assertEqual( r.getAttribute( "gl:blend:color" ), Color4fData( Color4f( 0, 1, 0, 1 ) ) )
+			r.setAttribute( "gl:blend:color", IECore.Color4fData( IECore.Color4f( 0, 1, 0, 1 ) ) )
+			self.assertEqual( r.getAttribute( "gl:blend:color" ), IECore.Color4fData( IECore.Color4f( 0, 1, 0, 1 ) ) )
 
 			r.attributeBegin()
-			r.setAttribute( "color", Color3fData( Color3f( 0 ) ) )
-			self.assertEqual( r.getAttribute( "gl:color" ), Color4fData( Color4f( 0, 0, 0, 4 ) ) )
+			r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 0 ) ) )
+			self.assertEqual( r.getAttribute( "gl:color" ), IECore.Color4fData( IECore.Color4f( 0, 0, 0, 4 ) ) )
 			r.attributeEnd()
-			self.assertEqual( r.getAttribute( "gl:color" ), Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			self.assertEqual( r.getAttribute( "gl:color" ), IECore.Color4fData( IECore.Color4f( 1, 2, 3, 4 ) ) )
 
 			factors = [ "zero", "one", "srcColor", "oneMinusSrcColor", "dstColor", "oneMinusDstColor",
 				"srcAlpha", "oneMinusSrcAlpha", "dstAlpha", "oneMinusDstAlpha", "dstAlpha", "oneMinusDstAlpha",
 				"constantColor", "oneMinusConstantColor", "constantAlpha", "oneMinusConstantAlpha" ]
 			for f in factors :
 				last = r.getAttribute( "gl:blend:dstFactor" )
-				r.setAttribute( "gl:blend:srcFactor", StringData( f ) )
-				self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), StringData( f ) )
+				r.setAttribute( "gl:blend:srcFactor", IECore.StringData( f ) )
+				self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), IECore.StringData( f ) )
 				self.assertEqual( r.getAttribute( "gl:blend:dstFactor" ), last )
 				last = r.getAttribute( "gl:blend:srcFactor" )
-				r.setAttribute( "gl:blend:dstFactor", StringData( f ) )
-				self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), StringData( f ) )
+				r.setAttribute( "gl:blend:dstFactor", IECore.StringData( f ) )
+				self.assertEqual( r.getAttribute( "gl:blend:srcFactor" ), IECore.StringData( f ) )
 				self.assertEqual( r.getAttribute( "gl:blend:dstFactor" ), last )
 
 			for e in ["add", "subtract", "reverseSubtract", "min", "max"] :
-				r.setAttribute( "gl:blend:equation", StringData( e ) )
-				self.assertEqual( r.getAttribute( "gl:blend:equation" ), StringData( e ) )
+				r.setAttribute( "gl:blend:equation", IECore.StringData( e ) )
+				self.assertEqual( r.getAttribute( "gl:blend:equation" ), IECore.StringData( e ) )
 
-			r.setAttribute( "name", StringData( "sphere" ) )
-			self.assertEqual( r.getAttribute( "name" ), StringData( "sphere" ) )
+			r.setAttribute( "name", IECore.StringData( "sphere" ) )
+			self.assertEqual( r.getAttribute( "name" ), IECore.StringData( "sphere" ) )
 
-			r.setAttribute( "doubleSided", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "doubleSided" ), BoolData( False ) )
+			r.setAttribute( "doubleSided", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "doubleSided" ), IECore.BoolData( False ) )
 
-			r.setAttribute( "gl:smoothing:points", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), BoolData( True ) )
-			r.setAttribute( "gl:smoothing:lines", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), BoolData( True ) )
-			r.setAttribute( "gl:smoothing:polygons", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), BoolData( True ) )
+			r.setAttribute( "gl:smoothing:points", IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:points" ), IECore.BoolData( True ) )
+			r.setAttribute( "gl:smoothing:lines", IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:lines" ), IECore.BoolData( True ) )
+			r.setAttribute( "gl:smoothing:polygons", IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:smoothing:polygons" ), IECore.BoolData( True ) )
 
-			r.setAttribute( "gl:procedural:reentrant", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), BoolData( False ) )
+			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:procedural:reentrant" ), IECore.BoolData( False ) )
 
-			if withFreeType() :
-				r.setAttribute( "gl:textPrimitive:type", StringData( "sprite" ) )
-				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), StringData( "sprite" ) )
+			if IECore.withFreeType() :
+				r.setAttribute( "gl:textPrimitive:type", IECore.StringData( "sprite" ) )
+				self.assertEqual( r.getAttribute( "gl:textPrimitive:type" ), IECore.StringData( "sprite" ) )
 
-			r.setAttribute( "gl:depthTest", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:depthTest" ), BoolData( False ) )
+			r.setAttribute( "gl:depthTest", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:depthTest" ), IECore.BoolData( False ) )
 
-			r.setAttribute( "gl:depthMask", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:depthMask" ), BoolData( False ) )
+			r.setAttribute( "gl:depthMask", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:depthMask" ), IECore.BoolData( False ) )
 
-			r.setAttribute( "gl:alphaTest", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:alphaTest" ), BoolData( True ) )
+			r.setAttribute( "gl:alphaTest", IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:alphaTest" ), IECore.BoolData( True ) )
 
 			alphaTestModes = [ "never", "less", "equal", "lequal", "greater", "notequal", "gequal", "always" ]
 			value = 0.1
 			for m in alphaTestModes :
 				last = r.getAttribute( "gl:alphaTest:value" )
-				r.setAttribute( "gl:alphaTest:mode", StringData( m ) )
-				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), StringData( m ) )
+				r.setAttribute( "gl:alphaTest:mode", IECore.StringData( m ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), IECore.StringData( m ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), last )
 
 				last = r.getAttribute( "gl:alphaTest:mode" )
-				r.setAttribute( "gl:alphaTest:value", FloatData( value ) )
-				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), FloatData( value ) )
+				r.setAttribute( "gl:alphaTest:value", IECore.FloatData( value ) )
+				self.assertEqual( r.getAttribute( "gl:alphaTest:value" ), IECore.FloatData( value ) )
 				self.assertEqual( r.getAttribute( "gl:alphaTest:mode" ), last )
 
 				value += 0.05
 
-			r.setAttribute( "gl:visibility:camera", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), BoolData( False ) )
+			r.setAttribute( "gl:visibility:camera", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:visibility:camera" ), IECore.BoolData( False ) )
 
-			r.setAttribute( "gl:automaticInstancing", BoolData( False ) )
-			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( False ) )
-			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( False ) )
-			r.setAttribute( "automaticInstancing", BoolData( True ) )
-			self.assertEqual( r.getAttribute( "automaticInstancing" ), BoolData( True ) )
-			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), BoolData( True ) )
+			r.setAttribute( "gl:automaticInstancing", IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), IECore.BoolData( False ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), IECore.BoolData( False ) )
+			r.setAttribute( "automaticInstancing", IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "automaticInstancing" ), IECore.BoolData( True ) )
+			self.assertEqual( r.getAttribute( "gl:automaticInstancing" ), IECore.BoolData( True ) )
 
 			r.worldEnd()
 
@@ -228,19 +228,19 @@ class TestRenderer( unittest.TestCase ) :
 
 		"""Attributes destined for other renderers should be silently ignored."""
 
-		deferred = Renderer()
-		deferred.setOption( "gl:mode", StringData( "deferred" ) )
+		deferred = IECoreGL.Renderer()
+		deferred.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
-		immediate = Renderer()
-		immediate.setOption( "gl:mode", StringData( "immediate" ) )
+		immediate = IECoreGL.Renderer()
+		immediate.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 
-		with CapturingMessageHandler() as handler :
+		with IECore.CapturingMessageHandler() as handler :
 
 			for r in [ deferred, immediate ] :
 
 				r.worldBegin()
 
-				r.setAttribute( "ri:visibility:diffuse", IntData( 0 ) )
+				r.setAttribute( "ri:visibility:diffuse", IECore.IntData( 0 ) )
 
 				r.worldEnd()
 
@@ -251,32 +251,32 @@ class TestRenderer( unittest.TestCase ) :
 		# This should produce a yellow sphere in between two red spheres. It does in the DeferredRenderer but
 		# currently fails in the ImmediateRenderer.
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/testStackBug.tif", "tiff", "rgba", {} )
 		r.worldBegin()
 
-		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 0 ), "blue" : FloatData( 0 ) } )
+		r.shader( "surface", "rgbColor", { "red" : IECore.FloatData( 1 ), "green" : IECore.FloatData( 0 ), "blue" : IECore.FloatData( 0 ) } )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 		r.attributeBegin()
 
-		r.shader( "surface", "rgbColor", { "red" : FloatData( 1 ), "green" : FloatData( 1 ), "blue" : FloatData( 0 ) } )
+		r.shader( "surface", "rgbColor", { "red" : IECore.FloatData( 1 ), "green" : IECore.FloatData( 1 ), "blue" : IECore.FloatData( 0 ) } )
 		r.sphere( 1, -1, 1, 360, {} )
 
 		r.attributeEnd()
 
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
 
-		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
 
 		r.worldEnd()
 
-		i = Reader.create( os.path.dirname( __file__ ) + "/output/testStackBug.tif" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testStackBug.tif" ).read()
 		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5) + int(dimensions.x * 0.5)
 		self.assertEqual( i["R"][index], 1 )
@@ -295,15 +295,15 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testPrimVars( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/testPrimVars.tif", "tiff", "rgba", {} )
 		r.worldBegin()
 
 		r.shader( "surface", "rgbColor", {} )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 		r.attributeBegin()
 
@@ -311,37 +311,37 @@ class TestRenderer( unittest.TestCase ) :
 		r.sphere(
 			1, -1, 1, 360,
 			{
-				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
-				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
-				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"red" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) ),
+				"green" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
+				"blue" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
 			}
 		)
 
 		r.attributeEnd()
 
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 		r.sphere(
 			1, -1, 1, 360,
 			{
-				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
-				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
-				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
+				"red" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
+				"green" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) ),
+				"blue" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
 			}
 		)
 
-		r.concatTransform( M44f.createTranslated( V3f( 2, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) )
 		r.sphere(
 			1, -1, 1, 360,
 			{
-				"red" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
-				"green" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 0 ) ),
-				"blue" : PrimitiveVariable( PrimitiveVariable.Interpolation.Constant, FloatData( 1 ) ),
+				"red" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
+				"green" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 0 ) ),
+				"blue" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.FloatData( 1 ) ),
 			}
 		)
 
 		r.worldEnd()
 
-		i = Reader.create( os.path.dirname( __file__ ) + "/output/testPrimVars.tif" ).read()
+		i = IECore.Reader.create( os.path.dirname( __file__ ) + "/output/testPrimVars.tif" ).read()
 		dimensions = i.dataWindow.size() + IECore.V2i( 1 )
 		index = dimensions.x * int(dimensions.y * 0.5)
 		self.assertEqual( i["R"][index], 0 )
@@ -360,20 +360,20 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testProcedural( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 		r.display( os.path.dirname( __file__ ) + "/output/proceduralTest.tif", "tiff", "rgba", {} )
 
 		r.worldBegin()
 
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
-		r.concatTransform( M44f.createScaled( V3f( 0.1 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
+		r.concatTransform( IECore.M44f.createScaled( IECore.V3f( 0.1 ) ) )
 
-		p = ReadProcedural()
-		p["files"]["name"].setValue( StringData( "test/IECore/data/cobFiles/pSphereShape1.cob" ) )
+		p = IECoreScene.ReadProcedural()
+		p["files"]["name"].setValue( IECore.StringData( "test/IECore/data/cobFiles/pSphereShape1.cob" ) )
 
 		p.render( r )
 
@@ -387,23 +387,23 @@ class TestRenderer( unittest.TestCase ) :
 	## \todo Make this assert something
 	def testShader( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 
 		r.worldBegin()
-		r.shader( "surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+		r.shader( "surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
 		r.worldEnd()
 
 		s = r.scene()
 
-		s.render( State( True ) )
+		s.render( IECoreGL.State( True ) )
 
 	def __countChildrenRecursive( self, g ) :
-		if not isinstance( g, Group ):
+		if not isinstance( g, IECoreGL.Group ):
 			return 1
 		count = 0
 		for c in g.children():
@@ -412,25 +412,25 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testEdits( self ):
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 
 		r.worldBegin()
 		r.worldEnd()
 
-		with CapturingMessageHandler() as handler :
+		with IECore.CapturingMessageHandler() as handler :
 
 			r.attributeBegin()
-			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			r.setAttribute( "gl:color", IECore.Color4fData( IECore.Color4f( 1, 2, 3, 4 ) ) )
 			r.attributeEnd()
 
 		self.assertEqual( len( handler.messages ), 3 )
 
-		with CapturingMessageHandler() as handler :
+		with IECore.CapturingMessageHandler() as handler :
 
 			r.command( "editBegin", {} )
 			r.attributeBegin()
-			r.setAttribute( "gl:color", Color4fData( Color4f( 1, 2, 3, 4 ) ) )
+			r.setAttribute( "gl:color", IECore.Color4fData( IECore.Color4f( 1, 2, 3, 4 ) ) )
 			r.attributeEnd()
 			r.command( "editEnd", {} )
 
@@ -438,9 +438,9 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testRemoveObject( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		with WorldBlock( r ) :
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "name", "sphereOne" )
 
@@ -450,7 +450,7 @@ class TestRenderer( unittest.TestCase ) :
 
 			r.sphere( 1, -1, 1, 360, {} )
 
-			with AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.sphere( 1, -1, 1, 360, {} )
 
@@ -466,9 +466,9 @@ class TestRenderer( unittest.TestCase ) :
 		# check that trying to remove objects when not in an editBegin/editEnd block
 		# fails and prints a message
 
-		errorCatcher = CapturingMessageHandler()
+		errorCatcher = IECore.CapturingMessageHandler()
 		with errorCatcher :
-			commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+			commandResult = r.command( "removeObject", { "name" : IECore.StringData( "sphereOne" ) } )
 
 		self.assertEqual( commandResult, None )
 		self.assertEqual( len( errorCatcher.messages ), 1 )
@@ -476,26 +476,26 @@ class TestRenderer( unittest.TestCase ) :
 		# check we can remove one object without affecting the other
 
 		r.command( "editBegin", {} )
-		commandResult = r.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
+		commandResult = r.command( "removeObject", { "name" : IECore.StringData( "sphereOne" ) } )
 		r.command( "editEnd", {} )
 
-		self.assertEqual( commandResult, BoolData( True ) )
+		self.assertEqual( commandResult, IECore.BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 2 )
 		self.assertEqual( self.__countChildrenRecursive( s.root() ), 2 )
 
 		# now we test that either the sphere and the following attribute block ( instantiates as a Group ) are removed
 		r.command( "editBegin", {} )
-		commandResult = r.command( "removeObject", { "name" : StringData( "sphereTwo" ) } )
+		commandResult = r.command( "removeObject", { "name" : IECore.StringData( "sphereTwo" ) } )
 		r.command( "editEnd", {} )
 
-		self.assertEqual( commandResult, BoolData( True ) )
+		self.assertEqual( commandResult, IECore.BoolData( True ) )
 		self.assertEqual( len( s.root().children() ), 0 )
 
 	def testEditQuery( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		with WorldBlock( r ) :
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		with IECoreScene.WorldBlock( r ) :
 			self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
 
 		self.assertEqual( r.command( "editQuery", {} ), IECore.BoolData( False ) )
@@ -506,9 +506,9 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testRemoveObjectDuringProcedural( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		with WorldBlock( r ) :
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "name", "sphereOne" )
 
@@ -521,17 +521,17 @@ class TestRenderer( unittest.TestCase ) :
 		s = r.scene()
 		self.assertEqual( len( s.root().children() ), 2 )
 
-		class RemovalProcedural( Renderer.Procedural ):
+		class RemovalProcedural( IECoreScene.Renderer.Procedural ):
 
 			def __init__( proc ):
-				Renderer.Procedural.__init__( proc )
+				IECoreScene.Renderer.Procedural.__init__( proc )
 
 			def bound( proc ) :
-				return Box3f( V3f( -1 ), V3f( 1 ) )
+				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 			def render( proc, renderer ):
-				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
-				self.assertEqual( commandResult, BoolData( True ) )
+				commandResult = renderer.command( "removeObject", { "name" : IECore.StringData( "sphereOne" ) } )
+				self.assertEqual( commandResult, IECore.BoolData( True ) )
 
 			def hash( self ):
 				h = IECore.MurmurHash()
@@ -546,12 +546,12 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testRemoveObjectWithResourcesDuringProcedural( self ) :
 
-		r = Renderer()
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		with WorldBlock( r ) :
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		with IECoreScene.WorldBlock( r ) :
 
-			with AttributeBlock( r ) :
+			with IECoreScene.AttributeBlock( r ) :
 
 				r.setAttribute( "name", "sphereOne" )
 
@@ -576,20 +576,20 @@ class TestRenderer( unittest.TestCase ) :
 
 		s.render()
 
-		class RemovalProcedural( Renderer.Procedural ):
+		class RemovalProcedural( IECoreScene.Renderer.Procedural ):
 
 			def __init__( proc, level=0 ) :
 
-				Renderer.Procedural.__init__( proc )
+				IECoreScene.Renderer.Procedural.__init__( proc )
 
 			def bound( proc ) :
 
-				return Box3f( V3f( -1 ), V3f( 1 ) )
+				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 			def render( proc, renderer ):
 
-				commandResult = renderer.command( "removeObject", { "name" : StringData( "sphereOne" ) } )
-				self.assertEqual( commandResult, BoolData( True ) )
+				commandResult = renderer.command( "removeObject", { "name" : IECore.StringData( "sphereOne" ) } )
+				self.assertEqual( commandResult, IECore.BoolData( True ) )
 
 			def hash( self ):
 
@@ -619,14 +619,14 @@ class TestRenderer( unittest.TestCase ) :
 		allScenes = []
 
 		def threadedRendering():
-			r = Renderer()
-			r.setOption( "gl:mode", StringData( "deferred" ) )
-			r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+			r = IECoreGL.Renderer()
+			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 
 			r.worldBegin()
 			r.shader( "surface", "failWithoutPreprocessing", {} )
-			r.concatTransform( M44f.createTranslated( V3f( 0, 0, -5 ) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 			r.worldEnd()
 			allScenes.append( r.scene() )
 
@@ -638,41 +638,41 @@ class TestRenderer( unittest.TestCase ) :
 			pass
 
 		for s in allScenes :
-			s.render( State( True ) )
+			s.render( IECoreGL.State( True ) )
 
-	class RecursiveProcedural( Renderer.Procedural ):
+	class RecursiveProcedural( IECoreScene.Renderer.Procedural ):
 		"""Creates a pyramid of spheres"""
 
 		maxLevel = 5
 		threadsUsed = set()
 
 		def __init__( self, level = 0 ):
-			Renderer.Procedural.__init__( self )
+			IECoreScene.Renderer.Procedural.__init__( self )
 			self.__level = level
 			if level == 0 :
 				self.threadsUsed.clear()
 
 		def bound( self ) :
-			return Box3f( V3f( -1 ), V3f( 1 ) )
+			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 		def render( self, renderer ):
 			# registers this thread id
 			self.threadsUsed.add( threading.currentThread().getName() )
 			renderer.attributeBegin()
-			renderer.setAttribute( "color", Color3fData( Color3f( float(self.__level)/self.maxLevel, 0, 1 - float(self.__level)/self.maxLevel ) ) )
+			renderer.setAttribute( "color", IECore.Color3fData( IECore.Color3f( float(self.__level)/self.maxLevel, 0, 1 - float(self.__level)/self.maxLevel ) ) )
 			renderer.transformBegin()
-			renderer.concatTransform( M44f.createTranslated(V3f( 0, 0.5, 0 )) )
-			renderer.concatTransform( M44f.createScaled( V3f(0.5) ) )
+			renderer.concatTransform( IECore.M44f.createTranslated(IECore.V3f( 0, 0.5, 0 )) )
+			renderer.concatTransform( IECore.M44f.createScaled( IECore.V3f(0.5) ) )
 			renderer.sphere( 1, -1, 1, 360, {} )
 			renderer.transformEnd()
 			# end of recursion
 			if self.__level < self.maxLevel :
 				renderer.transformBegin()
-				renderer.concatTransform( M44f.createTranslated(V3f( 0, -0.5, 0 )) )
+				renderer.concatTransform( IECore.M44f.createTranslated(IECore.V3f( 0, -0.5, 0 )) )
 				for i in xrange( 0, 2 ) :
 					renderer.transformBegin()
-					renderer.concatTransform( M44f.createTranslated(V3f( (i - 0.5) , 0, 0)) )
-					renderer.concatTransform( M44f.createScaled( V3f(0.5) ) )
+					renderer.concatTransform( IECore.M44f.createTranslated(IECore.V3f( (i - 0.5) , 0, 0)) )
+					renderer.concatTransform( IECore.M44f.createScaled( IECore.V3f(0.5) ) )
 					proc = TestRenderer.RecursiveProcedural( self.__level + 1 )
 					renderer.procedural( proc )
 					renderer.transformEnd()
@@ -684,13 +684,13 @@ class TestRenderer( unittest.TestCase ) :
 			h = IECore.MurmurHash()
 			return h
 
-	class RecursiveParameterisedProcedural( ParameterisedProcedural ):
+	class RecursiveParameterisedProcedural( IECoreScene.ParameterisedProcedural ):
 
 		maxLevel = 5
 		threadsUsed = set()
 
 		def __init__( self, level = 0 ):
-			ParameterisedProcedural.__init__( self )
+			IECoreScene.ParameterisedProcedural.__init__( self )
 			self.__level = level
 			if level == 0 :
 				self.threadsUsed.clear()
@@ -699,7 +699,7 @@ class TestRenderer( unittest.TestCase ) :
 			pass
 
 		def doBound( self, args ) :
-			return Box3f( V3f( -1 ), V3f( 1 ) )
+			return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 
 		def doRender( self, renderer, args ):
 			# registers this thread id
@@ -712,13 +712,13 @@ class TestRenderer( unittest.TestCase ) :
 
 	def __testMultithreadedProcedural( self, procType ):
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 		r.worldBegin()
 		p = procType()
-		if isinstance( p, Renderer.Procedural ):
+		if isinstance( p, IECoreScene.Renderer.Procedural ):
 			r.procedural( p )
 		else:
 			p.render( r )
@@ -731,13 +731,13 @@ class TestRenderer( unittest.TestCase ) :
 		renders = []
 
 		def newRender():
-			r = Renderer()
-			r.setOption( "gl:mode", StringData( "deferred" ) )
-			r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-			r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+			r = IECoreGL.Renderer()
+			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+			r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
 			r.worldBegin()
 			p = procType()
-			if isinstance( p, Renderer.Procedural ):
+			if isinstance( p, IECoreScene.Renderer.Procedural ):
 				r.procedural( p )
 			else:
 				p.render( r )
@@ -767,12 +767,12 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testDisableProceduralThreading( self ):
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
-		r.setOption( "gl:searchPath:shaderInclude", StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
-		with WorldBlock( r ) :
-			r.setAttribute( "gl:procedural:reentrant", BoolData( False ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( os.path.dirname( __file__ ) + "/shaders/include" ) )
+		with IECoreScene.WorldBlock( r ) :
+			r.setAttribute( "gl:procedural:reentrant", IECore.BoolData( False ) )
 			p = self.RecursiveParameterisedProcedural()
 			p.render( r )
 
@@ -783,15 +783,15 @@ class TestRenderer( unittest.TestCase ) :
 		p = self.RecursiveProcedural()
 
 		def renderWithCulling( box ):
-			r = Renderer()
-			r.setOption( "gl:mode", StringData( "deferred" ) )
+			r = IECoreGL.Renderer()
+			r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 			r.worldBegin()
 			r.sphere( 1.5, 0, 1, 360, {} )
 			r.procedural( p )
 			r.attributeBegin()
 			if True:
-				r.setAttribute( "gl:cullingSpace", StringData( "object" ) )
-				r.setAttribute( "gl:cullingBox", Box3fData( box ) )
+				r.setAttribute( "gl:cullingSpace", IECore.StringData( "object" ) )
+				r.setAttribute( "gl:cullingBox", IECore.Box3fData( box ) )
 				# everything in this block is culled
 				r.sphere( 1.5, 0, 1, 360, {} )
 				r.procedural( p )
@@ -799,26 +799,26 @@ class TestRenderer( unittest.TestCase ) :
 			r.worldEnd()
 			return self.__countChildrenRecursive( r.scene().root() )
 
-		noCullingCounter = renderWithCulling( Box3f() )
+		noCullingCounter = renderWithCulling( IECore.Box3f() )
 
 		# verify that only half of the things are renderer when the giving culling box is defined.
-		self.assertEqual( renderWithCulling( Box3f( V3f(2,-1,-1), V3f(3,1,1)  ) ) * 2, noCullingCounter )
+		self.assertEqual( renderWithCulling( IECore.Box3f( IECore.V3f(2,-1,-1), IECore.V3f(3,1,1)  ) ) * 2, noCullingCounter )
 
 	def testWorldSpaceCulling( self ):
 
 		p = self.RecursiveProcedural()
-		box = Box3f( V3f(0.001,-1,-1), V3f(1,1,1) )
+		box = IECore.Box3f( IECore.V3f(0.001,-1,-1), IECore.V3f(1,1,1) )
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.worldBegin()
-		r.setAttribute( "gl:cullingSpace", StringData( "world" ) )
-		r.setAttribute( "gl:cullingBox", Box3fData( box ) )
+		r.setAttribute( "gl:cullingSpace", IECore.StringData( "world" ) )
+		r.setAttribute( "gl:cullingBox", IECore.Box3fData( box ) )
 		r.sphere( 1, 0, 1, 360, {} )	# half-inside : 1 element
 		r.procedural( p )	# half-inside: 32 elements (full procedural renders 63 elements)
 		r.transformBegin()
 		if True:
-			r.concatTransform( M44f.createTranslated( V3f(-2, 0, 0) ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f(-2, 0, 0) ) )
 			# everything in this block is culled
 			r.sphere( 1, 0, 1, 360, {} )
 			r.procedural( p )
@@ -827,46 +827,46 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( self.__countChildrenRecursive( r.scene().root() ), 33 )
 
 	def testTransformsInImmediateRenderer( self ):
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "immediate" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 		r.transformBegin()
-		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
-		r.camera( "main", { "resolution" : V2iData( V2i( 512 ) ), "projection" : StringData( "perspective" ) } )
+		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 1, 1, 1 ) ) )
+		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 		r.transformEnd()
 		r.worldBegin()
 		# confirm that the camera transformation is not affecting the world space matrix
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-		self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 1, 0, 0 ) ), 1e-4 ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+		self.assert_( r.getTransform().equalWithAbsError( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ), 1e-4 ) )
 		# confirm that setting the world space transform does not affect the camera matrix (that was already set in openGL )
-		r.setTransform( M44f.createTranslated( V3f( 0, 1, 0 ) ) )
-		self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 0, 1, 0 ) ), 1e-4 ) )
+		r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ) )
+		self.assert_( r.getTransform().equalWithAbsError( IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) ), 1e-4 ) )
 		r.worldEnd()
 
 	def testTransformsInDeferredRenderer( self ):
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.transformBegin()
-		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
-		r.camera( "main", { "resolution" : V2iData( V2i( 512 ) ), "projection" : StringData( "perspective" ) } )
+		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 1, 1, 1 ) ) )
+		r.camera( "main", { "resolution" : IECore.V2iData( IECore.V2i( 512 ) ), "projection" : IECore.StringData( "perspective" ) } )
 		r.transformEnd()
 		r.worldBegin()
 		# confirm that the camera transformation is not affecting the world space matrix
-		self.assert_( r.getTransform().equalWithAbsError( M44f(), 1e-4 ) )
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-		r.concatTransform( M44f.createRotated( V3f( 1, 1, 1 ) ) )
+		self.assert_( r.getTransform().equalWithAbsError( IECore.M44f(), 1e-4 ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createRotated( IECore.V3f( 1, 1, 1 ) ) )
 		m = r.getTransform()
 		r.transformBegin()
 		if True:
 			# confirm that the transformBegin did not change the current transform
 			self.assert_( r.getTransform().equalWithAbsError( m, 1e-4 ) )
 			# confirm that concatenate transform works
-			r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
-			self.assert_( r.getTransform().equalWithAbsError( M44f.createTranslated( V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
-			r.concatTransform( M44f.createScaled( V3f(0.5) ) )
-			self.assert_( r.getTransform().equalWithAbsError( M44f.createScaled( V3f(0.5) ) * M44f.createTranslated( V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
+			self.assert_( r.getTransform().equalWithAbsError( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
+			r.concatTransform( IECore.M44f.createScaled( IECore.V3f(0.5) ) )
+			self.assert_( r.getTransform().equalWithAbsError( IECore.M44f.createScaled( IECore.V3f(0.5) ) * IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) * m, 1e-4 ) )
 
 			# confirm that setting the world space transform works too
-			m2 = M44f.createTranslated( V3f( 0, 1, 0 ) )
+			m2 = IECore.M44f.createTranslated( IECore.V3f( 0, 1, 0 ) )
 			r.setTransform( m2 )
 			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
 
@@ -875,8 +875,8 @@ class TestRenderer( unittest.TestCase ) :
 				# confirm that the attributeBegin did not change the current transform
 				self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
 				# confirm that setting the world space transform works too
-				r.setTransform( M44f.createRotated( V3f( 3, 1, 0 ) ) )
-				self.assert_( r.getTransform().equalWithAbsError( M44f.createRotated( V3f( 3, 1, 0 ) ), 1e-4 ) )
+				r.setTransform( IECore.M44f.createRotated( IECore.V3f( 3, 1, 0 ) ) )
+				self.assert_( r.getTransform().equalWithAbsError( IECore.M44f.createRotated( IECore.V3f( 3, 1, 0 ) ), 1e-4 ) )
 			r.attributeEnd()
 			# confirms that attributeEnd recovers the matrix.
 			self.assert_( r.getTransform().equalWithAbsError( m2, 1e-4 ) )
@@ -889,66 +889,66 @@ class TestRenderer( unittest.TestCase ) :
 
 	def testInstances(self):
 
-		r = Renderer()
+		r = IECoreGL.Renderer()
 		r.instanceBegin( "instanceA", {} )
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
 		r.transformBegin()
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
-		r.concatTransform( M44f.createTranslated( V3f( 1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 0, 0 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
 		r.transformEnd()
-		r.concatTransform( M44f.createTranslated( V3f( -1, 0, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -1, 0, 0 ) ) )
 		r.sphere( 1, -1, 1, 360, {} )
 		r.instanceEnd()
 
 		r.instanceBegin( "instanceB", {} )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 10 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 10 ) ) )
 		r.instance( "instanceA" )
-		r.concatTransform( M44f.createTranslated( V3f( 0, 0, 20 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 20 ) ) )
 		r.instance( "instanceA" )
 		r.instanceEnd()
 
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.worldBegin()
-		r.concatTransform( M44f.createTranslated( V3f( 0, 5, 0 ) ) )
+		r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 5, 0 ) ) )
 		r.instance( "instanceB" )
-		r.setTransform( M44f.createTranslated( V3f( 0, 10, 0 ) ) )
+		r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 10, 0 ) ) )
 		r.instance( "instanceB" )
 		r.worldEnd()
 
 		g = r.scene().root()
 
 		self.assertEqual( self.__countChildrenRecursive( g ), 12 )
-		self.assert_( g.bound().min.equalWithAbsError( V3f( -1, 4, 9 ), 0.001 ) )
-		self.assert_( g.bound().max.equalWithAbsError( V3f( 4, 11, 31 ), 0.001 ) )
+		self.assert_( g.bound().min.equalWithAbsError( IECore.V3f( -1, 4, 9 ), 0.001 ) )
+		self.assert_( g.bound().max.equalWithAbsError( IECore.V3f( 4, 11, 31 ), 0.001 ) )
 
 	def testCuriousCrashOnThreadedProceduralsAndAttribute( self ):
 
-		myMesh = Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
+		myMesh = IECore.Reader.create( "test/IECore/data/cobFiles/pSphereShape1.cob").read()
 
-		class MyProc( Renderer.Procedural ):
+		class MyProc( IECoreScene.Renderer.Procedural ):
 			def __init__( self, level = 0 ):
-				Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 				self.__level = level
 			def bound( self ) :
-				return Box3f( V3f( -1 ), V3f( 1 ) )
+				return IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) )
 			def render( self, renderer ):
 				if self.__level < 2 :
 					for i in xrange( 0, 50 ) :
 						renderer.procedural( MyProc( self.__level + 1 ) )
 				else:
-					g = IECore.Group()
+					g = IECoreScene.Group()
 					g.addChild( myMesh )
-					g.addState( IECore.AttributeState( { "name" : StringData( str(self.__level) ) } ) )
+					g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( str(self.__level) ) } ) )
 					g.render( renderer )
 
 			def hash( self ):
 				h = IECore.MurmurHash()
 				return h
 
-		r = Renderer()
-		r.setOption( "gl:mode", StringData( "deferred" ) )
+		r = IECoreGL.Renderer()
+		r.setOption( "gl:mode", IECore.StringData( "deferred" ) )
 		r.worldBegin()
 		p = MyProc()
 		r.procedural( p )
@@ -958,7 +958,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		def doTest( depthTest, r, g, b ) :
 
-			renderer = Renderer()
+			renderer = IECoreGL.Renderer()
 			renderer.setOption( "gl:mode", IECore.StringData( "immediate" ) )
 			renderer.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
@@ -971,9 +971,9 @@ class TestRenderer( unittest.TestCase ) :
 			)
 			renderer.display( os.path.dirname( __file__ ) + "/output/depthTest.tif", "tif", "rgba", {} )
 
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
-			with IECore.WorldBlock( renderer ) :
+			with IECoreScene.WorldBlock( renderer ) :
 
 				renderer.setAttribute( "gl:depthTest", IECore.BoolData( depthTest ) )
 
@@ -1000,7 +1000,7 @@ class TestRenderer( unittest.TestCase ) :
 
 		def doRender( mode, visibility ) :
 
-			r = Renderer()
+			r = IECoreGL.Renderer()
 			r.setOption( "gl:mode", IECore.StringData( mode ) )
 			r.setOption( "gl:searchPath:shaderInclude", IECore.StringData( "./glsl" ) )
 
@@ -1015,12 +1015,12 @@ class TestRenderer( unittest.TestCase ) :
 			if mode=="immediate" :
 				r.display( os.path.dirname( __file__ ) + "/output/testCameraVisibility.tif", "tif", "rgba", {} )
 
-			with IECore.WorldBlock( r ) :
+			with IECoreScene.WorldBlock( r ) :
 
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 
 				r.setAttribute( "gl:visibility:camera", IECore.BoolData( visibility ) )
-				r.points( 1, { "P" : IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
+				r.points( 1, { "P" : IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ) ] ) ) } )
 
 			return r
 
@@ -1043,52 +1043,52 @@ class TestRenderer( unittest.TestCase ) :
 		self.assertEqual( len( r.scene().root().children() ), 0 )
 
 	def testWarningMessages( self ):
-		r = Renderer()
+		r = IECoreGL.Renderer()
 
-		r.setOption( "gl:searchPath:shader", StringData( os.path.dirname( __file__ ) + "/shaders" ) )
+		r.setOption( "gl:searchPath:shader", IECore.StringData( os.path.dirname( __file__ ) + "/shaders" ) )
 
 		# gl renderer only supports "surface" shaders, so it should complain about this:
-		c = CapturingMessageHandler()
+		c = IECore.CapturingMessageHandler()
 		with c :
-			with IECore.WorldBlock( r ):
-				r.shader( "shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			with IECoreScene.WorldBlock( r ):
+				r.shader( "shader", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
 		self.assertEqual( len( c.messages ), 1 )
-		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
+		self.assertEqual( c.messages[0].level, IECore.Msg.Level.Warning )
 
 		# it should just ignore this, because of the "ri:" prefix:
-		c = CapturingMessageHandler()
+		c = IECore.CapturingMessageHandler()
 		with c :
-			with IECore.WorldBlock( r ):
-				r.shader( "ri:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			with IECoreScene.WorldBlock( r ):
+				r.shader( "ri:shader", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
 		self.assertEqual( len( c.messages ), 0 )
 
 		# this should work fine:
-		c = CapturingMessageHandler()
+		c = IECore.CapturingMessageHandler()
 		with c :
-			with IECore.WorldBlock( r ):
-				r.shader( "gl:surface", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			with IECoreScene.WorldBlock( r ):
+				r.shader( "gl:surface", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
 		self.assertEqual( len( c.messages ), 0 )
 
 
 		# it should just ignore this, because of the "lg:" prefix:
-		c = CapturingMessageHandler()
+		c = IECore.CapturingMessageHandler()
 		with c :
-			with IECore.WorldBlock( r ):
-				r.shader( "lg:shader", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			with IECoreScene.WorldBlock( r ):
+				r.shader( "lg:shader", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
 		self.assertEqual( len( c.messages ), 0 )
 
 		# this aint right!:
-		c = CapturingMessageHandler()
+		c = IECore.CapturingMessageHandler()
 		with c :
-			with IECore.WorldBlock( r ):
-				r.shader( "gl:nonsense", "color", { "colorValue" : Color3fData( Color3f( 1, 0, 0 ) ) } )
+			with IECoreScene.WorldBlock( r ):
+				r.shader( "gl:nonsense", "color", { "colorValue" : IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) } )
 
 		self.assertEqual( len( c.messages ), 1 )
-		self.assertEqual( c.messages[0].level, Msg.Level.Warning )
+		self.assertEqual( c.messages[0].level, IECore.Msg.Level.Warning )
 
 	def setUp( self ) :
 
