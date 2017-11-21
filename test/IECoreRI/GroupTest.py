@@ -38,6 +38,7 @@ import unittest
 import os
 
 import IECore
+import IECoreScene
 import IECoreRI
 
 class GroupTest( IECoreRI.TestCase ) :
@@ -46,14 +47,14 @@ class GroupTest( IECoreRI.TestCase ) :
 
 	def testRender( self ) :
 
-		g = IECore.Group()
-		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
-		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
-		g.addChild( IECore.SpherePrimitive() )
+		g = IECoreScene.Group()
+		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
+		g.addChild( IECoreScene.SpherePrimitive() )
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			g.render( r )
 
@@ -67,14 +68,14 @@ class GroupTest( IECoreRI.TestCase ) :
 
 	def testRenderNoAttributeBlock( self ) :
 
-		g = IECore.Group()
-		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
-		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
-		g.addChild( IECore.SpherePrimitive() )
+		g = IECoreScene.Group()
+		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
+		g.addChild( IECoreScene.SpherePrimitive() )
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			g.render( r, False )
 
@@ -88,14 +89,14 @@ class GroupTest( IECoreRI.TestCase ) :
 
 	def testRenderChildren( self ) :
 
-		g = IECore.Group()
-		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
-		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
-		g.addChild( IECore.SpherePrimitive() )
+		g = IECoreScene.Group()
+		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
+		g.addChild( IECoreScene.SpherePrimitive() )
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			g.renderChildren( r )
 
@@ -109,14 +110,14 @@ class GroupTest( IECoreRI.TestCase ) :
 
 	def testRenderState( self ) :
 
-		g = IECore.Group()
-		g.setTransform( IECore.MatrixTransform( IECore.M44f() ) )
-		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
-		g.addChild( IECore.SpherePrimitive() )
+		g = IECoreScene.Group()
+		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f() ) )
+		g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "bob" ) } ) )
+		g.addChild( IECoreScene.SpherePrimitive() )
 
 		r = IECoreRI.Renderer( self.outputFileName )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			g.renderState( r )
 

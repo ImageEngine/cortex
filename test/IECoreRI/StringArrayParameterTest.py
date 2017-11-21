@@ -38,6 +38,7 @@ import unittest
 import os
 
 import IECore
+import IECoreScene
 import IECoreRI
 
 class StringArrayParameterTest( IECoreRI.TestCase ) :
@@ -48,7 +49,7 @@ class StringArrayParameterTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [ "a", "b" ] ) } )
 
@@ -62,7 +63,7 @@ class StringArrayParameterTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testStringArrayParameter.rib" )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.shader( "surface", "test/IECoreRI/shaders/types", { "sa" : IECore.StringVectorData( [] ) } )
 

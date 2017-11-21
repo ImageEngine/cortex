@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 import os.path
@@ -74,7 +75,7 @@ class CameraTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 		r.worldBegin()
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
 
 		# check that nothing appears in the output image
@@ -94,7 +95,7 @@ class CameraTest( IECoreRI.TestCase ) :
 		r.transformEnd()
 
 		r.worldBegin()
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 		r.worldEnd()
 
 		# check that something appears in the output image
@@ -116,9 +117,9 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 1, 0, 0 ) ) )
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( 0.75, -0.25 ), IECore.V2f( 1.25, 0.25 ) ) ).render( r )
 		r.setAttribute( "color", IECore.Color3fData( IECore.Color3f( 0, 1, 0 ) ) )
-		IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
+		IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.25, 0.75 ), IECore.V2f( 0.25, 1.25 ) ) ).render( r )
 		r.worldEnd()
 
 		# check we get the colors we'd expect where we expect them
@@ -139,7 +140,7 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 
 			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
 
@@ -148,7 +149,7 @@ class CameraTest( IECoreRI.TestCase ) :
 				"projection:fov" : IECore.FloatData( 45 ),
 			} )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 
 			r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 3, 4, 5 ) ) )
 
@@ -157,7 +158,7 @@ class CameraTest( IECoreRI.TestCase ) :
 				"projection:fov" : IECore.FloatData( 50 ),
 			} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			pass
 
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )
@@ -174,15 +175,15 @@ class CameraTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.camera( "iCantSeeAnything", {} )
 
-		with IECore.TransformBlock( r ) :
+		with IECoreScene.TransformBlock( r ) :
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, 1 ) ) )
 			r.camera( "iCanSeeSomething", {} )
 
-		with IECore.WorldBlock( r ) :
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		with IECoreScene.WorldBlock( r ) :
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
@@ -195,15 +196,15 @@ class CameraTest( IECoreRI.TestCase ) :
 		r = IECoreRI.Renderer( "" )
 		r.display( "test/IECoreRI/output/testCamera.tif", "tiff", "rgba", {} )
 
-		with IECore.TransformBlock( r ) :
-			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+		with IECoreScene.TransformBlock( r ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
 
 			r.camera( "main", { "shutter" : IECore.V2f( 0, 1 ) } )
 
-		with IECore.WorldBlock( r ) :
-			IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
+		with IECoreScene.WorldBlock( r ) :
+			IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -0.1 ), IECore.V2f( 0.1 ) ) ).render( r )
 
 		# check that something appears in the output image
 		i = IECore.Reader.create( "test/IECoreRI/output/testCamera.tif" ).read()
@@ -216,8 +217,8 @@ class CameraTest( IECoreRI.TestCase ) :
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testCamera.rib" )
 
-		with IECore.TransformBlock( r ) :
-			with IECore.MotionBlock( r, [ 0, 1 ] ) :
+		with IECoreScene.TransformBlock( r ) :
+			with IECoreScene.MotionBlock( r, [ 0, 1 ] ) :
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( -0.2, 0, 1 ) ) )
 				r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0.2, 0, 1 ) ) )
 
@@ -239,7 +240,7 @@ class CameraTest( IECoreRI.TestCase ) :
 			"pixelAspectRatio" : 2.0,
 		} )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 			pass
 
 		l = "".join( file( "test/IECoreRI/output/testCamera.rib" ).readlines() )

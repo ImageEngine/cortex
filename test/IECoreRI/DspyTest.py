@@ -37,6 +37,7 @@ import unittest
 import time
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreRI
 
@@ -62,7 +63,7 @@ class DspyTest( IECoreRI.TestCase ) :
 			}
 		)
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 

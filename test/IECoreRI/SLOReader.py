@@ -37,7 +37,7 @@ import glob
 import unittest
 import threading
 
-from IECore import *
+import IECore
 from IECoreRI import *
 
 class TestSLOReader( unittest.TestCase ) :
@@ -71,7 +71,7 @@ class TestSLOReader( unittest.TestCase ) :
 				["Kd", "FloatData", 0.5],
 				["Ka", "FloatData", 1],
 				["roughness", "FloatData", 0.1],
-				["specularcolor", "Color3fData", Color3f( 1 ) ],
+				["specularcolor", "Color3fData", IECore.Color3f( 1 ) ],
 			]
 		)
 
@@ -89,11 +89,11 @@ class TestSLOReader( unittest.TestCase ) :
 		self.assertExpectedParams ( s,
 			[
 				["intensity", "FloatData", 1],
-				["lightcolor", "Color3fData", Color3f( 1 ) ],
+				["lightcolor", "Color3fData", IECore.Color3f( 1 ) ],
 				["shadowmap", "StringData", ""],
 				["blur", "FloatData", 0],
-				["from", "V3fData", V3f( 0 ), "point" ],
-				["to", "V3fData", V3f( 0, 0, 1 ), "point" ],
+				["from", "V3fData", IECore.V3f( 0 ), "point" ],
+				["to", "V3fData", IECore.V3f( 0, 0, 1 ), "point" ],
 			]
 		)
 
@@ -105,31 +105,31 @@ class TestSLOReader( unittest.TestCase ) :
 		s = r.read()
 
 		expectedParams = [
-			["f", FloatData( 1 )],
-			["s", StringData( "s")],
-			["c", Color3fData( Color3f( 1, 2, 3 ) )],
-			["p", V3fData( V3f( 0, 1, 2 ), GeometricData.Interpretation.Point )],
-			["v", V3fData( V3f( -1, 0, 1 ), GeometricData.Interpretation.Vector )],
-			["n", V3fData( V3f( -2, -1, 0 ), GeometricData.Interpretation.Normal )],
-			["m", M44fData( M44f( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ],
-			["fa", FloatVectorData( [ 1, 2] ) ],
-			["sa", StringVectorData( [ "one", "two" ] ) ],
-			["ca", Color3fVectorData( [ Color3f( 1 ), Color3f( 2 ) ] ) ],
-			["pa", V3fVectorData( [ V3f( 2 ), V3f( 3 ) ], GeometricData.Interpretation.Point ) ],
-			["va", V3fVectorData( [ V3f( 2 ), V3f( 3 ) ], GeometricData.Interpretation.Vector ) ],
-			["na", V3fVectorData( [ V3f( 2 ), V3f( 3 ) ], GeometricData.Interpretation.Normal ) ],
-			["ma", M44fVectorData( [ M44f(), M44f() ] ) ],
-			["fav", FloatVectorData() ],
-			["sav", StringVectorData() ],
-			["cav", Color3fVectorData() ],
-			["pav", V3fVectorData( [], GeometricData.Interpretation.Point ) ],
-			["vav", V3fVectorData( [], GeometricData.Interpretation.Vector ) ],
-			["nav", V3fVectorData( [], GeometricData.Interpretation.Normal ) ],
-			["mav", M44fVectorData() ],
-			["f3", FloatVectorData( [ 1, 2, 3 ] ) ],
-			["sh", StringData( "" ) ],
-			["sha", StringVectorData() ],
-			["sha3", StringVectorData( [ "", "", "" ] ) ],
+			["f", IECore.FloatData( 1 )],
+			["s", IECore.StringData( "s")],
+			["c", IECore.Color3fData( IECore.Color3f( 1, 2, 3 ) )],
+			["p", IECore.V3fData( IECore.V3f( 0, 1, 2 ), IECore.GeometricData.Interpretation.Point )],
+			["v", IECore.V3fData( IECore.V3f( -1, 0, 1 ), IECore.GeometricData.Interpretation.Vector )],
+			["n", IECore.V3fData( IECore.V3f( -2, -1, 0 ), IECore.GeometricData.Interpretation.Normal )],
+			["m", IECore.M44fData( IECore.M44f( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 ) ) ],
+			["fa", IECore.FloatVectorData( [ 1, 2] ) ],
+			["sa", IECore.StringVectorData( [ "one", "two" ] ) ],
+			["ca", IECore.Color3fVectorData( [ IECore.Color3f( 1 ), IECore.Color3f( 2 ) ] ) ],
+			["pa", IECore.V3fVectorData( [ IECore.V3f( 2 ), IECore.V3f( 3 ) ], IECore.GeometricData.Interpretation.Point ) ],
+			["va", IECore.V3fVectorData( [ IECore.V3f( 2 ), IECore.V3f( 3 ) ], IECore.GeometricData.Interpretation.Vector ) ],
+			["na", IECore.V3fVectorData( [ IECore.V3f( 2 ), IECore.V3f( 3 ) ], IECore.GeometricData.Interpretation.Normal ) ],
+			["ma", IECore.M44fVectorData( [ IECore.M44f(), IECore.M44f() ] ) ],
+			["fav", IECore.FloatVectorData() ],
+			["sav", IECore.StringVectorData() ],
+			["cav", IECore.Color3fVectorData() ],
+			["pav", IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Point ) ],
+			["vav", IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Vector ) ],
+			["nav", IECore.V3fVectorData( [], IECore.GeometricData.Interpretation.Normal ) ],
+			["mav", IECore.M44fVectorData() ],
+			["f3", IECore.FloatVectorData( [ 1, 2, 3 ] ) ],
+			["sh", IECore.StringData( "" ) ],
+			["sha", IECore.StringVectorData() ],
+			["sha3", IECore.StringVectorData( [ "", "", "" ] ) ],
 		]
 
 		self.assertEqual( len( expectedParams ), len( s.parameters ) )
@@ -155,7 +155,7 @@ class TestSLOReader( unittest.TestCase ) :
 
 			threads = []
 			for shader in shaders :
-				t = threading.Thread( target = curry( read, os.path.join( self.shaderPath(), shader ) ) )
+				t = threading.Thread( target = IECore.curry( read, os.path.join( self.shaderPath(), shader ) ) )
 				threads.append( t )
 
 			for t in threads :
@@ -166,16 +166,16 @@ class TestSLOReader( unittest.TestCase ) :
 
 	def testCantReadEmpty( self ) :
 
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/empty' )
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null' )
-		self.assertRaises( RuntimeError, Reader.create, 'test/IECore/data/null.cin' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/empty' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null' )
+		self.assertRaises( RuntimeError, IECore.Reader.create, 'test/IECore/data/null.cin' )
 
 	def testBlindData( self ) :
 
 		r = SLOReader( os.path.join( self.shaderPath(), "matte.sdl" ) )
 		s = r.read()
 
-		self.assertEqual( s.blindData()["ri:orderedParameterNames"], StringVectorData( [ "Ka", "Kd" ] ) )
+		self.assertEqual( s.blindData()["ri:orderedParameterNames"], IECore.StringVectorData( [ "Ka", "Kd" ] ) )
 
 	def testAnnotations( self ) :
 
@@ -186,8 +186,8 @@ class TestSLOReader( unittest.TestCase ) :
 
 		self.assertTrue( "ri:annotations" in s.blindData() )
 
-		self.assertEqual( s.blindData()["ri:annotations"]["author"], StringData( "JohnJohn" ) )
-		self.assertEqual( s.blindData()["ri:annotations"]["version"], StringData( "1.0" ) )
+		self.assertEqual( s.blindData()["ri:annotations"]["author"], IECore.StringData( "JohnJohn" ) )
+		self.assertEqual( s.blindData()["ri:annotations"]["version"], IECore.StringData( "1.0" ) )
 
 	def tearDown( self ) :
 

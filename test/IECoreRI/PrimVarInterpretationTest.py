@@ -34,6 +34,7 @@
 
 import unittest
 import IECore
+import IECoreScene
 import IECoreRI
 import os.path
 import os
@@ -42,18 +43,18 @@ class PrimVarInterpretationTest( IECoreRI.TestCase ) :
 
 	def test( self ) :
 
-		m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-		m["testPoint"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Point ) )
-		m["testNormal"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Normal ) )
-		m["testVector"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Vector ) )
-		m["testColor"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Color ) )
-		m["testNumeric"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Numeric ) )
+		m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+		m["testPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Point ) )
+		m["testNormal"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Normal ) )
+		m["testVector"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Vector ) )
+		m["testColor"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Color ) )
+		m["testNumeric"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fData( IECore.V3f( 0 ), IECore.GeometricData.Interpretation.Numeric ) )
 
-		m["testPointArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
-		m["testNormalArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
-		m["testVectorArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Vector ) )
-		m["testColorArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Color ) )
-		m["testNumericArray"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Numeric ) )
+		m["testPointArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Point ) )
+		m["testNormalArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Normal ) )
+		m["testVectorArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Vector ) )
+		m["testColorArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Color ) )
+		m["testNumericArray"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 1 ) ], IECore.GeometricData.Interpretation.Numeric ) )
 
 		r = IECoreRI.Renderer( "test/IECoreRI/output/testPrimVarInterpretation.rib" )
 		r.worldBegin()

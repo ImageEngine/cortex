@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+__import__( "IECoreScene" )
+
 from _IECoreRI import *
 from ExecuteProcedural import executeProcedural
 from MakeRibOp import MakeRibOp

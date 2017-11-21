@@ -36,6 +36,7 @@ import unittest
 import os.path
 
 import IECore
+import IECoreScene
 import IECoreRI
 
 class SubsurfaceTest( IECoreRI.TestCase ) :
@@ -48,7 +49,7 @@ class SubsurfaceTest( IECoreRI.TestCase ) :
 
 		r.worldBegin()
 
-		a = IECore.AttributeState()
+		a = IECoreScene.AttributeState()
 		a.attributes["ri:subsurface"] = IECore.CompoundData(
 			{
 				"visibility" : IECore.StringData( "test" ),
