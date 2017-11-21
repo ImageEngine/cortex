@@ -39,6 +39,7 @@
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 
 namespace asf = foundation;
 namespace asr = renderer;

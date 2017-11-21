@@ -56,9 +56,9 @@
 #include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/MeshPrimitive.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Transform.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/Transform.h"
 
 #include "IECoreAppleseed/private/RendererImplementation.h"
 #include "IECoreAppleseed/private/BatchPrimitiveConverter.h"
@@ -70,6 +70,7 @@
 #include "IECoreAppleseed/RendererController.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAppleseed;
 using namespace Imath;
 using namespace boost;

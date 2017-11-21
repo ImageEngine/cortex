@@ -38,7 +38,7 @@
 #include "IECoreAppleseed/MotionAlgo.h"
 
 #include "IECore/Exception.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 using namespace IECore;
 

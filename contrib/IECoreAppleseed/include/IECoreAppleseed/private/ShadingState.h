@@ -41,7 +41,7 @@
 #include "renderer/api/shadergroup.h"
 
 #include "IECore/MurmurHash.h"
-#include "IECore/Shader.h"
+#include "IECoreScene/Shader.h"
 
 namespace IECoreAppleseed
 {
@@ -54,8 +54,8 @@ class ShadingState
 
 		void setShadingSamples( int samples );
 
-		void addOSLShader( IECore::ConstShaderPtr shader );
-		void setOSLSurface( IECore::ConstShaderPtr surface );
+		void addOSLShader( IECoreScene::ConstShaderPtr shader );
+		void setOSLSurface( IECoreScene::ConstShaderPtr surface );
 
 		void shaderGroupHash( IECore::MurmurHash &hash ) const;
 		std::string createShaderGroup( renderer::Assembly &assembly, const std::string &name );
@@ -71,8 +71,8 @@ class ShadingState
 		renderer::ParamArray convertParameters( const IECore::CompoundDataMap &parameters );
 		void addConnections( const std::string &shaderHandle, const IECore::CompoundDataMap &parameters, renderer::ShaderGroup *shaderGroup );
 
-		std::vector<IECore::ConstShaderPtr> m_shaders;
-		IECore::ConstShaderPtr m_surfaceShader;
+		std::vector<IECoreScene::ConstShaderPtr> m_shaders;
+		IECoreScene::ConstShaderPtr m_surfaceShader;
 		int m_shadingSamples;
 
 };

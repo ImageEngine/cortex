@@ -38,12 +38,13 @@
 #include "renderer/api/version.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreAppleseed/MeshAlgo.h"
 
 using namespace std;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace Imath;
 
 namespace asf = foundation;

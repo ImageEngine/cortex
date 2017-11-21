@@ -40,6 +40,7 @@
 #include "foundation/math/scalar.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace Imath;
 
 namespace asf = foundation;
@@ -51,7 +52,7 @@ namespace IECoreAppleseed
 namespace CameraAlgo
 {
 
-renderer::Camera *convert( IECore::Camera *camera )
+renderer::Camera *convert( IECoreScene::Camera *camera )
 {
 	CameraPtr cameraCopy = camera->copy();
 	cameraCopy->addStandardParameters();

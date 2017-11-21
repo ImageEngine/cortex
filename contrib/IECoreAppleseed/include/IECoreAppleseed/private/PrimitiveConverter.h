@@ -44,7 +44,7 @@
 #include "renderer/api/object.h"
 
 #include "IECore/MurmurHash.h"
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreAppleseed/private/AttributeState.h"
 
@@ -67,18 +67,18 @@ class PrimitiveConverter : boost::noncopyable
 
 		void setShutterInterval( float openTime, float closeTime );
 
-		const renderer::Assembly *convertPrimitive( IECore::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
+		const renderer::Assembly *convertPrimitive( IECoreScene::PrimitivePtr primitive, const AttributeState &attrState, const std::string &materialName, renderer::Assembly &parentAssembly );
 
 		const renderer::Assembly *convertPrimitive( const std::set<float> &times,
-			const std::vector<IECore::PrimitivePtr> &primitives, const AttributeState &attrState,
+			const std::vector<IECoreScene::PrimitivePtr> &primitives, const AttributeState &attrState,
 			const std::string &materialName, renderer::Assembly &parentAssembly );
 
 	private :
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECore::PrimitivePtr primitive,
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( IECoreScene::PrimitivePtr primitive,
 			const std::string &name ) = 0;
 
-		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECore::PrimitivePtr> &primitives,
+		virtual foundation::auto_release_ptr<renderer::Object> doConvertPrimitive( const std::vector<IECoreScene::PrimitivePtr> &primitives,
 			const std::string &name ) = 0;
 
 		const renderer::Assembly *addObjectToScene( foundation::auto_release_ptr<renderer::Object> &obj, const IECore::MurmurHash &primitiveHash,

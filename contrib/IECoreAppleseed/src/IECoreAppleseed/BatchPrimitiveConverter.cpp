@@ -48,6 +48,7 @@
 using namespace std;
 using namespace boost;
 using namespace IECore;
+using namespace IECoreScene;
 
 namespace asf = foundation;
 namespace asr = renderer;

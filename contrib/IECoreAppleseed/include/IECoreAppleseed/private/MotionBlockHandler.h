@@ -44,7 +44,7 @@
 
 #include "renderer/api/scene.h"
 
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "IECoreAppleseed/private/AttributeState.h"
 #include "IECoreAppleseed/private/TransformStack.h"
@@ -75,7 +75,7 @@ class MotionBlockHandler : boost::noncopyable
 		void setTransform( const Imath::M44f &m );
 		void concatTransform( const Imath::M44f &m );
 
-		void primitive( IECore::PrimitivePtr primitive,
+		void primitive( IECoreScene::PrimitivePtr primitive,
 			const std::string &materialName );
 
 	private :
@@ -100,7 +100,7 @@ class MotionBlockHandler : boost::noncopyable
 
 		// primitives
 		PrimitiveConverter &m_primitiveConverter;
-		std::vector<IECore::PrimitivePtr> m_primitives;
+		std::vector<IECoreScene::PrimitivePtr> m_primitives;
 		IECore::TypeId m_primitiveType;
 		std::string m_materialName;
 };

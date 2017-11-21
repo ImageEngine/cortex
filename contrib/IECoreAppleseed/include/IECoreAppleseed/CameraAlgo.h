@@ -37,7 +37,7 @@
 
 #include "renderer/api/camera.h"
 
-#include "IECore/Camera.h"
+#include "IECoreScene/Camera.h"
 
 namespace IECoreAppleseed
 {
@@ -45,7 +45,7 @@ namespace IECoreAppleseed
 namespace CameraAlgo
 {
 
-renderer::Camera *convert( IECore::Camera *camera );
+renderer::Camera *convert( IECoreScene::Camera *camera );
 
 } // namespace CameraAlgo
 
