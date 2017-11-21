@@ -61,15 +61,15 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() )
 		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
 
-		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
 		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
-		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
-		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
 		self.failUnless( r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) )
-		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
 		self.assertRaises( RuntimeError, r.read, "doesNotExist" )
@@ -81,7 +81,7 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertLess( pool.memoryUsage(), o.memoryUsage() + oo.memoryUsage() )
 		self.failIf(
 			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) and
-			r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+			r.cached( "test/IECore/data/cobFiles/intDataTen.cob" )
 		)
 
 		# Here, the cache should throw away the remaining item because there
@@ -90,36 +90,37 @@ class CachedReaderTest( unittest.TestCase ) :
 		self.assertEqual( pool.memoryUsage(), 0 )
 		self.failIf(
 			r.cached( "test/IECore/data/cobFiles/compoundData.cob" ) or
-			r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+			r.cached( "test/IECore/data/cobFiles/intDataTen.cob" )
 		)
 
 		pool.setMaxMemoryUsage( oo.memoryUsage() * 2 )
-		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		pool.clear()
 		r.clear()
 		self.assertEqual( pool.memoryUsage(), 0 )
-		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failIf( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
-		oo = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		oo = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
-		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 		r.clear( "I don't exist" )
-		self.failUnless( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failUnless( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
-		r.clear( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		r.clear( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )	# clearing CachedReader doesn't clear the object from the pool
-		self.failIf( r.cached( "test/IECore/data/pdcFiles/particleShape1.250.pdc" ) )
+		self.failIf( r.cached( "test/IECore/data/cobFiles/intDataTen.cob" ) )
 
 		# testing insert.
 		pool.clear()
-		r.insert( "test/IECore/data/pdcFiles/particleShape1.250.pdc", oo )
+		pool.setMaxMemoryUsage( o.memoryUsage() + oo.memoryUsage() )
+		r.insert( "test/IECore/data/cobFiles/intDataTen.cob", oo )
 		self.assertEqual( pool.memoryUsage(), oo.memoryUsage() )
-		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		o2 = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( oo, o2 )
 		# testing overwritting existing item with insert
-		r.insert( "test/IECore/data/pdcFiles/particleShape1.250.pdc", o )
+		r.insert( "test/IECore/data/cobFiles/intDataTen.cob", o )
 		self.assertEqual( pool.memoryUsage(), o.memoryUsage()+oo.memoryUsage() )
-		o2 = r.read( "test/IECore/data/pdcFiles/particleShape1.250.pdc" )
+		o2 = r.read( "test/IECore/data/cobFiles/intDataTen.cob" )
 		self.assertEqual( o, o2 )
 
 		# test clear after failed load
@@ -191,13 +192,22 @@ class CachedReaderTest( unittest.TestCase ) :
 	def testPostProcessing( self ) :
 
 		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), IECore.ObjectPool(100 * 1024 * 1024) )
-		m = r.read( "polySphereQuads.cob" )
-		self.failUnless( 4 in m.verticesPerFace )
+		i = r.read( "intDataTen.cob" )
+		self.assertEqual( i.value, 10 )
 
-		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), IECore.TriangulateOp(), IECore.ObjectPool(100 * 1024 * 1024) )
-		m = r.read( "polySphereQuads.cob" )
-		for v in m.verticesPerFace :
-			self.assertEqual( v, 3 )
+		class PostProcessor( IECore.ModifyOp ) :
+
+			def __init__( self ) :
+
+				IECore.ModifyOp.__init__( self, "", IECore.IntParameter( "result", "" ), IECore.IntParameter( "input", "" ) )
+
+			def modify( self, obj, args ) :
+
+				obj.value *= 2
+
+		r = IECore.CachedReader( IECore.SearchPath( "./test/IECore/data/cobFiles", ":" ), PostProcessor(), IECore.ObjectPool(100 * 1024 * 1024) )
+		i = r.read( "intDataTen.cob" )
+		self.assertEqual( i.value, 20 )
 
 	def testPostProcessingFailureMode( self ) :
 
@@ -250,8 +260,7 @@ class CachedReaderTest( unittest.TestCase ) :
 
 		files = [
 			"test/IECore/data/cobFiles/compoundData.cob",
-			"test/IECore/data/pdcFiles/particleShape1.250.pdc",
-			"test/IECore/data/cobFiles/polySphereQuads.cob",
+			"test/IECore/data/cobFiles/intDataTen.cob",
 			"test/IECore/data/cachedReaderPath2/file.cob",
 		]
 

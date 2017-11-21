@@ -73,7 +73,7 @@ class TestPythonOp( unittest.TestCase ) :
 		abstractOps = {
 			IECore.Op, IECore.ModifyOp,
 			IECore.SequenceMergeOp, IECore.FileSequenceAnalyzerOp,
-			IECore.Reader, IECore.Writer
+			IECore.Reader, IECore.Writer,
 		}
 
 		def isOpWithMissingConstructor( c ):

@@ -758,40 +758,39 @@ class TestObjectParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.PointsPrimitive( 1 ), type = IECore.TypeId.PointsPrimitive )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.CompoundObject(), type = IECore.TypeId.CompoundObject )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IECore.PointsPrimitive( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
-		self.assertEqual( p.validTypes(), [IECore.TypeId.PointsPrimitive] )
+		self.assertEqual( p.validTypes(), [IECore.TypeId.CompoundObject] )
 
-		self.assert_( p.valueValid( IECore.PointsPrimitive( 1 ) )[0] )
+		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
 		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
 	def testConstructor2( self ) :
 
-		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.PointsPrimitive( 1 ), types = [IECore.TypeId.PointsPrimitive, IECore.TypeId.FloatData] )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.CompoundObject(), types = [ IECore.TypeId.CompoundObject, IECore.TypeId.FloatData ] )
 		self.assertEqual( p.name, "name" )
 		self.assertEqual( p.description, "description" )
-		self.assertEqual( p.defaultValue, IECore.PointsPrimitive( 1 ) )
+		self.assertEqual( p.defaultValue, IECore.CompoundObject() )
 		self.assertEqual( p.getValue(), p.defaultValue )
 		self.assertEqual( p.getCurrentPresetName(), "" )
 		self.assertEqual( len( p.validTypes() ), 2 )
-		self.assert_( IECore.TypeId.PointsPrimitive in p.validTypes() )
+		self.assert_( IECore.TypeId.CompoundObject in p.validTypes() )
  		self.assert_( IECore.TypeId.FloatData in p.validTypes() )
 
-		self.assert_( p.valueValid( IECore.PointsPrimitive( 1 ) )[0] )
+		self.assert_( p.valueValid( IECore.CompoundObject() )[0] )
 		self.assert_( p.valueValid( IECore.FloatData( 1 ) )[0] )
 		self.assert_( not p.valueValid( IECore.IntData( 1 ) )[0] )
 
-
 	def testUserData( self ) :
 
-		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.PointsPrimitive( 1 ), type = IECore.TypeId.PointsPrimitive, userData = IECore.CompoundObject( { "A" : IECore.IntData( 10 ) } ) )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.ObjectVector(), type = IECore.TypeId.ObjectVector, userData = IECore.CompoundObject( { "A" : IECore.IntData( 10 ) } ) )
 		self.assertEqual( p.userData(), IECore.CompoundObject( { "A" : IECore.IntData( 10 ) } ) )
 
-		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.PointsPrimitive( 1 ), type = IECore.TypeId.PointsPrimitive )
+		p = IECore.ObjectParameter( name = "name", description = "description", defaultValue = IECore.ObjectVector(), type = IECore.TypeId.ObjectVector )
 		self.assertEqual (p.userData(), IECore.CompoundObject() )
 
 	def testErrorMessage( self ) :
@@ -843,12 +842,12 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 
 	def testConstructor( self ) :
 
-		mesh = IECore.MeshPrimitive()
-		p = IECore.MeshPrimitiveParameter( "n", "d", mesh )
+		objectVector = IECore.ObjectVector()
+		p = IECore.ObjectVectorParameter( "n", "d", objectVector )
 		self.assertEqual( p.name, "n" )
 		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, mesh )
-		self.assertEqual( p.getValue(), mesh )
+		self.assertEqual( p.defaultValue, objectVector )
+		self.assertEqual( p.getValue(), objectVector )
 		self.assertEqual( p.userData(), IECore.CompoundObject() )
 
 	def testUserData( self ):
@@ -856,7 +855,7 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 		compound["first"] = IECore.IntData()
 		compound["second"] = IECore.QuatfData()
 		compound["third"] = IECore.StringData("test")
-		p = IECore.MeshPrimitiveParameter( "name", "description", IECore.MeshPrimitive(), userData = compound )
+		p = IECore.ObjectVectorParameter( "name", "description", IECore.ObjectVector(), userData = compound )
 		self.assertEqual( p.userData(), compound )
 		self.assert_(not p.userData().isSame(compound) )
 		data = p.userData()
@@ -865,94 +864,92 @@ class TestTypedObjectParameter( unittest.TestCase ) :
 
 	def testPresets( self ) :
 
-		mesh1 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([0,1,2]) )
-		mesh2 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([1,2,3]) )
-		mesh3 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([2,3,4]) )
+		preset1 = IECore.ObjectVector( [ IECore.IntData( 1 ) ] )
+		preset2 = IECore.ObjectVector( [ IECore.IntData( 2 ) ] )
+		preset3 = IECore.ObjectVector( [ IECore.IntData( 3 ) ] )
 
-		p = IECore.MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = True,
 		)
 
 		pr = p.getPresets()
 		self.assertEqual( len( pr ), 3 )
-		self.assertEqual( pr["one"], mesh1 )
-		self.assertEqual( pr["two"], mesh2 )
-		self.assertEqual( pr["three"], mesh3 )
+		self.assertEqual( pr["one"], preset1 )
+		self.assertEqual( pr["two"], preset2 )
+		self.assertEqual( pr["three"], preset3 )
 
 		p.setValue( "one" )
-		self.assertEqual( p.getValue(), mesh1 )
+		self.assertEqual( p.getValue(), preset1 )
 
 	def testPresetsOnly( self ) :
 
-		mesh1 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([0,1,2]) )
-		mesh2 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([1,2,3]) )
-		mesh3 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([2,3,4]) )
+		preset1 = IECore.ObjectVector( [ IECore.IntData( 1 ) ] )
+		preset2 = IECore.ObjectVector( [ IECore.IntData( 2 ) ] )
+		preset3 = IECore.ObjectVector( [ IECore.IntData( 3 ) ] )
 
-		mesh4 = IECore.MeshPrimitive( IECore.IntVectorData([3]), IECore.IntVectorData([3,4,5]) )
+		four = IECore.ObjectVector( [ IECore.IntData( 4 ) ] )
 
-		p = IECore.MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = True,
 		)
 
-		self.assertRaises( RuntimeError, p.setValidatedValue, mesh4 )
+		self.assertRaises( RuntimeError, p.setValidatedValue, four )
 
-		p = IECore.MeshPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = mesh2,
+			defaultValue = preset2,
 			presets = (
-				( "one", mesh1 ),
-				( "two", mesh2 ),
-				( "three", mesh3 ),
+				( "one", preset1 ),
+				( "two", preset2 ),
+				( "three", preset3 ),
 			),
 			presetsOnly = False,
 		)
 
-		p.setValue( mesh4 )
+		p.setValidatedValue( four )
 
 	def testOrderedPresets( self ) :
 
-		p = IECore.PointsPrimitiveParameter(
+		p = IECore.ObjectVectorParameter(
 			name = "n",
 			description = "d",
-			defaultValue = IECore.PointsPrimitive( 1 ),
+			defaultValue = IECore.ObjectVector( [ IECore.IntData( 1 ) ] ),
 			presets = (
-				( "p1", IECore.PointsPrimitive( 1 ) ),
-				( "p2", IECore.PointsPrimitive( 2 ) ),
-				( "p3", IECore.PointsPrimitive( 3 ) ),
-				( "p4", IECore.PointsPrimitive( 4 ) ),
+				( "p1", IECore.ObjectVector( [ IECore.IntData( 1 ) ] ) ),
+				( "p2", IECore.ObjectVector( [ IECore.IntData( 2 ) ] ) ),
+				( "p3", IECore.ObjectVector( [ IECore.IntData( 3 ) ] ) ),
+				( "p4", IECore.ObjectVector( [ IECore.IntData( 4 ) ] ) ),
 			),
 			presetsOnly = True,
 		)
 
 		self.assertEqual( p.presetNames(), ( "p1", "p2", "p3", "p4" ) )
-		self.assertEqual( p.presetValues(), ( IECore.PointsPrimitive( 1 ), IECore.PointsPrimitive( 2 ), IECore.PointsPrimitive( 3 ), IECore.PointsPrimitive( 4 ) ) )
-
-	def testSmoothSkinningData( self ) :
-
-		ssd = IECore.SmoothSkinningData()
-		p = IECore.SmoothSkinningDataParameter( "n", "d", ssd )
-		self.assertEqual( p.name, "n" )
-		self.assertEqual( p.description, "d" )
-		self.assertEqual( p.defaultValue, ssd )
-		self.assertEqual( p.getValue(), ssd )
-		self.assertEqual( p.userData(), IECore.CompoundObject() )
+		self.assertEqual(
+			p.presetValues(),
+			(
+				IECore.ObjectVector( [ IECore.IntData( 1 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 2 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 3 ) ] ),
+				IECore.ObjectVector( [ IECore.IntData( 4 ) ] ),
+			)
+		)
 
 class TestIntVectorParameter( unittest.TestCase ) :
 

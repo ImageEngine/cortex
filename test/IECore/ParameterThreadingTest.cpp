@@ -45,8 +45,7 @@
 #include "IECore/TypedObjectParameter.h"
 #include "IECore/CompoundObject.h"
 #include "IECore/CompoundParameter.h"
-#include "IECore/Shader.h"
-#include "IECore/MeshNormalsOp.h"
+#include "IECore/DataCastOp.h"
 
 #include "ParameterThreadingTest.h"
 
@@ -102,7 +101,6 @@ struct ParameterThreadingTest
 		c->addParameter( new V3dParameter( "e", "" ) );
 		c->addParameter( new Box3fParameter( "f", "" ) );
 		c->addParameter( new Box3fParameter( "g", "" ) );
-		c->addParameter( new ShaderParameter( "h", "", new Shader( "a", "b" ) ) );
 
 		parallel_for( blocked_range<size_t>( 0, 1000000 ), ReadCompoundChildren( *c ) );
 	}
@@ -163,7 +161,6 @@ struct ParameterThreadingTest
 		parameters.push_back( new V3dParameter( "e", "" ) );
 		parameters.push_back( new Box3fParameter( "f", "" ) );
 		parameters.push_back( new Box3fParameter( "g", "" ) );
-		parameters.push_back( new ShaderParameter( "h", "", new Shader( "a", "b" ) ) );
 
 		Imath::Rand32 rand;
 		const size_t permutationSize = 1000000;
@@ -183,7 +180,7 @@ struct ParameterThreadingTest
 		{
 			for( size_t i=r.begin(); i!=r.end(); ++i )
 			{
-				MeshNormalsOpPtr o = new MeshNormalsOp();
+				DataCastOpPtr o = new DataCastOp();
 			}
 		}
 	};

@@ -173,19 +173,19 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.Object, IECore.TypeId.RunTimeTyped ) )
 		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "Object", "RunTimeTyped" ) )
 
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Object ) )
-		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Object" ) )
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Object ) )
+		self.failUnless( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Object" ) )
 
-		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.MeshPrimitive, IECore.TypeId.Writer ) )
-		self.failIf( IECore.RunTimeTyped.inheritsFrom( "MeshPrimitive", "Writer" ) )
+		self.failIf( IECore.RunTimeTyped.inheritsFrom( IECore.TypeId.CompoundObject, IECore.TypeId.Writer ) )
+		self.failIf( IECore.RunTimeTyped.inheritsFrom( "CompoundObject", "Writer" ) )
 
 	def testRegisterPrefixedTypeName( self ) :
 
-		class Prefixed( IECore.ParameterisedProcedural ) :
+		class Prefixed( IECore.Op ) :
 
 			def __init__( self ) :
 
-				IECore.ParameterisedProcedural.__init__( self, "" )
+				IECore.Op.__init__( self, "", IECore.IntParameter( "result", "" ) )
 
 		prefixedTypeName = "SomeModuleName::Prefixed"
 		IECore.registerRunTimeTyped( Prefixed, typeName = prefixedTypeName )
@@ -197,8 +197,8 @@ class TestRunTimeTyped( unittest.TestCase ) :
 		self.assertEqual( p.typeName(), prefixedTypeName )
 		self.assertEqual( p.typeId(), IECore.RunTimeTyped.typeIdFromTypeName( Prefixed.staticTypeName() ) )
 
-		self.assertTrue( p.isInstanceOf( IECore.VisibleRenderable.staticTypeId() ) )
-		self.assertTrue( p.isInstanceOf( IECore.ParameterisedProcedural.staticTypeId() ) )
+		self.assertTrue( p.isInstanceOf( IECore.Op.staticTypeId() ) )
+		self.assertTrue( p.isInstanceOf( IECore.Parameterised.staticTypeId() ) )
 		self.assertTrue( p.isInstanceOf( IECore.RunTimeTyped.staticTypeId() ) )
 
 	def testClassInPlaceOfTypeId( self ) :

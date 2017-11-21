@@ -44,7 +44,7 @@ class UnicodeToStringTest( unittest.TestCase ) :
 
 	def testUnencodeable( self ) :
 
-		self.assertRaises( UnicodeEncodeError, IECore.CoordinateSystem, u"\322" )
+		self.assertRaises( UnicodeEncodeError, IECore.StringData, u"\322" )
 
 if __name__ == "__main__":
 	unittest.main()

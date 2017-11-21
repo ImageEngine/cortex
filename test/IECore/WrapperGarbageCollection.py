@@ -126,7 +126,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 
 			self.callbackCalled = True
 
-		o = IECore.Renderer.Procedural()
+		o = IECore.Op( "", IECore.IntParameter( "result", "" ) )
 		w = weakref.ref( o, callback )
 		self.assert_( w() is o )
 		del o
@@ -152,7 +152,7 @@ class TestWrapperGarbageCollection( unittest.TestCase ) :
 		def f() :
 
 			for i in range( 0, 100 ) :
-				o = IECore.Renderer.Procedural()
+				o = IECore.Op( "", IECore.IntParameter( "result", "" ) )
 				# The ClassWithDel class defines a __del__ method.
 				# This means that when it is deleted (when
 				# WrapperGarbageCollector::collect() calls Py_DECREF( o ) )

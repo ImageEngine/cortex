@@ -39,22 +39,7 @@ class TestReader(unittest.TestCase):
 
 	def testSupportedExtensions( self ) :
 
-		e = IECore.Reader.supportedExtensions()
-		for ee in e :
-			self.assert_( type( ee ) is str )
-
-		expectedExtensions = [ "pdc", "cob", "obj" ]
-
-		for ee in expectedExtensions :
-			self.assert_( ee in e )
-
-		e = IECore.Reader.supportedExtensions( IECore.TypeId.ParticleReader )
-		for ee in e :
-			self.assert_( type( ee ) is str )
-
-		self.assertEqual( set( [ "pdc", "mc" ] ), set( e ) )
-
-		self.assert_( not "obj" in e )
+		self.assertEqual( set( IECore.Reader.supportedExtensions() ), { "cob" } )
 
 	def test( self ) :
 
@@ -73,10 +58,8 @@ class TestReader(unittest.TestCase):
 
 		def isReader( x ) :
 
-			abstractReaders = ( IECore.Reader, IECore.ParticleReader )
-
 			try :
-				return issubclass( x, IECore.Reader ) and x not in abstractReaders
+				return issubclass( x, IECore.Reader ) and x is not IECore.Reader
 			except TypeError :
 				return False
 
