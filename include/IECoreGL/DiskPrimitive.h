@@ -52,7 +52,7 @@ class IECOREGL_API DiskPrimitive : public Primitive
 		~DiskPrimitive() override;
 
 		Imath::Box3f bound() const override;
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 
 		void renderInstances( size_t numInstances = 1 ) const override;
 

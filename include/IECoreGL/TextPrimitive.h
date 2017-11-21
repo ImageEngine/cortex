@@ -55,7 +55,7 @@ class IECOREGL_API TextPrimitive : public Primitive
 		~TextPrimitive() override;
 
 		Imath::Box3f bound() const override;
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 
 		//! @name StateComponents
 		/// The following StateComponent classes have an effect only on

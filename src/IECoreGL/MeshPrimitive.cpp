@@ -80,7 +80,7 @@ MeshPrimitive::~MeshPrimitive()
 {
 }
 
-void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
 	if( name == "P" )
 	{
@@ -97,15 +97,15 @@ void MeshPrimitive::addPrimitiveVariable( const std::string &name, const IECore:
 		}
 	}
 
-	if ( primVar.interpolation==IECore::PrimitiveVariable::FaceVarying )
+	if ( primVar.interpolation==IECoreScene::PrimitiveVariable::FaceVarying )
 	{
 		addVertexAttribute( name, primVar.expandedData() );
 	}
-	else if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	else if ( primVar.interpolation==IECoreScene::PrimitiveVariable::Constant )
 	{
 		addUniformAttribute( name, primVar.expandedData() );
 	}
-	else if ( primVar.interpolation==IECore::PrimitiveVariable::Vertex || primVar.interpolation==IECore::PrimitiveVariable::Varying )
+	else if ( primVar.interpolation==IECoreScene::PrimitiveVariable::Vertex || primVar.interpolation==IECoreScene::PrimitiveVariable::Varying )
 	{
 		throw( "IECoreGL::MeshPrimitive : Invalid interpolation for \"" + name + "\". Must be FaceVarying or Constant." );
 	}

@@ -205,7 +205,7 @@ void ImmediateRendererImplementation::addPrimitive( ConstPrimitivePtr primitive 
 	}
 }
 
-void ImmediateRendererImplementation::addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer )
+void ImmediateRendererImplementation::addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer )
 {
 	bool visible = static_cast<CameraVisibilityStateComponent *>( getState( CameraVisibilityStateComponent::staticTypeId() ) )->value();
 	if( visible )

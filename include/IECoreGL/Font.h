@@ -35,7 +35,7 @@
 #ifndef IECOREGL_FONT_H
 #define IECOREGL_FONT_H
 
-#include "IECore/Font.h"
+#include "IECoreScene/Font.h"
 
 #include "IECoreImage/Font.h"
 
@@ -55,10 +55,10 @@ class IECOREGL_API Font : public IECore::RunTimeTyped
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::Font, FontTypeId, IECore::RunTimeTyped );
 
-		Font( IECore::FontPtr font );
+		Font( IECoreScene::FontPtr font );
 		~Font() override;
 
-		IECore::Font *coreFont();
+		IECoreScene::Font *coreFont();
 
 		const MeshPrimitive *mesh( char c ) const;
 		const AlphaTexture *texture() const;
@@ -71,7 +71,7 @@ class IECOREGL_API Font : public IECore::RunTimeTyped
 
 	private :
 
-		IECore::FontPtr m_font;
+		IECoreScene::FontPtr m_font;
 		IECoreImage::FontPtr m_imageFont;
 
 		typedef std::vector<ConstMeshPrimitivePtr> MeshVector;

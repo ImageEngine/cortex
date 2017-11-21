@@ -82,7 +82,7 @@ class DeferredRendererImplementation : public RendererImplementation
 
 		void addPrimitive( ConstPrimitivePtr primitive ) override;
 
-		void addProcedural( IECore::Renderer::ProceduralPtr proc, IECore::RendererPtr renderer ) override;
+		void addProcedural( IECoreScene::Renderer::ProceduralPtr proc, IECoreScene::RendererPtr renderer ) override;
 
 		void addInstance( GroupPtr grp ) override;
 

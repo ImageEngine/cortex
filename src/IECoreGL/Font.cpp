@@ -32,7 +32,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreGL/Font.h"
 #include "IECoreGL/ToGLMeshConverter.h"
@@ -46,7 +46,7 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( Font );
 
-Font::Font( IECore::FontPtr font )
+Font::Font( IECoreScene::FontPtr font )
 	:	m_font( font ), m_imageFont( new IECoreImage::Font( font->fileName() ) ), m_texture( nullptr )
 {
 	m_meshes.resize( 128 );
@@ -56,7 +56,7 @@ Font::~Font()
 {
 }
 
-IECore::Font *Font::coreFont()
+IECoreScene::Font *Font::coreFont()
 {
 	return m_font.get();
 }

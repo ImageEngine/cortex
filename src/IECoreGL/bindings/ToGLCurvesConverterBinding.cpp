@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreGL/ToGLCurvesConverter.h"
 #include "IECoreGL/bindings/ToGLCurvesConverterBinding.h"
@@ -50,7 +50,7 @@ namespace IECoreGL
 void bindToGLCurvesConverter()
 {
 	IECorePython::RunTimeTypedClass<ToGLCurvesConverter>()
-		.def( init< IECore::ConstCurvesPrimitivePtr >() )
+		.def( init< IECoreScene::ConstCurvesPrimitivePtr >() )
 	;
 }
 

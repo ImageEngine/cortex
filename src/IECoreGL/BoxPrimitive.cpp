@@ -48,9 +48,9 @@ BoxPrimitive::~BoxPrimitive()
 {
 }
 
-void BoxPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void BoxPrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
-	if ( primVar.interpolation==IECore::PrimitiveVariable::Constant )
+	if ( primVar.interpolation==IECoreScene::PrimitiveVariable::Constant )
 	{
 		addUniformAttribute( name, primVar.data );
 	}

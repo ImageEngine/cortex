@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreGL/ToGLMeshConverter.h"
 #include "IECoreGL/bindings/ToGLMeshConverterBinding.h"
@@ -50,7 +50,7 @@ namespace IECoreGL
 void bindToGLMeshConverter()
 {
 	IECorePython::RunTimeTypedClass<ToGLMeshConverter>()
-		.def( init< IECore::ConstMeshPrimitivePtr >() )
+		.def( init< IECoreScene::ConstMeshPrimitivePtr >() )
 	;
 }
 

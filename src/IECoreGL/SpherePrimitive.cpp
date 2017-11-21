@@ -120,12 +120,12 @@ SpherePrimitive::~SpherePrimitive()
 
 }
 
-void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void SpherePrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
 	switch( primVar.interpolation )
 	{
-		case IECore::PrimitiveVariable::Constant :
-		case IECore::PrimitiveVariable::Uniform :
+		case IECoreScene::PrimitiveVariable::Constant :
+		case IECoreScene::PrimitiveVariable::Uniform :
 			addUniformAttribute( name, primVar.data );
 			break;
 		default :

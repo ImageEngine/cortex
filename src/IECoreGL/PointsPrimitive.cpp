@@ -170,7 +170,7 @@ void PointsPrimitive::updateBounds() const
 	}
 }
 
-void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void PointsPrimitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
 	if ( name == "P" )
 	{

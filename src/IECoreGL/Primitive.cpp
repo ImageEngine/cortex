@@ -168,9 +168,9 @@ Primitive::~Primitive()
 {
 }
 
-void Primitive::addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar )
+void Primitive::addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar )
 {
-	if ( primVar.interpolation == IECore::PrimitiveVariable::Constant )
+	if ( primVar.interpolation == IECoreScene::PrimitiveVariable::Constant )
 	{
 		addUniformAttribute( name, primVar.expandedData() );
 	}

@@ -48,7 +48,7 @@ namespace IECoreGL
 void bindToGLCameraConverter()
 {
 	IECorePython::RunTimeTypedClass<ToGLCameraConverter>()
-		.def( init< IECore::ConstCameraPtr >() )
+		.def( init< IECoreScene::ConstCameraPtr >() )
 	;
 }
 

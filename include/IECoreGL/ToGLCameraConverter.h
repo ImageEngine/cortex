@@ -38,7 +38,7 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
-#include "IECore/Camera.h"
+#include "IECoreScene/Camera.h"
 
 namespace IECoreGL
 {
@@ -52,12 +52,12 @@ class IECOREGL_API ToGLCameraConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::Camera InputType;
+		typedef IECoreScene::Camera InputType;
 		typedef IECoreGL::Camera ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCameraConverter, ToGLCameraConverterTypeId, ToGLConverter );
 
-		ToGLCameraConverter( IECore::ConstCameraPtr toConvert = nullptr );
+		ToGLCameraConverter( IECoreScene::ConstCameraPtr toConvert = nullptr );
 		~ToGLCameraConverter() override;
 
 	protected :

@@ -38,7 +38,7 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
-namespace IECore
+namespace IECoreScene
 {
 	IE_CORE_FORWARDDECLARE( CurvesPrimitive );
 }
@@ -55,12 +55,12 @@ class IECOREGL_API ToGLCurvesConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::CurvesPrimitive InputType;
+		typedef IECoreScene::CurvesPrimitive InputType;
 		typedef IECoreGL::CurvesPrimitive ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLCurvesConverter, ToGLCurvesConverterTypeId, ToGLConverter );
 
-		ToGLCurvesConverter( IECore::ConstCurvesPrimitivePtr toConvert = nullptr );
+		ToGLCurvesConverter( IECoreScene::ConstCurvesPrimitivePtr toConvert = nullptr );
 		~ToGLCurvesConverter() override;
 
 	protected :

@@ -53,7 +53,7 @@ class IECOREGL_API QuadPrimitive : public Primitive
 		QuadPrimitive( float width = 1, float height = 1 );
 		~QuadPrimitive() override;
 
-		void addPrimitiveVariable( const std::string &name, const IECore::PrimitiveVariable &primVar ) override;
+		void addPrimitiveVariable( const std::string &name, const IECoreScene::PrimitiveVariable &primVar ) override;
 		Imath::Box3f bound() const override;
 
 		void renderInstances( size_t numInstances ) const override;

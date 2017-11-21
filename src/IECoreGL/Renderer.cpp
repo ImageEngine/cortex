@@ -42,14 +42,15 @@
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/BoxOps.h"
-#include "IECore/Camera.h"
-#include "IECore/Transform.h"
 #include "IECore/MatrixAlgo.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/MeshNormalsOp.h"
 #include "IECore/SplineData.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PointsPrimitive.h"
+
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MeshNormalsOp.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/State.h"
@@ -83,6 +84,7 @@
 #include "IECoreGL/CachedConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreGL;
 using namespace Imath;
 using namespace std;
@@ -180,7 +182,7 @@ struct IECoreGL::Renderer::MemberData
 	std::set<RenderablePtr> removedObjects;
 	tbb::mutex removedObjectsMutex;
 
-	void addPrimitive( const IECore::Primitive *corePrimitive )
+	void addPrimitive( const IECoreScene::Primitive *corePrimitive )
 	{
 		ConstPrimitivePtr glPrimitive;
 		if( implementation->getState<AutomaticInstancingStateComponent>()->value() )
@@ -514,7 +516,7 @@ void IECoreGL::Renderer::camera( const std::string &name, const IECore::Compound
 
 	try
 	{
-		IECore::CameraPtr coreCamera = new IECore::Camera( name, nullptr, new CompoundData( parameters ) );
+		IECoreScene::CameraPtr coreCamera = new IECoreScene::Camera( name, nullptr, new CompoundData( parameters ) );
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( coreCamera ).convert() );
 		// we have to store these till worldBegin, as only then are we sure what sort of renderer backend we have
 		if( camera )
@@ -619,7 +621,7 @@ void IECoreGL::Renderer::worldBegin()
 	else
 	{
 		// specify the default camera
-		IECore::CameraPtr defaultCamera = new IECore::Camera();
+		IECoreScene::CameraPtr defaultCamera = new IECoreScene::Camera();
 		defaultCamera->addStandardParameters();
 		IECoreGL::CameraPtr camera = IECore::runTimeCast<IECoreGL::Camera>( ToGLCameraConverter( defaultCamera ).convert() );
 		m_data->implementation->addCamera( camera );
@@ -1575,10 +1577,10 @@ void IECoreGL::Renderer::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECore::PrimitiveVariableMap &primVars )
+static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	// add primVars to the gl primitive
-	for( IECore::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
+	for( IECoreScene::PrimitiveVariableMap::const_iterator it=primVars.begin(); it!=primVars.end(); it++ )
 	{
 		try
 		{
@@ -1591,11 +1593,11 @@ static void addPrimVarsToPrimitive( IECoreGL::PrimitivePtr primitive, const IECo
 	}
 }
 
-void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	try
 	{
-		IECore::PointsPrimitivePtr p = new IECore::PointsPrimitive( numPoints );
+		IECoreScene::PointsPrimitivePtr p = new IECoreScene::PointsPrimitive( numPoints );
 		p->variables = primVars;
 		m_data->addPrimitive( p.get() );
 	}
@@ -1606,18 +1608,18 @@ void IECoreGL::Renderer::points( size_t numPoints, const IECore::PrimitiveVariab
 	}
 }
 
-void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	DiskPrimitivePtr prim = new DiskPrimitive( radius, z, thetaMax );
 	addPrimVarsToPrimitive( prim, primVars );
 	m_data->addPrimitive( prim );
 }
 
-void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	try
 	{
-		IECore::CurvesPrimitivePtr c = new IECore::CurvesPrimitive( numVertices, basis, periodic );
+		IECoreScene::CurvesPrimitivePtr c = new IECoreScene::CurvesPrimitive( numVertices, basis, periodic );
 		c->variables = primVars;
 		m_data->addPrimitive( c.get() );
 	}
@@ -1628,7 +1630,7 @@ void IECoreGL::Renderer::curves( const IECore::CubicBasisf &basis, bool periodic
 	}
 }
 
-void IECoreGL::Renderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 
 #ifdef IECORE_WITH_FREETYPE
@@ -1650,7 +1652,7 @@ void IECoreGL::Renderer::text( const std::string &font, const std::string &text,
 #endif // IECORE_WITH_FREETYPE
 }
 
-void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	SpherePrimitivePtr prim = new SpherePrimitive( radius, zMin, zMax, thetaMax );
 	addPrimVarsToPrimitive( prim, primVars );
@@ -1675,7 +1677,7 @@ static const std::string &imageFragmentShader()
 /// \todo This positions images incorrectly when dataWindow!=displayWindow. This is because the texture
 /// contains only the dataWindow contents, but we've positioned the card as if it will contain the whole
 /// displayWindow.
-void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	if ( m_data->currentInstance )
 	{
@@ -1732,12 +1734,12 @@ void IECoreGL::Renderer::image( const Imath::Box2i &dataWindow, const Imath::Box
 	m_data->implementation->transformEnd();
 }
 
-void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	try
 	{
-		IECore::MeshPrimitivePtr m = new IECore::MeshPrimitive;
-		IECore::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
+		IECoreScene::MeshPrimitivePtr m = new IECoreScene::MeshPrimitive;
+		IECoreScene::PrimitiveVariableMap::const_iterator it = primVars.find( "P" );
 		if( it == primVars.end() )
 		{
 			throw IECore::Exception( "Trying to render a mesh without \"P\"" );
@@ -1760,22 +1762,22 @@ void IECoreGL::Renderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECor
 	}
 }
 
-void IECoreGL::Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "Renderer::nurbs", "Not implemented" );
 }
 
-void IECoreGL::Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "Renderer::patchMesh", "Not implemented" );
 }
 
-void IECoreGL::Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )
+void IECoreGL::Renderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "Renderer::geometry", boost::format( "Geometry type \"%s\" not implemented." ) % type );
 }
 
-void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreGL::Renderer::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	if ( m_data->currentInstance )
 	{
@@ -1790,7 +1792,7 @@ void IECoreGL::Renderer::procedural( IECore::Renderer::ProceduralPtr proc )
 				setAttribute( "gl:primitive:wireframe", new BoolData( true ) );
 				setAttribute( "gl:primitive:solid", new BoolData( false ) );
 				setAttribute( "gl:curvesPrimitive:useGLLines", new BoolData( true ) );
-				IECore::CurvesPrimitive::createBox( externalProcedural->bound() )->render( this );
+				IECoreScene::CurvesPrimitive::createBox( externalProcedural->bound() )->render( this );
 			attributeEnd();
 		}
 		else

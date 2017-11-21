@@ -38,7 +38,7 @@
 #include "IECoreGL/Export.h"
 #include "IECoreGL/ToGLConverter.h"
 
-namespace IECore
+namespace IECoreScene
 {
 	IE_CORE_FORWARDDECLARE( PointsPrimitive );
 }
@@ -55,12 +55,12 @@ class IECOREGL_API ToGLPointsConverter : public ToGLConverter
 
 	public :
 
-		typedef IECore::PointsPrimitive InputType;
+		typedef IECoreScene::PointsPrimitive InputType;
 		typedef IECoreGL::PointsPrimitive ResultType;
 
 		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( IECoreGL::ToGLPointsConverter, ToGLPointsConverterTypeId, ToGLConverter );
 
-		ToGLPointsConverter( IECore::ConstPointsPrimitivePtr toConvert = nullptr );
+		ToGLPointsConverter( IECoreScene::ConstPointsPrimitivePtr toConvert = nullptr );
 		~ToGLPointsConverter() override;
 
 	protected :

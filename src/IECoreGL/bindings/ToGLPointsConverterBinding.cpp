@@ -34,7 +34,7 @@
 
 #include "boost/python.hpp"
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreGL/ToGLPointsConverter.h"
 #include "IECoreGL/bindings/ToGLPointsConverterBinding.h"
@@ -50,7 +50,7 @@ namespace IECoreGL
 void bindToGLPointsConverter()
 {
 	IECorePython::RunTimeTypedClass<ToGLPointsConverter>()
-		.def( init< IECore::ConstPointsPrimitivePtr >() )
+		.def( init< IECoreScene::ConstPointsPrimitivePtr >() )
 	;
 }
 

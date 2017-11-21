@@ -39,9 +39,9 @@
 #include "IECore/ObjectParameter.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Camera.h"
 #include "IECore/Exception.h"
-#include "IECore/Transform.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Transform.h"
 
 #include <boost/format.hpp>
 
@@ -51,10 +51,10 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLCameraConverter );
 
 ToGLConverter::ConverterDescription<ToGLCameraConverter> ToGLCameraConverter::g_description;
 
-ToGLCameraConverter::ToGLCameraConverter( IECore::ConstCameraPtr toConvert )
-	:	ToGLConverter( "Converts IECore::Camera objects to IECoreGL::Camera objects.", IECore::CameraTypeId )
+ToGLCameraConverter::ToGLCameraConverter( IECoreScene::ConstCameraPtr toConvert )
+	:	ToGLConverter( "Converts IECoreScene::Camera objects to IECoreGL::Camera objects.", IECore::CameraTypeId )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::Camera>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::Camera>( toConvert ) );
 }
 
 ToGLCameraConverter::~ToGLCameraConverter()
@@ -63,7 +63,7 @@ ToGLCameraConverter::~ToGLCameraConverter()
 
 IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::CameraPtr camera = boost::static_pointer_cast<const IECore::Camera>( src )->copy(); // safe because the parameter validated it for us
+	IECoreScene::CameraPtr camera = boost::static_pointer_cast<const IECoreScene::Camera>( src )->copy(); // safe because the parameter validated it for us
 	camera->addStandardParameters(); // now all parameters should be there and have appropriate types - so we can avoid performing checks below
 
 	CameraPtr result = nullptr;
@@ -88,7 +88,7 @@ IECore::RunTimeTypedPtr ToGLCameraConverter::doConversion( IECore::ConstObjectPt
 	result->setScreenWindow( boost::static_pointer_cast<const IECore::Box2fData>( camera->parameters()["screenWindow"] )->readable() );
 	result->setClippingPlanes( boost::static_pointer_cast<const IECore::V2fData>( camera->parameters()["clippingPlanes"] )->readable() );
 
-	IECore::TransformPtr t = camera->getTransform();
+	IECoreScene::TransformPtr t = camera->getTransform();
 	if( t )
 	{
 		result->setTransform( t->transform() );

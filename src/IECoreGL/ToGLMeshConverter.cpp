@@ -36,12 +36,12 @@
 
 #include "boost/format.hpp"
 
-#include "IECore/MeshPrimitive.h"
-#include "IECore/TriangulateOp.h"
-#include "IECore/MeshNormalsOp.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MessageHandler.h"
-#include "IECore/FaceVaryingPromotionOp.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/TriangulateOp.h"
+#include "IECoreScene/MeshNormalsOp.h"
+#include "IECoreScene/FaceVaryingPromotionOp.h"
 
 #include "IECoreGL/ToGLMeshConverter.h"
 #include "IECoreGL/MeshPrimitive.h"
@@ -52,10 +52,10 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLMeshConverter );
 
 ToGLConverter::ConverterDescription<ToGLMeshConverter> ToGLMeshConverter::g_description;
 
-ToGLMeshConverter::ToGLMeshConverter( IECore::ConstMeshPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECore::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
+ToGLMeshConverter::ToGLMeshConverter( IECoreScene::ConstMeshPrimitivePtr toConvert )
+	:	ToGLConverter( "Converts IECoreScene::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
 {
-	srcParameter()->setValue( boost::const_pointer_cast<IECore::MeshPrimitive>( toConvert ) );
+	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::MeshPrimitive>( toConvert ) );
 }
 
 ToGLMeshConverter::~ToGLMeshConverter()
@@ -64,9 +64,9 @@ ToGLMeshConverter::~ToGLMeshConverter()
 
 IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr src, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::MeshPrimitivePtr mesh = boost::static_pointer_cast<IECore::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
+	IECoreScene::MeshPrimitivePtr mesh = boost::static_pointer_cast<IECoreScene::MeshPrimitive>( src->copy() ); // safe because the parameter validated it for us
 
-	if( !mesh->variableData<IECore::V3fVectorData>( "P", IECore::PrimitiveVariable::Vertex ) )
+	if( !mesh->variableData<IECore::V3fVectorData>( "P", IECoreScene::PrimitiveVariable::Vertex ) )
 	{
 		throw IECore::Exception( "Must specify primitive variable \"P\", of type V3fVectorData and interpolation type Vertex." );
 	}
@@ -76,29 +76,29 @@ IECore::RunTimeTypedPtr ToGLMeshConverter::doConversion( IECore::ConstObjectPtr 
 		// the mesh has no normals - we need to explicitly add some. if it's a polygon
 		// mesh (interpolation==linear) then we add per-face normals for a faceted look
 		// and if it's a subdivision mesh we add smooth per-vertex normals.
-		IECore::MeshNormalsOpPtr normalOp = new IECore::MeshNormalsOp();
+		IECoreScene::MeshNormalsOpPtr normalOp = new IECoreScene::MeshNormalsOp();
 		normalOp->inputParameter()->setValue( mesh );
 		normalOp->copyParameter()->setTypedValue( false );
 		normalOp->interpolationParameter()->setNumericValue(
-			mesh->interpolation() == "linear" ? IECore::PrimitiveVariable::Uniform : IECore::PrimitiveVariable::Vertex
+			mesh->interpolation() == "linear" ? IECoreScene::PrimitiveVariable::Uniform : IECoreScene::PrimitiveVariable::Vertex
 		);
 		normalOp->operate();
 	}
 
-	IECore::TriangulateOpPtr op = new IECore::TriangulateOp();
+	IECoreScene::TriangulateOpPtr op = new IECoreScene::TriangulateOp();
 	op->inputParameter()->setValue( mesh );
 	op->throwExceptionsParameter()->setTypedValue( false ); // it's better to see something than nothing
 	op->copyParameter()->setTypedValue( false );
 	op->operate();
 
-	IECore::FaceVaryingPromotionOpPtr faceVaryingOp = new IECore::FaceVaryingPromotionOp;
+	IECoreScene::FaceVaryingPromotionOpPtr faceVaryingOp = new IECoreScene::FaceVaryingPromotionOp;
 	faceVaryingOp->inputParameter()->setValue( mesh );
 	faceVaryingOp->copyParameter()->setTypedValue( false );
 	faceVaryingOp->operate();
 
 	MeshPrimitivePtr glMesh = new MeshPrimitive( mesh->numFaces() );
 
-	for ( IECore::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
+	for ( IECoreScene::PrimitiveVariableMap::iterator pIt = mesh->variables.begin(); pIt != mesh->variables.end(); ++pIt )
 	{
 		if( pIt->second.data )
 		{

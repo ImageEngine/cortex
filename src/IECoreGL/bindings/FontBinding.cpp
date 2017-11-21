@@ -43,7 +43,7 @@
 using namespace boost::python;
 using namespace IECoreGL;
 
-static IECore::FontPtr coreFont( IECoreGL::Font &f )
+static IECoreScene::FontPtr coreFont( IECoreGL::Font &f )
 {
 	return f.coreFont();
 }
@@ -61,7 +61,7 @@ static IECoreGL::AlphaTexturePtr texture( IECoreGL::Font &f )
 void IECoreGL::bindFont()
 {
 	IECorePython::RunTimeTypedClass<Font>()
-		.def( init<IECore::FontPtr>() )
+		.def( init<IECoreScene::FontPtr>() )
 		.def( "coreFont", &coreFont )
 		.def( "mesh", &mesh )
 		.def( "texture", &texture )
