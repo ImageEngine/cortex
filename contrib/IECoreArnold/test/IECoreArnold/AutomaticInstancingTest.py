@@ -40,6 +40,7 @@ import unittest
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreArnold
 
 class AutomaticInstancingTest( unittest.TestCase ) :
@@ -60,9 +61,9 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -80,11 +81,11 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( True ) )
 
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -102,11 +103,11 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 		r = IECoreArnold.Renderer()
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.setAttribute( "ai:automaticInstancing", IECore.BoolData( False ) )
 
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 
 			m.render( r )
 			m.render( r )
@@ -119,11 +120,11 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 	def testProceduralsShareInstances( self ) :
 
-		class PlaneProcedural( IECore.Renderer.Procedural ) :
+		class PlaneProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self ) :
 
-				IECore.Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 			def bound( self ) :
 
@@ -131,7 +132,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 
 			def render( self, renderer ) :
 
-				IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
+				IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -10 ), IECore.V2f( 10 ) ) ).render( renderer )
 
 			def hash( self ):
 
@@ -149,7 +150,7 @@ class AutomaticInstancingTest( unittest.TestCase ) :
 		self.__arnoldMessages = []
 		arnold.AiMsgSetConsoleFlags( arnold.AI_LOG_ALL )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.concatTransform( IECore.M44f.createTranslated( IECore.V3f( 0, 0, -5 ) ) )
 

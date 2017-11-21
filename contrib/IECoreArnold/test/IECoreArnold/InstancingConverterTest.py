@@ -42,6 +42,7 @@ import random
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreArnold
 
 class InstancingConverterTest( unittest.TestCase ) :
@@ -52,9 +53,9 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			c = IECoreArnold.InstancingConverter()
 
-			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			m2 = m1.copy()
-			m3 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
 			am1 = c.convert( m1, "testMesh" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( am1 ) ), "polymesh" )
@@ -74,7 +75,7 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			meshes = []
 			for i in range( 0, 1000 ) :
-				meshes.append( IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -i ), IECore.V2f( i ) ) ) )
+				meshes.append( IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -i ), IECore.V2f( i ) ) ) )
 
 			def f( nodeList ) :
 				for i in range( 0, 10000 ) :
@@ -122,8 +123,8 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			c = IECoreArnold.InstancingConverter()
 
-			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
 			h1 = IECore.MurmurHash()
 			h2 = IECore.MurmurHash()
@@ -149,8 +150,8 @@ class InstancingConverterTest( unittest.TestCase ) :
 
 			c = IECoreArnold.InstancingConverter()
 
-			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
 			n1 = c.convert( [ m1, m2 ], -0.25, 0.25, "testMesh" )
 			self.assertEqual( arnold.AiNodeEntryGetName( arnold.AiNodeGetNodeEntry( n1 ) ), "polymesh" )

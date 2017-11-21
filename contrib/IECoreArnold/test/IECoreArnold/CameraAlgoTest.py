@@ -37,6 +37,7 @@ import unittest
 import arnold
 
 import IECore
+import IECoreScene
 import IECoreArnold
 
 class CameraAlgoTest( unittest.TestCase ) :
@@ -46,7 +47,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert(
-				IECore.Camera(
+				IECoreScene.Camera(
 					parameters = {
 						"projection" : "perspective",
 						"projection:fov" : 45.0,
@@ -68,7 +69,7 @@ class CameraAlgoTest( unittest.TestCase ) :
 		with IECoreArnold.UniverseBlock( writable = True ) :
 
 			n = IECoreArnold.NodeAlgo.convert(
-				IECore.Camera(
+				IECoreScene.Camera(
 					parameters = {
 						"projection" : "cyl_camera",
 						"horizontal_fov" : 45.0,

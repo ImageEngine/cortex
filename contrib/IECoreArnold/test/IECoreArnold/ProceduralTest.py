@@ -37,16 +37,17 @@ import arnold
 import unittest
 
 import IECore
+import IECoreScene
 import IECoreImage
 import IECoreArnold
 
 class ProceduralTest( unittest.TestCase ) :
 
-	class SphereProcedural( IECore.Renderer.Procedural ) :
+	class SphereProcedural( IECoreScene.Renderer.Procedural ) :
 
 		def __init__( self, radius=1 ) :
 
-			IECore.Renderer.Procedural.__init__( self )
+			IECoreScene.Renderer.Procedural.__init__( self )
 
 			self.__radius = radius
 
@@ -63,11 +64,11 @@ class ProceduralTest( unittest.TestCase ) :
 			h = IECore.MurmurHash()
 			return h
 
-	class TransformingProcedural( IECore.Renderer.Procedural ) :
+	class TransformingProcedural( IECoreScene.Renderer.Procedural ) :
 
 		def __init__( self, transform, child ) :
 
-			IECore.Renderer.Procedural.__init__( self )
+			IECoreScene.Renderer.Procedural.__init__( self )
 
 			self.__transform = transform
 			self.__child = child
@@ -80,10 +81,10 @@ class ProceduralTest( unittest.TestCase ) :
 
 		def render( self, renderer ) :
 
-			with IECore.TransformBlock( renderer ) :
+			with IECoreScene.TransformBlock( renderer ) :
 
 				renderer.concatTransform( self.__transform )
-				if isinstance( self.__child, IECore.VisibleRenderable ) :
+				if isinstance( self.__child, IECoreScene.VisibleRenderable ) :
 					self.__child.render( renderer )
 				else :
 					renderer.procedural( self.__child )
@@ -93,11 +94,11 @@ class ProceduralTest( unittest.TestCase ) :
 			h = IECore.MurmurHash()
 			return h
 
-	class ShaderProcedural( IECore.Renderer.Procedural ) :
+	class ShaderProcedural( IECoreScene.Renderer.Procedural ) :
 
 		def __init__( self, shader, child ) :
 
-			IECore.Renderer.Procedural.__init__( self )
+			IECoreScene.Renderer.Procedural.__init__( self )
 
 			self.__shader = shader
 			self.__child = child
@@ -108,7 +109,7 @@ class ProceduralTest( unittest.TestCase ) :
 
 		def render( self, renderer ) :
 
-			with IECore.AttributeBlock( renderer ) :
+			with IECoreScene.AttributeBlock( renderer ) :
 
 				self.__shader.render( renderer )
 				renderer.procedural( self.__child )
@@ -132,7 +133,7 @@ class ProceduralTest( unittest.TestCase ) :
 
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				self.TransformingProcedural(
@@ -152,7 +153,7 @@ class ProceduralTest( unittest.TestCase ) :
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = ""
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				self.TransformingProcedural(
@@ -171,11 +172,11 @@ class ProceduralTest( unittest.TestCase ) :
 		r = IECoreArnold.Renderer()
 		r.display( "test", "ieDisplay", "rgba", { "driverType" : "ImageDisplayDriver", "handle" : "testHandle" } )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural(
 				self.ShaderProcedural(
-					IECore.Shader( "flat", "surface", { "color" : IECore.Color3f( 0, 1, 0 ) } ),
+					IECoreScene.Shader( "flat", "surface", { "color" : IECore.Color3f( 0, 1, 0 ) } ),
 					self.SphereProcedural()
 				)
 			)
@@ -190,11 +191,11 @@ class ProceduralTest( unittest.TestCase ) :
 
 	def testEmptyProceduralIsIgnored( self ) :
 
-		class EmptyProcedural( IECore.Renderer.Procedural ) :
+		class EmptyProcedural( IECoreScene.Renderer.Procedural ) :
 
 			def __init__( self ) :
 
-				IECore.Renderer.Procedural.__init__( self )
+				IECoreScene.Renderer.Procedural.__init__( self )
 
 			def bound( self ) :
 
@@ -216,7 +217,7 @@ class ProceduralTest( unittest.TestCase ) :
 		arnold.AiMsgSetCallback( messageCallback )
 		self.__arnoldMessages = ""
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			r.procedural( EmptyProcedural() )
 
