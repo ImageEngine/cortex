@@ -37,9 +37,9 @@
 #include "Alembic/AbcGeom/OPolyMesh.h"
 #include "Alembic/AbcGeom/OSubD.h"
 
-#include "IECore/MeshPrimitive.h"
-#include "IECore/MeshAlgo.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/MeshAlgo.h"
 
 #include "IECoreAlembic/PrimitiveWriter.h"
 
@@ -47,6 +47,7 @@ using namespace std;
 using namespace Imath;
 using namespace Alembic::AbcGeom;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 
 namespace
@@ -68,7 +69,7 @@ class MeshWriter : public PrimitiveWriter
 			if( const MeshPrimitive *typedObject = runTimeCast<const MeshPrimitive>( object ) )
 			{
 				MeshPrimitivePtr meshPrimitiveCopy = typedObject->copy();
-				IECore::MeshAlgo::reverseWinding( meshPrimitiveCopy.get() );
+				IECoreScene::MeshAlgo::reverseWinding( meshPrimitiveCopy.get() );
 				meshPrimitive = meshPrimitiveCopy;
 			}
 			else
@@ -134,7 +135,7 @@ class MeshWriter : public PrimitiveWriter
 	private :
 
 		template<typename Schema>
-		void writeSampleInternal( const IECore::MeshPrimitive *meshPrimitive, typename Schema::Sample &sample, Schema &schema )
+		void writeSampleInternal( const IECoreScene::MeshPrimitive *meshPrimitive, typename Schema::Sample &sample, Schema &schema )
 		{
 
 			sample.setFaceCounts(
@@ -213,6 +214,6 @@ class MeshWriter : public PrimitiveWriter
 
 };
 
-IECoreAlembic::ObjectWriter::Description<MeshWriter> MeshWriter::g_description( IECore::MeshPrimitive::staticTypeId() );
+IECoreAlembic::ObjectWriter::Description<MeshWriter> MeshWriter::g_description( IECoreScene::MeshPrimitive::staticTypeId() );
 
 } // namespace

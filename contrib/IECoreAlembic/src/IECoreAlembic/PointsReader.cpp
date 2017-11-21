@@ -34,11 +34,12 @@
 
 #include "Alembic/AbcGeom/IPoints.h"
 
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "IECoreAlembic/PrimitiveReader.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 

@@ -45,10 +45,10 @@
 #include "Alembic/AbcGeom/ArchiveBounds.h"
 #include "Alembic/AbcGeom/OXform.h"
 
-#include "IECore/SampledSceneInterface.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Exception.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/SampledSceneInterface.h"
 
 #include "IECoreAlembic/AlembicScene.h"
 #include "IECoreAlembic/ObjectWriter.h"
@@ -59,6 +59,7 @@ using namespace Alembic::AbcCoreFactory;
 using namespace Alembic::AbcGeom;
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 
 //////////////////////////////////////////////////////////////////////////
@@ -144,7 +145,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		void childNames( IECore::SceneInterface::NameList &childNames ) const override
+		void childNames( IECoreScene::SceneInterface::NameList &childNames ) const override
 		{
 			IObject p = m_xform;
 			if( !p.valid() )
@@ -162,7 +163,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 			}
 		}
 
-		AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
+		AlembicIOPtr child( const IECoreScene::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
 		{
 			ChildMap::iterator it = m_children.find( name );
 			if( it != m_children.end() )
@@ -548,7 +549,7 @@ class AlembicScene::AlembicReader : public AlembicIO
 		IXform m_xform; // Empty when we're at the root
 		std::unique_ptr<IECoreAlembic::ObjectReader> m_objectReader; // Null when there's no object
 
-		typedef std::unordered_map<IECore::SceneInterface::Name, AlembicReaderPtr> ChildMap;
+		typedef std::unordered_map<IECoreScene::SceneInterface::Name, AlembicReaderPtr> ChildMap;
 		ChildMap m_children;
 
 };
@@ -622,7 +623,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			}
 		}
 
-		void childNames( IECore::SceneInterface::NameList &childNames ) const override
+		void childNames( IECoreScene::SceneInterface::NameList &childNames ) const override
 		{
 			OObject p = m_xform;
 			if( !haveXform() )
@@ -640,7 +641,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 			}
 		}
 
-		AlembicIOPtr child( const IECore::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
+		AlembicIOPtr child( const IECoreScene::SceneInterface::Name &name, SceneInterface::MissingBehaviour missingBehaviour ) override
 		{
 			ChildMap::iterator it = m_children.find( name );
 			if( it != m_children.end() )
@@ -800,7 +801,7 @@ class AlembicScene::AlembicWriter : public AlembicIO
 		std::vector<chrono_t> m_boundSampleTimes;
 		std::vector<chrono_t> m_objectSampleTimes;
 
-		typedef std::unordered_map<IECore::SceneInterface::Name, AlembicWriterPtr> ChildMap;
+		typedef std::unordered_map<IECoreScene::SceneInterface::Name, AlembicWriterPtr> ChildMap;
 		ChildMap m_children;
 
 };
@@ -1017,7 +1018,7 @@ IECore::ConstObjectPtr AlembicScene::readObjectAtSample( size_t sampleIndex ) co
 	return reader()->objectAtSample( sampleIndex );
 }
 
-IECore::PrimitiveVariableMap AlembicScene::readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const
+IECoreScene::PrimitiveVariableMap AlembicScene::readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const
 {
 	/// \todo I cannot find a single use of this function anywhere, but we've had to implement
 	/// it for no end of SceneInterface classes. Can we just remove it?
@@ -1042,7 +1043,7 @@ void AlembicScene::childNames( NameList &childNames ) const
 	m_io->childNames( childNames );
 }
 
-IECore::SceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour )
+IECoreScene::SceneInterfacePtr AlembicScene::child( const Name &name, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour )
 {
 	AlembicIOPtr child = m_io->child( name, missingBehaviour );
 	if( !child )
@@ -1052,7 +1053,7 @@ IECore::SceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneIn
 	return new AlembicScene( m_root, child );
 }
 
-IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour ) const
+IECoreScene::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour ) const
 {
 	if( missingBehaviour == CreateIfMissing )
 	{
@@ -1067,7 +1068,7 @@ IECore::ConstSceneInterfacePtr AlembicScene::child( const Name &name, IECore::Sc
 	return new AlembicScene( m_root, child );
 }
 
-IECore::SceneInterfacePtr AlembicScene::createChild( const Name &name )
+IECoreScene::SceneInterfacePtr AlembicScene::createChild( const Name &name )
 {
 	AlembicWriter *writer = this->writer();
 	if( writer->child( name, NullIfMissing ) )
@@ -1077,7 +1078,7 @@ IECore::SceneInterfacePtr AlembicScene::createChild( const Name &name )
 	return new AlembicScene( m_root, writer->child( name, CreateIfMissing ) );
 }
 
-IECore::SceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour )
+IECoreScene::SceneInterfacePtr AlembicScene::scene( const Path &path, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour )
 {
 	AlembicIOPtr io = m_root;
 	for( const Name &name : path )
@@ -1091,7 +1092,7 @@ IECore::SceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneIn
 	return new AlembicScene( m_root, io );
 }
 
-IECore::ConstSceneInterfacePtr AlembicScene::scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour ) const
+IECoreScene::ConstSceneInterfacePtr AlembicScene::scene( const Path &path, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour ) const
 {
 	return const_cast<AlembicScene *>( this )->scene( path, missingBehaviour );
 }
@@ -1146,6 +1147,6 @@ AlembicScene::AlembicWriter *AlembicScene::writer()
 namespace
 {
 
-IECore::SceneInterface::FileFormatDescription<AlembicScene> g_description( ".abc", IECore::IndexedIO::Read | IECore::IndexedIO::Write );
+IECoreScene::SceneInterface::FileFormatDescription<AlembicScene> g_description( ".abc", IECore::IndexedIO::Read | IECore::IndexedIO::Write );
 
 } // namespace

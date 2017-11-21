@@ -35,7 +35,7 @@
 #ifndef IECOREALEMBIC_ALEMBICSCENE_H
 #define IECOREALEMBIC_ALEMBICSCENE_H
 
-#include "IECore/SampledSceneInterface.h"
+#include "IECoreScene/SampledSceneInterface.h"
 
 #include "IECoreAlembic/Export.h"
 #include "IECoreAlembic/TypeIds.h"
@@ -43,11 +43,11 @@
 namespace IECoreAlembic
 {
 
-class IECOREALEMBIC_API AlembicScene : public IECore::SampledSceneInterface
+class IECOREALEMBIC_API AlembicScene : public IECoreScene::SampledSceneInterface
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( AlembicScene, IECoreAlembic::AlembicSceneTypeId, IECore::SampledSceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( AlembicScene, IECoreAlembic::AlembicSceneTypeId, IECoreScene::SampledSceneInterface );
 
 		AlembicScene( const std::string &fileName, IECore::IndexedIO::OpenMode mode );
 
@@ -92,16 +92,16 @@ class IECOREALEMBIC_API AlembicScene : public IECore::SampledSceneInterface
 		double objectSampleTime( size_t sampleIndex ) const override;
 		double objectSampleInterval( double time, size_t &floorIndex, size_t &ceilIndex ) const override;
 		IECore::ConstObjectPtr readObjectAtSample( size_t sampleIndex ) const override;
-		IECore::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
+		IECoreScene::PrimitiveVariableMap readObjectPrimitiveVariables( const std::vector<IECore::InternedString> &primVarNames, double time ) const override;
 		void writeObject( const IECore::Object *object, double time ) override;
 
 		bool hasChild( const Name &name ) const override;
 		void childNames( NameList &childNames ) const override;
-		IECore::SceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
-		IECore::ConstSceneInterfacePtr child( const Name &name, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
-		IECore::SceneInterfacePtr createChild( const Name &name ) override;
-		IECore::SceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
-		IECore::ConstSceneInterfacePtr scene( const Path &path, IECore::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
+		IECoreScene::SceneInterfacePtr child( const Name &name, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		IECoreScene::ConstSceneInterfacePtr child( const Name &name, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
+		IECoreScene::SceneInterfacePtr createChild( const Name &name ) override;
+		IECoreScene::SceneInterfacePtr scene( const Path &path, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) override;
+		IECoreScene::ConstSceneInterfacePtr scene( const Path &path, IECoreScene::SceneInterface::MissingBehaviour missingBehaviour = ThrowIfMissing ) const override;
 
 		void hash( HashType hashType, double time, IECore::MurmurHash &h ) const override;
 

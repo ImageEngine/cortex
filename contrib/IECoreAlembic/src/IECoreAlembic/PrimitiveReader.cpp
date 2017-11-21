@@ -41,6 +41,7 @@
 using namespace Alembic::Abc;
 using namespace Alembic::AbcGeom;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 
 //////////////////////////////////////////////////////////////////////////
@@ -87,7 +88,7 @@ struct ApplyGeometricInterpretation<GeometricTypedData<T>, GeomParam>
 // PrimitiveReader implementation
 //////////////////////////////////////////////////////////////////////////
 
-void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &params, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
 {
 	if( !params.valid() )
 	{
@@ -171,7 +172,7 @@ void PrimitiveReader::readArbGeomParams( const Alembic::Abc::ICompoundProperty &
 }
 
 template<typename T>
-void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECore::Primitive *primitive ) const
+void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISampleSelector &sampleSelector, IECoreScene::Primitive *primitive ) const
 {
 
 	typedef typename T::prop_type::sample_ptr_type SamplePtr;
@@ -219,7 +220,7 @@ void PrimitiveReader::readGeomParam( const T &param, const Alembic::Abc::ISample
 	primitive->variables[param.getHeader().getName()] = pv;
 }
 
-IECore::PrimitiveVariable::Interpolation PrimitiveReader::interpolation( Alembic::AbcGeom::GeometryScope scope ) const
+IECoreScene::PrimitiveVariable::Interpolation PrimitiveReader::interpolation( Alembic::AbcGeom::GeometryScope scope ) const
 {
 	switch( scope )
 	{

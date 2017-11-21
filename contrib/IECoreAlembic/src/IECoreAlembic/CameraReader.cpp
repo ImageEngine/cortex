@@ -35,13 +35,14 @@
 
 #include "Alembic/AbcGeom/ICamera.h"
 
-#include "IECore/Camera.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/Transform.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/Transform.h"
 
 #include "IECoreAlembic/ObjectReader.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreAlembic;
 using namespace Alembic::AbcGeom;
 
