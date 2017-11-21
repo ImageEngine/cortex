@@ -35,7 +35,6 @@
 #include "pointcloud.h"
 
 #include "IECoreRI/PTCParticleReader.h"
-#include "IECore/PointsPrimitive.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/VectorTypedData.h"
 #include "IECore/ByteOrder.h"
@@ -43,7 +42,8 @@
 #include "IECore/FileNameParameter.h"
 #include "IECore/DespatchTypedData.h"
 #include "IECore/MatrixAlgo.h"
-#include "IECore/ParticleReader.inl"
+#include "IECoreScene/ParticleReader.inl"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include <algorithm>
 
@@ -54,6 +54,7 @@
 
 using namespace IECoreRI::PTCParticleIO;
 using namespace IECoreRI;
+using namespace IECoreScene;
 using namespace IECore;
 using namespace boost;
 using namespace Imath;

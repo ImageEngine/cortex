@@ -35,7 +35,7 @@
 #ifndef IE_CORERI_PTCPARTICLEWRITER_H
 #define IE_CORERI_PTCPARTICLEWRITER_H
 
-#include "IECore/ParticleWriter.h"
+#include "IECoreScene/ParticleWriter.h"
 #include "IECoreRI/Export.h"
 #include "IECoreRI/TypeIds.h"
 #include "IECoreRI/PTCParticleIO.h"
@@ -45,12 +45,12 @@ namespace IECoreRI
 
 /// The PTCParticleWriter class creates files in renderman ptc format.
 /// \ingroup ioGroup
-class IECORERI_API PTCParticleWriter : public IECore::ParticleWriter
+class IECORERI_API PTCParticleWriter : public IECoreScene::ParticleWriter
 {
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PTCParticleWriter, PTCParticleWriterTypeId, IECore::ParticleWriter )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PTCParticleWriter, PTCParticleWriterTypeId, IECoreScene::ParticleWriter )
 
 		PTCParticleWriter( );
 		PTCParticleWriter( IECore::ObjectPtr object, const std::string &fileName );

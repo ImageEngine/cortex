@@ -35,7 +35,7 @@
 #ifndef IECORERI_PRIMITIVEVARIABLELIST_H
 #define IECORERI_PRIMITIVEVARIABLELIST_H
 
-#include "IECore/Renderer.h"
+#include "IECoreScene/Renderer.h"
 
 #include "IECoreRI/Export.h"
 
@@ -61,7 +61,7 @@ class IECORERI_API PrimitiveVariableList
 		/// as you still use the PrimitiveVariableList.
 		///
 		/// TODO - typeHints is now unused and should be removed
-		PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars,
+		PrimitiveVariableList( const IECoreScene::PrimitiveVariableMap &primVars,
 			const std::map<std::string, std::string> *typeHints = nullptr );
 
 		/// Returns the number of primitive variables, to be passed as the
@@ -79,7 +79,7 @@ class IECORERI_API PrimitiveVariableList
 	private :
 
 		const char *type( const std::string &name, IECore::ConstDataPtr d, size_t &arraySize );
-		const char *interpolation( IECore::PrimitiveVariable::Interpolation i );
+		const char *interpolation( IECoreScene::PrimitiveVariable::Interpolation i );
 		const void *value( IECore::DataPtr d );
 
 		std::vector<std::string> m_strings;

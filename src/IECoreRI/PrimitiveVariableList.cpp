@@ -40,11 +40,12 @@
 #include "boost/format.hpp"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreRI;
 using namespace std;
 using namespace boost;
 
-PrimitiveVariableList::PrimitiveVariableList( const IECore::PrimitiveVariableMap &primVars, const std::map<std::string, std::string> *typeHints )
+PrimitiveVariableList::PrimitiveVariableList( const IECoreScene::PrimitiveVariableMap &primVars, const std::map<std::string, std::string> *typeHints )
 {
 	// figure out how many strings we need to deal with so we can reserve
 	// enough space for them
@@ -200,7 +201,7 @@ const char *PrimitiveVariableList::type( const std::string &name, ConstDataPtr d
 	}
 }
 
-const char *PrimitiveVariableList::interpolation( IECore::PrimitiveVariable::Interpolation i )
+const char *PrimitiveVariableList::interpolation( IECoreScene::PrimitiveVariable::Interpolation i )
 {
 	switch( i )
 	{

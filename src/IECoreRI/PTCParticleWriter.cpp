@@ -39,7 +39,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/ByteOrder.h"
 #include "IECore/FileNameParameter.h"
-#include "IECore/PointsPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "boost/format.hpp"
 
@@ -47,6 +47,7 @@
 
 using namespace IECoreRI::PTCParticleIO;
 using namespace IECoreRI;
+using namespace IECoreScene;
 using namespace IECore;
 using namespace std;
 using namespace boost;

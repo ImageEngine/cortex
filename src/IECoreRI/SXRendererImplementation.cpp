@@ -37,12 +37,12 @@
 #include "IECoreRI/Convert.h"
 
 #include "IECore/MessageHandler.h"
-#include "IECore/Shader.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/SplineData.h"
 #include "IECore/MatrixAlgo.h"
-#include "IECore/Transform.h"
-#include "IECore/Group.h"
+#include "IECoreScene/Shader.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/Group.h"
 
 #include "boost/algorithm/string/case_conv.hpp"
 #include "boost/format.hpp"
@@ -55,6 +55,7 @@
 #include "rx.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreRI;
 using namespace Imath;
 using namespace std;
@@ -395,42 +396,42 @@ void IECoreRI::SXRendererImplementation::motionEnd()
 // primitives
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void IECoreRI::SXRendererImplementation::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::points", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::disk", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::curves( const IECore::CubicBasisf &basis, bool periodic, ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::curves", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::text", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::sphere", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::image", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::mesh", "Not implemented" );
 }
 
-void IECoreRI::SXRendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void IECoreRI::SXRendererImplementation::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::nurbs", "Not implemented" );
 }
@@ -445,7 +446,7 @@ void IECoreRI::SXRendererImplementation::geometry( const std::string &type, cons
 	msg( Msg::Warning, "IECoreRI::SXRendererImplementation::geometry", format( "Unsupported geometry type \"%s\"." ) % type );
 }
 
-void IECoreRI::SXRendererImplementation::procedural( IECore::Renderer::ProceduralPtr proc )
+void IECoreRI::SXRendererImplementation::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	proc->render( m_parent );
 }

@@ -163,57 +163,57 @@ void SXRenderer::motionEnd()
 	m_implementation->motionEnd();
 }
 
-void SXRenderer::points( size_t numPoints, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::points( size_t numPoints, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->points( numPoints, primVars );
 }
 
-void SXRenderer::disk( float radius, float z, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::disk( float radius, float z, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->disk( radius, z, thetaMax, primVars );
 }
 
-void SXRenderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::curves( const IECore::CubicBasisf &basis, bool periodic, IECore::ConstIntVectorDataPtr numVertices, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->curves( basis, periodic, numVertices, primVars );
 }
 
-void SXRenderer::text( const std::string &font, const std::string &text, float kerning, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::text( const std::string &font, const std::string &text, float kerning, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->text( font, text, kerning, primVars );
 }
 
-void SXRenderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::sphere( float radius, float zMin, float zMax, float thetaMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->sphere( radius, zMin, zMax, thetaMax, primVars );
 }
 
-void SXRenderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::image( const Imath::Box2i &dataWindow, const Imath::Box2i &displayWindow, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->image( dataWindow, displayWindow, primVars );
 }
 
-void SXRenderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::mesh( IECore::ConstIntVectorDataPtr vertsPerFace, IECore::ConstIntVectorDataPtr vertIds, const std::string &interpolation, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->mesh( vertsPerFace, vertIds, interpolation, primVars );
 }
 
-void SXRenderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::nurbs( int uOrder, IECore::ConstFloatVectorDataPtr uKnot, float uMin, float uMax, int vOrder, IECore::ConstFloatVectorDataPtr vKnot, float vMin, float vMax, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->nurbs( uOrder, uKnot, uMin, uMax, vOrder, vKnot, vMin, vMax, primVars );
 }
 
-void SXRenderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::patchMesh( const IECore::CubicBasisf &uBasis, const IECore::CubicBasisf &vBasis, int nu, bool uPeriodic, int nv, bool vPeriodic, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->patchMesh( uBasis, vBasis, nu, uPeriodic, nv, vPeriodic, primVars );
 }
 
-void SXRenderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECore::PrimitiveVariableMap &primVars )
+void SXRenderer::geometry( const std::string &type, const IECore::CompoundDataMap &topology, const IECoreScene::PrimitiveVariableMap &primVars )
 {
 	m_implementation->geometry( type, topology, primVars );
 }
 
-void SXRenderer::procedural( IECore::Renderer::ProceduralPtr proc )
+void SXRenderer::procedural( IECoreScene::Renderer::ProceduralPtr proc )
 {
 	m_implementation->procedural( proc );
 }

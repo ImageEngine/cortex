@@ -35,7 +35,7 @@
 #ifndef IECORERI_PARAMETERLIST_H
 #define IECORERI_PARAMETERLIST_H
 
-#include "IECore/Renderer.h"
+#include "IECoreScene/Renderer.h"
 
 #include "IECoreRI/Export.h"
 
