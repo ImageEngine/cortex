@@ -35,7 +35,7 @@
 #
 ##########################################################################
 
-import hou, IECore, IECoreHoudini
+import hou, IECore, IECoreScene, IECoreHoudini
 import string, math
 
 '''
@@ -185,8 +185,8 @@ def createParm( p, folders=None, parent=None, top_level=False ):
 	ignoredParameterTypes = (
 		IECore.CompoundParameter,
 		IECore.ObjectParameter,
-		IECore.PrimitiveParameter,
-		IECore.GroupParameter,
+		IECoreScene.PrimitiveParameter,
+		IECoreScene.GroupParameter,
 	)
 
 	if not parm and not isinstance( p, ignoredParameterTypes ) :

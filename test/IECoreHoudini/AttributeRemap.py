@@ -38,6 +38,7 @@
 import os
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 
@@ -82,10 +83,10 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		object = cl.resultParameter().getValue()
 		self.assert_( object )
 		self.failUnless( 'P' in object )
-		self.assertEqual( object['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( object['P'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['P'].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.failUnless( 'Cs' in object )
-		self.assertEqual( object['Cs'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( object['Cs'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['Cs'].data.typeId(), IECore.TypeId.Color3fVectorData )
 
 	def testBasicRemapping(self):
@@ -100,16 +101,16 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.assert_( object )
 		self.failUnless( 'P' in object )
 		self.failUnless( object.arePrimitiveVariablesValid() )
-		self.assertEqual( object['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( object['P'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( object['P'].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.failUnless( 'Cs' in object )
-		self.assertEqual( object['Cs'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex ) # the default ri conversion sets this as vertex
+		self.assertEqual( object['Cs'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex ) # the default ri conversion sets this as vertex
 		self.assertEqual( object['Cs'].data.typeId(), IECore.TypeId.Color3fVectorData )
 		self.failUnless( 'rixlate' in object )
-		self.assertEqual( object['rixlate'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( object['rixlate'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( object['rixlate'].data.typeId(), IECore.TypeId.StringData )
 		self.failUnless( 'uv' in object )
-		self.assertEqual( object['uv'].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( object['uv'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.assertEqual( object['uv'].data.typeId(), IECore.TypeId.V2fVectorData )
 		self.assertEqual( object['uv'].indices.typeId(), IECore.TypeId.IntVectorData )
 
@@ -123,7 +124,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		geo = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( geo.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( geo.keys(), ["P", "col", "rixlate", "uv"] )
-		self.assertEqual( geo['col'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( geo['col'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( geo['col'].data.typeId(), IECore.TypeId.Color3fVectorData )
 
 	def testMappingOffsets(self):
@@ -149,13 +150,13 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		self.failUnless( "col_g" in geo.keys() )
 		self.failUnless( "col_b" in geo.keys() )
 		self.failUnless( "uv" in geo.keys() )
-		self.assertEqual( geo['col_r'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( geo['col_r'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( geo['col_r'].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assertNotEqual( geo['col_r'].data[0], geo['col_r'].data[1] )
-		self.assertEqual( geo['col_g'].interpolation, IECore.PrimitiveVariable.Interpolation.Varying )
+		self.assertEqual( geo['col_g'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Varying )
 		self.assertEqual( geo['col_g'].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assertEqual( geo['col_g'].data[0], geo['col_g'].data[1], 0.75 )
-		self.assertEqual( geo['col_b'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( geo['col_b'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( geo['col_b'].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assertEqual( geo['col_b'].data[0], geo['col_b'].data[1], 0.5 )
 
@@ -178,9 +179,9 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( geo.keys(), ['Cs', 'P', 'point_test', 'prim_test', 'rixlate', 'uv', 'varmap'] )
-		self.assertEqual( geo['point_test'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( geo['point_test'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( len(geo['point_test'].data), 100 )
-		self.assertEqual( geo['prim_test'].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( geo['prim_test'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( len(geo['prim_test'].data), 100 )
 
 	def testPrimAttributes(self):
@@ -197,7 +198,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( geo.keys(), ['Cs', 'P', 'rixlate', 'test', 'uv', 'varmap'] )
-		self.assertEqual( geo['test'].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( geo['test'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 		self.assertEqual( len(geo['test'].data), 100 )
 		attr.parm("hname0").set( "test" )
 		attr.parm("riname0").set( "test" ) # a constant prim float
@@ -206,7 +207,7 @@ class TestAttributeRemap( IECoreHoudini.TestCase ):
 		fn = IECoreHoudini.FnOpHolder(op)
 		geo = fn.getParameterised().resultParameter().getValue()
 		self.assertEqual( geo.keys(), ['Cs', 'P', 'rixlate', 'test', 'uv', 'varmap'] )
-		self.assertEqual( geo['test'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( geo['test'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( len(geo['test'].data), 100 )
 
 if __name__ == "__main__":

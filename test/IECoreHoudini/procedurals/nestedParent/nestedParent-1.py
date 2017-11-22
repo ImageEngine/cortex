@@ -42,7 +42,7 @@
 #
 #=====
 
-from IECore import *
+import IECore
 from random import *
 import IECoreGL
 
@@ -53,10 +53,10 @@ class nestedParent(ParameterisedProcedural) :
                 self.__pdata = []
                 seed(0)
                 for i in range(100):
-                        self.__pdata.append( V3f( random()*10, random()*10, random()*10 ) )
+                        self.__pdata.append( IECore.V3f( random()*10, random()*10, random()*10 ) )
 
         def doBound(self, args) :
-                return Box3f( V3f( 0 ), V3f( 10 ) )
+                return IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 10 ) )
 
         def doRenderState(self, renderer, args) :
                 pass
@@ -69,10 +69,10 @@ class nestedParent(ParameterisedProcedural) :
                         renderer.transformBegin()
 
                         # concatenate a transformation matrix
-                        renderer.concatTransform( M44f().createTranslated( p ) )
+                        renderer.concatTransform( IECore.M44f().createTranslated( p ) )
 
                         # create an instance of our child procedural
-                        procedural = ClassLoader.defaultProceduralLoader().load( "nestedChild", 1 )()
+                        procedural = IECore.ClassLoader.defaultProceduralLoader().load( "nestedChild", 1 )()
 
                         # do we want to draw our child procedural immediately or defer
                         # until later?
@@ -87,4 +87,4 @@ class nestedParent(ParameterisedProcedural) :
                         renderer.transformEnd()
 
 # register
-registerRunTimeTyped( nestedParent )
+IECore.registerRunTimeTyped( nestedParent )

@@ -35,100 +35,101 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
+import IECoreScene
 
-class compoundParameters( Op ) :
+class compoundParameters( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op with some compound parameters.",
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "result",
 				description = "Dummy.",
-				defaultValue = PointsPrimitive(V3fVectorData()),
-				type = TypeId.PointsPrimitive
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData() ),
+				type = IECore.TypeId.PointsPrimitive
 			)
 		)
 
 		self.parameters().addParameters( [
 
-			CompoundParameter(
+			IECore.CompoundParameter(
 				name = "compound_1",
 				description = "a compound parameter",
-				userData = { "UI" : { "label" : StringData( "My Compound 1" ) } },
+				userData = { "UI" : { "label" : IECore.StringData( "My Compound 1" ) } },
 				members = [
-					V3dParameter(
+					IECore.V3dParameter(
 						name = "j",
 						description = "a v3d",
-						defaultValue = V3dData( V3d( 8, 16, 32 ) ),
-						userData = { "UI" : { "label" : StringData( "A Vector" ) } },
+						defaultValue = IECore.V3dData( IECore.V3d( 8, 16, 32 ) ),
+						userData = { "UI" : { "label" : IECore.StringData( "A Vector" ) } },
 					),
-					Color3fParameter(
+					IECore.Color3fParameter(
 						name = "k",
 						description = "an m44f",
-						defaultValue = Color3f(1,0.5,0),
-						userData = { "UI" : { "label" : StringData( "A Colour" ) } },
+						defaultValue = IECore.Color3f(1,0.5,0),
+						userData = { "UI" : { "label" : IECore.StringData( "A Colour" ) } },
 					),
 				]
 			),
 
-			CompoundParameter(
+			IECore.CompoundParameter(
 				name = "compound_2",
 				description = "a compound parameter",
-				userData = { "UI" : { "label" : StringData( "My Compound 2" ) } },
+				userData = { "UI" : { "label" : IECore.StringData( "My Compound 2" ) } },
 				members = [
-					V3dParameter(
+					IECore.V3dParameter(
 						name = "j",
 						description = "a v3d",
-						defaultValue = V3dData( V3d( 8, 16, 32 ) ),
+						defaultValue = IECore.V3dData( IECore.V3d( 8, 16, 32 ) ),
 						presets = (
-							( "one", V3d( 1 ) ),
-							( "two", V3d( 2 ) )
+							( "one", IECore.V3d( 1 ) ),
+							( "two", IECore.V3d( 2 ) )
 						),
-						userData = { "UI" : { "label" : StringData( "Compound->V3d" ) } },
+						userData = { "UI" : { "label" : IECore.StringData( "Compound->V3d" ) } },
 					),
-					V2fParameter(
+					IECore.V2fParameter(
 						name = "k",
 						description = "an v2f",
-						defaultValue = V2f(1,1)
+						defaultValue = IECore.V2f(1,1)
 					),
 				]
 			),
 
-			CompoundParameter(
+			IECore.CompoundParameter(
 				name = "compound_3",
 				description = "a compound parameter",
-				userData ={ "UI" : { "label" : StringData( "My Compound 3" ) } },
+				userData ={ "UI" : { "label" : IECore.StringData( "My Compound 3" ) } },
 				members = [
-					CompoundParameter(
+					IECore.CompoundParameter(
 						name = "compound_4",
 						description = "a compound parameter",
-						userData = { "UI" : { "label" : StringData( "My Compound 4" ) } },
+						userData = { "UI" : { "label" : IECore.StringData( "My Compound 4" ) } },
 						members = [
-							IntParameter(
+							IECore.IntParameter(
 								name = "some_int",
 								description = "Int",
 								defaultValue = 123,
-								userData = { "UI" : { "label" : StringData( "Int" ) } },
+								userData = { "UI" : { "label" : IECore.StringData( "Int" ) } },
 							),
 						]
 					)
 				]
 			),
 
-			FloatParameter(
+			IECore.FloatParameter(
 				name="blah",
 				description="blah",
 				defaultValue = 123.0
 			),
 
-			CompoundParameter(
+			IECore.CompoundParameter(
 				name = "compound_5",
 				description = "a compound parameter",
-				userData = { "UI" : { "label" : StringData( "Another Compound Parameter" ) } },
+				userData = { "UI" : { "label" : IECore.StringData( "Another Compound Parameter" ) } },
 				members = [
-					BoolParameter(
+					IECore.BoolParameter(
 						name = "bool_1",
 						description = "a boolean parameter",
 						defaultValue = True
@@ -138,6 +139,6 @@ class compoundParameters( Op ) :
 		] )
 
 	def doOperation( self, args ) :
-		return PointsPrimitive(V3fVectorData())
+		return IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
 
-registerRunTimeTyped( compoundParameters )
+IECore.registerRunTimeTyped( compoundParameters )

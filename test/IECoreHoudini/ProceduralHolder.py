@@ -37,6 +37,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -548,7 +549,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertNotEqual( len( meshRender.warnings() ), 0 )
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
-		self.assertEqual( proc.bound(), IECore.MeshPrimitive().bound() )
+		self.assertEqual( proc.bound(), IECoreScene.MeshPrimitive().bound() )
 
 		# a single CortexObject will work fine
 		meshRender.parm( "parm_mesh_nameFilter" ).set( "boxB" )
@@ -570,7 +571,7 @@ class TestProceduralHolder( IECoreHoudini.TestCase ):
 		self.assertNotEqual( len( meshRender.warnings() ), 0 )
 		proc = IECoreHoudini.FromHoudiniGeometryConverter.create( meshRender ).convert()
 		self.assertTrue( proc.isInstanceOf( IECore.TypeId.ParameterisedProcedural ) )
-		self.assertEqual( proc.bound(), IECore.MeshPrimitive().bound() )
+		self.assertEqual( proc.bound(), IECoreScene.MeshPrimitive().bound() )
 
 	def setUp( self ) :
 		IECoreHoudini.TestCase.setUp( self )

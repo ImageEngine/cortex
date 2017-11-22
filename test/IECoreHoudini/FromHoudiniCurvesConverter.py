@@ -35,6 +35,7 @@
 import os
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 
@@ -157,7 +158,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			self.assertAlmostEqual( bBox.min[i], hBBox.minvec()[i] )
 			self.assertAlmostEqual( bBox.max[i], hBBox.maxvec()[i] )
 
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
 		index = 0
 		for i in range( len( result.verticesPerCurve() ) ) :
@@ -176,7 +177,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				continue
 
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 			self.assertEqual( result[attr.name()].data.value, geo.attribValue( attr.name() ) )
 
 		sopPoints = geo.points()
@@ -185,7 +186,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				continue
 
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
@@ -196,7 +197,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 		for attr in geo.primAttribs() :
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
@@ -212,7 +213,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( len(sopVerts), result["P"].data.size() )
 		for attr in geo.vertexAttribs() :
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
 				self.assertEqual( data[i], sopVerts[i].attribValue( attr.name() ) )
@@ -252,7 +253,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		else :
 			extraPoints = 4
 
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) + extraPoints*len(geo.prims()) )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), len(geo.points()) + extraPoints*len(geo.prims()) )
 		self.assertEqual( result.verticesPerCurve().size(), len(geo.prims()) )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 
@@ -278,7 +279,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				continue
 
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 			self.assertEqual( result[attr.name()].data.value, geo.attribValue( attr.name() ) )
 
 		sopPoints = geo.points()
@@ -287,18 +288,18 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 				continue
 
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		for attr in geo.vertexAttribs() :
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 
 		sopPrims = geo.prims()
 		self.assertEqual( len(sopPrims), len(result.verticesPerCurve()) )
 
 		for attr in geo.primAttribs() :
 			self.assert_( attr.name() in result )
-			self.assertEqual( result[attr.name()].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
+			self.assertEqual( result[attr.name()].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
 
 			data = result[attr.name()].data
 			for i in range( 0, data.size() ) :
@@ -385,7 +386,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# all curves were converted as one CurvesPrimitive
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 5 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 5 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesA" )
@@ -395,7 +396,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# only the named curves were converted
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 4 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 4 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "curvesB" )
@@ -405,7 +406,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# only the named curves were converted
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 	def testAttributeFilter( self ) :

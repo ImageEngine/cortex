@@ -1,34 +1,37 @@
-from IECore import *
+import IECore
+import IECoreScene
 import hou
 
-class swapAttribute( Op ) :
+class swapAttribute( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op that replaces an attribute on one mesh with that from another.",
-			PrimitiveParameter(
+			IECoreScene.PrimitiveParameter(
 				name = "result",
 				description = "The primitive with replaced attribute.",
-				defaultValue = PointsPrimitive(V3fVectorData()),
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData() ),
 			)
 		)
 
-		self.parameters().addParameters([
-			PrimitiveParameter(
+		self.parameters().addParameters( [
+			IECoreScene.PrimitiveParameter(
 				name = "destination",
 				description = "The primitive with an attribute to be added/replaced.",
-				defaultValue = PointsPrimitive(V3fVectorData()) ),
-			PrimitiveParameter(
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
+			),
+			IECoreScene.PrimitiveParameter(
 				name = "source",
 				description = "The primitive with an attribute to use.",
-				defaultValue = PointsPrimitive(V3fVectorData()) ),
-			StringParameter(
+				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData() )
+			),
+			IECore.StringParameter(
 				name = "name",
 				description = "The name of the attribute to copy from input2 onto input1.",
-				defaultValue = "P" )
-			]
-		)
+				defaultValue = "P"
+			)
+		] )
 
 	def doOperation( self, args ) :
 		dst = args['destination'].copy()
@@ -42,4 +45,4 @@ class swapAttribute( Op ) :
 		dst[attribute] = src[attribute]
 		return dst
 
-registerRunTimeTyped( swapAttribute )
+IECore.registerRunTimeTyped( swapAttribute )

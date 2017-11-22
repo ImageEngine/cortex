@@ -37,6 +37,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -115,7 +116,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 	# test that a C++ op can be assigned using the function set
 	def testCppOp(self):
 		(op,fn) = self.testOpHolder()
-		mesh_normals = IECore.MeshNormalsOp()
+		mesh_normals = IECoreScene.MeshNormalsOp()
 		self.assert_( mesh_normals )
 		fn.setParameterised(mesh_normals)
 		self.assertEqual( fn.getParameterised().typeName(), "MeshNormalsOp" )
@@ -494,7 +495,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "torusGroup" } ) )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 100 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
 		group1.bypass( True )
 		group2.bypass( True )
@@ -505,7 +506,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 106 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 106 )
 
 		## \todo: keep the names and convert in PrimitiveGroup mode. see todo in FromHoudiniGroupConverter.cpp
 
@@ -518,7 +519,7 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 		self.assertEqual( fn.getOp()['input'].getValue().typeId(), IECore.TypeId.Group )
 		self.assertEqual( result.typeId(), IECore.TypeId.MeshPrimitive )
 		self.assertEqual( result.blindData(), IECore.CompoundData( { "name" : "boxGroup" } ) )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
 
 	def testInputConnectionsSaveLoad( self ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
@@ -885,9 +886,9 @@ class TestOpHolder( IECoreHoudini.TestCase ):
 				self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
 				self.assertTrue( child.arePrimitiveVariablesValid() )
 				if child.blindData()["name"].value in passThrough :
-					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 )
+					self.assertEqual( child.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 )
 				else :
-					self.assertEqual( child.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 6 + numMergedFaces )
+					self.assertEqual( child.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 6 + numMergedFaces )
 
 		# torus is merged with each box
 		verify( numMergedFaces = 100 )

@@ -32,34 +32,35 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
+import IECoreScene
 
-class multiple( ParameterisedProcedural ) :
+class multiple( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
-		ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
+		IECoreScene.ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
 		self.parameters().addParameters( [
-			MeshPrimitiveParameter(
+			IECoreScene.MeshPrimitiveParameter(
 				name = "mesh",
 				description = "A mesh (Houdini polygons)",
-				defaultValue = MeshPrimitive(),
+				defaultValue = IECoreScene.MeshPrimitive(),
 			),
-			PointsPrimitiveParameter(
+			IECoreScene.PointsPrimitiveParameter(
 				name = "points",
 				description = "Points",
-				defaultValue = PointsPrimitive( 0 ),
+				defaultValue = IECoreScene.PointsPrimitive( 0 ),
 			),
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "meshOnlyObject",
 				description = "A mesh (Houdini polygons)",
-				defaultValue = MeshPrimitive(),
-				types = [ TypeId.MeshPrimitive ]
+				defaultValue = IECoreScene.MeshPrimitive(),
+				types = [ IECore.TypeId.MeshPrimitive ]
 			),
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "meshPointsOrGroupObject",
 				description = "A mesh (Houdini polygons) or points",
-				defaultValue = MeshPrimitive(),
-				types = [ TypeId.MeshPrimitive, TypeId.PointsPrimitive, TypeId.Group ]
+				defaultValue = IECoreScene.MeshPrimitive(),
+				types = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.Group ]
 			),
 		] )
 
@@ -69,7 +70,7 @@ class multiple( ParameterisedProcedural ) :
 		meshPointsOrGroupBound = args['meshPointsOrGroupObject'].bound()
 		meshOnlyBound = args['meshOnlyObject'].bound()
 
-		bound = Box3f( V3f( 0 ), V3f( 0 ) )
+		bound = IECore.Box3f( IECore.V3f( 0 ), IECore.V3f( 0 ) )
 		bound.min = min( min( min( meshBound.min, pointsBound.min ), meshPointsOrGroupBound.min ), meshOnlyBound.min )
 		bound.max = max( max( max( meshBound.max, pointsBound.max ), meshPointsOrGroupBound.max ), meshOnlyBound.max )
 
@@ -84,4 +85,4 @@ class multiple( ParameterisedProcedural ) :
 		args['meshPointsOrGroupObject'].render( renderer )
 		args['meshOnlyObject'].render( renderer )
 
-registerRunTimeTyped( multiple )
+IECore.registerRunTimeTyped( multiple )

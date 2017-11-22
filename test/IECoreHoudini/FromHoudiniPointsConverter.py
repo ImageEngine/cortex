@@ -37,6 +37,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -123,7 +124,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		torus = self.createTorus()
 		converter = IECoreHoudini.FromHoudiniPointsConverter( torus )
 		result = converter.convert()
-		self.assertEqual( result.typeId(), IECore.PointsPrimitive.staticTypeId() )
+		self.assertEqual( result.typeId(), IECoreScene.PointsPrimitive.staticTypeId() )
 
 		bbox = result.bound()
 		self.assertEqual( bbox.min.x, -2.0 )
@@ -241,19 +242,19 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		# test point attributes
 		self.assert_( "P" in result )
 		self.assertEqual( result['P'].data.typeId(), IECore.TypeId.V3fVectorData )
-		self.assertEqual( result['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( result['P'].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( result['P'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result['P'].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assert_( "N" in result )
 		self.assertEqual( result['N'].data.typeId(), IECore.TypeId.V3fVectorData )
-		self.assertEqual( result['N'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( result['N'].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( result['N'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result['N'].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( result["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		# test detail attributes
 		self.assert_( "detail_i3" in result )
 		self.assertEqual( result['detail_i3'].data.typeId(), IECore.TypeId.V3iData )
-		self.assertEqual( result['detail_i3'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result['detail_i3'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result['detail_i3'].data.value.x, 123 )
 		self.assertEqual( result['detail_i3'].data.value.y, 456 )
 		self.assertEqual( result['detail_i3'].data.value.z, 789 )
@@ -485,19 +486,19 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		# test point attributes
 		self.assert_( "P" in result )
 		self.assertEqual( result['P'].data.typeId(), IECore.TypeId.V3fVectorData )
-		self.assertEqual( result['P'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( result['P'].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( result['P'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result['P'].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( result["P"].data.getInterpretation(), IECore.GeometricData.Interpretation.Point )
 		self.assert_( "N" in result )
 		self.assertEqual( result['N'].data.typeId(), IECore.TypeId.V3fVectorData )
-		self.assertEqual( result['N'].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-		self.assertEqual( result['N'].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+		self.assertEqual( result['N'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result['N'].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 		self.assertEqual( result["N"].data.getInterpretation(), IECore.GeometricData.Interpretation.Normal )
 
 		# test detail attributes
 		self.assert_( "detail_i3" in result )
 		self.assertEqual( result['detail_i3'].data.typeId(), IECore.TypeId.V3iData )
-		self.assertEqual( result['detail_i3'].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result['detail_i3'].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result['detail_i3'].data.value.x, 123 )
 		self.assertEqual( result['detail_i3'].data.value.y, 456 )
 		self.assertEqual( result['detail_i3'].data.value.z, 789 )
@@ -505,10 +506,10 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		# test primitive attributes
 		self.assert_( "Cs" in result )
 		self.assertEqual( result["Cs"].data.typeId(), IECore.TypeId.Color3fVectorData )
-		self.assertEqual( result["Cs"].interpolation, IECore.PrimitiveVariable.Interpolation.Uniform )
-		self.assertEqual( result["Cs"].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( result["Cs"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Uniform )
+		self.assertEqual( result["Cs"].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
-		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) ) :
+		for i in range( 0, result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) ) :
 			for j in range( 0, 3 ) :
 				self.assert_( result["Cs"].data[i][j] >= 0.0 )
 				self.assert_( result["Cs"].data[i][j] <= 1.0 )
@@ -517,21 +518,21 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		attrs = [ "vert_f1", "vert_f2", "vert_f3", "orient", "quat_2", "vert_i1", "vert_i2", "vert_i3", "vert_v3f" ]
 		for a in attrs :
 			self.assert_( a in result )
-			self.assertEqual( result[a].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-			self.assertEqual( result[a].data.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+			self.assertEqual( result[a].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[a].data.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 
 		# test indexed vertex attributes
 		for a in [ "vertString", "vertString2" ] :
 			self.assert_( a in result )
-			self.assertEqual( result[a].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
-			self.assertEqual( result[a].indices.size(), result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) )
+			self.assertEqual( result[a].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+			self.assertEqual( result[a].indices.size(), result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) )
 
 		self.assertEqual( result["vert_f1"].data.typeId(), IECore.FloatVectorData.staticTypeId() )
 		self.assertEqual( result["vert_f2"].data.typeId(), IECore.V2fVectorData.staticTypeId() )
 		self.assertEqual( result["vert_f3"].data.typeId(), IECore.V3fVectorData.staticTypeId() )
 		self.assertEqual( result["orient"].data.typeId(), IECore.QuatfVectorData.staticTypeId() )
 
-		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
+		for i in range( 0, result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
 			for j in range( 0, 3 ) :
 				self.assert_( result["vert_f3"].data[i][j] >= 0.0 )
 				self.assert_( result["vert_f3"].data[i][j] < 400.1 )
@@ -550,16 +551,16 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["vert_i2"].data.typeId(), IECore.V2iVectorData.staticTypeId() )
 		self.assertEqual( result["vert_i3"].data.typeId(), IECore.V3iVectorData.staticTypeId() )
 
-		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
+		for i in range( 0, result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
 			for j in range( 0, 3 ) :
 				self.assert_( result["vert_i3"].data[i][j] < 10 )
 
 		self.assertEqual( result["vert_v3f"].data.typeId(), IECore.V3fVectorData.staticTypeId() )
 
 		self.assertEqual( result["vertString"].data.typeId(), IECore.TypeId.StringVectorData )
-		self.assertEqual( result["vertString"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["vertString"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( result["vertString"].indices.typeId(), IECore.TypeId.IntVectorData )
-		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
+		for i in range( 0, result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
 			index = result["vertString"].indices[i]
 			self.assertEqual( index, i )
 			self.assertEqual( result["vertString"].data[index], "string %06d!" % index )
@@ -567,11 +568,11 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		# make sure the string tables are alphabetically sorted:
 		self.assertEqual( result["vertString2"].data, IECore.StringVectorData( ['a','b','c','d','e','f','g'] ) )
 		stringVals = [ 'd','c','e','a','g','f','b' ]
-		for i in range( 0, result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ) ) :
+		for i in range( 0, result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ) ) :
 			index = result["vertString2"].indices[i]
 			self.assertEqual( result["vertString2"].data[ index ], stringVals[ i % 7 ] )
 
-		self.assertEqual( result["m44"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["m44"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( result["m44"].data.typeId(), IECore.M44fVectorData.staticTypeId() )
 
 		matrixScale = IECore.M44f.extractSHRT( result["m44"].data[0] )[0]
@@ -581,7 +582,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
 		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
 
-		self.assertEqual( result["detail_m44"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["detail_m44"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result["detail_m44"].data.typeId(), IECore.M44fData.staticTypeId() )
 
 		matrixScale = IECore.M44f.extractSHRT( result["detail_m44"].data.value )[0]
@@ -591,7 +592,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
 		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
 
-		self.assertEqual( result["m33"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["m33"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( result["m33"].data.typeId(), IECore.M33fVectorData.staticTypeId() )
 
 		m3 = result["m33"].data[0]
@@ -607,7 +608,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertTrue( matrixRot.equalWithRelError( IECore.V3f( math.pi / 6, math.pi / 4, math.pi / 3 ), 1.e-5 ) )
 		self.assertTrue( matrixScale.equalWithRelError( IECore.V3f( 3, 4, 5 ), 1.e-5 ) )
 
-		self.assertEqual( result["detail_m33"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["detail_m33"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( result["detail_m33"].data.typeId(), IECore.M33fData.staticTypeId() )
 
 		m3 = result["detail_m33"].data.value
@@ -630,7 +631,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		points = self.createPoints()
 		converter = IECoreHoudini.FromHoudiniPointsConverter( points )
 		result = converter.convert()
-		self.assertEqual( result.typeId(), IECore.PointsPrimitive.staticTypeId() )
+		self.assertEqual( result.typeId(), IECoreScene.PointsPrimitive.staticTypeId() )
 		self.assertEqual( points.parm('npts').eval(), result.numPoints )
 		self.assert_( "P" in result.keys() )
 		self.assert_( "N" in result.keys() )
@@ -662,7 +663,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.FloatVectorData )
 		self.assert_( result["test_attribute"].data[0] > 123.0 )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # integer
@@ -670,7 +671,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.IntVectorData )
 		self.assertEqual( result["test_attribute"].data[0], 123 )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(0) # float
@@ -680,7 +681,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2fVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V2f( 123.456, 456.789 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # int
@@ -688,7 +689,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2iVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V2i( 123, 456 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(0) # float
@@ -698,7 +699,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3fVectorData )
 		self.assertEqual( result["test_attribute"].data[0],IECore.V3f( 123.456, 456.789, 999.999 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # int
@@ -706,7 +707,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3iVectorData )
 		self.assertEqual( result["test_attribute"].data[0], IECore.V3i( 123, 456, 999 ) )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set( 3 ) # string
@@ -715,7 +716,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringVectorData )
 		self.assertEqual( result["test_attribute"].data[10], "string 000010!" )
 		self.assertEqual( result["test_attribute"].data.size(), 5000 )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( result["test_attribute"].indices[10], 10 )
 		self.assertEqual( result["test_attribute"].indices.size(), 5000 )
 		self.assert_( result.arePrimitiveVariablesValid() )
@@ -729,14 +730,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		attr.parm("value1").set(123.456)
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.FloatData )
 		self.assert_( result["test_attribute"].data > IECore.FloatData( 123.0 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # integer
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.IntData )
 		self.assertEqual( result["test_attribute"].data, IECore.IntData( 123 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(0) # float
@@ -745,14 +746,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2fData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V2f( 123.456, 456.789 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # int
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V2iData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V2i( 123, 456 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(0) # float
@@ -761,14 +762,14 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3fData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V3f( 123.456, 456.789, 999.999 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set(1) # int
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.V3iData )
 		self.assertEqual( result["test_attribute"].data.value, IECore.V3i( 123, 456, 999 ) )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		attr.parm("type").set( 3 ) # string
@@ -776,7 +777,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		result = IECoreHoudini.FromHoudiniPointsConverter( attr ).convert()
 		self.assertEqual( result["test_attribute"].data.typeId(), IECore.TypeId.StringData )
 		self.assertEqual( result["test_attribute"].data.value, "string!" )
-		self.assertEqual( result["test_attribute"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( result["test_attribute"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 	# testing that float[4] doesn't work!
@@ -865,13 +866,13 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		points = converter.convert()
 
-		self.assertEqual( type(points), IECore.PointsPrimitive )
-		self.assertEqual( points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 21 )
-		self.assertEqual( points["float3detail"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( type(points), IECoreScene.PointsPrimitive )
+		self.assertEqual( points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 21 )
+		self.assertEqual( points["float3detail"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( type(points["float3detail"].data), IECore.V3fData )
 		self.assert_( points["float3detail"].data.value.equalWithRelError( IECore.V3f( 1, 2, 3 ), 1e-10 ) )
 		self.assertEqual( type(points["float3point"].data), IECore.V3fVectorData )
-		self.assertEqual( points["float3point"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( points["float3point"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		for p in points["float3point"].data :
 			self.assert_( p.equalWithRelError( IECore.V3f( 1, 2, 3 ), 1e-10 ) )
 
@@ -898,12 +899,12 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniPointsConverter( popnet )
 		points = converter.convert()
 
-		self.assertEqual( type(points), IECore.PointsPrimitive )
-		self.assertEqual( points.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 24 )
-		self.assertEqual( points["accel"].interpolation, IECore.PrimitiveVariable.Interpolation.Vertex )
+		self.assertEqual( type(points), IECoreScene.PointsPrimitive )
+		self.assertEqual( points.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 24 )
+		self.assertEqual( points["accel"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( type(points["accel"].data), IECore.V3fVectorData )
 		self.assertEqual( points["accel"].data.getInterpretation(), IECore.GeometricData.Interpretation.Vector )
-		self.assertEqual( points["nextid"].interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( points["nextid"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( points["nextid"].data, IECore.IntData( 25 ) )
 		self.assertTrue( points.arePrimitiveVariablesValid() )
 
@@ -934,8 +935,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# both shapes were converted as one PointsPrimitive
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5008 )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 5008 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "points" )
@@ -945,7 +946,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# only the named points were converted
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 5000 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 5000 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECore.TypeId.PointsPrimitive )
@@ -955,8 +956,8 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.blindData(), IECore.CompoundData() )
 		self.assertFalse( "name" in result )
 		# only the named points were converted
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex ), 8 )
-		self.assertEqual( result.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ), 1 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 8 )
+		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 1 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
 	def testAttributeFilter( self ) :

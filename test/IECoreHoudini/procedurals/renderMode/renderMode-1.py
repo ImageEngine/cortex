@@ -40,7 +40,7 @@
 #
 #=====
 
-from IECore import *
+import IECore
 import IECoreGL
 import IECoreRI
 
@@ -50,7 +50,7 @@ class renderMode(ParameterisedProcedural) :
                ParameterisedProcedural.__init__( self, "RenderMode cookbook example." )
 
        def doBound(self, args) :
-               return Box3f( V3f( -1, -1, -1 ), V3f( 1, 1, 1 ) )
+               return IECore.Box3f( IECore.V3f( -1, -1, -1 ), IECore.V3f( 1, 1, 1 ) )
 
        def doRenderState(self, renderer, args) :
                pass
@@ -59,11 +59,11 @@ class renderMode(ParameterisedProcedural) :
 
                # This checks the renderer against the GL renderer type
                if renderer.typeId()==IECoreGL.Renderer.staticTypeId():
-                       MeshPrimitive.createBox( Box3f( V3f(-1), V3f(1) ) ).render( renderer )
+                       MeshPrimitive.createBox( IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) ) ).render( renderer )
 
                # This checks the renderer against the RenderMan renderer type
                if renderer.typeId()==IECoreRI.Renderer.staticTypeId():
                        renderer.sphere( -1, 1, -1, 360, {} )
 
 # register
-registerRunTimeTyped( renderMode )
+IECore.registerRunTimeTyped( renderMode )

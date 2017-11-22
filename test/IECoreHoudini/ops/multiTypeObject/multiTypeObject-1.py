@@ -1,34 +1,35 @@
-from IECore import *
+import IECore
+import IECoreScene
 
-class multiTypeObject( Op ) :
+class multiTypeObject( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op that returns either a MeshPrimitive or a PointsPrimitive, depending on the input type.",
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "result",
 				description = "",
-				defaultValue = Group(),
-				type = TypeId.Primitive
+				defaultValue = IECoreScene.Group(),
+				type = IECore.TypeId.Primitive
 			)
 		)
 
 		self.parameters().addParameter(
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "input",
 				description = "An object parameter that accepts multiple types.",
-				defaultValue = V3fVectorData([]),
-				types = [ TypeId.Primitive, TypeId.V3fVectorData ]
+				defaultValue = IECore.V3fVectorData([]),
+				types = [ IECore.TypeId.Primitive, IECore.TypeId.V3fVectorData ]
 			),
 		)
 
 	def doOperation( self, args ) :
 		obj = args['input']
 
-		if isinstance( obj, V3fVectorData ) :
-			return PointsPrimitive( obj )
+		if isinstance( obj, IECore.V3fVectorData ) :
+			return IECoreScene.PointsPrimitive( obj )
 
 		return obj
 
-registerRunTimeTyped( multiTypeObject )
+IECore.registerRunTimeTyped( multiTypeObject )

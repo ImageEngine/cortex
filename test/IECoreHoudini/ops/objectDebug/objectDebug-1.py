@@ -1,31 +1,31 @@
-from IECore import *
+import IECore
 
-class objectDebug( Op ) :
+class objectDebug( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op that prints out debug information about an object parameter.",
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "result",
 				description = "A pass through of the input object parameter.",
-				defaultValue = NullObject(),
-				type = TypeId.Object
+				defaultValue = IECore.NullObject(),
+				type = IECore.TypeId.Object
 			)
 		)
 
 		self.parameters().addParameter(
 
-			ObjectParameter(
+			IECore.ObjectParameter(
 				name = "input",
 				description = "The input object.",
-				defaultValue = NullObject(),
-				type = TypeId.Object
+				defaultValue = IECore.NullObject(),
+				type = IECore.TypeId.Object
 			)
 		)
 		self.parameters().addParameter(
 
-			BoolParameter(
+			IECore.BoolParameter(
 				name = "quiet",
 				description = "Silences the debug output.",
 				defaultValue = False
@@ -41,7 +41,7 @@ class objectDebug( Op ) :
 			print object.typeName(), object
 
 			# For meshes & points we can print out more verbose information
-			if object.typeId()==TypeId.MeshPrimitive or object.typeId()==TypeId.PointsPrimitive:
+			if object.typeId()==IECore.TypeId.MeshPrimitive or object.typeId()==IECore.TypeId.PointsPrimitive:
 				for k in object.keys():
 					primvar = object[k]
 					print "[%s]" % k, primvar.interpolation, primvar.data.typeName()
@@ -49,4 +49,4 @@ class objectDebug( Op ) :
 
 		return object
 
-registerRunTimeTyped( objectDebug )
+IECore.registerRunTimeTyped( objectDebug )

@@ -34,6 +34,7 @@
 
 import hou
 import IECore
+import IECoreScene
 import IECoreHoudini
 import unittest
 import os
@@ -69,7 +70,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 			pData.extend( p )
 
-		curves = IECore.CurvesPrimitive( vertsPerCurve, basis, periodic )
+		curves = IECoreScene.CurvesPrimitive( vertsPerCurve, basis, periodic )
 
 		floatData = IECore.FloatData( 1.5 )
 		v2fData = IECore.V2fData( IECore.V2f( 1.5, 2.5 ) )
@@ -90,19 +91,19 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		v3iVectorData = IECore.V3iVectorData( [ IECore.V3i( x, -x, x*2 ) for x in intRange ] )
 		stringVectorData = IECore.StringVectorData( [ "string number %06d!" % x for x in intRange ] )
 
-		detailInterpolation = IECore.PrimitiveVariable.Interpolation.Constant
-		pointInterpolation = IECore.PrimitiveVariable.Interpolation.Vertex
-		primitiveInterpolation = IECore.PrimitiveVariable.Interpolation.Uniform
+		detailInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Constant
+		pointInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Vertex
+		primitiveInterpolation = IECoreScene.PrimitiveVariable.Interpolation.Uniform
 
 		# add all valid detail attrib types
-		curves["floatDetail"] = IECore.PrimitiveVariable( detailInterpolation, floatData )
-		curves["v2fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2fData )
-		curves["v3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3fData )
-		curves["color3fDetail"] = IECore.PrimitiveVariable( detailInterpolation, color3fData )
-		curves["intDetail"] = IECore.PrimitiveVariable( detailInterpolation, intData )
-		curves["v2iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v2iData )
-		curves["v3iDetail"] = IECore.PrimitiveVariable( detailInterpolation, v3iData )
-		curves["stringDetail"] = IECore.PrimitiveVariable( detailInterpolation, stringData )
+		curves["floatDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, floatData )
+		curves["v2fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2fData )
+		curves["v3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3fData )
+		curves["color3fDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, color3fData )
+		curves["intDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, intData )
+		curves["v2iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v2iData )
+		curves["v3iDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, v3iData )
+		curves["stringDetail"] = IECoreScene.PrimitiveVariable( detailInterpolation, stringData )
 
 		# add all valid point attrib types
 		if not periodic and basis == IECore.CubicBasisf.bSpline() :
@@ -129,34 +130,34 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 					datas[j].extend( rawDatas[j][index:index+8] )
 					datas[j].extend( [ rawDatas[j][index+7], rawDatas[j][index+7] ] )
 
-			curves["P"] = IECore.PrimitiveVariable( pointInterpolation, modPData )
-			curves["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatPointData )
-			curves["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation,v2fPointData )
-			curves["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fPointData )
-			curves["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fPointData )
-			curves["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intPointData )
-			curves["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iPointData )
-			curves["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iPointData )
+			curves["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, modPData )
+			curves["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatPointData )
+			curves["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation,v2fPointData )
+			curves["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fPointData )
+			curves["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fPointData )
+			curves["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intPointData )
+			curves["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iPointData )
+			curves["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iPointData )
 		else :
-			curves["P"] = IECore.PrimitiveVariable( pointInterpolation, pData )
-			curves["floatPoint"] = IECore.PrimitiveVariable( pointInterpolation, floatVectorData[:8*numCurves] )
-			curves["v2fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2fVectorData[:8*numCurves] )
-			curves["v3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3fVectorData[:8*numCurves] )
-			curves["color3fPoint"] = IECore.PrimitiveVariable( pointInterpolation, color3fVectorData[:8*numCurves] )
-			curves["intPoint"] = IECore.PrimitiveVariable( pointInterpolation, intVectorData[:8*numCurves] )
-			curves["v2iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v2iVectorData[:8*numCurves] )
-			curves["v3iPoint"] = IECore.PrimitiveVariable( pointInterpolation, v3iVectorData[:8*numCurves] )
-			curves["stringPoint"] = IECore.PrimitiveVariable( pointInterpolation, stringVectorData[:8*numCurves], IECore.IntVectorData( range( 0, 8*numCurves ) ) )
+			curves["P"] = IECoreScene.PrimitiveVariable( pointInterpolation, pData )
+			curves["floatPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, floatVectorData[:8*numCurves] )
+			curves["v2fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2fVectorData[:8*numCurves] )
+			curves["v3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3fVectorData[:8*numCurves] )
+			curves["color3fPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, color3fVectorData[:8*numCurves] )
+			curves["intPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, intVectorData[:8*numCurves] )
+			curves["v2iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v2iVectorData[:8*numCurves] )
+			curves["v3iPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, v3iVectorData[:8*numCurves] )
+			curves["stringPoint"] = IECoreScene.PrimitiveVariable( pointInterpolation, stringVectorData[:8*numCurves], IECore.IntVectorData( range( 0, 8*numCurves ) ) )
 
 		# add all valid primitive attrib types
-		curves["floatPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, floatVectorData[:numCurves] )
-		curves["v2fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:numCurves] )
-		curves["v3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:numCurves] )
-		curves["color3fPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:numCurves] )
-		curves["intPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, intVectorData[:numCurves] )
-		curves["v2iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:numCurves] )
-		curves["v3iPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:numCurves] )
-		curves["stringPrim"] = IECore.PrimitiveVariable( primitiveInterpolation, stringVectorData[:numCurves], IECore.IntVectorData( range( 0, numCurves ) ) )
+		curves["floatPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, floatVectorData[:numCurves] )
+		curves["v2fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2fVectorData[:numCurves] )
+		curves["v3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3fVectorData[:numCurves] )
+		curves["color3fPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, color3fVectorData[:numCurves] )
+		curves["intPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, intVectorData[:numCurves] )
+		curves["v2iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v2iVectorData[:numCurves] )
+		curves["v3iPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, v3iVectorData[:numCurves] )
+		curves["stringPrim"] = IECoreScene.PrimitiveVariable( primitiveInterpolation, stringVectorData[:numCurves], IECore.IntVectorData( range( 0, numCurves ) ) )
 
 		self.assert_( curves.arePrimitiveVariablesValid() )
 
@@ -335,8 +336,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			self.assertEqual( tuple(prim[key].data.value), geo.attribValue( key ) )
 
 		sopPoints = geo.points()
-		numPoints = prim.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
-		origNumPoints = origSopPrim.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		numPoints = prim.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = origSopPrim.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( len(sopPoints), origNumPoints + numPoints )
 
 		for key in [ "floatPoint", "intPoint" ] :
@@ -519,11 +520,11 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 	def testAppendingIntoExistingSop( self ) :
 		curves = self.curves()
-		curvesNumPoints = curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		curvesNumPoints = curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.curvesSop()
 
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
 		self.assert_( not sop.isHardLocked() )
@@ -533,25 +534,25 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
 
 		sop.setHardLocked( False )
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
 
 	def testAppendingIntoLockedSop( self ) :
 		curves = self.curves()
-		curvesNumPoints = curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		curvesNumPoints = curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.curvesSop()
 
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
 		sop.setHardLocked( True )
@@ -562,14 +563,14 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
 
 		sop.setHardLocked( False )
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints )
 		self.assert_( "floatDetail" not in result.keys() )
 		self.assert_( "floatPoint" not in result.keys() )
@@ -578,12 +579,12 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
 
 		curves = self.curves()
-		curvesNumPoints = curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		curvesNumPoints = curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.curvesSop()
 		sopPath = sop.path()
 
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
 		self.assert_( not sop.isHardLocked() )
@@ -593,7 +594,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -609,7 +610,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, newSop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( newSop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -618,12 +619,12 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		hou.hipFile.clear( suppress_save_prompt=True )
 
 		curves = self.curves()
-		curvesNumPoints = curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		curvesNumPoints = curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.curvesSop()
 		sopPath = sop.path()
 
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
 		sop.setHardLocked( True )
@@ -634,7 +635,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -650,18 +651,18 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, newSop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( newSop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
 
 	def testMultipleConversions( self ) :
 		curves = self.curves()
-		curvesNumPoints = curves.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		curvesNumPoints = curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		sop = self.curvesSop()
 
 		orig = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		origNumPoints = orig.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		origNumPoints = orig.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertNotEqual( orig, curves )
 
 		self.assert_( not sop.isHardLocked() )
@@ -671,7 +672,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, orig )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -683,7 +684,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, result, multipleConversions=True )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + 2*curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -696,7 +697,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.comparePrimAndAppendedSop( curves, sop, result, multipleConversions=True )
 
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		resultNumPoints = result.variableSize( IECore.PrimitiveVariable.Interpolation.Vertex )
+		resultNumPoints = result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex )
 		self.assertEqual( resultNumPoints, origNumPoints + 3*curvesNumPoints )
 		for i in range( 0, curves["P"].data.size() ) :
 			self.assertEqual( result["P"].data[ origNumPoints + i ], curves["P"].data[i] )
@@ -724,10 +725,10 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 	def testWithUnacceptablePrimVars( self ) :
 		curves = self.curves()
-		curves["badDetail"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
-		curves["badPoint"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
-		curves["badPrim"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
-		curves["badVert"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		curves["badDetail"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Constant, IECore.TransformationMatrixfData() )
+		curves["badPoint"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		curves["badPrim"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
+		curves["badVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.DoubleVectorData( [ 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5 ] ) )
 		sop = self.emptySop()
 
 		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
@@ -812,7 +813,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 	def testVertAttribsCantBeConverted( self ) :
 		curves = self.curves()
-		curves["floatVert"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
+		curves["floatVert"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, IECore.FloatVectorData( 1 ) )
 		sop = self.emptySop()
 
 		self.assert_( IECoreHoudini.ToHoudiniCurvesConverter( curves ).convert( sop ) )
@@ -828,8 +829,8 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 	def testBadCurve( self ) :
 
-		curves = IECore.CurvesPrimitive( IECore.IntVectorData( [ 7 ] ), IECore.CubicBasisf.bSpline(), False )
-		curves['P'] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 2 ), IECore.V3f( 2 ) ] ) )
+		curves = IECoreScene.CurvesPrimitive( IECore.IntVectorData( [ 7 ] ), IECore.CubicBasisf.bSpline(), False )
+		curves['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( [ IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 0 ), IECore.V3f( 1 ), IECore.V3f( 2 ), IECore.V3f( 2 ), IECore.V3f( 2 ) ] ) )
 		self.failUnless( curves.arePrimitiveVariablesValid() )
 
 		sop = self.emptySop()
@@ -851,7 +852,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# blindData still works for backwards compatibility
 		curves.blindData()["name"] = IECore.StringData( "blindCurves" )
@@ -860,7 +861,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "blindCurves" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "blindCurves" ]), curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 		# name parameter takes preference over blindData
 		converter["name"].setTypedValue( "testCurves" )
@@ -868,7 +869,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		geo = sop.geometry()
 		nameAttr = sop.geometry().findPrimAttrib( "name" )
 		self.assertEqual( nameAttr.strings(), tuple( [ "testCurves" ] ) )
-		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECore.PrimitiveVariable.Interpolation.Uniform ) )
+		self.assertEqual( len([ x for x in geo.prims() if x.attribValue( "name" ) == "testCurves" ]), curves.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ) )
 
 	def testAttributeFilter( self ) :
 
@@ -901,9 +902,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			if key != "P" :
 				del curves[key]
 		rand = IECore.Rand32()
-		curves["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
-		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
-		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
+		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		curves["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
 
 		converter = IECoreHoudini.ToHoudiniCurvesConverter( curves )
@@ -943,9 +944,9 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 			if key != "P" :
 				del curves[key]
 		rand = IECore.Rand32()
-		curves["uv"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
-		curves["Cs"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
-		curves["width"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
+		curves["uv"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V2fVectorData( [ IECore.V2f( rand.nextf() ) for x in range( 0, 32 ) ] ) )
+		curves["Cs"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 4, IECore.GeometricData.Interpretation.Color ) )
+		curves["width"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.FloatVectorData( [ 1 ] * 32 ) )
 		curves["Pref"] = curves["P"]
 
 		self.assertTrue( curves.arePrimitiveVariablesValid() )

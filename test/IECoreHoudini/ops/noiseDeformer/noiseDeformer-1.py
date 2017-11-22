@@ -1,32 +1,33 @@
-from IECore import *
+import IECore
+import IECoreScene
 import hou
 
-class noiseDeformer( Op ) :
+class noiseDeformer( IECore.Op ) :
 
 	def __init__( self ) :
 
-		Op.__init__( self,
+		IECore.Op.__init__( self,
 			"Op that displaces verts along their normals using some noise.",
-			PrimitiveParameter(
+			IECoreScene.PrimitiveParameter(
 				name = "result",
 				description = "The primitive with displaced verts.",
-				defaultValue = PointsPrimitive(V3fVectorData()),
+				defaultValue = IECoreScene.PointsPrimitive(IECore.V3fVectorData()),
 			)
 		)
 
 		self.parameters().addParameters([
-			PrimitiveParameter(
+			IECoreScene.PrimitiveParameter(
 				name = "input",
 				description = "The primitive to work on.",
-				defaultValue = PointsPrimitive(V3fVectorData()) ),
-			FloatParameter(
+				defaultValue = IECoreScene.PointsPrimitive(IECore.V3fVectorData()) ),
+			IECore.FloatParameter(
 				name = "magnitude",
 				description = "The amount to displace by.",
 				defaultValue = 1.0 ),
-			V3fParameter(
+			IECore.V3fParameter(
 				name = "frequency",
 				description = "The frequency of the displacement noise.",
-				defaultValue = V3f(1.0) )
+				defaultValue = IECore.V3f(1.0) )
 			]
 		)
 
@@ -39,8 +40,8 @@ class noiseDeformer( Op ) :
 		if not "P" in prim:
 			raise Exception("Must have primvar 'P' in primitive!")
 		if not "N" in prim:
-			error( "Must have primvar 'N' in primitive!" )
-			return PointsPrimitive( 1 )
+			IECore.error( "Must have primvar 'N' in primitive!" )
+			return IECoreScene.PointsPrimitive( 1 )
 
 		# get our magnitude & frequency parameters
 		mag = args['magnitude'].value
@@ -51,15 +52,15 @@ class noiseDeformer( Op ) :
 		new_p = []
 		for p in p_data:
 			noise_val = mag * ( hou.hmath.noise3d( [p.x * freq.x, p.y * freq.y, p.z * freq.z] ) - hou.Vector3(.5,.5,.5) ) * 2
-			new_p.append( p + V3f( noise_val[0], noise_val[1], noise_val[2] ) )
+			new_p.append( p + IECore.V3f( noise_val[0], noise_val[1], noise_val[2] ) )
 
 		# overwrite with our new P and return from the Op
-		prim['P'] = PrimitiveVariable( PrimitiveVariable.Interpolation.Vertex, V3fVectorData( new_p ) )
+		prim['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( new_p ) )
 
 		# recalculate normals
-		if prim.typeId()==TypeId.MeshPrimitive:
-			MeshNormalsOp()( input=prim, copyInput=False )
+		if prim.typeId()==IECore.TypeId.MeshPrimitive:
+			IECoreScene.MeshNormalsOp()( input=prim, copyInput=False )
 
 		return prim
 
-registerRunTimeTyped( noiseDeformer )
+IECore.registerRunTimeTyped( noiseDeformer )

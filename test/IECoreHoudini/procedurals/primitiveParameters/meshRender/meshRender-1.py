@@ -32,17 +32,18 @@
 #
 ##########################################################################
 
-from IECore import *
+import IECore
+import IECoreScene
 
-class meshRender( ParameterisedProcedural ) :
+class meshRender( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__( self ) :
-		ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
+		IECoreScene.ParameterisedProcedural.__init__( self, "Renders all of it's input geo" )
 		self.parameters().addParameters( [
-			MeshPrimitiveParameter(
+			IECoreScene.MeshPrimitiveParameter(
 				name = "mesh",
 				description = "A mesh (Houdini polygons)",
-				defaultValue = MeshPrimitive(),
+				defaultValue = IECoreScene.MeshPrimitive(),
 			),
 		] )
 
@@ -55,4 +56,4 @@ class meshRender( ParameterisedProcedural ) :
 	def doRender( self, renderer, args ) :
 		args['mesh'].render( renderer )
 
-registerRunTimeTyped( meshRender )
+IECore.registerRunTimeTyped( meshRender )
