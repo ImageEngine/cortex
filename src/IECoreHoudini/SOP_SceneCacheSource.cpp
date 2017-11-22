@@ -39,14 +39,14 @@
 #include "UT/UT_StringMMPattern.h"
 #include "UT/UT_WorkArgs.h"
 
-#include "IECore/CoordinateSystem.h"
 #include "IECore/DespatchTypedData.h"
-#include "IECore/Group.h"
-#include "IECore/MeshPrimitive.h"
-#include "IECore/PointsPrimitive.h"
-#include "IECore/TransformOp.h"
 #include "IECore/TypeTraits.h"
-#include "IECore/VisibleRenderable.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MeshPrimitive.h"
+#include "IECoreScene/PointsPrimitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 #include "IECoreHoudini/SOP_SceneCacheSource.h"
@@ -56,6 +56,7 @@
 #include "IECoreHoudini/ToHoudiniStringAttribConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 static InternedString pName( "P" );
@@ -303,7 +304,7 @@ OP_ERROR SOP_SceneCacheSource::cookMySop( OP_Context &context )
 	return error();
 }
 
-void SOP_SceneCacheSource::loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath )
+void SOP_SceneCacheSource::loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath )
 {
 	UT_Interrupt *progress = UTgetInterrupt();
 	progress->setLongOpText( ( "Loading " + scene->name().string() ).c_str() );
@@ -650,7 +651,7 @@ bool SOP_SceneCacheSource::convertObject( const IECore::Object *object, const st
 				convertTagFilter.compile( "ObjectType:*" );
 			}
 			SceneInterface::NameList tags;
-			scene->readTags( tags, IECore::SceneInterface::LocalTag );
+			scene->readTags( tags, IECoreScene::SceneInterface::LocalTag );
 			for ( SceneInterface::NameList::const_iterator it=tags.begin(); it != tags.end(); ++it )
 			{
 				UT_String tag( *it );
@@ -754,7 +755,7 @@ MatrixTransformPtr SOP_SceneCacheSource::matrixTransform( Imath::M44d t )
 	);
 }
 
-std::string SOP_SceneCacheSource::relativePath( const IECore::SceneInterface *scene, size_t rootSize )
+std::string SOP_SceneCacheSource::relativePath( const IECoreScene::SceneInterface *scene, size_t rootSize )
 {
 	SceneInterface::Path path, relative;
 	scene->path( path );

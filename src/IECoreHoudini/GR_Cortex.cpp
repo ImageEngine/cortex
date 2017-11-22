@@ -49,7 +49,7 @@
 
 #include "IECore/Op.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/VisibleRenderable.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 #include "IECoreGL/BoxPrimitive.h"
 #include "IECoreGL/Camera.h"
@@ -145,7 +145,7 @@ IECoreGL::ConstStatePtr GR_Cortex::getDisplayState( const GR_DisplayOption *dopt
 void GR_Cortex::renderObject( const IECore::Object *object, const IECoreGL::State *displayState )
 {
 	// try and cast this to a visible renderable
-	IECore::ConstVisibleRenderablePtr renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object );
+	IECoreScene::ConstVisibleRenderablePtr renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object );
 	if ( !renderable )
 	{
 		return;

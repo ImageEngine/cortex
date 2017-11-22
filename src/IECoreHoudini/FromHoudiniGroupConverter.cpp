@@ -37,15 +37,16 @@
 #include "UT/UT_PtrArray.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/Group.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/SimpleTypedParameter.h"
+#include "IECoreScene/Group.h"
 
 #include "IECoreHoudini/DetailSplitter.h"
 #include "IECoreHoudini/FromHoudiniGroupConverter.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 #if UT_MAJOR_VERSION_INT >= 14
@@ -67,13 +68,13 @@ IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGroupConverter );
 FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> FromHoudiniGroupConverter::m_description( GroupTypeId );
 
 FromHoudiniGroupConverter::FromHoudiniGroupConverter( const GU_DetailHandle &handle ) :
-	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECore::Group." )
+	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECoreScene::Group." )
 {
 	constructCommon();
 }
 
 FromHoudiniGroupConverter::FromHoudiniGroupConverter( const SOP_Node *sop ) :
-	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECore::Group." )
+	FromHoudiniGeometryConverter( sop, "Converts a Houdini GU_Detail to an IECoreScene::Group." )
 {
 	constructCommon();
 }

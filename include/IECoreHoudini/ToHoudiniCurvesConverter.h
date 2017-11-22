@@ -35,7 +35,7 @@
 #ifndef IECOREHOUDINI_TOHOUDINICURVESCONVERTER_H
 #define IECOREHOUDINI_TOHOUDINICURVESCONVERTER_H
 
-#include "IECore/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/ToHoudiniGeometryConverter.h"
@@ -63,7 +63,7 @@ class ToHoudiniCurvesConverter : public IECoreHoudini::ToHoudiniGeometryConverte
 		virtual bool doConversion( const IECore::Object *object, GU_Detail *geo ) const;
 
 		/// Implemented to adjust Vertex interpolated PrimitiveVariables for de-duplicated end points
-		virtual IECore::PrimitiveVariable processPrimitiveVariable( const IECore::Primitive *primitive, const IECore::PrimitiveVariable &primVar ) const;
+		virtual IECoreScene::PrimitiveVariable processPrimitiveVariable( const IECoreScene::Primitive *primitive, const IECoreScene::PrimitiveVariable &primVar ) const;
 
 	private :
 

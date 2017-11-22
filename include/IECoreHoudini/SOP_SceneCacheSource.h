@@ -38,8 +38,8 @@
 #include "SOP/SOP_Node.h"
 #include "UT/UT_StringMMPattern.h"
 
-#include "IECore/SceneCache.h"
-#include "IECore/MatrixTransform.h"
+#include "IECoreScene/SceneCache.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "IECoreHoudini/SceneCacheNode.h"
 
@@ -95,15 +95,15 @@ class SOP_SceneCacheSource : public SceneCacheNode<SOP_Node>
 		// Groups, and CoordinateSystems. Updates animatedTopology and animatedPrimVars if appropriate.
 		IECore::ConstObjectPtr transformObject( const IECore::Object *object, const Imath::M44d &transform, Parameters &params );
 		// Convert the object to Houdini, optimizing for animated primitive variables if possible.
-		bool convertObject( const IECore::Object *object, const std::string &name, const IECore::SceneInterface *scene, Parameters &params );
+		bool convertObject( const IECore::Object *object, const std::string &name, const IECoreScene::SceneInterface *scene, Parameters &params );
 
-		void loadObjects( const IECore::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath );
-		IECore::MatrixTransformPtr matrixTransform( Imath::M44d t );
-		std::string relativePath( const IECore::SceneInterface *scene, size_t rootSize );
+		void loadObjects( const IECoreScene::SceneInterface *scene, Imath::M44d transform, double time, Space space, Parameters &params, size_t rootSize, std::string currentPath );
+		IECoreScene::MatrixTransformPtr matrixTransform( Imath::M44d t );
+		std::string relativePath( const IECoreScene::SceneInterface *scene, size_t rootSize );
 
 		struct InternedStringSort
 		{
-			bool operator() ( const IECore::SceneInterface::Name &i, const IECore::SceneInterface::Name &j );
+			bool operator() ( const IECoreScene::SceneInterface::Name &i, const IECoreScene::SceneInterface::Name &j );
 		};
 
 		/// Utility for detecting geometric primitive variables that need transforming

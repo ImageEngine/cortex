@@ -46,15 +46,15 @@
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
 
-#include "IECore/CoordinateSystem.h"
-#include "IECore/Group.h"
 #include "IECore/HexConversion.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/MemoryIndexedIO.h"
-#include "IECore/ParameterisedProcedural.h"
-#include "IECore/Primitive.h"
-#include "IECore/TransformOp.h"
-#include "IECore/VisibleRenderable.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/MatrixTransform.h"
+#include "IECoreScene/ParameterisedProcedural.h"
+#include "IECoreScene/Primitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/VisibleRenderable.h"
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
@@ -72,6 +72,7 @@
 #endif
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 GEO_CortexPrimitive::GEO_CortexPrimitive( GA_Detail *detail, GA_Offset offset )
@@ -271,7 +272,7 @@ int GEO_CortexPrimitive::getBBox( UT_BoundingBox *bbox ) const
 		return 0;
 	}
 
-	const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( m_object.get() );
+	const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( m_object.get() );
 	if ( !renderable )
 	{
 		return 0;
@@ -399,7 +400,7 @@ const IECore::Object *GEO_CortexPrimitive::getObject() const
 
 void GEO_CortexPrimitive::setObject( const IECore::Object *object )
 {
-	if ( object->isInstanceOf( IECore::ParameterisedProcedural::staticTypeId() ) )
+	if ( object->isInstanceOf( IECoreScene::ParameterisedProcedural::staticTypeId() ) )
 	{
 		m_object = const_cast<IECore::Object *>( object );
 	}
@@ -509,15 +510,15 @@ GEO_CortexPrimitive *GEO_CortexPrimitive::build( GU_Detail *geo, const IECore::O
 
 	result->setObject( object );
 
-	if ( const IECore::VisibleRenderable *renderable = IECore::runTimeCast<const IECore::VisibleRenderable>( object ) )
+	if ( const IECoreScene::VisibleRenderable *renderable = IECore::runTimeCast<const IECoreScene::VisibleRenderable>( object ) )
 	{
 		geo->setPos3( point, IECore::convert<UT_Vector3>( renderable->bound().center() ) );
 		return result;
 	}
 
-	if ( const IECore::CoordinateSystem *coord = IECore::runTimeCast<const IECore::CoordinateSystem>( object ) )
+	if ( const IECoreScene::CoordinateSystem *coord = IECore::runTimeCast<const IECoreScene::CoordinateSystem>( object ) )
 	{
-		if ( const IECore::Transform *transform = coord->getTransform() )
+		if ( const IECoreScene::Transform *transform = coord->getTransform() )
 		{
 			geo->setPos3( point, IECore::convert<UT_Vector3>( transform->transform().translation() ) );
 		}
@@ -637,7 +638,7 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 	{
 		GU_DetailHandle handle;
 		handle.allocateAndSet( (GU_Detail*)getParent(), false );
-		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECore::MeshPrimitive>( m_object.get() ) );
+		ToHoudiniPolygonsConverterPtr converter = new ToHoudiniPolygonsConverter( IECore::runTimeCast<const IECoreScene::MeshPrimitive>( m_object.get() ) );
 		if ( !converter->convert( handle ) )
 		{
 			return 0;

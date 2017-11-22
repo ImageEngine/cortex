@@ -48,6 +48,7 @@
 #include "IECoreHoudini/OBJ_SceneCacheTransform.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 const char *OBJ_SceneCacheTransform::typeName = "ieSceneCacheTransform";
@@ -395,7 +396,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 
 		std::string file;
 		bool visible = false;
-		if ( IECore::ConstSceneInterfacePtr scene = xform->scene() )
+		if ( IECoreScene::ConstSceneInterfacePtr scene = xform->scene() )
 		{
 			if ( tagged( scene.get(), tagFilter ) )
 			{
@@ -423,7 +424,7 @@ void OBJ_SceneCacheTransform::pushToHierarchy()
 
 		std::string file;
 		bool visible = false;
-		if ( IECore::ConstSceneInterfacePtr scene = geo->scene() )
+		if ( IECoreScene::ConstSceneInterfacePtr scene = geo->scene() )
 		{
 			visible = tagged( scene.get(), tagFilter );
 			if ( visible )

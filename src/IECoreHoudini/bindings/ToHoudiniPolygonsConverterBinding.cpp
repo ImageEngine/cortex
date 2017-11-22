@@ -45,6 +45,6 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindToHoudiniPolygonsConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniPolygonsConverter>()
-		.def(init<IECore::Primitive*>())
+		.def(init<IECoreScene::Primitive*>())
 	;
 }

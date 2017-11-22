@@ -92,7 +92,7 @@ class SceneCacheNodeHelper
 			return reinterpret_cast<SceneCacheNode<OP_Node>* >( node );
 		}
 
-		IECore::SceneInterfacePtr scene() const
+		IECoreScene::SceneInterfacePtr scene() const
 		{
 			if ( !hasNode() )
 			{
@@ -101,9 +101,9 @@ class SceneCacheNodeHelper
 
 			if ( SceneCacheNode<OP_Node> *node = sceneNode( m_handle.node() ) )
 			{
-				if ( IECore::ConstSceneInterfacePtr s = node->scene() )
+				if ( IECoreScene::ConstSceneInterfacePtr s = node->scene() )
 				{
-					return const_cast<IECore::SceneInterface*>( s.get() );
+					return const_cast<IECoreScene::SceneInterface*>( s.get() );
 				}
 			}
 

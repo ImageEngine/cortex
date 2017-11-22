@@ -45,6 +45,6 @@ using namespace IECoreHoudini;
 void IECoreHoudini::bindToHoudiniCurvesConverter()
 {
 	IECorePython::RunTimeTypedClass<ToHoudiniCurvesConverter>()
-		.def(init<IECore::Primitive*>())
+		.def(init<IECoreScene::Primitive*>())
 	;
 }

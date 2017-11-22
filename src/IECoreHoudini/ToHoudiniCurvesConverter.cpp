@@ -41,6 +41,7 @@
 #include "IECoreHoudini/TypeTraits.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCurvesConverter );
@@ -48,7 +49,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCurvesConverter );
 ToHoudiniGeometryConverter::Description<ToHoudiniCurvesConverter> ToHoudiniCurvesConverter::m_description( CurvesPrimitiveTypeId );
 
 ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const IECore::Object *object ) :
-	ToHoudiniGeometryConverter( object, "Converts an IECore::CurvesPrimitive to a Houdini GU_Detail." )
+	ToHoudiniGeometryConverter( object, "Converts an IECoreScene::CurvesPrimitive to a Houdini GU_Detail." )
 {
 }
 
@@ -120,7 +121,7 @@ bool ToHoudiniCurvesConverter::doConversion( const Object *object, GU_Detail *ge
 	return true;
 }
 
-PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECore::Primitive *primitive, const PrimitiveVariable &primVar ) const
+PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECoreScene::Primitive *primitive, const PrimitiveVariable &primVar ) const
 {
 	const CurvesPrimitive *curves = static_cast<const CurvesPrimitive *>( primitive );
 	if ( !curves )
@@ -130,11 +131,11 @@ PrimitiveVariable ToHoudiniCurvesConverter::processPrimitiveVariable( const IECo
 
 	// adjust for duplicated end points
 	bool duplicatedEnds = !curves->periodic() && ( curves->basis() == CubicBasisf::bSpline() );
-	if ( duplicatedEnds && primVar.interpolation == IECore::PrimitiveVariable::Vertex )
+	if ( duplicatedEnds && primVar.interpolation == IECoreScene::PrimitiveVariable::Vertex )
 	{
 		RemoveDuplicateEnds func( curves->verticesPerCurve()->readable() );
 		DataPtr data = despatchTypedData<RemoveDuplicateEnds, TypeTraits::IsVectorAttribTypedData, DespatchTypedDataIgnoreError>( primVar.data.get(), func );
-		return PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+		return PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, data );
 	}
 
 	return primVar;

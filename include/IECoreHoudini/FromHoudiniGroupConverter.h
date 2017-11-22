@@ -35,7 +35,7 @@
 #ifndef IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINIGROUPCONVERTER_H
 
-#include "IECore/Group.h"
+#include "IECoreScene/Group.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
@@ -88,10 +88,10 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		void constructCommon();
 
 		/// Converts the contents of the GA_PrimitiveGroup into a VisibleRenderable
-		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECore::VisibleRenderablePtr &result, const IECore::CompoundObject *operands ) const;
+		size_t doGroupConversion( const GU_Detail *geo, GA_PrimitiveGroup *group, IECoreScene::VisibleRenderablePtr &result, const IECore::CompoundObject *operands ) const;
 
 		/// Converts the given GA_PrimitiveGroup to an IECore::Primitive and adds it to the IECore::Group
-		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECore::GroupPtr &result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
+		void convertAndAddPrimitive( GU_Detail *geo, GA_PrimitiveGroup *group, IECoreScene::GroupPtr &result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
 
 		/// Regroups a single GA_PrimitiveGroup into several groups, based on GA_PrimitiveTypeId
 		/// @param geo The GU_Detail containing the orginal group. New groups will be added based on GA_PrimitiveTypeId
@@ -100,7 +100,7 @@ class FromHoudiniGroupConverter : public IECoreHoudini::FromHoudiniGeometryConve
 		size_t regroup( GU_Detail *geo, PrimIdGroupMap &groupMap ) const;
 
 		/// Used in NameAttribute mode to handle any unnamed or mismatched portions of the src detail.
-		void doUnnamedConversion( const GU_Detail *geo, IECore::Group *result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
+		void doUnnamedConversion( const GU_Detail *geo, IECoreScene::Group *result, const IECore::CompoundObject *operands, const std::string &name = "" ) const;
 
 		static FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> m_description;
 };

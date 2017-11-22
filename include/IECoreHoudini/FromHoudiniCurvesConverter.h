@@ -35,7 +35,7 @@
 #ifndef IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
 #define IECOREHOUDINI_FROMHOUDINICURVESCONVERTER_H
 
-#include "IECore/CurvesPrimitive.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreHoudini/TypeIds.h"
 #include "IECoreHoudini/FromHoudiniGeometryConverter.h"
