@@ -38,11 +38,11 @@
 #include "DDImage/Knob.h"
 #include "DDImage/Knobs.h"
 
-#include "IECore/WorldBlock.h"
-#include "IECore/ParameterisedProcedural.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/Convert.h"
+#include "IECoreScene/WorldBlock.h"
+#include "IECoreScene/ParameterisedProcedural.h"
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
@@ -226,9 +226,9 @@ const char *ProceduralHolder::node_shape() const
 	return "()";
 }
 
-IECore::ConstParameterisedProceduralPtr ProceduralHolder::procedural()
+IECoreScene::ConstParameterisedProceduralPtr ProceduralHolder::procedural()
 {
-	return IECore::runTimeCast<const IECore::ParameterisedProcedural>( parameterised() );
+	return IECore::runTimeCast<const IECoreScene::ParameterisedProcedural>( parameterised() );
 }
 
 IECoreGL::ConstScenePtr ProceduralHolder::scene()
@@ -238,7 +238,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		return m_scene;
 	}
 
-	IECore::ConstParameterisedProceduralPtr proc = procedural();
+	IECoreScene::ConstParameterisedProceduralPtr proc = procedural();
 	if( !proc )
 	{
 		return 0;
@@ -254,7 +254,7 @@ IECoreGL::ConstScenePtr ProceduralHolder::scene()
 		renderer->setOption( "gl:drawCoordinateSystems", new IECore::BoolData( m_drawCoordinateSystems ) );
 
 		{
-			IECore::WorldBlock worldBlock( renderer );
+			IECoreScene::WorldBlock worldBlock( renderer );
 			proc->render( renderer.get(), false, true, true, true );
 		}
 
@@ -289,7 +289,7 @@ Imath::Box3f ProceduralHolder::bound()
 		return m_bound;
 	}
 
-	IECore::ConstParameterisedProceduralPtr proc = procedural();
+	IECoreScene::ConstParameterisedProceduralPtr proc = procedural();
 	if( !proc )
 	{
 		m_bound = Imath::Box3f();

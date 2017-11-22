@@ -38,9 +38,9 @@
 #include "DDImage/Knob.h"
 #include "DDImage/Knobs.h"
 
-#include "IECore/WorldBlock.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/WorldBlock.h"
 
 #include "IECoreGL/Renderer.h"
 #include "IECoreGL/Scene.h"
@@ -162,11 +162,11 @@ IECoreGL::ConstScenePtr DrawableHolder::scene()
 			renderer->setOption( "gl:mode", new IECore::StringData( "deferred" ) );
 
 			{
-				IECore::WorldBlock worldBlock( renderer );
+				IECoreScene::WorldBlock worldBlock( renderer );
 				{
 					IECorePython::ScopedGILLock gilLock;
 					boost::python::object pythonDrawable( boost::const_pointer_cast<IECore::RunTimeTyped>( drawable ) );
-					pythonDrawable.attr( "draw" )( IECore::RendererPtr( renderer ) );
+					pythonDrawable.attr( "draw" )( IECoreScene::RendererPtr( renderer ) );
 				}
 			}
 

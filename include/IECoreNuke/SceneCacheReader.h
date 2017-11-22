@@ -48,7 +48,7 @@
 #include "IECoreGL/Scene.h"
 #include "IECoreGL/Renderer.h"
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 
 #include "OpenEXR/ImathMatrix.h"
 
@@ -94,9 +94,9 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		// Returns the name of the item at index itemIndex in the SceneView_knob.
 		const std::string &itemName( int itemIndex ) const;
 		// Returns a SceneInterface for the root item.
-		IECore::ConstSceneInterfacePtr getSceneInterface();
+		IECoreScene::ConstSceneInterfacePtr getSceneInterface();
 		// Returns a SceneInterface for the item at path.
-		IECore::ConstSceneInterfacePtr getSceneInterface( const std::string &path );
+		IECoreScene::ConstSceneInterfacePtr getSceneInterface( const std::string &path );
 		//@}
 
 		//! @name Methods which control the SceneView_knob
@@ -136,7 +136,7 @@ class SceneCacheReader : public DD::Image::SourceGeo
 		/// Get the hash of the SceneView knob (the default hash implementation of that knob returns a constant hash...)
 		DD::Image::Hash selectionHash( bool force = false ) const;
 
-		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, IECore::SceneInterface::Path root, double time );
+		Imath::M44d worldTransform( IECoreScene::ConstSceneInterfacePtr scene, IECoreScene::SceneInterface::Path root, double time );
 
 		// uses firstOp to return the Op that has the up-to-date private data
 		SceneCacheReader *firstReader();

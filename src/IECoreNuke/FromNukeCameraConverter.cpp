@@ -32,18 +32,19 @@
 //
 //////////////////////////////////////////////////////////////////////////
 
-#include "IECore/Camera.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/AngleConversion.h"
 #include "IECore/CompoundParameter.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "IECoreNuke/FromNukeCameraConverter.h"
 #include "IECoreNuke/Convert.h"
 
 using namespace IECoreNuke;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace Imath;
 
 FromNukeCameraConverter::FromNukeCameraConverter( const DD::Image::CameraOp *camera )
@@ -80,10 +81,10 @@ const IECore::V2iParameter *FromNukeCameraConverter::resolutionParameter() const
 
 IECore::ObjectPtr FromNukeCameraConverter::doConversion( IECore::ConstCompoundObjectPtr operands ) const
 {
-	CameraPtr result = new IECore::Camera( m_camera->node_name() );
+	CameraPtr result = new IECoreScene::Camera( m_camera->node_name() );
 
 	// transform
-	result->setTransform( new IECore::MatrixTransform( IECore::convert<Imath::M44f>( m_camera->matrix() ) ) );
+	result->setTransform( new IECoreScene::MatrixTransform( IECore::convert<Imath::M44f>( m_camera->matrix() ) ) );
 
 	// clipping planes
 	result->parameters()["clippingPlanes"] = new V2fData( V2f( m_camera->Near(), m_camera->Far() ) );

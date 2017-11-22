@@ -63,7 +63,7 @@ class ProceduralHolder : public ParameterisedHolderOp
 		//@}
 
 		/// Returns the procedural which is being held.
-		IECore::ConstParameterisedProceduralPtr procedural();
+		IECoreScene::ConstParameterisedProceduralPtr procedural();
 		/// Returns the scene created by the procedural in a form
 		/// suitable for OpenGL rendering.
 		IECoreGL::ConstScenePtr scene();

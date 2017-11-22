@@ -33,8 +33,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "IECore/TypeIds.h"
-#include "IECore/PointsPrimitive.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/PointsPrimitive.h"
 #include "IECoreNuke/Convert.h"
 #include "IECoreNuke/PointToNukeGeometryConverter.h"
 
@@ -44,6 +44,7 @@
 
 using namespace boost;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreNuke;
 using namespace DD::Image;
 
