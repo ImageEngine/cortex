@@ -36,12 +36,13 @@ import maya.cmds
 import maya.OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
-class dummyProcedural( IECore.ParameterisedProcedural ) :
+class dummyProcedural( IECoreScene.ParameterisedProcedural ) :
 
 	def __init__(self) :
-		IECore.ParameterisedProcedural.__init__( self, "Simple Geometry." )
+		IECoreScene.ParameterisedProcedural.__init__( self, "Simple Geometry." )
 
 	def doBound(self, args) :
 		return IECore.Box3f( IECore.V3f(-1), IECore.V3f(1) )

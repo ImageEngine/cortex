@@ -35,13 +35,14 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
-		converter = IECoreMaya.ToMayaObjectConverter.create( IECore.Camera() )
+		converter = IECoreMaya.ToMayaObjectConverter.create( IECoreScene.Camera() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.ToMayaCameraConverter.staticTypeId() ) )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaCameraConverter ) ) )
 
@@ -159,7 +160,7 @@ class ToMayaCameraConverterTest( IECoreMaya.TestCase ) :
 
 	def testWrongIECoreObject( self ) :
 
-		converter = IECoreMaya.ToMayaCameraConverter( IECore.MeshPrimitive() )
+		converter = IECoreMaya.ToMayaCameraConverter( IECoreScene.MeshPrimitive() )
 
 		messageHandler = IECore.CapturingMessageHandler()
 		with messageHandler :

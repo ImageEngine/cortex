@@ -39,16 +39,17 @@ import maya.cmds
 import maya.OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreGL
 import IECoreMaya
 
 class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 
-	class SphereProcedural( IECore.ParameterisedProcedural ) :
+	class SphereProcedural( IECoreScene.ParameterisedProcedural ) :
 
 		def __init__( self ) :
 
-			IECore.ParameterisedProcedural.__init__( self, "" )
+			IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 			self.parameters().addParameters(
 
@@ -81,15 +82,15 @@ class FnProceduralHolderTest( IECoreMaya.TestCase ) :
 
 		def doRender( self, renderer, args ) :
 
-			with IECore.AttributeBlock( renderer ) :
+			with IECoreScene.AttributeBlock( renderer ) :
 
-				g = IECore.Group()
-				g.addState( IECore.AttributeState( { "name" : IECore.StringData( "mySphere" ) } ) )
-				g.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( args["translate"].value ) ) )
+				g = IECoreScene.Group()
+				g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "mySphere" ) } ) )
+				g.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( args["translate"].value ) ) )
 
-				innerGroup = IECore.Group()
-				innerGroup.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( args["extraTranslate"].value ) ) )
-				innerGroup.addChild( IECore.SpherePrimitive( args["radius"].value, -1, 1, 360 ) )
+				innerGroup = IECoreScene.Group()
+				innerGroup.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( args["extraTranslate"].value ) ) )
+				innerGroup.addChild( IECoreScene.SpherePrimitive( args["radius"].value, -1, 1, 360 ) )
 
 				g.addChild( innerGroup )
 

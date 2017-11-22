@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 __dagMenuCallbacks = []
@@ -204,7 +205,7 @@ def _dagMenu( menu, sceneShape ) :
 		commonTags = None
 		for fn in fnScS:
 			scene = fn.sceneInterface()
-			tmpTags = scene.readTags(IECore.SceneInterface.EveryTag)
+			tmpTags = scene.readTags(IECoreScene.SceneInterface.EveryTag)
 			if commonTags is None:
 				commonTags = set( tmpTags )
 			else:

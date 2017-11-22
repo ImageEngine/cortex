@@ -38,13 +38,14 @@ import maya.cmds
 import maya.OpenMaya as OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testConversion( self ) :
 
-		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
@@ -65,7 +66,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertTrue( "uv" in coreMesh )
 
-		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
+		coreMesh[ "testUVSet" ] = IECoreScene.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		self.assert_( converter.isInstanceOf( IECoreMaya.ToMayaObjectConverter.staticTypeId() ) )
@@ -119,7 +120,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		self.assertTrue( "uv" in coreMesh )
 
-		coreMesh[ "testUVSet" ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
+		coreMesh[ "testUVSet" ] = IECoreScene.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 		op = fn.getOp()
@@ -174,7 +175,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		self.assertTrue( "uv" in coreMesh )
 
 		for i in range( 0, 7 ) :
-			coreMesh[ "testUVSet%d" % i ] = IECore.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
+			coreMesh[ "testUVSet%d" % i ] = IECoreScene.PrimitiveVariable( coreMesh["uv"].interpolation, coreMesh["uv"].data.copy() )
 
 		fn = IECoreMaya.FnOpHolder.create( "test", "meshMerge" )
 
@@ -255,7 +256,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testShadingGroup( self ) :
 
-		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
 		converter.convert( transform )
@@ -265,7 +266,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 	def testConstructor( self ) :
 
-		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
 
 		converter = IECoreMaya.ToMayaMeshConverter( coreMesh )
 		transform = maya.cmds.createNode( "transform" )
@@ -281,7 +282,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		mesh = IECoreMaya.FromMayaShapeConverter.create( sphere ).convert()
 		self.failUnless( "N" in mesh )
 		self.failUnless( mesh.arePrimitiveVariablesValid() )
-		self.assertEqual( mesh["N"].interpolation, IECore.PrimitiveVariable.Interpolation.FaceVarying )
+		self.assertEqual( mesh["N"].interpolation, IECoreScene.PrimitiveVariable.Interpolation.FaceVarying )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3fVectorData ) )
 
 		transform = maya.cmds.createNode( "transform" )
@@ -290,7 +291,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 
 		normals3d = IECore.DataConvertOp()( data=mesh["N"].data, targetType=IECore.TypeId.V3dVectorData )
 		del mesh["N"]
-		mesh["N"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.FaceVarying, normals3d )
+		mesh["N"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.FaceVarying, normals3d )
 		self.failUnless( mesh.arePrimitiveVariablesValid() )
 		self.failUnless( isinstance( mesh["N"].data, IECore.V3dVectorData ) )
 
@@ -316,7 +317,7 @@ class ToMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		IECoreMaya.ToMayaMeshConverter.setMeshInterpolationAttribute( sphere )
 		self.assertEqual( maya.cmds.getAttr( sphere + ".ieMeshInterpolation" ), 0 )
 
-		coreMesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
+		coreMesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -10 ), IECore.V3f( 10 ) ) )
 		coreMesh.interpolation = "catmullClark"
 		converter = IECoreMaya.ToMayaObjectConverter.create( coreMesh )
 		transform = maya.cmds.createNode( "transform" )

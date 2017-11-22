@@ -36,6 +36,7 @@ import maya.cmds
 import maya.OpenMaya as OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class LiveSceneTest( IECoreMaya.TestCase ) :
@@ -160,7 +161,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere2"] ).name() ), "pSphere2" )
 		self.assertEqual( str( scene.scene( ["pSphere1", "pSphere3"] ).name() ), "pSphere3" )
 
-		self.assertEqual( scene.scene( ["idontexist"], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertEqual( scene.scene( ["idontexist"], IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 		self.assertRaises( RuntimeError, IECore.curry( scene.scene, ["idontexist"] ) )
 
 	def testHasObject( self ) :
@@ -304,7 +305,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.curry( child.readTransformAsMatrix, 0.0 ) )
 
 		# this doesn't need to throw an exception does it?
-		self.assertEqual( child.scene( [ "pSphere1", "pSphereShape1" ], IECore.SceneInterface.MissingBehaviour.NullIfMissing ), None )
+		self.assertEqual( child.scene( [ "pSphere1", "pSphereShape1" ], IECoreScene.SceneInterface.MissingBehaviour.NullIfMissing ), None )
 
 		# I guess this does...
 		self.assertRaises( RuntimeError, IECore.curry( child.scene, [ "pSphere1", "pSphereShape1" ] ) )
@@ -516,7 +517,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeBound, IECore.Box3d(), 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeTransform, IECore.M44dData( IECore.M44d() ), 0.0 ) )
 		self.assertRaises( RuntimeError, IECore.curry( scene.writeAttribute, "asdfs", IECore.BoolData( False ), 0.0 ) )
-		self.assertRaises( RuntimeError, IECore.curry( scene.writeObject, IECore.SpherePrimitive(), 0.0 ) )
+		self.assertRaises( RuntimeError, IECore.curry( scene.writeObject, IECoreScene.SpherePrimitive(), 0.0 ) )
 
 	def testSceneShapeCustomReaders( self ):
 
@@ -528,43 +529,43 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		envNode = 'ieScene1'
 
 		envScene = scene.child( envNode )
-		self.assertFalse( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertFalse( envScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
 
 		maya.cmds.setAttr( envShape+'.file', 'test/IECore/data/sccFiles/environment.lscc',type='string' )
 
-		self.assertTrue( envScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertTrue( envScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
 
 		spheresShape = str( IECoreMaya.FnSceneShape.create( "ieScene2" ).fullPathName() )
 		spheresNode = 'ieScene2'
 		maya.cmds.setAttr( spheresShape+'.file', 'test/IECore/data/sccFiles/animatedSpheres.scc',type='string' )
 
 		self.assertEqual( set( scene.childNames() ).intersection([ envNode, spheresNode ]) , set( [ envNode, spheresNode ] ) )
-		self.assertTrue( IECore.LinkedScene.linkAttribute in envScene.attributeNames() )
-		self.assertEqual( envScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/environment.lscc'), "root":IECore.InternedStringVectorData() } ) )
+		self.assertTrue( IECoreScene.LinkedScene.linkAttribute in envScene.attributeNames() )
+		self.assertEqual( envScene.readAttribute( IECoreScene.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/environment.lscc'), "root":IECore.InternedStringVectorData() } ) )
 		self.assertFalse( envScene.hasObject() )
 
 		spheresScene = scene.child( spheresNode )
-		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
-		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData() } ) )
+		self.assertTrue( spheresScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
+		self.assertEqual( spheresScene.readAttribute( IECoreScene.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData() } ) )
 		self.assertFalse( spheresScene.hasObject() )
 
 		# expand the scene
 		fnSpheres = IECoreMaya.FnSceneShape( spheresShape )
 		fnSpheres.expandAll()
 
-		self.assertFalse( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertFalse( spheresScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
 		leafScene = spheresScene.child("A").child("a")
-		self.assertTrue( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertTrue( leafScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
 		# When expanding, we connect the child time attributes to their scene shape parent time attribute to propagate time remapping. When checking for time remapping, the scene shape
 		# currently only checks the direct connection, so we have here time in the link attributes. Will have to look out for performance issues.
-		self.assertEqual( leafScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]), 'time':IECore.DoubleData( 0 ) } ) )
+		self.assertEqual( leafScene.readAttribute( IECoreScene.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData([ 'A', 'a' ]), 'time':IECore.DoubleData( 0 ) } ) )
 		self.assertFalse( leafScene.hasObject() )
 
 		# expand scene to meshes
 		fnSpheres.convertAllToGeometry()
-		self.assertFalse( leafScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
+		self.assertFalse( leafScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
 		self.assertTrue( leafScene.hasObject() )
-		self.assertTrue( isinstance( leafScene.readObject(0), IECore.MeshPrimitive) )
+		self.assertTrue( isinstance( leafScene.readObject(0), IECoreScene.MeshPrimitive) )
 
 		# test time remapped scene readers...
 		spheresShape = str( maya.cmds.createNode( 'ieSceneShape' ) )
@@ -573,8 +574,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 
 		spheresScene = scene.child( 'ieScene3' )
 
-		self.assertTrue( spheresScene.hasAttribute( IECore.LinkedScene.linkAttribute ) )
-		self.assertEqual( spheresScene.readAttribute( IECore.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData(), "time":IECore.DoubleData(10.0) } ) )
+		self.assertTrue( spheresScene.hasAttribute( IECoreScene.LinkedScene.linkAttribute ) )
+		self.assertEqual( spheresScene.readAttribute( IECoreScene.LinkedScene.linkAttribute, 0 ), IECore.CompoundData( { "fileName":IECore.StringData('test/IECore/data/sccFiles/animatedSpheres.scc'), "root":IECore.InternedStringVectorData(), "time":IECore.DoubleData(10.0) } ) )
 
 	def testReadRootAttribute( self ):
 
@@ -623,7 +624,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			except:
 				return False
 
-			if not ( tagFilter & IECore.SceneInterface.TagFilter.LocalTag ) :
+			if not ( tagFilter & IECoreScene.SceneInterface.TagFilter.LocalTag ) :
 				return False
 
 			if dagPath.apiType() != maya.OpenMaya.MFn.kMesh :
@@ -645,7 +646,7 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 			except:
 				return result
 
-			if tagFilter & IECore.SceneInterface.TagFilter.LocalTag and dagPath.apiType() == maya.OpenMaya.MFn.kMesh :
+			if tagFilter & IECoreScene.SceneInterface.TagFilter.LocalTag and dagPath.apiType() == maya.OpenMaya.MFn.kMesh :
 				result.append( "renderable" )
 
 			return result
@@ -662,8 +663,8 @@ class LiveSceneTest( IECoreMaya.TestCase ) :
 		self.assertTrue( transformScene.hasTag( 'archivable' ) )
 		self.assertEqual( transformScene.readTags(), [ IECore.InternedString('archivable') ] )
 		self.assertEqual( set(sphereScene.readTags()), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
-		self.assertEqual( set(sphereScene.readTags( IECore.SceneInterface.TagFilter.EveryTag )), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
-		self.assertEqual( sphereScene.readTags( IECore.SceneInterface.TagFilter.AncestorTag ), [ IECore.InternedString('archivable') ] )
+		self.assertEqual( set(sphereScene.readTags( IECoreScene.SceneInterface.TagFilter.EveryTag )), set([ IECore.InternedString('renderable'), IECore.InternedString('archivable') ]) )
+		self.assertEqual( sphereScene.readTags( IECoreScene.SceneInterface.TagFilter.AncestorTag ), [ IECore.InternedString('archivable') ] )
 		self.assertTrue( sphereScene.hasTag( 'renderable') )
 		self.assertTrue( sphereScene.hasTag( 'archivable') )
 

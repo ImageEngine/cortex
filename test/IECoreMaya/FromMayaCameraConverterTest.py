@@ -36,6 +36,7 @@ import maya.cmds
 import maya.OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
@@ -45,10 +46,10 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape" )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Camera.staticTypeId() )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECoreScene.Camera.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Renderable.staticTypeId() )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECoreScene.Renderable.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaCameraConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaDagNodeConverter.create( "perspShape", IECore.Writer.staticTypeId() )
@@ -60,13 +61,13 @@ class FromMayaCameraConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaCameraConverter ) ) )
 
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )
+		self.assert_( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
 
 	def testConstructor( self ) :
 
 		converter = IECoreMaya.FromMayaCameraConverter( "perspShape" )
 		camera = converter.convert()
-		self.assert_( camera.isInstanceOf( IECore.Camera.staticTypeId() ) )
+		self.assert_( camera.isInstanceOf( IECoreScene.Camera.staticTypeId() ) )
 
 	def testPerspective( self ) :
 

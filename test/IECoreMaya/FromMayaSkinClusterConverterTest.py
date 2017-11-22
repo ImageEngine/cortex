@@ -38,6 +38,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 
@@ -64,7 +65,7 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.SmoothSkinningData.staticTypeId() )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECoreScene.SmoothSkinningData.staticTypeId() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.FromMayaSkinClusterConverter.staticTypeId() ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sc, IECore.Data.staticTypeId() )
@@ -77,7 +78,7 @@ class FromMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaSkinClusterConverter ) ) )
 		# convert it
 		ssd = converter.convert()
-		self.assert_( ssd.isInstanceOf( IECore.SmoothSkinningData.staticTypeId() ) )
+		self.assert_( ssd.isInstanceOf( IECoreScene.SmoothSkinningData.staticTypeId() ) )
 
 
 	def testConvert ( self ):

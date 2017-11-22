@@ -35,23 +35,24 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class ToMayaGroupConverterTest( IECoreMaya.TestCase ) :
 
 	def testConversion( self ) :
 
-		g = IECore.Group()
-		g.setTransform( IECore.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
+		g = IECoreScene.Group()
+		g.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createScaled( IECore.V3f( 2 ) ) ) )
 
-		c1 = IECore.Group()
-		c1.addChild( IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
-		c1.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) ) )
+		c1 = IECoreScene.Group()
+		c1.addChild( IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
+		c1.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( 2, 0, 0 ) ) ) )
 		g.addChild( c1 )
 
-		c2 = IECore.Group()
-		c2.addChild( IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
-		c2.setTransform( IECore.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -2, 0, 0 ) ) ) )
+		c2 = IECoreScene.Group()
+		c2.addChild( IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -1 ), IECore.V3f( 1 ) ) ) )
+		c2.setTransform( IECoreScene.MatrixTransform( IECore.M44f.createTranslated( IECore.V3f( -2, 0, 0 ) ) ) )
 		g.addChild( c2 )
 
 		p = maya.cmds.createNode( "transform" )
@@ -92,23 +93,23 @@ class ToMayaGroupConverterTest( IECoreMaya.TestCase ) :
 
 	def testNamedConversion( self ):
 
-		g = IECore.Group()
-		g.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel" ) } ) )
+		g = IECoreScene.Group()
+		g.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "topLevel" ) } ) )
 
-		c1 = IECore.Group()
-		c1.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel/child1" ) } ) )
+		c1 = IECoreScene.Group()
+		c1.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "topLevel/child1" ) } ) )
 		g.addChild( c1 )
 
-		c2 = IECore.Group()
-		c2.addState( IECore.AttributeState( { "name" : IECore.StringData( "child2" ) } ) )
+		c2 = IECoreScene.Group()
+		c2.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "child2" ) } ) )
 		g.addChild( c2 )
 
-		c3 = IECore.Group()
-		c3.addState( IECore.AttributeState( { "name" : IECore.StringData( "topLevel/child1/child3" ) } ) )
+		c3 = IECoreScene.Group()
+		c3.addState( IECoreScene.AttributeState( { "name" : IECore.StringData( "topLevel/child1/child3" ) } ) )
 		c1.addChild( c3 )
 
 		# nameless group
-		g.addChild( IECore.Group() )
+		g.addChild( IECoreScene.Group() )
 
 		p = maya.cmds.createNode( "transform" )
 

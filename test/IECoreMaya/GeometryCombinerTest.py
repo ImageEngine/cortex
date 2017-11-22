@@ -36,6 +36,7 @@ import os
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class GeometryCombinerTest( IECoreMaya.TestCase ) :
@@ -58,11 +59,11 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 
-		self.failUnless( isinstance( combined, IECore.Group ) )
+		self.failUnless( isinstance( combined, IECoreScene.Group ) )
 		self.assertEqual( len( combined.children() ), 2 )
 
-		self.failUnless( isinstance( combined.children()[0], IECore.MeshPrimitive ) )
-		self.failUnless( isinstance( combined.children()[1], IECore.CurvesPrimitive ) )
+		self.failUnless( isinstance( combined.children()[0], IECoreScene.MeshPrimitive ) )
+		self.failUnless( isinstance( combined.children()[1], IECoreScene.CurvesPrimitive ) )
 
 	def testPrimVars( self ) :
 
@@ -85,7 +86,7 @@ class GeometryCombinerTest( IECoreMaya.TestCase ) :
 		combined = IECoreMaya.FromMayaPlugConverter.create( combiner + ".outputGroup" ).convert()
 		primVar = combined.children()[0]["Test"]
 
-		self.assertEqual( primVar.interpolation, IECore.PrimitiveVariable.Interpolation.Constant )
+		self.assertEqual( primVar.interpolation, IECoreScene.PrimitiveVariable.Interpolation.Constant )
 		self.assertEqual( primVar.data, IECore.FloatData( 1 ) )
 
 	def testBlindData( self ) :

@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
@@ -55,12 +56,12 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 
 		converted = converter.convert()
 
-		self.assert_( converted.isInstanceOf( IECore.Group.staticTypeId() ) )
+		self.assert_( converted.isInstanceOf( IECoreScene.Group.staticTypeId() ) )
 		self.assertEqual( converted.getTransform().transform(), IECore.M44f.createTranslated( IECore.V3f( 1, 2, 3 ) ) )
 
 		self.assertEqual( len( converted.children() ), 1 )
 		convertedCube = converted.children()[0]
-		self.assert_( convertedCube.isInstanceOf( IECore.MeshPrimitive.staticTypeId() ) )
+		self.assert_( convertedCube.isInstanceOf( IECoreScene.MeshPrimitive.staticTypeId() ) )
 
 
 if __name__ == "__main__":

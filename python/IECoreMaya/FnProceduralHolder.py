@@ -39,6 +39,7 @@ import maya.OpenMaya
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 import _IECoreMaya
 from FnParameterisedHolder import FnParameterisedHolder
@@ -165,7 +166,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		if not procedural :
 			return None
 
-		renderer = IECore.CapturingRenderer()
+		renderer = IECoreScene.CapturingRenderer()
 
 		selected = self.selectedComponentNames()
 
@@ -179,7 +180,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		if len( objectFilter ):
 			renderer.setOption( "cp:objectFilter", IECore.StringVectorData( list( objectFilter ) ) )
 
-		with IECore.WorldBlock( renderer ) :
+		with IECoreScene.WorldBlock( renderer ) :
 			procedural.render( renderer )
 
 		world = renderer.world()
@@ -234,7 +235,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 		children = group.children()
 
 		for c in group.children():
-			if isinstance( c, IECore.Group ) :
+			if isinstance( c, IECoreScene.Group ) :
 				if len( c.children() ) == 0:
 					group.removeChild( c )
 				else:
@@ -254,18 +255,18 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 
 			child = children[0]
 
-			if isinstance( child, IECore.Group ):
+			if isinstance( child, IECoreScene.Group ):
 
 				parentGlobalTransform = group.globalTransformMatrix()
 
 				parentLocalTransform = group.transformMatrix()
 				childLocalTransform = child.transformMatrix()
 
-				group.setTransform( IECore.MatrixTransform( parentLocalTransform * childLocalTransform ) )
+				group.setTransform( IECoreScene.MatrixTransform( parentLocalTransform * childLocalTransform ) )
 
 				childName = child.getAttribute("name")
 				if childName:
-					group.addState( IECore.AttributeState( { "name" : childName } ) )
+					group.addState( IECoreScene.AttributeState( { "name" : childName } ) )
 
 				group.removeChild( child )
 
@@ -283,7 +284,7 @@ class FnProceduralHolder( FnParameterisedHolder ) :
 			# lets just recurse:
 
 			for c in group.children():
-				if isinstance( c, IECore.Group ) :
+				if isinstance( c, IECoreScene.Group ) :
 					self.__collapseGroups( c )
 
 	def createLocatorAtTransform( self, path ):

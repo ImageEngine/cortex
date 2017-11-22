@@ -38,6 +38,7 @@ import os
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FnSceneShapeTest( IECoreMaya.TestCase ) :
@@ -46,24 +47,24 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 	def setUp( self ) :
 
-		scene = IECore.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+		scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
 		sc = scene.createChild( str(1) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 1, 0, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, 0.0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 1, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
 
 		sc = sc.createChild( "child" )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 1, 0 ) ] * 6 ) )
 		sc.writeObject( mesh, 0.0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 2, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
 
 		sc = sc.createChild( str( 3 ) )
-		mesh = IECore.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
-		mesh["Cd"] = IECore.PrimitiveVariable( IECore.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
+		mesh = IECoreScene.MeshPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1)))
+		mesh["Cd"] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Uniform, IECore.V3fVectorData( [ IECore.V3f( 0, 0, 1 ) ] * 6 ) )
 		sc.writeObject( mesh, 0.0 )
 		matrix = IECore.M44d.createTranslated( IECore.V3d( 3, 0, 0 ) )
 		sc.writeTransform( IECore.M44dData( matrix ), 0.0 )
@@ -86,13 +87,13 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 
 		maya.cmds.setAttr( node+'.root', '/', type='string' )
 		scene = fn.sceneInterface()
-		self.assertTrue( isinstance( scene, IECore.SceneCache ) )
+		self.assertTrue( isinstance( scene, IECoreScene.SceneCache ) )
 		self.assertEqual( scene.childNames(), ['1'] )
 		self.assertFalse( scene.hasObject() )
 
 		maya.cmds.setAttr( node+'.root', '/1', type='string' )
 		scene = fn.sceneInterface()
-		self.assertTrue( isinstance( scene, IECore.SceneCache ) )
+		self.assertTrue( isinstance( scene, IECoreScene.SceneCache ) )
 		self.assertEqual( scene.childNames(), ['child'] )
 		self.assertTrue( scene.hasObject() )
 
@@ -319,9 +320,9 @@ class FnSceneShapeTest( IECoreMaya.TestCase ) :
 		maya.cmds.file( new=True, f=True )
 
 		def createSceneFile():
-		    scene = IECore.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
+		    scene = IECoreScene.SceneCache( FnSceneShapeTest.__testFile, IECore.IndexedIO.OpenMode.Write )
 		    sc = scene.createChild( str(1) )
-		    curves = IECore.CurvesPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1))) # 6 curves.
+		    curves = IECoreScene.CurvesPrimitive.createBox(IECore.Box3f(IECore.V3f(0),IECore.V3f(1))) # 6 curves.
 		    sc.writeObject( curves, 0.0 )
 		    matrix = IECore.M44d.createTranslated( IECore.V3d( 0, 0, 0 ) )
 		    sc.writeTransform( IECore.M44dData( matrix ), 0.0 )

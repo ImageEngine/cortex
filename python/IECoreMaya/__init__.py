@@ -32,6 +32,8 @@
 #
 ##########################################################################
 
+__import__( "IECoreScene" )
+
 from _IECoreMaya import *
 
 from UIElement import UIElement

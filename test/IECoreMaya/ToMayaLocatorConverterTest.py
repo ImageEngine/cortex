@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
@@ -45,14 +46,14 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 	def testFactory( self ) :
 
-		converter = IECoreMaya.ToMayaObjectConverter.create( IECore.CoordinateSystem() )
+		converter = IECoreMaya.ToMayaObjectConverter.create( IECoreScene.CoordinateSystem() )
 		self.failUnless( converter.isInstanceOf( IECoreMaya.ToMayaLocatorConverter.staticTypeId() ) )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaLocatorConverter ) ) )
 
 	def testNewLocator( self ) :
 
 		m = IECore.M44f.createScaled(IECore.V3f(1,2,3)) * IECore.M44f.createTranslated(IECore.V3f(10,20,30))
-		coordSys = IECore.CoordinateSystem( "myNamedCoordSys", IECore.MatrixTransform( m ) )
+		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( m ) )
 
 		parent = maya.cmds.createNode( "transform" )
 		self.failUnless( IECoreMaya.ToMayaLocatorConverter( coordSys ).convert( parent ) )
@@ -69,7 +70,7 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 
 	def testWrongIECoreObject( self ) :
 
-		converter = IECoreMaya.ToMayaLocatorConverter( IECore.MeshPrimitive() )
+		converter = IECoreMaya.ToMayaLocatorConverter( IECoreScene.MeshPrimitive() )
 
 		parent = maya.cmds.createNode( "transform" )
 		messageHandler = IECore.CapturingMessageHandler()
@@ -83,7 +84,7 @@ class ToMayaLocatorConverterTest( IECoreMaya.TestCase ) :
 	def testWrongMayaNode( self ) :
 
 		maya.cmds.polySphere( name="pSphere" )
-		coordSys = IECore.CoordinateSystem( "myNamedCoordSys", IECore.MatrixTransform( IECore.M44f() ) )
+		coordSys = IECoreScene.CoordinateSystem( "myNamedCoordSys", IECoreScene.MatrixTransform( IECore.M44f() ) )
 		converter = IECoreMaya.ToMayaLocatorConverter( coordSys )
 
 		messageHandler = IECore.CapturingMessageHandler()

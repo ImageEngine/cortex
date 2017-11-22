@@ -41,6 +41,7 @@ import maya.cmds
 import maya.OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class TestOp( IECore.Op ) :
@@ -126,12 +127,12 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		node2 = maya.cmds.ls( maya.cmds.rename( node2, "iAmNotUnique" ), long=True )[0]
 
 		fnPH = IECoreMaya.FnProceduralHolder( node )
-		proc = IECore.ReadProcedural()
+		proc = IECoreScene.ReadProcedural()
 		fnPH.setParameterised( proc )
 		self.assert_( fnPH.getParameterised()[0].isSame( proc ) )
 
 		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
-		proc2 = IECore.ReadProcedural()
+		proc2 = IECoreScene.ReadProcedural()
 		fnPH2.setParameterised( proc2 )
 		self.assert_( fnPH2.getParameterised()[0].isSame( proc2 ) )
 
@@ -875,7 +876,7 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		node2 = maya.cmds.createNode( "ieProceduralHolder" )
 
 		fnPH = IECoreMaya.FnProceduralHolder( node )
-		proc = IECore.ReadProcedural()
+		proc = IECoreScene.ReadProcedural()
 		fnPH.setParameterised( proc )
 
 		fnPH2 = IECoreMaya.FnProceduralHolder( node2 )
@@ -890,11 +891,11 @@ class FnParameterisedHolderTest( IECoreMaya.TestCase ) :
 		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls() ), 2 )
 
 		# do an ls on the procedural holders containing IECore.ReadProcedurals: should be one
-		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural ) ), 1 )
+		self.assertEqual( len( IECoreMaya.FnProceduralHolder.ls( classType=IECoreScene.ReadProcedural ) ), 1 )
 
 		# find full path name of node holding ReadProcedural, and check it's the same as the one returned by ls:
 		node = maya.cmds.ls( node, l=True )[0]
-		self.assertEqual( IECoreMaya.FnProceduralHolder.ls( classType=IECore.ReadProcedural )[0].fullPathName(), node )
+		self.assertEqual( IECoreMaya.FnProceduralHolder.ls( classType=IECoreScene.ReadProcedural )[0].fullPathName(), node )
 
 		# do an ls on the converter holders, this time just returning node names:
 		converterHolders = IECoreMaya.FnConverterHolder.ls( fnSets=False )

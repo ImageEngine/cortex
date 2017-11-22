@@ -40,6 +40,7 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 import sys
@@ -208,11 +209,11 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def testLazySettingFromCompoundPlugs( self ) :
 
-		class TestProcedural( IECore.ParameterisedProcedural ) :
+		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
 
 			def __init__( self ) :
 
-				IECore.ParameterisedProcedural.__init__( self, "" )
+				IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 				self.parameters().addParameter(
 
@@ -249,11 +250,11 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def testLazySettingFromArrayPlugs( self ) :
 
-		class TestProcedural( IECore.ParameterisedProcedural ) :
+		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
 
 			def __init__( self ) :
 
-				IECore.ParameterisedProcedural.__init__( self, "" )
+				IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 				self.parameters().addParameter(
 
@@ -382,7 +383,7 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 		fnOP = IECoreMaya.FnOpHolder.create( "merge", "meshMerge", 1 )
 		op = fnOP.getOp()
 
-		mesh = IECore.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -2, -2, -2 ), IECore.V3f( 2, 3, 4 ) ) )
+		mesh = IECoreScene.MeshPrimitive.createBox( IECore.Box3f( IECore.V3f( -2, -2, -2 ), IECore.V3f( 2, 3, 4 ) ) )
 		op.parameters()["input"].setValue( mesh )
 		fnOP.setNodeValues()
 
@@ -1990,11 +1991,11 @@ class TestParameterisedHolder( IECoreMaya.TestCase ) :
 
 	def testShouldSave( self ) :
 
-		class TestProcedural( IECore.ParameterisedProcedural ) :
+		class TestProcedural( IECoreScene.ParameterisedProcedural ) :
 
 			def __init__( self ) :
 
-				IECore.ParameterisedProcedural.__init__( self, "" )
+				IECoreScene.ParameterisedProcedural.__init__( self, "" )
 
 				self.parameters().addParameter(
 

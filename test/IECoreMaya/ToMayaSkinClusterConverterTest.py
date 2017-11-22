@@ -38,6 +38,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 
@@ -75,7 +76,7 @@ class ToMayaSkinClusterConverterTest( IECoreMaya.TestCase ) :
 
 	def testSimple( self ) :
 		# test factory
-		ssd = IECore.SmoothSkinningData()
+		ssd = IECoreScene.SmoothSkinningData()
 		converter = IECoreMaya.ToMayaObjectConverter.create( ssd )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.ToMayaSkinClusterConverter ) ) )
 
