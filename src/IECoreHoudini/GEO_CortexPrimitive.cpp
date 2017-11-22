@@ -45,6 +45,10 @@
 #include "UT/UT_JSONParser.h"
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
+#ifdef IECOREHOUDINI_WITH_GL
+#include "DM/DM_RenderTable.h"
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#endif
 
 #include "IECore/HexConversion.h"
 #include "IECore/MemoryIndexedIO.h"
@@ -57,7 +61,9 @@
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 #if UT_MAJOR_VERSION_INT < 14
 
@@ -409,14 +415,6 @@ GA_PrimitiveDefinition *GEO_CortexPrimitive::m_definition = 0;
 const GA_PrimitiveDefinition &GEO_CortexPrimitive::getTypeDef() const
 {
 	return *m_definition;
-}
-
-void GEO_CortexPrimitive::setTypeDef( GA_PrimitiveDefinition *def )
-{
-	if ( !m_definition )
-	{
-		m_definition = def;
-	}
 }
 
 GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
@@ -1020,4 +1018,38 @@ const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
 	}
 
 	return jsonPrim;
+}
+
+void GEO_CortexPrimitive::registerDefinition(GA_PrimitiveFactory *factory) {
+	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
+            GEO_CortexPrimitive::typeName, GEO_CortexPrimitive::create,
+            GA_FAMILY_NONE, (std::string(GEO_CortexPrimitive::typeName ) + "s" ).c_str()
+		);
+
+	if ( !primDef )
+		{
+			std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
+			return;
+		}
+
+	// merge constructors removed in H16
+#if UT_MAJOR_VERSION_INT < 16
+	primDef->setMergeConstructor( CortexPrimitive::create );
+#endif
+	primDef->setHasLocalTransform( true );
+
+    // this will put the proper cortex primitive type into the intrinsic attribute table
+    GEO_CortexPrimitive::registerIntrinsics(*primDef);
+
+    m_definition = primDef;
+
+	/// Create the default ObjectPool cache
+	UT_ObjectPoolCache::defaultObjectPoolCache();
+	/// Declare our new Render Hook if IECoreGL is enabled.
+#ifdef IECOREHOUDINI_WITH_GL
+
+	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
+
+#endif
+
 }

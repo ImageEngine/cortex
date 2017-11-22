@@ -133,9 +133,7 @@ class GEO_CortexPrimitive : public GEO_Primitive
 		virtual void copyPrimitive( const GEO_Primitive *src );
 
 		virtual const GA_PrimitiveDefinition &getTypeDef() const;
-		/// \todo: setTypeDef is called once by the plugin. Seems quite silly to expose.
-		/// Maybe we should just give up registration in the plugin and do it all here.
-		static void setTypeDef( GA_PrimitiveDefinition *def );
+		static void registerDefinition(GA_PrimitiveFactory *factory);
 		static GA_PrimitiveTypeId typeId();
 
 		virtual GEO_Primitive *convert( ConvertParms &parms, GA_PointGroup *usedpts = 0 );
