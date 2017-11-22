@@ -37,7 +37,7 @@
 
 #include "maya/MFnMesh.h"
 
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "IECoreMaya/ToMayaObjectConverter.h"
 
@@ -72,7 +72,7 @@ class ToMayaMeshConverter : public ToMayaObjectConverter
 	private:
 
 		void assignDefaultShadingGroup( MObject &shape ) const;
-		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECore::MeshPrimitive *mesh, IECore::PrimitiveVariableMap::const_iterator &uvIt ) const;
+		void addUVSet( MFnMesh &fnMesh, const MIntArray &polygonCounts, const IECoreScene::MeshPrimitive *mesh, IECoreScene::PrimitiveVariableMap::const_iterator &uvIt ) const;
 
 };
 

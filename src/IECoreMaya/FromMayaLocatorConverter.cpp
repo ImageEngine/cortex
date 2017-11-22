@@ -37,8 +37,8 @@
 
 #include "OpenEXR/ImathVec.h"
 #include "OpenEXR/ImathMatrix.h"
-#include "IECore/CoordinateSystem.h"
-#include "IECore/MatrixTransform.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "maya/MPlug.h"
 #include "maya/MString.h"
@@ -49,6 +49,7 @@
 
 using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaLocatorConverter );
@@ -56,7 +57,7 @@ IE_CORE_DEFINERUNTIMETYPED( FromMayaLocatorConverter );
 FromMayaDagNodeConverter::Description<FromMayaLocatorConverter> FromMayaLocatorConverter::m_description( MFn::kLocator, CoordinateSystemTypeId, true );
 
 FromMayaLocatorConverter::FromMayaLocatorConverter( const MDagPath &dagPath )
-	:	FromMayaDagNodeConverter( "Converts maya locator shape nodes into IECore::CoordinateSystem objects.", dagPath )
+	:	FromMayaDagNodeConverter( "Converts maya locator shape nodes into IECoreScene::CoordinateSystem objects.", dagPath )
 {
 }
 

@@ -41,21 +41,22 @@
 #include "maya/MSelectionList.h"
 
 #include "IECore/AngleConversion.h"
-#include "IECore/Camera.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/Camera.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaCameraConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
-ToMayaCameraConverter::Description ToMayaCameraConverter::g_description( IECore::Camera::staticTypeId(), MFn::kCamera );
+ToMayaCameraConverter::Description ToMayaCameraConverter::g_description( IECoreScene::Camera::staticTypeId(), MFn::kCamera );
 
 ToMayaCameraConverter::ToMayaCameraConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::Camera objects to Maya cameras.", object )
+: ToMayaObjectConverter( "Converts IECoreScene::Camera objects to Maya cameras.", object )
 {
 }
 
@@ -64,7 +65,7 @@ bool ToMayaCameraConverter::doConversion( IECore::ConstObjectPtr from, MObject &
 	ConstCameraPtr camera = IECore::runTimeCast<const Camera>( from );
 	if ( !camera )
 	{
-		IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "The source object is not an IECore::Camera." );
+		IECore::msg( IECore::Msg::Warning, "ToMayaCameraConverter::doConversion",  "The source object is not an IECoreScene::Camera." );
 		return false;
 	}
 

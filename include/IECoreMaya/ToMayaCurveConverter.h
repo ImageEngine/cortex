@@ -35,8 +35,8 @@
 #ifndef IE_COREMAYA_TOMAYACURVECONVERTER_H
 #define IE_COREMAYA_TOMAYACURVECONVERTER_H
 
-#include "IECore/CurvesPrimitive.h"
 #include "IECore/NumericParameter.h"
+#include "IECoreScene/CurvesPrimitive.h"
 
 #include "IECoreMaya/ToMayaObjectConverter.h"
 

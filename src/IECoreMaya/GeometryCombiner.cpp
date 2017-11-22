@@ -42,7 +42,7 @@
 #include "maya/MPlugArray.h"
 #include "maya/MDagPath.h"
 
-#include "IECore/Group.h"
+#include "IECoreScene/Group.h"
 
 #include "IECoreMaya/GeometryCombiner.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -138,7 +138,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 		bool convertBlindData = dataBlock.inputValue( aConvertBlindData ).asBool();
 		FromMayaShapeConverter::Space conversionSpace = (FromMayaShapeConverter::Space)dataBlock.inputValue( aConversionSpace ).asInt();
 
-		IECore::GroupPtr group = new IECore::Group;
+		IECoreScene::GroupPtr group = new IECoreScene::Group;
 
 		MArrayDataHandle arrayHandle = dataBlock.inputArrayValue( aInputGeometry );
 
@@ -189,7 +189,7 @@ MStatus GeometryCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 					converter->blindDataAttrPrefixParameter()->setTypedValue( "" );
 				}
 
-				IECore::VisibleRenderablePtr cortexGeometry = IECore::runTimeCast<IECore::VisibleRenderable>( converter->convert() );
+				IECoreScene::VisibleRenderablePtr cortexGeometry = IECore::runTimeCast<IECoreScene::VisibleRenderable>( converter->convert() );
 
 				if( cortexGeometry )
 				{

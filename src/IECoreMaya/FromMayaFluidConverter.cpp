@@ -38,15 +38,16 @@
 #include "IECoreMaya/Convert.h"
 
 #include "IECore/CompoundParameter.h"
-#include "IECore/PointsPrimitive.h"
 #include "IECore/MatrixMultiplyOp.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "maya/MFn.h"
 #include "maya/MFnFluid.h"
 
 using namespace IECoreMaya;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace std;
 using namespace Imath;
 
@@ -57,13 +58,13 @@ IE_CORE_DEFINERUNTIMETYPED( FromMayaFluidConverter );
 FromMayaShapeConverter::Description<FromMayaFluidConverter> FromMayaFluidConverter::m_description( MFn::kFluid, PointsPrimitive::staticTypeId(), false );
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MObject &object )
-	:	FromMayaShapeConverter( "Converts maya fluid data to IECore::PointsPrimitive Object", object )
+	:	FromMayaShapeConverter( "Converts maya fluid data to IECoreScene::PointsPrimitive Object", object )
 {
 	constructCommon();
 }
 
 FromMayaFluidConverter::FromMayaFluidConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( "Converts maya fluid data to IECore::PointsPrimitive Object", dagPath )
+	:	FromMayaShapeConverter( "Converts maya fluid data to IECoreScene::PointsPrimitive Object", dagPath )
 {
 	constructCommon();
 }
@@ -131,7 +132,7 @@ void FromMayaFluidConverter::constructCommon()
 	parameters()->addParameter( m_textureCoordinatesParameter );
 }
 
-void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const
+void FromMayaFluidConverter::addPrimVar( IECoreScene::PrimitivePtr primitive, const std::string &name, size_t numPoints, MFnFluid &fnFluid, float *(MFnFluid::*fn)( MStatus * ) ) const
 {
 	MStatus s;
 	float *mayaPtr = ((fnFluid).*(fn))( &s );
@@ -146,7 +147,7 @@ void FromMayaFluidConverter::addPrimVar( IECore::PrimitivePtr primitive, const s
 	}
 }
 
-IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnFluid fnFluid( object );
 	if( !fnFluid.hasObj( object ) )
@@ -156,7 +157,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MObjec
 	return doPrimitiveConversion( fnFluid );
 }
 
-IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnFluid fnFluid( dagPath );
 	if( !fnFluid.hasObj( dagPath.node() ) )
@@ -166,7 +167,7 @@ IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( const MDagPa
 	return doPrimitiveConversion( fnFluid );
 }
 
-IECore::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fnFluid ) const
+IECoreScene::PrimitivePtr FromMayaFluidConverter::doPrimitiveConversion( MFnFluid &fnFluid ) const
 {
 	MStatus s;
 	unsigned int nPoints = fnFluid.gridSize( &s );

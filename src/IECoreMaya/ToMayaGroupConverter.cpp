@@ -35,25 +35,25 @@
 #include "maya/MFnDagNode.h"
 #include "maya/MFnTransform.h"
 
-#include "IECore/Group.h"
 #include "IECore/SimpleTypedData.h"
-#include "IECore/AttributeState.h"
+#include "IECoreScene/Group.h"
+#include "IECoreScene/AttributeState.h"
 
 #include "IECoreMaya/ToMayaGroupConverter.h"
 #include "IECoreMaya/Convert.h"
 
 using namespace IECoreMaya;
 
-ToMayaObjectConverter::ToMayaObjectConverterDescription<ToMayaGroupConverter> ToMayaGroupConverter::g_registrar( IECore::Group::staticTypeId(), MFn::kTransform );
+ToMayaObjectConverter::ToMayaObjectConverterDescription<ToMayaGroupConverter> ToMayaGroupConverter::g_registrar( IECoreScene::Group::staticTypeId(), MFn::kTransform );
 
 ToMayaGroupConverter::ToMayaGroupConverter( IECore::ConstObjectPtr object )
-	: ToMayaObjectConverter( "Converts IECore::Group objects to maya hierarchies.", object )
+	: ToMayaObjectConverter( "Converts IECoreScene::Group objects to maya hierarchies.", object )
 {
 }
 
 bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &to, IECore::ConstCompoundObjectPtr operands ) const
 {
-	IECore::ConstGroupPtr group = IECore::runTimeCast<const IECore::Group>( from );
+	IECoreScene::ConstGroupPtr group = IECore::runTimeCast<const IECoreScene::Group>( from );
 	if( !group )
 	{
 		return false;
@@ -61,12 +61,12 @@ bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 
 	// find the name of this group, if it has one:
 	std::string name;
-	IECore::Group::StateContainer::const_iterator it = group->state().begin();
-	IECore::Group::StateContainer::const_iterator end = group->state().end();
+	IECoreScene::Group::StateContainer::const_iterator it = group->state().begin();
+	IECoreScene::Group::StateContainer::const_iterator end = group->state().end();
 
 	for(; it != end; ++it )
 	{
-		IECore::ConstAttributeStatePtr attrs = IECore::runTimeCast< const IECore::AttributeState >( *it );
+		IECoreScene::ConstAttributeStatePtr attrs = IECore::runTimeCast< const IECoreScene::AttributeState >( *it );
 		if( !attrs )
 		{
 			continue;
@@ -98,14 +98,14 @@ bool ToMayaGroupConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		fnTransform.setName( name.c_str() );
 	}
 
-	IECore::ConstTransformPtr coreTransform = group->getTransform();
+	IECoreScene::ConstTransformPtr coreTransform = group->getTransform();
 	if( coreTransform )
 	{
 		Imath::M44f matrix = coreTransform->transform();
 		fnTransform.set( MTransformationMatrix( IECore::convert<MMatrix>( matrix ) ) );
 	}
 
-	for( IECore::Group::ChildContainer::const_iterator it=group->children().begin(); it!=group->children().end(); it++ )
+	for( IECoreScene::Group::ChildContainer::const_iterator it=group->children().begin(); it!=group->children().end(); it++ )
 	{
 		ToMayaObjectConverterPtr converter = ToMayaObjectConverter::create( *it );
 		if( !converter )

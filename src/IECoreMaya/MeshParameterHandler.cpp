@@ -39,8 +39,8 @@
 #include "IECoreMaya/MayaTypeIds.h"
 #include "IECoreMaya/ObjectData.h"
 
-#include "IECore/TypedPrimitiveParameter.h"
-#include "IECore/MeshPrimitive.h"
+#include "IECoreScene/TypedPrimitiveParameter.h"
+#include "IECoreScene/MeshPrimitive.h"
 
 #include "maya/MFnGenericAttribute.h"
 #include "maya/MFnMeshData.h"
@@ -49,7 +49,7 @@ using namespace IECoreMaya;
 using namespace Imath;
 using namespace boost;
 
-static ParameterHandler::Description< MeshParameterHandler > registrar( IECore::MeshPrimitiveParameter::staticTypeId(), IECore::MeshPrimitive::staticTypeId() );
+static ParameterHandler::Description< MeshParameterHandler > registrar( IECoreScene::MeshPrimitiveParameter::staticTypeId(), IECoreScene::MeshPrimitive::staticTypeId() );
 
 MStatus MeshParameterHandler::doUpdate( IECore::ConstParameterPtr parameter, MPlug &plug ) const
 {
@@ -134,7 +134,7 @@ MStatus MeshParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPt
 	if( result )
 	{
 		/// \todo Pull in userData from parameter to set up conversion parameters
-		FromMayaMeshConverterPtr converter = boost::dynamic_pointer_cast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECore::MeshPrimitive::staticTypeId() ) );
+		FromMayaMeshConverterPtr converter = boost::dynamic_pointer_cast< FromMayaMeshConverter > ( FromMayaObjectConverter::create( v, IECoreScene::MeshPrimitive::staticTypeId() ) );
 		assert(converter);
 
 		converter->spaceParameter()->setNumericValue( (int)FromMayaMeshConverter::World );
@@ -152,7 +152,7 @@ MStatus MeshParameterHandler::doSetValue( const MPlug &plug, IECore::ParameterPt
 		// this means that when the file is loaded again the plug.getValue()
 		// method will fail and we end up here. the best thing we can do in this
 		// case seems to be to assume that the value should be an empty mesh.
-		p->setValue( new IECore::MeshPrimitive() );
+		p->setValue( new IECoreScene::MeshPrimitive() );
 		return MS::kSuccess;
 	}
 }

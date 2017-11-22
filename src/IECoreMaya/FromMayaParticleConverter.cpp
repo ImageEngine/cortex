@@ -39,11 +39,11 @@
 #include "IECoreMaya/VectorTraits.h"
 #include "IECoreMaya/Convert.h"
 
-#include "IECore/PointsPrimitive.h"
 #include "IECore/VectorOps.h"
 #include "IECore/Exception.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/MessageHandler.h"
+#include "IECoreScene/PointsPrimitive.h"
 
 #include "maya/MFnParticleSystem.h"
 
@@ -57,13 +57,13 @@ IE_CORE_DEFINERUNTIMETYPED( FromMayaParticleConverter );
 IECoreMaya::FromMayaShapeConverter::Description<FromMayaParticleConverter> FromMayaParticleConverter::m_description( MFn::kParticle, IECore::PointsPrimitiveTypeId, true );
 
 FromMayaParticleConverter::FromMayaParticleConverter( const MObject &object )
-	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECore::PointsPrimitive objects.", object )
+	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECoreScene::PointsPrimitive objects.", object )
 {
 	constructCommon();
 }
 
 FromMayaParticleConverter::FromMayaParticleConverter( const MDagPath &dagPath )
-	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECore::PointsPrimitive objects.", dagPath )
+	:	FromMayaShapeConverter( "Converts Maya particle shapes into IECoreScene::PointsPrimitive objects.", dagPath )
 {
 	constructCommon();
 }
@@ -97,7 +97,7 @@ IECore::ConstStringVectorParameterPtr FromMayaParticleConverter::attributeNamesP
 	return m_attributeNamesParameter;
 }
 
-IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnParticleSystem fnParticle( object );
 	if( !fnParticle.hasObj( object ) )
@@ -107,7 +107,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MOb
 	return doPrimitiveConversion( fnParticle );
 }
 
-IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
+IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const
 {
 	MFnParticleSystem fnParticle( dagPath );
 	if( !fnParticle.hasObj( dagPath.node() ) )
@@ -117,10 +117,10 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( const MDa
 	return doPrimitiveConversion( fnParticle );
 }
 
-IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnParticleSystem &fnParticle ) const
+IECoreScene::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnParticleSystem &fnParticle ) const
 {
 	MStatus s;
-	IECore::PointsPrimitivePtr points = new IECore::PointsPrimitive( fnParticle.count( ) );
+	IECoreScene::PointsPrimitivePtr points = new IECoreScene::PointsPrimitive( fnParticle.count( ) );
 
 	/// We always add "position" as "P"
 	MVectorArray position;
@@ -130,7 +130,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 	pos->setInterpretation( IECore::GeometricData::Point );
 	pos->writable().resize( position.length() );
 	std::transform( MArrayIter<MVectorArray>::begin( position ), MArrayIter<MVectorArray>::end( position ), pos->writable().begin(), IECore::VecConvert<MVector, V3f>() );
-	points->variables["P"] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, pos );
+	points->variables["P"] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, pos );
 
 	const IECore::StringVectorParameter::ValueType &attributeNames = attributeNamesParameter()->getTypedValue();
 
@@ -149,7 +149,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 			IECore::IntVectorDataPtr data = new IECore::IntVectorData();
 			data->writable().resize( len );
 			data->writable().assign( MArrayIter<MIntArray>::begin( arr ), MArrayIter<MIntArray>::end( arr ) );
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+			points->variables[ primVarName ] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, data );
 		}
 		else if ( fnParticle.isPerParticleDoubleAttribute( attrName, &s ) )
 		{
@@ -161,7 +161,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 			IECore::FloatVectorDataPtr data = new IECore::FloatVectorData();
 			data->writable().resize( len );
 			data->writable().assign( MArrayIter<MDoubleArray>::begin( arr ), MArrayIter<MDoubleArray>::end( arr ) );
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+			points->variables[ primVarName ] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, data );
 		}
 		else if ( fnParticle.isPerParticleVectorAttribute( attrName, &s ) )
 		{
@@ -174,7 +174,7 @@ IECore::PrimitivePtr FromMayaParticleConverter::doPrimitiveConversion( MFnPartic
 			data->setInterpretation( IECore::GeometricData::Vector );
 			data->writable().resize( len );
 		        std::transform( MArrayIter<MVectorArray>::begin( arr ), MArrayIter<MVectorArray>::end( arr ), data->writable().begin(), IECore::VecConvert<MVector, V3f>() );
-			points->variables[ primVarName ] = IECore::PrimitiveVariable( IECore::PrimitiveVariable::Vertex, data );
+			points->variables[ primVarName ] = IECoreScene::PrimitiveVariable( IECoreScene::PrimitiveVariable::Vertex, data );
 		}
 		else
 		{

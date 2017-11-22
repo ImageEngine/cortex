@@ -35,8 +35,8 @@
 #ifndef IE_COREMAYA_SCENESHAPEINTERFACE_H
 #define IE_COREMAYA_SCENESHAPEINTERFACE_H
 
-#include "IECore/SceneInterface.h"
 #include "IECore/CompoundParameter.h"
+#include "IECoreScene/SceneInterface.h"
 
 #include <map>
 #include "OpenEXR/ImathMatrix.h"
@@ -118,7 +118,7 @@ class SceneShapeInterface: public MPxComponentShape
 		 */
 
 		/// Returns the sceneInterface for this node. Needs to be implemented by derived classes.
-		virtual IECore::ConstSceneInterfacePtr getSceneInterface();
+		virtual IECoreScene::ConstSceneInterfacePtr getSceneInterface();
 
 		/// Returns the GL Scene representing the sceneInterface for the preview plug values ( objectOnly, drawGeometry, drawLocators, drawChildBounds )
 		IECoreGL::ConstScenePtr glScene();
@@ -203,10 +203,10 @@ class SceneShapeInterface: public MPxComponentShape
 		IECoreGL::ScenePtr m_scene;
 
 		/// Uses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
-		void buildScene( IECoreGL::RendererPtr renderer, IECore::ConstSceneInterfacePtr subSceneInterface );
+		void buildScene( IECoreGL::RendererPtr renderer, IECoreScene::ConstSceneInterfacePtr subSceneInterface );
 
 		/// Recursively parses the sceneInterface hierarchy to build a GL Scene matching the preview plug values
-		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECore::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECore::SceneInterface::NameList &drawTags );
+		void recurseBuildScene( IECoreGL::Renderer * renderer, const IECoreScene::SceneInterface *subSceneInterface, double time, bool drawBounds, bool drawGeometry, bool objectOnly, const IECoreScene::SceneInterface::NameList &drawTags );
 
 		void createInstances();
 
@@ -215,10 +215,10 @@ class SceneShapeInterface: public MPxComponentShape
 
 		void registerGroup( const std::string &name, IECoreGL::GroupPtr &group );
 
-		std::string relativePathName( IECore::SceneInterface::Path path );
-		IECore::SceneInterface::Path fullPathName( std::string relativeName );
+		std::string relativePathName( IECoreScene::SceneInterface::Path path );
+		IECoreScene::SceneInterface::Path fullPathName( std::string relativeName );
 		/// Returns concatenated matrix from current sceneInterface path to given scene
-		Imath::M44d worldTransform( IECore::ConstSceneInterfacePtr scene, double time );
+		Imath::M44d worldTransform( IECoreScene::ConstSceneInterfacePtr scene, double time );
 		/// Returns bound for the component matching the given index
 		Imath::Box3d componentBound( int idx );
 		bool animatedScene();
@@ -227,7 +227,7 @@ class SceneShapeInterface: public MPxComponentShape
 
 		bool readConvertParam( IECore::CompoundParameterPtr parameters, int attrIndex ) const;
 
-		MStatus computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECore::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time );
+		MStatus computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECoreScene::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time );
 
 		typedef std::map< IECore::InternedString,  std::pair< unsigned int, IECoreGL::GroupPtr> > NameToGroupMap;
 		typedef std::vector< IECore::InternedString > IndexToNameMap;

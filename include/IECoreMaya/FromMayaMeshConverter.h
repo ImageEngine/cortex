@@ -40,7 +40,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/TypedParameter.h"
-#include "IECore/Primitive.h"
+#include "IECoreScene/Primitive.h"
 
 #include "maya/MString.h"
 
@@ -81,19 +81,19 @@ class FromMayaMeshConverter : public FromMayaShapeConverter
 
 	protected :
 
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 	private :
 
 		void constructCommon();
 
-		IECore::PrimitiveVariable points() const;
-		IECore::PrimitiveVariable normals() const;
-		IECore::PrimitiveVariable uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const;
-		IECore::PrimitiveVariable colors( const MString &colorSet="", bool forceRgb = false ) const;
+		IECoreScene::PrimitiveVariable points() const;
+		IECoreScene::PrimitiveVariable normals() const;
+		IECoreScene::PrimitiveVariable uvs( const MString &uvSet, const std::vector<int> &vertsPerFace ) const;
+		IECoreScene::PrimitiveVariable colors( const MString &colorSet="", bool forceRgb = false ) const;
 
-		IECore::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
+		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnMesh &fnMesh ) const;
 
 		static Description<FromMayaMeshConverter> m_description;
 		static Description<FromMayaMeshConverter> m_dataDescription;

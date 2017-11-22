@@ -61,8 +61,8 @@ class FromMayaParticleConverter : public FromMayaShapeConverter
 
 	protected :
 
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
-		virtual IECore::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MObject &object, IECore::ConstCompoundObjectPtr operands ) const;
+		virtual IECoreScene::PrimitivePtr doPrimitiveConversion( const MDagPath &dagPath, IECore::ConstCompoundObjectPtr operands ) const;
 
 		IECore::StringVectorParameterPtr m_attributeNamesParameter;
 
@@ -70,7 +70,7 @@ class FromMayaParticleConverter : public FromMayaShapeConverter
 
 		void constructCommon();
 
-		IECore::PrimitivePtr doPrimitiveConversion( MFnParticleSystem &fnParticle ) const;
+		IECoreScene::PrimitivePtr doPrimitiveConversion( MFnParticleSystem &fnParticle ) const;
 
 		static Description<FromMayaParticleConverter> m_description;
 

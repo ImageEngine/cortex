@@ -66,16 +66,16 @@
 #include "IECore/SimpleTypedData.h"
 #include "IECore/CompoundParameter.h"
 #include "IECore/AngleConversion.h"
-#include "IECore/VisibleRenderable.h"
-#include "IECore/TransformBlock.h"
-#include "IECore/AttributeBlock.h"
-#include "IECore/SampledSceneInterface.h"
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/TransformOp.h"
-#include "IECore/CoordinateSystem.h"
-#include "IECore/Transform.h"
 #include "IECore/MatrixAlgo.h"
-#include "IECore/LinkedScene.h"
+#include "IECoreScene/VisibleRenderable.h"
+#include "IECoreScene/TransformBlock.h"
+#include "IECoreScene/AttributeBlock.h"
+#include "IECoreScene/SampledSceneInterface.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/TransformOp.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/Transform.h"
+#include "IECoreScene/LinkedScene.h"
 
 #include "maya/MArrayDataBuilder.h"
 #include "maya/MFnNumericAttribute.h"
@@ -105,6 +105,7 @@
 
 using namespace Imath;
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
 MTypeId SceneShapeInterface::id = SceneShapeInterfaceId;
@@ -798,7 +799,7 @@ MStatus SceneShapeInterface::compute( const MPlug &plug, MDataBlock &dataBlock )
 	return MS::kSuccess;
 }
 
-MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECore::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time )
+MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &topLevelPlug, MDataBlock &dataBlock, const IECoreScene::SceneInterface *scene, int topLevelIndex, int querySpace, MTime &time )
 {
 	MStatus s;
 
@@ -852,7 +853,7 @@ MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &
 		IECore::TypeId type = object->typeId();
 		if( type == CoordinateSystemTypeId )
 		{
-			IECore::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
+			IECoreScene::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
 			Imath::M44f m;
 			if( coordSys->getTransform() )
 			{
@@ -1284,7 +1285,7 @@ void SceneShapeInterface::recurseBuildScene( IECoreGL::Renderer * renderer, cons
 			IECore::IntVectorDataPtr inds = new IECore::IntVectorData;
 			inds->writable().resize( 3, 2 );
 
-			CurvesPrimitivePtr curves = new IECore::CurvesPrimitive( inds, IECore::CubicBasisf::linear(), false, p );
+			CurvesPrimitivePtr curves = new IECoreScene::CurvesPrimitive( inds, IECore::CubicBasisf::linear(), false, p );
 
 			curves->render( renderer );
 		}

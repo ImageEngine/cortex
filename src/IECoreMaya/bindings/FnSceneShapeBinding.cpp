@@ -38,7 +38,7 @@
 
 #include "maya/MFnDependencyNode.h"
 
-#include "IECore/SceneInterface.h"
+#include "IECoreScene/SceneInterface.h"
 
 #include "IECoreMaya/bindings/FnSceneShapeBinding.h"
 #include "IECoreMaya/StatusException.h"
@@ -47,15 +47,15 @@
 using namespace IECoreMaya;
 using namespace boost::python;
 
-static IECore::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
+static IECoreScene::SceneInterfacePtr sceneInterface( MFnDependencyNode *fnDN )
 {
 	assert( fnDN );
 	MPxNode *userNode = fnDN->userNode();
 	SceneShapeInterface *sc = dynamic_cast<SceneShapeInterface *>( userNode );
 	if( sc )
 	{
-		IECore::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
-		return const_cast<IECore::SceneInterface*>( scnInterface.get() );
+		IECoreScene::ConstSceneInterfacePtr scnInterface = sc->getSceneInterface();
+		return const_cast<IECoreScene::SceneInterface*>( scnInterface.get() );
 	}
 
 	// failed

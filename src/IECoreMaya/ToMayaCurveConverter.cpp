@@ -40,21 +40,21 @@
 #include "maya/MPointArray.h"
 #include "maya/MDoubleArray.h"
 
-#include "IECore/CurvesPrimitive.h"
-#include "IECore/PrimitiveVariable.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/CompoundParameter.h"
+#include "IECoreScene/CurvesPrimitive.h"
+#include "IECoreScene/PrimitiveVariable.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaCurveConverter.h"
 
 using namespace IECoreMaya;
 
-ToMayaCurveConverter::Description ToMayaCurveConverter::g_curvesDataDescription( IECore::CurvesPrimitive::staticTypeId(), MFn::kNurbsCurveData );
-ToMayaCurveConverter::Description ToMayaCurveConverter::g_curvesDescription( IECore::CurvesPrimitive::staticTypeId(), MFn::kNurbsCurve );
+ToMayaCurveConverter::Description ToMayaCurveConverter::g_curvesDataDescription( IECoreScene::CurvesPrimitive::staticTypeId(), MFn::kNurbsCurveData );
+ToMayaCurveConverter::Description ToMayaCurveConverter::g_curvesDescription( IECoreScene::CurvesPrimitive::staticTypeId(), MFn::kNurbsCurve );
 
 ToMayaCurveConverter::ToMayaCurveConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::CurvesPrimitive objects to a Maya object.", object)
+: ToMayaObjectConverter( "Converts IECoreScene::CurvesPrimitive objects to a Maya object.", object)
 {
 	m_indexParameter = new IECore::IntParameter( "index", "The index of the curve to be converted.", 0 );
 	parameters()->addParameter( m_indexParameter );
@@ -75,7 +75,7 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 {
 	MStatus s;
 
-	IECore::ConstCurvesPrimitivePtr curves = IECore::runTimeCast<const IECore::CurvesPrimitive>( from );
+	IECoreScene::ConstCurvesPrimitivePtr curves = IECore::runTimeCast<const IECoreScene::CurvesPrimitive>( from );
 
 	assert( curves );
 
@@ -91,7 +91,7 @@ bool ToMayaCurveConverter::doConversion( IECore::ConstObjectPtr from, MObject &t
 		return false;
 	}
 
-	IECore::ConstV3fVectorDataPtr p = curves->variableData< IECore::V3fVectorData >( "P", IECore::PrimitiveVariable::Vertex );
+	IECore::ConstV3fVectorDataPtr p = curves->variableData< IECore::V3fVectorData >( "P", IECoreScene::PrimitiveVariable::Vertex );
 	if( !p )
 	{
 		IECore::msg( IECore::Msg::Warning,"ToMayaCurveConverter::doConversion",  "Curve has no \"P\" data" );

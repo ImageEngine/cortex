@@ -41,21 +41,22 @@
 
 #include "OpenEXR/ImathMatrixAlgo.h"
 #include "IECore/AngleConversion.h"
-#include "IECore/CoordinateSystem.h"
-#include "IECore/MatrixTransform.h"
 #include "IECore/MessageHandler.h"
 #include "IECore/SimpleTypedData.h"
+#include "IECoreScene/CoordinateSystem.h"
+#include "IECoreScene/MatrixTransform.h"
 
 #include "IECoreMaya/Convert.h"
 #include "IECoreMaya/ToMayaLocatorConverter.h"
 
 using namespace IECore;
+using namespace IECoreScene;
 using namespace IECoreMaya;
 
-ToMayaLocatorConverter::Description ToMayaLocatorConverter::g_description( IECore::CoordinateSystem::staticTypeId(), MFn::kLocator );
+ToMayaLocatorConverter::Description ToMayaLocatorConverter::g_description( IECoreScene::CoordinateSystem::staticTypeId(), MFn::kLocator );
 
 ToMayaLocatorConverter::ToMayaLocatorConverter( IECore::ConstObjectPtr object )
-: ToMayaObjectConverter( "Converts IECore::CoordinateSystem objects to Maya locators.", object )
+: ToMayaObjectConverter( "Converts IECoreScene::CoordinateSystem objects to Maya locators.", object )
 {
 }
 
@@ -64,7 +65,7 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 	ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( from );
 	if ( !coordSys )
 	{
-		IECore::msg( IECore::Msg::Warning, "ToMayaLocatorConverter::doConversion",  "The source object is not an IECore::CoordinateSystem." );
+		IECore::msg( IECore::Msg::Warning, "ToMayaLocatorConverter::doConversion",  "The source object is not an IECoreScene::CoordinateSystem." );
 		return false;
 	}
 
@@ -119,7 +120,7 @@ bool ToMayaLocatorConverter::doConversion( IECore::ConstObjectPtr from, MObject 
 	MFnDagNode fnLocator( locatorObj );
 
 	Imath::M44f m;
-	const IECore::Transform* transform = coordSys->getTransform();
+	const IECoreScene::Transform* transform = coordSys->getTransform();
 	if( transform )
 	{
 		m = transform->transform();

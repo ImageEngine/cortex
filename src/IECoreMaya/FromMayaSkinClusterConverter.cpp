@@ -38,8 +38,8 @@
 #include "IECoreMaya/FromMayaSkinClusterConverter.h"
 #include "IECoreMaya/Convert.h"
 #include "IECore/Exception.h"
-#include "IECore/SmoothSkinningData.h"
 #include "IECore/CompoundParameter.h"
+#include "IECoreScene/SmoothSkinningData.h"
 
 #include "maya/MFnSkinCluster.h"
 #include "maya/MFnDagNode.h"
@@ -57,7 +57,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaSkinClusterConverter );
 
-FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaSkinClusterConverter> FromMayaSkinClusterConverter::m_description( MFn::kSkinClusterFilter, IECore::SmoothSkinningData::staticTypeId(), true );
+FromMayaObjectConverter::FromMayaObjectConverterDescription<FromMayaSkinClusterConverter> FromMayaSkinClusterConverter::m_description( MFn::kSkinClusterFilter, IECoreScene::SmoothSkinningData::staticTypeId(), true );
 
 FromMayaSkinClusterConverter::FromMayaSkinClusterConverter( const MObject &object )
 	:	FromMayaObjectConverter( "Converts data on skinCluster nodes.into SmoothSkinningData", object )
@@ -200,7 +200,7 @@ IECore::ObjectPtr FromMayaSkinClusterConverter::doConversion( const MObject &obj
 	}
 
 	// put all our results in a smooth skinning data object
-	return new IECore::SmoothSkinningData( influenceNamesData, influencePoseData, pointIndexOffsetsData,
+	return new IECoreScene::SmoothSkinningData( influenceNamesData, influencePoseData, pointIndexOffsetsData,
 										pointInfluenceCountsData, pointInfluenceIndicesData, pointInfluenceWeightsData  );
 }
 

@@ -35,7 +35,7 @@
 #include "maya/MFnTypedAttribute.h"
 #include "maya/MFnPluginData.h"
 
-#include "IECore/CurvesMergeOp.h"
+#include "IECoreScene/CurvesMergeOp.h"
 
 #include "IECoreMaya/CurveCombiner.h"
 #include "IECoreMaya/MayaTypeIds.h"
@@ -99,9 +99,9 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 	{
 
 		MArrayDataHandle arrayHandle = dataBlock.inputArrayValue( aInputCurves );
-		IECore::CurvesPrimitivePtr combinedCurves = 0;
+		IECoreScene::CurvesPrimitivePtr combinedCurves = 0;
 
-		IECore::CurvesMergeOpPtr curvesMergeOp = new IECore::CurvesMergeOp();
+		IECoreScene::CurvesMergeOpPtr curvesMergeOp = new IECoreScene::CurvesMergeOp();
 		curvesMergeOp->copyParameter()->setTypedValue( false );
 
 		unsigned numCurves = arrayHandle.elementCount();
@@ -111,7 +111,7 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 			FromMayaCurveConverterPtr converter = new FromMayaCurveConverter( curve );
 			// we want worldspace points if a worldShape is connected, and local otherwise
 			converter->spaceParameter()->setNumericValue( FromMayaShapeConverter::World );
-			IECore::CurvesPrimitivePtr cortexCurve = boost::static_pointer_cast<IECore::CurvesPrimitive>( converter->convert() );
+			IECoreScene::CurvesPrimitivePtr cortexCurve = boost::static_pointer_cast<IECoreScene::CurvesPrimitive>( converter->convert() );
 
 			if( !combinedCurves )
 			{
@@ -127,7 +127,7 @@ MStatus CurveCombiner::compute( const MPlug &plug, MDataBlock &dataBlock )
 
 		if( !combinedCurves )
 		{
-			combinedCurves = new IECore::CurvesPrimitive();
+			combinedCurves = new IECoreScene::CurvesPrimitive();
 		}
 
 		MFnPluginData fnD;

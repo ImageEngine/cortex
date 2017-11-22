@@ -42,7 +42,6 @@
 #include "IECorePython/IECoreBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ScopedGILLock.h"
-#include "IECorePython/SceneInterfaceBinding.h"
 
 using namespace IECoreMaya;
 using namespace boost::python;
@@ -54,7 +53,7 @@ class CustomTagReader
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &tag, int filter )
+		bool operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &tag, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -69,7 +68,7 @@ class CustomTagReader
 			}
 		}
 
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &tags, int filter )
+		void operator() ( const MDagPath &dagPath, IECoreScene::SceneInterface::NameList &tags, int filter )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -109,7 +108,7 @@ class CustomAttributeReader
 		{
 		}
 
-		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		IECore::ConstObjectPtr operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &attr )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -124,7 +123,7 @@ class CustomAttributeReader
 			}
 		}
 
-		void operator() ( const MDagPath &dagPath, IECore::SceneInterface::NameList &attributes )
+		void operator() ( const MDagPath &dagPath, IECoreScene::SceneInterface::NameList &attributes )
 		{
 			MString p = dagPath.fullPathName();
 			IECorePython::ScopedGILLock gilLock;
@@ -159,7 +158,7 @@ class CustomAttributeReaderMightHave
 		{
 		}
 
-		bool operator() ( const MDagPath &dagPath, const IECore::SceneInterface::Name &attr )
+		bool operator() ( const MDagPath &dagPath, const IECoreScene::SceneInterface::Name &attr )
 		{
 			// Use with care when registering a Python function.
 			// MDagPath::fullPathName() is a slow API. We allow registering the "might have" callback from Python

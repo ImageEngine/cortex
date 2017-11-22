@@ -85,7 +85,7 @@ class SceneShapeUI : public MPxSurfaceShapeUI
 		void selectionRayToWorldSpacePoint( const MDagPath &camera, const MSelectInfo &selectInfo, float depth, MPoint &worldIntersectionPoint ) const;
 
 		/// Returns the concatenated object transforms of the SceneInterface.
-		Imath::M44d worldTransform( const IECore::SceneInterface *scene, double time ) const;
+		Imath::M44d worldTransform( const IECoreScene::SceneInterface *scene, double time ) const;
 
 		mutable StateMap m_stateMap;
 		mutable DisplayStyle m_displayStyle;
