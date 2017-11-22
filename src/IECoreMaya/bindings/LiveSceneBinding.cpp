@@ -35,6 +35,7 @@
 #include "maya/MString.h"
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECoreMaya/LiveScene.h"
 #include "IECoreMaya/bindings/LiveSceneBinding.h"
@@ -45,6 +46,9 @@
 
 using namespace IECoreMaya;
 using namespace boost::python;
+
+namespace
+{
 
 class CustomTagReader
 {
@@ -88,7 +92,7 @@ class CustomTagReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), tags );
+			container_utils::extend_container( tags, l() );
 		}
 
 		object m_has;
@@ -144,7 +148,7 @@ class CustomAttributeReader
 				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
 			}
 
-			IECorePython::listToSceneInterfaceNameList( l(), attributes );
+			container_utils::extend_container( attributes, l() );
 		}
 
 		object m_names;
@@ -193,6 +197,8 @@ void registerCustomAttributes( object namesFn, object readFn, object mightHaveFn
 		LiveScene::registerCustomAttributes( reader, reader, readerm );
 	}
 }
+
+} // namespace
 
 void IECoreMaya::bindLiveScene()
 {
