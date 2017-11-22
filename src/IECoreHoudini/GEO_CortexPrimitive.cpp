@@ -45,6 +45,10 @@
 #include "UT/UT_JSONParser.h"
 #include "UT/UT_JSONWriter.h"
 #include "UT/UT_MemoryCounter.h"
+#ifdef IECOREHOUDINI_WITH_GL
+#include "DM/DM_RenderTable.h"
+#include "IECoreHoudini/GUI_CortexPrimitiveHook.h"
+#endif
 
 #include "IECore/HexConversion.h"
 #include "IECore/MemoryIndexedIO.h"
@@ -57,7 +61,9 @@
 
 #include "IECoreHoudini/Convert.h"
 #include "IECoreHoudini/GEO_CortexPrimitive.h"
+#include "IECoreHoudini/SOP_OpHolder.h"
 #include "IECoreHoudini/ToHoudiniPolygonsConverter.h"
+#include "IECoreHoudini/UT_ObjectPoolCache.h"
 
 #if UT_MAJOR_VERSION_INT < 14
 
@@ -411,14 +417,6 @@ const GA_PrimitiveDefinition &GEO_CortexPrimitive::getTypeDef() const
 	return *m_definition;
 }
 
-void GEO_CortexPrimitive::setTypeDef( GA_PrimitiveDefinition *def )
-{
-	if ( !m_definition )
-	{
-		m_definition = def;
-	}
-}
-
 GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
 {
 	// m_definition is set by calling setTypeDef above & this is performed by the houdiniPlugin.
@@ -434,13 +432,13 @@ GA_PrimitiveTypeId GEO_CortexPrimitive::typeId()
 #if UT_MAJOR_VERSION_INT >= 16
 
 void GEO_CortexPrimitive::create(
-	    GA_Primitive **newPrims,
-	    GA_Size numPrimitives,
-	    GA_Detail &detail,
-	    GA_Offset startOffset,
+		GA_Primitive **newPrims,
+		GA_Size numPrimitives,
+		GA_Detail &detail,
+		GA_Offset startOffset,
 		const GA_PrimitiveDefinition &def
-#if UT_MINOR_VERSION_INT >=5
-	    , bool allowed_to_parallelize
+#if MIN_HOU_VERSION(16, 5, 0)
+		, bool allowed_to_parallelize
 #endif
 		)
 {
@@ -450,7 +448,7 @@ void GEO_CortexPrimitive::create(
 #if UT_MINOR_VERSION_INT >=5
 	if ( allowed_to_parallelize && numPrimitives >= 4*GA_PAGE_SIZE )
 #else
-    if ( numPrimitives >= 4*GA_PAGE_SIZE )
+	if ( numPrimitives >= 4*GA_PAGE_SIZE )
 #endif
 	{
 		// Allocate them in parallel if we're allocating many.
@@ -1020,4 +1018,38 @@ const GA_PrimitiveJSON *GEO_CortexPrimitive::getJSON() const
 	}
 
 	return jsonPrim;
+}
+
+void GEO_CortexPrimitive::registerDefinition(GA_PrimitiveFactory *factory) {
+	GA_PrimitiveDefinition *primDef = factory->registerDefinition(
+			GEO_CortexPrimitive::typeName, GEO_CortexPrimitive::create,
+			GA_FAMILY_NONE, (std::string(GEO_CortexPrimitive::typeName ) + "s" ).c_str()
+		);
+
+	if ( !primDef )
+		{
+			std::cerr << "Warning: Duplicate definition for CortexPrimitive. Make sure only 1 version of the ieCoreHoudini plugin is on your path." << std::endl;
+			return;
+		}
+
+	// merge constructors removed in H16
+#if UT_MAJOR_VERSION_INT < 16
+	primDef->setMergeConstructor( CortexPrimitive::create );
+#endif
+	primDef->setHasLocalTransform( true );
+
+	// this will put the proper cortex primitive type into the intrinsic attribute table
+	GEO_CortexPrimitive::registerIntrinsics(*primDef);
+
+	m_definition = primDef;
+
+	/// Create the default ObjectPool cache
+	UT_ObjectPoolCache::defaultObjectPoolCache();
+	/// Declare our new Render Hook if IECoreGL is enabled.
+#ifdef IECOREHOUDINI_WITH_GL
+
+	DM_RenderTable::getTable()->registerGEOHook( new GUI_CortexPrimitiveHook, primDef->getId(), 0 );
+
+#endif
+
 }
