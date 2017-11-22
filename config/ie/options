@@ -91,6 +91,7 @@ if targetApp :
 	tbbVersion = targetAppReg.get( "tbbVersion", cortexReg["tbbVersion"] )
 	usdVersion = targetAppReg.get( "usdVersion", cortexReg.get("usdVersion", None) )
 	targetAppMajorVersion = targetAppReg.get( "majorVersion", targetAppVersion )
+	compatibilityVersion = targetAppReg.get( "compatibilityVersion", targetAppMajorVersion )
 else :
 	platformReg = IEEnv.registry["platformDefaults"][IEEnv.platform()]
 	if not compiler :
@@ -316,12 +317,21 @@ ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 
 # find USD:
 
-if usdVersion:
-    USD_INCLUDE_PATH = os.path.join( "/software/apps/usdgaffer/", usdVersion, platform, "include" )
-    USD_LIB_PATH = os.path.join( "/software/apps/usdgaffer/", usdVersion, platform, "lib" )
-else:
-    USD_INCLUDE_PATH = None
-    USD_LIB_PATH = None
+USD_INCLUDE_PATH = None
+USD_LIB_PATH = None
+
+if usdVersion :
+
+	usdReg = IEEnv.registry["apps"]["usd"][usdVersion][platform]
+
+	if usdReg :
+		if targetApp :
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], targetApp, compatibilityVersion, "lib" )
+		else:
+			USD_INCLUDE_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "include" )
+			USD_LIB_PATH = os.path.join( usdReg["location"], "cortex", "$IECORE_MAJOR_VERSION", "lib" )
+
 
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
