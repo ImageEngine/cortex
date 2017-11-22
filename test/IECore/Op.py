@@ -69,23 +69,36 @@ class TestPythonOp( unittest.TestCase ) :
 		self.assertEqual( o.resultParameter().getValue(), result )
 
 	def testDefaultConstructor( self ):
-		import IECore
-		exceptionList = [	IECore.Reader, IECore.Writer,
-							IECore.ParticleReader, IECore.ParticleWriter
-						]
-		def test(c):
-			try:
-				if issubclass(c, IECore.Op) and not c is IECore.Op and not c in exceptionList:
-					# instantiate using default constructor
-					f = c()
-			except:
+
+		abstractOps = {
+			IECore.Op, IECore.ModifyOp,
+			IECore.SequenceMergeOp, IECore.FileSequenceAnalyzerOp,
+			IECore.Reader, IECore.Writer
+		}
+
+		def isOpWithMissingConstructor( c ):
+
+			try :
+				if not issubclass( c, IECore.Op ) :
+					return False
+			except TypeError :
 				return False
 
+			if c in abstractOps :
+				return False
+
+			try :
+				c()
+			except :
+				return True
+
+			return False
+
 		IECore.RefCounted.collectGarbage()
-		badClasses = filter(test, map(lambda x: getattr(IECore, x), dir(IECore)))
+		badClasses = [ getattr( IECore, x ) for x in dir( IECore ) if isOpWithMissingConstructor( getattr( IECore, x ) ) ]
 		if len(badClasses) > 0:
 			raise Exception, "The following Op classes don't have a default constructor: " + \
-					string.join(map(str, badClasses), ", ")
+					", ".join( [ str( c ) for c in badClasses ] )
 
 	def testSpecializedCompoundParameter( self ):
 
