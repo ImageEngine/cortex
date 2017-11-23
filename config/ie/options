@@ -219,7 +219,7 @@ if targetApp :
 
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
-dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
+dlVersion = getOption( "DL_VERSION", os.environ.get( "DL_VERSION", None ) )
 try :
 	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
 	if dlReg["compiler"]==compiler :
@@ -385,8 +385,9 @@ else :
 	# We use basePrefix for IECoreRI, but dlPrefix for the renderman procedurals. See the note in
 	# the dlReg section for an explanation.
 	INSTALL_RMANLIB_NAME = os.path.join( basePrefix, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
-	INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
-	INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
+	if dlVersion:
+		INSTALL_RMANPROCEDURAL_NAME = os.path.join( basePrefix, "3delight", dlVersion, "procedurals", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
+		INSTALL_RMANDISPLAY_NAME = os.path.join( basePrefix, "3delight", dlVersion, "displayDrivers", compiler, compilerVersion, "$IECORE_NAME" )
 	INSTALL_ARNOLDLIB_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "lib", compiler, compilerVersion, "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_ARNOLDPYTHON_DIR = os.path.join( basePrefix, "arnold", arnoldVersion, "python", pythonVersion, compiler, compilerVersion )
 	INSTALL_ARNOLDPROCEDURAL_NAME = os.path.join( basePrefix, "arnold", arnoldVersion, "plugins", "python", "$PYTHON_VERSION", compiler, compilerVersion, "$IECORE_NAME" )
