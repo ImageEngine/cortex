@@ -117,11 +117,11 @@ class ParameterUI( IECoreMaya.UIElement ) :
 				# Top-level parameter comes through into here without a name
 				n = self.nodeName() + ".parameters"
 
-			return maya.mel.eval( "interToUI(\"" + n + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + n + "\")" )
 
 		else :
 
-			return maya.mel.eval( "interToUI(\"" + self.parameter.name + "\")" ).value
+			return maya.mel.eval( "interToUI(\"" + self.parameter.name + "\")" )
 
 	## Computes a wrapped annotation/tooltip for the ui
 	def description( self ):
