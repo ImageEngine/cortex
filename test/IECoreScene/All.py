@@ -109,6 +109,7 @@ from ClippingPlaneTest import ClippingPlaneTest
 from MeshAlgoTest import *
 from CurvesAlgoTest import *
 from PointsAlgoTest import *
+from ObjectInterpolationTest import ObjectInterpolationTest
 
 if IECore.withFreeType() :
 	from FontTest import *
