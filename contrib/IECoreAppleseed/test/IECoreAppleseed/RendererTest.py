@@ -36,6 +36,7 @@ import os
 import shutil
 
 import IECore
+import IECoreScene
 import IECoreAppleseed
 
 import AppleseedTest
@@ -48,7 +49,7 @@ class RendererTest( AppleseedTest.TestCase ):
 	def testTypeId( self ) :
 
 		self.assertEqual( IECoreAppleseed.Renderer().typeId(), IECoreAppleseed.Renderer.staticTypeId() )
-		self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECore.Renderer.staticTypeId() )
+		self.assertNotEqual( IECoreAppleseed.Renderer.staticTypeId(), IECoreScene.Renderer.staticTypeId() )
 
 	def testTypeName( self ) :
 
@@ -60,10 +61,10 @@ class RendererTest( AppleseedTest.TestCase ):
 		r = IECoreAppleseed.Renderer( self.__appleseedFileName )
 		self.failIf( os.path.exists( self.__appleseedFileName ) )
 
-		with IECore.WorldBlock( r ) :
+		with IECoreScene.WorldBlock( r ) :
 
 			self._createDefaultShader( r )
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			m.render( r )
 
 		self.failUnless( os.path.exists( self.__appleseedFileName ) )

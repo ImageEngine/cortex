@@ -37,6 +37,7 @@ import os
 import appleseed
 
 import IECore
+import IECoreScene
 import IECoreAppleseed
 
 import AppleseedTest
@@ -47,7 +48,7 @@ class MotionTest( AppleseedTest.TestCase ):
 
 			r = IECoreAppleseed.Renderer()
 
-			with IECore.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
 
 				r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0 ) ) )
 				r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
@@ -73,13 +74,13 @@ class MotionTest( AppleseedTest.TestCase ):
 
 			self._createDefaultShader( r )
 
-			with IECore.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
 
 				r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 0 ) ) )
 				r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 1 ) ) )
 				r.setTransform( IECore.M44f.createTranslated( IECore.V3f( 2 ) ) )
 
-			m = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
 			m.render( r )
 
 			r.attributeEnd()
@@ -102,13 +103,13 @@ class MotionTest( AppleseedTest.TestCase ):
 
 			self._createDefaultShader( r )
 
-			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
 
 			r.attributeBegin()
 			r.setAttribute( "name", "object" )
 
-			with IECore.MotionBlock( r, [ 0.25, 0.75 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0.25, 0.75 ] ) :
 
 				m1.render( r )
 				m2.render( r )
@@ -131,14 +132,14 @@ class MotionTest( AppleseedTest.TestCase ):
 
 			self._createDefaultShader( r )
 
-			m1 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
-			m2 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
-			m3 = IECore.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
+			m1 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -1 ), IECore.V2f( 1 ) ) )
+			m2 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -2 ), IECore.V2f( 2 ) ) )
+			m3 = IECoreScene.MeshPrimitive.createPlane( IECore.Box2f( IECore.V2f( -3 ), IECore.V2f( 3 ) ) )
 
 			r.attributeBegin()
 			r.setAttribute( "name", "object" )
 
-			with IECore.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
+			with IECoreScene.MotionBlock( r, [ 0.25, 0.5, 0.75 ] ) :
 
 				m1.render( r )
 				m2.render( r )
