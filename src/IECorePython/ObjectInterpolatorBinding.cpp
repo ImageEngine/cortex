@@ -50,7 +50,6 @@ void bindObjectInterpolator()
 	using boost::python::arg;
 
 	def("linearObjectInterpolation", &linearObjectInterpolation, ( arg( "y0" ), arg( "y1" ), arg( "x" ) ) );
-	def("cubicObjectInterpolation", &cubicObjectInterpolation, ( arg( "y0" ), arg( "y1" ), arg( "y2" ), arg( "y3" ), arg( "x" ) ) );
 }
 
 } // namespace IECorePython

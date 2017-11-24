@@ -176,11 +176,6 @@ class TransformationMatrixDatafTest(unittest.TestCase):
 		self.assert_( c.value.scale.equalWithAbsError( IECore.V3f( 1.5, 2, 2.5 ), 0.01 ) )
 		self.assert_( c.value.translate.equalWithAbsError( IECore.V3f( 0.5, 1, 1.5 ), 0.01 ) )
 
-		c = IECore.cubicObjectInterpolation( b, b, b, b, 0.5 )
-		self.assertEqual( type(c), IECore.TransformationMatrixfData )
-		self.assert_( c.value.scale.equalWithAbsError( IECore.V3f( 2, 3, 4 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( IECore.V3f( 1, 2, 3 ), 0.01 ) )
-
 	def testComparison(self):
 		"""Test TransformationMatrixfData comparison"""
 		a = IECore.TransformationMatrixfData()
@@ -293,11 +288,6 @@ class TransformationMatrixDatadTest(unittest.TestCase):
 		self.assertEqual( type(c), IECore.TransformationMatrixdData )
 		self.assert_( c.value.scale.equalWithAbsError( IECore.V3d( 1.5, 2, 2.5 ), 0.01 ) )
 		self.assert_( c.value.translate.equalWithAbsError( IECore.V3d( 0.5, 1, 1.5 ), 0.01 ) )
-
-		c = IECore.cubicObjectInterpolation( b, b, b, b, 0.5 )
-		self.assertEqual( type(c), IECore.TransformationMatrixdData )
-		self.assert_( c.value.scale.equalWithAbsError( IECore.V3d( 2, 3, 4 ), 0.01 ) )
-		self.assert_( c.value.translate.equalWithAbsError( IECore.V3d( 1, 2, 3 ), 0.01 ) )
 
 		# try rotation interpolation...
 		d = IECore.TransformationMatrixdData( IECore.TransformationMatrixd( IECore.V3d(2,3,4), IECore.Eulerd( 1., 2., 3. ), IECore.V3d(1,2,3) ) )

@@ -69,7 +69,6 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		mx.translate( IECore.V3d(0.5,0.5,0) )
 		mx.scale( IECore.V3d(5,5,5) )
 		self.assertEqual( IECore.linearObjectInterpolation( IECore.M44dData(m1), IECore.M44dData(m2), 0.5 ), IECore.M44dData(mx) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.M44dData(m1), IECore.M44dData(m1), IECore.M44dData(m2), IECore.M44dData(m2), 0.5 ), IECore.M44dData(mx) )
 
 	def __buildTree( self, compoundType, seed ):
 
@@ -97,7 +96,6 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		data2 = self.__buildTree( IECore.CompoundData, 2 )
 		data3 = self.__buildTree( IECore.CompoundData, 3 )
 		self.assertEqual( IECore.linearObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( IECore.CompoundData, 1.5 ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( data0, data1, data2, data3, 0.5 ), self.__buildTree( IECore.CompoundData, 1.5 ) )
 
 	def testCompoundObjectInterpolation( self ):
 
@@ -106,27 +104,6 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		data2 = self.__buildTree( IECore.CompoundObject, 2 )
 		data3 = self.__buildTree( IECore.CompoundObject, 3 )
 		self.assertEqual( IECore.linearObjectInterpolation( data1, data2, 0.5 ), self.__buildTree( IECore.CompoundObject, 1.5 ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( data0, data1, data2, data3, 0.5 ), self.__buildTree( IECore.CompoundObject, 1.5 ) )
-
-	def testSimpleCubicInterpolation( self ) :
-
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.IntData(1), IECore.IntData(2), IECore.IntData(3), IECore.IntData(4), 0.5 ), None )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.FloatData(1), IECore.FloatData(2), IECore.FloatData(3), IECore.FloatData(4), 0.5 ), IECore.FloatData(2.5) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.DoubleData(1), IECore.DoubleData(2), IECore.DoubleData(3), IECore.DoubleData(4), 0.5 ), IECore.DoubleData(2.5) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V2fData( IECore.V2f(1) ), IECore.V2fData( IECore.V2f(2) ), IECore.V2fData( IECore.V2f(3) ), IECore.V2fData( IECore.V2f(4) ), 0.5 ), IECore.V2fData( IECore.V2f(2.5) ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V3fData( IECore.V3f(1) ), IECore.V3fData( IECore.V3f(2) ), IECore.V3fData( IECore.V3f(3) ), IECore.V3fData( IECore.V3f(4) ), 0.5 ), IECore.V3fData( IECore.V3f(2.5) ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V2dData( IECore.V2d(1) ), IECore.V2dData( IECore.V2d(2) ), IECore.V2dData( IECore.V2d(3) ), IECore.V2dData( IECore.V2d(4) ), 0.5 ), IECore.V2dData( IECore.V2d(2.5) ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V3dData( IECore.V3d(1) ), IECore.V3dData( IECore.V3d(2) ), IECore.V3dData( IECore.V3d(3) ), IECore.V3dData( IECore.V3d(4) ), 0.5 ), IECore.V3dData( IECore.V3d(2.5) ) )
-
-	def testVectorCubicInterpolation( self ):
-
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.IntVectorData( [1] ), IECore.IntVectorData( [2] ), IECore.IntVectorData( [1] ), IECore.IntVectorData( [2] ), 0.5 ), None )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.FloatVectorData( [1]), IECore.FloatVectorData( [2] ), IECore.FloatVectorData( [3]), IECore.FloatVectorData( [4] ), 0.5 ), IECore.FloatVectorData([2.5]) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.DoubleVectorData( [1]), IECore.DoubleVectorData( [2] ), IECore.DoubleVectorData( [3]), IECore.DoubleVectorData( [4] ), 0.5 ), IECore.DoubleVectorData([2.5]) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V2fVectorData( [IECore.V2f(1)] ), IECore.V2fVectorData( [IECore.V2f(2)] ), IECore.V2fVectorData( [IECore.V2f(3)] ), IECore.V2fVectorData( [IECore.V2f(4)] ), 0.5 ), IECore.V2fVectorData( [IECore.V2f(2.5)] ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V3fVectorData( [IECore.V3f(1)] ), IECore.V3fVectorData( [IECore.V3f(2)] ), IECore.V3fVectorData( [IECore.V3f(3)] ), IECore.V3fVectorData( [IECore.V3f(4)] ), 0.5 ), IECore.V3fVectorData( [IECore.V3f(2.5)] ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V2dVectorData( [IECore.V2d(1)] ), IECore.V2dVectorData( [IECore.V2d(2)] ), IECore.V2dVectorData( [IECore.V2d(3)] ), IECore.V2dVectorData( [IECore.V2d(4)] ), 0.5 ), IECore.V2dVectorData( [IECore.V2d(2.5)] ) )
-		self.assertEqual( IECore.cubicObjectInterpolation( IECore.V3dVectorData( [IECore.V3d(1)] ), IECore.V3dVectorData( [IECore.V3d(2)] ), IECore.V3dVectorData( [IECore.V3d(3)] ), IECore.V3dVectorData( [IECore.V3d(4)] ), 0.5 ), IECore.V3dVectorData( [IECore.V3d(2.5)] ) )
 
 	def testNonSupportedInterpolation( self ):
 
@@ -135,7 +112,6 @@ class TestObjectInterpolation( unittest.TestCase ) :
 		obj3 = IECore.StringData()
 		obj4 = IECore.StringData()
 		self.assertEqual( IECore.linearObjectInterpolation( obj1, obj2, 0.5), None )
-		self.assertEqual( IECore.cubicObjectInterpolation( obj1, obj2, obj3, obj4, 0.5), None )
 
 if __name__ == "__main__":
     unittest.main()

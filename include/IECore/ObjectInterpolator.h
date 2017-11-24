@@ -53,21 +53,8 @@ struct LinearInterpolator< Object >
 		struct Adaptor;
 };
 
-template<>
-struct CubicInterpolator< Object >
-{
-	void operator()(const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x, ObjectPtr &result ) const;
-
-	private :
-
-		struct Adaptor;
-};
-
 /// Utility function that applies linear interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
 IECORE_API ObjectPtr linearObjectInterpolation( const Object *y0, const Object *y1, double x );
-
-/// Utility function that applies cubic interpolation on objects. Returns a "null" pointer if the Object cannot be interpolated.
-IECORE_API ObjectPtr cubicObjectInterpolation( const Object *y0, const Object *y1, const Object *y2, const Object *y3, double x );
 
 typedef ObjectPtr (*ObjectInterpolator)( const IECore::Object *y0, const IECore::Object *y1, double x );
 /// Registers a custom interpolator for a specific object type.
