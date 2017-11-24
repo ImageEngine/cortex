@@ -53,7 +53,7 @@ SConsignFile()
 
 ieCoreMajorVersion=9
 ieCoreMinorVersion=23
-ieCorePatchVersion=2
+ieCorePatchVersion=4
 ieCoreVersionSuffix=""	# used for alpha/beta releases. Example: "a1", "b2", etc.
 ieCoreVersionSuffix="arnold5"	# used for alpha/beta releases. Example: "a1", "b2", etc.
 
@@ -538,6 +538,13 @@ o.Add(
 	"The path to the appleseed lib directory.",
 	"/usr/local/appleseed/lib",
 )
+
+# compatibility options
+
+o.Add(
+	BoolVariable( "WITH_CORTEX10_COMPAT", "Set this to include cortex 10 compatibility modules.", False ),
+)
+
 
 # Build options
 
@@ -3421,6 +3428,21 @@ if doConfigure :
 		appleseedTestEnv.Depends( appleseedTest, [ appleseedPythonModule + appleseedDriverForTest ] )
 		appleseedTestEnv.Depends( appleseedTest, glob.glob( "contrib/IECoreAppleseed/test/IECoreAppleseed/*.py" ) )
 		appleseedTestEnv.Alias( "testAppleseed", appleseedTest )
+
+###########################################################################################
+# Install Cortex 10 forward-compatibility for IECoreImage
+###########################################################################################
+
+if env["WITH_CORTEX10_COMPAT"] :
+
+	coreImagePythonModuleEnv = pythonModuleEnv.Clone( IECORE_NAME = "IECoreImage" )
+
+	# python module
+	coreImagePythonScripts = glob.glob( "contrib/IECoreImage/python/IECoreImage/*.py" )
+	coreImagePythonModuleInstall = coreImagePythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreImage", coreImagePythonScripts )
+	coreImagePythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreImage", lambda target, source, env : makeSymLinks( coreImagePythonModuleEnv, coreImagePythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
+	coreImagePythonModuleEnv.Alias( "install", coreImagePythonModuleInstall )
+	coreImagePythonModuleEnv.Alias( "installCoreImage", coreImagePythonModuleInstall )
 
 ###########################################################################################
 # Documentation

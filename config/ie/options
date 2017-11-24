@@ -249,16 +249,17 @@ if targetApp :
 # find 3delight. we only build the 3delight stuff if the compiler we're building with is suitable.
 dlReg = None
 dlVersion = getOption( "DL_VERSION", os.environ["DL_VERSION"] )
-try :
-	dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
-	if dlReg["compiler"]==compiler :
-		RMAN_ROOT = dlReg["location"]
-		os.environ["DELIGHT_CONF"] = "/software/config/3delight"
-	
-		# Add ribdepends location to path
-		os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
-except :
-	pass
+if getOption( "WITH_DELIGHT", "" ):
+	try :
+		dlReg = IEEnv.registry["apps"]["3delight"][dlVersion][platform]
+		if dlReg["compiler"]==compiler :
+			RMAN_ROOT = dlReg["location"]
+			os.environ["DELIGHT_CONF"] = "/software/config/3delight"
+
+			# Add ribdepends location to path
+			os.environ["PATH"] = os.path.join( RMAN_ROOT, "bin" ) + ":" + os.environ["PATH"]
+	except :
+		pass
 	
 # find arnold. we only build the arnold stuff if the compiler we're building with is suitable.
 arnoldVersion = getOption( "ARNOLD_VERSION", os.environ["ARNOLD_VERSION"] )
@@ -269,7 +270,7 @@ except :
 	pass
 
 appleseedReg = None
-appleseedVersion = getOption( "APPLESEED_VERSION", os.environ["APPLESEED_VERSION"] )
+appleseedVersion = getOption( "APPLESEED_VERSION", os.environ.get("APPLESEED_VERSION", "") )
 try :
 	appleseedReg = IEEnv.registry["apps"]["appleseed"][appleseedVersion][platform]
 	APPLESEED_INCLUDE_PATH = os.path.join( appleseedReg["location"], "include" )
@@ -298,7 +299,7 @@ if targetApp=="maya" :
 	mayaReg = IEEnv.registry["apps"]["maya"][mayaVersion][platform]
 	mayaMajorVersion = mayaReg["majorVersion"]
 	MAYA_ROOT = mayaReg["location"]
-	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"]["LM_LICENSE_FILE"]
+	MAYA_LICENSE_FILE=mayaReg["wrapperEnvVars"].get("LM_LICENSE_FILE", "")
 	MAYA_ADLM_ENV_FILE=mayaReg["wrapperEnvVars"].get( "AUTODESK_ADLM_THINCLIENT_ENV", "" )
 	INSTALL_MAYALIB_NAME = os.path.join( appPrefix, "lib", "$IECORE_NAME-$IECORE_MAJOR_VERSION" )
 	INSTALL_MEL_DIR = os.path.join( appPrefix, "mel", "$IECORE_NAME" )
@@ -382,6 +383,9 @@ ALEMBIC_LIB_SUFFIX = "-" + alembicVersion
 # find hdf5:
 HDF5_INCLUDE_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "include" )
 HDF5_LIB_PATH = os.path.join( "/software/apps/hdf5", hdf5Version, platform, compiler, compilerVersion, "lib" )
+
+# enable cortex10 compatibility
+WITH_CORTEX10_COMPAT = 1
 
 # find doxygen
 DOXYGEN = os.path.join( "/software/apps/doxygen", os.environ["DOXYGEN_VERSION"], platform, "bin", "doxygen" )
