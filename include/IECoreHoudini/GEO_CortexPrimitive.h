@@ -36,6 +36,7 @@
 #define IECOREHOUDINI_GEOCORTEXPRIMITIVE_H
 
 #include "GA/GA_Defines.h"
+#include "GA/GA_LoadMap.h"
 #include "GEO/GEO_Primitive.h"
 #include "GU/GU_Detail.h"
 #include "GEO/GEO_Point.h"
@@ -112,10 +113,10 @@ class GEO_CortexPrimitive : public GEO_Primitive
 
 		static const char *typeName;
 
-#if UT_MAJOR_VERSION_INT >=16
-
-		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
-
+#if UT_MAJOR_VERSION_INT >=16 && UT_MINOR_VERSION_INT >=5
+		static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def, bool allowed_to_parallelize);
+#elif UT_MAJOR_VERSION_INT >=16
+        static void create(GA_Primitive **new_prims, GA_Size nprimitives, GA_Detail &detail, GA_Offset start_offset, const GA_PrimitiveDefinition &def);
 #elif UT_MAJOR_VERSION_INT >= 14
 		
 		static GA_Primitive *create( GA_Detail &detail, GA_Offset offset, const GA_PrimitiveDefinition &definition );		
