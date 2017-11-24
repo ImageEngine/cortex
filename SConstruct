@@ -408,10 +408,6 @@ o.Add(
 	"",
 )
 
-o.Add(
-	BoolVariable("WITH_MANTRA", "Set this to build the mantra procedural", False),
-)
-
 # Arnold options
 
 o.Add(
@@ -578,14 +574,6 @@ o.Add(
 )
 
 o.Add(
-	"INSTALL_MANTRALIB_NAME",
-	"The name under which to install the Mantra libraries. This "
-	"can be used to build and install the library for multiple "
-	"Mantra versions.",
-	"$INSTALL_PREFIX/lib/$IECORE_NAME",
-)
-
-o.Add(
 	"INSTALL_RMANLIB_NAME",
 	"The name under which to install the RI libraries. This "
 	"can be used to build and install the library for multiple "
@@ -711,12 +699,6 @@ o.Add(
 	"INSTALL_HOUDINIPLUGIN_NAME",
 	"The name under which to install houdini plugins.",
 	"$INSTALL_PREFIX/houdini/dso/$IECORE_NAME",
-)
-
-o.Add(
-	"INSTALL_MANTRAPROCEDURAL_NAME",
-	"",
-	"$INSTALL_PREFIX/houdini/dso/mantra/$IECORE_NAME",
 )
 
 o.Add(
@@ -912,14 +894,6 @@ o.Add(
 	"but it can be useful to override this to run just the test for the functionality "
 	"you're working on.",
 	"test/IECoreHoudini/All.py"
-)
-
-o.Add(
-	"TEST_MANTRA_SCRIPT",
-	"The python script to run for the houdini tests. The default will run all the tests, "
-	"but it can be useful to override this to run just the test for the functionality "
-	"you're working on.",
-	"contrib/IECoreMantra/test/IECoreMantra/All.py"
 )
 
 o.Add(
@@ -2428,9 +2402,6 @@ houdiniEnvAppends = {
 		"-isystem", "$HOUDINI_INCLUDE_PATH",
 		"-std=$CXXSTD",
 	],
-	"CPPPATH" : [
-		"contrib/IECoreMantra/include",
-	],
 	"CPPFLAGS" : [
 		pythonEnv["PYTHON_INCLUDE_FLAGS"],
 	],
@@ -2485,14 +2456,6 @@ if env["PLATFORM"] == "posix" :
 
 houdiniPluginEnv = houdiniEnv.Clone( IECORE_NAME="ieCoreHoudini" )
 
-mantraEnv = houdiniEnv.Clone( IECORE_NAME="IECoreMantra")
-## \todo: This is a stopgap measure to get IECoreMantra building for Houdini 14.
-# We should come back and address the deprecations appropriately.
-mantraEnv.Append( CXXFLAGS = [ "-Wno-deprecated-declarations" ] )
-mantraPythonModuleEnv = houdiniPythonModuleEnv.Clone( IECORE_NAME="IECoreMantra" )
-mantraProceduralEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieProcedural" )
-mantraWorldEnv =  houdiniEnv.Clone( IECORE_NAME="VRAY_ieWorld" )
-
 if doConfigure :
 
 	c = Configure( houdiniEnv )
@@ -2520,15 +2483,6 @@ if doConfigure :
 			houdiniSources.remove( "src/IECoreHoudini/GR_CortexPrimitive.cpp" )
 			houdiniSources.remove( "src/IECoreHoudini/GUI_CortexPrimitiveHook.cpp" )
 			houdiniEnv.Append( CPPFLAGS = '-DIECOREHOUDINI_WITH_GL' )
-		if env['WITH_MANTRA']:
-			mantraSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/*.cpp") )
-			mantraHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/*.inl" )
-			mantraBindingHeaders = glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.h" ) + glob.glob( "contrib/IECoreMantra/include/IECoreMantra/bindings/*.inl" )
-			mantraPythonSources = sorted( glob.glob( "contrib/IECoreMantra/src/IECoreMantra/bindings/*.cpp") )
-			mantraPythonScripts = glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" )
-			mantraProceduralSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/Procedural.cpp" ]
-			mantraWorldSources = [ "contrib/IECoreMantra/src/IECoreMantra/procedural/World.cpp" ]
-
 
 		# we can't append this before configuring, as then it gets built as
 		# part of the configure process
@@ -2536,11 +2490,6 @@ if doConfigure :
 		if env['WITH_GL'] :
 			houdiniEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
 		houdiniEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
-
-		mantraEnv.Append( LIBS = os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		if env['WITH_GL'] :
-			mantraEnv.Append( LIBS = os.path.basename( glEnv.subst( "$INSTALL_LIB_NAME" ) ) )
-		mantraEnv.Append( LIBS = os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ) )
 
 		#=====
 		# build library
@@ -2607,127 +2556,6 @@ if doConfigure :
 		houdiniPluginEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( houdiniPluginEnv, houdiniPluginEnv["INSTALL_HOUDINIOTL_DIR"] ) )
 		houdiniPluginEnv.Alias( "install", otlInstall )
 		houdiniPluginEnv.Alias( "installHoudini", otlInstall )
-
-		#=====
-		# build IECoreMantra
-		#=====
-		if env["WITH_MANTRA"] :
-
-			# library
-			mantraLib = mantraEnv.SharedLibrary( "lib/" + os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraSources )
-			mantraLibInstall = mantraEnv.Install( os.path.dirname( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ), mantraLib )
-			mantraEnv.NoCache( mantraLibInstall )
-			mantraEnv.AddPostAction( mantraLibInstall, lambda target, source, env : makeLibSymLinks( mantraEnv, "INSTALL_MANTRALIB_NAME" ) )
-			mantraEnv.Alias( "install", mantraLibInstall )
-			mantraEnv.Alias( "installMantra", mantraLibInstall )
-
-			# headers
-			mantraHeaderInstall = mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra", mantraHeaders )
-			mantraHeaderInstall += mantraEnv.Install( "$INSTALL_HEADER_DIR/IECoreMantra/bindings", mantraBindingHeaders )
-			mantraEnv.AddPostAction( "$INSTALL_HEADER_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HEADER_DIR"] ) )
-			mantraEnv.Alias( "install", mantraHeaderInstall )
-			mantraEnv.Alias( "installMantra", mantraHeaderInstall )
-
-			# VRAY_ieProcedural.dso
-			mantraProceduralEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraProceduralTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraProcedural = mantraProceduralEnv.SharedLibrary( mantraProceduralTarget, mantraProceduralSources, SHLIBPREFIX="" )
-			mantraProceduralInstall = mantraProceduralEnv.Install( os.path.dirname( mantraProceduralEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraProcedural )
-			mantraProceduralEnv.Depends( mantraProcedural, mantraLib )
-			mantraProceduralEnv.AddPostAction( mantraProceduralInstall, lambda target, source, env : makeSymLinks( mantraProceduralEnv, mantraProceduralEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraProceduralEnv.Alias( "install", mantraProceduralInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraProceduralInstall )
-
-			# VRAY_ieWorld dso
-			mantraWorldEnv.Append(
-				LIBS = [
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				],
-			)
-			mantraWorldTarget = "contrib/IECoreMantra/plugins/houdini/dso/mantra/" + os.path.basename( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) )
-			mantraWorld = mantraWorldEnv.SharedLibrary( mantraWorldTarget, mantraWorldSources, SHLIBPREFIX="" )
-			mantraWorldInstall = mantraWorldEnv.Install( os.path.dirname( mantraWorldEnv.subst( "$INSTALL_MANTRAPROCEDURAL_NAME" ) ), mantraWorld )
-			mantraWorldEnv.Depends( mantraProcedural, mantraLib )
-			mantraWorldEnv.AddPostAction( mantraWorldInstall, lambda target, source, env : makeSymLinks( mantraWorldEnv, mantraWorldEnv["INSTALL_MANTRAPROCEDURAL_NAME"] ) )
-			mantraWorldEnv.Alias( "install", mantraWorldInstall )
-			mantraWorldEnv.Alias( "installMantra", mantraWorldInstall )
-
-			# VRAYprocedural menu
-			mantraVrayInclude = 'contrib/IECoreMantra/src/IECoreMantra/procedural/VRAYprocedural'
-			mantraVrayInstall = mantraProceduralEnv.Install( mantraProceduralEnv.subst( "$INSTALL_HOUDINIMENU_DIR" ), source=[ mantraVrayInclude ] )
-			mantraVrayForTest = mantraProceduralEnv.Command( "contrib/IECoreMantra/plugins/houdini/VRAYprocedural", mantraVrayInclude, Copy( "$TARGET", "$SOURCE" ) )
-			mantraProceduralEnv.Alias( "install", mantraVrayInstall )
-			mantraProceduralEnv.Alias( "installMantra", mantraVrayInstall )
-
-			# python
-			mantraPythonModuleEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-					os.path.basename( corePythonEnv.subst( "$INSTALL_PYTHONLIB_NAME" ) ),
-				]
-			)
-			mantraPythonModule = mantraPythonModuleEnv.SharedLibrary( "contrib/IECoreMantra/python/IECoreMantra/_IECoreMantra", mantraPythonSources )
-			mantraPythonModuleEnv.Depends( mantraPythonModule, mantraLib )
-			mantraPythonModuleInstall = mantraPythonModuleEnv.Install( "$INSTALL_PYTHON_DIR/IECoreMantra", mantraPythonScripts + mantraPythonModule )
-			mantraPythonModuleEnv.AddPostAction( "$INSTALL_PYTHON_DIR/IECoreMantra", lambda target, source, env : makeSymLinks( mantraPythonModuleEnv, mantraPythonModuleEnv["INSTALL_PYTHON_DIR"] ) )
-			mantraPythonModuleEnv.Alias( "install", mantraPythonModuleInstall )
-			mantraPythonModuleEnv.Alias( "installMantra", mantraPythonModuleInstall )
-
-			# otls
-			otlPath = "contrib/IECoreMantra/otls/IECoreMantra/ieCoreMantra"
-			buildPath = "contrib/IECoreMantra/otls/IECoreMantra/build"
-			otlTarget = "contrib/IECoreMantra/plugins/houdini/otls/" + os.path.basename( mantraEnv.subst( "$IECORE_NAME" ) ) + ".otl"
-			mantraOtlCommand = mantraEnv.Command( otlTarget, otlPath, "cp -r %s %s; $HOUDINI_BIN_PATH/hotl -C %s $TARGET; rm -rf %s" % ( otlPath, buildPath, buildPath, buildPath ) )
-			mantraEnv.Depends( otlTarget, glob.glob( otlPath + "/*" ) + glob.glob( otlPath + "/*/*" ) + glob.glob( otlPath + "/*/*/*" ) + glob.glob( otlPath + "/*/*/*/*" ) )
-			otlInstall = mantraEnv.Install( "$INSTALL_HOUDINIOTL_DIR", source=[ otlTarget ] )
-			mantraEnv.AddPostAction( "$INSTALL_HOUDINIOTL_DIR", lambda target, source, env : makeSymLinks( mantraEnv, mantraEnv["INSTALL_HOUDINIOTL_DIR"] ) )
-			mantraEnv.Alias( "install", otlInstall )
-			mantraEnv.Alias( "installMantra", otlInstall )
-			Default( [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-
-			# test
-			mantraTestEnv = testEnv.Clone()
-
-			mantraTestLibPaths = mantraEnv.subst( ":".join( mantraPythonModuleEnv["LIBPATH"] ) )
-			if haveRI :
-				mantraTestLibPaths += ":" + mantraEnv.subst( "$RMAN_ROOT/lib" )
-			mantraTestEnv["ENV"][mantraTestEnv["TEST_LIBRARY_PATH_ENV_VAR"]] += ":" + mantraTestLibPaths
-			mantraTestEnv["ENV"][libraryPathEnvVar] += ":" + mantraTestLibPaths
-
-			mantraTestEnv["ENV"]["PATH"] = mantraEnv.subst( "$HOUDINI_ROOT/bin:" ) + mantraEnv["ENV"]["PATH"]
-
-			mantraTestEnv.Append( **houdiniEnvAppends )
-			mantraTestEnv.Append(
-				LIBS = [
-					os.path.basename( coreEnv.subst( "$INSTALL_LIB_NAME" ) ),
-					os.path.basename( mantraEnv.subst( "$INSTALL_MANTRALIB_NAME" ) ),
-				]
-			)
-
-			mantraTestEnv["ENV"]["PYTHONPATH"] += ":./python:./contrib/IECoreMantra/python"
-			mantraTestEnv["ENV"]["HOUDINI_PATH"] = "./contrib/IECoreMantra/plugins/houdini:&" # pickup the VRAYprocedural include file
-			mantraTestEnv["ENV"]["HOUDINI_DSO_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/dso:&"
-			mantraTestEnv["ENV"]["HOUDINI_OTLSCAN_PATH"] = "./plugins/houdini:./contrib/IECoreMantra/plugins/houdini/otls:&"
-
-			mantraTestEnv["ENV"]["IECORE_OP_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/ops"
-			mantraTestEnv["ENV"]["IECORE_PROCEDURAL_PATHS"] = "./contrib/IECoreMantra/test/IECoreMantra/procedurals"
-
-			mantraPythonExecutable = "hython"
-
-			mantraPythonTest = mantraTestEnv.Command( "contrib/IECoreMantra/test/IECoreMantra/resultsPython.txt", mantraPythonModule, mantraPythonExecutable + " $TEST_MANTRA_SCRIPT" )
-			NoCache( mantraPythonTest )
-			mantraTestEnv.Depends( mantraPythonTest, [ mantraLib, mantraProcedural, mantraWorld, mantraPythonModule, mantraOtlCommand, mantraVrayForTest ] )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/test/IECoreMantra/*.py" ) )
-			mantraTestEnv.Depends( mantraPythonTest, glob.glob( "contrib/IECoreMantra/python/IECoreMantra/*.py" ) )
-			if env["WITH_GL"] :
-				mantraTestEnv.Depends( mantraPythonTest, [ glLibrary, glPythonModule ] )
-			mantraTestEnv.Alias( "testMantra", mantraPythonTest )
-			mantraTestEnv.Alias( "testMantraPython", mantraPythonTest )
 
 		#=====
 		# install icons
