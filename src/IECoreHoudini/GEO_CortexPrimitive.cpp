@@ -445,13 +445,20 @@ void GEO_CortexPrimitive::create(
 	    GA_Size numPrimitives,
 	    GA_Detail &detail,
 	    GA_Offset startOffset,
-	    const GA_PrimitiveDefinition &def )
+		const GA_PrimitiveDefinition &def
+#if UT_MINOR_VERSION_INT >=5
+	    , bool allowed_to_parallelize
+#endif
+		)
 {
 
 	// allocate all the points and vertices at the same time
 	GA_Offset pointBlock = detail.appendPointBlock( numPrimitives );
-
-	if ( numPrimitives >= 4*GA_PAGE_SIZE )
+#if UT_MINOR_VERSION_INT >=5
+	if ( allowed_to_parallelize && numPrimitives >= 4*GA_PAGE_SIZE )
+#else
+    if ( numPrimitives >= 4*GA_PAGE_SIZE )
+#endif
 	{
 		// Allocate them in parallel if we're allocating many.
 		// This is using the C++11 lambda syntax to make a functor.
