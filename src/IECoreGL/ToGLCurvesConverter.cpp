@@ -49,7 +49,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLCurvesConverter );
 ToGLConverter::ConverterDescription<ToGLCurvesConverter> ToGLCurvesConverter::g_description;
 
 ToGLCurvesConverter::ToGLCurvesConverter( IECoreScene::ConstCurvesPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECoreScene::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECore::CurvesPrimitiveTypeId )
+	:	ToGLConverter( "Converts IECoreScene::CurvesPrimitive objects to IECoreGL::CurvesPrimitiveObjects.", IECoreScene::CurvesPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::CurvesPrimitive>( toConvert ) );
 }

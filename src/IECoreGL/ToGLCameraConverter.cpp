@@ -52,7 +52,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLCameraConverter );
 ToGLConverter::ConverterDescription<ToGLCameraConverter> ToGLCameraConverter::g_description;
 
 ToGLCameraConverter::ToGLCameraConverter( IECoreScene::ConstCameraPtr toConvert )
-	:	ToGLConverter( "Converts IECoreScene::Camera objects to IECoreGL::Camera objects.", IECore::CameraTypeId )
+	:	ToGLConverter( "Converts IECoreScene::Camera objects to IECoreGL::Camera objects.", IECoreScene::Camera::staticTypeId() )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::Camera>( toConvert ) );
 }

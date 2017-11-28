@@ -47,7 +47,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLPointsConverter );
 ToGLConverter::ConverterDescription<ToGLPointsConverter> ToGLPointsConverter::g_description;
 
 ToGLPointsConverter::ToGLPointsConverter( IECoreScene::ConstPointsPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECoreScene::PointsPrimitive objects to IECoreGL::PointsPrimitive objects.", IECore::PointsPrimitiveTypeId )
+	:	ToGLConverter( "Converts IECoreScene::PointsPrimitive objects to IECoreGL::PointsPrimitive objects.", IECoreScene::PointsPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::PointsPrimitive>( toConvert ) );
 }

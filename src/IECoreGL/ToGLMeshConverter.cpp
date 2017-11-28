@@ -53,7 +53,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLMeshConverter );
 ToGLConverter::ConverterDescription<ToGLMeshConverter> ToGLMeshConverter::g_description;
 
 ToGLMeshConverter::ToGLMeshConverter( IECoreScene::ConstMeshPrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECoreScene::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECore::MeshPrimitiveTypeId )
+	:	ToGLConverter( "Converts IECoreScene::MeshPrimitive objects to IECoreGL::MeshPrimitive objects.", IECoreScene::MeshPrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::MeshPrimitive>( toConvert ) );
 }

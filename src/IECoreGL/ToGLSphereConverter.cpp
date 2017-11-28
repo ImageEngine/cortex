@@ -45,7 +45,7 @@ IE_CORE_DEFINERUNTIMETYPED( ToGLSphereConverter );
 ToGLConverter::ConverterDescription<ToGLSphereConverter> ToGLSphereConverter::g_description;
 
 ToGLSphereConverter::ToGLSphereConverter( IECoreScene::ConstSpherePrimitivePtr toConvert )
-	:	ToGLConverter( "Converts IECoreScene::SpherePrimitive objects to IECoreGL::SpherePrimitive objects.", IECore::SpherePrimitiveTypeId )
+	:	ToGLConverter( "Converts IECoreScene::SpherePrimitive objects to IECoreGL::SpherePrimitive objects.", IECoreScene::SpherePrimitive::staticTypeId() )
 {
 	srcParameter()->setValue( boost::const_pointer_cast<IECoreScene::SpherePrimitive>( toConvert ) );
 }
