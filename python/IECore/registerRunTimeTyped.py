@@ -141,16 +141,14 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 			else:
 				if baseClass.staticTypeName() == t :
 					return True
-		elif type(t) is IECore.TypeId :
+		else :
 			if type( baseClass ) is list :
 				for base in baseClass :
-					if base.staticTypeId() == t :
+					if base.staticTypeId() == IECore.TypeId( t ) :
 						return True
 			else:
-				if baseClass.staticTypeId() == t :
+				if baseClass.staticTypeId() == IECore.TypeId( t ) :
 					return True
-		else:
-			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
 
 		if type( baseClass ) is list :
 			for base in baseClass:
@@ -170,11 +168,9 @@ def registerRunTimeTyped( typ, typId = None, typeName = None ) :
 		if type( t ) is str :
 			if self.staticTypeName() == t :
 				return True
-		elif type( t ) is IECore.TypeId :
-			if self.staticTypeId() == t :
-				return True
 		else :
-			raise TypeError( "Invalid type specifier ( %s )" % str( t ) )
+			if IECore.TypeId( t ) == self.staticTypeId() :
+				return True
 
 		return inheritsFrom( t, baseClass )
 

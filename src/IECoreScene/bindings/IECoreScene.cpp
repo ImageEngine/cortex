@@ -121,6 +121,7 @@
 #include "CurvesAlgoBinding.h"
 #include "PointsAlgoBinding.h"
 #include "TypedObjectParameterBinding.h"
+#include "TypeIdBinding.h"
 
 using namespace IECoreSceneModule;
 using namespace boost::python;
@@ -220,5 +221,6 @@ BOOST_PYTHON_MODULE(_IECoreScene)
 	bindCurvesAlgo();
 	bindPointsAlgo();
 	bindTypedObjectParameter();
+	bindTypeId();
 
 }
