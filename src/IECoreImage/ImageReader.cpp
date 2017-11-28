@@ -81,17 +81,7 @@ class ImageReader::Implementation
 
 			if( ImageInput *input = ImageInput::create( filename ) )
 			{
-				if( !input->valid_file( filename ) )
-				{
-					result = false;
-				}
-				else
-				{
-					ImageSpec spec;
-					input->open( filename, spec );
-					result = !spec.deep;
-				}
-
+				result = input->valid_file( filename );
 				ImageInput::destroy( input );
 			}
 
@@ -135,8 +125,23 @@ class ImageReader::Implementation
 			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
 
 			names.clear();
+
+			if ( spec->deep )
+			{
+				return;
+			}
+
 			names.resize( spec->nchannels );
 			std::copy( spec->channelnames.begin(), spec->channelnames.end(), names.begin() );
+		}
+
+		bool isDeep()
+		{
+			open( /* throwOnFailure */ true );
+
+			const ImageSpec *spec = m_cache->imagespec( m_inputFileName );
+
+			return spec->deep;
 		}
 
 		Imath::Box2i dataWindow()
@@ -519,6 +524,7 @@ CompoundObjectPtr ImageReader::readHeader()
 	m_implementation->updateHeader( header.get() );
 
 	header->members()["channelNames"] = new StringVectorData( cn );
+	header->members()["deep"] = new BoolData( m_implementation->isDeep() );
 
 	return header;
 }
