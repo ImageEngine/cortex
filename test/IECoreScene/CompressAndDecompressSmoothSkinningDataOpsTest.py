@@ -87,13 +87,13 @@ class CompressAndDecompressSmoothSkinningDataOpsTest( unittest.TestCase ) :
 
 		op = IECoreScene.CompressSmoothSkinningDataOp()
 		self.assertEqual( type(op), IECoreScene.CompressSmoothSkinningDataOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.CompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.CompressSmoothSkinningDataOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 		op = IECoreScene.DecompressSmoothSkinningDataOp()
 		self.assertEqual( type(op), IECoreScene.DecompressSmoothSkinningDataOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.DecompressSmoothSkinningDataOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.DecompressSmoothSkinningDataOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

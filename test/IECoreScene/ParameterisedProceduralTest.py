@@ -43,9 +43,9 @@ class ParameterisedProceduralTest( unittest.TestCase ) :
 
 	def testObject( self ) :
 
-		self.assert_( IECore.Object.isType( IECore.TypeId.ParameterisedProcedural ) )
-		self.assert_( IECore.Object.isAbstractType( IECore.TypeId.ParameterisedProcedural ) )
-		self.assertRaises( RuntimeError, IECore.Object.create, IECore.TypeId.ParameterisedProcedural )
+		self.assert_( IECore.Object.isType( IECoreScene.ParameterisedProcedural.staticTypeId() ) )
+		self.assert_( IECore.Object.isAbstractType( IECoreScene.ParameterisedProcedural.staticTypeId() ) )
+		self.assertRaises( RuntimeError, IECore.Object.create, IECoreScene.ParameterisedProcedural.staticTypeId() )
 
 		self.assert_( IECore.Object.isType( IECore.TypeId.ReadProcedural ) )
 		self.failIf( IECore.Object.isAbstractType( IECore.TypeId.ReadProcedural ) )

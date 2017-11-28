@@ -74,7 +74,7 @@ class ReorderSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.ReorderSmoothSkinningInfluencesOp()
 		self.assertEqual( type(op), IECoreScene.ReorderSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.ReorderSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.ReorderSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

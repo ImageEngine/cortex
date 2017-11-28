@@ -96,7 +96,7 @@ class MixSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.MixSmoothSkinningWeightsOp()
 		self.assertEqual( type(op), IECoreScene.MixSmoothSkinningWeightsOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.MixSmoothSkinningWeightsOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.MixSmoothSkinningWeightsOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

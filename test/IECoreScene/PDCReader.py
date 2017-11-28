@@ -316,7 +316,7 @@ class TestPDCReader( unittest.TestCase ) :
 
 		p = IECoreScene.PDCParticleReader()
 		self.assert_( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
-		self.assertEqual( p.resultParameter().validTypes(), [IECore.TypeId.PointsPrimitive] )
+		self.assertEqual( p.resultParameter().validTypes(), [ IECoreScene.TypeId.PointsPrimitive ] )
 
 	def testWarnings( self ) :
 

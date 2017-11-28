@@ -87,13 +87,13 @@ class AddAndRemoveSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.AddSmoothSkinningInfluencesOp()
 		self.assertEqual( type(op), IECoreScene.AddSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.AddSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.AddSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
 		op = IECoreScene.RemoveSmoothSkinningInfluencesOp()
 		self.assertEqual( type(op), IECoreScene.RemoveSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.RemoveSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.RemoveSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

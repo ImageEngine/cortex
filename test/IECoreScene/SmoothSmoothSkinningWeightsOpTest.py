@@ -177,7 +177,7 @@ class SmoothSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.SmoothSmoothSkinningWeightsOp()
 		self.assertEqual( type(op), IECoreScene.SmoothSmoothSkinningWeightsOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.SmoothSmoothSkinningWeightsOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.SmoothSmoothSkinningWeightsOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

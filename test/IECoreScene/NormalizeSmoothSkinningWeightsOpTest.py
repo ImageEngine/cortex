@@ -78,7 +78,7 @@ class NormalizeSmoothSkinningWeightsOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.NormalizeSmoothSkinningWeightsOp()
 		self.assertEqual( type(op), IECoreScene.NormalizeSmoothSkinningWeightsOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.NormalizeSmoothSkinningWeightsOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.NormalizeSmoothSkinningWeightsOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 

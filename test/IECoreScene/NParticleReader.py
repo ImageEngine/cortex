@@ -338,7 +338,7 @@ class TestNParticleReader( unittest.TestCase ) :
 
 		p = IECoreScene.NParticleReader()
 		self.assert_( p.resultParameter().isInstanceOf( "ObjectParameter" ) )
-		self.assertEqual( p.resultParameter().validTypes(), [IECore.TypeId.PointsPrimitive] )
+		self.assertEqual( p.resultParameter().validTypes(), [ IECoreScene.TypeId.PointsPrimitive ] )
 
 if __name__ == "__main__":
 	unittest.main()

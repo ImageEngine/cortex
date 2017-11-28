@@ -107,7 +107,7 @@ class LimitSmoothSkinningInfluencesOpTest( unittest.TestCase ) :
 
 		op = IECoreScene.LimitSmoothSkinningInfluencesOp()
 		self.assertEqual( type(op), IECoreScene.LimitSmoothSkinningInfluencesOp )
-		self.assertEqual( op.typeId(), IECore.TypeId.LimitSmoothSkinningInfluencesOp )
+		self.assertEqual( op.typeId(), IECoreScene.TypeId.LimitSmoothSkinningInfluencesOp )
 		op.parameters()['input'].setValue( IECore.IntData(1) )
 		self.assertRaises( RuntimeError, op.operate )
 
