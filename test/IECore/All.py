@@ -125,7 +125,6 @@ from TypedDataTest import *
 from DataTraitsTest import *
 from SubstitutedDictTest import SubstitutedDictTest
 from PointDistributionTest import PointDistributionTest
-from ThreadingTest import ThreadingTest
 from StringUtilTest import *
 from ClassParameterTest import ClassParameterTest
 from ClassVectorParameterTest import ClassVectorParameterTest
