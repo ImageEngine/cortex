@@ -38,7 +38,9 @@
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/VectorTypedParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -50,7 +52,7 @@ class IECORESCENE_API NormalizeSmoothSkinningWeightsOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NormalizeSmoothSkinningWeightsOp, IECore::NormalizeSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NormalizeSmoothSkinningWeightsOp, NormalizeSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
 
 		NormalizeSmoothSkinningWeightsOp();
 		~NormalizeSmoothSkinningWeightsOp() override;

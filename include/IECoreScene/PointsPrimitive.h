@@ -56,7 +56,7 @@ class IECORESCENE_API PointsPrimitive : public Primitive
 		PointsPrimitive( IECore::V3fVectorDataPtr points, IECore::FloatVectorDataPtr radii = nullptr );
 		~PointsPrimitive() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( PointsPrimitive, IECore::PointsPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( PointsPrimitive, PointsPrimitiveTypeId, Primitive );
 
 		/// Returns the number of points the primitive is expected
 		/// to have. This defines the expected dimensions of Primitive::Variable

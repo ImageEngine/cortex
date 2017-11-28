@@ -55,7 +55,7 @@ class IECORESCENE_API CurvesPrimitive : public Primitive
 		CurvesPrimitive( IECore::ConstIntVectorDataPtr vertsPerCurve, const IECore::CubicBasisf &basis=IECore::CubicBasisf::linear(), bool periodic = false, IECore::ConstV3fVectorDataPtr p = nullptr );
 		~CurvesPrimitive() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( CurvesPrimitive, IECore::CurvesPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( CurvesPrimitive, CurvesPrimitiveTypeId, Primitive );
 
 		size_t numCurves() const;
 		const IECore::IntVectorData *verticesPerCurve() const;

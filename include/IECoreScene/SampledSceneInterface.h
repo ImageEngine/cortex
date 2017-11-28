@@ -61,7 +61,7 @@ class IECORESCENE_API SampledSceneInterface : public SceneInterface
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SampledSceneInterface, IECore::SampledSceneInterfaceTypeId, SceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SampledSceneInterface, SampledSceneInterfaceTypeId, SceneInterface );
 
 		~SampledSceneInterface() override = 0;
 

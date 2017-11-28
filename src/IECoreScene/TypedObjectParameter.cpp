@@ -49,16 +49,16 @@
 namespace IECore
 {
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::RenderableParameter, IECore::RenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::StateRenderableParameter, IECore::StateRenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::AttributeStateParameter, IECore::AttributeStateParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::ShaderParameter, IECore::ShaderParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::TransformParameter, IECore::TransformParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixMotionTransformParameter, IECore::MatrixMotionTransformParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixTransformParameter, IECore::MatrixTransformParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::VisibleRenderableParameter, IECore::VisibleRenderableParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::GroupParameter, IECore::GroupParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::SmoothSkinningDataParameter, IECore::SmoothSkinningDataParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::RenderableParameter, IECoreScene::RenderableParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::StateRenderableParameter, IECoreScene::StateRenderableParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::AttributeStateParameter, IECoreScene::AttributeStateParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::ShaderParameter, IECoreScene::ShaderParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::TransformParameter, IECoreScene::TransformParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixMotionTransformParameter, IECoreScene::MatrixMotionTransformParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MatrixTransformParameter, IECoreScene::MatrixTransformParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::VisibleRenderableParameter, IECoreScene::VisibleRenderableParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::GroupParameter, IECoreScene::GroupParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::SmoothSkinningDataParameter, IECoreScene::SmoothSkinningDataParameterTypeId );
 
 template class IECORESCENE_API TypedObjectParameter<IECoreScene::Renderable>;
 template class IECORESCENE_API TypedObjectParameter<IECoreScene::StateRenderable>;

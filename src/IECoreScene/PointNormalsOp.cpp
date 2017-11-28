@@ -47,7 +47,7 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( PointNormalsOp );
 
-static TypeId pointTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
+static IECore::TypeId pointTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
 
 PointNormalsOp::PointNormalsOp()
 	:	Op(

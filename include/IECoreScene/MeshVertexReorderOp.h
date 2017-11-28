@@ -55,7 +55,7 @@ class IECORESCENE_API MeshVertexReorderOp : public MeshPrimitiveOp
 		MeshVertexReorderOp();
 		~MeshVertexReorderOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshVertexReorderOp, IECore::MeshVertexReorderOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshVertexReorderOp, MeshVertexReorderOpTypeId, MeshPrimitiveOp );
 
 		IECore::V3iParameter * startingVerticesParameter();
 		const IECore::V3iParameter * startingVerticesParameter() const;

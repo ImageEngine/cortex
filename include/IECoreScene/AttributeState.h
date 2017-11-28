@@ -54,7 +54,7 @@ class IECORESCENE_API AttributeState : public StateRenderable
 		AttributeState( const IECore::CompoundDataMap &attributes = IECore::CompoundDataMap() );
 		~AttributeState() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( AttributeState, IECore::AttributeStateTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( AttributeState, AttributeStateTypeId, StateRenderable );
 
 		IECore::CompoundDataMap &attributes();
 		const IECore::CompoundDataMap &attributes() const;

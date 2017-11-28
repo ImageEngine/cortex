@@ -51,7 +51,7 @@ class IECORESCENE_API CurveLineariser : public CurvesPrimitiveOp
 		CurveLineariser();
 		~CurveLineariser() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveLineariser, IECore::CurveLineariserTypeId, CurvesPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveLineariser, CurveLineariserTypeId, CurvesPrimitiveOp );
 
 		IECore::FloatParameter * verticesPerSegmentParameter();
 		const IECore::FloatParameter * verticesPerSegmentParameter() const;

@@ -51,7 +51,7 @@ class IECORESCENE_API MeshMergeOp : public MeshPrimitiveOp
 		MeshMergeOp();
 		~MeshMergeOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshMergeOp, IECore::MeshMergeOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshMergeOp, MeshMergeOpTypeId, MeshPrimitiveOp );
 
 		MeshPrimitiveParameter * meshParameter();
 		const MeshPrimitiveParameter * meshParameter() const;

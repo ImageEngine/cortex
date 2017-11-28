@@ -76,7 +76,7 @@ class IECORESCENE_API MeshPrimitiveShrinkWrapOp : public TypedPrimitiveOp<MeshPr
 		MeshPrimitiveShrinkWrapOp();
 		~MeshPrimitiveShrinkWrapOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitiveShrinkWrapOp, IECore::MeshPrimitiveShrinkWrapOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitiveShrinkWrapOp, MeshPrimitiveShrinkWrapOpTypeId, MeshPrimitiveOp );
 
 		MeshPrimitiveParameter * targetMeshParameter();
 		const MeshPrimitiveParameter * targetMeshParameter() const;

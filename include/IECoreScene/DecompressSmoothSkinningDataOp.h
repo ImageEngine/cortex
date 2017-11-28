@@ -36,7 +36,9 @@
 #define IECORESCENE_DECOMPRESSSMOOTHSKINNINGDATAOP_H
 
 #include "IECore/ModifyOp.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -47,7 +49,7 @@ class IECORESCENE_API DecompressSmoothSkinningDataOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DecompressSmoothSkinningDataOp, IECore::DecompressSmoothSkinningDataOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( DecompressSmoothSkinningDataOp, DecompressSmoothSkinningDataOpTypeId, IECore::ModifyOp );
 
 		DecompressSmoothSkinningDataOp();
 		~DecompressSmoothSkinningDataOp() override;

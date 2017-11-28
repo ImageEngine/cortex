@@ -39,7 +39,9 @@
 #include "IECore/SimpleTypedParameter.h"
 #include "IECore/VectorTypedParameter.h"
 #include "IECore/NumericParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -54,7 +56,7 @@ class IECORESCENE_API ParticleReader : public IECore::Reader
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ParticleReader, IECore::ParticleReaderTypeId, IECore::Reader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ParticleReader, ParticleReaderTypeId, IECore::Reader );
 
 		ParticleReader( const std::string &description );
 

@@ -51,7 +51,7 @@ class IECORESCENE_API CurvesMergeOp : public CurvesPrimitiveOp
 		CurvesMergeOp();
 		~CurvesMergeOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesMergeOp, IECore::CurvesMergeOpTypeId, CurvesPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesMergeOp, CurvesMergeOpTypeId, CurvesPrimitiveOp );
 
 		CurvesPrimitiveParameter *curvesParameter();
 		const CurvesPrimitiveParameter *curvesParameter() const;

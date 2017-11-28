@@ -63,7 +63,7 @@ class IECORESCENE_API LinkedScene : public  SampledSceneInterface
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LinkedScene, IECore::LinkedSceneTypeId, SampledSceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( LinkedScene, LinkedSceneTypeId, SampledSceneInterface );
 
 		/// Equals to "SceneInterface:link" and it's the name given to the link attribute that is recognized
 		// by this class when expanding linked scenes.

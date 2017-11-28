@@ -36,7 +36,9 @@
 #define IECORESCENE_RENDERABLE_H
 
 #include "IECore/BlindDataHolder.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -52,7 +54,7 @@ class IECORESCENE_API Renderable : public IECore::BlindDataHolder
 		Renderable();
 		~Renderable() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Renderable, IECore::RenderableTypeId, IECore::BlindDataHolder );
+		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Renderable, RenderableTypeId, IECore::BlindDataHolder );
 
 		/// Render the object held by this instance via the given renderer.
 		virtual void render( Renderer *renderer ) const = 0;

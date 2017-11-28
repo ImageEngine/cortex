@@ -37,7 +37,9 @@
 
 #include "IECore/ModifyOp.h"
 #include "IECore/VectorTypedParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -46,7 +48,7 @@ class IECORESCENE_API TransferSmoothSkinningWeightsOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TransferSmoothSkinningWeightsOp, IECore::TransferSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TransferSmoothSkinningWeightsOp, TransferSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
 
 		TransferSmoothSkinningWeightsOp();
 		~TransferSmoothSkinningWeightsOp() override;

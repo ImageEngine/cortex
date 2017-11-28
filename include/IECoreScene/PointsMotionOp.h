@@ -47,6 +47,7 @@
 #include "IECore/VectorTypedParameter.h"
 
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -60,7 +61,7 @@ class IECORESCENE_API PointsMotionOp : public IECore::Op
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointsMotionOp, IECore::PointsMotionOpTypeId, IECore::Op );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointsMotionOp, PointsMotionOpTypeId, IECore::Op );
 
 		PointsMotionOp();
 		~PointsMotionOp() override;

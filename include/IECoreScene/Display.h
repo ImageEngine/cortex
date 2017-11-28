@@ -50,7 +50,7 @@ class IECORESCENE_API Display : public PreWorldRenderable
 		Display( const std::string &name="default", const std::string &type="exr", const std::string &data="rgba", IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Display() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Display, IECore::DisplayTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Display, DisplayTypeId, PreWorldRenderable );
 
 		void setName( const std::string &name );
 		const std::string &getName() const;

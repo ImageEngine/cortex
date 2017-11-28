@@ -50,8 +50,8 @@ using namespace boost;
 
 IE_CORE_DEFINERUNTIMETYPED( PointBoundsOp );
 
-static TypeId pointAndVelocityTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
-static TypeId radiusTypes[] = { FloatVectorDataTypeId, DoubleVectorDataTypeId, InvalidTypeId };
+static IECore::TypeId pointAndVelocityTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
+static IECore::TypeId radiusTypes[] = { FloatVectorDataTypeId, DoubleVectorDataTypeId, InvalidTypeId };
 
 PointBoundsOp::PointBoundsOp()
 	:	Op(

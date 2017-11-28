@@ -45,7 +45,7 @@ class IECORESCENE_API MatrixTransform : public Transform
 {
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( MatrixTransform, IECore::MatrixTransformTypeId, Transform );
+		IE_CORE_DECLAREEXTENSIONOBJECT( MatrixTransform, MatrixTransformTypeId, Transform );
 
 		MatrixTransform( const Imath::M44f &matrix = Imath::M44f() );
 		~MatrixTransform() override;

@@ -39,7 +39,9 @@
 #include "OpenEXR/ImathBox.h"
 
 #include "IECore/RunTimeTyped.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -55,7 +57,7 @@ class IECORESCENE_API Font : public IECore::RunTimeTyped
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Font, IECore::FontTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Font, FontTypeId, IECore::RunTimeTyped );
 
 		Font( const std::string &fontFile );
 		~Font() override;

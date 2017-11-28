@@ -48,7 +48,7 @@ class IECORESCENE_API PDCParticleWriter : public ParticleWriter
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PDCParticleWriter, IECore::PDCParticleWriterTypeId, ParticleWriter )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PDCParticleWriter, PDCParticleWriterTypeId, ParticleWriter )
 
 		PDCParticleWriter( );
 		PDCParticleWriter( IECore::ObjectPtr object, const std::string &fileName );

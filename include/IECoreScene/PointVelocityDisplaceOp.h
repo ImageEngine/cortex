@@ -42,6 +42,7 @@
 #include "IECore/NumericParameter.h"
 
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -62,7 +63,7 @@ namespace IECoreScene
 class IECORESCENE_API PointVelocityDisplaceOp : public IECore::ModifyOp
 {
 	public :
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointVelocityDisplaceOp, IECore::PointVelocityDisplaceOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointVelocityDisplaceOp, PointVelocityDisplaceOpTypeId, IECore::ModifyOp );
 
 		PointVelocityDisplaceOp();
 		~PointVelocityDisplaceOp() override;

@@ -54,7 +54,7 @@ class IECORESCENE_API CoordinateSystem : public StateRenderable
 		CoordinateSystem( const std::string &name, TransformPtr transform=nullptr );
 		~CoordinateSystem() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( CoordinateSystem, IECore::CoordinateSystemTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( CoordinateSystem, CoordinateSystemTypeId, StateRenderable );
 
 		const std::string &getName() const;
 		void setName( const std::string &name );

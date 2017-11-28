@@ -58,7 +58,7 @@ class IECORESCENE_API MeshPrimitive : public Primitive
 
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( MeshPrimitive, IECore::MeshPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( MeshPrimitive, MeshPrimitiveTypeId, Primitive );
 
 		/// Construct a MeshPrimitive with no faces.
 		MeshPrimitive();

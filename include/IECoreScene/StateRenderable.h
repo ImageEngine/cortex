@@ -52,7 +52,7 @@ class IECORESCENE_API StateRenderable : public Renderable
 		StateRenderable();
 		~StateRenderable() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( StateRenderable, IECore::StateRenderableTypeId, Renderable );
+		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( StateRenderable, StateRenderableTypeId, Renderable );
 
 	private:
 

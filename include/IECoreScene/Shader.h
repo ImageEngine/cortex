@@ -50,7 +50,7 @@ class IECORESCENE_API Shader : public StateRenderable
 		Shader( const std::string &name="defaultsurface", const std::string &type="surface", const IECore::CompoundDataMap &parameters = IECore::CompoundDataMap() );
 		~Shader() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Shader, IECore::ShaderTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Shader, ShaderTypeId, StateRenderable );
 
 		const std::string &getName() const;
 		void setName( const std::string &name );

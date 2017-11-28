@@ -60,7 +60,7 @@ class IECORESCENE_API PrimitiveEvaluator : public IECore::RunTimeTyped
 
 		typedef PrimitiveEvaluatorPtr ( *CreatorFn )( ConstPrimitivePtr );
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PrimitiveEvaluator, IECore::PrimitiveEvaluatorTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PrimitiveEvaluator, PrimitiveEvaluatorTypeId, IECore::RunTimeTyped );
 
 		/// An interface defining the possible results returned from a query. Attempting to read back the results of a failed
 		/// query will yield undefined behaviour.
@@ -178,7 +178,7 @@ class IECORESCENE_API PrimitiveEvaluator : public IECore::RunTimeTyped
 
 		static void registerCreator( IECore::TypeId id, CreatorFn f );
 
-		typedef std::map< IECore::TypeId, CreatorFn > CreatorMap;
+		typedef std::map<IECore::TypeId, CreatorFn> CreatorMap;
 
 		static CreatorMap &getCreateFns();
 

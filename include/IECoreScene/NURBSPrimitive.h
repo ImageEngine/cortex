@@ -50,7 +50,7 @@ class IECORESCENE_API NURBSPrimitive : public Primitive
 
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( NURBSPrimitive, IECore::NURBSPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( NURBSPrimitive, NURBSPrimitiveTypeId, Primitive );
 
 		NURBSPrimitive();
 		/// Copies of all data are taken.

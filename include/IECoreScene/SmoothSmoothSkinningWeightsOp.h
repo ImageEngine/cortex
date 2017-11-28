@@ -59,7 +59,7 @@ class IECORESCENE_API SmoothSmoothSkinningWeightsOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SmoothSmoothSkinningWeightsOp, IECore::SmoothSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SmoothSmoothSkinningWeightsOp, SmoothSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
 
 		SmoothSmoothSkinningWeightsOp();
 		~SmoothSmoothSkinningWeightsOp() override;

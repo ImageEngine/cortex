@@ -52,7 +52,7 @@ class IECORESCENE_API FaceVaryingPromotionOp : public MeshPrimitiveOp
 		FaceVaryingPromotionOp();
 		~FaceVaryingPromotionOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FaceVaryingPromotionOp, IECore::FaceVaryingPromotionOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( FaceVaryingPromotionOp, FaceVaryingPromotionOpTypeId, MeshPrimitiveOp );
 
 		//! @name Parameter accessors
 		/// These provide convenient access to the parameters.

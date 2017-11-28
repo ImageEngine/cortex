@@ -46,7 +46,7 @@ using namespace boost;
 IE_CORE_DEFINERUNTIMETYPED( PrimitiveOp );
 
 PrimitiveOp::PrimitiveOp( const std::string &description )
-	:	ModifyOp( description, new ObjectParameter( "result", "The result", new NullObject, PrimitiveTypeId ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, PrimitiveTypeId ) )
+	:	ModifyOp( description, new ObjectParameter( "result", "The result", new NullObject, Primitive::staticTypeId() ), new ObjectParameter( "input", "The Primitive to modify", new NullObject, Primitive::staticTypeId() ) )
 {
 }
 

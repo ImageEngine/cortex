@@ -40,8 +40,10 @@
 #include "IECore/CompoundData.h"
 #include "IECore/CubicBasis.h"
 #include "IECore/MurmurHash.h"
+
 #include "IECoreScene/Export.h"
 #include "IECoreScene/PrimitiveVariable.h"
+#include "IECoreScene/TypeIds.h"
 
 #include "OpenEXR/ImathMatrix.h"
 #include "OpenEXR/ImathBox.h"
@@ -95,7 +97,7 @@ class IECORESCENE_API Renderer : public IECore::RunTimeTyped
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Renderer, IECore::RendererTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( Renderer, RendererTypeId, IECore::RunTimeTyped );
 
 		Renderer();
 		~Renderer() override;

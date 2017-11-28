@@ -48,7 +48,7 @@ class IECORESCENE_API ClippingPlane : public PreWorldRenderable
 		ClippingPlane();
 		~ClippingPlane() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( ClippingPlane, IECore::ClippingPlaneTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( ClippingPlane, ClippingPlaneTypeId, PreWorldRenderable );
 
 		void render( Renderer *renderer ) const override;
 

@@ -49,7 +49,7 @@ PrimitiveEvaluator::CreatorMap &PrimitiveEvaluator::getCreateFns()
 	return *g_createFns;
 }
 
-void PrimitiveEvaluator::registerCreator( TypeId id, CreatorFn f )
+void PrimitiveEvaluator::registerCreator( IECore::TypeId id, CreatorFn f )
 {
 	assert( f );
 	assert( f != &PrimitiveEvaluator::create );

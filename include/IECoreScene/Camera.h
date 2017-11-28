@@ -51,7 +51,7 @@ class IECORESCENE_API Camera : public PreWorldRenderable
 			TransformPtr transform = nullptr, IECore::CompoundDataPtr parameters = new IECore::CompoundData );
 		~Camera() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, IECore::CameraTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Camera, CameraTypeId, PreWorldRenderable );
 
 		void setName( const std::string &name );
 		const std::string &getName() const;

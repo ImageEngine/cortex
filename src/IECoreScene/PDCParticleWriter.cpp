@@ -142,7 +142,7 @@ void PDCParticleWriter::doWrite( const CompoundObject *operands )
 	for( vector<string>::const_iterator it = attrNames.begin(); it!=attrNames.end(); it++ )
 	{
 		DataPtr attr = pv.find( *it )->second.data;
-		TypeId t = attr->typeId();
+		const IECore::TypeId t = attr->typeId();
 		if( t==DoubleVectorDataTypeId || t==IntVectorDataTypeId || t==V3dVectorDataTypeId ||
 			t==DoubleDataTypeId || t==IntDataTypeId || t==V3dDataTypeId ||
 			t==FloatVectorDataTypeId || t==V3fVectorDataTypeId || t==FloatDataTypeId || t==V3fDataTypeId ||

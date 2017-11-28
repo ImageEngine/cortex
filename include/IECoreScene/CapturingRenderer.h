@@ -55,7 +55,7 @@ class IECORESCENE_API CapturingRenderer : public Renderer
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CapturingRenderer, IECore::CapturingRendererTypeId, Renderer );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CapturingRenderer, CapturingRendererTypeId, Renderer );
 
 		CapturingRenderer();
 		~CapturingRenderer() override;

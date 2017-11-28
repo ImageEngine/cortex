@@ -43,6 +43,7 @@
 #include "IECoreScene/Export.h"
 #include "IECoreScene/Renderable.h"
 #include "IECoreScene/PrimitiveVariable.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -71,7 +72,7 @@ class IECORESCENE_API SceneInterface : public IECore::RunTimeTyped
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SceneInterface, IECore::SceneInterfaceTypeId, IECore::RunTimeTyped );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SceneInterface, SceneInterfaceTypeId, IECore::RunTimeTyped );
 
 		typedef IECore::IndexedIO::EntryID Name;
 		typedef IECore::IndexedIO::EntryIDList NameList;

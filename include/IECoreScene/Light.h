@@ -50,7 +50,7 @@ class IECORESCENE_API Light : public StateRenderable
 		Light( const std::string &name="distantlight", const std::string &handle="", const IECore::CompoundDataMap &parameters = IECore::CompoundDataMap() );
 		~Light() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Light, IECore::LightTypeId, StateRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Light, LightTypeId, StateRenderable );
 
 		const std::string &getName() const;
 		void setName( const std::string &name );

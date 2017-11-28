@@ -40,6 +40,7 @@
 #include "IECore/ObjectParameter.h"
 
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -54,7 +55,7 @@ class IECORESCENE_API PointNormalsOp : public IECore::Op
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointNormalsOp, IECore::PointNormalsOpTypeId, IECore::Op );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointNormalsOp, PointNormalsOpTypeId, IECore::Op );
 
 		PointNormalsOp();
 		~PointNormalsOp() override;

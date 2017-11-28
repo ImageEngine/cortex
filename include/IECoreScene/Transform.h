@@ -53,7 +53,7 @@ class IECORESCENE_API Transform : public StateRenderable
 		Transform();
 		~Transform() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Transform, IECore::TransformTypeId, StateRenderable );
+		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( Transform, TransformTypeId, StateRenderable );
 
 		/// Returns the transform this object represents,
 		/// evaluated at the requested time.

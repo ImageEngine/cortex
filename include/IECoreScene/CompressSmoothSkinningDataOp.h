@@ -37,7 +37,9 @@
 
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -48,7 +50,7 @@ class IECORESCENE_API CompressSmoothSkinningDataOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CompressSmoothSkinningDataOp, IECore::CompressSmoothSkinningDataOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CompressSmoothSkinningDataOp, CompressSmoothSkinningDataOpTypeId, IECore::ModifyOp );
 
 		CompressSmoothSkinningDataOp();
 		~CompressSmoothSkinningDataOp() override;

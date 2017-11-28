@@ -64,7 +64,7 @@ class IECORESCENE_API PatchMeshPrimitive : public Primitive
 
 		~PatchMeshPrimitive() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( PatchMeshPrimitive, IECore::PatchMeshPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( PatchMeshPrimitive, PatchMeshPrimitiveTypeId, Primitive );
 
 		/// Returns the number of control points in U or V
 		unsigned int uPoints() const;

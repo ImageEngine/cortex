@@ -57,7 +57,7 @@ class IECORESCENE_API MotionPrimitive : public VisibleRenderable
 		MotionPrimitive();
 		~MotionPrimitive() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( MotionPrimitive, IECore::MotionPrimitiveTypeId, VisibleRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( MotionPrimitive, MotionPrimitiveTypeId, VisibleRenderable );
 
 		//! @name Snapshots
 		////////////////////////////////////////////////////

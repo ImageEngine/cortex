@@ -106,7 +106,7 @@ void MotionPrimitive::render( Renderer *renderer ) const
 		return;
 	}
 
-	TypeId t = m_snapshots.begin()->second->typeId();
+	IECore::TypeId t = m_snapshots.begin()->second->typeId();
 	size_t cs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Constant );
 	size_t us = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Uniform );
 	size_t vs = m_snapshots.begin()->second->variableSize( PrimitiveVariable::Varying );

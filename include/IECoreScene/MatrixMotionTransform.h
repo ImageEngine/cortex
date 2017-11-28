@@ -49,7 +49,7 @@ class IECORESCENE_API MatrixMotionTransform : public Transform
 		/// corresponding matrices.
 		typedef std::map<float, Imath::M44f> SnapshotMap;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( MatrixMotionTransform, IECore::MatrixMotionTransformTypeId, Transform );
+		IE_CORE_DECLAREEXTENSIONOBJECT( MatrixMotionTransform, MatrixMotionTransformTypeId, Transform );
 
 		MatrixMotionTransform();
 		~MatrixMotionTransform() override;

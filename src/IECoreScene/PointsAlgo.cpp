@@ -387,7 +387,7 @@ PointsPrimitivePtr deletePoints( const PointsPrimitive *pointsPrimitive, const P
 PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &pointsPrimitives )
 {
 	size_t totalPointCount = 0;
-	typedef std::map<std::string, TypeId> FoundPrimvars;
+	typedef std::map<std::string, IECore::TypeId> FoundPrimvars;
 	FoundPrimvars foundPrimvars;
 
 	PrimitiveVariableMap constantPrimVars;
@@ -404,7 +404,7 @@ PointsPrimitivePtr mergePoints( const std::vector<const PointsPrimitive *> &poin
 		for( PrimitiveVariableMap::iterator it = variables.begin(); it != variables.end(); ++it )
 		{
 			DataPtr data = it->second.data;
-			TypeId typeId = data->typeId();
+			const IECore::TypeId typeId = data->typeId();
 			PrimitiveVariable::Interpolation interpolation = it->second.interpolation;
 			const std::string &name = it->first;
 

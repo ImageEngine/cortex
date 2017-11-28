@@ -40,7 +40,9 @@
 #include "OpenEXR/ImathVec.h"
 
 #include "IECore/Reader.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -54,7 +56,7 @@ class IECORESCENE_API OBJReader : public IECore::Reader
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OBJReader, IECore::OBJReaderTypeId, IECore::Reader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( OBJReader, OBJReaderTypeId, IECore::Reader );
 
 		OBJReader( const std::string &fileName );
 

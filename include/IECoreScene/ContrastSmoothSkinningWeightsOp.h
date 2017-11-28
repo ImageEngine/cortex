@@ -55,7 +55,7 @@ class IECORESCENE_API ContrastSmoothSkinningWeightsOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ContrastSmoothSkinningWeightsOp, IECore::ContrastSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ContrastSmoothSkinningWeightsOp, ContrastSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
 
 		ContrastSmoothSkinningWeightsOp();
 		~ContrastSmoothSkinningWeightsOp() override;

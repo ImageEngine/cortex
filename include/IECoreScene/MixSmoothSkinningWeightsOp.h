@@ -40,6 +40,7 @@
 
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedObjectParameter.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -52,7 +53,7 @@ class IECORESCENE_API MixSmoothSkinningWeightsOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MixSmoothSkinningWeightsOp, IECore::MixSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MixSmoothSkinningWeightsOp, MixSmoothSkinningWeightsOpTypeId, IECore::ModifyOp );
 
 		MixSmoothSkinningWeightsOp();
 		~MixSmoothSkinningWeightsOp() override;

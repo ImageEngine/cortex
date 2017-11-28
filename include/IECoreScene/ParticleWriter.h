@@ -37,7 +37,9 @@
 
 #include "IECore/Writer.h"
 #include "IECore/VectorTypedParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -54,7 +56,7 @@ class IECORESCENE_API ParticleWriter : public IECore::Writer
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ParticleWriter, IECore::ParticleWriterTypeId, IECore::Writer )
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ParticleWriter, ParticleWriterTypeId, IECore::Writer )
 
 		/// Default implementation just checks that object is a PointsPrimitive instance.
 		static bool canWrite( IECore::ConstObjectPtr object, const std::string &fileName );

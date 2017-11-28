@@ -52,7 +52,7 @@ class IECORESCENE_API PDCParticleReader : public ParticleReader
 
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PDCParticleReader, IECore::PDCParticleReaderTypeId, ParticleReader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PDCParticleReader, PDCParticleReaderTypeId, ParticleReader );
 
 		PDCParticleReader( );
 		PDCParticleReader( const std::string &fileName );

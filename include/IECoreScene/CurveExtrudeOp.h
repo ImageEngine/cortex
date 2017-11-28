@@ -54,7 +54,7 @@ class IECORESCENE_API CurveExtrudeOp : public IECore::Op
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveExtrudeOp, IECore::CurveExtrudeOpTypeId, IECore::Op );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveExtrudeOp, CurveExtrudeOpTypeId, IECore::Op );
 
 		CurveExtrudeOp();
 		~CurveExtrudeOp() override;

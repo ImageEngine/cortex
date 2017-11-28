@@ -48,6 +48,7 @@
 #include "IECoreScene/Export.h"
 #include "IECoreScene/TypedPrimitiveParameter.h"
 #include "IECoreScene/TypedObjectParameter.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -65,7 +66,7 @@ class IECORESCENE_API PointSmoothSkinningOp : public IECore::ModifyOp
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointSmoothSkinningOp, IECore::PointSmoothSkinningOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PointSmoothSkinningOp, PointSmoothSkinningOpTypeId, IECore::ModifyOp );
 
 
 		// defines what algorithm to use when calculating the deformation

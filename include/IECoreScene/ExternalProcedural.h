@@ -51,7 +51,7 @@ class IECORESCENE_API ExternalProcedural : public VisibleRenderable
 		ExternalProcedural( const std::string &fileName = "", const Imath::Box3f &bound = Imath::Box3f(), const IECore::CompoundData *parameters = nullptr );
 		~ExternalProcedural() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( ExternalProcedural, IECore::ExternalProceduralTypeId, VisibleRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( ExternalProcedural, ExternalProceduralTypeId, VisibleRenderable );
 
 		// \todo : Rename to just "name"?
 		// In renderers like Arnold, procedurals don't load files directly, instead procedural files

@@ -36,7 +36,9 @@
 #define IECORESCENE_PRIMITIVEOP_H
 
 #include "IECore/ModifyOp.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -49,7 +51,7 @@ class IECORESCENE_API PrimitiveOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PrimitiveOp, IECore::PrimitiveOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( PrimitiveOp, PrimitiveOpTypeId, IECore::ModifyOp );
 
 		PrimitiveOp( const std::string &description );
 		~PrimitiveOp() override;

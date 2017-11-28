@@ -38,7 +38,9 @@
 #include "IECore/ModifyOp.h"
 #include "IECore/NumericParameter.h"
 #include "IECore/VectorTypedParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -52,7 +54,7 @@ class IECORESCENE_API AddSmoothSkinningInfluencesOp : public IECore::ModifyOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( AddSmoothSkinningInfluencesOp, IECore::AddSmoothSkinningInfluencesOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( AddSmoothSkinningInfluencesOp, AddSmoothSkinningInfluencesOpTypeId, IECore::ModifyOp );
 
 		AddSmoothSkinningInfluencesOp();
 		~AddSmoothSkinningInfluencesOp() override;

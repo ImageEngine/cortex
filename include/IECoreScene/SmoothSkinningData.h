@@ -40,7 +40,9 @@
 
 #include "IECore/Data.h"
 #include "IECore/VectorTypedData.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -90,7 +92,7 @@ class IECORESCENE_API SmoothSkinningData : public IECore::Data
 {
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( SmoothSkinningData, IECore::SmoothSkinningDataTypeId, IECore::Data );
+		IE_CORE_DECLAREEXTENSIONOBJECT( SmoothSkinningData, SmoothSkinningDataTypeId, IECore::Data );
 
 		/// Returns the names of the influence objects, it is used for reference.
 		const IECore::StringVectorData *influenceNames() const;

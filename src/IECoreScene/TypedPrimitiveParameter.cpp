@@ -43,11 +43,11 @@
 namespace IECore
 {
 
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MotionPrimitiveParameter, IECore::MotionPrimitiveParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PrimitiveParameter, IECore::PrimitiveParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MeshPrimitiveParameter, IECore::MeshPrimitiveParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::CurvesPrimitiveParameter, IECore::CurvesPrimitiveParameterTypeId );
-IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PointsPrimitiveParameter, IECore::PointsPrimitiveParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MotionPrimitiveParameter, IECoreScene::MotionPrimitiveParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PrimitiveParameter, IECoreScene::PrimitiveParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::MeshPrimitiveParameter, IECoreScene::MeshPrimitiveParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::CurvesPrimitiveParameter, IECoreScene::CurvesPrimitiveParameterTypeId );
+IECORE_RUNTIMETYPED_DEFINETEMPLATESPECIALISATION( IECoreScene::PointsPrimitiveParameter, IECoreScene::PointsPrimitiveParameterTypeId );
 
 template class IECORESCENE_API TypedObjectParameter<IECoreScene::MotionPrimitive>;
 template class IECORESCENE_API TypedObjectParameter<IECoreScene::Primitive>;

@@ -49,7 +49,7 @@ class IECORESCENE_API SpherePrimitive : public Primitive
 
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( SpherePrimitive, IECore::SpherePrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( SpherePrimitive, SpherePrimitiveTypeId, Primitive );
 
 		/// Construct a full sphere of radius 1.
 		SpherePrimitive();

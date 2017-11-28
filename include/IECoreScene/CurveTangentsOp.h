@@ -56,7 +56,7 @@ class IECORESCENE_API CurveTangentsOp : public CurvesPrimitiveOp
 		IECore::StringParameter *vTangentPrimVarNameParameter();
 		const IECore::StringParameter *vTangentPrimVarNameParameter() const;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveTangentsOp, IECore::CurveTangentsOpTypeId, CurvesPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurveTangentsOp, CurveTangentsOpTypeId, CurvesPrimitiveOp );
 
 	protected:
 

@@ -62,7 +62,7 @@ class IECORESCENE_API Group : public VisibleRenderable
 		Group();
 		~Group() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Group, IECore::GroupTypeId, VisibleRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Group, GroupTypeId, VisibleRenderable );
 
 		/// Returns the Transform applied to the children of
 		/// this Group. This is the local transform for the Group

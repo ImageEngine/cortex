@@ -65,7 +65,7 @@ class IECORESCENE_API ParameterisedProcedural : public VisibleRenderable, public
 
 		~ParameterisedProcedural() override;
 
-		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( ParameterisedProcedural, IECore::ParameterisedProceduralTypeId, VisibleRenderable );
+		IE_CORE_DECLAREABSTRACTEXTENSIONOBJECT( ParameterisedProcedural, ParameterisedProceduralTypeId, VisibleRenderable );
 
 		/// Returns a description for this parameterised object.
 		const std::string &description() const;

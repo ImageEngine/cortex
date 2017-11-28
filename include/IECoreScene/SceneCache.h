@@ -58,7 +58,7 @@ class IECORESCENE_API SceneCache : public SampledSceneInterface
 		typedef SceneInterface::NameList NameList;
 		typedef SceneInterface::Path Path;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SceneCache, IECore::SceneCacheTypeId, SampledSceneInterface );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SceneCache, SceneCacheTypeId, SampledSceneInterface );
 
 		/// Opens the cache, using the specified open mode, and setting the
 		/// current object path to "/". Depending on what mode is chosen,

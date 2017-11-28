@@ -48,7 +48,7 @@ class IECORESCENE_API DiskPrimitive : public Primitive
 
 	public:
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( DiskPrimitive, IECore::DiskPrimitiveTypeId, Primitive );
+		IE_CORE_DECLAREEXTENSIONOBJECT( DiskPrimitive, DiskPrimitiveTypeId, Primitive );
 
 		DiskPrimitive( float radius = 1.0f, float z = 0.0f, float thetaMax = 360.0f );
 

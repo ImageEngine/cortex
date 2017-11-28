@@ -39,6 +39,7 @@
 #include "IECore/CompoundParameter.h"
 #include "IECore/FileNameParameter.h"
 #include "IECore/TestTypedData.h"
+
 #include "IECoreScene/ParticleWriter.h"
 #include "IECoreScene/PointsPrimitive.h"
 
@@ -50,7 +51,7 @@ using namespace boost;
 IE_CORE_DEFINERUNTIMETYPED( ParticleWriter )
 
 ParticleWriter::ParticleWriter( const std::string &description )
-	:	Writer( description, PointsPrimitiveTypeId )
+	:	Writer( description, PointsPrimitive::staticTypeId() )
 {
 	m_attributesParameter = new StringVectorParameter(
 		"attributes",

@@ -52,7 +52,7 @@ class IECORESCENE_API Options : public PreWorldRenderable
 		Options( const IECore::CompoundDataMap &options = IECore::CompoundDataMap() );
 		~Options() override;
 
-		IE_CORE_DECLAREEXTENSIONOBJECT( Options, IECore::OptionsTypeId, PreWorldRenderable );
+		IE_CORE_DECLAREEXTENSIONOBJECT( Options, OptionsTypeId, PreWorldRenderable );
 
 		IECore::CompoundDataMap &options();
 		const IECore::CompoundDataMap &options() const;

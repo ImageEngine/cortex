@@ -51,7 +51,7 @@ class IECORESCENE_API MeshNormalsOp : public MeshPrimitiveOp
 		MeshNormalsOp();
 		~MeshNormalsOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshNormalsOp, IECore::MeshNormalsOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshNormalsOp, MeshNormalsOpTypeId, MeshPrimitiveOp );
 
 		IECore::StringParameter * pPrimVarNameParameter();
 		const IECore::StringParameter * pPrimVarNameParameter() const;

@@ -56,7 +56,7 @@ class IECORESCENE_API CurvesPrimitiveEvaluator : public PrimitiveEvaluator
 
 		typedef CurvesPrimitive PrimitiveType;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesPrimitiveEvaluator, IECore::CurvesPrimitiveEvaluatorTypeId, PrimitiveEvaluator );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( CurvesPrimitiveEvaluator, CurvesPrimitiveEvaluatorTypeId, PrimitiveEvaluator );
 
 		class IECORESCENE_API Result : public PrimitiveEvaluator::Result
 		{

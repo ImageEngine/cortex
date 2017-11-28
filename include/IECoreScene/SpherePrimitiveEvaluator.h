@@ -53,7 +53,7 @@ class IECORESCENE_API SpherePrimitiveEvaluator : public PrimitiveEvaluator
 
 		typedef SpherePrimitive PrimitiveType;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SpherePrimitiveEvaluator, IECore::SpherePrimitiveEvaluatorTypeId, PrimitiveEvaluator );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( SpherePrimitiveEvaluator, SpherePrimitiveEvaluatorTypeId, PrimitiveEvaluator );
 
 		class Result : public PrimitiveEvaluator::Result
 		{

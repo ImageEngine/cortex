@@ -37,7 +37,9 @@
 
 #include "IECore/ModifyOp.h"
 #include "IECore/VectorTypedParameter.h"
+
 #include "IECoreScene/Export.h"
+#include "IECoreScene/TypeIds.h"
 
 namespace IECoreScene
 {
@@ -48,7 +50,7 @@ class IECORESCENE_API ReorderSmoothSkinningInfluencesOp : public IECore::ModifyO
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ReorderSmoothSkinningInfluencesOp, IECore::ReorderSmoothSkinningInfluencesOpTypeId, IECore::ModifyOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( ReorderSmoothSkinningInfluencesOp, ReorderSmoothSkinningInfluencesOpTypeId, IECore::ModifyOp );
 
 		ReorderSmoothSkinningInfluencesOp();
 		~ReorderSmoothSkinningInfluencesOp() override;

@@ -51,7 +51,7 @@ class IECORESCENE_API NParticleReader : public ParticleReader
 {
 	public:
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NParticleReader, IECore::NParticleReaderTypeId, ParticleReader );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( NParticleReader, NParticleReaderTypeId, ParticleReader );
 
 		NParticleReader( );
 		NParticleReader( const std::string &fileName );

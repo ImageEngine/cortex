@@ -56,7 +56,7 @@ class IECORESCENE_API TriangulateOp : public TypedPrimitiveOp<MeshPrimitive>
 		TriangulateOp();
 		~TriangulateOp() override;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TriangulateOp, IECore::TriangulateOpTypeId, MeshPrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TriangulateOp, TriangulateOpTypeId, MeshPrimitiveOp );
 
 		IECore::BoolParameter * throwExceptionsParameter();
 		const IECore::BoolParameter * throwExceptionsParameter() const;

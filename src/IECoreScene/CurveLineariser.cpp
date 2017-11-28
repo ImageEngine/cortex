@@ -85,7 +85,7 @@ void CurveLineariser::modifyTypedPrimitive( CurvesPrimitive * curves, const Comp
 	PrimitiveEvaluator::ResultPtr evaluatorResult = evaluator->createResult();
 
 	std::vector<PrimitiveVariable> primitiveVariables;
-	std::vector<TypeId> primitiveVariableTypes;
+	std::vector<IECore::TypeId> primitiveVariableTypes;
 	std::vector<void *> primitiveVariableVectors;
 	for( PrimitiveVariableMap::iterator it=curves->variables.begin(); it!=curves->variables.end(); it++ )
 	{

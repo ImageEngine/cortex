@@ -54,7 +54,7 @@ PointsMotionOp::PointsMotionOp()
 			"result",
 			"Resulting motion primitive object.",
 			new MotionPrimitive(),
-			MotionPrimitiveTypeId
+			MotionPrimitive::staticTypeId()
 		)
 	)
 {
@@ -241,7 +241,7 @@ ObjectPtr PointsMotionOp::doOperation( const CompoundObject *operands )
 			throw InvalidArgumentException( "PointsMotionOp : NULL Object pointer in the pointsPrimitive parameter vector!" );
 		}
 		// Check if all objects in the vector are PointsPrimitive and contain the id prim var...
-		if ( (*it)->typeId() != PointsPrimitiveTypeId )
+		if ( (*it)->typeId() != PointsPrimitive::staticTypeId() )
 		{
 			throw InvalidArgumentException( "PointsMotionOp : Invalid object passed on pointsPrimitives parameter!" );
 		}

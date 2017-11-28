@@ -54,7 +54,7 @@ class IECORESCENE_API TransformOp : public PrimitiveOp
 {
 	public :
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TransformOp, IECore::TransformOpTypeId, PrimitiveOp );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( TransformOp, TransformOpTypeId, PrimitiveOp );
 
 		TransformOp();
 

@@ -50,8 +50,8 @@ using namespace std;
 
 IE_CORE_DEFINERUNTIMETYPED( PointDensitiesOp );
 
-static TypeId pointTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
-static TypeId resultTypes[] = { FloatVectorDataTypeId, DoubleVectorDataTypeId, InvalidTypeId };
+static IECore::TypeId pointTypes[] = { V3fVectorDataTypeId, V3dVectorDataTypeId, InvalidTypeId };
+static IECore::TypeId resultTypes[] = { FloatVectorDataTypeId, DoubleVectorDataTypeId, InvalidTypeId };
 
 PointDensitiesOp::PointDensitiesOp()
 	:	Op(

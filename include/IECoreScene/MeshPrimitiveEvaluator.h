@@ -56,7 +56,7 @@ class IECORESCENE_API MeshPrimitiveEvaluator : public PrimitiveEvaluator
 
 		typedef MeshPrimitive PrimitiveType;
 
-		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitiveEvaluator, IECore::MeshPrimitiveEvaluatorTypeId, PrimitiveEvaluator );
+		IE_CORE_DECLARERUNTIMETYPEDEXTENSION( MeshPrimitiveEvaluator, MeshPrimitiveEvaluatorTypeId, PrimitiveEvaluator );
 
 		class IECORESCENE_API Result : public PrimitiveEvaluator::Result
 		{
