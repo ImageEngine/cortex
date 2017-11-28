@@ -903,6 +903,14 @@ class SceneCacheTest( unittest.TestCase ) :
 
 			self.assertEqual( h1, h2 )
 
+	def testParallelAttributeRead( self ) :
+
+		IECoreScene.testSceneCacheParallelAttributeRead()
+
+	def testParallelFakeAttributeRead( self ) :
+
+		IECoreScene.testSceneCacheParallelFakeAttributeRead()
+
 if __name__ == "__main__":
 	unittest.main()
 

@@ -34,6 +34,10 @@
 
 #include "boost/python.hpp"
 
+#include "tbb/tbb.h"
+
+#include "OpenEXR/ImathRandom.h"
+
 #include "IECoreScene/CurvesPrimitiveEvaluator.h"
 #include "IECoreScene/CurvesPrimitive.h"
 #include "IECorePython/RunTimeTypedBinding.h"
@@ -41,6 +45,8 @@
 
 #include "CurvesPrimitiveEvaluatorBinding.h"
 
+using namespace tbb;
+using namespace Imath;
 using namespace IECore;
 using namespace IECoreScene;
 using namespace boost::python;
@@ -48,32 +54,165 @@ using namespace IECore;
 using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+//////////////////////////////////////////////////////////////////////////
+// Wrappers
+//////////////////////////////////////////////////////////////////////////
+
+namespace
 {
 
-static bool pointAtV( const CurvesPrimitiveEvaluator &e, unsigned curveIndex, float v, PrimitiveEvaluator::Result *r )
+bool pointAtV( const CurvesPrimitiveEvaluator &e, unsigned curveIndex, float v, PrimitiveEvaluator::Result *r )
 {
 	e.validateResult( r );
 	return e.pointAtV( curveIndex, v, r );
 }
 
-static IntVectorDataPtr verticesPerCurve( const CurvesPrimitiveEvaluator &e )
+IntVectorDataPtr verticesPerCurve( const CurvesPrimitiveEvaluator &e )
 {
 	return new IntVectorData( e.verticesPerCurve() );
 }
 
-static IntVectorDataPtr vertexDataOffsets( const CurvesPrimitiveEvaluator &e )
+IntVectorDataPtr vertexDataOffsets( const CurvesPrimitiveEvaluator &e )
 {
 	return new IntVectorData( e.vertexDataOffsets() );
 }
 
-static IntVectorDataPtr varyingDataOffsets( const CurvesPrimitiveEvaluator &e )
+IntVectorDataPtr varyingDataOffsets( const CurvesPrimitiveEvaluator &e )
 {
 	return new IntVectorData( e.varyingDataOffsets() );
 }
 
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Tests
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+static const unsigned g_numCurves = 10000;
+
+CurvesPrimitiveEvaluatorPtr makeEvaluator()
+{
+	Rand32 rand;
+
+	IntVectorDataPtr vertsPerCurveData = new IntVectorData;
+	std::vector<int> &vertsPerCurve = vertsPerCurveData->writable();
+	V3fVectorDataPtr pointsData = new V3fVectorData;
+	std::vector<V3f> &points = pointsData->writable();
+	for( unsigned curveIndex = 0; curveIndex < g_numCurves; curveIndex++ )
+	{
+		unsigned numVerts = 2 + rand.nexti() % 10;
+		vertsPerCurve.push_back( numVerts );
+		for( unsigned vertIndex=0; vertIndex<numVerts; vertIndex++ )
+		{
+			points.push_back( V3f( rand.nextf(), rand.nextf(), rand.nextf() ) );
+		}
+	}
+
+	CurvesPrimitivePtr curves = new CurvesPrimitive( vertsPerCurveData, CubicBasisf::linear(), false, pointsData );
+	return new CurvesPrimitiveEvaluator( curves );
+}
+
+struct CreateResultAndQueryPointAtV
+{
+	public :
+
+		CreateResultAndQueryPointAtV( CurvesPrimitiveEvaluator &evaluator )
+			:	m_evaluator( evaluator )
+		{
+		}
+
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				PrimitiveEvaluator::ResultPtr result = m_evaluator.createResult();
+				unsigned curveIndex = i % g_numCurves;
+				m_evaluator.pointAtV( curveIndex, 0.5, result.get() );
+			}
+		}
+
+	private :
+
+		CurvesPrimitiveEvaluator &m_evaluator;
+
+};
+
+void testCurvesPrimitiveEvaluatorParallelResultCreation()
+{
+	CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
+	const size_t pRefCount = evaluator->primitive()->variableData<Data>( "P" )->refCount();
+	parallel_for( blocked_range<size_t>( 0, 1000000 ), CreateResultAndQueryPointAtV( *evaluator ) );
+	if( pRefCount != evaluator->primitive()->variableData<Data>( "P" )->refCount() )
+	{
+		throw Exception( "Unexpected reference count." );
+	}
+}
+
+struct CheckClosestPoint
+{
+	public :
+
+		CheckClosestPoint( CurvesPrimitiveEvaluator &evaluator )
+			:	m_evaluator( evaluator )
+		{
+		}
+
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			PrimitiveEvaluator::ResultPtr result = m_evaluator.createResult();
+			for( size_t i=r.begin(); i!=r.end(); ++i )
+			{
+				unsigned curveIndex = i % g_numCurves;
+				bool ok = m_evaluator.pointAtV( curveIndex, 0.5, result.get() );
+				if( !ok )
+				{
+					throw Exception( "Not OK." );
+				}
+				V3f p = result->point();
+				ok = m_evaluator.closestPoint( p, result.get() );
+				if( !ok )
+				{
+					throw Exception( "Not OK." );
+				}
+				if( fabs( (p-result->point()).length() ) > 0.001 )
+				{
+					std::cerr << p << " | " << result->point() << std::endl;
+					throw Exception( "Closest point not close enough." );
+				}
+			}
+		}
+
+	private :
+
+		CurvesPrimitiveEvaluator &m_evaluator;
+
+};
+
+void testCurvesPrimitiveEvaluatorParallelClosestPoint()
+{
+	CurvesPrimitiveEvaluatorPtr evaluator = makeEvaluator();
+	parallel_for( blocked_range<size_t>( 0, 10000 ), CheckClosestPoint( *evaluator ) );
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Binding
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreSceneModule
+{
+
 void bindCurvesPrimitiveEvaluator()
 {
+
+	/// \todo Move these to an IECoreSceneTest module
+	def( "testCurvesPrimitiveEvaluatorParallelResultCreation", &testCurvesPrimitiveEvaluatorParallelResultCreation );
+	def( "testCurvesPrimitiveEvaluatorParallelClosestPoint", &testCurvesPrimitiveEvaluatorParallelClosestPoint );
+
 	scope s = RunTimeTypedClass<CurvesPrimitiveEvaluator>()
 		.def( init<CurvesPrimitivePtr>() )
 		.def( "pointAtV", &pointAtV )

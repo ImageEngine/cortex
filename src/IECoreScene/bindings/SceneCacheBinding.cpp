@@ -36,28 +36,132 @@
 // regarding redefinition of _POSIX_C_SOURCE
 #include "boost/python.hpp"
 
+#include "tbb/tbb.h"
+
 #include "IECoreScene/SceneCache.h"
+#include "IECoreScene/SharedSceneInterfaces.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 
 #include "SceneCacheBinding.h"
 
+using namespace tbb;
 using namespace boost::python;
 using namespace IECore;
 using namespace IECorePython;
 using namespace IECoreScene;
 
-namespace IECoreSceneModule
+//////////////////////////////////////////////////////////////////////////
+// Wrappers
+//////////////////////////////////////////////////////////////////////////
+
+namespace
 {
 
-static SceneCachePtr constructor( const std::string &fileName, IndexedIO::OpenMode mode )
+SceneCachePtr constructor( const std::string &fileName, IndexedIO::OpenMode mode )
 {
 	return new SceneCache( fileName, mode );
 }
 
-static SceneCachePtr constructor2( IECore::IndexedIOPtr indexedIO )
+SceneCachePtr constructor2( IECore::IndexedIOPtr indexedIO )
 {
 	return new SceneCache( indexedIO );
 }
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Tests
+//////////////////////////////////////////////////////////////////////////
+
+namespace
+{
+
+struct TestSceneCache
+{
+	public :
+
+		TestSceneCache( const char *attribute ) : m_errors( 0 ), m_attribute( attribute )
+		{
+		}
+
+		TestSceneCache( TestSceneCache &that, tbb::split ) : m_errors( 0 ), m_attribute( that.m_attribute )
+		{
+		}
+
+		void operator()( const blocked_range<size_t> &r ) const
+		{
+			for ( size_t i = r.begin(); i != r.end(); ++i )
+			{
+				for ( size_t j = 0; j < 1000; j++ )
+				{
+					if ( ( i + j ) % 7 == 0 )
+					{
+						SharedSceneInterfaces::clear();
+					}
+
+					ConstSceneInterfacePtr scene = SharedSceneInterfaces::get("test/IECore/data/sccFiles/attributeAtRoot.scc");
+
+					try
+					{
+						scene->readAttribute( m_attribute, 0 );
+					}
+					catch( Exception &e )
+					{
+						m_errors++;
+					}
+				}
+			}
+		}
+
+		void join( const TestSceneCache &that )
+		{
+			m_errors += that.m_errors;
+		}
+
+		size_t errors() const
+		{
+			return m_errors;
+		}
+
+	private :
+		mutable size_t m_errors;
+		SceneInterface::Name m_attribute;
+};
+
+void testSceneCacheParallelAttributeRead()
+{
+	task_scheduler_init scheduler( 100 );
+
+	TestSceneCache task( "w" );
+
+	parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
+	if( task.errors() )
+	{
+		throw Exception( "Error detected" );
+	}
+}
+
+void testSceneCacheParallelFakeAttributeRead()
+{
+	task_scheduler_init scheduler( 100 );
+
+	TestSceneCache task( "fake" );
+
+	parallel_reduce( blocked_range<size_t>( 0, 100 ), task );
+	if( task.errors() != 100000 )
+	{
+		throw Exception( "Unexpected number of errors" );
+	}
+}
+
+} // namespace
+
+//////////////////////////////////////////////////////////////////////////
+// Binding
+//////////////////////////////////////////////////////////////////////////
+
+namespace IECoreSceneModule
+{
 
 void bindSceneCache()
 {
@@ -65,6 +169,10 @@ void bindSceneCache()
 		.def( "__init__", make_constructor( &constructor ), "Opens a scene file for read or write." )
 		.def( "__init__", make_constructor( &constructor2 ), "Opens a scene from a previously opened file handle." )
 	;
+
+	def( "testSceneCacheParallelAttributeRead", &testSceneCacheParallelAttributeRead );
+	def( "testSceneCacheParallelFakeAttributeRead", &testSceneCacheParallelFakeAttributeRead );
+
 }
 
 } // namespace IECoreSceneModule

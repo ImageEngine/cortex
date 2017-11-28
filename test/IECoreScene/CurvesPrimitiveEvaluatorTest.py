@@ -1237,6 +1237,14 @@ class CurvesPrimitiveEvaluatorTest( unittest.TestCase ) :
 
 		self.failUnless( isinstance( e, IECoreScene.CurvesPrimitiveEvaluator ) )
 
+	def testParallelResultCreation( self ) :
+
+		IECoreScene.testCurvesPrimitiveEvaluatorParallelResultCreation()
+
+	def testParallelClosestPoint( self ) :
+
+		IECoreScene.testCurvesPrimitiveEvaluatorParallelClosestPoint()
+
 if __name__ == "__main__":
 	unittest.main()
 

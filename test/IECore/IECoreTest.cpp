@@ -57,12 +57,10 @@
 #include "ParameterThreadingTest.h"
 #include "InternedStringTest.h"
 #include "RefCountedThreadingTest.h"
-#include "CurvesPrimitiveEvaluatorThreadingTest.h"
 #include "LRUCacheThreadingTest.h"
 #include "CompoundDataTest.h"
 #include "CompoundObjectTest.h"
 #include "ComputationCacheTest.h"
-#include "SceneCacheThreadingTest.h"
 
 using namespace boost::unit_test;
 
@@ -93,12 +91,10 @@ bool init()
 		addParameterThreadingTest(test);
 		addInternedStringTest(test);
 		addRefCountedThreadingTest(test);
-		addCurvesPrimitiveEvaluatorThreadingTest(test);
 		addLRUCacheThreadingTest(test);
 		addCompoundDataTest(test);
 		addCompoundObjectTest(test);
 		addComputationCacheTest(test);
-		addSceneCacheThreadingTest(test);
 	}
 	catch (std::exception &ex)
 	{
