@@ -33,6 +33,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/container_utils.hpp"
 
 #include "IECoreScene/SceneInterface.h"
 #include "IECoreScene/SharedSceneInterfaces.h"
@@ -82,33 +83,10 @@ static std::string pathAsString( const SceneInterface &m )
 	return str;
 }
 
-void listToSceneInterfaceNameList( list l, SceneInterface::NameList &p )
-{
-	int listLen = IECorePython::len( l );
-	for (int i = 0; i < listLen; i++ )
-	{
-		extract< IECore::InternedString > inStr( l[i] );
-		if ( inStr.check() )
-		{
-			p.push_back( inStr() );
-		}
-		else
-		{
-			extract< std::string > ex( l[i] );
-			if ( !ex.check() )
-			{
-				throw IECore::InvalidArgumentException( std::string( "Invalid value! Expecting a list of strings." ) );
-			}
-
-			p.push_back( ex() );
-		}
-	}
-}
-
 static SceneInterfacePtr nonConstScene( SceneInterface &m, list l, SceneInterface::MissingBehaviour b )
 {
 	SceneInterface::Path p;
-	listToSceneInterfaceNameList( l, p );
+	container_utils::extend_container( p, l );
 	return m.scene( p, b );
 }
 
@@ -122,7 +100,7 @@ static list attributeNames( const SceneInterface &m )
 static std::string pathToString( list l )
 {
 	SceneInterface::Path p;
-	listToSceneInterfaceNameList( l, p );
+	container_utils::extend_container( p, l );
 	std::string str;
 	SceneInterface::pathToString( p, str );
 	return str;
@@ -149,7 +127,7 @@ static list supportedExtensions( IndexedIO::OpenMode modes )
 static dict readObjectPrimitiveVariables( const SceneInterface &m, list varNameList, double time )
 {
 	SceneInterface::NameList v;
-	listToSceneInterfaceNameList( varNameList, v );
+	container_utils::extend_container( v, varNameList );
 
 	PrimitiveVariableMap varMap = m.readObjectPrimitiveVariables( v, time );
 	dict result;
@@ -175,7 +153,7 @@ list readTags( const SceneInterface &m, int filter )
 void writeTags( SceneInterface &m, list tagList )
 {
 	SceneInterface::NameList v;
-	listToSceneInterfaceNameList( tagList, v );
+	container_utils::extend_container( v, tagList );
 	m.writeTags(v);
 }
 
