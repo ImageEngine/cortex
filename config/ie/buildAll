@@ -75,14 +75,16 @@ if IEEnv.platform() in ( "cent7.x86_64", ) :
 			for pythonVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["python"] ) :
 				build( [ "COMPILER_VERSION="+compilerVersion, "PYTHON_VERSION="+pythonVersion, "ARNOLD_VERSION=UNDEFINED", "APPLESEED_VERSION="+appleseedVersion, "DL_VERSION=UNDEFINED" ] )
 
-	for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
-		build( [ "APP=maya", "APP_VERSION="+mayaVersion ] )
+	for aiVersion in IEEnv.activeVersions( IEEnv.registry["apps"]["arnold"] ):
 
-	for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
-		build( [ "APP=nuke", "APP_VERSION="+nukeVersion ] )
+		for mayaVersion in IEEnv.activeAppVersions( "maya" ) :
+			build( [ "APP=maya", "APP_VERSION="+mayaVersion, "ARNOLD_VERSION=" + aiVersion ] )
 
-	for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
-		build( [ "APP=houdini", "APP_VERSION="+houdiniVersion ] )
+		for nukeVersion in IEEnv.activeAppVersions( "nuke" ) :
+			build( [ "APP=nuke", "APP_VERSION="+nukeVersion, "ARNOLD_VERSION=" + aiVersion ] )
+
+		for houdiniVersion in IEEnv.activeAppVersions( "houdini" ) :
+			build( [ "APP=houdini", "APP_VERSION="+houdiniVersion, "ARNOLD_VERSION=" + aiVersion ] )
 
 	installDocs()
 
