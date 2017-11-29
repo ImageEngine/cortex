@@ -47,7 +47,7 @@ class FixScene( BaseFix ) :
 		|
 		sceneImport=simple_stmt< import_name< 'import' 'IECoreScene' > "\\n" >
 		|
-		power< module='IECore' trailer<'.' name=any > any* >
+		power< module='IECore' trailer<'.' name=any > remainder=any* >
 	"""
 
 	def start_tree( self, tree, filename ) :
@@ -66,6 +66,15 @@ class FixScene( BaseFix ) :
 			self.__haveSceneImport = True
 
 		elif "name" in results and hasattr( IECoreScene, results["name"].value ) :
+
+			if results["name"].value == "TypeId" :
+				attr = None
+				if results["remainder"] :
+					attr = str( results["remainder"][0] ).lstrip( "." )
+				if not attr or not attr[0].isupper() or not hasattr( IECoreScene.TypeId, attr ) :
+					# Not an IECoreScene TypeId, so no transformation
+					# is needed.
+					return
 
 			results["module"].value = "IECoreScene"
 			node.changed()
