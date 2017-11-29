@@ -634,7 +634,7 @@ GEO_Primitive *GEO_CortexPrimitive::doConvert( ConvertParms &parms )
 	GA_PrimCompat::TypeMask type = parms.toType();
 
 	/// \todo: should the GEO_PrimTypeCompat be registered with the converters?
-	if ( m_object->isInstanceOf( IECore::MeshPrimitiveTypeId ) && type == GEO_PrimTypeCompat::GEOPRIMPOLY )
+	if ( m_object->isInstanceOf( IECoreScene::MeshPrimitive::staticTypeId() ) && type == GEO_PrimTypeCompat::GEOPRIMPOLY )
 	{
 		GU_DetailHandle handle;
 		handle.allocateAndSet( (GU_Detail*)getParent(), false );

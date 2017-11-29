@@ -121,18 +121,18 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.CurvesPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECoreScene.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( curve, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 
-		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.CurvesPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.CurvesPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECoreScene.TypeId.CurvesPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.CurvesPrimitive ] )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECoreScene.TypeId.CurvesPrimitive ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
 	def testConvertFromHOMGeo( self ) :
@@ -141,14 +141,14 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
 		result = converter.convert()
-		self.failUnless( result.isInstanceOf( IECore.TypeId.CurvesPrimitive ) )
+		self.failUnless( result.isInstanceOf( IECoreScene.TypeId.CurvesPrimitive ) )
 
-		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.CurvesPrimitive )
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECoreScene.TypeId.CurvesPrimitive )
 		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniCurvesConverter ) ) )
 
 	def verifyLinearCurves( self, sop ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.CurvesPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.CurvesPrimitive )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		geo = sop.geometry()
@@ -238,7 +238,7 @@ class TestFromHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 
 	def verifyBSplineCurves( self, sop ) :
 		result = IECoreHoudini.FromHoudiniCurvesConverter( sop ).convert()
-		self.assertEqual( result.typeId(), IECore.TypeId.CurvesPrimitive )
+		self.assertEqual( result.typeId(), IECoreScene.TypeId.CurvesPrimitive )
 		self.assert_( result.arePrimitiveVariablesValid() )
 
 		geo = sop.geometry()

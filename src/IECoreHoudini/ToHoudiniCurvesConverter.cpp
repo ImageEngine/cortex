@@ -46,7 +46,7 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( ToHoudiniCurvesConverter );
 
-ToHoudiniGeometryConverter::Description<ToHoudiniCurvesConverter> ToHoudiniCurvesConverter::m_description( CurvesPrimitiveTypeId );
+ToHoudiniGeometryConverter::Description<ToHoudiniCurvesConverter> ToHoudiniCurvesConverter::m_description( CurvesPrimitive::staticTypeId() );
 
 ToHoudiniCurvesConverter::ToHoudiniCurvesConverter( const IECore::Object *object ) :
 	ToHoudiniGeometryConverter( object, "Converts an IECoreScene::CurvesPrimitive to a Houdini GU_Detail." )

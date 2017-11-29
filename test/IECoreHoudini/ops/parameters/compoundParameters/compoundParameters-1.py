@@ -48,7 +48,7 @@ class compoundParameters( IECore.Op ) :
 				name = "result",
 				description = "Dummy.",
 				defaultValue = IECoreScene.PointsPrimitive( IECore.V3fVectorData() ),
-				type = IECore.TypeId.PointsPrimitive
+				type = IECoreScene.TypeId.PointsPrimitive
 			)
 		)
 

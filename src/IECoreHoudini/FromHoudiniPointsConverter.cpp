@@ -42,7 +42,7 @@ using namespace IECoreHoudini;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniPointsConverter );
 
-FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> FromHoudiniPointsConverter::m_description( PointsPrimitiveTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniPointsConverter> FromHoudiniPointsConverter::m_description( PointsPrimitive::staticTypeId() );
 
 FromHoudiniPointsConverter::FromHoudiniPointsConverter( const GU_DetailHandle &handle ) :
 	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECoreScene::PointsPrimitive." )

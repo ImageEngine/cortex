@@ -87,25 +87,25 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.MeshPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 
-		self.failUnless( IECore.TypeId.MeshPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.MeshPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.MeshPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.MeshPrimitive ] )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECoreScene.TypeId.MeshPrimitive ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 	# performs geometry conversion
 	def testDoConversion( self ) :
 		converter = self.testCreateConverter()
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assert_( result.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 
 	def testConvertFromHOMGeo( self ) :
 		geo = self.createBox().geometry()
@@ -113,9 +113,9 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 		result = converter.convert()
-		self.failUnless( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.failUnless( result.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 
-		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.MeshPrimitive )
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECoreScene.TypeId.MeshPrimitive )
 		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 		## \todo: make sure we catch that bad_cast crash
@@ -246,7 +246,7 @@ class TestFromHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assert_( result.isInstanceOf( IECoreScene.TypeId.MeshPrimitive ) )
 
 		bbox = result.bound()
 		self.assertEqual( bbox.min.x, -1.5 )

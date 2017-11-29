@@ -11,7 +11,7 @@ class multiTypeObject( IECore.Op ) :
 				name = "result",
 				description = "",
 				defaultValue = IECoreScene.Group(),
-				type = IECore.TypeId.Primitive
+				type = IECoreScene.TypeId.Primitive
 			)
 		)
 
@@ -20,7 +20,7 @@ class multiTypeObject( IECore.Op ) :
 				name = "input",
 				description = "An object parameter that accepts multiple types.",
 				defaultValue = IECore.V3fVectorData([]),
-				types = [ IECore.TypeId.Primitive, IECore.TypeId.V3fVectorData ]
+				types = [ IECoreScene.TypeId.Primitive, IECore.TypeId.V3fVectorData ]
 			),
 		)
 

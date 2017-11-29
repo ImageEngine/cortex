@@ -2317,10 +2317,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
 		self.assertTrue( root.hasObject() )
 		obj = root.readObject( 0 )
-		self.assertTrue( obj.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
 		self.assertEqual( len(obj.children()), 3 )
 		for child in obj.children() :
-			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			self.assertTrue( isinstance( child, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
 
 	def testRopFlattenedAndHidden( self ) :
@@ -2349,10 +2349,10 @@ class TestSceneCache( IECoreHoudini.TestCase ) :
 		self.assertEqual( root.readTransformAsMatrix( 0 ), IECore.M44d() )
 		self.assertTrue( root.hasObject() )
 		obj = root.readObject( 0 )
-		self.assertTrue( obj.isInstanceOf( IECore.TypeId.Group ) )
+		self.assertTrue( isinstance( obj, IECoreScene.Group ) )
 		self.assertEqual( len(obj.children()), 3 )
 		for child in obj.children() :
-			self.assertTrue( child.isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+			self.assertTrue( isinstance( child, IECoreScene.MeshPrimitive ) )
 		self.assertEqual( root.childNames(), [] )
 
 	def testRopFlattenedWithErrors( self ) :

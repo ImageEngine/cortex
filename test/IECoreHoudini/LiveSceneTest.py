@@ -789,13 +789,13 @@ class LiveSceneTest( IECoreHoudini.TestCase ) :
 		torus = gap.child( "torus" )
 		self.assertEqual( torus.childNames(), [] )
 		self.assertTrue( torus.hasObject() )
-		self.assertTrue( torus.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( isinstance( torus.readObject( 0 ), IECoreScene.MeshPrimitive ) )
 		self.assertEqual( torus.readObject( 0 ).variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
 		torus2 = gap.child( "torus2" )
 		self.assertEqual( torus2.childNames(), [] )
 		self.assertTrue( torus2.hasObject() )
-		self.assertTrue( torus2.readObject( 0 ).isInstanceOf( IECore.TypeId.MeshPrimitive ) )
+		self.assertTrue( isinstance( torus2.readObject( 0 ), IECoreScene.MeshPrimitive ) )
 		self.assertEqual( torus2.readObject( 0 ).variableSize( IECoreScene.PrimitiveVariable.Interpolation.Uniform ), 100 )
 
 	def testNonSlashNames( self ) :

@@ -418,7 +418,7 @@ class TestToHoudiniPolygonsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.mesh() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPolygonsConverter ) ) )
 
-		self.failUnless( IECore.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.MeshPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConversionIntoEmptySop( self ) :
 		mesh = self.mesh()

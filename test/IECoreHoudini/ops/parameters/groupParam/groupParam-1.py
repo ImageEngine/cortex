@@ -25,7 +25,7 @@ class groupParam( IECore.Op ) :
 	def doOperation( self, args ) :
 
 		for child in args["input"].children() :
-			if child.isInstanceOf( IECore.TypeId.Primitive ) :
+			if isinstance( child, IECoreScene.Primitive ) :
 				return child.copy()
 
 		return IECoreScene.PointsPrimitive( 0 )

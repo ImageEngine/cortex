@@ -1,4 +1,5 @@
 import IECore
+import IECoreScene
 
 class objectDebug( IECore.Op ) :
 
@@ -41,7 +42,7 @@ class objectDebug( IECore.Op ) :
 			print object.typeName(), object
 
 			# For meshes & points we can print out more verbose information
-			if object.typeId()==IECore.TypeId.MeshPrimitive or object.typeId()==IECore.TypeId.PointsPrimitive:
+			if object.typeId()==IECoreScene.TypeId.MeshPrimitive or object.typeId()==IECoreScene.TypeId.PointsPrimitive:
 				for k in object.keys():
 					primvar = object[k]
 					print "[%s]" % k, primvar.interpolation, primvar.data.typeName()

@@ -1,4 +1,5 @@
 import IECore
+import IECoreScene
 
 class objectDebug( IECore.Op ) :
 
@@ -42,7 +43,7 @@ class objectDebug( IECore.Op ) :
 		level = IECore.MessageHandler.Level( args["messageLevel"].value )
 		IECore.msg( level, "objectDebug", obj.typeName() + " " + str(obj) )
 
-		if obj.isInstanceOf( IECore.TypeId.Primitive ) :
+		if obj.isInstanceOf( IECoreScene.TypeId.Primitive ) :
 			for k in obj.keys() :
 				primvar = obj[k]
 				msg = "[%s], %s, %s, %s" % ( k, primvar.interpolation, primvar.data.typeName(), str(primvar.data) )

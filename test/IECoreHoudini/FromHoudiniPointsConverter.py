@@ -88,25 +88,25 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPolygonsConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECoreScene.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( box, resultType = IECore.TypeId.Parameter )
 		self.assertEqual( converter, None )
 
-		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.PointsPrimitive in IECoreHoudini.FromHoudiniGeometryConverter.supportedTypes() )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( IECoreScene.TypeId.PointsPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECore.TypeId.PointsPrimitive ] )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.createDummy( [ IECoreScene.TypeId.PointsPrimitive ] )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 	# performs geometry conversion
 	def testDoConversion( self ) :
 		converter = self.testCreateConverter()
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+		self.assert_( result.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 
 	def testConvertFromHOMGeo( self ) :
 		geo = self.createPoints().geometry()
@@ -114,9 +114,9 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		result = converter.convert()
-		self.failUnless( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+		self.failUnless( result.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 
-		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECore.TypeId.PointsPrimitive )
+		converter2 = IECoreHoudini.FromHoudiniGeometryConverter.createFromGeo( geo, IECoreScene.TypeId.PointsPrimitive )
 		self.failUnless( converter2.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 	# convert a mesh
@@ -229,7 +229,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+		self.assert_( result.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 
 		bbox = result.bound()
 		self.assertEqual( bbox.min.x, -2.0 )
@@ -467,7 +467,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 
 		result = converter.convert()
-		self.assert_( result.isInstanceOf( IECore.TypeId.PointsPrimitive ) )
+		self.assert_( result.isInstanceOf( IECoreScene.TypeId.PointsPrimitive ) )
 
 		bbox = result.bound()
 		self.assertEqual( bbox.min.x, -2.0 )
@@ -949,7 +949,7 @@ class TestFromHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 		self.assertEqual( result.variableSize( IECoreScene.PrimitiveVariable.Interpolation.Vertex ), 5000 )
 		self.assertTrue(  result.arePrimitiveVariablesValid() )
 
-		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECore.TypeId.PointsPrimitive )
+		converter = IECoreHoudini.FromHoudiniGeometryConverter.create( merge, "box", IECoreScene.TypeId.PointsPrimitive )
 		self.assertTrue( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.FromHoudiniPointsConverter ) ) )
 		result = converter.convert()
 		# names are not stored on the object at all

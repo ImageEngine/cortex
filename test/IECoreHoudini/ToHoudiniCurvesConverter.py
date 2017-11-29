@@ -450,7 +450,7 @@ class TestToHoudiniCurvesConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.curves() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniCurvesConverter ) ) )
-		self.failUnless( IECore.TypeId.CurvesPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.CurvesPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testLinearConversion( self ) :
 		sop = self.emptySop()

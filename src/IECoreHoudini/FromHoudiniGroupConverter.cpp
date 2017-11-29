@@ -65,7 +65,7 @@ typedef GA_ElementGroup GroupType;
 
 IE_CORE_DEFINERUNTIMETYPED( FromHoudiniGroupConverter );
 
-FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> FromHoudiniGroupConverter::m_description( GroupTypeId );
+FromHoudiniGeometryConverter::Description<FromHoudiniGroupConverter> FromHoudiniGroupConverter::m_description( Group::staticTypeId() );
 
 FromHoudiniGroupConverter::FromHoudiniGroupConverter( const GU_DetailHandle &handle ) :
 	FromHoudiniGeometryConverter( handle, "Converts a Houdini GU_Detail to an IECoreScene::Group." )

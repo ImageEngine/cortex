@@ -335,7 +335,7 @@ class TestToHoudiniPointsConverter( IECoreHoudini.TestCase ) :
 	def testFactory( self ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.points() )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniPointsConverter ) ) )
-		self.failUnless( IECore.TypeId.PointsPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.PointsPrimitive in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConversionIntoEmptySop( self ) :
 		points = self.points()

@@ -249,7 +249,7 @@ class TestToHoudiniGroupConverter( IECoreHoudini.TestCase ) :
 		converter = IECoreHoudini.ToHoudiniGeometryConverter.create( self.pointTwoBox() )
 		self.failUnless( converter.isInstanceOf( IECore.TypeId( IECoreHoudini.TypeId.ToHoudiniGroupConverter ) ) )
 
-		self.failUnless( IECore.TypeId.Group in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
+		self.failUnless( IECoreScene.TypeId.Group in IECoreHoudini.ToHoudiniGeometryConverter.supportedTypes() )
 
 	def testConvertScene( self ) :
 		null = self.emptySop()

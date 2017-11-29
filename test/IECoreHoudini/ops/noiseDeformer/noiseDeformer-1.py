@@ -58,7 +58,7 @@ class noiseDeformer( IECore.Op ) :
 		prim['P'] = IECoreScene.PrimitiveVariable( IECoreScene.PrimitiveVariable.Interpolation.Vertex, IECore.V3fVectorData( new_p ) )
 
 		# recalculate normals
-		if prim.typeId()==IECore.TypeId.MeshPrimitive:
+		if prim.typeId()==IECoreScene.TypeId.MeshPrimitive:
 			IECoreScene.MeshNormalsOp()( input=prim, copyInput=False )
 
 		return prim

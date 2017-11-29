@@ -54,13 +54,13 @@ class multiple( IECoreScene.ParameterisedProcedural ) :
 				name = "meshOnlyObject",
 				description = "A mesh (Houdini polygons)",
 				defaultValue = IECoreScene.MeshPrimitive(),
-				types = [ IECore.TypeId.MeshPrimitive ]
+				types = [ IECoreScene.TypeId.MeshPrimitive ]
 			),
 			IECore.ObjectParameter(
 				name = "meshPointsOrGroupObject",
 				description = "A mesh (Houdini polygons) or points",
 				defaultValue = IECoreScene.MeshPrimitive(),
-				types = [ IECore.TypeId.MeshPrimitive, IECore.TypeId.PointsPrimitive, IECore.TypeId.Group ]
+				types = [ IECoreScene.TypeId.MeshPrimitive, IECoreScene.TypeId.PointsPrimitive, IECoreScene.TypeId.Group ]
 			),
 		] )
 
