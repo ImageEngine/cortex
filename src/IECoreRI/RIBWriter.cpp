@@ -50,13 +50,13 @@ IE_CORE_DEFINERUNTIMETYPED( RIBWriter );
 const IECore::Writer::WriterDescription<RIBWriter> RIBWriter::g_writerDescription( "rib" );
 
 RIBWriter::RIBWriter()
-	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECore::RenderableTypeId )
+	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECoreScene::Renderable::staticTypeId() )
 {
 	constructParameters();
 }
 
 RIBWriter::RIBWriter( IECore::ObjectPtr object, const std::string &fileName )
-	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECore::RenderableTypeId )
+	:	IECore::Writer( "Writes Renderable objects in RIB format.", IECoreScene::Renderable::staticTypeId() )
 {
 	constructParameters();
 	m_objectParameter->setValue( object );

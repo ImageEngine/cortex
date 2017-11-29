@@ -53,7 +53,7 @@ PrimitiveVariableList::PrimitiveVariableList( const IECoreScene::PrimitiveVariab
 	PrimitiveVariableMap::const_iterator it;
 	for( it=primVars.begin(); it!=primVars.end(); it++ )
 	{
-		TypeId type = it->second.data->typeId();
+		IECore::TypeId type = it->second.data->typeId();
 		switch( type )
 		{
 			case StringVectorDataTypeId :

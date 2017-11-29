@@ -1740,12 +1740,12 @@ void IECoreRI::RendererImplementation::addPrimitive( IECoreScene::ConstPrimitive
 
 void IECoreRI::RendererImplementation::emitPrimitiveAttributes( const IECoreScene::Primitive *primitive )
 {
-	switch( primitive->typeId() )
+	switch( (int)primitive->typeId() )
 	{
-		case CurvesPrimitiveTypeId :
+		case IECoreScene::CurvesPrimitiveTypeId :
 			emitCurvesPrimitiveAttributes( static_cast<const CurvesPrimitive *>( primitive ) );
 			break;
-		case PatchMeshPrimitiveTypeId :
+		case IECoreScene::PatchMeshPrimitiveTypeId :
 			emitPatchMeshPrimitiveAttributes( static_cast<const PatchMeshPrimitive *>( primitive ) );
 			break;
 		default :
@@ -1774,27 +1774,27 @@ void IECoreRI::RendererImplementation::emitPatchMeshPrimitiveAttributes( const I
 
 void IECoreRI::RendererImplementation::emitPrimitive( const IECoreScene::Primitive *primitive )
 {
-	switch( primitive->typeId() )
+	switch( (int)primitive->typeId() )
 	{
-		case PointsPrimitiveTypeId :
+		case IECoreScene::PointsPrimitiveTypeId :
 			emitPointsPrimitive( static_cast<const PointsPrimitive *>( primitive ) );
 			break;
-		case MeshPrimitiveTypeId :
+		case IECoreScene::MeshPrimitiveTypeId :
 			emitMeshPrimitive( static_cast<const MeshPrimitive *>( primitive ) );
 			break;
-		case CurvesPrimitiveTypeId :
+		case IECoreScene::CurvesPrimitiveTypeId :
 			emitCurvesPrimitive( static_cast<const CurvesPrimitive *>( primitive ) );
 			break;
-		case DiskPrimitiveTypeId :
+		case IECoreScene::DiskPrimitiveTypeId :
 			emitDiskPrimitive( static_cast<const DiskPrimitive *>( primitive ) );
 			break;
-		case SpherePrimitiveTypeId :
+		case IECoreScene::SpherePrimitiveTypeId :
 			emitSpherePrimitive( static_cast<const SpherePrimitive *>( primitive ) );
 			break;
-		case NURBSPrimitiveTypeId :
+		case IECoreScene::NURBSPrimitiveTypeId :
 			emitNURBSPrimitive( static_cast<const NURBSPrimitive *>( primitive ) );
 			break;
-		case PatchMeshPrimitiveTypeId :
+		case IECoreScene::PatchMeshPrimitiveTypeId :
 			emitPatchMeshPrimitive( static_cast<const PatchMeshPrimitive *>( primitive ) );
 			break;
 		default :
