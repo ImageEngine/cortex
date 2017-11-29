@@ -37,6 +37,7 @@
 #include "IECore/VectorTypedData.h"
 #include "IECore/SimpleTypedData.h"
 #include "IECore/MessageHandler.h"
+
 #include "IECoreScene/Primitive.h"
 
 #include "IECoreArnold/ParameterAlgo.h"
@@ -208,7 +209,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 			arnoldInterpolation = "varying";
 			break;
 		case PrimitiveVariable::FaceVarying :
-			if( primitive->isInstanceOf( MeshPrimitiveTypeId ) )
+			if( primitive->isInstanceOf( (IECore::TypeId)IECoreScene::MeshPrimitiveTypeId ) )
 			{
 				arnoldInterpolation = "indexed";
 				break;
@@ -239,7 +240,7 @@ void convertPrimitiveVariable( const IECoreScene::Primitive *primitive, const Pr
 		return;
 	}
 
-	if( primitive->isInstanceOf( PointsPrimitiveTypeId ) )
+	if( primitive->isInstanceOf( (IECore::TypeId)IECoreScene::PointsPrimitiveTypeId ) )
 	{
 		// Cortex treats uniform as one-per-primitive
 		// but Arnold treats uniform as one-per-point.
