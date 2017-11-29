@@ -84,8 +84,6 @@ from MenuDefinition import MenuDefinition
 from ParameterParser import ParameterParser
 from SearchReplaceOp import SearchReplaceOp
 from CapturingMessageHandler import CapturingMessageHandler
-from FileSequenceAnalyzerOp import FileSequenceAnalyzerOp
-from FileSequenceGraphOp import FileSequenceGraphOp
 from LayeredDict import LayeredDict
 from CompoundVectorParameter import CompoundVectorParameter
 from SequenceMergeOp import SequenceMergeOp

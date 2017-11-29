@@ -72,7 +72,7 @@ class TestPythonOp( unittest.TestCase ) :
 
 		abstractOps = {
 			IECore.Op, IECore.ModifyOp,
-			IECore.SequenceMergeOp, IECore.FileSequenceAnalyzerOp,
+			IECore.SequenceMergeOp,
 			IECore.Reader, IECore.Writer,
 		}
 
