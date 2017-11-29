@@ -51,8 +51,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCurveConverter );
 
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( MFn::kNurbsCurve, IECore::CurvesPrimitiveTypeId, true );
-IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_dataDescription( MFn::kNurbsCurveData, IECore::CurvesPrimitiveTypeId, true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_description( MFn::kNurbsCurve, IECoreScene::CurvesPrimitive::staticTypeId(), true );
+IECoreMaya::FromMayaShapeConverter::Description<FromMayaCurveConverter> FromMayaCurveConverter::m_dataDescription( MFn::kNurbsCurveData, IECoreScene::CurvesPrimitive::staticTypeId(), true );
 
 FromMayaCurveConverter::FromMayaCurveConverter( const MObject &object )
 	:	FromMayaShapeConverter( "Converts maya curve shapes into IECoreScene::CurvesPrimitive objects.", object )

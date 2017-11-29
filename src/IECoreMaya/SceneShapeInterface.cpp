@@ -851,7 +851,7 @@ MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &
 		}
 
 		IECore::TypeId type = object->typeId();
-		if( type == CoordinateSystemTypeId )
+		if( type == CoordinateSystem::staticTypeId() )
 		{
 			IECoreScene::ConstCoordinateSystemPtr coordSys = IECore::runTimeCast<const CoordinateSystem>( object );
 			Imath::M44f m;
@@ -885,12 +885,12 @@ MStatus SceneShapeInterface::computeOutputPlug( const MPlug &plug, const MPlug &
 				// Check the type for now, because a dag node is created if you pass an empty MObject to the converter
 				// Won't be needed anymore when the related todo is addressed in the converter
 
-				if( type == MeshPrimitiveTypeId )
+				if( type == MeshPrimitive::staticTypeId() )
 				{
 					MFnMeshData fnData;
 					data = fnData.create();
 				}
-				else if( type == CurvesPrimitiveTypeId )
+				else if( type == CurvesPrimitive::staticTypeId() )
 				{
 					MFnNurbsCurveData fnData;
 					data = fnData.create();

@@ -52,7 +52,7 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaGroupConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, GroupTypeId, true );
+FromMayaDagNodeConverter::Description<FromMayaGroupConverter> FromMayaGroupConverter::m_description( MFn::kTransform, Group::staticTypeId(), true );
 
 FromMayaGroupConverter::FromMayaGroupConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts transforms to Group objects.", dagPath )

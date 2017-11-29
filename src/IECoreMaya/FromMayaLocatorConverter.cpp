@@ -54,7 +54,7 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaLocatorConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaLocatorConverter> FromMayaLocatorConverter::m_description( MFn::kLocator, CoordinateSystemTypeId, true );
+FromMayaDagNodeConverter::Description<FromMayaLocatorConverter> FromMayaLocatorConverter::m_description( MFn::kLocator, CoordinateSystem::staticTypeId(), true );
 
 FromMayaLocatorConverter::FromMayaLocatorConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts maya locator shape nodes into IECoreScene::CoordinateSystem objects.", dagPath )

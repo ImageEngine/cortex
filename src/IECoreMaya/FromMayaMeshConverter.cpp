@@ -59,8 +59,8 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaMeshConverter );
 
-FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_description( MFn::kMesh, MeshPrimitiveTypeId, true );
-FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_dataDescription( MFn::kMeshData, MeshPrimitiveTypeId, true );
+FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_description( MFn::kMesh, MeshPrimitive::staticTypeId(), true );
+FromMayaShapeConverter::Description<FromMayaMeshConverter> FromMayaMeshConverter::m_dataDescription( MFn::kMeshData, MeshPrimitive::staticTypeId(), true );
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // structors

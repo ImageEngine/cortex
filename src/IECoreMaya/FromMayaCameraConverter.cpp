@@ -55,7 +55,7 @@ using namespace Imath;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaCameraConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( MFn::kCamera, CameraTypeId, true );
+FromMayaDagNodeConverter::Description<FromMayaCameraConverter> FromMayaCameraConverter::m_description( MFn::kCamera, Camera::staticTypeId(), true );
 
 FromMayaCameraConverter::FromMayaCameraConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts maya camera shape nodes into IECoreScene::Camera objects.", dagPath )

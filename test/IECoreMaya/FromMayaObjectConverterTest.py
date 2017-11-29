@@ -35,6 +35,7 @@
 import maya.cmds
 
 import IECore
+import IECoreScene
 import IECoreMaya
 
 class FromMayaObjectConverterTest( IECoreMaya.TestCase ) :
@@ -47,7 +48,7 @@ class FromMayaObjectConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphereShape )
 		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sphereShape, IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sphereShape, IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId(IECoreMaya.TypeId.FromMayaMeshConverter) ) )
 
 if __name__ == "__main__":

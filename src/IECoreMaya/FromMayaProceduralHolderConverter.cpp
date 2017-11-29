@@ -45,7 +45,7 @@ using namespace IECoreScene;
 
 IE_CORE_DEFINERUNTIMETYPED( FromMayaProceduralHolderConverter );
 
-FromMayaDagNodeConverter::Description<FromMayaProceduralHolderConverter> FromMayaProceduralHolderConverter::m_description( MTypeId( ProceduralHolderId ), ParameterisedProceduralTypeId, true );
+FromMayaDagNodeConverter::Description<FromMayaProceduralHolderConverter> FromMayaProceduralHolderConverter::m_description( MTypeId( ProceduralHolderId ), ParameterisedProcedural::staticTypeId(), true );
 
 FromMayaProceduralHolderConverter::FromMayaProceduralHolderConverter( const MDagPath &dagPath )
 	:	FromMayaDagNodeConverter( "Converts maya procedural holder into an IECoreScene::ParameterisedProcedural object.", dagPath )

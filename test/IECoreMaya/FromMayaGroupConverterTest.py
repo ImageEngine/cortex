@@ -44,7 +44,7 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 
 		sphereTransform = maya.cmds.polySphere( subdivisionsX=10, subdivisionsY=5, constructionHistory=False )[0]
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( sphereTransform ), IECore.TypeId.Group )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( sphereTransform ), IECoreScene.TypeId.Group )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaGroupConverter ) ) )
 
 	def testConversion( self ) :
@@ -52,7 +52,7 @@ class FromMayaGroupConverterTest( IECoreMaya.TestCase ) :
 		cubeTransform = maya.cmds.polyCube()[0]
 		maya.cmds.move( 1, 2, 3, cubeTransform )
 
-		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( cubeTransform ), IECore.TypeId.Group )
+		converter = IECoreMaya.FromMayaDagNodeConverter.create( str( cubeTransform ), IECoreScene.TypeId.Group )
 
 		converted = converter.convert()
 

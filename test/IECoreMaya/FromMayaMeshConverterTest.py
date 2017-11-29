@@ -50,19 +50,19 @@ class FromMayaMeshConverterTest( IECoreMaya.TestCase ) :
 		converter = IECoreMaya.FromMayaShapeConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECore.TypeId.Primitive )
+		converter = IECoreMaya.FromMayaShapeConverter.create( sphere, IECoreScene.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 		converter = IECoreMaya.FromMayaObjectConverter.create( sphere )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.MeshPrimitive )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.MeshPrimitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
-		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECore.TypeId.Primitive )
+		converter = IECoreMaya.FromMayaObjectConverter.create( sphere, IECoreScene.TypeId.Primitive )
 		self.assert_( converter.isInstanceOf( IECore.TypeId( IECoreMaya.TypeId.FromMayaMeshConverter ) ) )
 
 	def testConstructor( self ) :
