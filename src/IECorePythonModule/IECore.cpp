@@ -44,7 +44,6 @@
 #include "IECorePython/RefCountedBinding.h"
 #include "IECorePython/RunTimeTypedBinding.h"
 #include "IECorePython/ExceptionBinding.h"
-#include "IECorePython/ImathBinding.h"
 #include "IECorePython/KDTreeBinding.h"
 #include "IECorePython/IndexedIOBinding.h"
 #include "IECorePython/DataBinding.h"
@@ -100,7 +99,6 @@
 #include "IECorePython/DataCastOpBinding.h"
 #include "IECorePython/DataPromoteOpBinding.h"
 #include "IECorePython/MatrixMultiplyOpBinding.h"
-#include "IECorePython/ImathRandomBinding.h"
 #include "IECorePython/RandomRotationOpBinding.h"
 #include "IECorePython/InternedStringBinding.h"
 #include "IECorePython/InverseDistanceWeightedInterpolationBinding.h"
@@ -184,7 +182,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindRefCounted();
 	bindRunTimeTyped();
 	bindException();
-	bindImath();
 	bindKDTree();
 	bindObject();
 	bindCompoundObject();
@@ -241,7 +238,6 @@ BOOST_PYTHON_MODULE(_IECore)
 	bindDataCastOp();
 	bindDataPromoteOp();
 	bindMatrixMultiplyOp();
-	bindImathRandom();
 	bindRandomRotationOp();
 	bindInternedString();
 	bindInverseDistanceWeightedInterpolation();
