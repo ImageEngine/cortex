@@ -48,10 +48,10 @@ using namespace IECoreScene;
 using namespace IECoreNuke;
 using namespace DD::Image;
 
-PointToNukeGeometryConverter::ToNukeGeometryConverterDescription<PointToNukeGeometryConverter> PointToNukeGeometryConverter::g_description( PointsPrimitiveTypeId );
+PointToNukeGeometryConverter::ToNukeGeometryConverterDescription<PointToNukeGeometryConverter> PointToNukeGeometryConverter::g_description( PointsPrimitive::staticTypeId() );
 
 PointToNukeGeometryConverter::PointToNukeGeometryConverter( IECore::ConstObjectPtr object )
-: ToNukeGeometryConverter( "Converts IECore.PointPrimitive objects to geometry in a Nuke GeometryList object.", PointsPrimitiveTypeId, object )
+: ToNukeGeometryConverter( "Converts IECore.PointPrimitive objects to geometry in a Nuke GeometryList object.", PointsPrimitive::staticTypeId(), object )
 {
 }
 
