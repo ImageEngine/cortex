@@ -50,7 +50,7 @@ namespace ObjectAlgo
 
 bool isPrimitiveSupported( const Object *primitive )
 {
-	return primitive->typeId() == MeshPrimitiveTypeId;
+	return runTimeCast<const IECoreScene::MeshPrimitive>( primitive );
 }
 
 renderer::Object *convert( const Object *primitive )

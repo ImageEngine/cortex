@@ -56,7 +56,7 @@ IECoreAppleseed::InteractivePrimitiveConverter::InteractivePrimitiveConverter( c
 
 asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverter::doConvertPrimitive( PrimitivePtr primitive, const string &name )
 {
-	if( primitive->typeId() == MeshPrimitiveTypeId )
+	if( primitive->typeId() == (IECore::TypeId)IECoreScene::MeshPrimitiveTypeId )
 	{
 		asf::auto_release_ptr<asr::MeshObject> entity( MeshAlgo::convert( primitive.get() ) );
 
@@ -87,7 +87,7 @@ asf::auto_release_ptr<asr::Object> IECoreAppleseed::InteractivePrimitiveConverte
 		return obj;
 	}
 
-	if( primitives[0]->typeId() == MeshPrimitiveTypeId )
+	if( primitives[0]->typeId() == (IECore::TypeId)IECoreScene::MeshPrimitiveTypeId )
 	{
 		// set the point positions for all other time samples.
 		asr::MeshObject *mesh = static_cast<asr::MeshObject*>( obj.get() );
