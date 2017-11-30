@@ -65,25 +65,6 @@ namespace IECorePython
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template<class T>
-struct ConstructHelper
-{
-	static typename T::Ptr construct()
-	{
-		return new T;
-	}
-};
-
-/// Half needs explicit initialisation
-template<>
-struct ConstructHelper<HalfData>
-{
-	static HalfDataPtr construct()
-	{
-		return new HalfData( 0 );
-	}
-};
-
-template<class T>
 static typename T::Ptr constructWithValue( const typename T::ValueType &v )
 {
 	return new T( v );
@@ -290,7 +271,7 @@ static RunTimeTypedClass<T> bindSimpleData()
 	TypedDataFromType<T>();
 
 	RunTimeTypedClass<T> result;
-	result.def( "__init__", make_constructor( &ConstructHelper<T>::construct ), "Construct with no specified value." );
+	result.def( init<>() );
 	result.def( "__init__", make_constructor( &constructWithValue<T> ), "Construct with the specified value." );
 	result.def( "__str__", &str<T> );
 	result.def( "__repr__", &repr<T> );
