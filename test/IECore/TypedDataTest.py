@@ -79,6 +79,12 @@ class TestTypedData( unittest.TestCase ) :
 		b.setInterpretation( IECore.GeometricData.Interpretation.Point )
 		self.assertNotEqual( a.hash(), b.hash() )
 
+	def testHalfDataConstruction( self ) :
+
+		zeroHalf = IECore.HalfData( 0 )
+		self.assertEqual( IECore.HalfData(), zeroHalf )
+		self.assertEqual( IECore.Object.create( IECore.HalfData.staticTypeId() ), zeroHalf )
+
 if __name__ == "__main__":
 	unittest.main()
 
